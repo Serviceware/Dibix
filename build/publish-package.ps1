@@ -1,20 +1,20 @@
-﻿param([string[]]$specificPackages, [switch]$clearNugetCache, [switch]$keepVersion)
+﻿param([string[]]$specificPackages, [switch]$clearNugetCache, [switch]$bumpVersion)
 
 $ErrorActionPreference = “Stop”
 
 $packages = @(
     @{ 
-		Name = "Dibix",
-		IsPrivate = $false
-	},
+        Name     = "Dibix"
+        IsPublic = $true
+    },
     @{ 
-		Name = "Dibix.Dapper",
-		IsPrivate = $false
-	},
-    @{ 
-		Name = "Dibix.Sdk",
-		IsPrivate = $true
-	}
+        Name     = "Dibix.Dapper"
+        IsPublic = $true
+    },
+    @{
+        Name     = "Dibix.Sdk"
+        IsPublic = $false
+    }
 )
 
 if ($specificPackages -ne $null)
@@ -40,13 +40,13 @@ function Execute-Command($cmd)
     }
 }
 
-function Get-NextVersion($versionDefinitionPath, $preventVersionIncrement)
+function Get-NextVersion($versionDefinitionPath, $incrementVersion)
 {
     [xml]$versionProps = Get-Content -Path $versionDefinitionPath
     $versionPrefix = [string]$versionProps.Project.PropertyGroup.VersionPrefix
     $versionSuffix = [string]$versionProps.Project.PropertyGroup.VersionSuffix
 
-    if (-Not $preventVersionIncrement)
+    if ($incrementVersion)
     {
         $versionSuffixMatch = $versionSuffix -match '^([a-z]+)([\d]+)$';
         $preReleaseType = "preview"
@@ -78,7 +78,7 @@ function Update-Version($versionDefinitionPath, $versionPrefix, $versionSuffix)
 #endregion
 
 # Get next version
-$versionInfo = Get-NextVersion $versionPropsPath $keepVersion
+$versionInfo = Get-NextVersion $versionPropsPath $bumpVersion
 $version = $versionInfo.VersionPrefix
 if ($versionInfo.VersionSuffix)
 {
@@ -86,20 +86,23 @@ if ($versionInfo.VersionSuffix)
 }
 
 # Update version
-Update-Version $versionPropsPath $versionInfo.VersionPrefix $versionInfo.VersionSuffix
+if ($bumpVersion)
+{
+    Update-Version $versionPropsPath $versionInfo.VersionPrefix $versionInfo.VersionSuffix
+}
 
 foreach ($package in $packages) 
 {
-    $packageSourceDirectory = Join-Path $sourceDirectory $package
-    $packageCacheDirectory = Join-Path $packagesCacheDirectory $package
-    $toolPackageCacheDirectory = Join-Path $toolPackagesCacheDirectory $package
-    $packagePath = Join-Path $packageSourceDirectory "bin\Debug" | Join-Path -ChildPath "$package.$version.nupkg"
+    $packageSourceDirectory = Join-Path $sourceDirectory $package.Name
+    $packageCacheDirectory = Join-Path $packagesCacheDirectory $package.Name
+    $toolPackageCacheDirectory = Join-Path $toolPackagesCacheDirectory $package.Name
+    $packagePath = Join-Path $packageSourceDirectory "bin\Release" | Join-Path -ChildPath "$($package.Name).$version.nupkg"
 
     # Apparently dotnet pack does not properly build the project, since for CLI tools, the .runtimeconfig.json is not created.
-    Execute-Command 'dotnet build "$packageSourceDirectory"' "Build"
+    Execute-Command 'dotnet build "$packageSourceDirectory" --configuration release' "Build"
 
     # Create package
-    Execute-Command 'dotnet pack "$packageSourceDirectory"' "CreatePackage"
+    Execute-Command 'dotnet pack "$packageSourceDirectory" --configuration release' "CreatePackage"
 
     # Remove previously cached package
     if ($clearNugetCache) 
@@ -115,5 +118,6 @@ foreach ($package in $packages)
     }
 
     # Publish to nuget
-    Execute-Command 'dotnet nuget push --source "helpLine" --api-key VSTS "$packagePath"' "PublishPackage"
+    $packageSource = If ($package.IsPublic) { "helpLine_Public" } Else { "helpLine_Private" }
+    Execute-Command "dotnet nuget push --source ""$packageSource"" --api-key VSTS ""$packagePath""" "PublishPackage"
 }
