@@ -1,0 +1,13 @@
+<Project>
+  <PropertyGroup>
+    <ReflectionVersion>4.3.0</ReflectionVersion>
+    <SqlClientVersion>4.1.0</SqlClientVersion>
+    <DapperVersion>1.50.5</DapperVersion>
+    <ConfigurationBinderVersion>2.1.1</ConfigurationBinderVersion>
+    <UserSecretsVersion>2.1.1</UserSecretsVersion>
+    <MicrosoftTestSdkVersion>15.8.0</MicrosoftTestSdkVersion>
+  	<XUnitVersion>2.4.0</XUnitVersion>
+	  <XUnitCliVersion>2.3.0-beta1-build3642</XUnitCliVersion>
+    <CoverletVersion>2.3.0</CoverletVersion>
+  </PropertyGroup>
+</Project>

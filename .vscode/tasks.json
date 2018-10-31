@@ -1,0 +1,63 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "group": "build",
+            "args": [
+                "build"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceFolder}/build"
+            },
+            "windows": {
+                "command": "powershell",
+                "args": [
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-Command",
+                    "${workspaceFolder}/build/publish-package.ps1"
+                ]
+            },
+            "osx": {
+                "command": "/usr/local/bin/pwsh",
+                "args": [
+                    "-Command",
+                    "${workspaceFolder}/build/publish-package.ps1"
+                ]
+            },
+            "linux": {
+                "command": "/usr/bin/pwsh",
+                "args": [
+                    "-Command",
+                    "${workspaceFolder}/build/publish-package.ps1"
+                ]
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "run tests",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "test",
+                "/p:CollectCoverage=true",
+                "/p:CoverletOutputFormat=lcov",
+                "/p:CoverletOutput=bin/debug/netcoreapp2.1/lcov.info",
+                "${workspaceFolder}/tests/Dibix.Dapper.Tests/Dibix.Dapper.Tests.csproj"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        }
+    ]
+}

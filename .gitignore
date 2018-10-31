@@ -1,0 +1,12 @@
+# Build results
+[Bb]in/
+[Oo]bj/
+
+# User-specific files
+*.suo
+
+# Visual Studio cache/options directory
+.vs/
+
+# MacOS cache
+.DS_Store
