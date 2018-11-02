@@ -28,7 +28,7 @@ function Execute-Command($cmd)
 function Get-Secret($key, $id)
 {
     $secretsDirectory = & { 
-        if ($IsWindows -ne $False) { Join-Path $env:USERPROFILE -ChildPath "Microsoft" | Join-Path -ChildPath "UserSecrets" } 
+        if ($IsWindows -ne $False) { Join-Path $env:APPDATA -ChildPath "Microsoft" | Join-Path -ChildPath "UserSecrets" } 
         else { Join-Path $env:HOME -ChildPath ".microsoft" | Join-Path -ChildPath "usersecrets" } 
     }
     $secretsPath = Join-Path $secretsDirectory -ChildPath "$id" | Join-Path -ChildPath "secrets.json"
