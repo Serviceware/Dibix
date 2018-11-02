@@ -3,6 +3,11 @@
     <ReflectionVersion>4.3.0</ReflectionVersion>
     <SqlClientVersion>4.5.1</SqlClientVersion>
     <DapperVersion>1.50.5</DapperVersion>
+    <EnvDTEVersion>8.0.2</EnvDTEVersion>
+    <EnvDTE80Version>8.0.3</EnvDTE80Version>
+    <SqlScriptDomVersion>14.0.3811.1</SqlScriptDomVersion>
+    <VSTextTemplatingVersion>10.0.30320</VSTextTemplatingVersion>
+    <VSLangProjVersion>7.0.3301</VSLangProjVersion>
     <ConfigurationBinderVersion>2.1.1</ConfigurationBinderVersion>
     <UserSecretsVersion>2.1.1</UserSecretsVersion>
     <MicrosoftTestSdkVersion>15.9.0</MicrosoftTestSdkVersion>
