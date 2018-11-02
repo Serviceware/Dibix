@@ -41,7 +41,7 @@ function Get-Secret($key, $id)
 
 function Set-Secret($key, $value, $id)
 {
-    Execute-Command "dotnet user-secrets set $key $value --id $id"
+    Execute-Command "dotnet user-secrets set $key ""$value"" --id $id"
 }
 #endregion
 
