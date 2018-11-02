@@ -265,6 +265,7 @@ FROM @values";
             ConnectionStringOptions connectionSections = new ConfigurationBuilder().AddUserSecrets("dibix")
                                                                                    .Build()
                                                                                    .Get<ConnectionStringOptions>();
+            Guard.IsNotNull(connectionSections, nameof(connectionSections), "No connection string configured. Please call setup-env script.");
             ConnectionStringSection connectionSection = connectionSections["DefaultConnection"];
 
             /* 
