@@ -12,6 +12,17 @@
             "problemMatcher": "$msCompile"
         },
         {
+            "label": "build runtime",
+            "command": "dotnet",
+            "type": "process",
+            "group": "build",
+            "args": [
+                "build",
+                "${workspaceFolder}/src/Dibix.Dapper",
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
             "label": "publish",
             "type": "shell",
             "options": {
