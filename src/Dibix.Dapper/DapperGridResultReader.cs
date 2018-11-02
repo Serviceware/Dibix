@@ -12,10 +12,10 @@ namespace Dibix.Dapper
         #endregion
 
         #region Constructor
-        public DapperGridResultReader(SqlMapper.GridReader reader, DapperMappingCheck _mappingCheck)
+        public DapperGridResultReader(SqlMapper.GridReader reader, DapperMappingCheck mappingCheck)
         {
             this._reader = reader;
-            this._mappingCheck = _mappingCheck;
+            this._mappingCheck = mappingCheck;
         }
         #endregion
 
@@ -48,8 +48,7 @@ namespace Dibix.Dapper
         #region IDisposable Members
         void IDisposable.Dispose()
         {
-            if (this._reader != null)
-                this._reader.Dispose();
+            this._reader?.Dispose();
         }
         #endregion
     }

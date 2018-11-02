@@ -41,7 +41,7 @@ namespace Dibix.Sdk
         public string Generate()
         {
             foreach (string @using in this._usings)
-                this._writer.WriteLine(String.Format("using {0};", @using));
+                this._writer.WriteLine($"using {@using};");
 
             if (this._usings.Any())
                 this._writer.WriteLine();

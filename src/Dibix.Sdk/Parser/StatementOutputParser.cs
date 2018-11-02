@@ -39,8 +39,7 @@ namespace Dibix.Sdk
             for (int i = 0; i < returnHints.Count; i++)
             {
                 SqlHint returnHint = returnHints[i];
-                string typeNamesStr;
-                if (!returnHint.TrySelectValueOrContent(ReturnHintClrTypes, x => environment.RegisterError(sourcePath, node.StartLine, node.StartColumn, null, x), out typeNamesStr))
+                if (!returnHint.TrySelectValueOrContent(ReturnHintClrTypes, x => environment.RegisterError(sourcePath, node.StartLine, node.StartColumn, null, x), out var typeNamesStr))
                     yield break;
 
                 string[] typeNames = typeNamesStr.Split(';');
@@ -77,7 +76,7 @@ namespace Dibix.Sdk
             if (!String.IsNullOrEmpty(result.Name))
             {
                 if (usedOutputNames.Contains(result.Name))
-                    environment.RegisterError(sourcePath, returnHint.Line, returnHint.Column, null, String.Format("The name '{0}' is already defined for another output result", result.Name));
+                    environment.RegisterError(sourcePath, returnHint.Line, returnHint.Column, null, $"The name '{result.Name}' is already defined for another output result");
                 else if (numberOfReturnHints == 1)
                     environment.RegisterError(sourcePath, returnHint.Line, returnHint.Column, null, "The 'Name' property is irrelevant when a single output is returned");
                 else
@@ -132,13 +131,13 @@ namespace Dibix.Sdk
                     // i.E.: SELECT COUNT(*) no alias
                     if (!columnResult.Result)
                     {
-                        environment.RegisterError(sourcePath, columnResult.Line, columnResult.Column, null, String.Format(@"Missing alias for expression '{0}'", columnResult.Expression));
+                        environment.RegisterError(sourcePath, columnResult.Line, columnResult.Column, null, $@"Missing alias for expression '{columnResult.Expression}'");
                         continue;
                     }
 
                     // Validate if entity property exists
                     if (returnType.Properties.All(x => !String.Equals(x, columnResult.ColumnName, StringComparison.OrdinalIgnoreCase)))
-                        environment.RegisterError(sourcePath, columnResult.Line, columnResult.Column, null, String.Format(@"Property '{0}' not found on return type '{1}'", columnResult.ColumnName, returnType.Name));
+                        environment.RegisterError(sourcePath, columnResult.Line, columnResult.Column, null, $@"Property '{columnResult.ColumnName}' not found on return type '{returnType.Name}'");
                 }
             }
         }

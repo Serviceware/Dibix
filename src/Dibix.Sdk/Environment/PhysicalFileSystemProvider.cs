@@ -19,7 +19,7 @@ namespace Dibix.Sdk
             string relativePath = virtualFolderPath != null ? virtualFolderPath.Replace("/", "\\").TrimEnd('\\') : String.Empty;
             string directory = Path.GetFullPath(Path.Combine(this._currentDirectory, relativePath));
             string[] paths = Directory.EnumerateFiles(directory, "*.sql", recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
-                                      .Where(x => !excludedFolders.Any(y => x.Substring(directory.Length + 1).StartsWith(y)))
+                                      .Where(x => !excludedFolders.Any(y => x.Substring(directory.Length + 1).StartsWith(y, StringComparison.OrdinalIgnoreCase)))
                                       .ToArray();
 
             return paths;

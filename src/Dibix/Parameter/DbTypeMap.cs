@@ -42,7 +42,7 @@ namespace Dibix
             if (clrType == typeof(TimeSpan))
                 return SqlDbType.Time;
 
-            throw new ArgumentOutOfRangeException("clrType", clrType, null);
+            throw new ArgumentOutOfRangeException(nameof(clrType), clrType, null);
         }
     }
 }

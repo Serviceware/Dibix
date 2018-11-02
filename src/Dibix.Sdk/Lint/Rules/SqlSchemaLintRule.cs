@@ -7,8 +7,8 @@ namespace Dibix.Sdk
 {
     public sealed class SqlSchemaLintRule : SqlLintRule
     {
-        public override int Id { get { return 2; } }
-        public override string ErrorMessage { get { return "Missing schema specification"; } }
+        public override int Id => 2;
+        public override string ErrorMessage => "Missing schema specification";
 
         public override void ExplicitVisit(SelectStatement node)
         {
@@ -40,8 +40,7 @@ namespace Dibix.Sdk
         {
             HashSet<string> whiteList = new HashSet<string>();
             WhiteListCTEExpressions(whiteList, node);
-            if (whiteListRegistrar != null)
-                whiteListRegistrar(whiteList);
+            whiteListRegistrar?.Invoke(whiteList);
 
             InnerVisitor inner = new InnerVisitor(whiteList, x => base.Fail(x));
             node.Accept(inner);
@@ -77,14 +76,12 @@ namespace Dibix.Sdk
 
         private static IEnumerable<string> CollectAliases(TableReference reference)
         {
-            TableReferenceWithAlias aliasedTable = reference as TableReferenceWithAlias;
-            if (aliasedTable != null)
+            if (reference is TableReferenceWithAlias aliasedTable)
             {
                 return Enumerable.Repeat(aliasedTable.Alias.Value, 1);
             }
 
-            QualifiedJoin join = reference as QualifiedJoin;
-            if (join != null)
+            if (reference is QualifiedJoin @join)
             {
                 return CollectAliases(join.FirstTableReference)
                 .Union(CollectAliases(join.SecondTableReference));

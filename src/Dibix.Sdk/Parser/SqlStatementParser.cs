@@ -7,7 +7,7 @@ namespace Dibix.Sdk
     public abstract class SqlStatementParser<TVisitor> : ISqlStatementParser where TVisitor : SqlParserVisitor, new()
     {
         #region Properties
-        public SqlLintConfiguration LintConfiguration { get; private set; }
+        public SqlLintConfiguration LintConfiguration { get; }
         public ISqlStatementFormatter Formatter { get; set; }
         #endregion
 
@@ -21,8 +21,7 @@ namespace Dibix.Sdk
         #region ISqlStatementParser Members
         public void Read(IExecutionEnvironment environment, Stream source, SqlStatementInfo target)
         {
-            FileStream file = source as FileStream;
-            string sourceFilePath = file != null ? file.Name : null;
+            string sourceFilePath = source is FileStream file ? file.Name : null;
             using (TextReader reader = new StreamReader(source))
             {
                 TSqlParser parser = new TSql140Parser(true);
@@ -45,10 +44,12 @@ namespace Dibix.Sdk
 
         private static void CollectStatementInfo(TSqlFragment fragment, SqlStatementInfo target, ISqlStatementFormatter formatter, IExecutionEnvironment environment)
         {
-            TVisitor visitor = new TVisitor();
-            visitor.Formatter = formatter;
-            visitor.Target = target;
-            visitor.Environment = environment;
+            TVisitor visitor = new TVisitor
+            {
+                Formatter = formatter,
+                Target = target,
+                Environment = environment
+            };
 
             fragment.Accept(visitor);
 

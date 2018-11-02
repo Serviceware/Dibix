@@ -5,10 +5,10 @@ namespace Dibix.Sdk
 {
     internal sealed class OutputSelectResult
     {
-        public int Index { get; private set; }
-        public int Line { get; private set; }
-        public int Column { get; private set; }
-        public IList<OutputColumnResult> Columns { get; private set; }
+        public int Index { get; }
+        public int Line { get; }
+        public int Column { get; }
+        public IList<OutputColumnResult> Columns { get; }
 
         public OutputSelectResult(int index, int line, int column)
         {

@@ -171,7 +171,7 @@ namespace Dibix.Sdk
 
         private static void WriteGuardCheck(StringWriter writer, ContractCheck mode, string parameterName)
         {
-            //writer.Write("Common.Check.Argument");
+            writer.Write("Guard.Is");
             switch (mode)
             {
                 case ContractCheck.None:
@@ -181,7 +181,7 @@ namespace Dibix.Sdk
                     writer.WriteRaw(mode);
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException("mode", mode, null);
+                    throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
             }
             writer.WriteRaw('(')
                   .WriteRaw(parameterName)
@@ -371,7 +371,7 @@ namespace Dibix.Sdk
                 case SqlQueryResultMode.FirstOrDefault: return "QueryFirstOrDefault";
                 case SqlQueryResultMode.Single: return "QuerySingle";
                 case SqlQueryResultMode.SingleOrDefault: return "QuerySingleOrDefault";
-                default: throw new ArgumentOutOfRangeException("mode", mode, null);
+                default: throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
             }
         }
 
@@ -381,7 +381,7 @@ namespace Dibix.Sdk
             {
                 case SqlQueryResultMode.Many: return "ReadMany";
                 case SqlQueryResultMode.Single: return "ReadSingle";
-                default: throw new ArgumentOutOfRangeException("mode", mode, null);
+                default: throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
             }
         }
 

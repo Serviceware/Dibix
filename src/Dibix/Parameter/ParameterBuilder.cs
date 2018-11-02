@@ -69,7 +69,7 @@ namespace Dibix
 
         IParameterBuilder IParameterBuilder.SetFromTemplate(object template)
         {
-            Guard.IsNotNull(template, "template");
+            Guard.IsNotNull(template, nameof(template));
             foreach (PropertyAccessor property in TypeAccessor.GetProperties(template.GetType()))
             {
                 object value = property.GetValue(template);
@@ -127,9 +127,9 @@ namespace Dibix
 
         private class ParameterValue
         {
-            public Type Type { get; private set; }
-            public object Value { get; private set; }
-            public DbType? SuggestedDataType { get; private set; }
+            public Type Type { get; }
+            public object Value { get; }
+            public DbType? SuggestedDataType { get; }
 
             public ParameterValue(Type type, object value, DbType? suggestedDataType)
             {

@@ -6,7 +6,7 @@ namespace Dibix.Dapper
 {
     internal sealed class DapperMappingCheckStrict : DapperMappingCheck
     {
-        internal override void Check(params Type[] types)
+        protected override void Check(params Type[] types)
         {
             foreach (Type type in types)
                 Register(type);
@@ -15,14 +15,13 @@ namespace Dibix.Dapper
         private static void Register(Type type)
         {
             SqlMapper.ITypeMap typeMape = SqlMapper.GetTypeMap(type);
-            SafeTypeMap safeTypeMap = typeMape as SafeTypeMap;
 
             // The safe map is already registered
-            if (safeTypeMap != null)
+            if (typeMape is SafeTypeMap)
                 return;
 
             // Wrap the current map with the a safe map
-            safeTypeMap = new SafeTypeMap(type, typeMape);
+            SafeTypeMap safeTypeMap = new SafeTypeMap(type, typeMape);
             SqlMapper.SetTypeMap(type, safeTypeMap);
         }
 

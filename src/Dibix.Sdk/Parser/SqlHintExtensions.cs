@@ -28,15 +28,14 @@ namespace Dibix.Sdk
             if (hint.Properties.TryGetValue(SqlHint.Default, out result))
                 return true;
 
-            errorHandler(String.Format("Missing property '{0}'", key));
+            errorHandler($"Missing property '{key}'");
             return false;
         }
 
         public static string SelectValueOrDefault(this SqlHint hint, string key) { return SelectValueOrDefault(hint, key, x => x); }
         public static TValue SelectValueOrDefault<TValue>(this SqlHint hint, string key, Func<string, TValue> converter)
         {
-            string value;
-            return hint.Properties.TryGetValue(key, out value) ? converter(value) : default(TValue);
+            return hint.Properties.TryGetValue(key, out var value) ? converter(value) : default;
         }
     }
 }

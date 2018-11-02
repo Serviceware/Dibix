@@ -10,7 +10,7 @@ namespace Dibix.Sdk
     {
         public bool IsEnabled { get; set; }
         internal IExecutionEnvironment Environment { get; set; }
-        internal ICollection<SqlLintRuleAccessor> Rules { get; private set; }
+        internal ICollection<SqlLintRuleAccessor> Rules { get; }
 
         public SqlLintConfiguration()
         {

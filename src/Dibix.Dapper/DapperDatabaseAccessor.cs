@@ -11,13 +11,16 @@ namespace Dibix.Dapper
         #region Fields
         private readonly DbConnection _connection;
         private readonly DapperMappingCheck _mappingCheck;
+        private readonly Action _onDispose;
         #endregion
 
         #region Constructor
-        public DapperDatabaseAccessor(DbConnection connection, DapperMappingBehavior mappingBehavior)
+        public DapperDatabaseAccessor(DbConnection connection, DapperMappingBehavior mappingBehavior) : this(connection, mappingBehavior, null) { }
+        public DapperDatabaseAccessor(DbConnection connection, DapperMappingBehavior mappingBehavior, Action onDispose) 
         {
             this._connection = connection;
             this._mappingCheck = DetermineMappingCheck(mappingBehavior);
+            this._onDispose = onDispose ?? this.DisposeConnection;
         }
         #endregion
 
@@ -86,17 +89,15 @@ namespace Dibix.Dapper
             {
                 case DapperMappingBehavior.Pragmatic: return new DapperMappingCheckPragmatic();
                 case DapperMappingBehavior.Strict: return new DapperMappingCheckStrict();
-                default: throw new ArgumentOutOfRangeException("mappingBehavior", mappingBehavior, null);
+                default: throw new ArgumentOutOfRangeException(nameof(mappingBehavior), mappingBehavior, null);
             }
         }
+
+        private void DisposeConnection() => this._connection?.Dispose();
         #endregion
 
         #region IDisposable Members
-        void IDisposable.Dispose()
-        {
-            if (this._connection != null)
-                this._connection.Dispose();
-        }
+        void IDisposable.Dispose() => this._onDispose?.Invoke();
         #endregion
     }
 }

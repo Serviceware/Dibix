@@ -10,8 +10,7 @@ namespace Dibix.Sdk
             batch.Statements.AddRange(base.GetStatements(body));
 
             Sql140ScriptGenerator generator = new Sql140ScriptGenerator { Options = { AlignClauseBodies = false } };
-            string output;
-            generator.GenerateScript(batch, out output);
+            generator.GenerateScript(batch, out var output);
             return output;
         }
     }

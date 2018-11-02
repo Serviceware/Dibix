@@ -9,7 +9,7 @@ namespace Dibix.Sdk
     internal class IfOutputResolutionContext
     {
         public bool IsResolved { get; private set; }
-        public IList<OutputSelectResult> Outputs { get; private set; }
+        public IList<OutputSelectResult> Outputs { get; }
 
         public IfOutputResolutionContext()
         {
@@ -33,7 +33,7 @@ namespace Dibix.Sdk
         #endregion
 
         #region Properties
-        public IList<OutputSelectResult> Results { get { return this._context.Outputs; } }
+        public IList<OutputSelectResult> Results => this._context.Outputs;
         #endregion
 
         #region Constructor
@@ -92,9 +92,9 @@ namespace Dibix.Sdk
 
                         if (leftColumn.ColumnName != rightColumn.ColumnName)
                         {
-                            this._environment.RegisterError(this._sourcePath, leftColumn.Line, leftColumn.Column, null, String.Format(@"The column names in output statement in IF THEN block do not match those in ELSE block
-Column in THEN: {0}
-Column in ELSE: {1}", leftColumn.ColumnName, rightColumn.ColumnName));
+                            this._environment.RegisterError(this._sourcePath, leftColumn.Line, leftColumn.Column, null, $@"The column names in output statement in IF THEN block do not match those in ELSE block
+Column in THEN: {leftColumn.ColumnName}
+Column in ELSE: {rightColumn.ColumnName}");
                             break;
                         }
                     }

@@ -16,7 +16,7 @@ namespace Dibix.Sdk
         #endregion
 
         #region Properties
-        public ICollection<string> Files { get; private set; }
+        public ICollection<string> Files { get; }
         public ISqlStatementParser Parser { get; set; }
         #endregion
 
@@ -53,8 +53,7 @@ namespace Dibix.Sdk
             parser.LintConfiguration.Environment = this._environment;
             SqlStatementParserConfigurationExpression expression = new SqlStatementParserConfigurationExpression(parser);
             expression.EnableDefaultLintRules();
-            if (configuration != null)
-                configuration(expression);
+            configuration?.Invoke(expression);
 
             this.Parser = parser;
         }

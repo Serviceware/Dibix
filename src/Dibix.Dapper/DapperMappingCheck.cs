@@ -8,6 +8,6 @@ namespace Dibix.Dapper
         internal void Check<TFirst, TSecond>() => this.Check(typeof(TFirst), typeof(TSecond));
         internal void Check<TFirst, TSecond, TThird>() => this.Check(typeof(TFirst), typeof(TSecond), typeof(TThird));
         internal void Check<TFirst, TSecond, TThird, TFourth>() => this.Check(typeof(TFirst), typeof(TSecond), typeof(TThird), typeof(TFourth));
-        internal abstract void Check(params Type[] types);
+        protected abstract void Check(params Type[] types);
     }
 }

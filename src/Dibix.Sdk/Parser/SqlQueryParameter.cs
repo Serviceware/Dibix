@@ -9,6 +9,6 @@ namespace Dibix.Sdk
         public string Name { get; set; }
         public string TypeName { get; set; }
         public ContractCheck Check { get; set; }
-        public bool IsStructured { get { return !String.IsNullOrEmpty(this.TypeName); } }
+        public bool IsStructured => !String.IsNullOrEmpty(this.TypeName);
     }
 }

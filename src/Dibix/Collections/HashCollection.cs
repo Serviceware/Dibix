@@ -30,16 +30,8 @@ namespace Dibix
         #endregion
 
         #region ICollection<T> Members
-        public int Count
-        {
-            get { return this._dictionary.Keys.Count; }
-        }
-
-        public bool IsReadOnly
-        {
-            get { return this._dictionary.Keys.IsReadOnly; }
-        }
-
+        public int Count => this._dictionary.Keys.Count;
+        public bool IsReadOnly => this._dictionary.Keys.IsReadOnly;
         public void Add(T item)
         {
             if (this._dictionary.ContainsKey(item))

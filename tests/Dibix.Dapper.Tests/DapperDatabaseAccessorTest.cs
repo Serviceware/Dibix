@@ -189,7 +189,7 @@ FROM @values";
 
                     a.Name = b.Name;
                     a.Price = c.Price;
-                };
+                }
 
                 Entity result = accessor.QuerySingle<Entity, NameEntity, PriceEntity>(commandText, @params, MapEntity, "id,id");
                 Assert.Equal(5, result.Id);
@@ -222,7 +222,7 @@ FROM @values";
 
                     a.Name = b.Name;
                     a.Price = c.Price;
-                };
+                }
 
                 using (IMultipleResultReader reader = accessor.QueryMultiple(commandText, @params))
                 {

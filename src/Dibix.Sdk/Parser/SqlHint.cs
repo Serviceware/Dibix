@@ -17,14 +17,13 @@ namespace Dibix.Sdk
         {
             get
             {
-                string value;
-                if (this.Properties.TryGetValue(Default, out value))
+                if (this.Properties.TryGetValue(Default, out var value))
                     return value;
 
                 return null;
             }
         }
-        public IDictionary<string, string> Properties { get; private set; }
+        public IDictionary<string, string> Properties { get; }
         public int Line { get; set; }
         public int Column { get; set; }
 

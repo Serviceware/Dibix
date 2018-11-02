@@ -44,8 +44,7 @@ namespace Dibix.Dapper
             param.ParameterName = parameterName;
             param.Value = this.GetValue();
 
-            SqlParameter sqlParam = param as SqlParameter;
-            if (sqlParam != null)
+            if (param is SqlParameter sqlParam)
             {
                 sqlParam.SqlDbType = SqlDbType.Structured;
                 sqlParam.TypeName = this.TypeName;

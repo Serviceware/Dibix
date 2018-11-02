@@ -7,8 +7,8 @@ namespace Dibix.Sdk
     {
 	    public SqlQueryResultMode ResultMode { get; set; }
         public string Name { get; set; }
-        public IList<TypeInfo> Types { get; private set; }
-        public IList<string> Columns { get; set; }
+        public IList<TypeInfo> Types { get; }
+        public IList<string> Columns { get; }
         public string Converter { get; set; }
         public string SplitOn { get; set; }
 

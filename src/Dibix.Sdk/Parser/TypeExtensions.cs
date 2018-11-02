@@ -50,8 +50,7 @@ namespace Dibix.Sdk
 
         public static Type ToClrType(this string cSharpTypeName)
         {
-            Type clrType;
-            CSharpTypeNames.TryGetValue(cSharpTypeName, out clrType);
+            CSharpTypeNames.TryGetValue(cSharpTypeName, out Type clrType);
             return clrType;
         }
 

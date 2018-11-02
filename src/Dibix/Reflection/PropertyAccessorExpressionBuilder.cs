@@ -9,12 +9,12 @@ namespace Dibix
         public static Func<object, object> BuildValueGetter(PropertyInfo property)
         {
             ParameterExpression instanceParameter = Expression.Parameter(typeof(object), "instance");
-            MethodInfo method = property.GetGetMethod();
+            MethodInfo method = property.GetMethod;
             Expression body;
             if (method != null)
             {
                 Expression instanceParameterCast = Expression.Convert(instanceParameter, property.DeclaringType);
-                Expression getterExpression = Expression.Call(instanceParameterCast, property.GetGetMethod());
+                Expression getterExpression = Expression.Call(instanceParameterCast, property.GetMethod);
                 body = Expression.Convert(getterExpression, typeof(object));
             }
             else
@@ -30,13 +30,13 @@ namespace Dibix
         {
             ParameterExpression instanceParameter = Expression.Parameter(typeof(object), "instance");
             ParameterExpression valueParameter = Expression.Parameter(typeof(object), "value");
-            MethodInfo method = property.GetSetMethod();
+            MethodInfo method = property.SetMethod;
             Expression body;
             if (method != null)
             {
                 Expression instanceParameterCast = Expression.Convert(instanceParameter, property.DeclaringType);
                 Expression valueParameterCast = Expression.Convert(valueParameter, property.PropertyType);
-                body = Expression.Call(instanceParameterCast, property.GetSetMethod(), valueParameterCast);
+                body = Expression.Call(instanceParameterCast, property.SetMethod, valueParameterCast);
             }
             else
             {

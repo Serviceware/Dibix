@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using EnvDTE;
-using EnvDTE80;
 using Microsoft.VisualStudio.TextTemplating;
 using VSLangProj;
 
@@ -84,20 +83,19 @@ namespace Dibix.Sdk
         {
             Project project = this.GetProject(projectName);
             if (project.Kind != ProjectKind.SqlProj)
-                throw new InvalidOperationException(String.Format("'{0}' is not a valid SQL project", project.Name));
+                throw new InvalidOperationException($"'{project.Name}' is not a valid SQL project");
         }
 
         public Assembly LoadAssembly(string assemblyName)
         {
-            string path;
-            return this._assemblyLookupAccessor.Value.TryGetValue(new AssemblyName(assemblyName).Name, out path) ? Assembly.ReflectionOnlyLoadFrom(path) : Assembly.ReflectionOnlyLoad(assemblyName);
+            return this._assemblyLookupAccessor.Value.TryGetValue(new AssemblyName(assemblyName).Name, out var path) ? Assembly.ReflectionOnlyLoadFrom(path) : Assembly.ReflectionOnlyLoad(assemblyName);
         }
 
         public void RegisterError(string fileName, int line, int column, string errorNumber, string errorText)
         {
             // Apparently errors are reported with distinct description, even though a different position is supplied
             // To make it work we append the position to the message
-            errorText = String.Concat(errorText, ZeroWidthUtility.MaskText(String.Format(" ({0},{1})", line, column)));
+            errorText = String.Concat(errorText, ZeroWidthUtility.MaskText($" ({line},{column})"));
             this._errors.Add(new CompilerError(fileName, line, column, errorNumber, errorText));
         }
 
@@ -151,7 +149,7 @@ namespace Dibix.Sdk
                         select CreateTypeInfo(typeName, element);
             TypeInfo type = query.FirstOrDefault();
             if (type == null)
-                errorHandler(String.Format("Could not find type '{0}' in current project", typeName));
+                errorHandler($"Could not find type '{typeName}' in current project");
 
             return type;
         }
@@ -219,7 +217,7 @@ namespace Dibix.Sdk
                                      .FirstOrDefault();
 
             if (String.IsNullOrEmpty(value))
-                throw new InvalidOperationException(String.Format("Could not determine '{0}' property of project", key));
+                throw new InvalidOperationException($"Could not determine '{key}' property of project");
 
             return value;
         }
@@ -251,8 +249,7 @@ namespace Dibix.Sdk
 
         private Project GetProject(string projectName)
         {
-            Project project;
-            if (!this._projectCache.TryGetValue(projectName, out project))
+            if (!this._projectCache.TryGetValue(projectName, out Project project))
             {
                 project = FindProject(this._dte.Solution, projectName);
                 this._projectCache.Add(projectName, project);
@@ -274,7 +271,7 @@ namespace Dibix.Sdk
             }
 
             if (item == null)
-                throw new InvalidOperationException(String.Format("Could not find project item using path '{0}'", virtualPath));
+                throw new InvalidOperationException($"Could not find project item using path '{virtualPath}'");
 
             return item;
         }
@@ -327,7 +324,7 @@ namespace Dibix.Sdk
                                       .FirstOrDefault(x => x.Name == projectName);
 
             if (project == null)
-                throw new InvalidOperationException(String.Format("Could not find project '{0}' in current solution", projectName));
+                throw new InvalidOperationException($"Could not find project '{projectName}' in current solution");
 
             return project;
         }
@@ -377,8 +374,8 @@ namespace Dibix.Sdk
         #region Nested Types
         private class CurrentProjectInfo
         {
-            public ProjectItem TemplateFile { get; private set; }
-            public Project Project { get; private set; }
+            public ProjectItem TemplateFile { get; }
+            public Project Project { get; }
 
             public CurrentProjectInfo(ProjectItem templateFile, Project project)
             {

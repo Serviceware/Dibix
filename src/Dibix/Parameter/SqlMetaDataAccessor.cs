@@ -18,8 +18,7 @@ namespace Dibix
 
         public static SqlMetaData[] GetMetadata(Type structuredType, LambdaExpression metadataMethodPointerExpression)
         {
-            SqlMetaData[] metadata;
-            if (!Cache.TryGetValue(structuredType, out metadata))
+            if (!Cache.TryGetValue(structuredType, out SqlMetaData[] metadata))
             {
                 metadata = ReadMetadata(metadataMethodPointerExpression);
                 Cache.TryAdd(structuredType, metadata);
@@ -31,7 +30,7 @@ namespace Dibix
         {
             MethodCallExpression methodExpression = metadataMethodPointerExpression.Body as MethodCallExpression;
             if (methodExpression == null)
-                throw new ArgumentException("Not a valid method expression", "metadataMethodPointerExpression");
+                throw new ArgumentException("Not a valid method expression", nameof(metadataMethodPointerExpression));
 
             return methodExpression.Method.GetParameters().Select(ReadMetadata).ToArray();
         }
@@ -43,12 +42,12 @@ namespace Dibix
 
             if (dbType == SqlDbType.Decimal)
             {
-                byte? precision = attribute != null ? attribute.Precision : (byte?)null;
-                byte? scale = attribute != null ? attribute.Scale : (byte?)null;
+                byte? precision = attribute?.Precision;
+                byte? scale = attribute?.Scale;
                 return new SqlMetaData(parameter.Name, dbType, precision ?? DefaultPrecision, scale ?? DefaultScale);
             }
 
-            int? maxLength = attribute != null ? attribute.MaxLength : (int?)null;
+            int? maxLength = attribute?.MaxLength;
             if (dbType == SqlDbType.NVarChar || dbType == SqlDbType.VarBinary || maxLength.HasValue)
                 return new SqlMetaData(parameter.Name, dbType, maxLength ?? DefaultMaxLength);
 

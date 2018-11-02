@@ -12,8 +12,8 @@ namespace Dibix.Sdk
         public string ProcedureName { get; set; }
         public CommandType? CommandType { get; set; }
         public string ResultTypeName { get; set; }
-        public IList<SqlQueryParameter> Parameters { get; private set; }
-        public IList<SqlQueryResult> Results { get; private set; }
+        public IList<SqlQueryParameter> Parameters { get; }
+        public IList<SqlQueryResult> Results { get; }
 
         public SqlStatementInfo() 
         {

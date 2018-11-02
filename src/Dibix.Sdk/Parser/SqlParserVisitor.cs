@@ -60,20 +60,20 @@ namespace Dibix.Sdk
                 {
                     // Type name hint is the only way to determine the UDT .NET type, that's why it's required
                     if (String.IsNullOrEmpty(parameter.ClrTypeName))
-                        this.Environment.RegisterError(this.Target.SourcePath, node.StartLine, node.StartColumn, null, String.Format(@"Could not determine CLR type for table value parameter
-Parameter name: {0}
-UDT type: {1}
-Please mark it with /* @ClrType <ClrTypeName> */", parameter.Name, parameter.TypeName));
+                        this.Environment.RegisterError(this.Target.SourcePath, node.StartLine, node.StartColumn, null, $@"Could not determine CLR type for table value parameter
+Parameter name: {parameter.Name}
+UDT type: {parameter.TypeName}
+Please mark it with /* @ClrType <ClrTypeName> */");
 
-                    parameter.TypeName = String.Format("[{0}].[{1}]", userDataType.Name.SchemaIdentifier.Value, userDataType.Name.BaseIdentifier.Value);
+                    parameter.TypeName = $"[{userDataType.Name.SchemaIdentifier.Value}].[{userDataType.Name.BaseIdentifier.Value}]";
                     parameter.Check = ContractCheck.NotNull;
                 }
             }
             else
             {
-                throw new InvalidOperationException(String.Format(@"Unknown data type reference for parameter
-Parameter: {0}
-ReferenceType: {1}", parameter.Name, node.DataType.GetType()));
+                throw new InvalidOperationException($@"Unknown data type reference for parameter
+Parameter: {parameter.Name}
+ReferenceType: {node.DataType.GetType()}");
             }
 
             if (parameter.ClrType != null)
@@ -158,7 +158,7 @@ ReferenceType: {1}", parameter.Name, node.DataType.GetType()));
                 case SqlDataTypeOption.NText: return typeof(string);
                 case SqlDataTypeOption.Image: return typeof(string);
                 case SqlDataTypeOption.Time: return typeof(TimeSpan);
-                default: throw new ArgumentOutOfRangeException("dataType", dataType, null);
+                default: throw new ArgumentOutOfRangeException(nameof(dataType), dataType, null);
             }
         }
         #endregion

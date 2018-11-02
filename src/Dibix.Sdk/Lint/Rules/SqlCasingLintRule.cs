@@ -41,8 +41,8 @@ namespace Dibix.Sdk
             "value"
         };
 
-        public override int Id { get { return 1; } }
-        public override string ErrorMessage { get { return "Invalid casing for '{0}' [{1}]"; } }
+        public override int Id => 1;
+        public override string ErrorMessage => "Invalid casing for '{0}' [{1}]";
 
         protected override void Visit(TSqlParserToken token)
         {

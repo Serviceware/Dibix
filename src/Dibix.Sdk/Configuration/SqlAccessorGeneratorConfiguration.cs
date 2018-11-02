@@ -5,7 +5,7 @@ namespace Dibix.Sdk
 {
     public sealed class SqlAccessorGeneratorConfiguration
     {
-        public ICollection<ISourceSelection> Sources { get; private set; }
+        public ICollection<ISourceSelection> Sources { get; }
         public IWriter Writer { get; set; }
 
         public SqlAccessorGeneratorConfiguration()

@@ -37,10 +37,9 @@ namespace %namespace%
         private static string BuildTestMethod(string testMethodName, string commandText, SqlQueryOutputFormatting formatting)
         {
             Match match = Regex.Match(testMethodName, @"^TC_([\d]+)_");
-            int testCaseId;
-            if (!match.Success || match.Groups.Count < 1 || !Int32.TryParse(match.Groups[1].Value, out testCaseId))
-                throw new InvalidOperationException(String.Format(@"Could not determine test case id for '{0}'.
-Please make sure the file has the following format: TC_%TESTCASEID%_*", testMethodName));
+            if (!match.Success || match.Groups.Count < 1 || !Int32.TryParse(match.Groups[1].Value, out var testCaseId))
+                throw new InvalidOperationException($@"Could not determine test case id for '{testMethodName}'.
+Please make sure the file has the following format: TC_%TESTCASEID%_*");
 
             const string template = @"		[TestMethod]
         public void %testMethodName%()

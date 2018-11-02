@@ -9,7 +9,7 @@ namespace Dibix.Sdk
         private readonly IExecutionEnvironment _environment;
         private readonly string _sourcePath;
 
-        public IList<OutputSelectResult> Results { get; private set; }
+        public IList<OutputSelectResult> Results { get; }
 
         public StatementOutputVisitor(IExecutionEnvironment environment, string sourcePath)
         {

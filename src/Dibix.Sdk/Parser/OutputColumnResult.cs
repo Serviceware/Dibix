@@ -1,12 +1,10 @@
-﻿using System.Collections;
-
-namespace Dibix.Sdk
+﻿namespace Dibix.Sdk
 {
     internal sealed class OutputColumnResult
     {
-        public bool Result { get; private set; }
-        public string ColumnName { get; private set; }
-        public string Expression { get; private set; }
+        public bool Result { get; }
+        public string ColumnName { get; }
+        public string Expression { get; }
         public int Line { get; set; }
         public int Column { get; set; }
 

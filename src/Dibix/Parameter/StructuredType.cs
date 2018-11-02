@@ -15,7 +15,7 @@ namespace Dibix
         #endregion
 
         #region Properties
-        public string TypeName { get; private set; }
+        public string TypeName { get; }
         #endregion
 
         #region Constructor
@@ -81,8 +81,8 @@ namespace Dibix
 
         public static TDefinition From<TSource>(IEnumerable<TSource> source, Action<TDefinition, TSource, int> addItemFunc)
         {
-            Guard.IsNotNull(source, "source");
-            Guard.IsNotNull(addItemFunc, "addItemFunc");
+            Guard.IsNotNull(source, nameof(source));
+            Guard.IsNotNull(addItemFunc, nameof(addItemFunc));
 
             TDefinition type = new TDefinition();
             int index = 0;

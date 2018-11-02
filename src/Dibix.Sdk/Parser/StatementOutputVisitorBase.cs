@@ -9,7 +9,7 @@ namespace Dibix.Sdk
     {
         #region Properties
         public string Statement { get; private set; }
-        protected IList<OutputSelectResult> Outputs { get; private set; }
+        protected IList<OutputSelectResult> Outputs { get; }
         #endregion
 
         #region Constructor
@@ -85,8 +85,7 @@ namespace Dibix.Sdk
 
             if (scalar.ColumnName == null)
             {
-                ColumnReferenceExpression columnReference = scalar.Expression as ColumnReferenceExpression;
-                if (columnReference != null)
+                if (scalar.Expression is ColumnReferenceExpression columnReference)
                 {
                     Identifier identifier = columnReference.MultiPartIdentifier.Identifiers.Last();
                     return OutputColumnResult.Success(identifier.Value, identifier.StartLine, identifier.StartColumn);

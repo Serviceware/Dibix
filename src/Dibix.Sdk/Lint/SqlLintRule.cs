@@ -22,8 +22,8 @@ namespace Dibix.Sdk
 
         protected void Fail(TSqlParserToken token, params object[] args)
         {
-            string errorCode = String.Format(@"SQLLINT#{0:d3}", this.Id);
-            string errorText = String.Format("[{0}] {1}", errorCode, String.Format(this.ErrorMessage, args));
+            string errorCode = $@"SQLLINT#{this.Id:d3}";
+            string errorText = $"[{errorCode}] {String.Format(this.ErrorMessage, args)}";
             this._environment.RegisterError(this._sourceFilePath, token.Line, token.Column, errorCode, errorText);
         }
 

@@ -33,7 +33,7 @@ namespace Dibix.Sdk
 
             sb.AppendLine("AS");
 
-            IEnumerable<string> statements = lines.SkipWhile(x => x.StartsWith("--DECLARE"))
+            IEnumerable<string> statements = lines.SkipWhile(x => x.StartsWith("--DECLARE", StringComparison.OrdinalIgnoreCase))
                                                   .SkipWhile(String.IsNullOrEmpty)
                                                   .Select(x => String.Concat('\t', x));
 
@@ -47,7 +47,7 @@ namespace Dibix.Sdk
 
         private static string BuildParametersStatement(IEnumerable<string> lines)
         {
-            IEnumerable<string> parameters = lines.TakeWhile(x => x.StartsWith("--DECLARE"))
+            IEnumerable<string> parameters = lines.TakeWhile(x => x.StartsWith("--DECLARE", StringComparison.OrdinalIgnoreCase))
                                                   .Select(x =>
                                                   {
                                                       string[] parts = x.Split(' ');
@@ -55,7 +55,7 @@ namespace Dibix.Sdk
                                                       if (parts[2].Split('.')[0].Trim('[', ']') == "dbo")
                                                           suffix = " READONLY";
 
-                                                      return String.Format("{0} {1}{2}", parts[1], parts[2], suffix);
+                                                      return $"{parts[1]} {parts[2]}{suffix}";
                                                   });
 
             return String.Join(String.Concat(',', Environment.NewLine), parameters.Select(x => String.Concat('\t', x)));

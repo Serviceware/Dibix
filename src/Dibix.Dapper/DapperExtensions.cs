@@ -14,8 +14,7 @@ namespace Dibix.Dapper
         private static object ProcessParameterValue(object value)
         {
             const string schemaName = "dbo";
-            StructuredType tvp = value as StructuredType;
-            if (tvp != null)
+            if (value is StructuredType tvp)
                 return new DapperStructuredTypeParameter(schemaName, tvp.TypeName, tvp.GetRecords);
 
             return value;

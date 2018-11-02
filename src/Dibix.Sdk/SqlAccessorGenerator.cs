@@ -43,8 +43,7 @@ namespace Dibix.Sdk
                 this._environment.VerifyProject(projectName);
 
             SourceSelectionExpression expression = new SourceSelectionExpression(this._environment, projectName);
-            if (configuration != null)
-                configuration(expression);
+            configuration?.Invoke(expression);
 
             expression.Build();
             this._configuration.Sources.Add(expression);
@@ -56,8 +55,7 @@ namespace Dibix.Sdk
         {
             TWriter writer = new TWriter();
             OutputConfigurationExpression expression = new OutputConfigurationExpression(this._environment, writer);
-            if (configuration != null)
-                configuration(expression);
+            configuration?.Invoke(expression);
 
             expression.Build();
             this._configuration.Writer = writer;
@@ -91,10 +89,7 @@ namespace Dibix.Sdk
         {
             foreach (ISourceSelection source in sources)
             {
-                ISqlStatementParser parser = source.Parser;
-                if (parser == null)
-                    //throw new InvalidOperationException("No sql parser was selected");
-                    parser = new NoOpParser();
+                ISqlStatementParser parser = source.Parser ?? new NoOpParser();
 
                 if (parser.Formatter == null)
                     parser.Formatter = new TakeSourceSqlStatementFormatter();
