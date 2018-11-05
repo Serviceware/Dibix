@@ -2,14 +2,12 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build netfx",
+            "label": "build",
             "command": "dotnet",
             "type": "process",
             "group": "build",
             "args": [
-                "build",
-                "-f",
-                "net451"
+                "build"
             ],
             "problemMatcher": "$msCompile"
         },
@@ -83,7 +81,7 @@
             "problemMatcher": []
         },
         {
-            "label": "run tests",
+            "label": "execute runtime tests",
             "command": "dotnet",
             "type": "process",
             "args": [
