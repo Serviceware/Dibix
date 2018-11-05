@@ -3,7 +3,7 @@
   <Import Project="..\..\build\common.props" />
 
   <PropertyGroup>
-    <TargetFramework>net45</TargetFramework>
+    <TargetFramework>net451</TargetFramework>
     <AssemblyName>Dibix.Sdk</AssemblyName>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>

@@ -2,53 +2,82 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build",
+            "label": "build netfx",
             "command": "dotnet",
             "type": "process",
             "group": "build",
             "args": [
-                "build"
+                "build",
+                "-f",
+                "net451"
             ],
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "build runtime",
+            "label": "build netstandard",
             "command": "dotnet",
             "type": "process",
             "group": "build",
             "args": [
                 "build",
                 "${workspaceFolder}/src/Dibix.Dapper",
+                "-f",
+                "netstandard1.3"
             ],
             "problemMatcher": "$msCompile"
         },
         {
             "label": "publish",
             "type": "shell",
-            "options": {
-                "cwd": "${workspaceFolder}/build"
-            },
             "windows": {
                 "command": "powershell",
                 "args": [
                     "-ExecutionPolicy",
                     "Bypass",
                     "-Command",
-                    "${workspaceFolder}/build/publish-package.ps1"
+                    "publish-package.ps1"
                 ]
             },
             "osx": {
                 "command": "/usr/local/bin/pwsh",
                 "args": [
                     "-Command",
-                    "${workspaceFolder}/build/publish-package.ps1"
+                    "publish-package.ps1"
                 ]
             },
             "linux": {
                 "command": "/usr/bin/pwsh",
                 "args": [
                     "-Command",
-                    "${workspaceFolder}/build/publish-package.ps1"
+                    "publish-package.ps1"
+                ]
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "clean",
+            "type": "shell",
+            "windows": {
+                "command": "powershell",
+                "args": [
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-Command",
+                    "${workspaceFolder}/build/clean.ps1"
+                ]
+            },
+            "osx": {
+                "command": "/usr/local/bin/pwsh",
+                "args": [
+                    "-Command",
+                    "${workspaceFolder}/build/clean.ps1"
+                ]
+            },
+            "linux": {
+                "command": "/usr/bin/pwsh",
+                "args": [
+                    "-Command",
+                    "${workspaceFolder}/build/clean.ps1"
                 ]
             },
             "problemMatcher": []
