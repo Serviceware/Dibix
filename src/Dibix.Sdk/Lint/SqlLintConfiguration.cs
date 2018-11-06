@@ -22,10 +22,14 @@ namespace Dibix.Sdk
             Expression environmentParameter = Expression.Constant(this.Environment);
             ParameterExpression fragmentParameter = Expression.Parameter(typeof(TSqlFragment), "fragment");
             ParameterExpression sourceFilePathParameter = Expression.Parameter(typeof(string), "sourceFilePath");
+            ParameterExpression ruleInstanceVariable = Expression.Variable(ruleType, "instance");
             Expression ruleInstance = Expression.New(ruleType);
-            Expression ruleInstanceCast = Expression.Convert(ruleInstance, typeof(SqlLintRule));
-            Expression execution = Expression.Call(ruleInstanceCast, "Execute", null, environmentParameter, fragmentParameter, sourceFilePathParameter);
-            Action<TSqlFragment, string> executionFunction = Expression.Lambda<Action<TSqlFragment, string>>(execution, fragmentParameter, sourceFilePathParameter).Compile();
+            Expression ruleInstanceAssignment = Expression.Assign(ruleInstanceVariable, ruleInstance);
+            Expression execution = Expression.Call(ruleInstanceVariable, nameof(SqlLintRule.Execute), null, environmentParameter, fragmentParameter, sourceFilePathParameter);
+            Expression hasErrorProperty = Expression.Property(ruleInstanceVariable, nameof(SqlLintRule.HasError));
+            Expression result = Expression.Not(hasErrorProperty);
+            Expression block = Expression.Block(new[] { ruleInstanceVariable }, ruleInstanceAssignment, execution, result);
+            Func<TSqlFragment, string, bool> executionFunction = Expression.Lambda<Func<TSqlFragment, string, bool>>(block, fragmentParameter, sourceFilePathParameter).Compile();
             this.Rules.Add(new SqlLintRuleAccessor(executionFunction));
         }
     }

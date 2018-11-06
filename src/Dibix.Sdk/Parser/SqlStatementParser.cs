@@ -27,19 +27,27 @@ namespace Dibix.Sdk
                 TSqlParser parser = new TSql140Parser(true);
                 IList<ParseError> parseErrors;
                 TSqlFragment fragment = parser.Parse(reader, out parseErrors);
-                RunLint(fragment, this.LintConfiguration, sourceFilePath);
+                if (!RunLint(fragment, this.LintConfiguration, sourceFilePath))
+                    return;
+
                 CollectStatementInfo(fragment, target, this.Formatter, environment);
             }
         }
         #endregion
 
         #region Private Methods
-        private static void RunLint(TSqlFragment fragment, SqlLintConfiguration configuration, string sourceFilePath)
+        private static bool RunLint(TSqlFragment fragment, SqlLintConfiguration configuration, string sourceFilePath)
         {
             if (!configuration.IsEnabled)
-                return;
+                return true;
 
-            configuration.Rules.Each(x => x.Execute(fragment, sourceFilePath));
+            bool success = true;
+            foreach (SqlLintRuleAccessor ruleAccessor in configuration.Rules)
+            {
+                if (!ruleAccessor.Execute(fragment, sourceFilePath))
+                    success = false;
+            }
+            return success;
         }
 
         private static void CollectStatementInfo(TSqlFragment fragment, SqlStatementInfo target, ISqlStatementFormatter formatter, IExecutionEnvironment environment)

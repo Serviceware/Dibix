@@ -23,7 +23,7 @@ namespace Dibix.Sdk
             this.Target.ResultTypeName = content.SingleHint(SqlHint.ResultTypeName);
 
             this.ParseResults(content);
-            this.ParseBody(statements);
+            this.ParseBody(statements ?? new StatementList());
         }
 
         protected internal void ParseParameter(DeclareVariableElement node)

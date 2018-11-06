@@ -12,7 +12,7 @@ namespace Dibix.Sdk
 
         public static string MaskText(string text)
         {
-            string binaryText = String.Join(" ", Encoding.Unicode.GetBytes(text).Select(c => Convert.ToString((byte)c, 2).PadLeft(8, '0')).ToArray());
+            string binaryText = String.Join(" ", Encoding.Unicode.GetBytes(text).Select(c => Convert.ToString(c, 2).PadLeft(8, '0')).ToArray());
             string zeroWidthText = String.Join("\ufeff", binaryText.ToCharArray().Select(MaskChar).ToArray());
             return zeroWidthText;
         }

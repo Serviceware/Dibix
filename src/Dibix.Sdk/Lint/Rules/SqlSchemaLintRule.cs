@@ -63,8 +63,8 @@ namespace Dibix.Sdk
             if (target == null)
                 return;
 
-            // UPDATE/DELETE x            -- x                => NamedTableReference with Name: x                => no dbo required
-            // FROM hlsys_test_table AS x -- hlsys_test_table => NamedTableReference with Name: hlsys_test_table => dbo required
+            // UPDATE/DELETE x     -- x         => NamedTableReference with Name: x         => no dbo required
+            // FROM dbx_table AS x -- dbx_table => NamedTableReference with Name: dbx_table => dbo required
             bool targetIsAliased = specification.FromClause
                                                 .TableReferences
                                                 .SelectMany(CollectAliases)
@@ -81,7 +81,7 @@ namespace Dibix.Sdk
                 return Enumerable.Repeat(aliasedTable.Alias.Value, 1);
             }
 
-            if (reference is QualifiedJoin @join)
+            if (reference is QualifiedJoin join)
             {
                 return CollectAliases(join.FirstTableReference)
                 .Union(CollectAliases(join.SecondTableReference));

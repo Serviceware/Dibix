@@ -5,16 +5,16 @@ namespace Dibix.Sdk
 {
     internal sealed class SqlLintRuleAccessor
     {
-        private readonly Action<TSqlFragment, string> _executionFunction;
+        private readonly Func<TSqlFragment, string, bool> _executionFunction;
 
-        public SqlLintRuleAccessor(Action<TSqlFragment, string> executionFunction)
+        public SqlLintRuleAccessor(Func<TSqlFragment, string, bool> executionFunction)
         {
             this._executionFunction = executionFunction;
         }
 
-        public void Execute(TSqlFragment fragment, string sourceFilePath)
+        public bool Execute(TSqlFragment fragment, string sourceFilePath)
         {
-            this._executionFunction(fragment, sourceFilePath);
+            return this._executionFunction(fragment, sourceFilePath);
         }
     }
 }

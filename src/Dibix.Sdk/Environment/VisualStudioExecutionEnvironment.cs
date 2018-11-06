@@ -290,8 +290,8 @@ namespace Dibix.Sdk
                 return false;
 
             string itemPath = (string)item.Properties.Item(ProjectDirectoryKey).Value;
-            string relativePath = itemPath.Substring(rootDirectory.Length);
-            if (excludedPaths.Any(x => relativePath.StartsWith(x, StringComparison.OrdinalIgnoreCase)))
+            string relativePath = itemPath.Substring(rootDirectory.Length).TrimStart('\\');
+            if (excludedPaths.Any(x => relativePath.StartsWith(x.Replace("/", "\\").TrimStart('\\'), StringComparison.OrdinalIgnoreCase)))
                 return false;
 
             return item.Name.EndsWith(".sql", StringComparison.OrdinalIgnoreCase);

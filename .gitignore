@@ -8,5 +8,10 @@
 # Visual Studio cache/options directory
 .vs/
 
+# SSDT
+*.dbmdl
+*.jfm
+*.sqlproj.user
+
 # MacOS cache
 .DS_Store
