@@ -92,10 +92,10 @@ namespace Dibix.Sdk
 
         private class InnerVisitor : TSqlFragmentVisitor
         {
-            private readonly Action<TSqlParserToken> _failAction;
+            private readonly Action<TSqlFragment> _failAction;
             private readonly HashSet<string> _whiteList;
 
-            public InnerVisitor(HashSet<string> whiteList, Action<TSqlParserToken> failAction)
+            public InnerVisitor(HashSet<string> whiteList, Action<TSqlFragment> failAction)
             {
                 this._failAction = failAction;
                 this._whiteList = whiteList;
@@ -104,7 +104,7 @@ namespace Dibix.Sdk
             public override void ExplicitVisit(NamedTableReference node)
             {
                 if (node.SchemaObject.SchemaIdentifier == null && !this._whiteList.Contains(node.SchemaObject.BaseIdentifier.Value))
-                    this._failAction(node.ScriptTokenStream[node.FirstTokenIndex]);
+                    this._failAction(node);
             }
         }
     }

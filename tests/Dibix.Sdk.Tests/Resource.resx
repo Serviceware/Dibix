@@ -379,6 +379,9 @@ Dibix.Sdk.Tests.Database\Lint\dbx_lint_error_001.sql(13,14) : error SQLLINT#001:
   <data name="SqlNoReturnLintRule" xml:space="preserve">
     <value>Dibix.Sdk.Tests.Database\Lint\dbx_lint_error_003.sql(3,2) : error SQLLINT#003: [SQLLINT#003] The use of RETURN expressions is not allowed</value>
   </data>
+  <data name="SqlRedundantAliasLintRule" xml:space="preserve">
+    <value>Dibix.Sdk.Tests.Database\Lint\dbx_lint_error_006.sql(3,17) : error SQLLINT#006: [SQLLINT#006] The alias is redundant</value>
+  </data>
   <data name="SqlSchemaLintRule" xml:space="preserve">
     <value>Dibix.Sdk.Tests.Database\Lint\dbx_lint_error_002.sql(9,7) : error SQLLINT#002: [SQLLINT#002] Missing schema specification
 Dibix.Sdk.Tests.Database\Lint\dbx_lint_error_002.sql(17,7) : error SQLLINT#002: [SQLLINT#002] Missing schema specification
@@ -393,7 +396,11 @@ Dibix.Sdk.Tests.Database\Lint\dbx_lint_error_002.sql(38,7) : error SQLLINT#002: 
 Dibix.Sdk.Tests.Database\Lint\dbx_lint_error_002.sql(49,8) : error SQLLINT#002: [SQLLINT#002] Missing schema specification
 Dibix.Sdk.Tests.Database\Lint\dbx_lint_error_002.sql(53,8) : error SQLLINT#002: [SQLLINT#002] Missing schema specification</value>
   </data>
-  <data name="SqlUnicodeLintRule" xml:space="preserve">
+  <data name="SqlUnicodeConstantLintRule" xml:space="preserve">
     <value>Dibix.Sdk.Tests.Database\Lint\dbx_lint_error_004.sql(3,28) : error SQLLINT#004: [SQLLINT#004] Invalid ascii string literal. Please specify unicode (N'')</value>
+  </data>
+  <data name="SqlUnicodeTypeLintRule" xml:space="preserve">
+    <value>Dibix.Sdk.Tests.Database\Lint\dbx_lint_error_005.sql(1,48) : error SQLLINT#005: [SQLLINT#005] Invalid data type VARCHAR. Please use NVARCHAR for unicode
+Dibix.Sdk.Tests.Database\Lint\dbx_lint_error_005.sql(4,19) : error SQLLINT#005: [SQLLINT#005] Invalid data type VARCHAR. Please use NVARCHAR for unicode</value>
   </data>
 </root>

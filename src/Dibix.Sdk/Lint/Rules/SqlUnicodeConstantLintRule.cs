@@ -2,7 +2,7 @@
 
 namespace Dibix.Sdk
 {
-    public sealed class SqlUnicodeLintRule : SqlLintRule
+    public sealed class SqlUnicodeConstantLintRule : SqlLintRule
     {
         public override int Id => 4;
         public override string ErrorMessage => "Invalid ascii string literal. Please specify unicode (N'')";

@@ -21,6 +21,7 @@ namespace Dibix.Sdk
             fragment.Accept(this);
         }
 
+        protected void Fail(TSqlFragment fragment, params object[] args) => this.Fail(fragment.ScriptTokenStream[fragment.FirstTokenIndex], args);
         protected void Fail(TSqlParserToken token, params object[] args)
         {
             string errorCode = $"SQLLINT#{this.Id:d3}";

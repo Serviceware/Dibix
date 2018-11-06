@@ -61,6 +61,8 @@
     <Build Include="Lint\dbx_lint_error_002.sql" />
     <Build Include="Lint\dbx_lint_error_003.sql" />
     <Build Include="Lint\dbx_lint_error_004.sql" />
+    <Build Include="Lint\dbx_lint_error_005.sql" />
+    <Build Include="Lint\dbx_lint_error_006.sql" />
     <Build Include="Tables\dbx_table.sql" />
     <Build Include="Tests\Parser\dbx_tests_parser_invalidcolumnsforentity.sql" />
     <Build Include="Tests\Parser\dbx_tests_parser_nestedifs.sql" />

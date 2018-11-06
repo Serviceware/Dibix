@@ -1,4 +1,6 @@
-﻿namespace Dibix.Sdk.Tests
+﻿using Xunit;
+
+namespace Dibix.Sdk.Tests
 {
     public sealed class LintTests : LintTestBase
     {
@@ -12,6 +14,12 @@
         public void SqlNoReturnLintRule() => base.RunLintTest(3);
 
         [Fact]
-        public void SqlUnicodeLintRule() => base.RunLintTest(4);
+        public void SqlUnicodeConstantLintRule() => base.RunLintTest(4);
+
+        [Fact]
+        public void SqlUnicodeTypeLintRule() => base.RunLintTest(5);
+
+        [Fact]
+        public void SqlRedundantAliasLintRule() => base.RunLintTest(6);
     }
 }

@@ -9,7 +9,7 @@ namespace Dibix.Sdk
 
         public override void ExplicitVisit(ReturnStatement fragment)
         {
-            base.Fail(fragment.ScriptTokenStream[fragment.FirstTokenIndex]);
+            base.Fail(fragment);
         }
     }
 }

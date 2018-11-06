@@ -126,6 +126,15 @@ namespace Dibix.Sdk.Tests {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Dibix.Sdk.Tests.Database\Lint\dbx_lint_error_006.sql(3,17) : error SQLLINT#006: [SQLLINT#006] The alias is redundant.
+        /// </summary>
+        internal static string SqlRedundantAliasLintRule {
+            get {
+                return ResourceManager.GetString("SqlRedundantAliasLintRule", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Dibix.Sdk.Tests.Database\Lint\dbx_lint_error_002.sql(9,7) : error SQLLINT#002: [SQLLINT#002] Missing schema specification
         ///Dibix.Sdk.Tests.Database\Lint\dbx_lint_error_002.sql(17,7) : error SQLLINT#002: [SQLLINT#002] Missing schema specification
         ///Dibix.Sdk.Tests.Database\Lint\dbx_lint_error_002.sql(22,14) : error SQLLINT#002: [SQLLINT#002] Missing schema specification
@@ -141,9 +150,19 @@ namespace Dibix.Sdk.Tests {
         /// <summary>
         ///   Looks up a localized string similar to Dibix.Sdk.Tests.Database\Lint\dbx_lint_error_004.sql(3,28) : error SQLLINT#004: [SQLLINT#004] Invalid ascii string literal. Please specify unicode (N&apos;&apos;).
         /// </summary>
-        internal static string SqlUnicodeLintRule {
+        internal static string SqlUnicodeConstantLintRule {
             get {
-                return ResourceManager.GetString("SqlUnicodeLintRule", resourceCulture);
+                return ResourceManager.GetString("SqlUnicodeConstantLintRule", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Dibix.Sdk.Tests.Database\Lint\dbx_lint_error_005.sql(1,48) : error SQLLINT#005: [SQLLINT#005] Invalid data type VARCHAR. Please use NVARCHAR for unicode
+        ///Dibix.Sdk.Tests.Database\Lint\dbx_lint_error_005.sql(4,19) : error SQLLINT#005: [SQLLINT#005] Invalid data type VARCHAR. Please use NVARCHAR for unicode.
+        /// </summary>
+        internal static string SqlUnicodeTypeLintRule {
+            get {
+                return ResourceManager.GetString("SqlUnicodeTypeLintRule", resourceCulture);
             }
         }
     }

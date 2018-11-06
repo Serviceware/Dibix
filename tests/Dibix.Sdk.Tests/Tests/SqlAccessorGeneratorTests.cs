@@ -1,4 +1,6 @@
-﻿namespace Dibix.Sdk.Tests
+﻿using Xunit;
+
+namespace Dibix.Sdk.Tests
 {
     public sealed class SqlAccessorGeneratorTests : SqlAccessorGeneratorTestBase
     {
