@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Dibix.Sdk
+﻿namespace Dibix.Sdk
 {
     internal class SqlStatementParserConfigurationExpression : ISqlStatementParserConfigurationExpression
     {
@@ -19,12 +17,6 @@ namespace Dibix.Sdk
         public ISqlStatementParserConfigurationExpression Formatter<TFormatter>() where TFormatter : ISqlStatementFormatter, new()
         {
             this._parser.Formatter = new TFormatter();
-            return this;
-        }
-
-        internal ISqlStatementParserConfigurationExpression Lint(Action<SqlLintConfiguration> configuration)
-        {
-            configuration(this._parser.LintConfiguration);
             return this;
         }
         #endregion
