@@ -55,7 +55,13 @@ namespace Dibix.Sdk
                                                      , modifiers: CSharpModifiers.Public | CSharpModifiers.Static);
                 method.AddParameter("databaseAccessorFactory", "IDatabaseAccessorFactory");
                 foreach (SqlQueryParameter parameter in statement.Parameters)
-                    method.AddParameter(parameter.Name, parameter.ClrTypeName);
+                {
+                    string annotation = null;
+                    if (!String.IsNullOrEmpty(parameter.Source))
+                        annotation = $"[ParameterSource(\"{parameter.Source}\")]";
+
+                    method.AddParameter(parameter.Name, parameter.ClrTypeName, annotation);
+                }
             }
 
             ICollection<SqlStatementInfo> multiResultStatements = statements.Where(x => x.Results.Count > 1 && x.ResultTypeName == null).ToArray();
