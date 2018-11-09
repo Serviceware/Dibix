@@ -4,7 +4,6 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard1.3;net451</TargetFrameworks>
-    <AssemblyName>Dibix.Dapper</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

@@ -43,6 +43,12 @@ namespace Dibix.Dapper
             this._mappingCheck.Check<T>();
             return this._reader.ReadSingle<T>();
         }
+
+        public T ReadSingleOrDefault<T>()
+        {
+            this._mappingCheck.Check<T>();
+            return this._reader.ReadSingleOrDefault<T>();
+        }
         #endregion
 
         #region IDisposable Members
