@@ -4,7 +4,6 @@
 
   <PropertyGroup>
     <TargetFramework>net451</TargetFramework>
-    <AssemblyName>Dibix.Sdk</AssemblyName>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 

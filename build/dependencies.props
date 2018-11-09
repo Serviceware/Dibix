@@ -5,6 +5,7 @@
     <DapperVersion>1.50.5</DapperVersion>
     <EnvDTEVersion>8.0.2</EnvDTEVersion>
     <SqlScriptDomVersion>14.0.3811.1</SqlScriptDomVersion>
+    <DacVersion>12.0.0</DacVersion>
     <VSTextTemplatingVersion>10.0.30320</VSTextTemplatingVersion>
     <VSLangProjVersion>7.0.3301</VSLangProjVersion>
     <ConfigurationBinderVersion>2.1.1</ConfigurationBinderVersion>
