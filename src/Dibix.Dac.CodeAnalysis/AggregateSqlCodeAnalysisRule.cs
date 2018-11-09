@@ -21,7 +21,6 @@ namespace Dibix.Dac.CodeAnalysis
 
         public AggregateSqlCodeAnalysisRule()
         {
-            System.Diagnostics.Debugger.Launch();
             this.SupportedElementTypes = SqlElementType.Types;
         }
 
