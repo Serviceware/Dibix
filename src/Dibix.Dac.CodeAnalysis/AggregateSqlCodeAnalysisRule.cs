@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -18,6 +19,11 @@ namespace Dibix.Dac.CodeAnalysis
     public sealed class AggregateSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
         private static ISqlCodeAnalysisRuleEngine _engine;
+
+        static AggregateSqlCodeAnalysisRule()
+        {
+            AttachDebugger();
+        }
 
         public AggregateSqlCodeAnalysisRule()
         {
@@ -48,6 +54,12 @@ namespace Dibix.Dac.CodeAnalysis
             Assembly assembly = Assembly.LoadFrom(targetPath);
             Type providerType = assembly.GetType("Dibix.Dac.CodeAnalysis.Rules.SqlCodeAnalysisRuleEngine");
             return (ISqlCodeAnalysisRuleEngine)Activator.CreateInstance(providerType);
+        }
+
+        private static void AttachDebugger()
+        {
+            if (File.Exists(String.Concat(typeof(AggregateSqlCodeAnalysisRule).Assembly.Location, ".lock")))
+                Debugger.Launch();
         }
     }
 }
