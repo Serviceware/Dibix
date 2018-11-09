@@ -8,7 +8,8 @@
             "group": "build",
             "args": [
                 "build",
-                "Dibix.sln"
+                "Dibix.sln",
+                "/p:GenerateFullPaths=true"
             ],
             "problemMatcher": "$msCompile"
         },
@@ -21,7 +22,8 @@
                 "build",
                 "${workspaceFolder}/src/Dibix.Dapper",
                 "-f",
-                "netstandard1.3"
+                "netstandard1.3",
+                "/p:GenerateFullPaths=true"
             ],
             "problemMatcher": "$msCompile"
         },
@@ -87,6 +89,7 @@
             "type": "process",
             "args": [
                 "test",
+                "/p:GenerateFullPaths=true",
                 "/p:CollectCoverage=true",
                 "/p:CoverletOutputFormat=lcov",
                 "/p:CoverletOutput=bin/debug/netcoreapp2.1/lcov.info",
