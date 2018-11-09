@@ -17,7 +17,7 @@ namespace Dibix.Sdk
                 if (token.TokenType != TSqlTokenType.SingleLineComment && token.TokenType != TSqlTokenType.MultilineComment)
                     continue;
 
-                Match match = ParseCommentRegex.Match(token.Text);
+                Match match = ParseCommentRegex.Match(token.Text.Trim());
                 if (!match.Success)
                     continue;
 
