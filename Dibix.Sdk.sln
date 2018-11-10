@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix", "src\Dibix\Dibix.cs
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Dibix.Sdk.Tests.Database", "tests\Dibix.Sdk.Tests.Database\Dibix.Sdk.Tests.Database.sqlproj", "{2AA95DFC-B5C9-4758-BC8F-7A2290112C89}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Dac.Extensions", "src\Dibix.Dac.Extensions\Dibix.Dac.Extensions.csproj", "{6A8E0A5F-7F3A-4F22-858E-3FF44059F612}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{2AA95DFC-B5C9-4758-BC8F-7A2290112C89}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2AA95DFC-B5C9-4758-BC8F-7A2290112C89}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2AA95DFC-B5C9-4758-BC8F-7A2290112C89}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{6A8E0A5F-7F3A-4F22-858E-3FF44059F612}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A8E0A5F-7F3A-4F22-858E-3FF44059F612}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A8E0A5F-7F3A-4F22-858E-3FF44059F612}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A8E0A5F-7F3A-4F22-858E-3FF44059F612}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -48,6 +54,7 @@ Global
 		{77DBF2BB-D93F-4669-872A-01D94C80DF21} = {B1D5F4EA-842C-494E-9B2F-1FF271591E29}
 		{C39FCD10-4874-4FC6-86A7-D35A1789DCD0} = {118B0BCE-C81F-4DA0-814C-2F8AC4867710}
 		{2AA95DFC-B5C9-4758-BC8F-7A2290112C89} = {B1D5F4EA-842C-494E-9B2F-1FF271591E29}
+		{6A8E0A5F-7F3A-4F22-858E-3FF44059F612} = {118B0BCE-C81F-4DA0-814C-2F8AC4867710}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F25BA702-70BE-4E04-8583-C71369C6D3D0}
