@@ -8,11 +8,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Reference Include="Microsoft.SqlServer.Dac.Extensions, Version=$(DacVersion)">
+      <HintPath>../../lib/Microsoft.SqlServer.Dac.Extensions.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="EnvDTE" Version="$(EnvDTEVersion)" />
     <PackageReference Include="Microsoft.VisualStudio.TextTemplating.Interfaces.10.0" Version="$(VSTextTemplatingVersion)" />
     <PackageReference Include="VSLangProj" Version="$(VSLangProjVersion)" />
     <PackageReference Include="Microsoft.SqlServer.TransactSql.ScriptDom" Version="$(SqlScriptDomVersion)" />
-    <PackageReference Include="SqlServer.Dac" Version="$(DacVersion)" />
   </ItemGroup>
   
 </Project>

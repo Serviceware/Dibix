@@ -8,10 +8,12 @@
 
   <ItemGroup>
     <Reference Include="System.ComponentModel.Composition" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="SqlServer.Dac" Version="$(DacVersion)" />
+    <Reference Include="Microsoft.Data.Tools.Schema.Sql, Version=$(DacVersion)">
+      <HintPath>../../lib/Microsoft.Data.Tools.Schema.Sql.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SqlServer.Dac.Extensions, Version=$(DacVersion)">
+      <HintPath>../../lib/Microsoft.SqlServer.Dac.Extensions.dll</HintPath>
+    </Reference>
   </ItemGroup>
   
 </Project>

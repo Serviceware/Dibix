@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Dibix.Sdk.CodeAnalysis;
 using Microsoft.SqlServer.Dac;
 using Microsoft.SqlServer.Dac.CodeAnalysis;
 
@@ -52,9 +51,21 @@ namespace Dibix.Dac.Extensions
             string sourcePath = RulesAssemblyLocator.Locate(source.SourceName);
             string targetPath = Path.GetTempFileName();
             File.Copy(sourcePath, targetPath, true);
+            string dacDirectory = Path.GetDirectoryName(typeof(SqlCodeAnalysisRule).Assembly.Location);
+
+            Assembly OnAssemblyResolve(object sender, ResolveEventArgs e)
+            {
+                string relatedAssemblyPath = Path.Combine(dacDirectory, String.Concat(new AssemblyName(e.Name).Name, ".dll"));
+                if (File.Exists(relatedAssemblyPath)) return Assembly.LoadFrom(relatedAssemblyPath);
+
+                return null;
+            }
+
             Assembly assembly = Assembly.LoadFrom(targetPath);
             Type providerType = assembly.GetType("Dibix.Sdk.CodeAnalysis.SqlCodeAnalysisRuleEngine");
+            AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
             object engine = Activator.CreateInstance(providerType);
+            AppDomain.CurrentDomain.AssemblyResolve -= OnAssemblyResolve;
             Expression instance = Expression.Constant(engine);
             ParameterExpression parameter = Expression.Parameter(typeof(SqlRuleExecutionContext), "context");
             Expression call = Expression.Call(instance, "Analyze", new Type[0], parameter);

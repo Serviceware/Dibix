@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.SqlServer.Dac.Model;
 
-namespace Dibix.Sdk.CodeAnalysis
+namespace Dibix.Dac.Extensions
 {
     internal static class SqlElementType
     {
