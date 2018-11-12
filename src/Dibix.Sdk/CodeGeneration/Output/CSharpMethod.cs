@@ -22,9 +22,9 @@ namespace Dibix.Sdk.CodeGeneration
             this._parameters = new Collection<CSharpParameter>();
         }
 
-        public CSharpMethod AddParameter(string name, string type, string annotation = null)
+        public CSharpMethod AddParameter(string name, string type)
         {
-            CSharpParameter parameter = new CSharpParameter(name, type, annotation);
+            CSharpParameter parameter = new CSharpParameter(name, type);
             this._parameters.Add(parameter);
             return this;
         }

@@ -77,9 +77,6 @@ SELECT @param1;
 
 SELECT 2;";
 
-        // dbx_tests_parser_paramsource
-        public const string dbx_tests_parser_paramsourceCommandText = @"";
-
         // dbx_tests_parser_xmlparam
         public const string dbx_tests_parser_xmlparamCommandText = @"";
 
@@ -130,20 +127,6 @@ SELECT 2;";
                     result.C.ReplaceWith(reader.ReadMany<int>());
                     return result;
                 }
-            }
-        }
-        public static int dbx_tests_parser_paramsource(this IDatabaseAccessorFactory databaseAccessorFactory, [ParameterSource("Session.LocaleId")] int a, [ParameterSource("Caller.ChannelId")] int b)
-        {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
-            {
-                IParametersVisitor @params = accessor.Parameters()
-                                                     .SetFromTemplate(new
-                                                     {
-                                                         a,
-                                                         b
-                                                     })
-                                                     .Build();
-                return accessor.Execute(dbx_tests_parser_paramsourceCommandText, @params);
             }
         }
         public static int dbx_tests_parser_xmlparam(this IDatabaseAccessorFactory databaseAccessorFactory, string x)
@@ -204,7 +187,6 @@ SELECT 2;";
         public static MethodInfo dbx_tests_parser_invalidcolumnsforentityMethodInfo { get { return typeof(ParserTest).GetMethod("dbx_tests_parser_invalidcolumnsforentity"); }  } 
         public static MethodInfo dbx_tests_parser_nestedifsMethodInfo { get { return typeof(ParserTest).GetMethod("dbx_tests_parser_nestedifs"); }  } 
         public static MethodInfo dbx_tests_parser_nobeginendMethodInfo { get { return typeof(ParserTest).GetMethod("dbx_tests_parser_nobeginend"); }  } 
-        public static MethodInfo dbx_tests_parser_paramsourceMethodInfo { get { return typeof(ParserTest).GetMethod("dbx_tests_parser_paramsource"); }  } 
         public static MethodInfo dbx_tests_parser_xmlparamMethodInfo { get { return typeof(ParserTest).GetMethod("dbx_tests_parser_xmlparam"); }  } 
     }
 }

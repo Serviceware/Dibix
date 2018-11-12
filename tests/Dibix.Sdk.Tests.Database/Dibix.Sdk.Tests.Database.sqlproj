@@ -74,7 +74,6 @@
     <Build Include="Tests\Sources\Excluded\Nested\dbx_tests_sources_excludednested.sql" />
     <Build Include="Tests\Sources\Included\Nested\dbx_tests_sources_includednested.sql" />
     <Build Include="Tests\Sources\dbx_tests_sources_externalsp.sql" />
-    <Build Include="Tests\Parser\dbx_tests_parser_paramsource.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Lint\" />

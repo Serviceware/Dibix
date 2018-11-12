@@ -46,7 +46,6 @@ namespace Dibix.Sdk.CodeGeneration
             if (sqlDataType != null)
             {
                 parameter.ClrType = ToClrType(sqlDataType.SqlDataTypeOption);
-                parameter.Source = node.SingleHint(SqlHint.Source, startIndex);
             }
             else if (xmlDataType != null)
             {
