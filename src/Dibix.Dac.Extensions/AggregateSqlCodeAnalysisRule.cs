@@ -48,7 +48,7 @@ namespace Dibix.Dac.Extensions
 
         private static Func<SqlRuleExecutionContext, IEnumerable<SqlRuleProblem>> BuildAnalyzer(SourceInformation source)
         {
-            string sourcePath = RulesAssemblyLocator.Locate(source.SourceName);
+            string sourcePath = DependentAssemblyLocator.LocateRulesAssembly(source.SourceName);
             string targetPath = Path.GetTempFileName();
             File.Copy(sourcePath, targetPath, true);
             string dacDirectory = Path.GetDirectoryName(typeof(SqlCodeAnalysisRule).Assembly.Location);
