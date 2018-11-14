@@ -19,7 +19,7 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
         [Fact]
         public void UnicodeDataTypeSqlCodeAnalysisRule() => base.Execute();
 
-        [Fact]
+        //[Fact]
         public void RedundantAliasSqlCodeAnalysisRule() => base.Execute();
     }
 }
