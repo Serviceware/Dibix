@@ -7,7 +7,7 @@
 string output = SqlAccessorGenerator.FromVisualStudio(this.Host, (IServiceProvider)this.Host)
                                     .AddSource("Dibix.Sdk.Tests.Database", x => 
                                     {
-										x.SelectFolder(null, "Lint", "Tables", "Tests/Parser", "Tests/Sources/Excluded", "Tests/Sources/dbx_tests_sources_externalsp")
+										x.SelectFolder(null, "CodeAnalysis", "Tables", "Tests/Parser", "Tests/Sources/Excluded", "Tests/Sources/dbx_tests_sources_externalsp")
 										 .SelectFile("Tests/Sources/Excluded/Nested/dbx_tests_sources_excludednested.sql")
 										 .SelectParser<SqlStoredProcedureParser>(y => 
 										 {
@@ -16,7 +16,7 @@ string output = SqlAccessorGenerator.FromVisualStudio(this.Host, (IServiceProvid
 									})
                                     .AddSource(x =>
                                     {
-                                        x.SelectFile(@"..\Dibix.Sdk.Tests.Database\Tests\Sources\dbx_tests_sources_externalsp.sql")
+                                        x.SelectFile(@"..\..\Dibix.Sdk.Tests.Database\Tests\Sources\dbx_tests_sources_externalsp.sql")
                                          .SelectParser<SqlStoredProcedureParser>(y =>
                                          {
                                              y.Formatter<ExecStoredProcedureSqlStatementFormatter>();

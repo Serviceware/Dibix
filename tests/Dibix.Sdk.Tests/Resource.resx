@@ -121,39 +121,39 @@
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
   &lt;error
-    description="[001] Invalid casing for 'SeLeCT' [Select]"
+    message="SRDBX : Dibix : [001] Invalid casing for 'SeLeCT' [Select]"
     line="13"
     column="2" /&gt;
   &lt;error
-    description="[001] Invalid casing for 'nvarchar' [Identifier]"
+    message="SRDBX : Dibix : [001] Invalid casing for 'nvarchar' [Identifier]"
     line="3"
     column="13" /&gt;
   &lt;error
-    description="[001] Invalid casing for 'max' [Identifier]"
+    message="SRDBX : Dibix : [001] Invalid casing for 'max' [Identifier]"
     line="3"
     column="22" /&gt;
   &lt;error
-    description="[001] Invalid casing for 'decimal' [Identifier]"
+    message="SRDBX : Dibix : [001] Invalid casing for 'decimal' [Identifier]"
     line="4"
     column="13" /&gt;
   &lt;error
-    description="[001] Invalid casing for 'bigint' [Identifier]"
+    message="SRDBX : Dibix : [001] Invalid casing for 'bigint' [Identifier]"
     line="5"
     column="13" /&gt;
   &lt;error
-    description="[001] Invalid casing for 'row_number' [Identifier]"
+    message="SRDBX : Dibix : [001] Invalid casing for 'row_number' [Identifier]"
     line="5"
     column="22" /&gt;
   &lt;error
-    description="[001] Invalid casing for 'VALUE' [Identifier]"
+    message="SRDBX : Dibix : [001] Invalid casing for 'VALUE' [Identifier]"
     line="8"
     column="33" /&gt;
   &lt;error
-    description="[001] Invalid casing for 'NoDeS' [Identifier]"
+    message="SRDBX : Dibix : [001] Invalid casing for 'NoDeS' [Identifier]"
     line="10"
     column="23" /&gt;
   &lt;error
-    description="[001] Invalid casing for 'count' [Identifier]"
+    message="SRDBX : Dibix : [001] Invalid casing for 'count' [Identifier]"
     line="13"
     column="14" /&gt;
 &lt;/errors&gt;</value>
@@ -359,7 +359,7 @@ SELECT 2;";
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
   &lt;error
-    description="[006] The alias is redundant"
+    message="SRDBX : Dibix : [006] The alias is redundant"
     line="3"
     column="17" /&gt;
 &lt;/errors&gt;</value>
@@ -368,51 +368,51 @@ SELECT 2;";
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
   &lt;error
-    description="[002] Missing schema specification"
+    message="SRDBX : Dibix : [002] Missing schema specification"
     line="9"
     column="7" /&gt;
   &lt;error
-    description="[002] Missing schema specification"
+    message="SRDBX : Dibix : [002] Missing schema specification"
     line="17"
     column="7" /&gt;
   &lt;error
-    description="[002] Missing schema specification"
+    message="SRDBX : Dibix : [002] Missing schema specification"
     line="22"
     column="14" /&gt;
   &lt;error
-    description="[002] Missing schema specification"
+    message="SRDBX : Dibix : [002] Missing schema specification"
     line="24"
     column="14" /&gt;
   &lt;error
-    description="[002] Missing schema specification"
+    message="SRDBX : Dibix : [002] Missing schema specification"
     line="24"
     column="39" /&gt;
   &lt;error
-    description="[002] Missing schema specification"
+    message="SRDBX : Dibix : [002] Missing schema specification"
     line="26"
     column="28" /&gt;
   &lt;error
-    description="[002] Missing schema specification"
+    message="SRDBX : Dibix : [002] Missing schema specification"
     line="28"
     column="9" /&gt;
   &lt;error
-    description="[002] Missing schema specification"
+    message="SRDBX : Dibix : [002] Missing schema specification"
     line="32"
     column="28" /&gt;
   &lt;error
-    description="[002] Missing schema specification"
+    message="SRDBX : Dibix : [002] Missing schema specification"
     line="35"
     column="7" /&gt;
   &lt;error
-    description="[002] Missing schema specification"
+    message="SRDBX : Dibix : [002] Missing schema specification"
     line="38"
     column="7" /&gt;
   &lt;error
-    description="[002] Missing schema specification"
+    message="SRDBX : Dibix : [002] Missing schema specification"
     line="49"
     column="8" /&gt;
   &lt;error
-    description="[002] Missing schema specification"
+    message="SRDBX : Dibix : [002] Missing schema specification"
     line="53"
     column="8" /&gt;
 &lt;/errors&gt;</value>
@@ -475,7 +475,7 @@ namespace This.Is.A.Custom.Namespace
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
   &lt;error
-    description="[004] Invalid ascii string literal. Please specify unicode (N'')"
+    message="SRDBX : Dibix : [004] Invalid ascii string literal. Please specify unicode (N'')"
     line="3"
     column="28" /&gt;
 &lt;/errors&gt;</value>
@@ -484,11 +484,11 @@ namespace This.Is.A.Custom.Namespace
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
   &lt;error
-    description="[005] Use unicode data types instead of ascii. Please replace VARCHAR with NVARCHAR."
+    message="SRDBX : Dibix : [005] Use unicode data types instead of ascii. Please replace VARCHAR with NVARCHAR."
     line="1"
     column="56" /&gt;
   &lt;error
-    description="[005] Use unicode data types instead of ascii. Please replace VARCHAR with NVARCHAR."
+    message="SRDBX : Dibix : [005] Use unicode data types instead of ascii. Please replace VARCHAR with NVARCHAR."
     line="4"
     column="19" /&gt;
 &lt;/errors&gt;</value>

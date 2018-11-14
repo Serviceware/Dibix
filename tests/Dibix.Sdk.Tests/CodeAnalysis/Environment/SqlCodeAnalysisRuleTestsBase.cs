@@ -1,16 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using Dibix.Sdk.CodeAnalysis;
 using Dibix.Sdk.Tests.Utilities;
-using Microsoft.SqlServer.Dac.CodeAnalysis;
-using Microsoft.SqlServer.Dac.Extensibility;
-using Microsoft.SqlServer.Dac.Model;
 
 namespace Dibix.Sdk.Tests.CodeAnalysis
 {
@@ -23,37 +20,12 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
             string expected = GetExpectedText(ruleName);
             Type ruleType = Type.GetType($"Dibix.Sdk.CodeAnalysis.Rules.{ruleName},{typeof(ISqlCodeAnalysisRule).Assembly.GetName().Name}");
             ISqlCodeAnalysisRule ruleInstance = (ISqlCodeAnalysisRule)Activator.CreateInstance(ruleType);
+            string violationScriptPath = $@"..\..\..\..\Dibix.Sdk.Tests.Database\CodeAnalysis\dbx_codeanalysis_error_{ruleInstance.Id:D3}.sql";
 
-            // Load script that violates exactly this rule
-            TSqlModel model = new TSqlModel(SqlServerVersion.Sql130, new TSqlModelOptions());
-            model.AddObjects(File.ReadAllText($@"..\..\..\..\Dibix.Sdk.Tests.Database\CodeAnalysis\dbx_codeanalysis_error_{ruleInstance.Id:D3}.sql"));
+            ISqlCodeAnalysisRuleEngine engine = new SqlCodeAnalysisRuleEngine();
+            IEnumerable<SqlCodeAnalysisError> errors = engine.Analyze(ruleInstance, violationScriptPath);
 
-            // Create DacFX code analysis engine
-            CodeAnalysisService service = new CodeAnalysisServiceFactory().CreateAnalysisService(model.Version);
-
-            // Here we have to forcefully make DacFX compose our rule
-            CompositionProperties properties = (CompositionProperties)service.GetType().GetField("_properties", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(service);
-            properties.AssemblyLookupPath = Environment.CurrentDirectory; // Make DacFX compose the test assembly to scan for rules
-
-            // Load rules
-            foreach (RuleDescriptor ruleDescriptor in service.GetRules())
-            {
-                if (ruleDescriptor.RuleId == SqlCodeAnalysisRuleDecorator.RuleId)
-                {
-                    // Apply current rule instance to composable rule decorator
-                    SqlCodeAnalysisRuleDecorator decorator = (SqlCodeAnalysisRuleDecorator)ruleDescriptor.Rule;
-                    decorator.Rule = ruleInstance;
-                }
-                else
-                {
-                    // Disable all built in rules
-                    ruleDescriptor.Enabled = false;
-                }
-            }
-
-            CodeAnalysisResult result = service.Analyze(model);
-
-            string actual = GenerateXmlFromResults(result);
+            string actual = GenerateXmlFromResults(errors);
             TestUtilities.AssertEqualWithDiffTool(expected, actual);
         }
 
@@ -66,12 +38,12 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
             return resource;
         }
 
-        private static string GenerateXmlFromResults(CodeAnalysisResult result)
+        private static string GenerateXmlFromResults(IEnumerable<SqlCodeAnalysisError> result)
         {
-            XDocument doc = new XDocument(new XElement("errors", result.Problems.Select(x => new XElement("error",
-                new XAttribute("description", x.Description),
-                new XAttribute("line", x.StartLine),
-                new XAttribute("column", x.StartColumn))).ToArray()));
+            XDocument doc = new XDocument(new XElement("errors", result.Select(x => new XElement("error",
+                new XAttribute("message", x.Message),
+                new XAttribute("line", x.Line),
+                new XAttribute("column", x.Column))).ToArray()));
 
             StringBuilder sb = new StringBuilder();
             using (StringWriter stringWriter = new StringWriter(sb))

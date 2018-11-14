@@ -1,61 +1,54 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Microsoft.SqlServer.Dac;
-using Microsoft.SqlServer.Dac.CodeAnalysis;
 using Microsoft.SqlServer.Dac.Model;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis
 {
-    public abstract class SqlCodeAnalysisRule<TVisitor> : ISqlCodeAnalysisRule where TVisitor : SqlCodeAnalysisRuleVisitor, new()
+    public abstract class SqlCodeAnalysisRule : ISqlCodeAnalysisRule
     {
         public abstract int Id { get; }
         public abstract string ErrorMessage { get; }
-        public ICollection<SqlRuleProblem> Errors { get; }
+        public ICollection<SqlCodeAnalysisError> Errors { get; }
 
         protected SqlCodeAnalysisRule()
         {
-            this.Errors = new Collection<SqlRuleProblem>();
+            this.Errors = new Collection<SqlCodeAnalysisError>();
         }
 
-        IEnumerable<SqlRuleProblem> ISqlCodeAnalysisRule.Analyze(SqlRuleExecutionContext context)
+        IEnumerable<SqlCodeAnalysisError> ISqlCodeAnalysisRule.Analyze(TSqlObject modelElement, TSqlFragment scriptFragment)
         {
             this.Errors.Clear();
 
-            if (context.ScriptFragment != null)
-                this.AnalyzeFragment(context);
-
-            this.AnalyzeModel(context.ModelElement);
+            this.Analyze(modelElement, scriptFragment);
 
             return this.Errors;
         }
 
-        protected virtual void AnalyzeModel(TSqlObject model)
-        {
-        }
+        protected abstract void Analyze(TSqlObject modelElement, TSqlFragment scriptFragment);
 
-        private void AnalyzeFragment(SqlRuleExecutionContext context)
+        protected void Fail(TSqlObject modelElement, TSqlFragment fragment, int line, int column, params object[] args)
+        {
+            string errorText = $"SRDBX : Dibix : [{this.Id:d3}] {String.Format(this.ErrorMessage, args)}";
+            SqlCodeAnalysisError problem = new SqlCodeAnalysisError(this.Id, errorText, modelElement, fragment, line, column);
+            this.Errors.Add(problem);
+        }
+    }
+
+
+    public abstract class SqlCodeAnalysisRule<TVisitor> : SqlCodeAnalysisRule, ISqlCodeAnalysisRule where TVisitor : SqlCodeAnalysisRuleVisitor, new()
+    {
+        protected override void Analyze(TSqlObject modelElement, TSqlFragment scriptFragment)
         {
             TVisitor visitor = new TVisitor();
-            visitor.ErrorHandler = (fragment, token, args) => this.Fail(fragment ?? context.ScriptFragment, token, context.ModelElement, args);
+            visitor.ErrorHandler = (fragment, line, column, args) => base.Fail(modelElement, fragment ?? scriptFragment, line, column, args);
 
             // First visit each token
-            context.ScriptFragment.Visit(visitor.Visit);
+            scriptFragment.Visit(visitor.Visit);
 
             // Now visit each fragment
-            context.ScriptFragment.Accept(visitor);
-        }
-
-        private void Fail(TSqlFragment fragment, TSqlParserToken token, TSqlObject model, params object[] args)
-        {
-            string errorText = $"[{this.Id:d3}] {String.Format(this.ErrorMessage, args)}";
-
-            SqlRuleProblem problem = new SqlRuleProblem(errorText, model, fragment);
-            if (token != null)
-                problem.SetSourceInformation(new SourceInformation(problem.SourceName, token.Line, token.Column));
-
-            this.Errors.Add(problem);
+            scriptFragment.Accept(visitor);
         }
     }
 }

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using Dibix.Sdk.CodeGeneration.Lint;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -51,9 +50,7 @@ namespace Dibix.Sdk.CodeGeneration
         public void SelectParser<TParser>(Action<ISqlStatementParserConfigurationExpression> configuration) where TParser : ISqlStatementParser, new()
         {
             TParser parser = new TParser();
-            parser.LintConfiguration.Environment = this._environment;
             SqlStatementParserConfigurationExpression expression = new SqlStatementParserConfigurationExpression(parser);
-            expression.EnableDefaultLintRules();
             configuration?.Invoke(expression);
 
             this.Parser = parser;

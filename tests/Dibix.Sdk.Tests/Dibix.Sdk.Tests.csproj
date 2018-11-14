@@ -8,22 +8,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="System.ComponentModel.Composition" />
-    <Reference Include="Microsoft.Data.Tools.Schema.Sql, Version=$(DacVersion)">
-      <HintPath>../../lib/Microsoft.Data.Tools.Schema.Sql.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.SqlServer.Dac, Version=$(DacVersion)">
-      <HintPath>../../lib/Microsoft.SqlServer.Dac.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.SqlServer.Dac.Extensions, Version=$(DacVersion)">
       <HintPath>../../lib/Microsoft.SqlServer.Dac.Extensions.dll</HintPath>
     </Reference>
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="CodeGeneration\LintTest.tt">
+    <None Update="CodeGeneration\CodeAnalysisTest.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>LintTest.cs</LastGenOutput>
+      <LastGenOutput>CodeAnalysisTest.cs</LastGenOutput>
     </None>
     <None Update="CodeGeneration\ParserTest.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
@@ -40,10 +33,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="CodeGeneration\LintTest.cs">
+    <Compile Update="CodeGeneration\CodeAnalysisTest.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>LintTest.tt</DependentUpon>
+      <DependentUpon>CodeAnalysisTest.tt</DependentUpon>
     </Compile>
     <Compile Update="CodeGeneration\ParserTest.cs">
       <DesignTime>True</DesignTime>
@@ -60,10 +53,6 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>SourcesTest.tt</DependentUpon>
     </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="..\..\lib\Microsoft.Data.Tools.Utilities.dll" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

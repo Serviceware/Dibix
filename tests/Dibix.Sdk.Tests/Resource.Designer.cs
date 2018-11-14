@@ -64,23 +64,20 @@ namespace Dibix.Sdk.Tests {
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;
         ///&lt;errors&gt;
         ///  &lt;error
-        ///    description=&quot;[001] Invalid casing for &apos;SeLeCT&apos; [Select]&quot;
+        ///    message=&quot;SRDBX : Dibix : [001] Invalid casing for &apos;SeLeCT&apos; [Select]&quot;
         ///    line=&quot;13&quot;
         ///    column=&quot;2&quot; /&gt;
         ///  &lt;error
-        ///    description=&quot;[001] Invalid casing for &apos;nvarchar&apos; [Identifier]&quot;
+        ///    message=&quot;SRDBX : Dibix : [001] Invalid casing for &apos;nvarchar&apos; [Identifier]&quot;
         ///    line=&quot;3&quot;
         ///    column=&quot;13&quot; /&gt;
         ///  &lt;error
-        ///    description=&quot;[001] Invalid casing for &apos;max&apos; [Identifier]&quot;
+        ///    message=&quot;SRDBX : Dibix : [001] Invalid casing for &apos;max&apos; [Identifier]&quot;
         ///    line=&quot;3&quot;
         ///    column=&quot;22&quot; /&gt;
         ///  &lt;error
-        ///    description=&quot;[001] Invalid casing for &apos;decimal&apos; [Identifier]&quot;
-        ///    line=&quot;4&quot;
-        ///    column=&quot;13&quot; /&gt;
-        ///  &lt;error
-        ///    description [rest of string was truncated]&quot;;.
+        ///    message=&quot;SRDBX : Dibix : [001] Invalid casing for &apos;decimal&apos; [Identifier]&quot;
+        ///    line=&quot;4 [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CasingSqlCodeAnalysisRule {
             get {
@@ -122,7 +119,7 @@ namespace Dibix.Sdk.Tests {
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;
         ///&lt;errors&gt;
         ///  &lt;error
-        ///    description=&quot;[006] The alias is redundant&quot;
+        ///    message=&quot;SRDBX : Dibix : [006] The alias is redundant&quot;
         ///    line=&quot;3&quot;
         ///    column=&quot;17&quot; /&gt;
         ///&lt;/errors&gt;.
@@ -137,24 +134,23 @@ namespace Dibix.Sdk.Tests {
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;
         ///&lt;errors&gt;
         ///  &lt;error
-        ///    description=&quot;[002] Missing schema specification&quot;
+        ///    message=&quot;SRDBX : Dibix : [002] Missing schema specification&quot;
         ///    line=&quot;9&quot;
         ///    column=&quot;7&quot; /&gt;
         ///  &lt;error
-        ///    description=&quot;[002] Missing schema specification&quot;
+        ///    message=&quot;SRDBX : Dibix : [002] Missing schema specification&quot;
         ///    line=&quot;17&quot;
         ///    column=&quot;7&quot; /&gt;
         ///  &lt;error
-        ///    description=&quot;[002] Missing schema specification&quot;
+        ///    message=&quot;SRDBX : Dibix : [002] Missing schema specification&quot;
         ///    line=&quot;22&quot;
         ///    column=&quot;14&quot; /&gt;
         ///  &lt;error
-        ///    description=&quot;[002] Missing schema specification&quot;
+        ///    message=&quot;SRDBX : Dibix : [002] Missing schema specification&quot;
         ///    line=&quot;24&quot;
         ///    column=&quot;14&quot; /&gt;
         ///  &lt;error
-        ///    description=&quot;[002] Missing schema specification&quot;
-        ///     [rest of string was truncated]&quot;;.
+        ///    messag [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SchemaSqlCodeAnalysisRule {
             get {
@@ -189,7 +185,7 @@ namespace Dibix.Sdk.Tests {
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;
         ///&lt;errors&gt;
         ///  &lt;error
-        ///    description=&quot;[004] Invalid ascii string literal. Please specify unicode (N&apos;&apos;)&quot;
+        ///    message=&quot;SRDBX : Dibix : [004] Invalid ascii string literal. Please specify unicode (N&apos;&apos;)&quot;
         ///    line=&quot;3&quot;
         ///    column=&quot;28&quot; /&gt;
         ///&lt;/errors&gt;.
@@ -204,11 +200,11 @@ namespace Dibix.Sdk.Tests {
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;
         ///&lt;errors&gt;
         ///  &lt;error
-        ///    description=&quot;[005] Use unicode data types instead of ascii. Please replace VARCHAR with NVARCHAR.&quot;
+        ///    message=&quot;SRDBX : Dibix : [005] Use unicode data types instead of ascii. Please replace VARCHAR with NVARCHAR.&quot;
         ///    line=&quot;1&quot;
         ///    column=&quot;56&quot; /&gt;
         ///  &lt;error
-        ///    description=&quot;[005] Use unicode data types instead of ascii. Please replace VARCHAR with NVARCHAR.&quot;
+        ///    message=&quot;SRDBX : Dibix : [005] Use unicode data types instead of ascii. Please replace VARCHAR with NVARCHAR.&quot;
         ///    line=&quot;4&quot;
         ///    column=&quot;19&quot; /&gt;
         ///&lt;/errors&gt;.

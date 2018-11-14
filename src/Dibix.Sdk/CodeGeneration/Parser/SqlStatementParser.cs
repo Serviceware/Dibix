@@ -1,21 +1,24 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using Dibix.Sdk.CodeGeneration.Parser;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
-using Dibix.Sdk.CodeGeneration.Lint;
 
 namespace Dibix.Sdk.CodeGeneration
 {
     public abstract class SqlStatementParser<TVisitor> : ISqlStatementParser where TVisitor : SqlParserVisitor, new()
     {
+        #region Fields
+        private readonly SqlCodeAnalysisGeneratorAdapter _codeAnalysisRunner;
+        #endregion
+
         #region Properties
-        public SqlLintConfiguration LintConfiguration { get; }
         public ISqlStatementFormatter Formatter { get; set; }
         #endregion
 
         #region Constructor
         protected SqlStatementParser()
         {
-            this.LintConfiguration = new SqlLintConfiguration();
+            this._codeAnalysisRunner = new SqlCodeAnalysisGeneratorAdapter();
         }
         #endregion
 
@@ -28,7 +31,7 @@ namespace Dibix.Sdk.CodeGeneration
                 TSqlParser parser = new TSql140Parser(true);
                 IList<ParseError> parseErrors;
                 TSqlFragment fragment = parser.Parse(reader, out parseErrors);
-                if (!RunLint(fragment, this.LintConfiguration, sourceFilePath))
+                if (this._codeAnalysisRunner.Analyze(environment, fragment, sourceFilePath))
                     return;
 
                 CollectStatementInfo(fragment, target, this.Formatter, environment);
@@ -37,20 +40,6 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private static bool RunLint(TSqlFragment fragment, SqlLintConfiguration configuration, string sourceFilePath)
-        {
-            if (!configuration.IsEnabled)
-                return true;
-
-            bool success = true;
-            foreach (SqlLintRuleAccessor ruleAccessor in configuration.Rules)
-            {
-                if (!ruleAccessor.Execute(fragment, sourceFilePath))
-                    success = false;
-            }
-            return success;
-        }
-
         private static void CollectStatementInfo(TSqlFragment fragment, SqlStatementInfo target, ISqlStatementFormatter formatter, IExecutionEnvironment environment)
         {
             TVisitor visitor = new TVisitor
