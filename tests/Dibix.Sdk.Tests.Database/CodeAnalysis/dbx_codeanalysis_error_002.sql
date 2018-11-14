@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[dbx_lint_error_002]
+﻿CREATE PROCEDURE [dbo].[dbx_codeanalysis_error_002]
 AS
 	DECLARE @t TABLE(x INT)
 

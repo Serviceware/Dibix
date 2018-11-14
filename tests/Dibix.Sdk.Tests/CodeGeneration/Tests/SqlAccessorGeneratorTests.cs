@@ -32,7 +32,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             {
                 cfg.AddSource("Dibix.Sdk.Tests.Database", x =>
                     {
-                        x.SelectFolder(null, "Lint", "Tables", "Tests/Parser", "Tests/Sources/Excluded", "Tests/Sources/dbx_tests_sources_externalsp")
+                        x.SelectFolder(null, "CodeAnalysis", "Tables", "Tests/Parser", "Tests/Sources/Excluded", "Tests/Sources/dbx_tests_sources_externalsp")
                          .SelectFile("Tests/Sources/Excluded/Nested/dbx_tests_sources_excludednested.sql")
                          .SelectParser<SqlStoredProcedureParser>(y =>
                          {

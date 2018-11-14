@@ -8,6 +8,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="Microsoft.Data.Tools.Schema.Sql, Version=$(DacVersion)">
+      <HintPath>../../lib/Microsoft.Data.Tools.Schema.Sql.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SqlServer.Dac, Version=$(DacVersion)">
+      <HintPath>../../lib/Microsoft.SqlServer.Dac.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SqlServer.Dac.Extensions, Version=$(DacVersion)">
+      <HintPath>../../lib/Microsoft.SqlServer.Dac.Extensions.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="CodeGeneration\LintTest.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>LintTest.cs</LastGenOutput>
@@ -16,7 +29,7 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>ParserTest.cs</LastGenOutput>
     </None>
-    <EmbeddedResource Update="CodeGeneration\Resource.resx">
+    <EmbeddedResource Update="Resource.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resource.Designer.cs</LastGenOutput>
     </EmbeddedResource>
@@ -37,7 +50,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>ParserTest.tt</DependentUpon>
     </Compile>
-    <Compile Update="CodeGeneration\Resource.Designer.cs">
+    <Compile Update="Resource.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>Resource.resx</DependentUpon>
@@ -47,6 +60,10 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>SourcesTest.tt</DependentUpon>
     </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="..\..\lib\Microsoft.Data.Tools.Utilities.dll" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

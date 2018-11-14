@@ -8,6 +8,9 @@
 # Visual Studio cache/options directory
 .vs/
 
+# ReSharper
+*.DotSettings.user
+
 # SSDT
 *.dbmdl
 *.jfm

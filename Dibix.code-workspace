@@ -4,5 +4,19 @@
 			"path": ".",
 			"name": "🥓",
 		}
-	]
+	],
+	"settings": {
+		"files.exclude": {
+			"**/bin": true,
+			"**/obj": true,
+			"**/*.dbmdl": true,
+			"**/*.jfm": true,
+			"**/*.sqlproj.user": true,
+			"**/*.vs": true,
+			"**/*.vspscc": true,
+			"**/*.vssscc": true,
+			"**/*.DotSettings": true,
+			"**/*.DotSettings.user": true
+		}
+	}
 }

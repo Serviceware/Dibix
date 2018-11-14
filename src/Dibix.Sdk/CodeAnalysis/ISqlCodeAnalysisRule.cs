@@ -5,6 +5,8 @@ namespace Dibix.Sdk.CodeAnalysis
 {
     public interface ISqlCodeAnalysisRule
     {
+        int Id { get; }
+
         IEnumerable<SqlRuleProblem> Analyze(SqlRuleExecutionContext context);
     }
 }

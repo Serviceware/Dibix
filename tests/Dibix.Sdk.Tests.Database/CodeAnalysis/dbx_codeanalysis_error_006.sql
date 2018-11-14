@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[dbx_lint_error_006]
+﻿CREATE PROCEDURE [dbo].[dbx_codeanalysis_error_006]
 AS
 	SELECT [id] AS [id]
 	FROM [dbo].[dbx_table]

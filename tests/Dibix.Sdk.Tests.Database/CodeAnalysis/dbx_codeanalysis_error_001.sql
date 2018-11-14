@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[dbx_lint_error_001]
+﻿CREATE PROCEDURE [dbo].[dbx_codeanalysis_error_001]
 AS
 	DECLARE @x nvarchar(max)
 	DECLARE @y decimal(5,2)

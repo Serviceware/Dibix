@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
-using System.IO;
 using Dibix.Sdk.CodeGeneration;
-using Xunit;
+using Dibix.Sdk.Tests.Utilities;
 
 namespace Dibix.Sdk.Tests.CodeGeneration
 {
@@ -24,20 +23,12 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             return GetExpectedText(key);
         }
 
-        protected static void AssertAreEqual(string expected, string actual)
-        {
-            if (expected != actual)
-                RunWinMerge(expected, actual);
-
-            Assert.Equal(expected, actual);
-        }
-
         private static void RunGeneratorTest(Action<ISqlAccessorGenerator> configuration, string projectName, string @namespace, string className, string expectedText)
         {
             ISqlAccessorGenerator generator = SqlAccessorGenerator.Create(new TestExecutionEnvironment(projectName, @namespace, className));
             configuration(generator);
             string actualText = generator.Generate();
-            AssertAreEqual(expectedText, actualText);
+            TestUtilities.AssertEqualWithDiffTool(expectedText, actualText);
         }
 
         private static string DetermineTestName(int frames = 3) => new StackTrace().GetFrame(frames).GetMethod().Name;
@@ -49,15 +40,6 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                 throw new InvalidOperationException($"Invalid test resource name '{key}'");
 
             return resource;
-        }
-
-        private static void RunWinMerge(string expectedText, string actualText)
-        {
-            string expectedFileName = Path.GetTempFileName();
-            string actualFileName = Path.GetTempFileName();
-            File.WriteAllText(expectedFileName, expectedText);
-            File.WriteAllText(actualFileName, actualText);
-            Process.Start("winmerge", $"\"{expectedFileName}\" \"{actualFileName}\"");
         }
     }
 }
