@@ -1,4 +1,6 @@
-﻿CREATE PROCEDURE [dbo].[dbx_codeanalysis_error_005] @x VARCHAR(100)
+﻿CREATE PROCEDURE [dbo].[dbx_codeanalysis_error_005] @x CHAR(100), @y VARCHAR(100)
 AS
-	DECLARE @valid NVARCHAR(10)
-	DECLARE @invalid VARCHAR(10)
+	DECLARE @a NCHAR(10)
+	DECLARE @b CHAR(10)
+	DECLARE @c NVARCHAR(10)
+	DECLARE @d VARCHAR(10)

@@ -365,7 +365,13 @@ SELECT 2;";
 }</value>
   </data>
   <data name="PrimitiveDataTypeIdentifierSqlCodeAnalysisRule" xml:space="preserve">
-    <value />
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="SRDBX : Dibix : [007] Primitive data type identifiers must not be quoted: [int]"
+    line="4"
+    column="13" /&gt;
+&lt;/errors&gt;</value>
   </data>
   <data name="RedundantAliasSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
@@ -496,13 +502,21 @@ namespace This.Is.A.Custom.Namespace
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="SRDBX : Dibix : [005] Use unicode data types instead of ascii. Please replace VARCHAR with NVARCHAR."
+    message="SRDBX : Dibix : [005] Use unicode data types instead of ascii. Replace 'CHAR' with 'NCHAR'."
     line="1"
     column="56" /&gt;
   &lt;error
-    message="SRDBX : Dibix : [005] Use unicode data types instead of ascii. Please replace VARCHAR with NVARCHAR."
+    message="SRDBX : Dibix : [005] Use unicode data types instead of ascii. Replace 'VARCHAR' with 'NVARCHAR'."
+    line="1"
+    column="70" /&gt;
+  &lt;error
+    message="SRDBX : Dibix : [005] Use unicode data types instead of ascii. Replace 'CHAR' with 'NCHAR'."
     line="4"
-    column="19" /&gt;
+    column="13" /&gt;
+  &lt;error
+    message="SRDBX : Dibix : [005] Use unicode data types instead of ascii. Replace 'VARCHAR' with 'NVARCHAR'."
+    line="6"
+    column="13" /&gt;
 &lt;/errors&gt;</value>
   </data>
 </root>

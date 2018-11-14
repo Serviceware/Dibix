@@ -21,7 +21,7 @@ namespace This.Is.A.Custom.Namespace
         public const string dbx_tests_sources_excludednestedCommandText = @"";
 
         // dbx_tests_sources_externalsp
-        public const string dbx_tests_sources_externalspCommandText = @"";
+        public const string dbx_tests_sources_externalspCommandText = @"[dbo].[dbx_tests_externalsp]";
 
         public static int dbx_tests_sources_includednested(this IDatabaseAccessorFactory databaseAccessorFactory)
         {
@@ -41,7 +41,7 @@ namespace This.Is.A.Custom.Namespace
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
-                return accessor.Execute(dbx_tests_sources_externalspCommandText);
+                return accessor.Execute(dbx_tests_sources_externalspCommandText, System.Data.CommandType.StoredProcedure);
             }
         }
 

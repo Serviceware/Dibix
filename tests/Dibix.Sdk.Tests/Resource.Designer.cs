@@ -131,7 +131,13 @@ namespace Dibix.Sdk.Tests {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;
+        ///&lt;errors&gt;
+        ///  &lt;error
+        ///    message=&quot;SRDBX : Dibix : [007] Primitive data type identifiers must not be quoted: [int]&quot;
+        ///    line=&quot;4&quot;
+        ///    column=&quot;13&quot; /&gt;
+        ///&lt;/errors&gt;.
         /// </summary>
         internal static string PrimitiveDataTypeIdentifierSqlCodeAnalysisRule {
             get {
@@ -224,14 +230,18 @@ namespace Dibix.Sdk.Tests {
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;
         ///&lt;errors&gt;
         ///  &lt;error
-        ///    message=&quot;SRDBX : Dibix : [005] Use unicode data types instead of ascii. Please replace VARCHAR with NVARCHAR.&quot;
+        ///    message=&quot;SRDBX : Dibix : [005] Use unicode data types instead of ascii. Replace &apos;CHAR&apos; with &apos;NCHAR&apos;.&quot;
         ///    line=&quot;1&quot;
         ///    column=&quot;56&quot; /&gt;
         ///  &lt;error
-        ///    message=&quot;SRDBX : Dibix : [005] Use unicode data types instead of ascii. Please replace VARCHAR with NVARCHAR.&quot;
+        ///    message=&quot;SRDBX : Dibix : [005] Use unicode data types instead of ascii. Replace &apos;VARCHAR&apos; with &apos;NVARCHAR&apos;.&quot;
+        ///    line=&quot;1&quot;
+        ///    column=&quot;70&quot; /&gt;
+        ///  &lt;error
+        ///    message=&quot;SRDBX : Dibix : [005] Use unicode data types instead of ascii. Replace &apos;CHAR&apos; with &apos;NCHAR&apos;.&quot;
         ///    line=&quot;4&quot;
-        ///    column=&quot;19&quot; /&gt;
-        ///&lt;/errors&gt;.
+        ///    column=&quot;13&quot; /&gt;
+        ///   [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string UnicodeDataTypeSqlCodeAnalysisRule {
             get {
