@@ -41,6 +41,9 @@ namespace Dibix.Sdk.CodeAnalysis
     {
         protected override void Analyze(TSqlObject modelElement, TSqlFragment scriptFragment)
         {
+            if (scriptFragment == null)
+                return;
+
             TVisitor visitor = new TVisitor();
             visitor.ErrorHandler = (fragment, line, column, args) => base.Fail(modelElement, fragment ?? scriptFragment, line, column, args);
 

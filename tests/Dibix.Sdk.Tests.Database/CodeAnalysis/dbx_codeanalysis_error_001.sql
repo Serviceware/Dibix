@@ -12,3 +12,9 @@ AS
 
 	SeLeCT @x = count(id)
 	FROM dbo.dbx_table
+
+	DECLARE @xml XML
+	SELECT @xml.value(NULL, NULL)
+	SELECT 1
+	FROM @xml.nodes(NULL) AS [x]([a])
+	SELECT @xml.query(NULL)

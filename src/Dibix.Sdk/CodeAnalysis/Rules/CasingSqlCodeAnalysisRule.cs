@@ -44,6 +44,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         private readonly string[] LowercaseList =
         {
             "nodes",
+            "query",
             "value"
         };
 
