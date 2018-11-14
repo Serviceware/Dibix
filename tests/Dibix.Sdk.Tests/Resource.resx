@@ -158,6 +158,15 @@
     column="14" /&gt;
 &lt;/errors&gt;</value>
   </data>
+  <data name="ImplicitAliasSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="SRDBX : Dibix : [008] Aliases must be marked with 'AS'"
+    line="4"
+    column="25" /&gt;
+&lt;/errors&gt;</value>
+  </data>
   <data name="NoReturnSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;DISABLED&gt;</value>
   </data>

@@ -76,6 +76,7 @@
     <Build Include="Tests\Sources\dbx_tests_sources_externalsp.sql" />
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_007.sql" />
     <Build Include="Types\dbx_udt.sql" />
+    <Build Include="CodeAnalysis\dbx_codeanalysis_error_008.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CodeAnalysis" />

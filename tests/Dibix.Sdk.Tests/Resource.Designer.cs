@@ -86,6 +86,21 @@ namespace Dibix.Sdk.Tests {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;
+        ///&lt;errors&gt;
+        ///  &lt;error
+        ///    message=&quot;SRDBX : Dibix : [008] Aliases must be marked with &apos;AS&apos;&quot;
+        ///    line=&quot;4&quot;
+        ///    column=&quot;25&quot; /&gt;
+        ///&lt;/errors&gt;.
+        /// </summary>
+        internal static string ImplicitAliasSqlCodeAnalysisRule {
+            get {
+                return ResourceManager.GetString("ImplicitAliasSqlCodeAnalysisRule", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;DISABLED&gt;.
         /// </summary>
         internal static string NoReturnSqlCodeAnalysisRule {
