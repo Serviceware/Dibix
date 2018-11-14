@@ -355,6 +355,9 @@ SELECT 2;";
     }
 }</value>
   </data>
+  <data name="PrimitiveDataTypeIdentifierSqlCodeAnalysisRule" xml:space="preserve">
+    <value />
+  </data>
   <data name="RedundantAliasSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;

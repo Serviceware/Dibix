@@ -8,7 +8,7 @@
 string output = SqlAccessorGenerator.FromVisualStudio(this.Host, (IServiceProvider)this.Host)
                                     .AddSource("Dibix.Sdk.Tests.Database", x => 
                                     {
-										x.SelectFolder("CodeAnalysis")
+										x.SelectFolder("CodeAnalysis", "dbx_codeanalysis_error_003", "dbx_codeanalysis_error_006")
 										 .SelectParser<SqlStoredProcedureParser>();
 									})
                                     .SelectOutputWriter<SqlDaoWriter>()

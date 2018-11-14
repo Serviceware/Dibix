@@ -116,6 +116,15 @@ namespace Dibix.Sdk.Tests {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string PrimitiveDataTypeIdentifierSqlCodeAnalysisRule {
+            get {
+                return ResourceManager.GetString("PrimitiveDataTypeIdentifierSqlCodeAnalysisRule", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;
         ///&lt;errors&gt;
         ///  &lt;error

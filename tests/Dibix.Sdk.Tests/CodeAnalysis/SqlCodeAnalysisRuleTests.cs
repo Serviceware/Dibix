@@ -21,5 +21,8 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
 
         //[Fact]
         public void RedundantAliasSqlCodeAnalysisRule() => base.Execute();
+
+        [Fact]
+        public void PrimitiveDataTypeIdentifierSqlCodeAnalysisRule() => base.Execute();
     }
 }
