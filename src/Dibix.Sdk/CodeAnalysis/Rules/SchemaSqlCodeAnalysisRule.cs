@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
@@ -13,101 +14,49 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
     public sealed class SchemaSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
     {
-        public override void ExplicitVisit(SelectStatement node)
+        private readonly ICollection<string> _tableAliases = new Collection<string>
         {
-            this.CollectWhiteListAndVisit(node);
+            "INSERTED",
+            "UPDATED",
+            "DELETED"
+        };
+
+        public override void Visit(TSqlStatement node)
+        {
+            ChildAliasVisitor childAliasVisitor = new ChildAliasVisitor();
+            node.AcceptChildren(childAliasVisitor);
+            this._tableAliases.AddRange(childAliasVisitor.TableAliases);
         }
 
-        public override void ExplicitVisit(InsertStatement node)
+        public override void Visit(NamedTableReference node)
         {
-            this.CollectWhiteListAndVisit(node);
-        }
-
-        public override void ExplicitVisit(MergeStatement node)
-        {
-            this.CollectWhiteListAndVisit(node);
-        }
-
-        public override void ExplicitVisit(UpdateStatement node)
-        {
-            this.CollectWhiteListAndVisit(node, x => WhiteListDataModificationAlias(x, node.UpdateSpecification));
-        }
-
-        public override void ExplicitVisit(DeleteStatement node)
-        {
-            this.CollectWhiteListAndVisit(node, x => WhiteListDataModificationAlias(x, node.DeleteSpecification));
-        }
-
-        private void CollectWhiteListAndVisit(StatementWithCtesAndXmlNamespaces node) { this.CollectWhiteListAndVisit(node, null); }
-        private void CollectWhiteListAndVisit(StatementWithCtesAndXmlNamespaces node, Action<ICollection<string>> whiteListRegistrar)
-        {
-            HashSet<string> whiteList = new HashSet<string>();
-            WhiteListCTEExpressions(whiteList, node);
-            whiteListRegistrar?.Invoke(whiteList);
-
-            InnerVisitor inner = new InnerVisitor(whiteList, x => base.Fail(x));
-            node.Accept(inner);
-        }
-
-        private static void WhiteListCTEExpressions(ICollection<string> target, StatementWithCtesAndXmlNamespaces statement)
-        {
-            if (statement.WithCtesAndXmlNamespaces == null)
+            if (node.SchemaObject.SchemaIdentifier != null)
                 return;
 
-            target.AddRange(statement.WithCtesAndXmlNamespaces.CommonTableExpressions.Select(x => x.ExpressionName.Value));
-        }
-
-        private static void WhiteListDataModificationAlias(ICollection<string> whiteList, UpdateDeleteSpecificationBase specification)
-        {
-            if (specification.FromClause == null)
+            // Exclude temp tables
+            if (node.SchemaObject.BaseIdentifier.Value.Contains("#"))
                 return;
 
-            NamedTableReference target = specification.Target as NamedTableReference;
-            if (target == null)
+            // Exclude aliased tables
+            if (this._tableAliases.Any(x => x.Equals(node.SchemaObject.BaseIdentifier.Value, StringComparison.OrdinalIgnoreCase)))
                 return;
 
-            // UPDATE/DELETE x     -- x         => NamedTableReference with Name: x         => no dbo required
-            // FROM dbx_table AS x -- dbx_table => NamedTableReference with Name: dbx_table => dbo required
-            bool targetIsAliased = specification.FromClause
-                                                .TableReferences
-                                                .SelectMany(CollectAliases)
-                                                .Any(y => y == target.SchemaObject.BaseIdentifier.Value);
-
-            if (targetIsAliased)
-                whiteList.Add(target.SchemaObject.BaseIdentifier.Value);
+            base.Fail(node);
         }
 
-        private static IEnumerable<string> CollectAliases(TableReference reference)
+        private class ChildAliasVisitor : TSqlFragmentVisitor
         {
-            if (reference is TableReferenceWithAlias aliasedTable)
+            public ICollection<string> TableAliases { get; } = new Collection<string>();
+
+            public override void Visit(TableReferenceWithAlias node)
             {
-                return Enumerable.Repeat(aliasedTable.Alias.Value, 1);
+                if (node.Alias != null)
+                    this.TableAliases.Add(node.Alias.Value);
             }
 
-            if (reference is QualifiedJoin join)
+            public override void Visit(CommonTableExpression node)
             {
-                return CollectAliases(join.FirstTableReference)
-                .Union(CollectAliases(join.SecondTableReference));
-            }
-
-            return Enumerable.Empty<string>();
-        }
-
-        private class InnerVisitor : TSqlFragmentVisitor
-        {
-            private readonly Action<TSqlFragment> _failAction;
-            private readonly HashSet<string> _whiteList;
-
-            public InnerVisitor(HashSet<string> whiteList, Action<TSqlFragment> failAction)
-            {
-                this._failAction = failAction;
-                this._whiteList = whiteList;
-            }
-
-            public override void ExplicitVisit(NamedTableReference node)
-            {
-                if (node.SchemaObject.SchemaIdentifier == null && !this._whiteList.Contains(node.SchemaObject.BaseIdentifier.Value))
-                    this._failAction(node);
+                this.TableAliases.Add(node.ExpressionName.Value);
             }
         }
     }
