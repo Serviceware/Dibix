@@ -64,20 +64,23 @@ namespace Dibix.Sdk.Tests {
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;
         ///&lt;errors&gt;
         ///  &lt;error
-        ///    message=&quot;SRDBX : Dibix : [001] Invalid casing for &apos;SeLeCT&apos; [Select]&quot;
+        ///    message=&quot;[001] Invalid casing for &apos;SeLeCT&apos; [Select]&quot;
         ///    line=&quot;13&quot;
         ///    column=&quot;2&quot; /&gt;
         ///  &lt;error
-        ///    message=&quot;SRDBX : Dibix : [001] Invalid casing for &apos;nvarchar&apos; [Identifier]&quot;
+        ///    message=&quot;[001] Invalid casing for &apos;nvarchar&apos; [Identifier]&quot;
         ///    line=&quot;3&quot;
         ///    column=&quot;13&quot; /&gt;
         ///  &lt;error
-        ///    message=&quot;SRDBX : Dibix : [001] Invalid casing for &apos;max&apos; [Identifier]&quot;
+        ///    message=&quot;[001] Invalid casing for &apos;max&apos; [Identifier]&quot;
         ///    line=&quot;3&quot;
         ///    column=&quot;22&quot; /&gt;
         ///  &lt;error
-        ///    message=&quot;SRDBX : Dibix : [001] Invalid casing for &apos;decimal&apos; [Identifier]&quot;
-        ///    line=&quot;4 [rest of string was truncated]&quot;;.
+        ///    message=&quot;[001] Invalid casing for &apos;decimal&apos; [Identifier]&quot;
+        ///    line=&quot;4&quot;
+        ///    column=&quot;13&quot; /&gt;
+        ///  &lt;error
+        ///    message=&quot;[001] Invalid casi [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CasingSqlCodeAnalysisRule {
             get {
@@ -89,23 +92,45 @@ namespace Dibix.Sdk.Tests {
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;
         ///&lt;errors&gt;
         ///  &lt;error
-        ///    message=&quot;SRDBX : Dibix : [009] Data type length not specified&quot;
+        ///    message=&quot;[011] Identifier quotation should be consistent and not mixed. Either use all square brackets or none: dbo.[dbx_udt]&quot;
         ///    line=&quot;5&quot;
         ///    column=&quot;13&quot; /&gt;
         ///  &lt;error
-        ///    message=&quot;SRDBX : Dibix : [009] Data type length not specified&quot;
+        ///    message=&quot;[011] Identifier quotation should be consistent and not mixed. Either use all square brackets or none: [dbo].dbx_udt&quot;
         ///    line=&quot;6&quot;
         ///    column=&quot;13&quot; /&gt;
         ///  &lt;error
-        ///    message=&quot;SRDBX : Dibix : [009] Data type length not specified&quot;
+        ///    message=&quot;[011] Identifier quotation should be consistent and not mixed. Either use all square b [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string ConsistentlyQuotedIdentifierSqlCodeAnalysisRule {
+            get {
+                return ResourceManager.GetString("ConsistentlyQuotedIdentifierSqlCodeAnalysisRule", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;
+        ///&lt;errors&gt;
+        ///  &lt;error
+        ///    message=&quot;[009] Data type length not specified&quot;
+        ///    line=&quot;5&quot;
+        ///    column=&quot;13&quot; /&gt;
+        ///  &lt;error
+        ///    message=&quot;[009] Data type length not specified&quot;
+        ///    line=&quot;6&quot;
+        ///    column=&quot;13&quot; /&gt;
+        ///  &lt;error
+        ///    message=&quot;[009] Data type length not specified&quot;
         ///    line=&quot;7&quot;
         ///    column=&quot;13&quot; /&gt;
         ///  &lt;error
-        ///    message=&quot;SRDBX : Dibix : [009] Data type length not specified&quot;
+        ///    message=&quot;[009] Data type length not specified&quot;
         ///    line=&quot;8&quot;
         ///    column=&quot;13&quot; /&gt;
         ///  &lt;error
-        ///    [rest of string was truncated]&quot;;.
+        ///    message=&quot;[009] Data type length not specified&quot;
+        ///    line=&quot;9&quot;
+        ///  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string DataTypeLengthSqlCodeAnalysisRule {
             get {
@@ -117,7 +142,7 @@ namespace Dibix.Sdk.Tests {
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;
         ///&lt;errors&gt;
         ///  &lt;error
-        ///    message=&quot;SRDBX : Dibix : [008] Aliases must be marked with &apos;AS&apos;&quot;
+        ///    message=&quot;[008] Aliases must be marked with &apos;AS&apos;&quot;
         ///    line=&quot;4&quot;
         ///    column=&quot;25&quot; /&gt;
         ///&lt;/errors&gt;.
@@ -132,11 +157,11 @@ namespace Dibix.Sdk.Tests {
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;
         ///&lt;errors&gt;
         ///  &lt;error
-        ///    message=&quot;SRDBX : Dibix : [010] Unaliased table found in multi table joins&quot;
+        ///    message=&quot;[010] Unaliased table found in multi table joins&quot;
         ///    line=&quot;7&quot;
         ///    column=&quot;7&quot; /&gt;
         ///  &lt;error
-        ///    message=&quot;SRDBX : Dibix : [010] Unaliased table found in multi table joins&quot;
+        ///    message=&quot;[010] Unaliased table found in multi table joins&quot;
         ///    line=&quot;11&quot;
         ///    column=&quot;7&quot; /&gt;
         ///&lt;/errors&gt;.
@@ -181,7 +206,7 @@ namespace Dibix.Sdk.Tests {
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;
         ///&lt;errors&gt;
         ///  &lt;error
-        ///    message=&quot;SRDBX : Dibix : [007] Primitive data type identifiers must not be quoted: [int]&quot;
+        ///    message=&quot;[007] Primitive data type identifiers must not be quoted: [int]&quot;
         ///    line=&quot;4&quot;
         ///    column=&quot;13&quot; /&gt;
         ///&lt;/errors&gt;.
@@ -196,7 +221,7 @@ namespace Dibix.Sdk.Tests {
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;
         ///&lt;errors&gt;
         ///  &lt;error
-        ///    message=&quot;SRDBX : Dibix : [006] The alias is redundant&quot;
+        ///    message=&quot;[006] The alias is redundant&quot;
         ///    line=&quot;3&quot;
         ///    column=&quot;17&quot; /&gt;
         ///&lt;/errors&gt;.
@@ -211,23 +236,25 @@ namespace Dibix.Sdk.Tests {
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;
         ///&lt;errors&gt;
         ///  &lt;error
-        ///    message=&quot;SRDBX : Dibix : [002] Missing schema specification&quot;
+        ///    message=&quot;[002] Missing schema specification&quot;
         ///    line=&quot;9&quot;
         ///    column=&quot;7&quot; /&gt;
         ///  &lt;error
-        ///    message=&quot;SRDBX : Dibix : [002] Missing schema specification&quot;
+        ///    message=&quot;[002] Missing schema specification&quot;
         ///    line=&quot;17&quot;
         ///    column=&quot;7&quot; /&gt;
         ///  &lt;error
-        ///    message=&quot;SRDBX : Dibix : [002] Missing schema specification&quot;
+        ///    message=&quot;[002] Missing schema specification&quot;
         ///    line=&quot;22&quot;
         ///    column=&quot;14&quot; /&gt;
         ///  &lt;error
-        ///    message=&quot;SRDBX : Dibix : [002] Missing schema specification&quot;
+        ///    message=&quot;[002] Missing schema specification&quot;
         ///    line=&quot;24&quot;
         ///    column=&quot;14&quot; /&gt;
         ///  &lt;error
-        ///    messag [rest of string was truncated]&quot;;.
+        ///    message=&quot;[002] Missing schema specification&quot;
+        ///    line=&quot;24&quot;
+        ///    colum [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SchemaSqlCodeAnalysisRule {
             get {
@@ -262,7 +289,7 @@ namespace Dibix.Sdk.Tests {
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;
         ///&lt;errors&gt;
         ///  &lt;error
-        ///    message=&quot;SRDBX : Dibix : [004] Invalid ascii string literal. Please specify unicode (N&apos;&apos;)&quot;
+        ///    message=&quot;[004] Invalid ascii string literal. Please specify unicode (N&apos;&apos;)&quot;
         ///    line=&quot;3&quot;
         ///    column=&quot;28&quot; /&gt;
         ///&lt;/errors&gt;.
@@ -277,18 +304,19 @@ namespace Dibix.Sdk.Tests {
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;
         ///&lt;errors&gt;
         ///  &lt;error
-        ///    message=&quot;SRDBX : Dibix : [005] Use unicode data types instead of ascii. Replace &apos;CHAR&apos; with &apos;NCHAR&apos;.&quot;
+        ///    message=&quot;[005] Use unicode data types instead of ascii. Replace &apos;CHAR&apos; with &apos;NCHAR&apos;.&quot;
         ///    line=&quot;1&quot;
         ///    column=&quot;56&quot; /&gt;
         ///  &lt;error
-        ///    message=&quot;SRDBX : Dibix : [005] Use unicode data types instead of ascii. Replace &apos;VARCHAR&apos; with &apos;NVARCHAR&apos;.&quot;
+        ///    message=&quot;[005] Use unicode data types instead of ascii. Replace &apos;VARCHAR&apos; with &apos;NVARCHAR&apos;.&quot;
         ///    line=&quot;1&quot;
         ///    column=&quot;70&quot; /&gt;
         ///  &lt;error
-        ///    message=&quot;SRDBX : Dibix : [005] Use unicode data types instead of ascii. Replace &apos;CHAR&apos; with &apos;NCHAR&apos;.&quot;
+        ///    message=&quot;[005] Use unicode data types instead of ascii. Replace &apos;CHAR&apos; with &apos;NCHAR&apos;.&quot;
         ///    line=&quot;4&quot;
         ///    column=&quot;13&quot; /&gt;
-        ///   [rest of string was truncated]&quot;;.
+        ///  &lt;error
+        ///    message=&quot;[005] Use unicode data type [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string UnicodeDataTypeSqlCodeAnalysisRule {
             get {
