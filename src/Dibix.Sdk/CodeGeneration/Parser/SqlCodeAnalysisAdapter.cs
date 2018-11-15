@@ -21,7 +21,7 @@ namespace Dibix.Sdk.CodeGeneration.Parser
                 return false;
 
             foreach (SqlCodeAnalysisError error in errors)
-                environment.RegisterError(sourceFilePath, error.Line, error.Column, error.RuleId.ToString(), error.Message);
+                environment.RegisterError(sourceFilePath, error.Line, error.Column, error.RuleId.ToString(), $"SRDBX : Dibix : {error.Message}");
 
             return true;
         }

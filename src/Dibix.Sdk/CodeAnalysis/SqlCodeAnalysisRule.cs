@@ -30,7 +30,7 @@ namespace Dibix.Sdk.CodeAnalysis
 
         protected void Fail(TSqlObject modelElement, TSqlFragment fragment, int line, int column, params object[] args)
         {
-            string errorText = $"SRDBX : Dibix : [{this.Id:d3}] {String.Format(this.ErrorMessage, args)}";
+            string errorText = $"[{this.Id:d3}] {String.Format(this.ErrorMessage, args)}";
             SqlCodeAnalysisError problem = new SqlCodeAnalysisError(this.Id, errorText, modelElement, fragment, line, column);
             this.Errors.Add(problem);
         }
