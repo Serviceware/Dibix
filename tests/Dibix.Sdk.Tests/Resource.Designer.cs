@@ -135,6 +135,10 @@ namespace Dibix.Sdk.Tests {
         ///    message=&quot;SRDBX : Dibix : [010] Unaliased table found in multi table joins&quot;
         ///    line=&quot;7&quot;
         ///    column=&quot;7&quot; /&gt;
+        ///  &lt;error
+        ///    message=&quot;SRDBX : Dibix : [010] Unaliased table found in multi table joins&quot;
+        ///    line=&quot;11&quot;
+        ///    column=&quot;7&quot; /&gt;
         ///&lt;/errors&gt;.
         /// </summary>
         internal static string MultiTableAliasSqlCodeAnalysisRule {

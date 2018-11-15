@@ -1,4 +1,4 @@
 ﻿CREATE TABLE [dbo].[dbx_table]
 (
-	[id] INT
+	[id] INT NOT NULL
 )

@@ -11,7 +11,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
     public sealed class MultiTableAliasSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
     {
-        public override void Visit(QualifiedJoin join)
+        public override void Visit(JoinTableReference join)
         {
             if (new[] { join.FirstTableReference, join.SecondTableReference }.OfType<TableReferenceWithAlias>().Any(x => x.Alias == null))
                 base.Fail(join);
