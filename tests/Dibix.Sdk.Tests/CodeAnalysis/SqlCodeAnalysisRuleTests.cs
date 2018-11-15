@@ -27,5 +27,8 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
 
         [Fact]
         public void ImplicitAliasSqlCodeAnalysisRule() => base.Execute();
+
+        [Fact]
+        public void DataTypeLengthSqlCodeAnalysisRule() => base.Execute();
     }
 }

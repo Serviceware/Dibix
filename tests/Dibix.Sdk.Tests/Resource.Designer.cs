@@ -89,6 +89,34 @@ namespace Dibix.Sdk.Tests {
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;
         ///&lt;errors&gt;
         ///  &lt;error
+        ///    message=&quot;SRDBX : Dibix : [009] Data type length not specified&quot;
+        ///    line=&quot;5&quot;
+        ///    column=&quot;13&quot; /&gt;
+        ///  &lt;error
+        ///    message=&quot;SRDBX : Dibix : [009] Data type length not specified&quot;
+        ///    line=&quot;6&quot;
+        ///    column=&quot;13&quot; /&gt;
+        ///  &lt;error
+        ///    message=&quot;SRDBX : Dibix : [009] Data type length not specified&quot;
+        ///    line=&quot;7&quot;
+        ///    column=&quot;13&quot; /&gt;
+        ///  &lt;error
+        ///    message=&quot;SRDBX : Dibix : [009] Data type length not specified&quot;
+        ///    line=&quot;8&quot;
+        ///    column=&quot;13&quot; /&gt;
+        ///  &lt;error
+        ///    [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string DataTypeLengthSqlCodeAnalysisRule {
+            get {
+                return ResourceManager.GetString("DataTypeLengthSqlCodeAnalysisRule", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;
+        ///&lt;errors&gt;
+        ///  &lt;error
         ///    message=&quot;SRDBX : Dibix : [008] Aliases must be marked with &apos;AS&apos;&quot;
         ///    line=&quot;4&quot;
         ///    column=&quot;25&quot; /&gt;
