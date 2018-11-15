@@ -112,6 +112,21 @@ namespace Dibix.Sdk.Tests {
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;
         ///&lt;errors&gt;
         ///  &lt;error
+        ///    message=&quot;[013] Found use of CURSOR statement&quot;
+        ///    line=&quot;3&quot;
+        ///    column=&quot;13&quot; /&gt;
+        ///&lt;/errors&gt;.
+        /// </summary>
+        internal static string CursorSqlCodeAnalysisRule {
+            get {
+                return ResourceManager.GetString("CursorSqlCodeAnalysisRule", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;
+        ///&lt;errors&gt;
+        ///  &lt;error
         ///    message=&quot;[009] Data type length not specified&quot;
         ///    line=&quot;5&quot;
         ///    column=&quot;13&quot; /&gt;

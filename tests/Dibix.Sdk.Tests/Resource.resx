@@ -187,6 +187,15 @@
     column="7" /&gt;
 &lt;/errors&gt;</value>
   </data>
+  <data name="CursorSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="[013] Found use of CURSOR statement"
+    line="3"
+    column="13" /&gt;
+&lt;/errors&gt;</value>
+  </data>
   <data name="DataTypeLengthSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;

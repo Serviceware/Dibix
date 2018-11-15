@@ -39,5 +39,8 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
 
         [Fact]
         public void HeapTableSqlCodeAnalysisRule() => base.Execute();
+
+        [Fact]
+        public void CursorSqlCodeAnalysisRule() => base.Execute();
     }
 }
