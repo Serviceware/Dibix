@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Dibix.Sdk.CodeGeneration
+namespace Dibix.Sdk
 {
     internal static class EnumerableExtensions
     {

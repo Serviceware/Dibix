@@ -616,4 +616,13 @@ namespace This.Is.A.Custom.Namespace
     column="13" /&gt;
 &lt;/errors&gt;</value>
   </data>
+  <data name="UnnamedDefaultConstraintSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="[014] Column 'idx' has an unnamed default constraint"
+    line="4"
+    column="5" /&gt;
+&lt;/errors&gt;</value>
+  </data>
 </root>

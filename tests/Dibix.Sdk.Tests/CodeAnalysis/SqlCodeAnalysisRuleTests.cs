@@ -42,5 +42,8 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
 
         [Fact]
         public void CursorSqlCodeAnalysisRule() => base.Execute();
+
+        [Fact]
+        public void UnnamedDefaultConstraintSqlCodeAnalysisRule() => base.Execute();
     }
 }
