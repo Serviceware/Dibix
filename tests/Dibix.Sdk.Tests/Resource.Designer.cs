@@ -129,6 +129,21 @@ namespace Dibix.Sdk.Tests {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;
+        ///&lt;errors&gt;
+        ///  &lt;error
+        ///    message=&quot;SRDBX : Dibix : [010] Unaliased table found in multi table joins&quot;
+        ///    line=&quot;7&quot;
+        ///    column=&quot;7&quot; /&gt;
+        ///&lt;/errors&gt;.
+        /// </summary>
+        internal static string MultiTableAliasSqlCodeAnalysisRule {
+            get {
+                return ResourceManager.GetString("MultiTableAliasSqlCodeAnalysisRule", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;DISABLED&gt;.
         /// </summary>
         internal static string NoReturnSqlCodeAnalysisRule {

@@ -78,6 +78,8 @@
     <Build Include="Types\dbx_udt.sql" />
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_008.sql" />
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_009.sql" />
+    <Build Include="CodeAnalysis\dbx_codeanalysis_error_010.sql" />
+    <Build Include="Tables\dbx_anothertable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CodeAnalysis" />

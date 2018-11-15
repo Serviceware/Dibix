@@ -200,6 +200,15 @@
     column="25" /&gt;
 &lt;/errors&gt;</value>
   </data>
+  <data name="MultiTableAliasSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="SRDBX : Dibix : [010] Unaliased table found in multi table joins"
+    line="7"
+    column="7" /&gt;
+&lt;/errors&gt;</value>
+  </data>
   <data name="NoReturnSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;DISABLED&gt;</value>
   </data>

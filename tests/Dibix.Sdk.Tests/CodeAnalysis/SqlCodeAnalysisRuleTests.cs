@@ -30,5 +30,8 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
 
         [Fact]
         public void DataTypeLengthSqlCodeAnalysisRule() => base.Execute();
+
+        [Fact]
+        public void MultiTableAliasSqlCodeAnalysisRule() => base.Execute();
     }
 }
