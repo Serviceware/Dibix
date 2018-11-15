@@ -225,6 +225,10 @@
 &lt;errors&gt;
   &lt;error
     message="[008] Aliases must be marked with 'AS'"
+    line="3"
+    column="28" /&gt;
+  &lt;error
+    message="[008] Aliases must be marked with 'AS'"
     line="4"
     column="25" /&gt;
 &lt;/errors&gt;</value>

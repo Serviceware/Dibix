@@ -143,6 +143,10 @@ namespace Dibix.Sdk.Tests {
         ///&lt;errors&gt;
         ///  &lt;error
         ///    message=&quot;[008] Aliases must be marked with &apos;AS&apos;&quot;
+        ///    line=&quot;3&quot;
+        ///    column=&quot;28&quot; /&gt;
+        ///  &lt;error
+        ///    message=&quot;[008] Aliases must be marked with &apos;AS&apos;&quot;
         ///    line=&quot;4&quot;
         ///    column=&quot;25&quot; /&gt;
         ///&lt;/errors&gt;.

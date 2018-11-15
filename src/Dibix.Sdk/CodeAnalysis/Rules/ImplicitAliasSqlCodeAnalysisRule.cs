@@ -22,5 +22,20 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             }
             base.Fail(node.Alias);
         }
+
+        public override void Visit(IdentifierOrValueExpression node)
+        {
+            for (int i = node.FirstTokenIndex - 1;; i--)
+            {
+                if (node.ScriptTokenStream[i].TokenType == TSqlTokenType.WhiteSpace)
+                    continue;
+
+                if (node.ScriptTokenStream[i].TokenType == TSqlTokenType.As)
+                    return;
+
+                break;
+            }
+            base.Fail(node);
+        }
     }
 }
