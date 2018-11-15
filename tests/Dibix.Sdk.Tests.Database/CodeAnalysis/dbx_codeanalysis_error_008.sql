@@ -5,3 +5,6 @@ AS
 
 	SELECT [x].[id] AS [idx]
 	FROM [dbo].[dbx_table] AS [x]
+
+	SELECT [idx] = [x].[id]
+	FROM [dbo].[dbx_table] AS [x]

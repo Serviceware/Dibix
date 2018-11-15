@@ -28,6 +28,10 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             if (node.ColumnName == null)
                 return;
 
+            // SELECT [idx] = [x].[id]
+            if (node.ColumnName.FirstTokenIndex < node.Expression.FirstTokenIndex)
+                return;
+
             for (int i = node.ColumnName.FirstTokenIndex; i > node.FirstTokenIndex; i--)
             {
                 if (node.ScriptTokenStream[i].TokenType == TSqlTokenType.As)
