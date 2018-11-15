@@ -1,5 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[dbx_codeanalysis_error_001]
 AS
+	set nocount on
+
 	DECLARE @x nvarchar(max)
 	DECLARE @y decimal(5,2)
 	DECLARE @z bigint = row_number()
@@ -12,6 +14,8 @@ AS
 
 	SeLeCT @x = count(id)
 	FROM dbo.dbx_table
+
+	DECLARE @b dbo.dbx_udt
 
 	DECLARE @xml XML
 	SELECT @xml.value(NULL, NULL)

@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using Dibix.Sdk.CodeGeneration;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules

@@ -121,40 +121,48 @@
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[001] Invalid casing for 'SeLeCT' [Select]"
-    line="13"
+    message="[001] Invalid casing for 'set' [Set]"
+    line="3"
     column="2" /&gt;
   &lt;error
-    message="[001] Invalid casing for 'nvarchar' [Identifier]"
+    message="[001] Invalid casing for 'on' [On]"
     line="3"
+    column="14" /&gt;
+  &lt;error
+    message="[001] Invalid casing for 'SeLeCT' [Select]"
+    line="15"
+    column="2" /&gt;
+  &lt;error
+    message="[001] Invalid casing for 'nocount' [Identifier]"
+    line="3"
+    column="6" /&gt;
+  &lt;error
+    message="[001] Invalid casing for 'nvarchar' [Identifier]"
+    line="5"
     column="13" /&gt;
   &lt;error
     message="[001] Invalid casing for 'max' [Identifier]"
-    line="3"
+    line="5"
     column="22" /&gt;
   &lt;error
     message="[001] Invalid casing for 'decimal' [Identifier]"
-    line="4"
+    line="6"
     column="13" /&gt;
   &lt;error
     message="[001] Invalid casing for 'bigint' [Identifier]"
-    line="5"
+    line="7"
     column="13" /&gt;
   &lt;error
     message="[001] Invalid casing for 'row_number' [Identifier]"
-    line="5"
+    line="7"
     column="22" /&gt;
   &lt;error
-    message="[001] Invalid casing for 'VALUE' [Identifier]"
-    line="8"
-    column="33" /&gt;
-  &lt;error
     message="[001] Invalid casing for 'NoDeS' [Identifier]"
-    line="10"
+    line="12"
     column="23" /&gt;
   &lt;error
     message="[001] Invalid casing for 'count' [Identifier]"
-    line="13"
+    line="15"
     column="14" /&gt;
 &lt;/errors&gt;</value>
   </data>

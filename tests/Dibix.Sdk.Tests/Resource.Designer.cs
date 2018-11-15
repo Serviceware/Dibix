@@ -64,23 +64,23 @@ namespace Dibix.Sdk.Tests {
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;
         ///&lt;errors&gt;
         ///  &lt;error
-        ///    message=&quot;[001] Invalid casing for &apos;SeLeCT&apos; [Select]&quot;
-        ///    line=&quot;13&quot;
+        ///    message=&quot;[001] Invalid casing for &apos;set&apos; [Set]&quot;
+        ///    line=&quot;3&quot;
         ///    column=&quot;2&quot; /&gt;
         ///  &lt;error
-        ///    message=&quot;[001] Invalid casing for &apos;nvarchar&apos; [Identifier]&quot;
+        ///    message=&quot;[001] Invalid casing for &apos;on&apos; [On]&quot;
         ///    line=&quot;3&quot;
-        ///    column=&quot;13&quot; /&gt;
+        ///    column=&quot;14&quot; /&gt;
         ///  &lt;error
-        ///    message=&quot;[001] Invalid casing for &apos;max&apos; [Identifier]&quot;
+        ///    message=&quot;[001] Invalid casing for &apos;SeLeCT&apos; [Select]&quot;
+        ///    line=&quot;15&quot;
+        ///    column=&quot;2&quot; /&gt;
+        ///  &lt;error
+        ///    message=&quot;[001] Invalid casing for &apos;nocount&apos; [Identifier]&quot;
         ///    line=&quot;3&quot;
-        ///    column=&quot;22&quot; /&gt;
+        ///    column=&quot;6&quot; /&gt;
         ///  &lt;error
-        ///    message=&quot;[001] Invalid casing for &apos;decimal&apos; [Identifier]&quot;
-        ///    line=&quot;4&quot;
-        ///    column=&quot;13&quot; /&gt;
-        ///  &lt;error
-        ///    message=&quot;[001] Invalid casi [rest of string was truncated]&quot;;.
+        ///    message=&quot;[001] Invalid casing for &apos;nvarchar&apos; [Iden [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CasingSqlCodeAnalysisRule {
             get {

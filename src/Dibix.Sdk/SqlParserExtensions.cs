@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
-namespace Dibix.Sdk.CodeGeneration
+namespace Dibix.Sdk
 {
     internal static class SqlParserExtensions
     {
@@ -17,8 +18,14 @@ namespace Dibix.Sdk.CodeGeneration
 
         public static void Visit(this TSqlFragment fragment, Action<TSqlParserToken> visitor)
         {
+            foreach (TSqlParserToken token in AsEnumerable(fragment))
+                visitor(token);
+        }
+
+        public static IEnumerable<TSqlParserToken> AsEnumerable(this TSqlFragment fragment)
+        {
             for (int i = fragment.FirstTokenIndex; i <= fragment.LastTokenIndex; i++)
-                visitor(fragment.ScriptTokenStream[i]);
+                yield return fragment.ScriptTokenStream[i];
         }
 
         public static bool ContainsIf(this TSqlFragment fragment)

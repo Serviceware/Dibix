@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
@@ -12,7 +13,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
     public sealed class CasingSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
     {
-        private static readonly TSqlTokenType[] TokenWhiteList =
+        private static readonly HashSet<TSqlTokenType> TokenWhiteList = new HashSet<TSqlTokenType>
         {
             TSqlTokenType.AsciiStringLiteral,
             TSqlTokenType.Bang,
@@ -41,7 +42,9 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             TSqlTokenType.Variable,
             TSqlTokenType.WhiteSpace
         };
-        private readonly string[] LowercaseList =
+
+        // XML functions are lowercase and case sensitive!
+        private static readonly HashSet<string> XmlFunctionWhiteList = new HashSet<string>
         {
             "nodes",
             "query",
@@ -56,10 +59,13 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         public override void Visit(FunctionCall node)
         {
+            if (XmlFunctionWhiteList.Contains(node.FunctionName.Value))
+                return;
+
             node.FunctionName.Visit(x => this.Visit(x, TSqlTokenType.Identifier));
         }
 
-        public override void Visit(DataTypeReference node)
+        public override void Visit(SqlDataTypeReference node)
         {
             node.Visit(x => this.Visit(x, TSqlTokenType.Identifier));
         }
@@ -69,14 +75,12 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             node.Visit(x => this.Visit(x, TSqlTokenType.Identifier));
         }
 
-        private void Visit(TSqlParserToken token, TSqlTokenType tokenType)
+        private void Visit(TSqlParserToken token, TSqlTokenType expectedTokenType)
         {
-            if (token.TokenType != tokenType)
+            if (token.TokenType != expectedTokenType)
                 return;
 
-            Func<char, bool> validator = this.LowercaseList.Contains(token.Text.ToLowerInvariant()) ? (Func<char, bool>)Char.IsLower : Char.IsUpper;
-
-            if (!token.Text.All(x => !Char.IsLetter(x) || validator(x)))
+            if (!token.Text.All(x => !Char.IsLetter(x) || Char.IsUpper(x)))
                 base.Fail(token, token.Text, token.TokenType);
         }
     }
