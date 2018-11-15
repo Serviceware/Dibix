@@ -142,6 +142,21 @@ namespace Dibix.Sdk.Tests {
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;
         ///&lt;errors&gt;
         ///  &lt;error
+        ///    message=&quot;[012] Table dbx_codeanalysis_error_012 does not have a primary key&quot;
+        ///    line=&quot;1&quot;
+        ///    column=&quot;1&quot; /&gt;
+        ///&lt;/errors&gt;.
+        /// </summary>
+        internal static string HeapTableSqlCodeAnalysisRule {
+            get {
+                return ResourceManager.GetString("HeapTableSqlCodeAnalysisRule", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;
+        ///&lt;errors&gt;
+        ///  &lt;error
         ///    message=&quot;[008] Aliases must be marked with &apos;AS&apos;&quot;
         ///    line=&quot;3&quot;
         ///    column=&quot;28&quot; /&gt;

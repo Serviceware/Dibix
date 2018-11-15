@@ -36,5 +36,8 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
 
         [Fact]
         public void ConsistentlyQuotedIdentifierSqlCodeAnalysisRule() => base.Execute();
+
+        [Fact]
+        public void HeapTableSqlCodeAnalysisRule() => base.Execute();
     }
 }

@@ -8,6 +8,3 @@ AS
 
 	SELECT 1 AS [id], [id]
 	FROM [dbo].[dbx_table]
-	
-	SELECT [id] = [id]
-	FROM [dbo].[dbx_table]
