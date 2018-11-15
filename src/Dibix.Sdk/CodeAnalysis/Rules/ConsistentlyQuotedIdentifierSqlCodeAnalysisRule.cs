@@ -13,7 +13,12 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         public override void Visit(SchemaObjectName name)
         {
-            if (name.Identifiers.Select(x => x.QuoteType).Distinct().Count() > 1)
+            bool allEqual = name.Identifiers
+                                .Where(x => !SqlConstants.ReservedFunctionNames.Contains(x.Value))
+                                .Select(x => x.QuoteType)
+                                .Distinct()
+                                .Count() > 1;
+            if (allEqual)
                 base.Fail(name, name.Dump());
         }
     }

@@ -43,14 +43,6 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             TSqlTokenType.WhiteSpace
         };
 
-        // XML functions are lowercase and case sensitive!
-        private static readonly HashSet<string> XmlFunctionWhiteList = new HashSet<string>
-        {
-            "nodes",
-            "query",
-            "value"
-        };
-
         public override void Visit(TSqlParserToken token)
         {
             if (!TokenWhiteList.Contains(token.TokenType))
@@ -59,7 +51,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         public override void Visit(FunctionCall node)
         {
-            if (XmlFunctionWhiteList.Contains(node.FunctionName.Value))
+            if (SqlConstants.ReservedFunctionNames.Contains(node.FunctionName.Value))
                 return;
 
             node.FunctionName.Visit(x => this.Visit(x, TSqlTokenType.Identifier));
