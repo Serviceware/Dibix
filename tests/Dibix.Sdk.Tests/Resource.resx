@@ -620,9 +620,9 @@ namespace This.Is.A.Custom.Namespace
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[014] Column 'idx' has an unnamed default constraint"
-    line="4"
-    column="5" /&gt;
+    message="[014] Column 'id' has an unnamed default constraint"
+    line="3"
+    column="2" /&gt;
 &lt;/errors&gt;</value>
   </data>
 </root>

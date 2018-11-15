@@ -15,7 +15,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         {
             node.Definition
                 .ColumnDefinitions
-                .Where(x => x.DefaultConstraint?.ConstraintIdentifier != null)
+                .Where(x => x.DefaultConstraint != null && x.DefaultConstraint.ConstraintIdentifier == null)
                 .Each(x => base.Fail(x, x.ColumnIdentifier.Value));
         }
     }

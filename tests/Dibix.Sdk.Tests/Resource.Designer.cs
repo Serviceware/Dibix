@@ -362,9 +362,9 @@ namespace Dibix.Sdk.Tests {
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;
         ///&lt;errors&gt;
         ///  &lt;error
-        ///    message=&quot;[014] Column &apos;idx&apos; has an unnamed default constraint&quot;
-        ///    line=&quot;4&quot;
-        ///    column=&quot;5&quot; /&gt;
+        ///    message=&quot;[014] Column &apos;id&apos; has an unnamed default constraint&quot;
+        ///    line=&quot;3&quot;
+        ///    column=&quot;2&quot; /&gt;
         ///&lt;/errors&gt;.
         /// </summary>
         internal static string UnnamedDefaultConstraintSqlCodeAnalysisRule {
