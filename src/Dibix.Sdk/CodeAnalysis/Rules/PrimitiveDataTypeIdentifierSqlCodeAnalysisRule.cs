@@ -13,7 +13,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         public override void Visit(SqlDataTypeReference node)
         {
-            Identifier identifier = node.Name.Identifiers.Last();
+            Identifier identifier = node.Name.BaseIdentifier;
             if (identifier.QuoteType != QuoteType.NotQuoted)
                 base.Fail(identifier, identifier.Dump());
         }

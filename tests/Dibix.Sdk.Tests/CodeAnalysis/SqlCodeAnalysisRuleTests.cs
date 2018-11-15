@@ -45,5 +45,11 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
 
         [Fact]
         public void UnnamedDefaultConstraintSqlCodeAnalysisRule() => base.Execute();
+
+        [Fact]
+        public void InsertWithoutColumnSpecificationSqlCodeAnalysisRule() => base.Execute();
+
+        [Fact]
+        public void ObsoleteDataTypeSqlCodeAnalysisRule() => base.Execute();
     }
 }

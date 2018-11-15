@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Sdk", "src\Dibix.Sdk\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Dac.Extensions", "src\Dibix.Dac.Extensions\Dibix.Dac.Extensions.csproj", "{D9A79CD4-D330-472D-B95B-040D93D166ED}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dibix.Sdk.Tests", "tests\Dibix.Sdk.Tests\Dibix.Sdk.Tests.csproj", "{95862D50-F79E-4D9B-8149-CD727E9D8600}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +89,18 @@ Global
 		{D9A79CD4-D330-472D-B95B-040D93D166ED}.Release|x64.Build.0 = Release|Any CPU
 		{D9A79CD4-D330-472D-B95B-040D93D166ED}.Release|x86.ActiveCfg = Release|Any CPU
 		{D9A79CD4-D330-472D-B95B-040D93D166ED}.Release|x86.Build.0 = Release|Any CPU
+		{95862D50-F79E-4D9B-8149-CD727E9D8600}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95862D50-F79E-4D9B-8149-CD727E9D8600}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95862D50-F79E-4D9B-8149-CD727E9D8600}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{95862D50-F79E-4D9B-8149-CD727E9D8600}.Debug|x64.Build.0 = Debug|Any CPU
+		{95862D50-F79E-4D9B-8149-CD727E9D8600}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{95862D50-F79E-4D9B-8149-CD727E9D8600}.Debug|x86.Build.0 = Debug|Any CPU
+		{95862D50-F79E-4D9B-8149-CD727E9D8600}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95862D50-F79E-4D9B-8149-CD727E9D8600}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95862D50-F79E-4D9B-8149-CD727E9D8600}.Release|x64.ActiveCfg = Release|Any CPU
+		{95862D50-F79E-4D9B-8149-CD727E9D8600}.Release|x64.Build.0 = Release|Any CPU
+		{95862D50-F79E-4D9B-8149-CD727E9D8600}.Release|x86.ActiveCfg = Release|Any CPU
+		{95862D50-F79E-4D9B-8149-CD727E9D8600}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -97,6 +111,7 @@ Global
 		{4D543B38-DAEE-4613-830C-BBA1AE3CCE0E} = {77D45FE7-2ACA-4275-8175-A823D0F0E1EF}
 		{47AE5EA7-A678-48E4-A6AA-2ABBD3267955} = {6C36280C-704E-48D8-970B-D2A535055E3B}
 		{D9A79CD4-D330-472D-B95B-040D93D166ED} = {6C36280C-704E-48D8-970B-D2A535055E3B}
+		{95862D50-F79E-4D9B-8149-CD727E9D8600} = {77D45FE7-2ACA-4275-8175-A823D0F0E1EF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {910D67A7-7CBA-4978-8CD4-2FCC1BAB69F4}
