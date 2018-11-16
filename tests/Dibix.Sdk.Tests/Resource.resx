@@ -130,39 +130,43 @@
     column="14" /&gt;
   &lt;error
     message="[001] Invalid casing for 'SeLeCT' [Select]"
-    line="15"
+    line="17"
     column="2" /&gt;
   &lt;error
     message="[001] Invalid casing for 'nocount' [Identifier]"
     line="3"
     column="6" /&gt;
   &lt;error
-    message="[001] Invalid casing for 'nvarchar' [Identifier]"
-    line="5"
-    column="13" /&gt;
-  &lt;error
-    message="[001] Invalid casing for 'max' [Identifier]"
-    line="5"
-    column="22" /&gt;
-  &lt;error
-    message="[001] Invalid casing for 'decimal' [Identifier]"
+    message="[001] Invalid casing for 'sysname' [Identifier]"
     line="6"
     column="13" /&gt;
   &lt;error
-    message="[001] Invalid casing for 'bigint' [Identifier]"
+    message="[001] Invalid casing for 'nvarchar' [Identifier]"
     line="7"
     column="13" /&gt;
   &lt;error
-    message="[001] Invalid casing for 'row_number' [Identifier]"
+    message="[001] Invalid casing for 'max' [Identifier]"
     line="7"
     column="22" /&gt;
   &lt;error
+    message="[001] Invalid casing for 'decimal' [Identifier]"
+    line="8"
+    column="13" /&gt;
+  &lt;error
+    message="[001] Invalid casing for 'bigint' [Identifier]"
+    line="9"
+    column="13" /&gt;
+  &lt;error
+    message="[001] Invalid casing for 'row_number' [Identifier]"
+    line="9"
+    column="22" /&gt;
+  &lt;error
     message="[001] Invalid casing for 'NoDeS' [Identifier]"
-    line="12"
+    line="14"
     column="23" /&gt;
   &lt;error
     message="[001] Invalid casing for 'count' [Identifier]"
-    line="15"
+    line="17"
     column="14" /&gt;
 &lt;/errors&gt;</value>
   </data>

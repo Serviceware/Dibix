@@ -2,6 +2,8 @@
 AS
 	set nocount on
 
+	DECLARE @v sys.sysname
+	DECLARE @w sysname
 	DECLARE @x nvarchar(max)
 	DECLARE @y decimal(5,2)
 	DECLARE @z bigint = row_number()

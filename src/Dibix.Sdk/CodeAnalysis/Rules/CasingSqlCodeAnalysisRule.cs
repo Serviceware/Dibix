@@ -62,6 +62,12 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             node.Visit(x => this.Visit(x, TSqlTokenType.Identifier));
         }
 
+        public override void Visit(UserDataTypeReference node)
+        {
+            if (String.Compare(node.Name.BaseIdentifier.Value, "SYSNAME", StringComparison.OrdinalIgnoreCase) == 0 && node.Name.SchemaIdentifier == null)
+                node.Visit(x => this.Visit(x, TSqlTokenType.Identifier));
+        }
+
         public override void Visit(PredicateSetStatement node)
         {
             node.Visit(x => this.Visit(x, TSqlTokenType.Identifier));
