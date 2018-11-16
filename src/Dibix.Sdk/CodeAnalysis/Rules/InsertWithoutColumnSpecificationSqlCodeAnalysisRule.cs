@@ -14,7 +14,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         public override void Visit(InsertStatement node)
         {
             if (!node.InsertSpecification.Columns.Any())
-                base.Fail(node);
+                base.Fail(node.InsertSpecification);
         }
     }
 }
