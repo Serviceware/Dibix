@@ -42,10 +42,14 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             TSqlTokenType.Variable,
             TSqlTokenType.WhiteSpace
         };
+        private static readonly HashSet<string> IdentifierBlacklist = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "PARTITION"
+        };
 
         public override void Visit(TSqlParserToken token)
         {
-            if (!TokenWhiteList.Contains(token.TokenType))
+            if (token.TokenType == TSqlTokenType.Identifier && IdentifierBlacklist.Contains(token.Text) || !TokenWhiteList.Contains(token.TokenType))
                 this.Visit(token, token.TokenType);
         }
 
