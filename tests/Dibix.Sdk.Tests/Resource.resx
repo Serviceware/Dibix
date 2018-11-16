@@ -264,11 +264,11 @@
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[010] Unaliased table found in multi table joins"
+    message="[010] Unaliased table reference found in multi table reference joins"
     line="7"
     column="7" /&gt;
   &lt;error
-    message="[010] Unaliased table found in multi table joins"
+    message="[010] Unaliased table reference found in multi table reference joins"
     line="11"
     column="7" /&gt;
 &lt;/errors&gt;</value>
