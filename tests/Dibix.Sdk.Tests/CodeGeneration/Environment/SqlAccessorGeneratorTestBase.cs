@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Resources;
 using Dibix.Sdk.CodeGeneration;
 using Dibix.Sdk.Tests.Utilities;
 
@@ -35,7 +36,8 @@ namespace Dibix.Sdk.Tests.CodeGeneration
 
         private static string GetExpectedText(string key)
         {
-            string resource = Resource.ResourceManager.GetString(key);
+            ResourceManager resourceManager = new ResourceManager("Dibix.Sdk.Tests.Resource", typeof(SqlAccessorGeneratorTestBase).Assembly);
+            string resource = resourceManager.GetString(key);
             if (resource == null)
                 throw new InvalidOperationException($"Invalid test resource name '{key}'");
 

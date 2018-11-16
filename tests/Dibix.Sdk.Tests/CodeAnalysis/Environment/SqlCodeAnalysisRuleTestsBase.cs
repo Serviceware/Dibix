@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Resources;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
@@ -31,7 +32,8 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
 
         private static string GetExpectedText(string key)
         {
-            string resource = Resource.ResourceManager.GetString(key);
+            ResourceManager resourceManager = new ResourceManager("Dibix.Sdk.Tests.Resource", typeof(SqlCodeAnalysisRuleTestsBase).Assembly);
+            string resource = resourceManager.GetString(key);
             if (resource == null)
                 throw new InvalidOperationException($"Invalid test resource name '{key}'");
 
