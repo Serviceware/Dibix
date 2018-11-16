@@ -13,7 +13,9 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         public override void Visit(CreateTableStatement node)
         {
-            if (node.Definition.TableConstraints.OfType<UniqueConstraintDefinition>().All(x => !x.IsPrimaryKey))
+            bool hasTableConstraint = node.Definition.TableConstraints.OfType<UniqueConstraintDefinition>().Any(x => x.IsPrimaryKey);
+            bool hasColumnConstraint = node.Definition.ColumnDefinitions.Any(x => x.Constraints.OfType<UniqueConstraintDefinition>().Any(y => y.IsPrimaryKey));
+            if (!hasTableConstraint && !hasColumnConstraint)
                 base.Fail(node, node.SchemaObjectName.BaseIdentifier.Value);
         }
     }
