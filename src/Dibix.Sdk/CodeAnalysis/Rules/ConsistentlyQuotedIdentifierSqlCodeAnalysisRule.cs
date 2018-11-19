@@ -3,6 +3,8 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
+    // This rule is disabled since it's not stable enough and its use is not yet clear
+    /*
     public sealed class ConsistentlyQuotedIdentifierSqlCodeAnalysisRule : SqlCodeAnalysisRule<ConsistentlyQuotedIdentifierSqlCodeAnalysisRuleVisitor>
     {
         public override int Id => 11;
@@ -22,4 +24,6 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                 base.Fail(node, node.Dump());
         }
     }
+    */
 }
+ 

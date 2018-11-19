@@ -34,7 +34,7 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
         [Fact]
         public void MultiTableAliasSqlCodeAnalysisRule() => base.Execute();
 
-        [Fact]
+        //[Fact]
         public void ConsistentlyQuotedIdentifierSqlCodeAnalysisRule() => base.Execute();
 
         [Fact]
