@@ -86,6 +86,7 @@
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_014.sql" />
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_015.sql" />
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_016.sql" />
+    <Build Include="CodeAnalysis\dbx_codeanalysis_error_017.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CodeAnalysis" />

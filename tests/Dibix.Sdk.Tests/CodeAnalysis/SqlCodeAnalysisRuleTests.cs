@@ -51,5 +51,8 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
 
         [Fact]
         public void ObsoleteDataTypeSqlCodeAnalysisRule() => base.Execute();
+
+        [Fact]
+        public void NamingConventionSqlCodeAnalysisRule() => base.Execute();
     }
 }
