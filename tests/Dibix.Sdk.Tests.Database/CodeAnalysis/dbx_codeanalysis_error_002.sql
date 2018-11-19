@@ -10,18 +10,18 @@ AS
 
 	;WITH x1 AS (SELECT 1 AS a), y1 AS (SELECT 1 AS b)
 	SELECT a
-	FROM x1
-	INNER JOIN y1 ON x1.a = y1.b
+	FROM x1 AS x1x
+	INNER JOIN y1 AS y1x ON x1x.a = y1x.b
 
 	SELECT a
 	FROM dbx_table AS x2
 	INNER JOIN @t AS y2 ON x2.a = y2.b
 
-	INSERT INTO @t VALUES (1)
+	INSERT INTO @t (x) VALUES (1)
 
-	INSERT INTO dbx_table VALUES (1)
+	INSERT INTO dbx_table (id) VALUES (1)
 
-	INSERT INTO dbx_table SELECT id FROM dbx_table
+	INSERT INTO dbx_table (id) SELECT id FROM dbx_table
 
 	UPDATE x3 SET id = 1 FROM dbx_table AS x3
 
