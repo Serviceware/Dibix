@@ -189,14 +189,6 @@
     message="[011] Identifier quotation should be consistent and not mixed. Either use all square brackets or none: [dbo].dbx_table"
     line="15"
     column="7" /&gt;
-  &lt;error
-    message="[011] Identifier quotation should be consistent and not mixed. Either use all square brackets or none: t.[id]"
-    line="20"
-    column="9" /&gt;
-  &lt;error
-    message="[011] Identifier quotation should be consistent and not mixed. Either use all square brackets or none: [t].id"
-    line="23"
-    column="9" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="CursorSqlCodeAnalysisRule" xml:space="preserve">

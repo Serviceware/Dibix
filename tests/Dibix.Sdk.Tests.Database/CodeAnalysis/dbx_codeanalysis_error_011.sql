@@ -14,17 +14,5 @@ AS
 	SELECT [id]
 	FROM [dbo].dbx_table
 
-	SELECT [t].[id]
-	FROM [dbo].[dbx_table] AS [t]
-
-	SELECT t.[id]
-	FROM [dbo].[dbx_table] AS [t]
-
-	SELECT [t].id
-	FROM [dbo].[dbx_table] AS [t]
-
-	SELECT S.[id]
-	FROM [dbo].[dbx_table] AS [S]
-
-	SELECT T.[id]
-	FROM [dbo].[dbx_table] AS [T]
+	SELECT [id]
+	FROM [dbo].[dbx_table]
