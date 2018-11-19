@@ -7,15 +7,6 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         public override int Id => 5;
         public override string ErrorMessage => "Use unicode data types instead of ascii. Replace '{0}' with '{1}'.";
-
-        protected override void Analyze(TSqlObject modelElement, TSqlFragment scriptFragment)
-        {
-            // Temporary suppression for HelplineData.dacpac
-            if (modelElement?.Name.ToString() == "[dbo].[hlsys_splitstringa]")
-                return;
-
-            base.Analyze(modelElement, scriptFragment);
-        }
     }
 
     public sealed class UnicodeDataTypeSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
