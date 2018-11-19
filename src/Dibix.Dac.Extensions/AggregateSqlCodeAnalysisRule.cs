@@ -7,6 +7,8 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Microsoft.SqlServer.Dac;
 using Microsoft.SqlServer.Dac.CodeAnalysis;
+using Microsoft.SqlServer.Dac.Model;
+using Assembly = System.Reflection.Assembly;
 
 namespace Dibix.Dac.Extensions
 {
@@ -27,7 +29,7 @@ namespace Dibix.Dac.Extensions
 
         public AggregateSqlCodeAnalysisRule()
         {
-            this.SupportedElementTypes = SqlElementType.Types;
+            this.SupportedElementTypes = ModelSchema.SchemaInstance.TopLevelTypes.ToArray();
         }
 
         public override IList<SqlRuleProblem> Analyze(SqlRuleExecutionContext ruleExecutionContext)

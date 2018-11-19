@@ -15,6 +15,7 @@
 			"**/*.vs": true,
 			"**/*.vspscc": true,
 			"**/*.vssscc": true,
+			"**/*.csproj.user": true,
 			"**/*.DotSettings": true,
 			"**/*.DotSettings.user": true
 		}

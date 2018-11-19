@@ -5,8 +5,9 @@
 # User-specific files
 *.suo
 
-# Visual Studio cache/options directory
+# Visual Studio cache/options
 .vs/
+*.csproj.user
 
 # ReSharper
 *.DotSettings.user
