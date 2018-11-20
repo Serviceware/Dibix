@@ -637,6 +637,19 @@ namespace This.Is.A.Custom.Namespace
     }
 }</value>
   </data>
+  <data name="UnfilteredDataModificationSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="[018] Missing where clause in update statement"
+    line="3"
+    column="3" /&gt;
+  &lt;error
+    message="[018] Missing where clause in delete statement"
+    line="4"
+    column="3" /&gt;
+&lt;/errors&gt;</value>
+  </data>
   <data name="UnicodeConstantSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;

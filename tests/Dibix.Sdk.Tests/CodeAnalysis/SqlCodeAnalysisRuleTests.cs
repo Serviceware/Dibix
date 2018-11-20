@@ -54,5 +54,8 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
 
         [Fact]
         public void NamingConventionSqlCodeAnalysisRule() => base.Execute();
+
+        [Fact]
+        public void UnfilteredDataModificationSqlCodeAnalysisRule() => base.Execute();
     }
 }
