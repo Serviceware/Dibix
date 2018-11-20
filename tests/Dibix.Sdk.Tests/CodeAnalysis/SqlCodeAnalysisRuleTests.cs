@@ -57,5 +57,8 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
 
         [Fact]
         public void UnfilteredDataModificationSqlCodeAnalysisRule() => base.Execute();
+
+        [Fact]
+        public void TruncateTableSqlCodeAnalysisRule() => base.Execute();
     }
 }
