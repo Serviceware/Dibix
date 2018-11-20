@@ -281,23 +281,23 @@
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[017] PrimaryKey 'PK_dbx_codeanalysis_error_017_failx' does not match naming convention 'PK_%TABLENAME%'"
+    message="[017] Primary key constraint 'PK_dbx_codeanalysis_error_017_failx' does not match naming convention 'PK_%TABLENAME%'"
     line="13"
     column="16" /&gt;
   &lt;error
-    message="[017] ForeignKey 'FK_dbx_codeanalysis_error_017_fail_id_' does not match naming convention 'FK_%TABLENAME%_*'"
+    message="[017] Foreign key constraint 'FK_dbx_codeanalysis_error_017_failx_id' does not match naming convention 'FK_%TABLENAME%_*'"
     line="15"
     column="16" /&gt;
   &lt;error
-    message="[017] Check 'CK_dbx_codeanalysis_error_017_fail_abc_' does not match naming convention 'CK_%TABLENAME%_*'"
+    message="[017] Check constraint 'CK_dbx_codeanalysis_error_017_failx_abc' does not match naming convention 'CK_%TABLENAME%_*'"
     line="16"
     column="16" /&gt;
   &lt;error
-    message="[017] Unique 'UQ_dbx_codeanalysis_error_017_fail_id_' does not match naming convention 'UQ_%TABLENAME%_*'"
+    message="[017] Unique constraint 'UQ_dbx_codeanalysis_error_017_failx_id' does not match naming convention 'UQ_%TABLENAME%_*'"
     line="18"
     column="16" /&gt;
   &lt;error
-    message="[017] Default 'DF_dbx_codeanalysis_error_017_fail_idx' does not match naming convention 'DF_%TABLENAME%_%COLUMNNAME%'"
+    message="[017] Default constraint 'DF_dbx_codeanalysis_error_017_fail_idx' does not match naming convention 'DF_%TABLENAME%_%COLUMNNAME%'"
     line="12"
     column="22" /&gt;
 &lt;/errors&gt;</value>
@@ -689,13 +689,17 @@ namespace This.Is.A.Custom.Namespace
     column="13" /&gt;
 &lt;/errors&gt;</value>
   </data>
-  <data name="UnnamedDefaultConstraintSqlCodeAnalysisRule" xml:space="preserve">
+  <data name="UnnamedConstraintSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
   &lt;error
+    message="[014] Column 'dbx_codeanalysis_error_014.id' has an unnamed primary key constraint"
+    line="3"
+    column="11" /&gt;
+  &lt;error
     message="[014] Column 'dbx_codeanalysis_error_014.id' has an unnamed default constraint"
     line="3"
-    column="2" /&gt;
+    column="23" /&gt;
 &lt;/errors&gt;</value>
   </data>
 </root>

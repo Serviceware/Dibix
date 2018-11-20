@@ -35,6 +35,27 @@ namespace Dibix.Sdk
             return visitor.Found;
         }
 
+        public static IEnumerable<Constraint> CollectConstraints(this TableDefinition table, ConstraintScope filter = ConstraintScope.All)
+        {
+            if (filter.HasFlag(ConstraintScope.Table))
+            {
+                foreach (ConstraintDefinition constraint in table.TableConstraints)
+                    yield return Constraint.Create(constraint);
+            }
+
+            if (filter.HasFlag(ConstraintScope.Column))
+            {
+                foreach (ColumnDefinition column in table.ColumnDefinitions)
+                {
+                    foreach (ConstraintDefinition constraint in column.Constraints)
+                        yield return Constraint.Create(constraint, column.ColumnIdentifier.Value);
+
+                    if (column.DefaultConstraint != null)
+                        yield return Constraint.Create(column.DefaultConstraint, column.ColumnIdentifier.Value);
+                }
+            }
+        }
+
         private class IfStatementVisitor : TSqlFragmentVisitor
         {
             public bool Found { get; private set; }
