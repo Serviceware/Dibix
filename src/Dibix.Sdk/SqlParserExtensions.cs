@@ -56,6 +56,20 @@ namespace Dibix.Sdk
             }
         }
 
+        public static IEnumerable<TableReference> Recursive(this IEnumerable<TableReference> references)
+        {
+            foreach (TableReference tableReference in references)
+            {
+                if (tableReference is QualifiedJoin join)
+                {
+                    yield return join.FirstTableReference;
+                    yield return join.SecondTableReference;
+                }
+                else
+                    yield return tableReference;
+            }
+        }
+
         private class IfStatementVisitor : TSqlFragmentVisitor
         {
             public bool Found { get; private set; }

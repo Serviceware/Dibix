@@ -30,18 +30,31 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
     public sealed class NamingConventionSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
     {
+        // helpLine suppressions
+        private static readonly HashSet<string> Workarounds = new HashSet<string>
+        {
+            "PK_hlsysobjecdata" // Renaming this PK would force rebuilding the full text catalog which would be very slow
+        };
+
         public override void Visit(CreateTableStatement node)
         {
-            IEnumerable<Constraint> constraints = node.Definition
-                                                      .CollectConstraints()
-                                                      .Where(x => x.Type != ConstraintType.Nullable && x.Definition.ConstraintIdentifier != null);
-
+            IEnumerable<Constraint> constraints = node.Definition.CollectConstraints();
             foreach (Constraint constraint in constraints)
             {
+                Identifier identifier = constraint.Definition.ConstraintIdentifier;
+                if (constraint.Type == ConstraintType.Nullable)
+                    continue;
+
+                if (identifier == null)
+                    continue;
+
+                if (Workarounds.Contains(identifier.Value))
+                    continue;
+
                 string pattern = NamingConventions.GetPattern(constraint.Type);
                 string mask = BuildMask(node, pattern, constraint.ParentName);
-                if (!Regex.IsMatch(constraint.Definition.ConstraintIdentifier.Value, mask))
-                    base.Fail(constraint.Definition.ConstraintIdentifier, constraint.Type.ToDisplayName(), constraint.Definition.ConstraintIdentifier.Value, pattern);
+                if (!Regex.IsMatch(identifier.Value, mask))
+                    base.Fail(identifier, constraint.Type.ToDisplayName(), identifier.Value, pattern);
             }
         }
 

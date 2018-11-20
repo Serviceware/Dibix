@@ -12,6 +12,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
     public sealed class HeapTableSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
     {
+        // helpLine suppressions
+        // Adding a PK here would be very slow due to the size of the tables
         private static readonly HashSet<string> Workarounds = new HashSet<string>
         {
             "hlwfactivityevents"
@@ -21,7 +23,6 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         public override void Visit(CreateTableStatement node)
         {
-            // Temporary suppression for HelplineData.dacpac
             if (Workarounds.Contains(node.SchemaObjectName.BaseIdentifier.Value))
                 return;
 

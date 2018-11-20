@@ -650,12 +650,12 @@ namespace This.Is.A.Custom.Namespace
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[018] Missing where clause in update statement"
-    line="3"
+    message="[018] Missing where clause in UPDATE statement"
+    line="5"
     column="3" /&gt;
   &lt;error
-    message="[018] Missing where clause in delete statement"
-    line="4"
+    message="[018] Missing where clause in DELETE statement"
+    line="6"
     column="3" /&gt;
 &lt;/errors&gt;</value>
   </data>
