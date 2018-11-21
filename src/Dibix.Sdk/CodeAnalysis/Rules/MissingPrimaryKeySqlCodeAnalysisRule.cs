@@ -27,6 +27,9 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         private void Check(string type, SchemaObjectName name, TableDefinition definition)
         {
+            if (name.IsTemporaryTableName())
+                return;
+
             if (Workarounds.Contains(name.BaseIdentifier.Value))
                 return;
 
