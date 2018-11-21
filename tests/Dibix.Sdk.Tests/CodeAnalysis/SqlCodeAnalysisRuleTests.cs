@@ -63,5 +63,8 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
 
         [Fact]
         public void LanguageDependentConstantSqlCodeAnalysisRule() => base.Execute();
+
+        [Fact]
+        public void TemporaryTableSqlCodeAnalysisRule() => base.Execute();
     }
 }

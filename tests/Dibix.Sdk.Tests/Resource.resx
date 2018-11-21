@@ -650,6 +650,15 @@ namespace This.Is.A.Custom.Namespace
     }
 }</value>
   </data>
+  <data name="TemporaryTableSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="[021] The use of temporary tables is not allowed: #dbx_codeanalysis_error_021"
+    line="3"
+    column="22" /&gt;
+&lt;/errors&gt;</value>
+  </data>
   <data name="TruncateTableSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
