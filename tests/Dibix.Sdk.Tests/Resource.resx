@@ -253,6 +253,10 @@
     message="[015] Missing column specification for INSERT statement"
     line="4"
     column="3" /&gt;
+  &lt;error
+    message="[015] Missing column specification for INSERT statement"
+    line="10"
+    column="4" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="LanguageDependentConstantSqlCodeAnalysisRule" xml:space="preserve">

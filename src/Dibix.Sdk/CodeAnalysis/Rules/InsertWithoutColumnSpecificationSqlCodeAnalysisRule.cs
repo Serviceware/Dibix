@@ -11,10 +11,16 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
     public sealed class InsertWithoutColumnSpecificationSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
     {
-        public override void Visit(InsertStatement node)
+        public override void Visit(InsertSpecification node)
         {
-            if (!node.InsertSpecification.Columns.Any())
-                base.Fail(node.InsertSpecification);
+            if (!node.Columns.Any())
+                base.Fail(node);
+        }
+
+        public override void Visit(InsertMergeAction node)
+        {
+            if (!node.Columns.Any())
+                base.Fail(node);
         }
     }
 }
