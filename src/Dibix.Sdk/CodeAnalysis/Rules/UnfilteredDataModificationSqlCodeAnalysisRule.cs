@@ -38,6 +38,10 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             if (node.WhereClause != null)
                 return;
 
+            // Table variables are allowed for delete
+            if (IsTableVariableReference(node))
+                return;
+
             // We don't investigate complex join filter logic and concentrate on simple DELETE FROM x WHERE
             if (node.FromClause != null && node.FromClause.TableReferences.OfType<QualifiedJoin>().Any())
                 return;

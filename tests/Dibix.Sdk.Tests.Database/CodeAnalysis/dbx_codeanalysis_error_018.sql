@@ -8,4 +8,5 @@ AS
   UPDATE [x] SET [x].[id] = 1 FROM @x AS [x]
   UPDATE @x SET [id] = 1
   UPDATE [dbo].[dbx_table] SET [id] = 1 WHERE [id] = 1
+  DELETE @x
   DELETE [dbo].[dbx_table] WHERE [id] = 1
