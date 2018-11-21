@@ -264,6 +264,19 @@
     column="3" /&gt;
 &lt;/errors&gt;</value>
   </data>
+  <data name="LanguageDependentConstantSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="[020] Found language dependent expression: CAST(N'1990-01-01' AS DATETIME)"
+    line="3"
+    column="30" /&gt;
+  &lt;error
+    message="[020] Found language dependent expression: CONSTRAINT [DF_dbx_codeanalysis_error_020_table_id] DEFAULT ((N'1990-01-01'))"
+    line="7"
+    column="81" /&gt;
+&lt;/errors&gt;</value>
+  </data>
   <data name="MultiTableAliasSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
@@ -571,15 +584,15 @@ SELECT 2;";
     column="7" /&gt;
   &lt;error
     message="[002] Missing schema specification"
-    line="38"
+    line="39"
     column="7" /&gt;
   &lt;error
     message="[002] Missing schema specification"
-    line="49"
+    line="53"
     column="8" /&gt;
   &lt;error
     message="[002] Missing schema specification"
-    line="53"
+    line="57"
     column="8" /&gt;
 &lt;/errors&gt;</value>
   </data>

@@ -16,7 +16,7 @@ namespace Dibix.Sdk.CodeAnalysis
         #region Constructor
         public SqlCodeAnalysisRuleEngine()
         {
-            this._rules = ScanRules().ToArray();
+            this._rules = ScanRules();
         }
         #endregion
 
@@ -39,13 +39,23 @@ namespace Dibix.Sdk.CodeAnalysis
         #endregion
 
         #region Private Methods
-        private static IEnumerable<ISqlCodeAnalysisRule> ScanRules()
+        private static ICollection<ISqlCodeAnalysisRule> ScanRules()
         {
             Type ruleDefinitionType = typeof(ISqlCodeAnalysisRule);
-            return ruleDefinitionType.Assembly
-                                     .GetTypes()
-                                     .Where(x => ruleDefinitionType.IsAssignableFrom(x) && x.IsClass && !x.IsAbstract)
-                                     .Select(x => (ISqlCodeAnalysisRule)Activator.CreateInstance(x));
+            IEnumerable<ISqlCodeAnalysisRule> rules = ruleDefinitionType.Assembly
+                                                                        .GetTypes()
+                                                                        .Where(x => ruleDefinitionType.IsAssignableFrom(x) && x.IsClass && !x.IsAbstract)
+                                                                        .Select(type => (ISqlCodeAnalysisRule)Activator.CreateInstance(type));
+
+            IDictionary<int, ISqlCodeAnalysisRule> ruleMap = new Dictionary<int, ISqlCodeAnalysisRule>();
+            foreach (ISqlCodeAnalysisRule rule in rules)
+            {
+                if (ruleMap.TryGetValue(rule.Id, out ISqlCodeAnalysisRule conflictingRule))
+                    throw new InvalidOperationException($"The rule '{conflictingRule}' is already registered for id '{rule.Id}'");
+
+                ruleMap.Add(rule.Id, rule);
+            }
+            return ruleMap.Values;
         }
         #endregion
     }

@@ -25,7 +25,7 @@ AS
 
 	UPDATE x3 SET id = 1 FROM dbx_table AS x3
 
-	UPDATE dbx_table SET id = 1
+	UPDATE dbx_table SET id = 1 WHERE id = 1
 
 	UPDATE @t SET id = 1
 
@@ -33,15 +33,19 @@ AS
 	
 	DELETE x4
 	FROM dbx_table AS x4
+	WHERE x4.id = 1
 
 	DELETE 
 	FROM dbx_table
+	WHERE id = 1
 
 	DELETE 
 	FROM @t
+	WHERE ISNULL(x, 0) = 1
 	
 	DELETE x5
-	FROM (VALUES (1)) AS x5
+	FROM (VALUES (1)) AS x5(x)
+	WHERE x5.x = 1
 
 	;WITH x6 AS 
 	(
