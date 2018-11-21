@@ -38,10 +38,14 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             if (node.WhereClause != null)
                 return;
 
+            // We don't investigate complex join filter logic and concentrate on simple DELETE FROM x WHERE
+            if (node.FromClause != null && node.FromClause.TableReferences.OfType<QualifiedJoin>().Any())
+                return;
+
             base.Fail(node, "DELETE");
         }
 
-        private static bool IsTableVariableReference(UpdateSpecification node)
+        private static bool IsTableVariableReference(UpdateDeleteSpecificationBase node)
         {
             // UPDATE @x
             if (node.Target is VariableTableReference)
