@@ -233,15 +233,6 @@
     column="13" /&gt;
 &lt;/errors&gt;</value>
   </data>
-  <data name="HeapTableSqlCodeAnalysisRule" xml:space="preserve">
-    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
-&lt;errors&gt;
-  &lt;error
-    message="[012] Table 'dbx_codeanalysis_error_012' does not have a primary key"
-    line="1"
-    column="1" /&gt;
-&lt;/errors&gt;</value>
-  </data>
   <data name="ImplicitAliasSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
@@ -275,6 +266,19 @@
     message="[020] Found language dependent expression: CONSTRAINT [DF_dbx_codeanalysis_error_020_table_id] DEFAULT ((N'1990-01-01'))"
     line="7"
     column="81" /&gt;
+&lt;/errors&gt;</value>
+  </data>
+  <data name="MissingPrimaryKeySqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="[012] Table 'dbx_codeanalysis_error_012_table' does not have a primary key"
+    line="3"
+    column="2" /&gt;
+  &lt;error
+    message="[012] User defined table type 'dbx_codeanalysis_error_012_table' does not have a primary key"
+    line="8"
+    column="2" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="MultiTableAliasSqlCodeAnalysisRule" xml:space="preserve">
