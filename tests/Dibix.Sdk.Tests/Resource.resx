@@ -667,6 +667,15 @@ namespace This.Is.A.Custom.Namespace
     column="22" /&gt;
 &lt;/errors&gt;</value>
   </data>
+  <data name="TopWithoutOrderBySqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="[022] Missing ORDER BY for SELECT TOP statement"
+    line="3"
+    column="3" /&gt;
+&lt;/errors&gt;</value>
+  </data>
   <data name="TruncateTableSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
