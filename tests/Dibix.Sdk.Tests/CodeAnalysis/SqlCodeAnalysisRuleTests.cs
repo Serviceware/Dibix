@@ -10,7 +10,7 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
         [Fact]
         public void SchemaSqlCodeAnalysisRule() => base.Execute();
 
-        //[Fact]
+        [Fact]
         public void NoReturnSqlCodeAnalysisRule() => base.Execute();
 
         [Fact]
@@ -19,7 +19,7 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
         [Fact]
         public void UnicodeDataTypeSqlCodeAnalysisRule() => base.Execute();
 
-        //[Fact]
+        [Fact]
         public void RedundantAliasSqlCodeAnalysisRule() => base.Execute();
 
         [Fact]
@@ -34,7 +34,7 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
         [Fact]
         public void MultiTableAliasSqlCodeAnalysisRule() => base.Execute();
 
-        //[Fact]
+        [Fact]
         public void ConsistentlyQuotedIdentifierSqlCodeAnalysisRule() => base.Execute();
 
         [Fact]
@@ -67,7 +67,7 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
         [Fact]
         public void TemporaryTableSqlCodeAnalysisRule() => base.Execute();
 
-        //[Fact]
+        [Fact]
         public void TopWithoutOrderBySqlCodeAnalysisRule() => base.Execute();
     }
 }

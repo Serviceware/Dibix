@@ -45,7 +45,8 @@ namespace Dibix.Sdk.CodeAnalysis
             IEnumerable<ISqlCodeAnalysisRule> rules = ruleDefinitionType.Assembly
                                                                         .GetTypes()
                                                                         .Where(x => ruleDefinitionType.IsAssignableFrom(x) && x.IsClass && !x.IsAbstract)
-                                                                        .Select(type => (ISqlCodeAnalysisRule)Activator.CreateInstance(type));
+                                                                        .Select(type => (ISqlCodeAnalysisRule)Activator.CreateInstance(type))
+                                                                        .Where(x => x.IsEnabled);
 
             IDictionary<int, ISqlCodeAnalysisRule> ruleMap = new Dictionary<int, ISqlCodeAnalysisRule>();
             foreach (ISqlCodeAnalysisRule rule in rules)

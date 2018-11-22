@@ -4,11 +4,11 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
     // This rule is disabled since it's not stable enough and its use is not yet clear
-    /*
     public sealed class ConsistentlyQuotedIdentifierSqlCodeAnalysisRule : SqlCodeAnalysisRule<ConsistentlyQuotedIdentifierSqlCodeAnalysisRuleVisitor>
     {
         public override int Id => 11;
         public override string ErrorMessage => "Identifier quotation should be consistent and not mixed. Either use all square brackets or none: {0}";
+        public override bool IsEnabled => false;
     }
 
     public sealed class ConsistentlyQuotedIdentifierSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
@@ -24,6 +24,5 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                 base.Fail(node, node.Dump());
         }
     }
-    */
 }
  

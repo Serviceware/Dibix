@@ -10,6 +10,7 @@ namespace Dibix.Sdk.CodeAnalysis
     {
         public abstract int Id { get; }
         public abstract string ErrorMessage { get; }
+        public virtual bool IsEnabled => true;
         public ICollection<SqlCodeAnalysisError> Errors { get; }
 
         protected SqlCodeAnalysisRule()

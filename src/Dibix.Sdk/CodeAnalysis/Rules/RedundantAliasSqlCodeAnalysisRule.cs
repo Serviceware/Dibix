@@ -9,12 +9,12 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     // [name] AS [name]
     // 
     // [id]   = [id]
-    // [name] = [idname
-    /*
+    // [name] = [name]
     public sealed class RedundantAliasSqlCodeAnalysisRule : SqlCodeAnalysisRule<RedundantAliasSqlCodeAnalysisRuleVisitor>
     {
         public override int Id => 6;
         public override string ErrorMessage => "The alias is redundant";
+        public override bool IsEnabled => false;
     }
 
     public sealed class RedundantAliasSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
@@ -30,5 +30,4 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                 base.Fail(node.ColumnName);
         }
     }
-    */
 }
