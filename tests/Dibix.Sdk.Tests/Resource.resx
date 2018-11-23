@@ -324,7 +324,13 @@
 &lt;/errors&gt;</value>
   </data>
   <data name="NoReturnSqlCodeAnalysisRule" xml:space="preserve">
-    <value>&lt;DISABLED&gt;</value>
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="[003] The use of RETURN expressions is not allowed"
+    line="3"
+    column="2" /&gt;
+&lt;/errors&gt;</value>
   </data>
   <data name="ObsoleteDataTypeSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;

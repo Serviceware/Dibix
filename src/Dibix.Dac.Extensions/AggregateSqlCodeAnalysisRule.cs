@@ -67,10 +67,10 @@ namespace Dibix.Dac.Extensions
             Type providerType = assembly.GetType("Dibix.Sdk.CodeAnalysis.Dac.DacSqlCodeAnalysisAdapter");
             AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
             object engine = Activator.CreateInstance(providerType);
-            AppDomain.CurrentDomain.AssemblyResolve -= OnAssemblyResolve;
             Expression instance = Expression.Constant(engine);
             ParameterExpression parameter = Expression.Parameter(typeof(SqlRuleExecutionContext), "context");
             Expression call = Expression.Call(instance, "Analyze", new Type[0], parameter);
+            AppDomain.CurrentDomain.AssemblyResolve -= OnAssemblyResolve;
             return Expression.Lambda<Func<SqlRuleExecutionContext, IEnumerable<SqlRuleProblem>>>(call, parameter).Compile();
         }
 
