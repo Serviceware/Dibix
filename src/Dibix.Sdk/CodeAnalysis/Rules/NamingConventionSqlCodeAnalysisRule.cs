@@ -12,7 +12,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         public override string ErrorMessage => "{0} '{1}' does not match naming convention '{2}'";
     }
 
-    internal sealed class NamingConventions
+    internal static class NamingConventions
     {
         private static readonly IDictionary<ConstraintType, string> Registrations = new Dictionary<ConstraintType, string>
         {

@@ -69,3 +69,8 @@ AS
 	WHEN NOT MATCHED BY SOURCE THEN
 		DELETE
 	;
+
+	CREATE TABLE x 
+	(
+		id int
+	)

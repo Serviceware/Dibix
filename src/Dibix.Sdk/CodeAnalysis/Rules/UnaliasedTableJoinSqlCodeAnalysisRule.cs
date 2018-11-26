@@ -3,13 +3,13 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class MultiTableAliasSqlCodeAnalysisRule : SqlCodeAnalysisRule<MultiTableAliasSqlCodeAnalysisRuleVisitor>
+    public sealed class UnaliasedTableJoinSqlCodeAnalysisRule : SqlCodeAnalysisRule<UnaliasedTableJoinSqlCodeAnalysisRuleVisitor>
     {
         public override int Id => 10;
         public override string ErrorMessage => "Unaliased table reference found in multi table reference joins";
     }
 
-    public sealed class MultiTableAliasSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
+    public sealed class UnaliasedTableJoinSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
     {
         public override void Visit(JoinTableReference join)
         {

@@ -6,13 +6,13 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class SchemaSqlCodeAnalysisRule : SqlCodeAnalysisRule<SchemaSqlCodeAnalysisRuleVisitor>
+    public sealed class SchemaSpecificationSqlCodeAnalysisRule : SqlCodeAnalysisRule<SchemaSpecificationSqlCodeAnalysisRuleVisitor>
     {
         public override int Id => 2;
         public override string ErrorMessage => "Missing schema specification";
     }
 
-    public sealed class SchemaSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
+    public sealed class SchemaSpecificationSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
     {
         private readonly ICollection<string> _tableAliases = new Collection<string>
         {
@@ -28,20 +28,30 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             this._tableAliases.AddRange(childAliasVisitor.TableAliases);
         }
 
+        public override void Visit(CreateTableStatement node)
+        {
+            this.Check(node.SchemaObjectName);
+        }
+
         public override void Visit(NamedTableReference node)
         {
-            if (node.SchemaObject.SchemaIdentifier != null)
+            this.Check(node.SchemaObject);
+        }
+
+        private void Check(SchemaObjectName name)
+        {
+            if (name.SchemaIdentifier != null)
                 return;
 
             // Exclude temp tables
-            if (node.SchemaObject.BaseIdentifier.Value.Contains("#"))
+            if (name.BaseIdentifier.Value.Contains("#"))
                 return;
 
             // Exclude aliased tables
-            if (this._tableAliases.Any(x => x.Equals(node.SchemaObject.BaseIdentifier.Value, StringComparison.OrdinalIgnoreCase)))
+            if (this._tableAliases.Any(x => x.Equals(name.BaseIdentifier.Value, StringComparison.OrdinalIgnoreCase)))
                 return;
 
-            base.Fail(node);
+            base.Fail(name);
         }
 
         private class ChildAliasVisitor : TSqlFragmentVisitor

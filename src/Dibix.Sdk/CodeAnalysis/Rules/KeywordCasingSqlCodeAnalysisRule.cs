@@ -5,13 +5,13 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class CasingSqlCodeAnalysisRule : SqlCodeAnalysisRule<CasingSqlCodeAnalysisRuleVisitor>
+    public sealed class KeywordCasingSqlCodeAnalysisRule : SqlCodeAnalysisRule<KeywordCasingSqlCodeAnalysisRuleVisitor>
     {
         public override int Id => 1;
         public override string ErrorMessage => "Invalid casing for '{0}' [{1}]";
     }
 
-    public sealed class CasingSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
+    public sealed class KeywordCasingSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
     {
         private static readonly HashSet<TSqlTokenType> TokenWhiteList = new HashSet<TSqlTokenType>
         {

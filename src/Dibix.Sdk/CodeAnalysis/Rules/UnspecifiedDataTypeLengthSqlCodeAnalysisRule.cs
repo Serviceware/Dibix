@@ -3,13 +3,13 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class DataTypeLengthSqlCodeAnalysisRule : SqlCodeAnalysisRule<DataTypeLengthSqlCodeAnalysisRuleVisitor>
+    public sealed class UnspecifiedDataTypeLengthSqlCodeAnalysisRule : SqlCodeAnalysisRule<UnspecifiedDataTypeLengthSqlCodeAnalysisRuleVisitor>
     {
         public override int Id => 9;
-        public override string ErrorMessage => "Data type length not specified";
+        public override string ErrorMessage => "Data type length not specified: {0}";
     }
 
-    public sealed class DataTypeLengthSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
+    public sealed class UnspecifiedDataTypeLengthSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
     {
         private static readonly HashSet<SqlDataTypeOption> DataTypesThatRequireLength = new HashSet<SqlDataTypeOption>
         {
@@ -31,7 +31,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
             if (DataTypesThatRequireLength.Contains(node.SqlDataTypeOption))
             {
-                base.Fail(node);
+                base.Fail(node, node.Dump());
             }
         }
     }

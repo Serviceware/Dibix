@@ -2,13 +2,13 @@
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class CursorSqlCodeAnalysisRule : SqlCodeAnalysisRule<CursorSqlCodeAnalysisRuleVisitor>
+    public sealed class NoCursorSqlCodeAnalysisRule : SqlCodeAnalysisRule<NoCursorSqlCodeAnalysisRuleVisitor>
     {
         public override int Id => 13;
         public override string ErrorMessage => "Found use of CURSOR statement";
     }
 
-    public sealed class CursorSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
+    public sealed class NoCursorSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
     {
         public override void Visit(TSqlParserToken token)
         {

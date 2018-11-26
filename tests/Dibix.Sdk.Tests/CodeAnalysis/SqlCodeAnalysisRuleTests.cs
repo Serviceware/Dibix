@@ -5,10 +5,10 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
     public class SqlCodeAnalysisRuleTests : SqlCodeAnalysisRuleTestsBase
     {
         [Fact]
-        public void CasingSqlCodeAnalysisRule() => base.Execute();
+        public void KeywordCasingSqlCodeAnalysisRule() => base.Execute();
 
         [Fact]
-        public void SchemaSqlCodeAnalysisRule() => base.Execute();
+        public void SchemaSpecificationSqlCodeAnalysisRule() => base.Execute();
 
         [Fact]
         public void NoReturnSqlCodeAnalysisRule() => base.Execute();
@@ -29,10 +29,10 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
         public void ImplicitAliasSqlCodeAnalysisRule() => base.Execute();
 
         [Fact]
-        public void DataTypeLengthSqlCodeAnalysisRule() => base.Execute();
+        public void UnspecifiedDataTypeLengthSqlCodeAnalysisRule() => base.Execute();
 
         [Fact]
-        public void MultiTableAliasSqlCodeAnalysisRule() => base.Execute();
+        public void UnaliasedTableJoinSqlCodeAnalysisRule() => base.Execute();
 
         [Fact]
         public void ConsistentlyQuotedIdentifierSqlCodeAnalysisRule() => base.Execute();
@@ -41,7 +41,7 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
         public void MissingPrimaryKeySqlCodeAnalysisRule() => base.Execute();
 
         [Fact]
-        public void CursorSqlCodeAnalysisRule() => base.Execute();
+        public void NoCursorSqlCodeAnalysisRule() => base.Execute();
 
         [Fact]
         public void UnnamedConstraintSqlCodeAnalysisRule() => base.Execute();

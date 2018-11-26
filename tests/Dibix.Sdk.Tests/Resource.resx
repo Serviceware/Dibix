@@ -117,7 +117,54 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="CasingSqlCodeAnalysisRule" xml:space="preserve">
+  <data name="ConsistentlyQuotedIdentifierSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="[011] Identifier quotation should be consistent and not mixed. Either use all square brackets or none: dbo.[dbx_udt]"
+    line="5"
+    column="13" /&gt;
+  &lt;error
+    message="[011] Identifier quotation should be consistent and not mixed. Either use all square brackets or none: [dbo].dbx_udt"
+    line="6"
+    column="13" /&gt;
+  &lt;error
+    message="[011] Identifier quotation should be consistent and not mixed. Either use all square brackets or none: dbo.[dbx_table]"
+    line="12"
+    column="7" /&gt;
+  &lt;error
+    message="[011] Identifier quotation should be consistent and not mixed. Either use all square brackets or none: [dbo].dbx_table"
+    line="15"
+    column="7" /&gt;
+&lt;/errors&gt;</value>
+  </data>
+  <data name="ImplicitAliasSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="[008] Aliases must be marked with 'AS'"
+    line="3"
+    column="28" /&gt;
+  &lt;error
+    message="[008] Aliases must be marked with 'AS'"
+    line="4"
+    column="25" /&gt;
+&lt;/errors&gt;</value>
+  </data>
+  <data name="InsertWithoutColumnSpecificationSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="[015] Missing column specification for INSERT statement"
+    line="4"
+    column="3" /&gt;
+  &lt;error
+    message="[015] Missing column specification for INSERT statement"
+    line="10"
+    column="4" /&gt;
+&lt;/errors&gt;</value>
+  </data>
+  <data name="KeywordCasingSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
   &lt;error
@@ -170,95 +217,6 @@
     column="14" /&gt;
 &lt;/errors&gt;</value>
   </data>
-  <data name="ConsistentlyQuotedIdentifierSqlCodeAnalysisRule" xml:space="preserve">
-    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
-&lt;errors&gt;
-  &lt;error
-    message="[011] Identifier quotation should be consistent and not mixed. Either use all square brackets or none: dbo.[dbx_udt]"
-    line="5"
-    column="13" /&gt;
-  &lt;error
-    message="[011] Identifier quotation should be consistent and not mixed. Either use all square brackets or none: [dbo].dbx_udt"
-    line="6"
-    column="13" /&gt;
-  &lt;error
-    message="[011] Identifier quotation should be consistent and not mixed. Either use all square brackets or none: dbo.[dbx_table]"
-    line="12"
-    column="7" /&gt;
-  &lt;error
-    message="[011] Identifier quotation should be consistent and not mixed. Either use all square brackets or none: [dbo].dbx_table"
-    line="15"
-    column="7" /&gt;
-&lt;/errors&gt;</value>
-  </data>
-  <data name="CursorSqlCodeAnalysisRule" xml:space="preserve">
-    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
-&lt;errors&gt;
-  &lt;error
-    message="[013] Found use of CURSOR statement"
-    line="3"
-    column="19" /&gt;
-&lt;/errors&gt;</value>
-  </data>
-  <data name="DataTypeLengthSqlCodeAnalysisRule" xml:space="preserve">
-    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
-&lt;errors&gt;
-  &lt;error
-    message="[009] Data type length not specified"
-    line="5"
-    column="13" /&gt;
-  &lt;error
-    message="[009] Data type length not specified"
-    line="6"
-    column="13" /&gt;
-  &lt;error
-    message="[009] Data type length not specified"
-    line="7"
-    column="13" /&gt;
-  &lt;error
-    message="[009] Data type length not specified"
-    line="8"
-    column="13" /&gt;
-  &lt;error
-    message="[009] Data type length not specified"
-    line="9"
-    column="13" /&gt;
-  &lt;error
-    message="[009] Data type length not specified"
-    line="10"
-    column="13" /&gt;
-  &lt;error
-    message="[009] Data type length not specified"
-    line="11"
-    column="13" /&gt;
-&lt;/errors&gt;</value>
-  </data>
-  <data name="ImplicitAliasSqlCodeAnalysisRule" xml:space="preserve">
-    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
-&lt;errors&gt;
-  &lt;error
-    message="[008] Aliases must be marked with 'AS'"
-    line="3"
-    column="28" /&gt;
-  &lt;error
-    message="[008] Aliases must be marked with 'AS'"
-    line="4"
-    column="25" /&gt;
-&lt;/errors&gt;</value>
-  </data>
-  <data name="InsertWithoutColumnSpecificationSqlCodeAnalysisRule" xml:space="preserve">
-    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
-&lt;errors&gt;
-  &lt;error
-    message="[015] Missing column specification for INSERT statement"
-    line="4"
-    column="3" /&gt;
-  &lt;error
-    message="[015] Missing column specification for INSERT statement"
-    line="10"
-    column="4" /&gt;
-&lt;/errors&gt;</value>
-  </data>
   <data name="LanguageDependentConstantSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
@@ -285,19 +243,6 @@
     column="2" /&gt;
 &lt;/errors&gt;</value>
   </data>
-  <data name="MultiTableAliasSqlCodeAnalysisRule" xml:space="preserve">
-    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
-&lt;errors&gt;
-  &lt;error
-    message="[010] Unaliased table reference found in multi table reference joins"
-    line="7"
-    column="7" /&gt;
-  &lt;error
-    message="[010] Unaliased table reference found in multi table reference joins"
-    line="11"
-    column="7" /&gt;
-&lt;/errors&gt;</value>
-  </data>
   <data name="NamingConventionSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
@@ -321,6 +266,15 @@
     message="[017] Default constraint 'DF_dbx_codeanalysis_error_017_fail_idx' does not match naming convention 'DF_%TABLENAME%_%COLUMNNAME%'"
     line="12"
     column="22" /&gt;
+&lt;/errors&gt;</value>
+  </data>
+  <data name="NoCursorSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="[013] Found use of CURSOR statement"
+    line="3"
+    column="19" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="NoReturnSqlCodeAnalysisRule" xml:space="preserve">
@@ -557,7 +511,7 @@ SELECT 2;";
     column="17" /&gt;
 &lt;/errors&gt;</value>
   </data>
-  <data name="SchemaSqlCodeAnalysisRule" xml:space="preserve">
+  <data name="SchemaSpecificationSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
   &lt;error
@@ -608,6 +562,10 @@ SELECT 2;";
     message="[002] Missing schema specification"
     line="57"
     column="8" /&gt;
+  &lt;error
+    message="[002] Missing schema specification"
+    line="73"
+    column="15" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="SourcesTest" xml:space="preserve">
@@ -691,6 +649,19 @@ namespace This.Is.A.Custom.Namespace
     column="3" /&gt;
 &lt;/errors&gt;</value>
   </data>
+  <data name="UnaliasedTableJoinSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="[010] Unaliased table reference found in multi table reference joins"
+    line="7"
+    column="7" /&gt;
+  &lt;error
+    message="[010] Unaliased table reference found in multi table reference joins"
+    line="11"
+    column="7" /&gt;
+&lt;/errors&gt;</value>
+  </data>
   <data name="UnfilteredDataModificationSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
@@ -745,6 +716,39 @@ namespace This.Is.A.Custom.Namespace
     message="[014] Column 'dbx_codeanalysis_error_014.id' has an unnamed default constraint"
     line="3"
     column="23" /&gt;
+&lt;/errors&gt;</value>
+  </data>
+  <data name="UnspecifiedDataTypeLengthSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="[009] Data type length not specified: NVARCHAR"
+    line="5"
+    column="13" /&gt;
+  &lt;error
+    message="[009] Data type length not specified: NCHAR"
+    line="6"
+    column="13" /&gt;
+  &lt;error
+    message="[009] Data type length not specified: BINARY"
+    line="7"
+    column="13" /&gt;
+  &lt;error
+    message="[009] Data type length not specified: VARBINARY"
+    line="8"
+    column="13" /&gt;
+  &lt;error
+    message="[009] Data type length not specified: DECIMAL"
+    line="9"
+    column="13" /&gt;
+  &lt;error
+    message="[009] Data type length not specified: NUMERIC"
+    line="10"
+    column="13" /&gt;
+  &lt;error
+    message="[009] Data type length not specified: FLOAT"
+    line="11"
+    column="13" /&gt;
 &lt;/errors&gt;</value>
   </data>
 </root>
