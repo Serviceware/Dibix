@@ -48,11 +48,11 @@ namespace Dibix.Sdk.CodeAnalysis
             TVisitor visitor = new TVisitor();
             visitor.ErrorHandler = (fragment, line, column, args) => base.Fail(modelElement, fragment ?? scriptFragment, line, column, args);
 
-            // First visit each token
-            scriptFragment.Visit(visitor.Visit);
-
-            // Now visit each fragment
+            // First visit each fragment
             scriptFragment.Accept(visitor);
+
+            // Now visit each token
+            scriptFragment.Visit(visitor.Visit);
         }
     }
 }

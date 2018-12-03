@@ -6,13 +6,13 @@ AS
 	DECLARE @w sysname
 	DECLARE @x nvarchar(max)
 	DECLARE @y decimal(5,2)
-	DECLARE @z bigint = row_number()
-	DECLARE @a XML
+	DECLARE @z XML
 
-	DECLARE @a1 NVARCHAR(MAX) = @a.VALUE()
-	DECLARE @a2 NVARCHAR(MAX) = @a.value()
-	DECLARE @a3 INT = @a.NoDeS()
-	DECLARE @a4 INT = @a.nodes()
+	DECLARE @a1 NVARCHAR(MAX) = @z.VALUE()
+	DECLARE @a2 NVARCHAR(MAX) = @z.value()
+	DECLARE @a3 INT = @z.NoDeS()
+	DECLARE @a4 INT = @z.nodes()
+	DECLARE @a5 DATETIME = cast(0 AS DATETIME)
 
 	SeLeCT @x = count(id)
 	FROM dbo.dbx_table
@@ -24,3 +24,6 @@ AS
 	SELECT 1
 	FROM @xml.nodes(NULL) AS [x]([a])
 	SELECT @xml.query(NULL)
+
+	SELECT row_number() over(partition by id order by id)
+	FROM dbo.dbx_table

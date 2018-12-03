@@ -168,18 +168,6 @@
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[001] Invalid casing for 'set' [Set]"
-    line="3"
-    column="2" /&gt;
-  &lt;error
-    message="[001] Invalid casing for 'on' [On]"
-    line="3"
-    column="14" /&gt;
-  &lt;error
-    message="[001] Invalid casing for 'SeLeCT' [Select]"
-    line="17"
-    column="2" /&gt;
-  &lt;error
     message="[001] Invalid casing for 'nocount' [Identifier]"
     line="3"
     column="6" /&gt;
@@ -200,21 +188,49 @@
     line="8"
     column="13" /&gt;
   &lt;error
-    message="[001] Invalid casing for 'bigint' [Identifier]"
-    line="9"
-    column="13" /&gt;
-  &lt;error
-    message="[001] Invalid casing for 'row_number' [Identifier]"
-    line="9"
-    column="22" /&gt;
-  &lt;error
-    message="[001] Invalid casing for 'NoDeS' [Identifier]"
-    line="14"
-    column="23" /&gt;
+    message="[001] Invalid casing for 'cast' [Identifier]"
+    line="15"
+    column="25" /&gt;
   &lt;error
     message="[001] Invalid casing for 'count' [Identifier]"
     line="17"
     column="14" /&gt;
+  &lt;error
+    message="[001] Invalid casing for 'row_number' [Identifier]"
+    line="28"
+    column="9" /&gt;
+  &lt;error
+    message="[001] Invalid casing for 'partition' [Identifier]"
+    line="28"
+    column="27" /&gt;
+  &lt;error
+    message="[001] Invalid casing for 'set' [Set]"
+    line="3"
+    column="2" /&gt;
+  &lt;error
+    message="[001] Invalid casing for 'on' [On]"
+    line="3"
+    column="14" /&gt;
+  &lt;error
+    message="[001] Invalid casing for 'SeLeCT' [Select]"
+    line="17"
+    column="2" /&gt;
+  &lt;error
+    message="[001] Invalid casing for 'over' [Over]"
+    line="28"
+    column="22" /&gt;
+  &lt;error
+    message="[001] Invalid casing for 'by' [By]"
+    line="28"
+    column="37" /&gt;
+  &lt;error
+    message="[001] Invalid casing for 'order' [Order]"
+    line="28"
+    column="43" /&gt;
+  &lt;error
+    message="[001] Invalid casing for 'by' [By]"
+    line="28"
+    column="49" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="LanguageDependentConstantSqlCodeAnalysisRule" xml:space="preserve">

@@ -42,48 +42,88 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             TSqlTokenType.Variable,
             TSqlTokenType.WhiteSpace
         };
-        private static readonly HashSet<string> IdentifierBlacklist = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        private IdentifierVisitor _identifierVisitor;
+
+        public override void Visit(TSqlStatement node)
         {
-            "PARTITION"
-        };
+            if (this._identifierVisitor != null)
+                return;
+
+            this._identifierVisitor = new IdentifierVisitor(this.Check);
+            node.AcceptChildren(this._identifierVisitor);
+        }
 
         public override void Visit(TSqlParserToken token)
         {
-            if (token.TokenType == TSqlTokenType.Identifier && IdentifierBlacklist.Contains(token.Text) || !TokenWhiteList.Contains(token.TokenType))
-                this.Visit(token, token.TokenType);
-        }
-
-        public override void Visit(FunctionCall node)
-        {
-            if (SqlConstants.ReservedFunctionNames.Contains(node.FunctionName.Value))
+            if (TokenWhiteList.Contains(token.TokenType))
                 return;
 
-            node.FunctionName.Visit(x => this.Visit(x, TSqlTokenType.Identifier));
+            this.Check(token);
         }
 
-        public override void Visit(SqlDataTypeReference node)
+        private void Check(TSqlParserToken token)
         {
-            node.Visit(x => this.Visit(x, TSqlTokenType.Identifier));
-        }
-
-        public override void Visit(UserDataTypeReference node)
-        {
-            if (String.Compare(node.Name.BaseIdentifier.Value, "SYSNAME", StringComparison.OrdinalIgnoreCase) == 0 && node.Name.SchemaIdentifier == null)
-                node.Visit(x => this.Visit(x, TSqlTokenType.Identifier));
-        }
-
-        public override void Visit(PredicateSetStatement node)
-        {
-            node.Visit(x => this.Visit(x, TSqlTokenType.Identifier));
-        }
-
-        private void Visit(TSqlParserToken token, TSqlTokenType expectedTokenType)
-        {
-            if (token.TokenType != expectedTokenType)
-                return;
-
             if (!token.Text.All(x => !Char.IsLetter(x) || Char.IsUpper(x)))
                 base.Fail(token, token.Text, token.TokenType);
+        }
+
+        private class IdentifierVisitor : TSqlFragmentVisitor
+        {
+            private readonly Action<TSqlParserToken> _tokenVisitor;
+
+            public IdentifierVisitor(Action<TSqlParserToken> tokenVisitor)
+            {
+                this._tokenVisitor = tokenVisitor;
+            }
+
+            public override void Visit(CastCall node) => this.VisitFirstToken(node);
+
+            public override void Visit(FunctionCall node)
+            {
+                if (SqlConstants.ReservedFunctionNames.Contains(node.FunctionName.Value))
+                    return;
+
+                // Excluded user function calls like '[dbo].[any]()'
+                if (node.FunctionName.QuoteType == QuoteType.SquareBracket || node.CallTarget is MultiPartIdentifierCallTarget)
+                    return;
+
+                this.VisitFirstToken(node.FunctionName);
+            }
+
+            public override void Visit(SqlDataTypeReference node)
+            {
+                node.AsEnumerable()
+                    .Where(x => x.TokenType == TSqlTokenType.Identifier)
+                    .Each(this._tokenVisitor);
+            }
+
+            // SYSNAME
+            public override void Visit(UserDataTypeReference node)
+            {
+                if (String.Compare(node.Name.BaseIdentifier.Value, "SYSNAME", StringComparison.OrdinalIgnoreCase) == 0 && node.Name.SchemaIdentifier == null)
+                    this.VisitFirstToken(node);
+            }
+
+            // PARTITION
+            public override void Visit(OverClause node)
+            {
+                TSqlParserToken partition = node.AsEnumerable().FirstOrDefault(x => x.Text.ToUpperInvariant() == "PARTITION");
+
+                if (partition != null)
+                    this._tokenVisitor(partition);
+            }
+
+            public override void Visit(PredicateSetStatement node)
+            {
+                node.AsEnumerable()
+                    .Where(x => x.TokenType == TSqlTokenType.Identifier)
+                    .Each(this._tokenVisitor);
+            }
+
+            private void VisitFirstToken(TSqlFragment fragment)
+            {
+                this._tokenVisitor(fragment.ScriptTokenStream[fragment.FirstTokenIndex]);
+            }
         }
     }
 }
