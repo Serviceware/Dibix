@@ -26,6 +26,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
 
         private static void RunGeneratorTest(Action<ISqlAccessorGenerator> configuration, string projectName, string @namespace, string className, string expectedText)
         {
+            TestUtilities.DefineNamingConventions();
             ISqlAccessorGenerator generator = SqlAccessorGenerator.Create(new TestExecutionEnvironment(projectName, @namespace, className));
             configuration(generator);
             string actualText = generator.Generate();
