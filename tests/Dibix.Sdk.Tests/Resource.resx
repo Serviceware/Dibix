@@ -251,12 +251,12 @@
 &lt;errors&gt;
   &lt;error
     message="[012] Table 'dbx_codeanalysis_error_012_table' does not have a primary key"
-    line="3"
-    column="2" /&gt;
+    line="5"
+    column="3" /&gt;
   &lt;error
-    message="[012] User defined table type 'dbx_codeanalysis_error_012_table' does not have a primary key"
-    line="8"
-    column="2" /&gt;
+    message="[012] User defined table type 'dbx_codeanalysis_error_012_type' does not have a primary key"
+    line="10"
+    column="3" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="NamingConventionSqlCodeAnalysisRule" xml:space="preserve">
@@ -725,13 +725,13 @@ namespace This.Is.A.Custom.Namespace
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[014] Column 'dbx_codeanalysis_error_014.id' has an unnamed primary key constraint"
-    line="3"
-    column="11" /&gt;
+    message="[014] Column 'dbx_codeanalysis_error_014_table.id' has an unnamed primary key constraint"
+    line="5"
+    column="12" /&gt;
   &lt;error
-    message="[014] Column 'dbx_codeanalysis_error_014.id' has an unnamed default constraint"
-    line="3"
-    column="23" /&gt;
+    message="[014] Column 'dbx_codeanalysis_error_014_table.id' has an unnamed default constraint"
+    line="5"
+    column="24" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="UnspecifiedDataTypeLengthSqlCodeAnalysisRule" xml:space="preserve">
