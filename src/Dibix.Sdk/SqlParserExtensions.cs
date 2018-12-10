@@ -28,6 +28,16 @@ namespace Dibix.Sdk
                 yield return fragment.ScriptTokenStream[i];
         }
 
+        public static QuerySpecification FindQuerySpecification(this QueryExpression expression)
+        {
+            if (expression is QuerySpecification query)
+                return query;
+
+            UnionStatementVisitor visitor = new UnionStatementVisitor();
+            expression.Accept(visitor);
+            return visitor.FirstQueryExpression;
+        }
+
         public static bool ContainsIf(this TSqlFragment fragment)
         {
             IfStatementVisitor visitor = new IfStatementVisitor();
@@ -79,6 +89,16 @@ namespace Dibix.Sdk
             public override void ExplicitVisit(IfStatement node)
             {
                 this.Found = true;
+            }
+        }
+
+        private class UnionStatementVisitor : TSqlFragmentVisitor
+        {
+            public QuerySpecification FirstQueryExpression { get; private set; }
+
+            public override void Visit(QuerySpecification node)
+            {
+                this.FirstQueryExpression = node;
             }
         }
     }

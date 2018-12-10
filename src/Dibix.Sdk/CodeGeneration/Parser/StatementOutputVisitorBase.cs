@@ -31,19 +31,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (node.Into != null)
                 return;
 
-            QuerySpecification query = null;
-
-            // For UNION use the first SELECT
-            BinaryQueryExpression binaryExpression = node.QueryExpression as BinaryQueryExpression;
-            while (binaryExpression != null)
-            {
-                query = binaryExpression.FirstQueryExpression as QuerySpecification;
-                binaryExpression = binaryExpression.FirstQueryExpression as BinaryQueryExpression;
-            }
-
-            if (query == null)
-                query = node.QueryExpression as QuerySpecification;
-
+            QuerySpecification query = node.QueryExpression.FindQuerySpecification();
             if (query == null)
                 return;
 

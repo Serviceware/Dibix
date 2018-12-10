@@ -77,6 +77,11 @@ SELECT @param1;
 
 SELECT 2;";
 
+        // dbx_tests_parser_unionreturn
+        public const string dbx_tests_parser_unionreturnCommandText = @"(SELECT 1)
+UNION ALL
+(SELECT 2);";
+
         // dbx_tests_parser_xmlparam
         public const string dbx_tests_parser_xmlparamCommandText = @"";
 
@@ -127,6 +132,13 @@ SELECT 2;";
                     result.C.ReplaceWith(reader.ReadMany<int>());
                     return result;
                 }
+            }
+        }
+        public static IEnumerable<int> dbx_tests_parser_unionreturn(this IDatabaseAccessorFactory databaseAccessorFactory)
+        {
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
+            {
+                return accessor.QueryMany<int>(dbx_tests_parser_unionreturnCommandText);
             }
         }
         public static int dbx_tests_parser_xmlparam(this IDatabaseAccessorFactory databaseAccessorFactory, string x)
@@ -187,6 +199,7 @@ SELECT 2;";
         public static MethodInfo dbx_tests_parser_invalidcolumnsforentityMethodInfo { get { return typeof(ParserTest).GetMethod("dbx_tests_parser_invalidcolumnsforentity"); }  } 
         public static MethodInfo dbx_tests_parser_nestedifsMethodInfo { get { return typeof(ParserTest).GetMethod("dbx_tests_parser_nestedifs"); }  } 
         public static MethodInfo dbx_tests_parser_nobeginendMethodInfo { get { return typeof(ParserTest).GetMethod("dbx_tests_parser_nobeginend"); }  } 
+        public static MethodInfo dbx_tests_parser_unionreturnMethodInfo { get { return typeof(ParserTest).GetMethod("dbx_tests_parser_unionreturn"); }  } 
         public static MethodInfo dbx_tests_parser_xmlparamMethodInfo { get { return typeof(ParserTest).GetMethod("dbx_tests_parser_xmlparam"); }  } 
     }
 }
