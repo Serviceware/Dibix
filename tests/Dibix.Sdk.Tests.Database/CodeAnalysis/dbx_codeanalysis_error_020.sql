@@ -5,6 +5,6 @@ AS
   CREATE TABLE [dbo].[dbx_codeanalysis_error_020_table]
   (
       [id] INT
-    , [value] DATETIME CONSTRAINT [DF_dbx_codeanalysis_error_020_table_id] DEFAULT ((N'1990-01-01'))
+    , [value] DATETIME CONSTRAINT [DF_dbx_codeanalysis_error_020_table_value] DEFAULT ((N'1990-01-01'))
 	, CONSTRAINT [PK_dbx_codeanalysis_error_020_table] PRIMARY KEY ([id])
   )

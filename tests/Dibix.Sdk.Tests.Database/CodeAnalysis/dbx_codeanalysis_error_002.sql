@@ -70,7 +70,7 @@ AS
 		DELETE
 	;
 
-	CREATE TABLE x 
+	CREATE TABLE dbxx 
 	(
-		id int
+		id INT CONSTRAINT [PK_dbxx] PRIMARY KEY 
 	)

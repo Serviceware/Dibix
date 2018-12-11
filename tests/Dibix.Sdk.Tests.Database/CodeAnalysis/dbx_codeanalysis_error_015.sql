@@ -4,7 +4,7 @@ AS
   INSERT INTO [dbo].[dbx_table] VALUES (1)
 
   MERGE [dbo].[dbx_table] AS [target]
-  USING (VALUES (1)) [source]([id])
+  USING (VALUES (1)) AS [source]([id])
    ON [source].[id] = [target].[id]
   WHEN NOT MATCHED BY TARGET THEN
   	INSERT VALUES([source].[id])

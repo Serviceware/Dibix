@@ -241,9 +241,9 @@
     line="3"
     column="30" /&gt;
   &lt;error
-    message="[020] Found language dependent expression: CONSTRAINT [DF_dbx_codeanalysis_error_020_table_id] DEFAULT ((N'1990-01-01'))"
+    message="[020] Found language dependent expression: CONSTRAINT [DF_dbx_codeanalysis_error_020_table_value] DEFAULT ((N'1990-01-01'))"
     line="8"
-    column="84" /&gt;
+    column="87" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="MissingPrimaryKeySqlCodeAnalysisRule" xml:space="preserve">
@@ -526,9 +526,13 @@ UNION ALL
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[023] Only TINYINT/SMALLINT/INT/BIGINT are allowed as primary key: PK_dbx_codeanalysis_error_023_fail"
+    message="[023] Only TINYINT/SMALLINT/INT/BIGINT are allowed as primary key: dbx_codeanalysis_error_023_fail1.b (NVARCHAR)"
     line="7"
-    column="73" /&gt;
+    column="74" /&gt;
+  &lt;error
+    message="[023] Only TINYINT/SMALLINT/INT/BIGINT are allowed as primary key: dbx_codeanalysis_error_023_fail2.b (NVARCHAR)"
+    line="13"
+    column="7" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="PrimitiveDataTypeIdentifierSqlCodeAnalysisRule" xml:space="preserve">
@@ -756,13 +760,17 @@ namespace This.Is.A.Custom.Namespace
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[014] Column 'dbx_codeanalysis_error_014_table.id' has an unnamed primary key constraint"
+    message="[014] Table 'dbx_codeanalysis_error_014_fail1' has an unnamed primary key constraint"
     line="5"
     column="12" /&gt;
   &lt;error
-    message="[014] Column 'dbx_codeanalysis_error_014_table.id' has an unnamed default constraint"
+    message="[014] Table 'dbx_codeanalysis_error_014_fail1' has an unnamed default constraint"
     line="5"
     column="24" /&gt;
+  &lt;error
+    message="[014] Table 'dbx_codeanalysis_error_014_fail2' has an unnamed primary key constraint"
+    line="16"
+    column="6" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="UnspecifiedDataTypeLengthSqlCodeAnalysisRule" xml:space="preserve">

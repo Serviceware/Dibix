@@ -47,7 +47,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         public override void Visit(CreateTableStatement node)
         {
-            this.Check(node.SchemaObjectName.BaseIdentifier, "Table", NamingConvention.Table);
+            if (!node.IsTemporaryTable())
+                this.Check(node.SchemaObjectName.BaseIdentifier, "Table", NamingConvention.Table);
 
             IEnumerable<Constraint> constraints = node.Definition.CollectConstraints();
             foreach (Constraint constraint in constraints)
@@ -103,7 +104,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                 return;
 
             string pattern = GetNamingConvention(constraint.Type);
-            this.Check(identifier, constraint.Type.ToDisplayName(), pattern, ResolveConstraintPlaceholders(createTableStatement, constraint.ParentName));
+            this.Check(identifier, constraint.Type.ToDisplayName(), pattern, ResolveConstraintPlaceholders(createTableStatement, constraint.Columns));
         }
 
         private static string GetNamingConvention(ConstraintType constraintType)
@@ -119,13 +120,13 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             }
         }
 
-        private static IEnumerable<KeyValuePair<string, string>> ResolveConstraintPlaceholders(CreateTableStatement table, string parentName)
+        private static IEnumerable<KeyValuePair<string, string>> ResolveConstraintPlaceholders(CreateTableStatement table, IList<ColumnReference> columns)
         {
             yield return new KeyValuePair<string, string>("tablename", table.SchemaObjectName.BaseIdentifier.Value);
             yield return new KeyValuePair<string, string>("columnnames", String.Join(String.Empty, Enumerable.Repeat($"({String.Join("|", table.Definition.ColumnDefinitions.Select(x => x.ColumnIdentifier.Value))})", table.Definition.ColumnDefinitions.Count)));
 
-            if (parentName != null)
-                yield return new KeyValuePair<string, string>("columnname", parentName);
+            if (columns.Count == 1)
+                yield return new KeyValuePair<string, string>("columnname", columns[0].Name);
         }
     }
 }

@@ -45,24 +45,18 @@ namespace Dibix.Sdk
             return visitor.Found;
         }
 
-        public static IEnumerable<Constraint> CollectConstraints(this TableDefinition table, ConstraintScope filter = ConstraintScope.All)
+        public static IEnumerable<Constraint> CollectConstraints(this TableDefinition table)
         {
-            if (filter.HasFlag(ConstraintScope.Table))
-            {
-                foreach (ConstraintDefinition constraint in table.TableConstraints)
-                    yield return Constraint.Create(constraint);
-            }
+            foreach (ConstraintDefinition constraint in table.TableConstraints)
+                yield return Constraint.Create(constraint);
 
-            if (filter.HasFlag(ConstraintScope.Column))
+            foreach (ColumnDefinition column in table.ColumnDefinitions)
             {
-                foreach (ColumnDefinition column in table.ColumnDefinitions)
-                {
-                    foreach (ConstraintDefinition constraint in column.Constraints)
-                        yield return Constraint.Create(constraint, column.ColumnIdentifier.Value);
+                foreach (ConstraintDefinition constraint in column.Constraints)
+                    yield return Constraint.Create(constraint, new ColumnReference(column.ColumnIdentifier.Value, column));
 
-                    if (column.DefaultConstraint != null)
-                        yield return Constraint.Create(column.DefaultConstraint, column.ColumnIdentifier.Value);
-                }
+                if (column.DefaultConstraint != null)
+                    yield return Constraint.Create(column.DefaultConstraint, new ColumnReference(column.ColumnIdentifier.Value, column));
             }
         }
 
