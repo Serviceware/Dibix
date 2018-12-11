@@ -21,15 +21,18 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
           , "hlwfuserevents"
         };
 
-        public override void Visit(CreateTableStatement node) => this.Check("Table", node.SchemaObjectName, node.Definition);
+        public override void Visit(CreateTableStatement node)
+        {
+            if (node.IsTemporaryTable())
+                return;
+
+            this.Check("Table", node.SchemaObjectName, node.Definition);
+        }
 
         public override void Visit(CreateTypeTableStatement node) => this.Check("User defined table type", node.Name, node.Definition);
 
         private void Check(string type, SchemaObjectName name, TableDefinition definition)
         {
-            if (name.IsTemporaryTableName())
-                return;
-
             if (Workarounds.Contains(name.BaseIdentifier.Value))
                 return;
 

@@ -96,6 +96,7 @@
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_021.sql" />
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_022.sql" />
     <Build Include="Tests\Parser\dbx_tests_parser_unionreturn.sql" />
+    <Build Include="CodeAnalysis\dbx_codeanalysis_error_023.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CodeAnalysis" />

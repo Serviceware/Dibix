@@ -69,5 +69,8 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
 
         [Fact]
         public void TopWithoutOrderBySqlCodeAnalysisRule() => base.Execute();
+
+        [Fact]
+        public void PrimaryKeyDataTypeSqlCodeAnalysisRule() => base.Execute();
     }
 }

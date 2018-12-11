@@ -12,7 +12,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         public override void Visit(CreateTableStatement node)
         {
-            if (node.SchemaObjectName.IsTemporaryTableName())
+            if (node.IsTemporaryTable())
                 base.Fail(node.SchemaObjectName.BaseIdentifier, node.SchemaObjectName.BaseIdentifier.Value);
         }
     }

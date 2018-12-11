@@ -242,8 +242,8 @@
     column="30" /&gt;
   &lt;error
     message="[020] Found language dependent expression: CONSTRAINT [DF_dbx_codeanalysis_error_020_table_id] DEFAULT ((N'1990-01-01'))"
-    line="7"
-    column="81" /&gt;
+    line="8"
+    column="84" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="MissingPrimaryKeySqlCodeAnalysisRule" xml:space="preserve">
@@ -521,6 +521,15 @@ UNION ALL
         public static MethodInfo dbx_tests_parser_xmlparamMethodInfo { get { return typeof(ParserTest).GetMethod("dbx_tests_parser_xmlparam"); }  } 
     }
 }</value>
+  </data>
+  <data name="PrimaryKeyDataTypeSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="[023] Only TINYINT/SMALLINT/INT/BIGINT are allowed as primary key: PK_dbx_codeanalysis_error_023_table"
+    line="7"
+    column="71" /&gt;
+&lt;/errors&gt;</value>
   </data>
   <data name="PrimitiveDataTypeIdentifierSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;

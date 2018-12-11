@@ -80,7 +80,7 @@ namespace Dibix.Sdk
             }
         }
 
-        public static bool IsTemporaryTableName(this SchemaObjectName name) => name.BaseIdentifier.Value[0] == '#';
+        public static bool IsTemporaryTable(this CreateTableStatement node) => node.SchemaObjectName.BaseIdentifier.Value[0] == '#';
 
         private class IfStatementVisitor : TSqlFragmentVisitor
         {
