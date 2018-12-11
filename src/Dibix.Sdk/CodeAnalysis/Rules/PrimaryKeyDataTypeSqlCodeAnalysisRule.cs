@@ -25,9 +25,11 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             if (node.IsTemporaryTable())
                 return;
 
-            Constraint primaryKey = node.Definition
-                                        .CollectConstraints()
-                                        .SingleOrDefault(x => x.Type == ConstraintType.PrimaryKey);
+            ICollection<Constraint> constraints = node.Definition
+                                                      .CollectConstraints()
+                                                      .ToArray();
+
+            Constraint primaryKey = constraints.SingleOrDefault(x => x.Type == ConstraintType.PrimaryKey);
             if (primaryKey == null)
                 return;
 
@@ -35,17 +37,35 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                                                                  .ColumnDefinitions
                                                                  .ToDictionary(x => x.ColumnIdentifier.Value, x => x.DataType);
 
-            UniqueConstraintDefinition constraint = (UniqueConstraintDefinition)primaryKey.Definition;
-            foreach (ColumnWithSortOrder column in constraint.Columns)
+            UniqueConstraintDefinition primaryKeyConstraint = (UniqueConstraintDefinition)primaryKey.Definition;
+
+            // If the PK is not the table's own key, and instead is a FK to a different table's key, no further analysis is needed
+            bool hasMatchingForeignKey = constraints.Where(x => x.Type == ConstraintType.ForeignKey).Any(x => AreEqual(primaryKeyConstraint, (ForeignKeyConstraintDefinition)x.Definition));
+            if (hasMatchingForeignKey)
+                return;
+
+            foreach (ColumnWithSortOrder column in primaryKeyConstraint.Columns)
             {
                 string columnName = column.Column.MultiPartIdentifier.Identifiers.Last().Value;
-                SqlDataTypeReference sqlDataType = columns[columnName] as SqlDataTypeReference;
-                if (sqlDataType != null)
-                {
-                    if (!AllowedPrimaryKeyTypes.Contains(sqlDataType.SqlDataTypeOption))
-                        base.Fail(column, constraint.ConstraintIdentifier.Value);
-                }
+                if (columns[columnName] is SqlDataTypeReference sqlDataType && !AllowedPrimaryKeyTypes.Contains(sqlDataType.SqlDataTypeOption))
+                    base.Fail(column, primaryKeyConstraint.ConstraintIdentifier.Value);
             }
+        }
+
+        private static bool AreEqual(UniqueConstraintDefinition uniqueConstraint, ForeignKeyConstraintDefinition foreignKeyConstraint)
+        {
+            if (uniqueConstraint.Columns.Count != foreignKeyConstraint.Columns.Count)
+                return false;
+
+            for (int i = 0; i < uniqueConstraint.Columns.Count; i++)
+            {
+                string uniqueColumnName = uniqueConstraint.Columns[i].Column.MultiPartIdentifier.Identifiers.Last().Value;
+                string foreignKeyColumnName = foreignKeyConstraint.Columns[i].Value;
+                if (uniqueColumnName != foreignKeyColumnName)
+                    return false;
+            }
+
+            return true;
         }
     }
 }

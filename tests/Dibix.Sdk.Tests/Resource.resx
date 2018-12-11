@@ -526,9 +526,9 @@ UNION ALL
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[023] Only TINYINT/SMALLINT/INT/BIGINT are allowed as primary key: PK_dbx_codeanalysis_error_023_table"
+    message="[023] Only TINYINT/SMALLINT/INT/BIGINT are allowed as primary key: PK_dbx_codeanalysis_error_023_fail"
     line="7"
-    column="71" /&gt;
+    column="73" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="PrimitiveDataTypeIdentifierSqlCodeAnalysisRule" xml:space="preserve">
