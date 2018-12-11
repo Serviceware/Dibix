@@ -660,6 +660,15 @@ namespace This.Is.A.Custom.Namespace
     }
 }</value>
   </data>
+  <data name="SurrogateKeySqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="[024] Surrogate keys are only allowed, if a business key is defined: dbx_codeanalysis_error_024_fail"
+    line="3"
+    column="3" /&gt;
+&lt;/errors&gt;</value>
+  </data>
   <data name="TemporaryTableSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;

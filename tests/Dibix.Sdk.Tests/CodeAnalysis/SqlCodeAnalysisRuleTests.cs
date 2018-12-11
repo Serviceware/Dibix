@@ -72,5 +72,8 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
 
         [Fact]
         public void PrimaryKeyDataTypeSqlCodeAnalysisRule() => base.Execute();
+
+        [Fact]
+        public void SurrogateKeySqlCodeAnalysisRule() => base.Execute();
     }
 }
