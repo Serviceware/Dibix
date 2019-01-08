@@ -11,35 +11,37 @@ namespace Dibix.Sdk.CodeGeneration
 
         public static TypeInfo LoadType(string typeName, IExecutionEnvironment environment, Action<string> errorHandler)
         {
-            // Ignore nullable specifier to load type info
-            // It will be used later in the generator
-            string normalizedTypeName = typeName.TrimEnd('?');
+            TypeName parsedTypeName = typeName;
 
             // Normally we would cache the type information, however T4 templates are only "recompiled" if the actual T4 content changes.
             // This isn't the case, so any static cache will still be in proc. That means also new members to an entity won't take effect.
             /*return TypeCache.GetOrAdd(normalizedTypeName, x =>
             {*/
-                bool isMarkedExternal = normalizedTypeName.Contains(',');
-                if (!isMarkedExternal)
+                if (!parsedTypeName.IsAssemblyQualified)
                 {
-                    TypeInfo clrType = TryClrType(normalizedTypeName);
+                    TypeInfo clrType = TryClrType(parsedTypeName);
                     if (clrType != null)
                         return clrType;
                 }
-                return (isMarkedExternal ? RuntimeTypeLoader : (ITypeLoader)environment).LoadType(environment, typeName, normalizedTypeName, errorHandler);
+
+                ITypeLoader typeLoader = parsedTypeName.IsAssemblyQualified ? RuntimeTypeLoader : (ITypeLoader)environment;
+                return typeLoader.LoadType(environment, parsedTypeName, errorHandler);
             //});
         }
 
-        private static TypeInfo TryClrType(string typeName)
+        private static TypeInfo TryClrType(TypeName parsedTypeName)
         {
             // Try CSharp type name first (string => System.String)
-            Type type = typeName.ToClrType();
+            Type type = parsedTypeName.NormalizedTypeName.ToClrType();
             if (type != null)
-                return new TypeInfo(typeName, true);
+                return new TypeInfo(parsedTypeName, true);
 
-            type = Type.GetType(typeName);
+            type = Type.GetType(parsedTypeName.NormalizedTypeName);
             if (type != null && type.IsPrimitive())
-                return new TypeInfo(type.ToCSharpTypeName(), true);
+            {
+                parsedTypeName.ClrType = type;
+                return new TypeInfo(parsedTypeName, true);
+            }
 
             return null;
         }

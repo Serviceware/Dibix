@@ -32,6 +32,6 @@ namespace Dibix.Sdk.Tests.CodeGeneration
 
         public virtual bool ReportErrors() => false;
 
-        public virtual TypeInfo LoadType(IExecutionEnvironment environment, string typeName, string normalizedTypeName, Action<string> errorHandler) => throw new NotImplementedException();
+        public virtual TypeInfo LoadType(IExecutionEnvironment environment, TypeName typeName, Action<string> errorHandler) => throw new NotImplementedException();
     }
 }

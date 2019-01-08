@@ -50,9 +50,8 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             return this._className;
         }
 
-        public override TypeInfo LoadType(IExecutionEnvironment environment, string typeName, string normalizedTypeName, Action<string> errorHandler)
+        public override TypeInfo LoadType(IExecutionEnvironment environment, TypeName typeName, Action<string> errorHandler)
         {
-            //Type.GetType(typeName)
             TypeInfo info = new TypeInfo(typeName, false);
             return info;
         }

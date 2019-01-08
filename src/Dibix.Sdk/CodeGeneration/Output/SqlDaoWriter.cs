@@ -71,7 +71,7 @@ namespace Dibix.Sdk.CodeGeneration
                 foreach (SqlQueryResult result in statement.Results)
                 {
                     bool isEnumerable = result.ResultMode == SqlQueryResultMode.Many;
-                    string resultTypeName = result.Types.First().Name;
+                    string resultTypeName = result.Types.First().Name.CSharpTypeName;
                     if (isEnumerable)
                         resultTypeName = MakeCollectionType(resultTypeName);
 
@@ -90,7 +90,7 @@ namespace Dibix.Sdk.CodeGeneration
                     ctorBodyWriter.Append("this.")
                                   .Append(property.Name)
                                   .Append(" = new Collection<")
-                                  .Append(property.Types.First().Name)
+                                  .Append(property.Types.First().Name.CSharpTypeName)
                                   .Append(">();");
 
                     if (i + 1 < collectionProperties.Count)
@@ -129,7 +129,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (query.Results.Count == 1) // Query<T>/QuerySingle/etc.
             {
-                string resultTypeName = query.Results[0].Types.First().Name;
+                string resultTypeName = query.Results[0].Types.First().Name.CSharpTypeName;
                 if (query.Results[0].ResultMode == SqlQueryResultMode.Many)
                     resultTypeName = MakeEnumerableType(resultTypeName);
 
@@ -263,7 +263,7 @@ namespace Dibix.Sdk.CodeGeneration
             for (int i = 0; i < singleResult.Types.Count; i++)
             {
                 TypeInfo returnType = singleResult.Types[i];
-                writer.WriteRaw(returnType.Name);
+                writer.WriteRaw(returnType.Name.CSharpTypeName);
                 if (i + 1 < singleResult.Types.Count)
                     writer.WriteRaw(", ");
             }
@@ -333,7 +333,7 @@ namespace Dibix.Sdk.CodeGeneration
                 for (int i = 0; i < result.Types.Count; i++)
                 {
                     TypeInfo returnType = result.Types[i];
-                    writer.WriteRaw(returnType.Name);
+                    writer.WriteRaw(returnType.Name.CSharpTypeName);
                     if (i + 1 < result.Types.Count)
                         writer.WriteRaw(", ");
                 }

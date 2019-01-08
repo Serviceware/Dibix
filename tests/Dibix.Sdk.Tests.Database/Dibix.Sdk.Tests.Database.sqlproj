@@ -98,6 +98,7 @@
     <Build Include="Tests\Parser\dbx_tests_parser_unionreturn.sql" />
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_023.sql" />
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_024.sql" />
+    <Build Include="Tests\Parser\dbx_tests_parser_typenames.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CodeAnalysis" />

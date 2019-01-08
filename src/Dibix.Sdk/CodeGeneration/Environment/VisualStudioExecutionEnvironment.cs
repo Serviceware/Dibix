@@ -24,6 +24,7 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly CurrentProjectInfo _currentProject;
         private readonly CompilerErrorCollection _errors;
         private readonly Lazy<IDictionary<string, string>> _assemblyLookupAccessor;
+        private readonly Lazy<ICollection<CodeElement>> _codeItemAccessor;
         #endregion
 
         #region Constructor
@@ -35,6 +36,7 @@ namespace Dibix.Sdk.CodeGeneration
             this._currentProject = this.GetCurrentProject();
             this._errors = new CompilerErrorCollection();
             this._assemblyLookupAccessor = new Lazy<IDictionary<string, string>>(this.BuildAssemblyLookupMap);
+            this._codeItemAccessor = new Lazy<ICollection<CodeElement>>(this.GetCodeItems);
             AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += this.OnAssemblyResolve;
         }
         #endregion
@@ -140,17 +142,13 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region ITypeLoader Members
-        TypeInfo ITypeLoader.LoadType(IExecutionEnvironment environment, string typeName, string normalizedTypeName, Action<string> errorHandler)
+        TypeInfo ITypeLoader.LoadType(IExecutionEnvironment environment, TypeName typeName, Action<string> errorHandler)
         {
-            var query = from item in TraverseProjectItems(this._currentProject.Project.ProjectItems)
-                        where item.FileCodeModel != null
-                        from CodeElement element in TraverseTypes(item.FileCodeModel.CodeElements, vsCMElement.vsCMElementClass, vsCMElement.vsCMElementEnum)
-                        where element.FullName == normalizedTypeName
-                        select CreateTypeInfo(typeName, element);
-            TypeInfo type = query.FirstOrDefault();
-            if (type == null)
-                errorHandler($"Could not find type '{typeName}' in current project");
+            CodeElement codeItem = this._codeItemAccessor.Value.FirstOrDefault(x => x.FullName == typeName.NormalizedTypeName);
+            if (codeItem == null)
+                errorHandler($"Could not resolve type '{typeName}'. Looking in current project.");
 
+            TypeInfo type = CreateTypeInfo(typeName, codeItem);
             return type;
         }
         #endregion
@@ -172,6 +170,14 @@ namespace Dibix.Sdk.CodeGeneration
         private IDictionary<string, string> BuildAssemblyLookupMap()
         {
             return new[] { this.GetProjectOutputPath() }.Union(this.GetProjectAssemblyReferences()).ToDictionary(Path.GetFileNameWithoutExtension);
+        }
+
+        private ICollection<CodeElement> GetCodeItems()
+        {
+            ICollection<CodeElement> codeItems = TraverseProjectItems(this._currentProject.Project.ProjectItems).Where(item => item.FileCodeModel != null)
+                .SelectMany(item => TraverseTypes(item.FileCodeModel.CodeElements, vsCMElement.vsCMElementClass, vsCMElement.vsCMElementEnum))
+                .ToArray();
+            return codeItems;
         }
 
         private Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
@@ -342,7 +348,7 @@ namespace Dibix.Sdk.CodeGeneration
             return new[] { project };
         }
 
-        private static TypeInfo CreateTypeInfo(string typeName, CodeElement element)
+        private static TypeInfo CreateTypeInfo(TypeName typeName, CodeElement element)
         {
             bool isPrimitiveType = element.Kind == vsCMElement.vsCMElementEnum;
             TypeInfo type = new TypeInfo(typeName, isPrimitiveType);

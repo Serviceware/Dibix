@@ -77,6 +77,27 @@ SELECT @param1;
 
 SELECT 2;";
 
+        // dbx_tests_parser_typenames
+        public const string dbx_tests_parser_typenamesCommandText = @"SELECT 0 AS [x];
+
+SELECT 0 AS [x];
+
+SELECT 0 AS [x];
+
+SELECT 0 AS [x];
+
+SELECT 0 AS [x];
+
+SELECT 0 AS [x];
+
+SELECT 0 AS [x],
+       0 AS [x],
+       0 AS [x];
+
+SELECT 0 AS [x],
+       0 AS [x],
+       0 AS [x];";
+
         // dbx_tests_parser_unionreturn
         public const string dbx_tests_parser_unionreturnCommandText = @"(SELECT 1)
 UNION ALL
@@ -92,7 +113,7 @@ UNION ALL
                 using (IMultipleResultReader reader = accessor.QueryMultiple(dbx_tests_parser_invalidcolumnsforentityCommandText))
                 {
                     dbx_tests_parser_invalidcolumnsforentityResult result = new dbx_tests_parser_invalidcolumnsforentityResult();
-                    result.A.ReplaceWith(reader.ReadMany<int>());
+                    result.A.ReplaceWith(reader.ReadMany<int?>());
                     result.B.ReplaceWith(reader.ReadMany<int>());
                     result.C.ReplaceWith(reader.ReadMany<string>());
                     result.D.ReplaceWith(reader.ReadMany<Dibix.Sdk.Tests.CodeGeneration.Direction?>());
@@ -134,6 +155,25 @@ UNION ALL
                 }
             }
         }
+        public static dbx_tests_parser_typenamesResult dbx_tests_parser_typenames(this IDatabaseAccessorFactory databaseAccessorFactory)
+        {
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
+            {
+                using (IMultipleResultReader reader = accessor.QueryMultiple(dbx_tests_parser_typenamesCommandText))
+                {
+                    dbx_tests_parser_typenamesResult result = new dbx_tests_parser_typenamesResult();
+                    result.A.ReplaceWith(reader.ReadMany<string>());
+                    result.B.ReplaceWith(reader.ReadMany<int?>());
+                    result.C.ReplaceWith(reader.ReadMany<Dibix.Sdk.Tests.CodeGeneration.Direction>());
+                    result.D.ReplaceWith(reader.ReadMany<Dibix.Sdk.Tests.CodeGeneration.Direction?>());
+                    result.E.ReplaceWith(reader.ReadMany<Dibix.Sdk.Tests.CodeGeneration.Direction>());
+                    result.F.ReplaceWith(reader.ReadMany<Dibix.Sdk.Tests.CodeGeneration.Direction?>());
+                    result.G.ReplaceWith(reader.ReadMany<string, int?, Dibix.Sdk.Tests.CodeGeneration.Direction>(ParserTestUtility.Map, "x,x"));
+                    result.H.ReplaceWith(reader.ReadMany<Dibix.Sdk.Tests.CodeGeneration.Direction?, Dibix.Sdk.Tests.CodeGeneration.Direction, Dibix.Sdk.Tests.CodeGeneration.Direction?>(ParserTestUtility.Map, "x,x"));
+                    return result;
+                }
+            }
+        }
         public static IEnumerable<int> dbx_tests_parser_unionreturn(this IDatabaseAccessorFactory databaseAccessorFactory)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
@@ -157,7 +197,7 @@ UNION ALL
 
         public class dbx_tests_parser_invalidcolumnsforentityResult
         {
-            public ICollection<int> A { get; private set; } 
+            public ICollection<int?> A { get; private set; } 
             public ICollection<int> B { get; private set; } 
             public ICollection<string> C { get; private set; } 
             public ICollection<Dibix.Sdk.Tests.CodeGeneration.Direction?> D { get; private set; } 
@@ -165,7 +205,7 @@ UNION ALL
 
             public dbx_tests_parser_invalidcolumnsforentityResult()
             {
-                this.A = new Collection<int>();
+                this.A = new Collection<int?>();
                 this.B = new Collection<int>();
                 this.C = new Collection<string>();
                 this.D = new Collection<Dibix.Sdk.Tests.CodeGeneration.Direction?>();
@@ -195,10 +235,34 @@ UNION ALL
                 this.C = new Collection<int>();
             }
         }
+        public class dbx_tests_parser_typenamesResult
+        {
+            public ICollection<string> A { get; private set; } 
+            public ICollection<int?> B { get; private set; } 
+            public ICollection<Dibix.Sdk.Tests.CodeGeneration.Direction> C { get; private set; } 
+            public ICollection<Dibix.Sdk.Tests.CodeGeneration.Direction?> D { get; private set; } 
+            public ICollection<Dibix.Sdk.Tests.CodeGeneration.Direction> E { get; private set; } 
+            public ICollection<Dibix.Sdk.Tests.CodeGeneration.Direction?> F { get; private set; } 
+            public ICollection<string> G { get; private set; } 
+            public ICollection<Dibix.Sdk.Tests.CodeGeneration.Direction?> H { get; private set; } 
+
+            public dbx_tests_parser_typenamesResult()
+            {
+                this.A = new Collection<string>();
+                this.B = new Collection<int?>();
+                this.C = new Collection<Dibix.Sdk.Tests.CodeGeneration.Direction>();
+                this.D = new Collection<Dibix.Sdk.Tests.CodeGeneration.Direction?>();
+                this.E = new Collection<Dibix.Sdk.Tests.CodeGeneration.Direction>();
+                this.F = new Collection<Dibix.Sdk.Tests.CodeGeneration.Direction?>();
+                this.G = new Collection<string>();
+                this.H = new Collection<Dibix.Sdk.Tests.CodeGeneration.Direction?>();
+            }
+        }
 
         public static MethodInfo dbx_tests_parser_invalidcolumnsforentityMethodInfo { get { return typeof(ParserTest).GetMethod("dbx_tests_parser_invalidcolumnsforentity"); }  } 
         public static MethodInfo dbx_tests_parser_nestedifsMethodInfo { get { return typeof(ParserTest).GetMethod("dbx_tests_parser_nestedifs"); }  } 
         public static MethodInfo dbx_tests_parser_nobeginendMethodInfo { get { return typeof(ParserTest).GetMethod("dbx_tests_parser_nobeginend"); }  } 
+        public static MethodInfo dbx_tests_parser_typenamesMethodInfo { get { return typeof(ParserTest).GetMethod("dbx_tests_parser_typenames"); }  } 
         public static MethodInfo dbx_tests_parser_unionreturnMethodInfo { get { return typeof(ParserTest).GetMethod("dbx_tests_parser_unionreturn"); }  } 
         public static MethodInfo dbx_tests_parser_xmlparamMethodInfo { get { return typeof(ParserTest).GetMethod("dbx_tests_parser_xmlparam"); }  } 
     }

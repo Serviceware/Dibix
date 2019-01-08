@@ -5,11 +5,11 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public class TypeInfo
     {
-        public string Name { get; }
+        public TypeName Name { get; }
         public bool IsPrimitiveType { get; }
         public ICollection<string> Properties { get; }
 
-        public TypeInfo(string name, bool isPrimitiveType)
+        public TypeInfo(TypeName name, bool isPrimitiveType)
         {
             this.Name = name;
             this.IsPrimitiveType = isPrimitiveType;

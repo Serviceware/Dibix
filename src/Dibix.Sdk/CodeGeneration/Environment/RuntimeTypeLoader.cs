@@ -5,39 +5,32 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class RuntimeTypeLoader : ITypeLoader
     {
-        public TypeInfo LoadType(IExecutionEnvironment environment, string typeName, string normalizedTypeName, Action<string> errorHandler)
+        public TypeInfo LoadType(IExecutionEnvironment environment, TypeName typeName, Action<string> errorHandler)
         {
-            Type type = GetType(environment, normalizedTypeName, errorHandler);
+            Type type = GetType(environment, typeName, errorHandler);
             if (type == null)
                 return null;
 
-            TypeInfo info = new TypeInfo(type.FullName, false);
+            typeName.ClrType = type;
+            TypeInfo info = new TypeInfo(typeName, type.IsPrimitive());
             foreach (PropertyInfo property in type.GetProperties())
                 info.Properties.Add(property.Name);
 
             return info;
         }
 
-        private static Type GetType(IExecutionEnvironment environment, string typeName, Action<string> errorHandler)
+        private static Type GetType(IExecutionEnvironment environment, TypeName typeName, Action<string> errorHandler)
         {
-            // Ignore nullable specifier to load runtime type
-            typeName = typeName.TrimEnd('?');
-
-            // Try CSharp type name first (string => System.String)
-            Type type = typeName.ToClrType();
-            if (type != null)
-                return type;
-
             try
             {
-                string[] parts = typeName.Split(',');
-                if (parts.Length > 1)
+                Type type;
+                if (!String.IsNullOrEmpty(typeName.AssemblyName))
                 {
-                    Assembly assembly = environment.LoadAssembly(parts[1]);
-                    type = assembly.GetType(parts[0], true);
+                    Assembly assembly = environment.LoadAssembly(typeName.AssemblyName);
+                    type = assembly.GetType(typeName.NormalizedTypeName, true);
                 }
                 else
-                    type = Type.GetType(parts[0], true);
+                    type = Type.GetType(typeName.NormalizedTypeName, true);
 
                 return type;
             }
