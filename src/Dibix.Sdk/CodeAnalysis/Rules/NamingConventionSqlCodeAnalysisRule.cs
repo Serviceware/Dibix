@@ -15,7 +15,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     internal static class NamingConvention
     {
         public static readonly string Table                = "hl*";
-        public static readonly string View                 = "hl*";
+        public static readonly string View                 = "hl*vw";
         public static readonly string Type                 = "hl*";
         public static readonly string Sequence             = "SEQ_hl*";
         public static readonly string Procedure            = "hl*";
