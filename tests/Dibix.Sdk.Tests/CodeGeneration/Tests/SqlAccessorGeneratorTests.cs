@@ -39,9 +39,9 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                              y.Formatter<TakeSourceSqlStatementFormatter>();
                          });
                     })
-                    .AddSource(x =>
+                    .AddSource("Dibix.Sdk.Tests.Database", x =>
                     {
-                        x.SelectFile(@"..\Dibix.Sdk.Tests.Database\Tests\Sources\dbx_tests_sources_externalsp.sql")
+                        x.SelectFile("Tests/Sources/dbx_tests_sources_externalsp.sql")
                          .SelectParser<SqlStoredProcedureParser>(y =>
                          {
                              y.Formatter<ExecStoredProcedureSqlStatementFormatter>();
