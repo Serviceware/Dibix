@@ -39,7 +39,10 @@ namespace Dibix.Sdk.CodeGeneration
         public ISqlAccessorGenerator AddSource(Action<ISourceSelectionExpression> configuration) { return this.AddSource(null, configuration); }
         public ISqlAccessorGenerator AddSource(string projectName, Action<ISourceSelectionExpression> configuration)
         {
-            if (!String.IsNullOrEmpty(projectName))
+            if (String.IsNullOrEmpty(projectName))
+                throw new ArgumentNullException(projectName);
+
+            //if (!String.IsNullOrEmpty(projectName))
                 this._environment.VerifyProject(projectName);
 
             SourceSelectionExpression expression = new SourceSelectionExpression(this._environment, projectName);
