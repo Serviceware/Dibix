@@ -7,14 +7,21 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal abstract class StatementOutputVisitorBase : TSqlFragmentVisitor
     {
+        #region Fields
+        private readonly IExecutionEnvironment _environment;
+        private readonly string _sourcePath;
+        #endregion
+
         #region Properties
         public string Statement { get; private set; }
         protected IList<OutputSelectResult> Outputs { get; }
         #endregion
 
         #region Constructor
-        protected StatementOutputVisitorBase()
+        protected StatementOutputVisitorBase(IExecutionEnvironment environment, string sourcePath)
         {
+            this._environment = environment;
+            this._sourcePath = sourcePath;
             this.Outputs = new Collection<OutputSelectResult>();
         }
         #endregion
@@ -54,7 +61,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Private Methods
         private void Visit(int index, int line, int column, IEnumerable<SelectElement> selectElements)
         {
-            OutputColumnResult[] columns = selectElements.Select(VisitSelectElement).Where(x => x != null).ToArray();
+            OutputColumnResult[] columns = selectElements.Select(this.VisitSelectElement).Where(x => x != null).ToArray();
             if (!columns.Any())
                 return;
 
@@ -65,8 +72,14 @@ namespace Dibix.Sdk.CodeGeneration
             this.OnOutputFound(result);
         }
 
-        private static OutputColumnResult VisitSelectElement(SelectElement selectElement)
+        private OutputColumnResult VisitSelectElement(SelectElement selectElement)
         {
+            if (selectElement is SelectStarExpression)
+            {
+                this._environment.RegisterError(this._sourcePath, selectElement.StartLine, selectElement.StartColumn, null, "Star expressions are not allowed");
+                return null;
+            }
+
             SelectScalarExpression scalar = selectElement as SelectScalarExpression;
             if (scalar == null)
                 return null;

@@ -4,7 +4,7 @@ namespace Dibix.Dapper
 {
     public static class DapperExtensions
     {
-           internal static object AsDapperParams(this IParametersVisitor parametersVisitor)
+        internal static object AsDapperParams(this IParametersVisitor parametersVisitor)
         {
             Guard.IsNotNull(parametersVisitor, nameof(parametersVisitor));
             DynamicParameters @params = new DynamicParameters();

@@ -11,7 +11,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public IList<OutputSelectResult> Results { get; }
 
-        public StatementOutputVisitor(IExecutionEnvironment environment, string sourcePath)
+        public StatementOutputVisitor(IExecutionEnvironment environment, string sourcePath) : base(environment, sourcePath)
         {
             this._environment = environment;
             this._sourcePath = sourcePath;

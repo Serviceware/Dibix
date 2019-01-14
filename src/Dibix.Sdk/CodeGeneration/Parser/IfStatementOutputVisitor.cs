@@ -37,7 +37,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         #region Constructor
         public IfStatementOutputVisitor(IExecutionEnvironment environment, string sourcePath) : this(environment, sourcePath, new IfOutputResolutionContext()) { }
-        public IfStatementOutputVisitor(IExecutionEnvironment environment, string sourcePath, IfOutputResolutionContext context)
+        public IfStatementOutputVisitor(IExecutionEnvironment environment, string sourcePath, IfOutputResolutionContext context) : base(environment, sourcePath)
         {
             this._environment = environment;
             this._sourcePath = sourcePath;
