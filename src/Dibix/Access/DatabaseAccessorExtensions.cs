@@ -136,6 +136,40 @@ namespace Dibix
             }, splitOn);
             return cache;
         }
+        public static IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird, TFourth>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, Action<TReturn, TSecond, TThird, TFourth> map, string splitOn)
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
+
+            HashCollection<TReturn> cache = new HashCollection<TReturn>();
+            accessor.QueryMany<TReturn, TSecond, TThird, TFourth, TReturn>(sql, CommandType.Text, parameters, (a, b, c, d) =>
+            {
+                if (!cache.TryGetValue(a, out TReturn instance))
+                {
+                    instance = a;
+                    cache.Add(instance);
+                }
+                map(instance, b, c, d);
+                return instance;
+            }, splitOn);
+            return cache;
+        }
+        public static IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird, TFourth, TFifth>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, Action<TReturn, TSecond, TThird, TFourth, TFifth> map, string splitOn)
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
+
+            HashCollection<TReturn> cache = new HashCollection<TReturn>();
+            accessor.QueryMany<TReturn, TSecond, TThird, TFourth, TFifth, TReturn>(sql, CommandType.Text, parameters, (a, b, c, d, e) =>
+            {
+                if (!cache.TryGetValue(a, out TReturn instance))
+                {
+                    instance = a;
+                    cache.Add(instance);
+                }
+                map(instance, b, c, d, e);
+                return instance;
+            }, splitOn);
+            return cache;
+        }
 
         public static T QuerySingle<T>(this IDatabaseAccessor accessor, string sql)
         {
@@ -193,6 +227,23 @@ namespace Dibix
                     cache.Add(instance);
                 }
                 map(instance, b, c);
+                return instance;
+            }, splitOn);
+            return cache.Single();
+        }
+        public static TReturn QuerySingle<TReturn, TSecond, TThird, TFourth>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, Action<TReturn, TSecond, TThird, TFourth> map, string splitOn)
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
+
+            HashCollection<TReturn> cache = new HashCollection<TReturn>();
+            accessor.QueryMany<TReturn, TSecond, TThird, TFourth, TReturn>(sql, CommandType.Text, parameters, (a, b, c, d) =>
+            {
+                if (!cache.TryGetValue(a, out TReturn instance))
+                {
+                    instance = a;
+                    cache.Add(instance);
+                }
+                map(instance, b, c, d);
                 return instance;
             }, splitOn);
             return cache.Single();

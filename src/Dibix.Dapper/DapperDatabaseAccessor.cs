@@ -62,6 +62,11 @@ namespace Dibix.Dapper
             this._mappingCheck.Check<TFirst, TSecond, TThird, TFourth>();
             return this._connection.Query(sql, map, parameters.AsDapperParams(), commandType: commandType, splitOn: splitOn);
         }
+        public IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(string sql, CommandType commandType, IParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> map, string splitOn)
+        {
+            this._mappingCheck.Check<TFirst, TSecond, TThird, TFourth, TFifth>();
+            return this._connection.Query(sql, map, parameters.AsDapperParams(), commandType: commandType, splitOn: splitOn);
+        }
 
         public T QuerySingle<T>(string sql, CommandType commandType, IParametersVisitor parameters)
         {
