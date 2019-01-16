@@ -3,15 +3,9 @@
   <Import Project="..\..\build\common.props" />
 
   <PropertyGroup>    
-    <TargetFramework>net452</TargetFramework>
+    <TargetFramework>net46</TargetFramework>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Reference Include="Microsoft.SqlServer.Dac.Extensions, Version=$(DacVersion)">
-      <HintPath>../../lib/Microsoft.SqlServer.Dac.Extensions.dll</HintPath>
-    </Reference>
-  </ItemGroup>
 
   <ItemGroup>
     <None Update="CodeGeneration\CodeAnalysisTest.tt">

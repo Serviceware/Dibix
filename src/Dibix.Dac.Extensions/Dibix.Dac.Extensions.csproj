@@ -3,17 +3,15 @@
   <Import Project="..\..\build\common.props" />
 
   <PropertyGroup>
-    <TargetFramework>net451</TargetFramework>
+    <TargetFramework>net46</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="System.ComponentModel.Composition" />
-    <Reference Include="Microsoft.Data.Tools.Schema.Sql, Version=$(DacVersion)">
-      <HintPath>../../lib/Microsoft.Data.Tools.Schema.Sql.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.SqlServer.Dac.Extensions, Version=$(DacVersion)">
-      <HintPath>../../lib/Microsoft.SqlServer.Dac.Extensions.dll</HintPath>
-    </Reference>
+    <PackageReference Include="Microsoft.SqlServer.DacFx.x64" Version="$(DacFxVersion)" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <Reference Include="System.ComponentModel.Composition" />
+  </ItemGroup> 
   
 </Project>
