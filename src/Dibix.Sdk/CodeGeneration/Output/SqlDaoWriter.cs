@@ -381,7 +381,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 case SqlQueryResultMode.Many: return "ReadMany";
                 case SqlQueryResultMode.Single: return "ReadSingle";
-                case SqlQueryResultMode.SingleOrDefault: return "SingleOrDefault";
+                case SqlQueryResultMode.SingleOrDefault: return "ReadSingleOrDefault";
                 default: throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
             }
         }
