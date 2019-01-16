@@ -31,9 +31,9 @@ namespace Dibix.Sdk.CodeGeneration
             return this;
         }
 
-        public CSharpClass AddClass(string name, CSharpModifiers modifiers)
+        public CSharpClass AddClass(string name, CSharpModifiers modifiers, string annotation = null)
         {
-            CSharpClass @class = new CSharpClass(name, modifiers);
+            CSharpClass @class = new CSharpClass(name, modifiers, annotation);
             this._types.Add(@class);
             return @class;
         }

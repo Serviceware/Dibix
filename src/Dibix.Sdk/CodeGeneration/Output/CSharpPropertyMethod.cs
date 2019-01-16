@@ -18,6 +18,7 @@
 
         public override void Write(StringWriter writer)
         {
+            base.Write(writer);
             WriteModifiers(writer, this._modifiers, false);
             writer.WriteRaw(this._name);
 

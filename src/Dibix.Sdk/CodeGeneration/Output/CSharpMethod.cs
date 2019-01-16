@@ -31,6 +31,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public override void Write(StringWriter writer)
         {
+            base.Write(writer);
             WriteModifiers(writer, this._modifiers);
 
             writer.WriteRaw(this._returnType)

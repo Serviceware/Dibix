@@ -1,7 +1,12 @@
 ﻿using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Data;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -9,29 +14,34 @@ namespace Dibix.Sdk.CodeGeneration
     public sealed class SqlDaoWriter : SqlWriter, IWriter
     {
         private static readonly bool WriteGuardChecks = false;
+        private static readonly string GeneratorName = typeof(SqlDaoWriter).Assembly.GetName().Name;
+        private static readonly string Version = FileVersionInfo.GetVersionInfo(typeof(SqlDaoWriter).Assembly.Location).FileVersion;
         private const string ConstantSuffix = "CommandText";
         private const string MethodPrefix = "";//"Execute";
         private const string ComplexResultTypeSuffix = "Result";
-        private const string MethodinfoSuffix = "MethodInfo";
 
         protected override void Write(StringWriter writer, string projectName, IList<SqlStatementInfo> statements)
         {
+            Type generatedCodeAttributeType = typeof(GeneratedCodeAttribute);
+            Type methodInfoType = typeof(MethodInfo);
             bool returnsEnumerable = false, hasCollectionProperties = false;
             CSharpWriter output = CSharpWriter.Init(writer, base.Namespace)
-                                              .AddUsing("System.Reflection")
+                                              .AddUsing(generatedCodeAttributeType.Namespace)
+                                              .AddUsing(methodInfoType.Namespace)
                                               .AddUsing("Dibix");
 
-            CSharpClass @class = output.AddClass(base.ClassName, CSharpModifiers.Internal | CSharpModifiers.Static);
+            string generatedCodeAnnotation = $"{generatedCodeAttributeType.Name}(\"{GeneratorName}\", \"{Version}\")";
+            CSharpClass @class = output.AddClass(base.ClassName, CSharpModifiers.Internal | CSharpModifiers.Static, generatedCodeAnnotation);
 
             for (int i = 0; i < statements.Count; i++)
             {
                 SqlStatementInfo statement = statements[i];
                 //@class.AddComment(String.Concat("file:///", statement.SourcePath.Replace(" ", "%20").Replace(@"\", "/")), false);
                 @class.AddComment(statement.Name, false);
-                @class.AddConstant(name: String.Concat(statement.Name, ConstantSuffix)
-                                 , type: typeof(string).ToCSharpTypeName()
-                                 , value: base.Format(statement.Content)
-                                 , verbatim: base.Formatting.HasFlag(SqlQueryOutputFormatting.Verbatim));
+                @class.AddField(name: String.Concat(statement.Name, ConstantSuffix)
+                              , type: typeof(string).ToCSharpTypeName()
+                              , value: new CSharpStringValue(base.Format(statement.Content), base.Formatting.HasFlag(SqlQueryOutputFormatting.Verbatim))
+                              , modifiers: CSharpModifiers.Public | CSharpModifiers.Const);
 
                 if (i + 1 < statements.Count)
                     @class.AddSeparator();
@@ -105,16 +115,18 @@ namespace Dibix.Sdk.CodeGeneration
 
             foreach (SqlStatementInfo statement in statements)
             {
-                @class.AddProperty(String.Concat(statement.Name, MethodinfoSuffix), "MethodInfo", CSharpModifiers.Public | CSharpModifiers.Static)
-                      .Getter(String.Format(CultureInfo.InvariantCulture, "return typeof({0}).GetMethod(\"{1}\");", base.ClassName, statement.Name));
+                @class.AddField(name: String.Concat(statement.Name, methodInfoType.Name)
+                              , type: methodInfoType.Name
+                              , value: new CSharpValue(String.Format(CultureInfo.InvariantCulture, "typeof({0}).GetMethod(\"{1}\")", base.ClassName, statement.Name))
+                              , modifiers: CSharpModifiers.Public | CSharpModifiers.Static | CSharpModifiers.ReadOnly);
             }
 
             if (returnsEnumerable || hasCollectionProperties)
-                output.AddUsing("System.Collections.Generic");
+                output.AddUsing(typeof(IEnumerable<>).Namespace);
 
             if (hasCollectionProperties)
             {
-                output.AddUsing("System.Collections.ObjectModel");
+                output.AddUsing(typeof(Collection<>).Namespace);
             }
 
             output.Generate();
@@ -221,20 +233,20 @@ namespace Dibix.Sdk.CodeGeneration
         }
 
         private static void WriteExecutor(StringWriter writer, SqlStatementInfo query, ref bool hasCollectionProperties)
-	    {
-	        if (query.Results.Count == 0) // Execute/ExecuteScalar.
-	        {
-	            WriteNoResult(writer, query);
-	        }
-	        else if (query.Results.Count == 1) // Query<T>/QuerySingle/etc.
+        {
+            if (query.Results.Count == 0) // Execute/ExecuteScalar.
+            {
+                WriteNoResult(writer, query);
+            }
+            else if (query.Results.Count == 1) // Query<T>/QuerySingle/etc.
             {
                 WriteSingleResult(writer, query);
             }
-	        else // GridReader
-	        {
-	            WriteComplexResult(writer, query, ref hasCollectionProperties);
-	        }
-	    }
+            else // GridReader
+            {
+                WriteComplexResult(writer, query, ref hasCollectionProperties);
+            }
+        }
 
         private static void WriteNoResult(StringWriter writer, SqlStatementInfo query)
         {
@@ -272,7 +284,7 @@ namespace Dibix.Sdk.CodeGeneration
                   .WriteRaw(ConstantSuffix);
 
             if (query.CommandType.HasValue)
-                writer.WriteRaw(", System.Data.CommandType.")
+                writer.WriteRaw($", {typeof(CommandType).FullName}.")
                       .WriteRaw(query.CommandType.Value);
 
             if (query.Parameters.Any())
@@ -297,7 +309,7 @@ namespace Dibix.Sdk.CodeGeneration
                   .WriteRaw(ConstantSuffix);
 
             if (query.CommandType.HasValue)
-                writer.WriteRaw(", System.Data.CommandType.")
+                writer.WriteRaw($", {typeof(CommandType).FullName}.")
                       .WriteRaw(query.CommandType.Value);
 
             if (query.Parameters.Any())

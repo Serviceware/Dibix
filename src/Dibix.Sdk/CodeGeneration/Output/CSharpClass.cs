@@ -9,16 +9,16 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly IList<CSharpStatement> _members;
         private readonly CSharpModifiers _modifiers;
 
-        public CSharpClass(string name, CSharpModifiers modifiers)
+        public CSharpClass(string name, CSharpModifiers modifiers, string annotation = null) : base(annotation)
         {
             this._name = name;
             this._modifiers = modifiers;
             this._members = new Collection<CSharpStatement>();
         }
 
-        public CSharpClass AddConstant(string name, string type, string value, bool verbatim, CSharpModifiers modifiers = CSharpModifiers.Public)
+        public CSharpClass AddField(string name, string type, CSharpValue value, CSharpModifiers modifiers = CSharpModifiers.Public)
         {
-            CSharpConstant constant = new CSharpConstant(name, type, new CSharpStringValue(value, verbatim), modifiers);
+            CSharpField constant = new CSharpField(name, type, value, modifiers);
             this._members.Add(constant);
             return this;
         }
@@ -65,6 +65,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public override void Write(StringWriter writer)
         {
+            base.Write(writer);
             WriteModifiers(writer, this._modifiers);
 
             writer.WriteRaw("class ")

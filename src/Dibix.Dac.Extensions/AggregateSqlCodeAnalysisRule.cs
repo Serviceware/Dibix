@@ -58,9 +58,7 @@ namespace Dibix.Dac.Extensions
             Assembly OnAssemblyResolve(object sender, ResolveEventArgs e)
             {
                 string relatedAssemblyPath = Path.Combine(dacDirectory, String.Concat(new AssemblyName(e.Name).Name, ".dll"));
-                if (File.Exists(relatedAssemblyPath)) return Assembly.LoadFrom(relatedAssemblyPath);
-
-                return null;
+                return File.Exists(relatedAssemblyPath) ? Assembly.LoadFrom(relatedAssemblyPath) : null;
             }
 
             Assembly assembly = Assembly.LoadFrom(targetPath);

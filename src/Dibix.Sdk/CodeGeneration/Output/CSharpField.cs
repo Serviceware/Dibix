@@ -1,13 +1,13 @@
 ﻿namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class CSharpConstant : CSharpStatement
+    internal sealed class CSharpField : CSharpStatement
     {
         private readonly string _name;
         private readonly string _type;
         private readonly CSharpValue _value;
         private readonly CSharpModifiers _modifiers;
 
-        public CSharpConstant(string name, string type, CSharpValue value, CSharpModifiers modifiers)
+        public CSharpField(string name, string type, CSharpValue value, CSharpModifiers modifiers)
         {
             this._name = name;
             this._type = type;
@@ -17,10 +17,10 @@
 
         public override void Write(StringWriter writer)
         {
+            base.Write(writer);
             WriteModifiers(writer, this._modifiers);
 
-            writer.WriteRaw("const ")
-                  .WriteRaw(this._type)
+            writer.WriteRaw(this._type)
                   .WriteRaw(' ')
                   .WriteRaw(this._name)
                   .WriteRaw(" = ");
