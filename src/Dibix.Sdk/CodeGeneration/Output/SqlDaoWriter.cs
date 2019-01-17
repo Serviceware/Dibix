@@ -22,10 +22,12 @@ namespace Dibix.Sdk.CodeGeneration
 
         protected override void Write(StringWriter writer, string projectName, IList<SqlStatementInfo> statements)
         {
+            Type funcType = typeof(Func<>);
             Type generatedCodeAttributeType = typeof(GeneratedCodeAttribute);
             Type methodInfoType = typeof(MethodInfo);
             bool returnsEnumerable = false, hasCollectionProperties = false;
             CSharpWriter output = CSharpWriter.Init(writer, base.Namespace)
+                                              .AddUsing(funcType.Namespace)
                                               .AddUsing(generatedCodeAttributeType.Namespace)
                                               .AddUsing(methodInfoType.Namespace)
                                               .AddUsing("Dibix");
@@ -49,6 +51,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             @class.AddSeparator();
 
+            IDictionary<SqlStatementInfo, string> methodReturnTypeMap = statements.ToDictionary(x => x, DetermineResultTypeName);
             foreach (SqlStatementInfo statement in statements)
             {
                 bool isSingleResult = statement.Results.Count == 1;
@@ -56,11 +59,10 @@ namespace Dibix.Sdk.CodeGeneration
                 if (isSingleResult && statement.Results[0].ResultMode == SqlQueryResultMode.Many)
                     returnsEnumerable = true;
 
-                string resultTypeName = DetermineResultTypeName(statement);
-
+                string resultTypeName = methodReturnTypeMap[statement];
                 CSharpMethod method = @class.AddMethod(name: String.Concat(MethodPrefix, statement.Name)
                                                      , type: resultTypeName
-                                                     , body: GenerateMethodBody(statement, ref hasCollectionProperties)
+                                                     , body: GenerateMethodBody(statement)
                                                      , isExtension: true
                                                      , modifiers: CSharpModifiers.Public | CSharpModifiers.Static);
                 method.AddParameter("databaseAccessorFactory", "IDatabaseAccessorFactory");
@@ -93,6 +95,9 @@ namespace Dibix.Sdk.CodeGeneration
                 if (!collectionProperties.Any())
                     continue;
 
+                if (!hasCollectionProperties)
+                    hasCollectionProperties = collectionProperties.Any();
+
                 StringBuilder ctorBodyWriter = new StringBuilder();
                 for (int i = 0; i < collectionProperties.Count; i++)
                 {
@@ -115,9 +120,11 @@ namespace Dibix.Sdk.CodeGeneration
 
             foreach (SqlStatementInfo statement in statements)
             {
+                string parameters = String.Join(", ", statement.Parameters.Select(x => x.ClrTypeName));
+                string methodSelector = $"new Func<IDatabaseAccessorFactory, {parameters}, {methodReturnTypeMap[statement]}>({statement.Name}).Method";
                 @class.AddField(name: String.Concat(statement.Name, methodInfoType.Name)
                               , type: methodInfoType.Name
-                              , value: new CSharpValue(String.Format(CultureInfo.InvariantCulture, "typeof({0}).GetMethod(\"{1}\")", base.ClassName, statement.Name))
+                              , value: new CSharpValue(methodSelector)
                               , modifiers: CSharpModifiers.Public | CSharpModifiers.Static | CSharpModifiers.ReadOnly);
             }
 
@@ -152,7 +159,7 @@ namespace Dibix.Sdk.CodeGeneration
             return GetComplexTypeName(query);
         }
 
-        private static string GenerateMethodBody(SqlStatementInfo statement, ref bool hasCollectionProperties)
+        private static string GenerateMethodBody(SqlStatementInfo statement)
         {
             StringWriter writer = new StringWriter();
 
@@ -173,7 +180,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (statement.Parameters.Any())
                 WriteParameters(writer, statement);
 
-            WriteExecutor(writer, statement, ref hasCollectionProperties);
+            WriteExecutor(writer, statement);
 
             writer.PopIndent()
                   .Write("}");
@@ -232,7 +239,7 @@ namespace Dibix.Sdk.CodeGeneration
                   .PopCustomIndent();
         }
 
-        private static void WriteExecutor(StringWriter writer, SqlStatementInfo query, ref bool hasCollectionProperties)
+        private static void WriteExecutor(StringWriter writer, SqlStatementInfo query)
         {
             if (query.Results.Count == 0) // Execute/ExecuteScalar.
             {
@@ -244,7 +251,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
             else // GridReader
             {
-                WriteComplexResult(writer, query, ref hasCollectionProperties);
+                WriteComplexResult(writer, query);
             }
         }
 
@@ -302,7 +309,7 @@ namespace Dibix.Sdk.CodeGeneration
             writer.WriteLineRaw(");");
         }
 
-        private static void WriteComplexResult(StringWriter writer, SqlStatementInfo query, ref bool hasCollectionProperties)
+        private static void WriteComplexResult(StringWriter writer, SqlStatementInfo query)
         {
             writer.Write("using (IMultipleResultReader reader = accessor.QueryMultiple(")
                   .WriteRaw(query.Name)
@@ -331,10 +338,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                 bool isEnumerable = result.ResultMode == SqlQueryResultMode.Many;
                 if (isEnumerable)
-                {
                     writer.WriteRaw(".ReplaceWith(");
-                    hasCollectionProperties = true;
-                }
                 else
                     writer.WriteRaw(" = ");
 

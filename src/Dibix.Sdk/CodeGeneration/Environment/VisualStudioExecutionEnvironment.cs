@@ -146,7 +146,10 @@ namespace Dibix.Sdk.CodeGeneration
         {
             CodeElement codeItem = this._codeItemAccessor.Value.FirstOrDefault(x => x.FullName == typeName.NormalizedTypeName);
             if (codeItem == null)
+            {
                 errorHandler($"Could not resolve type '{typeName}'. Looking in current project.");
+                return null;
+            }
 
             TypeInfo type = CreateTypeInfo(typeName, codeItem);
             return type;
