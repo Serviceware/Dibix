@@ -39,7 +39,7 @@ namespace Dibix.Sdk.CodeGeneration
             type = Type.GetType(parsedTypeName.NormalizedTypeName);
             if (type != null && type.IsPrimitive())
             {
-                parsedTypeName.ClrType = type;
+                parsedTypeName.CSharpTypeName = type.ToCSharpTypeName();
                 return new TypeInfo(parsedTypeName, true);
             }
 

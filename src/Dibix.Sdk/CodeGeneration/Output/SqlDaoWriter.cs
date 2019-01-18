@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -13,28 +12,64 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public sealed class SqlDaoWriter : SqlWriter, IWriter
     {
+        #region Fields
         private static readonly bool WriteGuardChecks = false;
         private static readonly string GeneratorName = typeof(SqlDaoWriter).Assembly.GetName().Name;
         private static readonly string Version = FileVersionInfo.GetVersionInfo(typeof(SqlDaoWriter).Assembly.Location).FileVersion;
         private const string ConstantSuffix = "CommandText";
         private const string MethodPrefix = "";//"Execute";
         private const string ComplexResultTypeSuffix = "Result";
+        #endregion
 
+        #region Overrides
         protected override void Write(StringWriter writer, string projectName, IList<SqlStatementInfo> statements)
         {
             Type funcType = typeof(Func<>);
             Type generatedCodeAttributeType = typeof(GeneratedCodeAttribute);
             Type methodInfoType = typeof(MethodInfo);
             bool returnsEnumerable = false, hasCollectionProperties = false;
+            IDictionary<SqlStatementInfo, string> methodReturnTypeMap = statements.ToDictionary(x => x, DetermineResultTypeName);
+
+            // Prepare writer
             CSharpWriter output = CSharpWriter.Init(writer, base.Namespace)
                                               .AddUsing(funcType.Namespace)
                                               .AddUsing(generatedCodeAttributeType.Namespace)
                                               .AddUsing(methodInfoType.Namespace)
                                               .AddUsing("Dibix");
 
+            // Class
             string generatedCodeAnnotation = $"{generatedCodeAttributeType.Name}(\"{GeneratorName}\", \"{Version}\")";
             CSharpClass @class = output.AddClass(base.ClassName, CSharpModifiers.Internal | CSharpModifiers.Static, generatedCodeAnnotation);
 
+            // Command text constants
+            this.AddCommandTextConstants(@class, statements);
+            @class.AddSeparator();
+
+            // Execution methods
+            AddExecutionMethods(@class, statements, methodReturnTypeMap, ref returnsEnumerable);
+
+            // Grid result types
+            AddGridResultTypes(@class, statements, ref hasCollectionProperties);
+
+            @class.AddSeparator();
+
+            // Add method info accessor fields
+            // This is useful for dynamic invocation like in WAX
+            AddMethodInfoFields(@class, statements, methodReturnTypeMap, methodInfoType);
+
+            if (returnsEnumerable || hasCollectionProperties)
+                output.AddUsing(typeof(IEnumerable<>).Namespace);
+
+            if (hasCollectionProperties)
+                output.AddUsing(typeof(Collection<>).Namespace);
+
+            output.Generate();
+        }
+        #endregion
+
+        #region Private Methods
+        private void AddCommandTextConstants(CSharpClass @class, IList<SqlStatementInfo> statements)
+        {
             for (int i = 0; i < statements.Count; i++)
             {
                 SqlStatementInfo statement = statements[i];
@@ -48,10 +83,10 @@ namespace Dibix.Sdk.CodeGeneration
                 if (i + 1 < statements.Count)
                     @class.AddSeparator();
             }
+        }
 
-            @class.AddSeparator();
-
-            IDictionary<SqlStatementInfo, string> methodReturnTypeMap = statements.ToDictionary(x => x, DetermineResultTypeName);
+        private static void AddExecutionMethods(CSharpClass @class, IList<SqlStatementInfo> statements, IDictionary<SqlStatementInfo, string> methodReturnTypeMap, ref bool returnsEnumerable)
+        {
             foreach (SqlStatementInfo statement in statements)
             {
                 bool isSingleResult = statement.Results.Count == 1;
@@ -69,12 +104,15 @@ namespace Dibix.Sdk.CodeGeneration
                 foreach (SqlQueryParameter parameter in statement.Parameters)
                     method.AddParameter(parameter.Name, parameter.ClrTypeName);
             }
+        }
 
-            ICollection<SqlStatementInfo> multiResultStatements = statements.Where(x => x.Results.Count > 1 && x.ResultTypeName == null).ToArray();
-            if (multiResultStatements.Any())
+        private static void AddGridResultTypes(CSharpClass @class, IList<SqlStatementInfo> statements, ref bool hasCollectionProperties)
+        {
+            ICollection<SqlStatementInfo> gridResultStatements = statements.Where(x => x.Results.Count > 1 && x.ResultTypeName == null).ToArray();
+            if (gridResultStatements.Any())
                 @class.AddSeparator();
 
-            foreach (SqlStatementInfo statement in multiResultStatements)
+            foreach (SqlStatementInfo statement in gridResultStatements)
             {
                 CSharpClass complexType = @class.AddClass(GetComplexTypeName(statement));
 
@@ -83,7 +121,7 @@ namespace Dibix.Sdk.CodeGeneration
                 foreach (SqlQueryResult result in statement.Results)
                 {
                     bool isEnumerable = result.ResultMode == SqlQueryResultMode.Many;
-                    string resultTypeName = result.Types.First().Name.CSharpTypeName;
+                    string resultTypeName = result.Types.First().Name.SimplifiedTypeName;
                     if (isEnumerable)
                         resultTypeName = MakeCollectionType(resultTypeName);
 
@@ -105,7 +143,7 @@ namespace Dibix.Sdk.CodeGeneration
                     ctorBodyWriter.Append("this.")
                                   .Append(property.Name)
                                   .Append(" = new Collection<")
-                                  .Append(property.Types.First().Name.CSharpTypeName)
+                                  .Append(property.Types.First().Name.SimplifiedTypeName)
                                   .Append(">();");
 
                     if (i + 1 < collectionProperties.Count)
@@ -115,28 +153,28 @@ namespace Dibix.Sdk.CodeGeneration
                 complexType.AddSeparator()
                            .AddConstructor(ctorBodyWriter.ToString());
             }
+        }
 
-            @class.AddSeparator();
-
+        private static void AddMethodInfoFields(CSharpClass @class, IList<SqlStatementInfo> statements, IDictionary<SqlStatementInfo, string> methodReturnTypeMap, Type methodInfoType)
+        {
             foreach (SqlStatementInfo statement in statements)
             {
-                string parameters = String.Join(", ", statement.Parameters.Select(x => x.ClrTypeName));
-                string methodSelector = $"new Func<IDatabaseAccessorFactory, {parameters}, {methodReturnTypeMap[statement]}>({statement.Name}).Method";
+                StringBuilder sb = new StringBuilder("new Func<IDatabaseAccessorFactory");
+                if (statement.Parameters.Any())
+                    sb.Append(", ");
+
+                sb.Append(String.Join(", ", statement.Parameters.Select(x => x.ClrTypeName)))
+                  .Append(", ")
+                  .Append(methodReturnTypeMap[statement])
+                  .Append(">(")
+                  .Append(statement.Name)
+                  .Append(").Method");
+
                 @class.AddField(name: String.Concat(statement.Name, methodInfoType.Name)
                               , type: methodInfoType.Name
-                              , value: new CSharpValue(methodSelector)
+                              , value: new CSharpValue(sb.ToString())
                               , modifiers: CSharpModifiers.Public | CSharpModifiers.Static | CSharpModifiers.ReadOnly);
             }
-
-            if (returnsEnumerable || hasCollectionProperties)
-                output.AddUsing(typeof(IEnumerable<>).Namespace);
-
-            if (hasCollectionProperties)
-            {
-                output.AddUsing(typeof(Collection<>).Namespace);
-            }
-
-            output.Generate();
         }
 
         private static string DetermineResultTypeName(SqlStatementInfo query)
@@ -148,7 +186,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (query.Results.Count == 1) // Query<T>/QuerySingle/etc.
             {
-                string resultTypeName = query.Results[0].Types.First().Name.CSharpTypeName;
+                string resultTypeName = query.Results[0].Types.First().Name.SimplifiedTypeName;
                 if (query.Results[0].ResultMode == SqlQueryResultMode.Many)
                     resultTypeName = MakeEnumerableType(resultTypeName);
 
@@ -282,7 +320,7 @@ namespace Dibix.Sdk.CodeGeneration
             for (int i = 0; i < singleResult.Types.Count; i++)
             {
                 TypeInfo returnType = singleResult.Types[i];
-                writer.WriteRaw(returnType.Name.CSharpTypeName);
+                writer.WriteRaw(returnType.Name.SimplifiedTypeName);
                 if (i + 1 < singleResult.Types.Count)
                     writer.WriteRaw(", ");
             }
@@ -349,7 +387,7 @@ namespace Dibix.Sdk.CodeGeneration
                 for (int i = 0; i < result.Types.Count; i++)
                 {
                     TypeInfo returnType = result.Types[i];
-                    writer.WriteRaw(returnType.Name.CSharpTypeName);
+                    writer.WriteRaw(returnType.Name.SimplifiedTypeName);
                     if (i + 1 < result.Types.Count)
                         writer.WriteRaw(", ");
                 }
@@ -416,5 +454,6 @@ namespace Dibix.Sdk.CodeGeneration
         {
             return statement.ResultTypeName ?? String.Concat(statement.Name, ComplexResultTypeSuffix);
         }
+        #endregion
     }
 }

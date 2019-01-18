@@ -12,8 +12,8 @@ namespace Dibix.Sdk.CodeGeneration
         public string AssemblyName { get; }
         public string NormalizedTypeName { get; }
         public bool IsAssemblyQualified { get; }
-        public Type ClrType { get; set; }
-        public string CSharpTypeName => this.BuildCSharpTypeName();
+        public string SimplifiedTypeName => this.BuildSimplifiedTypeName();
+        internal string CSharpTypeName { get; set; }
 
         private TypeName(string originalTypeName, string assemblyName, string normalizedTypeName, bool isAssemblyQualified, bool isNullable)
         {
@@ -41,9 +41,9 @@ namespace Dibix.Sdk.CodeGeneration
 
         public override string ToString() => this._originalTypeName;
 
-        private string BuildCSharpTypeName()
+        private string BuildSimplifiedTypeName()
         {
-            string typeName = this.ClrType != null ? this.ClrType.ToCSharpTypeName() : this.NormalizedTypeName;
+            string typeName = !String.IsNullOrEmpty(this.CSharpTypeName) ? this.CSharpTypeName : this.NormalizedTypeName;
             return $"{typeName}{(this._isNullable ? "?" : null)}";
         }
     }

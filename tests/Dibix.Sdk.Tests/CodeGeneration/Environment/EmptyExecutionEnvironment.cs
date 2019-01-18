@@ -22,7 +22,11 @@ namespace Dibix.Sdk.Tests.CodeGeneration
 
         public virtual void VerifyProject(string projectName) { }
 
-        public virtual Assembly LoadAssembly(string assemblyName) => null;
+        public virtual bool TryGetAssemblyLocation(string assemblyName, out string assemblyPath)
+        {
+            assemblyPath = null;
+            return false;
+        }
 
         public virtual void RegisterError(string fileName, int line, int column, string errorNumber, string errorText) { }
 

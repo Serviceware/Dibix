@@ -23,7 +23,7 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly IDictionary<string, Project> _projectCache;
         private readonly CurrentProjectInfo _currentProject;
         private readonly CompilerErrorCollection _errors;
-        private readonly Lazy<IDictionary<string, string>> _assemblyLookupAccessor;
+        private readonly Lazy<IDictionary<string, string>> _assemblyLocationLookupAccessor;
         private readonly Lazy<ICollection<CodeElement>> _codeItemAccessor;
         #endregion
 
@@ -35,9 +35,8 @@ namespace Dibix.Sdk.CodeGeneration
             this._projectCache = new Dictionary<string, Project>();
             this._currentProject = this.GetCurrentProject();
             this._errors = new CompilerErrorCollection();
-            this._assemblyLookupAccessor = new Lazy<IDictionary<string, string>>(this.BuildAssemblyLookupMap);
+            this._assemblyLocationLookupAccessor = new Lazy<IDictionary<string, string>>(this.BuildAssemblyLocationLookup);
             this._codeItemAccessor = new Lazy<ICollection<CodeElement>>(this.GetCodeItems);
-            AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += this.OnAssemblyResolve;
         }
         #endregion
 
@@ -88,9 +87,9 @@ namespace Dibix.Sdk.CodeGeneration
                 throw new InvalidOperationException($"'{project.Name}' is not a valid SQL project");
         }
 
-        public Assembly LoadAssembly(string assemblyName)
+        public bool TryGetAssemblyLocation(string assemblyName, out string assemblyPath)
         {
-            return this._assemblyLookupAccessor.Value.TryGetValue(new AssemblyName(assemblyName).Name, out var path) ? Assembly.ReflectionOnlyLoadFrom(path) : Assembly.ReflectionOnlyLoad(assemblyName);
+            return this._assemblyLocationLookupAccessor.Value.TryGetValue(new AssemblyName(assemblyName).Name, out assemblyPath);
         }
 
         public void RegisterError(string fileName, int line, int column, string errorNumber, string errorText)
@@ -170,7 +169,7 @@ namespace Dibix.Sdk.CodeGeneration
             return new CurrentProjectInfo(item, project);
         }
 
-        private IDictionary<string, string> BuildAssemblyLookupMap()
+        private IDictionary<string, string> BuildAssemblyLocationLookup()
         {
             return new[] { this.GetProjectOutputPath() }.Union(this.GetProjectAssemblyReferences()).ToDictionary(Path.GetFileNameWithoutExtension);
         }
@@ -181,15 +180,6 @@ namespace Dibix.Sdk.CodeGeneration
                 .SelectMany(item => TraverseTypes(item.FileCodeModel.CodeElements, vsCMElement.vsCMElementClass, vsCMElement.vsCMElementEnum))
                 .ToArray();
             return codeItems;
-        }
-
-        private Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
-        {
-            string path = Path.Combine(this.GetOutputDirectory(), String.Concat(new AssemblyName(args.Name).Name, ".dll"));
-            if (!File.Exists(path))
-                return Assembly.ReflectionOnlyLoad(args.Name);
-
-            return this.LoadAssembly(args.Name);
         }
 
         private string GetOutputDirectory()

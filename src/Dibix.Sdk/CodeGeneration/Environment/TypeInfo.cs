@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Reflection;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -14,6 +16,16 @@ namespace Dibix.Sdk.CodeGeneration
             this.Name = name;
             this.IsPrimitiveType = isPrimitiveType;
             this.Properties = new Collection<string>();
+        }
+
+        public static TypeInfo FromClrType(Type type, TypeName typeName)
+        {
+            TypeInfo info = new TypeInfo(typeName, type.IsPrimitive());
+            typeName.CSharpTypeName = type.ToCSharpTypeName();
+            foreach (PropertyInfo property in type.GetProperties())
+                info.Properties.Add(property.Name);
+
+            return info;
         }
     }
 }

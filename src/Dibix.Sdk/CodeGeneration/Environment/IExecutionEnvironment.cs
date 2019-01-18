@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-
-namespace Dibix.Sdk.CodeGeneration
+﻿namespace Dibix.Sdk.CodeGeneration
 {
     public interface IExecutionEnvironment : IFileSystemProvider, ITypeLoader
     {
@@ -9,7 +7,7 @@ namespace Dibix.Sdk.CodeGeneration
         string GetProjectDefaultNamespace();
         string GetClassName();
         void VerifyProject(string projectName);
-        Assembly LoadAssembly(string assemblyName);
+        bool TryGetAssemblyLocation(string assemblyName, out string assemblyPath);
         void RegisterError(string fileName, int line, int column, string errorNumber, string errorText);
         bool ReportErrors();
     }
