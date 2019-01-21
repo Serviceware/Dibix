@@ -50,9 +50,6 @@ namespace Dibix.Dac.Extensions
 
         private static Func<SqlRuleExecutionContext, IEnumerable<SqlRuleProblem>> BuildAnalyzer(SourceInformation source)
         {
-            string sourcePath = DependentAssemblyLocator.LocateRulesAssembly(source.SourceName);
-            string targetPath = Path.GetTempFileName();
-            File.Copy(sourcePath, targetPath, true);
             string dacDirectory = Path.GetDirectoryName(typeof(SqlCodeAnalysisRule).Assembly.Location);
 
             Assembly OnAssemblyResolve(object sender, ResolveEventArgs e)
@@ -61,8 +58,8 @@ namespace Dibix.Dac.Extensions
                 return File.Exists(relatedAssemblyPath) ? Assembly.LoadFrom(relatedAssemblyPath) : null;
             }
 
-            Assembly assembly = Assembly.LoadFrom(targetPath);
-            Type providerType = assembly.GetType("Dibix.Sdk.CodeAnalysis.Dac.DacSqlCodeAnalysisAdapter");
+            Assembly rulesAssembly = RulesAssemblyLoader.Load(source.SourceName);
+            Type providerType = rulesAssembly.GetType("Dibix.Sdk.CodeAnalysis.Dac.DacSqlCodeAnalysisAdapter");
             AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
             object engine = Activator.CreateInstance(providerType);
             Expression instance = Expression.Constant(engine);
