@@ -9,7 +9,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     public sealed class NamingConventionSqlCodeAnalysisRule : SqlCodeAnalysisRule<NamingConventionSqlCodeAnalysisRuleVisitor>
     {
         public override int Id => 17;
-        public override string ErrorMessage => "{0} '{1}' does not match naming convention '{2}'. Make sure the name is all lowercase.";
+        public override string ErrorMessage => "{0} '{1}' does not match naming convention '{2}'. Also make sure the name is all lowercase.";
     }
 
     internal static class NamingConvention
@@ -27,6 +27,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
       //public static readonly string UniqueConstraint     = "UQ_<tablename>_<columnnames>";
         public static readonly string UniqueConstraint     = "UQ_<tablename>_*";
         public static readonly string DefaultConstraint    = "DF_<tablename>_<columnname>";
+        public static readonly string Index                = "IX_<tablename>_*";
     }
 
     public sealed class NamingConventionSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
@@ -48,7 +49,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         public override void Visit(CreateTableStatement node)
         {
             if (!node.IsTemporaryTable())
-                this.Check(node.SchemaObjectName.BaseIdentifier, "Table", NamingConvention.Table);
+                this.Check(node.SchemaObjectName.BaseIdentifier, nameof(NamingConvention.Table), NamingConvention.Table);
 
             IEnumerable<Constraint> constraints = node.Definition.CollectConstraints();
             foreach (Constraint constraint in constraints)
@@ -57,18 +58,46 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             }
         }
 
-        public override void Visit(CreateViewStatement node) => this.Check(node.SchemaObjectName.BaseIdentifier, "View", NamingConvention.View);
+        public override void Visit(CreateViewStatement node) => this.Check(node.SchemaObjectName.BaseIdentifier, nameof(NamingConvention.View), NamingConvention.View);
 
-        public override void Visit(CreateTypeStatement node) => this.Check(node.Name.BaseIdentifier, "Type", NamingConvention.Type);
+        public override void Visit(CreateTypeStatement node) => this.Check(node.Name.BaseIdentifier, nameof(NamingConvention.Type), NamingConvention.Type);
 
-        public override void Visit(CreateSequenceStatement node) => this.Check(node.Name.BaseIdentifier, "Sequence", NamingConvention.Sequence);
+        public override void Visit(CreateSequenceStatement node) => this.Check(node.Name.BaseIdentifier, nameof(NamingConvention.Sequence), NamingConvention.Sequence);
+        
+        public override void Visit(CreateProcedureStatement node) => this.Check(node.ProcedureReference.Name.BaseIdentifier, nameof(NamingConvention.Procedure), NamingConvention.Procedure);
 
-        public override void Visit(CreateProcedureStatement node) => this.Check(node.ProcedureReference.Name.BaseIdentifier, "Procedure", NamingConvention.Procedure);
+        public override void Visit(CreateFunctionStatement node) => this.Check(node.Name.BaseIdentifier, nameof(NamingConvention.Function), NamingConvention.Function);
 
-        public override void Visit(CreateFunctionStatement node) => this.Check(node.Name.BaseIdentifier, "Function", NamingConvention.Function);
+        public override void Visit(CreateIndexStatement node)
+        {
+            string displayName, pattern;
+            if (node.Unique)
+            {
+                displayName = ConstraintType.Unique.ToDisplayName();
+                pattern = NamingConvention.UniqueConstraint;
+            }
+            else
+            {
+                displayName = nameof(NamingConvention.Index);
+                pattern = NamingConvention.Index;
+            }
+            this.Check(node.Name, displayName, pattern, new KeyValuePair<string, string>("tablename", node.OnName.BaseIdentifier.Value));
+        }
+
+        private void VisitConstraint(CreateTableStatement createTableStatement, Constraint constraint)
+        {
+            Identifier identifier = constraint.Definition.ConstraintIdentifier;
+            if (constraint.Type == ConstraintType.Nullable)
+                return;
+
+            if (identifier == null)
+                return;
+
+            string pattern = GetNamingConvention(constraint.Type);
+            this.Check(identifier, constraint.Type.ToDisplayName(), pattern, ResolveConstraintPlaceholders(createTableStatement, constraint.Columns));
+        }
 
         private void Check(Identifier identifier, string displayName, string pattern, params KeyValuePair<string, string>[] replacements) => this.Check(identifier, displayName, pattern, replacements.AsEnumerable());
-
         private void Check(Identifier identifier, string displayName, string pattern, IEnumerable<KeyValuePair<string, string>> replacements)
         {
             if (Workarounds.Contains(identifier.Value))
@@ -92,19 +121,6 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             string replacementPattern = String.Join("|", new[] { @"\*" }.Concat(replacements.Keys.Select(x => $@"\<{x}\>")));
             string mask = $"^{Regex.Replace(pattern, replacementPattern, OnMatch)}$";
             return mask;
-        }
-
-        private void VisitConstraint(CreateTableStatement createTableStatement, Constraint constraint)
-        {
-            Identifier identifier = constraint.Definition.ConstraintIdentifier;
-            if (constraint.Type == ConstraintType.Nullable)
-                return;
-
-            if (identifier == null)
-                return;
-
-            string pattern = GetNamingConvention(constraint.Type);
-            this.Check(identifier, constraint.Type.ToDisplayName(), pattern, ResolveConstraintPlaceholders(createTableStatement, constraint.Columns));
         }
 
         private static string GetNamingConvention(ConstraintType constraintType)

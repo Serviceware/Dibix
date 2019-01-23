@@ -19,3 +19,9 @@ AS
 	--, CONSTRAINT [UQ_dbx_codeanalysis_error_017_fail_idx] UNIQUE ([id])
 	  , CONSTRAINT [UQ_dbx_codeanalysis_error_017_failx_id] UNIQUE ([id])
 	)
+
+	CREATE NONCLUSTERED INDEX [IX_dbx_codeanalysis_error_017_success_success] ON [dbo].[dbx_codeanalysis_error_017_success] ([id])
+	CREATE NONCLUSTERED INDEX [IX_dbx_codeanalysis_error_017_successx_fail] ON [dbo].[dbx_codeanalysis_error_017_success] ([id])
+
+	CREATE UNIQUE NONCLUSTERED INDEX [UQ_dbx_codeanalysis_error_017_success_success] ON [dbo].[dbx_codeanalysis_error_017_success] ([id])
+	CREATE UNIQUE NONCLUSTERED INDEX [UQ_dbx_codeanalysis_error_017_successx_fail] ON [dbo].[dbx_codeanalysis_error_017_success] ([id])
