@@ -151,6 +151,15 @@
     column="25" /&gt;
 &lt;/errors&gt;</value>
   </data>
+  <data name="IndexClusteringSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="[025] Please specify the clustering (CLUSTERED/NONCLUSTERED) for the index 'IX_dbx_codeanalysis_error_025_fail' and don't rely on the default"
+    line="8"
+    column="3" /&gt;
+&lt;/errors&gt;</value>
+  </data>
   <data name="InsertWithoutColumnSpecificationSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
@@ -246,6 +255,15 @@
     column="87" /&gt;
 &lt;/errors&gt;</value>
   </data>
+  <data name="LooseConstraintsSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="[026] Constraints should be defined within the CREATE TABLE statement: UQ_dbx_codeanalysis_error_026_table"
+    line="8"
+    column="60" /&gt;
+&lt;/errors&gt;</value>
+  </data>
   <data name="MissingPrimaryKeySqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
@@ -325,6 +343,8 @@
 //     the code is regenerated.
 // &lt;/auto-generated&gt;
 //----------------------------------------------------------------------------*/
+using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Reflection;
@@ -332,6 +352,7 @@ using Dibix;
 
 namespace Dibix.Sdk.Tests
 {
+    [GeneratedCodeAttribute("Dibix.Sdk", "1.0.0.0")]
     internal static class ParserTest
     {
         // dbx_tests_parser_invalidcolumnsforentity
@@ -568,12 +589,12 @@ UNION ALL
             }
         }
 
-        public static MethodInfo dbx_tests_parser_invalidcolumnsforentityMethodInfo { get { return typeof(ParserTest).GetMethod("dbx_tests_parser_invalidcolumnsforentity"); }  } 
-        public static MethodInfo dbx_tests_parser_nestedifsMethodInfo { get { return typeof(ParserTest).GetMethod("dbx_tests_parser_nestedifs"); }  } 
-        public static MethodInfo dbx_tests_parser_nobeginendMethodInfo { get { return typeof(ParserTest).GetMethod("dbx_tests_parser_nobeginend"); }  } 
-        public static MethodInfo dbx_tests_parser_typenamesMethodInfo { get { return typeof(ParserTest).GetMethod("dbx_tests_parser_typenames"); }  } 
-        public static MethodInfo dbx_tests_parser_unionreturnMethodInfo { get { return typeof(ParserTest).GetMethod("dbx_tests_parser_unionreturn"); }  } 
-        public static MethodInfo dbx_tests_parser_xmlparamMethodInfo { get { return typeof(ParserTest).GetMethod("dbx_tests_parser_xmlparam"); }  } 
+        public static readonly MethodInfo dbx_tests_parser_invalidcolumnsforentityMethodInfo = new Func&lt;IDatabaseAccessorFactory, dbx_tests_parser_invalidcolumnsforentityResult&gt;(dbx_tests_parser_invalidcolumnsforentity).Method;
+        public static readonly MethodInfo dbx_tests_parser_nestedifsMethodInfo = new Func&lt;IDatabaseAccessorFactory, dbx_tests_parser_nestedifsResult&gt;(dbx_tests_parser_nestedifs).Method;
+        public static readonly MethodInfo dbx_tests_parser_nobeginendMethodInfo = new Func&lt;IDatabaseAccessorFactory, Dibix.Sdk.Tests.CodeGeneration.Direction, dbx_tests_parser_nobeginendResult&gt;(dbx_tests_parser_nobeginend).Method;
+        public static readonly MethodInfo dbx_tests_parser_typenamesMethodInfo = new Func&lt;IDatabaseAccessorFactory, dbx_tests_parser_typenamesResult&gt;(dbx_tests_parser_typenames).Method;
+        public static readonly MethodInfo dbx_tests_parser_unionreturnMethodInfo = new Func&lt;IDatabaseAccessorFactory, IEnumerable&lt;int&gt;&gt;(dbx_tests_parser_unionreturn).Method;
+        public static readonly MethodInfo dbx_tests_parser_xmlparamMethodInfo = new Func&lt;IDatabaseAccessorFactory, string, int&gt;(dbx_tests_parser_xmlparam).Method;
     }
 }</value>
   </data>
@@ -675,11 +696,14 @@ UNION ALL
 //     the code is regenerated.
 // &lt;/auto-generated&gt;
 //----------------------------------------------------------------------------*/
+using System;
+using System.CodeDom.Compiler;
 using System.Reflection;
 using Dibix;
 
 namespace This.Is.A.Custom.Namespace
 {
+    [GeneratedCodeAttribute("Dibix.Sdk", "1.0.0.0")]
     internal static class Accessor
     {
         // dbx_tests_sources_includednested
@@ -713,9 +737,9 @@ namespace This.Is.A.Custom.Namespace
             }
         }
 
-        public static MethodInfo dbx_tests_sources_includednestedMethodInfo { get { return typeof(Accessor).GetMethod("dbx_tests_sources_includednested"); }  } 
-        public static MethodInfo dbx_tests_sources_excludednestedMethodInfo { get { return typeof(Accessor).GetMethod("dbx_tests_sources_excludednested"); }  } 
-        public static MethodInfo dbx_tests_sources_externalspMethodInfo { get { return typeof(Accessor).GetMethod("dbx_tests_sources_externalsp"); }  } 
+        public static readonly MethodInfo dbx_tests_sources_includednestedMethodInfo = new Func&lt;IDatabaseAccessorFactory, int&gt;(dbx_tests_sources_includednested).Method;
+        public static readonly MethodInfo dbx_tests_sources_excludednestedMethodInfo = new Func&lt;IDatabaseAccessorFactory, int&gt;(dbx_tests_sources_excludednested).Method;
+        public static readonly MethodInfo dbx_tests_sources_externalspMethodInfo = new Func&lt;IDatabaseAccessorFactory, int&gt;(dbx_tests_sources_externalsp).Method;
     }
 }</value>
   </data>

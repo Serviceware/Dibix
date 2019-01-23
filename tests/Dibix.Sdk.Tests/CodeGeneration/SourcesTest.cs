@@ -7,11 +7,14 @@
 //     the code is regenerated.
 // </auto-generated>
 //----------------------------------------------------------------------------*/
+using System;
+using System.CodeDom.Compiler;
 using System.Reflection;
 using Dibix;
 
 namespace This.Is.A.Custom.Namespace
 {
+    [GeneratedCodeAttribute("Dibix.Sdk", "1.0.0.0")]
     internal static class Accessor
     {
         // dbx_tests_sources_includednested
@@ -45,8 +48,8 @@ namespace This.Is.A.Custom.Namespace
             }
         }
 
-        public static MethodInfo dbx_tests_sources_includednestedMethodInfo { get { return typeof(Accessor).GetMethod("dbx_tests_sources_includednested"); }  } 
-        public static MethodInfo dbx_tests_sources_excludednestedMethodInfo { get { return typeof(Accessor).GetMethod("dbx_tests_sources_excludednested"); }  } 
-        public static MethodInfo dbx_tests_sources_externalspMethodInfo { get { return typeof(Accessor).GetMethod("dbx_tests_sources_externalsp"); }  } 
+        public static readonly MethodInfo dbx_tests_sources_includednestedMethodInfo = new Func<IDatabaseAccessorFactory, int>(dbx_tests_sources_includednested).Method;
+        public static readonly MethodInfo dbx_tests_sources_excludednestedMethodInfo = new Func<IDatabaseAccessorFactory, int>(dbx_tests_sources_excludednested).Method;
+        public static readonly MethodInfo dbx_tests_sources_externalspMethodInfo = new Func<IDatabaseAccessorFactory, int>(dbx_tests_sources_externalsp).Method;
     }
 }

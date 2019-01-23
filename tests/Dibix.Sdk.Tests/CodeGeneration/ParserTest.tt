@@ -1,7 +1,7 @@
 ﻿<#@ template debug="false" hostspecific="true" language="C#" #>
 <#@ output extension=".cs" #>
-<#@ assembly name="$(SolutionDir)\src\Dibix.Sdk\bin\Debug\net451\Dibix.Sdk.dll" #>
-<#@ assembly name="$(SolutionDir)\src\Dibix.Sdk\bin\Debug\net451\Microsoft.SqlServer.TransactSql.ScriptDom.dll" #>
+<#@ assembly name="$(SolutionDir)\src\Dibix.Sdk\bin\Debug\net46\Dibix.Sdk.dll" #>
+<#@ assembly name="$(SolutionDir)\src\Dibix.Sdk\bin\Debug\net46\Microsoft.SqlServer.TransactSql.ScriptDom.dll" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.Reflection" #>
 <#@ import namespace="Dibix.Sdk.CodeAnalysis.Rules" #>

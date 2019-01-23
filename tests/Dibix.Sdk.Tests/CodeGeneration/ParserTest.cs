@@ -7,6 +7,8 @@
 //     the code is regenerated.
 // </auto-generated>
 //----------------------------------------------------------------------------*/
+using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Reflection;
@@ -14,6 +16,7 @@ using Dibix;
 
 namespace Dibix.Sdk.Tests.CodeGeneration
 {
+    [GeneratedCodeAttribute("Dibix.Sdk", "1.0.0.0")]
     internal static class ParserTest
     {
         // dbx_tests_parser_invalidcolumnsforentity
@@ -259,11 +262,11 @@ UNION ALL
             }
         }
 
-        public static MethodInfo dbx_tests_parser_invalidcolumnsforentityMethodInfo { get { return typeof(ParserTest).GetMethod("dbx_tests_parser_invalidcolumnsforentity"); }  } 
-        public static MethodInfo dbx_tests_parser_nestedifsMethodInfo { get { return typeof(ParserTest).GetMethod("dbx_tests_parser_nestedifs"); }  } 
-        public static MethodInfo dbx_tests_parser_nobeginendMethodInfo { get { return typeof(ParserTest).GetMethod("dbx_tests_parser_nobeginend"); }  } 
-        public static MethodInfo dbx_tests_parser_typenamesMethodInfo { get { return typeof(ParserTest).GetMethod("dbx_tests_parser_typenames"); }  } 
-        public static MethodInfo dbx_tests_parser_unionreturnMethodInfo { get { return typeof(ParserTest).GetMethod("dbx_tests_parser_unionreturn"); }  } 
-        public static MethodInfo dbx_tests_parser_xmlparamMethodInfo { get { return typeof(ParserTest).GetMethod("dbx_tests_parser_xmlparam"); }  } 
+        public static readonly MethodInfo dbx_tests_parser_invalidcolumnsforentityMethodInfo = new Func<IDatabaseAccessorFactory, dbx_tests_parser_invalidcolumnsforentityResult>(dbx_tests_parser_invalidcolumnsforentity).Method;
+        public static readonly MethodInfo dbx_tests_parser_nestedifsMethodInfo = new Func<IDatabaseAccessorFactory, dbx_tests_parser_nestedifsResult>(dbx_tests_parser_nestedifs).Method;
+        public static readonly MethodInfo dbx_tests_parser_nobeginendMethodInfo = new Func<IDatabaseAccessorFactory, Dibix.Sdk.Tests.CodeGeneration.Direction, dbx_tests_parser_nobeginendResult>(dbx_tests_parser_nobeginend).Method;
+        public static readonly MethodInfo dbx_tests_parser_typenamesMethodInfo = new Func<IDatabaseAccessorFactory, dbx_tests_parser_typenamesResult>(dbx_tests_parser_typenames).Method;
+        public static readonly MethodInfo dbx_tests_parser_unionreturnMethodInfo = new Func<IDatabaseAccessorFactory, IEnumerable<int>>(dbx_tests_parser_unionreturn).Method;
+        public static readonly MethodInfo dbx_tests_parser_xmlparamMethodInfo = new Func<IDatabaseAccessorFactory, string, int>(dbx_tests_parser_xmlparam).Method;
     }
 }
