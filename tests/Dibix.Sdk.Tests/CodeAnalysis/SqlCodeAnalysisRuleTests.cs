@@ -81,5 +81,8 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
 
         [Fact]
         public void LooseConstraintsSqlCodeAnalysisRule() => base.Execute();
+
+        [Fact]
+        public void UniqueIndexSqlCodeAnalysisRule() => base.Execute();
     }
 }

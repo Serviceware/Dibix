@@ -10,7 +10,7 @@ AS
 
   CREATE TABLE [dbo].[dbx_codeanalysis_error_023_fail2]
   (
-      [b] NVARCHAR(128) PRIMARY KEY
+      [b] NVARCHAR(128) CONSTRAINT [PK_dbx_codeanalysis_error_023_fail2] PRIMARY KEY
   )
 
   CREATE TABLE [dbo].[dbx_codeanalysis_error_023_success] -- PK = FK

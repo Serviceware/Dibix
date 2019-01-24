@@ -843,6 +843,15 @@ namespace This.Is.A.Custom.Namespace
     column="13" /&gt;
 &lt;/errors&gt;</value>
   </data>
+  <data name="UniqueIndexSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="[027] Unique index should be replaced by a unique constraint on the table definition: UQ_dbx_codeanalysis_error_027_table_id_fail"
+    line="10"
+    column="3" /&gt;
+&lt;/errors&gt;</value>
+  </data>
   <data name="UnnamedConstraintSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;

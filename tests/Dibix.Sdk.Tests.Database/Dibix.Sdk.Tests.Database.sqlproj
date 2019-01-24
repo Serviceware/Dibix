@@ -101,6 +101,7 @@
     <Build Include="Tests\Parser\dbx_tests_parser_typenames.sql" />
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_025.sql" />
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_026.sql" />
+    <Build Include="CodeAnalysis\dbx_codeanalysis_error_027.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CodeAnalysis" />
