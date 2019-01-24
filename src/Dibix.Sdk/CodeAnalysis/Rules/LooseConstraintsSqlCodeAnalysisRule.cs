@@ -5,7 +5,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     public sealed class LooseConstraintsSqlCodeAnalysisRule : SqlCodeAnalysisRule<LooseConstraintsSqlCodeAnalysisRuleVisitor>
     {
         public override int Id => 26;
-        public override string ErrorMessage => "Constraints should be defined within the CREATE TABLE statement{0}";
+        public override string ErrorMessage => "Constraints/Indexes should be defined within the CREATE TABLE statement{0}";
     }
 
     public sealed class LooseConstraintsSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
@@ -16,6 +16,11 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             {
                 base.Fail(constraint, constraint.ConstraintIdentifier != null ? $": {constraint.ConstraintIdentifier.Value}" : null);
             }
+        }
+
+        public override void Visit(CreateIndexStatement node)
+        {
+            base.Fail(node, $": {node.Name.Value}");
         }
     }
 }

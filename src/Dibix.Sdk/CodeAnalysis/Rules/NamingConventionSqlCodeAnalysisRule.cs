@@ -56,6 +56,11 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             {
                 this.VisitConstraint(node, constraint);
             }
+
+            foreach (IndexDefinition index in node.Definition.Indexes)
+            {
+                this.VisitIndex(index.Unique, index.Name, node.SchemaObjectName);
+            }
         }
 
         public override void Visit(CreateViewStatement node) => this.Check(node.SchemaObjectName.BaseIdentifier, nameof(NamingConvention.View), NamingConvention.View);
@@ -68,21 +73,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         public override void Visit(CreateFunctionStatement node) => this.Check(node.Name.BaseIdentifier, nameof(NamingConvention.Function), NamingConvention.Function);
 
-        public override void Visit(CreateIndexStatement node)
-        {
-            string displayName, pattern;
-            if (node.Unique)
-            {
-                displayName = ConstraintType.Unique.ToDisplayName();
-                pattern = NamingConvention.UniqueConstraint;
-            }
-            else
-            {
-                displayName = nameof(NamingConvention.Index);
-                pattern = NamingConvention.Index;
-            }
-            this.Check(node.Name, displayName, pattern, new KeyValuePair<string, string>("tablename", node.OnName.BaseIdentifier.Value));
-        }
+        public override void Visit(CreateIndexStatement node) => this.VisitIndex(node.Unique, node.Name, node.OnName);
 
         private void VisitConstraint(CreateTableStatement createTableStatement, Constraint constraint)
         {
@@ -95,6 +86,22 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
             string pattern = GetNamingConvention(constraint.Type);
             this.Check(identifier, constraint.Type.ToDisplayName(), pattern, ResolveConstraintPlaceholders(createTableStatement, constraint.Columns));
+        }
+
+        private void VisitIndex(bool unique, Identifier name, SchemaObjectName tableName)
+        {
+            string displayName, pattern;
+            if (unique)
+            {
+                displayName = ConstraintType.Unique.ToDisplayName();
+                pattern = NamingConvention.UniqueConstraint;
+            }
+            else
+            {
+                displayName = nameof(NamingConvention.Index);
+                pattern = NamingConvention.Index;
+            }
+            this.Check(name, displayName, pattern, new KeyValuePair<string, string>("tablename", tableName.BaseIdentifier.Value));
         }
 
         private void Check(Identifier identifier, string displayName, string pattern, params KeyValuePair<string, string>[] replacements) => this.Check(identifier, displayName, pattern, replacements.AsEnumerable());

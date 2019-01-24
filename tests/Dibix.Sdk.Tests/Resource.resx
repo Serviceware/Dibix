@@ -259,9 +259,13 @@
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[026] Constraints should be defined within the CREATE TABLE statement: UQ_dbx_codeanalysis_error_026_table"
-    line="8"
+    message="[026] Constraints/Indexes should be defined within the CREATE TABLE statement: UQ_dbx_codeanalysis_error_026_table"
+    line="9"
     column="60" /&gt;
+  &lt;error
+    message="[026] Constraints/Indexes should be defined within the CREATE TABLE statement: IX_dbx_codeanalysis_error_026_table_fail"
+    line="11"
+    column="3" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="MissingPrimaryKeySqlCodeAnalysisRule" xml:space="preserve">
