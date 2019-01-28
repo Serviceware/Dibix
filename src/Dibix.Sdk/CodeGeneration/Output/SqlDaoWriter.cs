@@ -24,7 +24,6 @@ namespace Dibix.Sdk.CodeGeneration
         #region Overrides
         protected override void Write(StringWriter writer, string projectName, IList<SqlStatementInfo> statements)
         {
-            Type funcType = typeof(Func<>);
             Type generatedCodeAttributeType = typeof(GeneratedCodeAttribute);
             Type methodInfoType = typeof(MethodInfo);
             bool returnsEnumerable = false, hasCollectionProperties = false;
@@ -32,7 +31,6 @@ namespace Dibix.Sdk.CodeGeneration
 
             // Prepare writer
             CSharpWriter output = CSharpWriter.Init(writer, base.Namespace)
-                                              .AddUsing(funcType.Namespace)
                                               .AddUsing(generatedCodeAttributeType.Namespace)
                                               .AddUsing(methodInfoType.Namespace)
                                               .AddUsing("Dibix");
@@ -55,7 +53,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             // Add method info accessor fields
             // This is useful for dynamic invocation like in WAX
-            AddMethodInfoFields(@class, statements, methodReturnTypeMap, methodInfoType);
+            this.AddMethodInfoFields(@class, statements, methodInfoType);
 
             if (returnsEnumerable || hasCollectionProperties)
                 output.AddUsing(typeof(IEnumerable<>).Namespace);
@@ -85,7 +83,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static void AddExecutionMethods(CSharpClass @class, IList<SqlStatementInfo> statements, IDictionary<SqlStatementInfo, string> methodReturnTypeMap, ref bool returnsEnumerable)
+        private static void AddExecutionMethods(CSharpClass @class, IEnumerable<SqlStatementInfo> statements, IDictionary<SqlStatementInfo, string> methodReturnTypeMap, ref bool returnsEnumerable)
         {
             foreach (SqlStatementInfo statement in statements)
             {
@@ -106,7 +104,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static void AddGridResultTypes(CSharpClass @class, IList<SqlStatementInfo> statements, ref bool hasCollectionProperties)
+        private static void AddGridResultTypes(CSharpClass @class, IEnumerable<SqlStatementInfo> statements, ref bool hasCollectionProperties)
         {
             ICollection<SqlStatementInfo> gridResultStatements = statements.Where(x => x.Results.Count > 1 && x.ResultTypeName == null).ToArray();
             if (gridResultStatements.Any())
@@ -155,24 +153,13 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static void AddMethodInfoFields(CSharpClass @class, IList<SqlStatementInfo> statements, IDictionary<SqlStatementInfo, string> methodReturnTypeMap, Type methodInfoType)
+        private void AddMethodInfoFields(CSharpClass @class, IEnumerable<SqlStatementInfo> statements, Type methodInfoType)
         {
             foreach (SqlStatementInfo statement in statements)
             {
-                StringBuilder sb = new StringBuilder("new Func<IDatabaseAccessorFactory");
-                if (statement.Parameters.Any())
-                    sb.Append(", ");
-
-                sb.Append(String.Join(", ", statement.Parameters.Select(x => x.ClrTypeName)))
-                  .Append(", ")
-                  .Append(methodReturnTypeMap[statement])
-                  .Append(">(")
-                  .Append(statement.Name)
-                  .Append(").Method");
-
                 @class.AddField(name: String.Concat(statement.Name, methodInfoType.Name)
                               , type: methodInfoType.Name
-                              , value: new CSharpValue(sb.ToString())
+                              , value: new CSharpValue($"typeof({base.ClassName}).GetMethod(\"{statement.Name}\")")
                               , modifiers: CSharpModifiers.Public | CSharpModifiers.Static | CSharpModifiers.ReadOnly);
             }
         }
