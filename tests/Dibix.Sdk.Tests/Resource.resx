@@ -138,6 +138,19 @@
     column="7" /&gt;
 &lt;/errors&gt;</value>
   </data>
+  <data name="DateTimeSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="[028] Use of non UTC date/time function: GETDATE"
+    line="6"
+    column="87" /&gt;
+  &lt;error
+    message="[028] Possible datetime constant: 1990-01-01"
+    line="7"
+    column="87" /&gt;
+&lt;/errors&gt;</value>
+  </data>
   <data name="ImplicitAliasSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
