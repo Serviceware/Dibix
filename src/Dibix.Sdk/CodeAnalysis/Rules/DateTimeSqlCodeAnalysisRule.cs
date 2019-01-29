@@ -3,12 +3,10 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    // Disabled, since it's more of a labs rule and not stable enough
     public sealed class DateTimeSqlCodeAnalysisRule : SqlCodeAnalysisRule<DateTimeSqlCodeAnalysisRuleVisitor>
     {
         public override int Id => 28;
         public override string ErrorMessage => "{0}";
-        public override bool IsEnabled => false;
     }
 
     public sealed class DateTimeSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
