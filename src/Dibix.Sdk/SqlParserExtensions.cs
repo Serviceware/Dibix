@@ -92,6 +92,9 @@ namespace Dibix.Sdk
 
             public override void Visit(QuerySpecification node)
             {
+                if (this.FirstQueryExpression != null)
+                    return;
+
                 this.FirstQueryExpression = node;
             }
         }
