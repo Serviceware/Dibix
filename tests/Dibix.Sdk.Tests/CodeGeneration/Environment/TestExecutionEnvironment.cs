@@ -1,8 +1,12 @@
 ﻿using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Dibix.Sdk.CodeGeneration;
+using TypeInfo = Dibix.Sdk.CodeGeneration.TypeInfo;
 
 namespace Dibix.Sdk.Tests.CodeGeneration
 {
@@ -11,9 +15,11 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         private readonly string _projectName;
         private readonly string _namespace;
         private readonly string _className;
+        private readonly ICollection<CompilerError> _errors;
 
         public TestExecutionEnvironment(string projectName, string @namespace, string className)
         {
+            this._errors = new Collection<CompilerError>();
             this._projectName = projectName;
             this._namespace = @namespace;
             this._className = className;
@@ -50,10 +56,35 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             return this._className;
         }
 
+        public override bool TryGetAssemblyLocation(string assemblyName, out string assemblyPath)
+        {
+            Assembly assembly = this.GetType().Assembly;
+            if (assemblyName == assembly.GetName().Name)
+            {
+                assemblyPath = assembly.Location;
+                return true;
+            }
+            assemblyPath = null;
+            return false;
+        }
+
+        public override void RegisterError(string fileName, int line, int column, string errorNumber, string errorText)
+        {
+            this._errors.Add(new CompilerError(fileName, line, column, errorNumber, errorText));
+        }
+
+        public override bool ReportErrors()
+        {
+            if (this._errors.Any())
+                throw new CodeGenerationException(this._errors);
+
+            return false;
+        }
+
         public override TypeInfo LoadType(IExecutionEnvironment environment, TypeName typeName, Action<string> errorHandler)
         {
-            TypeInfo info = new TypeInfo(typeName, false);
-            return info;
+            Type type = Type.GetType($"{typeName.NormalizedTypeName},{this.GetType().Assembly}", true);
+            return  TypeInfo.FromClrType(type, typeName);
         }
     }
 }

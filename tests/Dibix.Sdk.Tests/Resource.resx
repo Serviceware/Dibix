@@ -364,7 +364,6 @@
 //     the code is regenerated.
 // &lt;/auto-generated&gt;
 //----------------------------------------------------------------------------*/
-using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -526,7 +525,10 @@ UNION ALL
                     result.B.ReplaceWith(reader.ReadMany&lt;int?&gt;());
                     result.C.ReplaceWith(reader.ReadMany&lt;Dibix.Sdk.Tests.CodeGeneration.Direction&gt;());
                     result.D.ReplaceWith(reader.ReadMany&lt;Dibix.Sdk.Tests.CodeGeneration.Direction?&gt;());
+                    result.E.ReplaceWith(reader.ReadMany&lt;Dibix.Sdk.Tests.CodeGeneration.Direction&gt;());
+                    result.F.ReplaceWith(reader.ReadMany&lt;Dibix.Sdk.Tests.CodeGeneration.Direction?&gt;());
                     result.G.ReplaceWith(reader.ReadMany&lt;string, int?, Dibix.Sdk.Tests.CodeGeneration.Direction&gt;(ParserTestUtility.Map, "x,x"));
+                    result.H.ReplaceWith(reader.ReadMany&lt;Dibix.Sdk.Tests.CodeGeneration.Direction?, Dibix.Sdk.Tests.CodeGeneration.Direction, Dibix.Sdk.Tests.CodeGeneration.Direction?&gt;(ParserTestUtility.Map, "x,x"));
                     return result;
                 }
             }
@@ -598,7 +600,10 @@ UNION ALL
             public ICollection&lt;int?&gt; B { get; private set; } 
             public ICollection&lt;Dibix.Sdk.Tests.CodeGeneration.Direction&gt; C { get; private set; } 
             public ICollection&lt;Dibix.Sdk.Tests.CodeGeneration.Direction?&gt; D { get; private set; } 
+            public ICollection&lt;Dibix.Sdk.Tests.CodeGeneration.Direction&gt; E { get; private set; } 
+            public ICollection&lt;Dibix.Sdk.Tests.CodeGeneration.Direction?&gt; F { get; private set; } 
             public ICollection&lt;string&gt; G { get; private set; } 
+            public ICollection&lt;Dibix.Sdk.Tests.CodeGeneration.Direction?&gt; H { get; private set; } 
 
             public dbx_tests_parser_typenamesResult()
             {
@@ -606,16 +611,19 @@ UNION ALL
                 this.B = new Collection&lt;int?&gt;();
                 this.C = new Collection&lt;Dibix.Sdk.Tests.CodeGeneration.Direction&gt;();
                 this.D = new Collection&lt;Dibix.Sdk.Tests.CodeGeneration.Direction?&gt;();
+                this.E = new Collection&lt;Dibix.Sdk.Tests.CodeGeneration.Direction&gt;();
+                this.F = new Collection&lt;Dibix.Sdk.Tests.CodeGeneration.Direction?&gt;();
                 this.G = new Collection&lt;string&gt;();
+                this.H = new Collection&lt;Dibix.Sdk.Tests.CodeGeneration.Direction?&gt;();
             }
         }
 
-        public static readonly MethodInfo dbx_tests_parser_invalidcolumnsforentityMethodInfo = new Func&lt;IDatabaseAccessorFactory, dbx_tests_parser_invalidcolumnsforentityResult&gt;(dbx_tests_parser_invalidcolumnsforentity).Method;
-        public static readonly MethodInfo dbx_tests_parser_nestedifsMethodInfo = new Func&lt;IDatabaseAccessorFactory, dbx_tests_parser_nestedifsResult&gt;(dbx_tests_parser_nestedifs).Method;
-        public static readonly MethodInfo dbx_tests_parser_nobeginendMethodInfo = new Func&lt;IDatabaseAccessorFactory, Dibix.Sdk.Tests.CodeGeneration.Direction, dbx_tests_parser_nobeginendResult&gt;(dbx_tests_parser_nobeginend).Method;
-        public static readonly MethodInfo dbx_tests_parser_typenamesMethodInfo = new Func&lt;IDatabaseAccessorFactory, dbx_tests_parser_typenamesResult&gt;(dbx_tests_parser_typenames).Method;
-        public static readonly MethodInfo dbx_tests_parser_unionreturnMethodInfo = new Func&lt;IDatabaseAccessorFactory, IEnumerable&lt;int&gt;&gt;(dbx_tests_parser_unionreturn).Method;
-        public static readonly MethodInfo dbx_tests_parser_xmlparamMethodInfo = new Func&lt;IDatabaseAccessorFactory, string, int&gt;(dbx_tests_parser_xmlparam).Method;
+        public static readonly MethodInfo dbx_tests_parser_invalidcolumnsforentityMethodInfo = typeof(ParserTest).GetMethod("dbx_tests_parser_invalidcolumnsforentity");
+        public static readonly MethodInfo dbx_tests_parser_nestedifsMethodInfo = typeof(ParserTest).GetMethod("dbx_tests_parser_nestedifs");
+        public static readonly MethodInfo dbx_tests_parser_nobeginendMethodInfo = typeof(ParserTest).GetMethod("dbx_tests_parser_nobeginend");
+        public static readonly MethodInfo dbx_tests_parser_typenamesMethodInfo = typeof(ParserTest).GetMethod("dbx_tests_parser_typenames");
+        public static readonly MethodInfo dbx_tests_parser_unionreturnMethodInfo = typeof(ParserTest).GetMethod("dbx_tests_parser_unionreturn");
+        public static readonly MethodInfo dbx_tests_parser_xmlparamMethodInfo = typeof(ParserTest).GetMethod("dbx_tests_parser_xmlparam");
     }
 }</value>
   </data>
@@ -717,7 +725,6 @@ UNION ALL
 //     the code is regenerated.
 // &lt;/auto-generated&gt;
 //----------------------------------------------------------------------------*/
-using System;
 using System.CodeDom.Compiler;
 using System.Reflection;
 using Dibix;
@@ -758,9 +765,9 @@ namespace This.Is.A.Custom.Namespace
             }
         }
 
-        public static readonly MethodInfo dbx_tests_sources_includednestedMethodInfo = new Func&lt;IDatabaseAccessorFactory, int&gt;(dbx_tests_sources_includednested).Method;
-        public static readonly MethodInfo dbx_tests_sources_excludednestedMethodInfo = new Func&lt;IDatabaseAccessorFactory, int&gt;(dbx_tests_sources_excludednested).Method;
-        public static readonly MethodInfo dbx_tests_sources_externalspMethodInfo = new Func&lt;IDatabaseAccessorFactory, int&gt;(dbx_tests_sources_externalsp).Method;
+        public static readonly MethodInfo dbx_tests_sources_includednestedMethodInfo = typeof(Accessor).GetMethod("dbx_tests_sources_includednested");
+        public static readonly MethodInfo dbx_tests_sources_excludednestedMethodInfo = typeof(Accessor).GetMethod("dbx_tests_sources_excludednested");
+        public static readonly MethodInfo dbx_tests_sources_externalspMethodInfo = typeof(Accessor).GetMethod("dbx_tests_sources_externalsp");
     }
 }</value>
   </data>

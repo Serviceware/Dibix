@@ -7,7 +7,6 @@
 //     the code is regenerated.
 // </auto-generated>
 //----------------------------------------------------------------------------*/
-using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -262,11 +261,11 @@ UNION ALL
             }
         }
 
-        public static readonly MethodInfo dbx_tests_parser_invalidcolumnsforentityMethodInfo = new Func<IDatabaseAccessorFactory, dbx_tests_parser_invalidcolumnsforentityResult>(dbx_tests_parser_invalidcolumnsforentity).Method;
-        public static readonly MethodInfo dbx_tests_parser_nestedifsMethodInfo = new Func<IDatabaseAccessorFactory, dbx_tests_parser_nestedifsResult>(dbx_tests_parser_nestedifs).Method;
-        public static readonly MethodInfo dbx_tests_parser_nobeginendMethodInfo = new Func<IDatabaseAccessorFactory, Dibix.Sdk.Tests.CodeGeneration.Direction, dbx_tests_parser_nobeginendResult>(dbx_tests_parser_nobeginend).Method;
-        public static readonly MethodInfo dbx_tests_parser_typenamesMethodInfo = new Func<IDatabaseAccessorFactory, dbx_tests_parser_typenamesResult>(dbx_tests_parser_typenames).Method;
-        public static readonly MethodInfo dbx_tests_parser_unionreturnMethodInfo = new Func<IDatabaseAccessorFactory, IEnumerable<int>>(dbx_tests_parser_unionreturn).Method;
-        public static readonly MethodInfo dbx_tests_parser_xmlparamMethodInfo = new Func<IDatabaseAccessorFactory, string, int>(dbx_tests_parser_xmlparam).Method;
+        public static readonly MethodInfo dbx_tests_parser_invalidcolumnsforentityMethodInfo = typeof(ParserTest).GetMethod("dbx_tests_parser_invalidcolumnsforentity");
+        public static readonly MethodInfo dbx_tests_parser_nestedifsMethodInfo = typeof(ParserTest).GetMethod("dbx_tests_parser_nestedifs");
+        public static readonly MethodInfo dbx_tests_parser_nobeginendMethodInfo = typeof(ParserTest).GetMethod("dbx_tests_parser_nobeginend");
+        public static readonly MethodInfo dbx_tests_parser_typenamesMethodInfo = typeof(ParserTest).GetMethod("dbx_tests_parser_typenames");
+        public static readonly MethodInfo dbx_tests_parser_unionreturnMethodInfo = typeof(ParserTest).GetMethod("dbx_tests_parser_unionreturn");
+        public static readonly MethodInfo dbx_tests_parser_xmlparamMethodInfo = typeof(ParserTest).GetMethod("dbx_tests_parser_xmlparam");
     }
 }
