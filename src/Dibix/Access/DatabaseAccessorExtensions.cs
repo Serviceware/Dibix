@@ -170,6 +170,23 @@ namespace Dibix
             }, splitOn);
             return cache;
         }
+        public static IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, Action<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> map, string splitOn)
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
+
+            HashCollection<TReturn> cache = new HashCollection<TReturn>();
+            accessor.QueryMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TReturn>(sql, CommandType.Text, parameters, (a, b, c, d, e, f, g, h, i) =>
+            {
+                if (!cache.TryGetValue(a, out TReturn instance))
+                {
+                    instance = a;
+                    cache.Add(instance);
+                }
+                map(instance, b, c, d, e, f, g, h, i);
+                return instance;
+            }, splitOn);
+            return cache;
+        }
 
         public static T QuerySingle<T>(this IDatabaseAccessor accessor, string sql)
         {
@@ -247,6 +264,23 @@ namespace Dibix
                 return instance;
             }, splitOn);
             return cache.Single();
+        }
+        public static TReturn QuerySingleOrDefault<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, Action<TReturn, TSecond> map, string splitOn)
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
+
+            HashCollection<TReturn> cache = new HashCollection<TReturn>();
+            accessor.QueryMany<TReturn, TSecond, TReturn>(sql, CommandType.Text, parameters, (a, b) =>
+            {
+                if (!cache.TryGetValue(a, out TReturn instance))
+                {
+                    instance = a;
+                    cache.Add(instance);
+                }
+                map(instance, b);
+                return instance;
+            }, splitOn);
+            return cache.SingleOrDefault();
         }
         public static TReturn QuerySingleOrDefault<TReturn, TSecond, TThird, TFourth>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, Action<TReturn, TSecond, TThird, TFourth> map, string splitOn)
         {
