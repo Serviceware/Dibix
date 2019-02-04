@@ -26,7 +26,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             Type generatedCodeAttributeType = typeof(GeneratedCodeAttribute);
             Type methodInfoType = typeof(MethodInfo);
-            bool returnsEnumerable = false, hasCollectionProperties = false;
+            bool returnsEnumerable = false, hasCollectionProperties = statements.Any(x => x.IsAggregateResult);
             IDictionary<SqlStatementInfo, string> methodReturnTypeMap = statements.ToDictionary(x => x, DetermineResultTypeName);
 
             // Prepare writer
@@ -121,7 +121,7 @@ namespace Dibix.Sdk.CodeGeneration
                     bool isEnumerable = result.ResultMode == SqlQueryResultMode.Many;
                     string resultTypeName = result.Types.First().Name.SimplifiedTypeName;
                     if (isEnumerable)
-                        resultTypeName = MakeCollectionType(resultTypeName);
+                        resultTypeName = MakeCollectionInterfaceType(resultTypeName);
 
                     complexType.AddProperty(result.Name, resultTypeName)
                                .Getter(null)
@@ -140,9 +140,9 @@ namespace Dibix.Sdk.CodeGeneration
                     SqlQueryResult property = collectionProperties[i];
                     ctorBodyWriter.Append("this.")
                                   .Append(property.Name)
-                                  .Append(" = new Collection<")
-                                  .Append(property.Types.First().Name.SimplifiedTypeName)
-                                  .Append(">();");
+                                  .Append(" = new ")
+                                  .Append(MakeCollectionType(property.Types.First().Name.SimplifiedTypeName))
+                                  .Append("();");
 
                     if (i + 1 < collectionProperties.Count)
                         ctorBodyWriter.AppendLine();
@@ -270,13 +270,13 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 WriteNoResult(writer, query);
             }
+            else if (query.Results.Count > 1 || query.IsAggregateResult) // GridReader
+            {
+                WriteComplexResult(writer, query);
+            }
             else if (query.Results.Count == 1) // Query<T>/QuerySingle/etc.
             {
                 WriteSingleResult(writer, query);
-            }
-            else // GridReader
-            {
-                WriteComplexResult(writer, query);
             }
         }
 
@@ -347,11 +347,24 @@ namespace Dibix.Sdk.CodeGeneration
             if (query.Parameters.Any())
                 writer.WriteRaw(", @params");
 
-            string clrTypeName = GetComplexTypeName(query);
             writer.WriteLineRaw("))")
                   .WriteLine("{")
-                  .PushIndent()
-                  .Write(clrTypeName)
+                  .PushIndent();
+
+            if (!query.IsAggregateResult)
+                WriteComplexResultBody(writer, query);
+            else
+                WriteAggregateResultBody(writer, query);
+
+            writer.PopIndent()
+                  .WriteLine("}");
+        }
+
+        private static void WriteComplexResultBody(StringWriter writer, SqlStatementInfo query)
+        {
+            string clrTypeName = GetComplexTypeName(query);
+
+            writer.Write(clrTypeName)
                   .WriteRaw(" result = new ")
                   .WriteRaw(clrTypeName)
                   .WriteLineRaw("();");
@@ -397,9 +410,30 @@ namespace Dibix.Sdk.CodeGeneration
                 writer.WriteLineRaw(";");
             }
 
-            writer.WriteLine("return result;")
+            writer.WriteLine("return result;");
+        }
+
+        private static void WriteAggregateResultBody(StringWriter writer, SqlStatementInfo query)
+        {
+            SqlQueryResult singleResult = query.Results.Single();
+            string resultTypeName = singleResult.Types.First().Name.SimplifiedTypeName;
+            writer.Write(MakeCollectionInterfaceType(resultTypeName))
+                  .WriteRaw(" results = new ")
+                  .WriteRaw(MakeCollectionType(resultTypeName))
+                  .WriteLineRaw("();")
+                  .WriteLine("while (!reader.IsConsumed)")
+                  .PushIndent()
+                  .Write("results.AddRange(reader.ReadMany<")
+                  .WriteRaw(String.Join(", ", singleResult.Types.Select(x => x.Name.SimplifiedTypeName)))
+                  .WriteRaw(">(")
+                  .WriteRaw(singleResult.Converter)
+                  .WriteRaw(", \"")
+                  .WriteRaw(singleResult.SplitOn)
+                  .WriteRaw("\"));")
                   .PopIndent()
-                  .WriteLine("}");
+                  .WriteLine()
+                  .WriteLine()
+                  .WriteLine("return results;");
         }
 
         private static string GetExecutorMethodName(SqlQueryResultMode mode)
@@ -432,9 +466,14 @@ namespace Dibix.Sdk.CodeGeneration
             return String.Concat("IEnumerable<", typeName, '>');
         }
 
-        private static string MakeCollectionType(string typeName)
+        private static string MakeCollectionInterfaceType(string typeName)
         {
             return String.Concat("ICollection<", typeName, '>');
+        }
+
+        private static string MakeCollectionType(string typeName)
+        {
+            return String.Concat("Collection<", typeName, '>');
         }
 
         private static string GetComplexTypeName(SqlStatementInfo statement)

@@ -21,6 +21,7 @@ namespace Dibix.Sdk.CodeGeneration
                 this.Target.Name = name;
 
             this.Target.ResultTypeName = content.SingleHint(SqlHint.ResultTypeName);
+            this.Target.IsAggregateResult = content.IsSet(SqlHint.AggregateResult);
 
             this.ParseResults(content);
             this.ParseBody(statements ?? new StatementList());
@@ -111,7 +112,7 @@ ReferenceType: {node.DataType.GetType()}");
 
         private void ParseResults(TSqlStatement node)
         {
-            IEnumerable<SqlQueryResult> results = StatementOutputParser.Parse(this.Environment, this.Target.SourcePath, node);
+            IEnumerable<SqlQueryResult> results = StatementOutputParser.Parse(this.Environment, this.Target, node);
             this.Target.Results.AddRange(results);
         }
 

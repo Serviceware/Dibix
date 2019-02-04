@@ -13,25 +13,36 @@ namespace Dibix.Sdk.CodeGeneration
         private const string ReturnHintSplitOn = "SplitOn";
         private const string ReturnHintConverter = "Converter";
 
-        public static IEnumerable<SqlQueryResult> Parse(IExecutionEnvironment environment, string sourcePath, TSqlStatement node)
+        public static IEnumerable<SqlQueryResult> Parse(IExecutionEnvironment environment, SqlStatementInfo target, TSqlStatement node)
         {
-            StatementOutputVisitor visitor = new StatementOutputVisitor(environment, sourcePath);
+            StatementOutputVisitor visitor = new StatementOutputVisitor(environment, target.SourcePath);
             node.Accept(visitor);
 
             IList<SqlHint> returnHints = SqlHintReader.Read(node)
                                                       .Where(x => x.Kind == SqlHint.Return)
                                                       .ToArray();
 
-            if (returnHints.Count > visitor.Results.Count)
+            if (target.IsAggregateResult)
             {
-                environment.RegisterError(sourcePath, node.StartLine, node.StartColumn, null, "There are more return declarations than output statements being produced by the statement");
-                yield break;
+                if (returnHints.Count != 1 || visitor.Results.Count > 0)
+                {
+                    environment.RegisterError(target.SourcePath, node.StartLine, node.StartColumn, null, "For aggregate results, one return type is expected and no output statements");
+                    yield break;
+                }
             }
-
-            if (returnHints.Count < visitor.Results.Count)
+            else
             {
-                environment.RegisterError(sourcePath, node.StartLine, node.StartColumn, null, "There are missing return declarations for the output statements. Please mark the header of the statement with a line per output containting this hint: -- @Return <ClrTypeName>");
-                yield break;
+                if (returnHints.Count > visitor.Results.Count)
+                {
+                    environment.RegisterError(target.SourcePath, node.StartLine, node.StartColumn, null, "There are more return declarations than output statements being produced by the statement");
+                    yield break;
+                }
+
+                if (returnHints.Count < visitor.Results.Count)
+                {
+                    environment.RegisterError(target.SourcePath, node.StartLine, node.StartColumn, null, "There are missing return declarations for the output statements. Please mark the header of the statement with a line per output containting this hint: -- @Return <ClrTypeName>");
+                    yield break;
+                }
             }
 
             HashSet<string> usedOutputNames = new HashSet<string>();
@@ -39,7 +50,7 @@ namespace Dibix.Sdk.CodeGeneration
             for (int i = 0; i < returnHints.Count; i++)
             {
                 SqlHint returnHint = returnHints[i];
-                if (!returnHint.TrySelectValueOrContent(ReturnHintClrTypes, x => environment.RegisterError(sourcePath, node.StartLine, node.StartColumn, null, x), out var typeNamesStr))
+                if (!returnHint.TrySelectValueOrContent(ReturnHintClrTypes, x => environment.RegisterError(target.SourcePath, node.StartLine, node.StartColumn, null, x), out var typeNamesStr))
                     yield break;
 
                 string[] typeNames = typeNamesStr.Split(';');
@@ -56,15 +67,18 @@ namespace Dibix.Sdk.CodeGeneration
                     SplitOn = splitOn
                 };
 
-                OutputSelectResult output = visitor.Results[i];
-                IList<TypeInfo> returnTypes = typeNames.Select(x => TypeLoaderFacade.LoadType(x, environment, y => environment.RegisterError(sourcePath, returnHint.Line, returnHint.Column, null, y))).ToArray();
+                IList<TypeInfo> returnTypes = typeNames.Select(x => TypeLoaderFacade.LoadType(x, environment, y => environment.RegisterError(target.SourcePath, returnHint.Line, returnHint.Column, null, y))).ToArray();
                 if (returnTypes.Any(x => x == null))
                     continue;
-                
-                ValidateResult(environment, returnHints.Count, returnHint, result, returnTypes, output.Columns, usedOutputNames, sourcePath);
 
                 result.Types.AddRange(returnTypes);
-                result.Columns.AddRange(output.Columns.Select(x => x.ColumnName));
+
+                if (!target.IsAggregateResult)
+                {
+                    OutputSelectResult output = visitor.Results[i];
+                    ValidateResult(environment, returnHints.Count, returnHint, result, returnTypes, output.Columns, usedOutputNames, target.SourcePath);
+                    result.Columns.AddRange(output.Columns.Select(x => x.ColumnName));
+                }
 
                 yield return result;
             }

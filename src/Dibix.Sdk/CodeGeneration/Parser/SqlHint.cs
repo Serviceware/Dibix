@@ -10,6 +10,7 @@ namespace Dibix.Sdk.CodeGeneration
         public const string ResultTypeName = "ResultTypeName";
         public const string ClrType = "ClrType";
         public const string Nullable = "Nullable";
+        public const string AggregateResult = "AggregateResult";
 
         public string Kind { get; set; }
         public string Value
