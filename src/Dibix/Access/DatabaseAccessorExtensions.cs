@@ -90,24 +90,44 @@ namespace Dibix
         public static IEnumerable<TReturn> QueryMany<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, Action<TReturn, TSecond> map)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
-            return QueryMany(accessor, sql, EmptyParameters.Instance, map, DefaultSplitOn);
+            return QueryMany(accessor, sql, CommandType.Text, EmptyParameters.Instance, map, DefaultSplitOn);
+        }
+        public static IEnumerable<TReturn> QueryMany<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, CommandType commandType, Action<TReturn, TSecond> map)
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
+            return QueryMany(accessor, sql, commandType, EmptyParameters.Instance, map, DefaultSplitOn);
         }
         public static IEnumerable<TReturn> QueryMany<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, Action<TReturn, TSecond> map, string splitOn)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
-            return QueryMany(accessor, sql, EmptyParameters.Instance, map, splitOn);
+            return QueryMany(accessor, sql, CommandType.Text, EmptyParameters.Instance, map, splitOn);
+        }
+        public static IEnumerable<TReturn> QueryMany<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, CommandType commandType, Action<TReturn, TSecond> map, string splitOn)
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
+            return QueryMany(accessor, sql, commandType, EmptyParameters.Instance, map, splitOn);
         }
         public static IEnumerable<TReturn> QueryMany<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, Action<TReturn, TSecond> map)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
-            return QueryMany(accessor, sql, parameters, map, DefaultSplitOn);
+            return QueryMany(accessor, sql, CommandType.Text, parameters, map, DefaultSplitOn);
+        }
+        public static IEnumerable<TReturn> QueryMany<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, CommandType commandType, IParametersVisitor parameters, Action<TReturn, TSecond> map)
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
+            return QueryMany(accessor, sql, commandType, parameters, map, DefaultSplitOn);
         }
         public static IEnumerable<TReturn> QueryMany<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, Action<TReturn, TSecond> map, string splitOn)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
+            return QueryMany(accessor, sql, CommandType.Text, parameters, map, DefaultSplitOn);
+        }
+        public static IEnumerable<TReturn> QueryMany<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, CommandType commandType, IParametersVisitor parameters, Action<TReturn, TSecond> map, string splitOn)
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
 
             HashCollection<TReturn> cache = new HashCollection<TReturn>();
-            accessor.QueryMany<TReturn, TSecond, TReturn>(sql, CommandType.Text, parameters, (a, b) =>
+            accessor.QueryMany<TReturn, TSecond, TReturn>(sql, commandType, parameters, (a, b) =>
             {
                 if (!cache.TryGetValue(a, out TReturn instance))
                 {
@@ -352,6 +372,23 @@ namespace Dibix
             return accessor.QueryMultiple(sql, CommandType.Text, parameters);
         }
 
+        public static IEnumerable<TReturn> ReadMany<TReturn, TSecond>(this IMultipleResultReader reader, Action<TReturn, TSecond> map, string splitOn)
+        {
+            Guard.IsNotNull(reader, nameof(reader));
+
+            HashCollection<TReturn> cache = new HashCollection<TReturn>();
+            reader.ReadMany<TReturn, TSecond, TReturn>((a, b) =>
+            {
+                if (!cache.TryGetValue(a, out TReturn instance))
+                {
+                    instance = a;
+                    cache.Add(instance);
+                }
+                map(instance, b);
+                return instance;
+            }, splitOn);
+            return cache;
+        }
         public static IEnumerable<TReturn> ReadMany<TReturn, TSecond, TThird>(this IMultipleResultReader reader, Action<TReturn, TSecond, TThird> map, string splitOn)
         {
             Guard.IsNotNull(reader, nameof(reader));

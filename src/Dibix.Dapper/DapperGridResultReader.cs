@@ -11,6 +11,10 @@ namespace Dibix.Dapper
         private readonly DapperMappingCheck _mappingCheck;
         #endregion
 
+        #region Properties
+        public bool IsConsumed => this._reader.IsConsumed;
+        #endregion
+
         #region Constructor
         public DapperGridResultReader(SqlMapper.GridReader reader, DapperMappingCheck mappingCheck)
         {
@@ -24,6 +28,12 @@ namespace Dibix.Dapper
         {
             this._mappingCheck.Check<T>();
             return this._reader.Read<T>();
+        }
+
+        public IEnumerable<TReturn> ReadMany<TFirst, TSecond, TReturn>(Func<TFirst, TSecond, TReturn> map, string splitOn)
+        {
+            this._mappingCheck.Check<TFirst, TSecond>();
+            return this._reader.Read(map, splitOn);
         }
 
         public IEnumerable<TReturn> ReadMany<TFirst, TSecond, TThird, TReturn>(Func<TFirst, TSecond, TThird, TReturn> map, string splitOn)
