@@ -22,27 +22,16 @@ namespace Dibix.Sdk.CodeGeneration
                                                       .Where(x => x.Kind == SqlHint.Return)
                                                       .ToArray();
 
-            if (target.IsAggregateResult)
+            if (returnHints.Count > visitor.Results.Count)
             {
-                if (returnHints.Count != 1 || visitor.Results.Count > 0)
-                {
-                    environment.RegisterError(target.SourcePath, node.StartLine, node.StartColumn, null, "For aggregate results, one return type is expected and no output statements");
-                    yield break;
-                }
+                environment.RegisterError(target.SourcePath, node.StartLine, node.StartColumn, null, "There are more return declarations than output statements being produced by the statement");
+                yield break;
             }
-            else
-            {
-                if (returnHints.Count > visitor.Results.Count)
-                {
-                    environment.RegisterError(target.SourcePath, node.StartLine, node.StartColumn, null, "There are more return declarations than output statements being produced by the statement");
-                    yield break;
-                }
 
-                if (returnHints.Count < visitor.Results.Count)
-                {
-                    environment.RegisterError(target.SourcePath, node.StartLine, node.StartColumn, null, "There are missing return declarations for the output statements. Please mark the header of the statement with a line per output containting this hint: -- @Return <ClrTypeName>");
-                    yield break;
-                }
+            if (returnHints.Count < visitor.Results.Count)
+            {
+                environment.RegisterError(target.SourcePath, node.StartLine, node.StartColumn, null, "There are missing return declarations for the output statements. Please mark the header of the statement with a line per output containting this hint: -- @Return <ClrTypeName>");
+                yield break;
             }
 
             HashSet<string> usedOutputNames = new HashSet<string>();
@@ -73,12 +62,9 @@ namespace Dibix.Sdk.CodeGeneration
 
                 result.Types.AddRange(returnTypes);
 
-                if (!target.IsAggregateResult)
-                {
-                    OutputSelectResult output = visitor.Results[i];
-                    ValidateResult(environment, returnHints.Count, returnHint, result, returnTypes, output.Columns, usedOutputNames, target.SourcePath);
-                    result.Columns.AddRange(output.Columns.Select(x => x.ColumnName));
-                }
+                OutputSelectResult output = visitor.Results[i];
+                ValidateResult(environment, returnHints.Count, returnHint, result, returnTypes, output.Columns, usedOutputNames, target.SourcePath);
+                result.Columns.AddRange(output.Columns.Select(x => x.ColumnName));
 
                 yield return result;
             }

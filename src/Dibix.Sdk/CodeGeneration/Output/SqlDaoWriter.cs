@@ -26,7 +26,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             Type generatedCodeAttributeType = typeof(GeneratedCodeAttribute);
             Type methodInfoType = typeof(MethodInfo);
-            bool returnsEnumerable = false, hasCollectionProperties = statements.Any(x => x.IsAggregateResult);
+            bool usesEnumerable = false, usesCollections = false;
             IDictionary<SqlStatementInfo, string> methodReturnTypeMap = statements.ToDictionary(x => x, DetermineResultTypeName);
 
             // Prepare writer
@@ -44,10 +44,10 @@ namespace Dibix.Sdk.CodeGeneration
             @class.AddSeparator();
 
             // Execution methods
-            AddExecutionMethods(@class, statements, methodReturnTypeMap, ref returnsEnumerable);
+            AddExecutionMethods(@class, statements, methodReturnTypeMap, ref usesEnumerable);
 
             // Grid result types
-            AddGridResultTypes(@class, statements, ref hasCollectionProperties);
+            AddGridResultTypes(@class, statements, ref usesCollections);
 
             @class.AddSeparator();
 
@@ -55,10 +55,10 @@ namespace Dibix.Sdk.CodeGeneration
             // This is useful for dynamic invocation like in WAX
             this.AddMethodInfoFields(@class, statements, methodInfoType);
 
-            if (returnsEnumerable || hasCollectionProperties)
+            if (usesEnumerable || usesCollections)
                 output.AddUsing(typeof(IEnumerable<>).Namespace);
 
-            if (hasCollectionProperties)
+            if (usesCollections)
                 output.AddUsing(typeof(Collection<>).Namespace);
 
             output.Generate();
@@ -83,14 +83,14 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static void AddExecutionMethods(CSharpClass @class, IEnumerable<SqlStatementInfo> statements, IDictionary<SqlStatementInfo, string> methodReturnTypeMap, ref bool returnsEnumerable)
+        private static void AddExecutionMethods(CSharpClass @class, IEnumerable<SqlStatementInfo> statements, IDictionary<SqlStatementInfo, string> methodReturnTypeMap, ref bool usesEnumerable)
         {
             foreach (SqlStatementInfo statement in statements)
             {
                 bool isSingleResult = statement.Results.Count == 1;
 
                 if (isSingleResult && statement.Results[0].ResultMode == SqlQueryResultMode.Many)
-                    returnsEnumerable = true;
+                    usesEnumerable = true;
 
                 string resultTypeName = methodReturnTypeMap[statement];
                 CSharpMethod method = @class.AddMethod(name: String.Concat(MethodPrefix, statement.Name)
@@ -104,7 +104,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static void AddGridResultTypes(CSharpClass @class, IEnumerable<SqlStatementInfo> statements, ref bool hasCollectionProperties)
+        private static void AddGridResultTypes(CSharpClass @class, IEnumerable<SqlStatementInfo> statements, ref bool usesCollections)
         {
             ICollection<SqlStatementInfo> gridResultStatements = statements.Where(x => x.Results.Count > 1 && x.ResultTypeName == null).ToArray();
             if (gridResultStatements.Any())
@@ -131,8 +131,8 @@ namespace Dibix.Sdk.CodeGeneration
                 if (!collectionProperties.Any())
                     continue;
 
-                if (!hasCollectionProperties)
-                    hasCollectionProperties = collectionProperties.Any();
+                if (!usesCollections)
+                    usesCollections = collectionProperties.Any();
 
                 StringBuilder ctorBodyWriter = new StringBuilder();
                 for (int i = 0; i < collectionProperties.Count; i++)
@@ -270,13 +270,13 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 WriteNoResult(writer, query);
             }
-            else if (query.Results.Count > 1 || query.IsAggregateResult) // GridReader
-            {
-                WriteComplexResult(writer, query);
-            }
             else if (query.Results.Count == 1) // Query<T>/QuerySingle/etc.
             {
                 WriteSingleResult(writer, query);
+            }
+            else if (query.Results.Count > 1) // GridReader
+            {
+                WriteComplexResult(writer, query);
             }
         }
 
@@ -351,10 +351,7 @@ namespace Dibix.Sdk.CodeGeneration
                   .WriteLine("{")
                   .PushIndent();
 
-            if (!query.IsAggregateResult)
-                WriteComplexResultBody(writer, query);
-            else
-                WriteAggregateResultBody(writer, query);
+            WriteComplexResultBody(writer, query);
 
             writer.PopIndent()
                   .WriteLine("}");
@@ -411,29 +408,6 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             writer.WriteLine("return result;");
-        }
-
-        private static void WriteAggregateResultBody(StringWriter writer, SqlStatementInfo query)
-        {
-            SqlQueryResult singleResult = query.Results.Single();
-            string resultTypeName = singleResult.Types.First().Name.SimplifiedTypeName;
-            writer.Write(MakeCollectionInterfaceType(resultTypeName))
-                  .WriteRaw(" results = new ")
-                  .WriteRaw(MakeCollectionType(resultTypeName))
-                  .WriteLineRaw("();")
-                  .WriteLine("while (!reader.IsConsumed)")
-                  .PushIndent()
-                  .Write("results.AddRange(reader.ReadMany<")
-                  .WriteRaw(String.Join(", ", singleResult.Types.Select(x => x.Name.SimplifiedTypeName)))
-                  .WriteRaw(">(")
-                  .WriteRaw(singleResult.Converter)
-                  .WriteRaw(", \"")
-                  .WriteRaw(singleResult.SplitOn)
-                  .WriteRaw("\"));")
-                  .PopIndent()
-                  .WriteLine()
-                  .WriteLine()
-                  .WriteLine("return results;");
         }
 
         private static string GetExecutorMethodName(SqlQueryResultMode mode)

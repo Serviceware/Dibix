@@ -12,7 +12,6 @@ namespace Dibix.Sdk.CodeGeneration
         public string ProcedureName { get; set; }
         public CommandType? CommandType { get; set; }
         public string ResultTypeName { get; set; }
-        public bool IsAggregateResult { get; set; }
         public IList<SqlQueryParameter> Parameters { get; }
         public IList<SqlQueryResult> Results { get; }
 

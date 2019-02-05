@@ -21,7 +21,6 @@ namespace Dibix.Sdk.CodeGeneration
                 this.Target.Name = name;
 
             this.Target.ResultTypeName = content.SingleHint(SqlHint.ResultTypeName);
-            this.Target.IsAggregateResult = content.IsSet(SqlHint.AggregateResult);
 
             this.ParseResults(content);
             this.ParseBody(statements ?? new StatementList());
