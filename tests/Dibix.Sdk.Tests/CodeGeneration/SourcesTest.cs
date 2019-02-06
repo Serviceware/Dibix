@@ -7,7 +7,6 @@
 //     the code is regenerated.
 // </auto-generated>
 //----------------------------------------------------------------------------*/
-using System;
 using System.CodeDom.Compiler;
 using System.Reflection;
 using Dibix;
@@ -25,6 +24,9 @@ namespace This.Is.A.Custom.Namespace
 
         // dbx_tests_sources_externalsp
         public const string dbx_tests_sources_externalspCommandText = @"[dbo].[dbx_tests_externalsp]";
+
+        // DeleteProject
+        public const string DeleteProjectCommandText = @"[dbo].[delete_project]";
 
         public static int dbx_tests_sources_includednested(this IDatabaseAccessorFactory databaseAccessorFactory)
         {
@@ -47,9 +49,24 @@ namespace This.Is.A.Custom.Namespace
                 return accessor.Execute(dbx_tests_sources_externalspCommandText, System.Data.CommandType.StoredProcedure);
             }
         }
+        public static int DeleteProject(this IDatabaseAccessorFactory databaseAccessorFactory, string folder_name, string project_name)
+        {
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
+            {
+                IParametersVisitor @params = accessor.Parameters()
+                                                     .SetFromTemplate(new
+                                                     {
+                                                         folder_name,
+                                                         project_name
+                                                     })
+                                                     .Build();
+                return accessor.Execute(DeleteProjectCommandText, System.Data.CommandType.StoredProcedure, @params);
+            }
+        }
 
-        public static readonly MethodInfo dbx_tests_sources_includednestedMethodInfo = new Func<IDatabaseAccessorFactory, int>(dbx_tests_sources_includednested).Method;
-        public static readonly MethodInfo dbx_tests_sources_excludednestedMethodInfo = new Func<IDatabaseAccessorFactory, int>(dbx_tests_sources_excludednested).Method;
-        public static readonly MethodInfo dbx_tests_sources_externalspMethodInfo = new Func<IDatabaseAccessorFactory, int>(dbx_tests_sources_externalsp).Method;
+        public static readonly MethodInfo dbx_tests_sources_includednestedMethodInfo = typeof(Accessor).GetMethod("dbx_tests_sources_includednested");
+        public static readonly MethodInfo dbx_tests_sources_excludednestedMethodInfo = typeof(Accessor).GetMethod("dbx_tests_sources_excludednested");
+        public static readonly MethodInfo dbx_tests_sources_externalspMethodInfo = typeof(Accessor).GetMethod("dbx_tests_sources_externalsp");
+        public static readonly MethodInfo DeleteProjectMethodInfo = typeof(Accessor).GetMethod("DeleteProject");
     }
 }

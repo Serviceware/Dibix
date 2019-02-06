@@ -36,19 +36,25 @@ namespace Dibix.Sdk.CodeGeneration
         }
 
         public ISqlAccessorGenerator AddSource(string projectName) { return this.AddSource(projectName, null); }
-        public ISqlAccessorGenerator AddSource(Action<ISourceSelectionExpression> configuration) { return this.AddSource(null, configuration); }
-        public ISqlAccessorGenerator AddSource(string projectName, Action<ISourceSelectionExpression> configuration)
+        public ISqlAccessorGenerator AddSource(Action<IPhysicalSourceSelectionExpression> configuration) { return this.AddSource(null, configuration); }
+        public ISqlAccessorGenerator AddSource(string projectName, Action<IPhysicalSourceSelectionExpression> configuration)
         {
-            if (String.IsNullOrEmpty(projectName))
-                throw new ArgumentNullException(projectName);
+            Guard.IsNotNullOrEmpty(projectName, nameof(projectName));
 
             //if (!String.IsNullOrEmpty(projectName))
                 this._environment.VerifyProject(projectName);
 
-            SourceSelectionExpression expression = new SourceSelectionExpression(this._environment, projectName);
+            PhysicalSourceSelectionExpression expression = new PhysicalSourceSelectionExpression(this._environment, projectName);
             configuration?.Invoke(expression);
+            this._configuration.Sources.Add(expression);
+            return this;
+        }
 
-            expression.Build();
+        public ISqlAccessorGenerator AddDacPac(string packagePath, Action<IDacPacSelectionExpression> configuration)
+        {
+            Guard.IsNotNull(configuration, nameof(configuration));
+            DacPacSelectionExpression expression = new DacPacSelectionExpression(this._environment, packagePath);
+            configuration(expression);
             this._configuration.Sources.Add(expression);
             return this;
         }
@@ -80,42 +86,12 @@ namespace Dibix.Sdk.CodeGeneration
             if (configuration.Writer == null)
                 throw new InvalidOperationException("No output writer was selected");
 
-            IList<SqlStatementInfo> statements = TraverseSources(environment, configuration.Sources).ToArray();
+            IList<SqlStatementInfo> statements = configuration.Sources.SelectMany(x => x.CollectStatements()).ToArray();
             string output = configuration.Writer.Write(environment.GetProjectName(), statements);
             if (environment.ReportErrors())
                 output = "Please fix the errors first";
 
             return output;
-        }
-
-        private static IEnumerable<SqlStatementInfo> TraverseSources(IExecutionEnvironment environment, IEnumerable<ISourceSelection> sources)
-        {
-            foreach (ISourceSelection source in sources)
-            {
-                ISqlStatementParser parser = source.Parser ?? new NoOpParser();
-
-                if (parser.Formatter == null)
-                    parser.Formatter = new TakeSourceSqlStatementFormatter();
-
-                foreach (string filePath in source.Files)
-                {
-                    yield return ParseStatement(environment, filePath, parser);
-                }
-            }
-        }
-
-        private static SqlStatementInfo ParseStatement(IExecutionEnvironment environment, string filePath, ISqlStatementParser parser)
-        {
-            using (Stream stream = File.OpenRead(filePath))
-            {
-                SqlStatementInfo statement = new SqlStatementInfo
-                {
-                    SourcePath = filePath,
-                    Name = Path.GetFileNameWithoutExtension(filePath)
-                };
-                parser.Read(environment, stream, statement);
-                return statement;
-            }
         }
         #endregion
     }

@@ -80,10 +80,7 @@ namespace Dibix.Sdk
         {
             public bool Found { get; private set; }
 
-            public override void ExplicitVisit(IfStatement node)
-            {
-                this.Found = true;
-            }
+            public override void ExplicitVisit(IfStatement node) => this.Found = true;
         }
 
         private class UnionStatementVisitor : TSqlFragmentVisitor

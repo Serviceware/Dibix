@@ -27,7 +27,8 @@ namespace Dibix.Sdk.Tests.Utilities
                 { "Table",     "dbx*" }
               , { "Procedure", "dbx*" }
             };
-            overrides.Each(x => namingConventionType.GetField(x.Key, BindingFlags.Public | BindingFlags.Static).SetValue(null, x.Value));
+            foreach (KeyValuePair<string, string> @override in overrides)
+                namingConventionType.GetField(@override.Key, BindingFlags.Public | BindingFlags.Static).SetValue(null, @override.Value);
         }
 
         private static void RunWinMerge(string expectedText, string actualText)

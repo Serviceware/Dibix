@@ -15,7 +15,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public static IEnumerable<SqlQueryResult> Parse(IExecutionEnvironment environment, SqlStatementInfo target, TSqlStatement node)
         {
-            StatementOutputVisitor visitor = new StatementOutputVisitor(environment, target.SourcePath);
+            StatementOutputVisitor visitor = new StatementOutputVisitor(environment, target.Source);
             node.Accept(visitor);
 
             IList<SqlHint> returnHints = SqlHintReader.Read(node)
@@ -24,13 +24,13 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (returnHints.Count > visitor.Results.Count)
             {
-                environment.RegisterError(target.SourcePath, node.StartLine, node.StartColumn, null, "There are more return declarations than output statements being produced by the statement");
+                environment.RegisterError(target.Source, node.StartLine, node.StartColumn, null, "There are more return declarations than output statements being produced by the statement");
                 yield break;
             }
 
             if (returnHints.Count < visitor.Results.Count)
             {
-                environment.RegisterError(target.SourcePath, node.StartLine, node.StartColumn, null, "There are missing return declarations for the output statements. Please mark the header of the statement with a line per output containting this hint: -- @Return <ClrTypeName>");
+                environment.RegisterError(target.Source, node.StartLine, node.StartColumn, null, "There are missing return declarations for the output statements. Please mark the header of the statement with a line per output containting this hint: -- @Return <ClrTypeName>");
                 yield break;
             }
 
@@ -39,7 +39,7 @@ namespace Dibix.Sdk.CodeGeneration
             for (int i = 0; i < returnHints.Count; i++)
             {
                 SqlHint returnHint = returnHints[i];
-                if (!returnHint.TrySelectValueOrContent(ReturnHintClrTypes, x => environment.RegisterError(target.SourcePath, node.StartLine, node.StartColumn, null, x), out var typeNamesStr))
+                if (!returnHint.TrySelectValueOrContent(ReturnHintClrTypes, x => environment.RegisterError(target.Source, node.StartLine, node.StartColumn, null, x), out var typeNamesStr))
                     yield break;
 
                 string[] typeNames = typeNamesStr.Split(';');
@@ -56,14 +56,14 @@ namespace Dibix.Sdk.CodeGeneration
                     SplitOn = splitOn
                 };
 
-                IList<TypeInfo> returnTypes = typeNames.Select(x => TypeLoaderFacade.LoadType(x, environment, y => environment.RegisterError(target.SourcePath, returnHint.Line, returnHint.Column, null, y))).ToArray();
+                IList<TypeInfo> returnTypes = typeNames.Select(x => TypeLoaderFacade.LoadType(x, environment, y => environment.RegisterError(target.Source, returnHint.Line, returnHint.Column, null, y))).ToArray();
                 if (returnTypes.Any(x => x == null))
                     continue;
 
                 result.Types.AddRange(returnTypes);
 
                 OutputSelectResult output = visitor.Results[i];
-                ValidateResult(environment, returnHints.Count, returnHint, result, returnTypes, output.Columns, usedOutputNames, target.SourcePath);
+                ValidateResult(environment, returnHints.Count, returnHint, result, returnTypes, output.Columns, usedOutputNames, target.Source);
                 result.Columns.AddRange(output.Columns.Select(x => x.ColumnName));
 
                 yield return result;

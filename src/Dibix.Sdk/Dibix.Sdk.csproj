@@ -7,6 +7,10 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Include="..\Dibix\Diagnostics\Guard.cs" Link="Guard.cs" />
+    <Compile Include="..\Dibix\Extensions\EnumerableExtensions.cs" Link="EnumerableExtensions.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="EnvDTE" Version="$(EnvDTEVersion)" />

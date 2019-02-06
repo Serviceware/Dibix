@@ -6,8 +6,9 @@ namespace Dibix.Sdk.CodeGeneration
     {
         string Generate();
         ISqlAccessorGenerator AddSource(string projectName);
-        //ISqlAccessorGenerator AddSource(Action<ISourceSelectionExpression> configuration);
-        ISqlAccessorGenerator AddSource(string projectName, Action<ISourceSelectionExpression> configuration);
+        //ISqlAccessorGenerator AddSource(Action<IPhysicalSourceSelectionExpression> configuration);
+        ISqlAccessorGenerator AddSource(string projectName, Action<IPhysicalSourceSelectionExpression> configuration);
+        ISqlAccessorGenerator AddDacPac(string packagePath, Action<IDacPacSelectionExpression> configuration);
         ISqlAccessorGenerator SelectOutputWriter<TWriter>() where TWriter : IWriter, new();
         ISqlAccessorGenerator SelectOutputWriter<TWriter>(Action<IOutputConfigurationExpression> configuration) where TWriter : IWriter, new();
     }

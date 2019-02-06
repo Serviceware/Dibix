@@ -16,6 +16,9 @@ namespace Dibix.Sdk.CodeGeneration
 
         public IEnumerable<string> GetFilesInProject(string projectName, string virtualFolderPath, bool recursive, IEnumerable<string> excludedFolders)
         {
+            if (!String.IsNullOrEmpty(projectName))
+                throw new ArgumentException($"The {nameof(PhysicalFileSystemProvider)} does not support project names", nameof(projectName));
+
             string relativePath = virtualFolderPath != null ? virtualFolderPath.Replace("/", "\\").TrimEnd('\\') : String.Empty;
             string directory = Path.GetFullPath(Path.Combine(this._currentDirectory, relativePath));
             string[] paths = Directory.EnumerateFiles(directory, "*.sql", recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
@@ -27,6 +30,9 @@ namespace Dibix.Sdk.CodeGeneration
 
         public string GetPhysicalFilePath(string projectName, string virtualFilePath)
         {
+            if (!String.IsNullOrEmpty(projectName))
+                throw new ArgumentException($"The {nameof(PhysicalFileSystemProvider)} does not support project names", nameof(projectName));
+
             string path = Path.GetFullPath(Path.Combine(this._currentDirectory, virtualFilePath));
             return path;
         }

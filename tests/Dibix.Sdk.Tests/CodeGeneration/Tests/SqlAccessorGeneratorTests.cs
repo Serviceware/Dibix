@@ -47,6 +47,14 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                              y.Formatter<ExecStoredProcedureSqlStatementFormatter>();
                          });
                     })
+                    .AddDacPac("SSISDB.dacpac", x =>
+                    {
+                        x.SelectProcedure("[catalog].[delete_project]", "DeleteProject")
+                            .SelectParser<SqlStoredProcedureParser>(y =>
+                            {
+                                y.Formatter<ExecStoredProcedureSqlStatementFormatter>();
+                            });
+                    })
                     .SelectOutputWriter<SqlDaoWriter>(x =>
                     {
                         x.Namespace("This.Is.A.Custom.Namespace")

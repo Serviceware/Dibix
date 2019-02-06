@@ -3,7 +3,7 @@ using System.Linq;
 using Dibix.Sdk.CodeAnalysis;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
-namespace Dibix.Sdk.CodeGeneration.Parser
+namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class SqlCodeAnalysisGeneratorAdapter
     {

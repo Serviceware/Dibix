@@ -4,7 +4,6 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public interface ISourceSelection
     {
-        ICollection<string> Files { get; }
-        ISqlStatementParser Parser { get; }
+        IEnumerable<SqlStatementInfo> CollectStatements();
     }
 }

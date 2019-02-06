@@ -1,18 +1,25 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
-using Dibix.Sdk.CodeGeneration.Parser;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    public abstract class SqlStatementParser<TVisitor> : ISqlStatementParser where TVisitor : SqlParserVisitor, new()
+    public abstract class SqlStatementParser<TVisitor> : ISqlStatementParser, ISqlAnalysisRunner where TVisitor : SqlParserVisitor, new()
     {
         #region Fields
+        private static readonly IDictionary<SqlParserSourceKind, Func<object, TSqlFragment>> SourceReaders = new Dictionary<SqlParserSourceKind, Func<object, TSqlFragment>>
+        {
+            { SqlParserSourceKind.String, ReadFromString },
+            { SqlParserSourceKind.Stream, ReadFromStream },
+            { SqlParserSourceKind.Ast, ReadFromAst },
+        };
         private readonly SqlCodeAnalysisGeneratorAdapter _codeAnalysisRunner;
         #endregion
 
         #region Properties
         public ISqlStatementFormatter Formatter { get; set; }
+        public bool IsEnabled { get; set; } = true;
         #endregion
 
         #region Constructor
@@ -23,23 +30,35 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region ISqlStatementParser Members
-        public void Read(IExecutionEnvironment environment, Stream source, SqlStatementInfo target)
+        public void Read(IExecutionEnvironment environment, SqlParserSourceKind sourceKind, object source, SqlStatementInfo target)
         {
-            string sourceFilePath = source is FileStream file ? file.Name : null;
-            using (TextReader reader = new StreamReader(source))
-            {
-                TSqlParser parser = new TSql140Parser(true);
-                IList<ParseError> parseErrors;
-                TSqlFragment fragment = parser.Parse(reader, out parseErrors);
-                if (this._codeAnalysisRunner.Analyze(environment, fragment, sourceFilePath))
-                    return;
+            if (!SourceReaders.TryGetValue(sourceKind, out Func<object, TSqlFragment> reader))
+                throw new ArgumentOutOfRangeException(nameof(sourceKind), sourceKind, null);
 
-                CollectStatementInfo(fragment, target, this.Formatter, environment);
-            }
+            TSqlFragment fragment = reader(source);
+            if (this.IsEnabled && this._codeAnalysisRunner.Analyze(environment, fragment, target.Source))
+                return;
+
+            CollectStatementInfo(fragment, target, this.Formatter, environment);
         }
         #endregion
 
         #region Private Methods
+        private static TSqlFragment ReadFromString(object source) => ReadFromTextReader(new StringReader((string)source));
+
+        private static TSqlFragment ReadFromStream(object source) => ReadFromTextReader(new StreamReader((Stream)source));
+
+        private static TSqlFragment ReadFromAst(object source) => (TSqlFragment)source;
+
+        private static TSqlFragment ReadFromTextReader(TextReader reader)
+        {
+            using (reader)
+            {
+                TSqlParser parser = new TSql140Parser(true);
+                return parser.Parse(reader, out IList<ParseError> _);
+            }
+        }
+
         private static void CollectStatementInfo(TSqlFragment fragment, SqlStatementInfo target, ISqlStatementFormatter formatter, IExecutionEnvironment environment)
         {
             TVisitor visitor = new TVisitor
@@ -52,7 +71,7 @@ namespace Dibix.Sdk.CodeGeneration
             fragment.Accept(visitor);
 
             if (visitor.Target.Content == null)
-                environment.RegisterError(target.SourcePath, fragment.StartLine, fragment.StartColumn, null, "File could not be parsed");
+                environment.RegisterError(target.Source, fragment.StartLine, fragment.StartColumn, null, "File could not be parsed");
         }
         #endregion
     }

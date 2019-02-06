@@ -1,4 +1,4 @@
-﻿using System.IO;
+﻿using System;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -6,12 +6,12 @@ namespace Dibix.Sdk.CodeGeneration
     {
         public ISqlStatementFormatter Formatter { get; set; }
 
-        public void Read(IExecutionEnvironment environment, Stream source, SqlStatementInfo target)
+        public void Read(IExecutionEnvironment environment, SqlParserSourceKind sourceKind, object source, SqlStatementInfo target)
         {
-            using (StreamReader reader = new StreamReader(source))
-            {
-                target.Content = reader.ReadToEnd();
-            }
+            if (sourceKind != SqlParserSourceKind.String)
+                throw new ArgumentOutOfRangeException(nameof(sourceKind), sourceKind, "This parser only supports string input");
+
+            target.Content = (string)source;
         }
     }
 }

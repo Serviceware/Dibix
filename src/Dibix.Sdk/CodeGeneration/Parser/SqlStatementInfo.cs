@@ -6,7 +6,7 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public class SqlStatementInfo 
     {
-        public string SourcePath { get; set; }
+        public string Source { get; set; }
         public string Name { get; set; }
         public string Content { get; set; }
         public string ProcedureName { get; set; }
