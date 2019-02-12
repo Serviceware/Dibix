@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
@@ -12,18 +11,9 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
     public sealed class UnfilteredDataModificationSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
     {
-        // helpLine suppressions
-        private static readonly HashSet<string> Workarounds = new HashSet<string>
-        {
-            "hlwfreanalyzesubscription"
-        };
-
         public override void Visit(UpdateSpecification node)
         {
             if (node.WhereClause != null)
-                return;
-
-            if (node.Target is NamedTableReference namedTableSource && Workarounds.Contains(namedTableSource.SchemaObject.BaseIdentifier.Value))
                 return;
 
             // Table variables are allowed for update
