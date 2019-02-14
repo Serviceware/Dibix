@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Common;
-using System.Data.SqlClient;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Xunit;
@@ -13,7 +11,7 @@ namespace Dibix.Dapper.Tests
         [Fact]
         public void ExecuteScalar_ReturnsScalarResult()
         {
-            using (IDatabaseAccessor accessor = CreateAccessor())
+            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
             {
                 const string commandText = @"SELECT 1";
                 byte result = accessor.ExecuteScalar<byte>(commandText);
@@ -24,7 +22,7 @@ namespace Dibix.Dapper.Tests
         [Fact]
         public void QuerySingle_MissingColumnName_ThrowsException()
         {
-            using (IDatabaseAccessor accessor = CreateAccessor())
+            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
             {
                 const string commandText = @"SELECT 1";
                 InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => accessor.QuerySingle<Entity>(commandText));
@@ -35,7 +33,7 @@ namespace Dibix.Dapper.Tests
         [Fact]
         public void QuerySingle_InvalidColumnName_ThrowsException()
         {
-            using (IDatabaseAccessor accessor = CreateAccessor())
+            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
             {
                 const string commandText = @"SELECT 1 AS [idx]";
                 InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => accessor.QuerySingle<Entity>(commandText));
@@ -46,7 +44,7 @@ namespace Dibix.Dapper.Tests
         [Fact]
         public void QuerySingle_Success()
         {
-            using (IDatabaseAccessor accessor = CreateAccessor())
+            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
             {
                 const string commandText = @"SELECT 1 AS [id]";
                 Entity result = accessor.QuerySingle<Entity>(commandText);
@@ -58,7 +56,7 @@ namespace Dibix.Dapper.Tests
         [Fact]
         public void QuerySingle_WithPrimitiveParameter_UsingLambdaSyntax_Success()
         {
-            using (IDatabaseAccessor accessor = CreateAccessor())
+            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
             {
                 const string commandText = @"SELECT @agentid AS [id], N'beef' AS [name]";
                 Entity result = accessor.QuerySingle<Entity>(commandText, x => x.SetInt32("agentid", 6));
@@ -71,7 +69,7 @@ namespace Dibix.Dapper.Tests
         [Fact]
         public void QuerySingle_WithPrimitiveParameter_UsingLambdaAndTemplateSyntax_Success()
         {
-            using (IDatabaseAccessor accessor = CreateAccessor())
+            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
             {
                 const string commandText = @"SELECT @agentid AS [id], N'beef' AS [name]";
                 Entity result = accessor.QuerySingle<Entity>(commandText, x => x.SetFromTemplate(new { agentid = 6 }));
@@ -84,7 +82,7 @@ namespace Dibix.Dapper.Tests
         [Fact]
         public void QuerySingle_WithPrimitiveParameter_UsingVariableSyntax_Success()
         {
-            using (IDatabaseAccessor accessor = CreateAccessor())
+            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
             {
                 const string commandText = @"SELECT @agentid AS [id], N'beef' AS [name]";
                 IParametersVisitor @params = accessor.Parameters()
@@ -100,7 +98,7 @@ namespace Dibix.Dapper.Tests
         [Fact]
         public void QuerySingle_WithPrimitiveParameter_UsingVariableAndTemplateSyntax_Success()
         {
-            using (IDatabaseAccessor accessor = CreateAccessor())
+            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
             {
                 const string commandText = @"SELECT @agentid AS [id], N'beef' AS [name]";
                 IParametersVisitor @params = accessor.Parameters()
@@ -116,7 +114,7 @@ namespace Dibix.Dapper.Tests
         [Fact]
         public void QueryMany_WithTableValueParameter_Success()
         {
-            using (IDatabaseAccessor accessor = CreateAccessor())
+            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
             {
                 const string commandText = @"SELECT [intvalue] AS [id], [stringvalue] AS [name]
 FROM @translations";
@@ -140,7 +138,7 @@ FROM @translations";
         [Fact]
         public void QueryMultiple_Success()
         {
-            using (IDatabaseAccessor accessor = CreateAccessor())
+            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
             {
                 const string commandText = @"SELECT @agentid AS [id], N'beef' AS [name], [decimalvalue] AS [price]
 FROM @values
@@ -168,7 +166,7 @@ FROM @ids";
         [Fact]
         public void QuerySingle_WithMultiMap_Success()
         {
-            using (IDatabaseAccessor accessor = CreateAccessor())
+            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
             {
                 const string commandText = @"SELECT [intvalue] AS [id], 0 AS [id], [stringvalue] AS [name], 0 AS [id], [decimalvalue] AS [price]
 FROM @values";
@@ -201,7 +199,7 @@ FROM @values";
         [Fact]
         public void QueryMultiple_WithMultiMap_Success()
         {
-            using (IDatabaseAccessor accessor = CreateAccessor())
+            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
             {
                 const string commandText = @"SELECT [intvalue] AS [id], 0 AS [id], [stringvalue] AS [name], 0 AS [id], [decimalvalue] AS [price]
 FROM @values";
@@ -237,7 +235,7 @@ FROM @values";
         [Fact]
         public void CustomSqlMetadata_MaxLength_TextIsTrimmed()
         {
-            using (IDatabaseAccessor accessor = CreateAccessor())
+            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
             {
                 const string commandText = @"SELECT [stringvalue]
 FROM @values";
@@ -250,7 +248,7 @@ FROM @values";
         [Fact]
         public void CustomSqlMetadata_Scale_DecimalValueIsRounded()
         {
-            using (IDatabaseAccessor accessor = CreateAccessor())
+            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
             {
                 const string commandText = @"SELECT [decimalvalue]
 FROM @values";
@@ -259,54 +257,5 @@ FROM @values";
                 Assert.Equal(4M, result);
             }
         }
-
-        private static IDatabaseAccessor CreateAccessor()
-        {
-            ConnectionStringOptions connectionSections = new ConfigurationBuilder().AddUserSecrets("dibix")
-                                                                                   .Build()
-                                                                                   .Get<ConnectionStringOptions>();
-            Guard.IsNotNull(connectionSections, nameof(connectionSections), "No connection string configured. Please call setup-env script.");
-            ConnectionStringSection connectionSection = connectionSections["DefaultConnection"];
-
-            /* 
-                In .NET Framework, the providers are automatically available via machine.config and are also registered globally in the GAC.
-                In .NET Core, there is no GAC or global configuration anymore.
-                This means we have to register the provider first 
-            */
-            DbProviderFactories.RegisterFactory("System.Data.SqlClient", SqlClientFactory.Instance);
-
-            DbConnection connection = DbProviderFactories.GetFactory(connectionSection.ProviderName)
-                                                         .CreateConnection();
-            connection.ConnectionString = connectionSection.ConnectionString;
-            connection.Open();
-
-            using (DbCommand command = connection.CreateCommand())
-            {
-                command.CommandText = @"IF TYPE_ID('[dbo].[_dibix_tests_structuredtype]') IS NOT NULL
-BEGIN
-	CREATE TYPE [dbo].[_dibix_tests_structuredtype] AS TABLE
-	(
-		[intvalue]     INT			     NOT NULL
-	  , [stringvalue]  NVARCHAR(MAX) NOT NULL
-	  , [decimalvalue] DECIMAL(14,2) NOT NULL
-	  , PRIMARY KEY ([intvalue])
-	)
-END";
-                command.ExecuteNonQuery();
-            }
-
-            return new DapperDatabaseAccessor(connection, DapperMappingBehavior.Strict);
-        }
-    }
-
-    public sealed class ConnectionStringSection
-    {
-        public string ConnectionString { get; set; }
-        public string ProviderName { get; set; }
-    }
-
-    public sealed class ConnectionStringOptions : Dictionary<string, ConnectionStringSection>
-    {
-        public ConnectionStringOptions() : base(StringComparer.OrdinalIgnoreCase) { }
     }
 }

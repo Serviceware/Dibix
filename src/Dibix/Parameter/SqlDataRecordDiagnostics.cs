@@ -11,13 +11,13 @@ namespace Dibix
         public static string Dump(IEnumerable<SqlMetaData> metadata, IEnumerable<SqlDataRecord> records)
         {
             string[] columns = metadata.Select(DumpMetadata).ToArray();
-            string[][] cells = records.Select(x =>
+            string[][] rows = records.Select(x =>
             {
                 object[] values = new object[x.FieldCount];
                 x.GetValues(values);
                 return values.Select(y => y != DBNull.Value ? y.ToString() : "NULL").ToArray();
             }).ToArray();
-            string dump = ToTable(columns, cells);
+            string dump = ToTable(columns, rows);
             return dump;
         }
 
@@ -33,7 +33,7 @@ namespace Dibix
             return sb.ToString();
         }
 
-        private static string ToTable(string[] columns, string[][] cells, string separator = "  ")
+        private static string ToTable(string[] columns, string[][] rows, string separator = "  ")
         {
             StringBuilder sb = new StringBuilder();
             int[] sizes = new int[columns.Length];
@@ -42,7 +42,7 @@ namespace Dibix
             for (int i = 0; i < columns.Length; i++)
             {
                 int columnHeaderSize = columns[i].Length;
-                int maxCellSize = cells.Max(x => x[i].Length);
+                int maxCellSize = rows.Max(x => x[i].Length);
                 sizes[i] = Math.Max(columnHeaderSize, maxCellSize);
             }
 
@@ -65,17 +65,17 @@ namespace Dibix
             sb.AppendLine();
 
             // Write rows
-            for (int rowIndex = 0; rowIndex < cells.Length; rowIndex++)
+            for (int rowIndex = 0; rowIndex < rows.Length; rowIndex++)
             {
                 // Write cells
-                for (int cellIndex = 0; cellIndex < cells[rowIndex].Length; cellIndex++)
+                for (int cellIndex = 0; cellIndex < rows[rowIndex].Length; cellIndex++)
                 {
-                    sb.Append(cells[rowIndex][cellIndex].PadRight(sizes[cellIndex]));
-                    if (cellIndex + 1 < cells[rowIndex].Length)
+                    sb.Append(rows[rowIndex][cellIndex].PadRight(sizes[cellIndex]));
+                    if (cellIndex + 1 < rows[rowIndex].Length)
                         sb.Append(separator);
                 }
 
-                if (rowIndex + 1 < cells[rowIndex].Length)
+                if (rowIndex + 1 < rows.Length)
                     sb.AppendLine();
             }
 
