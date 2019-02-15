@@ -2,7 +2,7 @@
 -- @Return ClrTypes:System.Int32 Name:B
 -- @Return ClrTypes:string Name:C
 -- @Return ClrTypes:Dibix.Sdk.Tests.CodeGeneration.Direction? Name:D
--- @Return ClrTypes:Dibix.Sdk.Tests.CodeGeneration.Entity Name:E
+-- @Return ClrTypes:Dibix.Sdk.Tests.CodeGeneration.SpecialEntity Name:E
 CREATE PROCEDURE [dbo].[dbx_tests_parser_invalidcolumnsforentity]
 AS
 	SELECT COUNT(*) AS [column] FROM (VALUES(1)) AS x(a)
@@ -68,9 +68,9 @@ AS
 		OUTPUT $action AS [action]
 	;
 
-	SELECT 1 AS id, N'Cake' AS [name] -- [namex]
+	SELECT 1 AS id, N'Cake' AS [name] /* [namex] */, 12 AS [age]
 	UNION ALL
-	SELECT 2 AS id, N'Cookie' AS [name] -- [namex]
+	SELECT 2 AS id, N'Cookie' AS [name] /* [namex] */, 16 AS [age]
 
 	/*
 	SELECT [x].[i]

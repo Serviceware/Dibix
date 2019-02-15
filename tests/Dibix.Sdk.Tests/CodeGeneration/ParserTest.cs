@@ -40,10 +40,12 @@ USING dbo.dbx_table AS source ON (1 = 0)
 WHEN NOT MATCHED BY SOURCE THEN DELETE OUTPUT $ACTION AS [action];
 
 SELECT 1 AS id,
-       N'Cake' AS [name]
+       N'Cake' AS [name],
+       12 AS [age]
 UNION ALL
 SELECT 2 AS id,
-       N'Cookie' AS [name];";
+       N'Cookie' AS [name],
+       16 AS [age];";
 
         // dbx_tests_parser_nestedifs
         public const string dbx_tests_parser_nestedifsCommandText = @"IF 0 = 1
@@ -119,7 +121,7 @@ UNION ALL
                     result.B.ReplaceWith(reader.ReadMany<int>());
                     result.C.ReplaceWith(reader.ReadMany<string>());
                     result.D.ReplaceWith(reader.ReadMany<Dibix.Sdk.Tests.CodeGeneration.Direction?>());
-                    result.E.ReplaceWith(reader.ReadMany<Dibix.Sdk.Tests.CodeGeneration.Entity>());
+                    result.E.ReplaceWith(reader.ReadMany<Dibix.Sdk.Tests.CodeGeneration.SpecialEntity>());
                     return result;
                 }
             }
@@ -203,7 +205,7 @@ UNION ALL
             public ICollection<int> B { get; private set; } 
             public ICollection<string> C { get; private set; } 
             public ICollection<Dibix.Sdk.Tests.CodeGeneration.Direction?> D { get; private set; } 
-            public ICollection<Dibix.Sdk.Tests.CodeGeneration.Entity> E { get; private set; } 
+            public ICollection<Dibix.Sdk.Tests.CodeGeneration.SpecialEntity> E { get; private set; } 
 
             public dbx_tests_parser_invalidcolumnsforentityResult()
             {
@@ -211,7 +213,7 @@ UNION ALL
                 this.B = new Collection<int>();
                 this.C = new Collection<string>();
                 this.D = new Collection<Dibix.Sdk.Tests.CodeGeneration.Direction?>();
-                this.E = new Collection<Dibix.Sdk.Tests.CodeGeneration.Entity>();
+                this.E = new Collection<Dibix.Sdk.Tests.CodeGeneration.SpecialEntity>();
             }
         }
         public class dbx_tests_parser_nestedifsResult

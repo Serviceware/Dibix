@@ -397,10 +397,12 @@ USING dbo.dbx_table AS source ON (1 = 0)
 WHEN NOT MATCHED BY SOURCE THEN DELETE OUTPUT $ACTION AS [action];
 
 SELECT 1 AS id,
-       N'Cake' AS [name]
+       N'Cake' AS [name],
+       12 AS [age]
 UNION ALL
 SELECT 2 AS id,
-       N'Cookie' AS [name];";
+       N'Cookie' AS [name],
+       16 AS [age];";
 
         // dbx_tests_parser_nestedifs
         public const string dbx_tests_parser_nestedifsCommandText = @"IF 0 = 1
@@ -476,7 +478,7 @@ UNION ALL
                     result.B.ReplaceWith(reader.ReadMany&lt;int&gt;());
                     result.C.ReplaceWith(reader.ReadMany&lt;string&gt;());
                     result.D.ReplaceWith(reader.ReadMany&lt;Dibix.Sdk.Tests.CodeGeneration.Direction?&gt;());
-                    result.E.ReplaceWith(reader.ReadMany&lt;Dibix.Sdk.Tests.CodeGeneration.Entity&gt;());
+                    result.E.ReplaceWith(reader.ReadMany&lt;Dibix.Sdk.Tests.CodeGeneration.SpecialEntity&gt;());
                     return result;
                 }
             }
@@ -560,7 +562,7 @@ UNION ALL
             public ICollection&lt;int&gt; B { get; private set; } 
             public ICollection&lt;string&gt; C { get; private set; } 
             public ICollection&lt;Dibix.Sdk.Tests.CodeGeneration.Direction?&gt; D { get; private set; } 
-            public ICollection&lt;Dibix.Sdk.Tests.CodeGeneration.Entity&gt; E { get; private set; } 
+            public ICollection&lt;Dibix.Sdk.Tests.CodeGeneration.SpecialEntity&gt; E { get; private set; } 
 
             public dbx_tests_parser_invalidcolumnsforentityResult()
             {
@@ -568,7 +570,7 @@ UNION ALL
                 this.B = new Collection&lt;int&gt;();
                 this.C = new Collection&lt;string&gt;();
                 this.D = new Collection&lt;Dibix.Sdk.Tests.CodeGeneration.Direction?&gt;();
-                this.E = new Collection&lt;Dibix.Sdk.Tests.CodeGeneration.Entity&gt;();
+                this.E = new Collection&lt;Dibix.Sdk.Tests.CodeGeneration.SpecialEntity&gt;();
             }
         }
         public class dbx_tests_parser_nestedifsResult
