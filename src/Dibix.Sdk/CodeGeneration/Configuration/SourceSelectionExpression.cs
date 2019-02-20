@@ -24,10 +24,11 @@ namespace Dibix.Sdk.CodeGeneration
         #region ISourceSelection Members
         IEnumerable<SqlStatementInfo> ISourceSelection.CollectStatements()
         {
-            ISqlStatementParser parser = this.Parser ?? new NoOpParser();
+            if (this.Parser == null)
+                this.Parser = new NoOpParser();
 
-            if (parser.Formatter == null)
-                parser.Formatter = new TakeSourceSqlStatementFormatter();
+            if (this.Parser.Formatter == null)
+                this.Parser.Formatter = new TakeSourceSqlStatementFormatter();
 
             return this.CollectStatements();
         }

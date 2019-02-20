@@ -1,18 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Dibix
 {
     public static class EnumerableExtensions
     {
-        public static IEnumerable<T> Each<T>(this IEnumerable<T> source, Action<T> action)
+        public static void Each<T>(this IEnumerable<T> source, Action<T, int> action)
         {
-            IEnumerable<T> enumerable = source as T[] ?? source.ToArray();
-            foreach (T element in enumerable)
+            int i = 0;
+            foreach (T element in source)
+                action(element, i++);
+        }
+        public static void Each<T>(this IEnumerable<T> source, Action<T> action)
+        {
+            foreach (T element in source)
                 action(element);
-
-            return enumerable;
         }
     }
 }
