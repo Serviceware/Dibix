@@ -1,0 +1,81 @@
+{
+  "title": "Schema for configuring the Dibix.Sdk SQL DAO accessor code generator",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "definitions": {
+    "source": {
+      "type": "object",
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "description": "The kind of the source",
+          "enum": [
+            "directory",
+            "file"
+          ]
+        }
+      }
+    },
+    "directorySource": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "allOf": [
+        {
+          "$ref": "#/definitions/source"
+        }
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The path to the directory"
+        }
+      }
+    },
+    "fileSource": {
+      "type": "object",
+      "required": [
+        "path"
+      ],
+      "allOf": [
+        {
+          "$ref": "#/definitions/source"
+        }
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "The path to the file"
+        }
+      }
+    }
+  },
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "sources": {
+      "type": "array",
+      "description": "A list of sources to scan",
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/definitions/directorySource"
+          },
+          {
+            "$ref": "#/definitions/fileSource"
+          }
+        ]
+      },
+      "minItems": 1
+    }
+  },
+  "required": [
+    "sources"
+  ],
+  "additionalProperties": false
+}

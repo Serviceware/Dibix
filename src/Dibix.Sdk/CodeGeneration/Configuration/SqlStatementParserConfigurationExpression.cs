@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Dibix.Sdk.CodeGeneration
+﻿namespace Dibix.Sdk.CodeGeneration
 {
     internal class SqlStatementParserConfigurationExpression : ISqlStatementParserConfigurationExpression
     {

@@ -1,0 +1,25 @@
+
+{
+    "$schema": "../../../src/Dibix.Sdk/CodeGeneration/dibix.schema.json",
+    "sources": [
+        {
+            "kind": "directory",
+            "name": "C:/Projects1"
+        },
+        {
+            "kind": "directory",
+            "name": "C:/Projects2"
+        },
+        {
+            "kind": "directory",
+            "name": "C:/Projects2"
+        },
+        {
+            "kind": "file",
+            "path": "C:/Projects2/cake.json"
+        },
+        {
+            
+        }
+    ]
+}
