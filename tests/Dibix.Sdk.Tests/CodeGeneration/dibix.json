@@ -1,25 +1,36 @@
-
 {
     "$schema": "../../../src/Dibix.Sdk/CodeGeneration/dibix.schema.json",
-    "sources": [
-        {
-            "kind": "directory",
-            "name": "C:/Projects1"
+    "input": {
+        "Dibix.Sdk.Tests.Database1": null,
+        "Dibix.Sdk.Tests.Database2": {
+            "include": [
+                "Tables",
+                "Stored Procedures",
+                "Tests/Sources/Excluded/Nested/dbx_tests_sources_excludednested.sql"
+            ],
+            "exclude": [
+                "ignored"
+            ]
         },
-        {
-            "kind": "directory",
-            "name": "C:/Projects2"
+        "Dibix.Sdk.Tests.Database3": {
+            "include": "Tables",
+            "exclude": "ignored",
+            "parser": "SqlStoredProcedureParser",
+            "formatter": "ExecStoredProcedureSqlStatementFormatter"
         },
-        {
-            "kind": "directory",
-            "name": "C:/Projects2"
-        },
-        {
-            "kind": "file",
-            "path": "C:/Projects2/cake.json"
-        },
-        {
-            
+        "../SSISDB.dacpac": {
+            "include": {
+                "[catalog].[delete_project]": "DeleteProject"
+            },
+            "parser": "SqlStoredProcedureParser",
+            "formatter": "ExecStoredProcedureSqlStatementFormatter"
         }
-    ]
+    },
+    "output": "SqlDaoWriter",
+    "output": {
+        "name": "SqlDaoWriter",
+        "namespace": "This.Is.A.Custom.Namespace",
+        "className": "Accessor",
+        "formatting": "Verbatim"
+    }
 }

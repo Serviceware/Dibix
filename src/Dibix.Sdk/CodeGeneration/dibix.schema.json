@@ -1,71 +1,190 @@
 {
-  "title": "Schema for configuring the Dibix.Sdk SQL DAO accessor code generator",
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Schema for configuring the Dibix.Sdk SQL accessor code generator",
   "type": "object",
   "definitions": {
-    "directorySource": {
-      "type": "object",
-      "description": "A directory that contains SQL files",
-      "required": [
-        "kind",
-        "name"
-      ],
+    "textTransformConfiguration": {
       "properties": {
-        "kind": {
+        "parser": {
           "type": "string",
-          "description": "The kind of source. Can be \"directory\" or \"file\"",
-          "const": "directory"
+          "description": "Select a specific SQL text parser.",
+          "enum": [
+            "SqlStoredProcedureParser"
+          ]
         },
-        "name": {
+        "formatter": {
           "type": "string",
-          "description": "The path to a directory that contains SQL files"
+          "description": "Select a specific SQL text formatter.",
+          "enum": [
+            "ExecStoredProcedureSqlStatementFormatter"
+          ]
         }
-      },
-      "additionalProperties": false
+      }
     },
-    "fileSource": {
+    "inputConfiguration": {
       "type": "object",
-      "description": "A specific SQL file",
-      "required": [
-        "kind",
-        "path"
-      ],
-      "properties": {
-        "kind": {
-          "type": "string",
-          "description": "The kind of source. Can be \"directory\" or \"file\"",
-          "const": "file"
+      "description": "Defines the input for the generator.",
+      "patternProperties": {
+        "^[\\w./]+[^.dacpac]$": {
+          "description": "Select a .sqlproj project.",
+          "oneOf": [
+            {
+              "type": "null",
+              "description": "Include all SQL files of the selected project using the default parser."
+            },
+            {
+              "type": "object",
+              "description": "Specific input source configuration.",
+              "additionalProperties": false,
+              "minProperties": 1,
+              "allOf": [
+                {
+                  "$ref": "#/definitions/textTransformConfiguration"
+                }
+              ],
+              "properties": {
+                "parser": {},
+                "formatter": {},
+                "include": {
+                  "description": "Include specific items. If not specified, all SQL files of the selected project will be included.",
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "description": "Include a specific item. Can be a path to a directory or file.",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "array",
+                      "description": "Include one or more specific items. Can be a path to a directory or file.",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "minItems": 1,
+                      "uniqueItems": true
+                    }
+                  ]
+                },
+                "exclude": {
+                  "description": "Exclude specific items.",
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "description": "Exclude a specific item.",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "array",
+                      "description": "Exclude one or more specific items.",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "minItems": 1,
+                      "uniqueItems": true
+                    }
+                  ]
+                }
+              }
+            }
+          ]
         },
-        "path": {
-          "type": "string",
-          "description": "The path to a specific SQL file"
+        "^[\\w./]+.dacpac$": {
+          "type": "object",
+          "description": "Select a .dacpac file.",
+          "additionalProperties": false,
+          "properties": {
+            "include": {
+              "description": "Include specific DAC artifacts.",
+              "type": "object",
+              "patternProperties": {
+                "^[\\w\\[\\]_.]+$": {
+                  "type": "string",
+                  "description": "A DAC artifact. The key should be the model name and the value the name of the generated function.",
+                  "minLength": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            "parser": {},
+            "formatter": {}
+          },
+          "allOf": [
+            {
+              "$ref": "#/definitions/textTransformConfiguration"
+            }
+          ],
+          "required": [
+            "include"
+          ]
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "minProperties": 1
+    },
+    "writer": {
+      "type": "string",
+      "description": "Select a specific output writer.",
+      "enum": [
+        "SqlDaoWriter"
+      ]
+    },
+    "outputConfiguration": {
+      "description": "Defines the output for the generator.",
+      "oneOf": [
+        {
+          "$ref": "#/definitions/writer"
+        },
+        {
+          "type": "object",
+          "description": "Specific output configuration.",
+          "properties": {
+            "name": {
+              "$ref": "#/definitions/writer",
+              "description": "The name of the output writer."
+            },
+            "namespace": {
+              "type": "string",
+              "description": "The namespace of the accessor class.",
+              "minLength": 1
+            },
+            "className": {
+              "type": "string",
+              "description": "The name of the accessor class.",
+              "minLength": 1
+            },
+            "formatting": {
+              "type": "string",
+              "description": "Configure the behavior how the command text is expressed.",
+              "enum": [
+                "None",
+                "Verbatim",
+                "StripDoubleQuotes",
+                "Minified",
+                "WhiteStripped",
+                "Singleline",
+                "Multiline"
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
     }
   },
   "properties": {
     "$schema": {
       "type": "string"
     },
-    "sources": {
-      "type": "array",
-      "description": "A list of sources to scan",
-      "items": {
-        "oneOf": [
-          {
-            "$ref": "#/definitions/directorySource"
-          },
-          {
-            "$ref": "#/definitions/fileSource"
-          }
-        ]
-      },
-      "minItems": 1
+    "input": {
+      "$ref": "#/definitions/inputConfiguration"
+    },
+    "output": {
+      "$ref": "#/definitions/outputConfiguration"
     }
   },
   "required": [
-    "sources"
+    "input"
   ],
   "additionalProperties": false
 }
