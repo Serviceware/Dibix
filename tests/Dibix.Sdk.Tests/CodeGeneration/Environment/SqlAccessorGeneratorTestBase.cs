@@ -11,7 +11,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         private static readonly string ProjectName = typeof(SqlAccessorGeneratorTestBase).Assembly.GetName().Name;
         private static readonly string Namespace = typeof(SqlAccessorGeneratorTestBase).Assembly.GetName().Name;
 
-        protected void RunGeneratorTest(Action<ISqlAccessorGenerator> configuration)
+        protected void RunGeneratorTest(Action<ISqlAccessorGeneratorBuilder> configuration)
         {
             string testName = DetermineTestName(2);
             string expectedText = GetExpectedText(testName);
@@ -24,12 +24,12 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             return GetExpectedText(key);
         }
 
-        private static void RunGeneratorTest(Action<ISqlAccessorGenerator> configuration, string projectName, string @namespace, string className, string expectedText)
+        private static void RunGeneratorTest(Action<ISqlAccessorGeneratorBuilder> configuration, string projectName, string @namespace, string className, string expectedText)
         {
             TestUtilities.DefineNamingConventions();
-            ISqlAccessorGenerator generator = SqlAccessorGenerator.Create(new TestExecutionEnvironment(projectName, @namespace, className));
-            configuration(generator);
-            string actualText = generator.Generate();
+            ISqlAccessorGeneratorBuilder builder = SqlAccessorGeneratorBuilder.Create(new TestExecutionEnvironment(projectName, @namespace, className));
+            configuration(builder);
+            string actualText = builder.Generate();
             TestUtilities.AssertEqualWithDiffTool(expectedText, actualText);
         }
 

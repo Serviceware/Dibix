@@ -1,75 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TextTemplating;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    public sealed class SqlAccessorGenerator : ISqlAccessorGenerator
+
+    public sealed class SqlAccessorGenerator : ICodeGenerator
     {
         #region Fields
-        private readonly IExecutionEnvironment _environment;
         private readonly SqlAccessorGeneratorConfiguration _configuration;
+        private readonly IExecutionEnvironment _environment;
         #endregion
 
         #region Constructor
-        public SqlAccessorGenerator(IExecutionEnvironment environment)
+        public SqlAccessorGenerator(SqlAccessorGeneratorConfiguration configuration, IExecutionEnvironment environment)
         {
+            this._configuration = configuration;
             this._environment = environment;
-            this._configuration = new SqlAccessorGeneratorConfiguration();
         }
         #endregion
 
-        #region ISqlAccessorGenerator Members
-        public static ISqlAccessorGenerator Create(IExecutionEnvironment environment)
-        {
-            SqlAccessorGenerator generator = new SqlAccessorGenerator(environment);
-            return generator;
-        }
-
-        public static ISqlAccessorGenerator FromVisualStudio(ITextTemplatingEngineHost host, IServiceProvider serviceProvider)
-        {
-            IExecutionEnvironment environment = new VisualStudioExecutionEnvironment(host, serviceProvider);
-            SqlAccessorGenerator generator = new SqlAccessorGenerator(environment);
-            return generator;
-        }
-
-        public ISqlAccessorGenerator AddSource(string projectName) { return this.AddSource(projectName, null); }
-        public ISqlAccessorGenerator AddSource(Action<IPhysicalSourceSelectionExpression> configuration) { return this.AddSource(null, configuration); }
-        public ISqlAccessorGenerator AddSource(string projectName, Action<IPhysicalSourceSelectionExpression> configuration)
-        {
-            Guard.IsNotNullOrEmpty(projectName, nameof(projectName));
-
-            //if (!String.IsNullOrEmpty(projectName))
-                this._environment.VerifyProject(projectName);
-
-            PhysicalSourceSelectionExpression expression = new PhysicalSourceSelectionExpression(this._environment, projectName);
-            configuration?.Invoke(expression);
-            this._configuration.Sources.Add(expression);
-            return this;
-        }
-
-        public ISqlAccessorGenerator AddDacPac(string packagePath, Action<IDacPacSelectionExpression> configuration)
-        {
-            Guard.IsNotNull(configuration, nameof(configuration));
-            DacPacSelectionExpression expression = new DacPacSelectionExpression(this._environment, packagePath);
-            configuration(expression);
-            this._configuration.Sources.Add(expression);
-            return this;
-        }
-
-        public ISqlAccessorGenerator SelectOutputWriter<TWriter>() where TWriter : IWriter, new() { return this.SelectOutputWriter<TWriter>(null); }
-        public ISqlAccessorGenerator SelectOutputWriter<TWriter>(Action<IOutputConfigurationExpression> configuration) where TWriter : IWriter, new()
-        {
-            TWriter writer = new TWriter();
-            OutputConfigurationExpression expression = new OutputConfigurationExpression(this._environment, writer);
-            configuration?.Invoke(expression);
-
-            expression.Build();
-            this._configuration.Writer = writer;
-            return this;
-        }
-
+        #region ICodeGenerator Members
         public string Generate()
         {
             return Generate(this._environment, this._configuration);
