@@ -13,27 +13,39 @@ namespace Dibix.Sdk.Tests.CodeGeneration
 
         protected void RunGeneratorTest(Action<ISqlAccessorGeneratorBuilder> configuration)
         {
-            string testName = DetermineTestName(2);
-            string expectedText = GetExpectedText(testName);
-            RunGeneratorTest(configuration, ProjectName, Namespace, testName, expectedText);
+            string testName = DetermineTestName();
+            RunGeneratorTest(configuration, ProjectName, Namespace, testName, GetExpectedText(testName));
         }
-
-        protected static string DetermineExpectedText()
+        protected void RunGeneratorTest(string expectedTextKey, Action<ISqlAccessorGeneratorBuilder> configuration)
         {
-            string key = DetermineTestName();
-            return GetExpectedText(key);
+            RunGeneratorTest(configuration, ProjectName, Namespace, DetermineTestName(), GetExpectedText(expectedTextKey));
+        }
+        protected void RunGeneratorTest(string expectedTextKey, string configurationJson)
+        {
+            RunGeneratorTest(configurationJson, ProjectName, Namespace, DetermineTestName(), GetExpectedText(expectedTextKey));
         }
 
         private static void RunGeneratorTest(Action<ISqlAccessorGeneratorBuilder> configuration, string projectName, string @namespace, string className, string expectedText)
         {
-            TestUtilities.DefineNamingConventions();
+            TestUtilities.OverrideNamingConventions();
             ISqlAccessorGeneratorBuilder builder = SqlAccessorGeneratorBuilder.Create(new TestExecutionEnvironment(projectName, @namespace, className));
             configuration(builder);
-            string actualText = builder.Generate();
+            RunGeneratorTest(builder.Generate, expectedText);
+        }
+        private static void RunGeneratorTest(string configurationJson, string projectName, string @namespace, string className, string expectedText)
+        {
+            TestUtilities.OverrideNamingConventions();
+            string actualText = SqlAccessorGeneratorBuilder.GenerateFromJson(new TestExecutionEnvironment(projectName, @namespace, className), configurationJson);
+            RunGeneratorTest(() => actualText, expectedText);
+        }
+        private static void RunGeneratorTest(Func<string> generator, string expectedText)
+        {
+            TestUtilities.OverrideNamingConventions();
+            string actualText = generator();
             TestUtilities.AssertEqualWithDiffTool(expectedText, actualText);
         }
 
-        private static string DetermineTestName(int frames = 3) => new StackTrace().GetFrame(frames).GetMethod().Name;
+        private static string DetermineTestName() => new StackTrace().GetFrame(2).GetMethod().Name;
 
         private static string GetExpectedText(string key)
         {

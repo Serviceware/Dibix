@@ -10,12 +10,12 @@ using VSLangProj;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    public class VisualStudioExecutionEnvironment : IExecutionEnvironment, ITypeLoader
+    public class VisualStudioExecutionEnvironment : IExecutionEnvironment, IFileSystemProvider, ITypeLoader
     {
         #region Fields
         private const string VsProjectKindSolutionFolder = "{66A26720-8FB5-11D2-AA7E-00C04F688DDE}";
         private const string ProjectDefaultNamespaceKey = "projectDefaultNamespace";
-        private const string ProjectDirectoryKey = "FullPath";
+        private const string PhysicalPathKey = "FullPath";
         private const string OutputDirectoryKey = "OutputPath";
         private const string OutputFileNameKey = "OutputFileName";
         private readonly ITextTemplatingEngineHost _host;
@@ -108,35 +108,46 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region IFileSystemProvider Members
-        public IEnumerable<string> GetFilesInProject(string projectName, string virtualFolderPath, bool recursive, IEnumerable<string> excludedFolders)
+        public string GetPhysicalFilePath(string projectName, VirtualPath virtualPath)
         {
             Project project = this.GetProject(projectName);
-            ProjectItems items;
-            Properties properties;
-
-            if (!String.IsNullOrEmpty(virtualFolderPath))
-            {
-                ProjectItem folder = FindItem(project.ProjectItems, virtualFolderPath);
-                items = folder.ProjectItems;
-                properties = folder.Properties;
-            }
-            else
-            {
-                items = project.ProjectItems;
-                properties = project.Properties;
-            }
-
-            string rootDirectory = (string)properties.Item(ProjectDirectoryKey).Value;
-            IEnumerable<string> files = ScanFiles(items, rootDirectory, excludedFolders);
-            return files;
+            ProjectItem folder = FindItem(project.ProjectItems, virtualPath);
+            string physicalFilePath = (string)folder.Properties.Item(PhysicalPathKey).Value;
+            return physicalFilePath;
         }
 
-        public string GetPhysicalFilePath(string projectName, string virtualFilePath)
+        public IEnumerable<string> GetFiles(string projectName, IEnumerable<VirtualPath> include, IEnumerable<VirtualPath> exclude)
         {
             Project project = this.GetProject(projectName);
-            ProjectItem folder = FindItem(project.ProjectItems, virtualFilePath);
-            string physicalFilePath = (string)folder.Properties.Item(ProjectDirectoryKey).Value;
-            return physicalFilePath;
+            ICollection<string> normalizedExclude = exclude.Select(x => (string)x).ToArray();
+
+            foreach (VirtualPath virtualPath in include)
+            {
+                ProjectItems children;
+                Properties properties;
+                if (virtualPath.IsCurrent)
+                {
+                    children = project.ProjectItems;
+                    properties = project.Properties;
+                }
+                else
+                {
+                    ProjectItem item = FindItem(project.ProjectItems, virtualPath);
+                    children = item.ProjectItems;
+                    properties = item.Properties;
+                }
+
+                string physicalPath = (string)properties.Item(PhysicalPathKey).Value;
+                if (File.Exists(physicalPath))
+                {
+                    yield return physicalPath;
+                }
+                else
+                {
+                    foreach (string filePath in ScanFiles(children, physicalPath, normalizedExclude, virtualPath.IsRecursive))
+                        yield return filePath;
+                }
+            }
         }
         #endregion
 
@@ -176,15 +187,16 @@ namespace Dibix.Sdk.CodeGeneration
 
         private ICollection<CodeElement> GetCodeItems()
         {
-            ICollection<CodeElement> codeItems = TraverseProjectItems(this._currentProject.Project.ProjectItems).Where(item => item.FileCodeModel != null)
+            ICollection<CodeElement> codeItems = TraverseProjectItems(this._currentProject.Project.ProjectItems, true).Where(item => item.FileCodeModel != null)
                 .SelectMany(item => TraverseTypes(item.FileCodeModel.CodeElements, vsCMElement.vsCMElementClass, vsCMElement.vsCMElementEnum))
                 .ToArray();
+
             return codeItems;
         }
 
         private string GetOutputDirectory()
         {
-            string projectDirectory = GetProjectProperty(this._currentProject.Project, ProjectDirectoryKey);
+            string projectDirectory = GetProjectProperty(this._currentProject.Project, PhysicalPathKey);
             string outputDirectory = GetProjectConfigurationProperty(this._currentProject.Project, OutputDirectoryKey);
             string path = Path.GetFullPath(Path.Combine(projectDirectory, outputDirectory));
             return path;
@@ -256,11 +268,10 @@ namespace Dibix.Sdk.CodeGeneration
             return project;
         }
 
-        private static ProjectItem FindItem(ProjectItems items, string virtualPath)
+        private static ProjectItem FindItem(ProjectItems items, VirtualPath virtualPath)
         {
-            virtualPath = virtualPath.Replace("/", "\\").TrimEnd('\\');
             ProjectItem item = null;
-            foreach (string part in virtualPath.Split('\\'))
+            foreach (string part in virtualPath.Segments)
             {
                 item = items.Item(part);
                 if (item == null)
@@ -275,34 +286,36 @@ namespace Dibix.Sdk.CodeGeneration
             return item;
         }
 
-        private static IEnumerable<string> ScanFiles(ProjectItems root, string rootDirectory, IEnumerable<string> excludedPaths)
+        private static IEnumerable<string> ScanFiles(ProjectItems root, string rootDirectory, IEnumerable<string> exclude, bool recursive)
         {
-            IEnumerable<string> physicalFilePaths = TraverseProjectItems(root).Where(x => MatchFile(x, rootDirectory, excludedPaths))
-                                                                              .OrderBy(x => x.Name)
-                                                                              .Select(x => x.FileNames[0]);
+            IEnumerable<string> physicalFilePaths = TraverseProjectItems(root, recursive)
+                .Where(x => MatchFile(x, rootDirectory, exclude))
+                .OrderBy(x => x.Name)
+                .Select(x => x.FileNames[0]);
+
             return physicalFilePaths;
         }
 
-        private static bool MatchFile(ProjectItem item, string rootDirectory, IEnumerable<string> excludedPaths)
+        private static bool MatchFile(ProjectItem item, string rootDirectory, IEnumerable<string> exclude)
         {
             if (item.Kind != Constants.vsProjectItemKindPhysicalFile)
                 return false;
 
-            string itemPath = (string)item.Properties.Item(ProjectDirectoryKey).Value;
-            string relativePath = itemPath.Substring(rootDirectory.Length).TrimStart('\\');
-            if (excludedPaths.Any(x => relativePath.StartsWith(x.Replace("/", "\\").TrimStart('\\'), StringComparison.OrdinalIgnoreCase)))
+            string itemPath = (string)item.Properties.Item(PhysicalPathKey).Value;
+            string relativePath = itemPath.Substring(rootDirectory.Length).TrimStart(Path.DirectorySeparatorChar);
+            if (exclude.Any(x => relativePath.StartsWith(x, StringComparison.OrdinalIgnoreCase)))
                 return false;
 
             return item.Name.EndsWith(".sql", StringComparison.OrdinalIgnoreCase);
         }
 
-        private static IEnumerable<ProjectItem> TraverseProjectItems(ProjectItems projectItems)
+        private static IEnumerable<ProjectItem> TraverseProjectItems(ProjectItems projectItems, bool recursive)
         {
             foreach (ProjectItem item in projectItems)
             {
-                if (item.ProjectItems.Count > 0)
+                if (recursive && item.ProjectItems.Count > 0)
                 {
-                    foreach (ProjectItem subItem in TraverseProjectItems(item.ProjectItems))
+                    foreach (ProjectItem subItem in TraverseProjectItems(item.ProjectItems, true))
                     {
                         yield return subItem;
                     }

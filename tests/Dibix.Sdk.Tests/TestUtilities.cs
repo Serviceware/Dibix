@@ -18,7 +18,7 @@ namespace Dibix.Sdk.Tests.Utilities
             Assert.Equal(expected, actual);
         }
 
-        public static void DefineNamingConventions()
+        public static void OverrideNamingConventions()
         {
             string assemblyName = typeof(NamingConventionSqlCodeAnalysisRule).Assembly.GetName().Name;
             Type namingConventionType = Type.GetType($"Dibix.Sdk.CodeAnalysis.Rules.NamingConvention,{assemblyName}", true);

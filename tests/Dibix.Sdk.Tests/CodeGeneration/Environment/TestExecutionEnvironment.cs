@@ -25,22 +25,6 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             this._className = className;
         }
 
-        public override IEnumerable<string> GetFilesInProject(string projectName, string virtualFolderPath, bool recursive, IEnumerable<string> excludedFolders)
-        {
-            string directory = Path.GetFullPath(Path.Combine(TestsRootDirectory, projectName, virtualFolderPath ?? String.Empty));
-            string[] paths = Directory.EnumerateFiles(directory, "*.sql", recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
-                                      .Where(x => !excludedFolders.Any(y => x.Substring(directory.Length + 1).StartsWith(y.Replace("/", "\\").TrimStart('\\'), StringComparison.OrdinalIgnoreCase)))
-                                      .ToArray();
-
-            return paths;
-        }
-
-        public override string GetPhysicalFilePath(string projectName, string virtualFilePath)
-        {
-            string path = Path.GetFullPath(Path.Combine(TestsRootDirectory, projectName, virtualFilePath));
-            return path;
-        }
-
         public override string GetProjectName()
         {
             return this._projectName;
@@ -85,6 +69,18 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         {
             Type type = Type.GetType($"{typeName.NormalizedTypeName},{this.GetType().Assembly}", true);
             return  TypeInfo.FromClrType(type, typeName);
+        }
+
+        public override string GetPhysicalFilePath(string projectName, VirtualPath virtualPath) => GetFileSystemProvider(projectName).GetPhysicalFilePath(projectName, virtualPath);
+
+        public override IEnumerable<string> GetFiles(string projectName, IEnumerable<VirtualPath> include, IEnumerable<VirtualPath> exclude) => GetFileSystemProvider(projectName).GetFiles(projectName, include, exclude);
+
+        private static PhysicalFileSystemProvider GetFileSystemProvider(string projectName)
+        {
+            if (projectName == "Dibix.Sdk.Tests.Database")
+                return new PhysicalFileSystemProvider(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "..", "..", "..", "..", projectName)));
+
+            throw new InvalidOperationException("Could not determine working directory for file system provider");
         }
     }
 }

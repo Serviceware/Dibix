@@ -8,10 +8,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
 {
     public abstract class EmptyExecutionEnvironment : IExecutionEnvironment
     {
-        protected static readonly string TestsProjectDirectory = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "..", "..", ".."));
-        protected static readonly string TestsRootDirectory = Path.GetFullPath(Path.Combine(TestsProjectDirectory, ".."));
-
-        public virtual string GetCurrentDirectory() => TestsProjectDirectory;
+        public virtual string GetCurrentDirectory() => Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "..", "..", "..", "CodeGeneration"));
 
         public virtual string GetProjectName() => null;
 
@@ -29,9 +26,9 @@ namespace Dibix.Sdk.Tests.CodeGeneration
 
         public virtual void RegisterError(string fileName, int line, int column, string errorNumber, string errorText) { }
 
-        public virtual IEnumerable<string> GetFilesInProject(string projectName, string virtualFolderPath, bool recursive, IEnumerable<string> excludedFolders) { yield break; }
+        public virtual string GetPhysicalFilePath(string projectName, VirtualPath virtualPath) => null;
 
-        public virtual string GetPhysicalFilePath(string projectName, string virtualFilePath) => Path.Combine(TestsRootDirectory, projectName, virtualFilePath.Replace('/', '\\'));
+        public virtual IEnumerable<string> GetFiles(string projectName, IEnumerable<VirtualPath> include, IEnumerable<VirtualPath> exclude) { yield break; }
 
         public virtual bool ReportErrors() => false;
 

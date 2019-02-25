@@ -23,12 +23,16 @@ namespace Dibix.Sdk.CodeGeneration
 
         public static ISqlAccessorGeneratorBuilder FromVisualStudio(ITextTemplatingEngineHost host, IServiceProvider serviceProvider) => CreateFromVisualStudio(host, serviceProvider);
 
-        public static string GenerateFromJson(ITextTemplatingEngineHost host, IServiceProvider serviceProvider, string json)
+        public static string GenerateFromJson(IExecutionEnvironment environment, string json)
+        {
+            SqlAccessorGeneratorBuilder builder = CreateFromEnvironment(environment);
+            return GenerateFromJson(builder, json);
+        }
+
+        public static string GenerateFromJsonInVisualStudio(ITextTemplatingEngineHost host, IServiceProvider serviceProvider, string json)
         {
             SqlAccessorGeneratorBuilder builder = CreateFromVisualStudio(host, serviceProvider);
-            builder._configuration.ApplyFromJson(json);
-            string output = builder.Generate();
-            return output;
+            return GenerateFromJson(builder, json);
         }
         #endregion
 
@@ -44,7 +48,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             PhysicalSourceSelectionExpression expression = new PhysicalSourceSelectionExpression(this._environment, projectName);
             configuration?.Invoke(expression);
-            this._configuration.Sources.Add(expression);
+            this._configuration.Sources.Add(expression.Configuration);
             return this;
         }
 
@@ -53,7 +57,7 @@ namespace Dibix.Sdk.CodeGeneration
             Guard.IsNotNull(configuration, nameof(configuration));
             DacPacSelectionExpression expression = new DacPacSelectionExpression(this._environment, packagePath);
             configuration(expression);
-            this._configuration.Sources.Add(expression);
+            this._configuration.Sources.Add(expression.Configuration);
             return this;
         }
 
@@ -89,6 +93,13 @@ namespace Dibix.Sdk.CodeGeneration
             IExecutionEnvironment environment = new VisualStudioExecutionEnvironment(host, serviceProvider);
             SqlAccessorGeneratorBuilder builder = CreateFromEnvironment(environment);
             return builder;
+        }
+
+        private static string GenerateFromJson(SqlAccessorGeneratorBuilder builder, string json)
+        {
+            builder._configuration.ApplyFromJson(json, builder._environment);
+            string output = builder.Generate();
+            return output;
         }
         #endregion
     }

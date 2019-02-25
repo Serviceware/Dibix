@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.SqlServer.Dac.Model;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    public sealed class DacPacSelectionExpression : SourceSelectionExpression, IDacPacSelectionExpression, ISourceSelection
+    public sealed class DacPacSelection : SourceSelection, ISourceSelection
     {
         #region Fields
         private readonly IExecutionEnvironment _environment;
@@ -13,20 +13,16 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public DacPacSelectionExpression(IExecutionEnvironment environment, string filePath)
+        public DacPacSelection(IExecutionEnvironment environment, string packagePath)
         {
             this._environment = environment;
-            this._packagePath = new PhysicalFileSystemProvider(environment.GetCurrentDirectory()).GetPhysicalFilePath(null, filePath);
+            this._packagePath = new PhysicalFileSystemProvider(environment.GetCurrentDirectory()).GetPhysicalFilePath(null, packagePath);
             this._procedureNames = new HashSet<KeyValuePair<string, string>>();
         }
         #endregion
 
-        #region IDacPacSelectionExpression Members
-        public IDacPacSelectionExpression SelectProcedure(string procedureName, string displayName)
-        {
-            this._procedureNames.Add(new KeyValuePair<string, string>(displayName, procedureName));
-            return this;
-        }
+        #region Public Methods
+        public void AddStoredProcedure(string procedureName, string displayName) => this._procedureNames.Add(new KeyValuePair<string, string>(procedureName, displayName));
         #endregion
 
         #region Overrides

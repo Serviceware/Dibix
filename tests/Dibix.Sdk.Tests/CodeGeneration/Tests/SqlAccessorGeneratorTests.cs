@@ -26,9 +26,9 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         }
 
         [Fact]
-        public void SourcesTest()
+        public void FluentSourcesTest()
         {
-            base.RunGeneratorTest(cfg =>
+            base.RunGeneratorTest("SourcesTest", cfg =>
             {
                 cfg.AddSource("Dibix.Sdk.Tests.Database", x =>
                     {
@@ -50,10 +50,10 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                     .AddDacPac("SSISDB.dacpac", x =>
                     {
                         x.SelectProcedure("[catalog].[delete_project]", "DeleteProject")
-                            .SelectParser<SqlStoredProcedureParser>(y =>
-                            {
-                                y.Formatter<ExecStoredProcedureSqlStatementFormatter>();
-                            });
+                         .SelectParser<SqlStoredProcedureParser>(y =>
+                         {
+                             y.Formatter<ExecStoredProcedureSqlStatementFormatter>();
+                         });
                     })
                     .SelectOutputWriter<SqlDaoWriter>(x =>
                     {
@@ -62,6 +62,13 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                          .Formatting(SqlQueryOutputFormatting.Verbatim);
                     });
             });
+        }
+
+        [Fact]
+        public void JsonSourcesTest()
+        {
+            base.RunGeneratorTest("SourcesTest", @"{
+}");
         }
     }
 }

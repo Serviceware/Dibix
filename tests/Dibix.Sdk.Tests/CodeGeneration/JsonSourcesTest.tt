@@ -3,8 +3,8 @@
 <#@ assembly name="$(SolutionDir)\src\Dibix.Sdk\bin\Debug\net46\Dibix.Sdk.dll" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.Reflection" #>
-<#@ import namespace="Dibix.Sdk.CodeAnalysis.Rules" #>
-<#@ import namespace="Dibix.Sdk.CodeGeneration" #><#
+<#@ import namespace="Dibix.Sdk.CodeGeneration" #>
+<#@ import namespace="Dibix.Sdk.CodeAnalysis.Rules" #><#
 
 // Override naming conventions
 Type namingConventionType = typeof(NamingConventionSqlCodeAnalysisRule).Assembly.GetType("Dibix.Sdk.CodeAnalysis.Rules.NamingConvention");
@@ -12,19 +12,12 @@ IDictionary<string, string> overrides = new Dictionary<string, string>
 {
     { "Table",     "dbx*" }
   , { "Procedure", "dbx*" }
-  , { "Type",      "dbx*" }
 };
 foreach (KeyValuePair<string, string> @override in overrides)
     namingConventionType.GetField(@override.Key, BindingFlags.Public | BindingFlags.Static).SetValue(null, @override.Value);
 
-string output = SqlAccessorGeneratorBuilder.FromVisualStudio(this.Host, (IServiceProvider)this.Host)
-                                           .AddSource("Dibix.Sdk.Tests.Database", x => 
-                                           {
-                                               x.SelectFolder("CodeAnalysis", "dbx_codeanalysis_error_003", "dbx_codeanalysis_error_006")
-                                                .SelectParser<SqlStoredProcedureParser>();
-                                           })
-                                           .SelectOutputWriter<SqlDaoWriter>()
-                                           .Generate();
+string output = SqlAccessorGeneratorBuilder.GenerateFromJsonInVisualStudio(this.Host, (IServiceProvider)this.Host, @"{
+}");
 Write(output);
 
 #>

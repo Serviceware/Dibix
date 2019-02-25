@@ -8,11 +8,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="CodeGeneration\Configuration\dibix.schema.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Include="..\Dibix\Diagnostics\Guard.cs" Link="Guard.cs" />
     <Compile Include="..\Dibix\Extensions\EnumerableExtensions.cs" Link="EnumerableExtensions.cs" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json.Schema" Version="$(NewtonsoftJsonSchemaVersion)" />
     <PackageReference Include="EnvDTE" Version="$(EnvDTEVersion)" />
     <PackageReference Include="Microsoft.VisualStudio.TextTemplating.Interfaces.10.0" Version="$(VSTextTemplatingVersion)" />
     <PackageReference Include="VSLangProj" Version="$(VSLangProjVersion)" />

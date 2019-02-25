@@ -4,7 +4,7 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public interface IFileSystemProvider
     {
-        IEnumerable<string> GetFilesInProject(string projectName, string virtualFolderPath, bool recursive, IEnumerable<string> excludedFolders);
-        string GetPhysicalFilePath(string projectName, string virtualFilePath);
+        string GetPhysicalFilePath(string projectName, VirtualPath virtualPath);
+        IEnumerable<string> GetFiles(string projectName, IEnumerable<VirtualPath> include, IEnumerable<VirtualPath> exclude);
     }
 }

@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class PhysicalFileSystemProvider : IFileSystemProvider
+    public sealed class PhysicalFileSystemProvider : IFileSystemProvider
     {
         private readonly string _currentDirectory;
 
@@ -14,26 +14,45 @@ namespace Dibix.Sdk.CodeGeneration
             this._currentDirectory = currentDirectory;
         }
 
-        public IEnumerable<string> GetFilesInProject(string projectName, string virtualFolderPath, bool recursive, IEnumerable<string> excludedFolders)
+        public string GetPhysicalFilePath(string projectName, VirtualPath virtualPath)
         {
             if (!String.IsNullOrEmpty(projectName))
                 throw new ArgumentException($"The {nameof(PhysicalFileSystemProvider)} does not support project names", nameof(projectName));
 
-            string relativePath = virtualFolderPath != null ? virtualFolderPath.Replace("/", "\\").TrimEnd('\\') : String.Empty;
-            string directory = Path.GetFullPath(Path.Combine(this._currentDirectory, relativePath));
-            string[] paths = Directory.EnumerateFiles(directory, "*.sql", recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
-                                      .Where(x => !excludedFolders.Any(y => x.Substring(directory.Length + 1).StartsWith(y.Replace("/", "\\").TrimStart('\\'), StringComparison.OrdinalIgnoreCase)))
-                                      .ToArray();
-
-            return paths;
+            string path = this.GetPhysicalFilePath(virtualPath);
+            return path;
         }
 
-        public string GetPhysicalFilePath(string projectName, string virtualFilePath)
+        public IEnumerable<string> GetFiles(string projectName, IEnumerable<VirtualPath> include, IEnumerable<VirtualPath> exclude)
         {
-            if (!String.IsNullOrEmpty(projectName))
-                throw new ArgumentException($"The {nameof(PhysicalFileSystemProvider)} does not support project names", nameof(projectName));
+            ICollection<string> normalizedExclude = exclude.Select(x => (string)x).ToArray();
+            foreach (VirtualPath virtualPath in include)
+            {
+                string path = this.GetPhysicalFilePath(virtualPath);
+                if (File.Exists(path))
+                {
+                    yield return path;
+                }
+                else
+                {
+                    if (!Directory.Exists(path))
+                        throw new InvalidOperationException($"Invalid source path: {path}");
 
-            string path = Path.GetFullPath(Path.Combine(this._currentDirectory, virtualFilePath));
+                    int excludePathStart = path.Length + 1;
+                    foreach (string filePath in Directory.EnumerateFiles(path, "*.sql", virtualPath.IsRecursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))
+                    {
+                        if (normalizedExclude.Any(x => filePath.Substring(excludePathStart).StartsWith(x, StringComparison.OrdinalIgnoreCase)))
+                            continue;
+
+                        yield return filePath;
+                    }
+                }
+            }
+        }
+
+        private string GetPhysicalFilePath(VirtualPath virtualPath)
+        {
+            string path = Path.GetFullPath(Path.Combine(this._currentDirectory, virtualPath));
             return path;
         }
     }

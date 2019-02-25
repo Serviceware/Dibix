@@ -27,9 +27,17 @@ namespace Dibix.Sdk.CodeGeneration
         }
         #endregion
 
-        #region Generator
+        #region Private Methods
         public static string Generate(IExecutionEnvironment environment, SqlAccessorGeneratorConfiguration configuration)
         {
+            const string errorContent = "Please fix the errors first";
+            string output;
+            if (environment.ReportErrors())
+            {
+                output = errorContent;
+                return output;
+            }
+
             if (!configuration.Sources.Any())
                 throw new InvalidOperationException("No files were selected to scan");
 
@@ -37,9 +45,9 @@ namespace Dibix.Sdk.CodeGeneration
                 throw new InvalidOperationException("No output writer was selected");
 
             IList<SqlStatementInfo> statements = configuration.Sources.SelectMany(x => x.CollectStatements()).ToArray();
-            string output = configuration.Writer.Write(environment.GetProjectName(), statements);
+            output = configuration.Writer.Write(environment.GetProjectName(), statements);
             if (environment.ReportErrors())
-                output = "Please fix the errors first";
+                output = errorContent;
 
             return output;
         }

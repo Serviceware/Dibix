@@ -3,6 +3,7 @@
     <ReflectionVersion>4.3.0</ReflectionVersion>
     <SqlClientVersion>4.5.1</SqlClientVersion>
     <DapperVersion>1.50.5</DapperVersion>
+    <NewtonsoftJsonSchemaVersion>3.0.10</NewtonsoftJsonSchemaVersion>
     <EnvDTEVersion>8.0.2</EnvDTEVersion>
     <DacFxVersion>150.4200.1</DacFxVersion>
     <VSTextTemplatingVersion>10.0.30320</VSTextTemplatingVersion>

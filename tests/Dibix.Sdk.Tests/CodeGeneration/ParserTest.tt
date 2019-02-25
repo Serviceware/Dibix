@@ -13,23 +13,23 @@ IDictionary<string, string> overrides = new Dictionary<string, string>
     { "Table",     "dbx*" }
   , { "Procedure", "dbx*" }
 };
-foreach	(KeyValuePair<string, string> @override in overrides)
-	namingConventionType.GetField(@override.Key, BindingFlags.Public | BindingFlags.Static).SetValue(null, @override.Value);
+foreach (KeyValuePair<string, string> @override in overrides)
+    namingConventionType.GetField(@override.Key, BindingFlags.Public | BindingFlags.Static).SetValue(null, @override.Value);
 
-string output = SqlAccessorGenerator.FromVisualStudio(this.Host, (IServiceProvider)this.Host)
-                                    .AddSource("Dibix.Sdk.Tests.Database", x => 
-                                    {
-										x.SelectFolder("Tests/Parser")
-										 .SelectParser<SqlStoredProcedureParser>(y => 
-										 {
-										     y.Formatter<GenerateScriptSqlStatementFormatter>(); // Uses sql dom script generator
-										 });
-									})
-                                    .SelectOutputWriter<SqlDaoWriter>(x => 
-									{
-										x.Formatting(SqlQueryOutputFormatting.Verbatim);
-									})
-                                    .Generate();
+string output = SqlAccessorGeneratorBuilder.FromVisualStudio(this.Host, (IServiceProvider)this.Host)
+                                           .AddSource("Dibix.Sdk.Tests.Database", x => 
+                                           {
+                                               x.SelectFolder("Tests/Parser")
+                                                .SelectParser<SqlStoredProcedureParser>(y => 
+                                                {
+                                                    y.Formatter<GenerateScriptSqlStatementFormatter>(); // Uses sql dom script generator
+                                                });
+                                           })
+                                           .SelectOutputWriter<SqlDaoWriter>(x => 
+                                           {
+                                               x.Formatting(SqlQueryOutputFormatting.Verbatim);
+                                           })
+                                           .Generate();
 Write(output);
 
 #>
