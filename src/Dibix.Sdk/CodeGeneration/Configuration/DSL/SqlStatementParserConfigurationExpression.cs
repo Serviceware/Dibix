@@ -2,21 +2,13 @@
 {
     internal class SqlStatementParserConfigurationExpression : ISqlStatementParserConfigurationExpression
     {
-        #region Fields
-        private readonly ISqlStatementParser _parser;
+        #region Properties
+        public ISqlStatementFormatter SelectedFormatter { get; set; }
         #endregion
-
-        #region Constructor
-        public SqlStatementParserConfigurationExpression(ISqlStatementParser parser)
-        {
-            this._parser = parser;
-        }
-        #endregion
-
         #region ISqlStatementParserConfigurationExpression Members
         public ISqlStatementParserConfigurationExpression Formatter<TFormatter>() where TFormatter : ISqlStatementFormatter, new()
         {
-            this._parser.Formatter = new TFormatter();
+            this.SelectedFormatter = new TFormatter();
             return this;
         }
         #endregion

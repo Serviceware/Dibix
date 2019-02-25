@@ -9,6 +9,7 @@
           "type": "string",
           "description": "Select a specific SQL text parser.",
           "enum": [
+            "NoOpParser",
             "SqlStoredProcedureParser"
           ]
         },
@@ -16,6 +17,8 @@
           "type": "string",
           "description": "Select a specific SQL text formatter.",
           "enum": [
+            "TakeSourceSqlStatementFormatter",
+            "GenerateScriptSqlStatementFormatter",
             "ExecStoredProcedureSqlStatementFormatter"
           ]
         }

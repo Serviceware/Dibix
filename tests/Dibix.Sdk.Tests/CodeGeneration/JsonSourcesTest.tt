@@ -17,6 +17,44 @@ foreach (KeyValuePair<string, string> @override in overrides)
     namingConventionType.GetField(@override.Key, BindingFlags.Public | BindingFlags.Static).SetValue(null, @override.Value);
 
 string output = SqlAccessorGeneratorBuilder.GenerateFromJsonInVisualStudio(this.Host, (IServiceProvider)this.Host, @"{
+    ""input"": {
+        ""Dibix.Sdk.Tests.Database1"": null,
+        ""Dibix.Sdk.Tests.Database2"": {
+            ""include"": [
+                ""Tables"",
+                ""Stored Procedures"",
+                ""Tests/Sources/Excluded/Nested/dbx_tests_sources_excludednested.sql""
+            ],
+            ""exclude"": [
+                ""ignored""
+            ]
+        },
+        ""Dibix.Sdk.Tests.Database3"": {
+            ""include"": ""Tables"",
+            ""exclude"": ""ignored"",
+            ""parser"": ""SqlStoredProcedureParser"",
+            ""formatter"": ""TakeSourceSqlStatementFormatter""
+        },
+        ""Dibix.Sdk.Tests.Database4"": {
+            ""exclude"": ""ignored"",
+            ""parser"": ""NoOpParser"",
+            ""formatter"": ""GenerateScriptSqlStatementFormatter""
+        },
+        ""../SSISDB.dacpac"": {
+            ""include"": {
+                ""[catalog].[delete_project]"": ""DeleteProject""
+            },
+            ""parser"": ""SqlStoredProcedureParser"",
+            ""formatter"": ""ExecStoredProcedureSqlStatementFormatter""
+        }
+    },
+    ""output"": ""SqlDaoWriter"",
+    ""output"": {
+        ""name"": ""SqlDaoWriter"",
+        ""namespace"": ""This.Is.A.Custom.Namespace"",
+        ""className"": ""Accessor"",
+        ""formatting"": ""Verbatim""
+    }
 }");
 Write(output);
 

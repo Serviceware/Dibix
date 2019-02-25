@@ -20,7 +20,7 @@ namespace Dibix.Sdk.CodeGeneration
         public void SelectParser<TParser>(Action<ISqlStatementParserConfigurationExpression> configuration) where TParser : ISqlStatementParser, new()
         {
             TParser parser = new TParser();
-            SqlStatementParserConfigurationExpression expression = new SqlStatementParserConfigurationExpression(parser);
+            SqlStatementParserConfigurationExpression expression = new SqlStatementParserConfigurationExpression();
             configuration?.Invoke(expression);
 
             this.Configuration.Parser = parser;

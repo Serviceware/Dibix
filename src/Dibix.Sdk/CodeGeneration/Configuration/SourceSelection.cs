@@ -6,6 +6,7 @@ namespace Dibix.Sdk.CodeGeneration
     {
         #region Properties
         public ISqlStatementParser Parser { get; set; }
+        public ISqlStatementFormatter Formatter { get; set; }
         #endregion
 
         #region ISourceSelection Members
@@ -14,9 +15,10 @@ namespace Dibix.Sdk.CodeGeneration
             if (this.Parser == null)
                 this.Parser = new NoOpParser();
 
-            if (this.Parser.Formatter == null)
-                this.Parser.Formatter = new TakeSourceSqlStatementFormatter();
+            if (this.Formatter == null)
+                this.Formatter = new TakeSourceSqlStatementFormatter();
 
+            this.Parser.Formatter = this.Formatter;
             return this.CollectStatements();
         }
         #endregion
