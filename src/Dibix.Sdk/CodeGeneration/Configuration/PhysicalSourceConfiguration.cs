@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    public class PhysicalSourceSelection : SourceSelection, ISourceSelection
+    public class PhysicalSourceConfiguration : SourceConfiguration
     {
         #region Fields
         private readonly IExecutionEnvironment _environment;
@@ -15,7 +15,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public PhysicalSourceSelection(IExecutionEnvironment environment, string projectName)
+        public PhysicalSourceConfiguration(IExecutionEnvironment environment, string projectName)
         {
             this._environment = environment;
             this._projectName = projectName;
@@ -32,11 +32,11 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Overrides
-        protected override IEnumerable<SqlStatementInfo> CollectStatements()
+        protected override IEnumerable<SqlStatementInfo> CollectStatements(ISqlStatementParser parser, ISqlStatementFormatter formatter)
         {
             return this._fileSystemProvider
                        .GetFiles(this._projectName, this._include, this._exclude)
-                       .Select(x => ParseStatement(this._environment, x, base.Parser, base.Formatter));
+                       .Select(x => ParseStatement(this._environment, x, parser, formatter));
         }
         #endregion
 

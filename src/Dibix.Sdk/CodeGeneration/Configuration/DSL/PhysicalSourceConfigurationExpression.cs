@@ -2,10 +2,10 @@
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal class PhysicalSourceSelectionExpression : SourceSelectionExpression<PhysicalSourceSelection>, IPhysicalSourceSelectionExpression, ISourceSelectionExpression
+    internal sealed class PhysicalSourceConfigurationExpression : SourceConfigurationExpression<PhysicalSourceConfiguration>, IPhysicalSourceSelectionExpression, ISourceConfigurationExpression
     {
         #region Constructor
-        public PhysicalSourceSelectionExpression(IExecutionEnvironment environment, string projectName) : base(new PhysicalSourceSelection(environment, projectName)) { }
+        public PhysicalSourceConfigurationExpression(PhysicalSourceConfiguration configuration) : base(configuration) { }
         #endregion
 
         #region IPhyiscalSourceSelectionExpression Members

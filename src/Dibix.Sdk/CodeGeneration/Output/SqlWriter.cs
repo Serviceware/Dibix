@@ -16,21 +16,17 @@ namespace Dibix.Sdk.CodeGeneration
 // </auto-generated>
 //----------------------------------------------------------------------------*/";
 
-        public string Namespace { get; set; }
-        public string ClassName { get; set; }
-        public SqlQueryOutputFormatting Formatting { get; set; }
-
-        public string Write(string projectName, IList<SqlStatementInfo> statements)
+        public string Write(string projectName, string @namespace, string className, SqlQueryOutputFormatting formatting, IList<SqlStatementInfo> statements)
         {
             StringWriter writer = new StringWriter();
             writer.WriteLineRaw(Header);
-            this.Write(writer, projectName, statements);
+            this.Write(writer, projectName, @namespace, className, formatting, statements);
             return writer.ToString();
         }
 
-        protected abstract void Write(StringWriter writer, string projectName, IList<SqlStatementInfo> statements);
+        protected abstract void Write(StringWriter writer, string projectName, string @namespace, string className, SqlQueryOutputFormatting formatting, IList<SqlStatementInfo> statements);
 
-        protected string Format(string content)
+        protected static string Format(string content, SqlQueryOutputFormatting formatting)
         {
             if (content == null)
                 return null;
@@ -39,13 +35,13 @@ namespace Dibix.Sdk.CodeGeneration
 
             formatted = formatted.Replace("\t", new string(' ', TabSize));
 
-            if (this.Formatting.HasFlag(SqlQueryOutputFormatting.WhiteStripped))
+            if (formatting.HasFlag(SqlQueryOutputFormatting.WhiteStripped))
                 formatted = Regex.Replace(formatted, @"\s+", " ");
 
-            if (this.Formatting.HasFlag(SqlQueryOutputFormatting.StripDoubleQuotes))
-                formatted = formatted.Replace("\"", this.Formatting.HasFlag(SqlQueryOutputFormatting.Verbatim) ? "\"\"" : "\\\"");
+            if (formatting.HasFlag(SqlQueryOutputFormatting.StripDoubleQuotes))
+                formatted = formatted.Replace("\"", formatting.HasFlag(SqlQueryOutputFormatting.Verbatim) ? "\"\"" : "\\\"");
 
-            if (this.Formatting.HasFlag(SqlQueryOutputFormatting.Minified))
+            if (formatting.HasFlag(SqlQueryOutputFormatting.Minified))
                 formatted = formatted.Replace("\r\n", @"\r\n");
 
             return formatted;

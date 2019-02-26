@@ -1,51 +1,35 @@
-﻿using System;
-
-namespace Dibix.Sdk.CodeGeneration
+﻿namespace Dibix.Sdk.CodeGeneration
 {
-    internal class OutputConfigurationExpression : IOutputConfigurationExpression
+    internal sealed class OutputConfigurationExpression : IOutputConfigurationExpression
     {
         #region Fields
-        private readonly IExecutionEnvironment _environment;
-        private readonly IWriter _writer;
+        private readonly OutputConfiguration _outputConfiguration;
         #endregion
 
         #region Constructor
-        public OutputConfigurationExpression(IExecutionEnvironment environment, IWriter writer)
+        public OutputConfigurationExpression(OutputConfiguration outputConfiguration)
         {
-            this._environment = environment;
-            this._writer = writer;
+            this._outputConfiguration = outputConfiguration;
         }
         #endregion
 
         #region IOutputConfigurationExpression Members
         public IOutputConfigurationExpression Formatting(SqlQueryOutputFormatting formatting)
         {
-            this._writer.Formatting = formatting;
+            this._outputConfiguration.Formatting = formatting;
             return this;
         }
 
         public IOutputConfigurationExpression Namespace(string @namespace)
         {
-            this._writer.Namespace = @namespace;
+            this._outputConfiguration.Namespace = @namespace;
             return this;
         }
 
         public IOutputConfigurationExpression ClassName(string className)
         {
-            this._writer.ClassName = className;
+            this._outputConfiguration.ClassName = className;
             return this;
-        }
-        #endregion
-
-        #region Internal Methods
-        internal void Build()
-        {
-            // Detect namespace and class name
-            if (String.IsNullOrEmpty(this._writer.Namespace))
-                this._writer.Namespace = this._environment.GetProjectDefaultNamespace();
-
-            if (String.IsNullOrEmpty(this._writer.ClassName))
-                this._writer.ClassName = this._environment.GetClassName();
         }
         #endregion
     }

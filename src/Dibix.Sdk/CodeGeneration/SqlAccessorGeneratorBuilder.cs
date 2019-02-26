@@ -7,21 +7,23 @@ namespace Dibix.Sdk.CodeGeneration
     {
         #region Fields
         private readonly IExecutionEnvironment _environment;
+        private readonly ISqlAccessorGeneratorConfigurationFactory _configurationFactory;
         private readonly SqlAccessorGeneratorConfiguration _configuration;
         #endregion
 
         #region Constructor
-        private SqlAccessorGeneratorBuilder(IExecutionEnvironment environment)
+        private SqlAccessorGeneratorBuilder(IExecutionEnvironment environment, ISqlAccessorGeneratorConfigurationFactory configurationFactory)
         {
             this._environment = environment;
-            this._configuration = new SqlAccessorGeneratorConfiguration();
+            this._configurationFactory = configurationFactory;
+            this._configuration = this._configurationFactory.CreateConfiguration(environment);
         }
         #endregion
 
         #region Factory Members
         public static ISqlAccessorGeneratorBuilder Create(IExecutionEnvironment environment) => CreateFromEnvironment(environment);
 
-        public static ISqlAccessorGeneratorBuilder CreateUsingVisualStudio(ITextTemplatingEngineHost host, IServiceProvider serviceProvider) => CreateUsingVisualStudio(host, serviceProvider);
+        public static ISqlAccessorGeneratorBuilder CreateUsingVisualStudio(ITextTemplatingEngineHost host, IServiceProvider serviceProvider) => CreateUsingVisualStudioCore(host, serviceProvider);
 
         public static string GenerateFromJson(IExecutionEnvironment environment, string json)
         {
@@ -46,30 +48,30 @@ namespace Dibix.Sdk.CodeGeneration
             //if (!String.IsNullOrEmpty(projectName))
             this._environment.VerifyProject(projectName);
 
-            PhysicalSourceSelectionExpression expression = new PhysicalSourceSelectionExpression(this._environment, projectName);
+            PhysicalSourceConfiguration sourceConfiguration = this._configurationFactory.CreatePhysicalSourceConfiguration(this._environment, projectName);
+            PhysicalSourceConfigurationExpression expression = new PhysicalSourceConfigurationExpression(sourceConfiguration);
             configuration?.Invoke(expression);
-            this._configuration.Sources.Add(expression.Configuration);
+            this._configuration.Input.Sources.Add(sourceConfiguration);
             return this;
         }
 
         public ISqlAccessorGeneratorBuilder AddDacPac(string packagePath, Action<IDacPacSelectionExpression> configuration)
         {
             Guard.IsNotNull(configuration, nameof(configuration));
-            DacPacSelectionExpression expression = new DacPacSelectionExpression(this._environment, packagePath);
+            DacPacSourceConfiguration sourceConfiguration = this._configurationFactory.CreateDacPacSourceConfiguration(this._environment, packagePath);
+            DacPacSourceConfigurationExpression expression = new DacPacSourceConfigurationExpression(sourceConfiguration);
             configuration(expression);
-            this._configuration.Sources.Add(expression.Configuration);
+            this._configuration.Input.Sources.Add(sourceConfiguration);
             return this;
         }
 
-        public ISqlAccessorGeneratorBuilder SelectOutputWriter<TWriter>() where TWriter : IWriter, new() { return this.SelectOutputWriter<TWriter>(null); }
-        public ISqlAccessorGeneratorBuilder SelectOutputWriter<TWriter>(Action<IOutputConfigurationExpression> configuration) where TWriter : IWriter, new()
+        public ISqlAccessorGeneratorBuilder SelectOutputWriter<TWriter>() where TWriter : IWriter { return this.SelectOutputWriter<TWriter>(null); }
+        public ISqlAccessorGeneratorBuilder SelectOutputWriter<TWriter>(Action<IOutputConfigurationExpression> configuration) where TWriter : IWriter
         {
-            TWriter writer = new TWriter();
-            OutputConfigurationExpression expression = new OutputConfigurationExpression(this._environment, writer);
+            OutputConfigurationExpression expression = new OutputConfigurationExpression(this._configuration.Output);
             configuration?.Invoke(expression);
 
-            expression.Build();
-            this._configuration.Writer = writer;
+            this._configuration.Output.Writer = typeof(TWriter);
             return this;
         }
 
@@ -84,7 +86,8 @@ namespace Dibix.Sdk.CodeGeneration
         #region Private Methods
         private static SqlAccessorGeneratorBuilder CreateFromEnvironment(IExecutionEnvironment environment)
         {
-            SqlAccessorGeneratorBuilder builder = new SqlAccessorGeneratorBuilder(environment);
+            ISqlAccessorGeneratorConfigurationFactory configurationFactory = new SqlAccessorGeneratorConfigurationFactory();
+            SqlAccessorGeneratorBuilder builder = new SqlAccessorGeneratorBuilder(environment, configurationFactory);
             return builder;
         }
 

@@ -104,25 +104,30 @@ namespace Dibix.Sdk.CodeGeneration
             if (output.Type == JTokenType.String)
             {
                 string writerName = output.Value<string>();
-                configuration.Writer = CreateInstanceByKey<IWriter>(writerName, this._writers);
+                configuration.Output.Writer = this._writers[writerName];
             }
             else
             {
                 JObject values = (JObject)output;
                 string writerName = values.Value<string>("name");
-                configuration.Writer = CreateInstanceByKey<IWriter>(writerName, this._writers);
-                configuration.Writer.Namespace = values.Value<string>("namespace");
-                configuration.Writer.ClassName = values.Value<string>("className");
+                configuration.Output.Writer = this._writers[writerName];
+
+                string @namespace = values.Value<string>("namespace")
+                     , className  = values.Value<string>("className");
+                if (@namespace != null)
+                    configuration.Output.Namespace = @namespace;
+                if (className != null)
+                    configuration.Output.ClassName = className;
 
                 string formattingValue = values.Value<string>("formatting");
                 if (formattingValue != null)
-                    configuration.Writer.Formatting = (SqlQueryOutputFormatting)Enum.Parse(typeof(SqlQueryOutputFormatting), formattingValue);
+                    configuration.Output.Formatting = (SqlQueryOutputFormatting)Enum.Parse(typeof(SqlQueryOutputFormatting), formattingValue);
             }
         }
 
         private void ReadSqlProject(SqlAccessorGeneratorConfiguration configuration, JProperty property)
         {
-            PhysicalSourceSelection source = new PhysicalSourceSelection(this._environment, property.Name);
+            PhysicalSourceConfiguration source = new PhysicalSourceConfiguration(this._environment, property.Name);
             if (property.Value.Type != JTokenType.Null)
             {
                 JObject value = (JObject)property.Value;
@@ -132,35 +137,30 @@ namespace Dibix.Sdk.CodeGeneration
                 this.ReadTextTransformation(source, value);
             }
 
-            configuration.Sources.Add(source);
+            configuration.Input.Sources.Add(source);
         }
 
         private void ReadDacPac(SqlAccessorGeneratorConfiguration configuration, JProperty property)
         {
-            DacPacSelection source = new DacPacSelection(this._environment, property.Name);
+            DacPacSourceConfiguration source = new DacPacSourceConfiguration(this._environment, property.Name);
             JObject value = (JObject)property.Value;
             JObject include = (JObject)value.Property("include").Value;
             include.Properties().Each(x => source.AddStoredProcedure(x.Name, x.Value.Value<string>()));
 
             this.ReadTextTransformation(source, value);
-            configuration.Sources.Add(source);
+            configuration.Input.Sources.Add(source);
         }
 
-        private void ReadTextTransformation(SourceSelection source, JObject json)
+        private void ReadTextTransformation(SourceConfiguration source, JObject json)
         {
-            source.Parser = CreateInstanceByKey<ISqlStatementParser>("parser", json, this._parsers);
-            source.Formatter = CreateInstanceByKey<ISqlStatementFormatter>("formatter", json, this._formatters);
-        }
+            string parser    = json.Value<string>("parser")
+                 , formatter = json.Value<string>("parser");
 
-        private static T CreateInstanceByKey<T>(string propertyName, JObject json, IDictionary<string, Type> typeLookup) where T : class
-        {
-            string key = json.Value<string>(propertyName);
-            return key != null ? CreateInstanceByKey<T>(key, typeLookup) : null;
-        }
-        private static T CreateInstanceByKey<T>(string name, IDictionary<string, Type> typeLookup) where T : class
-        {
-            Type type = typeLookup[name];
-            return (T)Activator.CreateInstance(type);
+            if (parser != null)
+                source.Parser = this._parsers[parser];
+
+            if (formatter != null)
+                source.Formatter = this._formatters[formatter];
         }
         #endregion
 

@@ -1,16 +1,14 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-
-namespace Dibix.Sdk.CodeGeneration
+﻿namespace Dibix.Sdk.CodeGeneration
 {
     public sealed class SqlAccessorGeneratorConfiguration
     {
-        public ICollection<ISourceSelection> Sources { get; }
-        public IWriter Writer { get; set; }
+        public InputConfiguration Input { get; }
+        public OutputConfiguration Output { get; }
 
         public SqlAccessorGeneratorConfiguration()
         {
-            this.Sources = new Collection<ISourceSelection>();
+            this.Input = new InputConfiguration();
+            this.Output = new OutputConfiguration();
         }
     }
 }

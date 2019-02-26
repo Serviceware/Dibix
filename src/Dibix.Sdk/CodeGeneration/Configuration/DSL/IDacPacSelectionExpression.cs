@@ -1,6 +1,6 @@
 ﻿namespace Dibix.Sdk.CodeGeneration
 {
-    public interface IDacPacSelectionExpression : ISourceSelectionExpression
+    public interface IDacPacSelectionExpression : ISourceConfigurationExpression
     {
         IDacPacSelectionExpression SelectProcedure(string procedureName, string displayName);
     }

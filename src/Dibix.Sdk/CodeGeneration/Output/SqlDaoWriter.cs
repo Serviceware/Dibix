@@ -22,7 +22,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Overrides
-        protected override void Write(StringWriter writer, string projectName, IList<SqlStatementInfo> statements)
+        protected override void Write(StringWriter writer, string projectName, string @namespace, string className, SqlQueryOutputFormatting formatting, IList<SqlStatementInfo> statements)
         {
             Type generatedCodeAttributeType = typeof(GeneratedCodeAttribute);
             Type methodInfoType = typeof(MethodInfo);
@@ -30,17 +30,17 @@ namespace Dibix.Sdk.CodeGeneration
             IDictionary<SqlStatementInfo, string> methodReturnTypeMap = statements.ToDictionary(x => x, DetermineResultTypeName);
 
             // Prepare writer
-            CSharpWriter output = CSharpWriter.Init(writer, base.Namespace)
+            CSharpWriter output = CSharpWriter.Init(writer, @namespace)
                                               .AddUsing(generatedCodeAttributeType.Namespace)
                                               .AddUsing(methodInfoType.Namespace)
                                               .AddUsing("Dibix");
 
             // Class
             string generatedCodeAnnotation = $"{generatedCodeAttributeType.Name}(\"{GeneratorName}\", \"{Version}\")";
-            CSharpClass @class = output.AddClass(base.ClassName, CSharpModifiers.Internal | CSharpModifiers.Static, generatedCodeAnnotation);
+            CSharpClass @class = output.AddClass(className, CSharpModifiers.Internal | CSharpModifiers.Static, generatedCodeAnnotation);
 
             // Command text constants
-            this.AddCommandTextConstants(@class, statements);
+            AddCommandTextConstants(@class, statements, formatting);
             @class.AddSeparator();
 
             // Execution methods
@@ -53,7 +53,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             // Add method info accessor fields
             // This is useful for dynamic invocation like in WAX
-            this.AddMethodInfoFields(@class, statements, methodInfoType);
+            AddMethodInfoFields(@class, className, statements, methodInfoType);
 
             if (usesEnumerable || usesCollections)
                 output.AddUsing(typeof(IEnumerable<>).Namespace);
@@ -66,7 +66,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private void AddCommandTextConstants(CSharpClass @class, IList<SqlStatementInfo> statements)
+        private static void AddCommandTextConstants(CSharpClass @class, IList<SqlStatementInfo> statements, SqlQueryOutputFormatting formatting)
         {
             for (int i = 0; i < statements.Count; i++)
             {
@@ -75,7 +75,7 @@ namespace Dibix.Sdk.CodeGeneration
                 @class.AddComment(statement.Name, false);
                 @class.AddField(name: String.Concat(statement.Name, ConstantSuffix)
                               , type: typeof(string).ToCSharpTypeName()
-                              , value: new CSharpStringValue(base.Format(statement.Content), base.Formatting.HasFlag(SqlQueryOutputFormatting.Verbatim))
+                              , value: new CSharpStringValue(Format(statement.Content, formatting), formatting.HasFlag(SqlQueryOutputFormatting.Verbatim))
                               , modifiers: CSharpModifiers.Public | CSharpModifiers.Const);
 
                 if (i + 1 < statements.Count)
@@ -153,13 +153,13 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private void AddMethodInfoFields(CSharpClass @class, IEnumerable<SqlStatementInfo> statements, Type methodInfoType)
+        private static void AddMethodInfoFields(CSharpClass @class, string className, IEnumerable<SqlStatementInfo> statements, Type methodInfoType)
         {
             foreach (SqlStatementInfo statement in statements)
             {
                 @class.AddField(name: String.Concat(statement.Name, methodInfoType.Name)
                               , type: methodInfoType.Name
-                              , value: new CSharpValue($"typeof({base.ClassName}).GetMethod(\"{statement.Name}\")")
+                              , value: new CSharpValue($"typeof({className}).GetMethod(\"{statement.Name}\")")
                               , modifiers: CSharpModifiers.Public | CSharpModifiers.Static | CSharpModifiers.ReadOnly);
             }
         }

@@ -1,9 +1,9 @@
 ﻿namespace Dibix.Sdk.CodeGeneration
 {
-    public sealed class DacPacSelectionExpression : SourceSelectionExpression<DacPacSelection>, IDacPacSelectionExpression, ISourceSelectionExpression
+    internal sealed class DacPacSourceConfigurationExpression : SourceConfigurationExpression<DacPacSourceConfiguration>, IDacPacSelectionExpression, ISourceConfigurationExpression
     {
         #region Constructor
-        public DacPacSelectionExpression(IExecutionEnvironment environment, string packagePath) : base(new DacPacSelection(environment, packagePath)) { }
+        public DacPacSourceConfigurationExpression(DacPacSourceConfiguration configuration) : base(configuration) { }
         #endregion
 
         #region IDacPacSelectionExpression Members

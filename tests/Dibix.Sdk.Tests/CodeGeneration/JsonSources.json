@@ -1,0 +1,59 @@
+{
+  "$schema": "../../../src/Dibix.Sdk/CodeGeneration/Configuration/dibix.schema.json",
+  "input": {
+    "Dibix.Sdk.Tests.Database": null,
+    "Dibix.Sdk.Tests.Database": {
+      "include": [
+        "./**",
+        "Tests/Sources/Excluded/Nested/dbx_tests_sources_excludednested.sql"
+      ],
+      "exclude": [
+        "CodeAnalysis",
+        "Tables",
+        "Types",
+        "Tests/Parser",
+        "Tests/Sources/Excluded",
+        "Tests/Sources/dbx_tests_sources_externalsp"
+      ],
+      "parser": "SqlStoredProcedureParser",
+      "formatter": "TakeSourceSqlStatementFormatter"
+    },
+    "Dibix.Sdk.Tests.Database": [
+      {
+        "include": [
+          "./**",
+          "Tests/Sources/Excluded/Nested/dbx_tests_sources_excludednested.sql"
+        ],
+        "exclude": [
+          "CodeAnalysis",
+          "Tables",
+          "Types",
+          "Tests/Parser",
+          "Tests/Sources/Excluded",
+          "Tests/Sources/dbx_tests_sources_externalsp"
+        ],
+        "parser": "SqlStoredProcedureParser",
+        "formatter": "TakeSourceSqlStatementFormatter"
+      },
+      {
+        "include": "Tests/Sources/dbx_tests_sources_externalsp.sql",
+        "parser": "SqlStoredProcedureParser",
+        "formatter": "ExecStoredProcedureSqlStatementFormatter"
+      }
+    ],
+    "SSISDB.dacpac": {
+      "include": {
+        "[catalog].[delete_project]": "DeleteProject"
+      },
+      "parser": "SqlStoredProcedureParser",
+      "formatter": "ExecStoredProcedureSqlStatementFormatter"
+    }
+  },
+  "output": "SqlDaoWriter",
+  "output": {
+    "name": "SqlDaoWriter",
+    "namespace": "This.Is.A.Custom.Namespace",
+    "className": "Accessor",
+    "formatting": "Verbatim"
+  }
+}

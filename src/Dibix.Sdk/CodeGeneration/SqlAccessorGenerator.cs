@@ -37,14 +37,15 @@ namespace Dibix.Sdk.CodeGeneration
                 return output;
             }
 
-            if (!configuration.Sources.Any())
+            if (!configuration.Input.Sources.Any())
                 throw new InvalidOperationException("No files were selected to scan");
 
-            if (configuration.Writer == null)
+            if (configuration.Output.Writer == null)
                 throw new InvalidOperationException("No output writer was selected");
 
-            IList<SqlStatementInfo> statements = configuration.Sources.SelectMany(x => x.CollectStatements()).ToArray();
-            output = configuration.Writer.Write(environment.GetProjectName(), statements);
+            IWriter writer = (IWriter)Activator.CreateInstance(configuration.Output.Writer);
+            IList<SqlStatementInfo> statements = configuration.Input.Sources.SelectMany(x => x.CollectStatements()).ToArray();
+            output = writer.Write(environment.GetProjectName(), configuration.Output.Namespace, configuration.Output.ClassName, configuration.Output.Formatting, statements);
             if (environment.ReportErrors())
                 output = errorContent;
 

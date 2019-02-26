@@ -5,15 +5,15 @@ using System.Text.RegularExpressions;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    public class MsTestWrapperWriter : SqlWriter, IWriter
+    public sealed class MsTestWrapperWriter : SqlWriter, IWriter
     {
-        protected override void Write(StringWriter writer, string projectName, IList<SqlStatementInfo> statements)
+        protected override void Write(StringWriter writer, string projectName, string @namespace, string className, SqlQueryOutputFormatting formatting, IList<SqlStatementInfo> statements)
         {
-            string output = this.BuildTestClass(base.Namespace, base.ClassName, statements, base.Formatting);
+            string output = BuildTestClass(@namespace, className, statements, formatting);
             writer.WriteRaw(output);
         }
 
-        private string BuildTestClass(string @namespace, string className, IEnumerable<SqlStatementInfo> queries, SqlQueryOutputFormatting formatting)
+        private static string BuildTestClass(string @namespace, string className, IEnumerable<SqlStatementInfo> queries, SqlQueryOutputFormatting formatting)
         {
             const string template = @"using Helpline.Infrastructure.Tests.Components.Data;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -27,7 +27,7 @@ namespace %namespace%
     }
 }";
 
-            string methods = String.Join(String.Format("{0}{0}", Environment.NewLine), queries.Select(x => BuildTestMethod(x.Name, base.Format(x.Content), formatting)));
+            string methods = String.Join(String.Format("{0}{0}", Environment.NewLine), queries.Select(x => BuildTestMethod(x.Name, Format(x.Content, formatting), formatting)));
 
             return template.Replace("%namespace%", @namespace)
                            .Replace("%className%", className)

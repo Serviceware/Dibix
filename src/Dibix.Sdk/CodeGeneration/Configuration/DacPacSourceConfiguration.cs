@@ -4,7 +4,7 @@ using Microsoft.SqlServer.Dac.Model;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    public sealed class DacPacSelection : SourceSelection, ISourceSelection
+    public sealed class DacPacSourceConfiguration : SourceConfiguration
     {
         #region Fields
         private readonly IExecutionEnvironment _environment;
@@ -13,7 +13,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public DacPacSelection(IExecutionEnvironment environment, string packagePath)
+        public DacPacSourceConfiguration(IExecutionEnvironment environment, string packagePath)
         {
             this._environment = environment;
             this._packagePath = new PhysicalFileSystemProvider(environment.GetCurrentDirectory()).GetPhysicalFilePath(null, packagePath);
@@ -26,15 +26,15 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Overrides
-        protected override IEnumerable<SqlStatementInfo> CollectStatements()
+        protected override IEnumerable<SqlStatementInfo> CollectStatements(ISqlStatementParser parser, ISqlStatementFormatter formatter)
         {
             TSqlModel model = TSqlModel.LoadFromDacpac(this._packagePath, new ModelLoadOptions());
-            return this._procedureNames.Select(x => this.CollectStatement(x.Value, x.Key, model));
+            return this._procedureNames.Select(x => this.CollectStatement(x.Value, x.Key, model, parser, formatter));
         }
         #endregion
 
         #region Private Methods
-        private SqlStatementInfo CollectStatement(string procedureName, string displayName, TSqlModel model)
+        private SqlStatementInfo CollectStatement(string procedureName, string displayName, TSqlModel model, ISqlStatementParser parser, ISqlStatementFormatter formatter)
         {
             ICollection<string> parts = procedureName.Split('.').Select(x => x.Trim('[', ']')).ToArray();
             TSqlObject element = model.GetObject(ModelSchema.Procedure, new ObjectIdentifier(parts), DacQueryScopes.All);
@@ -47,10 +47,10 @@ namespace Dibix.Sdk.CodeGeneration
                 Source = this._packagePath
             };
 
-            if (base.Parser is ISqlAnalysisRunner sqlAnalysisRunner)
+            if (parser is ISqlAnalysisRunner sqlAnalysisRunner)
                 sqlAnalysisRunner.IsEnabled = false;
 
-            base.Parser.Read(this._environment, SqlParserSourceKind.String, script, statement, base.Formatter);
+            parser.Read(this._environment, SqlParserSourceKind.String, script, statement, formatter);
             return statement;
         }
         #endregion

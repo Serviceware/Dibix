@@ -1,15 +1,17 @@
-﻿namespace Dibix.Sdk.CodeGeneration
+﻿using System;
+
+namespace Dibix.Sdk.CodeGeneration
 {
-    internal class SqlStatementParserConfigurationExpression : ISqlStatementParserConfigurationExpression
+    internal sealed class SqlStatementParserConfigurationExpression : ISqlStatementParserConfigurationExpression
     {
         #region Properties
-        public ISqlStatementFormatter SelectedFormatter { get; set; }
+        public Type SelectedFormatter { get; set; }
         #endregion
 
         #region ISqlStatementParserConfigurationExpression Members
-        public ISqlStatementParserConfigurationExpression Formatter<TFormatter>() where TFormatter : ISqlStatementFormatter, new()
+        public ISqlStatementParserConfigurationExpression Formatter<TFormatter>() where TFormatter : ISqlStatementFormatter
         {
-            this.SelectedFormatter = new TFormatter();
+            this.SelectedFormatter = typeof(TFormatter);
             return this;
         }
         #endregion
