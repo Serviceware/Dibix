@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
     <PackageReference Include="Newtonsoft.Json.Schema" Version="$(NewtonsoftJsonSchemaVersion)" />
     <PackageReference Include="EnvDTE" Version="$(EnvDTEVersion)" />
     <PackageReference Include="Microsoft.VisualStudio.TextTemplating.Interfaces.10.0" Version="$(VSTextTemplatingVersion)" />

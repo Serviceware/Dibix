@@ -36,19 +36,19 @@ namespace Dibix.Sdk.CodeGeneration
         {
             return this._fileSystemProvider
                        .GetFiles(this._projectName, this._include, this._exclude)
-                       .Select(x => ParseStatement(this._environment, x, base.Parser));
+                       .Select(x => ParseStatement(this._environment, x, base.Parser, base.Formatter));
         }
         #endregion
 
         #region Private Methods
-        private static SqlStatementInfo ParseStatement(IExecutionEnvironment environment, string filePath, ISqlStatementParser parser)
+        private static SqlStatementInfo ParseStatement(IExecutionEnvironment environment, string filePath, ISqlStatementParser parser, ISqlStatementFormatter formatter)
         {
             SqlStatementInfo statement = new SqlStatementInfo
             {
                 Source = filePath,
                 Name = Path.GetFileNameWithoutExtension(filePath)
             };
-            parser.Read(environment, SqlParserSourceKind.Stream, File.OpenRead(filePath), statement);
+            parser.Read(environment, SqlParserSourceKind.Stream, File.OpenRead(filePath), statement, formatter);
             return statement;
         }
         #endregion

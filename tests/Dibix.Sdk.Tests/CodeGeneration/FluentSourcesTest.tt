@@ -26,14 +26,6 @@ string output = SqlAccessorGeneratorBuilder.FromVisualStudio(this.Host, (IServic
                                                     y.Formatter<TakeSourceSqlStatementFormatter>();
                                                 });
                                            })
-                                           .AddSource("Dibix.Sdk.Tests.Database", x =>
-                                           {
-                                               x.SelectFile("Tests/Sources/dbx_tests_sources_externalsp.sql")
-                                                .SelectParser<SqlStoredProcedureParser>(y =>
-                                                {
-                                                    y.Formatter<ExecStoredProcedureSqlStatementFormatter>();
-                                                });
-                                           })
                                            .AddDacPac("SSISDB.dacpac", x =>
                                            {
                                                x.SelectProcedure("[catalog].[delete_project]", "DeleteProject")

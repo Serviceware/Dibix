@@ -4,7 +4,6 @@ using System.Linq;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-
     public sealed class SqlAccessorGenerator : ICodeGenerator
     {
         #region Fields

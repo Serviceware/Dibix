@@ -9,7 +9,7 @@
         #region IDacPacSelectionExpression Members
         public IDacPacSelectionExpression SelectProcedure(string procedureName, string displayName)
         {
-            base.Configuration.AddStoredProcedure(displayName, procedureName);
+            base.Configuration.AddStoredProcedure(procedureName, displayName);
             return this;
         }
         #endregion

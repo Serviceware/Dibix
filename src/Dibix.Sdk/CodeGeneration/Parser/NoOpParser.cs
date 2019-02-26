@@ -12,9 +12,7 @@ namespace Dibix.Sdk.CodeGeneration
             { SqlParserSourceKind.Stream, ReadFromStream }
         };
 
-        public ISqlStatementFormatter Formatter { get; set; }
-
-        public void Read(IExecutionEnvironment environment, SqlParserSourceKind sourceKind, object source, SqlStatementInfo target)
+        public void Read(IExecutionEnvironment environment, SqlParserSourceKind sourceKind, object source, SqlStatementInfo target, ISqlStatementFormatter formatter)
         {
             if (!SourceReaders.TryGetValue(sourceKind, out Func<object, string> reader))
                 throw new ArgumentOutOfRangeException(nameof(sourceKind), sourceKind, null);

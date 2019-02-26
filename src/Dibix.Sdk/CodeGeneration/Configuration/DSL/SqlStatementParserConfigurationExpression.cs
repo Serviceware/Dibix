@@ -5,6 +5,7 @@
         #region Properties
         public ISqlStatementFormatter SelectedFormatter { get; set; }
         #endregion
+
         #region ISqlStatementParserConfigurationExpression Members
         public ISqlStatementParserConfigurationExpression Formatter<TFormatter>() where TFormatter : ISqlStatementFormatter, new()
         {

@@ -18,7 +18,6 @@ namespace Dibix.Sdk.CodeGeneration
             if (this.Formatter == null)
                 this.Formatter = new TakeSourceSqlStatementFormatter();
 
-            this.Parser.Formatter = this.Formatter;
             return this.CollectStatements();
         }
         #endregion

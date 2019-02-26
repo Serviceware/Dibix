@@ -24,6 +24,7 @@ namespace Dibix.Sdk.CodeGeneration
             configuration?.Invoke(expression);
 
             this.Configuration.Parser = parser;
+            this.Configuration.Formatter = expression.SelectedFormatter;
         }
         #endregion
     }

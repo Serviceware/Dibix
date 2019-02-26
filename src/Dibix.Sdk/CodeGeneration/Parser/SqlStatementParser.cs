@@ -18,7 +18,6 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Properties
-        public ISqlStatementFormatter Formatter { get; set; }
         public bool IsEnabled { get; set; } = true;
         #endregion
 
@@ -30,7 +29,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region ISqlStatementParser Members
-        public void Read(IExecutionEnvironment environment, SqlParserSourceKind sourceKind, object source, SqlStatementInfo target)
+        public void Read(IExecutionEnvironment environment, SqlParserSourceKind sourceKind, object source, SqlStatementInfo target, ISqlStatementFormatter formatter)
         {
             if (!SourceReaders.TryGetValue(sourceKind, out Func<object, TSqlFragment> reader))
                 throw new ArgumentOutOfRangeException(nameof(sourceKind), sourceKind, null);
@@ -39,7 +38,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (this.IsEnabled && this._codeAnalysisRunner.Analyze(environment, fragment, target.Source))
                 return;
 
-            CollectStatementInfo(fragment, target, this.Formatter, environment);
+            CollectStatementInfo(fragment, target, formatter, environment);
         }
         #endregion
 

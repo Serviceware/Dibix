@@ -129,7 +129,8 @@
       "type": "string",
       "description": "Select a specific output writer.",
       "enum": [
-        "SqlDaoWriter"
+        "SqlDaoWriter",
+        "MsTestWrapperWriter"
       ]
     },
     "outputConfiguration": {

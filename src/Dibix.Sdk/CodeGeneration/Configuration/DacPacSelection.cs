@@ -22,7 +22,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Public Methods
-        public void AddStoredProcedure(string procedureName, string displayName) => this._procedureNames.Add(new KeyValuePair<string, string>(procedureName, displayName));
+        public void AddStoredProcedure(string procedureName, string displayName) => this._procedureNames.Add(new KeyValuePair<string, string>(displayName, procedureName));
         #endregion
 
         #region Overrides
@@ -50,7 +50,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (base.Parser is ISqlAnalysisRunner sqlAnalysisRunner)
                 sqlAnalysisRunner.IsEnabled = false;
 
-            base.Parser.Read(this._environment, SqlParserSourceKind.String, script, statement);
+            base.Parser.Read(this._environment, SqlParserSourceKind.String, script, statement, base.Formatter);
             return statement;
         }
         #endregion

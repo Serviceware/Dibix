@@ -18,29 +18,23 @@ foreach (KeyValuePair<string, string> @override in overrides)
 
 string output = SqlAccessorGeneratorBuilder.GenerateFromJsonInVisualStudio(this.Host, (IServiceProvider)this.Host, @"{
     ""input"": {
-        ""Dibix.Sdk.Tests.Database1"": null,
-        ""Dibix.Sdk.Tests.Database2"": {
-            ""include"": [
-                ""Tables"",
-                ""Stored Procedures"",
-                ""Tests/Sources/Excluded/Nested/dbx_tests_sources_excludednested.sql""
-            ],
+        ""Dibix.Sdk.Tests.Database"": {
+		    ""include"": [
+				""./**""
+			  , ""Tests/Sources/Excluded/Nested/dbx_tests_sources_excludednested.sql""
+			],
             ""exclude"": [
-                ""ignored""
-            ]
+                ""CodeAnalysis""
+			  , ""Tables""
+			  , ""Types""
+			  , ""Tests/Parser""
+			  , ""Tests/Sources/Excluded""
+			  , ""Tests/Sources/dbx_tests_sources_externalsp""
+            ],
+			""parser"": ""SqlStoredProcedureParser"",
+			""formatter"": ""TakeSourceSqlStatementFormatter""
         },
-        ""Dibix.Sdk.Tests.Database3"": {
-            ""include"": ""Tables"",
-            ""exclude"": ""ignored"",
-            ""parser"": ""SqlStoredProcedureParser"",
-            ""formatter"": ""TakeSourceSqlStatementFormatter""
-        },
-        ""Dibix.Sdk.Tests.Database4"": {
-            ""exclude"": ""ignored"",
-            ""parser"": ""NoOpParser"",
-            ""formatter"": ""GenerateScriptSqlStatementFormatter""
-        },
-        ""../SSISDB.dacpac"": {
+        ""SSISDB.dacpac"": {
             ""include"": {
                 ""[catalog].[delete_project]"": ""DeleteProject""
             },
@@ -48,7 +42,6 @@ string output = SqlAccessorGeneratorBuilder.GenerateFromJsonInVisualStudio(this.
             ""formatter"": ""ExecStoredProcedureSqlStatementFormatter""
         }
     },
-    ""output"": ""SqlDaoWriter"",
     ""output"": {
         ""name"": ""SqlDaoWriter"",
         ""namespace"": ""This.Is.A.Custom.Namespace"",
