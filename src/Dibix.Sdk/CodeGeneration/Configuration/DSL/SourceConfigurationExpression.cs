@@ -23,7 +23,8 @@ namespace Dibix.Sdk.CodeGeneration
             configuration?.Invoke(expression);
 
             this.Configuration.Parser = typeof(TParser);
-            this.Configuration.Formatter = expression.SelectedFormatter;
+            if (expression.SelectedFormatter != null)
+                this.Configuration.Formatter = expression.SelectedFormatter;
         }
         #endregion
     }
