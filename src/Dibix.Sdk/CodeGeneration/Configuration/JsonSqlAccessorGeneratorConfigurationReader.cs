@@ -43,19 +43,13 @@ namespace Dibix.Sdk.CodeGeneration
             // We need Newtonsoft.Json 12 though, because of JsonLoadSettings.DuplicatePropertyNameHandling
             Assembly OnAssemblyResolve(object sender, ResolveEventArgs e)
             {
-                try
-                {
-                    AssemblyName requestedAssembly = new AssemblyName(e.Name);
-                    if (requestedAssembly.Name != "Newtonsoft.Json")
-                        return null;
+                AppDomain.CurrentDomain.AssemblyResolve -= OnAssemblyResolve;
+                AssemblyName requestedAssembly = new AssemblyName(e.Name);
+                if (requestedAssembly.Name != "Newtonsoft.Json")
+                    return null;
 
-                    requestedAssembly.Version = new Version(12, 0);
-                    return Assembly.Load(requestedAssembly);
-                }
-                finally
-                {
-                    AppDomain.CurrentDomain.AssemblyResolve -= OnAssemblyResolve;
-                }
+                requestedAssembly.Version = new Version(12, 0, 0, 0);
+                return Assembly.Load(requestedAssembly);
             }
 
             AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;

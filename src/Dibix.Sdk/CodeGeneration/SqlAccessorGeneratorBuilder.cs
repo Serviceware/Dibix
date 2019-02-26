@@ -21,7 +21,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Factory Members
         public static ISqlAccessorGeneratorBuilder Create(IExecutionEnvironment environment) => CreateFromEnvironment(environment);
 
-        public static ISqlAccessorGeneratorBuilder FromVisualStudio(ITextTemplatingEngineHost host, IServiceProvider serviceProvider) => CreateFromVisualStudio(host, serviceProvider);
+        public static ISqlAccessorGeneratorBuilder CreateUsingVisualStudio(ITextTemplatingEngineHost host, IServiceProvider serviceProvider) => CreateUsingVisualStudio(host, serviceProvider);
 
         public static string GenerateFromJson(IExecutionEnvironment environment, string json)
         {
@@ -29,9 +29,9 @@ namespace Dibix.Sdk.CodeGeneration
             return GenerateFromJson(builder, json);
         }
 
-        public static string GenerateFromJsonInVisualStudio(ITextTemplatingEngineHost host, IServiceProvider serviceProvider, string json)
+        public static string GenerateFromJsonUsingVisualStudio(ITextTemplatingEngineHost host, IServiceProvider serviceProvider, string json)
         {
-            SqlAccessorGeneratorBuilder builder = CreateFromVisualStudio(host, serviceProvider);
+            SqlAccessorGeneratorBuilder builder = CreateUsingVisualStudioCore(host, serviceProvider);
             return GenerateFromJson(builder, json);
         }
         #endregion
@@ -88,7 +88,7 @@ namespace Dibix.Sdk.CodeGeneration
             return builder;
         }
 
-        private static SqlAccessorGeneratorBuilder CreateFromVisualStudio(ITextTemplatingEngineHost host, IServiceProvider serviceProvider)
+        private static SqlAccessorGeneratorBuilder CreateUsingVisualStudioCore(ITextTemplatingEngineHost host, IServiceProvider serviceProvider)
         {
             IExecutionEnvironment environment = new VisualStudioExecutionEnvironment(host, serviceProvider);
             SqlAccessorGeneratorBuilder builder = CreateFromEnvironment(environment);

@@ -16,7 +16,7 @@ IDictionary<string, string> overrides = new Dictionary<string, string>
 foreach (KeyValuePair<string, string> @override in overrides)
     namingConventionType.GetField(@override.Key, BindingFlags.Public | BindingFlags.Static).SetValue(null, @override.Value);
 
-string output = SqlAccessorGeneratorBuilder.GenerateFromJsonInVisualStudio(this.Host, (IServiceProvider)this.Host, @"{
+string output = SqlAccessorGeneratorBuilder.GenerateFromJsonUsingVisualStudio(this.Host, (IServiceProvider)this.Host, @"{
     ""input"": {
         ""Dibix.Sdk.Tests.Database"": {
 		    ""include"": [
