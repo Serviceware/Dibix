@@ -16,7 +16,8 @@ IDictionary<string, string> overrides = new Dictionary<string, string>
 foreach (KeyValuePair<string, string> @override in overrides)
     namingConventionType.GetField(@override.Key, BindingFlags.Public | BindingFlags.Static).SetValue(null, @override.Value);
 
-string output = SqlAccessorGeneratorBuilder.CreateUsingVisualStudio(this.Host, (IServiceProvider)this.Host)
+string output = SqlAccessorGeneratorFactory.FromVisualStudio(this.Host, (IServiceProvider)this.Host)
+                                           .Build()
                                            .AddSource("Dibix.Sdk.Tests.Database", x => 
                                            {
                                                x.SelectFolder(null, "CodeAnalysis", "Tables", "Types", "Tests/Parser", "Tests/Sources/Excluded", "Tests/Sources/dbx_tests_sources_externalsp")

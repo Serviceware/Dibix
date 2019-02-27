@@ -1,9 +1,8 @@
 using System;
-using Microsoft.VisualStudio.TextTemplating;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    public sealed class SqlAccessorGeneratorBuilder : ISqlAccessorGeneratorBuilder
+    internal sealed class SqlAccessorGeneratorBuilder : ISqlAccessorGeneratorBuilder
     {
         #region Fields
         private readonly IExecutionEnvironment _environment;
@@ -12,29 +11,11 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        private SqlAccessorGeneratorBuilder(IExecutionEnvironment environment, ISqlAccessorGeneratorConfigurationFactory configurationFactory)
+        public SqlAccessorGeneratorBuilder(IExecutionEnvironment environment, ISqlAccessorGeneratorConfigurationFactory configurationFactory)
         {
             this._environment = environment;
             this._configurationFactory = configurationFactory;
             this._configuration = this._configurationFactory.CreateConfiguration(environment);
-        }
-        #endregion
-
-        #region Factory Members
-        public static ISqlAccessorGeneratorBuilder Create(IExecutionEnvironment environment) => CreateFromEnvironment(environment);
-
-        public static ISqlAccessorGeneratorBuilder CreateUsingVisualStudio(ITextTemplatingEngineHost host, IServiceProvider serviceProvider) => CreateUsingVisualStudioCore(host, serviceProvider);
-
-        public static string GenerateFromJson(IExecutionEnvironment environment, string json)
-        {
-            SqlAccessorGeneratorBuilder builder = CreateFromEnvironment(environment);
-            return GenerateFromJson(builder, json);
-        }
-
-        public static string GenerateFromJsonUsingVisualStudio(ITextTemplatingEngineHost host, IServiceProvider serviceProvider, string json)
-        {
-            SqlAccessorGeneratorBuilder builder = CreateUsingVisualStudioCore(host, serviceProvider);
-            return GenerateFromJson(builder, json);
         }
         #endregion
 
@@ -79,29 +60,6 @@ namespace Dibix.Sdk.CodeGeneration
         {
             ICodeGenerator generator = new SqlAccessorGenerator(this._configuration, this._environment);
             string output = generator.Generate();
-            return output;
-        }
-        #endregion
-
-        #region Private Methods
-        private static SqlAccessorGeneratorBuilder CreateFromEnvironment(IExecutionEnvironment environment)
-        {
-            ISqlAccessorGeneratorConfigurationFactory configurationFactory = new SqlAccessorGeneratorConfigurationFactory();
-            SqlAccessorGeneratorBuilder builder = new SqlAccessorGeneratorBuilder(environment, configurationFactory);
-            return builder;
-        }
-
-        private static SqlAccessorGeneratorBuilder CreateUsingVisualStudioCore(ITextTemplatingEngineHost host, IServiceProvider serviceProvider)
-        {
-            IExecutionEnvironment environment = new VisualStudioExecutionEnvironment(host, serviceProvider);
-            SqlAccessorGeneratorBuilder builder = CreateFromEnvironment(environment);
-            return builder;
-        }
-
-        private static string GenerateFromJson(SqlAccessorGeneratorBuilder builder, string json)
-        {
-            builder._configuration.ApplyFromJson(json, builder._environment, builder._configurationFactory);
-            string output = builder.Generate();
             return output;
         }
         #endregion

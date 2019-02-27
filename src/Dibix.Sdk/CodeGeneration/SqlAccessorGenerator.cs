@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    public sealed class SqlAccessorGenerator : ICodeGenerator
+    internal sealed class SqlAccessorGenerator : ICodeGenerator
     {
         #region Fields
         private readonly SqlAccessorGeneratorConfiguration _configuration;
@@ -27,7 +27,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        public static string Generate(IExecutionEnvironment environment, SqlAccessorGeneratorConfiguration configuration)
+        private static string Generate(IExecutionEnvironment environment, SqlAccessorGeneratorConfiguration configuration)
         {
             const string errorContent = "Please fix the errors first";
             string output;

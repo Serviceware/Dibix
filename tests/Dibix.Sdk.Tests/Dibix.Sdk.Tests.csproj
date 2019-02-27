@@ -16,14 +16,18 @@
       <LastGenOutput>FluentSourcesTest.cs</LastGenOutput>
       <Generator>TextTemplatingFileGenerator</Generator>
     </None>
+    <None Update="CodeGeneration\LoadJsonSourcesTest.tt">
+      <LastGenOutput>LoadJsonSourcesTest.cs</LastGenOutput>
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
     <None Update="CodeGeneration\ParserTest.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>ParserTest.cs</LastGenOutput>
     </None>
     <EmbeddedResource Update="Resource.resx" />
-    <None Update="CodeGeneration\JsonSourcesTest.tt">
+    <None Update="CodeGeneration\ParseJsonSourcesTest.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>JsonSourcesTest.cs</LastGenOutput>
+      <LastGenOutput>ParseJsonSourcesTest.cs</LastGenOutput>
     </None>
   </ItemGroup>
 
@@ -38,15 +42,20 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
+    <Compile Update="CodeGeneration\LoadJsonSourcesTest.cs">
+      <DependentUpon>LoadJsonSourcesTest.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
     <Compile Update="CodeGeneration\ParserTest.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>ParserTest.tt</DependentUpon>
     </Compile>
-    <Compile Update="CodeGeneration\JsonSourcesTest.cs">
+    <Compile Update="CodeGeneration\ParseJsonSourcesTest.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>JsonSourcesTest.tt</DependentUpon>
+      <DependentUpon>ParseJsonSourcesTest.tt</DependentUpon>
     </Compile>
   </ItemGroup>
 

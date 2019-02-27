@@ -17,20 +17,7 @@ foreach (KeyValuePair<string, string> @override in overrides)
     namingConventionType.GetField(@override.Key, BindingFlags.Public | BindingFlags.Static).SetValue(null, @override.Value);
 
 string output = SqlAccessorGeneratorFactory.FromVisualStudio(this.Host, (IServiceProvider)this.Host)
-                                           .Build()
-										   .AddSource("Dibix.Sdk.Tests.Database", x => 
-                                           {
-                                               x.SelectFolder("Tests/Parser")
-                                                .SelectParser<SqlStoredProcedureParser>(y => 
-                                                {
-                                                    y.Formatter<GenerateScriptSqlStatementFormatter>(); // Uses sql dom script generator
-                                                });
-                                           })
-                                           .SelectOutputWriter<SqlDaoWriter>(x => 
-                                           {
-                                               x.Formatting(SqlQueryOutputFormatting.Verbatim);
-                                           })
-                                           .Generate();
+                                           .LoadJson("JsonSources.json");
 Write(output);
 
 #>

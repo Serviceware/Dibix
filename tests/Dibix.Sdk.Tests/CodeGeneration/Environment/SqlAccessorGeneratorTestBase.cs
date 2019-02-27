@@ -28,14 +28,14 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         private static void RunGeneratorTest(Action<ISqlAccessorGeneratorBuilder> configuration, string projectName, string @namespace, string className, string expectedText)
         {
             TestUtilities.OverrideNamingConventions();
-            ISqlAccessorGeneratorBuilder builder = SqlAccessorGeneratorBuilder.Create(new TestExecutionEnvironment(projectName, @namespace, className));
+            ISqlAccessorGeneratorBuilder builder = SqlAccessorGeneratorFactory.Create(new TestExecutionEnvironment(projectName, @namespace, className)).Build();
             configuration(builder);
             RunGeneratorTest(builder.Generate, expectedText);
         }
         private static void RunGeneratorTest(string configurationJson, string projectName, string @namespace, string className, string expectedText)
         {
             TestUtilities.OverrideNamingConventions();
-            string actualText = SqlAccessorGeneratorBuilder.GenerateFromJson(new TestExecutionEnvironment(projectName, @namespace, className), configurationJson);
+            string actualText = SqlAccessorGeneratorFactory.Create(new TestExecutionEnvironment(projectName, @namespace, className)).ParseJson(configurationJson);
             RunGeneratorTest(() => actualText, expectedText);
         }
         private static void RunGeneratorTest(Func<string> generator, string expectedText)
