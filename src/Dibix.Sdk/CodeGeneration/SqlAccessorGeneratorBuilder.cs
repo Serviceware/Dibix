@@ -100,7 +100,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static string GenerateFromJson(SqlAccessorGeneratorBuilder builder, string json)
         {
-            builder._configuration.ApplyFromJson(json, builder._environment);
+            builder._configuration.ApplyFromJson(json, builder._environment, builder._configurationFactory);
             string output = builder.Generate();
             return output;
         }

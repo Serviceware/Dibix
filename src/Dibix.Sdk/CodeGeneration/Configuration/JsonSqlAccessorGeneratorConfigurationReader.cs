@@ -14,6 +14,7 @@ namespace Dibix.Sdk.CodeGeneration
     {
         #region Fields
         private readonly IExecutionEnvironment _environment;
+        private readonly ISqlAccessorGeneratorConfigurationFactory _configurationFactory;
         private readonly string _json;
         private readonly IDictionary<string, Action<SqlAccessorGeneratorConfiguration, JProperty>> _inputReaders;
         private readonly IDictionary<string, Type> _parsers;
@@ -22,9 +23,10 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public JsonSqlAccessorGeneratorConfigurationReader(IExecutionEnvironment environment, string json)
+        public JsonSqlAccessorGeneratorConfigurationReader(IExecutionEnvironment environment, ISqlAccessorGeneratorConfigurationFactory configurationFactory, string json)
         {
             this._environment = environment;
+            this._configurationFactory = configurationFactory;
             this._json = json;
             this._inputReaders = new Dictionary<string, Action<SqlAccessorGeneratorConfiguration, JProperty>>
             {
@@ -62,11 +64,11 @@ namespace Dibix.Sdk.CodeGeneration
             JObject json = JObject.Parse(this._json, new JsonLoadSettings { DuplicatePropertyNameHandling = DuplicatePropertyNameHandling.Error });
             if (!json.IsValid(JsonSchemaDefinition.Schema, out IList<ValidationError> errors))
             {
-                errors.Each(x =>
+                foreach (ValidationError error in errors)
                 {
-                    string errorMessage = $"JSON configuration error: {x.Message}";
-                    this._environment.RegisterError(x.Path, x.LineNumber, x.LinePosition, x.ErrorType.ToString(), errorMessage);
-                });
+                    string errorMessage = $"JSON configuration error: {error.Message}";
+                    this._environment.RegisterError(error.Path, error.LineNumber, error.LinePosition, error.ErrorType.ToString(), errorMessage);
+                }
                 return;
             }
 
@@ -79,7 +81,7 @@ namespace Dibix.Sdk.CodeGeneration
         private static IDictionary<string, Type> BuildTypeMap<T>(Assembly assembly)
         {
             return assembly.GetTypes()
-                           .Where(typeof(T).IsAssignableFrom)
+                           .Where(x => !x.IsInterface && !x.IsAbstract && typeof(T).IsAssignableFrom(x))
                            .ToDictionary(x => x.Name);
         }
 
@@ -109,52 +111,56 @@ namespace Dibix.Sdk.CodeGeneration
             else
             {
                 JObject values = (JObject)output;
-                string writerName = values.Value<string>("name");
-                configuration.Output.Writer = this._writers[writerName];
 
-                string @namespace = values.Value<string>("namespace")
-                     , className  = values.Value<string>("className");
+                string writerName = values.Value<string>("name")
+                     , @namespace = values.Value<string>("namespace")
+                     , className  = values.Value<string>("className")
+                     , formatting = values.Value<string>("formatting");
+
+                if (writerName != null)
+                    configuration.Output.Writer = this._writers[writerName];
                 if (@namespace != null)
                     configuration.Output.Namespace = @namespace;
                 if (className != null)
                     configuration.Output.ClassName = className;
-
-                string formattingValue = values.Value<string>("formatting");
-                if (formattingValue != null)
-                    configuration.Output.Formatting = (SqlQueryOutputFormatting)Enum.Parse(typeof(SqlQueryOutputFormatting), formattingValue);
+                if (formatting != null)
+                    configuration.Output.Formatting = (SqlQueryOutputFormatting)Enum.Parse(typeof(SqlQueryOutputFormatting), formatting);
             }
         }
 
         private void ReadSqlProject(SqlAccessorGeneratorConfiguration configuration, JProperty property)
         {
-            PhysicalSourceConfiguration source = new PhysicalSourceConfiguration(this._environment, property.Name);
-            if (property.Value.Type != JTokenType.Null)
+            this.ReadProject(configuration.Input, property, this._configurationFactory.CreatePhysicalSourceConfiguration, (source, value) =>
             {
-                JObject value = (JObject)property.Value;
-                (value.Property("include")?.GetValues() ?? Enumerable.Empty<string>()).Each(source.Include);
-                (value.Property("exclude")?.GetValues() ?? Enumerable.Empty<string>()).Each(source.Exclude);
-
-                this.ReadTextTransformation(source, value);
-            }
-
-            configuration.Input.Sources.Add(source);
+                value.GetPropertyValues("include").Each(source.Include);
+                value.GetPropertyValues("exclude").Each(source.Exclude);
+            });
         }
 
         private void ReadDacPac(SqlAccessorGeneratorConfiguration configuration, JProperty property)
         {
-            DacPacSourceConfiguration source = new DacPacSourceConfiguration(this._environment, property.Name);
-            JObject value = (JObject)property.Value;
-            JObject include = (JObject)value.Property("include").Value;
-            include.Properties().Each(x => source.AddStoredProcedure(x.Name, x.Value.Value<string>()));
+            this.ReadProject(configuration.Input, property, this._configurationFactory.CreateDacPacSourceConfiguration, (source, value) =>
+            {
+                JObject include = (JObject)value.Property("include").Value;
+                include.Properties().Each(x => source.AddStoredProcedure(x.Name, x.Value.Value<string>()));
+            });
+        }
 
-            this.ReadTextTransformation(source, value);
-            configuration.Input.Sources.Add(source);
+        private void ReadProject<T>(InputConfiguration configuration, JProperty property, Func<IExecutionEnvironment, string, T> factory, Action<T, JObject> specificConfiguration) where T : SourceConfiguration
+        {
+            foreach (JObject group in property.Value.GetObjects())
+            {
+                T source = factory(this._environment, property.Name);
+                specificConfiguration(source, group);
+                this.ReadTextTransformation(source, group);
+                configuration.Sources.Add(source);
+            }
         }
 
         private void ReadTextTransformation(SourceConfiguration source, JObject json)
         {
             string parser    = json.Value<string>("parser")
-                 , formatter = json.Value<string>("parser");
+                 , formatter = json.Value<string>("formatter");
 
             if (parser != null)
                 source.Parser = this._parsers[parser];

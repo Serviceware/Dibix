@@ -20,10 +20,14 @@ string output = SqlAccessorGeneratorBuilder.CreateUsingVisualStudio(this.Host, (
                                            .AddSource("Dibix.Sdk.Tests.Database", x => 
                                            {
                                                x.SelectFolder(null, "CodeAnalysis", "Tables", "Types", "Tests/Parser", "Tests/Sources/Excluded", "Tests/Sources/dbx_tests_sources_externalsp")
-                                                .SelectFile("Tests/Sources/Excluded/Nested/dbx_tests_sources_excludednested.sql")
-                                                .SelectParser<SqlStoredProcedureParser>(y => 
+                                                .SelectFile("Tests/Sources/Excluded/Nested/dbx_tests_sources_excludednested.sql");
+                                           })
+                                           .AddSource("Dibix.Sdk.Tests.Database", x =>
+                                           {
+                                               x.SelectFile("Tests/Sources/dbx_tests_sources_externalsp.sql")
+                                                .SelectParser<SqlStoredProcedureParser>(y =>
                                                 {
-                                                    y.Formatter<TakeSourceSqlStatementFormatter>();
+                                                    y.Formatter<ExecStoredProcedureSqlStatementFormatter>();
                                                 });
                                            })
                                            .AddDacPac("SSISDB.dacpac", x =>

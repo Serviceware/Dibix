@@ -17,37 +17,39 @@ foreach (KeyValuePair<string, string> @override in overrides)
     namingConventionType.GetField(@override.Key, BindingFlags.Public | BindingFlags.Static).SetValue(null, @override.Value);
 
 string output = SqlAccessorGeneratorBuilder.GenerateFromJsonUsingVisualStudio(this.Host, (IServiceProvider)this.Host, @"{
-    ""input"": {
-        ""Dibix.Sdk.Tests.Database"": {
-		    ""include"": [
-				""./**""
-			  , ""Tests/Sources/Excluded/Nested/dbx_tests_sources_excludednested.sql""
-			],
-            ""exclude"": [
-                ""CodeAnalysis""
-			  , ""Tables""
-			  , ""Types""
-			  , ""Tests/Parser""
-			  , ""Tests/Sources/Excluded""
-			  , ""Tests/Sources/dbx_tests_sources_externalsp""
-            ],
-			""parser"": ""SqlStoredProcedureParser"",
-			""formatter"": ""TakeSourceSqlStatementFormatter""
-        },
-        ""SSISDB.dacpac"": {
-            ""include"": {
-                ""[catalog].[delete_project]"": ""DeleteProject""
-            },
-            ""parser"": ""SqlStoredProcedureParser"",
-            ""formatter"": ""ExecStoredProcedureSqlStatementFormatter""
-        }
-    },
-    ""output"": {
-        ""name"": ""SqlDaoWriter"",
-        ""namespace"": ""This.Is.A.Custom.Namespace"",
-        ""className"": ""Accessor"",
-        ""formatting"": ""Verbatim""
+  ""input"": {
+    ""Dibix.Sdk.Tests.Database"": [
+      {
+        ""include"": [
+          ""./**"",
+          ""Tests/Sources/Excluded/Nested/dbx_tests_sources_excludednested.sql""
+        ],
+        ""exclude"": [
+          ""CodeAnalysis"",
+          ""Tables"",
+          ""Types"",
+          ""Tests/Parser"",
+          ""Tests/Sources/Excluded"",
+          ""Tests/Sources/dbx_tests_sources_externalsp""
+        ]
+      },
+      {
+        ""include"": ""Tests/Sources/dbx_tests_sources_externalsp.sql"",
+        ""formatter"": ""ExecStoredProcedureSqlStatementFormatter""
+      }
+    ],
+    ""SSISDB.dacpac"": {
+      ""include"": {
+        ""[catalog].[delete_project]"": ""DeleteProject""
+      },
+      ""formatter"": ""ExecStoredProcedureSqlStatementFormatter""
     }
+  },
+  ""output"": {
+    ""namespace"": ""This.Is.A.Custom.Namespace"",
+    ""className"": ""Accessor"",
+    ""formatting"": ""Verbatim""
+  }
 }");
 Write(output);
 

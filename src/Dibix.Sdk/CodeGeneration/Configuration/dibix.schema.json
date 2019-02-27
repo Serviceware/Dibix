@@ -24,6 +24,61 @@
         }
       }
     },
+    "inputSourceConfiguration": {
+      "type": "object",
+      "description": "Specific input source configuration.",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "allOf": [
+        {
+          "$ref": "#/definitions/textTransformConfiguration"
+        }
+      ],
+      "properties": {
+        "parser": {},
+        "formatter": {},
+        "include": {
+          "description": "Include specific items. If not specified, all SQL files of the selected project will be included.",
+          "oneOf": [
+            {
+              "type": "string",
+              "description": "Include a specific item. Can be a path to a directory or file.",
+              "minLength": 1
+            },
+            {
+              "type": "array",
+              "description": "Include one or more specific items. Can be a path to a directory or file.",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 2,
+              "uniqueItems": true
+            }
+          ]
+        },
+        "exclude": {
+          "description": "Exclude specific items.",
+          "oneOf": [
+            {
+              "type": "string",
+              "description": "Exclude a specific item.",
+              "minLength": 1
+            },
+            {
+              "type": "array",
+              "description": "Exclude one or more specific items.",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 2,
+              "uniqueItems": true
+            }
+          ]
+        }
+      }
+    },
     "inputConfiguration": {
       "type": "object",
       "description": "Defines the input for the generator.",
@@ -36,59 +91,15 @@
               "description": "Include all SQL files of the selected project using the default parser."
             },
             {
-              "type": "object",
-              "description": "Specific input source configuration.",
-              "additionalProperties": false,
-              "minProperties": 1,
-              "allOf": [
-                {
-                  "$ref": "#/definitions/textTransformConfiguration"
-                }
-              ],
-              "properties": {
-                "parser": {},
-                "formatter": {},
-                "include": {
-                  "description": "Include specific items. If not specified, all SQL files of the selected project will be included.",
-                  "oneOf": [
-                    {
-                      "type": "string",
-                      "description": "Include a specific item. Can be a path to a directory or file.",
-                      "minLength": 1
-                    },
-                    {
-                      "type": "array",
-                      "description": "Include one or more specific items. Can be a path to a directory or file.",
-                      "items": {
-                        "type": "string",
-                        "minLength": 1
-                      },
-                      "minItems": 1,
-                      "uniqueItems": true
-                    }
-                  ]
-                },
-                "exclude": {
-                  "description": "Exclude specific items.",
-                  "oneOf": [
-                    {
-                      "type": "string",
-                      "description": "Exclude a specific item.",
-                      "minLength": 1
-                    },
-                    {
-                      "type": "array",
-                      "description": "Exclude one or more specific items.",
-                      "items": {
-                        "type": "string",
-                        "minLength": 1
-                      },
-                      "minItems": 1,
-                      "uniqueItems": true
-                    }
-                  ]
-                }
-              }
+              "$ref": "#/definitions/inputSourceConfiguration"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/inputSourceConfiguration"
+              },
+              "minItems": 2,
+              "uniqueItems": true
             }
           ]
         },
@@ -171,10 +182,7 @@
               ]
             }
           },
-          "additionalProperties": false,
-          "required": [
-            "name"
-          ]
+          "additionalProperties": false
         }
       ]
     }

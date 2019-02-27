@@ -39,6 +39,14 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                              y.Formatter<TakeSourceSqlStatementFormatter>();
                          });
                     })
+                    .AddSource("Dibix.Sdk.Tests.Database", x =>
+                    {
+                        x.SelectFile("Tests/Sources/dbx_tests_sources_externalsp.sql")
+                         .SelectParser<SqlStoredProcedureParser>(y =>
+                         {
+                             y.Formatter<ExecStoredProcedureSqlStatementFormatter>();
+                         });
+                    })
                     .AddDacPac("SSISDB.dacpac", x =>
                     {
                         x.SelectProcedure("[catalog].[delete_project]", "DeleteProject")
@@ -60,37 +68,39 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         public void JsonSourcesTest()
         {
             base.RunGeneratorTest("SourcesTest", @"{
-    ""input"": {
-        ""Dibix.Sdk.Tests.Database"": {
-		    ""include"": [
-				""./**""
-			  , ""Tests/Sources/Excluded/Nested/dbx_tests_sources_excludednested.sql""
-			],
-            ""exclude"": [
-                ""CodeAnalysis""
-			  , ""Tables""
-			  , ""Types""
-			  , ""Tests/Parser""
-			  , ""Tests/Sources/Excluded""
-			  , ""Tests/Sources/dbx_tests_sources_externalsp""
-            ],
-			""parser"": ""SqlStoredProcedureParser"",
-			""formatter"": ""TakeSourceSqlStatementFormatter""
-        },
-        ""SSISDB.dacpac"": {
-            ""include"": {
-                ""[catalog].[delete_project]"": ""DeleteProject""
-            },
-            ""parser"": ""SqlStoredProcedureParser"",
-            ""formatter"": ""ExecStoredProcedureSqlStatementFormatter""
-        }
-    },
-    ""output"": {
-        ""name"": ""SqlDaoWriter"",
-        ""namespace"": ""This.Is.A.Custom.Namespace"",
-        ""className"": ""Accessor"",
-        ""formatting"": ""Verbatim""
+  ""input"": {
+    ""Dibix.Sdk.Tests.Database"": [
+      {
+        ""include"": [
+          ""./**"",
+          ""Tests/Sources/Excluded/Nested/dbx_tests_sources_excludednested.sql""
+        ],
+        ""exclude"": [
+          ""CodeAnalysis"",
+          ""Tables"",
+          ""Types"",
+          ""Tests/Parser"",
+          ""Tests/Sources/Excluded"",
+          ""Tests/Sources/dbx_tests_sources_externalsp""
+        ]
+      },
+      {
+        ""include"": ""Tests/Sources/dbx_tests_sources_externalsp.sql"",
+        ""formatter"": ""ExecStoredProcedureSqlStatementFormatter""
+      }
+    ],
+    ""SSISDB.dacpac"": {
+      ""include"": {
+        ""[catalog].[delete_project]"": ""DeleteProject""
+      },
+      ""formatter"": ""ExecStoredProcedureSqlStatementFormatter""
     }
+  },
+  ""output"": {
+    ""namespace"": ""This.Is.A.Custom.Namespace"",
+    ""className"": ""Accessor"",
+    ""formatting"": ""Verbatim""
+  }
 }");
         }
     }
