@@ -9,6 +9,8 @@
     <DacFxVersion>150.4200.1</DacFxVersion>
     <VSTextTemplatingVersion>10.0.30320</VSTextTemplatingVersion>
     <VSLangProjVersion>7.0.3301</VSLangProjVersion>
+    <VisualStudioShellVersion>15.0.26201</VisualStudioShellVersion>
+    <VSSDKBuildToolsVersion>15.9.3039</VSSDKBuildToolsVersion>
     <ConfigurationBinderVersion>2.1.1</ConfigurationBinderVersion>
     <UserSecretsVersion>2.1.1</UserSecretsVersion>
     <MicrosoftTestSdkVersion>15.9.0</MicrosoftTestSdkVersion>
