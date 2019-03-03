@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\Dibix.Sdk.Locator\*.cs" Link="Locator\%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.SqlServer.DacFx.x64" Version="$(DacFxVersion)" />
   </ItemGroup>
 
@@ -23,6 +27,6 @@
       <HintPath>\\pmcs-hlbuild9\C$\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\SQLDB\DAC\130\Microsoft.SqlServer.Dac.Extensions.dll</HintPath>
     </Reference>
     -->
-  </ItemGroup> 
+  </ItemGroup>
   
 </Project>

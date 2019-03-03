@@ -19,10 +19,14 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
     <PackageReference Include="Newtonsoft.Json.Schema" Version="$(NewtonsoftJsonSchemaVersion)" />
-    <PackageReference Include="EnvDTE" Version="$(EnvDTEVersion)" />
-    <PackageReference Include="Microsoft.VisualStudio.TextTemplating.Interfaces.10.0" Version="$(VSTextTemplatingVersion)" />
-    <PackageReference Include="VSLangProj" Version="$(VSLangProjVersion)" />
     <PackageReference Include="Microsoft.SqlServer.DacFx.x64" Version="$(DacFxVersion)" />
+    <PackageReference Include="EnvDTE" Version="$(EnvDTEVersion)" />
+    <PackageReference Include="VSLangProj" Version="$(VSLangProjVersion)" />
+    <PackageReference Include="Microsoft.VisualStudio.Shell.15.0" Version="$(VisualStudioShellVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.ComponentModel.Composition" />
   </ItemGroup>
   
 </Project>

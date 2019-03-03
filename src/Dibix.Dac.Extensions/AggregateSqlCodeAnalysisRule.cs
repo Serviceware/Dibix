@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Dibix.Sdk;
 using Microsoft.SqlServer.Dac;
 using Microsoft.SqlServer.Dac.CodeAnalysis;
 using Microsoft.SqlServer.Dac.Model;
@@ -58,7 +59,7 @@ namespace Dibix.Dac.Extensions
                 return File.Exists(relatedAssemblyPath) ? Assembly.LoadFrom(relatedAssemblyPath) : null;
             }
 
-            Assembly rulesAssembly = RulesAssemblyLoader.Load(source.SourceName);
+            Assembly rulesAssembly = SdkAssemblyLoader.Load(source.SourceName);
             Type providerType = rulesAssembly.GetType("Dibix.Sdk.CodeAnalysis.Dac.DacSqlCodeAnalysisAdapter");
             AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
             object engine = Activator.CreateInstance(providerType);

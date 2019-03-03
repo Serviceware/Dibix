@@ -19,7 +19,22 @@ namespace Dibix.Sdk.CodeGeneration
             try
             {
                 domain = AppDomain.CreateDomain($"Dibix.Sdk.Reflection: {Guid.NewGuid()}", null, new AppDomainSetup { ApplicationBase = AssemblyDirectory });
+
+                // Not sure yet why I need this..
+                // Might have to do something with different assembly load contexts
+                // Both assemblies/types get compared before they can be casted
+                // If something does not compare, you'll end up with invalid cast from transparent proxy..
+                ResolveEventHandler onAssemblyResolve = (sender, e) =>
+                {
+                    if (e.Name == AssemblyName)
+                        return AppDomain.CurrentDomain.GetAssemblies().Single(x => x.FullName == AssemblyName);
+
+                    return null;
+                };
+                AppDomain.CurrentDomain.AssemblyResolve += onAssemblyResolve;
                 ReflectionTypeLoader instance = (ReflectionTypeLoader)domain.CreateInstanceAndUnwrap(AssemblyName, TypeName);
+                AppDomain.CurrentDomain.AssemblyResolve -= onAssemblyResolve;
+
                 TypeInfo info = instance.GetTypeInfo(typeName.AssemblyName, assemblyPath, typeName.NormalizedTypeName);
                 typeName.CSharpTypeName = info.CSharpTypeName;
                 CodeGeneration.TypeInfo result = new CodeGeneration.TypeInfo(typeName, info.IsPrimitive);

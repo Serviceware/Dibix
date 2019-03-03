@@ -5,12 +5,15 @@
     <DapperVersion>1.50.5</DapperVersion>
     <NewtonsoftJsonVersion>12.0.1</NewtonsoftJsonVersion>
     <NewtonsoftJsonSchemaVersion>3.0.10</NewtonsoftJsonSchemaVersion>
-    <EnvDTEVersion>8.0.2</EnvDTEVersion>
     <DacFxVersion>150.4200.1</DacFxVersion>
-    <VSTextTemplatingVersion>10.0.30320</VSTextTemplatingVersion>
+
+    <VisualStudioShellVersion>15.9.28307</VisualStudioShellVersion>
+    <EnvDTEVersion>8.0.2</EnvDTEVersion>
     <VSLangProjVersion>7.0.3301</VSLangProjVersion>
-    <VisualStudioShellVersion>15.0.26201</VisualStudioShellVersion>
+    <VSLangProj80Version>8.0.50728</VSLangProj80Version>
     <VSSDKBuildToolsVersion>15.9.3039</VSSDKBuildToolsVersion>
+    <VisualStudioDesignerInterfacesVersion>1.1.4323</VisualStudioDesignerInterfacesVersion>
+
     <ConfigurationBinderVersion>2.1.1</ConfigurationBinderVersion>
     <UserSecretsVersion>2.1.1</UserSecretsVersion>
     <MicrosoftTestSdkVersion>15.9.0</MicrosoftTestSdkVersion>

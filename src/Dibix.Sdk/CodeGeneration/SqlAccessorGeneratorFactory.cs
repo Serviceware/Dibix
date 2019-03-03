@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Microsoft.VisualStudio.TextTemplating;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -14,9 +13,9 @@ namespace Dibix.Sdk.CodeGeneration
         }
 
         // Visual studio
-        public static ISqlAccessorGeneratorFactoryExpression FromVisualStudio(ITextTemplatingEngineHost host, IServiceProvider serviceProvider)
+        public static ISqlAccessorGeneratorFactoryExpression FromVisualStudio(CodeGeneratorContext context, IServiceProvider serviceProvider)
         {
-            IExecutionEnvironment environment = new VisualStudioExecutionEnvironment(host, serviceProvider);
+            IExecutionEnvironment environment = new VisualStudioExecutionEnvironment(context, serviceProvider);
             return new SqlAccessorGeneratorFactoryExpression(environment);
         }
         #endregion

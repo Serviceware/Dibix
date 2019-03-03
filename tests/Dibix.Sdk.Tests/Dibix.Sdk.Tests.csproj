@@ -8,6 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\..\src\Dibix.Sdk.Locator\*.cs" Link="Locator\%(Filename)%(Extension)" />
+
     <None Update="CodeGeneration\CodeAnalysisTest.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>CodeAnalysisTest.cs</LastGenOutput>
@@ -29,9 +31,7 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>ParseJsonSourcesTest.cs</LastGenOutput>
     </None>
-  </ItemGroup>
 
-  <ItemGroup>
     <Compile Update="CodeGeneration\CodeAnalysisTest.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>

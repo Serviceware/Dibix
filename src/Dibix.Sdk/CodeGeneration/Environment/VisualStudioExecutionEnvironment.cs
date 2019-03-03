@@ -5,56 +5,58 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using EnvDTE;
-using Microsoft.VisualStudio.TextTemplating;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using VSLangProj;
+using Constants = EnvDTE.Constants;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    public class VisualStudioExecutionEnvironment : IExecutionEnvironment, IFileSystemProvider, ITypeLoader
+    internal sealed class VisualStudioExecutionEnvironment : IExecutionEnvironment, IFileSystemProvider, ITypeLoader
     {
         #region Fields
         private const string VsProjectKindSolutionFolder = "{66A26720-8FB5-11D2-AA7E-00C04F688DDE}";
-        private const string ProjectDefaultNamespaceKey = "projectDefaultNamespace";
         private const string PhysicalPathKey = "FullPath";
         private const string OutputDirectoryKey = "OutputPath";
         private const string OutputFileNameKey = "OutputFileName";
-        private readonly ITextTemplatingEngineHost _host;
+        private readonly CodeGeneratorContext _context;
+        private readonly IServiceProvider _serviceProvider;
         private readonly DTE _dte;
+        private readonly IVsSolution _solution;
+        private readonly ErrorListProvider _errorProvider;
         private readonly IDictionary<string, Project> _projectCache;
         private readonly CurrentProjectInfo _currentProject;
         private readonly CompilerErrorCollection _errors;
         private readonly Lazy<IDictionary<string, string>> _assemblyLocationLookupAccessor;
         private readonly Lazy<ICollection<CodeElement>> _codeItemAccessor;
+        private readonly IDictionary<string, int> _currentErrors;
         #endregion
 
         #region Constructor
-        public VisualStudioExecutionEnvironment(ITextTemplatingEngineHost host, IServiceProvider serviceProvider)
+        public VisualStudioExecutionEnvironment(CodeGeneratorContext context, IServiceProvider serviceProvider)
         {
-            this._host = host;
+            this._context = context;
+            this._serviceProvider = serviceProvider;
             this._dte = (DTE)serviceProvider.GetService(typeof(DTE));
+            this._solution = serviceProvider.GetService(typeof(SVsSolution)) as IVsSolution;
+            this._errorProvider = new ErrorListProvider(serviceProvider);
+            this._errorProvider.MaintainInitialTaskOrder = true;
             this._projectCache = new Dictionary<string, Project>();
             this._currentProject = this.GetCurrentProject();
             this._errors = new CompilerErrorCollection();
             this._assemblyLocationLookupAccessor = new Lazy<IDictionary<string, string>>(this.BuildAssemblyLocationLookup);
             this._codeItemAccessor = new Lazy<ICollection<CodeElement>>(this.GetCodeItems);
+            this._currentErrors = new Dictionary<string, int>();
         }
         #endregion
 
         #region IExecutionEnvironment Members
-        public string GetCurrentDirectory()
-        {
-            return Path.GetDirectoryName(this._host.TemplateFile);
-        }
+        public string GetCurrentDirectory() => Path.GetDirectoryName(this._context.SourceFilePath);
 
-        public string GetProjectName()
-        {
-            return this._currentProject.Project.Name;
-        }
+        public string GetProjectName() => this._currentProject.Project.Name;
 
         public string GetProjectDefaultNamespace()
         {
-            string defaultNamespace = this._host.ResolveParameterValue("-", "-", ProjectDefaultNamespaceKey);
-
             string projectDirectory = this._currentProject.Project.Properties.Item("FullPath").Value.ToString().TrimEnd('\\');
             string currentDirectory = this.GetCurrentDirectory();
             string virtualPath = currentDirectory.Substring(projectDirectory.Length);
@@ -65,17 +67,17 @@ namespace Dibix.Sdk.CodeGeneration
             if (virtualPath.Length > 0)
             {
                 virtualPath = virtualPath.Replace('\\', '.');
-                @namespace = String.Concat(defaultNamespace, virtualPath);
+                @namespace = String.Concat(this._context.Namespace, virtualPath);
             }
             else
-                @namespace = defaultNamespace;
+                @namespace = this._context.Namespace;
 
             return @namespace;
         }
 
         public string GetClassName()
         {
-            ProjectItem item = this._dte.Solution.FindProjectItem(this._host.TemplateFile);
+            ProjectItem item = this._dte.Solution.FindProjectItem(this._context.SourceFilePath);
             string className = Path.GetFileNameWithoutExtension(item.Name);
             return className;
         }
@@ -102,7 +104,52 @@ namespace Dibix.Sdk.CodeGeneration
 
         public bool ReportErrors()
         {
-            this._host.LogErrors(this._errors);
+            this._currentErrors.Clear();
+            this._errorProvider.Tasks.Clear();
+            foreach (CompilerError error in this._errors)
+            {
+                int line = error.Line;
+                int column = error.Column;
+                string message = error.ErrorText;
+                string fileName = error.FileName;
+                if (line > 0)
+                    --line;
+
+                if (column > 0)
+                    --column;
+
+                int num = 0;
+                if (this._currentErrors != null && this._currentErrors.TryGetValue(message, out num))
+                    continue;
+
+                if (this._currentErrors != null)
+                    this._currentErrors[message] = 1;
+
+                //if (this.callback != null)
+                //    this.callback.ErrorCallback(isWarning, message, line, column);
+
+                ErrorTask errorTask = new ErrorTask();
+                IVsHierarchy ppHierarchy = null;
+                IVsSolution service = this._solution;
+                ProjectItem projectItem = null;
+                if (this._dte.Solution != null)
+                    projectItem = this._dte.Solution.FindProjectItem(fileName);
+
+                if (projectItem?.ContainingProject != null)
+                    service.GetProjectOfUniqueName(projectItem.ContainingProject.UniqueName, out ppHierarchy);
+
+                errorTask.Category = TaskCategory.BuildCompile;
+                errorTask.Document = fileName;
+                errorTask.HierarchyItem = ppHierarchy;
+                errorTask.CanDelete = false;
+                errorTask.Column = column;
+                errorTask.Line = line;
+                errorTask.Text = message;
+                errorTask.ErrorCategory = error.IsWarning ? TaskErrorCategory.Warning : TaskErrorCategory.Error;
+                errorTask.Navigate += this.OnNavigateError;
+                this._errorProvider.Tasks.Add(errorTask);
+            }
+
             return this._errors.Count > 0;
         }
         #endregion
@@ -169,7 +216,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Private Methods
         private CurrentProjectInfo GetCurrentProject()
         {
-            ProjectItem item = this._dte.Solution.FindProjectItem(this._host.TemplateFile);
+            ProjectItem item = this._dte.Solution.FindProjectItem(this._context.SourceFilePath);
             if (item == null)
                 throw new InvalidOperationException("Can't locate currently executing T4 file");
 
@@ -380,6 +427,20 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 yield return property;
             }
+        }
+
+        private void OnNavigateError(object sender, EventArgs e)
+        {
+            if (!(sender is ErrorTask errorTask) || String.IsNullOrEmpty(errorTask.Document) || !File.Exists(errorTask.Document))
+                return;
+
+            VsShellUtilities.OpenDocument(this._serviceProvider, errorTask.Document, Guid.Empty, out IVsUIHierarchy hierarchy, out uint _, out IVsWindowFrame windowFrame);
+            if (windowFrame == null)
+                return;
+
+            errorTask.HierarchyItem = hierarchy;
+            this._errorProvider.Refresh();
+            VsShellUtilities.GetTextView(windowFrame)?.SetSelection(errorTask.Line, errorTask.Column, errorTask.Line, errorTask.Column);
         }
         #endregion
 

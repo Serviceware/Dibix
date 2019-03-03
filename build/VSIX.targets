@@ -1,8 +1,18 @@
 <Project>
 
+  <Target Name="ResolveNuGetPackageAssets" />
+  <Target Name="IncludeNuGetResolvedAssets" DependsOnTargets="ResolveNuGetPackageAssets">
+    <ItemGroup>
+      <VSIXCopyLocalReferenceSourceItem Include="@(ReferenceCopyLocalPaths)"  />
+    </ItemGroup>
+  </Target>
+
   <PropertyGroup>
     <!-- Important for debugging -->
     <UseCodebase>True</UseCodebase>
+
+    <!-- Deploy third party packages within the VSIX -->
+    <GetVsixSourceItemsDependsOn>$(GetVsixSourceItemsDependsOn);IncludeNuGetResolvedAssets</GetVsixSourceItemsDependsOn>
   </PropertyGroup>
 
   <ItemGroup>
