@@ -14,6 +14,9 @@
   <ItemGroup>
     <Compile Include="..\Dibix\Diagnostics\Guard.cs" Link="Guard.cs" />
     <Compile Include="..\Dibix\Extensions\EnumerableExtensions.cs" Link="EnumerableExtensions.cs" />
+    <Content Include="CodeGeneration\Configuration\dibix.schema.json">
+      <PackagePath>content</PackagePath>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
@@ -23,6 +26,7 @@
     <PackageReference Include="EnvDTE" Version="$(EnvDTEVersion)" />
     <PackageReference Include="VSLangProj" Version="$(VSLangProjVersion)" />
     <PackageReference Include="Microsoft.VisualStudio.Shell.15.0" Version="$(VisualStudioShellVersion)" />
+    <PackageReference Include="Microsoft.VisualStudio.TextTemplating.Interfaces.10.0" Version="$(VSTextTemplatingInterfacesVersion)" />
   </ItemGroup>
 
   <ItemGroup>

@@ -7,6 +7,6 @@ namespace Dibix.Sdk.CodeGeneration
         public Type Writer { get; set; }
         public string Namespace { get; set; }
         public string ClassName { get; set; }
-        public SqlQueryOutputFormatting Formatting { get; set; }
+        public CommandTextFormatting? Formatting { get; set; }
     }
 }

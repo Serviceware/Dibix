@@ -5,15 +5,15 @@ using System.Text.RegularExpressions;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    public sealed class MsTestWrapperWriter : SqlWriter, IWriter
+    public sealed class MsTestWrapperWriter : OutputWriter, IWriter
     {
-        protected override void Write(StringWriter writer, string projectName, string @namespace, string className, SqlQueryOutputFormatting formatting, IList<SqlStatementInfo> statements)
+        protected override void Write(StringWriter writer, string @namespace, string className, CommandTextFormatting formatting, IList<SqlStatementInfo> statements)
         {
             string output = BuildTestClass(@namespace, className, statements, formatting);
             writer.WriteRaw(output);
         }
 
-        private static string BuildTestClass(string @namespace, string className, IEnumerable<SqlStatementInfo> queries, SqlQueryOutputFormatting formatting)
+        private static string BuildTestClass(string @namespace, string className, IEnumerable<SqlStatementInfo> queries, CommandTextFormatting formatting)
         {
             const string template = @"using Helpline.Infrastructure.Tests.Components.Data;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -34,7 +34,7 @@ namespace %namespace%
                            .Replace("%methods%", methods);
         }
 
-        private static string BuildTestMethod(string testMethodName, string commandText, SqlQueryOutputFormatting formatting)
+        private static string BuildTestMethod(string testMethodName, string commandText, CommandTextFormatting formatting)
         {
             Match match = Regex.Match(testMethodName, @"^TC_([\d]+)_");
             if (!match.Success || match.Groups.Count < 1 || !Int32.TryParse(match.Groups[1].Value, out var testCaseId))
@@ -49,7 +49,7 @@ Please make sure the file has the following format: TC_%TESTCASEID%_*");
         }";
 
             return template.Replace("%testMethodName%", testMethodName)
-                           .Replace("%prefix%", formatting.HasFlag(SqlQueryOutputFormatting.Verbatim) ? "@" : String.Empty)
+                           .Replace("%prefix%", formatting.HasFlag(CommandTextFormatting.Verbatim) ? "@" : String.Empty)
                            .Replace("%commandText%", commandText)
                            .Replace("%testCaseId%", testCaseId.ToString());
         }

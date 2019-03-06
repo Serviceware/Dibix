@@ -4,6 +4,6 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public interface ITypeLoader
     {
-        TypeInfo LoadType(IExecutionEnvironment environment, TypeName typeName, Action<string> errorHandler);
+        TypeInfo LoadType(TypeName typeName, Action<string> errorHandler);
     }
 }

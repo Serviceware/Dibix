@@ -25,7 +25,6 @@ namespace Dibix.Sdk.CodeGeneration
     internal sealed class IfStatementOutputVisitor : StatementOutputVisitorBase
     {
         #region Fields
-        private readonly IExecutionEnvironment _environment;
         private readonly IfOutputResolutionContext _context;
         private readonly string _sourcePath;
         private bool _containsIf;
@@ -36,10 +35,9 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public IfStatementOutputVisitor(IExecutionEnvironment environment, string sourcePath) : this(environment, sourcePath, new IfOutputResolutionContext()) { }
-        public IfStatementOutputVisitor(IExecutionEnvironment environment, string sourcePath, IfOutputResolutionContext context) : base(environment, sourcePath)
+        public IfStatementOutputVisitor(string sourcePath, IErrorReporter errorReporter) : this(sourcePath, new IfOutputResolutionContext(), errorReporter) { }
+        public IfStatementOutputVisitor(string sourcePath, IfOutputResolutionContext context, IErrorReporter errorReporter) : base(sourcePath, errorReporter)
         {
-            this._environment = environment;
             this._sourcePath = sourcePath;
             this._context = context;
         }
@@ -54,14 +52,14 @@ namespace Dibix.Sdk.CodeGeneration
 
         public override void ExplicitVisit(IfStatement node)
         {
-            IfStatementOutputVisitor left = new IfStatementOutputVisitor(this._environment, this._sourcePath, this._context);
+            IfStatementOutputVisitor left = new IfStatementOutputVisitor(this._sourcePath, this._context, base.ErrorReporter);
             left.Accept(node.ThenStatement);
 
             // This might be an IF block without ELSE
             // This is only allowed, if the IF block is not producing any outputs (i.E. RAISERROR)
             if (node.ElseStatement != null)
             {
-                IfStatementOutputVisitor right = new IfStatementOutputVisitor(this._environment, this._sourcePath, this._context);
+                IfStatementOutputVisitor right = new IfStatementOutputVisitor(this._sourcePath, this._context, base.ErrorReporter);
                 right.Accept(node.ElseStatement);
 
                 // Compare output statements between IF..THEN and ELSE
@@ -69,7 +67,7 @@ namespace Dibix.Sdk.CodeGeneration
                 IList<OutputSelectResult> rightResults = right._containsIf ? right.Results : right.Outputs;
                 if (leftResults.Count != rightResults.Count)
                 {
-                    this._environment.RegisterError(this._sourcePath, node.StartLine, node.StartColumn, null, "The number of output statements in IF THEN block does not match the number in ELSE block");
+                    base.ErrorReporter.RegisterError(this._sourcePath, node.StartLine, node.StartColumn, null, "The number of output statements in IF THEN block does not match the number in ELSE block");
                     return;
                 }
 
@@ -80,7 +78,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                     if (leftResult.Columns.Count != rightResult.Columns.Count)
                     {
-                        this._environment.RegisterError(this._sourcePath, leftResult.Line, leftResult.Column, null, "The number of columns in output statement in IF THEN block does not match the number in ELSE block");
+                        base.ErrorReporter.RegisterError(this._sourcePath, leftResult.Line, leftResult.Column, null, "The number of columns in output statement in IF THEN block does not match the number in ELSE block");
                         break;
                     }
 
@@ -91,7 +89,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                         if (leftColumn.ColumnName != rightColumn.ColumnName)
                         {
-                            this._environment.RegisterError(this._sourcePath, leftColumn.Line, leftColumn.Column, null, $@"The column names in output statement in IF THEN block do not match those in ELSE block
+                            base.ErrorReporter.RegisterError(this._sourcePath, leftColumn.Line, leftColumn.Column, null, $@"The column names in output statement in IF THEN block do not match those in ELSE block
 Column in THEN: {leftColumn.ColumnName}
 Column in ELSE: {rightColumn.ColumnName}");
                             break;
@@ -106,7 +104,7 @@ Column in ELSE: {rightColumn.ColumnName}");
                 //this._visitedStatements.AddRange(right.Results.Select(x => x.Index));
             }
             else if (left.Outputs.Any())
-                this._environment.RegisterError(this._sourcePath, node.StartLine, node.StartColumn, null, "IF statements that produce outputs but do not have an ELSE block are not supported, because the number of output results isn't guaranteed");
+                base.ErrorReporter.RegisterError(this._sourcePath, node.StartLine, node.StartColumn, null, "IF statements that produce outputs but do not have an ELSE block are not supported, because the number of output results isn't guaranteed");
         }
         #endregion
     }

@@ -29,16 +29,16 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region ISqlStatementParser Members
-        public void Read(IExecutionEnvironment environment, SqlParserSourceKind sourceKind, object source, SqlStatementInfo target, ISqlStatementFormatter formatter)
+        public void Read(SqlParserSourceKind sourceKind, object source, SqlStatementInfo target, ISqlStatementFormatter formatter, ITypeLoaderFacade typeLoaderFacade, IErrorReporter errorReporter)
         {
             if (!SourceReaders.TryGetValue(sourceKind, out Func<object, TSqlFragment> reader))
                 throw new ArgumentOutOfRangeException(nameof(sourceKind), sourceKind, null);
 
             TSqlFragment fragment = reader(source);
-            if (this.IsEnabled && this._codeAnalysisRunner.Analyze(environment, fragment, target.Source))
+            if (this.IsEnabled && this._codeAnalysisRunner.Analyze(fragment, target.Source, errorReporter))
                 return;
 
-            CollectStatementInfo(fragment, target, formatter, environment);
+            CollectStatementInfo(fragment, target, formatter, typeLoaderFacade, errorReporter);
         }
         #endregion
 
@@ -58,19 +58,20 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static void CollectStatementInfo(TSqlFragment fragment, SqlStatementInfo target, ISqlStatementFormatter formatter, IExecutionEnvironment environment)
+        private static void CollectStatementInfo(TSqlFragment fragment, SqlStatementInfo target, ISqlStatementFormatter formatter, ITypeLoaderFacade typeLoaderFacade, IErrorReporter errorReporter)
         {
             TVisitor visitor = new TVisitor
             {
                 Formatter = formatter,
                 Target = target,
-                Environment = environment
+                TypeLoaderFacade = typeLoaderFacade,
+                ErrorReporter = errorReporter
             };
 
             fragment.Accept(visitor);
 
             if (visitor.Target.Content == null)
-                environment.RegisterError(target.Source, fragment.StartLine, fragment.StartColumn, null, "File could not be parsed");
+                errorReporter.RegisterError(target.Source, fragment.StartLine, fragment.StartColumn, null, "File could not be parsed");
         }
         #endregion
     }

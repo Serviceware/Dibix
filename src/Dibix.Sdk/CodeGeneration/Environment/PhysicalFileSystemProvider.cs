@@ -7,11 +7,11 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public sealed class PhysicalFileSystemProvider : IFileSystemProvider
     {
-        private readonly string _currentDirectory;
+        public string CurrentDirectory { get; }
 
         public PhysicalFileSystemProvider(string currentDirectory)
         {
-            this._currentDirectory = currentDirectory;
+            this.CurrentDirectory = currentDirectory;
         }
 
         public string GetPhysicalFilePath(string projectName, VirtualPath virtualPath)
@@ -52,7 +52,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private string GetPhysicalFilePath(VirtualPath virtualPath)
         {
-            string path = Path.GetFullPath(Path.Combine(this._currentDirectory, virtualPath));
+            string path = Path.GetFullPath(Path.Combine(this.CurrentDirectory, virtualPath));
             return path;
         }
     }

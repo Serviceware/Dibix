@@ -12,11 +12,12 @@
     <VSLangProjVersion>7.0.3301</VSLangProjVersion>
     <VSLangProj80Version>8.0.50728</VSLangProj80Version>
     <VSSDKBuildToolsVersion>15.9.3039</VSSDKBuildToolsVersion>
-    <VisualStudioDesignerInterfacesVersion>1.1.4323</VisualStudioDesignerInterfacesVersion>
+    <VSTextTemplatingInterfacesVersion>10.0.30320</VSTextTemplatingInterfacesVersion>
 
     <ConfigurationBinderVersion>2.1.1</ConfigurationBinderVersion>
     <UserSecretsVersion>2.1.1</UserSecretsVersion>
     <MicrosoftTestSdkVersion>15.9.0</MicrosoftTestSdkVersion>
+  	<MoqVersion>4.10.1</MoqVersion>
   	<XUnitVersion>2.4.1</XUnitVersion>
 	  <XUnitCliVersion>2.3.1</XUnitCliVersion>
     <CoverletVersion>2.3.1</CoverletVersion>

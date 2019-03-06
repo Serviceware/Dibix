@@ -9,7 +9,8 @@ namespace Dibix.Sdk.CodeGeneration
     {
         #region Properties
         internal ISqlStatementFormatter Formatter { get; set; }
-        internal IExecutionEnvironment Environment { get; set; }
+        internal ITypeLoaderFacade TypeLoaderFacade{ get; set; }
+        internal IErrorReporter ErrorReporter { get; set; }
         internal SqlStatementInfo Target { get; set; }
         #endregion
 
@@ -60,7 +61,7 @@ namespace Dibix.Sdk.CodeGeneration
                 {
                     // Type name hint is the only way to determine the UDT .NET type, that's why it's required
                     if (String.IsNullOrEmpty(parameter.ClrTypeName))
-                        this.Environment.RegisterError(this.Target.Source, node.StartLine, node.StartColumn, null, $@"Could not determine CLR type for table value parameter
+                        this.ErrorReporter.RegisterError(this.Target.Source, node.StartLine, node.StartColumn, null, $@"Could not determine CLR type for table value parameter
 Parameter name: {parameter.Name}
 UDT type: {parameter.TypeName}
 Please mark it with /* @ClrType <ClrTypeName> */");
@@ -111,7 +112,7 @@ ReferenceType: {node.DataType.GetType()}");
 
         private void ParseResults(TSqlStatement node)
         {
-            IEnumerable<SqlQueryResult> results = StatementOutputParser.Parse(this.Environment, this.Target, node);
+            IEnumerable<SqlQueryResult> results = StatementOutputParser.Parse(this.Target, node, this.TypeLoaderFacade, this.ErrorReporter);
             this.Target.Results.AddRange(results);
         }
 

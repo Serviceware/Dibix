@@ -28,14 +28,14 @@ namespace Dibix.VisualStudio
         #endregion
 
         #region Private Methods
-        private static void OnBeforeOpenProject(object sender, BeforeOpenProjectEventArgs e)
+        private void OnBeforeOpenProject(object sender, BeforeOpenProjectEventArgs e)
         {
             try
             {
                 string projectDirectory = Path.GetDirectoryName(e.Filename);
                 Assembly sdkAssembly = SdkAssemblyLoader.Load(projectDirectory);
                 Type initializerType = sdkAssembly.GetType("Dibix.Sdk.SdkInitializer", true);
-                initializerType.InvokeMember("Initialize", BindingFlags.InvokeMethod, null, null, null);
+                initializerType.InvokeMember("Initialize", BindingFlags.InvokeMethod, null, null, new [] { this });
             }
             finally
             {

@@ -4,14 +4,21 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class RuntimeTypeLoader : ITypeLoader
     {
-        public TypeInfo LoadType(IExecutionEnvironment environment, TypeName typeName, Action<string> errorHandler)
+        private readonly IAssemblyLocator _assemblyLocator;
+
+        public RuntimeTypeLoader(IAssemblyLocator assemblyLocator)
+        {
+            this._assemblyLocator = assemblyLocator;
+        }
+
+        public TypeInfo LoadType(TypeName typeName, Action<string> errorHandler)
         {
             try
             {
                 TypeInfo info;
                 if (!String.IsNullOrEmpty(typeName.AssemblyName))
                 {
-                    environment.TryGetAssemblyLocation(typeName.AssemblyName, out string assemblyLocation);
+                    this._assemblyLocator.TryGetAssemblyLocation(typeName.AssemblyName, out string assemblyLocation);
                     info = ReflectionTypeLoader.GetTypeInfo(typeName, assemblyLocation);
                 }
                 else

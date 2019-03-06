@@ -65,7 +65,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             return false;
         }
 
-        public override TypeInfo LoadType(IExecutionEnvironment environment, TypeName typeName, Action<string> errorHandler)
+        public override TypeInfo LoadType(TypeName typeName, Action<string> errorHandler)
         {
             Type type = Type.GetType($"{typeName.NormalizedTypeName},{this.GetType().Assembly}", true);
             return  TypeInfo.FromClrType(type, typeName);

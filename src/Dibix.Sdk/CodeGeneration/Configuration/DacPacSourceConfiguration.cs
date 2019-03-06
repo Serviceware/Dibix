@@ -4,19 +4,17 @@ using Microsoft.SqlServer.Dac.Model;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    public sealed class DacPacSourceConfiguration : SourceConfiguration
+    public sealed class DacPacSourceConfiguration : InputSourceConfiguration
     {
         #region Fields
-        private readonly IExecutionEnvironment _environment;
         private readonly string _packagePath;
         private readonly ICollection<KeyValuePair<string, string>> _procedureNames;
         #endregion
 
         #region Constructor
-        public DacPacSourceConfiguration(IExecutionEnvironment environment, string packagePath)
+        public DacPacSourceConfiguration(IFileSystemProvider fileSystemProvider, string packagePath)
         {
-            this._environment = environment;
-            this._packagePath = new PhysicalFileSystemProvider(environment.GetCurrentDirectory()).GetPhysicalFilePath(null, packagePath);
+            this._packagePath = new PhysicalFileSystemProvider(fileSystemProvider.CurrentDirectory).GetPhysicalFilePath(null, packagePath);
             this._procedureNames = new HashSet<KeyValuePair<string, string>>();
         }
         #endregion
@@ -26,15 +24,15 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Overrides
-        protected override IEnumerable<SqlStatementInfo> CollectStatements(ISqlStatementParser parser, ISqlStatementFormatter formatter)
+        protected override IEnumerable<SqlStatementInfo> CollectStatements(ISqlStatementParser parser, ISqlStatementFormatter formatter, ITypeLoaderFacade typeLoaderFacade, IErrorReporter errorReporter)
         {
             TSqlModel model = TSqlModel.LoadFromDacpac(this._packagePath, new ModelLoadOptions());
-            return this._procedureNames.Select(x => this.CollectStatement(x.Value, x.Key, model, parser, formatter));
+            return this._procedureNames.Select(x => this.CollectStatement(x.Value, x.Key, model, parser, formatter, typeLoaderFacade, errorReporter));
         }
         #endregion
 
         #region Private Methods
-        private SqlStatementInfo CollectStatement(string procedureName, string displayName, TSqlModel model, ISqlStatementParser parser, ISqlStatementFormatter formatter)
+        private SqlStatementInfo CollectStatement(string procedureName, string displayName, TSqlModel model, ISqlStatementParser parser, ISqlStatementFormatter formatter, ITypeLoaderFacade typeLoaderFacade, IErrorReporter errorReporter)
         {
             ICollection<string> parts = procedureName.Split('.').Select(x => x.Trim('[', ']')).ToArray();
             TSqlObject element = model.GetObject(ModelSchema.Procedure, new ObjectIdentifier(parts), DacQueryScopes.All);
@@ -50,7 +48,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (parser is ISqlAnalysisRunner sqlAnalysisRunner)
                 sqlAnalysisRunner.IsEnabled = false;
 
-            parser.Read(this._environment, SqlParserSourceKind.String, script, statement, formatter);
+            parser.Read(SqlParserSourceKind.String, script, statement, formatter, typeLoaderFacade, errorReporter);
             return statement;
         }
         #endregion

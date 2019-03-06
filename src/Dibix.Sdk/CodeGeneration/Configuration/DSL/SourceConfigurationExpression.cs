@@ -2,7 +2,7 @@
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    public abstract class SourceConfigurationExpression<T> : ISourceConfigurationExpression where T : SourceConfiguration
+    public abstract class SourceConfigurationExpression<T> : ISourceConfigurationExpression where T : InputSourceConfiguration
     {
         #region Properties
         protected T Configuration { get; }

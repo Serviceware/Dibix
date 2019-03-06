@@ -1,6 +1,6 @@
 ﻿namespace Dibix.Sdk.CodeGeneration
 {
-    public enum SqlQueryOutputFormatting
+    public enum CommandTextFormatting
     {
         None = 0,
         Verbatim = 1,

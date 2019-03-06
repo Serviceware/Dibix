@@ -14,7 +14,7 @@
         #endregion
 
         #region IOutputConfigurationExpression Members
-        public IOutputConfigurationExpression Formatting(SqlQueryOutputFormatting formatting)
+        public IOutputConfigurationExpression Formatting(CommandTextFormatting formatting)
         {
             this._outputConfiguration.Formatting = formatting;
             return this;

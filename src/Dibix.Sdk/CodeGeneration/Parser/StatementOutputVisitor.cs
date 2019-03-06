@@ -6,21 +6,19 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class StatementOutputVisitor : StatementOutputVisitorBase
     {
-        private readonly IExecutionEnvironment _environment;
         private readonly string _sourcePath;
 
         public IList<OutputSelectResult> Results { get; }
 
-        public StatementOutputVisitor(IExecutionEnvironment environment, string sourcePath) : base(environment, sourcePath)
+        public StatementOutputVisitor(string sourcePath, IErrorReporter errorReporter) : base(sourcePath, errorReporter)
         {
-            this._environment = environment;
             this._sourcePath = sourcePath;
             this.Results = new Collection<OutputSelectResult>();
         }
 
         public override void ExplicitVisit(IfStatement node)
         {
-            IfStatementOutputVisitor visitor = new IfStatementOutputVisitor(this._environment, this._sourcePath);
+            IfStatementOutputVisitor visitor = new IfStatementOutputVisitor(this._sourcePath, base.ErrorReporter);
             visitor.Accept(node);
             this.Results.AddRange(visitor.Results);
         }

@@ -8,20 +8,20 @@ namespace Dibix.Sdk.CodeGeneration
     internal abstract class StatementOutputVisitorBase : TSqlFragmentVisitor
     {
         #region Fields
-        private readonly IExecutionEnvironment _environment;
         private readonly string _sourcePath;
         #endregion
 
         #region Properties
         public string Statement { get; private set; }
         protected IList<OutputSelectResult> Outputs { get; }
+        protected IErrorReporter ErrorReporter { get; }
         #endregion
 
         #region Constructor
-        protected StatementOutputVisitorBase(IExecutionEnvironment environment, string sourcePath)
+        protected StatementOutputVisitorBase(string sourcePath, IErrorReporter errorReporter)
         {
-            this._environment = environment;
             this._sourcePath = sourcePath;
+            this.ErrorReporter = errorReporter;
             this.Outputs = new Collection<OutputSelectResult>();
         }
         #endregion
@@ -76,7 +76,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             if (selectElement is SelectStarExpression)
             {
-                this._environment.RegisterError(this._sourcePath, selectElement.StartLine, selectElement.StartColumn, null, "Star expressions are not allowed");
+                this.ErrorReporter.RegisterError(this._sourcePath, selectElement.StartLine, selectElement.StartColumn, null, "Star expressions are not allowed");
                 return null;
             }
 

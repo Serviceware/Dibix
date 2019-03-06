@@ -10,25 +10,25 @@ using Newtonsoft.Json.Schema;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class JsonSqlAccessorGeneratorConfigurationReader : ISqlAccessorGeneratorConfigurationReader
+    internal sealed class JsonGeneratorConfigurationReader : IGeneratorConfigurationReader
     {
         #region Fields
-        private readonly IExecutionEnvironment _environment;
-        private readonly ISqlAccessorGeneratorConfigurationFactory _configurationFactory;
         private readonly string _json;
-        private readonly IDictionary<string, Action<SqlAccessorGeneratorConfiguration, JProperty>> _inputReaders;
+        private readonly IFileSystemProvider _fileSystemProvider;
+        private readonly IErrorReporter _errorReporter;
+        private readonly IDictionary<string, Action<GeneratorConfiguration, JProperty>> _inputReaders;
         private readonly IDictionary<string, Type> _parsers;
         private readonly IDictionary<string, Type> _formatters;
         private readonly IDictionary<string, Type> _writers;
         #endregion
 
         #region Constructor
-        public JsonSqlAccessorGeneratorConfigurationReader(IExecutionEnvironment environment, ISqlAccessorGeneratorConfigurationFactory configurationFactory, string json)
+        public JsonGeneratorConfigurationReader(string json, IFileSystemProvider fileSystemProvider, IErrorReporter errorReporter)
         {
-            this._environment = environment;
-            this._configurationFactory = configurationFactory;
             this._json = json;
-            this._inputReaders = new Dictionary<string, Action<SqlAccessorGeneratorConfiguration, JProperty>>
+            this._fileSystemProvider = fileSystemProvider;
+            this._errorReporter = errorReporter;
+            this._inputReaders = new Dictionary<string, Action<GeneratorConfiguration, JProperty>>
             {
                 { "^[\\w./]+[^.dacpac]$", this.ReadSqlProject }
               , { "^[\\w./]+.dacpac$",    this.ReadDacPac }
@@ -39,7 +39,7 @@ namespace Dibix.Sdk.CodeGeneration
             this._writers = BuildTypeMap<IWriter>(assembly);
         }
 
-        static JsonSqlAccessorGeneratorConfigurationReader()
+        static JsonGeneratorConfigurationReader()
         {
             // Newtonsoft.Json.Schema uses an older Newtonsoft.Json version
             // We need Newtonsoft.Json 12 though, because of JsonLoadSettings.DuplicatePropertyNameHandling
@@ -58,8 +58,8 @@ namespace Dibix.Sdk.CodeGeneration
         }
         #endregion
 
-        #region ISqlAccessorGeneratorConfigurationReader Members
-        public void Read(SqlAccessorGeneratorConfiguration configuration)
+        #region IGeneratorConfigurationReader Members
+        public void Read(GeneratorConfiguration configuration)
         {
             JObject json = JObject.Parse(this._json, new JsonLoadSettings { DuplicatePropertyNameHandling = DuplicatePropertyNameHandling.Error });
             if (!json.IsValid(JsonSchemaDefinition.Schema, out IList<ValidationError> errors))
@@ -67,8 +67,10 @@ namespace Dibix.Sdk.CodeGeneration
                 foreach (ValidationError error in errors)
                 {
                     string errorMessage = $"JSON configuration error: {error.Message}";
-                    this._environment.RegisterError(error.Path, error.LineNumber, error.LinePosition, error.ErrorType.ToString(), errorMessage);
+                    this._errorReporter.RegisterError(error.Path, error.LineNumber, error.LinePosition, error.ErrorType.ToString(), errorMessage);
                 }
+                configuration.IsInvalid = true;
+                this._errorReporter.ReportErrors();
                 return;
             }
 
@@ -85,7 +87,7 @@ namespace Dibix.Sdk.CodeGeneration
                            .ToDictionary(x => x.Name);
         }
 
-        private void ReadInput(SqlAccessorGeneratorConfiguration configuration, JToken token)
+        private void ReadInput(GeneratorConfiguration configuration, JToken token)
         {
             foreach (JProperty property in ((JObject)token["input"]).Properties())
             {
@@ -97,7 +99,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private void ReadOutput(SqlAccessorGeneratorConfiguration configuration, JObject json)
+        private void ReadOutput(GeneratorConfiguration configuration, JObject json)
         {
             JToken output = json["output"];
             if (output == null)
@@ -119,45 +121,48 @@ namespace Dibix.Sdk.CodeGeneration
 
                 if (writerName != null)
                     configuration.Output.Writer = this._writers[writerName];
+
                 if (@namespace != null)
                     configuration.Output.Namespace = @namespace;
+
                 if (className != null)
                     configuration.Output.ClassName = className;
+
                 if (formatting != null)
-                    configuration.Output.Formatting = (SqlQueryOutputFormatting)Enum.Parse(typeof(SqlQueryOutputFormatting), formatting);
+                    configuration.Output.Formatting = (CommandTextFormatting)Enum.Parse(typeof(CommandTextFormatting), formatting);
             }
         }
 
-        private void ReadSqlProject(SqlAccessorGeneratorConfiguration configuration, JProperty property)
+        private void ReadSqlProject(GeneratorConfiguration configuration, JProperty property)
         {
-            this.ReadProject(configuration.Input, property, this._configurationFactory.CreatePhysicalSourceConfiguration, (source, value) =>
+            this.ReadProject(configuration.Input, property, (projectName) => new PhysicalSourceConfiguration(this._fileSystemProvider, projectName), (source, value) =>
             {
                 value.GetPropertyValues("include").Each(source.Include);
                 value.GetPropertyValues("exclude").Each(source.Exclude);
             });
         }
 
-        private void ReadDacPac(SqlAccessorGeneratorConfiguration configuration, JProperty property)
+        private void ReadDacPac(GeneratorConfiguration configuration, JProperty property)
         {
-            this.ReadProject(configuration.Input, property, this._configurationFactory.CreateDacPacSourceConfiguration, (source, value) =>
+            this.ReadProject(configuration.Input, property, packagePath => new DacPacSourceConfiguration(this._fileSystemProvider, packagePath), (source, value) =>
             {
                 JObject include = (JObject)value.Property("include").Value;
                 include.Properties().Each(x => source.AddStoredProcedure(x.Name, x.Value.Value<string>()));
             });
         }
 
-        private void ReadProject<T>(InputConfiguration configuration, JProperty property, Func<IExecutionEnvironment, string, T> factory, Action<T, JObject> specificConfiguration) where T : SourceConfiguration
+        private void ReadProject<T>(InputConfiguration configuration, JProperty property, Func<string, T> factory, Action<T, JObject> specificConfiguration) where T : InputSourceConfiguration
         {
             foreach (JObject group in property.Value.GetObjects())
             {
-                T source = factory(this._environment, property.Name);
+                T source = factory(property.Name);
                 specificConfiguration(source, group);
                 this.ReadTextTransformation(source, group);
                 configuration.Sources.Add(source);
             }
         }
 
-        private void ReadTextTransformation(SourceConfiguration source, JObject json)
+        private void ReadTextTransformation(InputSourceConfiguration source, JObject json)
         {
             string parser    = json.Value<string>("parser")
                  , formatter = json.Value<string>("formatter");
@@ -180,7 +185,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             private static JSchema LoadSchema()
             {
-                Type type = typeof(JsonSqlAccessorGeneratorConfigurationReader);
+                Type type = typeof(JsonGeneratorConfigurationReader);
                 string resourcePath = $"{type.Namespace}.Configuration.{SchemaName}.json";
                 using (Stream stream = type.Assembly.GetManifestResourceStream(resourcePath))
                 {

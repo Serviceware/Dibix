@@ -14,14 +14,14 @@ namespace Dibix.Sdk.CodeGeneration
             this._engine = new SqlCodeAnalysisRuleEngine();
         }
 
-        public bool Analyze(IExecutionEnvironment environment, TSqlFragment scriptFragment, string sourceFilePath)
+        public bool Analyze(TSqlFragment scriptFragment, string sourceFilePath, IErrorReporter errorReporter)
         {
             ICollection<SqlCodeAnalysisError> errors = this._engine.Analyze(null, scriptFragment).ToArray();
             if (!errors.Any())
                 return false;
 
             foreach (SqlCodeAnalysisError error in errors)
-                environment.RegisterError(sourceFilePath, error.Line, error.Column, error.RuleId.ToString(), $"SRDBX : Dibix : {error.Message}");
+                errorReporter.RegisterError(sourceFilePath, error.Line, error.Column, error.RuleId.ToString(), $"SRDBX : Dibix : {error.Message}");
 
             return true;
         }

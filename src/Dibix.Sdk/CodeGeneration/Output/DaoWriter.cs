@@ -10,19 +10,19 @@ using System.Text;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    public sealed class SqlDaoWriter : SqlWriter, IWriter
+    public sealed class DaoWriter : OutputWriter, IWriter
     {
         #region Fields
         private static readonly bool WriteGuardChecks = false;
-        private static readonly string GeneratorName = typeof(SqlDaoWriter).Assembly.GetName().Name;
-        private static readonly string Version = FileVersionInfo.GetVersionInfo(typeof(SqlDaoWriter).Assembly.Location).FileVersion;
+        private static readonly string GeneratorName = typeof(DaoWriter).Assembly.GetName().Name;
+        private static readonly string Version = FileVersionInfo.GetVersionInfo(typeof(DaoWriter).Assembly.Location).FileVersion;
         private const string ConstantSuffix = "CommandText";
         private const string MethodPrefix = "";//"Execute";
         private const string ComplexResultTypeSuffix = "Result";
         #endregion
 
         #region Overrides
-        protected override void Write(StringWriter writer, string projectName, string @namespace, string className, SqlQueryOutputFormatting formatting, IList<SqlStatementInfo> statements)
+        protected override void Write(StringWriter writer, string @namespace, string className, CommandTextFormatting formatting, IList<SqlStatementInfo> statements)
         {
             Type generatedCodeAttributeType = typeof(GeneratedCodeAttribute);
             Type methodInfoType = typeof(MethodInfo);
@@ -66,7 +66,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private static void AddCommandTextConstants(CSharpClass @class, IList<SqlStatementInfo> statements, SqlQueryOutputFormatting formatting)
+        private static void AddCommandTextConstants(CSharpClass @class, IList<SqlStatementInfo> statements, CommandTextFormatting formatting)
         {
             for (int i = 0; i < statements.Count; i++)
             {
@@ -75,7 +75,7 @@ namespace Dibix.Sdk.CodeGeneration
                 @class.AddComment(statement.Name, false);
                 @class.AddField(name: String.Concat(statement.Name, ConstantSuffix)
                               , type: typeof(string).ToCSharpTypeName()
-                              , value: new CSharpStringValue(Format(statement.Content, formatting), formatting.HasFlag(SqlQueryOutputFormatting.Verbatim))
+                              , value: new CSharpStringValue(Format(statement.Content, formatting), formatting.HasFlag(CommandTextFormatting.Verbatim))
                               , modifiers: CSharpModifiers.Public | CSharpModifiers.Const);
 
                 if (i + 1 < statements.Count)

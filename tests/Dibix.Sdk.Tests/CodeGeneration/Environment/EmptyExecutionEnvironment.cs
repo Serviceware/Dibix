@@ -6,7 +6,7 @@ using TypeInfo = Dibix.Sdk.CodeGeneration.TypeInfo;
 
 namespace Dibix.Sdk.Tests.CodeGeneration
 {
-    public abstract class EmptyExecutionEnvironment : IExecutionEnvironment
+    public abstract class EmptyExecutionEnvironment
     {
         public virtual string GetCurrentDirectory() => Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "..", "..", "..", "CodeGeneration"));
 
@@ -32,6 +32,6 @@ namespace Dibix.Sdk.Tests.CodeGeneration
 
         public virtual bool ReportErrors() => false;
 
-        public virtual TypeInfo LoadType(IExecutionEnvironment environment, TypeName typeName, Action<string> errorHandler) => throw new NotImplementedException();
+        public virtual TypeInfo LoadType(TypeName typeName, Action<string> errorHandler) => throw new NotImplementedException();
     }
 }

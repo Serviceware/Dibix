@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    public abstract class SqlWriter : IWriter
+    public abstract class OutputWriter : IWriter
     {
         private const int TabSize = 4;
         private const string Header = @"/*------------------------------------------------------------------------------
@@ -16,17 +16,17 @@ namespace Dibix.Sdk.CodeGeneration
 // </auto-generated>
 //----------------------------------------------------------------------------*/";
 
-        public string Write(string projectName, string @namespace, string className, SqlQueryOutputFormatting formatting, IList<SqlStatementInfo> statements)
+        public string Write(string @namespace, string className, CommandTextFormatting formatting, IList<SqlStatementInfo> statements)
         {
             StringWriter writer = new StringWriter();
             writer.WriteLineRaw(Header);
-            this.Write(writer, projectName, @namespace, className, formatting, statements);
+            this.Write(writer, @namespace, className, formatting, statements);
             return writer.ToString();
         }
 
-        protected abstract void Write(StringWriter writer, string projectName, string @namespace, string className, SqlQueryOutputFormatting formatting, IList<SqlStatementInfo> statements);
+        protected abstract void Write(StringWriter writer, string @namespace, string className, CommandTextFormatting formatting, IList<SqlStatementInfo> statements);
 
-        protected static string Format(string content, SqlQueryOutputFormatting formatting)
+        protected static string Format(string content, CommandTextFormatting formatting)
         {
             if (content == null)
                 return null;
@@ -35,13 +35,13 @@ namespace Dibix.Sdk.CodeGeneration
 
             formatted = formatted.Replace("\t", new string(' ', TabSize));
 
-            if (formatting.HasFlag(SqlQueryOutputFormatting.WhiteStripped))
+            if (formatting.HasFlag(CommandTextFormatting.WhiteStripped))
                 formatted = Regex.Replace(formatted, @"\s+", " ");
 
-            if (formatting.HasFlag(SqlQueryOutputFormatting.StripDoubleQuotes))
-                formatted = formatted.Replace("\"", formatting.HasFlag(SqlQueryOutputFormatting.Verbatim) ? "\"\"" : "\\\"");
+            if (formatting.HasFlag(CommandTextFormatting.StripDoubleQuotes))
+                formatted = formatted.Replace("\"", formatting.HasFlag(CommandTextFormatting.Verbatim) ? "\"\"" : "\\\"");
 
-            if (formatting.HasFlag(SqlQueryOutputFormatting.Minified))
+            if (formatting.HasFlag(CommandTextFormatting.Minified))
                 formatted = formatted.Replace("\r\n", @"\r\n");
 
             return formatted;

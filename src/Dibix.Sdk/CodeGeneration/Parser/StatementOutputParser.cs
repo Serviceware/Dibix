@@ -13,9 +13,9 @@ namespace Dibix.Sdk.CodeGeneration
         private const string ReturnHintSplitOn = "SplitOn";
         private const string ReturnHintConverter = "Converter";
 
-        public static IEnumerable<SqlQueryResult> Parse(IExecutionEnvironment environment, SqlStatementInfo target, TSqlStatement node)
+        public static IEnumerable<SqlQueryResult> Parse(SqlStatementInfo target, TSqlStatement node, ITypeLoaderFacade typeLoaderFacade, IErrorReporter errorReporter)
         {
-            StatementOutputVisitor visitor = new StatementOutputVisitor(environment, target.Source);
+            StatementOutputVisitor visitor = new StatementOutputVisitor(target.Source, errorReporter);
             node.Accept(visitor);
 
             IList<SqlHint> returnHints = SqlHintReader.Read(node)
@@ -24,13 +24,13 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (returnHints.Count > visitor.Results.Count)
             {
-                environment.RegisterError(target.Source, node.StartLine, node.StartColumn, null, "There are more return declarations than output statements being produced by the statement");
+                errorReporter.RegisterError(target.Source, node.StartLine, node.StartColumn, null, "There are more return declarations than output statements being produced by the statement");
                 yield break;
             }
 
             if (returnHints.Count < visitor.Results.Count)
             {
-                environment.RegisterError(target.Source, node.StartLine, node.StartColumn, null, "There are missing return declarations for the output statements. Please mark the header of the statement with a line per output containting this hint: -- @Return <ClrTypeName>");
+                errorReporter.RegisterError(target.Source, node.StartLine, node.StartColumn, null, "There are missing return declarations for the output statements. Please mark the header of the statement with a line per output containting this hint: -- @Return <ClrTypeName>");
                 yield break;
             }
 
@@ -39,7 +39,7 @@ namespace Dibix.Sdk.CodeGeneration
             for (int i = 0; i < returnHints.Count; i++)
             {
                 SqlHint returnHint = returnHints[i];
-                if (!returnHint.TrySelectValueOrContent(ReturnHintClrTypes, x => environment.RegisterError(target.Source, node.StartLine, node.StartColumn, null, x), out var typeNamesStr))
+                if (!returnHint.TrySelectValueOrContent(ReturnHintClrTypes, x => errorReporter.RegisterError(target.Source, node.StartLine, node.StartColumn, null, x), out var typeNamesStr))
                     yield break;
 
                 string[] typeNames = typeNamesStr.Split(';');
@@ -56,47 +56,47 @@ namespace Dibix.Sdk.CodeGeneration
                     SplitOn = splitOn
                 };
 
-                IList<TypeInfo> returnTypes = typeNames.Select(x => TypeLoaderFacade.LoadType(x, environment, y => environment.RegisterError(target.Source, returnHint.Line, returnHint.Column, null, y))).ToArray();
+                IList<TypeInfo> returnTypes = typeNames.Select(x => typeLoaderFacade.LoadType(x, y => errorReporter.RegisterError(target.Source, returnHint.Line, returnHint.Column, null, y))).ToArray();
                 if (returnTypes.Any(x => x == null))
                     continue;
 
                 result.Types.AddRange(returnTypes);
 
                 OutputSelectResult output = visitor.Results[i];
-                ValidateResult(environment, returnHints.Count, returnHint, result, returnTypes, output.Columns, usedOutputNames, target.Source);
+                ValidateResult(returnHints.Count, returnHint, result, returnTypes, output.Columns, usedOutputNames, target.Source, errorReporter);
                 result.Columns.AddRange(output.Columns.Select(x => x.ColumnName));
 
                 yield return result;
             }
         }
 
-        private static void ValidateResult(IExecutionEnvironment environment, int numberOfReturnHints, SqlHint returnHint, SqlQueryResult result, IList<TypeInfo> returnTypes, IEnumerable<OutputColumnResult> columns, HashSet<string> usedOutputNames, string sourcePath)
+        private static void ValidateResult(int numberOfReturnHints, SqlHint returnHint, SqlQueryResult result, IList<TypeInfo> returnTypes, IEnumerable<OutputColumnResult> columns, HashSet<string> usedOutputNames, string sourcePath, IErrorReporter errorReporter)
         {
             // Validate return count/name
             if (!String.IsNullOrEmpty(result.Name))
             {
                 if (usedOutputNames.Contains(result.Name))
-                    environment.RegisterError(sourcePath, returnHint.Line, returnHint.Column, null, $"The name '{result.Name}' is already defined for another output result");
+                    errorReporter.RegisterError(sourcePath, returnHint.Line, returnHint.Column, null, $"The name '{result.Name}' is already defined for another output result");
                 else if (numberOfReturnHints == 1)
-                    environment.RegisterError(sourcePath, returnHint.Line, returnHint.Column, null, "The 'Name' property is irrelevant when a single output is returned");
+                    errorReporter.RegisterError(sourcePath, returnHint.Line, returnHint.Column, null, "The 'Name' property is irrelevant when a single output is returned");
                 else
                     usedOutputNames.Add(result.Name);
             }
             else if (numberOfReturnHints > 1)
-                environment.RegisterError(sourcePath, returnHint.Line, returnHint.Column, null, "The 'Name' property must be specified when multiple outputs are returned. Mark it in the @Return hint: -- @Return ClrTypes:<ClrTypeName> Name:<ResultName>");
+                errorReporter.RegisterError(sourcePath, returnHint.Line, returnHint.Column, null, "The 'Name' property must be specified when multiple outputs are returned. Mark it in the @Return hint: -- @Return ClrTypes:<ClrTypeName> Name:<ResultName>");
 
             // Validate required properties for MultiMap
             if (returnTypes.Count > 1)
             {
                 if (String.IsNullOrEmpty(result.SplitOn))
                 {
-                    environment.RegisterError(sourcePath, returnHint.Line, returnHint.Column, null, "The 'SplitOn' property must be specified when using multiple return types. Mark it in the @Return hint: -- @Return ClrTypes:<ClrTypeName> Name:<ResultName> SplitOn:<SplitColumnName>");
+                    errorReporter.RegisterError(sourcePath, returnHint.Line, returnHint.Column, null, "The 'SplitOn' property must be specified when using multiple return types. Mark it in the @Return hint: -- @Return ClrTypes:<ClrTypeName> Name:<ResultName> SplitOn:<SplitColumnName>");
                     return;
                 }
 
                 if (String.IsNullOrEmpty(result.Converter))
                 {
-                    environment.RegisterError(sourcePath, returnHint.Line, returnHint.Column, null, "The 'Converter' property must be specified when using multiple return types. Mark it in the @Return hint: -- @Return ClrTypes:<ClrTypeName> Name:<ResultName> SplitOn:<SplitColumnName> Converter:<ClrMethodDelegate>");
+                    errorReporter.RegisterError(sourcePath, returnHint.Line, returnHint.Column, null, "The 'Converter' property must be specified when using multiple return types. Mark it in the @Return hint: -- @Return ClrTypes:<ClrTypeName> Name:<ResultName> SplitOn:<SplitColumnName> Converter:<ClrMethodDelegate>");
                 }
             }
 
@@ -104,12 +104,12 @@ namespace Dibix.Sdk.CodeGeneration
             IList<ICollection<OutputColumnResult>> columnGroups = SplitColumns(columns, result.SplitOn).ToArray();
             if (columnGroups.Count > 1 && columnGroups.Any(x => !x.Any()))
             {
-                environment.RegisterError(sourcePath, returnHint.Line, returnHint.Column, null, "Part of the SplitOn property value did not match a column in the output expression");
+                errorReporter.RegisterError(sourcePath, returnHint.Line, returnHint.Column, null, "Part of the SplitOn property value did not match a column in the output expression");
                 return;
             }
             if (columnGroups.Count != returnTypes.Count)
             {
-                environment.RegisterError(sourcePath, returnHint.Line, returnHint.Column, null, "The SplitOn property does not match the number of return types");
+                errorReporter.RegisterError(sourcePath, returnHint.Line, returnHint.Column, null, "The SplitOn property does not match the number of return types");
                 return;
             }
 
@@ -131,13 +131,13 @@ namespace Dibix.Sdk.CodeGeneration
                     // i.E.: SELECT COUNT(*) no alias
                     if (!columnResult.Result)
                     {
-                        environment.RegisterError(sourcePath, columnResult.Line, columnResult.Column, null, $@"Missing alias for expression '{columnResult.Expression}'");
+                        errorReporter.RegisterError(sourcePath, columnResult.Line, columnResult.Column, null, $@"Missing alias for expression '{columnResult.Expression}'");
                         continue;
                     }
 
                     // Validate if entity property exists
                     if (returnType.Properties.All(x => !String.Equals(x, columnResult.ColumnName, StringComparison.OrdinalIgnoreCase)))
-                        environment.RegisterError(sourcePath, columnResult.Line, columnResult.Column, null, $@"Property '{columnResult.ColumnName}' not found on return type '{returnType.Name}'");
+                        errorReporter.RegisterError(sourcePath, columnResult.Line, columnResult.Column, null, $@"Property '{columnResult.ColumnName}' not found on return type '{returnType.Name}'");
                 }
             }
         }

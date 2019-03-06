@@ -9,15 +9,18 @@ namespace Dibix.Sdk
 {
     public static class SdkInitializer
     {
-        public static void Initialize()
+        public static void Initialize(IServiceProvider serviceProvider)
         {
+            VisualStudioCodeGenerationSubscriber.Initialize(serviceProvider);
             RegisterSqlCodeAnalysisRule();
         }
 
-        public static string InvokeGenerator(string sourceFilePath, string sourceFileContents, string @namespace, ReportError errorReporter, IServiceProvider serviceProvider)
+        public static string InvokeGenerator(string inputFilePath, string inputFileContents, string @namespace, IServiceProvider serviceProvider)
         {
-            string generated = SqlAccessorGeneratorFactory.FromVisualStudio(new CodeGeneratorContext(sourceFilePath, @namespace, errorReporter), serviceProvider)
-                                                          .ParseJson(sourceFileContents);
+            GeneratorConfiguration configuration = GeneratorConfigurationBuilder.FromVisualStudio(serviceProvider, inputFilePath)
+                                                                                .ParseJson(inputFileContents);
+            ICodeGenerator generator = CodeGeneratorFactory.FromCustomTool(configuration, serviceProvider, inputFilePath, @namespace);
+            string generated = generator.Generate();
             return generated;
         }
 

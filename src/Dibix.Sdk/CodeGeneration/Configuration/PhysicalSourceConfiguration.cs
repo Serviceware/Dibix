@@ -4,10 +4,9 @@ using System.Linq;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    public class PhysicalSourceConfiguration : SourceConfiguration
+    public class PhysicalSourceConfiguration : InputSourceConfiguration
     {
         #region Fields
-        private readonly IExecutionEnvironment _environment;
         private readonly string _projectName;
         private readonly IFileSystemProvider _fileSystemProvider;
         private readonly ICollection<VirtualPath> _include;
@@ -15,11 +14,10 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public PhysicalSourceConfiguration(IExecutionEnvironment environment, string projectName)
+        public PhysicalSourceConfiguration(IFileSystemProvider fileSystemProvider, string projectName)
         {
-            this._environment = environment;
             this._projectName = projectName;
-            this._fileSystemProvider = projectName != null ? (IFileSystemProvider)environment : new PhysicalFileSystemProvider(environment.GetCurrentDirectory());
+            this._fileSystemProvider = fileSystemProvider;
             this._include = new HashSet<VirtualPath>();
             this._exclude = new HashSet<VirtualPath>();
         }
@@ -32,23 +30,23 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Overrides
-        protected override IEnumerable<SqlStatementInfo> CollectStatements(ISqlStatementParser parser, ISqlStatementFormatter formatter)
+        protected override IEnumerable<SqlStatementInfo> CollectStatements(ISqlStatementParser parser, ISqlStatementFormatter formatter, ITypeLoaderFacade typeLoaderFacade, IErrorReporter errorReporter)
         {
             return this._fileSystemProvider
                        .GetFiles(this._projectName, this._include, this._exclude)
-                       .Select(x => ParseStatement(this._environment, x, parser, formatter));
+                       .Select(x => ParseStatement(x, parser, formatter, typeLoaderFacade, errorReporter));
         }
         #endregion
 
         #region Private Methods
-        private static SqlStatementInfo ParseStatement(IExecutionEnvironment environment, string filePath, ISqlStatementParser parser, ISqlStatementFormatter formatter)
+        private static SqlStatementInfo ParseStatement(string filePath, ISqlStatementParser parser, ISqlStatementFormatter formatter, ITypeLoaderFacade typeLoaderFacade, IErrorReporter errorReporter)
         {
             SqlStatementInfo statement = new SqlStatementInfo
             {
                 Source = filePath,
                 Name = Path.GetFileNameWithoutExtension(filePath)
             };
-            parser.Read(environment, SqlParserSourceKind.Stream, File.OpenRead(filePath), statement, formatter);
+            parser.Read(SqlParserSourceKind.Stream, File.OpenRead(filePath), statement, formatter, typeLoaderFacade, errorReporter);
             return statement;
         }
         #endregion
