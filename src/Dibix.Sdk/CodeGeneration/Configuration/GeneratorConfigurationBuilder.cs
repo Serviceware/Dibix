@@ -12,7 +12,7 @@ namespace Dibix.Sdk.CodeGeneration
             return new GeneratorConfigurationBuilderSourceExpression(fileSystemProvider, executingFilePath, errorReporter);
         }
 
-        public static IGeneratorConfigurationBuilderSourceExpression FromVisualStudio(IServiceProvider serviceProvider, string executingFilePath)
+        public static IGeneratorConfigurationBuilderSourceExpression FromVisualStudio(IServiceProvider serviceProvider, string executingFilePath, IErrorReporter reporter)
         {
             IFileSystemProvider fileSystemProvider = new VisualStudioFileSystemProvider(serviceProvider, executingFilePath);
             IErrorReporter errorReporter = new VisualStudioErrorReporter(serviceProvider);

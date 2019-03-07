@@ -14,14 +14,16 @@ namespace Dibix.Sdk.CodeGeneration
     {
         #region Fields
         private readonly IServiceProvider _serviceProvider;
+        private readonly IErrorReporter _errorReporter;
         private readonly RunningDocumentTable _runningDocumentTable;
         private readonly IDictionary<string, ICollection<VSProjectItem>> _map;
         #endregion
 
         #region Constructor
-        public VisualStudioCodeGenerationFileEvents(IServiceProvider serviceProvider)
+        public VisualStudioCodeGenerationFileEvents(IServiceProvider serviceProvider, IErrorReporter errorReporter)
         {
             this._serviceProvider = serviceProvider;
+            this._errorReporter = errorReporter;
             this._runningDocumentTable = new RunningDocumentTable(serviceProvider);
             this._runningDocumentTable.Advise(this);
             this._map = new Dictionary<string, ICollection<VSProjectItem>>();
@@ -60,7 +62,8 @@ namespace Dibix.Sdk.CodeGeneration
         {
             VSProjectItem vsProjectItem = (VSProjectItem)projectItem.Object;
             string executingFilePath = projectItem.Properties.GetFullPath();
-            GeneratorConfiguration configuration = GeneratorConfigurationBuilder.FromVisualStudio(this._serviceProvider, executingFilePath).LoadJson();
+            GeneratorConfiguration configuration = GeneratorConfigurationBuilder.FromVisualStudio(this._serviceProvider, executingFilePath, this._errorReporter)
+                                                                                .LoadJson();
 
             IEnumerable<string> files = configuration.Input.Sources.OfType<IPhysicalFileSelection>().SelectMany(x => x.Files);
             foreach (string file in files)

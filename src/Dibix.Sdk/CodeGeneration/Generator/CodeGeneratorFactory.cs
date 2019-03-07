@@ -5,6 +5,8 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public static class CodeGeneratorFactory
     {
+        private static IErrorReporter _errorReporter;
+
         public static ICodeGenerator Create(ICodeGenerationContext context)
         {
             ICodeGenerator generator = new CodeGenerator(context);
@@ -27,8 +29,10 @@ namespace Dibix.Sdk.CodeGeneration
             ITypeLoader typeLoader = new VisualStudioTypeLoader(serviceProvider, inputFilePath);
             IAssemblyLocator assemblyLocator = new VisualStudioAssemblyLocator(serviceProvider, inputFilePath);
             ITypeLoaderFacade typeLoaderFacade = new TypeLoaderFacade(typeLoader, assemblyLocator);
-            IErrorReporter errorReporter = new VisualStudioErrorReporter(serviceProvider);
-            ICodeGenerationContext context = new CustomToolCodeGenerationContext(configuration, typeLoaderFacade, errorReporter, inputFilePath, @namespace);
+            if (_errorReporter == null)
+                _errorReporter = new VisualStudioErrorReporter(serviceProvider);
+
+            ICodeGenerationContext context = new CustomToolCodeGenerationContext(configuration, typeLoaderFacade, _errorReporter, inputFilePath, @namespace);
             ICodeGenerator generator = new CodeGenerator(context);
             return generator;
         }

@@ -11,6 +11,7 @@ namespace Dibix.Sdk.CodeGeneration
     internal sealed class VisualStudioErrorReporter : ErrorReporter, IErrorReporter
     {
         #region Fields
+        private static IErrorReporter _instance;
         private readonly IServiceProvider _serviceProvider;
         private readonly ErrorListProvider _errorProvider;
         private readonly DTE _dte;
@@ -27,6 +28,10 @@ namespace Dibix.Sdk.CodeGeneration
             this._solution = serviceProvider.GetService(typeof(SVsSolution)) as IVsSolution;
             this._currentErrors = new Dictionary<string, int>();
         }
+        #endregion
+
+        #region Singleton
+        public static IErrorReporter Instance(IServiceProvider serviceProvider) => _instance ?? (_instance = new VisualStudioErrorReporter(serviceProvider));
         #endregion
 
         #region Overrides
@@ -77,6 +82,8 @@ namespace Dibix.Sdk.CodeGeneration
                 errorTask.Navigate += this.OnNavigateError;
                 this._errorProvider.Tasks.Add(errorTask);
             }
+
+            base.Errors.Clear();
 
             return base.Errors.Count > 0;
         }

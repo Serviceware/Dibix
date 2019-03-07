@@ -15,10 +15,12 @@ namespace Dibix.Sdk.CodeGeneration
     {
         private static VisualStudioCodeGenerationFileEvents _fileEvents;
         private static IServiceProvider _serviceProvider;
+        private static IErrorReporter _errorReporter;
 
-        public static void Initialize(IServiceProvider serviceProvider)
+        public static void Initialize(IServiceProvider serviceProvider, IErrorReporter errorReporter)
         {
             _serviceProvider = serviceProvider;
+            _errorReporter = errorReporter;
             SolutionEvents.OnAfterOpenProject += OnAfterOpenProject;
         }
 
@@ -36,7 +38,7 @@ namespace Dibix.Sdk.CodeGeneration
             foreach (ProjectItem projectItem in files)
             {
                 if (_fileEvents == null)
-                    _fileEvents = new VisualStudioCodeGenerationFileEvents(_serviceProvider);
+                    _fileEvents = new VisualStudioCodeGenerationFileEvents(_serviceProvider, _errorReporter);
 
                 _fileEvents.Subscribe(projectItem);
             }
