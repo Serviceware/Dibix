@@ -20,13 +20,13 @@ namespace Dibix.Sdk.CodeGeneration
         #region IGeneratorConfigurationReader
         public void Read(GeneratorConfiguration configuration)
         {
-            DaoConfigurationBuilderExpression expression = new DaoConfigurationBuilderExpression(configuration, this._fileSystemProvider);
+            GeneratorConfigurationBuilderExpression expression = new GeneratorConfigurationBuilderExpression(configuration, this._fileSystemProvider);
             this._configure(expression);
         }
         #endregion
 
         #region Nested Types
-        internal sealed class DaoConfigurationBuilderExpression : IGeneratorConfigurationBuilderExpression
+        internal sealed class GeneratorConfigurationBuilderExpression : IGeneratorConfigurationBuilderExpression
         {
             #region Fields
             private readonly GeneratorConfiguration _configuration;
@@ -34,14 +34,14 @@ namespace Dibix.Sdk.CodeGeneration
             #endregion
 
             #region Constructor
-            public DaoConfigurationBuilderExpression(GeneratorConfiguration configuration, IFileSystemProvider fileSystemProvider)
+            public GeneratorConfigurationBuilderExpression(GeneratorConfiguration configuration, IFileSystemProvider fileSystemProvider)
             {
                 this._configuration = configuration;
                 this._fileSystemProvider = fileSystemProvider;
             }
             #endregion
 
-            #region IDaoConfigurationBuilderExpression Members
+            #region IGeneratorConfigurationBuilderExpression Members
             public IGeneratorConfigurationBuilderExpression AddSource(string projectName) { return this.AddSource(projectName, null); }
             public IGeneratorConfigurationBuilderExpression AddSource(Action<IPhysicalSourceSelectionExpression> configuration) { return this.AddSource(null, configuration); }
             public IGeneratorConfigurationBuilderExpression AddSource(string projectName, Action<IPhysicalSourceSelectionExpression> configuration)

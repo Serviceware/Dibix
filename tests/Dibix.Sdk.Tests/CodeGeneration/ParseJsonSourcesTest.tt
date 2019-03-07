@@ -51,8 +51,13 @@ const string json = @"{
     ""formatting"": ""Verbatim""
   }
 }";
-string output = SqlAccessorGeneratorFactory.FromVisualStudio(this.Host, (IServiceProvider)this.Host)
-                                           .ParseJson(json);
+
+GeneratorConfiguration configuration = GeneratorConfigurationBuilder.FromTextTemplate(this.Host, (IServiceProvider)this.Host)
+																    .ParseJson(json);
+
+ICodeGenerator generator = CodeGeneratorFactory.FromTextTemplate(configuration, this.Host, (IServiceProvider)this.Host);
+string output = generator.Generate();
+
 Write(output);
 
 #>

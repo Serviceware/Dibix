@@ -77,18 +77,23 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                 .Configure(cfg => cfg.AddSource("Dibix.Sdk.Tests.Database", x =>
                                      {
                                          x.SelectFolder(null, "CodeAnalysis", "Tables", "Types", "Tests/Parser", "Tests/Sources/Excluded", "Tests/Sources/dbx_tests_sources_externalsp")
-                                          .SelectFile("Tests/Sources/Excluded/Nested/dbx_tests_sources_excludednested.sql")
-                                          .SelectParser<SqlStoredProcedureParser>(y => { y.Formatter<TakeSourceSqlStatementFormatter>(); });
+                                          .SelectFile("Tests/Sources/Excluded/Nested/dbx_tests_sources_excludednested.sql");
                                      })
                                      .AddSource("Dibix.Sdk.Tests.Database", x =>
                                      {
                                          x.SelectFile("Tests/Sources/dbx_tests_sources_externalsp.sql")
-                                          .SelectParser<SqlStoredProcedureParser>(y => { y.Formatter<ExecStoredProcedureSqlStatementFormatter>(); });
+                                          .SelectParser<SqlStoredProcedureParser>(y =>
+                                          {
+                                              y.Formatter<ExecStoredProcedureSqlStatementFormatter>();
+                                          });
                                      })
                                      .AddDacPac("SSISDB.dacpac", x =>
                                      {
                                          x.SelectProcedure("[catalog].[delete_project]", "DeleteProject")
-                                          .SelectParser<SqlStoredProcedureParser>(y => { y.Formatter<ExecStoredProcedureSqlStatementFormatter>(); });
+                                          .SelectParser<SqlStoredProcedureParser>(y =>
+                                          {
+                                              y.Formatter<ExecStoredProcedureSqlStatementFormatter>();
+                                          });
                                      })
                                      .SelectOutputWriter<DaoWriter>(x =>
                                      {

@@ -16,36 +16,40 @@ IDictionary<string, string> overrides = new Dictionary<string, string>
 foreach (KeyValuePair<string, string> @override in overrides)
     namingConventionType.GetField(@override.Key, BindingFlags.Public | BindingFlags.Static).SetValue(null, @override.Value);
 
-string output = SqlAccessorGeneratorFactory.FromVisualStudio(this.Host, (IServiceProvider)this.Host)
-                                           .Build()
-                                           .AddSource("Dibix.Sdk.Tests.Database", x => 
-                                           {
-                                               x.SelectFolder(null, "CodeAnalysis", "Tables", "Types", "Tests/Parser", "Tests/Sources/Excluded", "Tests/Sources/dbx_tests_sources_externalsp")
-                                                .SelectFile("Tests/Sources/Excluded/Nested/dbx_tests_sources_excludednested.sql");
-                                           })
-                                           .AddSource("Dibix.Sdk.Tests.Database", x =>
-                                           {
-                                               x.SelectFile("Tests/Sources/dbx_tests_sources_externalsp.sql")
-                                                .SelectParser<SqlStoredProcedureParser>(y =>
-                                                {
-                                                    y.Formatter<ExecStoredProcedureSqlStatementFormatter>();
-                                                });
-                                           })
-                                           .AddDacPac("SSISDB.dacpac", x =>
-                                           {
-                                               x.SelectProcedure("[catalog].[delete_project]", "DeleteProject")
-                                                .SelectParser<SqlStoredProcedureParser>(y =>
-                                                {
-                                                    y.Formatter<ExecStoredProcedureSqlStatementFormatter>();
-                                                });
-                                           })
-                                           .SelectOutputWriter<SqlDaoWriter>(x => 
-                                           {
-                                               x.Namespace("This.Is.A.Custom.Namespace")
-                                                .ClassName("Accessor")
-                                                .Formatting(SqlQueryOutputFormatting.Verbatim);
-                                           })
-                                           .Generate();
+GeneratorConfiguration configuration = GeneratorConfigurationBuilder.FromTextTemplate(this.Host, (IServiceProvider)this.Host)
+    .Configure(cfg => cfg.AddSource("Dibix.Sdk.Tests.Database", x =>
+                         {
+                             x.SelectFolder(null, "CodeAnalysis", "Tables", "Types", "Tests/Parser", "Tests/Sources/Excluded", "Tests/Sources/dbx_tests_sources_externalsp")
+                              .SelectFile("Tests/Sources/Excluded/Nested/dbx_tests_sources_excludednested.sql");
+                         })
+                         .AddSource("Dibix.Sdk.Tests.Database", x =>
+                         {
+                             x.SelectFile("Tests/Sources/dbx_tests_sources_externalsp.sql")
+                              .SelectParser<SqlStoredProcedureParser>(y => 
+							  { 
+							      y.Formatter<ExecStoredProcedureSqlStatementFormatter>(); 
+							  });
+                         })
+                         .AddDacPac("SSISDB.dacpac", x =>
+                         {
+                             x.SelectProcedure("[catalog].[delete_project]", "DeleteProject")
+                              .SelectParser<SqlStoredProcedureParser>(y => 
+							  { 
+							      y.Formatter<ExecStoredProcedureSqlStatementFormatter>(); 
+							  });
+                         })
+                         .SelectOutputWriter<DaoWriter>(x =>
+                         {
+                             x.Namespace("This.Is.A.Custom.Namespace")
+                              .ClassName("Accessor")
+                              .Formatting(CommandTextFormatting.Verbatim);
+                         })
+    );
+
+
+ICodeGenerator generator = CodeGeneratorFactory.FromTextTemplate(configuration, this.Host, (IServiceProvider)this.Host);
+string output = generator.Generate();
+
 Write(output);
 
 #>

@@ -51,6 +51,9 @@ namespace Dibix.Sdk.CodeGeneration
 
             public GeneratorConfiguration LoadJson(string filePath)
             {
+                if (!Path.IsPathRooted(filePath))
+                    filePath = new PhysicalFileSystemProvider(this._fileSystemProvider.CurrentDirectory).GetPhysicalFilePath(null, filePath);
+
                 return this.ReadJsonConfiguration(() => File.ReadAllText(filePath));
             }
 
