@@ -4,13 +4,18 @@ using System.Linq;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    public class PhysicalSourceConfiguration : InputSourceConfiguration
+    public class PhysicalSourceConfiguration : InputSourceConfiguration, IPhysicalFileSelection
     {
         #region Fields
         private readonly string _projectName;
         private readonly IFileSystemProvider _fileSystemProvider;
         private readonly ICollection<VirtualPath> _include;
         private readonly ICollection<VirtualPath> _exclude;
+        private IEnumerable<string> _files;
+        #endregion
+
+        #region Properties
+        public IEnumerable<string> Files => this._files ?? (this._files = this.GetFiles());
         #endregion
 
         #region Constructor
@@ -32,13 +37,18 @@ namespace Dibix.Sdk.CodeGeneration
         #region Overrides
         protected override IEnumerable<SqlStatementInfo> CollectStatements(ISqlStatementParser parser, ISqlStatementFormatter formatter, ITypeLoaderFacade typeLoaderFacade, IErrorReporter errorReporter)
         {
-            return this._fileSystemProvider
-                       .GetFiles(this._projectName, this._include, this._exclude)
+            return this.Files
                        .Select(x => ParseStatement(x, parser, formatter, typeLoaderFacade, errorReporter));
         }
         #endregion
 
         #region Private Methods
+        private IEnumerable<string> GetFiles()
+        {
+            return this._fileSystemProvider
+                       .GetFiles(this._projectName, this._include, this._exclude);
+        }
+
         private static SqlStatementInfo ParseStatement(string filePath, ISqlStatementParser parser, ISqlStatementFormatter formatter, ITypeLoaderFacade typeLoaderFacade, IErrorReporter errorReporter)
         {
             SqlStatementInfo statement = new SqlStatementInfo

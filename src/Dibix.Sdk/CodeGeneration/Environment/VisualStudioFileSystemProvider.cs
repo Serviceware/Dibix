@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using EnvDTE;
+using VSLangProj;
 
 namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class VisualStudioFileSystemProvider : IFileSystemProvider
     {
         #region Fields
-        private const string PhysicalPathKey = "FullPath";
         private readonly DTE _dte;
         private readonly IDictionary<string, Project> _projectCache;
         #endregion
@@ -32,7 +32,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             Project project = this.GetProject(projectName);
             ProjectItem folder = FindItem(project.ProjectItems, virtualPath);
-            string physicalFilePath = (string)folder.Properties.Item(PhysicalPathKey).Value;
+            string physicalFilePath = folder.Properties.GetFullPath();
             return physicalFilePath;
         }
 
@@ -57,7 +57,7 @@ namespace Dibix.Sdk.CodeGeneration
                     properties = item.Properties;
                 }
 
-                string physicalPath = (string)properties.Item(PhysicalPathKey).Value;
+                string physicalPath = properties.GetFullPath();
                 if (File.Exists(physicalPath))
                 {
                     yield return physicalPath;
@@ -77,6 +77,9 @@ namespace Dibix.Sdk.CodeGeneration
             if (!this._projectCache.TryGetValue(projectName, out Project project))
             {
                 project = FindProject(this._dte.Solution, projectName);
+                if (project.Kind != ProjectKind.SqlProj)
+                    throw new InvalidOperationException($"'{project.Name}' is not a valid SQL project");
+
                 this._projectCache.Add(projectName, project);
             }
             return project;
@@ -141,7 +144,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (item.Kind != Constants.vsProjectItemKindPhysicalFile)
                 return false;
 
-            string itemPath = (string)item.Properties.Item(PhysicalPathKey).Value;
+            string itemPath = item.Properties.GetFullPath();
             string relativePath = itemPath.Substring(rootDirectory.Length).TrimStart(Path.DirectorySeparatorChar);
             if (exclude.Any(x => relativePath.StartsWith(x, StringComparison.OrdinalIgnoreCase)))
                 return false;

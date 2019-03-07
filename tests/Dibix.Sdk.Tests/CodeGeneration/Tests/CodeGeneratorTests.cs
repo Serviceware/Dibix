@@ -35,7 +35,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             string path = this.GetType().Assembly.Location;
             assemblyLocator.Setup(x => x.TryGetAssemblyLocation(ProjectName, out path)).Returns(true);
 
-            GeneratorConfiguration configuration = GeneratorConfigurationBuilder.Create(fileSystemProvider.Object, errorReporter.Object)
+            GeneratorConfiguration configuration = GeneratorConfigurationBuilder.Create(fileSystemProvider.Object, null, errorReporter.Object)
                 .Configure(cfg => cfg.AddSource("Dibix.Sdk.Tests.Database", x =>
                                      {
                                          x.SelectFolder("Tests/Parser")
@@ -73,7 +73,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             codeGenerationContext.SetupGet(x => x.TypeLoaderFacade).Returns(typeLoaderFacade);
             codeGenerationContext.SetupGet(x => x.ErrorReporter).Returns(errorReporter.Object);
 
-            GeneratorConfiguration configuration = GeneratorConfigurationBuilder.Create(fileSystemProvider.Object, errorReporter.Object)
+            GeneratorConfiguration configuration = GeneratorConfigurationBuilder.Create(fileSystemProvider.Object, null, errorReporter.Object)
                 .Configure(cfg => cfg.AddSource("Dibix.Sdk.Tests.Database", x =>
                                      {
                                          x.SelectFolder(null, "CodeAnalysis", "Tables", "Types", "Tests/Parser", "Tests/Sources/Excluded", "Tests/Sources/dbx_tests_sources_externalsp")
@@ -129,7 +129,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             codeGenerationContext.SetupGet(x => x.TypeLoaderFacade).Returns(typeLoaderFacade);
             codeGenerationContext.SetupGet(x => x.ErrorReporter).Returns(errorReporter.Object);
 
-            GeneratorConfiguration configuration = GeneratorConfigurationBuilder.Create(fileSystemProvider.Object, errorReporter.Object)
+            GeneratorConfiguration configuration = GeneratorConfigurationBuilder.Create(fileSystemProvider.Object, null, errorReporter.Object)
                                                                                 .ParseJson(@"{
   ""input"": {
     ""Dibix.Sdk.Tests.Database"": [

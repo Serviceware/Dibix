@@ -37,7 +37,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             DTE dte = (DTE)serviceProvider.GetService(typeof(DTE));
             Project project = VisualStudioExtensions.GetContainingProject(dte, templatingEngineHost.TemplateFile);
-            string projectDirectory = project.Properties.Item("FullPath").Value.ToString().TrimEnd('\\');
+            string projectDirectory = project.Properties.GetFullPath().TrimEnd('\\');
             string currentDirectory = Path.GetDirectoryName(templatingEngineHost.TemplateFile);
             string virtualPath = currentDirectory.Substring(projectDirectory.Length);
 

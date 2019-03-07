@@ -6,6 +6,8 @@ using Dibix.Sdk;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Events;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Schema;
 
 namespace Dibix.VisualStudio
 {
@@ -20,10 +22,19 @@ namespace Dibix.VisualStudio
     [ProvideAutoLoad(VSConstants.UICONTEXT.ShellInitialized_string)]
     public sealed class DibixExtensionPackage : Package
     {
+        #region Fields
+        // Force loading of referenced assemblies that are needed later on
+        private static readonly Type[] ForeignAssemblyTypes =
+        {
+            typeof(DuplicatePropertyNameHandling),
+            typeof(JSchemaType)
+        };
+        #endregion
+
         #region Overrides
         protected override void Initialize()
         {
-            SolutionEvents.OnBeforeOpenProject += OnBeforeOpenProject;
+            SolutionEvents.OnBeforeOpenProject += this.OnBeforeOpenProject;
         }
         #endregion
 
@@ -34,12 +45,12 @@ namespace Dibix.VisualStudio
             {
                 string projectDirectory = Path.GetDirectoryName(e.Filename);
                 Assembly sdkAssembly = SdkAssemblyLoader.Load(projectDirectory);
-                Type initializerType = sdkAssembly.GetType("Dibix.Sdk.SdkInitializer", true);
-                initializerType.InvokeMember("Initialize", BindingFlags.InvokeMethod, null, null, new [] { this });
+                Type adapterType = sdkAssembly.GetType(Constants.SdkAdapterTypeName, true);
+                adapterType.InvokeMember("Initialize", BindingFlags.InvokeMethod, null, null, new object[] { this });
             }
             finally
             {
-                SolutionEvents.OnBeforeOpenProject -= OnBeforeOpenProject;
+                SolutionEvents.OnBeforeOpenProject -= this.OnBeforeOpenProject;
             }
         }
         #endregion

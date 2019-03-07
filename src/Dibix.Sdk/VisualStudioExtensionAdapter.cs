@@ -7,12 +7,12 @@ using Microsoft.Data.Tools.Schema.Extensibility;
 
 namespace Dibix.Sdk
 {
-    public static class SdkInitializer
+    public static class VisualStudioExtensionAdapter
     {
         public static void Initialize(IServiceProvider serviceProvider)
         {
-            VisualStudioCodeGenerationSubscriber.Initialize(serviceProvider);
             RegisterSqlCodeAnalysisRule();
+            VisualStudioCodeGenerationWatcher.Initialize(serviceProvider);
         }
 
         public static string InvokeGenerator(string inputFilePath, string inputFileContents, string @namespace, IServiceProvider serviceProvider)

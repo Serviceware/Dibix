@@ -11,7 +11,6 @@ namespace Dibix.Sdk.CodeGeneration
     internal sealed class VisualStudioAssemblyLocator : IAssemblyLocator
     {
         #region Fields
-        private const string PhysicalPathKey = "FullPath";
         private const string OutputDirectoryKey = "OutputPath";
         private const string OutputFileNameKey = "OutputFileName";
         private readonly Lazy<IDictionary<string, string>> _assemblyLocationLookupAccessor;
@@ -56,9 +55,9 @@ namespace Dibix.Sdk.CodeGeneration
         private static string GetProjectProperty(Properties properties, string key)
         {
             string value = properties.Cast<Property>()
-                .Where(x => x.Name == key)
-                .Select(x => x.Value as string)
-                .FirstOrDefault();
+                                     .Where(x => x.Name == key)
+                                     .Select(x => x.Value as string)
+                                     .FirstOrDefault();
 
             if (String.IsNullOrEmpty(value))
                 throw new InvalidOperationException($"Could not determine '{key}' property of project");
@@ -73,7 +72,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private string GetOutputDirectory()
         {
-            string projectDirectory = GetProjectProperty(this._currentProject, PhysicalPathKey);
+            string projectDirectory = GetProjectProperty(this._currentProject, nameof(FileProperties.FullPath));
             string outputDirectory = GetProjectConfigurationProperty(this._currentProject, OutputDirectoryKey);
             string path = Path.GetFullPath(Path.Combine(projectDirectory, outputDirectory));
             return path;

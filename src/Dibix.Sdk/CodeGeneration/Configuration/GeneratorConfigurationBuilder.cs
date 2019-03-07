@@ -7,23 +7,23 @@ namespace Dibix.Sdk.CodeGeneration
     public static class GeneratorConfigurationBuilder
     {
         #region Factory Methods
-        public static IGeneratorConfigurationBuilderSourceExpression Create(IFileSystemProvider fileSystemProvider, IErrorReporter errorReporter)
+        public static IGeneratorConfigurationBuilderSourceExpression Create(IFileSystemProvider fileSystemProvider, string executingFilePath, IErrorReporter errorReporter)
         {
-            return new GeneratorConfigurationBuilderSourceExpression(fileSystemProvider, errorReporter);
+            return new GeneratorConfigurationBuilderSourceExpression(fileSystemProvider, executingFilePath, errorReporter);
         }
 
         public static IGeneratorConfigurationBuilderSourceExpression FromVisualStudio(IServiceProvider serviceProvider, string executingFilePath)
         {
             IFileSystemProvider fileSystemProvider = new VisualStudioFileSystemProvider(serviceProvider, executingFilePath);
             IErrorReporter errorReporter = new VisualStudioErrorReporter(serviceProvider);
-            return new GeneratorConfigurationBuilderSourceExpression(fileSystemProvider, errorReporter);
+            return new GeneratorConfigurationBuilderSourceExpression(fileSystemProvider, executingFilePath, errorReporter);
         }
 
         public static IGeneratorConfigurationBuilderSourceExpression FromTextTemplate(ITextTemplatingEngineHost textTemplatingEngineHost, IServiceProvider serviceProvider)
         {
             IFileSystemProvider fileSystemProvider = new VisualStudioFileSystemProvider(serviceProvider, textTemplatingEngineHost.TemplateFile);
             IErrorReporter errorReporter = new TextTemplatingEngineErrorReporter(textTemplatingEngineHost);
-            return new GeneratorConfigurationBuilderSourceExpression(fileSystemProvider, errorReporter);
+            return new GeneratorConfigurationBuilderSourceExpression(fileSystemProvider, textTemplatingEngineHost.TemplateFile, errorReporter);
         }
         #endregion
 
@@ -32,13 +32,15 @@ namespace Dibix.Sdk.CodeGeneration
         {
             #region Fields
             private readonly IFileSystemProvider _fileSystemProvider;
+            private readonly string _executingFilePath;
             private readonly IErrorReporter _errorReporter;
             #endregion
 
             #region Constructor
-            public GeneratorConfigurationBuilderSourceExpression(IFileSystemProvider fileSystemProvider, IErrorReporter errorReporter)
+            public GeneratorConfigurationBuilderSourceExpression(IFileSystemProvider fileSystemProvider, string executingFilePath, IErrorReporter errorReporter)
             {
                 this._fileSystemProvider = fileSystemProvider;
+                this._executingFilePath = executingFilePath;
                 this._errorReporter = errorReporter;
             }
             #endregion
@@ -49,6 +51,10 @@ namespace Dibix.Sdk.CodeGeneration
                 return ReadConfiguration(() => new ActionGeneratorConfigurationReader(configure, this._fileSystemProvider));
             }
 
+            public GeneratorConfiguration LoadJson()
+            {
+                return this.LoadJson(this._executingFilePath);
+            }
             public GeneratorConfiguration LoadJson(string filePath)
             {
                 if (!Path.IsPathRooted(filePath))

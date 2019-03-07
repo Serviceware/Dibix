@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.CSharp;
 
-namespace Dibix.Sdk.CodeGeneration
+namespace Dibix.Sdk
 {
     internal static class TypeExtensions
     {
@@ -52,6 +52,19 @@ namespace Dibix.Sdk.CodeGeneration
         {
             CSharpTypeNames.TryGetValue(cSharpTypeName, out Type clrType);
             return clrType;
+        }
+
+        public static IEnumerable<Type> GetLoadableTypes(this Assembly assembly)
+        {
+            Guard.IsNotNull(assembly, nameof(assembly));
+            try
+            {
+                return assembly.GetTypes();
+            }
+            catch (ReflectionTypeLoadException e)
+            {
+                return e.Types.Where(t => t != null);
+            }
         }
 
         private static IEnumerable<KeyValuePair<string, Type>> LoadCSharpTypeNames()
