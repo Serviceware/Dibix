@@ -17,32 +17,28 @@ foreach (KeyValuePair<string, string> @override in overrides)
     namingConventionType.GetField(@override.Key, BindingFlags.Public | BindingFlags.Static).SetValue(null, @override.Value);
 
 const string json = @"{
-  ""input"": {
-    ""Dibix.Sdk.Tests.Database"": [
-      {
-        ""include"": [
-          ""./**"",
-          ""Tests/Sources/Excluded/Nested/dbx_tests_sources_excludednested.sql""
-        ],
-        ""exclude"": [
-          ""CodeAnalysis"",
-          ""Tables"",
-          ""Types"",
-          ""Tests/Parser"",
-          ""Tests/Sources/Excluded"",
-          ""Tests/Sources/dbx_tests_sources_externalsp""
-        ]
-      },
-      {
-        ""include"": ""Tests/Sources/dbx_tests_sources_externalsp.sql"",
-        ""formatter"": ""ExecStoredProcedureSqlStatementFormatter""
-      }
-    ],
+  ""dml"": {
+    ""Dibix.Sdk.Tests.Database"": {
+      ""include"": [
+        ""./**"",
+        ""Tests/Sources/Excluded/Nested/dbx_tests_sources_excludednested.sql""
+      ],
+      ""exclude"": [
+        ""CodeAnalysis"",
+        ""Tables"",
+        ""Types"",
+        ""Tests/Parser"",
+        ""Tests/Sources/Excluded"",
+        ""Tests/Sources/dbx_tests_sources_externalsp""
+      ]
+    }
+  },
+  ""ddl"": {
+    ""Dibix.Sdk.Tests.Database"": {
+      ""include"": ""Tests/Sources/dbx_tests_sources_externalsp.sql""
+    },
     ""SSISDB.dacpac"": {
-      ""include"": {
-        ""[catalog].[delete_project]"": ""DeleteProject""
-      },
-      ""formatter"": ""ExecStoredProcedureSqlStatementFormatter""
+      ""include"": ""[catalog].[delete_project]""
     }
   },
   ""output"": {

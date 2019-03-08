@@ -20,7 +20,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region ICodeGenerator Members
         public string Generate()
         {
-            const string errorContent = "Please fix the errors first";
+            const string errorContent = "\"Please fix the errors first\"";
             string output;
             if (this._context.Configuration.IsInvalid)
             {

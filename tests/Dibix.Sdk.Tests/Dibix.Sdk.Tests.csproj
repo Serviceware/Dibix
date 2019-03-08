@@ -1,61 +1,84 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  
+
   <Import Project="..\..\build\common.props" />
 
-  <PropertyGroup>    
+  <PropertyGroup>
     <TargetFramework>net46</TargetFramework>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="..\..\src\Dibix.Sdk.Locator\*.cs" Link="Locator\%(Filename)%(Extension)" />
+    <EmbeddedResource Update="Resource.resx" />
 
     <None Update="CodeGeneration\CodeAnalysisTest.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>CodeAnalysisTest.cs</LastGenOutput>
     </None>
-    <None Update="CodeGeneration\FluentSourcesTest.tt">
-      <LastGenOutput>FluentSourcesTest.cs</LastGenOutput>
-      <Generator>TextTemplatingFileGenerator</Generator>
-    </None>
-    <None Update="CodeGeneration\LoadJsonSourcesTest.tt">
-      <LastGenOutput>LoadJsonSourcesTest.cs</LastGenOutput>
-      <Generator>TextTemplatingFileGenerator</Generator>
-    </None>
-    <None Update="CodeGeneration\ParserTest.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>ParserTest.cs</LastGenOutput>
-    </None>
-    <EmbeddedResource Update="Resource.resx" />
-    <None Update="CodeGeneration\ParseJsonSourcesTest.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>ParseJsonSourcesTest.cs</LastGenOutput>
-    </None>
-
     <Compile Update="CodeGeneration\CodeAnalysisTest.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>CodeAnalysisTest.tt</DependentUpon>
     </Compile>
+
+    <None Update="CodeGeneration\FluentSourcesTest.tt">
+      <LastGenOutput>FluentSourcesTest.cs</LastGenOutput>
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
     <Compile Update="CodeGeneration\FluentSourcesTest.cs">
       <DependentUpon>FluentSourcesTest.tt</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
-    <Compile Update="CodeGeneration\LoadJsonSourcesTest.cs">
-      <DependentUpon>LoadJsonSourcesTest.tt</DependentUpon>
+
+    <None Update="CodeGeneration\LoadJsonSourcesTest.extended.tt">
+      <LastGenOutput>LoadJsonSourcesTest.extended.cs</LastGenOutput>
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
+    <Compile Update="CodeGeneration\LoadJsonSourcesTest.extended.cs">
+      <DependentUpon>LoadJsonSourcesTest.extended.tt</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
+
+    <None Update="CodeGeneration\LoadJsonSourcesTest.simple.tt">
+      <LastGenOutput>LoadJsonSourcesTest.simple.cs</LastGenOutput>
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
+    <Compile Update="CodeGeneration\LoadJsonSourcesTest.simple.cs">
+      <DependentUpon>LoadJsonSourcesTest.simple.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+
+    <None Update="CodeGeneration\ParseJsonSourcesTest.extended.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ParseJsonSourcesTest.extended.cs</LastGenOutput>
+    </None>
+    <Compile Update="CodeGeneration\ParseJsonSourcesTest.extended.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ParseJsonSourcesTest.extended.tt</DependentUpon>
+    </Compile>
+
+    <None Update="CodeGeneration\ParseJsonSourcesTest.simple.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ParseJsonSourcesTest.simple.cs</LastGenOutput>
+    </None>
+    <Compile Update="CodeGeneration\ParseJsonSourcesTest.simple.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ParseJsonSourcesTest.simple.tt</DependentUpon>
+    </Compile>
+
+    <None Update="CodeGeneration\ParserTest.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ParserTest.cs</LastGenOutput>
+    </None>
     <Compile Update="CodeGeneration\ParserTest.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>ParserTest.tt</DependentUpon>
-    </Compile>
-    <Compile Update="CodeGeneration\ParseJsonSourcesTest.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>ParseJsonSourcesTest.tt</DependentUpon>
     </Compile>
   </ItemGroup>
 

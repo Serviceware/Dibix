@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Dibix.Sdk.CodeGeneration;
 using Moq;
 using Xunit;
+using TypeInfo = Dibix.Sdk.CodeGeneration.TypeInfo;
 
 namespace Dibix.Sdk.Tests.CodeGeneration
 {
@@ -112,7 +114,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         }
 
         [Fact]
-        public void JsonSourcesTest()
+        public void JsonSourcesTest_SimpleSchema()
         {
             IFileSystemProvider physicalFileSystemProvider = new PhysicalFileSystemProvider(ScanDirectory);
             Mock<IFileSystemProvider> fileSystemProvider = new Mock<IFileSystemProvider>(MockBehavior.Strict);
@@ -128,6 +130,67 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             errorReporter.Setup(x => x.ReportErrors()).Returns(false);
             codeGenerationContext.SetupGet(x => x.TypeLoaderFacade).Returns(typeLoaderFacade);
             codeGenerationContext.SetupGet(x => x.ErrorReporter).Returns(errorReporter.Object);
+
+            GeneratorConfiguration configuration = GeneratorConfigurationBuilder.Create(fileSystemProvider.Object, null, errorReporter.Object)
+                                                                                .ParseJson(@"{
+  ""dml"": {
+    ""Dibix.Sdk.Tests.Database"": {
+      ""include"": [
+        ""./**"",
+        ""Tests/Sources/Excluded/Nested/dbx_tests_sources_excludednested.sql""
+      ],
+      ""exclude"": [
+        ""CodeAnalysis"",
+        ""Tables"",
+        ""Types"",
+        ""Tests/Parser"",
+        ""Tests/Sources/Excluded"",
+        ""Tests/Sources/dbx_tests_sources_externalsp""
+      ]
+    }
+  },
+  ""ddl"": {
+    ""Dibix.Sdk.Tests.Database"": {
+      ""include"": ""Tests/Sources/dbx_tests_sources_externalsp.sql""
+    },
+    ""SSISDB.dacpac"": {
+      ""include"": ""[catalog].[delete_project]""
+    }
+  },
+  ""output"": {
+    ""namespace"": ""This.Is.A.Custom.Namespace"",
+    ""className"": ""Accessor"",
+    ""formatting"": ""Verbatim""
+  }
+}");
+
+            codeGenerationContext.SetupGet(x => x.Configuration).Returns(configuration);
+
+            ICodeGenerator generator = CodeGeneratorFactory.Create(codeGenerationContext.Object);
+            string generated = generator.Generate();
+
+            Evaluate("SourcesTest", generated);
+        }
+
+        [Fact]
+        public void JsonSourcesTest_ExtendedSchema()
+        {
+            IFileSystemProvider physicalFileSystemProvider = new PhysicalFileSystemProvider(ScanDirectory);
+            Mock<IFileSystemProvider> fileSystemProvider = new Mock<IFileSystemProvider>(MockBehavior.Strict);
+            Mock<IErrorReporter> errorReporter = new Mock<IErrorReporter>(MockBehavior.Strict);
+            Mock<ICodeGenerationContext> codeGenerationContext = new Mock<ICodeGenerationContext>(MockBehavior.Strict);
+            Mock<ITypeLoader> typeLoader = new Mock<ITypeLoader>(MockBehavior.Strict);
+            Mock<IAssemblyLocator> assemblyLocator = new Mock<IAssemblyLocator>(MockBehavior.Strict);
+            ITypeLoaderFacade typeLoaderFacade = new TypeLoaderFacade(typeLoader.Object, assemblyLocator.Object);
+
+            fileSystemProvider.SetupGet(x => x.CurrentDirectory).Returns(ExecutingDirectory);
+            fileSystemProvider.Setup(x => x.GetFiles("Dibix.Sdk.Tests.Database", It.IsAny<IEnumerable<VirtualPath>>(), It.IsAny<IEnumerable<VirtualPath>>()))
+                              .Returns<string, IEnumerable<VirtualPath>, IEnumerable<VirtualPath>>(physicalFileSystemProvider.GetFiles);
+            errorReporter.Setup(x => x.ReportErrors()).Returns(false);
+            codeGenerationContext.SetupGet(x => x.TypeLoaderFacade).Returns(typeLoaderFacade);
+            codeGenerationContext.SetupGet(x => x.ErrorReporter).Returns(errorReporter.Object);
+
+            typeof(GeneratorConfigurationBuilder).GetField("UseExtendedJsonReader", BindingFlags.NonPublic | BindingFlags.Static).SetValue(null, true);
 
             GeneratorConfiguration configuration = GeneratorConfigurationBuilder.Create(fileSystemProvider.Object, null, errorReporter.Object)
                                                                                 .ParseJson(@"{

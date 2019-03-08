@@ -1,0 +1,198 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Schema for configuring the Dibix.Sdk SQL accessor code generator",
+  "type": "object",
+  "definitions": {
+    "inputSourceConfiguration": {
+      "properties": {
+        "include": {
+          "description": "Include specific items. If not specified, all SQL files of the selected project will be included.",
+          "oneOf": [
+            {
+              "type": "string",
+              "description": "Include a specific item. Can be a path to a directory or file.",
+              "minLength": 1
+            },
+            {
+              "type": "array",
+              "description": "Include one or more specific items. Can be a path to a directory or file.",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 2,
+              "uniqueItems": true
+            }
+          ]
+        }
+      }
+    },
+    "sqlProjInputSourceConfiguration": {
+      "type": "object",
+      "description": "Choose .sql files or folders that contain .sql files of the selected .sqlproj project.",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "allOf": [
+        {
+          "$ref": "#/definitions/inputSourceConfiguration"
+        }
+      ],
+      "properties": {
+        "include": {},
+        "exclude": {
+          "description": "Exclude specific items.",
+          "oneOf": [
+            {
+              "type": "string",
+              "description": "Exclude a specific item.",
+              "minLength": 1
+            },
+            {
+              "type": "array",
+              "description": "Exclude one or more specific items.",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 2,
+              "uniqueItems": true
+            }
+          ]
+        }
+      }
+    },
+    "dacPacInputSourceConfiguration": {
+      "type": "object",
+      "description": "Choose model elements of the selected .dacpac file.",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "allOf": [
+        {
+          "$ref": "#/definitions/inputSourceConfiguration"
+        }
+      ],
+      "properties": {
+        "include": {}
+      }
+    },
+    "inputConfiguration": {
+      "type": "object",
+      "description": "Defines the input for the generator.",
+      "patternProperties": {
+        "^[\\w./]+[^.dacpac]$": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/sqlProjInputSourceConfiguration"
+            },
+            {
+              "type": "array",
+              "description": "Define multiple source groups of the selected .sqlproj project.",
+              "items": {
+                "$ref": "#/definitions/sqlProjInputSourceConfiguration"
+              },
+              "minItems": 2,
+              "uniqueItems": true
+            }
+          ]
+        },
+        "^[\\w./]+.dacpac$": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/dacPacInputSourceConfiguration"
+            },
+            {
+              "type": "array",
+              "description": "Define multiple source groups of the selected .dacpac file.",
+              "items": {
+                "$ref": "#/definitions/dacPacInputSourceConfiguration"
+              },
+              "minItems": 2,
+              "uniqueItems": true
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 1
+    },
+    "writer": {
+      "type": "string",
+      "description": "Select a specific output writer.",
+      "enum": [
+        "SqlDaoWriter",
+        "MsTestWrapperWriter"
+      ]
+    },
+    "outputConfiguration": {
+      "description": "Defines the output for the generator.",
+      "oneOf": [
+        {
+          "$ref": "#/definitions/writer"
+        },
+        {
+          "type": "object",
+          "description": "Specific output configuration.",
+          "properties": {
+            "name": {
+              "$ref": "#/definitions/writer",
+              "description": "The name of the output writer."
+            },
+            "namespace": {
+              "type": "string",
+              "description": "The namespace of the accessor class.",
+              "minLength": 1
+            },
+            "className": {
+              "type": "string",
+              "description": "The name of the accessor class.",
+              "minLength": 1
+            },
+            "formatting": {
+              "type": "string",
+              "description": "Configure the behavior how the command text is expressed.",
+              "enum": [
+                "None",
+                "Verbatim",
+                "StripDoubleQuotes",
+                "Minified",
+                "WhiteStripped",
+                "Singleline",
+                "Multiline"
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "dml": {
+      "$ref": "#/definitions/inputConfiguration",
+      "description": "Define stored procedure sources, whose command text will be embedded."
+    },
+    "ddl": {
+      "$ref": "#/definitions/inputConfiguration",
+      "description": "Define stored procedure sources, which are present in the target database."
+    },
+    "output": {
+      "$ref": "#/definitions/outputConfiguration"
+    }
+  },
+  "anyOf": [
+    {
+      "required": [
+        "ddl"
+      ]
+    },
+    {
+      "required": [
+        "dml"
+      ]
+    }
+  ],
+  "additionalProperties": false
+}

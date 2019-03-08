@@ -6,6 +6,10 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public static class GeneratorConfigurationBuilder
     {
+        #region Fields
+        private static readonly bool UseExtendedJsonReader;
+        #endregion
+
         #region Factory Methods
         public static IGeneratorConfigurationBuilderSourceExpression Create(IFileSystemProvider fileSystemProvider, string executingFilePath, IErrorReporter errorReporter)
         {
@@ -72,7 +76,13 @@ namespace Dibix.Sdk.CodeGeneration
             #region Private Methods
             private GeneratorConfiguration ReadJsonConfiguration(Func<string> jsonSelector)
             {
-                return ReadConfiguration(() => new JsonGeneratorConfigurationReader(jsonSelector(), this._fileSystemProvider, this._errorReporter));
+                return ReadConfiguration(() =>
+                {
+                    if (UseExtendedJsonReader)
+                        return new ExtendedJsonGeneratorConfigurationReader(jsonSelector(), this._fileSystemProvider, this._errorReporter);
+
+                    return new SimpleJsonGeneratorConfigurationReader(jsonSelector(), this._fileSystemProvider, this._errorReporter);
+                });
             }
 
             private static GeneratorConfiguration ReadConfiguration(Func<IGeneratorConfigurationReader> readerSelector)
