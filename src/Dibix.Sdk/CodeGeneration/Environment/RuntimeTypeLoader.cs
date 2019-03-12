@@ -18,7 +18,11 @@ namespace Dibix.Sdk.CodeGeneration
                 TypeInfo info;
                 if (!String.IsNullOrEmpty(typeName.AssemblyName))
                 {
-                    this._assemblyLocator.TryGetAssemblyLocation(typeName.AssemblyName, out string assemblyLocation);
+                    if (!this._assemblyLocator.TryGetAssemblyLocation(typeName.AssemblyName, out string assemblyLocation))
+                    {
+                        errorHandler($"Could not locate assembly: {typeName.AssemblyName}");
+                        return null;
+                    }
                     info = ReflectionTypeLoader.GetTypeInfo(typeName, assemblyLocation);
                 }
                 else

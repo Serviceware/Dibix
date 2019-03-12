@@ -18,7 +18,8 @@ namespace Dibix.Sdk.CodeGeneration
 
         public static IGeneratorConfigurationBuilderSourceExpression FromVisualStudio(IServiceProvider serviceProvider, string executingFilePath, IErrorReporter reporter)
         {
-            IFileSystemProvider fileSystemProvider = new VisualStudioFileSystemProvider(serviceProvider, executingFilePath);
+            //IFileSystemProvider fileSystemProvider = new VisualStudioFileSystemProvider(serviceProvider, executingFilePath);
+            IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(Path.GetDirectoryName(executingFilePath));
             IErrorReporter errorReporter = new VisualStudioErrorReporter(serviceProvider);
             return new GeneratorConfigurationBuilderSourceExpression(fileSystemProvider, executingFilePath, errorReporter);
         }

@@ -6,6 +6,7 @@ namespace Dibix.Sdk.CodeGeneration
     public abstract class ErrorReporter : IErrorReporter
     {
         #region Properties
+        public bool HasErrors => this.Errors.HasErrors;
         protected CompilerErrorCollection Errors { get; }
         #endregion
 

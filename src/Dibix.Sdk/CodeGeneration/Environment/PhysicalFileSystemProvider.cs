@@ -14,21 +14,18 @@ namespace Dibix.Sdk.CodeGeneration
             this.CurrentDirectory = currentDirectory;
         }
 
-        public string GetPhysicalFilePath(string projectName, VirtualPath virtualPath)
+        public string GetPhysicalFilePath(string root, VirtualPath virtualPath)
         {
-            if (!String.IsNullOrEmpty(projectName))
-                throw new ArgumentException($"The {nameof(PhysicalFileSystemProvider)} does not support project names", nameof(projectName));
-
-            string path = this.GetPhysicalFilePath(virtualPath);
+            string path = Path.GetFullPath(Path.Combine(this.CurrentDirectory, root, virtualPath));
             return path;
         }
 
-        public IEnumerable<string> GetFiles(string projectName, IEnumerable<VirtualPath> include, IEnumerable<VirtualPath> exclude)
+        public IEnumerable<string> GetFiles(string root, IEnumerable<VirtualPath> include, IEnumerable<VirtualPath> exclude)
         {
             ICollection<string> normalizedExclude = exclude.Select(x => (string)x).ToArray();
             foreach (VirtualPath virtualPath in include)
             {
-                string path = this.GetPhysicalFilePath(virtualPath);
+                string path = this.GetPhysicalFilePath(root, virtualPath);
                 if (File.Exists(path))
                 {
                     yield return path;
@@ -48,12 +45,6 @@ namespace Dibix.Sdk.CodeGeneration
                     }
                 }
             }
-        }
-
-        private string GetPhysicalFilePath(VirtualPath virtualPath)
-        {
-            string path = Path.GetFullPath(Path.Combine(this.CurrentDirectory, virtualPath));
-            return path;
         }
     }
 }

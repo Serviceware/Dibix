@@ -85,7 +85,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             base.Errors.Clear();
 
-            return base.Errors.Count > 0;
+            return base.HasErrors;
         }
         #endregion
 

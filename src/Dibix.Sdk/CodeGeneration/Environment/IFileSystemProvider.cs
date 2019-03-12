@@ -6,7 +6,7 @@ namespace Dibix.Sdk.CodeGeneration
     {
         string CurrentDirectory { get; }
 
-        string GetPhysicalFilePath(string projectName, VirtualPath virtualPath);
-        IEnumerable<string> GetFiles(string projectName, IEnumerable<VirtualPath> include, IEnumerable<VirtualPath> exclude);
+        string GetPhysicalFilePath(string root, VirtualPath virtualPath);
+        IEnumerable<string> GetFiles(string root, IEnumerable<VirtualPath> include, IEnumerable<VirtualPath> exclude);
     }
 }

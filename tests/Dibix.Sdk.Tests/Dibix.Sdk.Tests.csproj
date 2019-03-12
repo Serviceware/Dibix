@@ -21,6 +21,16 @@
       <DependentUpon>CodeAnalysisTest.tt</DependentUpon>
     </Compile>
 
+    <None Update="CodeGeneration\dibix.simple.json">
+      <Generator>Dibix</Generator>
+      <LastGenOutput>dibix.cs</LastGenOutput>
+    </None>
+    <Compile Update="CodeGeneration\dibix.simple.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>dibix.simple.json</DependentUpon>
+    </Compile>
+
     <None Update="CodeGeneration\FluentSourcesTest.tt">
       <LastGenOutput>FluentSourcesTest.cs</LastGenOutput>
       <Generator>TextTemplatingFileGenerator</Generator>
@@ -97,5 +107,10 @@
   <ItemGroup>
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
+
+  <!--<PropertyGroup>
+    <DibixSdkPath>..\src\Dibix.Sdk\bin\$(Configuration)\$(TargetFramework)\Dibix.Sdk.dll</DibixSdkPath>
+  </PropertyGroup>
+  <Import Project="..\..\build\Sdk.targets" />-->
 
 </Project>

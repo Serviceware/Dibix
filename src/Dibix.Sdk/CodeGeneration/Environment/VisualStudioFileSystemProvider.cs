@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using EnvDTE;
-using VSLangProj;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -28,17 +27,17 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region IFileSystemProvider Members
-        public string GetPhysicalFilePath(string projectName, VirtualPath virtualPath)
+        public string GetPhysicalFilePath(string root, VirtualPath virtualPath)
         {
-            Project project = this.GetProject(projectName);
+            Project project = this.GetProject(root);
             ProjectItem folder = FindItem(project.ProjectItems, virtualPath);
             string physicalFilePath = folder.Properties.GetFullPath();
             return physicalFilePath;
         }
 
-        public IEnumerable<string> GetFiles(string projectName, IEnumerable<VirtualPath> include, IEnumerable<VirtualPath> exclude)
+        public IEnumerable<string> GetFiles(string root, IEnumerable<VirtualPath> include, IEnumerable<VirtualPath> exclude)
         {
-            Project project = this.GetProject(projectName);
+            Project project = this.GetProject(root);
             ICollection<string> normalizedExclude = exclude.Select(x => (string)x).ToArray();
 
             foreach (VirtualPath virtualPath in include)

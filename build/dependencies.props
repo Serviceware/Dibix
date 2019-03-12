@@ -15,6 +15,8 @@
     <VSSDKBuildToolsVersion>15.9.3039</VSSDKBuildToolsVersion>
     <VisualStudioDesignerInterfacesVersion>1.1.4323</VisualStudioDesignerInterfacesVersion>
 
+    <MSBuildUtilitiesVersion>15.9.20</MSBuildUtilitiesVersion>
+
     <ConfigurationBinderVersion>2.1.1</ConfigurationBinderVersion>
     <UserSecretsVersion>2.1.1</UserSecretsVersion>
     <MicrosoftTestSdkVersion>15.9.0</MicrosoftTestSdkVersion>

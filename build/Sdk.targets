@@ -1,0 +1,17 @@
+<Project>
+
+  <PropertyGroup>
+    <DibixSdkPath Condition="$(DibixSdkPath) == ''">$(MSBuildThisFileDirectory)..\tools\net46\Dibix.Sdk.dll</DibixSdkPath>
+  </PropertyGroup>
+
+  <UsingTask TaskName="VerifyGeneratedCodeTask" AssemblyFile="$(DibixSdkPath)" />
+
+  <Target Name="VerifyGeneratedCodeBeforeBuild" BeforeTargets="PreBuildEvent">
+    <VerifyGeneratedCodeTask ProjectDirectory="$(MSBuildProjectDirectory)"
+                             Namespace="$(RootNamespace)"
+                             AssemblyReferences="@(Reference->'%(HintPath)')"
+                             Inputs="@(None)"
+                             Condition="%(None.Generator) == 'Dibix'" />
+  </Target>
+
+</Project>

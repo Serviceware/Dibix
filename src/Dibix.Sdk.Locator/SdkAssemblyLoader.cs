@@ -28,10 +28,13 @@ namespace Dibix.Sdk
         private static string LocatePackage(string startDirectory, string packageName)
         {
             string root = RootDirectoryLocator.LocateRootDirectory(startDirectory);
-            if (Directory.Exists(Path.Combine(root, PackageLocator.PackagesDirectoryName)))
-                return new LocalNugetPackageLocator(root).LocatePackage(packageName);
 
-            return new GlobalNugetPackageLocator().LocatePackage(packageName);
+            const string folderName = "tools";
+
+            if (Directory.Exists(Path.Combine(root, PackageLocator.PackagesDirectoryName)))
+                return new LocalNugetPackageLocator(root).LocatePackage(packageName, folderName);
+
+            return new GlobalNugetPackageLocator().LocatePackage(packageName, folderName);
         }
 
         private static bool TryGetExistingTempFile(string tempDirectory, string sourcePath, string fileName, out string targetPath)

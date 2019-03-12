@@ -24,6 +24,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{62C58971
 		build\common.props = build\common.props
 		build\dependencies.props = build\dependencies.props
 		build\NuGet.config = build\NuGet.config
+		build\Sdk.Targets = build\Sdk.Targets
 		build\version.props = build\version.props
 		build\VSIX.targets = build\VSIX.targets
 	EndProjectSection

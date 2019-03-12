@@ -25,9 +25,6 @@
 
   <ItemGroup>
     <Compile Include="..\Dibix.Sdk.Locator\*.cs" Link="Locator\%(Filename)%(Extension)" />
-  </ItemGroup>
-
-  <ItemGroup>
     <EmbeddedResource Update="VSPackage.resx" />
   </ItemGroup>
 
