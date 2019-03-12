@@ -1,9 +1,10 @@
 ﻿using System;
 using System.IO;
+using Dibix.Sdk.CodeGeneration;
 using EnvDTE;
 using Microsoft.VisualStudio.TextTemplating;
 
-namespace Dibix.Sdk.CodeGeneration
+namespace Dibix.Sdk.VisualStudio
 {
     internal sealed class TextTemplateCodeGenerationContext : ICodeGenerationContext
     {

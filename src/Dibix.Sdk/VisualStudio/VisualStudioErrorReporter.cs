@@ -2,11 +2,12 @@
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
+using Dibix.Sdk.CodeGeneration;
 using EnvDTE;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
-namespace Dibix.Sdk.CodeGeneration
+namespace Dibix.Sdk.VisualStudio
 {
     internal sealed class VisualStudioErrorReporter : ErrorReporter, IErrorReporter
     {

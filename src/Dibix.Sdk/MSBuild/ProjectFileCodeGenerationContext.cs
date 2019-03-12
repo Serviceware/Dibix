@@ -1,7 +1,7 @@
 ﻿using System;
 using Dibix.Sdk.CodeGeneration;
 
-namespace Dibix.Sdk
+namespace Dibix.Sdk.MSBuild
 {
     internal sealed class ProjectFileCodeGenerationContext : ICodeGenerationContext
     {

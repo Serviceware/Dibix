@@ -3,7 +3,7 @@ using Dibix.Sdk.CodeGeneration;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
-namespace Dibix.Sdk
+namespace Dibix.Sdk.MSBuild
 {
     public class VerifyGeneratedCodeTask : Task, ITask
     {

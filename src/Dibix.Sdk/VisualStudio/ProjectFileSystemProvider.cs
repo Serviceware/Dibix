@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Dibix.Sdk.CodeGeneration;
 using EnvDTE;
 
-namespace Dibix.Sdk.CodeGeneration
+namespace Dibix.Sdk.VisualStudio
 {
-    internal sealed class VisualStudioFileSystemProvider : IFileSystemProvider
+    internal sealed class ProjectFileSystemProvider : IFileSystemProvider
     {
         #region Fields
         private readonly DTE _dte;
@@ -18,7 +19,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public VisualStudioFileSystemProvider(IServiceProvider serviceProvider, string executingFilePath)
+        public ProjectFileSystemProvider(IServiceProvider serviceProvider, string executingFilePath)
         {
             this._dte = (DTE)serviceProvider.GetService(typeof(DTE));
             this._projectCache = new Dictionary<string, Project>();

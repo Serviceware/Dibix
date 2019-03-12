@@ -1,11 +1,11 @@
 ﻿using System;
 using System.ComponentModel.Composition.Hosting;
 using System.Reflection;
-using Dibix.Sdk.CodeAnalysis;
 using Dibix.Sdk.CodeGeneration;
+using Dibix.Sdk.Dac;
 using Microsoft.Data.Tools.Schema.Extensibility;
 
-namespace Dibix.Sdk
+namespace Dibix.Sdk.VisualStudio
 {
     public static class VisualStudioExtensionAdapter
     {
@@ -15,7 +15,7 @@ namespace Dibix.Sdk
         {
             RegisterSqlCodeAnalysisRule();
             _errorReporter = new VisualStudioErrorReporter(serviceProvider);
-            VisualStudioCodeGenerationWatcher.Initialize(serviceProvider, _errorReporter);
+            CodeGenerationWatcher.Initialize(serviceProvider, _errorReporter);
         }
 
         public static string InvokeGenerator(string inputFilePath, string inputFileContents, string @namespace, IServiceProvider serviceProvider)

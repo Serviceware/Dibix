@@ -2,15 +2,16 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Dibix.Sdk.CodeGeneration;
 using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using VSLangProj;
 
-namespace Dibix.Sdk.CodeGeneration
+namespace Dibix.Sdk.VisualStudio
 {
-    internal sealed class VisualStudioCodeGenerationFileEvents : IVsRunningDocTableEvents
+    internal sealed class CodeGenerationFileEvents : IVsRunningDocTableEvents
     {
         #region Fields
         private readonly IServiceProvider _serviceProvider;
@@ -20,7 +21,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public VisualStudioCodeGenerationFileEvents(IServiceProvider serviceProvider, IErrorReporter errorReporter)
+        public CodeGenerationFileEvents(IServiceProvider serviceProvider, IErrorReporter errorReporter)
         {
             this._serviceProvider = serviceProvider;
             this._errorReporter = errorReporter;

@@ -1,4 +1,5 @@
 ﻿using System;
+using Dibix.Sdk.VisualStudio;
 using Microsoft.VisualStudio.TextTemplating;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -15,8 +16,8 @@ namespace Dibix.Sdk.CodeGeneration
 
         public static ICodeGenerator FromTextTemplate(GeneratorConfiguration configuration, ITextTemplatingEngineHost textTemplatingEngineHost, IServiceProvider serviceProvider)
         {
-            ITypeLoader typeLoader = new VisualStudioTypeLoader(serviceProvider, textTemplatingEngineHost.TemplateFile);
-            IAssemblyLocator assemblyLocator = new VisualStudioAssemblyLocator(serviceProvider, textTemplatingEngineHost.TemplateFile);
+            ITypeLoader typeLoader = new CodeElementTypeLoader(serviceProvider, textTemplatingEngineHost.TemplateFile);
+            IAssemblyLocator assemblyLocator = new ProjectReferenceAssemblyLocator(serviceProvider, textTemplatingEngineHost.TemplateFile);
             ITypeLoaderFacade typeLoaderFacade = new TypeLoaderFacade(typeLoader, assemblyLocator);
             IErrorReporter errorReporter = new TextTemplatingEngineErrorReporter(textTemplatingEngineHost);
             ICodeGenerationContext context = new TextTemplateCodeGenerationContext(configuration, typeLoaderFacade, errorReporter, textTemplatingEngineHost, serviceProvider);
@@ -26,8 +27,8 @@ namespace Dibix.Sdk.CodeGeneration
 
         public static ICodeGenerator FromCustomTool(GeneratorConfiguration configuration, IServiceProvider serviceProvider, string inputFilePath, string @namespace)
         {
-            ITypeLoader typeLoader = new VisualStudioTypeLoader(serviceProvider, inputFilePath);
-            IAssemblyLocator assemblyLocator = new VisualStudioAssemblyLocator(serviceProvider, inputFilePath);
+            ITypeLoader typeLoader = new CodeElementTypeLoader(serviceProvider, inputFilePath);
+            IAssemblyLocator assemblyLocator = new ProjectReferenceAssemblyLocator(serviceProvider, inputFilePath);
             ITypeLoaderFacade typeLoaderFacade = new TypeLoaderFacade(typeLoader, assemblyLocator);
             if (_errorReporter == null)
                 _errorReporter = new VisualStudioErrorReporter(serviceProvider);

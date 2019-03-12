@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Text;
 
-namespace Dibix.Sdk.CodeGeneration
+namespace Dibix.Sdk
 {
     internal static class ZeroWidthUtility
     {

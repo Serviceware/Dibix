@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Dibix.Sdk.VisualStudio;
 using Microsoft.VisualStudio.TextTemplating;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -26,7 +27,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public static IGeneratorConfigurationBuilderSourceExpression FromTextTemplate(ITextTemplatingEngineHost textTemplatingEngineHost, IServiceProvider serviceProvider)
         {
-            IFileSystemProvider fileSystemProvider = new VisualStudioFileSystemProvider(serviceProvider, textTemplatingEngineHost.TemplateFile);
+            IFileSystemProvider fileSystemProvider = new ProjectFileSystemProvider(serviceProvider, textTemplatingEngineHost.TemplateFile);
             IErrorReporter errorReporter = new TextTemplatingEngineErrorReporter(textTemplatingEngineHost);
             return new GeneratorConfigurationBuilderSourceExpression(fileSystemProvider, textTemplatingEngineHost.TemplateFile, errorReporter);
         }

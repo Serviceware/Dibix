@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
-namespace Dibix.Sdk
+namespace Dibix.Sdk.Sql
 {
     internal sealed class Constraint
     {

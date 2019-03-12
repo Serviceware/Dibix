@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Dibix.Sdk.CodeAnalysis;
 using Microsoft.SqlServer.Dac.CodeAnalysis;
 
-namespace Dibix.Sdk.CodeAnalysis.Dac
+namespace Dibix.Sdk.Dac
 {
     internal sealed class DacSqlCodeAnalysisAdapter
     {

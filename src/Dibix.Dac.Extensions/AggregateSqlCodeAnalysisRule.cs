@@ -60,7 +60,7 @@ namespace Dibix.Dac.Extensions
             }
 
             Assembly rulesAssembly = SdkAssemblyLoader.Load(source.SourceName);
-            Type providerType = rulesAssembly.GetType("Dibix.Sdk.CodeAnalysis.Dac.DacSqlCodeAnalysisAdapter");
+            Type providerType = rulesAssembly.GetType("Dibix.Sdk.Dac.DacSqlCodeAnalysisAdapter");
             AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
             object engine = Activator.CreateInstance(providerType);
             Expression instance = Expression.Constant(engine);

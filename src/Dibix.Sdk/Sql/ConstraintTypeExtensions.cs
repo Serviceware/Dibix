@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Dibix.Sdk
+namespace Dibix.Sdk.Sql
 {
     internal static class ConstraintTypeExtensions
     {

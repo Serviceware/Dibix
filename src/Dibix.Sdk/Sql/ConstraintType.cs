@@ -1,4 +1,4 @@
-﻿namespace Dibix.Sdk
+﻿namespace Dibix.Sdk.Sql
 {
     internal enum ConstraintType
     {

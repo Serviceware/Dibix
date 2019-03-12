@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dibix.Sdk.CodeGeneration;
 using EnvDTE;
 
-namespace Dibix.Sdk.CodeGeneration
+namespace Dibix.Sdk.VisualStudio
 {
-    internal sealed class VisualStudioTypeLoader : ITypeLoader
+    internal sealed class CodeElementTypeLoader : ITypeLoader
     {
         #region Fields
         private readonly Lazy<ICollection<CodeElement>> _codeItemAccessor;
@@ -13,7 +14,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public VisualStudioTypeLoader(IServiceProvider serviceProvider, string executingFilePath)
+        public CodeElementTypeLoader(IServiceProvider serviceProvider, string executingFilePath)
         {
             DTE dte = (DTE)serviceProvider.GetService(typeof(DTE));
             this._codeItemAccessor = new Lazy<ICollection<CodeElement>>(this.GetCodeItems);

@@ -1,6 +1,7 @@
 ﻿using System.IO;
+using Dibix.Sdk.CodeGeneration;
 
-namespace Dibix.Sdk.CodeGeneration
+namespace Dibix.Sdk.VisualStudio
 {
     internal sealed class CustomToolCodeGenerationContext : ICodeGenerationContext
     {

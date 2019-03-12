@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Dibix.Sdk.CodeGeneration;
 
-namespace Dibix.Sdk
+namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class AssemblyLocator : IAssemblyLocator
     {

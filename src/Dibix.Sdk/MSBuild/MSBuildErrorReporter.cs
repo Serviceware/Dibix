@@ -2,7 +2,7 @@
 using Dibix.Sdk.CodeGeneration;
 using Microsoft.Build.Utilities;
 
-namespace Dibix.Sdk
+namespace Dibix.Sdk.MSBuild
 {
     internal sealed class MSBuildErrorReporter : ErrorReporter, IErrorReporter
     {

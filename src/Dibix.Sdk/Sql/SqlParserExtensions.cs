@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
-namespace Dibix.Sdk
+namespace Dibix.Sdk.Sql
 {
     internal static class SqlParserExtensions
     {

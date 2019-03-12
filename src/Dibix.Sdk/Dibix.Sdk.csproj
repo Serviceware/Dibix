@@ -10,8 +10,8 @@
   <ItemGroup>
     <EmbeddedResource Include="CodeGeneration\Configuration\dibix.schema.extended.json" />
     <EmbeddedResource Include="CodeGeneration\Configuration\dibix.schema.simple.json" />
-    <Compile Include="..\Dibix\Diagnostics\Guard.cs" Link="Guard.cs" />
-    <Compile Include="..\Dibix\Extensions\EnumerableExtensions.cs" Link="EnumerableExtensions.cs" />
+    <Compile Include="..\Dibix\Diagnostics\Guard.cs" Link="Diagnostics\Guard.cs" />
+    <Compile Include="..\Dibix\Extensions\EnumerableExtensions.cs" Link="Extensions\EnumerableExtensions.cs" />
     <Content Include="CodeGeneration\Configuration\dibix.schema.simple.json">
       <PackagePath>content/dibix.schema.json</PackagePath>
     </Content>
@@ -33,6 +33,10 @@
 
   <ItemGroup>
     <Reference Include="System.ComponentModel.Composition" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Diagnostics\" />
   </ItemGroup>
   
 </Project>

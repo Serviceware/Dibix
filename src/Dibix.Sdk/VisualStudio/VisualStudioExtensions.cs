@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using EnvDTE;
 using VSLangProj;
 
-namespace Dibix.Sdk
+namespace Dibix.Sdk.VisualStudio
 {
     internal static class VisualStudioExtensions
     {

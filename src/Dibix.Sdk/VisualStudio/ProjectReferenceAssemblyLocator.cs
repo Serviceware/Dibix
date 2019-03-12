@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Dibix.Sdk.CodeGeneration;
 using EnvDTE;
 using VSLangProj;
 
-namespace Dibix.Sdk.CodeGeneration
+namespace Dibix.Sdk.VisualStudio
 {
-    internal sealed class VisualStudioAssemblyLocator : IAssemblyLocator
+    internal sealed class ProjectReferenceAssemblyLocator : IAssemblyLocator
     {
         #region Fields
         private const string OutputDirectoryKey = "OutputPath";
@@ -18,7 +19,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public VisualStudioAssemblyLocator(IServiceProvider serviceProvider, string executingFilePath)
+        public ProjectReferenceAssemblyLocator(IServiceProvider serviceProvider, string executingFilePath)
         {
             DTE dte = (DTE)serviceProvider.GetService(typeof(DTE));
             this._assemblyLocationLookupAccessor = new Lazy<IDictionary<string, string>>(this.BuildAssemblyLocationLookup);

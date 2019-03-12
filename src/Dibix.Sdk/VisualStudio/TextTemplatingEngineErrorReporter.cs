@@ -1,6 +1,7 @@
-﻿using Microsoft.VisualStudio.TextTemplating;
+﻿using Dibix.Sdk.CodeGeneration;
+using Microsoft.VisualStudio.TextTemplating;
 
-namespace Dibix.Sdk.CodeGeneration
+namespace Dibix.Sdk.VisualStudio
 {
     internal sealed class TextTemplatingEngineErrorReporter : ErrorReporter, IErrorReporter
     {

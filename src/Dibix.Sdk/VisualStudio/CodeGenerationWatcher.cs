@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dibix.Sdk.CodeGeneration;
 using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Events;
@@ -9,11 +10,11 @@ using VSLangProj;
 using Constants = EnvDTE.Constants;
 using SolutionEvents = Microsoft.VisualStudio.Shell.Events.SolutionEvents;
 
-namespace Dibix.Sdk.CodeGeneration
+namespace Dibix.Sdk.VisualStudio
 {
-    internal static class VisualStudioCodeGenerationWatcher
+    internal static class CodeGenerationWatcher
     {
-        private static VisualStudioCodeGenerationFileEvents _fileEvents;
+        private static CodeGenerationFileEvents _fileEvents;
         private static IServiceProvider _serviceProvider;
         private static IErrorReporter _errorReporter;
 
@@ -38,7 +39,7 @@ namespace Dibix.Sdk.CodeGeneration
             foreach (ProjectItem projectItem in files)
             {
                 if (_fileEvents == null)
-                    _fileEvents = new VisualStudioCodeGenerationFileEvents(_serviceProvider, _errorReporter);
+                    _fileEvents = new CodeGenerationFileEvents(_serviceProvider, _errorReporter);
 
                 _fileEvents.Subscribe(projectItem);
             }
