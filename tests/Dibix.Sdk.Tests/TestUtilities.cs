@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
-using System.Reflection;
-using Dibix.Sdk.CodeAnalysis.Rules;
 using Xunit;
 
 namespace Dibix.Sdk.Tests.Utilities
@@ -16,19 +12,6 @@ namespace Dibix.Sdk.Tests.Utilities
                 RunWinMerge(expected, actual);
 
             Assert.Equal(expected, actual);
-        }
-
-        public static void OverrideNamingConventions()
-        {
-            string assemblyName = typeof(NamingConventionSqlCodeAnalysisRule).Assembly.GetName().Name;
-            Type namingConventionType = Type.GetType($"Dibix.Sdk.CodeAnalysis.Rules.NamingConvention,{assemblyName}", true);
-            IDictionary<string, string> overrides = new Dictionary<string, string>
-            {
-                { "Table",     "dbx*" }
-              , { "Procedure", "dbx*" }
-            };
-            foreach (KeyValuePair<string, string> @override in overrides)
-                namingConventionType.GetField(@override.Key, BindingFlags.Public | BindingFlags.Static).SetValue(null, @override.Value);
         }
 
         private static void RunWinMerge(string expectedText, string actualText)

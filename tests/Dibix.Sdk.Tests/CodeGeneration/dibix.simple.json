@@ -1,7 +1,7 @@
 {
   "$schema": "../../../src/Dibix.Sdk/CodeGeneration/Configuration/dibix.schema.simple.json",
   "dml": {
-    "Dibix.Sdk.Tests.Database": {
+    "../../Dibix.Sdk.Tests.Database": {
       "include": [
         "./**",
         "Tests/Sources/Excluded/Nested/dbx_tests_sources_excludednested.sql"
@@ -17,7 +17,7 @@
     }
   },
   "ddl": {
-    "Dibix.Sdk.Tests.Database": {
+    "../../Dibix.Sdk.Tests.Database": {
       "include": "Tests/Sources/dbx_tests_sources_externalsp.sql"
     },
     "SSISDB.dacpac": {

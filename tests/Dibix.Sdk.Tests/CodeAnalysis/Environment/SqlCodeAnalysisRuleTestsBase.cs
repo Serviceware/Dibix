@@ -23,7 +23,6 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
             ISqlCodeAnalysisRule ruleInstance = (ISqlCodeAnalysisRule)Activator.CreateInstance(ruleType);
             string violationScriptPath = $@"..\..\..\..\Dibix.Sdk.Tests.Database\CodeAnalysis\dbx_codeanalysis_error_{ruleInstance.Id:D3}.sql";
 
-            TestUtilities.OverrideNamingConventions();
             ISqlCodeAnalysisRuleEngine engine = new SqlCodeAnalysisRuleEngine();
             IEnumerable<SqlCodeAnalysisError> errors = engine.Analyze(ruleInstance, violationScriptPath);
 

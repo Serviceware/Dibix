@@ -1,31 +1,19 @@
 ﻿<#@ template debug="false" hostspecific="true" language="C#" #>
 <#@ output extension=".cs" #>
 <#@ assembly name="$(SolutionDir)\src\Dibix.Sdk\bin\Debug\net46\Dibix.Sdk.dll" #>
-<#@ import namespace="System.Collections.Generic" #>
-<#@ import namespace="System.Reflection" #>
-<#@ import namespace="Dibix.Sdk.CodeAnalysis.Rules" #>
 <#@ import namespace="Dibix.Sdk.CodeGeneration" #><#
 
-// Override naming conventions
-Type namingConventionType = typeof(NamingConventionSqlCodeAnalysisRule).Assembly.GetType("Dibix.Sdk.CodeAnalysis.Rules.NamingConvention");
-IDictionary<string, string> overrides = new Dictionary<string, string>
-{
-    { "Table",     "dbx*" }
-  , { "Procedure", "dbx*" }
-  , { "Type",      "dbx*" }
-};
-foreach (KeyValuePair<string, string> @override in overrides)
-    namingConventionType.GetField(@override.Key, BindingFlags.Public | BindingFlags.Static).SetValue(null, @override.Value);
+GeneratorConfiguration configuration = GeneratorConfigurationBuilder.FromTextTemplate(this.Host, (IServiceProvider)this.Host)
+    .Configure(cfg => cfg.AddSource("Dibix.Sdk.Tests.Database", x =>
+                         {
+                             x.SelectFolder("CodeAnalysis", "dbx_codeanalysis_error_003", "dbx_codeanalysis_error_006");
+                         })
+    );
 
-string output = SqlAccessorGeneratorFactory.FromVisualStudio(this.Host, (IServiceProvider)this.Host)
-                                           .Build()
-										   .AddSource("Dibix.Sdk.Tests.Database", x => 
-                                           {
-                                               x.SelectFolder("CodeAnalysis", "dbx_codeanalysis_error_003", "dbx_codeanalysis_error_006")
-                                                .SelectParser<SqlStoredProcedureParser>();
-                                           })
-                                           .SelectOutputWriter<SqlDaoWriter>()
-                                           .Generate();
+
+ICodeGenerator generator = CodeGeneratorFactory.FromTextTemplate(configuration, this.Host, (IServiceProvider)this.Host);
+string output = generator.Generate();
+
 Write(output);
 
 #>

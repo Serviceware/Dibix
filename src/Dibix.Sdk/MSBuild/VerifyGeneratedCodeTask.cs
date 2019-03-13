@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq;
 using Dibix.Sdk.CodeGeneration;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
@@ -14,9 +15,11 @@ namespace Dibix.Sdk.MSBuild
 
         public override bool Execute()
         {
+            //System.Diagnostics.Debugger.Launch();
+
             IErrorReporter errorReporter = new MSBuildErrorReporter(base.Log);
 
-            foreach (string codeGenerationTarget in this.Inputs)
+            foreach (string codeGenerationTarget in this.Inputs ?? Enumerable.Empty<string>())
             {
                 string configurationPath = Path.GetFullPath(Path.Combine(this.ProjectDirectory, codeGenerationTarget));
                 string configurationDirectory = Path.GetDirectoryName(configurationPath);
@@ -30,7 +33,7 @@ namespace Dibix.Sdk.MSBuild
                 GeneratorConfiguration configuration = new GeneratorConfiguration();
                 reader.Read(configuration);
 
-                IAssemblyLocator assemblyLocator = new AssemblyLocator(this.ProjectDirectory, this.AssemblyReferences);
+                IAssemblyLocator assemblyLocator = new AssemblyLocator(this.ProjectDirectory, this.AssemblyReferences ?? Enumerable.Empty<string>());
                 ICodeGenerationContext context = new ProjectFileCodeGenerationContext(configuration, this.Namespace, configurationName, assemblyLocator, errorReporter);
                 ICodeGenerator generator = new CodeGenerator(context);
 

@@ -16,7 +16,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public string GetPhysicalFilePath(string root, VirtualPath virtualPath)
         {
-            string path = Path.GetFullPath(Path.Combine(this.CurrentDirectory, root, virtualPath));
+            string path = Path.GetFullPath(Path.Combine(this.CurrentDirectory, root ?? String.Empty, virtualPath));
             return path;
         }
 

@@ -18,9 +18,9 @@ namespace Dibix.Sdk.MSBuild
             foreach (CompilerError error in base.Errors)
             {
                 if (!error.IsWarning)
-                    this._taskLoggingHelper.LogError(null, error.ErrorNumber, null, error.FileName, error.Line, error.Column, 0, 0, error.ErrorText);
+                    this._taskLoggingHelper.LogError(null, /*error.ErrorNumber*/null, null, error.FileName, error.Line, error.Column, 0, 0, error.ErrorText);
                 else
-                    this._taskLoggingHelper.LogWarning(null, error.ErrorNumber, null, error.FileName, error.Line, error.Column, 0, 0, error.ErrorText);
+                    this._taskLoggingHelper.LogWarning(null, /*error.ErrorNumber*/null, null, error.FileName, error.Line, error.Column, 0, 0, error.ErrorText);
             }
 
             return base.HasErrors;

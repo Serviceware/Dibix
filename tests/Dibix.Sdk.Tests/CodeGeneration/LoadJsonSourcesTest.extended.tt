@@ -1,20 +1,8 @@
 ﻿<#@ template debug="false" hostspecific="true" language="C#" #>
 <#@ output extension=".cs" #>
 <#@ assembly name="$(SolutionDir)\src\Dibix.Sdk\bin\Debug\net46\Dibix.Sdk.dll" #>
-<#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.Reflection" #>
-<#@ import namespace="Dibix.Sdk.CodeGeneration" #>
-<#@ import namespace="Dibix.Sdk.CodeAnalysis.Rules" #><#
-
-// Override naming conventions
-Type namingConventionType = typeof(NamingConventionSqlCodeAnalysisRule).Assembly.GetType("Dibix.Sdk.CodeAnalysis.Rules.NamingConvention");
-IDictionary<string, string> overrides = new Dictionary<string, string>
-{
-    { "Table",     "dbx*" }
-  , { "Procedure", "dbx*" }
-};
-foreach (KeyValuePair<string, string> @override in overrides)
-    namingConventionType.GetField(@override.Key, BindingFlags.Public | BindingFlags.Static).SetValue(null, @override.Value);
+<#@ import namespace="Dibix.Sdk.CodeGeneration" #><#
 
 // Override schema version
 typeof(GeneratorConfigurationBuilder).GetField("UseExtendedJsonReader", BindingFlags.NonPublic | BindingFlags.Static).SetValue(null, true);

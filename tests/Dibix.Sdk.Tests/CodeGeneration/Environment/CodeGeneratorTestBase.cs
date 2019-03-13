@@ -14,15 +14,10 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         private static readonly Assembly Assembly = typeof(CodeGeneratorTestBase).Assembly;
         private static readonly string SrcDirectory = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "..", "..", ".."));
 
-        protected static string ScanDirectory { get; } = Path.GetFullPath(Path.Combine(SrcDirectory, "..", "Dibix.Sdk.Tests.Database"));
+        protected static string ScanDirectory { get; } = Path.GetFullPath(Path.Combine(SrcDirectory, ".."));
         protected static string ExecutingDirectory { get; } = Path.GetFullPath(Path.Combine(SrcDirectory, "CodeGeneration"));
         protected static string ProjectName { get; } = Assembly.GetName().Name;
         protected static string TestName => DetermineTestName();
-
-        protected CodeGeneratorTestBase()
-        {
-            TestUtilities.OverrideNamingConventions();
-        }
 
         protected static void Evaluate(string generated) => Evaluate(TestName, generated);
         protected static void Evaluate(string expectedTextKey, string generated)
