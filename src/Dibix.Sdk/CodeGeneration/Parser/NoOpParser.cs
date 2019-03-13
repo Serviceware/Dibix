@@ -4,7 +4,7 @@ using System.IO;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class NoOpParser : ISqlStatementParser
+    public sealed class NoOpParser : ISqlStatementParser
     {
         private static readonly IDictionary<SqlParserSourceKind, Func<object, string>> SourceReaders = new Dictionary<SqlParserSourceKind, Func<object, string>>
         {
