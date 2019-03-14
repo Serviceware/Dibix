@@ -109,7 +109,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <DibixSdkPath>..\src\Dibix.Sdk\bin\$(Configuration)\$(TargetFramework)\Dibix.Sdk.dll</DibixSdkPath>
+    <DibixToolPath>..\src\Dibix.MSBuild\bin\$(Configuration)\$(TargetFramework)\Dibix.MSBuild.dll</DibixToolPath>
   </PropertyGroup>
   <Import Project="..\..\build\Sdk.targets" />
 

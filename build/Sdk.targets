@@ -1,10 +1,10 @@
 <Project>
 
   <PropertyGroup>
-    <DibixSdkPath Condition="$(DibixSdkPath) == ''">$(MSBuildThisFileDirectory)..\tools\net46\Dibix.Sdk.dll</DibixSdkPath>
+    <DibixToolPath Condition="$(DibixToolPath) == ''">$(MSBuildThisFileDirectory)..\tools\net46\Dibix.MSBuild.dll</DibixToolPath>
   </PropertyGroup>
 
-  <UsingTask TaskName="VerifyGeneratedCodeTask" AssemblyFile="$(DibixSdkPath)" />
+  <UsingTask TaskName="VerifyGeneratedCodeTask" AssemblyFile="$(DibixToolPath)" />
 
   <Target Name="VerifyGeneratedCodeBeforeBuild" BeforeTargets="PreBuildEvent">
     <VerifyGeneratedCodeTask ProjectDirectory="$(MSBuildProjectDirectory)"

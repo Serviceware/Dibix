@@ -29,7 +29,7 @@ namespace Dibix.Sdk
         {
             string root = RootDirectoryLocator.LocateRootDirectory(startDirectory);
 
-            const string folderName = "tools";
+            const string folderName = "lib";
 
             if (Directory.Exists(Path.Combine(root, PackageLocator.PackagesDirectoryName)))
                 return new LocalNugetPackageLocator(root).LocatePackage(packageName, folderName);

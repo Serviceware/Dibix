@@ -18,6 +18,24 @@
     <Content Include="..\..\build\Sdk.Targets">
       <PackagePath>build</PackagePath>
     </Content>
+    <Content Include="..\Dibix.MSBuild\bin\$(Configuration)\$(TargetFramework)\Dibix.MSBuild.dll">
+      <PackagePath>tools/net46</PackagePath>
+    </Content>
+    <Content Include="..\Dibix.MSBuild\bin\$(Configuration)\$(TargetFramework)\Microsoft.SqlServer.Dac.dll">
+      <PackagePath>tools/net46</PackagePath>
+    </Content>
+    <Content Include="..\Dibix.MSBuild\bin\$(Configuration)\$(TargetFramework)\Microsoft.SqlServer.Dac.Extensions.dll">
+      <PackagePath>tools/net46</PackagePath>
+    </Content>
+    <Content Include="..\Dibix.MSBuild\bin\$(Configuration)\$(TargetFramework)\Microsoft.SqlServer.TransactSql.ScriptDom.dll">
+      <PackagePath>tools/net46</PackagePath>
+    </Content>
+    <Content Include="..\Dibix.MSBuild\bin\$(Configuration)\$(TargetFramework)\Newtonsoft.Json.dll">
+      <PackagePath>tools/net46</PackagePath>
+    </Content>
+    <Content Include="..\Dibix.MSBuild\bin\$(Configuration)\$(TargetFramework)\Newtonsoft.Json.Schema.dll">
+      <PackagePath>tools/net46</PackagePath>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
@@ -33,10 +51,6 @@
 
   <ItemGroup>
     <Reference Include="System.ComponentModel.Composition" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Diagnostics\" />
   </ItemGroup>
   
 </Project>

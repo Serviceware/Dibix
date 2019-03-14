@@ -3,6 +3,6 @@
     internal static class Constants
     {
         public const string SdkAssemblyName = "Dibix.Sdk";
-        public const string SdkAdapterTypeName = "Dibix.Sdk.VisualStudioExtensionAdapter";
+        public const string SdkAdapterTypeName = "Dibix.Sdk.VisualStudio.VisualStudioExtensionAdapter";
     }
 }
