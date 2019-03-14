@@ -15,12 +15,18 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
     internal static class NamingConvention
     {
-        public static readonly string Table                = "hl*";
-        public static readonly string View                 = "hl*vw";
-        public static readonly string Type                 = "hl*";
-        public static readonly string Sequence             = "SEQ_hl*";
-        public static readonly string Procedure            = "hl*";
-        public static readonly string Function             = "hl*";
+#if HELPLINE
+        private const string Prefix = "hl";
+#else
+        private const string Prefix = "dbx";
+#endif
+
+        public static readonly string Table                = $"{Prefix}*";
+        public static readonly string View                 = $"{Prefix}*vw";
+        public static readonly string Type                 = $"{Prefix}*";
+        public static readonly string Sequence             = $"SEQ_{Prefix}*";
+        public static readonly string Procedure            = $"{Prefix}*";
+        public static readonly string Function             = $"{Prefix}*";
         public static readonly string PrimaryKeyConstraint = "PK_<tablename>";
       //public static readonly string ForeignKeyConstraint = "FK_<tablename>_<columnnames>";
         public static readonly string ForeignKeyConstraint = "FK_<tablename>_*";
