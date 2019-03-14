@@ -307,7 +307,9 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             UniqueConstraintDefinition primaryKeyConstraint = (UniqueConstraintDefinition)primaryKey.Definition;
 
             // If the PK is not the table's own key, and instead is a FK to a different table's key, no further analysis is needed
-            bool hasMatchingForeignKey = constraints.Where(x => x.Type == ConstraintType.ForeignKey).Any(x => AreEqual(primaryKey, x));
+            bool hasMatchingForeignKey = constraints.Where(x => x.Type == ConstraintType.ForeignKey)
+                                                    .Any(x => x.Columns.All(y => primaryKey.Columns.Any(z => y.Name == z.Name)));
+
             if (hasMatchingForeignKey)
                 return;
 
@@ -327,22 +329,6 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                     base.Fail(column.Hit, tableName, column.Name, sqlDataType.SqlDataTypeOption.ToString().ToUpperInvariant());
                 }
             }
-        }
-
-        private static bool AreEqual(Constraint uniqueConstraint, Constraint foreignKeyConstraint)
-        {
-            if (uniqueConstraint.Columns.Count != foreignKeyConstraint.Columns.Count)
-                return false;
-
-            for (int i = 0; i < uniqueConstraint.Columns.Count; i++)
-            {
-                string uniqueColumnName = uniqueConstraint.Columns[i].Name;
-                string foreignKeyColumnName = foreignKeyConstraint.Columns[i].Name;
-                if (uniqueColumnName != foreignKeyColumnName)
-                    return false;
-            }
-
-            return true;
         }
     }
 }
