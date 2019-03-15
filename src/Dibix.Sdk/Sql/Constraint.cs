@@ -24,8 +24,6 @@ namespace Dibix.Sdk.Sql
         {
             ConstraintType type;
             ICollection<ColumnReference> columns = new Collection<ColumnReference>();
-            if (column != null)
-                columns.Add(column);
 
             switch (definition)
             {
@@ -47,6 +45,7 @@ namespace Dibix.Sdk.Sql
                     type = ConstraintType.Default;
                     if (defaultConstraint.Column != null)
                         columns.Add(new ColumnReference(defaultConstraint.Column.Value, defaultConstraint.Column));
+
                     break;
 
                 case NullableConstraintDefinition nullableConstraint when nullableConstraint.ConstraintIdentifier != null:
@@ -59,6 +58,10 @@ namespace Dibix.Sdk.Sql
                 default:
                     throw new ArgumentOutOfRangeException(nameof(definition), definition, null);
             }
+
+            if (!columns.Any() && column != null)
+                columns.Add(column);
+
             return new Constraint(definition, type, columns);
         }
     }

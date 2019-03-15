@@ -795,8 +795,12 @@ namespace This.Is.A.Custom.Namespace
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[024] Surrogate keys are only allowed, if a business key is defined: dbx_codeanalysis_error_024_fail"
+    message="[024] Surrogate keys are only allowed, if a business key is defined: dbx_codeanalysis_error_024_fail1"
     line="3"
+    column="3" /&gt;
+  &lt;error
+    message="[024] Surrogate keys are only allowed, if a business key is defined: dbx_codeanalysis_error_024_fail2"
+    line="10"
     column="3" /&gt;
 &lt;/errors&gt;</value>
   </data>
