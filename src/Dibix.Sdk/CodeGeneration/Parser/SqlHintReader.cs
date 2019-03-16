@@ -24,13 +24,13 @@ namespace Dibix.Sdk.CodeGeneration
                 Group keyGroup = match.Groups[1];
                 Group singleValueGroup = match.Groups[2];
                 Group multiValueGroup = match.Groups[3];
-                int column;
+                int column = 1;
                 if (singleValueGroup.Success)
-                    column = singleValueGroup.Index;
+                    column += singleValueGroup.Index;
                 else if (multiValueGroup.Success)
-                    column = multiValueGroup.Index;
+                    column += multiValueGroup.Index;
                 else
-                    column = keyGroup.Index;
+                    column += keyGroup.Index;
 
                 SqlHint hint = new SqlHint(keyGroup.Value, token.Line, column);
                 if (singleValueGroup.Success)

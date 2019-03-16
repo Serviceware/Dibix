@@ -2,6 +2,6 @@
 {
     internal static class Constants
     {
-        public const string SdkAdapterTypeName = "Dibix.Sdk.MSBuild.MSBuildTaskAdapter";
+        public const string SdkAdapterNamespace = "Dibix.Sdk.MSBuild";
     }
 }

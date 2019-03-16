@@ -1,17 +1,41 @@
 <Project>
 
   <PropertyGroup>
-    <DibixToolPath Condition="$(DibixToolPath) == ''">$(MSBuildThisFileDirectory)..\tools\net46\Dibix.MSBuild.dll</DibixToolPath>
+    <DibixToolsDirectory Condition="$(DibixToolsDirectory) == ''">$(MSBuildThisFileDirectory)..\tools\net46\</DibixToolsDirectory>
+    <DibixBuildToolsPath>$(DibixToolsDirectory)Dibix.MSBuild.dll</DibixBuildToolsPath>
   </PropertyGroup>
 
-  <UsingTask TaskName="VerifyGeneratedCodeTask" AssemblyFile="$(DibixToolPath)" />
+  <UsingTask TaskName="CompileDatabaseAccessorTask" AssemblyFile="$(DibixBuildToolsPath)" />
+  <UsingTask TaskName="VerifyDatabaseAccessorTask" AssemblyFile="$(DibixBuildToolsPath)" />
 
-  <Target Name="VerifyGeneratedCodeBeforeBuild" BeforeTargets="PreBuildEvent">
-    <VerifyGeneratedCodeTask ProjectDirectory="$(MSBuildProjectDirectory)"
-                             Namespace="$(RootNamespace)"
-                             AssemblyReferences="@(Reference->'%(HintPath)')"
-                             Inputs="@(None)"
-                             Condition="%(None.Generator) == 'Dibix'" />
+  <Target Name="CompileDatabaseAccessor" AfterTargets="PostBuildEvent" Condition="$(ShouldCompileDatabaseAccessor) == 'true'">
+    <CompileDatabaseAccessorTask ProjectDirectory="$(MSBuildProjectDirectory)"
+                                 TargetDirectory="$(IntermediateOutputPath)"
+                                 Inputs="@(Build)"
+                                 ProbingDirectories="$(DibixProbingDirectories)">
+      <Output TaskParameter="OutputFilePath" PropertyName="DatabaseAccessorPath" />
+      <Output TaskParameter="ReferencePaths" PropertyName="DatabaseAccessorReferences" />
+    </CompileDatabaseAccessorTask>
+
+    <PropertyGroup>
+      <DatabaseAccessorReferences>
+        $(DibixToolsDirectory)Dibix.dll;
+        $(DatabaseAccessorReferences);
+      </DatabaseAccessorReferences>
+    </PropertyGroup>
+
+    <Csc TargetType="library"
+         Sources="$(DatabaseAccessorPath)"
+         References="$(DatabaseAccessorReferences)"
+         OutputAssembly="$(OutDir)$(MSBuildProjectName).Accessor.dll" />
+  </Target>
+
+  <Target Name="VerifyDatabaseAccessor" BeforeTargets="PreBuildEvent">
+    <VerifyDatabaseAccessorTask ProjectDirectory="$(MSBuildProjectDirectory)"
+                                Namespace="$(RootNamespace)"
+                                AssemblyReferences="@(Reference->'%(HintPath)')"
+                                Inputs="@(None)"
+                                Condition="%(None.Generator) == 'Dibix'" />
   </Target>
 
 </Project>
