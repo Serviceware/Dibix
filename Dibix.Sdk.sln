@@ -5,6 +5,7 @@ VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Sdk", "src\Dibix.Sdk\Dibix.Sdk.csproj", "{89046AEF-80E6-4E84-8BB3-19D344B587C0}"
 	ProjectSection(ProjectDependencies) = postProject
+		{C39FCD10-4874-4FC6-86A7-D35A1789DCD0} = {C39FCD10-4874-4FC6-86A7-D35A1789DCD0}
 		{85FA91DD-BAC5-4627-B1BE-C2A0D8506E62} = {85FA91DD-BAC5-4627-B1BE-C2A0D8506E62}
 	EndProjectSection
 EndProject
