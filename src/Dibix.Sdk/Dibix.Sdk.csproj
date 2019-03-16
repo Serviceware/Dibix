@@ -18,6 +18,9 @@
     <Content Include="..\..\build\Sdk.Targets">
       <PackagePath>build</PackagePath>
     </Content>
+    <Content Include="..\Dibix\bin\$(Configuration)\net451\Dibix.dll">
+      <PackagePath>tools/net46</PackagePath>
+    </Content>
     <Content Include="..\Dibix.MSBuild\bin\$(Configuration)\$(TargetFramework)\Dibix.MSBuild.dll">
       <PackagePath>tools/net46</PackagePath>
     </Content>
