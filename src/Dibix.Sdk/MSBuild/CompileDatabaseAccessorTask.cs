@@ -8,13 +8,24 @@ namespace Dibix.Sdk.MSBuild
 {
     public static class CompileDatabaseAccessorTask
     { 
-        public static bool Execute(string projectDirectory, string targetDirectory, IEnumerable<string> inputs, ICollection<string> probingDirectories, TaskLoggingHelper logger, out string outputFilePath, out ICollection<string> referencePaths)
+        public static bool Execute
+        (
+            string projectDirectory
+          , string @namespace
+          , string targetDirectory
+          , IEnumerable<string> inputs
+          , ICollection<string> probingDirectories
+          , bool isDML
+          , TaskLoggingHelper logger
+          , out string outputFilePath
+          , out ICollection<string> referencePaths
+        )
         {
             outputFilePath = Path.Combine(projectDirectory, targetDirectory, "SqlQueryAccessor.cs");
 
             ProbingAssemblyLocator assemblyLocator = new ProbingAssemblyLocator(probingDirectories ?? new string[0]);
             IErrorReporter errorReporter = new MSBuildErrorReporter(logger);
-            ICodeGenerationContext context = new GlobalCodeGenerationContext(projectDirectory, inputs ?? Enumerable.Empty<string>(), assemblyLocator, errorReporter);
+            ICodeGenerationContext context = new GlobalCodeGenerationContext(projectDirectory, @namespace, inputs ?? Enumerable.Empty<string>(), assemblyLocator, isDML, errorReporter);
             ICodeGenerator generator = new DaoCodeGenerator(context);
 
             string generated = generator.Generate();

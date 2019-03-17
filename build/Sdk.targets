@@ -1,6 +1,10 @@
 <Project>
 
   <PropertyGroup>
+    <!-- Suppress default DLL so we can use the same name -->
+    <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
+    <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
+
     <DibixToolsDirectory Condition="$(DibixToolsDirectory) == ''">$(MSBuildThisFileDirectory)..\tools\net46\</DibixToolsDirectory>
     <DibixBuildToolsPath>$(DibixToolsDirectory)Dibix.MSBuild.dll</DibixBuildToolsPath>
   </PropertyGroup>
@@ -10,24 +14,31 @@
 
   <Target Name="CompileDatabaseAccessor" AfterTargets="PostBuildEvent" Condition="$(ShouldCompileDatabaseAccessor) == 'true'">
     <CompileDatabaseAccessorTask ProjectDirectory="$(MSBuildProjectDirectory)"
+                                 Namespace="$(DatabaseAccessorNamespace)"
                                  TargetDirectory="$(IntermediateOutputPath)"
                                  Inputs="@(Build)"
-                                 ProbingDirectories="$(DibixProbingDirectories)">
+                                 ProbingDirectories="$(DibixProbingDirectories)"
+                                 IsDML="$(IsDMLProject)">
       <Output TaskParameter="OutputFilePath" PropertyName="DatabaseAccessorPath" />
       <Output TaskParameter="ReferencePaths" PropertyName="DatabaseAccessorReferences" />
     </CompileDatabaseAccessorTask>
 
     <PropertyGroup>
+      <DatabaseAccessorSources>
+        $(DatabaseAccessorPath);
+        $(DatabaseAccessorSources)
+      </DatabaseAccessorSources>
       <DatabaseAccessorReferences>
         $(DibixToolsDirectory)Dibix.dll;
-        $(DatabaseAccessorReferences);
+        $(DatabaseAccessorReferences)
       </DatabaseAccessorReferences>
     </PropertyGroup>
 
     <Csc TargetType="library"
-         Sources="$(DatabaseAccessorPath)"
+         Sources="$(DatabaseAccessorSources)"
          References="$(DatabaseAccessorReferences)"
-         OutputAssembly="$(OutDir)$(MSBuildProjectName).Accessor.dll" />
+         OutputAssembly="$(TargetPath)"
+         EmitDebugInformation="$(DebugSymbols)" />
   </Target>
 
   <Target Name="VerifyDatabaseAccessor" BeforeTargets="PreBuildEvent">

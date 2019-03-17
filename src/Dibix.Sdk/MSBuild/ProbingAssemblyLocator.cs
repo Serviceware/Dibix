@@ -15,7 +15,7 @@ namespace Dibix.Sdk.MSBuild
         public ProbingAssemblyLocator(ICollection<string> probingDirectories)
         {
             this._probingDirectories = probingDirectories;
-            this.ReferencePaths = new Collection<string>();
+            this.ReferencePaths = new HashSet<string>();
         }
 
         public bool TryGetAssemblyLocation(string assemblyName, out string path)
