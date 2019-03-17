@@ -15,7 +15,7 @@ namespace Dibix.Sdk.MSBuild
             ProbingAssemblyLocator assemblyLocator = new ProbingAssemblyLocator(probingDirectories ?? new string[0]);
             IErrorReporter errorReporter = new MSBuildErrorReporter(logger);
             ICodeGenerationContext context = new GlobalCodeGenerationContext(projectDirectory, inputs ?? Enumerable.Empty<string>(), assemblyLocator, errorReporter);
-            ICodeGenerator generator = new CodeGenerator(context);
+            ICodeGenerator generator = new DaoCodeGenerator(context);
 
             string generated = generator.Generate();
             if (!logger.HasLoggedErrors)

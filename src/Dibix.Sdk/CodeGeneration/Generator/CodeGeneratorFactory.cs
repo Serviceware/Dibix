@@ -10,7 +10,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public static ICodeGenerator Create(ICodeGenerationContext context)
         {
-            ICodeGenerator generator = new CodeGenerator(context);
+            ICodeGenerator generator = new DaoCodeGenerator(context);
             return generator;
         }
 
@@ -21,7 +21,7 @@ namespace Dibix.Sdk.CodeGeneration
             ITypeLoaderFacade typeLoaderFacade = new TypeLoaderFacade(typeLoader, assemblyLocator);
             IErrorReporter errorReporter = new TextTemplatingEngineErrorReporter(textTemplatingEngineHost);
             ICodeGenerationContext context = new TextTemplateCodeGenerationContext(configuration, typeLoaderFacade, errorReporter, textTemplatingEngineHost, serviceProvider);
-            ICodeGenerator generator = new CodeGenerator(context);
+            ICodeGenerator generator = new DaoCodeGenerator(context);
             return generator;
         }
 
@@ -34,7 +34,7 @@ namespace Dibix.Sdk.CodeGeneration
                 _errorReporter = new VisualStudioErrorReporter(serviceProvider);
 
             ICodeGenerationContext context = new CustomToolCodeGenerationContext(configuration, typeLoaderFacade, _errorReporter, inputFilePath, @namespace);
-            ICodeGenerator generator = new CodeGenerator(context);
+            ICodeGenerator generator = new DaoCodeGenerator(context);
             return generator;
         }
     }

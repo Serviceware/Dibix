@@ -4,14 +4,14 @@ using System.Linq;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class CodeGenerator : ICodeGenerator
+    internal sealed class DaoCodeGenerator : ICodeGenerator
     {
         #region Fields
         private readonly ICodeGenerationContext _context;
         #endregion
 
         #region Constructor
-        public CodeGenerator(ICodeGenerationContext context)
+        public DaoCodeGenerator(ICodeGenerationContext context)
         {
             this._context = context;
         }
