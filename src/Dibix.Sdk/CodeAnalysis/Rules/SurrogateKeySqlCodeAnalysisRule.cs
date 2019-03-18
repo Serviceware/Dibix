@@ -54,6 +54,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
           , "PK_hlbpmusecaseattributedef(usecaseattributedefid)"
           , "PK_hlbpmusecasename(usecasenameid)"
           , "PK_hlbpmusecaseparameter(usecaseparameterid)"
+          , "PK_hlbpmusecaseresponseparameters(usecaseresponseparameterid)"
           , "PK_hlbpmversionchangelogitem(versionchangelogitemid)"
           , "PK_hlcmhypermedialinks(id)"
           , "PK_hlcmstartcontent(id)"

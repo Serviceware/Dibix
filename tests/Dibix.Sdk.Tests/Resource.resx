@@ -804,6 +804,15 @@ namespace This.Is.A.Custom.Namespace
     column="3" /&gt;
 &lt;/errors&gt;</value>
   </data>
+  <data name="TableConstraintSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="[029] The constraint 'PK_dbx_codeanalysis_error_029_table_fail_id' should be defined on the table, instead of the column 'name'"
+    line="13"
+    column="5" /&gt;
+&lt;/errors&gt;</value>
+  </data>
   <data name="TemporaryTableSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;

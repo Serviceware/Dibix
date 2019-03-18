@@ -87,5 +87,8 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
 
         [Fact]
         public void DateTimeSqlCodeAnalysisRule() => base.Execute();
+
+        [Fact]
+        public void TableConstraintSqlCodeAnalysisRule() => base.Execute();
     }
 }
