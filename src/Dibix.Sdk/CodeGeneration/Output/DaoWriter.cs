@@ -37,7 +37,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             // Class
             string generatedCodeAnnotation = $"{generatedCodeAttributeType.Name}(\"{GeneratorName}\", \"{Version}\")";
-            CSharpClass @class = output.AddClass(className, CSharpModifiers.Public | CSharpModifiers.Static, generatedCodeAnnotation);
+            CSharpClass @class = output.AddClass(className, CSharpModifiers.Internal | CSharpModifiers.Static, generatedCodeAnnotation);
 
             // Command text constants
             AddCommandTextConstants(@class, statements, formatting);

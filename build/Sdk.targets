@@ -20,7 +20,7 @@
                                  ProbingDirectories="$(DibixProbingDirectories)"
                                  IsDML="$(IsDMLProject)">
       <Output TaskParameter="OutputFilePath" PropertyName="DatabaseAccessorPath" />
-      <Output TaskParameter="ReferencePaths" PropertyName="DatabaseAccessorReferences" />
+      <Output TaskParameter="ReferencePaths" PropertyName="DetectedDatabaseAccessorReferences" />
     </CompileDatabaseAccessorTask>
 
     <PropertyGroup>
@@ -30,7 +30,8 @@
       </DatabaseAccessorSources>
       <DatabaseAccessorReferences>
         $(DibixToolsDirectory)Dibix.dll;
-        $(DatabaseAccessorReferences)
+        $(DatabaseAccessorReferences);
+        $(DetectedDatabaseAccessorReferences)
       </DatabaseAccessorReferences>
     </PropertyGroup>
 
