@@ -12,9 +12,7 @@ namespace Dibix.Sdk.CodeGeneration
             info.CommandType = CommandType.StoredProcedure;
 
             StringBuilder sb = new StringBuilder();
-            sb.Append("[dbo].[")
-              .Append(info.ProcedureName)
-              .Append(']');
+            sb.Append(info.ProcedureName);
 
             if (info.Parameters.Any())
             {

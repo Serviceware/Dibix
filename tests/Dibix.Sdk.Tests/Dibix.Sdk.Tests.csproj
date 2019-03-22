@@ -111,6 +111,6 @@
   <PropertyGroup>
     <DibixToolsDirectory>..\src\Dibix.MSBuild\bin\$(Configuration)\$(TargetFramework)\</DibixToolsDirectory>
   </PropertyGroup>
-  <Import Project="..\..\build\Sdk.targets" />
+  <!--<Import Project="..\..\build\Sdk.targets" />-->
 
 </Project>

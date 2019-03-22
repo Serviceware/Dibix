@@ -26,7 +26,7 @@ namespace This.Is.A.Custom.Namespace
         public const string dbx_tests_sources_externalspCommandText = @"[dbo].[dbx_tests_externalsp]";
 
         // DeleteProject
-        public const string DeleteProjectCommandText = @"[dbo].[delete_project]";
+        public const string DeleteProjectCommandText = @"[catalog].[delete_project]";
 
         public static int dbx_tests_sources_includednested(this IDatabaseAccessorFactory databaseAccessorFactory)
         {

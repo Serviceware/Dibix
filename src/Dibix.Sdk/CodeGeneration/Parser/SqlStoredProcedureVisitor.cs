@@ -1,4 +1,6 @@
-﻿using Microsoft.SqlServer.TransactSql.ScriptDom;
+﻿using System;
+using System.Linq;
+using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -6,7 +8,7 @@ namespace Dibix.Sdk.CodeGeneration
     {
         public override void ExplicitVisit(CreateProcedureStatement node)
         {
-            base.Target.ProcedureName = node.ProcedureReference.Name.BaseIdentifier.Value;
+            base.Target.ProcedureName = String.Join(".", node.ProcedureReference.Name.Identifiers.Select(x => Identifier.EncodeIdentifier(x.Value)));
             this.ParseContent(node, node.StatementList);
 
             base.ExplicitVisit(node);
