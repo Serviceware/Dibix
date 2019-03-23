@@ -17,8 +17,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         // helpLine suppressions
         private static readonly HashSet<string> Workarounds = new HashSet<string>
         {
-            "PK_hlbitomattribute(AttributeConfigId)"
-          , "PK_hlbitomtable(TableId)"
+            "PK_hlbitomattribute(attributeconfigid)"
+          , "PK_hlbitomtable(tableid)"
           , "PK_hlbpmattributedefobjectdef(attributedefobjectdefid)"
           , "PK_hlbpmattributedefobjectdefattribute(attributedefobjectdefattributeid)"
           , "PK_hlbpmautomatedtask(automatedtaskid)"
@@ -70,14 +70,14 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
           , "PK_hlsysslmcntragrmchangeadhoc(id)"
           , "PK_hlsysslmcntragrmchangewf(id)"
           , "PK_hlsystablecfg(tablecfgid)"
-          , "PK_hlsysworkeffort(Id)"
-          , "PK_hlsysworkeffortassociation(Id)"
-          , "PK_hlsysworkeffortpurpose(Id)"
-          , "PK_hlsysworkeffortstatus(Id)"
-          , "PK_hlsyswrkeffortpriority(Id)"
-          , "PK_hlsyswrkeffrtciassgnmnts(Id)"
-          , "PK_hlsyswrkeffrtprtyrle(Id)"
-          , "PK_hlsyswrkeffrt_location(Id)"
+          , "PK_hlsysworkeffort(id)"
+          , "PK_hlsysworkeffortassociation(id)"
+          , "PK_hlsysworkeffortpurpose(id)"
+          , "PK_hlsysworkeffortstatus(id)"
+          , "PK_hlsyswrkeffortpriority(id)"
+          , "PK_hlsyswrkeffrtciassgnmnts(id)"
+          , "PK_hlsyswrkeffrtprtyrle(id)"
+          , "PK_hlsyswrkeffrt_location(id)"
           , "PK_hltmtablecfg(tablecfgid)"
           , "PK_hltmtablecfgcolumn(tablecfgcolumnid)"
           , "PK_hltmtablecfgextcolumn(tablecfgcolumnid)"
@@ -134,4 +134,3 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         }
     }
 }
- 

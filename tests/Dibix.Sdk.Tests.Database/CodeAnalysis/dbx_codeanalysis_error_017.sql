@@ -11,7 +11,8 @@ AS
 
 	CREATE TABLE [dbo].[dbx_codeanalysis_error_017_fail]
 	(
-		[id] INT CONSTRAINT [DF_dbx_codeanalysis_error_017_fail_idx] DEFAULT (1)
+		[Id] INT CONSTRAINT [DF_dbx_codeanalysis_error_017_fail_idx] DEFAULT (1)
+	  ,	[column_x] INT
 	  , CONSTRAINT [PK_dbx_codeanalysis_error_017_failx] PRIMARY KEY ([id])
 	--, CONSTRAINT [FK_dbx_codeanalysis_error_017_fail_idx] FOREIGN KEY ([id]) REFERENCES [dbo].[dbx_table] ([id])
 	  , CONSTRAINT [FK_dbx_codeanalysis_error_017_failx_id] FOREIGN KEY ([id]) REFERENCES [dbo].[dbx_table] ([id])

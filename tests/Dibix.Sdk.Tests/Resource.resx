@@ -294,20 +294,28 @@
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[017] Primary key constraint 'PK_dbx_codeanalysis_error_017_failx' does not match naming convention 'PK_&amp;lt;tablename&amp;gt;'. Also make sure the name is all lowercase."
+    message="[017] Column names should be lowercase and contain only characters of the alphabet: dbx_codeanalysis_error_017_fail.Id"
+    line="14"
+    column="3" /&gt;
+  &lt;error
+    message="[017] Column names should be lowercase and contain only characters of the alphabet: dbx_codeanalysis_error_017_fail.column_x"
     line="15"
+    column="6" /&gt;
+  &lt;error
+    message="[017] Primary key constraint 'PK_dbx_codeanalysis_error_017_failx' does not match naming convention 'PK_&amp;lt;tablename&amp;gt;'. Also make sure the name is all lowercase."
+    line="16"
     column="17" /&gt;
   &lt;error
     message="[017] Foreign key constraint 'FK_dbx_codeanalysis_error_017_failx_id' does not match naming convention 'FK_&amp;lt;tablename&amp;gt;_*'. Also make sure the name is all lowercase."
-    line="17"
-    column="17" /&gt;
-  &lt;error
-    message="[017] Check constraint 'CK_dbx_codeanalysis_error_017_failx_abc' does not match naming convention 'CK_&amp;lt;tablename&amp;gt;_*'. Also make sure the name is all lowercase."
     line="18"
     column="17" /&gt;
   &lt;error
+    message="[017] Check constraint 'CK_dbx_codeanalysis_error_017_failx_abc' does not match naming convention 'CK_&amp;lt;tablename&amp;gt;_*'. Also make sure the name is all lowercase."
+    line="19"
+    column="17" /&gt;
+  &lt;error
     message="[017] Unique constraint 'UQ_dbx_codeanalysis_error_017_failx_id' does not match naming convention 'UQ_&amp;lt;tablename&amp;gt;_*'. Also make sure the name is all lowercase."
-    line="20"
+    line="21"
     column="17" /&gt;
   &lt;error
     message="[017] Default constraint 'DF_dbx_codeanalysis_error_017_fail_idx' does not match naming convention 'DF_&amp;lt;tablename&amp;gt;_&amp;lt;columnname&amp;gt;'. Also make sure the name is all lowercase."
@@ -315,11 +323,11 @@
     column="23" /&gt;
   &lt;error
     message="[017] Index 'IX_dbx_codeanalysis_error_017_successx_fail' does not match naming convention 'IX_&amp;lt;tablename&amp;gt;_*'. Also make sure the name is all lowercase."
-    line="24"
+    line="25"
     column="28" /&gt;
   &lt;error
     message="[017] Unique constraint 'UQ_dbx_codeanalysis_error_017_successx_fail' does not match naming convention 'UQ_&amp;lt;tablename&amp;gt;_*'. Also make sure the name is all lowercase."
-    line="27"
+    line="28"
     column="35" /&gt;
 &lt;/errors&gt;</value>
   </data>
