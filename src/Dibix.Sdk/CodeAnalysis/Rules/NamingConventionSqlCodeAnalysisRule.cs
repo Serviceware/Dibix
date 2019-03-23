@@ -54,7 +54,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         };
         private static readonly HashSet<string> ColumnWorkarounds = new HashSet<string>
         {
-            "hlsysdxirun#sys_serverexecutionid"
+            "BlobDetail#blobmeta_identifier"
+          , "hlsysdxirun#sys_serverexecutionid"
           , "hlsysdxirun#sys_executioninstanceguid"
           , "hlsysdxirun#sys_packagename"
           , "hlsysdxirun#sys_taskname"

@@ -1,4 +1,4 @@
-<Project>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
     <!-- Suppress default DLL so we can use the same name -->
@@ -9,8 +9,14 @@
     <DibixBuildToolsPath>$(DibixToolsDirectory)Dibix.MSBuild.dll</DibixBuildToolsPath>
   </PropertyGroup>
 
+  <UsingTask TaskName="SqlCodeAnalysisTask" AssemblyFile="$(DibixBuildToolsPath)" />
   <UsingTask TaskName="CompileDatabaseAccessorTask" AssemblyFile="$(DibixBuildToolsPath)" />
   <UsingTask TaskName="VerifyDatabaseAccessorTask" AssemblyFile="$(DibixBuildToolsPath)" />
+
+  <Target Name="SqlCodeAnalysis" BeforeTargets="PreBuildEvent">
+    <SqlCodeAnalysisTask ProjectDirectory="$(MSBuildProjectDirectory)"
+                         Inputs="@(Build)" />
+  </Target>
 
   <Target Name="CompileDatabaseAccessor" AfterTargets="PostBuildEvent" Condition="$(ShouldCompileDatabaseAccessor) == 'true'">
     <CompileDatabaseAccessorTask ProjectDirectory="$(MSBuildProjectDirectory)"
