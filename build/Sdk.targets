@@ -15,6 +15,7 @@
 
   <Target Name="SqlCodeAnalysis" BeforeTargets="BeforeBuild">
     <SqlCodeAnalysisTask ProjectDirectory="$(MSBuildProjectDirectory)"
+                         ProbingDirectory="$(SqlServerRedistPath)"
                          Inputs="@(Build)" />
   </Target>
 
