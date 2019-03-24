@@ -1,4 +1,6 @@
-﻿using Dibix.Sdk.CodeGeneration;
+﻿using System;
+using System.CodeDom.Compiler;
+using Dibix.Sdk.CodeGeneration;
 using Microsoft.VisualStudio.TextTemplating;
 
 namespace Dibix.Sdk.VisualStudio
@@ -19,6 +21,12 @@ namespace Dibix.Sdk.VisualStudio
         #region Overrides
         public override bool ReportErrors()
         {
+            foreach (CompilerError error in base.Errors)
+            {
+                // Apparently errors are reported with distinct description, even though a different position is supplied
+                // To make it work we append the position to the message
+                error.ErrorText = String.Concat(error.ErrorText, ZeroWidthUtility.MaskText($" ({error.Line},{error.Column})"));
+            }
             this._textTemplatingEngineHost.LogErrors(base.Errors);
             return base.HasErrors;
         }

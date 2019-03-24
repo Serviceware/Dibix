@@ -13,7 +13,7 @@
   <UsingTask TaskName="CompileDatabaseAccessorTask" AssemblyFile="$(DibixBuildToolsPath)" />
   <UsingTask TaskName="VerifyDatabaseAccessorTask" AssemblyFile="$(DibixBuildToolsPath)" />
 
-  <Target Name="SqlCodeAnalysis" BeforeTargets="PreBuildEvent">
+  <Target Name="SqlCodeAnalysis" BeforeTargets="BeforeBuild">
     <SqlCodeAnalysisTask ProjectDirectory="$(MSBuildProjectDirectory)"
                          Inputs="@(Build)" />
   </Target>
