@@ -9,13 +9,46 @@ namespace Dibix.Dapper.Tests
     public class DapperDatabaseAccessorTest
     {
         [Fact]
-        public void ExecuteScalar_ReturnsScalarResult()
+        public void ExecutePrimitive_ReturnsResult()
         {
             using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
             {
                 const string commandText = @"SELECT 1";
-                byte result = accessor.ExecuteScalar<byte>(commandText);
+                byte result = accessor.ExecutePrimitive<byte>(commandText);
                 Assert.Equal((byte)1, result);
+            }
+        }
+     
+        [Fact]
+        public void ExecutePrimitive_ReturnsNull_ThrowsException()
+        {
+            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
+            {
+                const string commandText = @"SELECT 1 WHERE 1 = 2";
+                InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => accessor.ExecutePrimitive<byte>(commandText));
+                Assert.Equal("A scalar value was expected, but the query did not return a result", exception.Message);
+            }
+        }
+
+        [Fact]
+        public void ExecutePrimitiveOrDefault_ReturnsResult()
+        {
+            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
+            {
+                const string commandText = @"SELECT 1";
+                byte result = accessor.ExecutePrimitiveOrDefault<byte>(commandText);
+                Assert.Equal((byte)1, result);
+            }
+        }
+     
+        [Fact]
+        public void ExecutePrimitiveOrDefault_ReturnsNull()
+        {
+            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
+            {
+                const string commandText = @"SELECT 1 WHERE 1 = 2";
+                byte result = accessor.ExecutePrimitiveOrDefault<byte>(commandText);
+                Assert.Equal(default, result);
             }
         }
 
@@ -240,7 +273,7 @@ FROM @values";
                 const string commandText = @"SELECT [stringvalue]
 FROM @values";
 
-                string result = accessor.ExecuteScalar<string>(commandText, x => x.SetStructured("values", new StructuredType_String_Custom { { "abc" } }));
+                string result = accessor.ExecutePrimitive<string>(commandText, x => x.SetStructured("values", new StructuredType_String_Custom { { "abc" } }));
                 Assert.Equal("a", result);
             }
         }
@@ -253,7 +286,7 @@ FROM @values";
                 const string commandText = @"SELECT [decimalvalue]
 FROM @values";
 
-                decimal result = accessor.ExecuteScalar<decimal>(commandText, x => x.SetStructured("values", new StructuredType_Decimal_Custom { { 3.975M } }));
+                decimal result = accessor.ExecutePrimitive<decimal>(commandText, x => x.SetStructured("values", new StructuredType_Decimal_Custom { { 3.975M } }));
                 Assert.Equal(4M, result);
             }
         }

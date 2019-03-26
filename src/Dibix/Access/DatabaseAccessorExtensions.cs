@@ -33,30 +33,56 @@ namespace Dibix
             return accessor.Execute(sql, CommandType.Text, parameters);
         }
 
-        public static T ExecuteScalar<T>(this IDatabaseAccessor accessor, string sql)
+        public static T ExecutePrimitive<T>(this IDatabaseAccessor accessor, string sql)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.ExecuteScalar<T>(sql, CommandType.Text, EmptyParameters.Instance);
+            return accessor.ExecutePrimitive<T>(sql, CommandType.Text, EmptyParameters.Instance);
         }
-        public static T ExecuteScalar<T>(this IDatabaseAccessor accessor, string sql, CommandType commandType)
+        public static T ExecutePrimitive<T>(this IDatabaseAccessor accessor, string sql, CommandType commandType)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.ExecuteScalar<T>(sql, commandType, EmptyParameters.Instance);
+            return accessor.ExecutePrimitive<T>(sql, commandType, EmptyParameters.Instance);
         }
-        public static T ExecuteScalar<T>(this IDatabaseAccessor accessor, string sql, Action<IParameterBuilder> configureParameters)
+        public static T ExecutePrimitive<T>(this IDatabaseAccessor accessor, string sql, Action<IParameterBuilder> configureParameters)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.ExecuteScalar<T>(sql, CommandType.Text, configureParameters.Build());
+            return accessor.ExecutePrimitive<T>(sql, CommandType.Text, configureParameters.Build());
         }
-        public static T ExecuteScalar<T>(this IDatabaseAccessor accessor, string sql, CommandType commandType, Action<IParameterBuilder> configureParameters)
+        public static T ExecutePrimitive<T>(this IDatabaseAccessor accessor, string sql, CommandType commandType, Action<IParameterBuilder> configureParameters)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.ExecuteScalar<T>(sql, commandType, configureParameters.Build());
+            return accessor.ExecutePrimitive<T>(sql, commandType, configureParameters.Build());
         }
-        public static T ExecuteScalar<T>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters)
+        public static T ExecutePrimitive<T>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.ExecuteScalar<T>(sql, CommandType.Text, parameters);
+            return accessor.ExecutePrimitive<T>(sql, CommandType.Text, parameters);
+        }
+
+        public static T ExecutePrimitiveOrDefault<T>(this IDatabaseAccessor accessor, string sql)
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
+            return accessor.ExecutePrimitiveOrDefault<T>(sql, CommandType.Text, EmptyParameters.Instance);
+        }
+        public static T ExecutePrimitiveOrDefault<T>(this IDatabaseAccessor accessor, string sql, CommandType commandType)
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
+            return accessor.ExecutePrimitiveOrDefault<T>(sql, commandType, EmptyParameters.Instance);
+        }
+        public static T ExecutePrimitiveOrDefault<T>(this IDatabaseAccessor accessor, string sql, Action<IParameterBuilder> configureParameters)
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
+            return accessor.ExecutePrimitiveOrDefault<T>(sql, CommandType.Text, configureParameters.Build());
+        }
+        public static T ExecutePrimitiveOrDefault<T>(this IDatabaseAccessor accessor, string sql, CommandType commandType, Action<IParameterBuilder> configureParameters)
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
+            return accessor.ExecutePrimitiveOrDefault<T>(sql, commandType, configureParameters.Build());
+        }
+        public static T ExecutePrimitiveOrDefault<T>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters)
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
+            return accessor.ExecutePrimitiveOrDefault<T>(sql, CommandType.Text, parameters);
         }
 
         public static IEnumerable<T> QueryMany<T>(this IDatabaseAccessor accessor, string sql)

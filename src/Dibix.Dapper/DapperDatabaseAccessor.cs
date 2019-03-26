@@ -16,7 +16,7 @@ namespace Dibix.Dapper
 
         #region Constructor
         public DapperDatabaseAccessor(DbConnection connection, DapperMappingBehavior mappingBehavior) : this(connection, mappingBehavior, null) { }
-        public DapperDatabaseAccessor(DbConnection connection, DapperMappingBehavior mappingBehavior, Action onDispose) 
+        public DapperDatabaseAccessor(DbConnection connection, DapperMappingBehavior mappingBehavior, Action onDispose)
         {
             this._connection = connection;
             this._mappingCheck = DetermineMappingCheck(mappingBehavior);
@@ -35,9 +35,17 @@ namespace Dibix.Dapper
             return this._connection.Execute(sql, parameters.AsDapperParams(), commandType: commandType);
         }
 
-        public T ExecuteScalar<T>(string sql, CommandType commandType, IParametersVisitor parameters)
+        public T ExecutePrimitive<T>(string sql, CommandType commandType, IParametersVisitor parameters)
         {
-            this._mappingCheck.Check<T>();
+            object result = this._connection.ExecuteScalar(sql, parameters.AsDapperParams(), commandType: commandType);
+            if (result == null)
+                throw new InvalidOperationException("A scalar value was expected, but the query did not return a result");
+
+            return (T)Convert.ChangeType(result, typeof(T));
+        }
+
+        public T ExecutePrimitiveOrDefault<T>(string sql, CommandType commandType, IParametersVisitor parameters)
+        {
             return this._connection.ExecuteScalar<T>(sql, parameters.AsDapperParams(), commandType: commandType);
         }
 

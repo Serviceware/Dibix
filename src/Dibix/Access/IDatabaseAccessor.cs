@@ -8,7 +8,8 @@ namespace Dibix
     {
         IParameterBuilder Parameters();
         int Execute(string sql, CommandType commandType, IParametersVisitor parameters);
-        T ExecuteScalar<T>(string sql, CommandType commandType, IParametersVisitor parameters);
+        T ExecutePrimitive<T>(string sql, CommandType commandType, IParametersVisitor parameters);
+        T ExecutePrimitiveOrDefault<T>(string sql, CommandType commandType, IParametersVisitor parameters);
         IEnumerable<T> QueryMany<T>(string sql, CommandType commandType, IParametersVisitor parameters);
         IEnumerable<TReturn> QueryMany<TFirst, TSecond, TReturn>(string sql, CommandType commandType, IParametersVisitor parameters, Func<TFirst, TSecond, TReturn> map, string splitOn);
         IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TReturn>(string sql, CommandType commandType, IParametersVisitor parameters, Func<TFirst, TSecond, TThird, TReturn> map, string splitOn);
