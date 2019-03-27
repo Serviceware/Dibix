@@ -16,7 +16,7 @@
   <Target Name="SqlCodeAnalysis" BeforeTargets="BeforeBuild">
     <SqlCodeAnalysisTask ProjectDirectory="$(MSBuildProjectDirectory)"
                          ProbingDirectory="$(SqlServerRedistPath)"
-                         Inputs="@(Build)" />
+                         Inputs="@(Build->'$(FullPath)'" />
   </Target>
 
   <Target Name="CompileDatabaseAccessor" AfterTargets="PostBuildEvent" Condition="$(ShouldCompileDatabaseAccessor) == 'true'">

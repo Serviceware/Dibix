@@ -11,14 +11,14 @@ namespace Dibix.Sdk.MSBuild
 {
     public static class SqlCodeAnalysisTask
     { 
-        public static bool Execute(string projectDirectory, IEnumerable<string> inputs, TaskLoggingHelper logger)
+        public static bool Execute(IEnumerable<string> inputs, TaskLoggingHelper logger)
         {
             Stopwatch sw = Stopwatch.StartNew();
             try
             {
                 IErrorReporter errorReporter = new MSBuildErrorReporter(logger);
                 ISqlCodeAnalysisRuleEngine codeAnalysis = new SqlCodeAnalysisRuleEngine();
-                foreach (string inputFilePath in (inputs ?? Enumerable.Empty<string>()).Select(x => Path.GetFullPath(Path.Combine(projectDirectory, x))))
+                foreach (string inputFilePath in inputs ?? Enumerable.Empty<string>())
                 {
                     TSqlParser parser = new TSql140Parser(true);
                     using (Stream stream = File.OpenRead(inputFilePath))
