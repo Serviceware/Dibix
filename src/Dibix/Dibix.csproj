@@ -6,6 +6,33 @@
     <TargetFrameworks>netstandard1.2;net451</TargetFrameworks>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Update="Access\DatabaseAccessorExtensions.Execute.cs">
+      <DependentUpon>Access\DatabaseAccessorExtensions.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Access\DatabaseAccessorExtensions.ExecutePrimitive.cs">
+      <DependentUpon>Access\DatabaseAccessorExtensions.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Access\DatabaseAccessorExtensions.ExecutePrimitiveOrDefault.cs">
+      <DependentUpon>Access\DatabaseAccessorExtensions.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Access\DatabaseAccessorExtensions.GridReader.cs">
+      <DependentUpon>Access\DatabaseAccessorExtensions.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Access\DatabaseAccessorExtensions.QueryMany.cs">
+      <DependentUpon>Access\DatabaseAccessorExtensions.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Access\DatabaseAccessorExtensions.QueryMultiple.cs">
+      <DependentUpon>Access\DatabaseAccessorExtensions.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Access\DatabaseAccessorExtensions.QuerySingle.cs">
+      <DependentUpon>Access\DatabaseAccessorExtensions.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Access\DatabaseAccessorExtensions.QuerySingleOrDefault.cs">
+      <DependentUpon>Access\DatabaseAccessorExtensions.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.2'">
     <PackageReference Include="System.Reflection" Version="$(ReflectionVersion)" />
     <PackageReference Include="System.Data.SqlClient" Version="$(SqlClientVersion)" />
