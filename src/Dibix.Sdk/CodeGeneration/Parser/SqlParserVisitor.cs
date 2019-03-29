@@ -27,10 +27,18 @@ namespace Dibix.Sdk.CodeGeneration
             this.ParseBody(statements ?? new StatementList());
         }
 
-        protected internal void ParseParameter(DeclareVariableElement node)
+        protected internal void ParseParameter(ProcedureParameter node)
         {
+            string parameterName = node.VariableName.Value.TrimStart('@');
+
+            if (node.Modifier == ParameterModifier.Output)
+            {
+                this.ErrorReporter.RegisterError(this.Target.Source, node.StartLine, node.StartColumn, null, $"Output parameters are not supported: {parameterName}");
+                return;
+            }
+
             // Determine parameter type
-            SqlQueryParameter parameter = new SqlQueryParameter { Name = node.VariableName.Value.TrimStart('@') };
+            SqlQueryParameter parameter = new SqlQueryParameter { Name = parameterName };
 
             // Parse type name hint
             int startIndex = node.FirstTokenIndex;
