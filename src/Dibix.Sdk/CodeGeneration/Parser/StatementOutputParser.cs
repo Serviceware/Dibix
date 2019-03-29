@@ -43,7 +43,14 @@ namespace Dibix.Sdk.CodeGeneration
                     yield break;
 
                 string[] typeNames = typeNamesStr.Split(';');
-                SqlQueryResultMode resultMode = returnHint.SelectValueOrDefault(ReturnHintMode, x => (SqlQueryResultMode)Enum.Parse(typeof(SqlQueryResultMode), x));
+                string resultModeStr = returnHint.SelectValueOrDefault(ReturnHintMode);
+                SqlQueryResultMode resultMode = SqlQueryResultMode.Many;
+                if (resultModeStr != null && !Enum.TryParse(resultModeStr, out resultMode))
+                {
+                    errorReporter.RegisterError(target.Source, node.StartLine, node.StartColumn, null, $"Result mode not supported: {resultModeStr}");
+                    yield break;
+                }
+
                 string resultName = returnHint.SelectValueOrDefault(ReturnHintResultName);
                 string converter = returnHint.SelectValueOrDefault(ReturnHintConverter);
                 string splitOn = returnHint.SelectValueOrDefault(ReturnHintSplitOn);
@@ -118,12 +125,29 @@ namespace Dibix.Sdk.CodeGeneration
                 TypeInfo returnType = returnTypes[i];
                 ICollection<OutputColumnResult> columnGroup = columnGroups[i];
 
-                bool singleColumn = columnGroup.Count == 1;
-                bool scalarResult = result.ResultMode == SqlQueryResultMode.Scalar || returnType.IsPrimitiveType;
+                // Use Primitive instead of Single
+                bool isGridResult = numberOfReturnHints > 1; // Scalar using grid reader is not possible
+                bool isSingleRowResult = result.ResultMode == SqlQueryResultMode.Single
+                                      || result.ResultMode == SqlQueryResultMode.SingleOrDefault;
+                if (!isGridResult && isSingleRowResult && returnType.IsPrimitiveType)
+                {
+                    errorReporter.RegisterError(sourcePath, returnHint.Line, returnHint.Column, null, "For single primitive results Mode:Primitive or Mode:PrimitiveOrDefault should be specified to avoid the use of a data reader");
+                    continue;
+                }
 
-                // SELECT 1 => Query<int>/ExecuteScalar => No entity property validation + No missing alias validation
-                if (singleColumn && scalarResult)
-                    return;
+                // Use Primitive only for primitive results
+                bool singleColumn = columnGroup.Count == 1;
+                bool isPrimitiveResult = result.ResultMode == SqlQueryResultMode.Primitive
+                                      || result.ResultMode == SqlQueryResultMode.PrimitiveOrDefault;
+                if (isPrimitiveResult && !returnType.IsPrimitiveType)
+                {
+                    errorReporter.RegisterError(sourcePath, returnHint.Line, returnHint.Column, null, "Mode:Primitive or Mode:PrimitiveOrDefault should only be used for primitive return types");
+                    continue;
+                }
+
+                // SELECT 1 => Query<int>/ExecutePrimitive => No entity property validation + No missing alias validation
+                if (singleColumn)
+                    continue;
 
                 foreach (OutputColumnResult columnResult in columnGroup)
                 {

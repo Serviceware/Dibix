@@ -2,8 +2,10 @@
 {
     public enum SqlQueryResultMode
     {
+        None,
         Many,
-        Scalar,
+        Primitive,
+        PrimitiveOrDefault,
         First,
         FirstOrDefault,
         Single,

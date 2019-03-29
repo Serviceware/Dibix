@@ -166,7 +166,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static string DetermineResultTypeName(SqlStatementInfo query)
         {
-            if (query.Results.Count == 0) // Execute/ExecuteScalar.
+            if (query.Results.Count == 0) // Execute/ExecutePrimitive.
             {
                 return typeof(int).ToCSharpTypeName();
             }
@@ -266,7 +266,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static void WriteExecutor(StringWriter writer, SqlStatementInfo query)
         {
-            if (query.Results.Count == 0) // Execute/ExecuteScalar.
+            if (query.Results.Count == 0) // Execute/ExecutePrimitive.
             {
                 WriteNoResult(writer, query);
             }
@@ -415,7 +415,8 @@ namespace Dibix.Sdk.CodeGeneration
             switch (mode)
             {
                 case SqlQueryResultMode.Many: return "QueryMany";
-                case SqlQueryResultMode.Scalar: return "ExecuteScalar";
+                case SqlQueryResultMode.Primitive: return "ExecutePrimitive";
+                case SqlQueryResultMode.PrimitiveOrDefault: return "ExecutePrimitiveOrDefault";
                 case SqlQueryResultMode.First: return "QueryFirst";
                 case SqlQueryResultMode.FirstOrDefault: return "QueryFirstOrDefault";
                 case SqlQueryResultMode.Single: return "QuerySingle";
