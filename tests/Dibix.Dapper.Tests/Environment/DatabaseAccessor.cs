@@ -41,7 +41,7 @@ END";
                 command.ExecuteNonQuery();
             }
 
-            return new DapperDatabaseAccessor(connection, DapperMappingBehavior.Strict);
+            return new DapperDatabaseAccessor(connection);
         }
     }
 }

@@ -15,8 +15,9 @@ namespace Dibix.Dapper
         #endregion
 
         #region Constructor
-        public DapperDatabaseAccessor(DbConnection connection, DapperMappingBehavior mappingBehavior) : this(connection, mappingBehavior, null) { }
-        public DapperDatabaseAccessor(DbConnection connection, DapperMappingBehavior mappingBehavior, Action onDispose)
+        public DapperDatabaseAccessor(DbConnection connection) : this(connection, DapperMappingBehavior.Strict, null) { }
+        public DapperDatabaseAccessor(DbConnection connection, Action onDispose) : this(connection, DapperMappingBehavior.Strict, onDispose) { }
+        private DapperDatabaseAccessor(DbConnection connection, DapperMappingBehavior mappingBehavior, Action onDispose)
         {
             this._connection = connection;
             this._mappingCheck = DetermineMappingCheck(mappingBehavior);
