@@ -7,6 +7,7 @@
 
     <DibixToolsDirectory Condition="$(DibixToolsDirectory) == ''">$(MSBuildThisFileDirectory)..\tools\net46\</DibixToolsDirectory>
     <DibixBuildToolsPath>$(DibixToolsDirectory)Dibix.MSBuild.dll</DibixBuildToolsPath>
+    <DibixSdkPath>$(MSBuildThisFileDirectory)..\lib\net46\Dibix.Sdk.dll</DibixSdkPath>
   </PropertyGroup>
 
   <UsingTask TaskName="SqlCodeAnalysisTask" AssemblyFile="$(DibixBuildToolsPath)" />
@@ -14,13 +15,14 @@
   <UsingTask TaskName="VerifyDatabaseAccessorTask" AssemblyFile="$(DibixBuildToolsPath)" />
 
   <Target Name="SqlCodeAnalysis" BeforeTargets="BeforeBuild">
-    <SqlCodeAnalysisTask ProjectDirectory="$(MSBuildProjectDirectory)"
+    <SqlCodeAnalysisTask SdkPath="$(DibixSdkPath)"
                          ProbingDirectory="$(SqlServerRedistPath)"
-                         Inputs="@(Build->'$(FullPath)'" />
+                         Inputs="@(Build->'%(FullPath)')" />
   </Target>
 
   <Target Name="CompileDatabaseAccessor" AfterTargets="PostBuildEvent" Condition="$(ShouldCompileDatabaseAccessor) == 'true'">
-    <CompileDatabaseAccessorTask ProjectDirectory="$(MSBuildProjectDirectory)"
+    <CompileDatabaseAccessorTask SdkPath="$(DibixSdkPath)"
+                                 ProjectDirectory="$(MSBuildProjectDirectory)"
                                  Namespace="$(DatabaseAccessorNamespace)"
                                  TargetDirectory="$(IntermediateOutputPath)"
                                  Inputs="@(Build)"
@@ -50,7 +52,8 @@
   </Target>
 
   <Target Name="VerifyDatabaseAccessor" BeforeTargets="PreBuildEvent">
-    <VerifyDatabaseAccessorTask ProjectDirectory="$(MSBuildProjectDirectory)"
+    <VerifyDatabaseAccessorTask SdkPath="$(DibixSdkPath)"
+                                ProjectDirectory="$(MSBuildProjectDirectory)"
                                 Namespace="$(RootNamespace)"
                                 AssemblyReferences="@(Reference->'%(HintPath)')"
                                 Inputs="@(None)"

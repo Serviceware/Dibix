@@ -59,7 +59,7 @@ namespace Dibix.Dac.Extensions
                 return File.Exists(relatedAssemblyPath) ? Assembly.LoadFrom(relatedAssemblyPath) : null;
             }
 
-            Assembly rulesAssembly = SdkAssemblyLoader.Load(source.SourceName);
+            Assembly rulesAssembly = SdkAssemblyLoader.LocatePackageRootAndLoad(source.SourceName);
             Type providerType = rulesAssembly.GetType("Dibix.Sdk.Dac.DacSqlCodeAnalysisAdapter");
             AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
             object engine = Activator.CreateInstance(providerType);

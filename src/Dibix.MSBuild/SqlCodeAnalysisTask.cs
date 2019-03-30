@@ -30,13 +30,13 @@ namespace Dibix.MSBuild
     {
         private static readonly string DependentAssemblyProbingDirectory = Path.GetDirectoryName(typeof(SqlCodeAnalysisTask).Assembly.Location);
 
-        public string ProjectDirectory { get; set; }
+        public string SdkPath { get; set; }
         public string ProbingDirectory { get; set; }
         public string[] Inputs { get; set; }
 
         public override bool Execute()
         {
-            Assembly sdkAssembly = SdkAssemblyLoader.Load(this.ProjectDirectory);
+            Assembly sdkAssembly = SdkAssemblyLoader.Load(this.SdkPath);
             Type adapterType = sdkAssembly.GetType($"{Constants.SdkAdapterNamespace}.{nameof(SqlCodeAnalysisTask)}", true);
             object[] args = 
             {

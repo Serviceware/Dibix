@@ -44,7 +44,7 @@ namespace Dibix.VisualStudio
             try
             {
                 string projectDirectory = Path.GetDirectoryName(e.Filename);
-                Assembly sdkAssembly = SdkAssemblyLoader.Load(projectDirectory);
+                Assembly sdkAssembly = SdkAssemblyLoader.LocatePackageRootAndLoad(projectDirectory);
                 Type adapterType = sdkAssembly.GetType(Constants.SdkAdapterTypeName, true);
                 adapterType.InvokeMember("Initialize", BindingFlags.InvokeMethod, null, null, new object[] { this });
             }

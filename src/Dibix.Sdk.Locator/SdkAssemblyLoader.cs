@@ -10,29 +10,33 @@ namespace Dibix.Sdk
         private const string RulesAssemblyName = "Dibix.Sdk";
         private const string TempFolderPrefix = "dibix-sdk-";
 
-        public static Assembly Load(string startDirectory)
+        public static Assembly LocatePackageRootAndLoad(string startDirectory)
         {
-            string sourcePath = LocatePackage(startDirectory, RulesAssemblyName);
-            string fileName = Path.GetFileName(sourcePath);
+            string rootDirectory = RootDirectoryLocator.LocateRootDirectory(startDirectory);
+            string packagePath = LocatePackage(rootDirectory, RulesAssemblyName);
+            return Load(packagePath);
+        }
+
+        public static Assembly Load(string packagePath)
+        {
+            string fileName = Path.GetFileName(packagePath);
             string tempDirectory = Path.GetTempPath();
-            if (!TryGetExistingTempFile(tempDirectory, sourcePath, fileName, out string targetPath))
+            if (!TryGetExistingTempFile(tempDirectory, packagePath, fileName, out string targetPath))
             {
                 string targetDirectory = Path.Combine(tempDirectory, $"{TempFolderPrefix}{Guid.NewGuid()}");
                 Directory.CreateDirectory(targetDirectory);
-                targetPath = Path.Combine(targetDirectory, Path.GetFileName(sourcePath));
-                File.Copy(sourcePath, targetPath);
+                targetPath = Path.Combine(targetDirectory, Path.GetFileName(packagePath));
+                File.Copy(packagePath, targetPath);
             }
             return Assembly.LoadFrom(targetPath);
         }
 
-        private static string LocatePackage(string startDirectory, string packageName)
+        private static string LocatePackage(string rootDirectory, string packageName)
         {
-            string root = RootDirectoryLocator.LocateRootDirectory(startDirectory);
-
             const string folderName = "lib";
 
-            if (Directory.Exists(Path.Combine(root, PackageLocator.PackagesDirectoryName)))
-                return new LocalNugetPackageLocator(root).LocatePackage(packageName, folderName);
+            if (Directory.Exists(Path.Combine(rootDirectory, PackageLocator.PackagesDirectoryName)))
+                return new LocalNugetPackageLocator(rootDirectory).LocatePackage(packageName, folderName);
 
             return new GlobalNugetPackageLocator().LocatePackage(packageName, folderName);
         }

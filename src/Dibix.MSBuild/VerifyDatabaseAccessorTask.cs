@@ -14,6 +14,7 @@ namespace Dibix.MSBuild
 {
     public sealed class VerifyDatabaseAccessorTask : Task, ITask
     {
+        public string SdkPath { get; set; }
         public string ProjectDirectory { get; set; }
         public string Namespace { get; set; }
         public string[] AssemblyReferences { get; set; }
@@ -34,7 +35,7 @@ namespace Dibix.MSBuild
 
         public override bool Execute()
         {
-            Assembly sdkAssembly = SdkAssemblyLoader.Load(this.ProjectDirectory);
+            Assembly sdkAssembly = SdkAssemblyLoader.Load(this.SdkPath);
             Type adapterType = sdkAssembly.GetType($"{Constants.SdkAdapterNamespace}.{nameof(VerifyDatabaseAccessorTask)}", true);
             return (bool)adapterType.InvokeMember("Execute", BindingFlags.InvokeMethod, null, null, new object[]
             {
