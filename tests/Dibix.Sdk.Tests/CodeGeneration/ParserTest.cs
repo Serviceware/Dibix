@@ -185,7 +185,7 @@ UNION ALL
                 return accessor.QueryMany<int>(dbx_tests_parser_unionreturnCommandText);
             }
         }
-        public static int dbx_tests_parser_xmlparam(this IDatabaseAccessorFactory databaseAccessorFactory, string x)
+        public static int dbx_tests_parser_xmlparam(this IDatabaseAccessorFactory databaseAccessorFactory, System.Xml.Linq.XElement x)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -58,7 +59,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
             else if (xmlDataType != null)
             {
-                parameter.ClrType = typeof(string);
+                parameter.ClrType = typeof(XElement);
             }
             else if (userDataType != null)
             {
