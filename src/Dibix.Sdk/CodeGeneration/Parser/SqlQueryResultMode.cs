@@ -4,10 +4,6 @@
     {
         None,
         Many,
-        Primitive,
-        PrimitiveOrDefault,
-        First,
-        FirstOrDefault,
         Single,
         SingleOrDefault
     }

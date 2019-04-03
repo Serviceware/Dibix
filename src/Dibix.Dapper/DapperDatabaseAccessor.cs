@@ -36,20 +36,6 @@ namespace Dibix.Dapper
             return this._connection.Execute(sql, parameters.AsDapperParams(), commandType: commandType);
         }
 
-        public T ExecutePrimitive<T>(string sql, CommandType commandType, IParametersVisitor parameters)
-        {
-            object result = this._connection.ExecuteScalar(sql, parameters.AsDapperParams(), commandType: commandType);
-            if (result == null)
-                throw new InvalidOperationException("A scalar value was expected, but the query did not return a result");
-
-            return (T)Convert.ChangeType(result, typeof(T));
-        }
-
-        public T ExecutePrimitiveOrDefault<T>(string sql, CommandType commandType, IParametersVisitor parameters)
-        {
-            return this._connection.ExecuteScalar<T>(sql, parameters.AsDapperParams(), commandType: commandType);
-        }
-
         public IEnumerable<T> QueryMany<T>(string sql, CommandType commandType, IParametersVisitor parameters)
         {
             this._mappingCheck.Check<T>();

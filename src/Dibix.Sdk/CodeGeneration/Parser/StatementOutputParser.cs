@@ -125,28 +125,9 @@ namespace Dibix.Sdk.CodeGeneration
                 TypeInfo returnType = returnTypes[i];
                 ICollection<OutputColumnResult> columnGroup = columnGroups[i];
 
-                // Use Primitive instead of Single
-                bool isGridResult = numberOfReturnHints > 1; // Scalar using grid reader is not possible
-                bool isSingleRowResult = result.ResultMode == SqlQueryResultMode.Single
-                                      || result.ResultMode == SqlQueryResultMode.SingleOrDefault;
-                if (!isGridResult && isSingleRowResult && returnType.IsPrimitiveType)
-                {
-                    errorReporter.RegisterError(sourcePath, returnHint.Line, returnHint.Column, null, "For single primitive results Mode:Primitive or Mode:PrimitiveOrDefault should be specified to avoid the use of a data reader");
-                    continue;
-                }
-
-                // Use Primitive only for primitive results
+                // SELECT 1 => Query<int>/Single<int> => No entity property validation + No missing alias validation
                 bool singleColumn = columnGroup.Count == 1;
-                bool isPrimitiveResult = result.ResultMode == SqlQueryResultMode.Primitive
-                                      || result.ResultMode == SqlQueryResultMode.PrimitiveOrDefault;
-                if (isPrimitiveResult && !returnType.IsPrimitiveType)
-                {
-                    errorReporter.RegisterError(sourcePath, returnHint.Line, returnHint.Column, null, "Mode:Primitive or Mode:PrimitiveOrDefault should only be used for primitive return types");
-                    continue;
-                }
-
-                // SELECT 1 => Query<int>/ExecutePrimitive => No entity property validation + No missing alias validation
-                if (singleColumn)
+                if (singleColumn && returnType.IsPrimitiveType)
                     continue;
 
                 foreach (OutputColumnResult columnResult in columnGroup)
@@ -155,13 +136,13 @@ namespace Dibix.Sdk.CodeGeneration
                     // i.E.: SELECT COUNT(*) no alias
                     if (!columnResult.Result)
                     {
-                        errorReporter.RegisterError(sourcePath, columnResult.Line, columnResult.Column, null, $@"Missing alias for expression '{columnResult.Expression}'");
+                        errorReporter.RegisterError(sourcePath, columnResult.Line, columnResult.Column, null, $"Missing alias for expression '{columnResult.Expression}'");
                         continue;
                     }
 
                     // Validate if entity property exists
                     if (returnType.Properties.All(x => !String.Equals(x, columnResult.ColumnName, StringComparison.OrdinalIgnoreCase)))
-                        errorReporter.RegisterError(sourcePath, columnResult.Line, columnResult.Column, null, $@"Property '{columnResult.ColumnName}' not found on return type '{returnType.Name}'");
+                        errorReporter.RegisterError(sourcePath, columnResult.Line, columnResult.Column, null, $"Property '{columnResult.ColumnName}' not found on return type '{returnType.Name}'");
                 }
             }
         }

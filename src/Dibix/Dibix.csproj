@@ -10,12 +10,6 @@
     <Compile Update="Access\DatabaseAccessorExtensions.Execute.cs">
       <DependentUpon>Access\DatabaseAccessorExtensions.cs</DependentUpon>
     </Compile>
-    <Compile Update="Access\DatabaseAccessorExtensions.ExecutePrimitive.cs">
-      <DependentUpon>Access\DatabaseAccessorExtensions.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Access\DatabaseAccessorExtensions.ExecutePrimitiveOrDefault.cs">
-      <DependentUpon>Access\DatabaseAccessorExtensions.cs</DependentUpon>
-    </Compile>
     <Compile Update="Access\DatabaseAccessorExtensions.GridReader.cs">
       <DependentUpon>Access\DatabaseAccessorExtensions.cs</DependentUpon>
     </Compile>

@@ -415,10 +415,6 @@ namespace Dibix.Sdk.CodeGeneration
             switch (mode)
             {
                 case SqlQueryResultMode.Many: return "QueryMany";
-                case SqlQueryResultMode.Primitive: return "ExecutePrimitive";
-                case SqlQueryResultMode.PrimitiveOrDefault: return "ExecutePrimitiveOrDefault";
-                case SqlQueryResultMode.First: return "QueryFirst";
-                case SqlQueryResultMode.FirstOrDefault: return "QueryFirstOrDefault";
                 case SqlQueryResultMode.Single: return "QuerySingle";
                 case SqlQueryResultMode.SingleOrDefault: return "QuerySingleOrDefault";
                 default: throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
