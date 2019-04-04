@@ -21,7 +21,6 @@ namespace Dibix
         #endregion
 
         #region Public Methods
-
         public bool TryGetValue(T equalValue, out T actualValue)
         {
             return this._dictionary.TryGetValue(equalValue, out actualValue);
@@ -46,7 +45,7 @@ namespace Dibix
 
         public void Clear()
         {
-            this._dictionary.Keys.Clear();
+            this._dictionary.Clear();
         }
 
         public void CopyTo(T[] array, int arrayIndex)
@@ -56,7 +55,7 @@ namespace Dibix
 
         public bool Remove(T item)
         {
-            return this._dictionary.Keys.Remove(item);
+            return this._dictionary.Remove(item);
         }
         #endregion
 
