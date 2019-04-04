@@ -129,6 +129,24 @@ namespace Dibix
             return cache;
         }
 
+        public static IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, Action<TReturn, TSecond, TThird, TFourth, TFifth, TSixth> map, string splitOn)
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
+
+            HashCollection<TReturn> cache = new HashCollection<TReturn>();
+            accessor.QueryMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(sql, CommandType.Text, parameters, (a, b, c, d, e, f) =>
+            {
+                if (!cache.TryGetValue(a, out TReturn instance))
+                {
+                    instance = a;
+                    cache.Add(instance);
+                }
+                map(instance, b, c, d, e, f);
+                return instance;
+            }, splitOn);
+            return cache;
+        }
+
         public static IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, Action<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> map, string splitOn)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
