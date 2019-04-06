@@ -13,6 +13,7 @@ using Dibix;
 
 namespace This.Is.A.Custom.Namespace
 {
+    #region Accessor
     [GeneratedCodeAttribute("Dibix.Sdk", "1.0.0.0")]
     internal static class Accessor
     {
@@ -35,6 +36,7 @@ namespace This.Is.A.Custom.Namespace
                 return accessor.Execute(dbx_tests_sources_includednestedCommandText);
             }
         }
+
         public static int dbx_tests_sources_excludednested(this IDatabaseAccessorFactory databaseAccessorFactory)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
@@ -42,6 +44,7 @@ namespace This.Is.A.Custom.Namespace
                 return accessor.Execute(dbx_tests_sources_excludednestedCommandText);
             }
         }
+
         public static int dbx_tests_sources_externalsp(this IDatabaseAccessorFactory databaseAccessorFactory)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
@@ -49,6 +52,7 @@ namespace This.Is.A.Custom.Namespace
                 return accessor.Execute(dbx_tests_sources_externalspCommandText, System.Data.CommandType.StoredProcedure);
             }
         }
+
         public static int DeleteProject(this IDatabaseAccessorFactory databaseAccessorFactory, string folder_name, string project_name)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
@@ -69,4 +73,5 @@ namespace This.Is.A.Custom.Namespace
         public static readonly MethodInfo dbx_tests_sources_externalspMethodInfo = typeof(Accessor).GetMethod("dbx_tests_sources_externalsp");
         public static readonly MethodInfo DeleteProjectMethodInfo = typeof(Accessor).GetMethod("DeleteProject");
     }
+    #endregion
 }

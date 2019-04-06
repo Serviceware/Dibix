@@ -15,6 +15,7 @@ using Dibix;
 
 namespace Dibix.Sdk.Tests.CodeGeneration
 {
+    #region Accessor
     [GeneratedCodeAttribute("Dibix.Sdk", "1.0.0.0")]
     internal static class ParserTest
     {
@@ -126,6 +127,7 @@ UNION ALL
                 }
             }
         }
+
         public static dbx_tests_parser_nestedifsResult dbx_tests_parser_nestedifs(this IDatabaseAccessorFactory databaseAccessorFactory)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
@@ -139,6 +141,7 @@ UNION ALL
                 }
             }
         }
+
         public static dbx_tests_parser_nobeginendResult dbx_tests_parser_nobeginend(this IDatabaseAccessorFactory databaseAccessorFactory, Dibix.Sdk.Tests.CodeGeneration.Direction param1)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
@@ -159,6 +162,7 @@ UNION ALL
                 }
             }
         }
+
         public static dbx_tests_parser_typenamesResult dbx_tests_parser_typenames(this IDatabaseAccessorFactory databaseAccessorFactory)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
@@ -178,6 +182,7 @@ UNION ALL
                 }
             }
         }
+
         public static IEnumerable<int> dbx_tests_parser_unionreturn(this IDatabaseAccessorFactory databaseAccessorFactory)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
@@ -185,6 +190,7 @@ UNION ALL
                 return accessor.QueryMany<int>(dbx_tests_parser_unionreturnCommandText);
             }
         }
+
         public static int dbx_tests_parser_xmlparam(this IDatabaseAccessorFactory databaseAccessorFactory, System.Xml.Linq.XElement x)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
@@ -199,70 +205,6 @@ UNION ALL
             }
         }
 
-        public class dbx_tests_parser_invalidcolumnsforentityResult
-        {
-            public ICollection<int?> A { get; private set; } 
-            public ICollection<int> B { get; private set; } 
-            public ICollection<string> C { get; private set; } 
-            public ICollection<Dibix.Sdk.Tests.CodeGeneration.Direction?> D { get; private set; } 
-            public ICollection<Dibix.Sdk.Tests.CodeGeneration.SpecialEntity> E { get; private set; } 
-
-            public dbx_tests_parser_invalidcolumnsforentityResult()
-            {
-                this.A = new Collection<int?>();
-                this.B = new Collection<int>();
-                this.C = new Collection<string>();
-                this.D = new Collection<Dibix.Sdk.Tests.CodeGeneration.Direction?>();
-                this.E = new Collection<Dibix.Sdk.Tests.CodeGeneration.SpecialEntity>();
-            }
-        }
-        public class dbx_tests_parser_nestedifsResult
-        {
-            public ICollection<int> A { get; private set; } 
-            public ICollection<int> B { get; private set; } 
-
-            public dbx_tests_parser_nestedifsResult()
-            {
-                this.A = new Collection<int>();
-                this.B = new Collection<int>();
-            }
-        }
-        public class dbx_tests_parser_nobeginendResult
-        {
-            public ICollection<int> A { get; private set; } 
-            public int B { get; set; } 
-            public ICollection<int> C { get; private set; } 
-
-            public dbx_tests_parser_nobeginendResult()
-            {
-                this.A = new Collection<int>();
-                this.C = new Collection<int>();
-            }
-        }
-        public class dbx_tests_parser_typenamesResult
-        {
-            public ICollection<string> A { get; private set; } 
-            public ICollection<int?> B { get; private set; } 
-            public ICollection<Dibix.Sdk.Tests.CodeGeneration.Direction> C { get; private set; } 
-            public ICollection<Dibix.Sdk.Tests.CodeGeneration.Direction?> D { get; private set; } 
-            public ICollection<Dibix.Sdk.Tests.CodeGeneration.Direction> E { get; private set; } 
-            public ICollection<Dibix.Sdk.Tests.CodeGeneration.Direction?> F { get; private set; } 
-            public ICollection<string> G { get; private set; } 
-            public ICollection<Dibix.Sdk.Tests.CodeGeneration.Direction?> H { get; private set; } 
-
-            public dbx_tests_parser_typenamesResult()
-            {
-                this.A = new Collection<string>();
-                this.B = new Collection<int?>();
-                this.C = new Collection<Dibix.Sdk.Tests.CodeGeneration.Direction>();
-                this.D = new Collection<Dibix.Sdk.Tests.CodeGeneration.Direction?>();
-                this.E = new Collection<Dibix.Sdk.Tests.CodeGeneration.Direction>();
-                this.F = new Collection<Dibix.Sdk.Tests.CodeGeneration.Direction?>();
-                this.G = new Collection<string>();
-                this.H = new Collection<Dibix.Sdk.Tests.CodeGeneration.Direction?>();
-            }
-        }
-
         public static readonly MethodInfo dbx_tests_parser_invalidcolumnsforentityMethodInfo = typeof(ParserTest).GetMethod("dbx_tests_parser_invalidcolumnsforentity");
         public static readonly MethodInfo dbx_tests_parser_nestedifsMethodInfo = typeof(ParserTest).GetMethod("dbx_tests_parser_nestedifs");
         public static readonly MethodInfo dbx_tests_parser_nobeginendMethodInfo = typeof(ParserTest).GetMethod("dbx_tests_parser_nobeginend");
@@ -270,4 +212,74 @@ UNION ALL
         public static readonly MethodInfo dbx_tests_parser_unionreturnMethodInfo = typeof(ParserTest).GetMethod("dbx_tests_parser_unionreturn");
         public static readonly MethodInfo dbx_tests_parser_xmlparamMethodInfo = typeof(ParserTest).GetMethod("dbx_tests_parser_xmlparam");
     }
+    #endregion
+
+    #region Grid result types
+    internal sealed class dbx_tests_parser_invalidcolumnsforentityResult
+    {
+        public ICollection<int?> A { get; private set; } 
+        public ICollection<int> B { get; private set; } 
+        public ICollection<string> C { get; private set; } 
+        public ICollection<Dibix.Sdk.Tests.CodeGeneration.Direction?> D { get; private set; } 
+        public ICollection<Dibix.Sdk.Tests.CodeGeneration.SpecialEntity> E { get; private set; } 
+
+        public dbx_tests_parser_invalidcolumnsforentityResult()
+        {
+            this.A = new Collection<int?>();
+            this.B = new Collection<int>();
+            this.C = new Collection<string>();
+            this.D = new Collection<Dibix.Sdk.Tests.CodeGeneration.Direction?>();
+            this.E = new Collection<Dibix.Sdk.Tests.CodeGeneration.SpecialEntity>();
+        }
+    }
+
+    internal sealed class dbx_tests_parser_nestedifsResult
+    {
+        public ICollection<int> A { get; private set; } 
+        public ICollection<int> B { get; private set; } 
+
+        public dbx_tests_parser_nestedifsResult()
+        {
+            this.A = new Collection<int>();
+            this.B = new Collection<int>();
+        }
+    }
+
+    internal sealed class dbx_tests_parser_nobeginendResult
+    {
+        public ICollection<int> A { get; private set; } 
+        public int B { get; set; } 
+        public ICollection<int> C { get; private set; } 
+
+        public dbx_tests_parser_nobeginendResult()
+        {
+            this.A = new Collection<int>();
+            this.C = new Collection<int>();
+        }
+    }
+
+    internal sealed class dbx_tests_parser_typenamesResult
+    {
+        public ICollection<string> A { get; private set; } 
+        public ICollection<int?> B { get; private set; } 
+        public ICollection<Dibix.Sdk.Tests.CodeGeneration.Direction> C { get; private set; } 
+        public ICollection<Dibix.Sdk.Tests.CodeGeneration.Direction?> D { get; private set; } 
+        public ICollection<Dibix.Sdk.Tests.CodeGeneration.Direction> E { get; private set; } 
+        public ICollection<Dibix.Sdk.Tests.CodeGeneration.Direction?> F { get; private set; } 
+        public ICollection<string> G { get; private set; } 
+        public ICollection<Dibix.Sdk.Tests.CodeGeneration.Direction?> H { get; private set; } 
+
+        public dbx_tests_parser_typenamesResult()
+        {
+            this.A = new Collection<string>();
+            this.B = new Collection<int?>();
+            this.C = new Collection<Dibix.Sdk.Tests.CodeGeneration.Direction>();
+            this.D = new Collection<Dibix.Sdk.Tests.CodeGeneration.Direction?>();
+            this.E = new Collection<Dibix.Sdk.Tests.CodeGeneration.Direction>();
+            this.F = new Collection<Dibix.Sdk.Tests.CodeGeneration.Direction?>();
+            this.G = new Collection<string>();
+            this.H = new Collection<Dibix.Sdk.Tests.CodeGeneration.Direction?>();
+        }
+    }
+    #endregion
 }
