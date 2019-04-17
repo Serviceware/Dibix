@@ -48,6 +48,12 @@ namespace Dibix.Dapper
             return this._reader.Read(map, splitOn);
         }
 
+        public IEnumerable<TReturn> ReadMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> map, string splitOn)
+        {
+            this._mappingCheck.Check<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>();
+            return this._reader.Read(map, splitOn);
+        }
+
         public T ReadSingle<T>()
         {
             this._mappingCheck.Check<T>();

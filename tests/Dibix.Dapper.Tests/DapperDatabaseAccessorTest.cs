@@ -11,13 +11,6 @@ namespace Dibix.Dapper.Tests
         [Fact]
         public void QuerySingle_WithMultipleRows_ThrowsException()
         {
-            HashCollection<Entity> x = new HashCollection<Entity>();
-            x.Clear();
-            Entity entity = new Entity();
-            x.Add(entity);
-            x.Remove(entity);
-            x.Remove(new Entity());
-            //x.Remove(null);
             using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
             {
                 const string commandText = "SELECT 1 UNION ALL SELECT 2";

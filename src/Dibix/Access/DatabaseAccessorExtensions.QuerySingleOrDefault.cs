@@ -57,6 +57,23 @@ namespace Dibix
             }, splitOn);
             return cache.SingleOrDefault();
         }
+        public static TReturn QuerySingleOrDefault<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, Action<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> map, string splitOn)
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
+
+            HashCollection<TReturn> cache = new HashCollection<TReturn>();
+            accessor.QueryMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(sql, CommandType.Text, parameters, (a, b, c, d, e, f, g) =>
+            {
+                if (!cache.TryGetValue(a, out TReturn instance))
+                {
+                    instance = a;
+                    cache.Add(instance);
+                }
+                map(instance, b, c, d, e, f, g);
+                return instance;
+            }, splitOn);
+            return cache.SingleOrDefault();
+        }
 
         public static T QuerySingleOrDefault<T>(this IDatabaseAccessor accessor, string sql)
         {
