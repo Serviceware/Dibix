@@ -40,19 +40,19 @@ namespace Dibix
             }, splitOn);
             return cache;
         }
-        public static IEnumerable<TReturn> ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth>(this IMultipleResultReader reader, Action<TReturn, TSecond, TThird, TFourth, TFifth, TSixth> map, string splitOn)
+        public static IEnumerable<TReturn> ReadMany<TReturn, TSecond, TThird, TFourth, TFifth>(this IMultipleResultReader reader, Action<TReturn, TSecond, TThird, TFourth, TFifth> map, string splitOn)
         {
             Guard.IsNotNull(reader, nameof(reader));
 
             HashCollection<TReturn> cache = new HashCollection<TReturn>();
-            reader.ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>((a, b, c, d, e, f) =>
+            reader.ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TReturn>((a, b, c, d, e) =>
             {
                 if (!cache.TryGetValue(a, out TReturn instance))
                 {
                     instance = a;
                     cache.Add(instance);
                 }
-                map(instance, b, c, d, e, f);
+                map(instance, b, c, d, e);
                 return instance;
             }, splitOn);
             return cache;
