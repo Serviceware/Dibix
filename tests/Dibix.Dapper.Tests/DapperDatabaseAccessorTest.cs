@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 using Microsoft.Extensions.Configuration;
 using Xunit;
 
@@ -16,6 +17,20 @@ namespace Dibix.Dapper.Tests
                 const string commandText = "SELECT 1 UNION ALL SELECT 2";
                 InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => accessor.QuerySingle<byte>(commandText));
                 Assert.Equal("Sequence contains more than one element", exception.Message);
+            }
+        }
+
+        [Fact]
+        public void QueryMany_WithXElementParameter_Success()
+        {
+            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
+            {
+                const string commandText = "SELECT [x].[v].value('@value', 'INT') FROM @xml.nodes(N'root/item') AS [x]([v])";
+                XElement xml = XElement.Parse("<root><item value=\"1\" /><item value=\"2\" /></root>");
+                IList<byte> results = accessor.QueryMany<byte>(commandText, x => x.SetFromTemplate(new { xml })).ToArray();
+                Assert.Equal(2, results.Count);
+                Assert.Equal((byte)1, results[0]);
+                Assert.Equal((byte)2, results[1]);
             }
         }
 
