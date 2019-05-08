@@ -20,6 +20,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
           , SqlDataTypeOption.SmallInt
           , SqlDataTypeOption.Int
           , SqlDataTypeOption.BigInt
+          , SqlDataTypeOption.Date
         };
         // helpLine suppressions
         private static readonly HashSet<string> Workarounds = new HashSet<string>
