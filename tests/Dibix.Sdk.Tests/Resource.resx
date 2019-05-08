@@ -660,6 +660,10 @@ UNION ALL
     message="[023] Only TINYINT/SMALLINT/INT/BIGINT are allowed as primary key: dbx_codeanalysis_error_023_fail2.b (NVARCHAR)"
     line="13"
     column="7" /&gt;
+  &lt;error
+    message="[023] Only TINYINT/SMALLINT/INT/BIGINT are allowed as primary key: dbx_codeanalysis_error_023_fail3.c (NVARCHAR)"
+    line="20"
+    column="74" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="PrimitiveDataTypeIdentifierSqlCodeAnalysisRule" xml:space="preserve">

@@ -234,7 +234,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
           , "PK_hlsystweettoprocess#processid"
           , "PK_hlsyswebservice#configurationname"
           , "PK_hlsyswebservice#webserviceclient"
-          , "PK_hlsyswrkeffrtprtyassgnmnts#FromDate"
+          , "PK_hlsyswrkeffrtprtyassgnmnts#fromdate"
           , "PK_hltmendpointstorage#partitionkey"
           , "PK_hltmendpointstorage#rowkey"
           , "PK_hltmkeytoid#id"
@@ -306,16 +306,15 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
             UniqueConstraintDefinition primaryKeyConstraint = (UniqueConstraintDefinition)primaryKey.Definition;
 
-            // If the PK is not the table's own key, and instead is a FK to a different table's key, no further analysis is needed
-            bool hasMatchingForeignKey = constraints.Where(x => x.Type == ConstraintType.ForeignKey)
-                                                    .Any(x => x.Columns.All(y => primaryKey.Columns.Any(z => y.Name == z.Name)));
-
-            if (hasMatchingForeignKey)
-                return;
-
             string tableName = node.SchemaObjectName.BaseIdentifier.Value;
             foreach (ColumnReference column in primaryKey.Columns)
             {
+                // If the PK is not the table's own key, and instead is a FK to a different table's key, no further analysis is needed
+                bool hasMatchingForeignKey = constraints.Where(x => x.Type == ConstraintType.ForeignKey)
+                                                        .Any(x => x.Columns.Any(y => y.Name == column.Name));
+                if (hasMatchingForeignKey)
+                    continue;
+
                 string identifier = column.Name;
                 if (primaryKeyConstraint.ConstraintIdentifier != null)
                     identifier = String.Concat(primaryKeyConstraint.ConstraintIdentifier.Value, '#', identifier);

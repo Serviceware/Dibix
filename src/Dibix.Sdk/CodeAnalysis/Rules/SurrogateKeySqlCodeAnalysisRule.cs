@@ -126,7 +126,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
             // IDENTITY
             string primaryKeyColumnName = primaryKey.Columns.Single().Name;
-            ColumnDefinition primaryKeyColumn = createTableStatement.Definition.ColumnDefinitions.Single(x => x.ColumnIdentifier.Value == primaryKeyColumnName);
+            ColumnDefinition primaryKeyColumn = createTableStatement.Definition.ColumnDefinitions.Single(x => String.Equals(x.ColumnIdentifier.Value, primaryKeyColumnName, StringComparison.OrdinalIgnoreCase));
             if (primaryKeyColumn.IdentityOptions == null)
                 return false;
 
