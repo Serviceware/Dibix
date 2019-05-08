@@ -15,6 +15,14 @@ AS
       CONSTRAINT [PK_dbx_codeanalysis_error_024_fail2] PRIMARY KEY ([a])
   )
 
+  CREATE TABLE [dbo].[dbx_codeanalysis_error_024_fail3] -- Business key is defined on PK => fail
+  (
+      [a] INT IDENTITY
+    , [b] NVARCHAR(128)
+    , CONSTRAINT [PK_dbx_codeanalysis_error_024_fail3] PRIMARY KEY ([a])
+    , CONSTRAINT [UQ_dbx_codeanalysis_error_024_fail3_b] UNIQUE ([a])
+  )
+
   CREATE TABLE [dbo].[dbx_codeanalysis_error_024_success1] -- No identity column, probably INT business key => OK
   (
       [a] INT

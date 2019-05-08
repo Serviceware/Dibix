@@ -827,6 +827,10 @@ namespace This.Is.A.Custom.Namespace
     message="[024] Surrogate keys are only allowed, if a business key is defined: dbx_codeanalysis_error_024_fail2"
     line="10"
     column="3" /&gt;
+  &lt;error
+    message="[024] Surrogate keys are only allowed, if a business key is defined: dbx_codeanalysis_error_024_fail3"
+    line="18"
+    column="3" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="TableConstraintSqlCodeAnalysisRule" xml:space="preserve">

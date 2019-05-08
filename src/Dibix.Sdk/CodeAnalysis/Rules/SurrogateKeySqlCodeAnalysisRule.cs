@@ -97,7 +97,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                 return;
 
             // We just assume here that a UQ could be a business key
-            bool hasBusinessKey = constraints.Any(x => x.Type == ConstraintType.Unique && !((UniqueConstraintDefinition)x.Definition).IsPrimaryKey);
+            bool hasBusinessKey = constraints.Any(x => IsValidBusinessKey(primaryKey, x));
             if (hasBusinessKey)
                 return;
 
@@ -131,6 +131,20 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                 return false;
 
             return true;
+        }
+
+        private static bool IsValidBusinessKey(Constraint primaryKey, Constraint constraint)
+        {
+            if (constraint.Type != ConstraintType.Unique)
+                return false;
+
+            if (((UniqueConstraintDefinition)constraint.Definition).IsPrimaryKey)
+                return false;
+
+            bool businessKeyIsPrimaryKey = primaryKey.Columns.Count == constraint.Columns.Count
+                                       && !primaryKey.Columns.Where((x, i) => x.Name != constraint.Columns[i].Name).Any();
+
+            return !businessKeyIsPrimaryKey;
         }
     }
 }
