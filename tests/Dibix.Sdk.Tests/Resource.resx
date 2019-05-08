@@ -294,13 +294,9 @@
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[017] Column names should be lowercase and contain only characters of the alphabet: dbx_codeanalysis_error_017_fail.Id"
+    message="[017] Column names should only contain the characters 'a-z_' and have no trailing underscores: dbx_codeanalysis_error_017_fail.Id"
     line="14"
     column="3" /&gt;
-  &lt;error
-    message="[017] Column names should be lowercase and contain only characters of the alphabet: dbx_codeanalysis_error_017_fail.column_x"
-    line="15"
-    column="6" /&gt;
   &lt;error
     message="[017] Primary key constraint 'PK_dbx_codeanalysis_error_017_failx' does not match naming convention 'PK_&amp;lt;tablename&amp;gt;'. Also make sure the name is all lowercase."
     line="16"

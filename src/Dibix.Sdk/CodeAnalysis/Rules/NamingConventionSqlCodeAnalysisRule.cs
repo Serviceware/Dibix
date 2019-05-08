@@ -39,6 +39,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
     public sealed class NamingConventionSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
     {
+        private const string NamePattern = "^[a-z](([a-z_]+)?[a-z])?$";
+
         // helpLine suppressions
         private static readonly HashSet<string> Workarounds = new HashSet<string>
         {
@@ -55,73 +57,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         private static readonly HashSet<string> ColumnWorkarounds = new HashSet<string>
         {
             "BlobDetail#blobmeta_identifier"
-          , "hlsysdxirun#sys_serverexecutionid"
-          , "hlsysdxirun#sys_executioninstanceguid"
-          , "hlsysdxirun#sys_packagename"
-          , "hlsysdxirun#sys_taskname"
-          , "hlfrmelementattr#attr_type"
-          , "hlfrmelementattrdatetime#attr_type"
-          , "hlfrmelementattrlist#attr_type"
-          , "hlfrmelementattrstring#attr_type"
-          , "hlomdlgrequestactivatedataattr#value_bit"
-          , "hlomdlgrequestactivatedataattr#value_int"
-          , "hlomdlgrequestactivatedataattr#value_decimal"
-          , "hlomdlgrequestactivatedataattr#value_datetime"
-          , "hlomdlgrequestactivatedataattr#value_nvarchar"
-          , "hlsysattrpathodedef#attrpath_text"
-          , "hlsysattrpathodedef#attrpath_lvl"
-          , "hlsysattrpathodedef#attrpath_multiple"
-          , "hlsysattrpathodedef#attrpath_required"
-          , "hlsysattrpathodedef#attrpath_readonly"
-          , "hlsysattrpathodedef#attrpath_hidden"
-          , "hlsysattrpathodedef#attr_defid"
-          , "hlsysattrpathodedef#attr_type"
-          , "hlsysattrpathodedef#parent_defid"
-          , "hlsysattrpathodedef#parent_type"
-          , "hlsysattrpathodedef#gparent_defid"
-          , "hlsysattrpathodedef#gparent_type"
-          , "hlsysattrpathodedef#ggparent_defid"
-          , "hlsysattrpathodedef#ggparent_type"
           , "hlsysbaselineattr#fixedvalue2"
-          , "hlsysobjectdefstgcolumn#max_length"
-          , "hlsysobjectdefstgcolumn#attrpathattr_defid"
-          , "hlsysobjectdefstgcolumn#attrpathattr_type"
-          , "hlsysobjectdefstgtable#attrpathattr_defid"
-          , "hlsysobjectdefstgtable#attrpathattr_type"
-          , "hlsyspathdef#from_objectdefid"
-          , "hlsyspathdef#from_objecttype"
-          , "hlsyspathdef#to_objectdefid"
-          , "hlsyspathdef#to_objecttype"
-          , "hlsyspathdef#left_path"
-          , "hlsyspathdef#left_output"
-          , "hlsyspathdef#left_depth"
-          , "hlsyspathdef#left_from_objectdefid"
-          , "hlsyspathdef#left_from_objecttype"
-          , "hlsyspathdef#left_to_objectdefid"
-          , "hlsyspathdef#left_to_objecttype"
-          , "hlsyspathdef#middle_objectdefid"
-          , "hlsyspathdef#middle_objecttype"
-          , "hlsyspathdef#right_path"
-          , "hlsyspathdef#right_output"
-          , "hlsyspathdef#right_depth"
-          , "hlsyspathdef#right_from_objectdefid"
-          , "hlsyspathdef#right_from_objecttype"
-          , "hlsyspathdef#right_from_objecttype"
-          , "hlsyspathdef#right_to_objectdefid"
-          , "hlsyspathdef#right_to_objecttype"
-          , "hlsysportalcfgcasetablefield#attrpath_odedefid"
-          , "hlsysportalcfgcasetablefield#attrpath_attrdefid"
-          , "hlsysportalcfgcasetablefield#attrpath_attrtype"
-          , "hlsysportalcfgcasetablefield#attrpath_multiple"
-          , "hlsysportalcfgcasetablefield#x_cd"
-          , "hlsysportalcfgsearchpathorgunit#searchpathorgunit_sectionid"
-          , "hlsysportalcfgsearchpathorgunit#searchpathorgunit_sectionname"
-          , "hlsysportalcfgsearchpathorgunit#orgunit_sectionid"
-          , "hlsysportalcfgsearchpathorgunit#orgunit_sectionname"
-          , "hlsysportalcfgsearchpathorgunit#orgunit_objectdefid"
-          , "hlsysportalcfgsearchpathorgunit#standardcontact_sectionid"
-          , "hlsysportalcfgsearchpathorgunit#standardcontact_sectionname"
-          , "hlsysportalcfgsearchpathorgunit#standardcontact_objectdefid"
           , "hlsysportalconfig#attrpathapp1"
           , "hlsysportalconfig#attrpathapp2"
           , "hlsysportalconfig#attrpathacc1"
@@ -134,38 +70,6 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
           , "hlsysslmservicehoursentry#dayofweek2"
           , "hlsysslmservicehoursentry#datetime1"
           , "hlsysslmservicehoursentry#datetime2"
-          , "hlsyssvccatfeature#product_id"
-          , "hlsyssvccatfeature#hlproduct_objectdefid"
-          , "hlsyssvccatfeature#hlproduct_listattributevalue"
-          , "hlsyssvccatfeature#hlproduct_version"
-          , "hlsyssvccatorderitem#product_id"
-          , "hlsyssvccatorderitem#orderitem_id"
-          , "hlsyssvccatorderitem#order_id"
-          , "hlsyssvccatorderitemfeature#orderitem_id"
-          , "hlsyssvccatorderitemfeature#feature_id"
-          , "hlsyssvccatpicture#product_id"
-          , "hlsyssvccatproducttocat#products_id"
-          , "hlsyssvccatproducttocat#categories_id"
-          , "hlsystimezoneadjustmentrule#southern_hemisphere"
-          , "hlsystimezoneadjustmentrule#northern_hemisphere"
-          , "hlsysworkeffort#status_id"
-          , "hlsysworkeffort#purpose_id"
-          , "hlsysworkeffort#priority_id"
-          , "hlsysworkeffortassociation#involvedtorole_id"
-          , "hlsysworkeffortassociation#involvedfromrole_id"
-          , "hlsyswrkeffrtciassgnmnts#workeffort_id"
-          , "hlsyswrkeffrtciassgnmnts#workeffort_id"
-          , "hlsyswrkeffrtprtyassgnmnts#workeffort_id"
-          , "hlsyswrkeffrtprtyassgnmnts#performer_id"
-          , "hlsyswrkeffrtprtyassgnmnts#performer_defid"
-          , "hlsyswrkeffrt_tsk#definedin_id"
-          , "hlwfrunningactivity#activitystatus_last"
-          , "hlwfrunningstagenotifmemo#ntf_wq_m"
-          , "hlwfrunningstagenotifmemo#ntf_ct_m"
-          , "hlwfrunningstagenotifmemo#ntf_wq_p"
-          , "hlwfrunningstagenotifmemo#ntf_ct_p"
-          , "hlwfrunningstagenotifmemo#ntf_wq_r"
-          , "hlwfrunningstagenotifmemo#ntf_ct_r"
         };
 
         public override void Visit(CreateTableStatement node)
@@ -178,8 +82,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                 if (ColumnWorkarounds.Contains($"{node.SchemaObjectName.BaseIdentifier.Value}#{column.ColumnIdentifier.Value}"))
                     continue;
 
-                if (!Regex.IsMatch(column.ColumnIdentifier.Value, "^[a-z]+$"))
-                    base.Fail(column, $"Column names should be lowercase and contain only characters of the alphabet: {node.SchemaObjectName.BaseIdentifier.Value}.{column.ColumnIdentifier.Value}");
+                if (!Regex.IsMatch(column.ColumnIdentifier.Value, NamePattern))
+                    base.Fail(column, $"Column names should only contain the characters 'a-z_' and have no trailing underscores: {node.SchemaObjectName.BaseIdentifier.Value}.{column.ColumnIdentifier.Value}");
             }
             
             IEnumerable<Constraint> constraints = node.Definition.CollectConstraints();
