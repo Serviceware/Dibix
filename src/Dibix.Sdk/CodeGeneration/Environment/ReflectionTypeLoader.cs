@@ -13,7 +13,7 @@ namespace Dibix.Sdk.CodeGeneration
         private static readonly string AssemblyName = typeof(ReflectionTypeLoader).Assembly.FullName;
         private static readonly string TypeName = typeof(ReflectionTypeLoader).FullName;
 
-        public static CodeGeneration.TypeInfo GetTypeInfo(TypeName typeName, string assemblyPath)
+        public static ContractInfo GetTypeInfo(string assemblyName, ContractName contractName, string assemblyPath)
         {
             AppDomain domain = null;
             try
@@ -35,9 +35,9 @@ namespace Dibix.Sdk.CodeGeneration
                 ReflectionTypeLoader instance = (ReflectionTypeLoader)domain.CreateInstanceAndUnwrap(AssemblyName, TypeName);
                 AppDomain.CurrentDomain.AssemblyResolve -= onAssemblyResolve;
 
-                TypeInfo info = instance.GetTypeInfo(typeName.AssemblyName, assemblyPath, typeName.NormalizedTypeName);
-                typeName.CSharpTypeName = info.CSharpTypeName;
-                CodeGeneration.TypeInfo result = new CodeGeneration.TypeInfo(typeName, info.IsPrimitive);
+                TypeInfo info = instance.GetTypeInfo(assemblyName, contractName.TypeName, assemblyPath);
+                contractName.TypeName = info.CSharpTypeName;
+                ContractInfo result = new ContractInfo(contractName, info.IsPrimitive);
                 result.Properties.AddRange(info.PropertyNames);
                 return result;
             }
@@ -48,7 +48,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private TypeInfo GetTypeInfo(string assemblyName, string assemblyPath, string typeName)
+        private TypeInfo GetTypeInfo(string assemblyName, string typeName, string assemblyPath)
         {
             Assembly assembly = !String.IsNullOrEmpty(assemblyPath) ? Assembly.LoadFrom(assemblyPath) : Assembly.Load(assemblyName);
             Type type = assembly.GetType(typeName, true);

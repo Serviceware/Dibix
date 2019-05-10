@@ -7,14 +7,14 @@ namespace Dibix.Sdk.CodeGeneration
     {
 	    public SqlQueryResultMode ResultMode { get; set; }
         public string Name { get; set; }
-        public IList<TypeInfo> Types { get; }
+        public IList<ContractInfo> Contracts { get; }
         public IList<string> Columns { get; }
         public string Converter { get; set; }
         public string SplitOn { get; set; }
 
         public SqlQueryResult()
         {
-            this.Types = new Collection<TypeInfo>();
+            this.Contracts = new Collection<ContractInfo>();
             this.Columns = new Collection<string>();
         }
     }

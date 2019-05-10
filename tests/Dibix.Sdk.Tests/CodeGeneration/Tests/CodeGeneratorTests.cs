@@ -4,7 +4,6 @@ using System.Reflection;
 using Dibix.Sdk.CodeGeneration;
 using Moq;
 using Xunit;
-using TypeInfo = Dibix.Sdk.CodeGeneration.TypeInfo;
 
 namespace Dibix.Sdk.Tests.CodeGeneration
 {
@@ -17,24 +16,30 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             Mock<IFileSystemProvider> fileSystemProvider = new Mock<IFileSystemProvider>(MockBehavior.Strict);
             Mock<IErrorReporter> errorReporter = new Mock<IErrorReporter>(MockBehavior.Strict);
             Mock<ICodeGenerationContext> codeGenerationContext = new Mock<ICodeGenerationContext>(MockBehavior.Strict);
-            Mock<ITypeLoader> typeLoader = new Mock<ITypeLoader>(MockBehavior.Strict);
+            Mock<IContractResolver> contractResolver = new Mock<IContractResolver>(MockBehavior.Strict);
             Mock<IAssemblyLocator> assemblyLocator = new Mock<IAssemblyLocator>(MockBehavior.Strict);
-            ITypeLoaderFacade typeLoaderFacade = new TypeLoaderFacade(fileSystemProvider.Object, assemblyLocator.Object);
-            typeLoaderFacade.RegisterTypeLoader(typeLoader.Object);
+            IContractResolverFacade contractResolverFacade = new ContractResolverFacade(fileSystemProvider.Object, assemblyLocator.Object);
+            contractResolverFacade.RegisterContractResolver(contractResolver.Object);
 
             fileSystemProvider.Setup(x => x.GetFiles("Dibix.Sdk.Tests.Database", It.IsAny<IEnumerable<VirtualPath>>(), It.IsAny<IEnumerable<VirtualPath>>()))
                               .Returns<string, IEnumerable<VirtualPath>, IEnumerable<VirtualPath>>(physicalFileSystemProvider.GetFiles);
             errorReporter.Setup(x => x.ReportErrors()).Returns(false);
             codeGenerationContext.SetupGet(x => x.Namespace).Returns(ProjectName);
             codeGenerationContext.SetupGet(x => x.ClassName).Returns(TestName);
-            codeGenerationContext.SetupGet(x => x.TypeLoaderFacade).Returns(typeLoaderFacade);
+            codeGenerationContext.SetupGet(x => x.ContractResolverFacade).Returns(contractResolverFacade);
             codeGenerationContext.SetupGet(x => x.ErrorReporter).Returns(errorReporter.Object);
-            typeLoader.Setup(x => x.LoadType(It.IsAny<TypeName>(), It.IsAny<Action<string>>()))
-                      .Returns((TypeName typeName, Action<string> errorHandler) =>
-                      {
-                          Type type = Type.GetType($"{typeName.NormalizedTypeName},{this.GetType().Assembly}", true);
-                          return TypeInfo.FromClrType(type, typeName);
-                      });
+            contractResolver.Setup(x => x.ResolveContract(It.IsAny<string>(), It.IsAny<Action<string>>()))
+                            .Returns((string input, Action<string> errorHandler) =>
+                            {
+                                ContractName contractName = new ContractName(input);
+                                Type type = Type.GetType($"{contractName.TypeName},{this.GetType().Assembly}", true);
+                                ContractInfo info = new ContractInfo(contractName, type.IsPrimitive());
+                                contractName.TypeName = type.ToCSharpTypeName();
+                                foreach (PropertyInfo property in type.GetProperties())
+                                    info.Properties.Add(property.Name);
+
+                                return info;
+                            });
             string path = this.GetType().Assembly.Location;
             assemblyLocator.Setup(x => x.TryGetAssemblyLocation(ProjectName, out path)).Returns(true);
 
@@ -65,16 +70,16 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             Mock<IFileSystemProvider> fileSystemProvider = new Mock<IFileSystemProvider>(MockBehavior.Strict);
             Mock<IErrorReporter> errorReporter = new Mock<IErrorReporter>(MockBehavior.Strict);
             Mock<ICodeGenerationContext> codeGenerationContext = new Mock<ICodeGenerationContext>(MockBehavior.Strict);
-            Mock<ITypeLoader> typeLoader = new Mock<ITypeLoader>(MockBehavior.Strict);
+            Mock<IContractResolver> contractResolver = new Mock<IContractResolver>(MockBehavior.Strict);
             Mock<IAssemblyLocator> assemblyLocator = new Mock<IAssemblyLocator>(MockBehavior.Strict);
-            ITypeLoaderFacade typeLoaderFacade = new TypeLoaderFacade(fileSystemProvider.Object, assemblyLocator.Object);
-            typeLoaderFacade.RegisterTypeLoader(typeLoader.Object);
+            IContractResolverFacade contractResolverFacade = new ContractResolverFacade(fileSystemProvider.Object, assemblyLocator.Object);
+            contractResolverFacade.RegisterContractResolver(contractResolver.Object);
 
             fileSystemProvider.SetupGet(x => x.CurrentDirectory).Returns(ExecutingDirectory);
             fileSystemProvider.Setup(x => x.GetFiles("Dibix.Sdk.Tests.Database", It.IsAny<IEnumerable<VirtualPath>>(), It.IsAny<IEnumerable<VirtualPath>>()))
                               .Returns<string, IEnumerable<VirtualPath>, IEnumerable<VirtualPath>>(physicalFileSystemProvider.GetFiles);
             errorReporter.Setup(x => x.ReportErrors()).Returns(false);
-            codeGenerationContext.SetupGet(x => x.TypeLoaderFacade).Returns(typeLoaderFacade);
+            codeGenerationContext.SetupGet(x => x.ContractResolverFacade).Returns(contractResolverFacade);
             codeGenerationContext.SetupGet(x => x.ErrorReporter).Returns(errorReporter.Object);
 
             GeneratorConfiguration configuration = GeneratorConfigurationBuilder.Create(fileSystemProvider.Object, null, errorReporter.Object)
@@ -122,16 +127,16 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             Mock<IFileSystemProvider> fileSystemProvider = new Mock<IFileSystemProvider>(MockBehavior.Strict);
             Mock<IErrorReporter> errorReporter = new Mock<IErrorReporter>(MockBehavior.Strict);
             Mock<ICodeGenerationContext> codeGenerationContext = new Mock<ICodeGenerationContext>(MockBehavior.Strict);
-            Mock<ITypeLoader> typeLoader = new Mock<ITypeLoader>(MockBehavior.Strict);
+            Mock<IContractResolver> contractResolver = new Mock<IContractResolver>(MockBehavior.Strict);
             Mock<IAssemblyLocator> assemblyLocator = new Mock<IAssemblyLocator>(MockBehavior.Strict);
-            ITypeLoaderFacade typeLoaderFacade = new TypeLoaderFacade(fileSystemProvider.Object, assemblyLocator.Object);
-            typeLoaderFacade.RegisterTypeLoader(typeLoader.Object);
+            IContractResolverFacade contractResolverFacade = new ContractResolverFacade(fileSystemProvider.Object, assemblyLocator.Object);
+            contractResolverFacade.RegisterContractResolver(contractResolver.Object);
 
             fileSystemProvider.SetupGet(x => x.CurrentDirectory).Returns(ExecutingDirectory);
             fileSystemProvider.Setup(x => x.GetFiles("Dibix.Sdk.Tests.Database", It.IsAny<IEnumerable<VirtualPath>>(), It.IsAny<IEnumerable<VirtualPath>>()))
                               .Returns<string, IEnumerable<VirtualPath>, IEnumerable<VirtualPath>>(physicalFileSystemProvider.GetFiles);
             errorReporter.Setup(x => x.ReportErrors()).Returns(false);
-            codeGenerationContext.SetupGet(x => x.TypeLoaderFacade).Returns(typeLoaderFacade);
+            codeGenerationContext.SetupGet(x => x.ContractResolverFacade).Returns(contractResolverFacade);
             codeGenerationContext.SetupGet(x => x.ErrorReporter).Returns(errorReporter.Object);
 
             GeneratorConfiguration configuration = GeneratorConfigurationBuilder.Create(fileSystemProvider.Object, null, errorReporter.Object)
@@ -182,16 +187,16 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             Mock<IFileSystemProvider> fileSystemProvider = new Mock<IFileSystemProvider>(MockBehavior.Strict);
             Mock<IErrorReporter> errorReporter = new Mock<IErrorReporter>(MockBehavior.Strict);
             Mock<ICodeGenerationContext> codeGenerationContext = new Mock<ICodeGenerationContext>(MockBehavior.Strict);
-            Mock<ITypeLoader> typeLoader = new Mock<ITypeLoader>(MockBehavior.Strict);
+            Mock<IContractResolver> contractResolver = new Mock<IContractResolver>(MockBehavior.Strict);
             Mock<IAssemblyLocator> assemblyLocator = new Mock<IAssemblyLocator>(MockBehavior.Strict);
-            ITypeLoaderFacade typeLoaderFacade = new TypeLoaderFacade(fileSystemProvider.Object, assemblyLocator.Object);
-            typeLoaderFacade.RegisterTypeLoader(typeLoader.Object);
+            IContractResolverFacade contractResolverFacade = new ContractResolverFacade(fileSystemProvider.Object, assemblyLocator.Object);
+            contractResolverFacade.RegisterContractResolver(contractResolver.Object);
 
             fileSystemProvider.SetupGet(x => x.CurrentDirectory).Returns(ExecutingDirectory);
             fileSystemProvider.Setup(x => x.GetFiles("Dibix.Sdk.Tests.Database", It.IsAny<IEnumerable<VirtualPath>>(), It.IsAny<IEnumerable<VirtualPath>>()))
                               .Returns<string, IEnumerable<VirtualPath>, IEnumerable<VirtualPath>>(physicalFileSystemProvider.GetFiles);
             errorReporter.Setup(x => x.ReportErrors()).Returns(false);
-            codeGenerationContext.SetupGet(x => x.TypeLoaderFacade).Returns(typeLoaderFacade);
+            codeGenerationContext.SetupGet(x => x.ContractResolverFacade).Returns(contractResolverFacade);
             codeGenerationContext.SetupGet(x => x.ErrorReporter).Returns(errorReporter.Object);
 
             typeof(GeneratorConfigurationBuilder).GetField("UseExtendedJsonReader", BindingFlags.NonPublic | BindingFlags.Static).SetValue(null, true);

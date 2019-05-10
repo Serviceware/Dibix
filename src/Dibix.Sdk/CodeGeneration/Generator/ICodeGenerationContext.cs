@@ -5,7 +5,7 @@
         GeneratorConfiguration Configuration { get; }
         string Namespace { get; }
         string ClassName { get; }
-        ITypeLoaderFacade TypeLoaderFacade { get; }
+        IContractResolverFacade ContractResolverFacade { get; }
         IErrorReporter ErrorReporter { get; }
     }
 }

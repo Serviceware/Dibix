@@ -1,0 +1,40 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+
+namespace Dibix.Sdk.CodeGeneration
+{
+    public sealed class ContractResolverFacade : IContractResolverFacade
+    {
+        #region Fields
+        private readonly ICollection<IContractResolver> _contractResolvers;
+        #endregion
+
+        #region Constructor
+        public ContractResolverFacade() => this._contractResolvers = new Collection<IContractResolver>();
+        public ContractResolverFacade(IFileSystemProvider fileSystemProvider, IAssemblyLocator assemblyLocator)
+        {
+            this._contractResolvers = new Collection<IContractResolver>
+            {
+                new JsonSchemaContractResolver(fileSystemProvider),
+                new ClrTypeContractResolver(),
+                new ForeignAssemblyTypeContractResolver(assemblyLocator)
+            };
+        }
+        #endregion
+
+        #region IContractResolverFacade Members
+        public void RegisterContractResolver(IContractResolver contractResolver) => this._contractResolvers.Add(contractResolver);
+
+        public ContractInfo ResolveContract(string input, Action<string> errorHandler)
+        {
+            ContractInfo contract = this._contractResolvers.Select(x => x.ResolveContract(input, errorHandler)).FirstOrDefault(x => x != null);
+            if (contract == null)
+                errorHandler($"Could not resolve contract '{input}'");
+
+            return contract;
+        }
+        #endregion
+    }
+}

@@ -33,7 +33,7 @@ namespace Dibix.Sdk.CodeGeneration
                 foreach (SqlQueryResult result in statement.Results)
                 {
                     bool isEnumerable = result.ResultMode == SqlQueryResultMode.Many;
-                    string resultTypeName = result.Types.First().Name.SimplifiedTypeName;
+                    string resultTypeName = result.Contracts.First().Name.ToString();
                     if (isEnumerable)
                         resultTypeName = MakeCollectionInterfaceType(resultTypeName);
 
@@ -58,7 +58,7 @@ namespace Dibix.Sdk.CodeGeneration
                     ctorBodyWriter.Append("this.")
                                   .Append(property.Name)
                                   .Append(" = new ")
-                                  .Append(MakeCollectionType(property.Types.First().Name.SimplifiedTypeName))
+                                  .Append(MakeCollectionType(property.Contracts.First().Name.ToString()))
                                   .Append("();");
 
                     if (j + 1 < collectionProperties.Count)

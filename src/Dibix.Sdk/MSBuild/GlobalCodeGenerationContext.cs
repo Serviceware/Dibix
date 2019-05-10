@@ -11,7 +11,7 @@ namespace Dibix.Sdk.MSBuild
         public GeneratorConfiguration Configuration { get; }
         public string Namespace { get; } = "Dibix";
         public string ClassName => "SqlQueryAccessor";
-        public ITypeLoaderFacade TypeLoaderFacade { get; }
+        public IContractResolverFacade ContractResolverFacade { get; }
         public IErrorReporter ErrorReporter { get; }
 
         public GlobalCodeGenerationContext(string projectDirectory, string @namespace, IEnumerable<string> inputs, IAssemblyLocator assemblyLocator, bool isDml, IErrorReporter errorReporter)
@@ -29,14 +29,14 @@ namespace Dibix.Sdk.MSBuild
             inputs.Where(x => MatchFile(projectDirectory, x)).Each(source.Include);
             this.Configuration.Input.Sources.Add(source);
 
-            this.TypeLoaderFacade = new TypeLoaderFacade(fileSystemProvider, assemblyLocator);
+            this.ContractResolverFacade = new ContractResolverFacade(fileSystemProvider, assemblyLocator);
             this.ErrorReporter = errorReporter;
         }
 
         private static bool MatchFile(string projectDirectory, string relativeFilePath)
         {
             string inputFilePath = Path.Combine(projectDirectory, relativeFilePath);
-            if (inputFilePath != @"C:\Projects\HelpLineScrum\Development\Dev\SQL\HelplineData\Programmability\hlsysapprovalfulfillment_getpending.sql")
+            if (inputFilePath != @"F:\Helpline\HelplineScrum\Development\Dev\SQL\HelplineData\Programmability\hlsysapprovalfulfillment_getpending.sql")
                 return false;
 
             using (Stream stream = File.OpenRead(inputFilePath))

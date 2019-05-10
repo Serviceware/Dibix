@@ -31,7 +31,7 @@ namespace Dibix.Sdk.CodeGeneration
             this.ApplyConfigurationDefaults();
 
             IWriter writer = (IWriter)Activator.CreateInstance(this._context.Configuration.Output.Writer);
-            IList<SqlStatementInfo> statements = this._context.Configuration.Input.Sources.SelectMany(x => x.CollectStatements(this._context.TypeLoaderFacade, this._context.ErrorReporter)).ToArray();
+            IList<SqlStatementInfo> statements = this._context.Configuration.Input.Sources.SelectMany(x => x.CollectStatements(this._context.ContractResolverFacade, this._context.ErrorReporter)).ToArray();
             output = writer.Write(this._context.Configuration.Output.Namespace, this._context.Configuration.Output.ClassName, this._context.Configuration.Output.Formatting.Value, statements);
             if (this._context.ErrorReporter.ReportErrors())
                 output = errorContent;

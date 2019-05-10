@@ -7,7 +7,7 @@ namespace Dibix.Sdk.MSBuild
         public GeneratorConfiguration Configuration { get; }
         public string Namespace { get; }
         public string ClassName { get; }
-        public ITypeLoaderFacade TypeLoaderFacade { get; }
+        public IContractResolverFacade ContractResolverFacade { get; }
         public IErrorReporter ErrorReporter { get; }
 
         public ProjectFileCodeGenerationContext(GeneratorConfiguration configuration, string @namespace, string configurationName, IFileSystemProvider fileSystemProvider, IAssemblyLocator assemblyLocator, IErrorReporter errorReporter)
@@ -15,7 +15,7 @@ namespace Dibix.Sdk.MSBuild
             this.Configuration = configuration;
             this.Namespace = @namespace;
             this.ClassName = configurationName;
-            this.TypeLoaderFacade = new TypeLoaderFacade(fileSystemProvider, assemblyLocator);
+            this.ContractResolverFacade = new ContractResolverFacade(fileSystemProvider, assemblyLocator);
             this.ErrorReporter = errorReporter;
         }
     }

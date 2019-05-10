@@ -29,7 +29,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region ISqlStatementParser Members
-        public void Read(SqlParserSourceKind sourceKind, object source, SqlStatementInfo target, ISqlStatementFormatter formatter, ITypeLoaderFacade typeLoaderFacade, IErrorReporter errorReporter)
+        public void Read(SqlParserSourceKind sourceKind, object source, SqlStatementInfo target, ISqlStatementFormatter formatter, IContractResolverFacade contractResolverFacade, IErrorReporter errorReporter)
         {
             if (!SourceReaders.TryGetValue(sourceKind, out Func<object, TSqlFragment> reader))
                 throw new ArgumentOutOfRangeException(nameof(sourceKind), sourceKind, null);
@@ -38,7 +38,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (this.IsEnabled && this._codeAnalysisRunner.Analyze(fragment, target.Source, errorReporter))
                 return;
 
-            CollectStatementInfo(fragment, target, formatter, typeLoaderFacade, errorReporter);
+            CollectStatementInfo(fragment, target, formatter, contractResolverFacade, errorReporter);
         }
         #endregion
 
@@ -58,13 +58,13 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static void CollectStatementInfo(TSqlFragment fragment, SqlStatementInfo target, ISqlStatementFormatter formatter, ITypeLoaderFacade typeLoaderFacade, IErrorReporter errorReporter)
+        private static void CollectStatementInfo(TSqlFragment fragment, SqlStatementInfo target, ISqlStatementFormatter formatter, IContractResolverFacade contractResolverFacade, IErrorReporter errorReporter)
         {
             TVisitor visitor = new TVisitor
             {
                 Formatter = formatter,
                 Target = target,
-                TypeLoaderFacade = typeLoaderFacade,
+                ContractResolverFacade = contractResolverFacade,
                 ErrorReporter = errorReporter
             };
 

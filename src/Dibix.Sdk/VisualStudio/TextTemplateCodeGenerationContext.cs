@@ -16,15 +16,15 @@ namespace Dibix.Sdk.VisualStudio
         public GeneratorConfiguration Configuration { get; }
         public string Namespace { get; }
         public string ClassName { get; }
-        public ITypeLoaderFacade TypeLoaderFacade { get; }
+        public IContractResolverFacade ContractResolverFacade { get; }
         public IErrorReporter ErrorReporter { get; }
         #endregion
 
         #region Constructor
-        public TextTemplateCodeGenerationContext(GeneratorConfiguration configuration, ITypeLoaderFacade typeLoaderFacade, IErrorReporter errorReporter, ITextTemplatingEngineHost textTemplatingEngineHost, IServiceProvider serviceProvider)
+        public TextTemplateCodeGenerationContext(GeneratorConfiguration configuration, IContractResolverFacade contractResolverFacade, IErrorReporter errorReporter, ITextTemplatingEngineHost textTemplatingEngineHost, IServiceProvider serviceProvider)
         {
             this.Configuration = configuration;
-            this.TypeLoaderFacade = typeLoaderFacade;
+            this.ContractResolverFacade = contractResolverFacade;
             this.ErrorReporter = errorReporter;
             this.Namespace = GetProjectDefaultNamespace(textTemplatingEngineHost, serviceProvider);
             this.ClassName = Path.GetFileNameWithoutExtension(textTemplatingEngineHost.TemplateFile);

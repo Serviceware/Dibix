@@ -99,7 +99,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (query.Results.Count == 1) // Query<T>/QuerySingle/etc.
             {
-                string resultTypeName = query.Results[0].Types.First().Name.SimplifiedTypeName;
+                string resultTypeName = query.Results[0].Contracts.First().Name.ToString();
                 if (query.Results[0].ResultMode == SqlQueryResultMode.Many)
                     resultTypeName = MakeEnumerableType(resultTypeName);
 
@@ -243,11 +243,11 @@ namespace Dibix.Sdk.CodeGeneration
                   .WriteRaw(GetExecutorMethodName(query.Results[0].ResultMode))
                   .WriteRaw('<');
 
-            for (int i = 0; i < singleResult.Types.Count; i++)
+            for (int i = 0; i < singleResult.Contracts.Count; i++)
             {
-                TypeInfo returnType = singleResult.Types[i];
-                writer.WriteRaw(returnType.Name.SimplifiedTypeName);
-                if (i + 1 < singleResult.Types.Count)
+                string returnTypeName = singleResult.Contracts[i].Name.ToString();
+                writer.WriteRaw(returnTypeName);
+                if (i + 1 < singleResult.Contracts.Count)
                     writer.WriteRaw(", ");
             }
             writer.WriteRaw(">(")
@@ -261,7 +261,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (query.Parameters.Any())
                 writer.WriteRaw(", @params");
 
-            if (query.Results[0].Types.Count > 1)
+            if (query.Results[0].Contracts.Count > 1)
             {
                 writer.WriteRaw(", ")
                       .WriteRaw(query.Results[0].Converter)
@@ -320,17 +320,17 @@ namespace Dibix.Sdk.CodeGeneration
                       .WriteRaw(GetMultipleResultReaderMethodName(result.ResultMode))
                       .WriteRaw('<');
 
-                for (int i = 0; i < result.Types.Count; i++)
+                for (int i = 0; i < result.Contracts.Count; i++)
                 {
-                    TypeInfo returnType = result.Types[i];
-                    writer.WriteRaw(returnType.Name.SimplifiedTypeName);
-                    if (i + 1 < result.Types.Count)
+                    string returnTypeName = result.Contracts[i].Name.ToString();
+                    writer.WriteRaw(returnTypeName);
+                    if (i + 1 < result.Contracts.Count)
                         writer.WriteRaw(", ");
                 }
 
                 writer.WriteRaw(">(");
 
-                if (result.Types.Count > 1)
+                if (result.Contracts.Count > 1)
                 {
                     writer.WriteRaw(result.Converter)
                           .WriteRaw(", \"")

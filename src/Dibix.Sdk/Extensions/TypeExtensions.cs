@@ -7,7 +7,7 @@ using Microsoft.CSharp;
 
 namespace Dibix.Sdk
 {
-    internal static class TypeExtensions
+    public static class TypeExtensions
     {
         private static readonly IDictionary<string, Type> CSharpTypeNames = LoadCSharpTypeNames().ToDictionary(x => x.Key, x => x.Value);
 
@@ -20,12 +20,12 @@ namespace Dibix.Sdk
             return type.IsPrimitive || type.IsEnum || type == typeof(string) || type == typeof(Guid);
         }
 
-        public static bool IsNullable(this Type type)
+        internal static bool IsNullable(this Type type)
         {
             return !type.IsValueType || Nullable.GetUnderlyingType(type) != null;
         }
 
-        public static Type MakeNullable(this Type type)
+        internal static Type MakeNullable(this Type type)
         {
             Type nullableType = typeof(Nullable<>).MakeGenericType(type);
             return nullableType;
@@ -48,13 +48,13 @@ namespace Dibix.Sdk
             }
         }
 
-        public static Type ToClrType(this string cSharpTypeName)
+        internal static Type ToClrType(this string cSharpTypeName)
         {
             CSharpTypeNames.TryGetValue(cSharpTypeName, out Type clrType);
             return clrType;
         }
 
-        public static IEnumerable<Type> GetLoadableTypes(this Assembly assembly)
+        internal static IEnumerable<Type> GetLoadableTypes(this Assembly assembly)
         {
             Guard.IsNotNull(assembly, nameof(assembly));
             try

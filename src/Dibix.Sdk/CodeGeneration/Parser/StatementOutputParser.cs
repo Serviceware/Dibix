@@ -13,7 +13,7 @@ namespace Dibix.Sdk.CodeGeneration
         private const string ReturnHintSplitOn = "SplitOn";
         private const string ReturnHintConverter = "Converter";
 
-        public static IEnumerable<SqlQueryResult> Parse(SqlStatementInfo target, TSqlStatement node, ITypeLoaderFacade typeLoaderFacade, IErrorReporter errorReporter)
+        public static IEnumerable<SqlQueryResult> Parse(SqlStatementInfo target, TSqlStatement node, IContractResolverFacade contractResolverFacade, IErrorReporter errorReporter)
         {
             StatementOutputVisitor visitor = new StatementOutputVisitor(target.Source, errorReporter);
             node.Accept(visitor);
@@ -63,11 +63,11 @@ namespace Dibix.Sdk.CodeGeneration
                     SplitOn = splitOn
                 };
 
-                IList<TypeInfo> returnTypes = typeNames.Select(x => typeLoaderFacade.LoadType(x, y => errorReporter.RegisterError(target.Source, returnHint.Line, returnHint.Column, null, y))).ToArray();
+                IList<ContractInfo> returnTypes = typeNames.Select(x => contractResolverFacade.ResolveContract(x, y => errorReporter.RegisterError(target.Source, returnHint.Line, returnHint.Column, null, y))).ToArray();
                 if (returnTypes.Any(x => x == null))
                     continue;
 
-                result.Types.AddRange(returnTypes);
+                result.Contracts.AddRange(returnTypes);
 
                 OutputSelectResult output = visitor.Results[i];
                 ValidateResult(returnHints.Count, returnHint, result, returnTypes, output.Columns, usedOutputNames, target.Source, errorReporter);
@@ -77,7 +77,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static void ValidateResult(int numberOfReturnHints, SqlHint returnHint, SqlQueryResult result, IList<TypeInfo> returnTypes, IEnumerable<OutputColumnResult> columns, HashSet<string> usedOutputNames, string sourcePath, IErrorReporter errorReporter)
+        private static void ValidateResult(int numberOfReturnHints, SqlHint returnHint, SqlQueryResult result, IList<ContractInfo> returnTypes, IEnumerable<OutputColumnResult> columns, HashSet<string> usedOutputNames, string sourcePath, IErrorReporter errorReporter)
         {
             // Validate return count/name
             if (!String.IsNullOrEmpty(result.Name))
@@ -122,7 +122,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             for (int i = 0; i < returnTypes.Count; i++)
             {
-                TypeInfo returnType = returnTypes[i];
+                ContractInfo returnType = returnTypes[i];
                 ICollection<OutputColumnResult> columnGroup = columnGroups[i];
 
                 // SELECT 1 => Query<int>/Single<int> => No entity property validation + No missing alias validation

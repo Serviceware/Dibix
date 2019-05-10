@@ -35,10 +35,10 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Overrides
-        protected override IEnumerable<SqlStatementInfo> CollectStatements(ISqlStatementParser parser, ISqlStatementFormatter formatter, ITypeLoaderFacade typeLoaderFacade, IErrorReporter errorReporter)
+        protected override IEnumerable<SqlStatementInfo> CollectStatements(ISqlStatementParser parser, ISqlStatementFormatter formatter, IContractResolverFacade contractResolverFacade, IErrorReporter errorReporter)
         {
             return this.Files
-                       .Select(x => ParseStatement(x, parser, formatter, typeLoaderFacade, errorReporter));
+                       .Select(x => ParseStatement(x, parser, formatter, contractResolverFacade, errorReporter));
         }
         #endregion
 
@@ -49,14 +49,14 @@ namespace Dibix.Sdk.CodeGeneration
                        .GetFiles(this._projectName, this._include, this._exclude);
         }
 
-        private static SqlStatementInfo ParseStatement(string filePath, ISqlStatementParser parser, ISqlStatementFormatter formatter, ITypeLoaderFacade typeLoaderFacade, IErrorReporter errorReporter)
+        private static SqlStatementInfo ParseStatement(string filePath, ISqlStatementParser parser, ISqlStatementFormatter formatter, IContractResolverFacade contractResolverFacade, IErrorReporter errorReporter)
         {
             SqlStatementInfo statement = new SqlStatementInfo
             {
                 Source = filePath,
                 Name = Path.GetFileNameWithoutExtension(filePath)
             };
-            parser.Read(SqlParserSourceKind.Stream, File.OpenRead(filePath), statement, formatter, typeLoaderFacade, errorReporter);
+            parser.Read(SqlParserSourceKind.Stream, File.OpenRead(filePath), statement, formatter, contractResolverFacade, errorReporter);
             return statement;
         }
         #endregion

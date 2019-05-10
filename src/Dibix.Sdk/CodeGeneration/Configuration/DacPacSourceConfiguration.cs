@@ -24,15 +24,15 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Overrides
-        protected override IEnumerable<SqlStatementInfo> CollectStatements(ISqlStatementParser parser, ISqlStatementFormatter formatter, ITypeLoaderFacade typeLoaderFacade, IErrorReporter errorReporter)
+        protected override IEnumerable<SqlStatementInfo> CollectStatements(ISqlStatementParser parser, ISqlStatementFormatter formatter, IContractResolverFacade contractResolverFacade, IErrorReporter errorReporter)
         {
             TSqlModel model = TSqlModel.LoadFromDacpac(this._packagePath, new ModelLoadOptions());
-            return this._procedureNames.Select(x => this.CollectStatement(x.Value, x.Key, model, parser, formatter, typeLoaderFacade, errorReporter));
+            return this._procedureNames.Select(x => this.CollectStatement(x.Value, x.Key, model, parser, formatter, contractResolverFacade, errorReporter));
         }
         #endregion
 
         #region Private Methods
-        private SqlStatementInfo CollectStatement(string procedureName, string displayName, TSqlModel model, ISqlStatementParser parser, ISqlStatementFormatter formatter, ITypeLoaderFacade typeLoaderFacade, IErrorReporter errorReporter)
+        private SqlStatementInfo CollectStatement(string procedureName, string displayName, TSqlModel model, ISqlStatementParser parser, ISqlStatementFormatter formatter, IContractResolverFacade contractResolverFacade, IErrorReporter errorReporter)
         {
             ICollection<string> parts = procedureName.Split('.').Select(x => x.Trim('[', ']')).ToArray();
             TSqlObject element = model.GetObject(ModelSchema.Procedure, new ObjectIdentifier(parts), DacQueryScopes.All);
@@ -48,7 +48,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (parser is ISqlAnalysisRunner sqlAnalysisRunner)
                 sqlAnalysisRunner.IsEnabled = false;
 
-            parser.Read(SqlParserSourceKind.String, script, statement, formatter, typeLoaderFacade, errorReporter);
+            parser.Read(SqlParserSourceKind.String, script, statement, formatter, contractResolverFacade, errorReporter);
             return statement;
         }
         #endregion

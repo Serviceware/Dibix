@@ -11,7 +11,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Public Methods
-        public IEnumerable<SqlStatementInfo> CollectStatements(ITypeLoaderFacade typeLoaderFacade, IErrorReporter errorReporter)
+        public IEnumerable<SqlStatementInfo> CollectStatements(IContractResolverFacade contractResolverFacade, IErrorReporter errorReporter)
         {
             if (this.Parser == null)
                 throw new InvalidOperationException("No parser was configured");
@@ -21,12 +21,12 @@ namespace Dibix.Sdk.CodeGeneration
 
             ISqlStatementParser parser = (ISqlStatementParser)Activator.CreateInstance(this.Parser);
             ISqlStatementFormatter formatter = (ISqlStatementFormatter)Activator.CreateInstance(this.Formatter);
-            return this.CollectStatements(parser, formatter, typeLoaderFacade, errorReporter);
+            return this.CollectStatements(parser, formatter, contractResolverFacade, errorReporter);
         }
         #endregion
 
         #region Abstract Methods
-        protected abstract IEnumerable<SqlStatementInfo> CollectStatements(ISqlStatementParser parser, ISqlStatementFormatter formatter, ITypeLoaderFacade typeLoaderFacade, IErrorReporter errorReporter);
+        protected abstract IEnumerable<SqlStatementInfo> CollectStatements(ISqlStatementParser parser, ISqlStatementFormatter formatter, IContractResolverFacade contractResolverFacade, IErrorReporter errorReporter);
         #endregion
     }
 }

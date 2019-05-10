@@ -6,7 +6,7 @@ using EnvDTE;
 
 namespace Dibix.Sdk.VisualStudio
 {
-    internal sealed class CodeElementTypeLoader : ITypeLoader
+    internal sealed class CodeElementContractResolver : IContractResolver
     {
         #region Fields
         private readonly Lazy<ICollection<CodeElement>> _codeItemAccessor;
@@ -14,7 +14,7 @@ namespace Dibix.Sdk.VisualStudio
         #endregion
 
         #region Constructor
-        public CodeElementTypeLoader(IServiceProvider serviceProvider, string executingFilePath)
+        public CodeElementContractResolver(IServiceProvider serviceProvider, string executingFilePath)
         {
             DTE dte = (DTE)serviceProvider.GetService(typeof(DTE));
             this._codeItemAccessor = new Lazy<ICollection<CodeElement>>(this.GetCodeItems);
@@ -22,18 +22,19 @@ namespace Dibix.Sdk.VisualStudio
         }
         #endregion
 
-        #region ITypeLoader Members
-        public TypeInfo LoadType(TypeName typeName, Action<string> errorHandler)
+        #region IContractResolver Members
+        public ContractInfo ResolveContract(string input, Action<string> errorHandler)
         {
-            CodeElement codeItem = this._codeItemAccessor.Value.FirstOrDefault(x => x.FullName == typeName.NormalizedTypeName);
+            ContractName name = new ContractName(input);
+            CodeElement codeItem = this._codeItemAccessor.Value.FirstOrDefault(x => x.FullName == name.TypeName);
             if (codeItem == null)
             {
-                errorHandler($"Could not resolve type '{typeName}'. Looking in current project.");
+                errorHandler($"Could not resolve type '{name}'. Looking in current project.");
                 return null;
             }
 
-            TypeInfo type = CreateTypeInfo(typeName, codeItem);
-            return type;
+            ContractInfo contract = CreateContractInfo(name, codeItem);
+            return contract;
         }
         #endregion
 
@@ -69,18 +70,18 @@ namespace Dibix.Sdk.VisualStudio
             }
         }
 
-        private static TypeInfo CreateTypeInfo(TypeName typeName, CodeElement element)
+        private static ContractInfo CreateContractInfo(ContractName contractName, CodeElement element)
         {
             bool isPrimitiveType = element.Kind == vsCMElement.vsCMElementEnum;
-            TypeInfo type = new TypeInfo(typeName, isPrimitiveType);
+            ContractInfo contract = new ContractInfo(contractName, isPrimitiveType);
 
             if (element is CodeClass @class)
             {
                 IEnumerable<string> properties = TraverseProperties(@class);
-                type.Properties.AddRange(properties);
+                contract.Properties.AddRange(properties);
             }
 
-            return type;
+            return contract;
         }
 
         private static IEnumerable<string> TraverseProperties(CodeClass @class)

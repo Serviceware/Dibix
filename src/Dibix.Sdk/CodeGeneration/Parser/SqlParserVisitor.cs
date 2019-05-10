@@ -10,7 +10,7 @@ namespace Dibix.Sdk.CodeGeneration
     {
         #region Properties
         internal ISqlStatementFormatter Formatter { get; set; }
-        internal ITypeLoaderFacade TypeLoaderFacade{ get; set; }
+        internal IContractResolverFacade ContractResolverFacade{ get; set; }
         internal IErrorReporter ErrorReporter { get; set; }
         internal SqlStatementInfo Target { get; set; }
         #endregion
@@ -121,7 +121,7 @@ ReferenceType: {node.DataType.GetType()}");
 
         private void ParseResults(TSqlStatement node)
         {
-            IEnumerable<SqlQueryResult> results = StatementOutputParser.Parse(this.Target, node, this.TypeLoaderFacade, this.ErrorReporter);
+            IEnumerable<SqlQueryResult> results = StatementOutputParser.Parse(this.Target, node, this.ContractResolverFacade, this.ErrorReporter);
             this.Target.Results.AddRange(results);
         }
 

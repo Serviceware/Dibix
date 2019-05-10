@@ -7,7 +7,7 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal static class SqlHintReader
     {
-        private static readonly Regex ParseCommentRegex = new Regex(@"^(?:\/\*|--) ?@([\w]+)(?: (?:([#\w:.[\],;? ]+)))?(?: ?\*\/)?$", RegexOptions.Compiled);
+        private static readonly Regex ParseCommentRegex = new Regex(@"^(?:\/\*|--) ?@([\w]+)(?: (?:([#\w.[\],;?]+)|([#\w:.[\],;? ]+)))?(?: ?\*\/)?$", RegexOptions.Compiled);
 
         public static IEnumerable<SqlHint> Read(TSqlFragment fragment, int startIndex = 0)
         {

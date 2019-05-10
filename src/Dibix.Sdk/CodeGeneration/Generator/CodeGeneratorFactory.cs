@@ -17,28 +17,28 @@ namespace Dibix.Sdk.CodeGeneration
 
         public static ICodeGenerator FromTextTemplate(GeneratorConfiguration configuration, ITextTemplatingEngineHost textTemplatingEngineHost, IServiceProvider serviceProvider)
         {
-            ITypeLoader typeLoader = new CodeElementTypeLoader(serviceProvider, textTemplatingEngineHost.TemplateFile);
+            IContractResolver contractResolver = new CodeElementContractResolver(serviceProvider, textTemplatingEngineHost.TemplateFile);
             IAssemblyLocator assemblyLocator = new ProjectReferenceAssemblyLocator(serviceProvider, textTemplatingEngineHost.TemplateFile);
             IFileSystemProvider fileSystemProvider = new ProjectFileSystemProvider(serviceProvider, textTemplatingEngineHost.TemplateFile);
-            ITypeLoaderFacade typeLoaderFacade = new TypeLoaderFacade(fileSystemProvider, assemblyLocator);
-            typeLoaderFacade.RegisterTypeLoader(typeLoader);
+            IContractResolverFacade contractResolverFacade = new ContractResolverFacade(fileSystemProvider, assemblyLocator);
+            contractResolverFacade.RegisterContractResolver(contractResolver);
             IErrorReporter errorReporter = new TextTemplatingEngineErrorReporter(textTemplatingEngineHost);
-            ICodeGenerationContext context = new TextTemplateCodeGenerationContext(configuration, typeLoaderFacade, errorReporter, textTemplatingEngineHost, serviceProvider);
+            ICodeGenerationContext context = new TextTemplateCodeGenerationContext(configuration, contractResolverFacade, errorReporter, textTemplatingEngineHost, serviceProvider);
             ICodeGenerator generator = new DaoCodeGenerator(context);
             return generator;
         }
 
         public static ICodeGenerator FromCustomTool(GeneratorConfiguration configuration, IServiceProvider serviceProvider, string inputFilePath, string @namespace)
         {
-            ITypeLoader typeLoader = new CodeElementTypeLoader(serviceProvider, inputFilePath);
+            IContractResolver contractResolver = new CodeElementContractResolver(serviceProvider, inputFilePath);
             IAssemblyLocator assemblyLocator = new ProjectReferenceAssemblyLocator(serviceProvider, inputFilePath);
             IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(Path.GetDirectoryName(inputFilePath));
-            ITypeLoaderFacade typeLoaderFacade = new TypeLoaderFacade(fileSystemProvider, assemblyLocator);
-            typeLoaderFacade.RegisterTypeLoader(typeLoader);
+            IContractResolverFacade contractResolverFacade = new ContractResolverFacade(fileSystemProvider, assemblyLocator);
+            contractResolverFacade.RegisterContractResolver(contractResolver);
             if (_errorReporter == null)
                 _errorReporter = new VisualStudioErrorReporter(serviceProvider);
 
-            ICodeGenerationContext context = new CustomToolCodeGenerationContext(configuration, typeLoaderFacade, _errorReporter, inputFilePath, @namespace);
+            ICodeGenerationContext context = new CustomToolCodeGenerationContext(configuration, contractResolverFacade, _errorReporter, inputFilePath, @namespace);
             ICodeGenerator generator = new DaoCodeGenerator(context);
             return generator;
         }
