@@ -29,13 +29,15 @@ namespace Dibix.Sdk.MSBuild
             inputs.Where(x => MatchFile(projectDirectory, x)).Each(source.Include);
             this.Configuration.Input.Sources.Add(source);
 
-            this.TypeLoaderFacade = new TypeLoaderFacade(new TypeLoader(), assemblyLocator);
+            this.TypeLoaderFacade = new TypeLoaderFacade(fileSystemProvider, assemblyLocator);
             this.ErrorReporter = errorReporter;
         }
 
         private static bool MatchFile(string projectDirectory, string relativeFilePath)
         {
             string inputFilePath = Path.Combine(projectDirectory, relativeFilePath);
+            if (inputFilePath != @"C:\Projects\HelpLineScrum\Development\Dev\SQL\HelplineData\Programmability\hlsysapprovalfulfillment_getpending.sql")
+                return false;
 
             using (Stream stream = File.OpenRead(inputFilePath))
             {
@@ -47,15 +49,6 @@ namespace Dibix.Sdk.MSBuild
             }
 
             return false;
-        }
-
-        private class TypeLoader : ITypeLoader
-        {
-            public TypeInfo LoadType(TypeName typeName, Action<string> errorHandler)
-            {
-                errorHandler($"The type must be qualified with an assembly name: {typeName}");
-                return null;
-            }
         }
     }
 }

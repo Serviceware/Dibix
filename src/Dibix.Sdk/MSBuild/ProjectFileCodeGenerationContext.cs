@@ -1,5 +1,4 @@
-﻿using System;
-using Dibix.Sdk.CodeGeneration;
+﻿using Dibix.Sdk.CodeGeneration;
 
 namespace Dibix.Sdk.MSBuild
 {
@@ -11,21 +10,13 @@ namespace Dibix.Sdk.MSBuild
         public ITypeLoaderFacade TypeLoaderFacade { get; }
         public IErrorReporter ErrorReporter { get; }
 
-        public ProjectFileCodeGenerationContext(GeneratorConfiguration configuration, string @namespace, string configurationName, IAssemblyLocator assemblyLocator, IErrorReporter errorReporter)
+        public ProjectFileCodeGenerationContext(GeneratorConfiguration configuration, string @namespace, string configurationName, IFileSystemProvider fileSystemProvider, IAssemblyLocator assemblyLocator, IErrorReporter errorReporter)
         {
             this.Configuration = configuration;
             this.Namespace = @namespace;
             this.ClassName = configurationName;
-            this.TypeLoaderFacade = new TypeLoaderFacade(new TypeLoader(), assemblyLocator);
+            this.TypeLoaderFacade = new TypeLoaderFacade(fileSystemProvider, assemblyLocator);
             this.ErrorReporter = errorReporter;
-        }
-
-        private class TypeLoader : ITypeLoader
-        {
-            public TypeInfo LoadType(TypeName typeName, Action<string> errorHandler)
-            {
-                throw new NotImplementedException();
-            }
         }
     }
 }

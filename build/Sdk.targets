@@ -16,12 +16,13 @@
 
   <Target Name="SqlCodeAnalysis" BeforeTargets="BeforeBuild">
     <SqlCodeAnalysisTask SdkPath="$(DibixSdkPath)"
-                         ProbingDirectory="$(SqlServerRedistPath)"
+                         SSDTDirectory="$(SqlServerRedistPath)"
                          Inputs="@(Build->'%(FullPath)')" />
   </Target>
 
   <Target Name="CompileDatabaseAccessor" AfterTargets="PostBuildEvent" Condition="$(ShouldCompileDatabaseAccessor) == 'true'">
     <CompileDatabaseAccessorTask SdkPath="$(DibixSdkPath)"
+                                 SSDTDirectory="$(SqlServerRedistPath)"
                                  ProjectDirectory="$(MSBuildProjectDirectory)"
                                  Namespace="$(DatabaseAccessorNamespace)"
                                  TargetDirectory="$(IntermediateOutputPath)"

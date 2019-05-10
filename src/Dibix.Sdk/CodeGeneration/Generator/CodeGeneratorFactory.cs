@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Dibix.Sdk.VisualStudio;
 using Microsoft.VisualStudio.TextTemplating;
 
@@ -18,7 +19,9 @@ namespace Dibix.Sdk.CodeGeneration
         {
             ITypeLoader typeLoader = new CodeElementTypeLoader(serviceProvider, textTemplatingEngineHost.TemplateFile);
             IAssemblyLocator assemblyLocator = new ProjectReferenceAssemblyLocator(serviceProvider, textTemplatingEngineHost.TemplateFile);
-            ITypeLoaderFacade typeLoaderFacade = new TypeLoaderFacade(typeLoader, assemblyLocator);
+            IFileSystemProvider fileSystemProvider = new ProjectFileSystemProvider(serviceProvider, textTemplatingEngineHost.TemplateFile);
+            ITypeLoaderFacade typeLoaderFacade = new TypeLoaderFacade(fileSystemProvider, assemblyLocator);
+            typeLoaderFacade.RegisterTypeLoader(typeLoader);
             IErrorReporter errorReporter = new TextTemplatingEngineErrorReporter(textTemplatingEngineHost);
             ICodeGenerationContext context = new TextTemplateCodeGenerationContext(configuration, typeLoaderFacade, errorReporter, textTemplatingEngineHost, serviceProvider);
             ICodeGenerator generator = new DaoCodeGenerator(context);
@@ -29,7 +32,9 @@ namespace Dibix.Sdk.CodeGeneration
         {
             ITypeLoader typeLoader = new CodeElementTypeLoader(serviceProvider, inputFilePath);
             IAssemblyLocator assemblyLocator = new ProjectReferenceAssemblyLocator(serviceProvider, inputFilePath);
-            ITypeLoaderFacade typeLoaderFacade = new TypeLoaderFacade(typeLoader, assemblyLocator);
+            IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(Path.GetDirectoryName(inputFilePath));
+            ITypeLoaderFacade typeLoaderFacade = new TypeLoaderFacade(fileSystemProvider, assemblyLocator);
+            typeLoaderFacade.RegisterTypeLoader(typeLoader);
             if (_errorReporter == null)
                 _errorReporter = new VisualStudioErrorReporter(serviceProvider);
 

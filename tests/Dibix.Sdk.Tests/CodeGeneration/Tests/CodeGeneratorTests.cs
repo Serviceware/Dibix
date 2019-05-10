@@ -19,7 +19,8 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             Mock<ICodeGenerationContext> codeGenerationContext = new Mock<ICodeGenerationContext>(MockBehavior.Strict);
             Mock<ITypeLoader> typeLoader = new Mock<ITypeLoader>(MockBehavior.Strict);
             Mock<IAssemblyLocator> assemblyLocator = new Mock<IAssemblyLocator>(MockBehavior.Strict);
-            ITypeLoaderFacade typeLoaderFacade = new TypeLoaderFacade(typeLoader.Object, assemblyLocator.Object);
+            ITypeLoaderFacade typeLoaderFacade = new TypeLoaderFacade(fileSystemProvider.Object, assemblyLocator.Object);
+            typeLoaderFacade.RegisterTypeLoader(typeLoader.Object);
 
             fileSystemProvider.Setup(x => x.GetFiles("Dibix.Sdk.Tests.Database", It.IsAny<IEnumerable<VirtualPath>>(), It.IsAny<IEnumerable<VirtualPath>>()))
                               .Returns<string, IEnumerable<VirtualPath>, IEnumerable<VirtualPath>>(physicalFileSystemProvider.GetFiles);
@@ -66,7 +67,8 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             Mock<ICodeGenerationContext> codeGenerationContext = new Mock<ICodeGenerationContext>(MockBehavior.Strict);
             Mock<ITypeLoader> typeLoader = new Mock<ITypeLoader>(MockBehavior.Strict);
             Mock<IAssemblyLocator> assemblyLocator = new Mock<IAssemblyLocator>(MockBehavior.Strict);
-            ITypeLoaderFacade typeLoaderFacade = new TypeLoaderFacade(typeLoader.Object, assemblyLocator.Object);
+            ITypeLoaderFacade typeLoaderFacade = new TypeLoaderFacade(fileSystemProvider.Object, assemblyLocator.Object);
+            typeLoaderFacade.RegisterTypeLoader(typeLoader.Object);
 
             fileSystemProvider.SetupGet(x => x.CurrentDirectory).Returns(ExecutingDirectory);
             fileSystemProvider.Setup(x => x.GetFiles("Dibix.Sdk.Tests.Database", It.IsAny<IEnumerable<VirtualPath>>(), It.IsAny<IEnumerable<VirtualPath>>()))
@@ -122,7 +124,8 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             Mock<ICodeGenerationContext> codeGenerationContext = new Mock<ICodeGenerationContext>(MockBehavior.Strict);
             Mock<ITypeLoader> typeLoader = new Mock<ITypeLoader>(MockBehavior.Strict);
             Mock<IAssemblyLocator> assemblyLocator = new Mock<IAssemblyLocator>(MockBehavior.Strict);
-            ITypeLoaderFacade typeLoaderFacade = new TypeLoaderFacade(typeLoader.Object, assemblyLocator.Object);
+            ITypeLoaderFacade typeLoaderFacade = new TypeLoaderFacade(fileSystemProvider.Object, assemblyLocator.Object);
+            typeLoaderFacade.RegisterTypeLoader(typeLoader.Object);
 
             fileSystemProvider.SetupGet(x => x.CurrentDirectory).Returns(ExecutingDirectory);
             fileSystemProvider.Setup(x => x.GetFiles("Dibix.Sdk.Tests.Database", It.IsAny<IEnumerable<VirtualPath>>(), It.IsAny<IEnumerable<VirtualPath>>()))
@@ -181,7 +184,8 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             Mock<ICodeGenerationContext> codeGenerationContext = new Mock<ICodeGenerationContext>(MockBehavior.Strict);
             Mock<ITypeLoader> typeLoader = new Mock<ITypeLoader>(MockBehavior.Strict);
             Mock<IAssemblyLocator> assemblyLocator = new Mock<IAssemblyLocator>(MockBehavior.Strict);
-            ITypeLoaderFacade typeLoaderFacade = new TypeLoaderFacade(typeLoader.Object, assemblyLocator.Object);
+            ITypeLoaderFacade typeLoaderFacade = new TypeLoaderFacade(fileSystemProvider.Object, assemblyLocator.Object);
+            typeLoaderFacade.RegisterTypeLoader(typeLoader.Object);
 
             fileSystemProvider.SetupGet(x => x.CurrentDirectory).Returns(ExecutingDirectory);
             fileSystemProvider.Setup(x => x.GetFiles("Dibix.Sdk.Tests.Database", It.IsAny<IEnumerable<VirtualPath>>(), It.IsAny<IEnumerable<VirtualPath>>()))

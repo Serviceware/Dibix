@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using Dibix.Sdk;
 using Microsoft.Build.Framework;
@@ -29,10 +27,8 @@ namespace Dibix.MSBuild
     */
     public sealed class SqlCodeAnalysisTask : Task, ITask
     {
-        private static readonly string DependentAssemblyProbingDirectory = Path.GetDirectoryName(typeof(SqlCodeAnalysisTask).Assembly.Location);
-
         public string SdkPath { get; set; }
-        public string ProbingDirectory { get; set; }
+        public string SSDTDirectory { get; set; }
         public string[] Inputs { get; set; }
 
         public override bool Execute()
@@ -47,19 +43,12 @@ namespace Dibix.MSBuild
                 this.Inputs
               , base.Log
             };
-            AppDomain.CurrentDomain.AssemblyResolve += this.OnAssemblyResolve;
-            bool result = (bool)adapterType.InvokeMember("Execute", BindingFlags.InvokeMethod, null, null, args);
-            AppDomain.CurrentDomain.AssemblyResolve -= this.OnAssemblyResolve;
-            return result;
-        }
 
-        private Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
-        {
-            var query = from directory in new[] { this.ProbingDirectory,DependentAssemblyProbingDirectory }
-                        let path = Path.Combine(directory, $"{new AssemblyName(args.Name).Name}.dll")
-                        where File.Exists(path)
-                        select Assembly.LoadFrom(path);
-            return query.FirstOrDefault();
+            using (new SSDTAssemblyResolver(this.SSDTDirectory))
+            {
+                bool result = (bool)adapterType.InvokeMember("Execute", BindingFlags.InvokeMethod, null, null, args);
+                return result;
+            }
         }
     }
 }

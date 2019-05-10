@@ -5,12 +5,14 @@ using System.Reflection;
 using Dibix.Sdk;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using Newtonsoft.Json.Schema;
 
 namespace Dibix.MSBuild
 {
     public sealed class CompileDatabaseAccessorTask : Task, ITask
     {
         public string SdkPath { get; set; }
+        public string SSDTDirectory { get; set; }
         public string ProjectDirectory { get; set; }
         public string Namespace { get; set; }
         public string TargetDirectory { get; set; }
@@ -23,6 +25,15 @@ namespace Dibix.MSBuild
 
         [Output]
         public string[] ReferencePaths { get; set; }
+
+        static CompileDatabaseAccessorTask()
+        {
+            // Force loading of referenced assemblies that are needed later on
+            new[]
+            {
+                typeof(JSchemaType) // Newtonsoft.Json.Schema
+            }.GetHashCode();
+        }
 
         public override bool Execute()
         {
@@ -40,10 +51,14 @@ namespace Dibix.MSBuild
               , null
               , null
             };
-            bool result = (bool)adapterType.InvokeMember("Execute", BindingFlags.InvokeMethod, null, null, args);
-            this.OutputFilePath = (string)args[7];
-            this.ReferencePaths = ((ICollection<string>)args[8]).ToArray();
-            return result;
+
+            using (new SSDTAssemblyResolver(this.SSDTDirectory))
+            {
+                bool result = (bool)adapterType.InvokeMember("Execute", BindingFlags.InvokeMethod, null, null, args);
+                this.OutputFilePath = (string)args[7];
+                this.ReferencePaths = ((ICollection<string>)args[8]).ToArray();
+                return result;
+            }
         }
     }
 }

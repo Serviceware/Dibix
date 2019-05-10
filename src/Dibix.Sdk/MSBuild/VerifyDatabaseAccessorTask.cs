@@ -27,7 +27,7 @@ namespace Dibix.Sdk.MSBuild
                 reader.Read(configuration);
 
                 IAssemblyLocator assemblyLocator = new DefaultAssemblyLocator(projectDirectory, assemblyReferences ?? Enumerable.Empty<string>());
-                ICodeGenerationContext context = new ProjectFileCodeGenerationContext(configuration, @namespace, configurationName, assemblyLocator, errorReporter);
+                ICodeGenerationContext context = new ProjectFileCodeGenerationContext(configuration, @namespace, configurationName, fileSystemProvider, assemblyLocator, errorReporter);
                 ICodeGenerator generator = new DaoCodeGenerator(context);
 
                 string expected = File.ReadAllText(outputPath);
