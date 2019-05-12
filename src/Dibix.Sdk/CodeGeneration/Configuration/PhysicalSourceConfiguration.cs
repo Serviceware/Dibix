@@ -9,6 +9,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Fields
         private readonly string _projectName;
         private readonly IFileSystemProvider _fileSystemProvider;
+        private readonly IJsonSchemaProvider _jsonSchemaProvider;
         private readonly ICollection<VirtualPath> _include;
         private readonly ICollection<VirtualPath> _exclude;
         private IEnumerable<string> _files;
@@ -19,10 +20,12 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public PhysicalSourceConfiguration(IFileSystemProvider fileSystemProvider, string projectName)
+        public PhysicalSourceConfiguration(IFileSystemProvider fileSystemProvider, string projectName) : this(fileSystemProvider, null, projectName) { }
+        public PhysicalSourceConfiguration(IFileSystemProvider fileSystemProvider, IJsonSchemaProvider jsonSchemaProvider, string projectName)
         {
             this._projectName = projectName;
             this._fileSystemProvider = fileSystemProvider;
+            this._jsonSchemaProvider = jsonSchemaProvider;
             this._include = new HashSet<VirtualPath>();
             this._exclude = new HashSet<VirtualPath>();
         }
@@ -38,15 +41,24 @@ namespace Dibix.Sdk.CodeGeneration
         protected override IEnumerable<SqlStatementInfo> CollectStatements(ISqlStatementParser parser, ISqlStatementFormatter formatter, IContractResolverFacade contractResolverFacade, IErrorReporter errorReporter)
         {
             return this.Files
+                       .Where(x => Path.GetExtension(x) == ".sql")
                        .Select(x => ParseStatement(x, parser, formatter, contractResolverFacade, errorReporter));
+        }
+
+        protected override IEnumerable<JsonContract> CollectContracts()
+        {
+            // Not all entry points support this
+            if (this._jsonSchemaProvider == null)
+                return Enumerable.Empty<JsonContract>();
+
+            return this._jsonSchemaProvider.Schemas;
         }
         #endregion
 
         #region Private Methods
         private IEnumerable<string> GetFiles()
         {
-            return this._fileSystemProvider
-                       .GetFiles(this._projectName, this._include, this._exclude);
+            return this._fileSystemProvider.GetFiles(this._projectName, this._include, this._exclude);
         }
 
         private static SqlStatementInfo ParseStatement(string filePath, ISqlStatementParser parser, ISqlStatementFormatter formatter, IContractResolverFacade contractResolverFacade, IErrorReporter errorReporter)

@@ -16,15 +16,16 @@ namespace Dibix.Sdk.CodeGeneration
 // </auto-generated>
 //----------------------------------------------------------------------------*/";
 
-        public string Write(string @namespace, string className, CommandTextFormatting formatting, IList<SqlStatementInfo> statements)
+        public string Write(string @namespace, string className, CommandTextFormatting formatting, SourceArtifacts artifacts)
         {
             StringWriter writer = new StringWriter();
             writer.WriteLineRaw(Header);
-            this.Write(writer, @namespace, className, formatting, statements);
+            this.Write(writer, @namespace, className, formatting, artifacts);
             return writer.ToString();
         }
 
-        protected abstract void Write(StringWriter writer, string @namespace, string className, CommandTextFormatting formatting, IList<SqlStatementInfo> statements);
+        protected abstract void Write(StringWriter writer, string @namespace, string className,
+            CommandTextFormatting formatting, SourceArtifacts statements);
 
         protected static string Format(string content, CommandTextFormatting formatting)
         {

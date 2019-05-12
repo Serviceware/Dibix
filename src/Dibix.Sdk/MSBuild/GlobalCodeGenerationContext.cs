@@ -20,16 +20,20 @@ namespace Dibix.Sdk.MSBuild
                 this.Namespace = @namespace;
 
             IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(projectDirectory);
+            IJsonSchemaProvider jsonSchemaProvider = new JsonSchemaContractProvider(fileSystemProvider);
 
             this.Configuration = new GeneratorConfiguration();
-            PhysicalSourceConfiguration source = new PhysicalSourceConfiguration(fileSystemProvider, null);
+            PhysicalSourceConfiguration source = new PhysicalSourceConfiguration(fileSystemProvider, jsonSchemaProvider, null);
             if (!isDml)
                 source.Formatter = typeof(ExecStoredProcedureSqlStatementFormatter);
 
             inputs.Where(x => MatchFile(projectDirectory, x)).Each(source.Include);
             this.Configuration.Input.Sources.Add(source);
 
-            this.ContractResolverFacade = new ContractResolverFacade(fileSystemProvider, assemblyLocator);
+            this.ContractResolverFacade = new ContractResolverFacade();
+            this.ContractResolverFacade.RegisterContractResolver(new JsonSchemaContractResolver(jsonSchemaProvider));
+            this.ContractResolverFacade.RegisterContractResolver(new ClrTypeContractResolver());
+            this.ContractResolverFacade.RegisterContractResolver(new ForeignAssemblyTypeContractResolver(assemblyLocator));
             this.ErrorReporter = errorReporter;
         }
 

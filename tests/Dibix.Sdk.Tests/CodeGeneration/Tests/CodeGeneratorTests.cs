@@ -18,7 +18,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             Mock<ICodeGenerationContext> codeGenerationContext = new Mock<ICodeGenerationContext>(MockBehavior.Strict);
             Mock<IContractResolver> contractResolver = new Mock<IContractResolver>(MockBehavior.Strict);
             Mock<IAssemblyLocator> assemblyLocator = new Mock<IAssemblyLocator>(MockBehavior.Strict);
-            IContractResolverFacade contractResolverFacade = new ContractResolverFacade(fileSystemProvider.Object, assemblyLocator.Object);
+            IContractResolverFacade contractResolverFacade = new ContractResolverFacade(assemblyLocator.Object);
             contractResolverFacade.RegisterContractResolver(contractResolver.Object);
 
             fileSystemProvider.Setup(x => x.GetFiles("Dibix.Sdk.Tests.Database", It.IsAny<IEnumerable<VirtualPath>>(), It.IsAny<IEnumerable<VirtualPath>>()))
@@ -72,7 +72,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             Mock<ICodeGenerationContext> codeGenerationContext = new Mock<ICodeGenerationContext>(MockBehavior.Strict);
             Mock<IContractResolver> contractResolver = new Mock<IContractResolver>(MockBehavior.Strict);
             Mock<IAssemblyLocator> assemblyLocator = new Mock<IAssemblyLocator>(MockBehavior.Strict);
-            IContractResolverFacade contractResolverFacade = new ContractResolverFacade(fileSystemProvider.Object, assemblyLocator.Object);
+            IContractResolverFacade contractResolverFacade = new ContractResolverFacade(assemblyLocator.Object);
             contractResolverFacade.RegisterContractResolver(contractResolver.Object);
 
             fileSystemProvider.SetupGet(x => x.CurrentDirectory).Returns(ExecutingDirectory);
@@ -129,7 +129,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             Mock<ICodeGenerationContext> codeGenerationContext = new Mock<ICodeGenerationContext>(MockBehavior.Strict);
             Mock<IContractResolver> contractResolver = new Mock<IContractResolver>(MockBehavior.Strict);
             Mock<IAssemblyLocator> assemblyLocator = new Mock<IAssemblyLocator>(MockBehavior.Strict);
-            IContractResolverFacade contractResolverFacade = new ContractResolverFacade(fileSystemProvider.Object, assemblyLocator.Object);
+            IContractResolverFacade contractResolverFacade = new ContractResolverFacade(assemblyLocator.Object);
             contractResolverFacade.RegisterContractResolver(contractResolver.Object);
 
             fileSystemProvider.SetupGet(x => x.CurrentDirectory).Returns(ExecutingDirectory);
@@ -189,7 +189,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             Mock<ICodeGenerationContext> codeGenerationContext = new Mock<ICodeGenerationContext>(MockBehavior.Strict);
             Mock<IContractResolver> contractResolver = new Mock<IContractResolver>(MockBehavior.Strict);
             Mock<IAssemblyLocator> assemblyLocator = new Mock<IAssemblyLocator>(MockBehavior.Strict);
-            IContractResolverFacade contractResolverFacade = new ContractResolverFacade(fileSystemProvider.Object, assemblyLocator.Object);
+            IContractResolverFacade contractResolverFacade = new ContractResolverFacade(assemblyLocator.Object);
             contractResolverFacade.RegisterContractResolver(contractResolver.Object);
 
             fileSystemProvider.SetupGet(x => x.CurrentDirectory).Returns(ExecutingDirectory);

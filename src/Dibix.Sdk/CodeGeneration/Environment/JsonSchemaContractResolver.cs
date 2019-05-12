@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -10,13 +7,13 @@ namespace Dibix.Sdk.CodeGeneration
     internal sealed class JsonSchemaContractResolver : IContractResolver
     {
         #region Fields
-        private readonly IFileSystemProvider _fileSystemProvider;
+        private readonly IJsonSchemaProvider _jsonSchemaProvider;
         #endregion
 
         #region Constructor
-        public JsonSchemaContractResolver(IFileSystemProvider fileSystemProvider)
+        public JsonSchemaContractResolver(IJsonSchemaProvider jsonSchemaProvider)
         {
-            this._fileSystemProvider = fileSystemProvider;
+            this._jsonSchemaProvider = jsonSchemaProvider;
         }
         #endregion
 
@@ -33,36 +30,17 @@ namespace Dibix.Sdk.CodeGeneration
 
             string schemaName = parts[0];
             string definitionName = parts[1];
-            string schemaPath = this._fileSystemProvider.GetPhysicalFilePath(null, $"Contracts/{schemaName}.json");
-            using (Stream stream = File.OpenRead(schemaPath))
-            {
-                using (TextReader textReader = new StreamReader(stream))
-                {
-                    using (JsonReader schemaJsonReader = new JsonTextReader(textReader))
-                    {
-                        JSchema schema = JSchema.Load(schemaJsonReader);
-                        if (!schema.ExtensionData.TryGetValue("definitions", out JToken definitionsExtension))
-                            return null;
 
-                        JObject definitions = definitionsExtension as JObject;
-                        JProperty definitionProperty = definitions?.Property(definitionName);
-                        if (definitionProperty == null)
-                            return null;
+            if (!this._jsonSchemaProvider.TryGetSchemaDefinition(schemaName, definitionName, out JSchema definitionSchema))
+                throw new InvalidOperationException($"Cannot find JSON schema '{normalizedInput}'");
 
-                        using (JsonReader definitionJsonReader = new JTokenReader(definitionProperty.Value))
-                        {
-                            JSchema definitionSchema = JSchema.Load(definitionJsonReader);
-                            ContractName contractName = new ContractName(input, definitionName);
-                            ContractInfo contract = new ContractInfo(contractName, false);
-                            contract.Schema = definitionSchema;
-                            foreach (KeyValuePair<string, JSchema> property in definitionSchema.Properties)
-                                contract.Properties.Add(property.Key);
+            ContractName contractName = new ContractName(input, definitionSchema.Title);
+            ContractInfo contract = new ContractInfo(contractName, false);
+            contract.Schema = definitionSchema;
+            foreach (KeyValuePair<string, JSchema> property in definitionSchema.Properties)
+                contract.Properties.Add(property.Key);
 
-                            return contract;
-                        }
-                    }
-                }
-            }
+            return contract;
         }
         #endregion
     }

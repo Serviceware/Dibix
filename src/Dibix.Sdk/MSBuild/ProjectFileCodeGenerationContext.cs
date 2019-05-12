@@ -10,12 +10,12 @@ namespace Dibix.Sdk.MSBuild
         public IContractResolverFacade ContractResolverFacade { get; }
         public IErrorReporter ErrorReporter { get; }
 
-        public ProjectFileCodeGenerationContext(GeneratorConfiguration configuration, string @namespace, string configurationName, IFileSystemProvider fileSystemProvider, IAssemblyLocator assemblyLocator, IErrorReporter errorReporter)
+        public ProjectFileCodeGenerationContext(GeneratorConfiguration configuration, string @namespace, string configurationName, IAssemblyLocator assemblyLocator, IErrorReporter errorReporter)
         {
             this.Configuration = configuration;
             this.Namespace = @namespace;
             this.ClassName = configurationName;
-            this.ContractResolverFacade = new ContractResolverFacade(fileSystemProvider, assemblyLocator);
+            this.ContractResolverFacade = new ContractResolverFacade(assemblyLocator);
             this.ErrorReporter = errorReporter;
         }
     }

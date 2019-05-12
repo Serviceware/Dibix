@@ -46,9 +46,9 @@ namespace Dibix.Sdk.CodeGeneration
         #region Private Methods
         private static void AddCommandTextConstants(CSharpClass @class, DaoWriterContext context)
         {
-            for (int i = 0; i < context.Statements.Count; i++)
+            for (int i = 0; i < context.Artifacts.Statements.Count; i++)
             {
-                SqlStatementInfo statement = context.Statements[i];
+                SqlStatementInfo statement = context.Artifacts.Statements[i];
                 //@class.AddComment(String.Concat("file:///", statement.SourcePath.Replace(" ", "%20").Replace(@"\", "/")), false);
                 @class.AddComment(statement.Name, false);
                 @class.AddField(name: String.Concat(statement.Name, ConstantSuffix)
@@ -56,7 +56,7 @@ namespace Dibix.Sdk.CodeGeneration
                               , value: new CSharpStringValue(context.FormatCommandText(statement.Content, context.Formatting), context.Formatting.HasFlag(CommandTextFormatting.Verbatim))
                               , modifiers: CSharpModifiers.Public | CSharpModifiers.Const);
 
-                if (i + 1 < context.Statements.Count)
+                if (i + 1 < context.Artifacts.Statements.Count)
                     @class.AddSeparator();
             }
         }
@@ -65,11 +65,11 @@ namespace Dibix.Sdk.CodeGeneration
         {
             context.Output.AddUsing("Dibix");
 
-            IDictionary<SqlStatementInfo, string> methodReturnTypeMap = context.Statements.ToDictionary(x => x, DetermineResultTypeName);
+            IDictionary<SqlStatementInfo, string> methodReturnTypeMap = context.Artifacts.Statements.ToDictionary(x => x, DetermineResultTypeName);
 
-            for (int i = 0; i < context.Statements.Count; i++)
+            for (int i = 0; i < context.Artifacts.Statements.Count; i++)
             {
-                SqlStatementInfo statement = context.Statements[i];
+                SqlStatementInfo statement = context.Artifacts.Statements[i];
                 bool isSingleResult = statement.Results.Count == 1;
 
                 if (isSingleResult && statement.Results[0].ResultMode == SqlQueryResultMode.Many)
@@ -85,7 +85,7 @@ namespace Dibix.Sdk.CodeGeneration
                 foreach (SqlQueryParameter parameter in statement.Parameters)
                     method.AddParameter(parameter.Name, parameter.ClrTypeName);
 
-                if (i + 1 < context.Statements.Count)
+                if (i + 1 < context.Artifacts.Statements.Count)
                     @class.AddSeparator();
             }
         }
@@ -114,7 +114,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             Type methodInfoType = typeof(MethodInfo);
             context.Output.AddUsing(methodInfoType.Namespace);
-            foreach (SqlStatementInfo statement in context.Statements)
+            foreach (SqlStatementInfo statement in context.Artifacts.Statements)
             {
                 @class.AddField(name: String.Concat(statement.Name, methodInfoType.Name)
                               , type: methodInfoType.Name

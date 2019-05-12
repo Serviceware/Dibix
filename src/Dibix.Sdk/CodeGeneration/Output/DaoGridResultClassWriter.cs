@@ -21,7 +21,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public void Write(DaoWriterContext context)
         {
-            IList<SqlStatementInfo> gridResultStatements = context.Statements.Where(IsGridResult).ToArray();
+            IList<SqlStatementInfo> gridResultStatements = context.Artifacts.Statements.Where(IsGridResult).ToArray();
             for (int i = 0; i < gridResultStatements.Count; i++)
             {
                 SqlStatementInfo statement = gridResultStatements[i];

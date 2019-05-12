@@ -13,11 +13,10 @@ namespace Dibix.Sdk.CodeGeneration
 
         #region Constructor
         public ContractResolverFacade() => this._contractResolvers = new Collection<IContractResolver>();
-        public ContractResolverFacade(IFileSystemProvider fileSystemProvider, IAssemblyLocator assemblyLocator)
+        public ContractResolverFacade(IAssemblyLocator assemblyLocator)
         {
             this._contractResolvers = new Collection<IContractResolver>
             {
-                new JsonSchemaContractResolver(fileSystemProvider),
                 new ClrTypeContractResolver(),
                 new ForeignAssemblyTypeContractResolver(assemblyLocator)
             };

@@ -36,7 +36,7 @@ namespace Dibix.Sdk.CodeGeneration
                         throw new InvalidOperationException($"Invalid source path: {path}");
 
                     int excludePathStart = path.Length + 1;
-                    foreach (string filePath in Directory.EnumerateFiles(path, "*.sql", virtualPath.IsRecursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))
+                    foreach (string filePath in Directory.EnumerateFiles(path, "*", virtualPath.IsRecursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))
                     {
                         if (normalizedExclude.Any(x => filePath.Substring(excludePathStart).StartsWith(x, StringComparison.OrdinalIgnoreCase)))
                             continue;

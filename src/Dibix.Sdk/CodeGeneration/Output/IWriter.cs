@@ -4,6 +4,6 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public interface IWriter
     {
-        string Write(string @namespace, string className, CommandTextFormatting formatting, IList<SqlStatementInfo> statements);
+        string Write(string @namespace, string className, CommandTextFormatting formatting, SourceArtifacts artifacts);
     }
 }

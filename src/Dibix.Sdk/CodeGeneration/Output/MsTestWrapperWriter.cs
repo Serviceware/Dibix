@@ -7,13 +7,13 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public sealed class MsTestWrapperWriter : OutputWriter, IWriter
     {
-        protected override void Write(StringWriter writer, string @namespace, string className, CommandTextFormatting formatting, IList<SqlStatementInfo> statements)
+        protected override void Write(StringWriter writer, string @namespace, string className, CommandTextFormatting formatting, SourceArtifacts artifacts)
         {
-            string output = BuildTestClass(@namespace, className, statements, formatting);
+            string output = BuildTestClass(@namespace, className, artifacts.Statements, formatting);
             writer.WriteRaw(output);
         }
 
-        private static string BuildTestClass(string @namespace, string className, IEnumerable<SqlStatementInfo> queries, CommandTextFormatting formatting)
+        private static string BuildTestClass(string @namespace, string className, IEnumerable<SqlStatementInfo> statements, CommandTextFormatting formatting)
         {
             const string template = @"using Helpline.Infrastructure.Tests.Components.Data;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -27,7 +27,7 @@ namespace %namespace%
     }
 }";
 
-            string methods = String.Join(String.Format("{0}{0}", Environment.NewLine), queries.Select(x => BuildTestMethod(x.Name, Format(x.Content, formatting), formatting)));
+            string methods = String.Join(String.Format("{0}{0}", Environment.NewLine), statements.Select(x => BuildTestMethod(x.Name, Format(x.Content, formatting), formatting)));
 
             return template.Replace("%namespace%", @namespace)
                            .Replace("%className%", className)

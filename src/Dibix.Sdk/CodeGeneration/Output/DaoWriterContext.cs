@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Dibix.Sdk.CodeGeneration.Ast;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -7,20 +8,20 @@ namespace Dibix.Sdk.CodeGeneration
     {
         private readonly Func<string, CommandTextFormatting, string> _commandTextFormatter;
 
-        public CSharpWriter Output { get; }
+        public CSharpRoot Output { get; }
         public string ClassName { get; }
         public CommandTextFormatting Formatting { get; }
-        public IList<SqlStatementInfo> Statements { get; }
+        public SourceArtifacts Artifacts { get; }
         public string GeneratedCodeAnnotation { get; }
         public bool WriteGuardChecks { get; set; }
 
         internal DaoWriterContext
         (
-            CSharpWriter output
+            CSharpRoot output
           , string generatedCodeAnnotation
           , string className
           , CommandTextFormatting formatting
-          , IList<SqlStatementInfo> statements
+          , SourceArtifacts artifacts
           , Func<string, CommandTextFormatting, string> commandTextFormatter)
         {
             this._commandTextFormatter = commandTextFormatter;
@@ -28,7 +29,7 @@ namespace Dibix.Sdk.CodeGeneration
             this.GeneratedCodeAnnotation = generatedCodeAnnotation;
             this.ClassName = className;
             this.Formatting = formatting;
-            this.Statements = statements;
+            this.Artifacts = artifacts;
         }
 
         public string FormatCommandText(string commandText, CommandTextFormatting formatting) => this._commandTextFormatter(commandText, formatting);

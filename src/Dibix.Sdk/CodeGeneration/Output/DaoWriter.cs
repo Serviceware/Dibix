@@ -23,30 +23,30 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Overrides
-        protected override void Write(StringWriter writer, string @namespace, string className, CommandTextFormatting formatting, IList<SqlStatementInfo> statements)
+        protected override void Write(StringWriter writer, string @namespace, string className, CommandTextFormatting formatting, SourceArtifacts artifacts)
         {
-            IList<IDaoWriter> writers = this._writers.Where(x => x.HasContent(statements)).ToArray();
+            IList<IDaoWriter> writers = this._writers.Where(x => x.HasContent(artifacts.Statements)).ToArray();
             //if (!writers.Any())
             //    return;
 
             string generatedCodeAnnotation = $"{typeof(GeneratedCodeAttribute).Name}(\"{GeneratorName}\", \"{Version}\")";
 
             // Prepare writer
-            CSharpWriter output = CSharpWriter.Init(writer, @namespace);
+            CSharpWriter output = new CSharpWriter(writer, @namespace);
 
-            DaoWriterContext context = new DaoWriterContext(output, generatedCodeAnnotation, className, formatting, statements, Format);
+            DaoWriterContext context = new DaoWriterContext(output.Root, generatedCodeAnnotation, className, formatting, artifacts, Format);
 
             for (int i = 0; i < writers.Count; i++)
             {
                 IDaoWriter nestedWriter = writers[i];
 
-                using (output.CreateRegion(nestedWriter.RegionName))
+                using (output.Root.CreateRegion(nestedWriter.RegionName))
                 {
                     nestedWriter.Write(context);
                 }
 
                 if (i + 1 < writers.Count)
-                    output.AddSeparator();
+                    output.Root.AddSeparator();
             }
 
             output.Generate();
@@ -58,6 +58,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             yield return new DaoExecutorWriter();
             yield return new DaoGridResultClassWriter();
+            yield return new DaoContractClassWriter();
         }
         #endregion
     }

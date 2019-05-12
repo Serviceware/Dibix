@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json.Schema;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -11,7 +12,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Public Methods
-        public IEnumerable<SqlStatementInfo> CollectStatements(IContractResolverFacade contractResolverFacade, IErrorReporter errorReporter)
+        public void Collect(SourceArtifacts artifacts, IContractResolverFacade contractResolverFacade, IErrorReporter errorReporter)
         {
             if (this.Parser == null)
                 throw new InvalidOperationException("No parser was configured");
@@ -21,12 +22,14 @@ namespace Dibix.Sdk.CodeGeneration
 
             ISqlStatementParser parser = (ISqlStatementParser)Activator.CreateInstance(this.Parser);
             ISqlStatementFormatter formatter = (ISqlStatementFormatter)Activator.CreateInstance(this.Formatter);
-            return this.CollectStatements(parser, formatter, contractResolverFacade, errorReporter);
+            artifacts.Statements.AddRange(this.CollectStatements(parser, formatter, contractResolverFacade, errorReporter));
+            artifacts.Contracts.AddRange(this.CollectContracts());
         }
         #endregion
 
-        #region Abstract Methods
+        #region Protected Methods
         protected abstract IEnumerable<SqlStatementInfo> CollectStatements(ISqlStatementParser parser, ISqlStatementFormatter formatter, IContractResolverFacade contractResolverFacade, IErrorReporter errorReporter);
+        protected virtual IEnumerable<JsonContract> CollectContracts() { yield break; }
         #endregion
     }
 }
