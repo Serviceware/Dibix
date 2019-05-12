@@ -7,19 +7,8 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class DaoContractClassWriter : IDaoWriter
     {
-        #region Fields
-        private readonly IJsonSchemaProvider _jsonSchemaProvider;
-        #endregion
-
         #region Properties
         public string RegionName => "Contracts";
-        #endregion
-
-        #region Constructor
-        public DaoContractClassWriter(IJsonSchemaProvider jsonSchemaProvider)
-        {
-            this._jsonSchemaProvider = jsonSchemaProvider;
-        }
         #endregion
 
         #region IDaoWriter Members
