@@ -9,7 +9,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Fields
         private readonly string _projectName;
         private readonly IFileSystemProvider _fileSystemProvider;
-        private readonly IJsonSchemaProvider _jsonSchemaProvider;
+        private readonly IContractDefinitionProvider _contractDefinitionProvider;
         private readonly ICollection<VirtualPath> _include;
         private readonly ICollection<VirtualPath> _exclude;
         private IEnumerable<string> _files;
@@ -21,11 +21,11 @@ namespace Dibix.Sdk.CodeGeneration
 
         #region Constructor
         public PhysicalSourceConfiguration(IFileSystemProvider fileSystemProvider, string projectName) : this(fileSystemProvider, null, projectName) { }
-        public PhysicalSourceConfiguration(IFileSystemProvider fileSystemProvider, IJsonSchemaProvider jsonSchemaProvider, string projectName)
+        public PhysicalSourceConfiguration(IFileSystemProvider fileSystemProvider, IContractDefinitionProvider contractDefinitionProvider, string projectName)
         {
             this._projectName = projectName;
             this._fileSystemProvider = fileSystemProvider;
-            this._jsonSchemaProvider = jsonSchemaProvider;
+            this._contractDefinitionProvider = contractDefinitionProvider;
             this._include = new HashSet<VirtualPath>();
             this._exclude = new HashSet<VirtualPath>();
         }
@@ -45,13 +45,13 @@ namespace Dibix.Sdk.CodeGeneration
                        .Select(x => ParseStatement(x, parser, formatter, contractResolverFacade, errorReporter));
         }
 
-        protected override IEnumerable<JsonContract> CollectContracts()
+        protected override IEnumerable<ContractDefinition> CollectContracts()
         {
             // Not all entry points support this
-            if (this._jsonSchemaProvider == null)
-                return Enumerable.Empty<JsonContract>();
+            if (this._contractDefinitionProvider == null)
+                return Enumerable.Empty<ContractDefinition>();
 
-            return this._jsonSchemaProvider.Schemas;
+            return this._contractDefinitionProvider.Contracts;
         }
         #endregion
 

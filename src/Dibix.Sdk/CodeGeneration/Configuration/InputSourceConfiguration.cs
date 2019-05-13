@@ -29,7 +29,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         #region Protected Methods
         protected abstract IEnumerable<SqlStatementInfo> CollectStatements(ISqlStatementParser parser, ISqlStatementFormatter formatter, IContractResolverFacade contractResolverFacade, IErrorReporter errorReporter);
-        protected virtual IEnumerable<JsonContract> CollectContracts() { yield break; }
+        protected virtual IEnumerable<ContractDefinition> CollectContracts() { yield break; }
         #endregion
     }
 }

@@ -4,7 +4,6 @@ using System.Reflection;
 using Dibix.Sdk;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using Newtonsoft.Json.Schema;
 
 namespace Dibix.MSBuild
 {
@@ -31,15 +30,6 @@ namespace Dibix.MSBuild
         public string SdkPath { get; set; }
         public string SSDTDirectory { get; set; }
         public string[] Inputs { get; set; }
-
-        static SqlCodeAnalysisTask()
-        {
-            // Force loading of referenced assemblies that are needed later on
-            new[]
-            {
-                typeof(JSchemaType) // Newtonsoft.Json.Schema
-            }.GetHashCode();
-        }
 
         public override bool Execute()
         {

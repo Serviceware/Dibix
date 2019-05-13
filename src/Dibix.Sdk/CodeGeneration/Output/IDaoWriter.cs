@@ -1,12 +1,10 @@
-﻿using System.Collections.Generic;
-
-namespace Dibix.Sdk.CodeGeneration
+﻿namespace Dibix.Sdk.CodeGeneration
 {
     public interface IDaoWriter
     {
         string RegionName { get; }
 
-        bool HasContent(IEnumerable<SqlStatementInfo> context);
+        bool HasContent(SourceArtifacts artifacts);
         void Write(DaoWriterContext context);
     }
 }

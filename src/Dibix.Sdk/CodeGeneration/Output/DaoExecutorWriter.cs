@@ -20,7 +20,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region IDaoWriter Members
-        public bool HasContent(IEnumerable<SqlStatementInfo> statements) => statements.Any();
+        public bool HasContent(SourceArtifacts artifacts) => artifacts.Statements.Any();
 
         public void Write(DaoWriterContext context)
         {

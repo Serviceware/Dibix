@@ -25,7 +25,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Overrides
         protected override void Write(StringWriter writer, string @namespace, string className, CommandTextFormatting formatting, SourceArtifacts artifacts)
         {
-            IList<IDaoWriter> writers = this._writers.Where(x => x.HasContent(artifacts.Statements)).ToArray();
+            IList<IDaoWriter> writers = this._writers.Where(x => x.HasContent(artifacts)).ToArray();
             //if (!writers.Any())
             //    return;
 

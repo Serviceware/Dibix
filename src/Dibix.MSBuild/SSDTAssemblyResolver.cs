@@ -4,6 +4,7 @@ using System.Reflection;
 
 namespace Dibix.MSBuild
 {
+    // Probe DAC assemblies from VS installation to make it more stable in MSBuild
     internal sealed class SSDTAssemblyResolver : IDisposable
     {
         private readonly string _ssdtDirectory;

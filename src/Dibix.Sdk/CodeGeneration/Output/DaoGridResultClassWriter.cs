@@ -17,7 +17,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region IDaoWriter Members
-        public bool HasContent(IEnumerable<SqlStatementInfo> statements) => statements.Any(IsGridResult);
+        public bool HasContent(SourceArtifacts artifacts) => artifacts.Statements.Any(IsGridResult);
 
         public void Write(DaoWriterContext context)
         {

@@ -20,10 +20,10 @@ namespace Dibix.Sdk.MSBuild
                 this.Namespace = @namespace;
 
             IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(projectDirectory);
-            IJsonSchemaProvider jsonSchemaProvider = new JsonSchemaContractProvider(fileSystemProvider);
+            IContractDefinitionProvider contractDefinitionProvider = new ContractDefinitionProvider(fileSystemProvider);
 
             this.Configuration = new GeneratorConfiguration();
-            PhysicalSourceConfiguration source = new PhysicalSourceConfiguration(fileSystemProvider, jsonSchemaProvider, null);
+            PhysicalSourceConfiguration source = new PhysicalSourceConfiguration(fileSystemProvider, contractDefinitionProvider, null);
             if (!isDml)
                 source.Formatter = typeof(ExecStoredProcedureSqlStatementFormatter);
 
@@ -31,7 +31,7 @@ namespace Dibix.Sdk.MSBuild
             this.Configuration.Input.Sources.Add(source);
 
             this.ContractResolverFacade = new ContractResolverFacade();
-            this.ContractResolverFacade.RegisterContractResolver(new JsonSchemaContractResolver(jsonSchemaProvider));
+            this.ContractResolverFacade.RegisterContractResolver(new ContractDefinitionResolver(contractDefinitionProvider));
             this.ContractResolverFacade.RegisterContractResolver(new ClrTypeContractResolver());
             this.ContractResolverFacade.RegisterContractResolver(new ForeignAssemblyTypeContractResolver(assemblyLocator));
             this.ErrorReporter = errorReporter;
@@ -40,7 +40,7 @@ namespace Dibix.Sdk.MSBuild
         private static bool MatchFile(string projectDirectory, string relativeFilePath)
         {
             string inputFilePath = Path.Combine(projectDirectory, relativeFilePath);
-            if (inputFilePath != @"F:\Helpline\HelplineScrum\Development\Dev\SQL\HelplineData\Programmability\hlsysapprovalfulfillment_getpending.sql")
+            if (!inputFilePath.EndsWith("hlsysapprovalfulfillment_getpending.sql"))
                 return false;
 
             using (Stream stream = File.OpenRead(inputFilePath))
