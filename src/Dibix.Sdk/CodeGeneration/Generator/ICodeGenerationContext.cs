@@ -7,5 +7,7 @@
         string ClassName { get; }
         IContractResolverFacade ContractResolverFacade { get; }
         IErrorReporter ErrorReporter { get; }
+
+        void CollectAdditionalArtifacts(SourceArtifacts artifacts);
     }
 }

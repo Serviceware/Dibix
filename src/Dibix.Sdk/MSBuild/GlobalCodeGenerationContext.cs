@@ -8,22 +8,26 @@ namespace Dibix.Sdk.MSBuild
 {
     internal sealed class GlobalCodeGenerationContext : ICodeGenerationContext
     {
+        private readonly IContractDefinitionProvider _contractDefinitionProvider;
+        private readonly IUserDefinedTypeProvider _userDefinedTypeProvider;
+
         public GeneratorConfiguration Configuration { get; }
         public string Namespace { get; } = "Dibix";
         public string ClassName => "SqlQueryAccessor";
         public IContractResolverFacade ContractResolverFacade { get; }
         public IErrorReporter ErrorReporter { get; }
 
-        public GlobalCodeGenerationContext(string projectDirectory, string @namespace, IEnumerable<string> inputs, IAssemblyLocator assemblyLocator, bool isDml, IErrorReporter errorReporter)
+        public GlobalCodeGenerationContext(string projectDirectory, string @namespace, ICollection<string> inputs, IAssemblyLocator assemblyLocator, bool isDml, IErrorReporter errorReporter)
         {
             if (!String.IsNullOrEmpty(@namespace))
                 this.Namespace = @namespace;
 
             IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(projectDirectory);
-            IContractDefinitionProvider contractDefinitionProvider = new ContractDefinitionProvider(fileSystemProvider);
+            this._contractDefinitionProvider = new ContractDefinitionProvider(fileSystemProvider);
+            this._userDefinedTypeProvider = new UserDefinedTypeProvider(inputs);
 
             this.Configuration = new GeneratorConfiguration();
-            PhysicalSourceConfiguration source = new PhysicalSourceConfiguration(fileSystemProvider, contractDefinitionProvider, null);
+            PhysicalSourceConfiguration source = new PhysicalSourceConfiguration(fileSystemProvider, null);
             if (!isDml)
                 source.Formatter = typeof(ExecStoredProcedureSqlStatementFormatter);
 
@@ -31,10 +35,16 @@ namespace Dibix.Sdk.MSBuild
             this.Configuration.Input.Sources.Add(source);
 
             this.ContractResolverFacade = new ContractResolverFacade();
-            this.ContractResolverFacade.RegisterContractResolver(new ContractDefinitionResolver(contractDefinitionProvider));
+            this.ContractResolverFacade.RegisterContractResolver(new ContractDefinitionResolver(this._contractDefinitionProvider));
             this.ContractResolverFacade.RegisterContractResolver(new ClrTypeContractResolver());
             this.ContractResolverFacade.RegisterContractResolver(new ForeignAssemblyTypeContractResolver(assemblyLocator));
             this.ErrorReporter = errorReporter;
+        }
+
+        public void CollectAdditionalArtifacts(SourceArtifacts artifacts)
+        {
+            artifacts.Contracts.AddRange(this._contractDefinitionProvider.Contracts);
+            artifacts.UserDefinedTypes.AddRange(this._userDefinedTypeProvider.Types);
         }
 
         private static bool MatchFile(string projectDirectory, string relativeFilePath)

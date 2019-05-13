@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Dibix.Sdk.CodeGeneration;
 using Microsoft.Build.Utilities;
 
@@ -13,7 +12,7 @@ namespace Dibix.Sdk.MSBuild
             string projectDirectory
           , string @namespace
           , string targetDirectory
-          , IEnumerable<string> inputs
+          , ICollection<string> inputs
           , ICollection<string> probingDirectories
           , bool isDML
           , TaskLoggingHelper logger
@@ -25,7 +24,7 @@ namespace Dibix.Sdk.MSBuild
 
             ProbingAssemblyLocator assemblyLocator = new ProbingAssemblyLocator(probingDirectories ?? new string[0]);
             IErrorReporter errorReporter = new MSBuildErrorReporter(logger);
-            ICodeGenerationContext context = new GlobalCodeGenerationContext(projectDirectory, @namespace, inputs ?? Enumerable.Empty<string>(), assemblyLocator, isDML, errorReporter);
+            ICodeGenerationContext context = new GlobalCodeGenerationContext(projectDirectory, @namespace, inputs ?? new string[0], assemblyLocator, isDML, errorReporter);
             ICodeGenerator generator = new DaoCodeGenerator(context);
 
             string generated = generator.Generate();

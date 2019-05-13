@@ -23,5 +23,9 @@ namespace Dibix.Sdk.VisualStudio
             this.ClassName = Path.GetFileNameWithoutExtension(inputFilePath);
         }
         #endregion
+
+        #region Public Methods
+        public void CollectAdditionalArtifacts(SourceArtifacts artifacts) { }
+        #endregion
     }
 }

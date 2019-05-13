@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Newtonsoft.Json.Schema;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -23,13 +22,11 @@ namespace Dibix.Sdk.CodeGeneration
             ISqlStatementParser parser = (ISqlStatementParser)Activator.CreateInstance(this.Parser);
             ISqlStatementFormatter formatter = (ISqlStatementFormatter)Activator.CreateInstance(this.Formatter);
             artifacts.Statements.AddRange(this.CollectStatements(parser, formatter, contractResolverFacade, errorReporter));
-            artifacts.Contracts.AddRange(this.CollectContracts());
         }
         #endregion
 
         #region Protected Methods
         protected abstract IEnumerable<SqlStatementInfo> CollectStatements(ISqlStatementParser parser, ISqlStatementFormatter formatter, IContractResolverFacade contractResolverFacade, IErrorReporter errorReporter);
-        protected virtual IEnumerable<ContractDefinition> CollectContracts() { yield break; }
         #endregion
     }
 }

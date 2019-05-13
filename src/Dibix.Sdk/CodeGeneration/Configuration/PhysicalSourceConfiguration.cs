@@ -9,7 +9,6 @@ namespace Dibix.Sdk.CodeGeneration
         #region Fields
         private readonly string _projectName;
         private readonly IFileSystemProvider _fileSystemProvider;
-        private readonly IContractDefinitionProvider _contractDefinitionProvider;
         private readonly ICollection<VirtualPath> _include;
         private readonly ICollection<VirtualPath> _exclude;
         private IEnumerable<string> _files;
@@ -20,12 +19,10 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public PhysicalSourceConfiguration(IFileSystemProvider fileSystemProvider, string projectName) : this(fileSystemProvider, null, projectName) { }
-        public PhysicalSourceConfiguration(IFileSystemProvider fileSystemProvider, IContractDefinitionProvider contractDefinitionProvider, string projectName)
+        public PhysicalSourceConfiguration(IFileSystemProvider fileSystemProvider, string projectName)
         {
-            this._projectName = projectName;
             this._fileSystemProvider = fileSystemProvider;
-            this._contractDefinitionProvider = contractDefinitionProvider;
+            this._projectName = projectName;
             this._include = new HashSet<VirtualPath>();
             this._exclude = new HashSet<VirtualPath>();
         }
@@ -43,15 +40,6 @@ namespace Dibix.Sdk.CodeGeneration
             return this.Files
                        .Where(x => Path.GetExtension(x) == ".sql")
                        .Select(x => ParseStatement(x, parser, formatter, contractResolverFacade, errorReporter));
-        }
-
-        protected override IEnumerable<ContractDefinition> CollectContracts()
-        {
-            // Not all entry points support this
-            if (this._contractDefinitionProvider == null)
-                return Enumerable.Empty<ContractDefinition>();
-
-            return this._contractDefinitionProvider.Contracts;
         }
         #endregion
 

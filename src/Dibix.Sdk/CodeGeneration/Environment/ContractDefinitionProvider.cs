@@ -27,7 +27,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private void CollectSchemas(IFileSystemProvider fileSystemProvider)
         {
-            //// We assume that we are running in the context of a a sql project so we look for a neighbour contracts folder
+            // We assume that we are running in the context of a a sql project so we look for a neighbour contracts folder
             DirectoryInfo contractsDirectory = new DirectoryInfo(Path.Combine(fileSystemProvider.CurrentDirectory, "Contracts"));
             if (!contractsDirectory.Exists)
                 return;

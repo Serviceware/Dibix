@@ -18,5 +18,7 @@ namespace Dibix.Sdk.MSBuild
             this.ContractResolverFacade = new ContractResolverFacade(assemblyLocator);
             this.ErrorReporter = errorReporter;
         }
+
+        public void CollectAdditionalArtifacts(SourceArtifacts artifacts) { }
     }
 }

@@ -31,6 +31,10 @@ namespace Dibix.Sdk.VisualStudio
         }
         #endregion
 
+        #region Public Methods
+        public void CollectAdditionalArtifacts(SourceArtifacts artifacts) { }
+        #endregion
+
         #region Private Methods
         private static string GetProjectDefaultNamespace(ITextTemplatingEngineHost templatingEngineHost, IServiceProvider serviceProvider)
         {

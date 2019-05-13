@@ -33,6 +33,8 @@ namespace Dibix.Sdk.CodeGeneration
             foreach (InputSourceConfiguration input in this._context.Configuration.Input.Sources)
                 input.Collect(artifacts, this._context.ContractResolverFacade, this._context.ErrorReporter);
 
+            this._context.CollectAdditionalArtifacts(artifacts);
+
             output = writer.Write(this._context.Configuration.Output.Namespace, this._context.Configuration.Output.ClassName, this._context.Configuration.Output.Formatting.Value, artifacts);
             if (this._context.ErrorReporter.ReportErrors())
                 output = errorContent;
