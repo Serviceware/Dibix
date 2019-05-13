@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -8,12 +9,14 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly string _declaringTypeName;
         private readonly IList<CSharpParameter> _parameters;
         private readonly string _body;
+        private readonly string _baseConstructorParameters;
         private readonly CSharpModifiers _modifiers;
 
-        public CSharpConstructor(string declaringTypeName, string body, CSharpModifiers modifiers)
+        public CSharpConstructor(string declaringTypeName, string body, string baseConstructorParameters, CSharpModifiers modifiers)
         {
             this._declaringTypeName = declaringTypeName;
             this._body = body;
+            this._baseConstructorParameters = baseConstructorParameters;
             this._modifiers = modifiers;
             this._parameters = new Collection<CSharpParameter>();
         }
@@ -41,8 +44,16 @@ namespace Dibix.Sdk.CodeGeneration
                     writer.WriteRaw(", ");
             }
 
-            writer.WriteRaw(')')
-                  .WriteLine()
+            writer.WriteRaw(')');
+
+            if (!String.IsNullOrEmpty(this._baseConstructorParameters))
+            {
+                writer.WriteRaw(" : base(")
+                      .WriteRaw(this._baseConstructorParameters)
+                      .WriteRaw(')');
+            }
+
+            writer.WriteLine()
                   .WriteLine("{")
                   .PushIndent();
 

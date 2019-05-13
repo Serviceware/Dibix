@@ -6,7 +6,7 @@ namespace Dibix.Sdk.CodeGeneration
     public sealed class SourceArtifacts
     {
         public IList<SqlStatementInfo> Statements { get; }
-        public ICollection<UserDefinedTypeDefinition> UserDefinedTypes { get; }
+        public IList<UserDefinedTypeDefinition> UserDefinedTypes { get; }
         public ICollection<ContractDefinition> Contracts { get; }
 
         public SourceArtifacts()

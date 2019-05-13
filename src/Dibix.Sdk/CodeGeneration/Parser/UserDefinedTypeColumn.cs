@@ -2,7 +2,13 @@
 {
     public sealed class UserDefinedTypeColumn
     {
-        public string Name { get; set; }
-        public string Type { get; set; }
+        public string Name { get; }
+        public string Type { get; }
+
+        public UserDefinedTypeColumn(string name, string type)
+        {
+            this.Name = name;
+            this.Type = type;
+        }
     }
 }

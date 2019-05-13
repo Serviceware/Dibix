@@ -4,6 +4,6 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public interface IUserDefinedTypeProvider
     {
-        IEnumerable<UserDefinedTypeDefinition> Types { get; }
+        ICollection<UserDefinedTypeDefinition> Types { get; }
     }
 }

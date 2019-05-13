@@ -5,11 +5,14 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public sealed class UserDefinedTypeDefinition
     {
-        public string TypeName { get; set; }
+        public string TypeName { get; }
+        public string DisplayName { get; }
         public ICollection<UserDefinedTypeColumn> Columns { get; }
 
-        public UserDefinedTypeDefinition()
+        public UserDefinedTypeDefinition(string typeName, string displayName)
         {
+            this.TypeName = typeName;
+            this.DisplayName = displayName;
             this.Columns = new Collection<UserDefinedTypeColumn>();
         }
     }

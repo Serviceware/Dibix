@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -8,6 +9,7 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly string _name;
         private readonly IList<CSharpStatement> _members;
         private readonly CSharpModifiers _modifiers;
+        private string _baseClassName;
 
         public CSharpClass(string name, CSharpModifiers modifiers, string annotation = null) : base(annotation)
         {
@@ -30,9 +32,9 @@ namespace Dibix.Sdk.CodeGeneration
             return property;
         }
 
-        public CSharpConstructor AddConstructor(string body, CSharpModifiers modifiers = CSharpModifiers.Public)
+        public CSharpConstructor AddConstructor(string body, CSharpModifiers modifiers = CSharpModifiers.Public, string baseConstructorParameters = null)
         {
-            CSharpConstructor ctor = new CSharpConstructor(this._name, body, modifiers);
+            CSharpConstructor ctor = new CSharpConstructor(this._name, body, baseConstructorParameters, modifiers);
             this._members.Add(ctor);
             return ctor;
         }
@@ -63,14 +65,27 @@ namespace Dibix.Sdk.CodeGeneration
             return this;
         }
 
+        public CSharpClass Inherits(string baseClassName)
+        {
+            this._baseClassName = baseClassName;
+            return this;
+        }
+
         public override void Write(StringWriter writer)
         {
             base.Write(writer);
             WriteModifiers(writer, this._modifiers);
 
             writer.WriteRaw("class ")
-                  .WriteRaw(this._name)
-                  .WriteLine()
+                  .WriteRaw(this._name);
+
+            if (!String.IsNullOrEmpty(this._baseClassName))
+            {
+                writer.WriteRaw(" : ")
+                      .WriteRaw(this._baseClassName);
+            }
+
+            writer.WriteLine()
                   .WriteLine("{")
                   .PushIndent();
 

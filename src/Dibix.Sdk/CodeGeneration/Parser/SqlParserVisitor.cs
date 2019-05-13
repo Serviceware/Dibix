@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml.Linq;
+using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -50,34 +50,18 @@ namespace Dibix.Sdk.CodeGeneration
             if (previousToken.TokenType == TSqlTokenType.MultilineComment)
                 parameter.ClrTypeName = node.SingleHint(SqlHint.ClrType, startIndex);
 
-            SqlDataTypeReference sqlDataType = node.DataType as SqlDataTypeReference;
-            XmlDataTypeReference xmlDataType = node.DataType as XmlDataTypeReference;
-            UserDataTypeReference userDataType = node.DataType as UserDataTypeReference;
-            if (sqlDataType != null)
-            {
-                parameter.ClrType = ToClrType(sqlDataType.SqlDataTypeOption);
-            }
-            else if (xmlDataType != null)
-            {
-                parameter.ClrType = typeof(XElement);
-            }
-            else if (userDataType != null)
-            {
-                string name = userDataType.Name.BaseIdentifier.Value;
-                if (String.Equals(name, "SYSNAME", StringComparison.OrdinalIgnoreCase))
-                    parameter.ClrType = typeof(string);
-                else
-                {
-                    // Type name hint is the only way to determine the UDT .NET type, that's why it's required
-                    if (String.IsNullOrEmpty(parameter.ClrTypeName))
-                        this.ErrorReporter.RegisterError(this.Target.Source, node.StartLine, node.StartColumn, null, $@"Could not determine CLR type for table value parameter
+            parameter.ClrType = node.DataType.ToClrType();
+            if (parameter.ClrType == null && node.DataType is UserDataTypeReference userDataType)
+            { 
+                // Type name hint is the only way to determine the UDT .NET type, that's why it's required
+                if (String.IsNullOrEmpty(parameter.ClrTypeName))
+                    this.ErrorReporter.RegisterError(this.Target.Source, node.StartLine, node.StartColumn, null, $@"Could not determine CLR type for table value parameter
 Parameter name: {parameter.Name}
 UDT type: {parameter.TypeName}
 Please mark it with /* @ClrType <ClrTypeName> */");
 
-                    parameter.TypeName = $"[{userDataType.Name.SchemaIdentifier.Value}].[{userDataType.Name.BaseIdentifier.Value}]";
-                    parameter.Check = ContractCheck.NotNull;
-                }
+                parameter.TypeName = $"[{userDataType.Name.SchemaIdentifier.Value}].[{userDataType.Name.BaseIdentifier.Value}]";
+                parameter.Check = ContractCheck.NotNull;
             }
             else
             {
@@ -132,44 +116,6 @@ ReferenceType: {node.DataType.GetType()}");
                 statementList = beginEndBlock.StatementList;
 
             this.Target.Content = this.Formatter.Format(this.Target, statementList);
-        }
-
-        private static Type ToClrType(SqlDataTypeOption dataType)
-        {
-            switch (dataType)
-            {
-                case SqlDataTypeOption.Bit: return typeof(bool);
-                case SqlDataTypeOption.TinyInt: return typeof(byte);
-                case SqlDataTypeOption.Binary: return typeof(byte[]);
-                case SqlDataTypeOption.VarBinary: return typeof(byte[]);
-                case SqlDataTypeOption.Timestamp: return typeof(byte[]);
-                case SqlDataTypeOption.Rowversion: return typeof(byte[]);
-                case SqlDataTypeOption.Char: return typeof(char);
-                case SqlDataTypeOption.DateTime: return typeof(DateTime);
-                case SqlDataTypeOption.SmallDateTime: return typeof(DateTime);
-                case SqlDataTypeOption.Date: return typeof(DateTime);
-                case SqlDataTypeOption.DateTime2: return typeof(DateTime);
-                case SqlDataTypeOption.DateTimeOffset: return typeof(DateTimeOffset);
-                case SqlDataTypeOption.Decimal: return typeof(decimal);
-                case SqlDataTypeOption.Numeric: return typeof(decimal);
-                case SqlDataTypeOption.Money: return typeof(decimal);
-                case SqlDataTypeOption.SmallMoney: return typeof(decimal);
-                case SqlDataTypeOption.Float: return typeof(double);
-                case SqlDataTypeOption.Real: return typeof(float);
-                case SqlDataTypeOption.UniqueIdentifier: return typeof(Guid);
-                case SqlDataTypeOption.Int: return typeof(int);
-                case SqlDataTypeOption.BigInt: return typeof(long);
-                case SqlDataTypeOption.Sql_Variant: return typeof(object);
-                case SqlDataTypeOption.SmallInt: return typeof(short);
-                case SqlDataTypeOption.VarChar: return typeof(string);
-                case SqlDataTypeOption.Text: return typeof(string);
-                case SqlDataTypeOption.NChar: return typeof(string);
-                case SqlDataTypeOption.NVarChar: return typeof(string);
-                case SqlDataTypeOption.NText: return typeof(string);
-                case SqlDataTypeOption.Image: return typeof(string);
-                case SqlDataTypeOption.Time: return typeof(TimeSpan);
-                default: throw new ArgumentOutOfRangeException(nameof(dataType), dataType, null);
-            }
         }
         #endregion
     }

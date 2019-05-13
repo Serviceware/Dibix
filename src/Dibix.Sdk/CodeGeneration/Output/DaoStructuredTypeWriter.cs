@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -13,10 +14,24 @@ namespace Dibix.Sdk.CodeGeneration
 
         public void Write(DaoWriterContext context)
         {
-        }
-        #endregion
+            for (int i = 0; i < context.Artifacts.UserDefinedTypes.Count; i++)
+            {
+                UserDefinedTypeDefinition userDefinedType = context.Artifacts.UserDefinedTypes[i];
+                CSharpClass @class = context.Output
+                                            .AddClass(userDefinedType.DisplayName, CSharpModifiers.Public | CSharpModifiers.Sealed)
+                                            .Inherits($"StructuredType<{userDefinedType.DisplayName}, {String.Join(", ", userDefinedType.Columns.Select(x => x.Type))}>");
 
-        #region Private Methods
+                @class.AddConstructor(body: $"base.ImportSqlMetadata(() => this.Add({String.Join(", ", userDefinedType.Columns.Select(x => "default"))}));"
+                                    , baseConstructorParameters: $"\"{userDefinedType.TypeName}\"");
+
+                CSharpMethod method = @class.AddMethod("Add", "void", $"base.AddValues({String.Join(", ", userDefinedType.Columns.Select(x => x.Name))});");
+                foreach (UserDefinedTypeColumn column in userDefinedType.Columns)
+                    method.AddParameter(column.Name, column.Type);
+
+                if (i + 1 < context.Artifacts.Statements.Count)
+                    context.Output.AddSeparator();
+            }
+        }
         #endregion
     }
 }

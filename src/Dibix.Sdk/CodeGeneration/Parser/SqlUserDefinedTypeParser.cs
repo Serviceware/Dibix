@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -14,19 +17,39 @@ namespace Dibix.Sdk.CodeGeneration
                 using (TextReader reader = new StreamReader(stream))
                 {
                     TSqlFragment fragment = parser.Parse(reader, out IList<ParseError> _);
-                    
+                    UserDefinedTypeVisitor visitor = new UserDefinedTypeVisitor();
+                    fragment.Accept(visitor);
+                    return visitor.Definition;
                 }
             }
-
-            return null;
         }
 
         private class UserDefinedTypeVisitor : TSqlFragmentVisitor
         {
-            //public override void Visit(user node)
-            //{
+            public UserDefinedTypeDefinition Definition { get; private set; }
 
-            //}
+            public override void Visit(CreateTypeTableStatement node)
+            {
+                string typeName = node.Name.BaseIdentifier.Value;
+                string displayName = node.SingleHint(SqlHint.Name);
+                if (String.IsNullOrEmpty(displayName))
+                    displayName = typeName;
+
+                this.Definition = new UserDefinedTypeDefinition(typeName, displayName);
+                this.Definition.Columns.AddRange(node.Definition.ColumnDefinitions.Select(MapColumn));
+            }
+
+            private static UserDefinedTypeColumn MapColumn(ColumnDefinition column)
+            {
+                Type clrType = column.DataType.ToClrType();
+                bool shouldBeNullable = column.Constraints.OfType<NullableConstraintDefinition>().All(x => x.Nullable);
+                bool isNullable = clrType.IsNullable();
+                bool makeNullable = shouldBeNullable && !isNullable;
+                if (makeNullable)
+                    clrType = clrType.MakeNullable();
+
+                return new UserDefinedTypeColumn(column.ColumnIdentifier.Value, clrType.ToCSharpTypeName());
+            }
         }
     }
 }

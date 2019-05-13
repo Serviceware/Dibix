@@ -8,15 +8,14 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class ContractDefinitionProvider : IContractDefinitionProvider
     {
-        private readonly ICollection<ContractDefinition> _schemas;
         private readonly IDictionary<string, ContractDefinition> _definitions;
 
-        public IEnumerable<ContractDefinition> Contracts => this._schemas;
+        public ICollection<ContractDefinition> Contracts { get; }
 
         public ContractDefinitionProvider(IFileSystemProvider fileSystemProvider)
         {
-            this._schemas = new Collection<ContractDefinition>();
             this._definitions = new Dictionary<string, ContractDefinition>();
+            this.Contracts = new Collection<ContractDefinition>();
             this.CollectSchemas(fileSystemProvider);
         }
 
@@ -50,7 +49,7 @@ namespace Dibix.Sdk.CodeGeneration
                                 foreach (JProperty property in ((JObject)definitionProperty.Value).Properties())
                                     definition.Properties.Add(new ContractDefinitionProperty(property.Name, property.Value.Value<string>()));
 
-                                this._schemas.Add(definition);
+                                this.Contracts.Add(definition);
                                 this._definitions.Add($"{schemaName}#{definitionName}", definition);
                             }
                         }

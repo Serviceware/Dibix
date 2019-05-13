@@ -25,7 +25,7 @@ namespace Dibix.Sdk.CodeGeneration
                 CSharpStatementScope scope = context.Output.BeginScope(@namespace);
                 foreach (ContractDefinition contract in group)
                 {
-                    CSharpClass @class = scope.AddClass(contract.DefinitionName, CSharpModifiers.Public);
+                    CSharpClass @class = scope.AddClass(contract.DefinitionName, CSharpModifiers.Public | CSharpModifiers.Sealed);
                     ICollection<string> ctorAssignments = new Collection<string>();
                     foreach (ContractDefinitionProperty property in contract.Properties)
                     {
