@@ -144,6 +144,46 @@ namespace Dibix
         }
     }
 
+    public abstract class StructuredType<TDefinition, TItem1, TItem2, TItem3, TItem4, TItem5, TItem6> : StructuredType<TDefinition> where TDefinition : StructuredType, new()
+    {
+        protected StructuredType(string typeName) : base(typeName) { }
+
+        protected void AddValues(TItem1 item1, TItem2 item2, TItem3 item3, TItem4 item4, TItem5 item5, TItem6 item6)
+        {
+            base.AddItem(item1, item2, item3, item4, item5, item6);
+        }
+    }
+
+    public abstract class StructuredType<TDefinition, TItem1, TItem2, TItem3, TItem4, TItem5, TItem6, TItem7> : StructuredType<TDefinition> where TDefinition : StructuredType, new()
+    {
+        protected StructuredType(string typeName) : base(typeName) { }
+
+        protected void AddValues(TItem1 item1, TItem2 item2, TItem3 item3, TItem4 item4, TItem5 item5, TItem6 item6, TItem7 item7)
+        {
+            base.AddItem(item1, item2, item3, item4, item5, item6, item7);
+        }
+    }
+
+    public abstract class StructuredType<TDefinition, TItem1, TItem2, TItem3, TItem4, TItem5, TItem6, TItem7, TItem8> : StructuredType<TDefinition> where TDefinition : StructuredType, new()
+    {
+        protected StructuredType(string typeName) : base(typeName) { }
+
+        protected void AddValues(TItem1 item1, TItem2 item2, TItem3 item3, TItem4 item4, TItem5 item5, TItem6 item6, TItem7 item7, TItem8 item8)
+        {
+            base.AddItem(item1, item2, item3, item4, item5, item6, item7, item8);
+        }
+    }
+
+    public abstract class StructuredType<TDefinition, TItem1, TItem2, TItem3, TItem4, TItem5, TItem6, TItem7, TItem8, TItem9> : StructuredType<TDefinition> where TDefinition : StructuredType, new()
+    {
+        protected StructuredType(string typeName) : base(typeName) { }
+
+        protected void AddValues(TItem1 item1, TItem2 item2, TItem3 item3, TItem4 item4, TItem5 item5, TItem6 item6, TItem7 item7, TItem8 item8, TItem9 item9)
+        {
+            base.AddItem(item1, item2, item3, item4, item5, item6, item7, item8, item9);
+        }
+    }
+
     public abstract class StructuredType<TDefinition, TItem1, TItem2, TItem3, TItem4, TItem5, TItem6, TItem7, TItem8, TItem9, TItem10, TItem11> : StructuredType<TDefinition> where TDefinition : StructuredType, new()
     {
         protected StructuredType(string typeName) : base(typeName) { }
@@ -161,6 +201,16 @@ namespace Dibix
         protected void AddValues(TItem1 item1, TItem2 item2, TItem3 item3, TItem4 item4, TItem5 item5, TItem6 item6, TItem7 item7, TItem8 item8, TItem9 item9, TItem10 item10, TItem11 item11, TItem12 item12)
         {
             base.AddItem(item1, item2, item3, item4, item5, item6, item7, item8, item9, item10, item11, item12);
+        }
+    }
+
+    public abstract class StructuredType<TDefinition, TItem1, TItem2, TItem3, TItem4, TItem5, TItem6, TItem7, TItem8, TItem9, TItem10, TItem11, TItem12, TItem13> : StructuredType<TDefinition> where TDefinition : StructuredType, new()
+    {
+        protected StructuredType(string typeName) : base(typeName) { }
+
+        protected void AddValues(TItem1 item1, TItem2 item2, TItem3 item3, TItem4 item4, TItem5 item5, TItem6 item6, TItem7 item7, TItem8 item8, TItem9 item9, TItem10 item10, TItem11 item11, TItem12 item12, TItem13 item13)
+        {
+            base.AddItem(item1, item2, item3, item4, item5, item6, item7, item8, item9, item10, item11, item12, item13);
         }
     }
 }

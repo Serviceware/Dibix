@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
@@ -58,6 +59,23 @@ namespace Dibix.Sdk.Sql
                 if (column.DefaultConstraint != null)
                     yield return Constraint.Create(column.DefaultConstraint, new ColumnReference(column.ColumnIdentifier.Value, column));
             }
+        }
+
+        public static bool IsNullable(this TableDefinition table, string columnName)
+        {
+            ICollection<Constraint> constraints = CollectConstraints(table).ToArray();
+            bool notNullable = constraints.Where(x => x.Type == ConstraintType.Nullable && x.Columns[0].Name == columnName)
+                                          .Select(x => x.Definition)
+                                          .Cast<NullableConstraintDefinition>()
+                                          .Any(x => !x.Nullable);
+            if (notNullable)
+                return false;
+
+            bool isPartOfPk = constraints.Any(x => x.Type == ConstraintType.PrimaryKey && x.Columns.Any(y => y.Name == columnName));
+            if (isPartOfPk)
+                return false;
+
+            return true;
         }
 
         public static IEnumerable<TableReference> Recursive(this IEnumerable<TableReference> references)

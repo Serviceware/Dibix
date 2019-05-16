@@ -36,19 +36,20 @@ namespace Dibix.Sdk.CodeGeneration
                     displayName = typeName;
 
                 this.Definition = new UserDefinedTypeDefinition(typeName, displayName);
-                this.Definition.Columns.AddRange(node.Definition.ColumnDefinitions.Select(MapColumn));
+                this.Definition.Columns.AddRange(node.Definition.ColumnDefinitions.Select(x => MapColumn(node.Definition, x)));
             }
 
-            private static UserDefinedTypeColumn MapColumn(ColumnDefinition column)
+            private static UserDefinedTypeColumn MapColumn(TableDefinition table, ColumnDefinition column)
             {
                 Type clrType = column.DataType.ToClrType();
-                bool shouldBeNullable = column.Constraints.OfType<NullableConstraintDefinition>().All(x => x.Nullable);
+                string columnName = column.ColumnIdentifier.Value;
+                bool shouldBeNullable = table.IsNullable(columnName);
                 bool isNullable = clrType.IsNullable();
                 bool makeNullable = shouldBeNullable && !isNullable;
                 if (makeNullable)
                     clrType = clrType.MakeNullable();
 
-                return new UserDefinedTypeColumn(column.ColumnIdentifier.Value, clrType.ToCSharpTypeName());
+                return new UserDefinedTypeColumn(columnName, clrType.ToCSharpTypeName());
             }
         }
     }
