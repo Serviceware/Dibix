@@ -51,23 +51,26 @@ namespace Dibix.Sdk.CodeGeneration
                 parameter.ClrTypeName = node.SingleHint(SqlHint.ClrType, startIndex);
 
             parameter.ClrType = node.DataType.ToClrType();
-            if (parameter.ClrType == null && node.DataType is UserDataTypeReference userDataType)
-            { 
-                // Type name hint is the only way to determine the UDT .NET type, that's why it's required
-                if (String.IsNullOrEmpty(parameter.ClrTypeName))
-                    this.ErrorReporter.RegisterError(this.Target.Source, node.StartLine, node.StartColumn, null, $@"Could not determine CLR type for table value parameter
+            if (parameter.ClrType == null)
+            {
+                if (node.DataType is UserDataTypeReference userDataType)
+                {
+                    // Type name hint is the only way to determine the UDT .NET type, that's why it's required
+                    if (String.IsNullOrEmpty(parameter.ClrTypeName))
+                        this.ErrorReporter.RegisterError(this.Target.Source, node.StartLine, node.StartColumn, null, $@"Could not determine CLR type for table value parameter
 Parameter name: {parameter.Name}
 UDT type: {parameter.TypeName}
 Please mark it with /* @ClrType <ClrTypeName> */");
 
-                parameter.TypeName = $"[{userDataType.Name.SchemaIdentifier.Value}].[{userDataType.Name.BaseIdentifier.Value}]";
-                parameter.Check = ContractCheck.NotNull;
-            }
-            else
-            {
-                throw new InvalidOperationException($@"Unknown data type reference for parameter
+                    parameter.TypeName = $"[{userDataType.Name.SchemaIdentifier.Value}].[{userDataType.Name.BaseIdentifier.Value}]";
+                    parameter.Check = ContractCheck.NotNull;
+                }
+                else
+                {
+                    throw new InvalidOperationException($@"Unknown data type reference for parameter
 Parameter: {parameter.Name}
 ReferenceType: {node.DataType.GetType()}");
+                }
             }
 
             if (parameter.ClrType != null)
