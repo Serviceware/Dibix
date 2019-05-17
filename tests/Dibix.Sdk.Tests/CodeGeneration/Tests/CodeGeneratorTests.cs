@@ -28,6 +28,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             codeGenerationContext.SetupGet(x => x.ClassName).Returns(TestName);
             codeGenerationContext.SetupGet(x => x.ContractResolverFacade).Returns(contractResolverFacade);
             codeGenerationContext.SetupGet(x => x.ErrorReporter).Returns(errorReporter.Object);
+            codeGenerationContext.Setup(x => x.CollectAdditionalArtifacts(It.IsAny<SourceArtifacts>()));
             contractResolver.Setup(x => x.ResolveContract(It.IsAny<string>(), It.IsAny<Action<string>>()))
                             .Returns((string input, Action<string> errorHandler) =>
                             {
@@ -81,6 +82,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             errorReporter.Setup(x => x.ReportErrors()).Returns(false);
             codeGenerationContext.SetupGet(x => x.ContractResolverFacade).Returns(contractResolverFacade);
             codeGenerationContext.SetupGet(x => x.ErrorReporter).Returns(errorReporter.Object);
+            codeGenerationContext.Setup(x => x.CollectAdditionalArtifacts(It.IsAny<SourceArtifacts>()));
 
             GeneratorConfiguration configuration = GeneratorConfigurationBuilder.Create(fileSystemProvider.Object, null, errorReporter.Object)
                 .Configure(cfg => cfg.AddSource("Dibix.Sdk.Tests.Database", x =>
@@ -138,6 +140,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             errorReporter.Setup(x => x.ReportErrors()).Returns(false);
             codeGenerationContext.SetupGet(x => x.ContractResolverFacade).Returns(contractResolverFacade);
             codeGenerationContext.SetupGet(x => x.ErrorReporter).Returns(errorReporter.Object);
+            codeGenerationContext.Setup(x => x.CollectAdditionalArtifacts(It.IsAny<SourceArtifacts>()));
 
             GeneratorConfiguration configuration = GeneratorConfigurationBuilder.Create(fileSystemProvider.Object, null, errorReporter.Object)
                                                                                 .ParseJson(@"{
@@ -198,6 +201,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             errorReporter.Setup(x => x.ReportErrors()).Returns(false);
             codeGenerationContext.SetupGet(x => x.ContractResolverFacade).Returns(contractResolverFacade);
             codeGenerationContext.SetupGet(x => x.ErrorReporter).Returns(errorReporter.Object);
+            codeGenerationContext.Setup(x => x.CollectAdditionalArtifacts(It.IsAny<SourceArtifacts>()));
 
             typeof(GeneratorConfigurationBuilder).GetField("UseExtendedJsonReader", BindingFlags.NonPublic | BindingFlags.Static).SetValue(null, true);
 

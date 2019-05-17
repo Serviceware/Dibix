@@ -318,12 +318,16 @@
     line="14"
     column="23" /&gt;
   &lt;error
+    message="[017] Type 'dbx_codeanalysis_error_017_fail_udt' does not match naming convention 'dbx*_udt_*'. Also make sure the name is all lowercase."
+    line="24"
+    column="20" /&gt;
+  &lt;error
     message="[017] Index 'IX_dbx_codeanalysis_error_017_successx_fail' does not match naming convention 'IX_&amp;lt;tablename&amp;gt;_*'. Also make sure the name is all lowercase."
-    line="25"
+    line="28"
     column="28" /&gt;
   &lt;error
     message="[017] Unique constraint 'UQ_dbx_codeanalysis_error_017_successx_fail' does not match naming convention 'UQ_&amp;lt;tablename&amp;gt;_*'. Also make sure the name is all lowercase."
-    line="28"
+    line="31"
     column="35" /&gt;
 &lt;/errors&gt;</value>
   </data>

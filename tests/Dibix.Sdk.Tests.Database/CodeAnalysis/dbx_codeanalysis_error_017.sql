@@ -21,6 +21,9 @@ AS
 	  , CONSTRAINT [UQ_dbx_codeanalysis_error_017_failx_id] UNIQUE ([id])
 	)
 
+	CREATE TYPE [dbo].[dbx_codeanalysis_error_017_fail_udt] AS TABLE ([id] INT)
+	CREATE TYPE [dbo].[dbx_codeanalysis_error_017_udt_success] AS TABLE ([id] INT)
+
 	CREATE NONCLUSTERED INDEX [IX_dbx_codeanalysis_error_017_success_success] ON [dbo].[dbx_codeanalysis_error_017_success] ([id])
 	CREATE NONCLUSTERED INDEX [IX_dbx_codeanalysis_error_017_successx_fail] ON [dbo].[dbx_codeanalysis_error_017_success] ([id])
 
