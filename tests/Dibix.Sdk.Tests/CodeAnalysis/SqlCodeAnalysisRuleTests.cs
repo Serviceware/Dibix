@@ -77,7 +77,7 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
         public void SurrogateKeySqlCodeAnalysisRule() => base.Execute();
 
         [Fact]
-        public void IndexClusteringSqlCodeAnalysisRule() => base.Execute();
+        public void ImplicitDefaultSqlCodeAnalysisRule() => base.Execute();
 
         [Fact]
         public void LooseConstraintsSqlCodeAnalysisRule() => base.Execute();
