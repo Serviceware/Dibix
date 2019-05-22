@@ -8,23 +8,20 @@ namespace Dibix.Sdk.CodeGeneration
     public sealed class ContractResolverFacade : IContractResolverFacade
     {
         #region Fields
-        private readonly ICollection<IContractResolver> _contractResolvers;
+        private readonly IList<IContractResolver> _contractResolvers;
         #endregion
 
         #region Constructor
         public ContractResolverFacade() => this._contractResolvers = new Collection<IContractResolver>();
         public ContractResolverFacade(IAssemblyLocator assemblyLocator)
         {
-            this._contractResolvers = new Collection<IContractResolver>
-            {
-                new ClrTypeContractResolver(),
-                new ForeignAssemblyTypeContractResolver(assemblyLocator)
-            };
+            this._contractResolvers = new Collection<IContractResolver> { new TypeContractResolver(assemblyLocator) };
         }
         #endregion
 
         #region IContractResolverFacade Members
-        public void RegisterContractResolver(IContractResolver contractResolver) => this._contractResolvers.Add(contractResolver);
+        public void RegisterContractResolver(IContractResolver contractResolver) => this.RegisterContractResolver(contractResolver, this._contractResolvers.Count);
+        public void RegisterContractResolver(IContractResolver contractResolver, int position) => this._contractResolvers.Insert(position, contractResolver);
 
         public ContractInfo ResolveContract(string input, Action<string> errorHandler)
         {

@@ -34,10 +34,8 @@ namespace Dibix.Sdk.MSBuild
             inputs.Where(x => MatchFile(projectDirectory, x)).Each(source.Include);
             this.Configuration.Input.Sources.Add(source);
 
-            this.ContractResolverFacade = new ContractResolverFacade();
-            this.ContractResolverFacade.RegisterContractResolver(new ContractDefinitionResolver(this._contractDefinitionProvider));
-            this.ContractResolverFacade.RegisterContractResolver(new ClrTypeContractResolver());
-            this.ContractResolverFacade.RegisterContractResolver(new ForeignAssemblyTypeContractResolver(assemblyLocator));
+            this.ContractResolverFacade = new ContractResolverFacade(assemblyLocator);
+            this.ContractResolverFacade.RegisterContractResolver(new ContractDefinitionResolver(this._contractDefinitionProvider), 0);
             this.ErrorReporter = errorReporter;
         }
 

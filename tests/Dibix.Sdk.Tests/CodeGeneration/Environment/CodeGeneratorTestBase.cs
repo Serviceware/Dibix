@@ -11,9 +11,9 @@ namespace Dibix.Sdk.Tests.CodeGeneration
 {
     public abstract class CodeGeneratorTestBase
     {
-        private static readonly Assembly Assembly = typeof(CodeGeneratorTestBase).Assembly;
         private static readonly string SrcDirectory = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "..", "..", ".."));
 
+        protected static readonly Assembly Assembly = typeof(CodeGeneratorTestBase).Assembly;
         protected static string ScanDirectory { get; } = Path.GetFullPath(Path.Combine(SrcDirectory, ".."));
         protected static string ExecutingDirectory { get; } = Path.GetFullPath(Path.Combine(SrcDirectory, "CodeGeneration"));
         protected static string ProjectName { get; } = Assembly.GetName().Name;

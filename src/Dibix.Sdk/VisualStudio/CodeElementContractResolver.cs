@@ -28,10 +28,7 @@ namespace Dibix.Sdk.VisualStudio
             ContractName name = new ContractName(input);
             CodeElement codeItem = this._codeItemAccessor.Value.FirstOrDefault(x => x.FullName == name.TypeName);
             if (codeItem == null)
-            {
-                errorHandler($"Could not resolve type '{name}'. Looking in current project.");
                 return null;
-            }
 
             ContractInfo contract = CreateContractInfo(name, codeItem);
             return contract;

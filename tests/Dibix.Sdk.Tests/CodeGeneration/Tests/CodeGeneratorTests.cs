@@ -19,7 +19,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             Mock<IContractResolver> contractResolver = new Mock<IContractResolver>(MockBehavior.Strict);
             Mock<IAssemblyLocator> assemblyLocator = new Mock<IAssemblyLocator>(MockBehavior.Strict);
             IContractResolverFacade contractResolverFacade = new ContractResolverFacade(assemblyLocator.Object);
-            contractResolverFacade.RegisterContractResolver(contractResolver.Object);
+            contractResolverFacade.RegisterContractResolver(contractResolver.Object, 0);
 
             fileSystemProvider.Setup(x => x.GetFiles("Dibix.Sdk.Tests.Database", It.IsAny<IEnumerable<VirtualPath>>(), It.IsAny<IEnumerable<VirtualPath>>()))
                               .Returns<string, IEnumerable<VirtualPath>, IEnumerable<VirtualPath>>(physicalFileSystemProvider.GetFiles);
@@ -32,8 +32,11 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             contractResolver.Setup(x => x.ResolveContract(It.IsAny<string>(), It.IsAny<Action<string>>()))
                             .Returns((string input, Action<string> errorHandler) =>
                             {
+                                if (!input.StartsWith(ProjectName, StringComparison.Ordinal) || input.IndexOf(',') >= 0)
+                                    return null;
+
                                 ContractName contractName = new ContractName(input);
-                                Type type = Type.GetType($"{contractName.TypeName},{this.GetType().Assembly}", true);
+                                Type type = Type.GetType(contractName.TypeName, true);
                                 ContractInfo info = new ContractInfo(contractName, type.IsPrimitive());
                                 contractName.TypeName = type.ToCSharpTypeName();
                                 foreach (PropertyInfo property in type.GetProperties())
@@ -74,7 +77,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             Mock<IContractResolver> contractResolver = new Mock<IContractResolver>(MockBehavior.Strict);
             Mock<IAssemblyLocator> assemblyLocator = new Mock<IAssemblyLocator>(MockBehavior.Strict);
             IContractResolverFacade contractResolverFacade = new ContractResolverFacade(assemblyLocator.Object);
-            contractResolverFacade.RegisterContractResolver(contractResolver.Object);
+            contractResolverFacade.RegisterContractResolver(contractResolver.Object, 0);
 
             fileSystemProvider.SetupGet(x => x.CurrentDirectory).Returns(ExecutingDirectory);
             fileSystemProvider.Setup(x => x.GetFiles("Dibix.Sdk.Tests.Database", It.IsAny<IEnumerable<VirtualPath>>(), It.IsAny<IEnumerable<VirtualPath>>()))
@@ -132,7 +135,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             Mock<IContractResolver> contractResolver = new Mock<IContractResolver>(MockBehavior.Strict);
             Mock<IAssemblyLocator> assemblyLocator = new Mock<IAssemblyLocator>(MockBehavior.Strict);
             IContractResolverFacade contractResolverFacade = new ContractResolverFacade(assemblyLocator.Object);
-            contractResolverFacade.RegisterContractResolver(contractResolver.Object);
+            contractResolverFacade.RegisterContractResolver(contractResolver.Object, 0);
 
             fileSystemProvider.SetupGet(x => x.CurrentDirectory).Returns(ExecutingDirectory);
             fileSystemProvider.Setup(x => x.GetFiles("Dibix.Sdk.Tests.Database", It.IsAny<IEnumerable<VirtualPath>>(), It.IsAny<IEnumerable<VirtualPath>>()))
@@ -193,7 +196,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             Mock<IContractResolver> contractResolver = new Mock<IContractResolver>(MockBehavior.Strict);
             Mock<IAssemblyLocator> assemblyLocator = new Mock<IAssemblyLocator>(MockBehavior.Strict);
             IContractResolverFacade contractResolverFacade = new ContractResolverFacade(assemblyLocator.Object);
-            contractResolverFacade.RegisterContractResolver(contractResolver.Object);
+            contractResolverFacade.RegisterContractResolver(contractResolver.Object, 0);
 
             fileSystemProvider.SetupGet(x => x.CurrentDirectory).Returns(ExecutingDirectory);
             fileSystemProvider.Setup(x => x.GetFiles("Dibix.Sdk.Tests.Database", It.IsAny<IEnumerable<VirtualPath>>(), It.IsAny<IEnumerable<VirtualPath>>()))

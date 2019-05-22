@@ -14,7 +14,7 @@ AS
       [id] INT -- Implicit NOT NULL
     , CONSTRAINT [PK_dbx_codeanalysis_error_025_fail] PRIMARY KEY ([id])
   )
-
+  GO
   CREATE TYPE [dbo].[dbx_codeanalysis_error_025_type_fail] AS TABLE
   (
       [id] INT -- Implicit NOT NULL

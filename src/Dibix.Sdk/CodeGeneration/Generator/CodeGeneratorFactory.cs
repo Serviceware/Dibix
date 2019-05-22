@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using Dibix.Sdk.VisualStudio;
 using Microsoft.VisualStudio.TextTemplating;
 
@@ -19,9 +18,8 @@ namespace Dibix.Sdk.CodeGeneration
         {
             IContractResolver contractResolver = new CodeElementContractResolver(serviceProvider, textTemplatingEngineHost.TemplateFile);
             IAssemblyLocator assemblyLocator = new ProjectReferenceAssemblyLocator(serviceProvider, textTemplatingEngineHost.TemplateFile);
-            IFileSystemProvider fileSystemProvider = new ProjectFileSystemProvider(serviceProvider, textTemplatingEngineHost.TemplateFile);
             IContractResolverFacade contractResolverFacade = new ContractResolverFacade(assemblyLocator);
-            contractResolverFacade.RegisterContractResolver(contractResolver);
+            contractResolverFacade.RegisterContractResolver(contractResolver, 0);
             IErrorReporter errorReporter = new TextTemplatingEngineErrorReporter(textTemplatingEngineHost);
             ICodeGenerationContext context = new TextTemplateCodeGenerationContext(configuration, contractResolverFacade, errorReporter, textTemplatingEngineHost, serviceProvider);
             ICodeGenerator generator = new DaoCodeGenerator(context);
@@ -32,9 +30,8 @@ namespace Dibix.Sdk.CodeGeneration
         {
             IContractResolver contractResolver = new CodeElementContractResolver(serviceProvider, inputFilePath);
             IAssemblyLocator assemblyLocator = new ProjectReferenceAssemblyLocator(serviceProvider, inputFilePath);
-            IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(Path.GetDirectoryName(inputFilePath));
             IContractResolverFacade contractResolverFacade = new ContractResolverFacade(assemblyLocator);
-            contractResolverFacade.RegisterContractResolver(contractResolver);
+            contractResolverFacade.RegisterContractResolver(contractResolver, 0);
             if (_errorReporter == null)
                 _errorReporter = new VisualStudioErrorReporter(serviceProvider);
 
