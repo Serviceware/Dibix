@@ -13,6 +13,9 @@ namespace Dibix.Sdk.MSBuild
     { 
         public static bool Execute(IEnumerable<string> inputs, TaskLoggingHelper logger)
         {
+#if DEBUG
+            Debugger.Launch();
+#endif
             Stopwatch sw = Stopwatch.StartNew();
             try
             {

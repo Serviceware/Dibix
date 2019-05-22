@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Reflection;
 using Dibix.Sdk;
 using Microsoft.Build.Framework;
@@ -33,9 +32,6 @@ namespace Dibix.MSBuild
 
         public override bool Execute()
         {
-#if DEBUG
-            Debugger.Launch();
-#endif
             Assembly sdkAssembly = SdkAssemblyLoader.Load(this.SdkPath);
             Type adapterType = sdkAssembly.GetType($"{Constants.SdkAdapterNamespace}.{nameof(SqlCodeAnalysisTask)}", true);
             object[] args = 

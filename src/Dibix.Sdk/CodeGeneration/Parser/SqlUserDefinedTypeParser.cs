@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using Dibix.Sdk.Sql;
@@ -24,6 +25,16 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
+        private static string GenerateDisplayName(string udtTypeName)
+        {
+            const string delimiter = "_udt_";
+            int index = udtTypeName.IndexOf(delimiter, StringComparison.Ordinal);
+            if (index >= 0)
+                udtTypeName = udtTypeName.Substring(index + delimiter.Length);
+
+            return CultureInfo.InvariantCulture.TextInfo.ToTitleCase(udtTypeName).Replace("_", String.Empty);
+        }
+
         private class UserDefinedTypeVisitor : TSqlFragmentVisitor
         {
             public UserDefinedTypeDefinition Definition { get; private set; }
@@ -33,7 +44,7 @@ namespace Dibix.Sdk.CodeGeneration
                 string typeName = node.Name.BaseIdentifier.Value;
                 string displayName = node.SingleHint(SqlHint.Name);
                 if (String.IsNullOrEmpty(displayName))
-                    displayName = typeName;
+                    displayName = GenerateDisplayName(typeName);
 
                 this.Definition = new UserDefinedTypeDefinition(typeName, displayName);
                 this.Definition.Columns.AddRange(node.Definition.ColumnDefinitions.Select(x => MapColumn(node.Definition, x)));
