@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    public sealed class DaoWriter : OutputWriter, IWriter
+    public class DaoWriter : OutputWriter, IWriter
     {
         #region Fields
         private static readonly string GeneratorName = typeof(DaoWriter).Assembly.GetName().Name;
@@ -53,8 +53,8 @@ namespace Dibix.Sdk.CodeGeneration
         }
         #endregion
 
-        #region Private Methods
-        private static IEnumerable<IDaoWriter> SelectWriters()
+        #region Protected Methods
+        protected virtual IEnumerable<IDaoWriter> SelectWriters()
         {
             yield return new DaoExecutorWriter();
             yield return new DaoGridResultClassWriter();

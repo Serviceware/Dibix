@@ -5,6 +5,7 @@ using System.Reflection;
 using Dibix.Sdk;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using Newtonsoft.Json.Linq;
 
 namespace Dibix.MSBuild
 {
@@ -24,6 +25,15 @@ namespace Dibix.MSBuild
 
         [Output]
         public string[] ReferencePaths { get; set; }
+
+        static CompileDatabaseAccessorTask()
+        {
+            // Force loading of referenced assemblies that are needed later on
+            new[]
+            {
+                typeof(DuplicatePropertyNameHandling) // Newtonsoft.Json
+            }.GetHashCode();
+        }
 
         public override bool Execute()
         {

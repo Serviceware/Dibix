@@ -33,6 +33,7 @@ namespace Dibix.Sdk.MSBuild
 
             inputs.Where(x => MatchFile(projectDirectory, x)).Each(source.Include);
             this.Configuration.Input.Sources.Add(source);
+            this.Configuration.Output.Writer = typeof(DaoStructuredTypesWriter);
 
             this.ContractResolverFacade = new ContractResolverFacade(assemblyLocator);
             this.ContractResolverFacade.RegisterContractResolver(new ContractDefinitionResolver(this._contractDefinitionProvider), 0);

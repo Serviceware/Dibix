@@ -14,6 +14,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public void Write(DaoWriterContext context)
         {
+            context.Output.AddUsing("Dibix");
             for (int i = 0; i < context.Artifacts.UserDefinedTypes.Count; i++)
             {
                 UserDefinedTypeDefinition userDefinedType = context.Artifacts.UserDefinedTypes[i];
