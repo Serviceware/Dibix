@@ -31,9 +31,8 @@ namespace Dibix.Sdk.MSBuild
             if (!isDml)
                 source.Formatter = typeof(ExecStoredProcedureSqlStatementFormatter);
 
-            inputs.Where(x => MatchFile(projectDirectory, x)).Each(source.Include);
-            this.Configuration.Input.Sources.Add(source);
-            this.Configuration.Output.Writer = typeof(DaoStructuredTypesWriter);
+            //inputs.Where(x => MatchFile(projectDirectory, x)).Each(source.Include);
+            //this.Configuration.Input.Sources.Add(source);
 
             this.ContractResolverFacade = new ContractResolverFacade(assemblyLocator);
             this.ContractResolverFacade.RegisterContractResolver(new ContractDefinitionResolver(this._contractDefinitionProvider), 0);

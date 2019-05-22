@@ -49,6 +49,7 @@
          Sources="$(DatabaseAccessorSources)"
          References="$(DatabaseAccessorReferences)"
          OutputAssembly="$(TargetPath)"
+         LangVersion="latest"
          EmitDebugInformation="$(DebugSymbols)" />
   </Target>
 

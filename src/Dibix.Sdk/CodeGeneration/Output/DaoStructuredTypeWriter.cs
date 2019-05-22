@@ -10,7 +10,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region IDaoWriter Members
-        public bool HasContent(SourceArtifacts artifacts) => artifacts.Contracts.Any();
+        public bool HasContent(SourceArtifacts artifacts) => artifacts.UserDefinedTypes.Any();
 
         public void Write(DaoWriterContext context)
         {
