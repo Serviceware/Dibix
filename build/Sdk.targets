@@ -50,6 +50,7 @@
          References="$(DatabaseAccessorReferences)"
          OutputAssembly="$(TargetPath)"
          LangVersion="latest"
+         KeyFile="$(AssemblyOriginatorKeyFile)"
          EmitDebugInformation="$(DebugSymbols)" />
   </Target>
 
