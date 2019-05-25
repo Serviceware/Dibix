@@ -45,13 +45,14 @@
       </DatabaseAccessorReferences>
     </PropertyGroup>
 
-    <Csc TargetType="library"
-         Sources="$(DatabaseAccessorSources)"
-         References="$(DatabaseAccessorReferences)"
-         OutputAssembly="$(TargetPath)"
-         LangVersion="latest"
+    <Csc EmitDebugInformation="$(DebugSymbols)"
          KeyFile="$(AssemblyOriginatorKeyFile)"
-         EmitDebugInformation="$(DebugSymbols)" />
+         DefineConstants="$(DefineConstants)"
+         LangVersion="latest"
+         OutputAssembly="$(TargetPath)"
+         References="$(DatabaseAccessorReferences)"
+         Sources="$(DatabaseAccessorSources)"
+         TargetType="library" />
   </Target>
 
   <Target Name="VerifyDatabaseAccessor" BeforeTargets="PreBuildEvent">
