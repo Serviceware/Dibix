@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using Xunit;
 
@@ -12,7 +14,7 @@ namespace Dibix.Dapper.Tests
     public class DapperDatabaseAccessorAutoMultiMapTest
     {
         [Fact]
-        public void QuerySingle_WithMultiMap1_Success()
+        public void QuerySingle_WithAutoMultiMap_T2_Success()
         {
             using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
             {
@@ -24,7 +26,7 @@ SELECT N'desks' AS [identifier], N'workingdesk' AS [identifier]";
                 {
                     multiMapper.MultiMap(a, b);
                     return a;
-                }, "identifier").Distinct(new EqualityComparerY<RecursiveEntity>()).Single();
+                }, "identifier").Distinct(new EntityComparer<RecursiveEntity>()).Single();
                 Assert.Equal("desks", result.Identifier);
                 Assert.Equal(2, result.Children.Count);
                 Assert.Equal("agentdesk", result.Children[0].Identifier);
@@ -33,7 +35,7 @@ SELECT N'desks' AS [identifier], N'workingdesk' AS [identifier]";
         }
 
         [Fact]
-        public void QuerySingle_WithMultiMap2_Success()
+        public void QuerySingle_WithAutoMultiMap_T3_Success()
         {
             using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
             {
@@ -49,7 +51,7 @@ SELECT [name] = N'feature1', [name] = N'red', [name] = N'dependentfeaturey'";
                 {
                     multiMapper.MultiMap(a, b, c);
                     return a;
-                }, "name,name").Distinct(new EqualityComparerY<FeatureEntity>()).Single();
+                }, "name,name").Distinct(new EntityComparer<FeatureEntity>()).Single();
             }
         }
 
@@ -92,6 +94,54 @@ SELECT [name] = N'feature1', [name] = N'red', [name] = N'dependentfeaturey'";
         }
     }
 
+    internal static class EntityDescriptorCache
+    {
+        private static readonly ConcurrentDictionary<Type, EntityDescriptor> Cache = new ConcurrentDictionary<Type, EntityDescriptor>();
+
+        public static EntityDescriptor GetDescriptor(Type type) => Cache.GetOrAdd(type, BuildDescriptor);
+
+        private static EntityDescriptor BuildDescriptor(Type type)
+        {
+            EntityDescriptor descriptor = new EntityDescriptor();
+            descriptor.Keys.AddRange(type.GetProperties()
+                                         .Where(x => x.IsDefined(typeof(KeyAttribute)))
+                                         .Select(BuildEntityKey));
+            return descriptor;
+        }
+
+        private static EntityKey BuildEntityKey(PropertyInfo property)
+        {
+            ParameterExpression instanceParameter = Expression.Parameter(typeof(object), "instance");
+            Expression instanceCast = Expression.Convert(instanceParameter, property.DeclaringType);
+            Expression propertyAccessor = Expression.Property(instanceCast, property);
+            Expression<Func<object, object>> expression = Expression.Lambda<Func<object, object>>(propertyAccessor, instanceParameter);
+            Func<object, object> compiled = expression.Compile();
+            return new EntityKey(compiled);
+        }
+    }
+
+    internal sealed class EntityDescriptor
+    {
+        public ICollection<EntityKey> Keys { get; }
+
+        public EntityDescriptor()
+        {
+            this.Keys = new Collection<EntityKey>();
+        }
+    }
+
+    internal sealed class EntityKey
+    {
+        private readonly Func<object, object> _valueAccessor;
+
+        public EntityKey(Func<object, object> valueAccessor)
+        {
+            this._valueAccessor = valueAccessor;
+        }
+
+        public object GetValue(object instance) => this._valueAccessor(instance);
+    }
+
     internal class MultiMapper
     {
         private struct CollectionEntry
@@ -100,7 +150,7 @@ SELECT [name] = N'feature1', [name] = N'red', [name] = N'dependentfeaturey'";
             public object Collection { get; set; }
         }
 
-        private readonly IDictionary<object, object> _entityCache = new Dictionary<object, object>(new EqualityComparerX());
+        private readonly IDictionary<object, object> _entityCache = new Dictionary<object, object>(new EntityComparer());
         private readonly IDictionary<CollectionEntry, HashSet<object>> _collectionCache = new Dictionary<CollectionEntry, HashSet<object>>();
 
         private object GetCachedEntity(object item)
@@ -155,7 +205,7 @@ SELECT [name] = N'feature1', [name] = N'red', [name] = N'dependentfeaturey'";
             CollectionEntry key = new CollectionEntry { Instance = instance, Collection = property };
             if (!this._collectionCache.TryGetValue(key, out HashSet<object> collection))
             {
-                collection = new HashSet<object>(new EqualityComparerX());
+                collection = new HashSet<object>(new EntityComparer());
                 this._collectionCache.Add(key, collection);
             }
 
@@ -180,31 +230,38 @@ SELECT [name] = N'feature1', [name] = N'red', [name] = N'dependentfeaturey'";
         }
     }
 
-    internal class EqualityComparerY<T> : EqualityComparerX, IEqualityComparer<T>
+    internal sealed class EntityComparer<T> : IEqualityComparer<T>
     {
         private readonly IEqualityComparer<object> _inner;
 
-        public EqualityComparerY()
+        public EntityComparer()
         {
-            this._inner = new EqualityComparerX();
+            this._inner = new EntityComparer();
         }
 
         bool IEqualityComparer<T>.Equals(T x, T y) => this._inner.Equals(x, y);
 
         int IEqualityComparer<T>.GetHashCode(T obj) => this._inner.GetHashCode(obj);
     }
-    internal class EqualityComparerX : IEqualityComparer<object>
+
+    internal sealed class EntityComparer : IEqualityComparer<object>
     {
         bool IEqualityComparer<object>.Equals(object x, object y)
         {
-            PropertyInfo property = x.GetType().GetProperties().FirstOrDefault(a => a.IsDefined(typeof(KeyAttribute)));
-            return Equals(property.GetValue(x), property.GetValue(y));
+            if (x.GetType() != y.GetType())
+                return false;
+
+            EntityDescriptor entityDescriptor = EntityDescriptorCache.GetDescriptor(x.GetType());
+            return entityDescriptor.Keys.All(a => Equals(a.GetValue(x), a.GetValue(y)));
         }
 
         int IEqualityComparer<object>.GetHashCode(object obj)
         {
-            PropertyInfo property = obj.GetType().GetProperties().FirstOrDefault(x => x.IsDefined(typeof(KeyAttribute)));
-            return property.GetValue(obj).GetHashCode();
+            EntityDescriptor entityDescriptor = EntityDescriptorCache.GetDescriptor(obj.GetType());
+            int hashCode = entityDescriptor.Keys
+                                           .Select(x => x.GetValue(obj).GetHashCode())
+                                           .Aggregate((x, y) => x ^ y);
+            return hashCode;
         }
     }
 }
