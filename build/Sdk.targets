@@ -21,12 +21,17 @@
   </Target>
 
   <Target Name="CompileDatabaseAccessor" AfterTargets="PostBuildEvent" Condition="$(ShouldCompileDatabaseAccessor) == 'true'">
+    <ItemGroup>
+      <Contracts Include="@(None)" Condition="'%(Extension)' == '.json'" />
+    </ItemGroup>
+
     <CompileDatabaseAccessorTask SdkPath="$(DibixSdkPath)"
                                  SSDTDirectory="$(SqlServerRedistPath)"
                                  ProjectDirectory="$(MSBuildProjectDirectory)"
                                  Namespace="$(DatabaseAccessorNamespace)"
                                  TargetDirectory="$(IntermediateOutputPath)"
-                                 Inputs="@(Build)"
+                                 Artifacts="@(Build)"
+                                 Contracts="@(Contracts)"
                                  ProbingDirectories="$(DibixProbingDirectories)"
                                  IsDML="$(IsDMLProject)">
       <Output TaskParameter="OutputFilePath" PropertyName="DatabaseAccessorPath" />

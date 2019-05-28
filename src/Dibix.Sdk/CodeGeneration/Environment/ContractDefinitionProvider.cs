@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -12,11 +13,11 @@ namespace Dibix.Sdk.CodeGeneration
 
         public ICollection<ContractDefinition> Contracts { get; }
 
-        public ContractDefinitionProvider(IFileSystemProvider fileSystemProvider)
+        public ContractDefinitionProvider(IFileSystemProvider fileSystemProvider, IEnumerable<string> contracts)
         {
             this._definitions = new Dictionary<string, ContractDefinition>();
             this.Contracts = new Collection<ContractDefinition>();
-            this.CollectSchemas(fileSystemProvider);
+            this.CollectSchemas(fileSystemProvider, contracts);
         }
 
         public bool TryGetContract(string @namespace, string definitionName, out ContractDefinition schema)
@@ -24,14 +25,14 @@ namespace Dibix.Sdk.CodeGeneration
             return this._definitions.TryGetValue($"{@namespace}#{definitionName}", out schema);
         }
 
-        private void CollectSchemas(IFileSystemProvider fileSystemProvider)
+        private void CollectSchemas(IFileSystemProvider fileSystemProvider, IEnumerable<string> contracts)
         {
             // We assume that we are running in the context of a a sql project so we look for a neighbour contracts folder
             DirectoryInfo contractsDirectory = new DirectoryInfo(Path.Combine(fileSystemProvider.CurrentDirectory, "Contracts"));
             if (!contractsDirectory.Exists)
                 return;
 
-            foreach (FileInfo contractsFile in contractsDirectory.EnumerateFiles("*.json"))
+            foreach (FileInfo contractsFile in contracts.Select(x => new FileInfo(fileSystemProvider.GetPhysicalFilePath(null, x))))
             {
                 using (Stream stream = File.OpenRead(contractsFile.FullName))
                 {

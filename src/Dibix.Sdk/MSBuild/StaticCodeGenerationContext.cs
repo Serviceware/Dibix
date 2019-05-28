@@ -6,7 +6,7 @@ using Dibix.Sdk.CodeGeneration;
 
 namespace Dibix.Sdk.MSBuild
 {
-    internal sealed class GlobalCodeGenerationContext : ICodeGenerationContext
+    internal sealed class StaticCodeGenerationContext : ICodeGenerationContext
     {
         private readonly IContractDefinitionProvider _contractDefinitionProvider;
         private readonly IUserDefinedTypeProvider _userDefinedTypeProvider;
@@ -17,22 +17,22 @@ namespace Dibix.Sdk.MSBuild
         public IContractResolverFacade ContractResolverFacade { get; }
         public IErrorReporter ErrorReporter { get; }
 
-        public GlobalCodeGenerationContext(string projectDirectory, string @namespace, ICollection<string> inputs, IAssemblyLocator assemblyLocator, bool isDml, IErrorReporter errorReporter)
+        public StaticCodeGenerationContext(string projectDirectory, string @namespace, ICollection<string> artifacts, IEnumerable<string> contracts, IAssemblyLocator assemblyLocator, bool isDml, IErrorReporter errorReporter)
         {
             if (!String.IsNullOrEmpty(@namespace))
                 this.Namespace = @namespace;
 
             IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(projectDirectory);
-            this._contractDefinitionProvider = new ContractDefinitionProvider(fileSystemProvider);
-            this._userDefinedTypeProvider = new UserDefinedTypeProvider(inputs);
+            this._contractDefinitionProvider = new ContractDefinitionProvider(fileSystemProvider, contracts);
+            this._userDefinedTypeProvider = new UserDefinedTypeProvider(artifacts);
 
             this.Configuration = new GeneratorConfiguration();
             PhysicalSourceConfiguration source = new PhysicalSourceConfiguration(fileSystemProvider, null);
             if (!isDml)
                 source.Formatter = typeof(ExecStoredProcedureSqlStatementFormatter);
 
-            //inputs.Where(x => MatchFile(projectDirectory, x)).Each(source.Include);
-            //this.Configuration.Input.Sources.Add(source);
+            artifacts.Where(x => MatchFile(projectDirectory, x)).Each(source.Include);
+            this.Configuration.Input.Sources.Add(source);
 
             this.ContractResolverFacade = new ContractResolverFacade(assemblyLocator);
             this.ContractResolverFacade.RegisterContractResolver(new ContractDefinitionResolver(this._contractDefinitionProvider), 0);
