@@ -29,16 +29,16 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region ISqlStatementParser Members
-        public void Read(SqlParserSourceKind sourceKind, object source, SqlStatementInfo target, ISqlStatementFormatter formatter, IContractResolverFacade contractResolverFacade, IErrorReporter errorReporter)
+        public bool Read(SqlParserSourceKind sourceKind, object source, SqlStatementInfo target, ISqlStatementFormatter formatter, IContractResolverFacade contractResolverFacade, IErrorReporter errorReporter)
         {
             if (!SourceReaders.TryGetValue(sourceKind, out Func<object, TSqlFragment> reader))
                 throw new ArgumentOutOfRangeException(nameof(sourceKind), sourceKind, null);
 
             TSqlFragment fragment = reader(source);
             if (this.IsEnabled && this._codeAnalysisRunner.Analyze(fragment, target.Source, errorReporter))
-                return;
+                return false;
 
-            CollectStatementInfo(fragment, target, formatter, contractResolverFacade, errorReporter);
+            return CollectStatementInfo(fragment, target, formatter, contractResolverFacade, errorReporter);
         }
         #endregion
 
@@ -58,7 +58,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static void CollectStatementInfo(TSqlFragment fragment, SqlStatementInfo target, ISqlStatementFormatter formatter, IContractResolverFacade contractResolverFacade, IErrorReporter errorReporter)
+        private static bool CollectStatementInfo(TSqlFragment fragment, SqlStatementInfo target, ISqlStatementFormatter formatter, IContractResolverFacade contractResolverFacade, IErrorReporter errorReporter)
         {
             TVisitor visitor = new TVisitor
             {
@@ -70,8 +70,9 @@ namespace Dibix.Sdk.CodeGeneration
 
             fragment.Accept(visitor);
 
-            if (visitor.Target.Content == null)
-                errorReporter.RegisterError(target.Source, fragment.StartLine, fragment.StartColumn, null, "File could not be parsed");
+            //if (visitor.Target.Content == null)
+            //    errorReporter.RegisterError(target.Source, fragment.StartLine, fragment.StartColumn, null, "File could not be parsed");
+            return visitor.Target.Content != null;
         }
         #endregion
     }

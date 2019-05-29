@@ -48,10 +48,6 @@ namespace Dibix.Sdk.MSBuild
         private static bool MatchFile(string projectDirectory, string relativeFilePath)
         {
             string inputFilePath = Path.Combine(projectDirectory, relativeFilePath);
-            if (!inputFilePath.EndsWith("hlsysapprovalfulfillment_getpending.sql")
-             && !inputFilePath.EndsWith("hlstptile_query.sql"))
-                return false;
-
             using (Stream stream = File.OpenRead(inputFilePath))
             {
                 using (TextReader textReader = new StreamReader(stream))

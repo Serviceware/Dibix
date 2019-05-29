@@ -56,8 +56,8 @@ namespace Dibix.Sdk.CodeGeneration
                 Source = filePath,
                 Name = Path.GetFileNameWithoutExtension(filePath)
             };
-            parser.Read(SqlParserSourceKind.Stream, File.OpenRead(filePath), statement, formatter, contractResolverFacade, errorReporter);
-            return statement;
+            bool result = parser.Read(SqlParserSourceKind.Stream, File.OpenRead(filePath), statement, formatter, contractResolverFacade, errorReporter);
+            return result ? statement : null;
         }
         #endregion
     }

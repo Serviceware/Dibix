@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -21,7 +22,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             ISqlStatementParser parser = (ISqlStatementParser)Activator.CreateInstance(this.Parser);
             ISqlStatementFormatter formatter = (ISqlStatementFormatter)Activator.CreateInstance(this.Formatter);
-            artifacts.Statements.AddRange(this.CollectStatements(parser, formatter, contractResolverFacade, errorReporter));
+            artifacts.Statements.AddRange(this.CollectStatements(parser, formatter, contractResolverFacade, errorReporter).Where(x => x != null));
         }
         #endregion
 

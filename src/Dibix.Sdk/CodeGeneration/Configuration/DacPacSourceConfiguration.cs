@@ -50,8 +50,8 @@ namespace Dibix.Sdk.CodeGeneration
             if (parser is ISqlAnalysisRunner sqlAnalysisRunner)
                 sqlAnalysisRunner.IsEnabled = false;
 
-            parser.Read(SqlParserSourceKind.String, script, statement, formatter, contractResolverFacade, errorReporter);
-            return statement;
+            bool result = parser.Read(SqlParserSourceKind.String, script, statement, formatter, contractResolverFacade, errorReporter);
+            return result ? statement : null;
         }
         #endregion
     }
