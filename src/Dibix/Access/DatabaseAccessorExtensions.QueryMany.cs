@@ -44,6 +44,12 @@ namespace Dibix
         {
             return QueryMany(accessor, sql, CommandType.Text, parameters, map, splitOn);
         }
+        public static IEnumerable<TReturn> QueryMany<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, CommandType commandType, IParametersVisitor parameters, string splitOn)
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
+            MultiMapper multiMapper = new MultiMapper();
+            return accessor.QueryMany<TReturn, TSecond, TReturn>(sql, commandType, parameters, (a, b) => { multiMapper.AutoMap(a, b); return a; }, splitOn);
+        }
         public static IEnumerable<TReturn> QueryMany<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, CommandType commandType, IParametersVisitor parameters, Action<TReturn, TSecond> map, string splitOn)
         {
             Guard.IsNotNull(accessor, nameof(accessor));

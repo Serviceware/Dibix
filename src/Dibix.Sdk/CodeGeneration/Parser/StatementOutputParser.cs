@@ -101,10 +101,10 @@ namespace Dibix.Sdk.CodeGeneration
                     return;
                 }
 
-                if (String.IsNullOrEmpty(result.Converter))
-                {
-                    errorReporter.RegisterError(sourcePath, returnHint.Line, returnHint.Column, null, "The 'Converter' property must be specified when using multiple return types. Mark it in the @Return hint: -- @Return ClrTypes:<ClrTypeName> Name:<ResultName> SplitOn:<SplitColumnName> Converter:<ClrMethodDelegate>");
-                }
+                //if (String.IsNullOrEmpty(result.Converter))
+                //{
+                //    errorReporter.RegisterError(sourcePath, returnHint.Line, returnHint.Column, null, "The 'Converter' property must be specified when using multiple return types. Mark it in the @Return hint: -- @Return ClrTypes:<ClrTypeName> Name:<ResultName> SplitOn:<SplitColumnName> Converter:<ClrMethodDelegate>");
+                //}
             }
 
             // Validate if the return statements match the return types

@@ -27,7 +27,7 @@ namespace Dibix.Sdk.CodeGeneration
             context.Output.AddUsing(typeof(GeneratedCodeAttribute).Namespace);
 
             // Class
-            CSharpClass @class = context.Output.AddClass(context.ClassName, CSharpModifiers.Internal | CSharpModifiers.Static, context.GeneratedCodeAnnotation);
+            CSharpClass @class = context.Output.AddClass(context.ClassName, CSharpModifiers.Public | CSharpModifiers.Static, context.GeneratedCodeAnnotation);
 
             // Command text constants
             AddCommandTextConstants(@class, context);
@@ -263,9 +263,11 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (query.Results[0].Contracts.Count > 1)
             {
-                writer.WriteRaw(", ")
-                      .WriteRaw(query.Results[0].Converter)
-                      .WriteRaw(", \"")
+                if (!String.IsNullOrEmpty(query.Results[0].Converter))
+                    writer.WriteRaw(", ")
+                          .WriteRaw(query.Results[0].Converter);
+
+                writer.WriteRaw(", \"")
                       .WriteRaw(query.Results[0].SplitOn)
                       .WriteRaw('"');
             }
