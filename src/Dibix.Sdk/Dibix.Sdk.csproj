@@ -12,6 +12,7 @@
     <EmbeddedResource Include="CodeGeneration\Configuration\dibix.schema.simple.json" />
     <Compile Include="..\Dibix\Diagnostics\Guard.cs" Link="Diagnostics\Guard.cs" />
     <Compile Include="..\Dibix\Extensions\EnumerableExtensions.cs" Link="Extensions\EnumerableExtensions.cs" />
+    <Compile Include="..\Dibix\Reflection\TypeExtensions.cs" Link="Extensions\TypeExtensions.Base.cs" />
     <Content Include="CodeGeneration\Configuration\dibix.schema.simple.json">
       <PackagePath>content/dibix.schema.json</PackagePath>
     </Content>

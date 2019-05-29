@@ -1,6 +1,7 @@
 <Project>
   <PropertyGroup>
     <ReflectionVersion>4.3.0</ReflectionVersion>
+    <DataAnnotationsVersion>4.1.0</DataAnnotationsVersion>
     <SqlClientVersion>4.5.1</SqlClientVersion>
     <DapperVersion>1.50.5</DapperVersion>
     <NewtonsoftJsonVersion>12.0.1</NewtonsoftJsonVersion>

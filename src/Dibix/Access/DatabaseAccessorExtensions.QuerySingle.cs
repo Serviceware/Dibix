@@ -32,6 +32,15 @@ namespace Dibix
             return accessor.QuerySingle<T>(sql, CommandType.Text, parameters);
         }
         public static TReturn QuerySingle<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, Action<IParameterBuilder> configureParameters, Action<TReturn, TSecond> map, string splitOn) => QuerySingle(accessor, sql, configureParameters.Build(), map, splitOn);
+        public static TReturn QuerySingle<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, string splitOn)
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
+
+            MultiMapper multiMapper = new MultiMapper();
+            return accessor.QueryMany<TReturn, TSecond, TReturn>(sql, CommandType.Text, parameters, (a, b) => { multiMapper.AutoMap(a, b); return a; }, splitOn)
+                           .Distinct(new EntityComparer<TReturn>())
+                           .Single();
+        }
         public static TReturn QuerySingle<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, Action<TReturn, TSecond> map, string splitOn)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
@@ -65,6 +74,15 @@ namespace Dibix
                 return instance;
             }, splitOn);
             return cache.Single();
+        }
+        public static TReturn QuerySingle<TReturn, TSecond, TThird>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, string splitOn)
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
+
+            MultiMapper multiMapper = new MultiMapper();
+            return accessor.QueryMany<TReturn, TSecond, TThird, TReturn>(sql, CommandType.Text, parameters, (a, b, c) => { multiMapper.AutoMap(a, b); return a; }, splitOn)
+                           .Distinct(new EntityComparer<TReturn>())
+                           .Single();
         }
         public static TReturn QuerySingle<TReturn, TSecond, TThird, TFourth>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, Action<TReturn, TSecond, TThird, TFourth> map, string splitOn)
         {

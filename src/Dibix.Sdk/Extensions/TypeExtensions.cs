@@ -11,15 +11,6 @@ namespace Dibix.Sdk
     {
         private static readonly IDictionary<string, Type> CSharpTypeNames = LoadCSharpTypeNames().ToDictionary(x => x.Key, x => x.Value);
 
-        public static bool IsPrimitive(this Type type)
-        {
-            Type nullableType = Nullable.GetUnderlyingType(type);
-            if (nullableType != null)
-                type = nullableType;
-
-            return type.IsPrimitive || type.IsEnum || type == typeof(string) || type == typeof(Guid);
-        }
-
         internal static bool IsNullable(this Type type)
         {
             return !type.IsValueType || Nullable.GetUnderlyingType(type) != null;
@@ -72,7 +63,7 @@ namespace Dibix.Sdk
             Assembly mscorlib = Assembly.GetAssembly(typeof(int));
             using (CSharpCodeProvider provider = new CSharpCodeProvider())
             {
-                foreach (Type type in mscorlib.DefinedTypes)
+                foreach (TypeInfo type in mscorlib.DefinedTypes)
                 {
                     if (!String.Equals(type.Namespace, "System"))
                         continue;

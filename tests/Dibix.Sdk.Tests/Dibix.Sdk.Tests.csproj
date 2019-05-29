@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <Compile Include="..\..\src\Dibix.Sdk.Locator\*.cs" Link="Locator\%(Filename)%(Extension)" />
+    <Compile Include="..\..\src\Dibix\Reflection\TypeExtensions.cs" Link="TypeExtensions.cs" />
     <EmbeddedResource Update="Resource.resx" />
 
     <None Update="CodeGeneration\CodeAnalysisTest.tt">
