@@ -14,6 +14,9 @@ namespace Dibix
         #region Public Methods
         public void AutoMap(params object[] args)
         {
+            // LEFT JOIN => related entities can be null
+            args = args.Skip(1).Where(x => x == null).ToArray();
+
             for (int i = args.Length - 1; i > 0; i--)
             {
                 object item = this.GetCachedEntity(args[i]);
