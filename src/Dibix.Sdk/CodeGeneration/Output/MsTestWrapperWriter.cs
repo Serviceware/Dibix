@@ -7,7 +7,7 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public sealed class MsTestWrapperWriter : OutputWriter, IWriter
     {
-        protected override void Write(StringWriter writer, string @namespace, string className, CommandTextFormatting formatting, SourceArtifacts artifacts)
+        protected override void Write(StringWriter writer, bool generatePublicArtifacts, string @namespace, string className, CommandTextFormatting formatting, SourceArtifacts artifacts)
         {
             string output = BuildTestClass(@namespace, className, artifacts.Statements, formatting);
             writer.WriteRaw(output);

@@ -35,7 +35,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             this._context.CollectAdditionalArtifacts(artifacts);
 
-            output = writer.Write(this._context.Configuration.Output.Namespace, this._context.Configuration.Output.ClassName, this._context.Configuration.Output.Formatting.Value, artifacts);
+            output = writer.Write(this._context.Configuration.GeneratePublicArtfifacts, this._context.Configuration.Output.Namespace, this._context.Configuration.Output.ClassName, this._context.Configuration.Output.Formatting.Value, artifacts);
             if (this._context.ErrorReporter.ReportErrors())
                 output = errorContent;
 

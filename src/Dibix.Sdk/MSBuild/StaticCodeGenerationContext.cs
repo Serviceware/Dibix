@@ -27,6 +27,7 @@ namespace Dibix.Sdk.MSBuild
             this._userDefinedTypeProvider = new UserDefinedTypeProvider(artifacts);
 
             this.Configuration = new GeneratorConfiguration();
+            this.Configuration.GeneratePublicArtfifacts = true;
             PhysicalSourceConfiguration source = new PhysicalSourceConfiguration(fileSystemProvider, null);
             if (!isDml)
                 source.Formatter = typeof(ExecStoredProcedureSqlStatementFormatter);
@@ -52,12 +53,20 @@ namespace Dibix.Sdk.MSBuild
             {
                 using (TextReader textReader = new StreamReader(stream))
                 {
-                    if (textReader.ReadLine().StartsWith("-- @"))
-                        return true;
+                    while (true)
+                    {
+                        string line = textReader.ReadLine();
+                        if (line == null)
+                            return false;
+
+                        if (line.StartsWith("CREATE", StringComparison.OrdinalIgnoreCase))
+                            return false;
+
+                        if (line.StartsWith("-- @", StringComparison.Ordinal))
+                            return true;
+                    }
                 }
             }
-
-            return false;
         }
     }
 }

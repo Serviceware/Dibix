@@ -27,7 +27,8 @@ namespace Dibix.Sdk.CodeGeneration
             context.Output.AddUsing(typeof(GeneratedCodeAttribute).Namespace);
 
             // Class
-            CSharpClass @class = context.Output.AddClass(context.ClassName, CSharpModifiers.Public | CSharpModifiers.Static, context.GeneratedCodeAnnotation);
+            CSharpModifiers classVisibility = context.GeneratePublicArtifacts ? CSharpModifiers.Public : CSharpModifiers.Internal;
+            CSharpClass @class = context.Output.AddClass(context.ClassName, classVisibility | CSharpModifiers.Static, context.GeneratedCodeAnnotation);
 
             // Command text constants
             AddCommandTextConstants(@class, context);
@@ -51,10 +52,11 @@ namespace Dibix.Sdk.CodeGeneration
                 SqlStatementInfo statement = context.Artifacts.Statements[i];
                 //@class.AddComment(String.Concat("file:///", statement.SourcePath.Replace(" ", "%20").Replace(@"\", "/")), false);
                 @class.AddComment(statement.Name, false);
+                CSharpModifiers fieldVisibility = context.GeneratePublicArtifacts ? CSharpModifiers.Private : CSharpModifiers.Public;
                 @class.AddField(name: String.Concat(statement.Name, ConstantSuffix)
                               , type: typeof(string).ToCSharpTypeName()
                               , value: new CSharpStringValue(context.FormatCommandText(statement.Content, context.Formatting), context.Formatting.HasFlag(CommandTextFormatting.Verbatim))
-                              , modifiers: CSharpModifiers.Public | CSharpModifiers.Const);
+                              , modifiers: fieldVisibility | CSharpModifiers.Const);
 
                 if (i + 1 < context.Artifacts.Statements.Count)
                     @class.AddSeparator();

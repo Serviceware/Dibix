@@ -45,8 +45,7 @@
       </DatabaseAccessorSources>
       <DatabaseAccessorReferences>
         $(DibixToolsDirectory)Dibix.dll;
-        $(DatabaseAccessorReferences);
-        $(DetectedDatabaseAccessorReferences)
+        $(DatabaseAccessorReferences)
       </DatabaseAccessorReferences>
     </PropertyGroup>
 

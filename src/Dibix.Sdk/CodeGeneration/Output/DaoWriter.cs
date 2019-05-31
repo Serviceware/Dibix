@@ -23,7 +23,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Overrides
-        protected override void Write(StringWriter writer, string @namespace, string className, CommandTextFormatting formatting, SourceArtifacts artifacts)
+        protected override void Write(StringWriter writer, bool generatePublicArtifacts, string @namespace, string className, CommandTextFormatting formatting, SourceArtifacts artifacts)
         {
             IList<IDaoWriter> writers = this._writers.Where(x => x.HasContent(artifacts)).ToArray();
             //if (!writers.Any())
@@ -34,7 +34,7 @@ namespace Dibix.Sdk.CodeGeneration
             // Prepare writer
             CSharpWriter output = new CSharpWriter(writer, @namespace);
 
-            DaoWriterContext context = new DaoWriterContext(output.Root, generatedCodeAnnotation, className, formatting, artifacts, Format);
+            DaoWriterContext context = new DaoWriterContext(output.Root, generatedCodeAnnotation, generatePublicArtifacts, className, formatting, artifacts, Format);
 
             for (int i = 0; i < writers.Count; i++)
             {
