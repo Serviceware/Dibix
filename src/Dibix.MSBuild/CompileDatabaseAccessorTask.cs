@@ -24,9 +24,6 @@ namespace Dibix.MSBuild
         [Output]
         public string OutputFilePath { get; set; }
 
-        [Output]
-        public string[] ReferencePaths { get; set; }
-
         static CompileDatabaseAccessorTask()
         {
             // Force loading of referenced assemblies that are needed later on
@@ -51,14 +48,12 @@ namespace Dibix.MSBuild
               , this.IsDML
               , base.Log
               , null
-              , null
             };
 
             using (new SSDTAssemblyResolver(this.SSDTDirectory))
             {
                 bool result = (bool)adapterType.InvokeMember("Execute", BindingFlags.InvokeMethod, null, null, args);
                 this.OutputFilePath = (string)args[8];
-                this.ReferencePaths = ((ICollection<string>)args[9]).ToArray();
                 return result;
             }
         }

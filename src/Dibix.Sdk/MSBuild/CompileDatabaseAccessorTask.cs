@@ -18,7 +18,6 @@ namespace Dibix.Sdk.MSBuild
           , bool isDML
           , TaskLoggingHelper logger
           , out string outputFilePath
-          , out ICollection<string> referencePaths
         )
         {
             outputFilePath = Path.Combine(projectDirectory, targetDirectory, "SqlQueryAccessor.cs");
@@ -32,11 +31,9 @@ namespace Dibix.Sdk.MSBuild
             if (!logger.HasLoggedErrors)
             {
                 File.WriteAllText(outputFilePath, generated);
-                referencePaths = assemblyLocator.ReferencePaths;
                 return true;
             }
 
-            referencePaths = new string[0];
             return false;
         }
     }
