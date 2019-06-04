@@ -61,11 +61,13 @@
 
   <Target Name="VerifyDatabaseAccessor" BeforeTargets="PreBuildEvent">
     <VerifyDatabaseAccessorTask SdkPath="$(DibixSdkPath)"
+                                SSDTDirectory="$(SqlServerRedistPath)"
                                 ProjectDirectory="$(MSBuildProjectDirectory)"
                                 Namespace="$(RootNamespace)"
                                 AssemblyReferences="@(Reference->'%(HintPath)')"
                                 Inputs="@(None)"
-                                Condition="%(None.Generator) == 'Dibix'" />
+                                Condition="%(None.Generator) == 'Dibix'"
+                                IsIDEBuild="$(BuildingInsideVisualStudio)" />
   </Target>
 
 </Project>
