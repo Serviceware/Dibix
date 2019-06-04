@@ -12,7 +12,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Properties
-        protected override string SchemaName => "dibix.schema.extended";
+        protected override string SchemaName => "dibix.configuration.schema.extended";
         #endregion
 
         #region Constructor

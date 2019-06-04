@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Dibix.Sdk.CodeGeneration.Ast;
 
 namespace Dibix.Sdk.CodeGeneration
 {

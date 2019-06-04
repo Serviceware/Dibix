@@ -1,18 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using Dibix.Sdk;
+﻿using System.Collections.Generic;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using Newtonsoft.Json.Linq;
 
 namespace Dibix.MSBuild
 {
-    public sealed class CompileDatabaseAccessorTask : Task, ITask
+    public sealed class CompileDatabaseAccessorTask : SdkTask, ITask
     {
-        public string SdkPath { get; set; }
-        public string SSDTDirectory { get; set; }
         public string ProjectDirectory { get; set; }
         public string Namespace { get; set; }
         public string TargetDirectory { get; set; }
@@ -23,37 +15,21 @@ namespace Dibix.MSBuild
         [Output]
         public string OutputFilePath { get; set; }
 
-        static CompileDatabaseAccessorTask()
+        protected override IEnumerable<object> CollectParameters()
         {
-            // Force loading of referenced assemblies that are needed later on
-            new[]
-            {
-                typeof(DuplicatePropertyNameHandling) // Newtonsoft.Json
-            }.GetHashCode();
+            yield return this.ProjectDirectory;
+            yield return this.Namespace;
+            yield return this.TargetDirectory;
+            yield return this.Artifacts;
+            yield return this.Contracts;
+            yield return this.IsDML;
+            yield return base.Log;
+            yield return null;
         }
 
-        public override bool Execute()
+        protected override void ProcessParameters(object[] args)
         {
-            Assembly sdkAssembly = SdkAssemblyLoader.Load(this.SdkPath);
-            Type adapterType = sdkAssembly.GetType($"{Constants.SdkAdapterNamespace}.{nameof(CompileDatabaseAccessorTask)}", true);
-            object[] args = 
-            {
-                this.ProjectDirectory
-              , this.Namespace
-              , this.TargetDirectory
-              , this.Artifacts
-              , this.Contracts
-              , this.IsDML
-              , base.Log
-              , null
-            };
-
-            using (new SSDTAssemblyResolver(this.SSDTDirectory))
-            {
-                bool result = (bool)adapterType.InvokeMember("Execute", BindingFlags.InvokeMethod, null, null, args);
-                this.OutputFilePath = (string)args[7];
-                return result;
-            }
+            this.OutputFilePath = (string)args[7];
         }
     }
 }

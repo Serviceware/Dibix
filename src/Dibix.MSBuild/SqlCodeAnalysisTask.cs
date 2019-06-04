@@ -1,50 +1,16 @@
-﻿using System;
-using System.Reflection;
-using Dibix.Sdk;
+﻿using System.Collections.Generic;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 
 namespace Dibix.MSBuild
 {
-    /*
-      ITaskItem Reference:
-        [FullPath, C:\Projects\HelpLineScrum\Development\Dev\SQL\HelplineData\Views\hlsyscasevw.sql]
-        [RootDir, C:\]
-        [Filename, hlsyscasevw]
-        [Extension, .sql]
-        [RelativeDir, C:\Projects\HelpLineScrum\Development\Dev\SQL\HelplineData\Views\]
-        [Directory, Projects\HelpLineScrum\Development\Dev\SQL\HelplineData\Views\]
-        [RecursiveDir, ]
-        [Identity, C:\Projects\HelpLineScrum\Development\Dev\SQL\HelplineData\Views\hlsyscasevw.sql]
-        [ModifiedTime, 2019-02-21 08:02:11.6820812]
-        [CreatedTime, 2016-03-10 11:24:54.8619620]
-        [AccessedTime, 2019-02-21 08:02:11.6820812]
-        [DefiningProjectFullPath, C:\Projects\HelpLineScrum\Development\Dev\SQL\HelplineData\HelplineData.sqlproj]
-        [DefiningProjectDirectory, C:\Projects\HelpLineScrum\Development\Dev\SQL\HelplineData\]
-        [DefiningProjectName, HelplineData]
-        [DefiningProjectExtension, .sqlproj]
-    */
-    public sealed class SqlCodeAnalysisTask : Task, ITask
+    public sealed class SqlCodeAnalysisTask : SdkTask, ITask
     {
-        public string SdkPath { get; set; }
-        public string SSDTDirectory { get; set; }
         public string[] Inputs { get; set; }
 
-        public override bool Execute()
+        protected override IEnumerable<object> CollectParameters()
         {
-            Assembly sdkAssembly = SdkAssemblyLoader.Load(this.SdkPath);
-            Type adapterType = sdkAssembly.GetType($"{Constants.SdkAdapterNamespace}.{nameof(SqlCodeAnalysisTask)}", true);
-            object[] args = 
-            {
-                this.Inputs
-              , base.Log
-            };
-
-            using (new SSDTAssemblyResolver(this.SSDTDirectory))
-            {
-                bool result = (bool)adapterType.InvokeMember("Execute", BindingFlags.InvokeMethod, null, null, args);
-                return result;
-            }
+            yield return this.Inputs;
+            yield return base.Log;
         }
     }
 }

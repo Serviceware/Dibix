@@ -17,7 +17,8 @@
   <Target Name="SqlCodeAnalysis" BeforeTargets="BeforeBuild">
     <SqlCodeAnalysisTask SdkPath="$(DibixSdkPath)"
                          SSDTDirectory="$(SqlServerRedistPath)"
-                         Inputs="@(Build->'%(FullPath)')" />
+                         Inputs="@(Build->'%(FullPath)')"
+                         IsIDEBuild="$(BuildingInsideVisualStudio)" />
   </Target>
 
   <Target Name="CompileDatabaseAccessor" AfterTargets="PostBuildEvent" Condition="$(ShouldCompileDatabaseAccessor) == 'true'">
@@ -32,6 +33,7 @@
                                  TargetDirectory="$(IntermediateOutputPath)"
                                  Artifacts="@(Build)"
                                  Contracts="@(Contracts)"
+                                 IsIDEBuild="$(BuildingInsideVisualStudio)"
                                  IsDML="$(IsDMLProject)">
       <Output TaskParameter="OutputFilePath" PropertyName="DatabaseAccessorPath" />
     </CompileDatabaseAccessorTask>

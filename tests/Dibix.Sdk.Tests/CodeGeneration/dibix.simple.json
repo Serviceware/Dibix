@@ -1,5 +1,5 @@
 {
-  "$schema": "../../../src/Dibix.Sdk/CodeGeneration/Configuration/dibix.schema.simple.json",
+  "$schema": "../../../src/Dibix.Sdk/CodeGeneration/Configuration/dibix.configuration.schema.simple.json",
   "dml": {
     "../../Dibix.Sdk.Tests.Database": {
       "include": [

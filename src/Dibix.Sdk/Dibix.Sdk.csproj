@@ -8,13 +8,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="CodeGeneration\Configuration\dibix.schema.extended.json" />
-    <EmbeddedResource Include="CodeGeneration\Configuration\dibix.schema.simple.json" />
+    <EmbeddedResource Include="CodeGeneration\Configuration\dibix.configuration.schema.extended.json" />
+    <EmbeddedResource Include="CodeGeneration\Configuration\dibix.configuration.schema.simple.json" />
+    <EmbeddedResource Include="CodeGeneration\Environment\dibix.contracts.schema.json" />
     <Compile Include="..\Dibix\Diagnostics\Guard.cs" Link="Diagnostics\Guard.cs" />
     <Compile Include="..\Dibix\Extensions\EnumerableExtensions.cs" Link="Extensions\EnumerableExtensions.cs" />
     <Compile Include="..\Dibix\Reflection\TypeExtensions.cs" Link="Extensions\TypeExtensions.Base.cs" />
-    <Content Include="CodeGeneration\Configuration\dibix.schema.simple.json">
-      <PackagePath>content/dibix.schema.json</PackagePath>
+    <Content Include="CodeGeneration\Environment\dibix.contracts.schema.json">
+      <PackagePath>content/dibix.contracts.schema.json</PackagePath>
     </Content>
     <Content Include="..\..\build\Sdk.Targets">
       <PackagePath>build</PackagePath>
@@ -28,10 +29,12 @@
     <Content Include="..\Dibix.MSBuild\bin\$(Configuration)\$(TargetFramework)\Newtonsoft.Json.dll">
       <PackagePath>tools/net46</PackagePath>
     </Content>
+    <Content Include="..\Dibix.MSBuild\bin\$(Configuration)\$(TargetFramework)\Newtonsoft.Json.Schema.dll">
+      <PackagePath>tools/net46</PackagePath>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
     <PackageReference Include="Newtonsoft.Json.Schema" Version="$(NewtonsoftJsonSchemaVersion)" />
     <PackageReference Include="Microsoft.SqlServer.DacFx.x64" Version="$(DacFxVersion)" />
     <PackageReference Include="EnvDTE" Version="$(EnvDTEVersion)" />

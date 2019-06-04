@@ -10,12 +10,17 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 namespace Dibix.Sdk.MSBuild
 {
     public static class SqlCodeAnalysisTask
-    { 
+    {
         public static bool Execute(IEnumerable<string> inputs, TaskLoggingHelper logger)
         {
 #if DEBUG
             Debugger.Launch();
 #endif
+            return ExecuteCore(inputs, logger);
+        }
+
+        public static bool ExecuteCore(IEnumerable<string> inputs, TaskLoggingHelper logger)
+        {
             Stopwatch sw = Stopwatch.StartNew();
             try
             {

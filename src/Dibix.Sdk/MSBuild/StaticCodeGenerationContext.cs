@@ -23,11 +23,17 @@ namespace Dibix.Sdk.MSBuild
                 this.Namespace = @namespace;
 
             IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(projectDirectory);
-            this._contractDefinitionProvider = new ContractDefinitionProvider(fileSystemProvider, contracts);
+            this._contractDefinitionProvider = new ContractDefinitionProvider(fileSystemProvider, errorReporter, contracts);
             this._userDefinedTypeProvider = new UserDefinedTypeProvider(artifacts);
 
             this.Configuration = new GeneratorConfiguration();
             this.Configuration.GeneratePublicArtfifacts = true;
+            if (this._contractDefinitionProvider.HasSchemaErrors)
+            {
+                errorReporter.ReportErrors();
+                this.Configuration.IsInvalid = true;
+            }
+
             PhysicalSourceConfiguration source = new PhysicalSourceConfiguration(fileSystemProvider, null);
             if (!isDml)
                 source.Formatter = typeof(ExecStoredProcedureSqlStatementFormatter);

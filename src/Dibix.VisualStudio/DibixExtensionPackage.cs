@@ -6,7 +6,6 @@ using Dibix.Sdk;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Events;
-using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
 
 namespace Dibix.VisualStudio
@@ -26,7 +25,6 @@ namespace Dibix.VisualStudio
         // Force loading of referenced assemblies that are needed later on
         private static readonly Type[] ForeignAssemblyTypes =
         {
-            typeof(DuplicatePropertyNameHandling),
             typeof(JSchemaType)
         };
         #endregion

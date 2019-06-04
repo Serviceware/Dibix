@@ -15,7 +15,6 @@
     <PackageReference Include="VSLangProj80" Version="$(VSLangProj80Version)" />
     <PackageReference Include="Microsoft.VisualStudio.Shell.15.0" Version="$(VisualStudioShellVersion)" />
     <PackageReference Include="Microsoft.VisualStudio.Designer.Interfaces" Version="$(VisualStudioDesignerInterfacesVersion)" />
-    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
     <PackageReference Include="Newtonsoft.Json.Schema" Version="$(NewtonsoftJsonSchemaVersion)" />
   </ItemGroup>
 

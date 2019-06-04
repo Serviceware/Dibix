@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading;
 
-namespace Dibix.Sdk.CodeGeneration.Ast
+namespace Dibix.Sdk.CodeGeneration
 {
     public class CSharpStatementScope : CSharpStatement
     {

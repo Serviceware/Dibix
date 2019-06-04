@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Dibix.Sdk.CodeGeneration.Ast
+namespace Dibix.Sdk.CodeGeneration
 {
     public sealed class CSharpRoot : CSharpStatementScope
     {

@@ -9,7 +9,7 @@ namespace Dibix.Sdk.CodeGeneration
     internal sealed class SimpleJsonGeneratorConfigurationReader : JsonGeneratorConfigurationReader
     {
         #region Properties
-        protected override string SchemaName => "dibix.schema.simple";
+        protected override string SchemaName => "dibix.configuration.schema.simple";
         #endregion
 
         #region Constructor

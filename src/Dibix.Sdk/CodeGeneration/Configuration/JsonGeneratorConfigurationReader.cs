@@ -39,31 +39,12 @@ namespace Dibix.Sdk.CodeGeneration
             };
             this._writers = BuildTypeMap<IWriter>();
         }
-
-        static JsonGeneratorConfigurationReader()
-        {
-            // Newtonsoft.Json.Schema uses an older Newtonsoft.Json version
-            // We need Newtonsoft.Json 12 though, because of JsonLoadSettings.DuplicatePropertyNameHandling
-            Assembly OnAssemblyResolve(object sender, ResolveEventArgs e)
-            {
-                AssemblyName requestedAssembly = new AssemblyName(e.Name);
-                if (requestedAssembly.Name == "Newtonsoft.Json" && requestedAssembly.Version.Major == 11)
-                {
-                    AppDomain.CurrentDomain.AssemblyResolve -= OnAssemblyResolve;
-                    requestedAssembly.Version = new Version(12, 0, 0, 0);
-                    return Assembly.Load(requestedAssembly);
-                }
-                return null;
-            }
-
-            AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
-        }
         #endregion
 
         #region IGeneratorConfigurationReader Members
         public void Read(GeneratorConfiguration configuration)
         {
-            JObject json = JObject.Parse(this._json, new JsonLoadSettings { DuplicatePropertyNameHandling = DuplicatePropertyNameHandling.Error });
+            JObject json = JObject.Parse(this._json/*, new JsonLoadSettings { DuplicatePropertyNameHandling = DuplicatePropertyNameHandling.Error }*/);
             if (!json.IsValid(JsonSchemaDefinition.GetSchema(this.SchemaName), out IList<ValidationError> errors))
             {
                 foreach (ValidationError error in errors)
