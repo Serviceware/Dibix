@@ -1,19 +1,15 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-
-namespace Dibix.Sdk.CodeGeneration
+﻿namespace Dibix.Sdk.CodeGeneration
 {
-    public sealed class ContractDefinition
+    public abstract class ContractDefinition
     {
         public string Namespace { get; set; }
         public string DefinitionName { get; }
-        public ICollection<ContractDefinitionProperty> Properties { get; }
+        public abstract bool IsPrimitive { get; }
 
-        public ContractDefinition(string @namespace, string definitionName)
+        protected ContractDefinition(string @namespace, string definitionName)
         {
             this.Namespace = @namespace;
             this.DefinitionName = definitionName;
-            this.Properties = new Collection<ContractDefinitionProperty>();
         }
     }
 }

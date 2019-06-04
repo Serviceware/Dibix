@@ -83,20 +83,54 @@ namespace Dibix.Sdk.CodeGeneration
 
         private void ReadContract(string @namespace, string definitionName, JToken value)
         {
-            ContractDefinition definition = new ContractDefinition(@namespace, definitionName);
             switch (value.Type)
             {
                 case JTokenType.Object:
-                    foreach (JProperty property in ((JObject)value).Properties())
-                        definition.Properties.Add(new ContractDefinitionProperty(property.Name, property.Value.Value<string>()));
+                    this.ReadObjectContract(@namespace, definitionName, value);
+                    break;
 
-                    this.Contracts.Add(definition);
-                    this._definitions.Add($"{@namespace}#{definitionName}", definition);
+                case JTokenType.Array:
+                    this.ReadEnumContract(@namespace, definitionName, value);
                     break;
 
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(value), value.Type, null);
+                    throw new ArgumentOutOfRangeException(nameof(value.Type), value.Type, null);
             }
+        }
+
+        private void ReadObjectContract(string @namespace, string definitionName, JToken value)
+        {
+            ObjectContract contract = new ObjectContract(@namespace, definitionName);
+            foreach (JProperty property in ((JObject)value).Properties())
+                contract.Properties.Add(new ObjectContractProperty(property.Name, property.Value.Value<string>()));
+
+            this.Contracts.Add(contract);
+            this._definitions.Add($"{@namespace}#{definitionName}", contract);
+        }
+
+        private void ReadEnumContract(string @namespace, string definitionName, JToken value)
+        {
+            EnumContract contract = new EnumContract(@namespace, definitionName, false);
+            foreach (JToken child in (JArray)value)
+            {
+                switch (child.Type)
+                {
+                    case JTokenType.Object:
+                        JProperty property = ((JObject)child).Properties().Single();
+                        contract.Members.Add(new EnumContractMember(property.Name, property.Value.Value<int>()));
+                        break;
+
+                    case JTokenType.String:
+                        contract.Members.Add(new EnumContractMember(child.Value<string>()));
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(child.Type), child.Type, null);
+                }
+            }
+
+            this.Contracts.Add(contract);
+            this._definitions.Add($"{@namespace}#{definitionName}", contract);
         }
         #endregion
     }

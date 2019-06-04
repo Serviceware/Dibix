@@ -37,6 +37,13 @@ namespace Dibix.Sdk.CodeGeneration
             return @class;
         }
 
+        public CSharpEnum AddEnum(string name, CSharpModifiers modifiers, string annotation = null)
+        {
+            CSharpEnum @enum = new CSharpEnum(name, modifiers, annotation);
+            this._statements.Add(@enum);
+            return @enum;
+        }
+
         public IDisposable CreateRegion(string regionName)
         {
             this._statements.Add(new CSharpRegionStart(regionName));

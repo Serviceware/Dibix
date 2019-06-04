@@ -24,33 +24,57 @@ namespace Dibix.Sdk.CodeGeneration
                 CSharpStatementScope scope = context.Output.BeginScope(@namespace);
                 foreach (ContractDefinition contract in group)
                 {
-                    CSharpClass @class = scope.AddClass(contract.DefinitionName, CSharpModifiers.Public | CSharpModifiers.Sealed);
-                    ICollection<string> ctorAssignments = new Collection<string>();
-                    foreach (ContractDefinitionProperty property in contract.Properties)
+                    switch (contract)
                     {
-                        bool isEnumerable = TryGetArrayType(property.Type, out string arrayType);
-                        @class.AddProperty(property.Name, !isEnumerable ? property.Type : $"ICollection<{arrayType}>")
-                              .Getter(null)
-                              .Setter(null, isEnumerable ? CSharpModifiers.Private : default);
+                        case ObjectContract objectContract:
+                            ProcessObjectContract(context, scope, objectContract);
+                            break;
 
-                        if (isEnumerable)
-                            ctorAssignments.Add($"this.{property.Name} = new Collection<{arrayType}>();");
+                        case EnumContract enumContract:
+                            ProcessEnumContract(scope, enumContract);
+                            break;
                     }
-
-                    if (!ctorAssignments.Any())
-                        continue;
-
-                    context.Output.AddUsing(typeof(ICollection<>).Namespace);
-                    context.Output.AddUsing(typeof(Collection<>).Namespace);
-
-                    @class.AddSeparator()
-                          .AddConstructor(String.Join(Environment.NewLine, ctorAssignments));
                 }
             }
         }
         #endregion
 
         #region Private Methods
+        private static void ProcessObjectContract(DaoWriterContext context, CSharpStatementScope scope, ObjectContract contract)
+        {
+            CSharpClass @class = scope.AddClass(contract.DefinitionName, CSharpModifiers.Public | CSharpModifiers.Sealed);
+            ICollection<string> ctorAssignments = new Collection<string>();
+            foreach (ObjectContractProperty property in contract.Properties)
+            {
+                bool isEnumerable = TryGetArrayType(property.Type, out string arrayType);
+                @class.AddProperty(property.Name, !isEnumerable ? property.Type : $"ICollection<{arrayType}>")
+                      .Getter(null)
+                      .Setter(null, isEnumerable ? CSharpModifiers.Private : default);
+
+                if (isEnumerable)
+                    ctorAssignments.Add($"this.{property.Name} = new Collection<{arrayType}>();");
+            }
+
+            if (!ctorAssignments.Any())
+                return;
+
+            context.Output.AddUsing(typeof(ICollection<>).Namespace);
+            context.Output.AddUsing(typeof(Collection<>).Namespace);
+
+            @class.AddSeparator()
+                  .AddConstructor(String.Join(Environment.NewLine, ctorAssignments));
+        }
+
+        private static void ProcessEnumContract(CSharpStatementScope scope, EnumContract contract)
+        {
+            CSharpEnum @enum = scope.AddEnum(contract.DefinitionName, CSharpModifiers.Public, contract.IsFlaggable ? "Flags" : null);
+            foreach (EnumContractMember member in contract.Members)
+            {
+                @enum.AddMember(member.Name, member.Value)
+                     .Inherits("int");
+            }
+        }
+
         private static bool TryGetArrayType(string type, out string arrayType)
         {
             int index = type.LastIndexOf('*');

@@ -33,10 +33,12 @@ namespace Dibix.Sdk.CodeGeneration
                 throw new InvalidOperationException($"Cannot resolve contract '{normalizedInput}'");
 
             ContractName contractName = new ContractName(input, normalizedInput);
-            ContractInfo contract = new ContractInfo(contractName, false);
-            foreach (ContractDefinitionProperty property in contractDefinition.Properties)
-                contract.Properties.Add(property.Name);
-
+            ContractInfo contract = new ContractInfo(contractName, contractDefinition.IsPrimitive);
+            if (contractDefinition is ObjectContract objectContract)
+            {
+                foreach (ObjectContractProperty property in objectContract.Properties)
+                    contract.Properties.Add(property.Name);
+            }
             return contract;
         }
         #endregion
