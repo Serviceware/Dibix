@@ -14,7 +14,6 @@ namespace Dibix.Sdk.MSBuild
           , string targetDirectory
           , ICollection<string> artifacts
           , ICollection<string> contracts
-          , ICollection<string> probingDirectories
           , bool isDML
           , TaskLoggingHelper logger
           , out string outputFilePath
@@ -22,9 +21,8 @@ namespace Dibix.Sdk.MSBuild
         {
             outputFilePath = Path.Combine(projectDirectory, targetDirectory, "SqlQueryAccessor.cs");
 
-            ProbingAssemblyLocator assemblyLocator = new ProbingAssemblyLocator(probingDirectories ?? new string[0]);
             IErrorReporter errorReporter = new MSBuildErrorReporter(logger);
-            ICodeGenerationContext context = new StaticCodeGenerationContext(projectDirectory, @namespace, artifacts ?? new string[0], contracts ?? new string[0], assemblyLocator, isDML, errorReporter);
+            ICodeGenerationContext context = new StaticCodeGenerationContext(projectDirectory, @namespace, artifacts ?? new string[0], contracts ?? new string[0], isDML, errorReporter);
             ICodeGenerator generator = new DaoCodeGenerator(context);
 
             string generated = generator.Generate();

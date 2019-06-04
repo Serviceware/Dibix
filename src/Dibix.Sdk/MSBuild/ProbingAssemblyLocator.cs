@@ -1,26 +1,15 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Dibix.Sdk.CodeGeneration;
+﻿using Dibix.Sdk.CodeGeneration;
 
 namespace Dibix.Sdk.MSBuild
 {
-    internal sealed class ProbingAssemblyLocator : IAssemblyLocator
+    // Loading foreign assemblies is not supported in CompileDatabaseAccessorTask.
+    // Instead contracts should be defined within the same project in JSON format.
+    internal sealed class UnsupportedAssemblyLocator : IAssemblyLocator
     {
-        private readonly ICollection<string> _probingDirectories;
-
-        public ProbingAssemblyLocator(ICollection<string> probingDirectories)
-        {
-            this._probingDirectories = probingDirectories;
-        }
-
         public bool TryGetAssemblyLocation(string assemblyName, out string path)
         {
-            path = this._probingDirectories
-                       .Select(x => Path.Combine(x, $"{assemblyName}.dll"))
-                       .FirstOrDefault(File.Exists);
-
-            return path != null;
+            path = null;
+            return false;
         }
     }
 }

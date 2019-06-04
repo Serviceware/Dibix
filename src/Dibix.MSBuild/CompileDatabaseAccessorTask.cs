@@ -18,7 +18,6 @@ namespace Dibix.MSBuild
         public string TargetDirectory { get; set; }
         public string[] Artifacts { get; set; }
         public string[] Contracts { get; set; }
-        public string[] ProbingDirectories { get; set; }
         public bool IsDML { get; set; }
 
         [Output]
@@ -44,7 +43,6 @@ namespace Dibix.MSBuild
               , this.TargetDirectory
               , this.Artifacts
               , this.Contracts
-              , this.ProbingDirectories
               , this.IsDML
               , base.Log
               , null
@@ -53,7 +51,7 @@ namespace Dibix.MSBuild
             using (new SSDTAssemblyResolver(this.SSDTDirectory))
             {
                 bool result = (bool)adapterType.InvokeMember("Execute", BindingFlags.InvokeMethod, null, null, args);
-                this.OutputFilePath = (string)args[8];
+                this.OutputFilePath = (string)args[7];
                 return result;
             }
         }
