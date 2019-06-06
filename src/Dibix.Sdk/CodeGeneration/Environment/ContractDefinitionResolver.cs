@@ -22,17 +22,10 @@ namespace Dibix.Sdk.CodeGeneration
                 return null;
 
             string normalizedInput = input.Substring(1, input.Length - 1);
-            string[] parts = normalizedInput.Split('.');
-            if (parts.Length != 2)
-                return null;
-
-            string schemaName = parts[0];
-            string definitionName = parts[1];
-
-            if (!this._contractDefinitionProvider.TryGetContract(schemaName, definitionName, out ContractDefinition contractDefinition))
+            if (!this._contractDefinitionProvider.TryGetContract(normalizedInput, out ContractDefinition contractDefinition))
                 throw new InvalidOperationException($"Cannot resolve contract '{normalizedInput}'");
 
-            ContractName contractName = new ContractName(input, normalizedInput);
+            ContractName contractName = new ContractName(input, $"{contractDefinition.Namespace}.{contractDefinition.DefinitionName}");
             ContractInfo contract = new ContractInfo(contractName, contractDefinition.IsPrimitive);
             if (contractDefinition is ObjectContract objectContract)
             {

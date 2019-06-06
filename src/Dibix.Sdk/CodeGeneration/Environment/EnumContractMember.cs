@@ -3,11 +3,10 @@
     public sealed class EnumContractMember
     {
         public string Name { get; }
-        public int? Value { get; }
+        public string Value { get; }
 
         public EnumContractMember(string name) : this(name, null) { }
-        public EnumContractMember(string name, int value) : this(name, (int?)value) { }
-        private EnumContractMember(string name, int? value)
+        public EnumContractMember(string name, string value)
         {
             this.Name = name;
             this.Value = value;

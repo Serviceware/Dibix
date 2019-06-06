@@ -7,13 +7,13 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public sealed class MsTestWrapperWriter : OutputWriter, IWriter
     {
-        protected override void Write(StringWriter writer, bool generatePublicArtifacts, string @namespace, string className, CommandTextFormatting formatting, SourceArtifacts artifacts)
+        protected override void Write(StringWriter writer, OutputConfiguration configuration, SourceArtifacts artifacts)
         {
-            string output = BuildTestClass(@namespace, className, artifacts.Statements, formatting);
+            string output = BuildTestClass(configuration, artifacts.Statements);
             writer.WriteRaw(output);
         }
 
-        private static string BuildTestClass(string @namespace, string className, IEnumerable<SqlStatementInfo> statements, CommandTextFormatting formatting)
+        private static string BuildTestClass(OutputConfiguration configuration, IEnumerable<SqlStatementInfo> statements)
         {
             const string template = @"using Helpline.Infrastructure.Tests.Components.Data;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -27,10 +27,10 @@ namespace %namespace%
     }
 }";
 
-            string methods = String.Join(String.Format("{0}{0}", Environment.NewLine), statements.Select(x => BuildTestMethod(x.Name, Format(x.Content, formatting), formatting)));
+            string methods = String.Join(String.Format("{0}{0}", Environment.NewLine), statements.Select(x => BuildTestMethod(x.Name, Format(x.Content, configuration.Formatting), configuration.Formatting)));
 
-            return template.Replace("%namespace%", @namespace)
-                           .Replace("%className%", className)
+            return template.Replace("%namespace%", configuration.Namespace)
+                           .Replace("%className%", configuration.ClassName)
                            .Replace("%methods%", methods);
         }
 

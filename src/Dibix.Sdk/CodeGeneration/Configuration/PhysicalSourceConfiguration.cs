@@ -8,6 +8,8 @@ namespace Dibix.Sdk.CodeGeneration
     {
         #region Fields
         private readonly string _projectName;
+        private readonly bool _multipleAreas;
+        private readonly string _contractsLayerName;
         private readonly IFileSystemProvider _fileSystemProvider;
         private readonly ICollection<VirtualPath> _include;
         private readonly ICollection<VirtualPath> _exclude;
@@ -19,10 +21,12 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public PhysicalSourceConfiguration(IFileSystemProvider fileSystemProvider, string projectName)
+        public PhysicalSourceConfiguration(IFileSystemProvider fileSystemProvider, string projectName, bool multipleAreas, string contractsLayerName)
         {
             this._fileSystemProvider = fileSystemProvider;
             this._projectName = projectName;
+            this._multipleAreas = multipleAreas;
+            this._contractsLayerName = contractsLayerName;
             this._include = new HashSet<VirtualPath>();
             this._exclude = new HashSet<VirtualPath>();
         }
@@ -39,7 +43,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             return this.Files
                        .Where(x => Path.GetExtension(x) == ".sql")
-                       .Select(x => ParseStatement(x, parser, formatter, contractResolverFacade, errorReporter));
+                       .Select(x => this.ParseStatement(x, parser, formatter, contractResolverFacade, errorReporter));
         }
         #endregion
 
@@ -49,14 +53,18 @@ namespace Dibix.Sdk.CodeGeneration
             return this._fileSystemProvider.GetFiles(this._projectName, this._include, this._exclude);
         }
 
-        private static SqlStatementInfo ParseStatement(string filePath, ISqlStatementParser parser, ISqlStatementFormatter formatter, IContractResolverFacade contractResolverFacade, IErrorReporter errorReporter)
+        private SqlStatementInfo ParseStatement(string filePath, ISqlStatementParser parser, ISqlStatementFormatter formatter, IContractResolverFacade contractResolverFacade, IErrorReporter errorReporter)
         {
             SqlStatementInfo statement = new SqlStatementInfo
             {
                 Source = filePath,
                 Name = Path.GetFileNameWithoutExtension(filePath)
             };
+
             bool result = parser.Read(SqlParserSourceKind.Stream, File.OpenRead(filePath), statement, formatter, contractResolverFacade, errorReporter);
+
+            statement.Namespace = NamespaceUtility.BuildNamespace(statement.Namespace, this._multipleAreas, this._contractsLayerName);
+
             return result ? statement : null;
         }
         #endregion

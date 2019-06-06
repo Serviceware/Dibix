@@ -18,6 +18,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Protected Methods
         protected internal void ParseContent(TSqlStatement content, StatementList statements)
         {
+            this.Target.Namespace = content.SingleHint(SqlHint.Namespace);
             string name = content.SingleHint(SqlHint.Name);
             if (!String.IsNullOrEmpty(name))
                 this.Target.Name = name;

@@ -12,18 +12,25 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region IDaoWriter Members
-        public bool HasContent(SourceArtifacts artifacts) => artifacts.Contracts.Any();
+        public bool HasContent(OutputConfiguration configuration, SourceArtifacts artifacts) => artifacts.Contracts.Any();
 
         public void Write(DaoWriterContext context)
         {
             context.Output.AddUsing("System");
 
-            foreach (IGrouping<string, ContractDefinition> group in context.Artifacts.Contracts.GroupBy(x => x.Namespace))
+            var namespaceGroups = context.Artifacts
+                                         .Contracts
+                                         .GroupBy(x => x.Namespace)
+                                         .ToArray();
+
+            for (int i = 0; i < namespaceGroups.Length; i++)
             {
-                string @namespace = group.Key;
-                CSharpStatementScope scope = context.Output.BeginScope(@namespace);
-                foreach (ContractDefinition contract in group)
+                IGrouping<string, ContractDefinition> group = namespaceGroups[i];
+                IList<ContractDefinition> contracts = group.ToArray();
+                CSharpStatementScope scope = context.Output.BeginScope(group.Key);
+                for (int j = 0; j < contracts.Count; j++)
                 {
+                    ContractDefinition contract = contracts[j];
                     switch (contract)
                     {
                         case ObjectContract objectContract:
@@ -34,7 +41,13 @@ namespace Dibix.Sdk.CodeGeneration
                             ProcessEnumContract(scope, enumContract);
                             break;
                     }
+
+                    if (j + 1 < contracts.Count)
+                        scope.AddSeparator();
                 }
+
+                if (i + 1 < namespaceGroups.Length)
+                    context.Output.AddSeparator();
             }
         }
         #endregion

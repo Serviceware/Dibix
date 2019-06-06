@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -20,58 +21,61 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region IDaoWriter Members
-        public bool HasContent(SourceArtifacts artifacts) => artifacts.Statements.Any();
+        public bool HasContent(OutputConfiguration configuration, SourceArtifacts artifacts) => artifacts.Statements.Any();
 
         public void Write(DaoWriterContext context)
         {
             context.Output.AddUsing(typeof(GeneratedCodeAttribute).Namespace);
 
+            CSharpStatementScope scope = context.Configuration.GeneratePublicArtifacts ? context.Output.BeginScope("Data") : context.Output;
+            IList<SqlStatementInfo> statements = context.Artifacts.Statements;
+
             // Class
-            CSharpModifiers classVisibility = context.GeneratePublicArtifacts ? CSharpModifiers.Public : CSharpModifiers.Internal;
-            CSharpClass @class = context.Output.AddClass(context.ClassName, classVisibility | CSharpModifiers.Static, context.GeneratedCodeAnnotation);
+            CSharpModifiers classVisibility = context.Configuration.GeneratePublicArtifacts ? CSharpModifiers.Public : CSharpModifiers.Internal;
+            CSharpClass @class = scope.AddClass(context.Configuration.ClassName, classVisibility | CSharpModifiers.Static, context.GeneratedCodeAnnotation);
 
             // Command text constants
-            AddCommandTextConstants(@class, context);
+            AddCommandTextConstants(@class, context, statements);
 
             // Execution methods
             @class.AddSeparator();
-            AddExecutionMethods(@class, context);
+            AddExecutionMethods(@class, context, statements);
 
             // Add method info accessor fields
             // This is useful for dynamic invocation like in WAX
             @class.AddSeparator();
-            AddMethodInfoFields(@class, context);
+            AddMethodInfoFields(@class, context, statements);
         }
         #endregion
 
         #region Private Methods
-        private static void AddCommandTextConstants(CSharpClass @class, DaoWriterContext context)
+        private static void AddCommandTextConstants(CSharpClass @class, DaoWriterContext context, IList<SqlStatementInfo> statements)
         {
-            for (int i = 0; i < context.Artifacts.Statements.Count; i++)
+            for (int i = 0; i < statements.Count; i++)
             {
-                SqlStatementInfo statement = context.Artifacts.Statements[i];
+                SqlStatementInfo statement = statements[i];
                 //@class.AddComment(String.Concat("file:///", statement.SourcePath.Replace(" ", "%20").Replace(@"\", "/")), false);
                 @class.AddComment(statement.Name, false);
-                CSharpModifiers fieldVisibility = context.GeneratePublicArtifacts ? CSharpModifiers.Private : CSharpModifiers.Public;
+                CSharpModifiers fieldVisibility = context.Configuration.GeneratePublicArtifacts ? CSharpModifiers.Private : CSharpModifiers.Public;
                 @class.AddField(name: String.Concat(statement.Name, ConstantSuffix)
                               , type: typeof(string).ToCSharpTypeName()
-                              , value: new CSharpStringValue(context.FormatCommandText(statement.Content, context.Formatting), context.Formatting.HasFlag(CommandTextFormatting.Verbatim))
+                              , value: new CSharpStringValue(context.FormatCommandText(statement.Content, context.Configuration.Formatting), context.Configuration.Formatting.HasFlag(CommandTextFormatting.Verbatim))
                               , modifiers: fieldVisibility | CSharpModifiers.Const);
 
-                if (i + 1 < context.Artifacts.Statements.Count)
+                if (i + 1 < statements.Count)
                     @class.AddSeparator();
             }
         }
 
-        private static void AddExecutionMethods(CSharpClass @class, DaoWriterContext context)
+        private static void AddExecutionMethods(CSharpClass @class, DaoWriterContext context, IList<SqlStatementInfo> statements)
         {
             context.Output.AddUsing("Dibix");
 
-            IDictionary<SqlStatementInfo, string> methodReturnTypeMap = context.Artifacts.Statements.ToDictionary(x => x, DetermineResultTypeName);
+            IDictionary<SqlStatementInfo, string> methodReturnTypeMap = statements.ToDictionary(x => x, DetermineResultTypeName);
 
-            for (int i = 0; i < context.Artifacts.Statements.Count; i++)
+            for (int i = 0; i < statements.Count; i++)
             {
-                SqlStatementInfo statement = context.Artifacts.Statements[i];
+                SqlStatementInfo statement = statements[i];
                 bool isSingleResult = statement.Results.Count == 1;
 
                 if (isSingleResult && statement.Results[0].ResultMode == SqlQueryResultMode.Many)
@@ -87,7 +91,7 @@ namespace Dibix.Sdk.CodeGeneration
                 foreach (SqlQueryParameter parameter in statement.Parameters)
                     method.AddParameter(parameter.Name, parameter.ClrTypeName);
 
-                if (i + 1 < context.Artifacts.Statements.Count)
+                if (i + 1 < statements.Count)
                     @class.AddSeparator();
             }
         }
@@ -102,6 +106,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (query.Results.Count == 1) // Query<T>/QuerySingle/etc.
             {
                 string resultTypeName = query.Results[0].Contracts.First().Name.ToString();
+
                 if (query.Results[0].ResultMode == SqlQueryResultMode.Many)
                     resultTypeName = MakeEnumerableType(resultTypeName);
 
@@ -112,15 +117,15 @@ namespace Dibix.Sdk.CodeGeneration
             return GetComplexTypeName(query);
         }
 
-        private static void AddMethodInfoFields(CSharpClass @class, DaoWriterContext context)
+        private static void AddMethodInfoFields(CSharpClass @class, DaoWriterContext context, IEnumerable<SqlStatementInfo> statements)
         {
             Type methodInfoType = typeof(MethodInfo);
             context.Output.AddUsing(methodInfoType.Namespace);
-            foreach (SqlStatementInfo statement in context.Artifacts.Statements)
+            foreach (SqlStatementInfo statement in statements)
             {
                 @class.AddField(name: String.Concat(statement.Name, methodInfoType.Name)
                               , type: methodInfoType.Name
-                              , value: new CSharpValue($"typeof({context.ClassName}).GetMethod(\"{statement.Name}\")")
+                              , value: new CSharpValue($"typeof({context.Configuration.ClassName}).GetMethod(\"{statement.Name}\")")
                               , modifiers: CSharpModifiers.Public | CSharpModifiers.Static | CSharpModifiers.ReadOnly);
             }
         }
@@ -382,7 +387,18 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static string GetComplexTypeName(SqlStatementInfo statement)
         {
-            return statement.ResultTypeName ?? String.Concat(statement.Name, ComplexResultTypeSuffix);
+            StringBuilder sb = new StringBuilder();
+            if (statement.Namespace != null)
+                sb.Append(statement.Namespace)
+                  .Append('.');
+
+            if (statement.ResultTypeName != null)
+                sb.Append(statement.ResultTypeName);
+            else
+                sb.Append(statement.Name)
+                  .Append(ComplexResultTypeSuffix);
+
+            return sb.ToString();
         }
         #endregion
     }

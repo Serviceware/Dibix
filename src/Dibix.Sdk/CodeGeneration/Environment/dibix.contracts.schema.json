@@ -1,51 +1,58 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "definitions": {
-        "Entity": {
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "Entity": {
+      "type": "object",
+      "patternProperties": {
+        "^[A-Z]([\\w]+)?$": {
+          "type": "string",
+          "pattern": "^[A-Za-z]([\\w]+)?\\??(\\[\\]|\\*?)?$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Enum": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "string",
+            "pattern": "^[A-Z]([\\w]+)?$"
+          },
+          {
             "type": "object",
+            "minProperties": 1,
+            "maxProperties": 1,
             "patternProperties": {
-                "^[A-Z]([\\w]+)?$": {
-                    "type": "string",
-                    "pattern": "^[\\w\\?]+\\*?$"
-                }
+              "^[A-Z]([\\w]+)?$": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              }
             },
             "additionalProperties": false
+          }
+        ]
+      }
+    }
+  },
+  "type": "object",
+  "patternProperties": {
+    "^[A-Z]([\\w]+)?$": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/Entity"
         },
-        "Enum": {
-            "type": "array",
-            "items": {
-                "anyOf": [
-                    {
-                        "type": "string",
-                        "pattern": "^[A-Z]([\\w]+)?$"
-                    },
-                    {
-                        "type": "object",
-                        "minProperties": 1,
-                        "maxProperties": 1,
-                        "patternProperties": {
-                            "^[A-Z]([\\w]+)?$": {
-                                "type": "number"
-                            }
-                        },
-                        "additionalProperties": false
-                    }
-                ]
-            }
+        {
+          "$ref": "#/definitions/Enum"
         }
-    },
-    "type": "object",
-    "patternProperties": {
-        "^[A-Z]([\\w]+)?$": {
-            "anyOf": [
-                {
-                    "$ref": "#/definitions/Entity"
-                },
-                {
-                    "$ref": "#/definitions/Enum"
-                }
-            ]
-        }
-    },
-    "additionalProperties": false
+      ]
+    }
+  },
+  "additionalProperties": false
 }

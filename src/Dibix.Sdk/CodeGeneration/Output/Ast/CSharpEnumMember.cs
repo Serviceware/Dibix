@@ -3,9 +3,9 @@
     public sealed class CSharpEnumMember : CSharpStatement
     {
         private readonly string _name;
-        private readonly int? _value;
+        private readonly string _value;
 
-        public CSharpEnumMember(string name, int? value)
+        public CSharpEnumMember(string name, string value)
         {
             this._name = name;
             this._value = value;
@@ -16,7 +16,7 @@
             base.Write(writer);
 
             writer.Write(this._name);
-            if (this._value.HasValue)
+            if (this._value != null)
             {
                 writer.WriteRaw(" = ")
                       .WriteRaw(this._value);

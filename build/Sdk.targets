@@ -22,6 +22,10 @@
   </Target>
 
   <Target Name="CompileDatabaseAccessor" AfterTargets="PostBuildEvent" Condition="$(ShouldCompileDatabaseAccessor) == 'true'">
+    <PropertyGroup>
+      <DatabaseAccessorNamespace Condition="'$(DatabaseAccessorNamespace)' == ''">$(RootNamespace)</DatabaseAccessorNamespace>
+    </PropertyGroup>
+
     <ItemGroup>
       <Contracts Include="@(None)" Condition="'%(Extension)' == '.json'" />
     </ItemGroup>
@@ -33,6 +37,8 @@
                                  TargetDirectory="$(IntermediateOutputPath)"
                                  Artifacts="@(Build)"
                                  Contracts="@(Contracts)"
+                                 MultipleAreas="$(MultipleAreas)"
+                                 ContractsLayerName="$(ContractsLayerName)"
                                  IsIDEBuild="$(BuildingInsideVisualStudio)"
                                  IsDML="$(IsDMLProject)">
       <Output TaskParameter="OutputFilePath" PropertyName="DatabaseAccessorPath" />

@@ -18,7 +18,7 @@ namespace Dibix.Sdk.CodeGeneration
             this._members = new Collection<CSharpEnumMember>();
         }
 
-        public CSharpEnum AddMember(string name, int? value)
+        public CSharpEnum AddMember(string name, string value)
         {
             CSharpEnumMember member = new CSharpEnumMember(name, value);
             this._members.Add(member);

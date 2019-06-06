@@ -2,6 +2,6 @@
 {
     public interface IWriter
     {
-        string Write(bool generatePublicArtifacts, string @namespace, string className, CommandTextFormatting formatting, SourceArtifacts artifacts);
+        string Write(OutputConfiguration configuration, SourceArtifacts artifacts);
     }
 }

@@ -17,24 +17,24 @@ namespace Dibix.Sdk.MSBuild
         public IContractResolverFacade ContractResolverFacade { get; }
         public IErrorReporter ErrorReporter { get; }
 
-        public StaticCodeGenerationContext(string projectDirectory, string @namespace, ICollection<string> artifacts, IEnumerable<string> contracts, bool isDml, IErrorReporter errorReporter)
+        public StaticCodeGenerationContext(string projectDirectory, string @namespace, ICollection<string> artifacts, IEnumerable<string> contracts, bool multipleAreas, string contractsLayerName, bool isDml, IErrorReporter errorReporter)
         {
             if (!String.IsNullOrEmpty(@namespace))
                 this.Namespace = @namespace;
 
             IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(projectDirectory);
-            this._contractDefinitionProvider = new ContractDefinitionProvider(fileSystemProvider, errorReporter, contracts);
+            this._contractDefinitionProvider = new ContractDefinitionProvider(fileSystemProvider, errorReporter, contracts, multipleAreas, contractsLayerName);
             this._userDefinedTypeProvider = new UserDefinedTypeProvider(artifacts);
 
             this.Configuration = new GeneratorConfiguration();
-            this.Configuration.GeneratePublicArtfifacts = true;
+            this.Configuration.Output.GeneratePublicArtifacts = true;
             if (this._contractDefinitionProvider.HasSchemaErrors)
             {
                 errorReporter.ReportErrors();
                 this.Configuration.IsInvalid = true;
             }
 
-            PhysicalSourceConfiguration source = new PhysicalSourceConfiguration(fileSystemProvider, null);
+            PhysicalSourceConfiguration source = new PhysicalSourceConfiguration(fileSystemProvider, null, multipleAreas, contractsLayerName);
             if (!isDml)
                 source.Formatter = typeof(ExecStoredProcedureSqlStatementFormatter);
 

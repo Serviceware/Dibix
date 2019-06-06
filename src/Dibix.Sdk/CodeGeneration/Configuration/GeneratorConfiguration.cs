@@ -5,7 +5,6 @@
         public InputConfiguration Input { get; }
         public OutputConfiguration Output { get; }
         public bool IsInvalid { get; internal set; }
-        public bool GeneratePublicArtfifacts { get; set; }
 
         public GeneratorConfiguration()
         {

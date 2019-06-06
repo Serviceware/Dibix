@@ -10,6 +10,8 @@ namespace Dibix.MSBuild
         public string TargetDirectory { get; set; }
         public string[] Artifacts { get; set; }
         public string[] Contracts { get; set; }
+        public bool MultipleAreas { get; set; }
+        public string ContractsLayerName { get; set; }
         public bool IsDML { get; set; }
 
         [Output]
@@ -22,6 +24,8 @@ namespace Dibix.MSBuild
             yield return this.TargetDirectory;
             yield return this.Artifacts;
             yield return this.Contracts;
+            yield return this.MultipleAreas;
+            yield return this.ContractsLayerName;
             yield return this.IsDML;
             yield return base.Log;
             yield return null;
@@ -29,7 +33,7 @@ namespace Dibix.MSBuild
 
         protected override void ProcessParameters(object[] args)
         {
-            this.OutputFilePath = (string)args[7];
+            this.OutputFilePath = (string)args[9];
         }
     }
 }

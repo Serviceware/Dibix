@@ -10,17 +10,17 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region IDaoWriter Members
-        public bool HasContent(SourceArtifacts artifacts) => artifacts.UserDefinedTypes.Any();
+        public bool HasContent(OutputConfiguration configuration, SourceArtifacts artifacts) => artifacts.UserDefinedTypes.Any();
 
         public void Write(DaoWriterContext context)
         {
             context.Output.AddUsing("Dibix");
+            CSharpStatementScope scope = context.Output.BeginScope("Data");
             for (int i = 0; i < context.Artifacts.UserDefinedTypes.Count; i++)
             {
                 UserDefinedTypeDefinition userDefinedType = context.Artifacts.UserDefinedTypes[i];
-                CSharpClass @class = context.Output
-                                            .AddClass(userDefinedType.DisplayName, CSharpModifiers.Public | CSharpModifiers.Sealed)
-                                            .Inherits($"StructuredType<{userDefinedType.DisplayName}, {String.Join(", ", userDefinedType.Columns.Select(x => x.Type))}>");
+                CSharpClass @class = scope.AddClass(userDefinedType.DisplayName, CSharpModifiers.Public | CSharpModifiers.Sealed)
+                                          .Inherits($"StructuredType<{userDefinedType.DisplayName}, {String.Join(", ", userDefinedType.Columns.Select(x => x.Type))}>");
 
                 @class.AddConstructor(body: $"base.ImportSqlMetadata(() => this.Add({String.Join(", ", userDefinedType.Columns.Select(x => "default"))}));"
                                     , baseConstructorParameters: $"\"{userDefinedType.TypeName}\"");
@@ -29,8 +29,8 @@ namespace Dibix.Sdk.CodeGeneration
                 foreach (UserDefinedTypeColumn column in userDefinedType.Columns)
                     method.AddParameter(column.Name, column.Type);
 
-                if (i + 1 < context.Artifacts.Statements.Count)
-                    context.Output.AddSeparator();
+                if (i + 1 < context.Artifacts.UserDefinedTypes.Count)
+                    scope.AddSeparator();
             }
         }
         #endregion

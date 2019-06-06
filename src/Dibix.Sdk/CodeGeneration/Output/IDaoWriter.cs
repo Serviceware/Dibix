@@ -4,7 +4,7 @@
     {
         string RegionName { get; }
 
-        bool HasContent(SourceArtifacts artifacts);
+        bool HasContent(OutputConfiguration configuration, SourceArtifacts artifacts);
         void Write(DaoWriterContext context);
     }
 }

@@ -35,7 +35,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             this._context.CollectAdditionalArtifacts(artifacts);
 
-            output = writer.Write(this._context.Configuration.GeneratePublicArtfifacts, this._context.Configuration.Output.Namespace, this._context.Configuration.Output.ClassName, this._context.Configuration.Output.Formatting.Value, artifacts);
+            output = writer.Write(this._context.Configuration.Output, artifacts);
             if (this._context.ErrorReporter.ReportErrors())
                 output = errorContent;
 
@@ -62,7 +62,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (this._context.Configuration.Output.ClassName == null)
                 this._context.Configuration.Output.ClassName = this._context.ClassName;
 
-            if (this._context.Configuration.Output.Formatting == null)
+            if (this._context.Configuration.Output.Formatting == default)
                 this._context.Configuration.Output.Formatting = CommandTextFormatting.Singleline;
         }
         #endregion
