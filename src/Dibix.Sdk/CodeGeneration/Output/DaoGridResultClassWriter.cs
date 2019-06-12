@@ -43,11 +43,17 @@ namespace Dibix.Sdk.CodeGeneration
                     foreach (SqlQueryResult result in statement.Results)
                     {
                         bool isEnumerable = result.ResultMode == SqlQueryResultMode.Many;
-                        string resultTypeName = result.Contracts.First().Name.ToString();
-                        if (isEnumerable)
-                            resultTypeName = MakeCollectionInterfaceType(resultTypeName);
+                        string propertyTypeName;
+                        if (result.ResultTypeName != null)
+                            propertyTypeName = MakeCollectionInterfaceType(result.ResultTypeName);
+                        else
+                        {
+                            propertyTypeName = result.Contracts.First().Name.ToString();
+                            if (isEnumerable)
+                                propertyTypeName = MakeCollectionInterfaceType(propertyTypeName);
+                        }
 
-                        complexType.AddProperty(result.Name, resultTypeName)
+                        complexType.AddProperty(result.Name, propertyTypeName)
                                    .Getter(null)
                                    .Setter(null, isEnumerable ? CSharpModifiers.Private : default);
                     }
@@ -65,10 +71,11 @@ namespace Dibix.Sdk.CodeGeneration
                     for (int k = 0; k < collectionProperties.Count; k++)
                     {
                         SqlQueryResult property = collectionProperties[k];
+                        string collectionTypeName = MakeCollectionType(property.ResultTypeName ?? property.Contracts.First().Name.ToString());
                         ctorBodyWriter.Append("this.")
                                       .Append(property.Name)
                                       .Append(" = new ")
-                                      .Append(MakeCollectionType(property.Contracts.First().Name.ToString()))
+                                      .Append(collectionTypeName)
                                       .Append("();");
 
                         if (k + 1 < collectionProperties.Count)

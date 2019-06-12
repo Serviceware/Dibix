@@ -11,6 +11,7 @@ namespace Dibix.Sdk.CodeGeneration
         public IList<string> Columns { get; }
         public string Converter { get; set; }
         public string SplitOn { get; set; }
+        public string ResultTypeName { get; set; }
 
         public SqlQueryResult()
         {

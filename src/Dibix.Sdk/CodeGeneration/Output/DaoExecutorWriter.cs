@@ -257,6 +257,11 @@ namespace Dibix.Sdk.CodeGeneration
                 if (i + 1 < singleResult.Contracts.Count)
                     writer.WriteRaw(", ");
             }
+
+            if (singleResult.ResultTypeName != null)
+                writer.WriteRaw(", ")
+                      .WriteRaw(singleResult.ResultTypeName);
+
             writer.WriteRaw(">(")
                   .WriteRaw(query.Name)
                   .WriteRaw(ConstantSuffix);
@@ -336,6 +341,10 @@ namespace Dibix.Sdk.CodeGeneration
                     if (i + 1 < result.Contracts.Count)
                         writer.WriteRaw(", ");
                 }
+
+                if (result.ResultTypeName != null)
+                    writer.WriteRaw(", ")
+                          .WriteRaw(result.ResultTypeName);
 
                 writer.WriteRaw(">(");
 

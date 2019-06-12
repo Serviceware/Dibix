@@ -58,6 +58,23 @@ namespace Dibix
             return cache;
         }
 
+        public static TReturn ReadSingle<TReturn, TSecond>(this IMultipleResultReader reader, Action<TReturn, TSecond> map, string splitOn)
+        {
+            Guard.IsNotNull(reader, nameof(reader));
+
+            HashCollection<TReturn> cache = new HashCollection<TReturn>();
+            reader.ReadMany<TReturn, TSecond, TReturn>((a, b) =>
+            {
+                if (!cache.TryGetValue(a, out TReturn instance))
+                {
+                    instance = a;
+                    cache.Add(instance);
+                }
+                map(instance, b);
+                return instance;
+            }, splitOn);
+            return cache.Single();
+        }
         public static TReturn ReadSingle<TReturn, TSecond, TThird>(this IMultipleResultReader reader, Action<TReturn, TSecond, TThird> map, string splitOn)
         {
             Guard.IsNotNull(reader, nameof(reader));

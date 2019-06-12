@@ -12,6 +12,7 @@ namespace Dibix.Sdk.CodeGeneration
         private const string ReturnHintResultName = "Name";
         private const string ReturnHintSplitOn = "SplitOn";
         private const string ReturnHintConverter = "Converter";
+        private const string ReturnHintResultTypeName = "ResultTypeName";
 
         public static IEnumerable<SqlQueryResult> Parse(SqlStatementInfo target, TSqlStatement node, IContractResolverFacade contractResolverFacade, IErrorReporter errorReporter)
         {
@@ -54,13 +55,15 @@ namespace Dibix.Sdk.CodeGeneration
                 string resultName = returnHint.SelectValueOrDefault(ReturnHintResultName);
                 string converter = returnHint.SelectValueOrDefault(ReturnHintConverter);
                 string splitOn = returnHint.SelectValueOrDefault(ReturnHintSplitOn);
+                string resultTypeName = returnHint.SelectValueOrDefault(ReturnHintResultTypeName);
 
                 SqlQueryResult result = new SqlQueryResult
                 {
                     Name = resultName,
                     ResultMode = resultMode,
                     Converter = converter,
-                    SplitOn = splitOn
+                    SplitOn = splitOn,
+                    ResultTypeName = resultTypeName
                 };
 
                 IList<ContractInfo> returnTypes = typeNames.Select(x => contractResolverFacade.ResolveContract(x, y => errorReporter.RegisterError(target.Source, returnHint.Line, returnHint.Column, null, y))).ToArray();
