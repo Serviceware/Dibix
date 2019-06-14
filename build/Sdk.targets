@@ -38,6 +38,7 @@
                                  Artifacts="@(Build)"
                                  Contracts="@(Contracts)"
                                  MultipleAreas="$(MultipleAreas)"
+                                 DataLayerName="$(DataLayerName)"
                                  ContractsLayerName="$(ContractsLayerName)"
                                  IsIDEBuild="$(BuildingInsideVisualStudio)"
                                  IsDML="$(IsDMLProject)">

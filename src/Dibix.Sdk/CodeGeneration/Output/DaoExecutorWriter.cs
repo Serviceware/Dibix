@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class DaoExecutorWriter : IDaoWriter
+    internal sealed class DaoExecutorWriter : DaoWriterBase, IDaoWriter
     {
         #region Fields
         private const string ConstantSuffix = "CommandText";
@@ -17,34 +17,37 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Properties
-        public string RegionName => "Accessor";
+        public override string RegionName => "Accessor";
         #endregion
 
-        #region IDaoWriter Members
-        public bool HasContent(OutputConfiguration configuration, SourceArtifacts artifacts) => artifacts.Statements.Any();
+        #region Overrides
+        public override bool HasContent(OutputConfiguration configuration, SourceArtifacts artifacts) => artifacts.Statements.Any();
 
-        public void Write(DaoWriterContext context)
+        protected override void Write(DaoWriterContext context, HashSet<string> contracts)
         {
             context.Output.AddUsing(typeof(GeneratedCodeAttribute).Namespace);
 
-            CSharpStatementScope scope = context.Configuration.GeneratePublicArtifacts ? context.Output.BeginScope("Data") : context.Output;
-            IList<SqlStatementInfo> statements = context.Artifacts.Statements;
+            foreach (IGrouping<string, SqlStatementInfo> namespaceGroup in context.Artifacts.Statements.GroupBy(x => x.Namespace))
+            {
+                CSharpStatementScope scope = namespaceGroup.Key != null ? context.Output.BeginScope(namespaceGroup.Key) : context.Output;
+                IList<SqlStatementInfo> statements = namespaceGroup.ToArray();
 
-            // Class
-            CSharpModifiers classVisibility = context.Configuration.GeneratePublicArtifacts ? CSharpModifiers.Public : CSharpModifiers.Internal;
-            CSharpClass @class = scope.AddClass(context.Configuration.ClassName, classVisibility | CSharpModifiers.Static, context.GeneratedCodeAnnotation);
+                // Class
+                CSharpModifiers classVisibility = context.Configuration.GeneratePublicArtifacts ? CSharpModifiers.Public : CSharpModifiers.Internal;
+                CSharpClass @class = scope.AddClass(context.Configuration.ClassName, classVisibility | CSharpModifiers.Static, context.GeneratedCodeAnnotation);
 
-            // Command text constants
-            AddCommandTextConstants(@class, context, statements);
+                // Command text constants
+                AddCommandTextConstants(@class, context, statements);
 
-            // Execution methods
-            @class.AddSeparator();
-            AddExecutionMethods(@class, context, statements);
+                // Execution methods
+                @class.AddSeparator();
+                this.AddExecutionMethods(@class, context, statements, contracts);
 
-            // Add method info accessor fields
-            // This is useful for dynamic invocation like in WAX
-            @class.AddSeparator();
-            AddMethodInfoFields(@class, context, statements);
+                // Add method info accessor fields
+                // This is useful for dynamic invocation like in WAX
+                @class.AddSeparator();
+                AddMethodInfoFields(@class, context, statements);
+            }
         }
         #endregion
 
@@ -67,11 +70,11 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static void AddExecutionMethods(CSharpClass @class, DaoWriterContext context, IList<SqlStatementInfo> statements)
+        private void AddExecutionMethods(CSharpClass @class, DaoWriterContext context, IList<SqlStatementInfo> statements, HashSet<string> contracts)
         {
             context.Output.AddUsing("Dibix");
 
-            IDictionary<SqlStatementInfo, string> methodReturnTypeMap = statements.ToDictionary(x => x, DetermineResultTypeName);
+            IDictionary<SqlStatementInfo, string> methodReturnTypeMap = statements.ToDictionary(x => x, x => this.DetermineResultTypeName(context, x, contracts));
 
             for (int i = 0; i < statements.Count; i++)
             {
@@ -84,7 +87,7 @@ namespace Dibix.Sdk.CodeGeneration
                 string resultTypeName = methodReturnTypeMap[statement];
                 CSharpMethod method = @class.AddMethod(name: String.Concat(MethodPrefix, statement.Name)
                                                      , type: resultTypeName
-                                                     , body: GenerateMethodBody(statement, context)
+                                                     , body: this.GenerateMethodBody(statement, context, contracts)
                                                      , isExtension: true
                                                      , modifiers: CSharpModifiers.Public | CSharpModifiers.Static);
                 method.AddParameter("databaseAccessorFactory", "IDatabaseAccessorFactory");
@@ -96,7 +99,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static string DetermineResultTypeName(SqlStatementInfo query)
+        private string DetermineResultTypeName(DaoWriterContext context, SqlStatementInfo query, HashSet<string> contracts)
         {
             if (query.Results.Count == 0) // Execute/ExecutePrimitive.
             {
@@ -105,16 +108,17 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (query.Results.Count == 1) // Query<T>/QuerySingle/etc.
             {
-                string resultTypeName = query.Results[0].Contracts.First().Name.ToString();
+                ContractInfo resultContract = query.Results[0].Contracts.First();
+                string resultContractName = base.PrefixWithRootNamespace(context, resultContract.Name, contracts);
 
                 if (query.Results[0].ResultMode == SqlQueryResultMode.Many)
-                    resultTypeName = MakeEnumerableType(resultTypeName);
+                    resultContractName = MakeEnumerableType(resultContractName);
 
-                return resultTypeName;
+                return resultContractName;
             }
 
             // GridReader
-            return GetComplexTypeName(query);
+            return this.GetComplexTypeName(context, query, contracts);
         }
 
         private static void AddMethodInfoFields(CSharpClass @class, DaoWriterContext context, IEnumerable<SqlStatementInfo> statements)
@@ -130,7 +134,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static string GenerateMethodBody(SqlStatementInfo statement, DaoWriterContext context)
+        private string GenerateMethodBody(SqlStatementInfo statement, DaoWriterContext context, HashSet<string> contracts)
         {
             StringWriter writer = new StringWriter();
 
@@ -151,7 +155,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (statement.Parameters.Any())
                 WriteParameters(writer, statement);
 
-            WriteExecutor(writer, statement);
+            this.WriteExecutor(context, writer, statement, contracts);
 
             writer.PopIndent()
                   .Write("}");
@@ -210,7 +214,7 @@ namespace Dibix.Sdk.CodeGeneration
                   .PopCustomIndent();
         }
 
-        private static void WriteExecutor(StringWriter writer, SqlStatementInfo query)
+        private void WriteExecutor(DaoWriterContext context, StringWriter writer, SqlStatementInfo query, HashSet<string> contracts)
         {
             if (query.Results.Count == 0) // Execute/ExecutePrimitive.
             {
@@ -222,7 +226,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
             else if (query.Results.Count > 1) // GridReader
             {
-                WriteComplexResult(writer, query);
+                this.WriteComplexResult(context, writer, query, contracts);
             }
         }
 
@@ -252,8 +256,8 @@ namespace Dibix.Sdk.CodeGeneration
 
             for (int i = 0; i < singleResult.Contracts.Count; i++)
             {
-                string returnTypeName = singleResult.Contracts[i].Name.ToString();
-                writer.WriteRaw(returnTypeName);
+                ContractName returnType = singleResult.Contracts[i].Name;
+                writer.WriteRaw(returnType);
                 if (i + 1 < singleResult.Contracts.Count)
                     writer.WriteRaw(", ");
             }
@@ -287,7 +291,7 @@ namespace Dibix.Sdk.CodeGeneration
             writer.WriteLineRaw(");");
         }
 
-        private static void WriteComplexResult(StringWriter writer, SqlStatementInfo query)
+        private void WriteComplexResult(DaoWriterContext context, StringWriter writer, SqlStatementInfo query, HashSet<string> contracts)
         {
             writer.Write("using (IMultipleResultReader reader = accessor.QueryMultiple(")
                   .WriteRaw(query.Name)
@@ -304,15 +308,15 @@ namespace Dibix.Sdk.CodeGeneration
                   .WriteLine("{")
                   .PushIndent();
 
-            WriteComplexResultBody(writer, query);
+            this.WriteComplexResultBody(context, writer, query, contracts);
 
             writer.PopIndent()
                   .WriteLine("}");
         }
 
-        private static void WriteComplexResultBody(StringWriter writer, SqlStatementInfo query)
+        private void WriteComplexResultBody(DaoWriterContext context, StringWriter writer, SqlStatementInfo query, HashSet<string> contracts)
         {
-            string clrTypeName = GetComplexTypeName(query);
+            string clrTypeName = this.GetComplexTypeName(context, query, contracts);
 
             writer.Write(clrTypeName)
                   .WriteRaw(" result = new ")
@@ -336,8 +340,8 @@ namespace Dibix.Sdk.CodeGeneration
 
                 for (int i = 0; i < result.Contracts.Count; i++)
                 {
-                    string returnTypeName = result.Contracts[i].Name.ToString();
-                    writer.WriteRaw(returnTypeName);
+                    ContractName returnType = result.Contracts[i].Name;
+                    writer.WriteRaw(returnType);
                     if (i + 1 < result.Contracts.Count)
                         writer.WriteRaw(", ");
                 }
@@ -394,18 +398,38 @@ namespace Dibix.Sdk.CodeGeneration
             return String.Concat("IEnumerable<", typeName, '>');
         }
 
-        private static string GetComplexTypeName(SqlStatementInfo statement)
+        private string GetComplexTypeName(DaoWriterContext context, SqlStatementInfo statement, HashSet<string> contracts)
         {
             StringBuilder sb = new StringBuilder();
-            if (statement.Namespace != null)
-                sb.Append(statement.Namespace)
+
+            // Explicit existing type specified
+            if (statement.ResultType != null)
+            {
+                sb.Append(base.PrefixWithRootNamespace(context, statement.ResultType, contracts));
+            }
+            else
+            {
+                // Use absolute namespaces to make it more stable
+                sb.Append(context.Configuration.Namespace)
                   .Append('.');
 
-            if (statement.ResultTypeName != null)
-                sb.Append(statement.ResultTypeName);
-            else
-                sb.Append(statement.Name)
-                  .Append(ComplexResultTypeSuffix);
+                // Control generated type name (includes namespace)
+                if (statement.GeneratedResultTypeName != null)
+                {
+                    sb.Append(statement.GeneratedResultTypeName);
+                }
+                else
+                {
+                    // Use data accessor namespace if available
+                    if (statement.Namespace != null)
+                        sb.Append(statement.Namespace)
+                          .Append('.');
+
+                    // Generate type name based on statement name
+                    sb.Append(statement.Name)
+                      .Append(ComplexResultTypeSuffix);
+                }
+            }
 
             return sb.ToString();
         }

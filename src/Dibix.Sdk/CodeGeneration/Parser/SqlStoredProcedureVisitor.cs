@@ -9,7 +9,7 @@ namespace Dibix.Sdk.CodeGeneration
         public override void ExplicitVisit(CreateProcedureStatement node)
         {
             base.Target.ProcedureName = String.Join(".", node.ProcedureReference.Name.Identifiers.Select(x => Identifier.EncodeIdentifier(x.Value)));
-            this.ParseContent(node, node.StatementList);
+            this.ParseContent(base.Target, node, node.StatementList);
 
             base.ExplicitVisit(node);
         }

@@ -47,7 +47,7 @@ namespace Dibix.Sdk.CodeGeneration
             public IGeneratorConfigurationBuilderExpression AddSource(string projectName, Action<IPhysicalSourceSelectionExpression> configuration)
             {
                 Guard.IsNotNullOrEmpty(projectName, nameof(projectName));
-                PhysicalSourceConfiguration sourceConfiguration = new PhysicalSourceConfiguration(this._fileSystemProvider, projectName, false, null);
+                PhysicalSourceConfiguration sourceConfiguration = new PhysicalSourceConfiguration(this._fileSystemProvider, projectName, false, null, null);
                 PhysicalSourceConfigurationExpression expression = new PhysicalSourceConfigurationExpression(sourceConfiguration);
                 configuration?.Invoke(expression);
                 this._configuration.Input.Sources.Add(sourceConfiguration);

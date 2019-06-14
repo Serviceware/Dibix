@@ -9,6 +9,7 @@ namespace Dibix.Sdk.CodeGeneration
         public const string Name = "Name";
         public const string Return = "Return";
         public const string ResultTypeName = "ResultTypeName";
+        public const string GeneratedResultTypeName = "GeneratedResultTypeName";
         public const string ClrType = "ClrType";
         public const string Nullable = "Nullable";
 

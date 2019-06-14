@@ -6,7 +6,9 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal static class SqlHintExtensions
     {
-        public static string SingleHint(this TSqlFragment fragment, string hintType, int startIndex = 0)
+        public static SqlHint SingleHint(this TSqlFragment fragment, string hintType, int startIndex = 0) => SqlHintReader.Read(fragment, startIndex).FirstOrDefault(x => x.Kind == hintType);
+
+        public static string SingleHintValue(this TSqlFragment fragment, string hintType, int startIndex = 0)
         {
             return SqlHintReader.Read(fragment, startIndex)
                                 .Where(x => x.Kind == hintType)

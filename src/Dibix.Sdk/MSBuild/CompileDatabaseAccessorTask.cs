@@ -15,6 +15,7 @@ namespace Dibix.Sdk.MSBuild
           , ICollection<string> artifacts
           , ICollection<string> contracts
           , bool multipleAreas
+          , string dataLayerName
           , string contractsLayerName
           , bool isDML
           , TaskLoggingHelper logger
@@ -24,7 +25,7 @@ namespace Dibix.Sdk.MSBuild
             outputFilePath = Path.Combine(projectDirectory, targetDirectory, "SqlQueryAccessor.cs");
 
             IErrorReporter errorReporter = new MSBuildErrorReporter(logger);
-            ICodeGenerationContext context = new StaticCodeGenerationContext(projectDirectory, @namespace, artifacts ?? new string[0], contracts ?? new string[0], multipleAreas, contractsLayerName, isDML, errorReporter);
+            ICodeGenerationContext context = new StaticCodeGenerationContext(projectDirectory, @namespace, artifacts ?? new string[0], contracts ?? new string[0], multipleAreas, dataLayerName, contractsLayerName, isDML, errorReporter);
             ICodeGenerator generator = new DaoCodeGenerator(context);
 
             string generated = generator.Generate();

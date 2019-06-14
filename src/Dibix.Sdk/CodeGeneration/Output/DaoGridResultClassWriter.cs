@@ -6,25 +6,25 @@ using System.Text;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class DaoGridResultClassWriter : IDaoWriter
+    internal sealed class DaoGridResultClassWriter : DaoWriterBase, IDaoWriter
     {
         #region Fields
         private const string ComplexResultTypeSuffix = "Result";
         #endregion
 
         #region Properties
-        public string RegionName => "Grid result types";
+        public override string RegionName => "Grid result types";
         #endregion
 
-        #region IDaoWriter Members
-        public bool HasContent(OutputConfiguration configuration, SourceArtifacts artifacts) => artifacts.Statements.Any(x => IsGridResult(configuration, x));
+        #region Overrides
+        public override bool HasContent(OutputConfiguration configuration, SourceArtifacts artifacts) => artifacts.Statements.Any(IsGridResult);
 
-        public void Write(DaoWriterContext context)
+        protected override void Write(DaoWriterContext context, HashSet<string> contracts)
         {
             var namespaceGroups = context.Artifacts
                                          .Statements
-                                         .Where(x => IsGridResult(context.Configuration, x))
-                                         .GroupBy(x => x.Namespace)
+                                         .Where(IsGridResult)
+                                         .GroupBy(x => x.GeneratedResultTypeName != null ? ExtractNamespace(x.GeneratedResultTypeName) : x.Namespace)
                                          .ToArray();
 
             for (int i = 0; i < namespaceGroups.Length; i++)
@@ -48,7 +48,7 @@ namespace Dibix.Sdk.CodeGeneration
                             propertyTypeName = MakeCollectionInterfaceType(result.ResultTypeName);
                         else
                         {
-                            propertyTypeName = result.Contracts.First().Name.ToString();
+                            propertyTypeName = base.PrefixWithRootNamespace(context, result.Contracts.First().Name, contracts);
                             if (isEnumerable)
                                 propertyTypeName = MakeCollectionInterfaceType(propertyTypeName);
                         }
@@ -71,7 +71,8 @@ namespace Dibix.Sdk.CodeGeneration
                     for (int k = 0; k < collectionProperties.Count; k++)
                     {
                         SqlQueryResult property = collectionProperties[k];
-                        string collectionTypeName = MakeCollectionType(property.ResultTypeName ?? property.Contracts.First().Name.ToString());
+                        string innerTypeName = property.ResultTypeName ?? base.PrefixWithRootNamespace(context, property.Contracts.First().Name, contracts);
+                        string collectionTypeName = MakeCollectionType(innerTypeName);
                         ctorBodyWriter.Append("this.")
                                       .Append(property.Name)
                                       .Append(" = new ")
@@ -96,9 +97,18 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private static bool IsGridResult(OutputConfiguration configuration, SqlStatementInfo statement)
+        private static bool IsGridResult(SqlStatementInfo statement)
         {
-            return statement.Results.Count > 1 && (statement.ResultTypeName == null || configuration.GeneratePublicArtifacts);
+            return statement.Results.Count > 1 && statement.ResultType == null;
+        }
+
+        private static string ExtractNamespace(string resultContractName)
+        {
+            int index = resultContractName.LastIndexOf('.');
+            if (index < 0)
+                return resultContractName;
+
+            return resultContractName.Substring(0, index);
         }
 
         private static string MakeCollectionInterfaceType(string typeName)
@@ -113,7 +123,13 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static string GetComplexTypeName(SqlStatementInfo statement)
         {
-            return statement.ResultTypeName ?? String.Concat(statement.Name, ComplexResultTypeSuffix);
+            if (statement.ResultType != null)
+                return statement.ResultType.ToString();
+
+            if (statement.GeneratedResultTypeName != null)
+                return statement.GeneratedResultTypeName.Split('.').Last();
+
+            return String.Concat(statement.Name, ComplexResultTypeSuffix);
         }
         #endregion
     }

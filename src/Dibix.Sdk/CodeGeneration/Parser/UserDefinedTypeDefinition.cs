@@ -6,6 +6,7 @@ namespace Dibix.Sdk.CodeGeneration
     public sealed class UserDefinedTypeDefinition
     {
         public string TypeName { get; }
+        public string Namespace { get; set; }
         public string DisplayName { get; }
         public ICollection<UserDefinedTypeColumn> Columns { get; }
 

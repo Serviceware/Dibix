@@ -16,14 +16,22 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Protected Methods
-        protected internal void ParseContent(TSqlStatement content, StatementList statements)
+        protected internal void ParseContent(SqlStatementInfo target, TSqlStatement content, StatementList statements)
         {
-            this.Target.Namespace = content.SingleHint(SqlHint.Namespace);
-            string name = content.SingleHint(SqlHint.Name);
+            this.Target.Namespace = content.SingleHintValue(SqlHint.Namespace);
+            string name = content.SingleHintValue(SqlHint.Name);
             if (!String.IsNullOrEmpty(name))
                 this.Target.Name = name;
 
-            this.Target.ResultTypeName = content.SingleHint(SqlHint.ResultTypeName);
+            SqlHint resultTypeHint = content.SingleHint(SqlHint.ResultTypeName);
+            if (resultTypeHint != null)
+            {
+                ContractInfo contract = this.ContractResolverFacade.ResolveContract(resultTypeHint.Value, x => this.ErrorReporter.RegisterError(target.Source, resultTypeHint.Line, resultTypeHint.Column, null, x));
+                if (contract != null)
+                    this.Target.ResultType = contract.Name;
+            }
+
+            this.Target.GeneratedResultTypeName = content.SingleHintValue(SqlHint.GeneratedResultTypeName);
 
             this.ParseResults(content);
             this.ParseBody(statements ?? new StatementList());
@@ -49,7 +57,7 @@ namespace Dibix.Sdk.CodeGeneration
                 previousToken = node.ScriptTokenStream[--startIndex];
 
             if (previousToken.TokenType == TSqlTokenType.MultilineComment)
-                parameter.ClrTypeName = node.SingleHint(SqlHint.ClrType, startIndex);
+                parameter.ClrTypeName = node.SingleHintValue(SqlHint.ClrType, startIndex);
 
             parameter.ClrType = node.DataType.ToClrType();
             if (parameter.ClrType == null)

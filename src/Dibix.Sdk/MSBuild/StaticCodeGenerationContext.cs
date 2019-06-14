@@ -8,6 +8,7 @@ namespace Dibix.Sdk.MSBuild
 {
     internal sealed class StaticCodeGenerationContext : ICodeGenerationContext
     {
+        private readonly string _dataLayerName;
         private readonly IContractDefinitionProvider _contractDefinitionProvider;
         private readonly IUserDefinedTypeProvider _userDefinedTypeProvider;
 
@@ -17,8 +18,9 @@ namespace Dibix.Sdk.MSBuild
         public IContractResolverFacade ContractResolverFacade { get; }
         public IErrorReporter ErrorReporter { get; }
 
-        public StaticCodeGenerationContext(string projectDirectory, string @namespace, ICollection<string> artifacts, IEnumerable<string> contracts, bool multipleAreas, string contractsLayerName, bool isDml, IErrorReporter errorReporter)
+        public StaticCodeGenerationContext(string projectDirectory, string @namespace, ICollection<string> artifacts, IEnumerable<string> contracts, bool multipleAreas, string dataLayerName, string contractsLayerName, bool isDml, IErrorReporter errorReporter)
         {
+            this._dataLayerName = dataLayerName;
             if (!String.IsNullOrEmpty(@namespace))
                 this.Namespace = @namespace;
 
@@ -34,7 +36,7 @@ namespace Dibix.Sdk.MSBuild
                 this.Configuration.IsInvalid = true;
             }
 
-            PhysicalSourceConfiguration source = new PhysicalSourceConfiguration(fileSystemProvider, null, multipleAreas, contractsLayerName);
+            PhysicalSourceConfiguration source = new PhysicalSourceConfiguration(fileSystemProvider, null, multipleAreas, dataLayerName, contractsLayerName);
             if (!isDml)
                 source.Formatter = typeof(ExecStoredProcedureSqlStatementFormatter);
 
@@ -49,7 +51,11 @@ namespace Dibix.Sdk.MSBuild
         public void CollectAdditionalArtifacts(SourceArtifacts artifacts)
         {
             artifacts.Contracts.AddRange(this._contractDefinitionProvider.Contracts);
-            artifacts.UserDefinedTypes.AddRange(this._userDefinedTypeProvider.Types);
+            artifacts.UserDefinedTypes.AddRange(this._userDefinedTypeProvider.Types.Select(x =>
+            {
+                x.Namespace = this._dataLayerName;
+                return x;
+            }));
         }
 
         private static bool MatchFile(string projectDirectory, string relativeFilePath)

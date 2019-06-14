@@ -93,7 +93,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Private Methods
         private IEnumerable<InputSourceConfiguration> ReadSqlProject(GeneratorConfiguration configuration, JProperty property)
         {
-            return this.ReadProject(configuration.Input, property, projectName => new PhysicalSourceConfiguration(this._fileSystemProvider, projectName, false, null), (source, value) =>
+            return this.ReadProject(configuration.Input, property, projectName => new PhysicalSourceConfiguration(this._fileSystemProvider, projectName, false, null, null), (source, value) =>
             {
                 value.GetPropertyValues("include").Each(source.Include);
                 value.GetPropertyValues("exclude").Each(source.Exclude);

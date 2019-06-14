@@ -42,7 +42,7 @@ namespace Dibix.Sdk.CodeGeneration
             public override void Visit(CreateTypeTableStatement node)
             {
                 string typeName = node.Name.BaseIdentifier.Value;
-                string displayName = node.SingleHint(SqlHint.Name);
+                string displayName = node.SingleHintValue(SqlHint.Name);
                 if (String.IsNullOrEmpty(displayName))
                     displayName = GenerateDisplayName(typeName);
 

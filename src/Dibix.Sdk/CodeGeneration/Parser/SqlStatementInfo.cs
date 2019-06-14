@@ -12,7 +12,8 @@ namespace Dibix.Sdk.CodeGeneration
         public string Content { get; set; }
         public string ProcedureName { get; set; }
         public CommandType? CommandType { get; set; }
-        public string ResultTypeName { get; set; }
+        public ContractName ResultType { get; set; }
+        public string GeneratedResultTypeName { get; set; }
         public IList<SqlQueryParameter> Parameters { get; }
         public IList<SqlQueryResult> Results { get; }
 
