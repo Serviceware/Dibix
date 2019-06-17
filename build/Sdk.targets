@@ -46,14 +46,14 @@
     </CompileDatabaseAccessorTask>
 
     <PropertyGroup>
-      <DatabaseAccessorSources>
+      <DatabaseAccessorSource>
         $(DatabaseAccessorPath);
-        $(DatabaseAccessorSources)
-      </DatabaseAccessorSources>
-      <DatabaseAccessorReferences>
+        $(DatabaseAccessorSource)
+      </DatabaseAccessorSource>
+      <DatabaseAccessorReference>
         $(DibixToolsDirectory)Dibix.dll;
-        $(DatabaseAccessorReferences)
-      </DatabaseAccessorReferences>
+        @(ArtifactReference->'%(RelativeDir)%(Filename).dll')
+      </DatabaseAccessorReference>
     </PropertyGroup>
 
     <Csc EmitDebugInformation="$(DebugSymbols)"
@@ -61,8 +61,8 @@
          DefineConstants="$(DefineConstants)"
          LangVersion="latest"
          OutputAssembly="$(TargetPath)"
-         References="$(DatabaseAccessorReferences)"
-         Sources="$(DatabaseAccessorSources)"
+         References="$(DatabaseAccessorReference)"
+         Sources="$(DatabaseAccessorSource)"
          TargetType="library" />
   </Target>
 
