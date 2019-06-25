@@ -10,8 +10,6 @@ namespace Dibix.Sdk.CodeGeneration
         #region Fields
         private readonly string _projectName;
         private readonly bool _multipleAreas;
-        private readonly string _dataLayerName;
-        private readonly string _contractsLayerName;
         private readonly IFileSystemProvider _fileSystemProvider;
         private readonly ICollection<VirtualPath> _include;
         private readonly ICollection<VirtualPath> _exclude;
@@ -23,13 +21,11 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public PhysicalSourceConfiguration(IFileSystemProvider fileSystemProvider, string projectName, bool multipleAreas, string dataLayerName, string contractsLayerName)
+        public PhysicalSourceConfiguration(IFileSystemProvider fileSystemProvider, string projectName, bool multipleAreas)
         {
             this._fileSystemProvider = fileSystemProvider;
             this._projectName = projectName;
             this._multipleAreas = multipleAreas;
-            this._dataLayerName = dataLayerName;
-            this._contractsLayerName = contractsLayerName;
             this._include = new HashSet<VirtualPath>();
             this._exclude = new HashSet<VirtualPath>();
         }
@@ -66,10 +62,10 @@ namespace Dibix.Sdk.CodeGeneration
 
             bool result = parser.Read(SqlParserSourceKind.Stream, File.OpenRead(filePath), statement, formatter, contractResolverFacade, errorReporter);
 
-            statement.Namespace = NamespaceUtility.BuildNamespace(statement.Namespace, this._multipleAreas, this._dataLayerName);
+            statement.Namespace = NamespaceUtility.BuildNamespace(statement.Namespace, this._multipleAreas, LayerName.Data);
 
             if (!String.IsNullOrEmpty(statement.GeneratedResultTypeName))
-                statement.GeneratedResultTypeName = NamespaceUtility.BuildNamespace(statement.GeneratedResultTypeName, this._multipleAreas, this._contractsLayerName);
+                statement.GeneratedResultTypeName = NamespaceUtility.BuildNamespace(statement.GeneratedResultTypeName, this._multipleAreas, LayerName.DomainModel);
 
             return result ? statement : null;
         }

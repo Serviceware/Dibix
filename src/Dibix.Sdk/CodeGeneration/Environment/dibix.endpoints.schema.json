@@ -1,0 +1,80 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "Api": {
+      "type": "object",
+      "properties": {
+        "$schema": {
+          "type": "string"
+        }
+      },
+      "patternProperties": {
+        "^[A-Za-z]+$": {
+          "$ref": "#/definitions/Controller"
+        }
+      },
+      "minProperties": 1,
+      "additionalProperties": false
+    },
+    "Controller": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "anyOf": [
+          {
+            "$ref": "#/definitions/Action"
+          },
+          {
+            "$ref": "#/definitions/ControllerImport"
+          }
+        ]
+      }
+    },
+    "Action": {
+      "type": "object",
+      "properties": {
+        "childRoute": {
+          "type": "string",
+          "pattern": "^[A-Za-z/\\{\\}]+$"
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "GET",
+            "POST",
+            "PUT",
+            "PATCH",
+            "DELETE"
+          ]
+        },
+        "target": {
+          "type": "string",
+          "pattern": "^[A-Z]([A-Za-z.]+)?$"
+        },
+        "params": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-z]([A-Za-z]+)?$": {
+              "type": "string",
+              "pattern": "^HLSESSION.[A-Z]([A-Za-z]+)?$"
+            }
+          },
+          "minProperties": 1,
+          "additionalProperties": false
+        },
+        "omitResult": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "target"
+      ],
+      "additionalProperties": false
+    },
+    "ControllerImport": {
+      "type": "string",
+      "pattern": "^[A-Za-z.]+(,[A-Za-z.]+)?$"
+    }
+  },
+  "$ref": "#/definitions/Api"
+}

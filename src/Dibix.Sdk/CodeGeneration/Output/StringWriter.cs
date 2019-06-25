@@ -6,8 +6,8 @@ namespace Dibix.Sdk.CodeGeneration
     {
         private const int TabSize = 4;
         private readonly StringBuilder _stringBuilder;
-        private int _indentation;
-        private int _customIndent;
+        private int _indentationIndex;
+        private int _fixedIndentation;
 
         public StringWriter()
         {
@@ -77,25 +77,25 @@ namespace Dibix.Sdk.CodeGeneration
 
         public StringWriter PushIndent()
         {
-            this._indentation++;
+            this._indentationIndex++;
             return this;
         }
 
-        public StringWriter PushCustomIndent(int customIndent)
+        public StringWriter SetTemporaryIndent(int indentSize)
         {
-            this._customIndent = customIndent;
+            this._fixedIndentation = indentSize;
             return this;
         }
 
         public StringWriter PopIndent()
         {
-            this._indentation--;
+            this._indentationIndex--;
             return this;
         }
 
-        public StringWriter PopCustomIndent()
+        public StringWriter ResetTemporaryIndent()
         {
-            this._customIndent = 0;
+            this._fixedIndentation = 0;
             return this;
         }
 
@@ -106,7 +106,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private int ComputeIndentation()
         {
-            return this._indentation * TabSize + this._customIndent;
+            return this._indentationIndex * TabSize + this._fixedIndentation;
         }
     }
 }

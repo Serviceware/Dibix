@@ -8,8 +8,8 @@ namespace Dibix.Sdk.MSBuild
 {
     internal sealed class StaticCodeGenerationContext : ICodeGenerationContext
     {
-        private readonly string _dataLayerName;
         private readonly IContractDefinitionProvider _contractDefinitionProvider;
+        private readonly IControllerDefinitionProvider _controllerDefinitionProvider;
         private readonly IUserDefinedTypeProvider _userDefinedTypeProvider;
 
         public GeneratorConfiguration Configuration { get; }
@@ -18,14 +18,14 @@ namespace Dibix.Sdk.MSBuild
         public IContractResolverFacade ContractResolverFacade { get; }
         public IErrorReporter ErrorReporter { get; }
 
-        public StaticCodeGenerationContext(string projectDirectory, string @namespace, ICollection<string> artifacts, IEnumerable<string> contracts, bool multipleAreas, string dataLayerName, string contractsLayerName, bool isDml, IErrorReporter errorReporter)
+        public StaticCodeGenerationContext(string projectDirectory, string @namespace, ICollection<string> artifacts, IEnumerable<string> contracts, IEnumerable<string> endpoints, bool multipleAreas, bool isDml, IErrorReporter errorReporter)
         {
-            this._dataLayerName = dataLayerName;
             if (!String.IsNullOrEmpty(@namespace))
                 this.Namespace = @namespace;
 
             IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(projectDirectory);
-            this._contractDefinitionProvider = new ContractDefinitionProvider(fileSystemProvider, errorReporter, contracts, multipleAreas, contractsLayerName);
+            this._contractDefinitionProvider = new ContractDefinitionProvider(fileSystemProvider, errorReporter, contracts, multipleAreas);
+            this._controllerDefinitionProvider = new ControllerDefinitionProvider(fileSystemProvider, errorReporter, endpoints);
             this._userDefinedTypeProvider = new UserDefinedTypeProvider(artifacts);
 
             this.Configuration = new GeneratorConfiguration();
@@ -36,7 +36,7 @@ namespace Dibix.Sdk.MSBuild
                 this.Configuration.IsInvalid = true;
             }
 
-            PhysicalSourceConfiguration source = new PhysicalSourceConfiguration(fileSystemProvider, null, multipleAreas, dataLayerName, contractsLayerName);
+            PhysicalSourceConfiguration source = new PhysicalSourceConfiguration(fileSystemProvider, null, multipleAreas);
             if (!isDml)
                 source.Formatter = typeof(ExecStoredProcedureSqlStatementFormatter);
 
@@ -53,9 +53,10 @@ namespace Dibix.Sdk.MSBuild
             artifacts.Contracts.AddRange(this._contractDefinitionProvider.Contracts);
             artifacts.UserDefinedTypes.AddRange(this._userDefinedTypeProvider.Types.Select(x =>
             {
-                x.Namespace = this._dataLayerName;
+                x.Namespace = LayerName.Data;
                 return x;
             }));
+            artifacts.Controllers.AddRange(this._controllerDefinitionProvider.Controllers);
         }
 
         private static bool MatchFile(string projectDirectory, string relativeFilePath)

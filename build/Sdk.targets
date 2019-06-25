@@ -27,7 +27,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Contracts Include="@(None)" Condition="'%(Extension)' == '.json'" />
+      <Contracts Include="@(None)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(RelativeDir)', '^Contracts\\')) and %(Extension) == '.json'" />
+      <Endpoints Include="@(None)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(RelativeDir)', '^Endpoints\\')) and %(Extension) == '.json'" />
     </ItemGroup>
 
     <CompileDatabaseAccessorTask SdkPath="$(DibixSdkPath)"
@@ -37,9 +38,8 @@
                                  TargetDirectory="$(IntermediateOutputPath)"
                                  Artifacts="@(Build)"
                                  Contracts="@(Contracts)"
+                                 Endpoints="@(Endpoints)"
                                  MultipleAreas="$(MultipleAreas)"
-                                 DataLayerName="$(DataLayerName)"
-                                 ContractsLayerName="$(ContractsLayerName)"
                                  IsIDEBuild="$(BuildingInsideVisualStudio)"
                                  IsDML="$(IsDMLProject)">
       <Output TaskParameter="OutputFilePath" PropertyName="DatabaseAccessorPath" />

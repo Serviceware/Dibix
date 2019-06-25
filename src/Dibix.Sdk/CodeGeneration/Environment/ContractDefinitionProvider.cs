@@ -3,36 +3,29 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Schema;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class ContractDefinitionProvider : IContractDefinitionProvider
+    internal sealed class ContractDefinitionProvider : JsonSchemaDefinitionReader, IContractDefinitionProvider
     {
         #region Fields
-        private const string SchemaName = "dibix.contracts.schema";
-        private readonly IErrorReporter _errorReporter;
         private readonly bool _multipleAreas;
-        private readonly string _layerName;
         private readonly IDictionary<string, ContractDefinition> _definitions;
         #endregion
 
         #region Properties
         public ICollection<ContractDefinition> Contracts { get; }
-        public bool HasSchemaErrors { get; private set; }
+        protected override string SchemaName => "dibix.contracts.schema";
         #endregion
 
         #region Constructor
-        public ContractDefinitionProvider(IFileSystemProvider fileSystemProvider, IErrorReporter errorReporter, IEnumerable<string> contracts, bool multipleAreas, string layerName)
+        public ContractDefinitionProvider(IFileSystemProvider fileSystemProvider, IErrorReporter errorReporter, IEnumerable<string> contracts, bool multipleAreas) : base(fileSystemProvider, errorReporter)
         {
-            this._errorReporter = errorReporter;
             this._multipleAreas = multipleAreas;
-            this._layerName = layerName;
             this._definitions = new Dictionary<string, ContractDefinition>();
             this.Contracts = new Collection<ContractDefinition>();
-            this.CollectSchemas(fileSystemProvider, contracts);
+            base.Collect(contracts);
         }
         #endregion
 
@@ -41,46 +34,25 @@ namespace Dibix.Sdk.CodeGeneration
         {
             return this._definitions.TryGetValue(contractName, out schema);
         }
+        #endregion
 
-        private void CollectSchemas(IFileSystemProvider fileSystemProvider, IEnumerable<string> contracts)
+        #region Overrides
+        protected override void Read(string filePath, JObject json)
         {
-            foreach (string contractsFile in fileSystemProvider.GetFiles(null, contracts.Select(x => (VirtualPath)x), new VirtualPath[0]))
+            string virtualPath = Path.GetDirectoryName(filePath).Substring(base.FileSystemProvider.CurrentDirectory.Length + 1);
+            int virtualPathRootIndex = virtualPath.IndexOf(Path.DirectorySeparatorChar) + 1;
+            string namespaceKey = String.Empty;
+            if (virtualPathRootIndex > 0)
             {
-                using (Stream stream = File.OpenRead(contractsFile))
-                {
-                    using (TextReader textReader = new StreamReader(stream))
-                    {
-                        using (JsonReader jsonReader = new JsonTextReader(textReader))
-                        {
-                            JObject contractJson = JObject.Load(jsonReader/*, new JsonLoadSettings { DuplicatePropertyNameHandling = DuplicatePropertyNameHandling.Error }*/);
-
-                            if (!contractJson.IsValid(JsonSchemaDefinition.GetSchema($"{this.GetType().Namespace}.Environment", SchemaName), out IList<ValidationError> errors))
-                            {
-                                foreach (ValidationError error in errors.Flatten())
-                                {
-                                    string errorMessage = $"[JSON] {error.Message} ({error.Path})";
-                                    this._errorReporter.RegisterError(contractsFile, error.LineNumber, error.LinePosition, error.ErrorType.ToString(), errorMessage);
-                                }
-                                this.HasSchemaErrors = true;
-                                continue;
-                            }
-
-                            string virtualPath = Path.GetDirectoryName(contractsFile).Substring(fileSystemProvider.CurrentDirectory.Length + 1);
-                            int virtualPathRootIndex = virtualPath.IndexOf(Path.DirectorySeparatorChar) + 1;
-                            string namespaceKey = String.Empty;
-                            if (virtualPathRootIndex > 0)
-                            {
-                                string virtualPathRoot = virtualPath.Substring(virtualPathRootIndex);
-                                namespaceKey = virtualPathRoot.Replace(Path.DirectorySeparatorChar, '.');
-                            }
-                            string @namespace = NamespaceUtility.BuildNamespace(namespaceKey, this._multipleAreas, this._layerName);
-                            this.ReadContracts(namespaceKey, @namespace, contractJson);
-                        }
-                    }
-                }
+                string virtualPathRoot = virtualPath.Substring(virtualPathRootIndex);
+                namespaceKey = virtualPathRoot.Replace(Path.DirectorySeparatorChar, '.');
             }
+            string @namespace = NamespaceUtility.BuildNamespace(namespaceKey, this._multipleAreas, LayerName.DomainModel);
+            this.ReadContracts(namespaceKey, @namespace, json);
         }
+        #endregion
 
+        #region Private Methods
         private void ReadContracts(string namespaceKey, string @namespace, JObject contracts)
         {
             foreach (JProperty definitionProperty in contracts.Properties())

@@ -188,7 +188,7 @@ namespace Dibix.Sdk.CodeGeneration
         private static void WriteParameters(StringWriter writer, SqlStatementInfo query)
         {
             writer.Write("IParametersVisitor @params = accessor.Parameters()")
-                  .PushCustomIndent(37);
+                  .SetTemporaryIndent(37);
 
             writer.WriteLine()
                   .WriteLine(".SetFromTemplate(new")
@@ -211,7 +211,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             writer.WriteLine()
                   .WriteLine(".Build();")
-                  .PopCustomIndent();
+                  .ResetTemporaryIndent();
         }
 
         private void WriteExecutor(DaoWriterContext context, StringWriter writer, SqlStatementInfo query, HashSet<string> contracts)

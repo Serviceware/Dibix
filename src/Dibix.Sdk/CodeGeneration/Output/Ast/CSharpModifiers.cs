@@ -8,10 +8,12 @@ namespace Dibix.Sdk.CodeGeneration
         None = 0,
         Public = 1,
         Internal = 2,
-        Private = 4,
-        Static = 8,
-        Sealed = 16,
-        Const = 32,
-        ReadOnly = 64
+        Protected = 4,
+        Private = 8,
+        Static = 16,
+        Sealed = 32,
+        Const = 64,
+        ReadOnly = 128,
+        Override = 256
     }
 }
