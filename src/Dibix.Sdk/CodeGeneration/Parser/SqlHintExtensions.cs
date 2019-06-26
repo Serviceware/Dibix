@@ -10,9 +10,7 @@ namespace Dibix.Sdk.CodeGeneration
     {
         public static IEnumerable<SqlHint> Hints(this TSqlFragment fragment)
         {
-            var lines = fragment.AsEnumerable()
-                                .Where(x => x.TokenType == TSqlTokenType.SingleLineComment || x.TokenType == TSqlTokenType.MultilineComment)
-                                .Select(x => new KeyValuePair<int, string>(x.Line, x.Text));
+            var lines = fragment.AsEnumerable().Select(x => new KeyValuePair<int, string>(x.Line, x.Text));
 
             return SqlHintReader.Read(lines);
         }

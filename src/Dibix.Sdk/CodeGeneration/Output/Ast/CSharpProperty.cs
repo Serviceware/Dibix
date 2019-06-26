@@ -8,7 +8,7 @@
         private CSharpPropertyGetter _getter;
         private CSharpPropertySetter _setter;
 
-        public CSharpProperty(string name, string returnType, CSharpModifiers modifiers)
+        public CSharpProperty(string name, string returnType, CSharpModifiers modifiers, string annotation = null) : base(annotation)
         {
             this._name = name;
             this._returnType = returnType;

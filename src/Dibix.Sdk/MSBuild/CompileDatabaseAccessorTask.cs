@@ -24,7 +24,7 @@ namespace Dibix.Sdk.MSBuild
             outputFilePath = Path.Combine(projectDirectory, targetDirectory, "Accessor.cs");
 
             IErrorReporter errorReporter = new MSBuildErrorReporter(logger);
-            ICodeGenerationContext context = new StaticCodeGenerationContext(projectDirectory, @namespace, artifacts ?? new string[0], contracts ?? new string[0], endpoints ?? new string[0], multipleAreas, isDML, errorReporter);
+            StaticCodeGenerationContext context = new StaticCodeGenerationContext(projectDirectory, @namespace, artifacts ?? new string[0], contracts ?? new string[0], endpoints ?? new string[0], multipleAreas, isDML, errorReporter);
             ICodeGenerator generator = new DaoCodeGenerator(context);
 
             string generated = generator.Generate();

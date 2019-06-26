@@ -83,7 +83,18 @@ namespace Dibix.Sdk.CodeGeneration
         {
             ObjectContract contract = new ObjectContract(@namespace, definitionName);
             foreach (JProperty property in ((JObject)value).Properties())
-                contract.Properties.Add(new ObjectContractProperty(property.Name, property.Value.Value<string>()));
+            {
+                if (property.Name == "$wcfNs")
+                {
+                    string wcfNamespace = (string)property.Value;
+                    if (!wcfNamespace.StartsWith("http://", StringComparison.Ordinal))
+                        wcfNamespace = $"http://schemas.datacontract.org/2004/07/{wcfNamespace}";
+
+                    contract.WcfNamespace = wcfNamespace;
+                }
+                else
+                    contract.Properties.Add(new ObjectContractProperty(property.Name, property.Value.Value<string>()));
+            }
 
             this.Contracts.Add(contract);
             this._definitions.Add(key, contract);

@@ -55,12 +55,21 @@ namespace Dibix.Sdk.CodeGeneration
         #region Private Methods
         private static void ProcessObjectContract(DaoWriterContext context, CSharpStatementScope scope, ObjectContract contract)
         {
-            CSharpClass @class = scope.AddClass(contract.DefinitionName, CSharpModifiers.Public | CSharpModifiers.Sealed);
+            string dataContractAnnotation = null;
+            string dataMemberAnnotation = null;
+            if (!String.IsNullOrEmpty(contract.WcfNamespace))
+            {
+                context.Output.AddUsing("System.Runtime.Serialization");
+                dataContractAnnotation = $"DataContract(Namespace = \"{contract.WcfNamespace}\")";
+                dataMemberAnnotation = "DataMember";
+            }
+
+            CSharpClass @class = scope.AddClass(contract.DefinitionName, CSharpModifiers.Public | CSharpModifiers.Sealed, dataContractAnnotation);
             ICollection<string> ctorAssignments = new Collection<string>();
             foreach (ObjectContractProperty property in contract.Properties)
             {
                 bool isEnumerable = TryGetArrayType(property.Type, out string arrayType);
-                @class.AddProperty(property.Name, !isEnumerable ? property.Type : $"ICollection<{arrayType}>")
+                @class.AddProperty(property.Name, !isEnumerable ? property.Type : $"ICollection<{arrayType}>", annotation: dataMemberAnnotation)
                       .Getter(null)
                       .Setter(null, isEnumerable ? CSharpModifiers.Private : default);
 

@@ -25,9 +25,9 @@ namespace Dibix.Sdk.CodeGeneration
             return this;
         }
 
-        public CSharpProperty AddProperty(string name, string returnType, CSharpModifiers modifiers = CSharpModifiers.Public)
+        public CSharpProperty AddProperty(string name, string returnType, CSharpModifiers modifiers = CSharpModifiers.Public, string annotation = null)
         {
-            CSharpProperty property = new CSharpProperty(name, returnType, modifiers);
+            CSharpProperty property = new CSharpProperty(name, returnType, modifiers, annotation);
             this._members.Add(property);
             return property;
         }
