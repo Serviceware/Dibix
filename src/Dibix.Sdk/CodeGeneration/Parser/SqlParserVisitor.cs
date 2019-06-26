@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
@@ -13,17 +14,25 @@ namespace Dibix.Sdk.CodeGeneration
         internal IContractResolverFacade ContractResolverFacade{ get; set; }
         internal IErrorReporter ErrorReporter { get; set; }
         internal SqlStatementInfo Target { get; set; }
+        internal ICollection<SqlHint> Hints { get; }
+        #endregion
+
+        #region Constructor
+        public SqlParserVisitor()
+        {
+            this.Hints = new Collection<SqlHint>();
+        }
         #endregion
 
         #region Protected Methods
         protected internal void ParseContent(SqlStatementInfo target, TSqlStatement content, StatementList statements)
         {
-            this.Target.Namespace = content.SingleHintValue(SqlHint.Namespace);
-            string name = content.SingleHintValue(SqlHint.Name);
+            this.Target.Namespace = this.Hints.SingleHintValue(SqlHint.Namespace);
+            string name = this.Hints.SingleHintValue(SqlHint.Name);
             if (!String.IsNullOrEmpty(name))
                 this.Target.Name = name;
 
-            SqlHint resultTypeHint = content.SingleHint(SqlHint.ResultTypeName);
+            SqlHint resultTypeHint = this.Hints.SingleHint(SqlHint.ResultTypeName);
             if (resultTypeHint != null)
             {
                 ContractInfo contract = this.ContractResolverFacade.ResolveContract(resultTypeHint.Value, x => this.ErrorReporter.RegisterError(target.Source, resultTypeHint.Line, resultTypeHint.Column, null, x));
@@ -31,9 +40,9 @@ namespace Dibix.Sdk.CodeGeneration
                     this.Target.ResultType = contract.Name;
             }
 
-            this.Target.GeneratedResultTypeName = content.SingleHintValue(SqlHint.GeneratedResultTypeName);
+            this.Target.GeneratedResultTypeName = this.Hints.SingleHintValue(SqlHint.GeneratedResultTypeName);
 
-            this.ParseResults(content);
+            this.ParseResults(content, this.Hints);
             this.ParseBody(statements ?? new StatementList());
         }
 
@@ -57,7 +66,7 @@ namespace Dibix.Sdk.CodeGeneration
                 previousToken = node.ScriptTokenStream[--startIndex];
 
             if (previousToken.TokenType == TSqlTokenType.MultilineComment)
-                parameter.ClrTypeName = node.SingleHintValue(SqlHint.ClrType, startIndex);
+                parameter.ClrTypeName = previousToken.SingleHintValue(SqlHint.ClrType);
 
             parameter.ClrType = node.DataType.ToClrType();
             if (parameter.ClrType == null)
@@ -84,7 +93,7 @@ ReferenceType: {node.DataType.GetType()}");
 
             if (parameter.ClrType != null)
             {
-                bool shouldBeNullable = node.IsSet(SqlHint.Nullable, startIndex);
+                bool shouldBeNullable = previousToken.IsSet(SqlHint.Nullable);
                 bool isNullable = parameter.ClrType.IsNullable();
                 bool makeNullable = shouldBeNullable && !isNullable;
                 if (makeNullable)
@@ -115,9 +124,9 @@ ReferenceType: {node.DataType.GetType()}");
             return ContractCheck.NotNull;
         }
 
-        private void ParseResults(TSqlStatement node)
+        private void ParseResults(TSqlStatement node, ICollection<SqlHint> hints)
         {
-            IEnumerable<SqlQueryResult> results = StatementOutputParser.Parse(this.Target, node, this.ContractResolverFacade, this.ErrorReporter);
+            IEnumerable<SqlQueryResult> results = StatementOutputParser.Parse(this.Target, node, hints, this.ContractResolverFacade, this.ErrorReporter);
             this.Target.Results.AddRange(results);
         }
 

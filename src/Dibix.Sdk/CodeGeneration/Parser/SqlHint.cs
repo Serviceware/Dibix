@@ -2,11 +2,12 @@
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal class SqlHint
+    public class SqlHint
     {
         public const string Default = "";
         public const string Namespace = "Namespace";
         public const string Name = "Name";
+        public const string NoCompile = "NoCompile";
         public const string Return = "Return";
         public const string ResultTypeName = "ResultTypeName";
         public const string GeneratedResultTypeName = "GeneratedResultTypeName";

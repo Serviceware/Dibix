@@ -23,9 +23,10 @@ namespace Dibix.Sdk.Sql
                 visitor(token);
         }
 
-        public static IEnumerable<TSqlParserToken> AsEnumerable(this TSqlFragment fragment)
+        public static IEnumerable<TSqlParserToken> AsEnumerable(this TSqlFragment fragment) => AsEnumerable(fragment, fragment.FirstTokenIndex);
+        public static IEnumerable<TSqlParserToken> AsEnumerable(this TSqlFragment fragment, int startIndex)
         {
-            for (int i = fragment.FirstTokenIndex; i <= fragment.LastTokenIndex; i++)
+            for (int i = startIndex; i <= fragment.LastTokenIndex; i++)
                 yield return fragment.ScriptTokenStream[i];
         }
 

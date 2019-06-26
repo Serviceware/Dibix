@@ -67,6 +67,7 @@ namespace Dibix.Sdk.CodeGeneration
                 ContractResolverFacade = contractResolverFacade,
                 ErrorReporter = errorReporter
             };
+            visitor.Hints.AddRange(fragment.Hints());
 
             fragment.Accept(visitor);
 

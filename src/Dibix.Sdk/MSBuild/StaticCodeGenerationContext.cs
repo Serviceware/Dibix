@@ -62,24 +62,8 @@ namespace Dibix.Sdk.MSBuild
         private static bool MatchFile(string projectDirectory, string relativeFilePath)
         {
             string inputFilePath = Path.Combine(projectDirectory, relativeFilePath);
-            using (Stream stream = File.OpenRead(inputFilePath))
-            {
-                using (TextReader textReader = new StreamReader(stream))
-                {
-                    while (true)
-                    {
-                        string line = textReader.ReadLine();
-                        if (line == null)
-                            return false;
-
-                        if (line.StartsWith("CREATE", StringComparison.OrdinalIgnoreCase))
-                            return false;
-
-                        if (line.StartsWith("-- @", StringComparison.Ordinal))
-                            return true;
-                    }
-                }
-            }
+            ICollection<SqlHint> hints = SqlHintReader.Read(File.ReadLines(inputFilePath).Select((x, i) => new KeyValuePair<int, string>(i, x))).ToArray();
+            return hints.Any() && hints.All(x => x.Kind != SqlHint.NoCompile);
         }
     }
 }

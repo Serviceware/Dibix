@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -9,17 +9,18 @@ namespace Dibix.Sdk.CodeGeneration
     {
         private static readonly Regex ParseCommentRegex = new Regex(@"^(?:\/\*|--) ?@([\w]+)(?: (?:([#\w.[\],;?]+)|([#\w:.[\],;? ]+)))?(?: ?\*\/)?$", RegexOptions.Compiled);
 
-        public static IEnumerable<SqlHint> Read(TSqlFragment fragment, int startIndex = 0)
+        public static IEnumerable<SqlHint> Read(params KeyValuePair<int, string>[] lines) => Read(lines.AsEnumerable());
+        public static IEnumerable<SqlHint> Read(IEnumerable<KeyValuePair<int, string>> lines)
         {
-            for (int i = startIndex; i < fragment.FirstTokenIndex; i++)
+            foreach (KeyValuePair<int, string> line in lines)
             {
-                TSqlParserToken token = fragment.ScriptTokenStream[i];
-                if (token.TokenType != TSqlTokenType.SingleLineComment && token.TokenType != TSqlTokenType.MultilineComment)
+                string text = line.Value.Trim();
+                if (String.IsNullOrEmpty(text))
                     continue;
 
-                Match match = ParseCommentRegex.Match(token.Text.Trim());
+                Match match = ParseCommentRegex.Match(text);
                 if (!match.Success)
-                    continue;
+                    yield break;
 
                 Group keyGroup = match.Groups[1];
                 Group singleValueGroup = match.Groups[2];
@@ -32,7 +33,7 @@ namespace Dibix.Sdk.CodeGeneration
                 else
                     column += keyGroup.Index;
 
-                SqlHint hint = new SqlHint(keyGroup.Value, token.Line, column);
+                SqlHint hint = new SqlHint(keyGroup.Value, line.Key, column);
                 if (singleValueGroup.Success)
                 {
                     hint.Properties.Add(SqlHint.Default, singleValueGroup.Value);

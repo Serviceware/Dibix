@@ -14,14 +14,12 @@ namespace Dibix.Sdk.CodeGeneration
         private const string ReturnHintConverter = "Converter";
         private const string ReturnHintResultTypeName = "ResultTypeName";
 
-        public static IEnumerable<SqlQueryResult> Parse(SqlStatementInfo target, TSqlStatement node, IContractResolverFacade contractResolverFacade, IErrorReporter errorReporter)
+        public static IEnumerable<SqlQueryResult> Parse(SqlStatementInfo target, TSqlStatement node, ICollection<SqlHint> hints, IContractResolverFacade contractResolverFacade, IErrorReporter errorReporter)
         {
             StatementOutputVisitor visitor = new StatementOutputVisitor(target.Source, errorReporter);
             node.Accept(visitor);
 
-            IList<SqlHint> returnHints = SqlHintReader.Read(node)
-                                                      .Where(x => x.Kind == SqlHint.Return)
-                                                      .ToArray();
+            IList<SqlHint> returnHints = hints.Where(x => x.Kind == SqlHint.Return).ToArray();
 
             if (returnHints.Count > visitor.Results.Count)
             {

@@ -18,7 +18,8 @@ namespace Dibix.Sdk.CodeGeneration
                 using (TextReader reader = new StreamReader(stream))
                 {
                     TSqlFragment fragment = parser.Parse(reader, out IList<ParseError> _);
-                    UserDefinedTypeVisitor visitor = new UserDefinedTypeVisitor();
+                    ICollection<SqlHint> hints = fragment.Hints().ToArray();
+                    UserDefinedTypeVisitor visitor = new UserDefinedTypeVisitor(hints);
                     fragment.Accept(visitor);
                     return visitor.Definition;
                 }
@@ -37,12 +38,19 @@ namespace Dibix.Sdk.CodeGeneration
 
         private class UserDefinedTypeVisitor : TSqlFragmentVisitor
         {
+            private readonly ICollection<SqlHint> _hints;
+
+            public UserDefinedTypeVisitor(ICollection<SqlHint> hints)
+            {
+                this._hints = hints;
+            }
+
             public UserDefinedTypeDefinition Definition { get; private set; }
 
             public override void Visit(CreateTypeTableStatement node)
             {
                 string typeName = node.Name.BaseIdentifier.Value;
-                string displayName = node.SingleHintValue(SqlHint.Name);
+                string displayName = this._hints.SingleHintValue(SqlHint.Name);
                 if (String.IsNullOrEmpty(displayName))
                     displayName = GenerateDisplayName(typeName);
 
