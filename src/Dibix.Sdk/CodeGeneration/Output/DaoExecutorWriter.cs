@@ -262,9 +262,9 @@ namespace Dibix.Sdk.CodeGeneration
                     writer.WriteRaw(", ");
             }
 
-            if (singleResult.ResultTypeName != null)
+            if (singleResult.ResultType != null)
                 writer.WriteRaw(", ")
-                      .WriteRaw(singleResult.ResultTypeName);
+                      .WriteRaw(singleResult.ResultType);
 
             writer.WriteRaw(">(")
                   .WriteRaw(query.Name)
@@ -346,16 +346,19 @@ namespace Dibix.Sdk.CodeGeneration
                         writer.WriteRaw(", ");
                 }
 
-                if (result.ResultTypeName != null)
+                if (result.ResultType != null)
                     writer.WriteRaw(", ")
-                          .WriteRaw(result.ResultTypeName);
+                          .WriteRaw(result.ResultType);
 
                 writer.WriteRaw(">(");
 
                 if (result.Contracts.Count > 1)
                 {
-                    writer.WriteRaw(result.Converter)
-                          .WriteRaw(", \"")
+                    if (!String.IsNullOrEmpty(result.Converter))
+                        writer.WriteRaw(result.Converter)
+                              .WriteRaw(", ");
+
+                    writer.WriteRaw('"')
                           .WriteRaw(result.SplitOn)
                           .WriteRaw('"');
                 }

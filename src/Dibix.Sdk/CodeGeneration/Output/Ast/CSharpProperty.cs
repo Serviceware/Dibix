@@ -1,4 +1,6 @@
-﻿namespace Dibix.Sdk.CodeGeneration
+﻿using System.Collections.Generic;
+
+namespace Dibix.Sdk.CodeGeneration
 {
     public sealed class CSharpProperty : CSharpStatement
     {
@@ -8,7 +10,7 @@
         private CSharpPropertyGetter _getter;
         private CSharpPropertySetter _setter;
 
-        public CSharpProperty(string name, string returnType, CSharpModifiers modifiers, string annotation = null) : base(annotation)
+        public CSharpProperty(string name, string returnType, CSharpModifiers modifiers, IEnumerable<string> annotations) : base(annotations)
         {
             this._name = name;
             this._returnType = returnType;

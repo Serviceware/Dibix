@@ -17,6 +17,9 @@ namespace Dibix.MSBuild
         [Output]
         public string OutputFilePath { get; set; }
 
+        [Output]
+        public string[] DetectedReferences { get; set; }
+
         protected override IEnumerable<object> CollectParameters()
         {
             yield return this.ProjectDirectory;
@@ -29,11 +32,13 @@ namespace Dibix.MSBuild
             yield return this.IsDML;
             yield return base.Log;
             yield return null;
+            yield return null;
         }
 
         protected override void ProcessParameters(object[] args)
         {
             this.OutputFilePath = (string)args[9];
+            this.DetectedReferences = (string[])args[10];
         }
     }
 }

@@ -12,7 +12,7 @@ namespace Dibix.Sdk.CodeGeneration
         private const string ReturnHintResultName = "Name";
         private const string ReturnHintSplitOn = "SplitOn";
         private const string ReturnHintConverter = "Converter";
-        private const string ReturnHintResultTypeName = "ResultTypeName";
+        private const string ReturnHintResultType = "ResultType";
 
         public static IEnumerable<SqlQueryResult> Parse(SqlStatementInfo target, TSqlStatement node, ICollection<SqlHint> hints, IContractResolverFacade contractResolverFacade, IErrorReporter errorReporter)
         {
@@ -53,16 +53,22 @@ namespace Dibix.Sdk.CodeGeneration
                 string resultName = returnHint.SelectValueOrDefault(ReturnHintResultName);
                 string converter = returnHint.SelectValueOrDefault(ReturnHintConverter);
                 string splitOn = returnHint.SelectValueOrDefault(ReturnHintSplitOn);
-                string resultTypeName = returnHint.SelectValueOrDefault(ReturnHintResultTypeName);
+                string resultType = returnHint.SelectValueOrDefault(ReturnHintResultType);
 
                 SqlQueryResult result = new SqlQueryResult
                 {
                     Name = resultName,
                     ResultMode = resultMode,
                     Converter = converter,
-                    SplitOn = splitOn,
-                    ResultTypeName = resultTypeName
+                    SplitOn = splitOn
                 };
+
+                if (!String.IsNullOrEmpty(resultType))
+                {
+                    ContractInfo contract = contractResolverFacade.ResolveContract(resultType, x => errorReporter.RegisterError(target.Source, returnHint.Line, returnHint.Column, null, x));
+                    if (contract != null)
+                        result.ResultType = contract.Name;
+                }
 
                 IList<ContractInfo> returnTypes = typeNames.Select(x => contractResolverFacade.ResolveContract(x, y => errorReporter.RegisterError(target.Source, returnHint.Line, returnHint.Column, null, y))).ToArray();
                 if (returnTypes.Any(x => x == null))

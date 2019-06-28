@@ -93,7 +93,27 @@ namespace Dibix.Sdk.CodeGeneration
                     contract.WcfNamespace = wcfNamespace;
                 }
                 else
-                    contract.Properties.Add(new ObjectContractProperty(property.Name, property.Value.Value<string>()));
+                {
+                    string typeName;
+                    bool isPartOfKey = false;
+                    switch (property.Value.Type)
+                    {
+                        case JTokenType.Object:
+                            JObject propertyInfo = (JObject)property.Value;
+                            typeName = (string)propertyInfo.Property("type").Value;
+                            isPartOfKey = (bool?)propertyInfo.Property("isPartOfKey")?.Value ?? default;
+                            break;
+
+                        case JTokenType.String:
+                            typeName = (string)property.Value;
+                            break;
+
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(property.Type), property.Type, null);
+                    }
+                    bool isEnumerable = TryGetArrayType(typeName, ref typeName);
+                    contract.Properties.Add(new ObjectContractProperty(property.Name, typeName, isPartOfKey, isEnumerable));
+                }
             }
 
             this.Contracts.Add(contract);
@@ -123,6 +143,16 @@ namespace Dibix.Sdk.CodeGeneration
 
             this.Contracts.Add(contract);
             this._definitions.Add(key, contract);
+        }
+
+        private static bool TryGetArrayType(string type, ref string arrayType)
+        {
+            int index = type.LastIndexOf('*');
+            if (index < 0)
+                return false;
+
+            arrayType = type.Substring(0, index);
+            return true;
         }
         #endregion
     }

@@ -36,7 +36,7 @@ namespace Dibix.Sdk.MSBuild
                 this.Configuration.IsInvalid = true;
             }
 
-            PhysicalSourceConfiguration source = new PhysicalSourceConfiguration(fileSystemProvider, null, multipleAreas);
+            PhysicalSourceConfiguration source = new PhysicalSourceConfiguration(fileSystemProvider, null, multipleAreas, this.Configuration.Output.GeneratePublicArtifacts);
             if (!isDml)
                 source.Formatter = typeof(ExecStoredProcedureSqlStatementFormatter);
 
@@ -62,7 +62,7 @@ namespace Dibix.Sdk.MSBuild
         private static bool MatchFile(string projectDirectory, string relativeFilePath)
         {
             string inputFilePath = Path.Combine(projectDirectory, relativeFilePath);
-            ICollection<SqlHint> hints = SqlHintReader.Read(File.ReadLines(inputFilePath).Select((x, i) => new KeyValuePair<int, string>(i, x))).ToArray();
+            ICollection<SqlHint> hints = SqlHintReader.Read(File.ReadLines(inputFilePath).Select((x, i) => new KeyValuePair<int, string>(i + 1, x))).ToArray();
             return hints.Any() && hints.All(x => x.Kind != SqlHint.NoCompile);
         }
     }

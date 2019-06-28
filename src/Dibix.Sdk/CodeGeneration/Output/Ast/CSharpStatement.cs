@@ -7,17 +7,20 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public abstract class CSharpStatement
     {
-        private readonly string _annotation;
+        private readonly IEnumerable<string> _annotations;
         
-        public CSharpStatement(string annotation = null)
+        protected CSharpStatement() : this(Enumerable.Empty<string>()) { }
+        protected CSharpStatement(IEnumerable<string> annotations)
         {
-            this._annotation = annotation;
+            this._annotations = annotations;
         }
 
         public virtual void Write(StringWriter writer)
         {
-            if (!String.IsNullOrEmpty(this._annotation))
-                writer.WriteLine($"[{this._annotation}]");
+            foreach (string annotation in this._annotations.OrderBy(x => x.Length))
+            {
+                writer.WriteLine($"[{annotation}]");
+            }
         }
 
         protected static void WriteMultiline(StringWriter writer, string content)

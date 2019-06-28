@@ -32,7 +32,8 @@ namespace Dibix
             ParameterExpression instanceParameter = Expression.Parameter(typeof(object), "instance");
             Expression instanceCast = Expression.Convert(instanceParameter, property.DeclaringType);
             Expression propertyAccessor = Expression.Property(instanceCast, property);
-            Expression<Func<object, object>> expression = Expression.Lambda<Func<object, object>>(propertyAccessor, instanceParameter);
+            Expression propertyAccessorCast = Expression.Convert(propertyAccessor, typeof(object));
+            Expression<Func<object, object>> expression = Expression.Lambda<Func<object, object>>(propertyAccessorCast, instanceParameter);
             Func<object, object> compiled = expression.Compile();
             return new EntityKey(compiled);
         }

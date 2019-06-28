@@ -12,18 +12,18 @@ namespace Dibix
         #endregion
 
         #region Public Methods
-        public void AutoMap(params object[] args)
+        public TReturn AutoMap<TReturn>(bool useProjection, params object[] args) where TReturn : new()
         {
             // LEFT JOIN => related entities can be null
-            args = args.Skip(1).Where(x => x == null).ToArray();
+            object[] relevantArgs = args.Where(x => x != null).ToArray();
 
-            for (int i = args.Length - 1; i > 0; i--)
+            for (int i = relevantArgs.Length - 1; i > 0; i--)
             {
-                object item = this.GetCachedEntity(args[i]);
+                object item = this.GetCachedEntity(relevantArgs[i]);
 
                 for (int j = i - 1; j >= 0; j--)
                 {
-                    object previousItem = this.GetCachedEntity(args[j]);
+                    object previousItem = this.GetCachedEntity(relevantArgs[j]);
                     EntityDescriptor descriptor = EntityDescriptorCache.GetDescriptor(previousItem.GetType());
                     EntityProperty property = descriptor.ComplexProperties.FirstOrDefault(x => MatchProperty(x, item.GetType()));
                     if (property == null)
@@ -36,6 +36,11 @@ namespace Dibix
                     break;
                 }
             }
+
+            if (!useProjection)
+                return (TReturn)args[0];
+
+            return ProjectResult<TReturn>(relevantArgs);
         }
         #endregion
 
@@ -71,6 +76,12 @@ namespace Dibix
         private static bool MatchProperty(EntityProperty entityProperty, Type targetType)
         {
             return entityProperty.EntityType == targetType;
+        }
+
+        private static TReturn ProjectResult<TReturn>(params object[] args) where TReturn : new()
+        {
+            TReturn result = new TReturn();
+            return result;
         }
         #endregion
 

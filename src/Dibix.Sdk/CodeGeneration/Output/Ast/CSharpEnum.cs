@@ -11,7 +11,7 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly CSharpModifiers _modifiers;
         private string _baseTypeName;
 
-        public CSharpEnum(string name, CSharpModifiers modifiers, string annotation = null) : base(annotation)
+        public CSharpEnum(string name, CSharpModifiers modifiers, IEnumerable<string> annotations) : base(annotations)
         {
             this._name = name;
             this._modifiers = modifiers;

@@ -43,6 +43,7 @@
                                  IsIDEBuild="$(BuildingInsideVisualStudio)"
                                  IsDML="$(IsDMLProject)">
       <Output TaskParameter="OutputFilePath" PropertyName="DatabaseAccessorPath" />
+      <Output TaskParameter="DetectedReferences" PropertyName="DetectedDatabaseAccessorReferences" />
     </CompileDatabaseAccessorTask>
 
     <PropertyGroup>
@@ -51,6 +52,7 @@
         $(DatabaseAccessorSource)
       </DatabaseAccessorSource>
       <DatabaseAccessorReference>
+        $(DetectedDatabaseAccessorReferences);
         $(DibixToolsDirectory)Dibix.dll;
         @(ArtifactReference->'%(RelativeDir)%(Filename).dll')
       </DatabaseAccessorReference>

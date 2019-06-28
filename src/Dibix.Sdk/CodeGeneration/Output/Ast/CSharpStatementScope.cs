@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -30,16 +31,17 @@ namespace Dibix.Sdk.CodeGeneration
             return this;
         }
 
-        public CSharpClass AddClass(string name, CSharpModifiers modifiers, string annotation = null)
+        public CSharpClass AddClass(string name, CSharpModifiers modifiers, params string[] annotations) => this.AddClass(name, modifiers, annotations.AsEnumerable());
+        public CSharpClass AddClass(string name, CSharpModifiers modifiers, IEnumerable<string> annotations)
         {
-            CSharpClass @class = new CSharpClass(name, modifiers, annotation);
+            CSharpClass @class = new CSharpClass(name, modifiers, annotations);
             this._statements.Add(@class);
             return @class;
         }
 
-        public CSharpEnum AddEnum(string name, CSharpModifiers modifiers, string annotation = null)
+        public CSharpEnum AddEnum(string name, CSharpModifiers modifiers, IEnumerable<string> annotations)
         {
-            CSharpEnum @enum = new CSharpEnum(name, modifiers, annotation);
+            CSharpEnum @enum = new CSharpEnum(name, modifiers, annotations);
             this._statements.Add(@enum);
             return @enum;
         }

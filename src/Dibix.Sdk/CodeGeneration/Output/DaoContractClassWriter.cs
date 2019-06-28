@@ -55,26 +55,34 @@ namespace Dibix.Sdk.CodeGeneration
         #region Private Methods
         private static void ProcessObjectContract(DaoWriterContext context, CSharpStatementScope scope, ObjectContract contract)
         {
-            string dataContractAnnotation = null;
-            string dataMemberAnnotation = null;
+            ICollection<string> classAnnotations = new Collection<string>();
             if (!String.IsNullOrEmpty(contract.WcfNamespace))
             {
                 context.Output.AddUsing("System.Runtime.Serialization");
-                dataContractAnnotation = $"DataContract(Namespace = \"{contract.WcfNamespace}\")";
-                dataMemberAnnotation = "DataMember";
+                classAnnotations.Add($"DataContract(Namespace = \"{contract.WcfNamespace}\")");
             }
 
-            CSharpClass @class = scope.AddClass(contract.DefinitionName, CSharpModifiers.Public | CSharpModifiers.Sealed, dataContractAnnotation);
+            CSharpClass @class = scope.AddClass(contract.DefinitionName, CSharpModifiers.Public | CSharpModifiers.Sealed, classAnnotations);
             ICollection<string> ctorAssignments = new Collection<string>();
             foreach (ObjectContractProperty property in contract.Properties)
             {
-                bool isEnumerable = TryGetArrayType(property.Type, out string arrayType);
-                @class.AddProperty(property.Name, !isEnumerable ? property.Type : $"ICollection<{arrayType}>", annotation: dataMemberAnnotation)
-                      .Getter(null)
-                      .Setter(null, isEnumerable ? CSharpModifiers.Private : default);
+                ICollection<string> propertyAnnotations = new Collection<string>();
+                if (!String.IsNullOrEmpty(contract.WcfNamespace))
+                    propertyAnnotations.Add("DataMember");
 
-                if (isEnumerable)
-                    ctorAssignments.Add($"this.{property.Name} = new Collection<{arrayType}>();");
+                if (property.IsPartOfKey)
+                {
+                    context.Output.AddUsing("System.ComponentModel.DataAnnotations");
+                    context.Configuration.DetectedReferences.Add("System.ComponentModel.DataAnnotations.dll");
+                    propertyAnnotations.Add("Key");
+                }
+
+                @class.AddProperty(property.Name, !property.IsEnumerable ? property.Type : $"ICollection<{property.Type}>", propertyAnnotations)
+                      .Getter(null)
+                      .Setter(null, property.IsEnumerable ? CSharpModifiers.Private : default);
+
+                if (property.IsEnumerable)
+                    ctorAssignments.Add($"this.{property.Name} = new Collection<{property.Type}>();");
             }
 
             if (!ctorAssignments.Any())
@@ -89,25 +97,16 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static void ProcessEnumContract(CSharpStatementScope scope, EnumContract contract)
         {
-            CSharpEnum @enum = scope.AddEnum(contract.DefinitionName, CSharpModifiers.Public, contract.IsFlaggable ? "Flags" : null);
+            ICollection<string> annotations = new Collection<string>();
+            if (contract.IsFlaggable)
+                annotations.Add("Flags");
+
+            CSharpEnum @enum = scope.AddEnum(contract.DefinitionName, CSharpModifiers.Public, annotations);
             foreach (EnumContractMember member in contract.Members)
             {
                 @enum.AddMember(member.Name, member.Value)
                      .Inherits("int");
             }
-        }
-
-        private static bool TryGetArrayType(string type, out string arrayType)
-        {
-            int index = type.LastIndexOf('*');
-            if (index >= 0)
-            {
-                arrayType = type.Substring(0, index);
-                return true;
-            }
-
-            arrayType = null;
-            return false;
         }
         #endregion
     }

@@ -44,8 +44,8 @@ namespace Dibix.Sdk.CodeGeneration
                     {
                         bool isEnumerable = result.ResultMode == SqlQueryResultMode.Many;
                         string propertyTypeName;
-                        if (result.ResultTypeName != null)
-                            propertyTypeName = MakeCollectionInterfaceType(result.ResultTypeName);
+                        if (result.ResultType != null)
+                            propertyTypeName = MakeCollectionInterfaceType(result.ResultType.ToString());
                         else
                         {
                             propertyTypeName = base.PrefixWithRootNamespace(context, result.Contracts.First().Name, contracts);
@@ -71,7 +71,7 @@ namespace Dibix.Sdk.CodeGeneration
                     for (int k = 0; k < collectionProperties.Count; k++)
                     {
                         SqlQueryResult property = collectionProperties[k];
-                        string innerTypeName = property.ResultTypeName ?? base.PrefixWithRootNamespace(context, property.Contracts.First().Name, contracts);
+                        string innerTypeName = property.ResultType?.ToString() ?? base.PrefixWithRootNamespace(context, property.Contracts.First().Name, contracts);
                         string collectionTypeName = MakeCollectionType(innerTypeName);
                         ctorBodyWriter.Append("this.")
                                       .Append(property.Name)

@@ -23,6 +23,13 @@ namespace Dibix
             }, splitOn);
             return cache;
         }
+        public static IEnumerable<TReturn> ReadMany<TFirst, TSecond, TReturn>(this IMultipleResultReader reader, string splitOn) where TReturn : new()
+        {
+            Guard.IsNotNull(reader, nameof(reader));
+            MultiMapper multiMapper = new MultiMapper();
+            return reader.ReadMany<TFirst, TSecond, TReturn>((a, b) => multiMapper.AutoMap<TReturn>(true, a, b), splitOn)
+                         .Distinct(new EntityComparer<TReturn>());
+        }
         public static IEnumerable<TReturn> ReadMany<TReturn, TSecond, TThird>(this IMultipleResultReader reader, Action<TReturn, TSecond, TThird> map, string splitOn)
         {
             Guard.IsNotNull(reader, nameof(reader));
@@ -58,6 +65,14 @@ namespace Dibix
             return cache;
         }
 
+        public static TReturn ReadSingle<TReturn, TSecond>(this IMultipleResultReader reader, string splitOn) where TReturn : new()
+        {
+            Guard.IsNotNull(reader, nameof(reader));
+            MultiMapper multiMapper = new MultiMapper();
+            return reader.ReadMany<TReturn, TSecond, TReturn>((a, b) => multiMapper.AutoMap<TReturn>(false, a, b), splitOn)
+                         .Distinct(new EntityComparer<TReturn>())
+                         .Single();
+        }
         public static TReturn ReadSingle<TReturn, TSecond>(this IMultipleResultReader reader, Action<TReturn, TSecond> map, string splitOn)
         {
             Guard.IsNotNull(reader, nameof(reader));

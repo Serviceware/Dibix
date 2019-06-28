@@ -2,13 +2,17 @@
 {
     public sealed class ObjectContractProperty
     {
-        public string Name { get; set; }
-        public string Type { get; set; }
+        public string Name { get; }
+        public string Type { get; }
+        public bool IsPartOfKey { get; }
+        public bool IsEnumerable { get; }
 
-        public ObjectContractProperty(string name, string type)
+        public ObjectContractProperty(string name, string type, bool isPartOfKey, bool isEnumerable)
         {
             this.Name = name;
             this.Type = type;
+            this.IsPartOfKey = isPartOfKey;
+            this.IsEnumerable = isEnumerable;
         }
     }
 }

@@ -10,6 +10,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Fields
         private readonly string _projectName;
         private readonly bool _multipleAreas;
+        private readonly bool _generatePublicArtifacts;
         private readonly IFileSystemProvider _fileSystemProvider;
         private readonly ICollection<VirtualPath> _include;
         private readonly ICollection<VirtualPath> _exclude;
@@ -21,11 +22,12 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public PhysicalSourceConfiguration(IFileSystemProvider fileSystemProvider, string projectName, bool multipleAreas)
+        public PhysicalSourceConfiguration(IFileSystemProvider fileSystemProvider, string projectName, bool multipleAreas, bool generatePublicArtifacts)
         {
             this._fileSystemProvider = fileSystemProvider;
             this._projectName = projectName;
             this._multipleAreas = multipleAreas;
+            this._generatePublicArtifacts = generatePublicArtifacts;
             this._include = new HashSet<VirtualPath>();
             this._exclude = new HashSet<VirtualPath>();
         }
@@ -62,7 +64,8 @@ namespace Dibix.Sdk.CodeGeneration
 
             bool result = parser.Read(SqlParserSourceKind.Stream, File.OpenRead(filePath), statement, formatter, contractResolverFacade, errorReporter);
 
-            statement.Namespace = NamespaceUtility.BuildNamespace(statement.Namespace, this._multipleAreas, LayerName.Data);
+            if (this._generatePublicArtifacts)
+                statement.Namespace = NamespaceUtility.BuildNamespace(statement.Namespace, this._multipleAreas, LayerName.Data);
 
             if (!String.IsNullOrEmpty(statement.GeneratedResultTypeName))
                 statement.GeneratedResultTypeName = NamespaceUtility.BuildNamespace(statement.GeneratedResultTypeName, this._multipleAreas, LayerName.DomainModel);

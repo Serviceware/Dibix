@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -11,7 +12,7 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly CSharpModifiers _modifiers;
         private string _baseClassName;
 
-        public CSharpClass(string name, CSharpModifiers modifiers, string annotation = null) : base(annotation)
+        public CSharpClass(string name, CSharpModifiers modifiers, IEnumerable<string> annotations) : base(annotations)
         {
             this._name = name;
             this._modifiers = modifiers;
@@ -25,9 +26,10 @@ namespace Dibix.Sdk.CodeGeneration
             return this;
         }
 
-        public CSharpProperty AddProperty(string name, string returnType, CSharpModifiers modifiers = CSharpModifiers.Public, string annotation = null)
+        public CSharpProperty AddProperty(string name, string returnType, CSharpModifiers modifiers = CSharpModifiers.Public) => this.AddProperty(name, returnType, Enumerable.Empty<string>(), modifiers);
+        public CSharpProperty AddProperty(string name, string returnType, IEnumerable<string> annotations, CSharpModifiers modifiers = CSharpModifiers.Public)
         {
-            CSharpProperty property = new CSharpProperty(name, returnType, modifiers, annotation);
+            CSharpProperty property = new CSharpProperty(name, returnType, modifiers, annotations);
             this._members.Add(property);
             return property;
         }
@@ -48,7 +50,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public CSharpClass AddClass(string name, CSharpModifiers modifiers = CSharpModifiers.Public)
         {
-            CSharpClass @class = new CSharpClass(name, modifiers);
+            CSharpClass @class = new CSharpClass(name, modifiers, Enumerable.Empty<string>());
             this._members.Add(@class);
             return @class;
         }

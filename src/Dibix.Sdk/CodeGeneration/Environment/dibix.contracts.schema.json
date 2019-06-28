@@ -1,17 +1,40 @@
 {
   "$schema": "http://json-schema.org/draft-05/schema#",
   "definitions": {
+    "TypeName": {
+      "type": "string",
+      "pattern": "^[A-Za-z]([\\w]+)?\\??(\\[\\]|\\*?)?$"
+    },
     "Entity": {
       "type": "object",
       "properties": {
         "$wcfNs": {
           "type": "string"
-        } 
+        }
       },
       "patternProperties": {
         "^[A-Z]([\\w]+)?$": {
-          "type": "string",
-          "pattern": "^[A-Za-z]([\\w]+)?\\??(\\[\\]|\\*?)?$"
+          "anyOf": [
+            {
+              "$ref": "#/definitions/TypeName"
+            },
+            {
+              "type": "object",
+              "minProperties": 1,
+              "properties": {
+                "type": {
+                  "$ref": "#/definitions/TypeName"
+                },
+                "isPartOfKey": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "type"
+              ],
+              "additionalProperties": false
+            }
+          ]
         }
       },
       "additionalProperties": false
