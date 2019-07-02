@@ -26,6 +26,9 @@ namespace Dibix
         int IEqualityComparer<object>.GetHashCode(object obj)
         {
             EntityDescriptor entityDescriptor = EntityDescriptorCache.GetDescriptor(obj.GetType());
+            if (!entityDescriptor.Keys.Any())
+                return obj.GetHashCode();
+
             int hashCode = entityDescriptor.Keys
                                            .Select(x => x.GetValue(obj).GetHashCode())
                                            .Aggregate((x, y) => x ^ y);
