@@ -22,7 +22,10 @@ namespace Dibix
                 if (property.IsDefined(typeof(KeyAttribute)))
                     descriptor.Keys.Add(BuildEntityKey(property));
                 else if (!property.PropertyType.IsPrimitive())
-                    descriptor.ComplexProperties.Add(BuildEntityProperty(property));
+                {
+                    EntityProperty entityProperty = BuildEntityProperty(property);
+                    descriptor.ComplexProperties.Add(entityProperty.EntityType, entityProperty);
+                }
             }
             return descriptor;
         }

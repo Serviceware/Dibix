@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace Dibix
@@ -25,8 +24,7 @@ namespace Dibix
                 {
                     object previousItem = this.GetCachedEntity(relevantArgs[j]);
                     EntityDescriptor descriptor = EntityDescriptorCache.GetDescriptor(previousItem.GetType());
-                    EntityProperty property = descriptor.ComplexProperties.FirstOrDefault(x => MatchProperty(x, item.GetType()));
-                    if (property == null)
+                    if (!descriptor.ComplexProperties.TryGetValue(item.GetType(), out EntityProperty property))
                         continue;
 
                     if (property.IsCollection && this.IsInCollection(previousItem, property.Name, item))
@@ -73,14 +71,15 @@ namespace Dibix
             return true;
         }
 
-        private static bool MatchProperty(EntityProperty entityProperty, Type targetType)
-        {
-            return entityProperty.EntityType == targetType;
-        }
-
         private static TReturn ProjectResult<TReturn>(params object[] args) where TReturn : new()
         {
+            EntityDescriptor entityDescriptor = EntityDescriptorCache.GetDescriptor(typeof(TReturn));
             TReturn result = new TReturn();
+            foreach (object arg in args)
+            {
+                if (entityDescriptor.ComplexProperties.TryGetValue(arg.GetType(), out EntityProperty property))
+                    property.SetValue(result, arg);
+            }
             return result;
         }
         #endregion
