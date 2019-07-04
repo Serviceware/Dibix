@@ -11,27 +11,11 @@ namespace Dibix
             Guard.IsNotNull(accessor, nameof(accessor));
             return accessor.QuerySingle<T>(sql, CommandType.Text, EmptyParameters.Instance);
         }
-        public static T QuerySingle<T>(this IDatabaseAccessor accessor, string sql, CommandType commandType)
-        {
-            Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.QuerySingle<T>(sql, commandType, EmptyParameters.Instance);
-        }
-        public static T QuerySingle<T>(this IDatabaseAccessor accessor, string sql, Action<IParameterBuilder> configureParameters)
-        {
-            Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.QuerySingle<T>(sql, CommandType.Text, configureParameters.Build());
-        }
-        public static T QuerySingle<T>(this IDatabaseAccessor accessor, string sql, CommandType commandType, Action<IParameterBuilder> configureParameters)
-        {
-            Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.QuerySingle<T>(sql, commandType, configureParameters.Build());
-        }
         public static T QuerySingle<T>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
             return accessor.QuerySingle<T>(sql, CommandType.Text, parameters);
         }
-        public static TReturn QuerySingle<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, Action<IParameterBuilder> configureParameters, Action<TReturn, TSecond> map, string splitOn) => QuerySingle(accessor, sql, configureParameters.Build(), map, splitOn);
         public static TReturn QuerySingle<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, Action<TReturn, TSecond> map, string splitOn)
         {
             Guard.IsNotNull(accessor, nameof(accessor));

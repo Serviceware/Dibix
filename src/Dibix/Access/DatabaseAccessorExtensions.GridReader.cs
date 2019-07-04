@@ -6,23 +6,6 @@ namespace Dibix
 {
     public static partial class DatabaseAccessorExtensions
     {
-        public static IEnumerable<TReturn> ReadMany<TReturn, TSecond>(this IMultipleResultReader reader, Action<TReturn, TSecond> map, string splitOn)
-        {
-            Guard.IsNotNull(reader, nameof(reader));
-
-            HashCollection<TReturn> cache = new HashCollection<TReturn>();
-            reader.ReadMany<TReturn, TSecond, TReturn>((a, b) =>
-            {
-                if (!cache.TryGetValue(a, out TReturn instance))
-                {
-                    instance = a;
-                    cache.Add(instance);
-                }
-                map(instance, b);
-                return instance;
-            }, splitOn);
-            return cache;
-        }
         public static IEnumerable<TReturn> ReadMany<TFirst, TSecond, TReturn>(this IMultipleResultReader reader, string splitOn) where TReturn : new()
         {
             Guard.IsNotNull(reader, nameof(reader));
@@ -72,23 +55,6 @@ namespace Dibix
             return reader.ReadMany<TReturn, TSecond, TReturn>((a, b) => multiMapper.AutoMap<TReturn>(false, a, b), splitOn)
                          .Distinct(new EntityComparer<TReturn>())
                          .Single();
-        }
-        public static TReturn ReadSingle<TReturn, TSecond>(this IMultipleResultReader reader, Action<TReturn, TSecond> map, string splitOn)
-        {
-            Guard.IsNotNull(reader, nameof(reader));
-
-            HashCollection<TReturn> cache = new HashCollection<TReturn>();
-            reader.ReadMany<TReturn, TSecond, TReturn>((a, b) =>
-            {
-                if (!cache.TryGetValue(a, out TReturn instance))
-                {
-                    instance = a;
-                    cache.Add(instance);
-                }
-                map(instance, b);
-                return instance;
-            }, splitOn);
-            return cache.Single();
         }
         public static TReturn ReadSingle<TReturn, TSecond, TThird>(this IMultipleResultReader reader, Action<TReturn, TSecond, TThird> map, string splitOn)
         {
