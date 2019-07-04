@@ -12,7 +12,7 @@ namespace Dibix
                 type = nullableType;
 
             TypeInfo typeInfo = type.GetTypeInfo();
-            return typeInfo.IsPrimitive || typeInfo.IsEnum || type == typeof(string) || type == typeof(Guid);
+            return typeInfo.IsPrimitive || typeInfo.IsEnum || type == typeof(string) || type == typeof(Guid) || type == typeof(DateTime);
         }
     }
 }

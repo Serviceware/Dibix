@@ -24,6 +24,12 @@ namespace Dibix
                 else if (!property.PropertyType.IsPrimitive())
                 {
                     EntityProperty entityProperty = BuildEntityProperty(property);
+                    if (descriptor.ComplexProperties.ContainsKey(entityProperty.EntityType))
+                    {
+                        throw new InvalidOperationException($@"Automatic deverticalization is only supported for entities with unique related entity types.
+The entity '{type}' defines multiple properties of the same type '{entityProperty.EntityType}'.
+Therefore it cannot be distinguished to which target property a related entity should be mapped.");
+                    }
                     descriptor.ComplexProperties.Add(entityProperty.EntityType, entityProperty);
                 }
             }
