@@ -65,8 +65,9 @@ namespace Dibix.Sdk.CodeGeneration
             if (previousToken.TokenType == TSqlTokenType.WhiteSpace)
                 previousToken = node.ScriptTokenStream[--startIndex];
 
+            ICollection<SqlHint> hints = SqlHintParser.FromToken(this.Target.Source, this.ErrorReporter, previousToken).ToArray();
             if (previousToken.TokenType == TSqlTokenType.MultilineComment)
-                parameter.ClrTypeName = previousToken.SingleHintValue(SqlHint.ClrType);
+                parameter.ClrTypeName = hints.SingleHintValue(SqlHint.ClrType);
 
             parameter.ClrType = node.DataType.ToClrType();
             if (parameter.ClrType == null)
@@ -93,7 +94,7 @@ ReferenceType: {node.DataType.GetType()}");
 
             if (parameter.ClrType != null)
             {
-                bool shouldBeNullable = previousToken.IsSet(SqlHint.Nullable);
+                bool shouldBeNullable = hints.IsSet(SqlHint.Nullable);
                 bool isNullable = parameter.ClrType.IsNullable();
                 bool makeNullable = shouldBeNullable && !isNullable;
                 if (makeNullable)

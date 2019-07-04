@@ -10,6 +10,13 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class SqlUserDefinedTypeParser
     {
+        private readonly IErrorReporter _errorReporter;
+
+        public SqlUserDefinedTypeParser(IErrorReporter errorReporter)
+        {
+            this._errorReporter = errorReporter;
+        }
+
         public UserDefinedTypeDefinition Parse(string filePath)
         {
             TSqlParser parser = new TSql140Parser(true);
@@ -18,8 +25,7 @@ namespace Dibix.Sdk.CodeGeneration
                 using (TextReader reader = new StreamReader(stream))
                 {
                     TSqlFragment fragment = parser.Parse(reader, out IList<ParseError> _);
-                    ICollection<SqlHint> hints = fragment.Hints().ToArray();
-                    UserDefinedTypeVisitor visitor = new UserDefinedTypeVisitor(hints);
+                    UserDefinedTypeVisitor visitor = new UserDefinedTypeVisitor(() => SqlHintParser.FromFragment(filePath, this._errorReporter, fragment).ToArray());
                     fragment.Accept(visitor);
                     return visitor.Definition;
                 }
@@ -38,19 +44,19 @@ namespace Dibix.Sdk.CodeGeneration
 
         private class UserDefinedTypeVisitor : TSqlFragmentVisitor
         {
-            private readonly ICollection<SqlHint> _hints;
-
-            public UserDefinedTypeVisitor(ICollection<SqlHint> hints)
-            {
-                this._hints = hints;
-            }
+            private readonly Lazy<ICollection<SqlHint>> _hintsAccessor;
 
             public UserDefinedTypeDefinition Definition { get; private set; }
+
+            public UserDefinedTypeVisitor(Func<ICollection<SqlHint>> hintsProvider)
+            {
+                this._hintsAccessor = new Lazy<ICollection<SqlHint>>(hintsProvider);
+            }
 
             public override void Visit(CreateTypeTableStatement node)
             {
                 string typeName = node.Name.BaseIdentifier.Value;
-                string displayName = this._hints.SingleHintValue(SqlHint.Name);
+                string displayName = this._hintsAccessor.Value.SingleHintValue(SqlHint.Name);
                 if (String.IsNullOrEmpty(displayName))
                     displayName = GenerateDisplayName(typeName);
 

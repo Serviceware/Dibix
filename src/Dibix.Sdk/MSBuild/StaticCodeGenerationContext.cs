@@ -26,7 +26,7 @@ namespace Dibix.Sdk.MSBuild
             IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(projectDirectory);
             this._contractDefinitionProvider = new ContractDefinitionProvider(fileSystemProvider, errorReporter, contracts, multipleAreas);
             this._controllerDefinitionProvider = new ControllerDefinitionProvider(fileSystemProvider, errorReporter, endpoints);
-            this._userDefinedTypeProvider = new UserDefinedTypeProvider(artifacts);
+            this._userDefinedTypeProvider = new UserDefinedTypeProvider(artifacts, errorReporter);
 
             this.Configuration = new GeneratorConfiguration();
             this.Configuration.Output.GeneratePublicArtifacts = true;
@@ -40,7 +40,7 @@ namespace Dibix.Sdk.MSBuild
             if (!isDml)
                 source.Formatter = typeof(ExecStoredProcedureSqlStatementFormatter);
 
-            artifacts.Where(x => MatchFile(projectDirectory, x, isDml)).Each(source.Include);
+            artifacts.Where(x => MatchFile(projectDirectory, x, isDml, errorReporter)).Each(source.Include);
             this.Configuration.Input.Sources.Add(source);
 
             this.ContractResolverFacade = new ContractResolverFacade(new UnsupportedAssemblyLocator());
@@ -59,10 +59,10 @@ namespace Dibix.Sdk.MSBuild
             artifacts.Controllers.AddRange(this._controllerDefinitionProvider.Controllers);
         }
 
-        private static bool MatchFile(string projectDirectory, string relativeFilePath, bool isDML)
+        private static bool MatchFile(string projectDirectory, string relativeFilePath, bool isDML, IErrorReporter errorReporter)
         {
             string inputFilePath = Path.Combine(projectDirectory, relativeFilePath);
-            ICollection<SqlHint> hints = SqlHintReader.Read(File.ReadLines(inputFilePath).Select((x, i) => new KeyValuePair<int, string>(i + 1, x))).ToArray();
+            ICollection<SqlHint> hints = SqlHintParser.FromFile(inputFilePath, errorReporter).ToArray();
             bool hasHints = hints.Any();
             bool hasNoCompileHint = hints.Any(x => x.Kind == SqlHint.NoCompile);
             return (isDML || hasHints) && !hasNoCompileHint;

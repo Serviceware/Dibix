@@ -67,7 +67,7 @@ namespace Dibix.Sdk.CodeGeneration
                 ContractResolverFacade = contractResolverFacade,
                 ErrorReporter = errorReporter
             };
-            visitor.Hints.AddRange(fragment.Hints());
+            visitor.Hints.AddRange(SqlHintParser.FromFragment(target.Source, errorReporter, fragment));
 
             fragment.Accept(visitor);
 
