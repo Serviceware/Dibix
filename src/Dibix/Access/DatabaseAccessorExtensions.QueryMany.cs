@@ -56,6 +56,7 @@ namespace Dibix
             return cache;
         }
 
+        // BPMNModeler
         public static IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird>(this IDatabaseAccessor accessor, string sql, Action<TReturn, TSecond, TThird> map, string splitOn)
         {
             return QueryMany(accessor, sql, CommandType.Text, EmptyParameters.Instance, map, splitOn);

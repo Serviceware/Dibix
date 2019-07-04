@@ -35,6 +35,7 @@ namespace Dibix
             return cache.SingleOrDefault();
         }
 
+        // BPMNModeler
         public static TReturn QuerySingleOrDefault<TReturn, TSecond, TThird>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, Action<TReturn, TSecond, TThird> map, string splitOn)
         {
             Guard.IsNotNull(accessor, nameof(accessor));

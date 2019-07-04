@@ -1,3 +1,4 @@
+using System;
 using System.Data;
 
 namespace Dibix
@@ -8,6 +9,12 @@ namespace Dibix
         {
             Guard.IsNotNull(accessor, nameof(accessor));
             return accessor.Execute(sql, CommandType.Text, EmptyParameters.Instance);
+        }
+        // DataImport
+        public static int Execute(this IDatabaseAccessor accessor, string sql, CommandType commandType, Action<IParameterBuilder> configureParameters)
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
+            return accessor.Execute(sql, commandType, configureParameters.Build());
         }
         public static int Execute(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters)
         {
