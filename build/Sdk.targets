@@ -1,10 +1,44 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <!-- Suppress default DLL so we can use the same name -->
-    <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
-    <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
+    <!-- 
+      Skip compilation of default SQL CLR .NET assembly.
+      The empty line in between by default contains:
+      
+      CoreCompile;
+    -->
+    <BuildDependsOn>
+      BuildOnlySettings;
+      BeforeBuild;
+      PrepareForBuild;
+      PreBuildEvent;
+      ResolveReferences;
+      ResolveArtifactReferences;
+      GenerateSqlTargetFrameworkMoniker;
+      ResolveKeySource;
 
+      GenerateSerializationAssemblies;
+      SqlBuild;
+      GetTargetPath;
+      PrepareForRun;
+      SqlPrepareForRun;
+      IncrementalClean;
+      PostBuildEvent;
+      AfterBuild;
+    </BuildDependsOn>
+
+    <!-- 
+      Skip copying the default SQL CLR .NET assembly to output.
+      The empty line in between by default contains:
+      
+      CopyFilesToOutputDirectory;
+    -->
+    <PrepareForRunDependsOn>
+
+      RunCodeAnalysis;
+      SqlRunCodeAnalysis
+    </PrepareForRunDependsOn>
+    
     <DibixToolsDirectory Condition="$(DibixToolsDirectory) == ''">$(MSBuildThisFileDirectory)..\tools\net46\</DibixToolsDirectory>
     <DibixBuildToolsPath>$(DibixToolsDirectory)Dibix.MSBuild.dll</DibixBuildToolsPath>
     <DibixSdkPath>$(MSBuildThisFileDirectory)..\lib\net46\Dibix.Sdk.dll</DibixSdkPath>
@@ -23,12 +57,15 @@
 
   <Target Name="CompileDatabaseAccessor" AfterTargets="PostBuildEvent" Condition="$(ShouldCompileDatabaseAccessor) == 'true'">
     <PropertyGroup>
+      <LangVersion>latest</LangVersion>
+      <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
+      <CopyOutputSymbolsToOutputDirectory>true</CopyOutputSymbolsToOutputDirectory>
       <DatabaseAccessorNamespace Condition="'$(DatabaseAccessorNamespace)' == ''">$(RootNamespace)</DatabaseAccessorNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-      <Contracts Include="@(None)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(RelativeDir)', '^Contracts\\')) and %(Extension) == '.json'" />
-      <Endpoints Include="@(None)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(RelativeDir)', '^Endpoints\\')) and %(Extension) == '.json'" />
+      <Contract Include="@(None)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(RelativeDir)', '^Contracts\\')) and %(Extension) == '.json'" />
+      <Endpoint Include="@(None)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(RelativeDir)', '^Endpoints\\')) and %(Extension) == '.json'" />
     </ItemGroup>
 
     <CompileDatabaseAccessorTask SdkPath="$(DibixSdkPath)"
@@ -37,35 +74,55 @@
                                  Namespace="$(DatabaseAccessorNamespace)"
                                  TargetDirectory="$(IntermediateOutputPath)"
                                  Artifacts="@(Build)"
-                                 Contracts="@(Contracts)"
-                                 Endpoints="@(Endpoints)"
+                                 Contracts="@(Contract)"
+                                 Endpoints="@(Endpoint)"
                                  MultipleAreas="$(MultipleAreas)"
                                  IsIDEBuild="$(BuildingInsideVisualStudio)"
                                  IsDML="$(IsDMLProject)">
-      <Output TaskParameter="OutputFilePath" PropertyName="DatabaseAccessorPath" />
-      <Output TaskParameter="DetectedReferences" PropertyName="DetectedDatabaseAccessorReferences" />
+      <Output TaskParameter="OutputFilePath" ItemName="DatabaseAccessorSource" />
+      <Output TaskParameter="DetectedReferences" ItemName="DatabaseAccessorReference" />
     </CompileDatabaseAccessorTask>
 
-    <PropertyGroup>
-      <DatabaseAccessorSource>
-        $(DatabaseAccessorPath);
-        $(DatabaseAccessorSource)
-      </DatabaseAccessorSource>
-      <DatabaseAccessorReference>
-        $(DetectedDatabaseAccessorReferences);
-        $(DibixToolsDirectory)Dibix.dll;
-        @(ArtifactReference->'%(RelativeDir)%(Filename).dll')
-      </DatabaseAccessorReference>
-    </PropertyGroup>
+    <ItemGroup>
+      <DatabaseAccessorReference Include="$(DibixToolsDirectory)Dibix.dll" />
+      <DatabaseAccessorReference Include="@(ArtifactReference->'%(RelativeDir)%(Filename).dll')" />
+    </ItemGroup>
 
-    <Csc EmitDebugInformation="$(DebugSymbols)"
+    <Csc DefineConstants="$(DefineConstants)"
+         EmitDebugInformation="$(DebugSymbols)"
          KeyFile="$(AssemblyOriginatorKeyFile)"
-         DefineConstants="$(DefineConstants)"
-         LangVersion="latest"
-         OutputAssembly="$(TargetPath)"
-         References="$(DatabaseAccessorReference)"
-         Sources="$(DatabaseAccessorSource)"
-         TargetType="library" />
+         LangVersion="$(LangVersion)"
+         OutputAssembly="@(IntermediateAssembly)"
+         References="@(DatabaseAccessorReference)"
+         Sources="@(DatabaseAccessorSource)"
+         TargetType="$(OutputType)" />
+
+    <!-- Copy the build product (.dll or .exe). -->
+    <Copy SourceFiles="@(IntermediateAssembly)"
+          DestinationFolder="$(OutDir)"
+          SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
+          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+          Retries="$(CopyRetryCount)"
+          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+          UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
+          UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
+          Condition="'$(CopyBuildOutputToOutputDirectory)' == 'true' and '$(SkipCopyBuildProduct)' != 'true'">
+      <Output TaskParameter="DestinationFiles" ItemName="MainAssembly"/>
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+    </Copy>
+ 
+    <!-- Copy the debug information file (.pdb), if any -->
+    <Copy SourceFiles="@(_DebugSymbolsIntermediatePath)"
+          DestinationFiles="@(_DebugSymbolsOutputPath)"
+          SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
+          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+          Retries="$(CopyRetryCount)"
+          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+          UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
+          UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
+          Condition="'$(_DebugSymbolsProduced)'=='true' and '$(SkipCopyingSymbolsToOutputDirectory)' != 'true' and '$(CopyOutputSymbolsToOutputDirectory)'=='true'">
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+    </Copy>
   </Target>
 
   <Target Name="VerifyDatabaseAccessor" BeforeTargets="PreBuildEvent">

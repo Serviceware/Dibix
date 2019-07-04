@@ -40,7 +40,7 @@ namespace Dibix.Sdk.MSBuild
             if (!isDml)
                 source.Formatter = typeof(ExecStoredProcedureSqlStatementFormatter);
 
-            artifacts.Where(x => MatchFile(projectDirectory, x)).Each(source.Include);
+            artifacts.Where(x => MatchFile(projectDirectory, x, isDml)).Each(source.Include);
             this.Configuration.Input.Sources.Add(source);
 
             this.ContractResolverFacade = new ContractResolverFacade(new UnsupportedAssemblyLocator());
@@ -59,11 +59,13 @@ namespace Dibix.Sdk.MSBuild
             artifacts.Controllers.AddRange(this._controllerDefinitionProvider.Controllers);
         }
 
-        private static bool MatchFile(string projectDirectory, string relativeFilePath)
+        private static bool MatchFile(string projectDirectory, string relativeFilePath, bool isDML)
         {
             string inputFilePath = Path.Combine(projectDirectory, relativeFilePath);
             ICollection<SqlHint> hints = SqlHintReader.Read(File.ReadLines(inputFilePath).Select((x, i) => new KeyValuePair<int, string>(i + 1, x))).ToArray();
-            return hints.Any() && hints.All(x => x.Kind != SqlHint.NoCompile);
+            bool hasHints = hints.Any();
+            bool hasNoCompileHint = hints.Any(x => x.Kind == SqlHint.NoCompile);
+            return (isDML || hasHints) && !hasNoCompileHint;
         }
     }
 }
