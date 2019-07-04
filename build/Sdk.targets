@@ -27,17 +27,9 @@
       AfterBuild;
     </BuildDependsOn>
 
-    <!-- 
-      Skip copying the default SQL CLR .NET assembly to output.
-      The empty line in between by default contains:
-      
-      CopyFilesToOutputDirectory;
-    -->
-    <PrepareForRunDependsOn>
-
-      RunCodeAnalysis;
-      SqlRunCodeAnalysis
-    </PrepareForRunDependsOn>
+    <!-- Skip copying the default SQL CLR .NET assembly to output -->
+    <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
+    <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
     
     <DibixToolsDirectory Condition="$(DibixToolsDirectory) == ''">$(MSBuildThisFileDirectory)..\tools\net46\</DibixToolsDirectory>
     <DibixBuildToolsPath>$(DibixToolsDirectory)Dibix.MSBuild.dll</DibixBuildToolsPath>
@@ -110,7 +102,7 @@
       <Output TaskParameter="DestinationFiles" ItemName="MainAssembly"/>
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
     </Copy>
- 
+
     <!-- Copy the debug information file (.pdb), if any -->
     <Copy SourceFiles="@(_DebugSymbolsIntermediatePath)"
           DestinationFiles="@(_DebugSymbolsOutputPath)"
