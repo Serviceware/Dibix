@@ -42,6 +42,15 @@ namespace Dibix
                            .Distinct(new EntityComparer<TReturn>())
                            .Single();
         }
+        public static TReturn QuerySingle<TReturn, TSecond, TThird>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, string splitOn) where TReturn : new()
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
+
+            MultiMapper multiMapper = new MultiMapper();
+            return accessor.QueryMany<TReturn, TSecond, TThird, TReturn>(sql, CommandType.Text, parameters, (a, b, c) => multiMapper.AutoMap<TReturn>(false, a, b, c), splitOn)
+                           .Distinct(new EntityComparer<TReturn>())
+                           .Single();
+        }
         public static TReturn QuerySingle<TReturn, TSecond, TThird>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, Action<TReturn, TSecond, TThird> map, string splitOn)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
