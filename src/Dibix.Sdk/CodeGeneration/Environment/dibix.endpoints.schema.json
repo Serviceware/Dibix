@@ -1,5 +1,5 @@
 {
-  "$schema": "http://json-schema.org/draft-05/schema#",
+  "$schema": "http://json-schema.org/draft-04/schema#",
   "definitions": {
     "Api": {
       "type": "object",
@@ -55,8 +55,18 @@
           "type": "object",
           "patternProperties": {
             "^[a-z]([A-Za-z]+)?$": {
-              "type": "string",
-              "pattern": "^HLSESSION.[A-Z]([A-Za-z]+)?$"
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^HLSESSION.[A-Z]([A-Za-z]+)?$"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
             }
           },
           "minProperties": 1,
