@@ -45,11 +45,17 @@ namespace This.Is.A.Custom.Namespace
             }
         }
 
-        public static int dbx_tests_sources_externalsp(this IDatabaseAccessorFactory databaseAccessorFactory)
+        public static int dbx_tests_sources_externalsp(this IDatabaseAccessorFactory databaseAccessorFactory, int x)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
-                return accessor.Execute(dbx_tests_sources_externalspCommandText, System.Data.CommandType.StoredProcedure);
+                IParametersVisitor @params = accessor.Parameters()
+                                                     .SetFromTemplate(new
+                                                     {
+                                                         x
+                                                     })
+                                                     .Build();
+                return accessor.Execute(dbx_tests_sources_externalspCommandText, System.Data.CommandType.StoredProcedure, @params);
             }
         }
 

@@ -61,6 +61,7 @@
   </PropertyGroup>
   <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
   <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Project="$(USERPROFILE)\.nuget\packages\dibix.sdk\1.0.0\build\Sdk.Targets" />
   <ItemGroup>
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_001.sql" />
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_002.sql" />
@@ -104,6 +105,7 @@
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_027.sql" />
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_028.sql" />
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_029.sql" />
+    <Build Include="CodeAnalysis\dbx_codeanalysis_error_030.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CodeAnalysis" />

@@ -90,5 +90,8 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
 
         [Fact]
         public void TableConstraintSqlCodeAnalysisRule() => base.Execute();
+
+        [Fact]
+        public void SecurityAlgorithmSqlCodeAnalysisRule() => base.Execute();
     }
 }
