@@ -88,10 +88,32 @@ namespace Dibix.Sdk.CodeGeneration
 
             foreach (JProperty property in mappings.Properties())
             {
-                string source = (string)property.Value;
-                string[] sourceParts = source.Split('.');
-                action.DynamicParameters.Add(new ActionParameterMapping(sourceParts[0], sourceParts[1], property.Name));
+                JValue value = (JValue)property.Value;
+                switch (property.Value.Type)
+                {
+                    case JTokenType.Object:
+                        ReadConstantActionParameter(action, property.Name, value);
+                        break;
+
+                    case JTokenType.String:
+                        ReadPropertyActionParameter(action, property.Name, (string)value);
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(property.Value.Type), property.Value.Type, null);
+                }
             }
+        }
+
+        private static void ReadConstantActionParameter(ActionDefinition action, string parameterName, object value)
+        {
+            action.DynamicParameters.Add(parameterName, new ActionParameterConstantSource(value));
+        }
+
+        private static void ReadPropertyActionParameter(ActionDefinition action, string parameterName, string value)
+        {
+            string[] parts = value.Split(new [] { '.' }, 2);
+            action.DynamicParameters.Add(parameterName, new ActionParameterPropertySource(parts[0], parts[1]));
         }
         #endregion
     }

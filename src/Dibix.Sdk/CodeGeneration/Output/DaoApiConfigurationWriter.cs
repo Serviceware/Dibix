@@ -61,9 +61,9 @@ namespace Dibix.Sdk.CodeGeneration
                     if (action.OmitResult)
                         writer.WriteLine("y.OmitResult = true;");
 
-                    foreach (ActionParameterMapping parameter in action.DynamicParameters)
+                    foreach (KeyValuePair<string, ActionParameterSource> parameter in action.DynamicParameters)
                     {
-                        writer.WriteLine($"y.ResolveParameter(\"{parameter.TargetParameterName}\", \"{parameter.SourceName}\", \"{parameter.SourcePropertyName}\");");
+                        WriteParameter(writer, parameter.Key, parameter.Value);
                     }
 
                     writer.PopIndent()
@@ -75,6 +75,25 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             return writer.ToString();
+        }
+
+        private static void WriteParameter(StringWriter writer, string parameterName, ActionParameterSource value)
+        {
+            writer.Write($"y.ResolveParameter(\"{parameterName}\", ");
+            switch (value)
+            {
+                case ActionParameterConstantSource constant:
+                    writer.WriteRaw(constant.Value);
+                    break;
+
+                case ActionParameterPropertySource property:
+                    writer.WriteRaw($"\"{property.SourceName}\", \"{property.PropertyName}\"");
+                    break;
+
+                default:
+                    throw new InvalidOperationException($"Unsupported parameter source for {parameterName}: {value.GetType()}");
+            }
+            writer.WriteLine(");");
         }
         #endregion
     }
