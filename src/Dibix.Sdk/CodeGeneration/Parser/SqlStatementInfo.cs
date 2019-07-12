@@ -11,6 +11,7 @@ namespace Dibix.Sdk.CodeGeneration
         public string Name { get; set; }
         public string Content { get; set; }
         public string ProcedureName { get; set; }
+        public bool MergeGridResult { get; set; }
         public CommandType? CommandType { get; set; }
         public ContractName ResultType { get; set; }
         public string GeneratedResultTypeName { get; set; }

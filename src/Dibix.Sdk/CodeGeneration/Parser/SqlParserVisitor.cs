@@ -32,6 +32,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (!String.IsNullOrEmpty(name))
                 this.Target.Name = name;
 
+            this.Target.MergeGridResult = this.Hints.IsSet(SqlHint.MergeGridResult);
             SqlHint resultTypeHint = this.Hints.SingleHint(SqlHint.ResultTypeName);
             if (resultTypeHint != null)
             {

@@ -35,6 +35,12 @@ namespace Dibix.Sdk.CodeGeneration
 
             HashSet<string> usedOutputNames = new HashSet<string>();
 
+            if (target.MergeGridResult && returnHints.Count < 2)
+            {
+                errorReporter.RegisterError(target.Source, node.StartLine, node.StartColumn, null, "The @MergeGridResult option only works with a grid result so at least two results should be specified with the @Return hint");
+                yield break;
+            }
+
             for (int i = 0; i < returnHints.Count; i++)
             {
                 SqlHint returnHint = returnHints[i];
@@ -47,6 +53,13 @@ namespace Dibix.Sdk.CodeGeneration
                 if (resultModeStr != null && !Enum.TryParse(resultModeStr, out resultMode))
                 {
                     errorReporter.RegisterError(target.Source, node.StartLine, node.StartColumn, null, $"Result mode not supported: {resultModeStr}");
+                    yield break;
+                }
+
+                SqlQueryResultMode[] supportedMergeGridResultModes = { SqlQueryResultMode.Single, SqlQueryResultMode.SingleOrDefault };
+                if (i == 0 && target.MergeGridResult && !supportedMergeGridResultModes.Contains(resultMode))
+                {
+                    errorReporter.RegisterError(target.Source, node.StartLine, node.StartColumn, null, $"When using the @MergeGridResult option, the first result should specify one of the following result modes using the 'Mode' property: {String.Join(", ", supportedMergeGridResultModes)}");
                     yield break;
                 }
 

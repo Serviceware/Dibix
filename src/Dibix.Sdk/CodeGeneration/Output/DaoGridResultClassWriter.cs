@@ -99,7 +99,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Private Methods
         private static bool IsGridResult(SqlStatementInfo statement)
         {
-            return statement.Results.Count > 1 && statement.ResultType == null;
+            return statement.Results.Count > 1 && statement.ResultType == null && !statement.MergeGridResult;
         }
 
         private static string ExtractNamespace(string resultContractName)

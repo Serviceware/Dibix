@@ -316,33 +316,43 @@ namespace Dibix.Sdk.CodeGeneration
 
         private void WriteComplexResultBody(DaoWriterContext context, StringWriter writer, SqlStatementInfo query, HashSet<string> contracts)
         {
-            string clrTypeName = this.GetComplexTypeName(context, query, contracts);
+            string resultTypeName = this.GetComplexTypeName(context, query, contracts);
 
-            writer.Write(clrTypeName)
-                  .WriteRaw(" result = new ")
-                  .WriteRaw(clrTypeName)
-                  .WriteLineRaw("();");
+            writer.Write(resultTypeName)
+                  .WriteRaw(" result = ");
 
-            foreach (SqlQueryResult result in query.Results)
+            if (!query.MergeGridResult)
             {
-                writer.Write("result.")
-                      .WriteRaw(result.Name);
+                writer.WriteRaw("new ")
+                      .WriteRaw(resultTypeName)
+                      .WriteLineRaw("();");
+            }
+
+            for (int i = 0; i < query.Results.Count; i++)
+            {
+                SqlQueryResult result = query.Results[i];
 
                 bool isEnumerable = result.ResultMode == SqlQueryResultMode.Many;
-                if (isEnumerable)
-                    writer.WriteRaw(".ReplaceWith(");
-                else
-                    writer.WriteRaw(" = ");
+                if (i > 0 || !query.MergeGridResult)
+                {
+                    writer.Write("result")
+                          .WriteRaw($".{result.Name}");
+
+                    if (isEnumerable)
+                        writer.WriteRaw(".ReplaceWith(");
+                    else
+                        writer.WriteRaw(" = ");
+                }
 
                 writer.WriteRaw("reader.")
                       .WriteRaw(GetMultipleResultReaderMethodName(result.ResultMode))
                       .WriteRaw('<');
 
-                for (int i = 0; i < result.Contracts.Count; i++)
+                for (int j = 0; j < result.Contracts.Count; j++)
                 {
-                    ContractName returnType = result.Contracts[i].Name;
+                    ContractName returnType = result.Contracts[j].Name;
                     writer.WriteRaw(returnType);
-                    if (i + 1 < result.Contracts.Count)
+                    if (j + 1 < result.Contracts.Count)
                         writer.WriteRaw(", ");
                 }
 
@@ -365,7 +375,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                 writer.WriteRaw(')');
 
-                if (isEnumerable)
+                if (isEnumerable && (i > 0 || !query.MergeGridResult))
                     writer.WriteRaw(')');
 
                 writer.WriteLineRaw(";");
@@ -403,6 +413,9 @@ namespace Dibix.Sdk.CodeGeneration
 
         private string GetComplexTypeName(DaoWriterContext context, SqlStatementInfo statement, HashSet<string> contracts)
         {
+            if (statement.MergeGridResult)
+                return statement.Results[0].Contracts[0].Name.ToString();
+
             StringBuilder sb = new StringBuilder();
 
             // Explicit existing type specified
