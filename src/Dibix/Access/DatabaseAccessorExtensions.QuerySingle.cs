@@ -33,6 +33,7 @@ namespace Dibix
             }, splitOn);
             return cache.Single();
         }
+        // SubProcessOverview
         public static TReturn QuerySingle<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, string splitOn) where TReturn : new()
         {
             Guard.IsNotNull(accessor, nameof(accessor));
