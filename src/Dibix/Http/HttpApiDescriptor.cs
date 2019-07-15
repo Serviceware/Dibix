@@ -23,7 +23,7 @@ namespace Dibix.Http
             if (attribute == null)
                 throw new InvalidOperationException($"Assembly {assembly.GetName().Name} is not marked with {typeof(ApiRegistrationAttribute)}");
 
-            if (!String.IsNullOrEmpty(attribute.AreaName))
+            if (String.IsNullOrEmpty(attribute.AreaName))
                 throw new InvalidOperationException($@"Area name cannot be empty
 {assembly.GetName().Name} -> {implType}");
 
@@ -31,9 +31,11 @@ namespace Dibix.Http
         }
         #endregion
 
-        #region Protected Methods
-        protected abstract void Configure();
+        #region Abstract Methods
+        public abstract void Configure();
+        #endregion
 
+        #region Protected Methods
         protected void RegisterController(string controllerName, Action<HttpControllerDefinition> setupAction)
         {
             HttpControllerDefinition controller = new HttpControllerDefinition(this.AreaName, controllerName);

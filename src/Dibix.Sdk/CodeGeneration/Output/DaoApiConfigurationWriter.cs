@@ -31,7 +31,7 @@ namespace Dibix.Sdk.CodeGeneration
                    .BeginScope(LayerName.Business)
                    .AddClass("ApiConfiguration", CSharpModifiers.Public | CSharpModifiers.Sealed)
                    .Inherits("HttpApiDescriptor")
-                   .AddMethod("Configure", "void", body, modifiers: CSharpModifiers.Protected | CSharpModifiers.Override);
+                   .AddMethod("Configure", "void", body, modifiers: CSharpModifiers.Public | CSharpModifiers.Override);
         }
         #endregion
 
