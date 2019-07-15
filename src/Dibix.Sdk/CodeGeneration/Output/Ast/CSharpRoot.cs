@@ -8,7 +8,7 @@ namespace Dibix.Sdk.CodeGeneration
     {
         private readonly ICollection<string> _usings;
 
-        public CSharpRoot(string @namespace) : base(@namespace)
+        public CSharpRoot(string @namespace, IEnumerable<string> globalAnnotations) : base(@namespace, globalAnnotations)
         {
             this._usings = new SortedSet<string>(new UsingComparer());
         }

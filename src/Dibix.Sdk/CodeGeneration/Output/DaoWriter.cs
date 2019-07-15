@@ -32,7 +32,8 @@ namespace Dibix.Sdk.CodeGeneration
             string generatedCodeAnnotation = $"{typeof(GeneratedCodeAttribute).Name}(\"{GeneratorName}\", \"{Version}\")";
 
             // Prepare writer
-            CSharpWriter output = new CSharpWriter(writer, configuration.Namespace);
+            IEnumerable<string> globalAnnotations = writers.SelectMany(x => x.GetGlobalAnnotations(configuration)).Distinct().OrderBy(x => x.Length);
+            CSharpWriter output = new CSharpWriter(writer, configuration.Namespace, globalAnnotations);
 
             DaoWriterContext context = new DaoWriterContext(output.Root, generatedCodeAnnotation, configuration, artifacts, Format);
 

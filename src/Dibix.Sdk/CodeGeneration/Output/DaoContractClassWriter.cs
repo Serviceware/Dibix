@@ -14,6 +14,8 @@ namespace Dibix.Sdk.CodeGeneration
         #region IDaoWriter Members
         public bool HasContent(OutputConfiguration configuration, SourceArtifacts artifacts) => artifacts.Contracts.Any();
 
+        public IEnumerable<string> GetGlobalAnnotations(OutputConfiguration configuration) { yield break; }
+
         public void Write(DaoWriterContext context)
         {
             context.Output.AddUsing("System");

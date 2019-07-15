@@ -8,6 +8,7 @@ namespace Dibix.Sdk.CodeGeneration
     {
         public abstract string RegionName { get; }
         public abstract bool HasContent(OutputConfiguration configuration, SourceArtifacts artifacts);
+        public virtual IEnumerable<string> GetGlobalAnnotations(OutputConfiguration configuration) { yield break; }
 
         void IDaoWriter.Write(DaoWriterContext context)
         {

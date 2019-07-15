@@ -8,7 +8,7 @@ namespace Dibix.Sdk.CodeGeneration
         public IList<SqlStatementInfo> Statements { get; }
         public IList<UserDefinedTypeDefinition> UserDefinedTypes { get; }
         public ICollection<ContractDefinition> Contracts { get; }
-        public ICollection<ControllerDefinition> Controllers { get; }
+        public IList<ControllerDefinition> Controllers { get; }
 
         public SourceArtifacts()
         {

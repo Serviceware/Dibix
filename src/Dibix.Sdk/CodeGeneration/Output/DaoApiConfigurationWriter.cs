@@ -13,26 +13,35 @@ namespace Dibix.Sdk.CodeGeneration
         #region IDaoWriter Members
         public bool HasContent(OutputConfiguration configuration, SourceArtifacts artifacts) => artifacts.Controllers.Any();
 
+        public IEnumerable<string> GetGlobalAnnotations(OutputConfiguration configuration)
+        {
+            yield return $"ApiRegistration(\"{configuration.Namespace.Split('.')[1]}\")";
+        }
+
         public void Write(DaoWriterContext context)
         {
+            context.Output.AddUsing("Dibix.Http");
+
             if (context.Artifacts.Controllers.Any(x => x.ControllerImports.Any()))
                 context.Output.AddUsing("System");
 
-            string body = WriteBody(context.Artifacts.Controllers);
+            string body = WriteBody(context.Configuration, context.Artifacts.Controllers);
 
             context.Output
                    .BeginScope(LayerName.Business)
                    .AddClass("ApiConfiguration", CSharpModifiers.Public | CSharpModifiers.Sealed)
+                   .Inherits("HttpApiDescriptor")
                    .AddMethod("Configure", "void", body, modifiers: CSharpModifiers.Protected | CSharpModifiers.Override);
         }
         #endregion
 
         #region Private Methods
-        private static string WriteBody(IEnumerable<ControllerDefinition> controllers)
+        private static string WriteBody(OutputConfiguration configuration, IList<ControllerDefinition> controllers)
         {
             StringWriter writer = new StringWriter();
-            foreach (ControllerDefinition controller in controllers)
+            for (int i = 0; i < controllers.Count; i++)
             {
+                ControllerDefinition controller = controllers[i];
                 writer.WriteLine($"base.RegisterController(\"{controller.Name}\", x => ")
                       .WriteLine("{")
                       .PushIndent();
@@ -44,7 +53,14 @@ namespace Dibix.Sdk.CodeGeneration
                     if (action.Target.IsExternal)
                         writer.WriteRaw('"');
 
+                    bool isLocal = !action.Target.Target.Contains(".");
+                    if (isLocal)
+                        writer.WriteRaw($"{configuration.Namespace}.Data.{configuration.ClassName}.");
+
                     writer.WriteRaw(action.Target.Target);
+
+                    if (isLocal)
+                        writer.WriteRaw("MethodInfo");
 
                     if (action.Target.IsExternal)
                         writer.WriteRaw('"');
@@ -58,20 +74,23 @@ namespace Dibix.Sdk.CodeGeneration
                     if (!String.IsNullOrEmpty(action.ChildRoute))
                         writer.WriteLine($"y.ChildRoute = \"{action.ChildRoute}\";");
 
-                    if (action.OmitResult)
-                        writer.WriteLine("y.OmitResult = true;");
-
                     foreach (KeyValuePair<string, ActionParameterSource> parameter in action.DynamicParameters)
                     {
                         WriteParameter(writer, parameter.Key, parameter.Value);
                     }
+
+                    if (action.OmitResult)
+                        writer.WriteLine("y.OmitResult = true;");
 
                     writer.PopIndent()
                           .WriteLine("});");
                 }
 
                 writer.PopIndent()
-                      .Write('}');
+                      .Write("});");
+
+                if (i + 1 < controllers.Count)
+                    writer.WriteLine();
             }
 
             return writer.ToString();
@@ -83,7 +102,8 @@ namespace Dibix.Sdk.CodeGeneration
             switch (value)
             {
                 case ActionParameterConstantSource constant:
-                    writer.WriteRaw(constant.Value);
+                    string constantValue = constant.Value is bool boolValue ? boolValue.ToString().ToLowerInvariant() : constant.Value.ToString();
+                    writer.WriteRaw(constantValue);
                     break;
 
                 case ActionParameterPropertySource property:
@@ -93,7 +113,7 @@ namespace Dibix.Sdk.CodeGeneration
                 default:
                     throw new InvalidOperationException($"Unsupported parameter source for {parameterName}: {value.GetType()}");
             }
-            writer.WriteLine(");");
+            writer.WriteLineRaw(");");
         }
         #endregion
     }

@@ -91,8 +91,9 @@ namespace Dibix.Sdk.CodeGeneration
                 JValue value = (JValue)property.Value;
                 switch (property.Value.Type)
                 {
-                    case JTokenType.Object:
-                        ReadConstantActionParameter(action, property.Name, value);
+                    case JTokenType.Boolean:
+                    case JTokenType.Integer:
+                        ReadConstantActionParameter(action, property.Name, value.Value);
                         break;
 
                     case JTokenType.String:

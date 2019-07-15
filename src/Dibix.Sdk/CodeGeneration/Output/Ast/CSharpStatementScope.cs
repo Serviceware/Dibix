@@ -12,7 +12,8 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly string _namespace;
         private readonly IList<CSharpStatement> _statements;
 
-        protected CSharpStatementScope(string @namespace)
+        protected CSharpStatementScope(string @namespace) : this(@namespace, Enumerable.Empty<string>()) { }
+        protected CSharpStatementScope(string @namespace, IEnumerable<string> globalAnnotations) : base(globalAnnotations.Select(x => $"assembly: {x}"))
         {
             this._namespace = @namespace;
             this._statements = new Collection<CSharpStatement>();
@@ -54,6 +55,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public override void Write(StringWriter writer)
         {
+            base.Write(writer);
             writer.WriteLine(String.Concat("namespace ", this._namespace))
                 .WriteLine("{")
                 .PushIndent();
