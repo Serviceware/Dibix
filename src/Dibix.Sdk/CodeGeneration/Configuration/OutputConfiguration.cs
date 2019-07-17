@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -15,7 +14,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public OutputConfiguration()
         {
-            this.DetectedReferences = new Collection<string>();
+            this.DetectedReferences = new HashSet<string>();
         }
     }
 }

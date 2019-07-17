@@ -29,7 +29,6 @@ namespace Dibix.MSBuild
     */
     public abstract class SdkTask : Task, ITask
     {
-        private static readonly string CurrentDirectory = Path.GetDirectoryName(typeof(SdkTask).Assembly.Location);
         private static readonly string[] SSDTAssemblies =
         {
             "Microsoft.SqlServer.TransactSql.ScriptDom"
@@ -39,6 +38,7 @@ namespace Dibix.MSBuild
         public string SdkPath { get; set; }
         public string SSDTDirectory { get; set; }
         public bool IsIDEBuild { get; set; }
+        protected static string CurrentDirectory { get; } = Path.GetDirectoryName(typeof(SdkTask).Assembly.Location);
 
         public sealed override bool Execute()
         {

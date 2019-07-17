@@ -79,6 +79,13 @@ namespace Dibix.Sdk.CodeGeneration
                     propertyAnnotations.Add("Key");
                 }
 
+                if (property.SkipNull)
+                {
+                    context.Output.AddUsing("Newtonsoft.Json");
+                    context.Configuration.DetectedReferences.Add("Newtonsoft.Json.dll");
+                    propertyAnnotations.Add("JsonProperty(NullValueHandling = NullValueHandling.Ignore)");
+                }
+
                 @class.AddProperty(property.Name, !property.IsEnumerable ? property.Type : $"ICollection<{property.Type}>", propertyAnnotations)
                       .Getter(null)
                       .Setter(null, property.IsEnumerable ? CSharpModifiers.Private : default);

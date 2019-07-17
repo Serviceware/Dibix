@@ -96,12 +96,14 @@ namespace Dibix.Sdk.CodeGeneration
                 {
                     string typeName;
                     bool isPartOfKey = false;
+                    bool skipNull = false;
                     switch (property.Value.Type)
                     {
                         case JTokenType.Object:
                             JObject propertyInfo = (JObject)property.Value;
                             typeName = (string)propertyInfo.Property("type").Value;
                             isPartOfKey = (bool?)propertyInfo.Property("isPartOfKey")?.Value ?? default;
+                            skipNull = (bool?)propertyInfo.Property("skipNull")?.Value ?? default;
                             break;
 
                         case JTokenType.String:
@@ -112,7 +114,7 @@ namespace Dibix.Sdk.CodeGeneration
                             throw new ArgumentOutOfRangeException(nameof(property.Type), property.Type, null);
                     }
                     bool isEnumerable = TryGetArrayType(typeName, ref typeName);
-                    contract.Properties.Add(new ObjectContractProperty(property.Name, typeName, isPartOfKey, isEnumerable));
+                    contract.Properties.Add(new ObjectContractProperty(property.Name, typeName, isPartOfKey, skipNull, isEnumerable));
                 }
             }
 

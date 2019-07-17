@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using Microsoft.Build.Framework;
 
 namespace Dibix.MSBuild
@@ -39,6 +40,13 @@ namespace Dibix.MSBuild
         {
             this.OutputFilePath = (string)args[9];
             this.DetectedReferences = (string[])args[10];
+            for (int i = 0; i < this.DetectedReferences.Length; i++)
+            {
+                string detectedReference = this.DetectedReferences[i];
+                string toolPath = Path.Combine(CurrentDirectory, detectedReference);
+                if (File.Exists(toolPath))
+                    this.DetectedReferences[i] = toolPath;
+            }
         }
     }
 }
