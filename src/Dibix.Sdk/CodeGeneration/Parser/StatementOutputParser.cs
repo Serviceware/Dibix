@@ -27,7 +27,7 @@ namespace Dibix.Sdk.CodeGeneration
                 yield break;
             }
 
-            if (returnHints.Count < visitor.Results.Count)
+            if (!target.IsFileApi && returnHints.Count < visitor.Results.Count)
             {
                 errorReporter.RegisterError(target.Source, node.StartLine, node.StartColumn, null, "There are missing return declarations for the output statements. Please mark the header of the statement with a line per output containting this hint: -- @Return <ClrTypeName>");
                 yield break;

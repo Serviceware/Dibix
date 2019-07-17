@@ -9,6 +9,7 @@ namespace Dibix.Sdk.CodeGeneration
         public const string Name = "Name";
         public const string NoCompile = "NoCompile";
         public const string MergeGridResult = "MergeGridResult";
+        public const string FileApi = "FileApi";
         public const string Return = "Return";
         public const string ResultTypeName = "ResultTypeName";
         public const string GeneratedResultTypeName = "GeneratedResultTypeName";

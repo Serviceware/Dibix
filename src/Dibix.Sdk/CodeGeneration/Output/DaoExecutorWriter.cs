@@ -84,6 +84,9 @@ namespace Dibix.Sdk.CodeGeneration
                 if (isSingleResult && statement.Results[0].ResultMode == SqlQueryResultMode.Many)
                     context.Output.AddUsing(typeof(IEnumerable<>).Namespace);
 
+                if (statement.IsFileApi)
+                    context.Output.AddUsing("Dibix.Http");
+
                 string resultTypeName = methodReturnTypeMap[statement];
                 CSharpMethod method = @class.AddMethod(name: String.Concat(MethodPrefix, statement.Name)
                                                      , type: resultTypeName
@@ -101,6 +104,11 @@ namespace Dibix.Sdk.CodeGeneration
 
         private string DetermineResultTypeName(DaoWriterContext context, SqlStatementInfo query, HashSet<string> contracts)
         {
+            if (query.IsFileApi)
+            {
+                return "HttpFileResponse";
+            }
+
             if (query.Results.Count == 0) // Execute/ExecutePrimitive.
             {
                 return typeof(int).ToCSharpTypeName();
@@ -216,7 +224,11 @@ namespace Dibix.Sdk.CodeGeneration
 
         private void WriteExecutor(DaoWriterContext context, StringWriter writer, SqlStatementInfo query, HashSet<string> contracts)
         {
-            if (query.Results.Count == 0) // Execute/ExecutePrimitive.
+            if (query.IsFileApi)
+            {
+                WriteFileApiResult(writer, query);
+            }
+            else if (query.Results.Count == 0) // Execute/ExecutePrimitive.
             {
                 WriteNoResult(writer, query);
             }
@@ -382,6 +394,15 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             writer.WriteLine("return result;");
+        }
+
+        private static void WriteFileApiResult(StringWriter writer, SqlStatementInfo query)
+        {
+            writer.Write("return accessor.QueryFile(")
+                  .WriteRaw(query.Name)
+                  .WriteRaw(ConstantSuffix)
+                  .WriteRaw(", @params);")
+                  .WriteLine();
         }
 
         private static string GetExecutorMethodName(SqlQueryResultMode mode)
