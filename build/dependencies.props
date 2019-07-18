@@ -6,6 +6,7 @@
     <DapperVersion>1.50.5</DapperVersion>
     <NewtonsoftJsonSchemaVersion>3.0.10</NewtonsoftJsonSchemaVersion>
     <DacFxVersion>150.4200.1</DacFxVersion>
+    <AspNetWebApiVersion>5.2.3</AspNetWebApiVersion>
 
     <VisualStudioShellVersion>15.9.28307</VisualStudioShellVersion>
     <EnvDTEVersion>8.0.2</EnvDTEVersion>

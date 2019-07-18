@@ -49,7 +49,7 @@
         },
         "target": {
           "type": "string",
-          "pattern": "^[A-Z]([A-Za-z.]+)?$"
+          "pattern": "^[A-Z]([A-Za-z.]+)?(,[A-Z]([A-Za-z.]+)?)?$"
         },
         "params": {
           "type": "object",
