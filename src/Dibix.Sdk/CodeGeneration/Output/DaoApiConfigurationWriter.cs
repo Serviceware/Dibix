@@ -51,19 +51,21 @@ namespace Dibix.Sdk.CodeGeneration
                     writer.Write("x.AddAction(ReflectionHttpActionTarget.Create(");
 
                     if (action.Target.IsExternal)
-                        writer.WriteRaw('"');
+                    {
+                        writer.WriteRaw($"\"{action.Target.Target}\"");
+                    }
+                    else
+                    {
+                        string @namespace = "Data";
+                        int statementNameIndex = action.Target.Target.LastIndexOf('.');
+                        if (statementNameIndex >= 0)
+                            @namespace = action.Target.Target.Substring(0, statementNameIndex);
 
-                    bool isLocal = !action.Target.Target.Contains(".");
-                    if (isLocal)
-                        writer.WriteRaw($"{configuration.Namespace}.Data.{configuration.ClassName}.");
-
-                    writer.WriteRaw(action.Target.Target);
-
-                    if (isLocal)
-                        writer.WriteRaw("MethodInfo");
-
-                    if (action.Target.IsExternal)
-                        writer.WriteRaw('"');
+                        string typeName = $"{@namespace}.{configuration.ClassName}";
+                        writer.WriteRaw($"typeof({typeName}), nameof({typeName}.")
+                              .WriteRaw(action.Target.Target.Substring(statementNameIndex + 1))
+                              .WriteRaw(')');
+                    }
 
                     writer.WriteLineRaw("), y =>")
                           .WriteLine("{")
