@@ -8,6 +8,7 @@ namespace Dibix.Sdk.CodeGeneration
         public ActionMethod Method { get; set; }
         public string ChildRoute { get; set; }
         public bool OmitResult { get; set; }
+        public bool IsAnonymous { get; set; }
         public IDictionary<string, ActionParameterSource> DynamicParameters { get; }
 
         public ActionDefinition(ActionDefinitionTarget target)

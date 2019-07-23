@@ -70,7 +70,8 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 Method = method,
                 ChildRoute = (string)action.Property("childRoute")?.Value,
-                OmitResult = (bool?)action.Property("omitResult")?.Value ?? default
+                OmitResult = (bool?)action.Property("omitResult")?.Value ?? default,
+                IsAnonymous = (bool?)action.Property("isAnonymous")?.Value ?? default
             };
             ReadControllerActionParameters(actionDefinition, (JObject)action.Property("params")?.Value);
             controller.Actions.Add(actionDefinition);

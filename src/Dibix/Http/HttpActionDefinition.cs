@@ -12,6 +12,7 @@ namespace Dibix.Http
         public HttpApiMethod Method { get; set; }
         public string ChildRoute { get; set; }
         public bool OmitResult { get; set; }
+        public bool IsAnonymous { get; set; }
         public string Description { get; set; }
         public IDictionary<string, HttpParameterSource> DynamicParameters { get; }
         public Uri ComputedUri => this._computedUri ?? (this._computedUri = this.BuildUri());
