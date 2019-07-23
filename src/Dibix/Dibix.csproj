@@ -3,7 +3,7 @@
   <Import Project="..\..\build\common.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.2;net451</TargetFrameworks>
+    <TargetFrameworks>netstandard1.5;net451</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,7 +27,10 @@
     </Compile>
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.2'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.5'">
+    <Compile Remove="Http\DatabaseAccessorExtensions.Http.cs" />
+    <Compile Remove="Http\Http*Response.cs" />
+    
     <PackageReference Include="System.Reflection" Version="$(ReflectionVersion)" />
     <PackageReference Include="System.Data.SqlClient" Version="$(SqlClientVersion)" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="$(DataAnnotationsVersion)" />
