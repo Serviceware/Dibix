@@ -30,7 +30,7 @@ namespace Dibix
                 return obj.GetHashCode();
 
             int hashCode = entityDescriptor.Keys
-                                           .Select(x => x.GetValue(obj).GetHashCode())
+                                           .Select(x => x.GetValue(obj)?.GetHashCode() ?? 0)
                                            .Aggregate((x, y) => x ^ y);
             return hashCode;
         }
