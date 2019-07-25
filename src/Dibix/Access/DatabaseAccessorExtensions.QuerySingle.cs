@@ -16,6 +16,7 @@ namespace Dibix
             Guard.IsNotNull(accessor, nameof(accessor));
             return accessor.QuerySingle<T>(sql, CommandType.Text, parameters);
         }
+
         public static TReturn QuerySingle<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, Action<TReturn, TSecond> map, string splitOn)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
@@ -52,6 +53,7 @@ namespace Dibix
                            .Distinct(new EntityComparer<TReturn>())
                            .Single();
         }
+
         public static TReturn QuerySingle<TReturn, TSecond, TThird>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, Action<TReturn, TSecond, TThird> map, string splitOn)
         {
             Guard.IsNotNull(accessor, nameof(accessor));

@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -49,8 +49,10 @@ Therefore it cannot be distinguished to which target property a related entity s
 
         private static EntityProperty BuildEntityProperty(PropertyInfo property)
         {
-            Type collectionType = IsCollectionType(property.PropertyType) ? property.PropertyType : property.PropertyType.GetTypeInfo().ImplementedInterfaces.FirstOrDefault(IsCollectionType);
-            return collectionType == null ? BuildComplexEntityProperty(property) : BuildCollectionEntityProperty(property, collectionType);
+            if (!TryGetCollectionType(property.PropertyType, out Type collectionType))
+                return BuildComplexEntityProperty(property);
+
+            return BuildCollectionEntityProperty(property, collectionType);
         }
 
         private static EntityProperty BuildComplexEntityProperty(PropertyInfo property)
@@ -76,6 +78,35 @@ Therefore it cannot be distinguished to which target property a related entity s
             Expression<Action<object, object>> expression = Expression.Lambda<Action<object, object>>(setValue, instanceParameter, valueParameter);
             Action<object, object> compiled = expression.Compile();
             return new EntityProperty(property.Name, entityType, isCollection, compiled);
+        }
+
+        private static bool TryGetCollectionType(Type type, out Type collectionType)
+        {
+            // No collection logic is applied to byte arrays as they are simply being set to a binary
+            if (type == typeof(byte[]))
+            {
+                collectionType = null;
+                return false;
+            }
+
+            // Direct ICollection<T> property
+            if (IsCollectionType(type))
+            {
+                collectionType = type;
+                return true;
+            }
+
+            // Indirect ICollection<T> property, i.E.: IList<T>
+            Type baseCollectionType = type.GetTypeInfo().ImplementedInterfaces.FirstOrDefault(IsCollectionType);
+            if (baseCollectionType != null)
+            {
+                collectionType = baseCollectionType;
+                return true;
+            }
+
+            // No collection property
+            collectionType = null;
+            return false;
         }
 
         private static bool IsCollectionType(Type type) => type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(ICollection<>);
