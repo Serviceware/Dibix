@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Dibix
@@ -16,15 +17,16 @@ namespace Dibix
             // LEFT JOIN => related entities can be null
             object[] relevantArgs = args.Where(x => x != null).ToArray();
 
+            ICollection<EntityProperty> matchedProperties = new HashSet<EntityProperty>();
             for (int i = relevantArgs.Length - 1; i > 0; i--)
             {
                 object item = this.GetCachedEntity(relevantArgs[i]);
-
                 for (int j = i - 1; j >= 0; j--)
                 {
                     object previousItem = this.GetCachedEntity(relevantArgs[j]);
                     EntityDescriptor descriptor = EntityDescriptorCache.GetDescriptor(previousItem.GetType());
-                    if (!descriptor.ComplexProperties.TryGetValue(item.GetType(), out EntityProperty property))
+
+                    if (!TryMatchProperty(descriptor, item.GetType(), matchedProperties, out EntityProperty property))
                         continue;
 
                     if (property.IsCollection && this.IsInCollection(previousItem, property.Name, item))
@@ -53,6 +55,16 @@ namespace Dibix
             return existingValue;
         }
 
+        private static bool TryMatchProperty(EntityDescriptor descriptor, Type sourceType, ICollection<EntityProperty> usedProperties, out EntityProperty property)
+        {
+            property = descriptor.ComplexProperties.Reverse().FirstOrDefault(x => x.EntityType == sourceType && !usedProperties.Contains(x));
+            if (property == null)
+                return false;
+
+            usedProperties.Add(property);
+            return true;
+        }
+
         private bool IsInCollection(object instance, string property, object item)
         {
             InstancePropertyKey key = new InstancePropertyKey(instance, property);
@@ -73,12 +85,15 @@ namespace Dibix
 
         private static TReturn ProjectResult<TReturn>(params object[] args) where TReturn : new()
         {
-            EntityDescriptor entityDescriptor = EntityDescriptorCache.GetDescriptor(typeof(TReturn));
+            EntityDescriptor descriptor = EntityDescriptorCache.GetDescriptor(typeof(TReturn));
             TReturn result = new TReturn();
-            foreach (object arg in args)
+            ICollection<EntityProperty> matchedProperties = new HashSet<EntityProperty>();
+            foreach (object arg in args.Reverse())
             {
-                if (entityDescriptor.ComplexProperties.TryGetValue(arg.GetType(), out EntityProperty property))
-                    property.SetValue(result, arg);
+                if (!TryMatchProperty(descriptor, arg.GetType(), matchedProperties, out EntityProperty property))
+                    continue;
+
+                property.SetValue(result, arg);
             }
             return result;
         }

@@ -19,3 +19,6 @@
 
 # MacOS cache
 .DS_Store
+
+# MSTest test Results
+[Tt]est[Rr]esult*/
