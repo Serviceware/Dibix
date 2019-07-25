@@ -79,11 +79,23 @@ namespace Dibix.Sdk.CodeGeneration
                     propertyAnnotations.Add("Key");
                 }
 
-                if (property.SkipNull)
+                switch (property.SerializationBehavior)
                 {
-                    context.Output.AddUsing("Newtonsoft.Json");
-                    context.Configuration.DetectedReferences.Add("Newtonsoft.Json.dll");
-                    propertyAnnotations.Add("JsonProperty(NullValueHandling = NullValueHandling.Ignore)");
+                    case SerializationBehavior.Always:
+                        break;
+
+                    case SerializationBehavior.IfNotNull:
+                        AddJsonReference(context);
+                        propertyAnnotations.Add("JsonProperty(NullValueHandling = NullValueHandling.Ignore)");
+                        break;
+
+                    case SerializationBehavior.Never:
+                        AddJsonReference(context);
+                        propertyAnnotations.Add("JsonIgnore");
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(property.SerializationBehavior), property.SerializationBehavior, null);
                 }
 
                 @class.AddProperty(property.Name, !property.IsEnumerable ? property.Type : $"ICollection<{property.Type}>", propertyAnnotations)
@@ -116,6 +128,12 @@ namespace Dibix.Sdk.CodeGeneration
                 @enum.AddMember(member.Name, member.Value)
                      .Inherits("int");
             }
+        }
+
+        private static void AddJsonReference(DaoWriterContext context)
+        {
+            context.Output.AddUsing("Newtonsoft.Json");
+            context.Configuration.DetectedReferences.Add("Newtonsoft.Json.dll");
         }
         #endregion
     }

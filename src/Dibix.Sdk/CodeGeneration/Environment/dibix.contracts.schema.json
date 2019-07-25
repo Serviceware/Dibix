@@ -5,6 +5,14 @@
       "type": "string",
       "pattern": "^[A-Za-z]([\\w]+)?\\??(\\[\\]|\\*?)?$"
     },
+    "SerializationBehavior": {
+      "type": "string",
+      "enum": [
+        "Always",
+        "IfNotNull",
+        "Never"
+      ]
+    },
     "Entity": {
       "type": "object",
       "properties": {
@@ -28,8 +36,8 @@
                 "isPartOfKey": {
                   "type": "boolean"
                 },
-                "skipNull": {
-                  "type": "boolean"
+                "serialize": {
+                  "$ref": "#/definitions/SerializationBehavior"
                 }
               },
               "required": [
