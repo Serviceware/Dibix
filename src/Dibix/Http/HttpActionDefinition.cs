@@ -28,6 +28,10 @@ namespace Dibix.Http
         {
             this.ResolveParameter(targetParameterName, new HttpParameterConstantSource(value));
         }
+        public void ResolveParameter(string targetParameterName, Type contractType)
+        {
+            this.ResolveParameter(targetParameterName, new HttpParameterComplexSource(contractType));
+        }
         public void ResolveParameter(string targetParameterName, string sourceName, string sourcePropertyName)
         {
             this.ResolveParameter(targetParameterName, new HttpParameterPropertySource(sourceName, sourcePropertyName));

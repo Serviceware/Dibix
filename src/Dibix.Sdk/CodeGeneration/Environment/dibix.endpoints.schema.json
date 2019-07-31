@@ -58,7 +58,7 @@
               "anyOf": [
                 {
                   "type": "string",
-                  "pattern": "^HLSESSION.[A-Z]([A-Za-z]+)?$"
+                  "pattern": "(^HLSESSION.[A-Z]([A-Za-z]+)?$)|(^#[A-Z]([A-Za-z.]+)?$)"
                 },
                 {
                   "type": "number"

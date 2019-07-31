@@ -98,7 +98,11 @@ namespace Dibix.Sdk.CodeGeneration
                         break;
 
                     case JTokenType.String:
-                        ReadPropertyActionParameter(action, property.Name, (string)value);
+                        string textValue = (string)value;
+                        if (textValue[0] == '#')
+                            ReadComplexActionParameter(action, property.Name, textValue);
+                        else
+                            ReadPropertyActionParameter(action, property.Name, textValue);
                         break;
 
                     default:
@@ -110,6 +114,11 @@ namespace Dibix.Sdk.CodeGeneration
         private static void ReadConstantActionParameter(ActionDefinition action, string parameterName, object value)
         {
             action.DynamicParameters.Add(parameterName, new ActionParameterConstantSource(value));
+        }
+
+        private static void ReadComplexActionParameter(ActionDefinition action, string parameterName, string value)
+        {
+            action.DynamicParameters.Add(parameterName, new ActionParameterComplexSource(value.Substring(1)));
         }
 
         private static void ReadPropertyActionParameter(ActionDefinition action, string parameterName, string value)
