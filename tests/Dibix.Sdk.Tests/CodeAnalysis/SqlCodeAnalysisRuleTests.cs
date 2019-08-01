@@ -93,5 +93,8 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
 
         [Fact]
         public void SecurityAlgorithmSqlCodeAnalysisRule() => base.Execute();
+
+        [Fact]
+        public void UnintentionalBooleanComparisonSqlCodeAnalysisRule() => base.Execute();
     }
 }

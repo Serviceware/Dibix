@@ -946,6 +946,27 @@ namespace This.Is.A.Custom.Namespace
     column="13" /&gt;
 &lt;/errors&gt;</value>
   </data>
+  <data name="UnintentionalBooleanComparisonSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="[031] Unintentional boolean comparison: 1 = 1"
+    line="4"
+    column="9" /&gt;
+  &lt;error
+    message="[031] Unintentional boolean comparison: @a = @a"
+    line="9"
+    column="9" /&gt;
+  &lt;error
+    message="[031] Unintentional boolean comparison: @b = @b"
+    line="9"
+    column="21" /&gt;
+  &lt;error
+    message="[031] Unintentional boolean comparison: 1 = 2"
+    line="12"
+    column="9" /&gt;
+&lt;/errors&gt;</value>
+  </data>
   <data name="UniqueIndexSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
