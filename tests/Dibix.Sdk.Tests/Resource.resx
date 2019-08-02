@@ -117,6 +117,15 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ClusteredIndexSizeSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="[032] Clustered index PK_dbx_codeanalysis_error_032_fail size is 1167 bytes. The maximum key length is 900 bytes"
+    line="32"
+    column="6" /&gt;
+&lt;/errors&gt;</value>
+  </data>
   <data name="ConsistentlyQuotedIdentifierSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
