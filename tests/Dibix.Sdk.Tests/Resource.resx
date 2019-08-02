@@ -154,10 +154,6 @@
     message="[028] Use of non UTC date/time function: GETDATE"
     line="6"
     column="87" /&gt;
-  &lt;error
-    message="[028] Possible datetime constant: 1990-01-01"
-    line="7"
-    column="87" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="ImplicitAliasSqlCodeAnalysisRule" xml:space="preserve">
@@ -280,8 +276,12 @@
     line="3"
     column="30" /&gt;
   &lt;error
+    message="[020] Found language dependent expression: 1990-01-01"
+    line="4"
+    column="25" /&gt;
+  &lt;error
     message="[020] Found language dependent expression: CONSTRAINT [DF_dbx_codeanalysis_error_020_table_value] DEFAULT ((N'1990-01-01'))"
-    line="8"
+    line="9"
     column="87" /&gt;
 &lt;/errors&gt;</value>
   </data>

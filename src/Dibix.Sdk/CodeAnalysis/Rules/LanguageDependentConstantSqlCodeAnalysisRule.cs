@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
@@ -21,6 +22,12 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
           , SqlDataTypeOption.Time
           , SqlDataTypeOption.Timestamp
         };
+        private readonly HashSet<StringLiteral> _visitedLiterals;
+
+        public LanguageDependentConstantSqlCodeAnalysisRuleVisitor()
+        {
+            this._visitedLiterals = new HashSet<StringLiteral>();
+        }
 
         public override void Visit(CastCall node) => this.Check(node, node.DataType, node.Parameter);
 
@@ -30,6 +37,15 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                 return;
 
             this.Check(node.DefaultConstraint, node.DataType, node.DefaultConstraint.Expression);
+        }
+
+        public override void Visit(StringLiteral node)
+        {
+            if (this._visitedLiterals.Contains(node))
+                return;
+
+            if (Regex.IsMatch(node.Value, @"^((\d\d-\d\d-\d\d\d\d)|(\d\d\d\d-\d\d-\d\d)|(\d\d\/\d\d\/\d\d\d\d)|(\d\d\d\d\/\d\d\/\d\d))"))
+                base.Fail(node, node.Value);
         }
 
         private void Check(TSqlFragment target, DataTypeReference dataType, ScalarExpression expression)
@@ -47,6 +63,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
             if (stringLiteral == null)
                 return;
+
+            this._visitedLiterals.Add(stringLiteral);
 
             base.Fail(expression, target.Dump());
         }

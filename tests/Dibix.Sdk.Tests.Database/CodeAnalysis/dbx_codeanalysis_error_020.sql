@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[dbx_codeanalysis_error_020]
 AS
   DECLARE @x DATETIME = CAST(N'1990-01-01' AS DATETIME)
-  
+  DECLARE @y DATETIME = N'1990-01-01'
+
   CREATE TABLE [dbo].[dbx_codeanalysis_error_020_table]
   (
       [id] INT NOT NULL
