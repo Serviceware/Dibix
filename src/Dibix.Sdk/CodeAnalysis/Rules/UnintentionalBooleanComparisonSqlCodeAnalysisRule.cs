@@ -17,5 +17,11 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
              || node.FirstExpression is Literal && node.SecondExpression is Literal) // 1 = 1 or 1 = 2
                 base.Fail(node, node.Dump());
         }
+
+        public override void Visit(BooleanIsNullExpression node)
+        {
+             if (node.Expression is Literal) // 1 IS NOT NULL
+                base.Fail(node, node.Dump());
+        }
     }
 }

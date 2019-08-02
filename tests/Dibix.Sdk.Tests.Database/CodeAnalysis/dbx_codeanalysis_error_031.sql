@@ -12,4 +12,16 @@ AS
   WHERE 1 = 2
 
   SELECT 1
+  WHERE 1 > 2
+
+  SELECT 1
+  WHERE 1 <> 2
+
+  SELECT 1
+  WHERE 1 < 2
+
+  SELECT 1
+  WHERE 1 IS NOT NULL
+
+  SELECT 1
   WHERE @a = @b

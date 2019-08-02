@@ -984,6 +984,22 @@ namespace This.Is.A.Custom.Namespace
     message="[031] Unintentional boolean comparison: 1 = 2"
     line="12"
     column="9" /&gt;
+  &lt;error
+    message="[031] Unintentional boolean comparison: 1 &amp;gt; 2"
+    line="15"
+    column="9" /&gt;
+  &lt;error
+    message="[031] Unintentional boolean comparison: 1 &amp;lt;&amp;gt; 2"
+    line="18"
+    column="9" /&gt;
+  &lt;error
+    message="[031] Unintentional boolean comparison: 1 &amp;lt; 2"
+    line="21"
+    column="9" /&gt;
+  &lt;error
+    message="[031] Unintentional boolean comparison: 1 IS NOT NULL"
+    line="24"
+    column="9" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="UniqueIndexSqlCodeAnalysisRule" xml:space="preserve">
