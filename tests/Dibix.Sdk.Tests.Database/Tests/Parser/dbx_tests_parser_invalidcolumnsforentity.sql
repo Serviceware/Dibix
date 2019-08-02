@@ -13,17 +13,18 @@ AS
 	SELECT [i] AS [y]
 	FROM [x]
 
-	IF 0 = 1
+	DECLARE @true BIT = 1
+	IF @true = 1
 	BEGIN
 		SELECT 1 AS [action]
 	END
 	ELSE 
 	/*
-	IF 0 = 1
+	IF @true = 1
 	BEGIN
 		SELECT 2AS [action]
 	END
-	ELSE IF 0 = 1
+	ELSE IF @true = 1
 	BEGIN
 		SELECT 3 AS [action]
 	END
@@ -32,26 +33,26 @@ AS
 		SELECT 4 AS [action]
 
 	/*
-	IF 0 = 1
+	IF @true = 1
 	BEGIN
 		SELECT 1 AS [action]
 	END
 
-	IF 0 = 1
+	IF @true = 1
 	BEGIN
 		SELECT 1 AS [a]
 	END
 	ELSE
 		SELECT 4 AS [b]
 
-	IF 0 = 1
+	IF @true = 1
 	BEGIN
 		SELECT 1 AS [a], 2 AS [x]
 	END
 	ELSE
 		SELECT 4 AS [b]
 
-	IF 0 = 1
+	IF @true = 1
 	BEGIN
 		SELECT 1 AS [x]
 		SELECT 2 AS [x]
@@ -62,7 +63,7 @@ AS
 
 	MERGE dbo.dbx_table AS target
 	USING dbo.dbx_table AS source
-	ON (1 = 0)
+	ON (@true = 0)
 	WHEN NOT MATCHED BY SOURCE THEN
 		DELETE
 		OUTPUT $action AS [action]

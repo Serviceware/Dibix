@@ -12,10 +12,10 @@ AS
   CREATE TABLE [dbo].[dbx_codeanalysis_error_025_table_fail]
   (
       [id] INT -- Implicit NOT NULL
-    , CONSTRAINT [PK_dbx_codeanalysis_error_025_fail] PRIMARY KEY ([id])
+    , CONSTRAINT [PK_dbx_codeanalysis_error_025_table_fail] PRIMARY KEY ([id])
   )
   GO
-  CREATE TYPE [dbo].[dbx_codeanalysis_error_025_type_fail] AS TABLE
+  CREATE TYPE [dbo].[dbx_codeanalysis_udt_error_025_fail] AS TABLE
   (
       [id] INT -- Implicit NOT NULL
     , PRIMARY KEY ([id])

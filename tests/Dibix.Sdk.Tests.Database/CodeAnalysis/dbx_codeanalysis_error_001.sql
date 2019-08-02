@@ -17,7 +17,7 @@ AS
 	SeLeCT @x = count(id)
 	FROM dbo.dbx_table
 
-	DECLARE @b dbo.dbx_udt
+	DECLARE @b dbo.dbx_codeanalysis_udt_generic
 
 	DECLARE @xml XML
 	SELECT @xml.value(NULL, NULL)

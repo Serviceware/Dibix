@@ -1,9 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[dbx_codeanalysis_error_011]
 AS
-	DECLARE @a [dbo].[dbx_udt]
-	DECLARE @b dbo.dbx_udt
-	DECLARE @c dbo.[dbx_udt]
-	DECLARE @d [dbo].dbx_udt
+	DECLARE @a [dbo].[dbx_codeanalysis_udt_generic]
+	DECLARE @b dbo.dbx_codeanalysis_udt_generic
+	DECLARE @c dbo.[dbx_codeanalysis_udt_generic]
+	DECLARE @d [dbo].dbx_codeanalysis_udt_generic
 
 	SELECT [id]
 	FROM dbo.dbx_table

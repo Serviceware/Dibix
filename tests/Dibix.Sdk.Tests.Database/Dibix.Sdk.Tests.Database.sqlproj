@@ -79,7 +79,7 @@
     <Build Include="Tests\Sources\Included\Nested\dbx_tests_sources_includednested.sql" />
     <Build Include="Tests\Sources\dbx_tests_sources_externalsp.sql" />
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_007.sql" />
-    <Build Include="Types\dbx_udt.sql" />
+    <Build Include="Types\dbx_codeanalysis_udt_generic.sql" />
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_008.sql" />
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_009.sql" />
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_010.sql" />

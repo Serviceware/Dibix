@@ -2,7 +2,8 @@
 AS
 	CREATE TABLE [dbo].[dbx_codeanalysis_error_017_success]
 	(
-		[id] INT CONSTRAINT [DF_dbx_codeanalysis_error_017_success_id] DEFAULT (1)
+		[id] INT NOT NULL CONSTRAINT [DF_dbx_codeanalysis_error_017_success_id] DEFAULT (1)
+      , [column_x] INT
 	  , CONSTRAINT [PK_dbx_codeanalysis_error_017_success] PRIMARY KEY ([id])
 	  , CONSTRAINT [FK_dbx_codeanalysis_error_017_success_id] FOREIGN KEY ([id]) REFERENCES [dbo].[dbx_table] ([id])
 	  , CONSTRAINT [CK_dbx_codeanalysis_error_017_success_abc] CHECK ([id] > 0)
@@ -11,7 +12,7 @@ AS
 
 	CREATE TABLE [dbo].[dbx_codeanalysis_error_017_fail]
 	(
-		[Id] INT CONSTRAINT [DF_dbx_codeanalysis_error_017_fail_idx] DEFAULT (1)
+		[Id] INT NOT NULL CONSTRAINT [DF_dbx_codeanalysis_error_017_fail_idx] DEFAULT (1)
 	  ,	[column_x] INT
 	  , CONSTRAINT [PK_dbx_codeanalysis_error_017_failx] PRIMARY KEY ([id])
 	--, CONSTRAINT [FK_dbx_codeanalysis_error_017_fail_idx] FOREIGN KEY ([id]) REFERENCES [dbo].[dbx_table] ([id])
@@ -21,11 +22,11 @@ AS
 	  , CONSTRAINT [UQ_dbx_codeanalysis_error_017_failx_id] UNIQUE ([id])
 	)
 
-	CREATE TYPE [dbo].[dbx_codeanalysis_error_017_fail_udt] AS TABLE ([id] INT)
-	CREATE TYPE [dbo].[dbx_codeanalysis_error_017_udt_success] AS TABLE ([id] INT)
+	CREATE TYPE [dbo].[dbx_codeanalysis_error_017_fail_udt] AS TABLE ([id] INT NOT NULL PRIMARY KEY)
+	CREATE TYPE [dbo].[dbx_codeanalysis_udt_error_017_success] AS TABLE ([id] INT NOT NULL PRIMARY KEY)
 
 	CREATE NONCLUSTERED INDEX [IX_dbx_codeanalysis_error_017_success_success] ON [dbo].[dbx_codeanalysis_error_017_success] ([id])
 	CREATE NONCLUSTERED INDEX [IX_dbx_codeanalysis_error_017_successx_fail] ON [dbo].[dbx_codeanalysis_error_017_success] ([id])
 
-	CREATE UNIQUE NONCLUSTERED INDEX [UQ_dbx_codeanalysis_error_017_success_success] ON [dbo].[dbx_codeanalysis_error_017_success] ([id])
-	CREATE UNIQUE NONCLUSTERED INDEX [UQ_dbx_codeanalysis_error_017_successx_fail] ON [dbo].[dbx_codeanalysis_error_017_success] ([id])
+	CREATE UNIQUE NONCLUSTERED INDEX [UQ_dbx_codeanalysis_error_017_success_success] ON [dbo].[dbx_codeanalysis_error_017_success] ([id]) INCLUDE ([column_x])
+	CREATE UNIQUE NONCLUSTERED INDEX [UQ_dbx_codeanalysis_error_017_successx_fail] ON [dbo].[dbx_codeanalysis_error_017_success] ([id]) INCLUDE ([column_x])

@@ -130,11 +130,11 @@
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[011] Identifier quotation should be consistent and not mixed. Either use all square brackets or none: dbo.[dbx_udt]"
+    message="[011] Identifier quotation should be consistent and not mixed. Either use all square brackets or none: dbo.[dbx_codeanalysis_udt_generic]"
     line="5"
     column="13" /&gt;
   &lt;error
-    message="[011] Identifier quotation should be consistent and not mixed. Either use all square brackets or none: [dbo].dbx_udt"
+    message="[011] Identifier quotation should be consistent and not mixed. Either use all square brackets or none: [dbo].dbx_codeanalysis_udt_generic"
     line="6"
     column="13" /&gt;
   &lt;error
@@ -183,9 +183,9 @@
   &lt;error
     message="[025] Column must be explcitly marked as NOT NULL, since it is part of a primary key: dbx_codeanalysis_error_025_table_fail.id"
     line="15"
-    column="68" /&gt;
+    column="74" /&gt;
   &lt;error
-    message="[025] Column must be explcitly marked as NOT NULL, since it is part of a primary key: dbx_codeanalysis_error_025_type_fail.id"
+    message="[025] Column must be explcitly marked as NOT NULL, since it is part of a primary key: dbx_codeanalysis_udt_error_025_fail.id"
     line="21"
     column="20" /&gt;
 &lt;/errors&gt;</value>
@@ -302,7 +302,7 @@
     line="5"
     column="3" /&gt;
   &lt;error
-    message="[012] User defined table type 'dbx_codeanalysis_error_012_type' does not have a primary key"
+    message="[012] User defined table type 'dbx_codeanalysis_udt_error_012' does not have a primary key"
     line="10"
     column="3" /&gt;
 &lt;/errors&gt;</value>
@@ -312,39 +312,39 @@
 &lt;errors&gt;
   &lt;error
     message="[017] Column names should only contain the characters 'a-z_' and have no trailing underscores: dbx_codeanalysis_error_017_fail.Id"
-    line="14"
+    line="15"
     column="3" /&gt;
   &lt;error
     message="[017] Primary key constraint 'PK_dbx_codeanalysis_error_017_failx' does not match naming convention 'PK_&amp;lt;tablename&amp;gt;'. Also make sure the name is all lowercase."
-    line="16"
+    line="17"
     column="17" /&gt;
   &lt;error
     message="[017] Foreign key constraint 'FK_dbx_codeanalysis_error_017_failx_id' does not match naming convention 'FK_&amp;lt;tablename&amp;gt;_*'. Also make sure the name is all lowercase."
-    line="18"
-    column="17" /&gt;
-  &lt;error
-    message="[017] Check constraint 'CK_dbx_codeanalysis_error_017_failx_abc' does not match naming convention 'CK_&amp;lt;tablename&amp;gt;_*'. Also make sure the name is all lowercase."
     line="19"
     column="17" /&gt;
   &lt;error
+    message="[017] Check constraint 'CK_dbx_codeanalysis_error_017_failx_abc' does not match naming convention 'CK_&amp;lt;tablename&amp;gt;_*'. Also make sure the name is all lowercase."
+    line="20"
+    column="17" /&gt;
+  &lt;error
     message="[017] Unique constraint 'UQ_dbx_codeanalysis_error_017_failx_id' does not match naming convention 'UQ_&amp;lt;tablename&amp;gt;_*'. Also make sure the name is all lowercase."
-    line="21"
+    line="22"
     column="17" /&gt;
   &lt;error
     message="[017] Default constraint 'DF_dbx_codeanalysis_error_017_fail_idx' does not match naming convention 'DF_&amp;lt;tablename&amp;gt;_&amp;lt;columnname&amp;gt;'. Also make sure the name is all lowercase."
-    line="14"
-    column="23" /&gt;
+    line="15"
+    column="32" /&gt;
   &lt;error
     message="[017] Type 'dbx_codeanalysis_error_017_fail_udt' does not match naming convention 'dbx*_udt_*'. Also make sure the name is all lowercase."
-    line="24"
+    line="25"
     column="20" /&gt;
   &lt;error
     message="[017] Index 'IX_dbx_codeanalysis_error_017_successx_fail' does not match naming convention 'IX_&amp;lt;tablename&amp;gt;_*'. Also make sure the name is all lowercase."
-    line="28"
+    line="29"
     column="28" /&gt;
   &lt;error
     message="[017] Unique constraint 'UQ_dbx_codeanalysis_error_017_successx_fail' does not match naming convention 'UQ_&amp;lt;tablename&amp;gt;_*'. Also make sure the name is all lowercase."
-    line="31"
+    line="32"
     column="35" /&gt;
 &lt;/errors&gt;</value>
   </data>
@@ -410,7 +410,9 @@ AS (SELECT 1 AS [i])
 SELECT [i] AS [y]
 FROM [x];
 
-IF 0 = 1
+DECLARE @true AS BIT = 1;
+
+IF @true = 1
     BEGIN
         SELECT 1 AS [action];
     END
@@ -419,7 +421,7 @@ ELSE
 
 MERGE INTO dbo.dbx_table
  AS target
-USING dbo.dbx_table AS source ON (1 = 0)
+USING dbo.dbx_table AS source ON (@true = 0)
 WHEN NOT MATCHED BY SOURCE THEN DELETE OUTPUT $ACTION AS [action];
 
 SELECT 1 AS id,
@@ -431,15 +433,17 @@ SELECT 2 AS id,
        16 AS [age];";
 
         // dbx_tests_parser_nestedifs
-        public const string dbx_tests_parser_nestedifsCommandText = @"IF 0 = 1
+        public const string dbx_tests_parser_nestedifsCommandText = @"DECLARE @true AS BIT = 1;
+
+IF @true = 1
     BEGIN
-        IF 1 = 0
+        IF @true = 0
             SELECT 1.0 AS [action];
         ELSE
             SELECT 1.1 AS [action];
     END
 ELSE
-    IF 0 = 1
+    IF @true = 1
         BEGIN
             DECLARE @x AS INT = 1;
             SELECT 2 AS [action];
@@ -449,10 +453,10 @@ ELSE
             SELECT 3 AS [action];
         END
 
-IF 0 = 1
+IF @true = 1
     SELECT 1;
 ELSE
-    IF 0 = 2
+    IF @true = 2
         SELECT 2;
     ELSE
         SELECT 3;";
@@ -493,13 +497,13 @@ UNION ALL
         // dbx_tests_parser_xmlparam
         public const string dbx_tests_parser_xmlparamCommandText = @"";
 
-        public static dbx_tests_parser_invalidcolumnsforentityResult dbx_tests_parser_invalidcolumnsforentity(this IDatabaseAccessorFactory databaseAccessorFactory)
+        public static Dibix.Sdk.Tests.dbx_tests_parser_invalidcolumnsforentityResult dbx_tests_parser_invalidcolumnsforentity(this IDatabaseAccessorFactory databaseAccessorFactory)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
                 using (IMultipleResultReader reader = accessor.QueryMultiple(dbx_tests_parser_invalidcolumnsforentityCommandText))
                 {
-                    dbx_tests_parser_invalidcolumnsforentityResult result = new dbx_tests_parser_invalidcolumnsforentityResult();
+                    Dibix.Sdk.Tests.dbx_tests_parser_invalidcolumnsforentityResult result = new Dibix.Sdk.Tests.dbx_tests_parser_invalidcolumnsforentityResult();
                     result.A.ReplaceWith(reader.ReadMany&lt;int?&gt;());
                     result.B.ReplaceWith(reader.ReadMany&lt;int&gt;());
                     result.C.ReplaceWith(reader.ReadMany&lt;string&gt;());
@@ -510,13 +514,13 @@ UNION ALL
             }
         }
 
-        public static dbx_tests_parser_nestedifsResult dbx_tests_parser_nestedifs(this IDatabaseAccessorFactory databaseAccessorFactory)
+        public static Dibix.Sdk.Tests.dbx_tests_parser_nestedifsResult dbx_tests_parser_nestedifs(this IDatabaseAccessorFactory databaseAccessorFactory)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
                 using (IMultipleResultReader reader = accessor.QueryMultiple(dbx_tests_parser_nestedifsCommandText))
                 {
-                    dbx_tests_parser_nestedifsResult result = new dbx_tests_parser_nestedifsResult();
+                    Dibix.Sdk.Tests.dbx_tests_parser_nestedifsResult result = new Dibix.Sdk.Tests.dbx_tests_parser_nestedifsResult();
                     result.A.ReplaceWith(reader.ReadMany&lt;int&gt;());
                     result.B.ReplaceWith(reader.ReadMany&lt;int&gt;());
                     return result;
@@ -524,7 +528,7 @@ UNION ALL
             }
         }
 
-        public static dbx_tests_parser_nobeginendResult dbx_tests_parser_nobeginend(this IDatabaseAccessorFactory databaseAccessorFactory, Dibix.Sdk.Tests.CodeGeneration.Direction param1)
+        public static Dibix.Sdk.Tests.dbx_tests_parser_nobeginendResult dbx_tests_parser_nobeginend(this IDatabaseAccessorFactory databaseAccessorFactory, Dibix.Sdk.Tests.CodeGeneration.Direction param1)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
@@ -536,7 +540,7 @@ UNION ALL
                                                      .Build();
                 using (IMultipleResultReader reader = accessor.QueryMultiple(dbx_tests_parser_nobeginendCommandText, @params))
                 {
-                    dbx_tests_parser_nobeginendResult result = new dbx_tests_parser_nobeginendResult();
+                    Dibix.Sdk.Tests.dbx_tests_parser_nobeginendResult result = new Dibix.Sdk.Tests.dbx_tests_parser_nobeginendResult();
                     result.A.ReplaceWith(reader.ReadMany&lt;int&gt;());
                     result.B = reader.ReadSingle&lt;int&gt;();
                     result.C.ReplaceWith(reader.ReadMany&lt;int&gt;());
@@ -545,13 +549,13 @@ UNION ALL
             }
         }
 
-        public static dbx_tests_parser_typenamesResult dbx_tests_parser_typenames(this IDatabaseAccessorFactory databaseAccessorFactory)
+        public static Dibix.Sdk.Tests.dbx_tests_parser_typenamesResult dbx_tests_parser_typenames(this IDatabaseAccessorFactory databaseAccessorFactory)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
                 using (IMultipleResultReader reader = accessor.QueryMultiple(dbx_tests_parser_typenamesCommandText))
                 {
-                    dbx_tests_parser_typenamesResult result = new dbx_tests_parser_typenamesResult();
+                    Dibix.Sdk.Tests.dbx_tests_parser_typenamesResult result = new Dibix.Sdk.Tests.dbx_tests_parser_typenamesResult();
                     result.A.ReplaceWith(reader.ReadMany&lt;string&gt;());
                     result.B.ReplaceWith(reader.ReadMany&lt;int?&gt;());
                     result.C.ReplaceWith(reader.ReadMany&lt;Dibix.Sdk.Tests.CodeGeneration.Direction&gt;());
@@ -746,15 +750,15 @@ UNION ALL
     column="7" /&gt;
   &lt;error
     message="[002] Missing schema specification"
-    line="53"
+    line="54"
     column="8" /&gt;
   &lt;error
     message="[002] Missing schema specification"
-    line="57"
+    line="58"
     column="8" /&gt;
   &lt;error
     message="[002] Missing schema specification"
-    line="73"
+    line="74"
     column="15" /&gt;
 &lt;/errors&gt;</value>
   </data>
@@ -815,11 +819,17 @@ namespace This.Is.A.Custom.Namespace
             }
         }
 
-        public static int dbx_tests_sources_externalsp(this IDatabaseAccessorFactory databaseAccessorFactory)
+        public static int dbx_tests_sources_externalsp(this IDatabaseAccessorFactory databaseAccessorFactory, int x)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
-                return accessor.Execute(dbx_tests_sources_externalspCommandText, System.Data.CommandType.StoredProcedure);
+                IParametersVisitor @params = accessor.Parameters()
+                                                     .SetFromTemplate(new
+                                                     {
+                                                         x
+                                                     })
+                                                     .Build();
+                return accessor.Execute(dbx_tests_sources_externalspCommandText, System.Data.CommandType.StoredProcedure, @params);
             }
         }
 
@@ -867,7 +877,7 @@ namespace This.Is.A.Custom.Namespace
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[029] The constraint 'PK_dbx_codeanalysis_error_029_table_fail_id' should be defined on the table, instead of the column 'name'"
+    message="[029] The constraint 'PK_dbx_codeanalysis_error_029_table_fail' should be defined on the table, instead of the column 'name'"
     line="13"
     column="5" /&gt;
 &lt;/errors&gt;</value>
@@ -991,11 +1001,11 @@ namespace This.Is.A.Custom.Namespace
   &lt;error
     message="[014] Table 'dbx_codeanalysis_error_014_fail1' has an unnamed primary key constraint"
     line="5"
-    column="12" /&gt;
+    column="21" /&gt;
   &lt;error
     message="[014] Table 'dbx_codeanalysis_error_014_fail1' has an unnamed default constraint"
     line="5"
-    column="24" /&gt;
+    column="33" /&gt;
   &lt;error
     message="[014] Table 'dbx_codeanalysis_error_014_fail2' has an unnamed primary key constraint"
     line="16"

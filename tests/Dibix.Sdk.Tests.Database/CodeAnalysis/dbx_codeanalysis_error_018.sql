@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[dbx_codeanalysis_error_018]
 AS
-  DECLARE @x [dbo].[dbx_udt]
+  DECLARE @x [dbo].[dbx_codeanalysis_udt_generic]
 
   UPDATE [dbo].[dbx_table] SET [id] = 1
   DELETE [dbo].[dbx_table]

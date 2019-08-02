@@ -2,7 +2,7 @@
 AS
   CREATE TABLE [dbo].[dbx_codeanalysis_error_029_table_success]
   (
-    [id]   INT           NOT NULL CONSTRAINT [PK_dbx_codeanalysis_error_029_table_success_id] PRIMARY KEY
+    [id]   INT           NOT NULL CONSTRAINT [PK_dbx_codeanalysis_error_029_table_success] PRIMARY KEY
   , [name] NVARCHAR(128) NOT NULL
   )
 
@@ -10,5 +10,5 @@ AS
   (
     [id]   INT           NOT NULL
   , [name] NVARCHAR(128) NOT NULL
-    CONSTRAINT [PK_dbx_codeanalysis_error_029_table_fail_id] PRIMARY KEY ([id])
+    CONSTRAINT [PK_dbx_codeanalysis_error_029_table_fail] PRIMARY KEY ([id])
   )

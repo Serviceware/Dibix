@@ -47,6 +47,7 @@ AS
 	FROM (VALUES (1)) AS x5(x)
 	WHERE x5.x = 1
 
+	DECLARE @true BIT = 1
 	;WITH x6 AS 
 	(
 		SELECT id
@@ -58,19 +59,19 @@ AS
 	)
 	MERGE x6 AS target
 	USING x7 AS source
-	ON (1 = 0)
+	ON (@true = 0)
 	WHEN NOT MATCHED BY SOURCE THEN
 		DELETE
 	;
 
 	MERGE @t AS target
 	USING @t AS source
-	ON (1 = 0)
+	ON (@true = 0)
 	WHEN NOT MATCHED BY SOURCE THEN
 		DELETE
 	;
 
 	CREATE TABLE dbxx 
 	(
-		id INT CONSTRAINT [PK_dbxx] PRIMARY KEY 
+		id INT NOT NULL CONSTRAINT [PK_dbxx] PRIMARY KEY 
 	)

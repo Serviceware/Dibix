@@ -5,7 +5,7 @@ AS
 		[id] INT
 	)
 
-	CREATE TYPE [dbo].[dbx_codeanalysis_error_012_type] AS TABLE
+	CREATE TYPE [dbo].[dbx_codeanalysis_udt_error_012] AS TABLE
 	(
 		[id] INT
 	)
