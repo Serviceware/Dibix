@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
@@ -40,7 +39,10 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             ICollection<string> nullableConstraintColumns = constraints.Where(x => x.Type == ConstraintType.Nullable)
                                                                        .SelectMany(x => x.Columns.Select(y => y.Name))
                                                                        .Distinct()
-                                                                       .ToArray();
+                                                                       .ToList();
+
+            foreach (ColumnDefinition column in definition.ColumnDefinitions.Where(x => x.IsPersisted))
+                nullableConstraintColumns.Add(column.ColumnIdentifier.Value);
 
             foreach (ColumnReference column in primaryKey.Columns.Where(x => !nullableConstraintColumns.Contains(x.Name)))
             {
