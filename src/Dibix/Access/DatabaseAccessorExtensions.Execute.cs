@@ -11,7 +11,6 @@ namespace Dibix
             Guard.IsNotNull(accessor, nameof(accessor));
             return accessor.Execute(sql, CommandType.Text, EmptyParameters.Instance);
         }
-        // TaskReminder (ValidateReminders)
         public static int Execute(this IDatabaseAccessor accessor, string sql, CommandType commandType)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
