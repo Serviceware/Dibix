@@ -174,16 +174,16 @@
 &lt;errors&gt;
   &lt;error
     message="[025] Please specify the clustering (CLUSTERED/NONCLUSTERED) for the index 'IX_dbx_codeanalysis_error_025_table_fail' and don't rely on the default"
-    line="8"
+    line="11"
     column="3" /&gt;
   &lt;error
-    message="[025] Column must be explcitly marked as NOT NULL, since it is part of a primary key: dbx_codeanalysis_error_025_table_fail.id"
-    line="15"
-    column="74" /&gt;
+    message="[025] Column must be explcitly marked as NOT NULL, since it is part of the primary key: dbx_codeanalysis_error_025_table_fail.c"
+    line="20"
+    column="81" /&gt;
   &lt;error
-    message="[025] Column must be explcitly marked as NOT NULL, since it is part of a primary key: dbx_codeanalysis_udt_error_025_fail.id"
-    line="21"
-    column="20" /&gt;
+    message="[025] Column must be explcitly marked as NOT NULL, since it is part of the primary key: dbx_codeanalysis_udt_error_025_fail.c"
+    line="28"
+    column="27" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="InsertWithoutColumnSpecificationSqlCodeAnalysisRule" xml:space="preserve">
