@@ -117,15 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ClusteredIndexSizeSqlCodeAnalysisRule" xml:space="preserve">
-    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
-&lt;errors&gt;
-  &lt;error
-    message="[032] Clustered index PK_dbx_codeanalysis_error_032_fail size is 1167 bytes. The maximum key length is 900 bytes"
-    line="32"
-    column="6" /&gt;
-&lt;/errors&gt;</value>
-  </data>
   <data name="ConsistentlyQuotedIdentifierSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
@@ -184,6 +175,23 @@
     message="[025] Please specify the clustering (CLUSTERED/NONCLUSTERED) for the index 'IX_dbx_codeanalysis_error_025_table_fail' and don't rely on the default"
     line="11"
     column="3" /&gt;
+&lt;/errors&gt;</value>
+  </data>
+  <data name="IndexSizeSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="[032] Clustered index PK_dbx_codeanalysis_error_032_fail size is 1167 bytes. The maximum key length is 900 bytes"
+    line="33"
+    column="6" /&gt;
+  &lt;error
+    message="[032] Nonclustered index UQ_dbx_codeanalysis_error_032_fail size is 1701 bytes. The maximum key length is 1700 bytes"
+    line="34"
+    column="6" /&gt;
+  &lt;error
+    message="[032] Nonclustered index IX_dbx_codeanalysis_error_032_fail size is 1701 bytes. The maximum key length is 1700 bytes"
+    line="35"
+    column="6" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="InsertWithoutColumnSpecificationSqlCodeAnalysisRule" xml:space="preserve">

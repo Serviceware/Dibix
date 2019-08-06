@@ -29,7 +29,10 @@ AS
 	  , [y]  BINARY(2)        NOT NULL -- 2   bytes	  
 	  , [z]  VARBINARY        NOT NULL -- 1   byte    Default: VARBINARY(1)
 	  , [aa] VARBINARY(2)     NOT NULL -- 2   bytes
+	  , [ab] VARBINARY(1701)  NOT NULL
 	  , CONSTRAINT [PK_dbx_codeanalysis_error_032_fail] PRIMARY KEY ([a], [b], [c], [d], [e], [f], [g], [h], [i], [j], [k], [l], [m], [n], [o], [p], [q], [r], [s], [t], [u], [v], [w], [x], [y], [z], [aa])
+	  , CONSTRAINT [UQ_dbx_codeanalysis_error_032_fail] UNIQUE ([ab])
+	  , INDEX [IX_dbx_codeanalysis_error_032_fail] ([ab])
 	)
 	
 	CREATE TABLE [dbo].[dbx_codeanalysis_error_032_success]
@@ -61,5 +64,8 @@ AS
 	  , [y]  BINARY(2)        NOT NULL -- 2   bytes	  
 	  , [z]  VARBINARY        NOT NULL -- 1   byte    Default: VARBINARY(1)
 	  , [aa] VARBINARY(2)     NOT NULL -- 2   bytes
+	  , [ab] VARBINARY(1700)  NOT NULL
 	  , CONSTRAINT [PK_dbx_codeanalysis_error_032_success] PRIMARY KEY ([a], [b], [c], [d], [e], [f], [g], [h], [i], [j], [k], [l], [m], [n], [o], [p], [q], [r], [s], [t], [u], [v], [w], [x], [y], [z], [aa])
+	  , CONSTRAINT [UQ_dbx_codeanalysis_error_032_success] UNIQUE ([ab])
+	  , INDEX [IX_dbx_codeanalysis_error_032_success] ([ab])
 	)

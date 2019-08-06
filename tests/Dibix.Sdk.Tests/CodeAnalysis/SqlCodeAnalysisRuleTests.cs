@@ -98,6 +98,6 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
         public void UnintentionalBooleanComparisonSqlCodeAnalysisRule() => base.Execute();
 
         [Fact]
-        public void ClusteredIndexSizeSqlCodeAnalysisRule() => base.Execute();
+        public void IndexSizeSqlCodeAnalysisRule() => base.Execute();
     }
 }

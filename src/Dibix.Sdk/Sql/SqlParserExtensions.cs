@@ -19,7 +19,11 @@ namespace Dibix.Sdk.Sql
 
         public static string ToKey(this SchemaObjectName name)
         {
-            return String.Join(".", name.Identifiers.Select(x => x.Value));
+            IList<string> identifiers = name.Identifiers.Select(x => x.Value).ToList();
+            if (identifiers.Count == 1)
+                identifiers.Insert(0, "dbo");
+
+            return String.Join(".", identifiers);
         }
 
         public static IEnumerable<TSqlParserToken> AsEnumerable(this TSqlFragment fragment) => AsEnumerable(fragment, fragment.FirstTokenIndex);
