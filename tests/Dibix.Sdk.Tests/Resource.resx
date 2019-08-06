@@ -164,16 +164,16 @@
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[025] Column must be explcitly marked as NOT NULL, since it is part of the primary key: dbx_codeanalysis_error_025_table_fail.c"
-    line="20"
-    column="81" /&gt;
+    message="[025] Please specify a nullable constraint for the column 'dbx_codeanalysis_error_025_table_fail.a' and don't rely on the default"
+    line="14"
+    column="7" /&gt;
   &lt;error
-    message="[025] Column must be explcitly marked as NOT NULL, since it is part of the primary key: dbx_codeanalysis_udt_error_025_fail.c"
-    line="28"
-    column="27" /&gt;
+    message="[025] Please specify a nullable constraint for the column 'dbx_codeanalysis_error_025_table_fail.b' and don't rely on the default"
+    line="15"
+    column="4" /&gt;
   &lt;error
     message="[025] Please specify the clustering (CLUSTERED/NONCLUSTERED) for the index 'IX_dbx_codeanalysis_error_025_table_fail' and don't rely on the default"
-    line="11"
+    line="20"
     column="3" /&gt;
 &lt;/errors&gt;</value>
   </data>

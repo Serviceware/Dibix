@@ -21,22 +21,17 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         protected override void Visit(Table table)
         {
-            ICollection<Constraint> constraints = base.GetConstraints(table.Name).ToArray();
-            Constraint primaryKey = constraints.SingleOrDefault(x => x.Type == ConstraintType.PrimaryKey);
-            if (primaryKey == null)
-                return;
+            HashSet<string> validColumns = new HashSet<string>(base.GetConstraints(table.Name)
+                                                                   .Where(x => x.Type == ConstraintType.Nullable)
+                                                                   .SelectMany(x => x.Columns.Select(y => y.Name)));
 
-            ICollection<string> nullableConstraintColumns = constraints.Where(x => x.Type == ConstraintType.Nullable)
-                                                                       .SelectMany(x => x.Columns.Select(y => y.Name))
-                                                                       .Distinct()
-                                                                       .ToList();
-
-            foreach (ColumnDefinition column in table.Definition.ColumnDefinitions.Where(x => x.IsPersisted))
-                nullableConstraintColumns.Add(column.ColumnIdentifier.Value);
-
-            foreach (ColumnReference column in primaryKey.Columns.Where(x => !nullableConstraintColumns.Contains(x.Name)))
+            foreach (ColumnDefinition column in table.Definition.ColumnDefinitions)
             {
-                base.Fail(column.Hit, $"Column must be explcitly marked as NOT NULL, since it is part of the primary key: {table.Name.BaseIdentifier.Value}.{column.Name}");
+                string columnName = column.ColumnIdentifier.Value;
+                if (column.IsPersisted || validColumns.Contains(columnName))
+                    continue;
+
+                base.Fail(column, $"Please specify a nullable constraint for the column '{table.Name.BaseIdentifier.Value}.{columnName}' and don't rely on the default");
             }
         }
     }
