@@ -54,7 +54,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             node.AcceptChildren(this._identifierVisitor);
         }
 
-        public override void Visit(TSqlParserToken token)
+        protected override void Visit(TSqlParserToken token)
         {
             if (TokenWhiteList.Contains(token.TokenType))
                 return;

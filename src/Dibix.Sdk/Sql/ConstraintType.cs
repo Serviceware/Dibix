@@ -1,6 +1,6 @@
 ﻿namespace Dibix.Sdk.Sql
 {
-    internal enum ConstraintType
+    public enum ConstraintType
     {
         None,
         PrimaryKey,

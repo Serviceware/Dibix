@@ -173,10 +173,6 @@
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[025] Please specify the clustering (CLUSTERED/NONCLUSTERED) for the index 'IX_dbx_codeanalysis_error_025_table_fail' and don't rely on the default"
-    line="11"
-    column="3" /&gt;
-  &lt;error
     message="[025] Column must be explcitly marked as NOT NULL, since it is part of the primary key: dbx_codeanalysis_error_025_table_fail.c"
     line="20"
     column="81" /&gt;
@@ -184,6 +180,10 @@
     message="[025] Column must be explcitly marked as NOT NULL, since it is part of the primary key: dbx_codeanalysis_udt_error_025_fail.c"
     line="28"
     column="27" /&gt;
+  &lt;error
+    message="[025] Please specify the clustering (CLUSTERED/NONCLUSTERED) for the index 'IX_dbx_codeanalysis_error_025_table_fail' and don't rely on the default"
+    line="11"
+    column="3" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="InsertWithoutColumnSpecificationSqlCodeAnalysisRule" xml:space="preserve">
@@ -311,41 +311,45 @@
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[017] Column names should only contain the characters 'a-z_' and have no trailing underscores: dbx_codeanalysis_error_017_fail.Id"
-    line="15"
-    column="3" /&gt;
+    message="[017] Default constraint 'DF_dbx_codeanalysis_error_017_fail_idx' does not match naming convention 'DF_&amp;lt;tablename&amp;gt;_&amp;lt;columnname&amp;gt;'. Also make sure the name is all lowercase."
+    line="19"
+    column="32" /&gt;
   &lt;error
     message="[017] Primary key constraint 'PK_dbx_codeanalysis_error_017_failx' does not match naming convention 'PK_&amp;lt;tablename&amp;gt;'. Also make sure the name is all lowercase."
-    line="17"
+    line="21"
     column="17" /&gt;
   &lt;error
     message="[017] Foreign key constraint 'FK_dbx_codeanalysis_error_017_failx_id' does not match naming convention 'FK_&amp;lt;tablename&amp;gt;_*'. Also make sure the name is all lowercase."
-    line="19"
+    line="23"
     column="17" /&gt;
   &lt;error
     message="[017] Check constraint 'CK_dbx_codeanalysis_error_017_failx_abc' does not match naming convention 'CK_&amp;lt;tablename&amp;gt;_*'. Also make sure the name is all lowercase."
-    line="20"
+    line="24"
     column="17" /&gt;
   &lt;error
     message="[017] Unique constraint 'UQ_dbx_codeanalysis_error_017_failx_id' does not match naming convention 'UQ_&amp;lt;tablename&amp;gt;_*'. Also make sure the name is all lowercase."
-    line="22"
+    line="26"
     column="17" /&gt;
   &lt;error
-    message="[017] Default constraint 'DF_dbx_codeanalysis_error_017_fail_idx' does not match naming convention 'DF_&amp;lt;tablename&amp;gt;_&amp;lt;columnname&amp;gt;'. Also make sure the name is all lowercase."
-    line="15"
-    column="32" /&gt;
+    message="[017] Index 'IX_dbx_codeanalysis_error_017_id1_fail' does not match naming convention 'IX_&amp;lt;tablename&amp;gt;_*'. Also make sure the name is all lowercase."
+    line="27"
+    column="12" /&gt;
   &lt;error
-    message="[017] Type 'dbx_codeanalysis_error_017_fail_udt' does not match naming convention 'dbx*_udt_*'. Also make sure the name is all lowercase."
-    line="25"
-    column="20" /&gt;
-  &lt;error
-    message="[017] Index 'IX_dbx_codeanalysis_error_017_successx_fail' does not match naming convention 'IX_&amp;lt;tablename&amp;gt;_*'. Also make sure the name is all lowercase."
+    message="[017] Index 'IX_dbx_codeanalysis_error_017_id2_fail' does not match naming convention 'IX_&amp;lt;tablename&amp;gt;_*'. Also make sure the name is all lowercase."
     line="29"
     column="28" /&gt;
   &lt;error
-    message="[017] Unique constraint 'UQ_dbx_codeanalysis_error_017_successx_fail' does not match naming convention 'UQ_&amp;lt;tablename&amp;gt;_*'. Also make sure the name is all lowercase."
-    line="32"
+    message="[017] Unique index 'UQ_dbx_codeanalysis_error_017_id2_fail' does not match naming convention 'UQ_&amp;lt;tablename&amp;gt;_*'. Also make sure the name is all lowercase."
+    line="30"
     column="35" /&gt;
+  &lt;error
+    message="[017] Column names should only contain the characters 'a-z_' and have no trailing underscores: dbx_codeanalysis_error_017_fail.Id"
+    line="19"
+    column="3" /&gt;
+  &lt;error
+    message="[017] Type 'dbx_codeanalysis_error_017_fail_udt' does not match naming convention 'dbx*_udt_*'. Also make sure the name is all lowercase."
+    line="33"
+    column="20" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="NoCursorSqlCodeAnalysisRule" xml:space="preserve">

@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Dibix.Sdk.Sql;
+﻿using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
@@ -14,10 +13,13 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         public override void Visit(CreateTableStatement node)
         {
-            node.Definition
-                .CollectConstraints()
-                .Where(x => x.Type != ConstraintType.Nullable && x.Definition.ConstraintIdentifier == null)
-                .Each(x => base.Fail(x.Definition, node.SchemaObjectName.BaseIdentifier.Value, x.Type.ToDisplayName().ToLowerInvariant()));
+            foreach (Constraint constraint in base.GetConstraints(node.SchemaObjectName))
+            {
+                if (constraint.Type == ConstraintType.Nullable || constraint.Definition.ConstraintIdentifier != null)
+                    continue;
+
+                base.Fail(constraint.Definition, node.SchemaObjectName.BaseIdentifier.Value, constraint.TypeDisplayName.ToLowerInvariant());
+            }
         }
     }
 }

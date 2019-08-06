@@ -2,7 +2,7 @@
 
 namespace Dibix.Sdk.Sql
 {
-    internal sealed class ColumnReference
+    public sealed class ColumnReference
     {
         public string Name { get; }
         public TSqlFragment Hit { get; }

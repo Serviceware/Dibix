@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Dibix.Sdk.Sql;
-using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
@@ -22,24 +22,24 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
           , "hlwfuserevents"
         };
 
-        public override void Visit(CreateTableStatement node)
+        protected override void Visit(Table table)
         {
-            if (node.IsTemporaryTable())
+            if (Workarounds.Contains(table.Name.BaseIdentifier.Value))
                 return;
 
-            this.Check("Table", node.SchemaObjectName, node.Definition);
+            bool hasPrimaryKey = base.GetConstraints(table.Name).Any(x => x.Type == ConstraintType.PrimaryKey);
+            if (!hasPrimaryKey)
+                base.Fail(table.Definition, ToDisplayName(table.Type), table.Name.BaseIdentifier.Value);
         }
 
-        public override void Visit(CreateTypeTableStatement node) => this.Check("User defined table type", node.Name, node.Definition);
-
-        private void Check(string type, SchemaObjectName name, TableDefinition definition)
+        private static string ToDisplayName(TableType type)
         {
-            if (Workarounds.Contains(name.BaseIdentifier.Value))
-                return;
-
-            bool hasPrimaryKey = definition.CollectConstraints().Any(x => x.Type == ConstraintType.PrimaryKey);
-            if (!hasPrimaryKey)
-                base.Fail(definition, type, name.BaseIdentifier.Value);
+            switch (type)
+            {
+                case TableType.Table: return "Table";
+                case TableType.TypeTable: return "User defined table type";
+                default: throw new ArgumentOutOfRangeException(nameof(type), type, null);
+            }
         }
     }
 }

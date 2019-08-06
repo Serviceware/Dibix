@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.Dac.Model;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
@@ -48,12 +47,7 @@ namespace Dibix.Sdk.CodeAnalysis
 
             TVisitor visitor = new TVisitor();
             visitor.ErrorHandler = (fragment, line, column, args) => base.Fail(modelElement, fragment ?? scriptFragment, line, column, args);
-
-            // First visit each fragment
             scriptFragment.Accept(visitor);
-
-            // Now visit each token
-            scriptFragment.Visit(visitor.Visit);
         }
     }
 }

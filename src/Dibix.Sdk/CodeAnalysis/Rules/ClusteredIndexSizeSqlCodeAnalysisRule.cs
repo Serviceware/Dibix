@@ -40,24 +40,23 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             if (node.IsTemporaryTable())
                 return;
 
-            foreach (Constraint constraint in node.Definition.CollectConstraints())
+            foreach (Constraint constraint in this.GetConstraints(node.SchemaObjectName))
             {
                 if (!(constraint.Definition is UniqueConstraintDefinition uniqueConstraint))
-                    return;
+                    continue;
                 
                 bool isClustered = uniqueConstraint.Clustered ?? uniqueConstraint.IsPrimaryKey;
                 if (!isClustered)
-                    return;
+                    continue;
 
                 int length = CollectColumnLengths(node.Definition, constraint).Sum();
                 if (length <= MaximumClusteredIndexSize)
-                    return;
+                    continue;
 
-                ConstraintDefinition constraintDefinition = constraint.Definition;
-                string constraintName = constraintDefinition.ConstraintIdentifier.Value;
+                string constraintName = uniqueConstraint.ConstraintIdentifier.Value;
 
                 if (!Workarounds.Contains(constraintName))
-                    base.Fail(constraintDefinition, constraintName, length, MaximumClusteredIndexSize);
+                    base.Fail(uniqueConstraint, constraintName, length, MaximumClusteredIndexSize);
             }
         }
 

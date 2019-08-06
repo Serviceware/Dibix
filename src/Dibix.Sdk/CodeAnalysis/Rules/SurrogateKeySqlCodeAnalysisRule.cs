@@ -90,7 +90,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             if (node.IsTemporaryTable())
                 return;
 
-            ICollection<Constraint> constraints = node.Definition.CollectConstraints().ToArray();
+            ICollection<Constraint> constraints = base.GetConstraints(node.SchemaObjectName).ToArray();
 
             bool hasSurrogateKey = TryGetSurrogateKey(node, constraints, out Constraint primaryKey);
             if (!hasSurrogateKey)

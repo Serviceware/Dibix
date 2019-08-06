@@ -36,6 +36,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         public static readonly NamingConvention UniqueConstraint     = new NamingConvention($"^UQ_<tablename>_{TextRegex}$",          "UQ_<tablename>_*");
         public static readonly NamingConvention DefaultConstraint    = new NamingConvention("^DF_<tablename>_<columnname>$",          "DF_<tablename>_<columnname>");
         public static readonly NamingConvention Index                = new NamingConvention($"^IX_<tablename>_{TextRegex}$",          "IX_<tablename>_*");
+        public static readonly NamingConvention UniqueIndex          = new NamingConvention($"^UQ_<tablename>_{TextRegex}$",          "UQ_<tablename>_*");
         public static readonly NamingConvention Column               = new NamingConvention("^[a-z](([a-z_]+)?[a-z])?$");
     }
 
@@ -85,55 +86,40 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
           , "hlsysslmservicehoursentry#datetime2"
         };
 
-        public override void Visit(CreateTableStatement node)
-        {
-            if (!node.IsTemporaryTable())
-                this.Check(node.SchemaObjectName.BaseIdentifier, nameof(NamingConventions.Table), NamingConventions.Table);
+        // Tables
+        public override void Visit(CreateTableStatement node) => this.Check(node.SchemaObjectName.BaseIdentifier, nameof(NamingConventions.Table), NamingConventions.Table);
 
-            foreach (ColumnDefinition column in node.Definition.ColumnDefinitions)
+        // Views
+        public override void Visit(CreateViewStatement node) => this.Check(node.SchemaObjectName.BaseIdentifier, nameof(NamingConventions.View), NamingConventions.View);
+
+        // UDTs
+        public override void Visit(CreateTypeStatement node) => this.Check(node.Name.BaseIdentifier, nameof(NamingConventions.Type), NamingConventions.Type);
+
+        // Sequences
+        public override void Visit(CreateSequenceStatement node) => this.Check(node.Name.BaseIdentifier, nameof(NamingConventions.Sequence), NamingConventions.Sequence);
+        
+        // Stored procedures
+        public override void Visit(CreateProcedureStatement node) => this.Check(node.ProcedureReference.Name.BaseIdentifier, nameof(NamingConventions.Procedure), NamingConventions.Procedure);
+
+        // Functions
+        public override void Visit(CreateFunctionStatement node) => this.Check(node.Name.BaseIdentifier, nameof(NamingConventions.Function), NamingConventions.Function);
+
+        // Table columns
+        protected override void Visit(Table table)
+        {
+            // Columns
+            foreach (ColumnDefinition column in table.Definition.ColumnDefinitions)
             {
-                if (ColumnWorkarounds.Contains($"{node.SchemaObjectName.BaseIdentifier.Value}#{column.ColumnIdentifier.Value}"))
+                if (ColumnWorkarounds.Contains($"{table.Name.BaseIdentifier.Value}#{column.ColumnIdentifier.Value}"))
                     continue;
 
                 if (!Regex.IsMatch(column.ColumnIdentifier.Value, NamingConventions.Column.Pattern))
-                    base.Fail(column, $"Column names should only contain the characters 'a-z_' and have no trailing underscores: {node.SchemaObjectName.BaseIdentifier.Value}.{column.ColumnIdentifier.Value}");
-            }
-            
-            IEnumerable<Constraint> constraints = node.Definition.CollectConstraints();
-            foreach (Constraint constraint in constraints)
-            {
-                this.VisitConstraint(node, constraint);
+                    base.Fail(column, $"Column names should only contain the characters 'a-z_' and have no trailing underscores: {table.Name.BaseIdentifier.Value}.{column.ColumnIdentifier.Value}");
             }
         }
 
-        public override void Visit(CreateViewStatement node) => this.Check(node.SchemaObjectName.BaseIdentifier, nameof(NamingConventions.View), NamingConventions.View);
-
-        public override void Visit(CreateTypeStatement node) => this.Check(node.Name.BaseIdentifier, nameof(NamingConventions.Type), NamingConventions.Type);
-
-        public override void Visit(CreateSequenceStatement node) => this.Check(node.Name.BaseIdentifier, nameof(NamingConventions.Sequence), NamingConventions.Sequence);
-        
-        public override void Visit(CreateProcedureStatement node) => this.Check(node.ProcedureReference.Name.BaseIdentifier, nameof(NamingConventions.Procedure), NamingConventions.Procedure);
-
-        public override void Visit(CreateFunctionStatement node) => this.Check(node.Name.BaseIdentifier, nameof(NamingConventions.Function), NamingConventions.Function);
-
-        public override void Visit(CreateIndexStatement node)
-        {
-            string displayName;
-            NamingConvention namingConvention;
-            if (node.Unique)
-            {
-                displayName = ConstraintType.Unique.ToDisplayName();
-                namingConvention = NamingConventions.UniqueConstraint;
-            }
-            else
-            {
-                displayName = nameof(NamingConventions.Index);
-                namingConvention = NamingConventions.Index;
-            }
-            this.Check(node.Name, displayName, namingConvention, new KeyValuePair<string, string>("tablename", node.OnName.BaseIdentifier.Value));
-        }
-
-        private void VisitConstraint(CreateTableStatement createTableStatement, Constraint constraint)
+        // Constraints
+        protected override void Visit(ConstraintTarget target, Constraint constraint)
         {
             Identifier identifier = constraint.Definition.ConstraintIdentifier;
             if (constraint.Type == ConstraintType.Nullable)
@@ -143,7 +129,25 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                 return;
 
             NamingConvention namingConvention = GetNamingConvention(constraint.Type);
-            this.Check(identifier, constraint.Type.ToDisplayName(), namingConvention, ResolveConstraintPlaceholders(createTableStatement, constraint.Columns));
+            this.Check(identifier, constraint.TypeDisplayName, namingConvention, ResolveConstraintPlaceholders(target.Name, constraint.Columns));
+        }
+
+        // Indexes
+        protected override void Visit(IndexTarget target, Index index)
+        {
+            string displayName;
+            NamingConvention namingConvention;
+            if (index.IsUnique)
+            {
+                displayName = "Unique index";
+                namingConvention = NamingConventions.UniqueIndex;
+            }
+            else
+            {
+                displayName = nameof(NamingConventions.Index);
+                namingConvention = NamingConventions.Index;
+            }
+            this.Check(index.Identifier, displayName, namingConvention, ResolveConstraintPlaceholders(target.Name, index.Columns));
         }
 
         private void Check(Identifier identifier, string displayName, NamingConvention namingConvention, params KeyValuePair<string, string>[] replacements) => this.Check(identifier, displayName, namingConvention, replacements.AsEnumerable());
@@ -182,10 +186,10 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             }
         }
 
-        private static IEnumerable<KeyValuePair<string, string>> ResolveConstraintPlaceholders(CreateTableStatement table, IList<ColumnReference> columns)
+        private static IEnumerable<KeyValuePair<string, string>> ResolveConstraintPlaceholders(SchemaObjectName targetName, IList<ColumnReference> columns)
         {
-            yield return new KeyValuePair<string, string>("tablename", table.SchemaObjectName.BaseIdentifier.Value);
-            yield return new KeyValuePair<string, string>("columnnames", String.Join(String.Empty, Enumerable.Repeat($"({String.Join("|", table.Definition.ColumnDefinitions.Select(x => x.ColumnIdentifier.Value))})", table.Definition.ColumnDefinitions.Count)));
+            yield return new KeyValuePair<string, string>("tablename", targetName.BaseIdentifier.Value);
+            //yield return new KeyValuePair<string, string>("columnnames", String.Join(String.Empty, Enumerable.Repeat($"({String.Join("|", table.Definition.ColumnDefinitions.Select(x => x.ColumnIdentifier.Value))})", table.Definition.ColumnDefinitions.Count)));
 
             if (columns.Count == 1)
                 yield return new KeyValuePair<string, string>("columnname", columns[0].Name);

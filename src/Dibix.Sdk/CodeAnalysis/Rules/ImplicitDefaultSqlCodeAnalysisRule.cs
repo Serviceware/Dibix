@@ -19,19 +19,9 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                 base.Fail(node, $"Please specify the clustering (CLUSTERED/NONCLUSTERED) for the index '{node.Name.Value}' and don't rely on the default");
         }
 
-        public override void Visit(CreateTableStatement node)
+        protected override void Visit(Table table)
         {
-            if (node.IsTemporaryTable())
-                return;
-
-            this.Check(node.SchemaObjectName, node.Definition);
-        }
-
-        public override void Visit(CreateTypeTableStatement node) => this.Check(node.Name, node.Definition);
-
-        private void Check(SchemaObjectName name, TableDefinition definition)
-        {
-            ICollection<Constraint> constraints = definition.CollectConstraints().ToArray();
+            ICollection<Constraint> constraints = base.GetConstraints(table.Name).ToArray();
             Constraint primaryKey = constraints.SingleOrDefault(x => x.Type == ConstraintType.PrimaryKey);
             if (primaryKey == null)
                 return;
@@ -41,14 +31,13 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                                                                        .Distinct()
                                                                        .ToList();
 
-            foreach (ColumnDefinition column in definition.ColumnDefinitions.Where(x => x.IsPersisted))
+            foreach (ColumnDefinition column in table.Definition.ColumnDefinitions.Where(x => x.IsPersisted))
                 nullableConstraintColumns.Add(column.ColumnIdentifier.Value);
 
             foreach (ColumnReference column in primaryKey.Columns.Where(x => !nullableConstraintColumns.Contains(x.Name)))
             {
-                base.Fail(column.Hit, $"Column must be explcitly marked as NOT NULL, since it is part of the primary key: {name.BaseIdentifier.Value}.{column.Name}");
+                base.Fail(column.Hit, $"Column must be explcitly marked as NOT NULL, since it is part of the primary key: {table.Name.BaseIdentifier.Value}.{column.Name}");
             }
         }
     }
 }
- 

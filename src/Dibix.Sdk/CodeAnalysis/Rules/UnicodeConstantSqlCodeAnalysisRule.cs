@@ -10,7 +10,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
     public sealed class UnicodeConstantSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
     {
-        public override void Visit(TSqlParserToken token)
+        protected override void Visit(TSqlParserToken token)
         {
             if (token.TokenType == TSqlTokenType.AsciiStringLiteral)
                 base.Fail(token);

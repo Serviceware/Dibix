@@ -17,10 +17,9 @@ namespace Dibix.Sdk.Sql
             return sb.ToString();
         }
 
-        public static void Visit(this TSqlFragment fragment, Action<TSqlParserToken> visitor)
+        public static string ToKey(this SchemaObjectName name)
         {
-            foreach (TSqlParserToken token in AsEnumerable(fragment))
-                visitor(token);
+            return String.Join(".", name.Identifiers.Select(x => x.Value));
         }
 
         public static IEnumerable<TSqlParserToken> AsEnumerable(this TSqlFragment fragment) => AsEnumerable(fragment, fragment.FirstTokenIndex);
@@ -47,34 +46,19 @@ namespace Dibix.Sdk.Sql
             return visitor.Found;
         }
 
-        public static IEnumerable<Constraint> CollectConstraints(this TableDefinition table)
-        {
-            foreach (ConstraintDefinition constraint in table.TableConstraints)
-                yield return Constraint.Create(constraint);
-
-            foreach (ColumnDefinition column in table.ColumnDefinitions)
-            {
-                foreach (ConstraintDefinition constraint in column.Constraints)
-                    yield return Constraint.Create(constraint, new ColumnReference(column.ColumnIdentifier.Value, column));
-
-                if (column.DefaultConstraint != null)
-                    yield return Constraint.Create(column.DefaultConstraint, new ColumnReference(column.ColumnIdentifier.Value, column));
-            }
-        }
-
         public static bool IsNullable(this TableDefinition table, string columnName)
         {
-            ICollection<Constraint> constraints = CollectConstraints(table).ToArray();
-            bool notNullable = constraints.Where(x => x.Type == ConstraintType.Nullable && x.Columns[0].Name == columnName)
-                                          .Select(x => x.Definition)
-                                          .Cast<NullableConstraintDefinition>()
-                                          .Any(x => !x.Nullable);
-            if (notNullable)
-                return false;
+            //ICollection<Constraint> constraints = CollectConstraints(table).ToArray();
+            //bool notNullable = constraints.Where(x => x.Type == ConstraintType.Nullable && x.Columns[0].Name == columnName)
+            //                              .Select(x => x.Definition)
+            //                              .Cast<NullableConstraintDefinition>()
+            //                              .Any(x => !x.Nullable);
+            //if (notNullable)
+            //    return false;
 
-            bool isPartOfPk = constraints.Any(x => x.Type == ConstraintType.PrimaryKey && x.Columns.Any(y => y.Name == columnName));
-            if (isPartOfPk)
-                return false;
+            //bool isPartOfPk = constraints.Any(x => x.Type == ConstraintType.PrimaryKey && x.Columns.Any(y => y.Name == columnName));
+            //if (isPartOfPk)
+            //    return false;
 
             return true;
         }
