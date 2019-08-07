@@ -3,7 +3,7 @@ AS
   CREATE TABLE [dbo].[dbx_codeanalysis_error_023_fail1] -- Part of the PK has an invalid type -> fail
   (
       [a] INT NOT NULL
-    , [b] NVARCHAR(128)
+    , [b] NVARCHAR(128) NULL
     , CONSTRAINT [PK_dbx_codeanalysis_error_023_fail1] PRIMARY KEY ([a], [b])
     , CONSTRAINT [UQ_dbx_codeanalysis_error_023_fail1_b] UNIQUE ([b])
   )

@@ -87,7 +87,13 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         };
 
         // Tables
-        public override void Visit(CreateTableStatement node) => this.Check(node.SchemaObjectName.BaseIdentifier, nameof(NamingConventions.Table), NamingConventions.Table);
+        public override void Visit(CreateTableStatement node)
+        {
+            if (node.IsTemporaryTable())
+                return;
+
+            this.Check(node.SchemaObjectName.BaseIdentifier, nameof(NamingConventions.Table), NamingConventions.Table);
+        }
 
         // Views
         public override void Visit(CreateViewStatement node) => this.Check(node.SchemaObjectName.BaseIdentifier, nameof(NamingConventions.View), NamingConventions.View);
