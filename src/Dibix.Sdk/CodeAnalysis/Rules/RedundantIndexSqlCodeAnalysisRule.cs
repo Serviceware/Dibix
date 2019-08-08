@@ -70,7 +70,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
             private static string NormalizeFilterCondition(BooleanExpression filter)
             {
-                SqlScriptGenerator generator = new Sql150ScriptGenerator();
+                SqlScriptGenerator generator = new Sql140ScriptGenerator();
                 generator.GenerateScript(filter, out string script);
                 return script;
             }
