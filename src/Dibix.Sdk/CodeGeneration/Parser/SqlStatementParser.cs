@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -49,14 +50,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static TSqlFragment ReadFromAst(object source) => (TSqlFragment)source;
 
-        private static TSqlFragment ReadFromTextReader(TextReader reader)
-        {
-            using (reader)
-            {
-                TSqlParser parser = new TSql140Parser(true);
-                return parser.Parse(reader, out IList<ParseError> _);
-            }
-        }
+        private static TSqlFragment ReadFromTextReader(TextReader reader) => ScriptDomFacade.Load(reader);
 
         private static bool CollectStatementInfo(TSqlFragment fragment, SqlStatementInfo target, ISqlStatementFormatter formatter, IContractResolverFacade contractResolverFacade, IErrorReporter errorReporter)
         {

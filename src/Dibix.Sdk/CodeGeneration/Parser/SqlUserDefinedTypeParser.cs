@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
@@ -19,17 +18,10 @@ namespace Dibix.Sdk.CodeGeneration
 
         public UserDefinedTypeDefinition Parse(string filePath)
         {
-            TSqlParser parser = new TSql140Parser(true);
-            using (Stream stream = File.OpenRead(filePath))
-            {
-                using (TextReader reader = new StreamReader(stream))
-                {
-                    TSqlFragment fragment = parser.Parse(reader, out IList<ParseError> _);
-                    UserDefinedTypeVisitor visitor = new UserDefinedTypeVisitor(() => SqlHintParser.FromFragment(filePath, this._errorReporter, fragment).ToArray());
-                    fragment.Accept(visitor);
-                    return visitor.Definition;
-                }
-            }
+            TSqlFragment fragment = ScriptDomFacade.Load(filePath);
+            UserDefinedTypeVisitor visitor = new UserDefinedTypeVisitor(() => SqlHintParser.FromFragment(filePath, this._errorReporter, fragment).ToArray());
+            fragment.Accept(visitor);
+            return visitor.Definition;
         }
 
         private static string GenerateDisplayName(string udtTypeName)

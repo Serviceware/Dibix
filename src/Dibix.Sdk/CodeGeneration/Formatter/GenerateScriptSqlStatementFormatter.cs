@@ -1,4 +1,5 @@
-﻿using Microsoft.SqlServer.TransactSql.ScriptDom;
+﻿using Dibix.Sdk.Sql;
+using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -9,8 +10,7 @@ namespace Dibix.Sdk.CodeGeneration
             TSqlBatch batch = new TSqlBatch();
             batch.Statements.AddRange(base.GetStatements(body));
 
-            Sql140ScriptGenerator generator = new Sql140ScriptGenerator { Options = { AlignClauseBodies = false } };
-            generator.GenerateScript(batch, out var output);
+            string output = ScriptDomFacade.Generate(batch, x => x.Options.AlignClauseBodies = false);
             return output;
         }
     }

@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using Dibix.Sdk.CodeAnalysis;
 using Dibix.Sdk.CodeGeneration;
+using Dibix.Sdk.Sql;
 using Microsoft.Build.Utilities;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
@@ -28,17 +28,10 @@ namespace Dibix.Sdk.MSBuild
                 ISqlCodeAnalysisRuleEngine codeAnalysis = new SqlCodeAnalysisRuleEngine();
                 foreach (string inputFilePath in inputs ?? Enumerable.Empty<string>())
                 {
-                    TSqlParser parser = new TSql140Parser(true);
-                    using (Stream stream = File.OpenRead(inputFilePath))
+                    TSqlFragment fragment = ScriptDomFacade.Load(inputFilePath);
+                    foreach (SqlCodeAnalysisError error in codeAnalysis.Analyze(null, fragment))
                     {
-                        using (TextReader reader = new StreamReader(stream))
-                        {
-                            TSqlFragment fragment = parser.Parse(reader, out IList<ParseError> _);
-                            foreach (SqlCodeAnalysisError error in codeAnalysis.Analyze(null, fragment))
-                            {
-                                errorReporter.RegisterError(inputFilePath, error.Line, error.Column, error.RuleId.ToString(), $"[Dibix] {error.Message}");
-                            }
-                        }
+                        errorReporter.RegisterError(inputFilePath, error.Line, error.Column, error.RuleId.ToString(), $"[Dibix] {error.Message}");
                     }
                 }
 

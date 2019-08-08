@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
+using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.Dac.Model;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
@@ -28,13 +28,8 @@ namespace Dibix.Sdk.CodeAnalysis
 
         public IEnumerable<SqlCodeAnalysisError> Analyze(ISqlCodeAnalysisRule rule, string scriptFilePath)
         {
-            using (TextReader reader = new StreamReader(scriptFilePath))
-            {
-                TSqlParser parser = new TSql140Parser(true);
-                IList<ParseError> parseErrors;
-                TSqlFragment fragment = parser.Parse(reader, out parseErrors);
-                return rule.Analyze(null, fragment);
-            }
+            TSqlFragment fragment = ScriptDomFacade.Load(scriptFilePath);
+            return rule.Analyze(null, fragment);
         }
         #endregion
 

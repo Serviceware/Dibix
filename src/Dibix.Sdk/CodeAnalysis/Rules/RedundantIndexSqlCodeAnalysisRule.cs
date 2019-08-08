@@ -68,12 +68,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                     this.Filter = NormalizeFilterCondition(filter);
             }
 
-            private static string NormalizeFilterCondition(BooleanExpression filter)
-            {
-                SqlScriptGenerator generator = new Sql140ScriptGenerator();
-                generator.GenerateScript(filter, out string script);
-                return script;
-            }
+            private static string NormalizeFilterCondition(BooleanExpression filter) => ScriptDomFacade.Generate(filter);
         }
 
         private sealed class IndexHitComparer : IEqualityComparer<IndexHit>
