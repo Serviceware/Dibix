@@ -717,6 +717,23 @@ UNION ALL
     column="17" /&gt;
 &lt;/errors&gt;</value>
   </data>
+  <data name="RedundantIndexSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="[033] Found duplicate indexes: PK_dbx_codeanalysis_error_033_fail1, UQ_dbx_codeanalysis_error_033_fail1_a, IX_dbx_codeanalysis_error_033_fail1_a"
+    line="7"
+    column="6" /&gt;
+  &lt;error
+    message="[033] Found duplicate indexes: IX_dbx_codeanalysis_error_033_fail1_b1, IX_dbx_codeanalysis_error_033_fail1_b2"
+    line="11"
+    column="2" /&gt;
+  &lt;error
+    message="[033] Found duplicate indexes with different includes: PK_dbx_codeanalysis_error_033_fail2, IX_dbx_codeanalysis_error_033_fail2_a"
+    line="18"
+    column="6" /&gt;
+&lt;/errors&gt;</value>
+  </data>
   <data name="SchemaSpecificationSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;

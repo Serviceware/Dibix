@@ -8,7 +8,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectVersion>4.1</ProjectVersion>
     <ProjectGuid>{2aa95dfc-b5c9-4758-bc8f-7a2290112c89}</ProjectGuid>
-    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql130DatabaseSchemaProvider</DSP>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql140DatabaseSchemaProvider</DSP>
     <OutputType>Database</OutputType>
     <RootPath>
     </RootPath>
@@ -108,6 +108,7 @@
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_030.sql" />
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_031.sql" />
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_032.sql" />
+    <Build Include="CodeAnalysis\dbx_codeanalysis_error_033.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CodeAnalysis" />

@@ -99,5 +99,8 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
 
         [Fact]
         public void IndexSizeSqlCodeAnalysisRule() => base.Execute();
+
+        [Fact]
+        public void RedundantIndexSqlCodeAnalysisRule() => base.Execute();
     }
 }
