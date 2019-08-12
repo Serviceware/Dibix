@@ -11,12 +11,12 @@ namespace Dibix.Sdk.CodeGeneration
 
         public SqlCodeAnalysisGeneratorAdapter()
         {
-            this._engine = new SqlCodeAnalysisRuleEngine();
+            this._engine = SqlCodeAnalysisRuleEngine.Create();
         }
 
         public bool Analyze(TSqlFragment scriptFragment, string sourceFilePath, IErrorReporter errorReporter)
         {
-            ICollection<SqlCodeAnalysisError> errors = this._engine.Analyze(null, scriptFragment).ToArray();
+            ICollection<SqlCodeAnalysisError> errors = this._engine.Analyze(scriptFragment).ToArray();
             if (!errors.Any())
                 return false;
 

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Microsoft.SqlServer.Dac.Model;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis
@@ -18,21 +17,21 @@ namespace Dibix.Sdk.CodeAnalysis
             this.Errors = new Collection<SqlCodeAnalysisError>();
         }
 
-        IEnumerable<SqlCodeAnalysisError> ISqlCodeAnalysisRule.Analyze(TSqlObject modelElement, TSqlFragment scriptFragment)
+        IEnumerable<SqlCodeAnalysisError> ISqlCodeAnalysisRule.Analyze(TSqlFragment scriptFragment)
         {
             this.Errors.Clear();
 
-            this.Analyze(modelElement, scriptFragment);
+            this.Analyze(scriptFragment);
 
             return this.Errors;
         }
 
-        protected abstract void Analyze(TSqlObject modelElement, TSqlFragment scriptFragment);
+        protected abstract void Analyze(TSqlFragment scriptFragment);
 
-        protected void Fail(TSqlObject modelElement, TSqlFragment fragment, int line, int column, params object[] args)
+        protected void Fail(TSqlFragment fragment, int line, int column, params object[] args)
         {
             string errorText = $"[{this.Id:d3}] {String.Format(this.ErrorMessage, args)}";
-            SqlCodeAnalysisError problem = new SqlCodeAnalysisError(this.Id, errorText, modelElement, fragment, line, column);
+            SqlCodeAnalysisError problem = new SqlCodeAnalysisError(this.Id, errorText, fragment, line, column);
             this.Errors.Add(problem);
         }
     }
@@ -40,13 +39,10 @@ namespace Dibix.Sdk.CodeAnalysis
 
     public abstract class SqlCodeAnalysisRule<TVisitor> : SqlCodeAnalysisRule, ISqlCodeAnalysisRule where TVisitor : SqlCodeAnalysisRuleVisitor, new()
     {
-        protected override void Analyze(TSqlObject modelElement, TSqlFragment scriptFragment)
+        protected override void Analyze(TSqlFragment scriptFragment)
         {
-            if (scriptFragment == null)
-                return;
-
             TVisitor visitor = new TVisitor();
-            visitor.ErrorHandler = (fragment, line, column, args) => base.Fail(modelElement, fragment ?? scriptFragment, line, column, args);
+            visitor.ErrorHandler = (fragment, line, column, args) => base.Fail(fragment ?? scriptFragment, line, column, args);
             scriptFragment.Accept(visitor);
         }
     }

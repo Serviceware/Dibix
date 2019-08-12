@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Dibix.Sdk.Sql;
-using Microsoft.SqlServer.Dac.Model;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis
@@ -14,22 +13,32 @@ namespace Dibix.Sdk.CodeAnalysis
         #endregion
 
         #region Constructor
-        public SqlCodeAnalysisRuleEngine()
+        private SqlCodeAnalysisRuleEngine()
         {
             this._rules = ScanRules();
         }
         #endregion
 
+        #region Factory Methods
+        public static SqlCodeAnalysisRuleEngine Create() => new SqlCodeAnalysisRuleEngine();
+        #endregion
+
         #region Public Methods
-        public IEnumerable<SqlCodeAnalysisError> Analyze(TSqlObject modelElement, TSqlFragment scriptFragment)
+        public IEnumerable<SqlCodeAnalysisError> Analyze(TSqlFragment fragment)
         {
-            return this._rules.SelectMany(x => x.Analyze(modelElement, scriptFragment));
+            return this._rules.SelectMany(x => x.Analyze(fragment));
         }
 
-        public IEnumerable<SqlCodeAnalysisError> Analyze(ISqlCodeAnalysisRule rule, string scriptFilePath)
+        public IEnumerable<SqlCodeAnalysisError> Analyze(string scriptFilePath)
         {
             TSqlFragment fragment = ScriptDomFacade.Load(scriptFilePath);
-            return rule.Analyze(null, fragment);
+            return this.Analyze(fragment);
+        }
+
+        public IEnumerable<SqlCodeAnalysisError> Analyze(string scriptFilePath, ISqlCodeAnalysisRule rule)
+        {
+            TSqlFragment fragment = ScriptDomFacade.Load(scriptFilePath);
+            return rule.Analyze(fragment);
         }
         #endregion
 

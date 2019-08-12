@@ -3,9 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using Dibix.Sdk.CodeAnalysis;
 using Dibix.Sdk.CodeGeneration;
-using Dibix.Sdk.Sql;
 using Microsoft.Build.Utilities;
-using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.MSBuild
 {
@@ -25,11 +23,10 @@ namespace Dibix.Sdk.MSBuild
             try
             {
                 IErrorReporter errorReporter = new MSBuildErrorReporter(logger);
-                ISqlCodeAnalysisRuleEngine codeAnalysis = new SqlCodeAnalysisRuleEngine();
+                ISqlCodeAnalysisRuleEngine codeAnalysis = SqlCodeAnalysisRuleEngine.Create();
                 foreach (string inputFilePath in inputs ?? Enumerable.Empty<string>())
                 {
-                    TSqlFragment fragment = ScriptDomFacade.Load(inputFilePath);
-                    foreach (SqlCodeAnalysisError error in codeAnalysis.Analyze(null, fragment))
+                    foreach (SqlCodeAnalysisError error in codeAnalysis.Analyze(inputFilePath))
                     {
                         errorReporter.RegisterError(inputFilePath, error.Line, error.Column, error.RuleId.ToString(), $"[Dibix] {error.Message}");
                     }
