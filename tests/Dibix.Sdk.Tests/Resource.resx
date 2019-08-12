@@ -181,17 +181,21 @@
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[032] Clustered index PK_dbx_codeanalysis_error_032_fail size is 1167 bytes. The maximum key length is 900 bytes"
-    line="34"
-    column="6" /&gt;
+    message="[032] Clustered index PK_dbx_codeanalysis_error_032_fail1 size is 901 bytes. The maximum key length is 900 bytes"
+    line="18"
+    column="5" /&gt;
   &lt;error
-    message="[032] Nonclustered index UQ_dbx_codeanalysis_error_032_fail_ab size is 1701 bytes. The maximum key length is 1700 bytes"
+    message="[032] Clustered index PK_dbx_codeanalysis_error_032_fail2 size is 901 bytes. The maximum key length is 900 bytes"
     line="35"
-    column="6" /&gt;
+    column="5" /&gt;
   &lt;error
-    message="[032] Nonclustered index IX_dbx_codeanalysis_error_032_fail_ac size is 1701 bytes. The maximum key length is 1700 bytes"
+    message="[032] Nonclustered index UQ_dbx_codeanalysis_error_032_fail2_ab size is 1701 bytes. The maximum key length is 1700 bytes"
     line="36"
-    column="6" /&gt;
+    column="5" /&gt;
+  &lt;error
+    message="[032] Nonclustered index IX_dbx_codeanalysis_error_032_fail2_ac size is 1701 bytes. The maximum key length is 1700 bytes"
+    line="37"
+    column="5" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="InsertWithoutColumnSpecificationSqlCodeAnalysisRule" xml:space="preserve">
