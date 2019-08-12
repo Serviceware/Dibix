@@ -50,23 +50,6 @@ namespace Dibix.Sdk.Sql
             return visitor.Found;
         }
 
-        public static bool IsNullable(this TableDefinition table, string columnName)
-        {
-            //ICollection<Constraint> constraints = CollectConstraints(table).ToArray();
-            //bool notNullable = constraints.Where(x => x.Type == ConstraintType.Nullable && x.Columns[0].Name == columnName)
-            //                              .Select(x => x.Definition)
-            //                              .Cast<NullableConstraintDefinition>()
-            //                              .Any(x => !x.Nullable);
-            //if (notNullable)
-            //    return false;
-
-            //bool isPartOfPk = constraints.Any(x => x.Type == ConstraintType.PrimaryKey && x.Columns.Any(y => y.Name == columnName));
-            //if (isPartOfPk)
-            //    return false;
-
-            return true;
-        }
-
         public static IEnumerable<TableReference> Recursive(this IEnumerable<TableReference> references)
         {
             foreach (TableReference tableReference in references)
