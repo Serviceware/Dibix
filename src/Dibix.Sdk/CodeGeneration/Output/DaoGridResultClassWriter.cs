@@ -9,7 +9,7 @@ namespace Dibix.Sdk.CodeGeneration
     internal sealed class DaoGridResultClassWriter : DaoWriterBase, IDaoWriter
     {
         #region Fields
-        private const string ComplexResultTypeSuffix = "Result";
+        internal const string ComplexResultTypeSuffix = "Result";
         #endregion
 
         #region Properties

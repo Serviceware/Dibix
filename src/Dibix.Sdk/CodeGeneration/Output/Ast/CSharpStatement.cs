@@ -19,8 +19,13 @@ namespace Dibix.Sdk.CodeGeneration
         {
             foreach (string annotation in this._annotations.OrderBy(x => x.Length))
             {
-                writer.WriteLine($"[{annotation}]");
+                this.WriteAnnotation(writer, annotation);
             }
+        }
+
+        protected virtual void WriteAnnotation(StringWriter writer, string annotation)
+        {
+            writer.WriteLine($"[{annotation}]");
         }
 
         protected static void WriteMultiline(StringWriter writer, string content)

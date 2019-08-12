@@ -58,6 +58,7 @@ namespace Dibix.Sdk.CodeGeneration
         private static IEnumerable<IDaoWriter> SelectWriters()
         {
             yield return new DaoExecutorWriter();
+            yield return new DaoExecutorInputClassWriter();
             yield return new DaoGridResultClassWriter();
             yield return new DaoContractClassWriter();
             yield return new DaoStructuredTypeWriter();

@@ -13,7 +13,6 @@ namespace Dibix.Sdk.CodeGeneration
         #region Fields
         private const string ConstantSuffix = "CommandText";
         private const string MethodPrefix = "";//"Execute";
-        private const string ComplexResultTypeSuffix = "Result";
         #endregion
 
         #region Properties
@@ -94,8 +93,14 @@ namespace Dibix.Sdk.CodeGeneration
                                                      , isExtension: true
                                                      , modifiers: CSharpModifiers.Public | CSharpModifiers.Static);
                 method.AddParameter("databaseAccessorFactory", "IDatabaseAccessorFactory");
-                foreach (SqlQueryParameter parameter in statement.Parameters)
-                    method.AddParameter(parameter.Name, parameter.ClrTypeName);
+
+                if (statement.GenerateInputClass)
+                    method.AddParameter("input", $"{statement.Name}{DaoExecutorInputClassWriter.InputTypeSuffix}", "InputClass");
+                else
+                {
+                    foreach (SqlQueryParameter parameter in statement.Parameters)
+                        method.AddParameter(parameter.Name, parameter.ClrTypeName);
+                }
 
                 if (i + 1 < statements.Count)
                     @class.AddSeparator();
@@ -199,25 +204,33 @@ namespace Dibix.Sdk.CodeGeneration
                   .SetTemporaryIndent(37);
 
             writer.WriteLine()
-                  .WriteLine(".SetFromTemplate(new")
-                  .WriteLine("{")
-                  .PushIndent();
+                  .Write(".SetFromTemplate(");
 
-            for (int i = 0; i < query.Parameters.Count; i++)
+            if (query.GenerateInputClass)
+                writer.WriteRaw("input");
+            else
             {
-                SqlQueryParameter parameter = query.Parameters[i];
-                writer.Write(parameter.Name);
 
-                if (i + 1 < query.Parameters.Count)
-                    writer.WriteRaw(",");
+                writer.WriteLineRaw("new")
+                      .WriteLine("{")
+                      .PushIndent();
 
-                writer.WriteLine();
+                for (int i = 0; i < query.Parameters.Count; i++)
+                {
+                    SqlQueryParameter parameter = query.Parameters[i];
+                    writer.Write(parameter.Name);
+
+                    if (i + 1 < query.Parameters.Count)
+                        writer.WriteRaw(",");
+
+                    writer.WriteLine();
+                }
+
+                writer.PopIndent()
+                      .Write("}");
             }
 
-            writer.PopIndent()
-                  .Write("})");
-
-            writer.WriteLine()
+            writer.WriteLineRaw(")")
                   .WriteLine(".Build();")
                   .ResetTemporaryIndent();
         }
@@ -464,7 +477,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                     // Generate type name based on statement name
                     sb.Append(statement.Name)
-                      .Append(ComplexResultTypeSuffix);
+                      .Append(DaoGridResultClassWriter.ComplexResultTypeSuffix);
                 }
             }
 

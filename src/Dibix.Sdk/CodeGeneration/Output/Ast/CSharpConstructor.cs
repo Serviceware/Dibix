@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -23,7 +24,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public CSharpConstructor AddParameter(string name, string type)
         {
-            CSharpParameter parameter = new CSharpParameter(name, type);
+            CSharpParameter parameter = new CSharpParameter(name, type, Enumerable.Empty<string>());
             this._parameters.Add(parameter);
             return this;
         }
