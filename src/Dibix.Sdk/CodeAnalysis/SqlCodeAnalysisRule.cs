@@ -28,15 +28,14 @@ namespace Dibix.Sdk.CodeAnalysis
 
         private void Analyze(TSqlFragment scriptFragment)
         {
-            TVisitor visitor = new TVisitor();
-            visitor.ErrorHandler = (fragment, line, column, args) => this.Fail(fragment ?? scriptFragment, line, column, args);
+            TVisitor visitor = new TVisitor { ErrorHandler = this.Fail };
             scriptFragment.Accept(visitor);
         }
 
-        private void Fail(TSqlFragment fragment, int line, int column, params object[] args)
+        private void Fail(int line, int column, params object[] args)
         {
             string errorText = $"[{this.Id:d3}] {String.Format(this.ErrorMessage, args)}";
-            SqlCodeAnalysisError problem = new SqlCodeAnalysisError(this.Id, errorText, fragment, line, column);
+            SqlCodeAnalysisError problem = new SqlCodeAnalysisError(this.Id, errorText, line, column);
             this.Errors.Add(problem);
         }
     }

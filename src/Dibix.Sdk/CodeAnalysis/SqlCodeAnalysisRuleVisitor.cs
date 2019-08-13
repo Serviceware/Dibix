@@ -67,12 +67,9 @@ namespace Dibix.Sdk.CodeAnalysis
 
         protected virtual void Visit(TSqlParserToken token) { }
 
-        protected void Fail(TSqlParserToken token, params object[] args) => this.Fail(null, token.Line, token.Column, args);
-        protected void Fail(TSqlFragment fragment, params object[] args) => this.Fail(fragment, fragment.StartLine, fragment.StartColumn, args);
-        private void Fail(TSqlFragment fragment, int line, int column, params object[] args)
-        {
-            this.ErrorHandler(fragment, line, column, args);
-        }
+        protected void Fail(TSqlParserToken token, params object[] args) => this.Fail(token.Line, token.Column, args);
+        protected void Fail(TSqlFragment fragment, params object[] args) => this.Fail(fragment.StartLine, fragment.StartColumn, args);
+        private void Fail(int line, int column, params object[] args) => this.ErrorHandler(line, column, args);
 
         private void CollectConstraints(TSqlFragment node)
         {
