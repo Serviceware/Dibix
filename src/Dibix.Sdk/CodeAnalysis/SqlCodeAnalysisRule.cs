@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Dibix.Sdk.Sql;
+using Microsoft.SqlServer.Dac.Model;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis
@@ -17,18 +19,22 @@ namespace Dibix.Sdk.CodeAnalysis
             this.Errors = new Collection<SqlCodeAnalysisError>();
         }
 
-        IEnumerable<SqlCodeAnalysisError> ISqlCodeAnalysisRule.Analyze(TSqlFragment scriptFragment)
+        IEnumerable<SqlCodeAnalysisError> ISqlCodeAnalysisRule.Analyze(TSqlModel model, TSqlFragment scriptFragment)
         {
             this.Errors.Clear();
 
-            this.Analyze(scriptFragment);
+            this.Analyze(model, scriptFragment);
 
             return this.Errors;
         }
 
-        private void Analyze(TSqlFragment scriptFragment)
+        private void Analyze(TSqlModel model, TSqlFragment scriptFragment)
         {
-            TVisitor visitor = new TVisitor { ErrorHandler = this.Fail };
+            TVisitor visitor = new TVisitor
+            {
+                Model = new SqlModel(model),
+                ErrorHandler = this.Fail
+            };
             scriptFragment.Accept(visitor);
         }
 

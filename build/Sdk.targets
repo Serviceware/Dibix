@@ -40,10 +40,13 @@
   <UsingTask TaskName="CompileDatabaseAccessorTask" AssemblyFile="$(DibixBuildToolsPath)" />
   <UsingTask TaskName="VerifyDatabaseAccessorTask" AssemblyFile="$(DibixBuildToolsPath)" />
 
-  <Target Name="SqlCodeAnalysis" BeforeTargets="BeforeBuild">
+  <Target Name="SqlCodeAnalysis" AfterTargets="ResolveArtifactReferences">
     <SqlCodeAnalysisTask SdkPath="$(DibixSdkPath)"
                          SSDTDirectory="$(SqlServerRedistPath)"
-                         Inputs="@(Build->'%(FullPath)')"
+                         DatabaseSchemaProviderName="$(DSP)"
+                         ModelCollation="$(ModelCollation)"
+                         Source="@(Build)"
+                         SqlReferencePath="@(SqlReferencePath)"
                          IsIDEBuild="$(BuildingInsideVisualStudio)" />
   </Target>
 

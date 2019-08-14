@@ -1,43 +1,39 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Linq;
 using Dibix.Sdk.CodeAnalysis;
 using Dibix.Sdk.CodeGeneration;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
 namespace Dibix.Sdk.MSBuild
 {
     public static class SqlCodeAnalysisTask
     {
-        public static bool Execute(IEnumerable<string> inputs, TaskLoggingHelper logger)
+        public static bool Execute(string databaseSchemaProviderName, string modelCollation, ITaskItem[] source, ITaskItem[] sqlReferencePath, ITask task, TaskLoggingHelper logger)
         {
 #if DEBUG
             Debugger.Launch();
 #endif
-            return ExecuteCore(inputs, logger);
+            return ExecuteCore(databaseSchemaProviderName, modelCollation, source, sqlReferencePath, task, logger);
         }
 
-        public static bool ExecuteCore(IEnumerable<string> inputs, TaskLoggingHelper logger)
+        public static bool ExecuteCore(string databaseSchemaProviderName, string modelCollation, ITaskItem[] source, ITaskItem[] sqlReferencePath, ITask task, TaskLoggingHelper logger)
         {
-            Stopwatch sw = Stopwatch.StartNew();
-            try
-            {
-                IErrorReporter errorReporter = new MSBuildErrorReporter(logger);
-                ISqlCodeAnalysisRuleEngine codeAnalysis = SqlCodeAnalysisRuleEngine.Create();
-                foreach (string inputFilePath in inputs ?? Enumerable.Empty<string>())
-                {
-                    foreach (SqlCodeAnalysisError error in codeAnalysis.Analyze(inputFilePath))
-                    {
-                        errorReporter.RegisterError(inputFilePath, error.Line, error.Column, error.RuleId.ToString(), $"[Dibix] {error.Message}");
-                    }
-                }
+            IErrorReporter errorReporter = new MSBuildErrorReporter(logger);
+            ISqlCodeAnalysisRuleEngine codeAnalysis = SqlCodeAnalysisRuleEngine.Create(databaseSchemaProviderName, modelCollation, source, sqlReferencePath, task, errorReporter);
+            if (errorReporter.ReportErrors())
+                return false;
 
-                return !errorReporter.ReportErrors();
-            }
-            finally
+            foreach (ITaskItem inputFile in source ?? Enumerable.Empty<ITaskItem>())
             {
-                logger.LogMessage($"Executed SQL code analysis in {sw.Elapsed}");
+                string inputFilePath = inputFile.GetMetadata("FullPath");
+                foreach (SqlCodeAnalysisError error in codeAnalysis.Analyze(inputFilePath))
+                {
+                    errorReporter.RegisterError(inputFilePath, error.Line, error.Column, error.RuleId.ToString(), $"[Dibix] {error.Message}");
+                }
             }
+
+            return !errorReporter.ReportErrors();
         }
     }
 }

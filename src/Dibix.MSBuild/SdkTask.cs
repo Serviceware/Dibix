@@ -31,7 +31,9 @@ namespace Dibix.MSBuild
     {
         private static readonly string[] SSDTAssemblies =
         {
-            "Microsoft.SqlServer.TransactSql.ScriptDom"
+            "Microsoft.Data.Tools.Schema.Sql"
+          , "Microsoft.Data.Tools.Schema.Tasks.Sql"
+          , "Microsoft.SqlServer.TransactSql.ScriptDom"
           , "Microsoft.SqlServer.Dac.Extensions"
         };
 

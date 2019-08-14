@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Dibix.Sdk.Sql;
+using Microsoft.SqlServer.Dac;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis
@@ -12,6 +13,8 @@ namespace Dibix.Sdk.CodeAnalysis
         private readonly ICollection<Table> _tables;
 
         internal ReportSqlCodeAnalysisError ErrorHandler { get; set; }
+
+        protected internal SqlModel Model { get; set; }
 
         protected SqlCodeAnalysisRuleVisitor()
         {
@@ -69,6 +72,7 @@ namespace Dibix.Sdk.CodeAnalysis
 
         protected void Fail(TSqlParserToken token, params object[] args) => this.Fail(token.Line, token.Column, args);
         protected void Fail(TSqlFragment fragment, params object[] args) => this.Fail(fragment.StartLine, fragment.StartColumn, args);
+        protected void Fail(SourceInformation sourceInformation, params object[] args) => this.Fail(sourceInformation.StartLine, sourceInformation.StartColumn, args);
         private void Fail(int line, int column, params object[] args) => this.ErrorHandler(line, column, args);
 
         private void CollectConstraints(TSqlFragment node)

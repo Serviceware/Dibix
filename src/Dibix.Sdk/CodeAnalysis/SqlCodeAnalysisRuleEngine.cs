@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dibix.Sdk.CodeGeneration;
 using Dibix.Sdk.Sql;
+using Microsoft.Build.Framework;
+using Microsoft.SqlServer.Dac.Model;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis
@@ -9,24 +12,31 @@ namespace Dibix.Sdk.CodeAnalysis
     public sealed class SqlCodeAnalysisRuleEngine : ISqlCodeAnalysisRuleEngine
     {
         #region Fields
+        private readonly TSqlModel _model;
         private readonly ICollection<ISqlCodeAnalysisRule> _rules;
         #endregion
 
         #region Constructor
-        private SqlCodeAnalysisRuleEngine()
+        private SqlCodeAnalysisRuleEngine(TSqlModel model)
         {
+            this._model = model;
             this._rules = ScanRules();
         }
         #endregion
 
         #region Factory Methods
-        public static SqlCodeAnalysisRuleEngine Create() => new SqlCodeAnalysisRuleEngine();
+        public static SqlCodeAnalysisRuleEngine Create() => new SqlCodeAnalysisRuleEngine(null);
+        public static SqlCodeAnalysisRuleEngine Create(string databaseSchemaProviderName, string modelCollation, ITaskItem[] source, ITaskItem[] sqlReferencePath, ITask task, IErrorReporter errorReporter)
+        {
+            TSqlModel model = PublicSqlDataSchemaModelLoader.Load(databaseSchemaProviderName, modelCollation, source, sqlReferencePath, task, errorReporter);
+            return new SqlCodeAnalysisRuleEngine(model);
+        }
         #endregion
 
         #region Public Methods
         public IEnumerable<SqlCodeAnalysisError> Analyze(TSqlFragment fragment)
         {
-            return this._rules.SelectMany(x => x.Analyze(fragment));
+            return this._rules.SelectMany(x => x.Analyze(this._model, fragment));
         }
 
         public IEnumerable<SqlCodeAnalysisError> Analyze(string scriptFilePath)
@@ -38,7 +48,7 @@ namespace Dibix.Sdk.CodeAnalysis
         public IEnumerable<SqlCodeAnalysisError> Analyze(string scriptFilePath, ISqlCodeAnalysisRule rule)
         {
             TSqlFragment fragment = ScriptDomFacade.Load(scriptFilePath);
-            return rule.Analyze(fragment);
+            return rule.Analyze(this._model, fragment);
         }
         #endregion
 

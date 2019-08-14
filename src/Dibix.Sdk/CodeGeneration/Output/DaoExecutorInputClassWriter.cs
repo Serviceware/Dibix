@@ -34,7 +34,7 @@ namespace Dibix.Sdk.CodeGeneration
                 {
                     SqlStatementInfo statement = statements[j];
                     CSharpModifiers classVisibility = context.Configuration.GeneratePublicArtifacts ? CSharpModifiers.Public : CSharpModifiers.Internal;
-                    CSharpClass inputType = scope.AddClass(GetComplexTypeName(statement), classVisibility | CSharpModifiers.Sealed);
+                    CSharpClass inputType = scope.AddClass(GetInputTypeName(statement), classVisibility | CSharpModifiers.Sealed);
 
                     foreach (SqlQueryParameter parameter in statement.Parameters)
                     {
@@ -56,7 +56,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Private Methods
         private static bool RequiresInput(SqlStatementInfo statement) => statement.GenerateInputClass;
 
-        private static string GetComplexTypeName(SqlStatementInfo statement) => String.Concat(statement.Name, InputTypeSuffix);
+        private static string GetInputTypeName(SqlStatementInfo statement) => String.Concat(statement.Name, InputTypeSuffix);
         #endregion
     }
 }

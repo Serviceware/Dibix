@@ -1,5 +1,8 @@
 ﻿using System;
+using System.CodeDom.Compiler;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -7,13 +10,29 @@ using System.Resources;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
+using System.Xml.XPath;
 using Dibix.Sdk.CodeAnalysis;
+using Dibix.Sdk.CodeGeneration;
 using Dibix.Sdk.Tests.Utilities;
+using Microsoft.Build.Framework;
+using Microsoft.Data.Tools.Schema.Tasks.Sql;
+using Moq;
+using Xunit;
+using StringWriter = System.IO.StringWriter;
 
 namespace Dibix.Sdk.Tests.CodeAnalysis
 {
     public abstract class SqlCodeAnalysisRuleTestsBase
     {
+        static SqlCodeAnalysisRuleTestsBase()
+        {
+            // Force loading of referenced assemblies that are needed later on
+            new[]
+            {
+                typeof(SqlStaticCodeAnalysisTask) // Microsoft.Data.Tools.Schema.Tasks.Sql
+            }.GetHashCode();
+        }
+
         protected void Execute()
         {
             // Determine rule by 'back in time development' and create instance
@@ -21,9 +40,48 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
             string expected = GetExpectedText(ruleName);
             Type ruleType = Type.GetType($"Dibix.Sdk.CodeAnalysis.Rules.{ruleName},{typeof(ISqlCodeAnalysisRule).Assembly.GetName().Name}");
             ISqlCodeAnalysisRule ruleInstance = (ISqlCodeAnalysisRule)Activator.CreateInstance(ruleType);
-            string violationScriptPath = $@"..\..\..\..\Dibix.Sdk.Tests.Database\CodeAnalysis\dbx_codeanalysis_error_{ruleInstance.Id:D3}.sql";
+            string databaseProjectDirectory = Path.GetFullPath(@"..\..\..\..\Dibix.Sdk.Tests.Database");
+            string violationScriptPath = Path.Combine(databaseProjectDirectory, "CodeAnalysis", $"dbx_codeanalysis_error_{ruleInstance.Id:D3}.sql");
+            string databaseProjectPath = Path.Combine(databaseProjectDirectory, "Dibix.Sdk.Tests.Database.sqlproj");
 
-            ISqlCodeAnalysisRuleEngine engine = SqlCodeAnalysisRuleEngine.Create();
+            XDocument databaseProject = XDocument.Load(databaseProjectPath);
+            XmlNamespaceManager mgr = new XmlNamespaceManager(new NameTable());
+            mgr.AddNamespace("x", "http://schemas.microsoft.com/developer/msbuild/2003");
+
+            string databaseSchemaProviderName = (string)databaseProject.XPathEvaluate("string(x:Project/x:PropertyGroup/x:DSP)", mgr);
+            string modelCollation = (string)databaseProject.XPathEvaluate("string(x:Project/x:PropertyGroup/x:ModelCollation)", mgr);
+            ITaskItem[] source = ((IEnumerable)databaseProject.XPathEvaluate("x:Project/x:ItemGroup/x:Build/@Include", mgr))
+                                                              .OfType<XAttribute>()
+                                                              .Select(x =>
+                                                              {
+                                                                  Mock<ITaskItem> item = new Mock<ITaskItem>(MockBehavior.Strict);
+                                                                  item.SetupGet(y => y.MetadataNames).Returns(new string[0]);
+                                                                  item.Setup(y => y.GetMetadata("FullPath")).Returns(Path.Combine(databaseProjectDirectory, x.Value));
+                                                                  return item.Object;
+                                                              })
+                                                              .ToArray();
+
+            ICollection<CompilerError> loadErrors = new Collection<CompilerError>();
+
+            Mock<ITask> task = new Mock<ITask>(MockBehavior.Strict);
+            Mock<IBuildEngine> buildEngine = new Mock<IBuildEngine>(MockBehavior.Strict);
+            Mock<IErrorReporter> errorReporter = new Mock<IErrorReporter>(MockBehavior.Strict);
+
+            task.SetupGet(x => x.BuildEngine).Returns(buildEngine.Object);
+            buildEngine.Setup(x => x.LogMessageEvent(It.IsAny<BuildMessageEventArgs>()));
+            errorReporter.Setup(x => x.RegisterError(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>()))
+                         .Callback((string fileName, int line, int column, string errorNumber, string errorText) => loadErrors.Add(new CompilerError(fileName, line, column, errorNumber, errorText)));
+            errorReporter.Setup(x => x.ReportErrors())
+                         .Returns(() =>
+                         {
+                             if (!loadErrors.Any())
+                                 return false;
+
+                             Assert.True(false, String.Join(Environment.NewLine, loadErrors));
+                             return true;
+                         });
+
+            ISqlCodeAnalysisRuleEngine engine = SqlCodeAnalysisRuleEngine.Create(databaseSchemaProviderName, modelCollation, source, new ITaskItem[0], task.Object, errorReporter.Object);
             IEnumerable<SqlCodeAnalysisError> errors = engine.Analyze(violationScriptPath, ruleInstance);
 
             string actual = GenerateXmlFromResults(errors);
@@ -42,10 +100,24 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
 
         private static string GenerateXmlFromResults(IEnumerable<SqlCodeAnalysisError> result)
         {
-            XDocument doc = new XDocument(new XElement("errors", result.Select(x => new XElement("error",
-                new XAttribute("message", x.Message),
-                new XAttribute("line", x.Line),
-                new XAttribute("column", x.Column))).ToArray()));
+            XDocument doc = new XDocument
+            (
+                new XElement
+                (
+                    "errors"
+                  , result.Select
+                    (
+                        x => new XElement
+                        (
+                            "error"
+                          , new XAttribute("message", x.Message)
+                          , new XAttribute("line", x.Line)
+                          , new XAttribute("column", x.Column)
+                        )
+                    )
+                    .ToArray()
+                )
+            );
 
             StringBuilder sb = new StringBuilder();
             using (StringWriter stringWriter = new StringWriter(sb))

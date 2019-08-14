@@ -104,6 +104,12 @@
     <ProjectReference Include="..\..\src\Dibix\Dibix.csproj" />
     <ProjectReference Include="..\..\src\Dibix.Sdk\Dibix.Sdk.csproj" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <Reference Include="Microsoft.Data.Tools.Schema.Tasks.Sql">
+      <HintPath>$(VsInstallRoot)\Common7\IDE\Extensions\Microsoft\SQLDB\Dac\150\Microsoft.Data.Tools.Schema.Tasks.Sql.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 
   <ItemGroup>
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
