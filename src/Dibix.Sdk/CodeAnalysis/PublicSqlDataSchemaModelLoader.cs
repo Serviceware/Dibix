@@ -28,15 +28,20 @@ namespace Dibix.Sdk.CodeAnalysis
             ParameterExpression taskParameter = Expression.Parameter(typeof(ITask), "task");
             ParameterExpression errorReporterParameter = Expression.Parameter(typeof(IErrorReporter), "errorReporter");
 
+            Type hostLoaderType = Type.GetType("Microsoft.Data.Tools.Schema.Tasks.Sql.TaskHostLoader,Microsoft.Data.Tools.Schema.Tasks.Sql", true);
+            MethodInfo loadMethod = hostLoaderType.GetMethod("Load");
+            Guard.IsNotNull(loadMethod, nameof(loadMethod), "Could find method 'Load' on 'TaskHostLoader'");
+
             // TaskLoggingHelper logger = new TaskLoggingHelper(task);
-            Type loggerType = Type.GetType("Microsoft.Build.Utilities.TaskLoggingHelper,Microsoft.Build.Utilities.v4.0, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", true);
+            // Since the TaskLoggingHelper exists in both Microsoft.Build.Utilities.Core or Microsoft.Build.Utilities.v4.0,
+            // based on the MSBuild version, we have to inspect the target method parameter to specify it from the correct assembly.
+            Type loggerType = loadMethod.GetParameters()[1].ParameterType;
             ParameterExpression loggerVariable = Expression.Variable(loggerType, "logger");
             ConstructorInfo loggerCtor = loggerType.GetConstructor(new[] { typeof(ITask) });
             Expression loggerValue = Expression.New(loggerCtor, taskParameter);
             Expression loggerAssign = Expression.Assign(loggerVariable, loggerValue);
 
             // TaskHostLoader hostLoader = new TaskHostLoader();
-            Type hostLoaderType = Type.GetType("Microsoft.Data.Tools.Schema.Tasks.Sql.TaskHostLoader,Microsoft.Data.Tools.Schema.Tasks.Sql", true);
             ParameterExpression hostLoaderVariable = Expression.Variable(hostLoaderType, "hostLoader");
             Expression hostLoaderValue = Expression.New(hostLoaderType);
             Expression hostLoaderAssign = Expression.Assign(hostLoaderVariable, hostLoaderValue);
@@ -58,7 +63,7 @@ namespace Dibix.Sdk.CodeAnalysis
             Expression sqlReferencePathAssign = Expression.Assign(sqlReferencePathProperty, sqlReferencePathParameter);
 
             // hostLoader.Load(null, logger);
-            Expression loadCall = Expression.Call(hostLoaderVariable, "Load", new Type[0], Expression.Constant(null, typeof(ITaskHost)), loggerVariable);
+            Expression loadCall = Expression.Call(hostLoaderVariable, loadMethod, Expression.Constant(null, typeof(ITaskHost)), loggerVariable);
 
             //IEnumerator<DataSchemaError> errorEnumerator;
             //try
