@@ -5,12 +5,15 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Dibix.Sdk.CodeGeneration;
 using Microsoft.Build.Framework;
+using Microsoft.Data.Tools.Schema.Extensibility;
 using Microsoft.SqlServer.Dac.Model;
+using Assembly = System.Reflection.Assembly;
 
 namespace Dibix.Sdk.CodeAnalysis
 {
     internal static class PublicSqlDataSchemaModelLoader
     {
+        private static readonly Assembly SchemaSqlAssembly = typeof(IExtension).Assembly;
         private static readonly LoadPublicDataSchemaModel ModelFactory = CompileModelFactory();
 
         public static TSqlModel Load(string databaseSchemaProviderName, string modelCollation, ITaskItem[] source, ITaskItem[] sqlReferencePath, ITask task, IErrorReporter errorReporter)
@@ -79,7 +82,7 @@ namespace Dibix.Sdk.CodeAnalysis
             //{
             //    errorEnumerator.Dispose();
             //}
-            Type dataSchemaErrorType = Type.GetType("Microsoft.Data.Tools.Schema.DataSchemaError,Microsoft.Data.Tools.Schema.Sql", true);
+            Type dataSchemaErrorType = SchemaSqlAssembly.GetType("Microsoft.Data.Tools.Schema.DataSchemaError", true);
             ParameterExpression errorEnumeratorVariable = Expression.Variable(typeof(IEnumerator<>).MakeGenericType(dataSchemaErrorType), "errorEnumerator");
 
             Expression errorManagerProperty = Expression.Property(hostLoaderVariable, "LoadedErrorManager");
@@ -118,7 +121,7 @@ namespace Dibix.Sdk.CodeAnalysis
             // new TSqlModel(hostLoader.LoadedTaskHost.Model);
             Expression loadedTaskHostProperty = Expression.Property(hostLoaderVariable, "LoadedTaskHost");
             MemberExpression modelProperty = Expression.Property(loadedTaskHostProperty, "Model");
-            Type dataSchemaModelType = Type.GetType("Microsoft.Data.Tools.Schema.SchemaModel.DataSchemaModel,Microsoft.Data.Tools.Schema.Sql", true);
+            Type dataSchemaModelType = SchemaSqlAssembly.GetType("Microsoft.Data.Tools.Schema.SchemaModel.DataSchemaModel", true);
             ConstructorInfo modelCtor = typeof(TSqlModel).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { dataSchemaModelType }, null);
             Expression modelValue = Expression.New(modelCtor, modelProperty);
 
