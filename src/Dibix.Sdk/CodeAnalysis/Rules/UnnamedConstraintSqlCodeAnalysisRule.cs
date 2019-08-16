@@ -13,12 +13,15 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         public override void Visit(CreateTableStatement node)
         {
-            foreach (Constraint constraint in base.GetConstraints(node.SchemaObjectName))
+            if (node.IsTemporaryTable())
+                return;
+
+            foreach (Constraint constraint in base.Model.GetConstraints(node.SchemaObjectName))
             {
-                if (constraint.Type == ConstraintType.Nullable || constraint.Definition.ConstraintIdentifier != null)
+                if (constraint.Kind == ConstraintKind.Nullable || constraint.Name != null)
                     continue;
 
-                base.Fail(constraint.Definition, node.SchemaObjectName.BaseIdentifier.Value, constraint.TypeDisplayName.ToLowerInvariant());
+                base.Fail(constraint.Definition, node.SchemaObjectName.BaseIdentifier.Value, constraint.KindDisplayName.ToLowerInvariant());
             }
         }
     }

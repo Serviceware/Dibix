@@ -34,7 +34,7 @@ namespace Dibix.Sdk.CodeGeneration
             return CultureInfo.InvariantCulture.TextInfo.ToTitleCase(udtTypeName).Replace("_", String.Empty);
         }
 
-        private class UserDefinedTypeVisitor : ConstraintVisitor
+        private class UserDefinedTypeVisitor : TSqlFragmentVisitor
         {
             private readonly Lazy<ICollection<SqlHint>> _hintsAccessor;
 
@@ -45,29 +45,34 @@ namespace Dibix.Sdk.CodeGeneration
                 this._hintsAccessor = new Lazy<ICollection<SqlHint>>(hintsProvider);
             }
 
-            protected override void Visit(Table table)
+            public override void Visit(CreateTypeTableStatement node)
             {
-                if (table.Type != TableType.TypeTable)
-                    return;
-
-                base.Visit(table);
-
-                string typeName = table.Name.BaseIdentifier.Value;
+                string typeName = node.Name.BaseIdentifier.Value;
                 string displayName = this._hintsAccessor.Value.SingleHintValue(SqlHint.Name);
                 if (String.IsNullOrEmpty(displayName))
                     displayName = GenerateDisplayName(typeName);
 
-                ICollection<string> notNullableColumns = new HashSet<string>();
-                if (base.Targets.TryGetValue(table.Name.ToKey(), out ConstraintTarget constraintTarget))
+                ICollection<string> notNullableColumns = new HashSet<string>(GetNotNullableColumns(node.Definition));
+                this.Definition = new UserDefinedTypeDefinition(typeName, displayName);
+                this.Definition.Columns.AddRange(node.Definition.ColumnDefinitions.Select(x => MapColumn(x, notNullableColumns)));
+            }
+
+            private static IEnumerable<string> GetNotNullableColumns(TableDefinition table)
+            {
+                foreach (ConstraintDefinition constraint in table.TableConstraints)
                 {
-                    notNullableColumns.AddRange(constraintTarget.Constraints
-                                                                .Where(x => x.Type == ConstraintType.PrimaryKey
-                                                                         || x.Type == ConstraintType.Nullable && !((NullableConstraintDefinition)x.Definition).Nullable)
-                                                                .SelectMany(x => x.Columns, (x, y) => y.Name));
+                    if (!(constraint is UniqueConstraintDefinition unique) || !unique.IsPrimaryKey)
+                        continue;
+
+                    foreach (ColumnWithSortOrder column in unique.Columns)
+                        yield return column.Column.GetName().Value;
                 }
 
-                this.Definition = new UserDefinedTypeDefinition(typeName, displayName);
-                this.Definition.Columns.AddRange(table.Definition.ColumnDefinitions.Select(x => MapColumn(x, notNullableColumns)));
+                foreach (ColumnDefinition column in table.ColumnDefinitions)
+                {
+                    if (column.Constraints.Any(x => x is NullableConstraintDefinition nullable && !nullable.Nullable))
+                        yield return column.ColumnIdentifier.Value;
+                }
             }
 
             private static UserDefinedTypeColumn MapColumn(ColumnDefinition column, ICollection<string> notNullableColumns)

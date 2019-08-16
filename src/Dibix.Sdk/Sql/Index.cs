@@ -1,25 +1,31 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using Microsoft.SqlServer.Dac;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.Sql
 {
-    [DebuggerDisplay("{(IsUnique ? \"Unique\" : \"Nonunique\")} - {Identifier.Value}")]
+    [DebuggerDisplay("{(IsUnique ? \"Unique\" : \"Nonunique\")} - {Name}")]
     public sealed class Index
     {
-        public TSqlStatement Target { get; }
-        public Identifier Identifier { get; }
+        public string Name { get; }
         public bool IsUnique { get; }
-        public IList<ColumnReference> Columns { get; }
+        public bool IsClustered { get; }
+        public SourceInformation Source { get; }
+        public Identifier Identifier { get; }
+        public TSqlFragment Definition { get; }
+        public IList<Column> Columns { get; }
 
-        internal Index(TSqlStatement target, Identifier identifier, bool isUnique, IEnumerable<ColumnReference> columns)
+        internal Index(string name, bool isUnique, bool isClustered, SourceInformation source, Identifier identifier, TSqlFragment definition)
         {
-            this.Target = target;
-            this.Identifier = identifier;
+            this.Name = name;
             this.IsUnique = isUnique;
-            this.Columns = new Collection<ColumnReference>();
-            this.Columns.AddRange(columns);
+            this.IsClustered = isClustered;
+            this.Source = source;
+            this.Identifier = identifier;
+            this.Definition = definition;
+            this.Columns = new Collection<Column>();
         }
     }
 }

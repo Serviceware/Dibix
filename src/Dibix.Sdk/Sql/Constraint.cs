@@ -2,25 +2,31 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using Microsoft.SqlServer.Dac;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.Sql
 {
-    [DebuggerDisplay("{Type} - {Definition.Dump()}")]
+    [DebuggerDisplay("[{Kind}] {Name}")]
     public sealed class Constraint
     {
+        public ConstraintKind Kind { get; }
+        public string KindDisplayName { get; }
+        public string Name { get; }
+        public bool? IsClustered { get; }
+        public SourceInformation Source { get; }
         public ConstraintDefinition Definition { get; }
-        public ConstraintType Type { get; }
-        public string TypeDisplayName { get; }
-        public IList<ColumnReference> Columns { get; }
+        public IList<Column> Columns { get; }
 
-        internal Constraint(ConstraintDefinition definition, ConstraintType type, IEnumerable<ColumnReference> columns)
+        internal Constraint(ConstraintKind kind, string name, bool? isClustered, SourceInformation source, ConstraintDefinition definition)
         {
+            this.Kind = kind;
+            this.KindDisplayName = $"{String.Join(" ", kind.ToString().SplitWords())} constraint";
+            this.Name = name;
+            this.IsClustered = isClustered;
+            this.Source = source;
             this.Definition = definition;
-            this.Type = type;
-            this.TypeDisplayName = $"{String.Join(" ", type.ToString().SplitWords())} constraint";
-            this.Columns = new Collection<ColumnReference>();
-            this.Columns.AddRange(columns);
+            this.Columns = new Collection<Column>();
         }
     }
 }

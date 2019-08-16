@@ -295,9 +295,9 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             if (node.IsTemporaryTable())
                 return;
 
-            ICollection<Constraint> constraints = base.GetConstraints(node.SchemaObjectName).ToArray();
+            ICollection<Constraint> constraints = base.Model.GetConstraints(node.SchemaObjectName).ToArray();
 
-            Constraint primaryKey = constraints.SingleOrDefault(x => x.Type == ConstraintType.PrimaryKey);
+            Constraint primaryKey = constraints.SingleOrDefault(x => x.Kind == ConstraintKind.PrimaryKey);
             if (primaryKey == null)
                 return;
 
@@ -305,20 +305,18 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                                                                  .ColumnDefinitions
                                                                  .ToDictionary(x => x.ColumnIdentifier.Value, x => x.DataType);
 
-            UniqueConstraintDefinition primaryKeyConstraint = (UniqueConstraintDefinition)primaryKey.Definition;
-
             string tableName = node.SchemaObjectName.BaseIdentifier.Value;
-            foreach (ColumnReference column in primaryKey.Columns)
+            foreach (Column column in primaryKey.Columns)
             {
                 // If the PK is not the table's own key, and instead is a FK to a different table's key, no further analysis is needed
-                bool hasMatchingForeignKey = constraints.Where(x => x.Type == ConstraintType.ForeignKey)
+                bool hasMatchingForeignKey = constraints.Where(x => x.Kind == ConstraintKind.ForeignKey)
                                                         .Any(x => x.Columns.Any(y => y.Name == column.Name));
                 if (hasMatchingForeignKey)
                     continue;
 
                 string identifier = column.Name;
-                if (primaryKeyConstraint.ConstraintIdentifier != null)
-                    identifier = String.Concat(primaryKeyConstraint.ConstraintIdentifier.Value, '#', identifier);
+                if (primaryKey.Name != null)
+                    identifier = String.Concat(primaryKey.Name, '#', identifier);
                 else
                     identifier = String.Concat(tableName, '#', identifier);
 
@@ -326,7 +324,9 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                  && !AllowedPrimaryKeyTypes.Contains(sqlDataType.SqlDataTypeOption)
                  && !Workarounds.Contains(identifier))
                 {
-                    base.Fail(column.Hit, tableName, column.Name, sqlDataType.SqlDataTypeOption.ToString().ToUpperInvariant());
+                    UniqueConstraintDefinition definition = (UniqueConstraintDefinition)primaryKey.Definition;
+                    TSqlFragment target = definition.Columns.SingleOrDefault(x => x.Column.GetName().Value == column.Name) ?? column.ScriptDom;
+                    base.Fail(target, tableName, column.Name, sqlDataType.SqlDataTypeOption.ToString().ToUpperInvariant());
                 }
             }
         }

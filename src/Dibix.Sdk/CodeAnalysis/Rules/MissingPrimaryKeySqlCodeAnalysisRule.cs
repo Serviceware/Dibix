@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using Dibix.Sdk.Sql;
+using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
@@ -22,24 +21,14 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
           , "hlwfuserevents"
         };
 
-        protected override void Visit(Table table)
+        protected override void Visit(TableModel tableModel, SchemaObjectName tableName, TableDefinition tableDefinition)
         {
-            if (Workarounds.Contains(table.Name.BaseIdentifier.Value))
+            if (Workarounds.Contains(tableName.BaseIdentifier.Value))
                 return;
 
-            bool hasPrimaryKey = base.GetConstraints(table.Name).Any(x => x.Type == ConstraintType.PrimaryKey);
+            bool hasPrimaryKey = base.Model.HasPrimaryKey(tableModel, tableName);
             if (!hasPrimaryKey)
-                base.Fail(table.Definition, ToDisplayName(table.Type), table.Name.BaseIdentifier.Value);
-        }
-
-        private static string ToDisplayName(TableType type)
-        {
-            switch (type)
-            {
-                case TableType.Table: return "Table";
-                case TableType.TypeTable: return "User defined table type";
-                default: throw new ArgumentOutOfRangeException(nameof(type), type, null);
-            }
+                base.Fail(tableDefinition, tableModel.TypeDisplayName, tableName.BaseIdentifier.Value);
         }
     }
 }

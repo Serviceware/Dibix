@@ -143,8 +143,8 @@
 &lt;errors&gt;
   &lt;error
     message="[028] Use of non UTC date/time function: GETDATE"
-    line="6"
-    column="87" /&gt;
+    line="4"
+    column="84" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="ImplicitAliasSqlCodeAnalysisRule" xml:space="preserve">
@@ -165,16 +165,16 @@
 &lt;errors&gt;
   &lt;error
     message="[025] Please specify a nullable constraint for the column 'dbx_codeanalysis_error_025_table_fail.a' and don't rely on the default"
-    line="14"
-    column="7" /&gt;
+    line="12"
+    column="5" /&gt;
   &lt;error
     message="[025] Please specify a nullable constraint for the column 'dbx_codeanalysis_error_025_table_fail.b' and don't rely on the default"
-    line="15"
-    column="4" /&gt;
+    line="13"
+    column="5" /&gt;
   &lt;error
     message="[025] Please specify the clustering (CLUSTERED/NONCLUSTERED) for the index 'IX_dbx_codeanalysis_error_025_table_fail_b' and don't rely on the default"
-    line="21"
-    column="3" /&gt;
+    line="25"
+    column="1" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="IndexSizeSqlCodeAnalysisRule" xml:space="preserve">
@@ -292,18 +292,18 @@
     line="4"
     column="25" /&gt;
   &lt;error
-    message="[020] Found language dependent expression: CONSTRAINT [DF_dbx_codeanalysis_error_020_table_value] DEFAULT ((N'1990-01-01'))"
+    message="[020] Found language dependent expression: CONSTRAINT [DF_dbx_codeanalysis_error_020_table_value] DEFAULT N'1990-01-01'"
     line="9"
-    column="92" /&gt;
+    column="90" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="LooseConstraintsSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[026] Constraints should be defined within the CREATE TABLE statement: UQ_dbx_codeanalysis_error_026_table"
-    line="8"
-    column="60" /&gt;
+    message="[026] Constraints should be defined within the CREATE TABLE statement: UQ_dbx_codeanalysis_error_026_table_b"
+    line="7"
+    column="58" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="MissingPrimaryKeySqlCodeAnalysisRule" xml:space="preserve">
@@ -311,57 +311,57 @@
 &lt;errors&gt;
   &lt;error
     message="[012] Table 'dbx_codeanalysis_error_012_table' does not have a primary key"
-    line="5"
-    column="3" /&gt;
+    line="3"
+    column="2" /&gt;
   &lt;error
     message="[012] User defined table type 'dbx_codeanalysis_udt_error_012' does not have a primary key"
-    line="10"
-    column="3" /&gt;
+    line="8"
+    column="2" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="NamingConventionSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[017] Default constraint 'DF_dbx_codeanalysis_error_017_fail_idx' does not match naming convention 'DF_&amp;lt;tablename&amp;gt;_&amp;lt;columnname&amp;gt;'. Also make sure the name is all lowercase."
+    message="[017] Column names should only contain the characters 'a-z_' and have no trailing underscores: dbx_codeanalysis_error_017_fail.A"
     line="22"
-    column="31" /&gt;
+    column="5" /&gt;
   &lt;error
     message="[017] Primary key constraint 'PK_dbx_codeanalysis_error_017_failx' does not match naming convention 'PK_&amp;lt;tablename&amp;gt;'. Also make sure the name is all lowercase."
     line="27"
-    column="17" /&gt;
+    column="16" /&gt;
   &lt;error
     message="[017] Foreign key constraint 'FK_dbx_codeanalysis_error_017_failx_a' does not match naming convention 'FK_&amp;lt;tablename&amp;gt;_*'. Also make sure the name is all lowercase."
     line="28"
-    column="17" /&gt;
-  &lt;error
-    message="[017] Check constraint 'CK_dbx_codeanalysis_error_017_failx_a' does not match naming convention 'CK_&amp;lt;tablename&amp;gt;_*'. Also make sure the name is all lowercase."
-    line="29"
-    column="17" /&gt;
+    column="16" /&gt;
   &lt;error
     message="[017] Unique constraint 'UQ_dbx_codeanalysis_error_017_failx_b' does not match naming convention 'UQ_&amp;lt;tablename&amp;gt;_*'. Also make sure the name is all lowercase."
     line="30"
-    column="17" /&gt;
+    column="16" /&gt;
+  &lt;error
+    message="[017] Check constraint 'CK_dbx_codeanalysis_error_017_failx_a' does not match naming convention 'CK_&amp;lt;tablename&amp;gt;_*'. Also make sure the name is all lowercase."
+    line="29"
+    column="16" /&gt;
+  &lt;error
+    message="[017] Default constraint 'DF_dbx_codeanalysis_error_017_fail_idx' does not match naming convention 'DF_&amp;lt;tablename&amp;gt;_&amp;lt;columnname&amp;gt;'. Also make sure the name is all lowercase."
+    line="22"
+    column="33" /&gt;
   &lt;error
     message="[017] Index 'IX_dbx_codeanalysis_error_017_failx_c' does not match naming convention 'IX_&amp;lt;tablename&amp;gt;_*'. Also make sure the name is all lowercase."
     line="31"
-    column="12" /&gt;
+    column="11" /&gt;
   &lt;error
     message="[017] Index 'IX_dbx_codeanalysis_error_017_failx_d' does not match naming convention 'IX_&amp;lt;tablename&amp;gt;_*'. Also make sure the name is all lowercase."
-    line="33"
-    column="28" /&gt;
+    line="34"
+    column="27" /&gt;
   &lt;error
     message="[017] Unique index 'UQ_dbx_codeanalysis_error_017_failx_e' does not match naming convention 'UQ_&amp;lt;tablename&amp;gt;_*'. Also make sure the name is all lowercase."
-    line="34"
-    column="35" /&gt;
-  &lt;error
-    message="[017] Column names should only contain the characters 'a-z_' and have no trailing underscores: dbx_codeanalysis_error_017_fail.A"
-    line="22"
-    column="3" /&gt;
+    line="36"
+    column="34" /&gt;
   &lt;error
     message="[017] Type 'dbx_codeanalysis_error_017_fail_udt' does not match naming convention 'dbx*_udt_*'. Also make sure the name is all lowercase."
-    line="37"
-    column="20" /&gt;
+    line="39"
+    column="19" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="NoCursorSqlCodeAnalysisRule" xml:space="preserve">
@@ -691,16 +691,16 @@ UNION ALL
 &lt;errors&gt;
   &lt;error
     message="[023] Only TINYINT/SMALLINT/INT/BIGINT are allowed as primary key: dbx_codeanalysis_error_023_fail1.b (NVARCHAR)"
-    line="7"
-    column="74" /&gt;
+    line="5"
+    column="72" /&gt;
   &lt;error
     message="[023] Only TINYINT/SMALLINT/INT/BIGINT are allowed as primary key: dbx_codeanalysis_error_023_fail2.b (NVARCHAR)"
-    line="13"
-    column="7" /&gt;
+    line="11"
+    column="5" /&gt;
   &lt;error
     message="[023] Only TINYINT/SMALLINT/INT/BIGINT are allowed as primary key: dbx_codeanalysis_error_023_fail3.c (NVARCHAR)"
-    line="20"
-    column="74" /&gt;
+    line="19"
+    column="72" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="PrimitiveDataTypeIdentifierSqlCodeAnalysisRule" xml:space="preserve">
@@ -726,16 +726,16 @@ UNION ALL
 &lt;errors&gt;
   &lt;error
     message="[033] Found duplicate indexes: PK_dbx_codeanalysis_error_033_fail1, UQ_dbx_codeanalysis_error_033_fail1_a, IX_dbx_codeanalysis_error_033_fail1_a"
-    line="7"
-    column="6" /&gt;
+    line="5"
+    column="5" /&gt;
   &lt;error
     message="[033] Found duplicate indexes: IX_dbx_codeanalysis_error_033_fail1_b1, IX_dbx_codeanalysis_error_033_fail1_b2"
-    line="11"
-    column="2" /&gt;
+    line="10"
+    column="1" /&gt;
   &lt;error
     message="[033] Found duplicate indexes with different includes: PK_dbx_codeanalysis_error_033_fail2, IX_dbx_codeanalysis_error_033_fail2_a"
-    line="18"
-    column="6" /&gt;
+    line="19"
+    column="5" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="SchemaSpecificationSqlCodeAnalysisRule" xml:space="preserve">
@@ -792,7 +792,7 @@ UNION ALL
   &lt;error
     message="[002] Missing schema specification"
     line="74"
-    column="15" /&gt;
+    column="14" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="SecurityAlgorithmSqlCodeAnalysisRule" xml:space="preserve">
@@ -894,16 +894,16 @@ namespace This.Is.A.Custom.Namespace
 &lt;errors&gt;
   &lt;error
     message="[024] Surrogate keys are only allowed, if a business key is defined: dbx_codeanalysis_error_024_fail1"
-    line="3"
-    column="3" /&gt;
+    line="1"
+    column="1" /&gt;
   &lt;error
     message="[024] Surrogate keys are only allowed, if a business key is defined: dbx_codeanalysis_error_024_fail2"
-    line="10"
-    column="3" /&gt;
+    line="8"
+    column="1" /&gt;
   &lt;error
     message="[024] Surrogate keys are only allowed, if a business key is defined: dbx_codeanalysis_error_024_fail3"
-    line="18"
-    column="3" /&gt;
+    line="16"
+    column="1" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="TableConstraintSqlCodeAnalysisRule" xml:space="preserve">
@@ -911,8 +911,8 @@ namespace This.Is.A.Custom.Namespace
 &lt;errors&gt;
   &lt;error
     message="[029] The constraint 'PK_dbx_codeanalysis_error_029_table_fail' should be defined on the table, instead of the column 'name'"
-    line="13"
-    column="5" /&gt;
+    line="11"
+    column="3" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="TemporaryTableSqlCodeAnalysisRule" xml:space="preserve">
@@ -1041,7 +1041,7 @@ namespace This.Is.A.Custom.Namespace
   &lt;error
     message="[027] Unique index should be replaced by a unique constraint on the table definition: UQ_dbx_codeanalysis_error_027_table_id_fail"
     line="13"
-    column="3" /&gt;
+    column="1" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="UnnamedConstraintSqlCodeAnalysisRule" xml:space="preserve">
@@ -1049,16 +1049,16 @@ namespace This.Is.A.Custom.Namespace
 &lt;errors&gt;
   &lt;error
     message="[014] Table 'dbx_codeanalysis_error_014_fail1' has an unnamed primary key constraint"
-    line="5"
-    column="21" /&gt;
+    line="3"
+    column="20" /&gt;
   &lt;error
     message="[014] Table 'dbx_codeanalysis_error_014_fail1' has an unnamed default constraint"
-    line="5"
-    column="33" /&gt;
+    line="3"
+    column="32" /&gt;
   &lt;error
     message="[014] Table 'dbx_codeanalysis_error_014_fail2' has an unnamed primary key constraint"
-    line="16"
-    column="6" /&gt;
+    line="14"
+    column="5" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="UnspecifiedDataTypeLengthSqlCodeAnalysisRule" xml:space="preserve">

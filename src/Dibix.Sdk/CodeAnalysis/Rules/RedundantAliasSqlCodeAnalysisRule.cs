@@ -1,4 +1,4 @@
-﻿using System.Linq;
+﻿using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
@@ -25,7 +25,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                 return;
 
             string alias = node.ColumnName.Value;
-            string columnName = columnReference.MultiPartIdentifier?.Identifiers.Last().Value;
+            string columnName = columnReference.GetName().Value;
             if (alias == columnName)
                 base.Fail(node.ColumnName);
         }

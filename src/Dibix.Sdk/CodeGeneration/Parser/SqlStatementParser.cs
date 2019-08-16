@@ -6,7 +6,7 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    public abstract class SqlStatementParser<TVisitor> : ISqlStatementParser, ISqlAnalysisRunner where TVisitor : SqlParserVisitor, new()
+    public abstract class SqlStatementParser<TVisitor> : ISqlStatementParser where TVisitor : SqlParserVisitor, new()
     {
         #region Fields
         private static readonly IDictionary<SqlParserSourceKind, Func<object, TSqlFragment>> SourceReaders = new Dictionary<SqlParserSourceKind, Func<object, TSqlFragment>>
@@ -15,18 +15,6 @@ namespace Dibix.Sdk.CodeGeneration
             { SqlParserSourceKind.Stream, ReadFromStream },
             { SqlParserSourceKind.Ast, ReadFromAst },
         };
-        private readonly SqlCodeAnalysisGeneratorAdapter _codeAnalysisRunner;
-        #endregion
-
-        #region Properties
-        public bool IsEnabled { get; set; } = true;
-        #endregion
-
-        #region Constructor
-        protected SqlStatementParser()
-        {
-            this._codeAnalysisRunner = new SqlCodeAnalysisGeneratorAdapter();
-        }
         #endregion
 
         #region ISqlStatementParser Members
@@ -36,9 +24,6 @@ namespace Dibix.Sdk.CodeGeneration
                 throw new ArgumentOutOfRangeException(nameof(sourceKind), sourceKind, null);
 
             TSqlFragment fragment = reader(source);
-            if (this.IsEnabled && this._codeAnalysisRunner.Analyze(fragment, target.Source, errorReporter))
-                return false;
-
             return CollectStatementInfo(fragment, target, formatter, contractResolverFacade, errorReporter);
         }
         #endregion

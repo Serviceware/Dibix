@@ -89,7 +89,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 if (scalar.Expression is ColumnReferenceExpression columnReference)
                 {
-                    Identifier identifier = columnReference.MultiPartIdentifier.Identifiers.Last();
+                    Identifier identifier = columnReference.GetName();
                     return OutputColumnResult.Success(identifier.Value, identifier.StartLine, identifier.StartColumn);
                 }
 

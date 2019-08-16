@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using Dibix.Sdk.Sql;
+using Microsoft.SqlServer.Dac;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
+using SqlDataType = Microsoft.SqlServer.Dac.Model.SqlDataType;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
@@ -26,9 +27,6 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         private const byte  DateTimeLength               = 8;    // bytes
         private const short SysNameLength                = 256;  // bytes
         private const short UniqueIdentifierLength       = 16;   // bytes
-        private const byte  DefaultBinaryLength          = 1;
-        private const byte  DefaultCharacterLength       = 1;
-        private const byte  DefaultDecimalPrecision      = 18;
 
         // helpLine suppressions
         private static readonly HashSet<string> Workarounds = new HashSet<string>
@@ -42,25 +40,21 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             if (node.IsTemporaryTable())
                 return;
 
-            foreach (Constraint constraint in this.GetConstraints(node.SchemaObjectName))
+            foreach (Constraint constraint in base.Model.GetConstraints(node.SchemaObjectName))
             {
-                if (!(constraint.Definition is UniqueConstraintDefinition uniqueConstraint))
+                if (constraint.Kind != ConstraintKind.PrimaryKey && constraint.Kind != ConstraintKind.Unique)
                     continue;
 
-                bool isClustered = uniqueConstraint.Clustered ?? uniqueConstraint.IsPrimaryKey;
-                Identifier name = constraint.Definition.ConstraintIdentifier;
-                this.Check(node, uniqueConstraint, isClustered, name, constraint.Columns);
+                this.Check(constraint.Source, constraint.IsClustered.Value, constraint.Name, constraint.Columns);
             }
 
-            foreach (Index index in this.GetIndexes(node.SchemaObjectName))
+            foreach (Index index in base.Model.GetIndexes(node.SchemaObjectName))
             {
-                bool isClustered = false; // So far we assume that a PK is defined so we don't expect any other clustered indexes
-                Identifier name = index.Identifier;
-                this.Check(node, index.Target, isClustered, name, index.Columns);
+                this.Check(index.Source, index.IsClustered, index.Name, index.Columns);
             }
         }
 
-        private void Check(CreateTableStatement node, TSqlFragment target, bool isClustered, Identifier indexName, IEnumerable<ColumnReference> indexColumns)
+        private void Check(SourceInformation source, bool isClustered, string indexName, IEnumerable<Column> columns)
         {
             string kind;
             int maxSize;
@@ -75,65 +69,44 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                 maxSize = MaximumNonClusteredIndexSize;
             }
 
-            int length = CollectColumnLengths(node.Definition, indexColumns).Sum();
+            int length = columns.Where(x => !x.IsComputed)
+                                .Select(ComputeColumnLength)
+                                .Sum();
+
             if (length <= maxSize)
                 return;
 
-            if (!Workarounds.Contains(indexName.Value))
-                base.Fail(target, kind, indexName.Value, length, maxSize);
+            if (!Workarounds.Contains(indexName))
+                base.Fail(source, kind, indexName, length, maxSize);
         }
 
-        private static IEnumerable<int> CollectColumnLengths(TableDefinition definition, IEnumerable<ColumnReference> indexColumns)
+        private static int ComputeColumnLength(Column column)
         {
-            ICollection<string> columnNames = new HashSet<string>(indexColumns.Select(x => x.Name));
-            foreach (ColumnDefinition column in definition.ColumnDefinitions)
+            switch (column.SqlDataType)
             {
-                if (!columnNames.Contains(column.ColumnIdentifier.Value) || column.IsPersisted)
-                    continue;
-
-                switch (column.DataType)
-                {
-                    case SqlDataTypeReference sqlDataTypeReference:
-                        yield return DetermineByteLength(sqlDataTypeReference);
-                        break;
-
-                    case UserDataTypeReference userDataTypeReference when userDataTypeReference.Name.BaseIdentifier.Value.ToUpperInvariant() == "SYSNAME":
-                        yield return SysNameLength;
-                        break;
-
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(column.DataType), column.DataType, "Unexpected data type for clustered index column");
-                }
-            }
-        }
-
-        private static int DetermineByteLength(SqlDataTypeReference sqlDataTypeReference)
-        {
-            switch (sqlDataTypeReference.SqlDataTypeOption)
-            {
-                case SqlDataTypeOption.Bit:
+                case SqlDataType.Bit:
                     return BitLength;
 
-                case SqlDataTypeOption.TinyInt:
+                case SqlDataType.TinyInt:
                     return TinyIntLength;
 
-                case SqlDataTypeOption.SmallInt:
+                case SqlDataType.SmallInt:
                     return SmallIntLength;
 
-                case SqlDataTypeOption.Int:
+                case SqlDataType.Int:
                     return IntLength;
 
-                case SqlDataTypeOption.BigInt:
+                case SqlDataType.BigInt:
                     return BigIntLength;
 
-                case SqlDataTypeOption.Date:
+                case SqlDataType.Date:
                     return DateLength;
 
-                case SqlDataTypeOption.DateTime:
+                case SqlDataType.DateTime:
                     return DateTimeLength;
 
-                case SqlDataTypeOption.Decimal:
-                    int precision = GetLengthSpecification(sqlDataTypeReference, DefaultDecimalPrecision);
+                case SqlDataType.Decimal:
+                    int precision = column.Precision;
                     if (precision > 0 && precision < 10)
                         return 5;
                     else if (precision > 9 && precision < 20)
@@ -143,35 +116,29 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                     else if (precision > 28 && precision < 39)
                         return 17;
                     else
-                        throw new ArgumentOutOfRangeException(nameof(sqlDataTypeReference.Parameters), precision, "Invalid decimal precision");
+                        throw new ArgumentOutOfRangeException(nameof(column.Precision), column.Precision, "Invalid decimal precision");
 
-                case SqlDataTypeOption.Char:
-                case SqlDataTypeOption.VarChar:
-                    return GetLengthSpecification(sqlDataTypeReference, DefaultCharacterLength);
+                case SqlDataType.Char:
+                case SqlDataType.VarChar:
+                    return column.Length;
 
-                case SqlDataTypeOption.NChar:
-                case SqlDataTypeOption.NVarChar:
-                    return GetLengthSpecification(sqlDataTypeReference, DefaultCharacterLength) * 2;
+                case SqlDataType.NChar:
+                case SqlDataType.NVarChar:
+                    return column.Length * 2;
 
-                case SqlDataTypeOption.UniqueIdentifier:
+                case SqlDataType.UniqueIdentifier:
                     return UniqueIdentifierLength;
 
-                case SqlDataTypeOption.Binary:
-                case SqlDataTypeOption.VarBinary:
-                    return GetLengthSpecification(sqlDataTypeReference, DefaultBinaryLength);
+                case SqlDataType.Binary:
+                case SqlDataType.VarBinary:
+                    return column.Length;
+
+                case SqlDataType.Unknown when column.DataTypeName == "sys.sysname":
+                    return SysNameLength;
 
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(sqlDataTypeReference.SqlDataTypeOption), sqlDataTypeReference.SqlDataTypeOption, "Unexpected data type for clustered index column");
+                    throw new ArgumentOutOfRangeException(nameof(column.DataTypeName), column.DataTypeName, "Unexpected data type for clustered index column");
             }
-        }
-
-        private static int GetLengthSpecification(SqlDataTypeReference sqlDataTypeReference, int @default)
-        {
-            if (!sqlDataTypeReference.Parameters.Any())
-                return @default;
-
-            IntegerLiteral literal = (IntegerLiteral)sqlDataTypeReference.Parameters[0];
-            return Convert.ToInt32(literal.Value, CultureInfo.InvariantCulture);
         }
     }
 }

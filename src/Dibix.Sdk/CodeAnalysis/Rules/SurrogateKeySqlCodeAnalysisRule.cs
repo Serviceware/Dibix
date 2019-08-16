@@ -90,7 +90,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             if (node.IsTemporaryTable())
                 return;
 
-            ICollection<Constraint> constraints = base.GetConstraints(node.SchemaObjectName).ToArray();
+            ICollection<Constraint> constraints = base.Model.GetConstraints(node.SchemaObjectName).ToArray();
 
             bool hasSurrogateKey = TryGetSurrogateKey(node, constraints, out Constraint primaryKey);
             if (!hasSurrogateKey)
@@ -116,7 +116,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         private static bool TryGetSurrogateKey(CreateTableStatement createTableStatement, IEnumerable<Constraint> constraints, out Constraint primaryKey)
         {
             // PK
-            primaryKey = constraints.SingleOrDefault(x => x.Type == ConstraintType.PrimaryKey);
+            primaryKey = constraints.SingleOrDefault(x => x.Kind == ConstraintKind.PrimaryKey);
             if (primaryKey == null)
                 return false;
 
@@ -135,10 +135,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         private static bool IsValidBusinessKey(Constraint primaryKey, Constraint constraint)
         {
-            if (constraint.Type != ConstraintType.Unique)
-                return false;
-
-            if (((UniqueConstraintDefinition)constraint.Definition).IsPrimaryKey)
+            if (constraint.Kind != ConstraintKind.Unique)
                 return false;
 
             bool businessKeyIsPrimaryKey = primaryKey.Columns.Count == constraint.Columns.Count

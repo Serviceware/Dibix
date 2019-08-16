@@ -14,14 +14,16 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
     public sealed class RedundantIndexSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
     {
-        protected override void Visit(Table table)
+        protected override void Visit(TableModel tableModel, SchemaObjectName tableName, TableDefinition tableDefinition)
         {
-            IEnumerable<IndexHit> constraints = base.GetConstraints(table.Name)
-                                                    .Where(x => x.Type == ConstraintType.PrimaryKey || x.Type == ConstraintType.Unique)
+            IEnumerable<IndexHit> constraints = base.Model
+                                                    .GetConstraints(tableModel, tableName)
+                                                    .Where(x => x.Kind == ConstraintKind.PrimaryKey || x.Kind == ConstraintKind.Unique)
                                                     .Select(x => new IndexHit(x.Definition.ConstraintIdentifier, x.Definition, x.Columns));
 
-            IEnumerable<IndexHit> indexes = base.GetIndexes(table.Name)
-                                                .Select(index => new IndexHit(index.Identifier, index.Target, index.Columns));
+            IEnumerable<IndexHit> indexes = base.Model
+                                                .GetIndexes(tableModel, tableName)
+                                                .Select(index => new IndexHit(index.Identifier, index.Definition, index.Columns));
 
             IEnumerable<IGrouping<IndexHit, IndexHit>> matches = constraints.Concat(indexes)
                                                                             .GroupBy(x => x, new IndexHitComparer())
@@ -29,30 +31,30 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             foreach (IGrouping<IndexHit, IndexHit> match in matches)
             {
                 bool differentIncludeColumns = match.Select(x => x.IncludeColumns).Distinct().Count() > 1;
-                base.Fail(match.First().Target, $"Found duplicate indexes{(differentIncludeColumns ? " with different includes" : null)}: {String.Join(", ", match.Select(x => x.Identifier.Value))}");
+                base.Fail(match.First().Definition, $"Found duplicate indexes{(differentIncludeColumns ? " with different includes" : null)}: {String.Join(", ", match.Select(x => x.Identifier.Value))}");
             }
         }
 
         private class IndexHit
         {
             public Identifier Identifier { get; }
-            public TSqlFragment Target { get; }
+            public TSqlFragment Definition { get; }
             public string Columns { get; }
             public string Filter { get; private set; }
             public string IncludeColumns { get; private set; }
 
-            public IndexHit(Identifier identifier, TSqlFragment target, IEnumerable<ColumnReference> columns)
+            public IndexHit(Identifier identifier, TSqlFragment definition, IEnumerable<Column> columns)
             {
                 this.Identifier = identifier;
-                this.Target = target;
+                this.Definition = definition;
                 this.Columns = String.Join(",", columns.Select(x => x.Name));
-                this.ApplyAdditionalIndexFeatures(target);
+                this.ApplyAdditionalIndexFeatures(definition);
             }
 
-            private void ApplyAdditionalIndexFeatures(TSqlFragment target)
+            private void ApplyAdditionalIndexFeatures(TSqlFragment definition)
             {
                 BooleanExpression filter = null;
-                switch (target)
+                switch (definition)
                 {
                     case IndexDefinition indexDefinition:
                         filter = indexDefinition.FilterPredicate;
@@ -103,4 +105,3 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         }
     }
 }
- 

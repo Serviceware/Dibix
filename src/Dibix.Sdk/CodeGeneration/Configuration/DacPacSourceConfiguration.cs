@@ -1,8 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.SqlServer.Dac.Model;
-using Newtonsoft.Json.Schema;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -46,9 +44,6 @@ namespace Dibix.Sdk.CodeGeneration
                 Name = displayName,
                 Source = this._packagePath
             };
-
-            if (parser is ISqlAnalysisRunner sqlAnalysisRunner)
-                sqlAnalysisRunner.IsEnabled = false;
 
             bool result = parser.Read(SqlParserSourceKind.String, script, statement, formatter, contractResolverFacade, errorReporter);
             return result ? statement : null;

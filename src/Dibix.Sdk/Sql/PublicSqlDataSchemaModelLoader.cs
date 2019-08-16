@@ -9,7 +9,7 @@ using Microsoft.Data.Tools.Schema.Extensibility;
 using Microsoft.SqlServer.Dac.Model;
 using Assembly = System.Reflection.Assembly;
 
-namespace Dibix.Sdk.CodeAnalysis
+namespace Dibix.Sdk.Sql
 {
     internal static class PublicSqlDataSchemaModelLoader
     {

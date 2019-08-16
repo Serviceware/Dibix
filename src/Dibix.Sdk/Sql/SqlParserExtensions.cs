@@ -17,21 +17,14 @@ namespace Dibix.Sdk.Sql
             return sb.ToString();
         }
 
-        public static string ToKey(this SchemaObjectName name)
-        {
-            IList<string> identifiers = name.Identifiers.Select(x => x.Value).ToList();
-            if (identifiers.Count == 1)
-                identifiers.Insert(0, "dbo");
-
-            return String.Join(".", identifiers);
-        }
-
         public static IEnumerable<TSqlParserToken> AsEnumerable(this TSqlFragment fragment) => AsEnumerable(fragment, fragment.FirstTokenIndex);
         public static IEnumerable<TSqlParserToken> AsEnumerable(this TSqlFragment fragment, int startIndex)
         {
             for (int i = startIndex; i <= fragment.LastTokenIndex; i++)
                 yield return fragment.ScriptTokenStream[i];
         }
+
+        public static Identifier GetName(this ColumnReferenceExpression column) => column.MultiPartIdentifier?.Identifiers.Last();
 
         public static QuerySpecification FindQuerySpecification(this QueryExpression expression)
         {

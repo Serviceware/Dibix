@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using Dibix.Sdk.CodeAnalysis;
 using Dibix.Sdk.CodeGeneration;
@@ -27,9 +28,17 @@ namespace Dibix.Sdk.MSBuild
             foreach (ITaskItem inputFile in source ?? Enumerable.Empty<ITaskItem>())
             {
                 string inputFilePath = inputFile.GetMetadata("FullPath");
-                foreach (SqlCodeAnalysisError error in codeAnalysis.Analyze(inputFilePath))
+                try
                 {
-                    errorReporter.RegisterError(inputFilePath, error.Line, error.Column, error.RuleId.ToString(), $"[Dibix] {error.Message}");
+                    foreach (SqlCodeAnalysisError error in codeAnalysis.Analyze(inputFilePath))
+                    {
+                        errorReporter.RegisterError(inputFilePath, error.Line, error.Column, error.RuleId.ToString(), $"[Dibix] {error.Message}");
+                    }
+                }
+                catch (Exception e)
+                {
+                    throw new InvalidOperationException($@"Code analysis execution failed at
+{inputFilePath}", e);
                 }
             }
 
