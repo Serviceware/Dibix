@@ -16,12 +16,19 @@ namespace Dibix.Sdk.Sql
         #region Properties
         public abstract string TypeDisplayName { get; }
         public abstract ModelTypeClass ObjectType { get; }
+        public abstract ModelRelationshipClass Columns { get; }
         public abstract ModelRelationshipClass ColumnDataType { get; }
         public abstract ModelPropertyClass ColumnLength { get; }
         public abstract ModelPropertyClass ColumnPrecision { get; }
         #endregion
 
         #region Public Methods
+        public bool TryGetTable(TSqlModel model, SchemaObjectName name, out TSqlObject table)
+        {
+            table = this.GetTable(model, name, false);
+            return table != null;
+        }
+
         public IEnumerable<Constraint> GetConstraints(TSqlModel model, SchemaObjectName tableName)
         {
             TSqlObject table = this.GetTable(model, tableName);
@@ -60,6 +67,15 @@ namespace Dibix.Sdk.Sql
             TSqlObject table = this.GetTable(model, tableName);
             return this.HasPrimaryKey(table);
         }
+
+        public SqlDataType GetColumnType(TSqlObject table, string columnName)
+        {
+            TSqlObject column = table.GetReferenced(this.Columns)
+                                     .Single(x => x.Name.Parts.Last() == columnName);
+            TSqlObject columnType = column.GetReferenced(this.ColumnDataType).Single();
+            SqlDataType sqlDataType = columnType.GetProperty<SqlDataType>(DataType.SqlDataType);
+            return sqlDataType;
+        }
         #endregion
 
         #region Abstract Methods
@@ -83,14 +99,14 @@ namespace Dibix.Sdk.Sql
         #endregion
 
         #region Private Methods
-        private TSqlObject GetTable(TSqlModel model, SchemaObjectName name)
+        private TSqlObject GetTable(TSqlModel model, SchemaObjectName name, bool @throw = true)
         {
             ObjectIdentifier id = new ObjectIdentifier(name.Identifiers.Select(x => x.Value));
             if (name.SchemaIdentifier == null)
                 id.Parts.Insert(0, "dbo");
 
             TSqlObject table = model.GetObject(this.ObjectType, id, DacQueryScopes.UserDefined);
-            if (table == null)
+            if (table == null && @throw)
                 throw new InvalidOperationException($"Could not find table in model: {id}");
 
             return table;

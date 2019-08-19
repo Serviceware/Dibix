@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.SqlServer.Dac.Model;
@@ -9,13 +10,14 @@ namespace Dibix.Sdk.Sql
         private static readonly IDictionary<ModelTypeClass, ConstraintSelector> ConstraintMap = new Dictionary<ModelTypeClass, ConstraintSelector>
         {
             { ModelSchema.TableTypePrimaryKeyConstraint, new ConstraintSelector(ConstraintKind.PrimaryKey, TableTypePrimaryKeyConstraint.Columns,   TableTypePrimaryKeyConstraint.Clustered) }
-          , { ModelSchema.TableTypeUniqueConstraint,     new ConstraintSelector(ConstraintKind.Unique,         TableTypeUniqueConstraint.Columns,      TableTypeUniqueConstraint.Clustered) }
+          , { ModelSchema.TableTypeUniqueConstraint,     new ConstraintSelector(ConstraintKind.Unique,         TableTypeUniqueConstraint.Columns,       TableTypeUniqueConstraint.Clustered) }
           , { ModelSchema.TableTypeCheckConstraint,      new ConstraintSelector(ConstraintKind.Check,      null,                                    null) }
           , { ModelSchema.TableTypeDefaultConstraint,    new ConstraintSelector(ConstraintKind.Default,    TableTypeDefaultConstraint.TargetColumn, null) }
         };
 
         public override string TypeDisplayName => "User defined table type";
         public override ModelTypeClass ObjectType => ModelSchema.TableType;
+        public override ModelRelationshipClass Columns => Microsoft.SqlServer.Dac.Model.TableType.Columns;
         public override ModelRelationshipClass ColumnDataType => TableTypeColumn.DataType;
         public override ModelPropertyClass ColumnLength => TableTypeColumn.Length;
         public override ModelPropertyClass ColumnPrecision => TableTypeColumn.Precision;

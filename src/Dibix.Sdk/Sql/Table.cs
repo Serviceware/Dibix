@@ -18,6 +18,7 @@ namespace Dibix.Sdk.Sql
 
         public override string TypeDisplayName => "Table";
         public override ModelTypeClass ObjectType => ModelSchema.Table;
+        public override ModelRelationshipClass Columns => Microsoft.SqlServer.Dac.Model.Table.Columns;
         public override ModelRelationshipClass ColumnDataType => Microsoft.SqlServer.Dac.Model.Column.DataType;
         public override ModelPropertyClass ColumnLength => Microsoft.SqlServer.Dac.Model.Column.Length;
         public override ModelPropertyClass ColumnPrecision => Microsoft.SqlServer.Dac.Model.Column.Precision;

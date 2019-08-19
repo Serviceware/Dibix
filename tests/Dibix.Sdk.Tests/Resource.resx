@@ -906,6 +906,9 @@ namespace This.Is.A.Custom.Namespace
     column="1" /&gt;
 &lt;/errors&gt;</value>
   </data>
+  <data name="SuspiciousJoinPredicateSqlCodeAnalysisRule" xml:space="preserve">
+    <value />
+  </data>
   <data name="TableConstraintSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;

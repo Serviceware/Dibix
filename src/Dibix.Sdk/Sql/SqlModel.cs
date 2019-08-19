@@ -17,5 +17,14 @@ namespace Dibix.Sdk.Sql
         public IEnumerable<Index> GetIndexes(TableModel tableDefinition, SchemaObjectName tableName) => tableDefinition.GetIndexes(this._model, tableName);
 
         public bool HasPrimaryKey(TableModel tableDefinition, SchemaObjectName tableName) => tableDefinition.HasPrimaryKey(this._model, tableName);
+
+        public bool TryGetColumnType(SchemaObjectName tableName, string columnName, ref SqlDataType dataType)
+        {
+            if (!TableModel.Table.TryGetTable(this._model, tableName, out TSqlObject table))
+                return false;
+
+            dataType = TableModel.Table.GetColumnType(table, columnName);
+            return true;
+        }
     }
 }
