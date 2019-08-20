@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
 using Dibix.Sdk.CodeAnalysis;
 using Dibix.Sdk.CodeGeneration;
@@ -11,14 +10,6 @@ namespace Dibix.Sdk.MSBuild
     public static class SqlCodeAnalysisTask
     {
         public static bool Execute(string databaseSchemaProviderName, string modelCollation, ITaskItem[] source, ITaskItem[] sqlReferencePath, ITask task, TaskLoggingHelper logger)
-        {
-#if DEBUG
-            Debugger.Launch();
-#endif
-            return ExecuteCore(databaseSchemaProviderName, modelCollation, source, sqlReferencePath, task, logger);
-        }
-
-        public static bool ExecuteCore(string databaseSchemaProviderName, string modelCollation, ITaskItem[] source, ITaskItem[] sqlReferencePath, ITask task, TaskLoggingHelper logger)
         {
             IErrorReporter errorReporter = new MSBuildErrorReporter(logger);
             ISqlCodeAnalysisRuleEngine codeAnalysis = SqlCodeAnalysisRuleEngine.Create(databaseSchemaProviderName, modelCollation, source, sqlReferencePath, task, errorReporter);

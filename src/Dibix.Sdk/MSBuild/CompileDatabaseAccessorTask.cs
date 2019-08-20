@@ -12,19 +12,16 @@ namespace Dibix.Sdk.MSBuild
         (
             string projectDirectory
           , string @namespace
-          , string targetDirectory
+          , string outputFilePath
           , ICollection<string> artifacts
           , ICollection<string> contracts
           , ICollection<string> endpoints
           , bool multipleAreas
           , bool isDML
           , TaskLoggingHelper logger
-          , out string outputFilePath
           , out string[] detectedReferences
         )
         {
-            outputFilePath = Path.Combine(projectDirectory, targetDirectory, "Accessor.cs");
-
             IErrorReporter errorReporter = new MSBuildErrorReporter(logger);
             StaticCodeGenerationContext context = new StaticCodeGenerationContext(projectDirectory, @namespace, artifacts ?? new string[0], contracts ?? new string[0], endpoints ?? new string[0], multipleAreas, isDML, errorReporter);
             ICodeGenerator generator = new DaoCodeGenerator(context);

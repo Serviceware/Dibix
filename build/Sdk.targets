@@ -30,17 +30,60 @@
     <!-- Skip copying the default SQL CLR .NET assembly to output -->
     <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
     <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
-    
-    <DibixToolsDirectory Condition="$(DibixToolsDirectory) == ''">$(MSBuildThisFileDirectory)..\tools\net46\</DibixToolsDirectory>
-    <DibixBuildToolsPath>$(DibixToolsDirectory)Dibix.MSBuild.dll</DibixBuildToolsPath>
+
     <DibixSdkPath>$(MSBuildThisFileDirectory)..\lib\net46\Dibix.Sdk.dll</DibixSdkPath>
+    <DibixToolsDirectory Condition="$(DibixToolsDirectory) == ''">$(MSBuildThisFileDirectory)..\tools\net46\</DibixToolsDirectory>
+    <DibixLibraryPath>$(DibixToolsDirectory)Dibix.dll</DibixLibraryPath>
+    <DibixBuildToolsPath>$(DibixToolsDirectory)Dibix.MSBuild.dll</DibixBuildToolsPath>
   </PropertyGroup>
 
   <UsingTask TaskName="SqlCodeAnalysisTask" AssemblyFile="$(DibixBuildToolsPath)" />
   <UsingTask TaskName="CompileDatabaseAccessorTask" AssemblyFile="$(DibixBuildToolsPath)" />
   <UsingTask TaskName="VerifyDatabaseAccessorTask" AssemblyFile="$(DibixBuildToolsPath)" />
 
-  <Target Name="SqlCodeAnalysis" AfterTargets="ResolveArtifactReferences">
+  <!-- Define inputs and outputs so the targets know when they need to be rebuilt -->
+  <Target Name="SetupSqlBuildInputs" AfterTargets="_SetupSqlBuildInputs">
+    <ItemGroup>
+      <!-- 
+        The intermediate assembly/pdb is used as an input,
+        therefore each time we run the CompileDatabaseAccessorTask,
+        both these inputs are newer than the dacpac, and all targets
+        are forced to rebuild.
+      -->
+      <SqlBuildInputItem Remove="$(IntermediateTargetFullFileName)" />
+      <SqlBuildInputItem Remove="$(IntermediateSymbolsFullFileName)" />
+
+      <!--
+        Since the SqlCodeAnalysis target does not produce any output, 
+        we use the dacpac to detect if it needs to be rebuilt.
+        To make this work we need to force rebuilding the dacpac aswell,
+        by specifying the same inputs.
+      -->
+      <SqlBuildInputItem Include="$(DibixSdkPath)" />
+
+      <!-- SqlCodeAnalysis -->
+      <SqlCodeAnalysisInput Include="$(DibixSdkPath)" />
+      <SqlCodeAnalysisInput Include="@(Build)" />
+      <SqlCodeAnalysisInput Include="@(SqlReferencePath)" />
+      <SqlCodeAnalysisOutput Include="@(SqlTarget)" /> <!-- dacpac -->
+
+      <!-- CompileDatabaseAccessor -->
+      <CompileDatabaseAccessorInput Include="$(DibixSdkPath)" />
+      <CompileDatabaseAccessorInput Include="@(Build)" />
+      <CompileDatabaseAccessorInput Include="@(Contract)" />
+      <CompileDatabaseAccessorInput Include="@(Endpoint)" />
+      <CompileDatabaseAccessorOutput Include="$(DatabaseAccessorIntermediateFilePath)" /> <!-- Source cs file -->
+      <CompileDatabaseAccessorOutput Include="$(IntermediateAssembly)" />                 <!-- DLL in obj folder -->
+      <CompileDatabaseAccessorOutput Include="$(TargetPath)" />                           <!-- DLL in bin folder -->
+    </ItemGroup>
+  </Target>
+
+  <!-- Run our own sql code analysis rules -->
+  <Target Name="SqlCodeAnalysis" 
+          BeforeTargets="SqlBuild"
+          DependsOnTargets="SetupSqlBuildInputs"
+          Inputs="@(SqlCodeAnalysisInput)"
+          Outputs="@(SqlCodeAnalysisOutput)">
     <SqlCodeAnalysisTask SdkPath="$(DibixSdkPath)"
                          SSDTDirectory="$(SqlServerRedistPath)"
                          DatabaseSchemaProviderName="$(DSP)"
@@ -50,7 +93,23 @@
                          IsIDEBuild="$(BuildingInsideVisualStudio)" />
   </Target>
 
-  <Target Name="CompileDatabaseAccessor" AfterTargets="PostBuildEvent" Condition="$(ShouldCompileDatabaseAccessor) == 'true'">
+  <!-- Compile database accessors for stored procedures including their contracts and an API endpoint configuration -->
+  <Target Name="SetupCompilationArtifacts" BeforeTargets="SetupSqlBuildInputs" Condition="$(ShouldCompileDatabaseAccessor) == 'true'">
+    <PropertyGroup>
+      <DatabaseAccessorIntermediateFilePath Condition="'$(DatabaseAccessorIntermediateFilePath)' == ''">$(GeneratedFilesIntermediatePath)Accessor.cs</DatabaseAccessorIntermediateFilePath>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Contract Include="@(None)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(RelativeDir)', '^Contracts\\')) and %(Extension) == '.json'" />
+      <Endpoint Include="@(None)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(RelativeDir)', '^Endpoints\\')) and %(Extension) == '.json'" />
+    </ItemGroup>
+  </Target>
+  <Target Name="CompileDatabaseAccessor" 
+          AfterTargets="PostBuildEvent" 
+          DependsOnTargets="SetupSqlBuildInputs"
+          Inputs="@(CompileDatabaseAccessorInput)"
+          Outputs="@(CompileDatabaseAccessorOutput)"
+          Condition="$(ShouldCompileDatabaseAccessor) == 'true'">
     <PropertyGroup>
       <LangVersion>latest</LangVersion>
       <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
@@ -58,28 +117,22 @@
       <DatabaseAccessorNamespace Condition="'$(DatabaseAccessorNamespace)' == ''">$(RootNamespace)</DatabaseAccessorNamespace>
     </PropertyGroup>
 
-    <ItemGroup>
-      <Contract Include="@(None)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(RelativeDir)', '^Contracts\\')) and %(Extension) == '.json'" />
-      <Endpoint Include="@(None)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(RelativeDir)', '^Endpoints\\')) and %(Extension) == '.json'" />
-    </ItemGroup>
-
     <CompileDatabaseAccessorTask SdkPath="$(DibixSdkPath)"
                                  SSDTDirectory="$(SqlServerRedistPath)"
                                  ProjectDirectory="$(MSBuildProjectDirectory)"
                                  Namespace="$(DatabaseAccessorNamespace)"
-                                 TargetDirectory="$(IntermediateOutputPath)"
+                                 OutputFilePath="$(DatabaseAccessorIntermediateFilePath)"
                                  Artifacts="@(Build)"
                                  Contracts="@(Contract)"
                                  Endpoints="@(Endpoint)"
                                  MultipleAreas="$(MultipleAreas)"
                                  IsIDEBuild="$(BuildingInsideVisualStudio)"
                                  IsDML="$(IsDMLProject)">
-      <Output TaskParameter="OutputFilePath" ItemName="DatabaseAccessorSource" />
       <Output TaskParameter="DetectedReferences" ItemName="DatabaseAccessorReference" />
     </CompileDatabaseAccessorTask>
 
     <ItemGroup>
-      <DatabaseAccessorReference Include="$(DibixToolsDirectory)Dibix.dll" />
+      <DatabaseAccessorReference Include="$(DibixLibraryPath)" />
       <DatabaseAccessorReference Include="@(ArtifactReference->'%(RelativeDir)%(Filename).dll')" />
     </ItemGroup>
 
@@ -87,7 +140,7 @@
          EmitDebugInformation="$(DebugSymbols)"
          KeyFile="$(AssemblyOriginatorKeyFile)"
          LangVersion="$(LangVersion)"
-         OutputAssembly="@(IntermediateAssembly)"
+         OutputAssembly="$(IntermediateAssembly)"
          References="@(DatabaseAccessorReference)"
          Sources="@(DatabaseAccessorSource)"
          TargetType="$(OutputType)" />
@@ -107,8 +160,8 @@
     </Copy>
 
     <!-- Copy the debug information file (.pdb), if any -->
-    <Copy SourceFiles="@(_DebugSymbolsIntermediatePath)"
-          DestinationFiles="@(_DebugSymbolsOutputPath)"
+    <Copy SourceFiles="$(_DebugSymbolsIntermediatePath)"
+          DestinationFiles="$(_DebugSymbolsOutputPath)"
           SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
           OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
           Retries="$(CopyRetryCount)"
@@ -120,6 +173,10 @@
     </Copy>
   </Target>
 
+  <!-- 
+    Initially used to verify if the (manually) generated code is still up-to-date.
+    Since we now compile entire projects, this is currently not used anymore.
+  -->
   <Target Name="VerifyDatabaseAccessor" BeforeTargets="PreBuildEvent">
     <VerifyDatabaseAccessorTask SdkPath="$(DibixSdkPath)"
                                 SSDTDirectory="$(SqlServerRedistPath)"

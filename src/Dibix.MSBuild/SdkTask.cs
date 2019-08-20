@@ -44,6 +44,9 @@ namespace Dibix.MSBuild
 
         public sealed override bool Execute()
         {
+#if DEBUG
+            System.Diagnostics.Debugger.Launch();
+#endif
             Assembly sdkAssembly = SdkAssemblyLoader.Load(this.SdkPath);
             Type adapterType = sdkAssembly.GetType($"{Constants.SdkAdapterNamespace}.{this.GetType().Name}", true);
             object[] args = this.CollectParameters().ToArray();
@@ -76,6 +79,11 @@ namespace Dibix.MSBuild
 
             // Newtonsoft.Json.Schema is unknown to both devenv and MSBuild
             if (assemblyName == "Newtonsoft.Json.Schema")
+                directory = CurrentDirectory;
+
+            // In some occasions, the previous loading of Newtonsoft.Json.Schema,
+            // does include loading the dependent assembly Newtonsoft.Json
+            if (assemblyName == "Newtonsoft.Json")
                 directory = CurrentDirectory;
 
             if (directory == null)
