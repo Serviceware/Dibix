@@ -53,22 +53,26 @@
       <SqlBuildInputItem Remove="$(IntermediateTargetFullFileName)" />
       <SqlBuildInputItem Remove="$(IntermediateSymbolsFullFileName)" />
 
+      <_SqlTargetInput Include="$(DibixSdkPath)" />
+      <_SqlTargetInput Include="$(MSBuildProjectFullPath)" />
+      <_SqlTargetInput Include="$(MSBuildAllProjects)" />
+
       <!--
         Since the SqlCodeAnalysis target does not produce any output, 
         we use the dacpac to detect if it needs to be rebuilt.
         To make this work we need to force rebuilding the dacpac aswell,
         by specifying the same inputs.
       -->
-      <SqlBuildInputItem Include="$(DibixSdkPath)" />
+      <SqlBuildInputItem Include="@(_SqlTargetInput)" />
 
       <!-- SqlCodeAnalysis -->
-      <SqlCodeAnalysisInput Include="$(DibixSdkPath)" />
+      <SqlCodeAnalysisInput Include="@(_SqlTargetInput)" />
       <SqlCodeAnalysisInput Include="@(Build)" />
       <SqlCodeAnalysisInput Include="@(SqlReferencePath)" />
       <SqlCodeAnalysisOutput Include="@(SqlTarget)" /> <!-- dacpac -->
 
       <!-- CompileDatabaseAccessor -->
-      <CompileDatabaseAccessorInput Include="$(DibixSdkPath)" />
+      <CompileDatabaseAccessorInput Include="@(_SqlTargetInput)" />
       <CompileDatabaseAccessorInput Include="@(Build)" />
       <CompileDatabaseAccessorInput Include="@(Contract)" />
       <CompileDatabaseAccessorInput Include="@(Endpoint)" />
@@ -117,6 +121,10 @@
       <DatabaseAccessorNamespace Condition="'$(DatabaseAccessorNamespace)' == ''">$(RootNamespace)</DatabaseAccessorNamespace>
     </PropertyGroup>
 
+    <ItemGroup>
+      <DatabaseAccessorSource Include="$(DatabaseAccessorIntermediateFilePath)" />
+    </ItemGroup>
+
     <CompileDatabaseAccessorTask SdkPath="$(DibixSdkPath)"
                                  SSDTDirectory="$(SqlServerRedistPath)"
                                  ProjectDirectory="$(MSBuildProjectDirectory)"
@@ -140,7 +148,7 @@
          EmitDebugInformation="$(DebugSymbols)"
          KeyFile="$(AssemblyOriginatorKeyFile)"
          LangVersion="$(LangVersion)"
-         OutputAssembly="$(IntermediateAssembly)"
+         OutputAssembly="@(IntermediateAssembly)"
          References="@(DatabaseAccessorReference)"
          Sources="@(DatabaseAccessorSource)"
          TargetType="$(OutputType)" />
@@ -160,8 +168,8 @@
     </Copy>
 
     <!-- Copy the debug information file (.pdb), if any -->
-    <Copy SourceFiles="$(_DebugSymbolsIntermediatePath)"
-          DestinationFiles="$(_DebugSymbolsOutputPath)"
+    <Copy SourceFiles="@(_DebugSymbolsIntermediatePath)"
+          DestinationFiles="@(_DebugSymbolsOutputPath)"
           SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
           OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
           Retries="$(CopyRetryCount)"
