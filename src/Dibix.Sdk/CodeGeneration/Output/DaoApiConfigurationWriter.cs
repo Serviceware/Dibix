@@ -91,6 +91,9 @@ namespace Dibix.Sdk.CodeGeneration
                           .WriteLine("});");
                 }
 
+                foreach (string controllerImport in controller.ControllerImports)
+                    writer.WriteLine($"x.ControllerImports.Add(\"{controllerImport}\");");
+
                 writer.PopIndent()
                       .Write("});");
 

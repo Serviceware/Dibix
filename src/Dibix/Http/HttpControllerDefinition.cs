@@ -10,14 +10,14 @@ namespace Dibix.Http
         public string ControllerName { get; }
 
         public ICollection<HttpActionDefinition> Actions { get; }
-        public ICollection<Type> ControllerImports { get; }
+        public ICollection<string> ControllerImports { get; }
 
         internal HttpControllerDefinition(string areaName, string controllerName)
         {
             this.AreaName = areaName;
             this.ControllerName = controllerName;
             this.Actions = new Collection<HttpActionDefinition>();
-            this.ControllerImports = new Collection<Type>();
+            this.ControllerImports = new Collection<string>();
         }
 
         public void AddAction(IHttpActionTarget target, Action<HttpActionDefinition> setupAction)
