@@ -1,14 +1,12 @@
-﻿using System;
-
-namespace Dibix.Http
+﻿namespace Dibix.Http
 {
-    public sealed class HttpParameterComplexSource : HttpParameterSource
+    public sealed class HttpParameterBodySource : HttpParameterSource
     {
-        public Type ContractType { get; }
+        public string ConverterName { get; }
 
-        internal HttpParameterComplexSource(Type contractType)
+        internal HttpParameterBodySource(string converterName)
         {
-            this.ContractType = contractType;
+            this.ConverterName = converterName;
         }
     }
 }

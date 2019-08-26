@@ -89,20 +89,19 @@ namespace Dibix.Sdk.CodeGeneration
 
             foreach (JProperty property in mappings.Properties())
             {
-                JValue value = (JValue)property.Value;
                 switch (property.Value.Type)
                 {
                     case JTokenType.Boolean:
                     case JTokenType.Integer:
-                        ReadConstantActionParameter(action, property.Name, value.Value);
+                        ReadConstantActionParameter(action, property.Name, (JValue)property.Value);
                         break;
 
                     case JTokenType.String:
-                        string textValue = (string)value;
-                        if (textValue[0] == '#')
-                            ReadComplexActionParameter(action, property.Name, textValue);
-                        else
-                            ReadPropertyActionParameter(action, property.Name, textValue);
+                        ReadPropertyActionParameter(action, property.Name, (JValue)property.Value);
+                        break;
+
+                    case JTokenType.Object:
+                        ReadComplexActionParameter(action, property.Name, (JObject)property.Value);
                         break;
 
                     default:
@@ -111,20 +110,21 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static void ReadConstantActionParameter(ActionDefinition action, string parameterName, object value)
+        private static void ReadConstantActionParameter(ActionDefinition action, string parameterName, JValue value)
         {
-            action.DynamicParameters.Add(parameterName, new ActionParameterConstantSource(value));
+            action.DynamicParameters.Add(parameterName, new ActionParameterConstantSource(value.Value));
         }
 
-        private static void ReadComplexActionParameter(ActionDefinition action, string parameterName, string value)
+        private static void ReadPropertyActionParameter(ActionDefinition action, string parameterName, JValue value)
         {
-            action.DynamicParameters.Add(parameterName, new ActionParameterComplexSource(value.Substring(1)));
-        }
-
-        private static void ReadPropertyActionParameter(ActionDefinition action, string parameterName, string value)
-        {
-            string[] parts = value.Split(new [] { '.' }, 2);
+            string[] parts = ((string)value.Value).Split(new [] { '.' }, 2);
             action.DynamicParameters.Add(parameterName, new ActionParameterPropertySource(parts[0], parts[1]));
+        }
+
+        private static void ReadComplexActionParameter(ActionDefinition action, string parameterName, JObject @object)
+        {
+            string bodyConverterTypeName = (string)((JValue)@object.Property("fromBody").Value).Value;
+            action.DynamicParameters.Add(parameterName, new ActionParameterBodySource(bodyConverterTypeName));
         }
         #endregion
     }

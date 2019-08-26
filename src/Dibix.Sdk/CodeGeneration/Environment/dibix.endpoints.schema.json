@@ -58,13 +58,24 @@
               "anyOf": [
                 {
                   "type": "string",
-                  "pattern": "(^HLSESSION.[A-Z]([A-Za-z]+)?$)|(^#[A-Z]([A-Za-z.]+)?$)"
+                  "pattern": "^HLSESSION.[A-Z]([A-Za-z]+)?$"
                 },
                 {
                   "type": "number"
                 },
                 {
                   "type": "boolean"
+                },
+                {
+                  "type": "object",
+                  "minProperties": 1,
+                  "additionalProperties": false,
+                  "properties": {
+                    "fromBody": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z.]+(,[A-Za-z.]+)?$"
+                    }
+                  }
                 }
               ]
             }

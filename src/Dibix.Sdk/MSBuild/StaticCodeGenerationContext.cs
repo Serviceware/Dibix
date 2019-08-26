@@ -30,7 +30,7 @@ namespace Dibix.Sdk.MSBuild
 
             this.Configuration = new GeneratorConfiguration();
             this.Configuration.Output.GeneratePublicArtifacts = true;
-            if (this._contractDefinitionProvider.HasSchemaErrors)
+            if (this._contractDefinitionProvider.HasSchemaErrors || this._controllerDefinitionProvider.HasSchemaErrors)
             {
                 errorReporter.ReportErrors();
                 this.Configuration.IsInvalid = true;

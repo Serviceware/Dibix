@@ -114,8 +114,8 @@ namespace Dibix.Sdk.CodeGeneration
                     writer.WriteRaw(constantValue);
                     break;
 
-                case ActionParameterComplexSource complex:
-                    writer.WriteRaw($"typeof({complex.ContractName})");
+                case ActionParameterBodySource body:
+                    writer.WriteRaw($"\"{body.ConverterName}\"");
                     break;
 
                 case ActionParameterPropertySource property:
