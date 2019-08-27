@@ -37,6 +37,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Dapper", "src\Dibix.D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Dapper.Tests", "tests\Dibix.Dapper.Tests\Dibix.Dapper.Tests.csproj", "{F7DE0355-1833-4D18-98C8-020A15945E58}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Tests", "tests\Dibix.Tests\Dibix.Tests.csproj", "{597C345A-895D-40B2-AB4F-61CBF6110795}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +79,10 @@ Global
 		{F7DE0355-1833-4D18-98C8-020A15945E58}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F7DE0355-1833-4D18-98C8-020A15945E58}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F7DE0355-1833-4D18-98C8-020A15945E58}.Release|Any CPU.Build.0 = Release|Any CPU
+		{597C345A-895D-40B2-AB4F-61CBF6110795}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{597C345A-895D-40B2-AB4F-61CBF6110795}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{597C345A-895D-40B2-AB4F-61CBF6110795}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{597C345A-895D-40B2-AB4F-61CBF6110795}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -90,6 +96,7 @@ Global
 		{85FA91DD-BAC5-4627-B1BE-C2A0D8506E62} = {118B0BCE-C81F-4DA0-814C-2F8AC4867710}
 		{A6D595E0-EA46-4A3C-A82A-61E8B3D61804} = {118B0BCE-C81F-4DA0-814C-2F8AC4867710}
 		{F7DE0355-1833-4D18-98C8-020A15945E58} = {B1D5F4EA-842C-494E-9B2F-1FF271591E29}
+		{597C345A-895D-40B2-AB4F-61CBF6110795} = {B1D5F4EA-842C-494E-9B2F-1FF271591E29}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F25BA702-70BE-4E04-8583-C71369C6D3D0}

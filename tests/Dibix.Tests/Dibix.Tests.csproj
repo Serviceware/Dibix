@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  
+  <Import Project="..\..\build\common.props" />
+
+  <PropertyGroup>    
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <AssemblyName>Dibix.Tests</AssemblyName>
+    <VersionPrefix>2.0.0</VersionPrefix>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftTestSdkVersion)" />
+    <PackageReference Include="xunit" Version="$(XUnitVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(XUnitVersion)" />
+    <PackageReference Include="coverlet.msbuild" Version="$(CoverletVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Dibix\Dibix.csproj" />
+  </ItemGroup>
+
+</Project>
