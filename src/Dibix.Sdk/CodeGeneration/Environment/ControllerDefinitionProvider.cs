@@ -70,6 +70,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 Method = method,
                 ChildRoute = (string)action.Property("childRoute")?.Value,
+                BodyBinder = (string)action.Property("bindFromBody")?.Value,
                 OmitResult = (bool?)action.Property("omitResult")?.Value ?? default,
                 IsAnonymous = (bool?)action.Property("isAnonymous")?.Value ?? default
             };
@@ -123,7 +124,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static void ReadComplexActionParameter(ActionDefinition action, string parameterName, JObject @object)
         {
-            string bodyConverterTypeName = (string)((JValue)@object.Property("fromBody").Value).Value;
+            string bodyConverterTypeName = (string)((JValue)@object.Property("convertFromBody").Value).Value;
             action.DynamicParameters.Add(parameterName, new ActionParameterBodySource(bodyConverterTypeName));
         }
         #endregion

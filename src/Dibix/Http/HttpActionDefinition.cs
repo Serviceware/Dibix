@@ -12,6 +12,7 @@ namespace Dibix.Http
         public HttpApiMethod Method { get; set; }
         public string ChildRoute { get; set; }
         public bool OmitResult { get; set; }
+        public string BodyBinder { get; private set; }
         public bool IsAnonymous { get; set; }
         public string Description { get; set; }
         public IDictionary<string, HttpParameterSource> DynamicParameters { get; }
@@ -23,6 +24,8 @@ namespace Dibix.Http
             this.Target = target;
             this.DynamicParameters = new Dictionary<string, HttpParameterSource>(StringComparer.OrdinalIgnoreCase);
         }
+
+        public void BindFromBody(string binderName) => this.BodyBinder = binderName;
 
         public void ResolveParameter(string targetParameterName, bool value)
         {

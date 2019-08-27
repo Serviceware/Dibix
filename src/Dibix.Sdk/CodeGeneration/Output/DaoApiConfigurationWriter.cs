@@ -76,6 +76,9 @@ namespace Dibix.Sdk.CodeGeneration
                     if (!String.IsNullOrEmpty(action.ChildRoute))
                         writer.WriteLine($"y.ChildRoute = \"{action.ChildRoute}\";");
 
+                    if (!String.IsNullOrEmpty(action.BodyBinder))
+                        writer.WriteLine($"y.BindFromBody(\"{action.BodyBinder}\");");
+
                     foreach (KeyValuePair<string, ActionParameterSource> parameter in action.DynamicParameters)
                     {
                         WriteParameter(writer, parameter.Key, parameter.Value);

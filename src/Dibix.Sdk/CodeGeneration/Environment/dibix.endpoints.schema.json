@@ -71,7 +71,7 @@
                   "minProperties": 1,
                   "additionalProperties": false,
                   "properties": {
-                    "fromBody": {
+                    "convertFromBody": {
                       "type": "string",
                       "pattern": "^[A-Za-z.]+(,[A-Za-z.]+)?$"
                     }
@@ -82,6 +82,10 @@
           },
           "minProperties": 1,
           "additionalProperties": false
+        },
+        "bindFromBody": {
+          "type": "string",
+          "pattern": "^[A-Za-z.]+(,[A-Za-z.]+)?$"
         },
         "omitResult": {
           "type": "boolean"
