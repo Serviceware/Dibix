@@ -56,7 +56,7 @@ namespace Dibix.Sdk.CodeGeneration
                     }
                     else
                     {
-                        string @namespace = "Data";
+                        string @namespace = LayerName.Data;
                         int statementNameIndex = action.Target.Target.LastIndexOf('.');
                         if (statementNameIndex >= 0)
                             @namespace = action.Target.Target.Substring(0, statementNameIndex);
@@ -75,6 +75,15 @@ namespace Dibix.Sdk.CodeGeneration
 
                     if (!String.IsNullOrEmpty(action.ChildRoute))
                         writer.WriteLine($"y.ChildRoute = \"{action.ChildRoute}\";");
+
+                    if (!String.IsNullOrEmpty(action.BodyContract))
+                    {
+                        string bodyContractName = action.BodyContract;
+                        if (!bodyContractName.StartsWith(configuration.Namespace, StringComparison.Ordinal))
+                            bodyContractName = $"{configuration.Namespace}.{LayerName.DomainModel}.{bodyContractName}";
+
+                        writer.WriteLine($"y.BodyContract = typeof({bodyContractName});");
+                    }
 
                     if (!String.IsNullOrEmpty(action.BodyBinder))
                         writer.WriteLine($"y.BindFromBody(\"{action.BodyBinder}\");");

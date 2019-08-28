@@ -12,6 +12,7 @@ namespace Dibix.Http
         public HttpApiMethod Method { get; set; }
         public string ChildRoute { get; set; }
         public bool OmitResult { get; set; }
+        public Type BodyContract { get; set; }
         public string BodyBinder { get; private set; }
         public bool IsAnonymous { get; set; }
         public string Description { get; set; }

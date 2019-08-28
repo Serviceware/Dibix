@@ -70,6 +70,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 Method = method,
                 ChildRoute = (string)action.Property("childRoute")?.Value,
+                BodyContract = (string)action.Property("body")?.Value,
                 BodyBinder = (string)action.Property("bindFromBody")?.Value,
                 OmitResult = (bool?)action.Property("omitResult")?.Value ?? default,
                 IsAnonymous = (bool?)action.Property("isAnonymous")?.Value ?? default
