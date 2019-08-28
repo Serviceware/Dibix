@@ -25,7 +25,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (context.Artifacts.Controllers.Any(x => x.ControllerImports.Any()))
                 context.Output.AddUsing("System");
 
-            string body = WriteBody(context.Configuration, context.Artifacts.Controllers);
+            string body = WriteBody(context, context.Artifacts.Controllers);
 
             context.Output
                    .BeginScope(LayerName.Business)
@@ -36,7 +36,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private static string WriteBody(OutputConfiguration configuration, IList<ControllerDefinition> controllers)
+        private static string WriteBody(DaoWriterContext context, IList<ControllerDefinition> controllers)
         {
             StringWriter writer = new StringWriter();
             for (int i = 0; i < controllers.Count; i++)
@@ -61,7 +61,7 @@ namespace Dibix.Sdk.CodeGeneration
                         if (statementNameIndex >= 0)
                             @namespace = action.Target.Target.Substring(0, statementNameIndex);
 
-                        string typeName = $"{@namespace}.{configuration.ClassName}";
+                        string typeName = $"{@namespace}.{context.Configuration.ClassName}";
                         writer.WriteRaw($"typeof({typeName}), nameof({typeName}.")
                               .WriteRaw(action.Target.Target.Substring(statementNameIndex + 1))
                               .WriteRaw(')');
@@ -79,14 +79,17 @@ namespace Dibix.Sdk.CodeGeneration
                     if (!String.IsNullOrEmpty(action.BodyContract))
                     {
                         string bodyContractName = action.BodyContract;
-                        if (!bodyContractName.StartsWith(configuration.Namespace, StringComparison.Ordinal))
-                            bodyContractName = $"{configuration.Namespace}.{LayerName.DomainModel}.{bodyContractName}";
+                        if (!bodyContractName.StartsWith(context.Configuration.Namespace, StringComparison.Ordinal))
+                            bodyContractName = $"{context.Configuration.Namespace}.{LayerName.DomainModel}.{bodyContractName}";
 
                         writer.WriteLine($"y.BodyContract = typeof({bodyContractName});");
                     }
 
                     if (!String.IsNullOrEmpty(action.BodyBinder))
-                        writer.WriteLine($"y.BindFromBody(\"{action.BodyBinder}\");");
+                    {
+                        context.Output.AddUsing("System");
+                        writer.WriteLine($"y.BodyBinder = Type.GetType(\"{action.BodyBinder}\", true);");
+                    }
 
                     foreach (KeyValuePair<string, ActionParameterSource> parameter in action.DynamicParameters)
                     {
