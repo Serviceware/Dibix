@@ -141,7 +141,7 @@
 
     <ItemGroup>
       <DatabaseAccessorReference Include="$(DibixLibraryPath)" />
-      <DatabaseAccessorReference Include="@(ArtifactReference->'%(RelativeDir)%(Filename).dll')" Condition="!$([System.Text.RegularExpressions.Regex]::IsMatch('%(Filename)%(Extension)', '^master\.dacpac|msdb\.dacpac$'))" />
+      <DatabaseAccessorReference Include="@(ArtifactReference->'%(RelativeDir)%(Filename).dll')" Condition="!$([System.Text.RegularExpressions.Regex]::IsMatch('%(Filename)%(Extension)', '^master|msdb(\.dacpac)$'))" />
     </ItemGroup>
 
     <Csc DefineConstants="$(DefineConstants)"
