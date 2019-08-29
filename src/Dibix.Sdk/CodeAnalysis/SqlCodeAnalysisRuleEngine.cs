@@ -13,30 +13,32 @@ namespace Dibix.Sdk.CodeAnalysis
     {
         #region Fields
         private readonly TSqlModel _model;
+        private readonly SqlCodeAnalysisConfiguration _configuration;
         private readonly ICollection<ISqlCodeAnalysisRule> _rules;
         #endregion
 
         #region Constructor
-        private SqlCodeAnalysisRuleEngine(TSqlModel model)
+        private SqlCodeAnalysisRuleEngine(TSqlModel model, SqlCodeAnalysisConfiguration configuration)
         {
             this._model = model;
+            this._configuration = configuration;
             this._rules = ScanRules();
         }
         #endregion
 
         #region Factory Methods
-        public static SqlCodeAnalysisRuleEngine Create() => new SqlCodeAnalysisRuleEngine(null);
-        public static SqlCodeAnalysisRuleEngine Create(string databaseSchemaProviderName, string modelCollation, ITaskItem[] source, ITaskItem[] sqlReferencePath, ITask task, IErrorReporter errorReporter)
+        public static SqlCodeAnalysisRuleEngine Create(string namingConventionPrefix, string databaseSchemaProviderName, string modelCollation, ITaskItem[] source, ITaskItem[] sqlReferencePath, ITask task, IErrorReporter errorReporter)
         {
             TSqlModel model = PublicSqlDataSchemaModelLoader.Load(databaseSchemaProviderName, modelCollation, source, sqlReferencePath, task, errorReporter);
-            return new SqlCodeAnalysisRuleEngine(model);
+            SqlCodeAnalysisConfiguration configuration = new SqlCodeAnalysisConfiguration(namingConventionPrefix);
+            return new SqlCodeAnalysisRuleEngine(model, configuration);
         }
         #endregion
 
         #region Public Methods
         public IEnumerable<SqlCodeAnalysisError> Analyze(TSqlFragment fragment)
         {
-            return this._rules.SelectMany(x => x.Analyze(this._model, fragment));
+            return this._rules.SelectMany(x => x.Analyze(this._model, fragment, this._configuration));
         }
 
         public IEnumerable<SqlCodeAnalysisError> Analyze(string scriptFilePath)
@@ -48,7 +50,7 @@ namespace Dibix.Sdk.CodeAnalysis
         public IEnumerable<SqlCodeAnalysisError> Analyze(string scriptFilePath, ISqlCodeAnalysisRule rule)
         {
             TSqlFragment fragment = ScriptDomFacade.Load(scriptFilePath);
-            return rule.Analyze(this._model, fragment);
+            return rule.Analyze(this._model, fragment, this._configuration);
         }
         #endregion
 

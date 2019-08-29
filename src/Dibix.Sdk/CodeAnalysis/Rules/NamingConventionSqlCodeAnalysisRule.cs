@@ -15,42 +15,22 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
     internal static class NamingConventions
     {
-#if HELPLINE
-        private const string Prefix = "hl";
-#else
-        private const string Prefix = "dbx";
-#endif
         private const string TextRegex = "[a-z0-9_]+";
 
-        public static readonly NamingConvention Table                = new NamingConvention($"^{Prefix}{TextRegex}$",                 $"{Prefix}*");
-        public static readonly NamingConvention View                 = new NamingConvention($"^{Prefix}{TextRegex}vw$",               $"{Prefix}*vw");
-        public static readonly NamingConvention Type                 = new NamingConvention($"^{Prefix}{TextRegex}_udt_{TextRegex}$", $"{Prefix}*_udt_*");
-        public static readonly NamingConvention Sequence             = new NamingConvention($"^SEQ_{Prefix}{TextRegex}$",             $"SEQ_{Prefix}*");
-        public static readonly NamingConvention Procedure            = new NamingConvention($"^{Prefix}{TextRegex}$",                 $"{Prefix}*");
-        public static readonly NamingConvention Function             = new NamingConvention($"^{Prefix}{TextRegex}$",                 $"{Prefix}*");
-        public static readonly NamingConvention PrimaryKeyConstraint = new NamingConvention("^PK_<tablename>$",                       "PK_<tablename>");
-      //public static readonly NamingConvention ForeignKeyConstraint = new NamingConvention("^FK_<tablename>_<columnnames>$",         "FK_<tablename>_<columnnames>");
-        public static readonly NamingConvention ForeignKeyConstraint = new NamingConvention($"^FK_<tablename>_{TextRegex}$",          "FK_<tablename>_*");
-        public static readonly NamingConvention CheckConstraint      = new NamingConvention($"^CK_<tablename>_{TextRegex}$",          "CK_<tablename>_*");
-      //public static readonly NamingConvention UniqueConstraint     = new NamingConvention($"^UQ_<tablename>_<columnnames>$",        "UQ_<tablename>_<columnnames>");
-        public static readonly NamingConvention UniqueConstraint     = new NamingConvention($"^UQ_<tablename>_{TextRegex}$",          "UQ_<tablename>_*");
-        public static readonly NamingConvention DefaultConstraint    = new NamingConvention("^DF_<tablename>_<columnname>$",          "DF_<tablename>_<columnname>");
-        public static readonly NamingConvention Index                = new NamingConvention($"^IX_<tablename>_{TextRegex}$",          "IX_<tablename>_*");
-        public static readonly NamingConvention UniqueIndex          = new NamingConvention($"^UQ_<tablename>_{TextRegex}$",          "UQ_<tablename>_*");
+        public static readonly NamingConvention Table                = new NamingConvention($"^{Placeholder.Prefix}{TextRegex}$",                 $"{Placeholder.Prefix}*");
+        public static readonly NamingConvention View                 = new NamingConvention($"^{Placeholder.Prefix}{TextRegex}vw$",               $"{Placeholder.Prefix}*vw");
+        public static readonly NamingConvention Type                 = new NamingConvention($"^{Placeholder.Prefix}{TextRegex}_udt_{TextRegex}$", $"{Placeholder.Prefix}*_udt_*");
+        public static readonly NamingConvention Sequence             = new NamingConvention($"^SEQ_{Placeholder.Prefix}{TextRegex}$",             $"SEQ_{Placeholder.Prefix}*");
+        public static readonly NamingConvention Procedure            = new NamingConvention($"^{Placeholder.Prefix}{TextRegex}$",                 $"{Placeholder.Prefix}*");
+        public static readonly NamingConvention Function             = new NamingConvention($"^{Placeholder.Prefix}{TextRegex}$",                 $"{Placeholder.Prefix}*");
+        public static readonly NamingConvention PrimaryKeyConstraint = new NamingConvention($"^PK_{Placeholder.Table}$",                          $"PK_{Placeholder.Table}");
+        public static readonly NamingConvention ForeignKeyConstraint = new NamingConvention($"^FK_{Placeholder.Table}_{TextRegex}$",              $"FK_{Placeholder.Table}_*");
+        public static readonly NamingConvention CheckConstraint      = new NamingConvention($"^CK_{Placeholder.Table}_{TextRegex}$",              $"CK_{Placeholder.Table}_*");
+        public static readonly NamingConvention UniqueConstraint     = new NamingConvention($"^UQ_{Placeholder.Table}_{TextRegex}$",              $"UQ_{Placeholder.Table}_*");
+        public static readonly NamingConvention DefaultConstraint    = new NamingConvention($"^DF_{Placeholder.Table}_{Placeholder.Column}$",     $"DF_{Placeholder.Table}_{Placeholder.Column}");
+        public static readonly NamingConvention Index                = new NamingConvention($"^IX_{Placeholder.Table}_{TextRegex}$",              $"IX_{Placeholder.Table}_*");
+        public static readonly NamingConvention UniqueIndex          = new NamingConvention($"^UQ_{Placeholder.Table}_{TextRegex}$",              $"UQ_{Placeholder.Table}_*");
         public static readonly NamingConvention Column               = new NamingConvention("^[a-z](([a-z_]+)?[a-z])?$");
-    }
-
-    internal struct NamingConvention
-    {
-        public string Pattern { get; set; }
-        public string Description { get; set; }
-
-        public NamingConvention(string pattern) : this(pattern, pattern) { }
-        public NamingConvention(string pattern, string description)
-        {
-            this.Pattern = pattern;
-            this.Description = description;
-        }
     }
 
     public sealed class NamingConventionSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
@@ -140,7 +120,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                     return;
 
                 NamingConvention namingConvention = GetNamingConvention(constraint.Kind);
-                this.Check(constraint.Definition.ConstraintIdentifier, constraint.Name, constraint.KindDisplayName, namingConvention, ResolveConstraintPlaceholders(tableName.BaseIdentifier.Value, constraint.Columns));
+                this.Check(constraint.Definition.ConstraintIdentifier, constraint.Name, constraint.KindDisplayName, namingConvention, x => ResolveConstraintPlaceholders(x, tableName.BaseIdentifier.Value, constraint.Columns));
             }
         }
 
@@ -161,32 +141,23 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                     displayName = nameof(NamingConventions.Index);
                     namingConvention = NamingConventions.Index;
                 }
-                this.Check(index.Identifier, index.Name, displayName, namingConvention, ResolveConstraintPlaceholders(tableName.BaseIdentifier.Value, index.Columns));
+                this.Check(index.Identifier, index.Name, displayName, namingConvention, x => ResolveConstraintPlaceholders(x, tableName.BaseIdentifier.Value, index.Columns));
             }
         }
 
-        private void Check(SchemaObjectName schemaObjectName, string displayName, NamingConvention namingConvention, params KeyValuePair<string, string>[] replacements) => this.Check(schemaObjectName.BaseIdentifier, displayName, namingConvention, replacements.AsEnumerable());
-        private void Check(Identifier identifier, string displayName, NamingConvention namingConvention, IEnumerable<KeyValuePair<string, string>> replacements) => this.Check(identifier, identifier.Value, displayName, namingConvention, replacements.AsEnumerable());
-        private void Check(TSqlFragment target, string name, string displayName, NamingConvention namingConvention, IEnumerable<KeyValuePair<string, string>> replacements)
+        private void Check(SchemaObjectName schemaObjectName, string displayName, NamingConvention namingConvention) => this.Check(schemaObjectName.BaseIdentifier, displayName, namingConvention, null);
+        private void Check(Identifier identifier, string displayName, NamingConvention namingConvention, Action<PatternNormalizer> replacements) => this.Check(identifier, identifier.Value, displayName, namingConvention, replacements);
+        private void Check(TSqlFragment target, string name, string displayName, NamingConvention namingConvention, Action<PatternNormalizer> replacements)
         {
             if (Workarounds.Contains(name))
                 return;
 
-            string mask = BuildMask(namingConvention.Pattern, replacements.ToDictionary(x => x.Key, x => x.Value));
+            string mask = namingConvention.NormalizePattern(base.Configuration, replacements);
+            string description = namingConvention.NormalizeDescription(this.Configuration);
             if (!Regex.IsMatch(name, mask))
-                base.Fail(target, $"{displayName} '{name}' does not match naming convention '{namingConvention.Description}'. Also make sure the name is all lowercase.");
-        }
-
-        private static string BuildMask(string pattern, IDictionary<string, string> replacements)
-        {
-            string OnMatch(Match match)
             {
-                return replacements.TryGetValue(match.Value.TrimStart('<').TrimEnd('>'), out string replacement) ? replacement : match.Value;
+                base.Fail(target, $"{displayName} '{name}' does not match naming convention '{description}'. Also make sure the name is all lowercase.");
             }
-
-            string replacementPattern = String.Join("|", new[] { @"\*" }.Concat(replacements.Keys.Select(x => $@"\<{x}\>")));
-            string mask = Regex.Replace(pattern, replacementPattern, OnMatch);
-            return mask;
         }
 
         private static NamingConvention GetNamingConvention(ConstraintKind constraintKind)
@@ -202,13 +173,79 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             }
         }
 
-        private static IEnumerable<KeyValuePair<string, string>> ResolveConstraintPlaceholders(string tableName, IList<Column> columns)
+        private static void ResolveConstraintPlaceholders(PatternNormalizer normalizer, string tableName, IList<Column> columns)
         {
-            yield return new KeyValuePair<string, string>("tablename", tableName);
-            //yield return new KeyValuePair<string, string>("columnnames", String.Join(String.Empty, Enumerable.Repeat($"({String.Join("|", table.Definition.ColumnDefinitions.Select(x => x.ColumnIdentifier.Value))})", table.Definition.ColumnDefinitions.Count)));
+            normalizer.ResolvePlaceholder(Placeholder.Table.Name, tableName);
 
             if (columns.Count == 1)
-                yield return new KeyValuePair<string, string>("columnname", columns[0].Name);
+                normalizer.ResolvePlaceholder(Placeholder.Column.Name, columns[0].Name);
         }
+    }
+
+    internal struct NamingConvention
+    {
+        public string Pattern { get; }
+        public string Description { get; }
+
+        public NamingConvention(string pattern) : this(pattern, pattern) { }
+        public NamingConvention(string pattern, string description)
+        {
+            this.Pattern = pattern;
+            this.Description = description;
+        }
+
+        public string NormalizePattern(SqlCodeAnalysisConfiguration configuration, Action<PatternNormalizer> replacements)
+        {
+            PatternNormalizer normalizer = new PatternNormalizer(this.Pattern, configuration);
+            replacements?.Invoke(normalizer);
+            return normalizer.Normalize();
+        }
+
+        public string NormalizeDescription(SqlCodeAnalysisConfiguration configuration)
+        {
+            PatternNormalizer normalizer = new PatternNormalizer(this.Description, configuration);
+            return normalizer.Normalize();
+        }
+    }
+
+    internal struct Placeholder
+    {
+        public static readonly Placeholder Prefix = new Placeholder("prefix", true);
+        public static readonly Placeholder Table  = new Placeholder("table");
+        public static readonly Placeholder Column = new Placeholder("column");
+
+        public string Name { get; }
+        public bool NormalizeDescription { get; }
+
+        private Placeholder(string name, bool normalizeDescription = false)
+        {
+            this.Name = name;
+            this.NormalizeDescription = normalizeDescription;
+        }
+
+        public override string ToString() => $"<{this.Name}>";
+    }
+
+    internal sealed class PatternNormalizer
+    {
+        private readonly string _pattern;
+        private readonly IDictionary<string, string> _map;
+
+        public PatternNormalizer(string pattern, SqlCodeAnalysisConfiguration configuration)
+        {
+            this._pattern = pattern;
+            this._map = new Dictionary<string, string> { { Placeholder.Prefix.Name, configuration.NamingConventionPrefix } };
+        }
+
+        public void ResolvePlaceholder(string name, string value) => this._map.Add(name, value);
+
+        public string Normalize()
+        {
+            string replacementPattern = String.Join("|", new[] { @"\*" }.Concat(this._map.Keys.Select(x => $@"\<{x}\>")));
+            string mask = Regex.Replace(this._pattern, replacementPattern, this.OnMatch);
+            return mask;
+        }
+
+        private string OnMatch(Match match) => this._map.TryGetValue(match.Value.TrimStart('<').TrimEnd('>'), out string replacement) ? replacement : match.Value;
     }
 }

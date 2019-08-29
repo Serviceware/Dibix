@@ -9,10 +9,10 @@ namespace Dibix.Sdk.MSBuild
 {
     public static class SqlCodeAnalysisTask
     {
-        public static bool Execute(string databaseSchemaProviderName, string modelCollation, ITaskItem[] source, ITaskItem[] sqlReferencePath, ITask task, TaskLoggingHelper logger)
+        public static bool Execute(string namingConventionPrefix, string databaseSchemaProviderName, string modelCollation, ITaskItem[] source, ITaskItem[] sqlReferencePath, ITask task, TaskLoggingHelper logger)
         {
             IErrorReporter errorReporter = new MSBuildErrorReporter(logger);
-            ISqlCodeAnalysisRuleEngine codeAnalysis = SqlCodeAnalysisRuleEngine.Create(databaseSchemaProviderName, modelCollation, source, sqlReferencePath, task, errorReporter);
+            ISqlCodeAnalysisRuleEngine codeAnalysis = SqlCodeAnalysisRuleEngine.Create(namingConventionPrefix, databaseSchemaProviderName, modelCollation, source, sqlReferencePath, task, errorReporter);
             if (errorReporter.ReportErrors())
                 return false;
 

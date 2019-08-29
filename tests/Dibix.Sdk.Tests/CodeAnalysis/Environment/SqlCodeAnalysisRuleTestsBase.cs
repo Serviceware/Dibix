@@ -81,7 +81,7 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
                              return true;
                          });
 
-            ISqlCodeAnalysisRuleEngine engine = SqlCodeAnalysisRuleEngine.Create(databaseSchemaProviderName, modelCollation, source, new ITaskItem[0], task.Object, errorReporter.Object);
+            ISqlCodeAnalysisRuleEngine engine = SqlCodeAnalysisRuleEngine.Create("dbx", databaseSchemaProviderName, modelCollation, source, new ITaskItem[0], task.Object, errorReporter.Object);
             IEnumerable<SqlCodeAnalysisError> errors = engine.Analyze(violationScriptPath, ruleInstance);
 
             string actual = GenerateXmlFromResults(errors);

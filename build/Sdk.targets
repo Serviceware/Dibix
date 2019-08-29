@@ -88,8 +88,13 @@
           DependsOnTargets="SetupSqlBuildInputs"
           Inputs="@(SqlCodeAnalysisInput)"
           Outputs="@(SqlCodeAnalysisOutput)">
+    <PropertyGroup>
+      <SqlNamingConventionPrefix Condition="'$(SqlNamingConventionPrefix)' == ''">dbx</SqlNamingConventionPrefix>
+    </PropertyGroup>
+
     <SqlCodeAnalysisTask SdkPath="$(DibixSdkPath)"
                          SSDTDirectory="$(SqlServerRedistPath)"
+                         NamingConventionPrefix="$(SqlNamingConventionPrefix)"
                          DatabaseSchemaProviderName="$(DSP)"
                          ModelCollation="$(ModelCollation)"
                          Source="@(Build)"

@@ -19,20 +19,21 @@ namespace Dibix.Sdk.CodeAnalysis
             this.Errors = new Collection<SqlCodeAnalysisError>();
         }
 
-        IEnumerable<SqlCodeAnalysisError> ISqlCodeAnalysisRule.Analyze(TSqlModel model, TSqlFragment scriptFragment)
+        IEnumerable<SqlCodeAnalysisError> ISqlCodeAnalysisRule.Analyze(TSqlModel model, TSqlFragment scriptFragment, SqlCodeAnalysisConfiguration configuration)
         {
             this.Errors.Clear();
 
-            this.Analyze(model, scriptFragment);
+            this.Analyze(model, scriptFragment, configuration);
 
             return this.Errors;
         }
 
-        private void Analyze(TSqlModel model, TSqlFragment scriptFragment)
+        private void Analyze(TSqlModel model, TSqlFragment scriptFragment, SqlCodeAnalysisConfiguration configuration)
         {
             TVisitor visitor = new TVisitor
             {
                 Model = new SqlModel(model),
+                Configuration = configuration,
                 ErrorHandler = this.Fail
             };
             scriptFragment.Accept(visitor);

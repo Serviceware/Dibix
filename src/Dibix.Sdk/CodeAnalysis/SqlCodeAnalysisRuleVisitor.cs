@@ -9,6 +9,7 @@ namespace Dibix.Sdk.CodeAnalysis
         internal ReportSqlCodeAnalysisError ErrorHandler { get; set; }
 
         protected internal SqlModel Model { get; set; }
+        protected internal SqlCodeAnalysisConfiguration Configuration { get; set; }
 
         public override void ExplicitVisit(TSqlScript node)
         {
