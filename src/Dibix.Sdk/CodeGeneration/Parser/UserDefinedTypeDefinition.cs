@@ -10,9 +10,10 @@ namespace Dibix.Sdk.CodeGeneration
         public string DisplayName { get; }
         public ICollection<UserDefinedTypeColumn> Columns { get; }
 
-        public UserDefinedTypeDefinition(string typeName, string displayName)
+        public UserDefinedTypeDefinition(string typeName, string @namespace, string displayName)
         {
             this.TypeName = typeName;
+            this.Namespace = @namespace;
             this.DisplayName = displayName;
             this.Columns = new Collection<UserDefinedTypeColumn>();
         }

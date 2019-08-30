@@ -26,7 +26,7 @@ namespace Dibix.Sdk.MSBuild
             IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(projectDirectory);
             this._contractDefinitionProvider = new ContractDefinitionProvider(fileSystemProvider, errorReporter, contracts, multipleAreas);
             this._controllerDefinitionProvider = new ControllerDefinitionProvider(fileSystemProvider, errorReporter, endpoints);
-            this._userDefinedTypeProvider = new UserDefinedTypeProvider(artifacts, errorReporter);
+            this._userDefinedTypeProvider = new UserDefinedTypeProvider(artifacts, errorReporter, multipleAreas);
 
             this.Configuration = new GeneratorConfiguration();
             this.Configuration.Output.GeneratePublicArtifacts = true;
@@ -51,11 +51,7 @@ namespace Dibix.Sdk.MSBuild
         public void CollectAdditionalArtifacts(SourceArtifacts artifacts)
         {
             artifacts.Contracts.AddRange(this._contractDefinitionProvider.Contracts);
-            artifacts.UserDefinedTypes.AddRange(this._userDefinedTypeProvider.Types.Select(x =>
-            {
-                x.Namespace = LayerName.Data;
-                return x;
-            }));
+            artifacts.UserDefinedTypes.AddRange(this._userDefinedTypeProvider.Types);
             artifacts.Controllers.AddRange(this._controllerDefinitionProvider.Controllers);
         }
 

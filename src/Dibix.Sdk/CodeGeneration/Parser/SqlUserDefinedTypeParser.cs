@@ -10,16 +10,18 @@ namespace Dibix.Sdk.CodeGeneration
     internal sealed class SqlUserDefinedTypeParser
     {
         private readonly IErrorReporter _errorReporter;
+        private readonly bool _multipleAreas;
 
-        public SqlUserDefinedTypeParser(IErrorReporter errorReporter)
+        public SqlUserDefinedTypeParser(IErrorReporter errorReporter, bool multipleAreas)
         {
             this._errorReporter = errorReporter;
+            this._multipleAreas = multipleAreas;
         }
 
         public UserDefinedTypeDefinition Parse(string filePath)
         {
             TSqlFragment fragment = ScriptDomFacade.Load(filePath);
-            UserDefinedTypeVisitor visitor = new UserDefinedTypeVisitor(() => SqlHintParser.FromFragment(filePath, this._errorReporter, fragment).ToArray());
+            UserDefinedTypeVisitor visitor = new UserDefinedTypeVisitor(() => SqlHintParser.FromFragment(filePath, this._errorReporter, fragment).ToArray(), this._multipleAreas);
             fragment.Accept(visitor);
             return visitor.Definition;
         }
@@ -37,23 +39,27 @@ namespace Dibix.Sdk.CodeGeneration
         private class UserDefinedTypeVisitor : TSqlFragmentVisitor
         {
             private readonly Lazy<ICollection<SqlHint>> _hintsAccessor;
+            private readonly bool _multipleAreas;
 
             public UserDefinedTypeDefinition Definition { get; private set; }
 
-            public UserDefinedTypeVisitor(Func<ICollection<SqlHint>> hintsProvider)
+            public UserDefinedTypeVisitor(Func<ICollection<SqlHint>> hintsProvider, bool multipleAreas)
             {
                 this._hintsAccessor = new Lazy<ICollection<SqlHint>>(hintsProvider);
+                this._multipleAreas = multipleAreas;
             }
 
             public override void Visit(CreateTypeTableStatement node)
             {
                 string typeName = node.Name.BaseIdentifier.Value;
+                string @namespace = this._hintsAccessor.Value.SingleHintValue(SqlHint.Namespace);
                 string displayName = this._hintsAccessor.Value.SingleHintValue(SqlHint.Name);
                 if (String.IsNullOrEmpty(displayName))
                     displayName = GenerateDisplayName(typeName);
 
+                @namespace = NamespaceUtility.BuildNamespace(@namespace, this._multipleAreas, LayerName.Data);
                 ICollection<string> notNullableColumns = new HashSet<string>(GetNotNullableColumns(node.Definition));
-                this.Definition = new UserDefinedTypeDefinition(typeName, displayName);
+                this.Definition = new UserDefinedTypeDefinition(typeName, @namespace, displayName);
                 this.Definition.Columns.AddRange(node.Definition.ColumnDefinitions.Select(x => MapColumn(x, notNullableColumns)));
             }
 
