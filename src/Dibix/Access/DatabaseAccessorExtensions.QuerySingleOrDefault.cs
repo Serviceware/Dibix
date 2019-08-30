@@ -11,6 +11,12 @@ namespace Dibix
             Guard.IsNotNull(accessor, nameof(accessor));
             return accessor.QuerySingleOrDefault<T>(sql, CommandType.Text, EmptyParameters.Instance);
         }
+        // DataImport (LoadDeployAlias)
+        public static T QuerySingleOrDefault<T>(this IDatabaseAccessor accessor, string sql, CommandType commandType)
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
+            return accessor.QuerySingleOrDefault<T>(sql, commandType, EmptyParameters.Instance);
+        }
         public static T QuerySingleOrDefault<T>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
