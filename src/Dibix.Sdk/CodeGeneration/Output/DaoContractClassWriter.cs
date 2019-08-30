@@ -22,6 +22,8 @@ namespace Dibix.Sdk.CodeGeneration
 
         public void Write(DaoWriterContext context)
         {
+            context.Output.AddUsing(typeof(DateTime).Namespace);
+
             var namespaceGroups = context.Artifacts
                                          .Contracts
                                          .GroupBy(x => x.Namespace)

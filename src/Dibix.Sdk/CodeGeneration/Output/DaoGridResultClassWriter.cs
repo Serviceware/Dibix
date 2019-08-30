@@ -31,7 +31,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 IGrouping<string, SqlStatementInfo> namespaceGroup = namespaceGroups[i];
                 CSharpStatementScope scope = namespaceGroup.Key != null ? context.Output.BeginScope(namespaceGroup.Key) : context.Output;
-                IList<SqlStatementInfo> statements = namespaceGroup.ToArray();
+                IList<SqlStatementInfo> statements = namespaceGroup.DistinctBy(x => x.GeneratedResultTypeName).ToArray();
                 for (int j = 0; j < statements.Count; j++)
                 {
                     SqlStatementInfo statement = statements[j];
