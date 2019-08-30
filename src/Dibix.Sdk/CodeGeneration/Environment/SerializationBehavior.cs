@@ -3,7 +3,7 @@
     public enum SerializationBehavior
     {
         Always,
-        IfNotNull,
+        IfNotSet,
         Never
     }
 }

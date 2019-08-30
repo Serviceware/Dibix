@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
+using Newtonsoft.Json;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -18,8 +22,6 @@ namespace Dibix.Sdk.CodeGeneration
 
         public void Write(DaoWriterContext context)
         {
-            context.Output.AddUsing("System");
-
             var namespaceGroups = context.Artifacts
                                          .Contracts
                                          .GroupBy(x => x.Namespace)
@@ -60,12 +62,13 @@ namespace Dibix.Sdk.CodeGeneration
             ICollection<string> classAnnotations = new Collection<string>();
             if (!String.IsNullOrEmpty(contract.WcfNamespace))
             {
-                context.Output.AddUsing("System.Runtime.Serialization");
+                context.Output.AddUsing(typeof(DataMemberAttribute).Namespace);
                 classAnnotations.Add($"DataContract(Namespace = \"{contract.WcfNamespace}\")");
             }
 
             CSharpClass @class = scope.AddClass(contract.DefinitionName, CSharpModifiers.Public | CSharpModifiers.Sealed, classAnnotations);
             ICollection<string> ctorAssignments = new Collection<string>();
+            ICollection<string> shouldSerializeMethods = new Collection<string>();
             foreach (ObjectContractProperty property in contract.Properties)
             {
                 ICollection<string> propertyAnnotations = new Collection<string>();
@@ -74,7 +77,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                 if (property.IsPartOfKey)
                 {
-                    context.Output.AddUsing("System.ComponentModel.DataAnnotations");
+                    context.Output.AddUsing(typeof(KeyAttribute).Namespace);
                     context.Configuration.DetectedReferences.Add("System.ComponentModel.DataAnnotations.dll");
                     propertyAnnotations.Add("Key");
                 }
@@ -84,9 +87,16 @@ namespace Dibix.Sdk.CodeGeneration
                     case SerializationBehavior.Always:
                         break;
 
-                    case SerializationBehavior.IfNotNull:
-                        AddJsonReference(context);
-                        propertyAnnotations.Add("JsonProperty(NullValueHandling = NullValueHandling.Ignore)");
+                    case SerializationBehavior.IfNotSet:
+                        if (!property.IsEnumerable)
+                        {
+                            AddJsonReference(context);
+                            propertyAnnotations.Add("JsonProperty(NullValueHandling = NullValueHandling.Ignore)");
+                        }
+                        else
+                        {
+                            shouldSerializeMethods.Add(property.Name);
+                        }
                         break;
 
                     case SerializationBehavior.Never:
@@ -106,14 +116,26 @@ namespace Dibix.Sdk.CodeGeneration
                     ctorAssignments.Add($"this.{property.Name} = new Collection<{property.Type}>();");
             }
 
-            if (!ctorAssignments.Any())
-                return;
+            if (ctorAssignments.Any())
+            {
+                context.Output.AddUsing(typeof(ICollection<>).Namespace);
+                context.Output.AddUsing(typeof(Collection<>).Namespace);
 
-            context.Output.AddUsing(typeof(ICollection<>).Namespace);
-            context.Output.AddUsing(typeof(Collection<>).Namespace);
+                @class.AddSeparator()
+                      .AddConstructor(String.Join(Environment.NewLine, ctorAssignments));
+            }
 
-            @class.AddSeparator()
-                  .AddConstructor(String.Join(Environment.NewLine, ctorAssignments));
+            if (shouldSerializeMethods.Any())
+            {
+                context.Output.AddUsing(typeof(Enumerable).Namespace);
+
+                @class.AddSeparator();
+
+                foreach (string shouldSerializeMethod in shouldSerializeMethods)
+                {
+                    @class.AddMethod($"ShouldSerialize{shouldSerializeMethod}", "bool", $"return {shouldSerializeMethod}.Any();");
+                }
+            }
         }
 
         private static void ProcessEnumContract(CSharpStatementScope scope, EnumContract contract)
@@ -132,8 +154,8 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static void AddJsonReference(DaoWriterContext context)
         {
-            context.Output.AddUsing("Newtonsoft.Json");
-            context.Configuration.DetectedReferences.Add("Newtonsoft.Json.dll");
+            context.Output.AddUsing(typeof(JsonPropertyAttribute).Namespace);
+            context.Configuration.DetectedReferences.Add(Path.GetFileName(typeof(JsonPropertyAttribute).Assembly.Location));
         }
         #endregion
     }

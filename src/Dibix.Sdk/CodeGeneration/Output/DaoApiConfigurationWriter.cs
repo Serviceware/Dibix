@@ -23,7 +23,7 @@ namespace Dibix.Sdk.CodeGeneration
             context.Output.AddUsing("Dibix.Http");
 
             if (context.Artifacts.Controllers.Any(x => x.ControllerImports.Any()))
-                context.Output.AddUsing("System");
+                context.Output.AddUsing(typeof(Type).Namespace);
 
             string body = WriteBody(context, context.Artifacts.Controllers);
 
@@ -87,7 +87,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                     if (!String.IsNullOrEmpty(action.BodyBinder))
                     {
-                        context.Output.AddUsing("System");
+                        context.Output.AddUsing(typeof(Type).Namespace);
                         writer.WriteLine($"y.BodyBinder = Type.GetType(\"{action.BodyBinder}\", true);");
                     }
 
