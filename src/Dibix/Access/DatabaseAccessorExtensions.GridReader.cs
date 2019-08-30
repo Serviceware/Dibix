@@ -6,6 +6,14 @@ namespace Dibix
 {
     public static partial class DatabaseAccessorExtensions
     {
+        // ObjectManagement (GetDetailConfigurationExportById, GetDetailConfigurationExportByObjectDef)
+        public static IEnumerable<TReturn> ReadMany<TReturn, TSecond>(this IMultipleResultReader reader, string splitOn) where TReturn : new()
+        {
+            Guard.IsNotNull(reader, nameof(reader));
+            MultiMapper multiMapper = new MultiMapper();
+            return reader.ReadMany<TReturn, TSecond, TReturn>((a, b) => multiMapper.AutoMap<TReturn>(false, a, b), splitOn)
+                         .Distinct(new EntityComparer<TReturn>());
+        }
         public static IEnumerable<TReturn> ReadMany<TFirst, TSecond, TReturn>(this IMultipleResultReader reader, string splitOn) where TReturn : new()
         {
             Guard.IsNotNull(reader, nameof(reader));
