@@ -12,6 +12,7 @@ namespace Dibix.Http
     {
         #region Fields
         private static readonly ICollection<Type> KnownDependencies = new[] { typeof(IDatabaseAccessorFactory) };
+        private static readonly Lazy<PropertyAccessor> DebugViewAccessor = new Lazy<PropertyAccessor>(BuildDebugViewAccessor);
         #endregion
 
         #region Delegates
@@ -53,8 +54,8 @@ namespace Dibix.Http
             // ...
             CollectParameterAssignments(action, @params, argumentsParameter, sources, context);
 
-            HttpParameterResolutionMethod method = new HttpParameterResolutionMethod();
-            method.PrepareParametersMethod = Compile(context);
+            ResolveParameters compiled = Compile(context, out string source);
+            HttpParameterResolutionMethod method = new HttpParameterResolutionMethod(source, compiled);
             CollectExpectedParameters(method.Parameters, @params, action.BodyContract);
             return method;
         }
@@ -328,11 +329,18 @@ namespace Dibix.Http
             return value;
         }
 
-        private static ResolveParameters Compile(HttpParameterResolverCompilationContext context)
+        private static PropertyAccessor BuildDebugViewAccessor()
+        {
+            PropertyInfo property = typeof(Expression).GetTypeInfo().GetProperty("DebugView", BindingFlags.Instance | BindingFlags.NonPublic);
+            return PropertyAccessor.Create(property);
+        }
+
+        private static ResolveParameters Compile(HttpParameterResolverCompilationContext context, out string source)
         {
             Expression block = Expression.Block(context.Variables, context.Statements);
             Expression<ResolveParameters> lambda = Expression.Lambda<ResolveParameters>(block, context.Parameters);
             ResolveParameters compiled = lambda.Compile();
+            source = (string)DebugViewAccessor.Value.GetValue(lambda);
             return compiled;
         }
 
@@ -452,17 +460,21 @@ namespace Dibix.Http
 
         private sealed class HttpParameterResolutionMethod : IHttpParameterResolutionMethod
         {
-            public IDictionary<string, Type> Parameters { get; }
-            public ResolveParameters PrepareParametersMethod { get; set; }
+            private readonly ResolveParameters _compiled;
 
-            public HttpParameterResolutionMethod()
+            public string Source { get; }
+            public IDictionary<string, Type> Parameters { get; }
+
+            public HttpParameterResolutionMethod(string source, ResolveParameters compiled)
             {
+                this._compiled = compiled;
+                this.Source = source;
                 this.Parameters = new Dictionary<string, Type>();
             }
 
             public void PrepareParameters(IDictionary<string, object> arguments, IParameterDependencyResolver dependencyResolver)
             {
-                this.PrepareParametersMethod(arguments, dependencyResolver);
+                this._compiled(arguments, dependencyResolver);
             }
         }
         #endregion
