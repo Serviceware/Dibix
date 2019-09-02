@@ -37,6 +37,12 @@
     <DibixBuildToolsPath>$(DibixToolsDirectory)Dibix.MSBuild.dll</DibixBuildToolsPath>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!-- Clean target assembly, which is required to force rebuild of CompileDatabaseAccessorTask -->
+    <!-- This is probably not included, because we skip copying it to output -->
+    <Clean Include="$(TargetPath)" />
+  </ItemGroup>
+
   <UsingTask TaskName="SqlCodeAnalysisTask" AssemblyFile="$(DibixBuildToolsPath)" />
   <UsingTask TaskName="CompileDatabaseAccessorTask" AssemblyFile="$(DibixBuildToolsPath)" />
   <UsingTask TaskName="VerifyDatabaseAccessorTask" AssemblyFile="$(DibixBuildToolsPath)" />
