@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using Xunit;
 
-namespace Dibix.Dapper.Tests
+namespace Dibix.Tests
 {
     public class MultiMapperTest
     {
