@@ -10,7 +10,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <AssemblyAttribute Include="Dibix.Http.ApiRegistrationAttribute">
+      <_Parameter1>Dibix</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftTestSdkVersion)" />
+    <PackageReference Include="Moq" Version="$(MoqVersion)" />
     <PackageReference Include="xunit" Version="$(XUnitVersion)" />
     <PackageReference Include="xunit.runner.visualstudio" Version="$(XUnitVersion)" />
     <PackageReference Include="coverlet.msbuild" Version="$(CoverletVersion)" />

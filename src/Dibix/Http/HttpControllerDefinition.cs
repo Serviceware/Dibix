@@ -23,6 +23,7 @@ namespace Dibix.Http
         public void AddAction(IHttpActionTarget target, Action<HttpActionDefinition> setupAction)
         {
             HttpActionDefinition action = new HttpActionDefinition(this, target);
+            Guard.IsNotNull(setupAction, nameof(setupAction));
             setupAction(action);
             this.Actions.Add(action);
         }
