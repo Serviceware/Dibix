@@ -7,8 +7,12 @@ namespace Dibix.Http
 {
     public abstract class HttpApiDescriptor
     {
+        #region Fields
+        private readonly Lazy<string> _areaNameAccessor;
+        #endregion
+
         #region Properties
-        public string AreaName { get; }
+        public string AreaName => this._areaNameAccessor.Value;
         public ICollection<HttpControllerDefinition> Controllers { get; }
         #endregion
 
@@ -16,18 +20,7 @@ namespace Dibix.Http
         protected HttpApiDescriptor()
         {
             this.Controllers = new Collection<HttpControllerDefinition>();
-
-            Type implType = this.GetType();
-            Assembly assembly = implType.GetTypeInfo().Assembly;
-            ApiRegistrationAttribute attribute = assembly.GetCustomAttribute<ApiRegistrationAttribute>();
-            if (attribute == null)
-                throw new InvalidOperationException($"Assembly {assembly.GetName().Name} is not marked with {typeof(ApiRegistrationAttribute)}");
-
-            if (String.IsNullOrEmpty(attribute.AreaName))
-                throw new InvalidOperationException($@"Area name cannot be empty
-{assembly.GetName().Name} -> {implType}");
-
-            this.AreaName = attribute.AreaName;
+            this._areaNameAccessor = new Lazy<string>(this.ResolveAreaName);
         }
         #endregion
 
@@ -36,11 +29,32 @@ namespace Dibix.Http
         #endregion
 
         #region Protected Methods
+        protected virtual string ResolveAreaName(Assembly assembly)
+        {
+            ApiRegistrationAttribute attribute = assembly.GetCustomAttribute<ApiRegistrationAttribute>();
+            if (attribute == null)
+                throw new InvalidOperationException($"Assembly {assembly.GetName().Name} is not marked with {typeof(ApiRegistrationAttribute)}");
+
+            if (String.IsNullOrEmpty(attribute.AreaName))
+                throw new InvalidOperationException($@"Area name cannot be empty
+{assembly.GetName().Name} -> {this.GetType()}");
+
+            return attribute.AreaName;
+        }
+
         protected void RegisterController(string controllerName, Action<HttpControllerDefinition> setupAction)
         {
             HttpControllerDefinition controller = new HttpControllerDefinition(this.AreaName, controllerName);
             setupAction(controller);
             this.Controllers.Add(controller);
+        }
+        #endregion
+
+        #region Private Methods
+        private string ResolveAreaName()
+        {
+            Assembly assembly = this.GetType().GetTypeInfo().Assembly;
+            return this.ResolveAreaName(assembly);
         }
         #endregion
     }
