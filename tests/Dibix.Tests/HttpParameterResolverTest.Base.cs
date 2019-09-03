@@ -3,7 +3,10 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Xml.Linq;
 using Dibix.Http;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace Dibix.Tests
@@ -54,6 +57,11 @@ namespace Dibix.Tests
         private sealed class HttpParameterSource
         {
             public int LocaleId => 1033;
+        }
+
+        private sealed class JsonToXmlConverter : IFormattedInputConverter<JObject, XElement>
+        {
+            public XElement Convert(JObject source) => JsonConvert.DeserializeXNode(source.ToString()).Root;
         }
     }
 }
