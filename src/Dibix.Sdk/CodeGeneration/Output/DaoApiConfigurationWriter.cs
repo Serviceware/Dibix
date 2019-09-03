@@ -15,7 +15,12 @@ namespace Dibix.Sdk.CodeGeneration
 
         public IEnumerable<string> GetGlobalAnnotations(OutputConfiguration configuration)
         {
-            yield return $"ApiRegistration(\"{configuration.Namespace.Split('.')[1]}\")";
+            string[] parts = configuration.Namespace.Split('.');
+            if (parts.Length < 2)
+                throw new InvalidOperationException("Could not detect area name of project. The project namespace should have the following format: <PRODUCTNAME>.<AREANAME>");
+
+            string areaName = parts[1];
+            yield return $"ApiRegistration(\"{areaName}\")";
         }
 
         public void Write(DaoWriterContext context)
