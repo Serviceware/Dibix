@@ -44,6 +44,7 @@ namespace Dibix.Http
 
         protected void RegisterController(string controllerName, Action<HttpControllerDefinition> setupAction)
         {
+            Guard.IsNotNullOrEmpty(controllerName, nameof(controllerName));
             HttpControllerDefinition controller = new HttpControllerDefinition(this.AreaName, controllerName);
             setupAction(controller);
             this.Controllers.Add(controller);

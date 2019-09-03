@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using Dibix.Http;
@@ -38,6 +39,7 @@ namespace Dibix.Tests
             Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
+        private static void Compile_Default_Target(IDatabaseAccessorFactory databaseAccessorFactory) { }
 
         [Fact]
         public void Compile_PropertySource()
@@ -75,6 +77,7 @@ namespace Dibix.Tests
             Assert.Equal(1033, arguments["lcid"]);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
+        private static void Compile_PropertySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, int lcid) { }
 
         [Fact]
         public void Compile_BodySource()
@@ -122,6 +125,7 @@ namespace Dibix.Tests
             Assert.Equal(7, ((HttpParameterInput)arguments["input"]).targetid);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
+        private static void Compile_BodySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] HttpParameterInput input) { }
 
         [Fact]
         public void Compile_BodyConverter()
@@ -162,6 +166,7 @@ namespace Dibix.Tests
             Assert.Equal("<id>5</id>", arguments["data"].ToString());
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
+        private static void Compile_BodyConverter_Target(IDatabaseAccessorFactory databaseAccessorFactory, XElement data) { }
 
         [Fact]
         public void Compile_BodyBinder()
@@ -208,6 +213,20 @@ namespace Dibix.Tests
             Assert.Equal(7, ((HttpParameterInput)arguments["input"]).targetid);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
+        private static void Compile_BodyBinder_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] HttpParameterInput input) { }
+
+        [Fact]
+        public void Compile_BodyBinder_WithoutInputClass_Throws()
+        {
+            Assert.Equal(@"Using a binder for the body is only supported if the target parameter is a class and is marked with the Dibix.InputClassAttribute
+Parameter: input
+at GET api/Dibix/Test", Assert.Throws<InvalidOperationException>(() => Compile(x =>
+            {
+                x.BodyContract = typeof(HttpBody);
+                x.BodyBinder = typeof(FormattedInputBinder);
+            })).Message);
+        }
+        private static void Compile_BodyBinder_WithoutInputClass_Throws_Target(IDatabaseAccessorFactory databaseAccessorFactory, HttpParameterInput input) { }
 
         [Fact]
         public void Compile_ConstantSource()
@@ -241,6 +260,7 @@ namespace Dibix.Tests
             Assert.Equal(true, arguments["value"]);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
+        private static void Compile_ConstantSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, bool value) { }
 
         [Fact]
         public void Compile_UriSource()
@@ -282,19 +302,6 @@ namespace Dibix.Tests
             Assert.Equal(9, ((HttpParameterInput)arguments["input"]).targetid);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
-
-        private static void Compile_Default_Target(IDatabaseAccessorFactory databaseAccessorFactory) { }
-
-        private static void Compile_PropertySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, int lcid) { }
-
-        private static void Compile_BodySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] HttpParameterInput input) { }
-
-        private static void Compile_BodyConverter_Target(IDatabaseAccessorFactory databaseAccessorFactory, XElement data) { }
-
-        private static void Compile_BodyBinder_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] HttpParameterInput input) { }
-
-        private static void Compile_ConstantSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, bool value) { }
-
         private static void Compile_UriSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] HttpParameterInput input, int id) { }
     }
 }

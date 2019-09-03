@@ -106,7 +106,7 @@ namespace Dibix.Http
                     }
                     else if (action.BodyBinder != null)
                     {
-                        throw HttpParameterResolverUtility.CreateException(action, "Using a binder for the body is only supported if a target input parameter class exists", parameter.Name);
+                        throw HttpParameterResolverUtility.CreateException(action, $"Using a binder for the body is only supported if the target parameter is a class and is marked with the {typeof(InputClassAttribute)}", parameter.Name);
                     }
                     else
                     {

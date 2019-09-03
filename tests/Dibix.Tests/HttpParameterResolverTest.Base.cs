@@ -31,7 +31,7 @@ namespace Dibix.Tests
 
             public HttpApiRegistration(Action<HttpActionDefinition> actionConfiguration) => this._actionConfiguration = actionConfiguration;
 
-            public override void Configure() => base.RegisterController(null, x => x.AddAction(ReflectionHttpActionTarget.Create(typeof(HttpParameterResolverTest), this._methodName), this._actionConfiguration));
+            public override void Configure() => base.RegisterController("Test", x => x.AddAction(ReflectionHttpActionTarget.Create(typeof(HttpParameterResolverTest), this._methodName), this._actionConfiguration));
 
             private static string DetermineTestName()
             {
