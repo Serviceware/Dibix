@@ -162,6 +162,39 @@ namespace Dibix.Tests
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
 
+        [Fact]
+        public void Compile_ConstantSource()
+        {
+            IHttpParameterResolutionMethod result = Compile(x => x.ResolveParameter("value", true));
+            Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
+    System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
+    Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
+    .Block(Dibix.IDatabaseAccessorFactory $databaseaccessorfactory) {
+        $databaseaccessorfactory = .Call $dependencyResolver.Resolve();
+        .Call $arguments.Add(
+            ""databaseAccessorFactory"",
+            (System.Object)$databaseaccessorfactory);
+        .Call $arguments.Add(
+            ""value"",
+            (System.Object)True)
+    }
+}", result.Source);
+            Assert.False(result.Parameters.Any());
+
+            IDictionary<string, object> arguments = new Dictionary<string, object>();
+            Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
+            Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
+
+            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
+
+            result.PrepareParameters(arguments, dependencyResolver.Object);
+
+            Assert.Equal(2, arguments.Count);
+            Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
+            Assert.Equal(true, arguments["value"]);
+            dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
+        }
+
         private static void Compile_Default_Target(IDatabaseAccessorFactory databaseAccessorFactory) { }
 
         private static void Compile_PropertySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, int lcid) { }
@@ -169,5 +202,7 @@ namespace Dibix.Tests
         private static void Compile_BodyConverter_Target(IDatabaseAccessorFactory databaseAccessorFactory, XElement data) { }
 
         private static void Compile_BodySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] HttpParameterInput input) { }
+
+        private static void Compile_ConstantSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, bool value) { }
     }
 }
