@@ -80,6 +80,15 @@ namespace Dibix.Tests
         private static void Compile_PropertySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, int lcid) { }
 
         [Fact]
+        public void Compile_PropertySource_WithUnknownSource_Throws()
+        {
+            Assert.Equal(@"Unknown source provider 'UNKNOWNSOURCE' for property 'LocaleId'
+Parameter: lcid
+at GET api/Dibix/Test", Assert.Throws<InvalidOperationException>(() => Compile(x => x.ResolveParameter("lcid", "UNKNOWNSOURCE", "LocaleId"))).Message);
+        }
+        private static void Compile_PropertySource_WithUnknownSource_Throws_Target(IDatabaseAccessorFactory databaseAccessorFactory, int lcid) { }
+
+        [Fact]
         public void Compile_BodySource()
         {
             IHttpParameterResolutionMethod result = Compile(x =>
