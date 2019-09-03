@@ -73,5 +73,10 @@ namespace Dibix.Tests
         {
             public XElement Convert(JObject source) => JsonConvert.DeserializeXNode(source.ToString()).Root;
         }
+
+        private sealed class FormattedInputBinder : IFormattedInputBinder<HttpBody, HttpParameterInput>
+        {
+            public void Bind(HttpBody source, HttpParameterInput target) => target.targetid = source.SourceId;
+        }
     }
 }
