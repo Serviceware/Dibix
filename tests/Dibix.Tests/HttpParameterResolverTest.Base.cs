@@ -59,6 +59,16 @@ namespace Dibix.Tests
             public int LocaleId => 1033;
         }
 
+        private sealed class HttpBody
+        {
+            public int SourceId { get; set; }
+        }
+
+        private sealed class HttpParameterInput
+        {
+            public int targetid { get; set; }
+        }
+
         private sealed class JsonToXmlConverter : IFormattedInputConverter<JObject, XElement>
         {
             public XElement Convert(JObject source) => JsonConvert.DeserializeXNode(source.ToString()).Root;

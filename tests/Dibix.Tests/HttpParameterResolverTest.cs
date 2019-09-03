@@ -116,10 +116,58 @@ namespace Dibix.Tests
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
 
+        [Fact]
+        public void Compile_BodySource()
+        {
+            IHttpParameterResolutionMethod result = Compile(x =>
+            {
+                x.BodyContract = typeof(HttpBody);
+                x.ResolveParameter("targetId", "BODY", "SourceId");
+            });
+            Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
+    System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
+    Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
+    .Block(
+        Dibix.IDatabaseAccessorFactory $databaseaccessorfactory,
+        Dibix.Tests.HttpParameterResolverTest+HttpBody $body,
+        Dibix.Tests.HttpParameterResolverTest+HttpParameterInput $input) {
+        $databaseaccessorfactory = .Call $dependencyResolver.Resolve();
+        $body = .Call Dibix.Http.HttpParameterResolverUtility.ReadBody($arguments);
+        .Call $arguments.Add(
+            ""databaseAccessorFactory"",
+            (System.Object)$databaseaccessorfactory);
+        $input = .New Dibix.Tests.HttpParameterResolverTest+HttpParameterInput();
+        $input.targetid = $body.SourceId;
+        .Call $arguments.Add(
+            ""input"",
+            (System.Object)$input)
+    }
+}", result.Source);
+            Assert.Equal(1, result.Parameters.Count);
+            Assert.Equal(typeof(HttpBody), result.Parameters["$body"]);
+
+            object body = new HttpBody { SourceId = 7 };
+            IDictionary<string, object> arguments = new Dictionary<string, object> { { "$body", body } };
+            Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
+            Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
+
+            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
+
+            result.PrepareParameters(arguments, dependencyResolver.Object);
+
+            Assert.Equal(3, arguments.Count);
+            Assert.Equal(body, arguments["$body"]);
+            Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
+            Assert.Equal(7, ((HttpParameterInput)arguments["input"]).targetid);
+            dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
+        }
+
         private static void Compile_Default_Target(IDatabaseAccessorFactory databaseAccessorFactory) { }
 
         private static void Compile_PropertySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, int lcid) { }
 
         private static void Compile_BodyConverter_Target(IDatabaseAccessorFactory databaseAccessorFactory, XElement data) { }
+
+        private static void Compile_BodySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] HttpParameterInput input) { }
     }
 }
