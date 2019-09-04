@@ -61,7 +61,7 @@ namespace Dibix.Tests
 
         private sealed class HttpBody
         {
-            public int SourceId { get; set; }
+            public short SourceId { get; set; }
         }
 
         private sealed class HttpParameterInput

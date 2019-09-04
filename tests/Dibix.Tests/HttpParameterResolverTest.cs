@@ -109,7 +109,7 @@ at GET api/Dibix/Test", Assert.Throws<InvalidOperationException>(() => Compile(x
             ""databaseAccessorFactory"",
             (System.Object)$databaseaccessorfactory);
         $input = .New Dibix.Tests.HttpParameterResolverTest+HttpParameterInput();
-        $input.targetid = $body.SourceId;
+        $input.targetid = (System.Int32)$body.SourceId;
         .Call $arguments.Add(
             ""input"",
             (System.Object)$input)
