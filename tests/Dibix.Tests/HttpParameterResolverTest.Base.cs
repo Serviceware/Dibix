@@ -69,6 +69,11 @@ namespace Dibix.Tests
             public int targetid { get; set; }
         }
 
+        private sealed class AnotherHttpParameterInput
+        {
+            public XElement data { get; set; }
+        }
+
         private sealed class JsonToXmlConverter : IFormattedInputConverter<JObject, XElement>
         {
             public XElement Convert(JObject source) => JsonConvert.DeserializeXNode(source.ToString()).Root;
