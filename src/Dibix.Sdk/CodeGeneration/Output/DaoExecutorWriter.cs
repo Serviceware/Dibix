@@ -3,7 +3,6 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -41,11 +40,6 @@ namespace Dibix.Sdk.CodeGeneration
                 // Execution methods
                 @class.AddSeparator();
                 this.AddExecutionMethods(@class, context, statements, contracts);
-
-                // Add method info accessor fields
-                // This is useful for dynamic invocation like in WAX
-                @class.AddSeparator();
-                AddMethodInfoFields(@class, context, statements);
             }
         }
         #endregion
@@ -132,19 +126,6 @@ namespace Dibix.Sdk.CodeGeneration
 
             // GridReader
             return this.GetComplexTypeName(context, query, contracts);
-        }
-
-        private static void AddMethodInfoFields(CSharpClass @class, DaoWriterContext context, IEnumerable<SqlStatementInfo> statements)
-        {
-            Type methodInfoType = typeof(MethodInfo);
-            context.Output.AddUsing(methodInfoType.Namespace);
-            foreach (SqlStatementInfo statement in statements)
-            {
-                @class.AddField(name: String.Concat(statement.Name, methodInfoType.Name)
-                              , type: methodInfoType.Name
-                              , value: new CSharpValue($"typeof({context.Configuration.ClassName}).GetMethod(\"{statement.Name}\")")
-                              , modifiers: CSharpModifiers.Public | CSharpModifiers.Static | CSharpModifiers.ReadOnly);
-            }
         }
 
         private string GenerateMethodBody(SqlStatementInfo statement, DaoWriterContext context, HashSet<string> contracts)
