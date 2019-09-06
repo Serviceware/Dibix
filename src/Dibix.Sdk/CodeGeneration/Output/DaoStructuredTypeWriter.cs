@@ -1,21 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dibix.Sdk.CodeGeneration.CSharp;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class DaoStructuredTypeWriter : IDaoWriter
+    internal sealed class DaoStructuredTypeWriter : IDaoChildWriter
     {
         #region Properties
         public string RegionName => "Structured types";
         #endregion
 
-        #region IDaoWriter Members
-        public bool HasContent(OutputConfiguration configuration, SourceArtifacts artifacts) => artifacts.UserDefinedTypes.Any();
+        #region IDaoChildWriter Members
+        public bool HasContent(SourceArtifacts artifacts) => artifacts.UserDefinedTypes.Any();
 
         public IEnumerable<string> GetGlobalAnnotations(OutputConfiguration context) { yield break; }
 
-        public void Write(DaoWriterContext context)
+        public void Write(WriterContext context)
         {
             context.Output.AddUsing("Dibix");
 

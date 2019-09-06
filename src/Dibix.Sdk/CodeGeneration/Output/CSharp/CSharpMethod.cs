@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace Dibix.Sdk.CodeGeneration
+namespace Dibix.Sdk.CodeGeneration.CSharp
 {
     public sealed class CSharpMethod : CSharpStatement
     {

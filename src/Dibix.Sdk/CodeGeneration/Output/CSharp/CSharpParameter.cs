@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Dibix.Sdk.CodeGeneration
+namespace Dibix.Sdk.CodeGeneration.CSharp
 {
     internal sealed class CSharpParameter : CSharpStatement
     {

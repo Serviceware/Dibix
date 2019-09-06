@@ -1,4 +1,4 @@
-﻿namespace Dibix.Sdk.CodeGeneration
+﻿namespace Dibix.Sdk.CodeGeneration.CSharp
 {
     internal class CSharpRegionEnd : CSharpStatement
     {

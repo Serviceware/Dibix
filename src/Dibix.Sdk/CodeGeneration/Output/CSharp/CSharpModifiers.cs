@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Dibix.Sdk.CodeGeneration
+namespace Dibix.Sdk.CodeGeneration.CSharp
 {
     [Flags]
     public enum CSharpModifiers

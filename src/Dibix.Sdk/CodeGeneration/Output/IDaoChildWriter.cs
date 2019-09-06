@@ -2,12 +2,12 @@
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    public interface IDaoWriter
+    public interface IDaoChildWriter
     {
         string RegionName { get; }
 
-        bool HasContent(OutputConfiguration configuration, SourceArtifacts artifacts);
+        bool HasContent(SourceArtifacts artifacts);
         IEnumerable<string> GetGlobalAnnotations(OutputConfiguration configuration);
-        void Write(DaoWriterContext context);
+        void Write(WriterContext context);
     }
 }

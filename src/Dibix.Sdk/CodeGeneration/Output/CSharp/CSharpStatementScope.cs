@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
-namespace Dibix.Sdk.CodeGeneration
+namespace Dibix.Sdk.CodeGeneration.CSharp
 {
     public class CSharpStatementScope : CSharpStatement
     {

@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using Dibix.Sdk.CodeGeneration.CSharp;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class DaoGridResultClassWriter : DaoWriterBase, IDaoWriter
+    internal sealed class DaoGridResultClassWriter : DaoChildWriterBase, IDaoChildWriter
     {
         #region Fields
         internal const string ComplexResultTypeSuffix = "Result";
@@ -17,9 +18,9 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Overrides
-        public override bool HasContent(OutputConfiguration configuration, SourceArtifacts artifacts) => artifacts.Statements.Any(IsGridResult);
+        public override bool HasContent(SourceArtifacts artifacts) => artifacts.Statements.Any(IsGridResult);
 
-        protected override void Write(DaoWriterContext context, HashSet<string> contracts)
+        protected override void Write(WriterContext context, HashSet<string> contracts)
         {
             var namespaceGroups = context.Artifacts
                                          .Statements

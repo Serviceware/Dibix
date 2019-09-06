@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using Dibix.Sdk.CodeGeneration.CSharp;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class DaoExecutorWriter : DaoWriterBase, IDaoWriter
+    internal sealed class DaoExecutorWriter : DaoChildWriterBase, IDaoChildWriter
     {
         #region Fields
         private const string ConstantSuffix = "CommandText";
@@ -19,9 +20,9 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Overrides
-        public override bool HasContent(OutputConfiguration configuration, SourceArtifacts artifacts) => artifacts.Statements.Any();
+        public override bool HasContent(SourceArtifacts artifacts) => artifacts.Statements.Any();
 
-        protected override void Write(DaoWriterContext context, HashSet<string> contracts)
+        protected override void Write(WriterContext context, HashSet<string> contracts)
         {
             context.Output.AddUsing(typeof(GeneratedCodeAttribute).Namespace);
 
@@ -45,7 +46,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private static void AddCommandTextConstants(CSharpClass @class, DaoWriterContext context, IList<SqlStatementInfo> statements)
+        private static void AddCommandTextConstants(CSharpClass @class, WriterContext context, IList<SqlStatementInfo> statements)
         {
             for (int i = 0; i < statements.Count; i++)
             {
@@ -63,7 +64,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private void AddExecutionMethods(CSharpClass @class, DaoWriterContext context, IList<SqlStatementInfo> statements, HashSet<string> contracts)
+        private void AddExecutionMethods(CSharpClass @class, WriterContext context, IList<SqlStatementInfo> statements, HashSet<string> contracts)
         {
             context.Output.AddUsing("Dibix");
 
@@ -101,7 +102,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private string DetermineResultTypeName(DaoWriterContext context, SqlStatementInfo query, HashSet<string> contracts)
+        private string DetermineResultTypeName(WriterContext context, SqlStatementInfo query, HashSet<string> contracts)
         {
             if (query.IsFileApi)
             {
@@ -128,7 +129,7 @@ namespace Dibix.Sdk.CodeGeneration
             return this.GetComplexTypeName(context, query, contracts);
         }
 
-        private string GenerateMethodBody(SqlStatementInfo statement, DaoWriterContext context, HashSet<string> contracts)
+        private string GenerateMethodBody(SqlStatementInfo statement, WriterContext context, HashSet<string> contracts)
         {
             StringWriter writer = new StringWriter();
 
@@ -216,7 +217,7 @@ namespace Dibix.Sdk.CodeGeneration
                   .ResetTemporaryIndent();
         }
 
-        private void WriteExecutor(DaoWriterContext context, StringWriter writer, SqlStatementInfo query, HashSet<string> contracts)
+        private void WriteExecutor(WriterContext context, StringWriter writer, SqlStatementInfo query, HashSet<string> contracts)
         {
             if (query.IsFileApi)
             {
@@ -297,7 +298,7 @@ namespace Dibix.Sdk.CodeGeneration
             writer.WriteLineRaw(");");
         }
 
-        private void WriteComplexResult(DaoWriterContext context, StringWriter writer, SqlStatementInfo query, HashSet<string> contracts)
+        private void WriteComplexResult(WriterContext context, StringWriter writer, SqlStatementInfo query, HashSet<string> contracts)
         {
             writer.Write("using (IMultipleResultReader reader = accessor.QueryMultiple(")
                   .WriteRaw(query.Name)
@@ -320,7 +321,7 @@ namespace Dibix.Sdk.CodeGeneration
                   .WriteLine("}");
         }
 
-        private void WriteComplexResultBody(DaoWriterContext context, StringWriter writer, SqlStatementInfo query, HashSet<string> contracts)
+        private void WriteComplexResultBody(WriterContext context, StringWriter writer, SqlStatementInfo query, HashSet<string> contracts)
         {
             string resultTypeName = this.GetComplexTypeName(context, query, contracts);
 
@@ -426,7 +427,7 @@ namespace Dibix.Sdk.CodeGeneration
             return String.Concat("IEnumerable<", typeName, '>');
         }
 
-        private string GetComplexTypeName(DaoWriterContext context, SqlStatementInfo statement, HashSet<string> contracts)
+        private string GetComplexTypeName(WriterContext context, SqlStatementInfo statement, HashSet<string> contracts)
         {
             if (statement.MergeGridResult)
                 return statement.Results[0].Contracts[0].Name.ToString();

@@ -5,22 +5,23 @@ using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
+using Dibix.Sdk.CodeGeneration.CSharp;
 using Newtonsoft.Json;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class DaoContractClassWriter : IDaoWriter
+    internal sealed class DaoContractClassWriter : IDaoChildWriter
     {
         #region Properties
         public string RegionName => "Contracts";
         #endregion
 
-        #region IDaoWriter Members
-        public bool HasContent(OutputConfiguration configuration, SourceArtifacts artifacts) => artifacts.Contracts.Any();
+        #region IDaoChildWriter Members
+        public bool HasContent(SourceArtifacts artifacts) => artifacts.Contracts.Any();
 
         public IEnumerable<string> GetGlobalAnnotations(OutputConfiguration configuration) { yield break; }
 
-        public void Write(DaoWriterContext context)
+        public void Write(WriterContext context)
         {
             context.Output.AddUsing(typeof(DateTime).Namespace);
 
@@ -59,7 +60,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private static void ProcessObjectContract(DaoWriterContext context, CSharpStatementScope scope, ObjectContract contract)
+        private static void ProcessObjectContract(WriterContext context, CSharpStatementScope scope, ObjectContract contract)
         {
             ICollection<string> classAnnotations = new Collection<string>();
             if (!String.IsNullOrEmpty(contract.WcfNamespace))
@@ -154,7 +155,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static void AddJsonReference(DaoWriterContext context)
+        private static void AddJsonReference(WriterContext context)
         {
             context.Output.AddUsing(typeof(JsonPropertyAttribute).Namespace);
             context.Configuration.DetectedReferences.Add(Path.GetFileName(typeof(JsonPropertyAttribute).Assembly.Location));

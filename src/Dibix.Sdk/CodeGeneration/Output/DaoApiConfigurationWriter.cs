@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dibix.Sdk.CodeGeneration.CSharp;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class DaoApiConfigurationWriter : IDaoWriter
+    internal sealed class DaoApiConfigurationWriter : IDaoChildWriter
     {
         #region Properties
         public string RegionName => "Endpoints";
         #endregion
 
-        #region IDaoWriter Members
-        public bool HasContent(OutputConfiguration configuration, SourceArtifacts artifacts) => artifacts.Controllers.Any();
+        #region IDaoChildWriter Members
+        public bool HasContent(SourceArtifacts artifacts) => artifacts.Controllers.Any();
 
         public IEnumerable<string> GetGlobalAnnotations(OutputConfiguration configuration)
         {
@@ -23,7 +24,7 @@ namespace Dibix.Sdk.CodeGeneration
             yield return $"ApiRegistration(\"{areaName}\")";
         }
 
-        public void Write(DaoWriterContext context)
+        public void Write(WriterContext context)
         {
             context.Output.AddUsing("Dibix.Http");
 
@@ -41,7 +42,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private static string WriteBody(DaoWriterContext context, IList<ControllerDefinition> controllers)
+        private static string WriteBody(WriterContext context, IList<ControllerDefinition> controllers)
         {
             StringWriter writer = new StringWriter();
             for (int i = 0; i < controllers.Count; i++)

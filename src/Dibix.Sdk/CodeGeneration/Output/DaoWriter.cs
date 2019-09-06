@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using Dibix.Sdk.CodeGeneration.CSharp;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -11,13 +12,13 @@ namespace Dibix.Sdk.CodeGeneration
         #region Fields
         private static readonly string GeneratorName = typeof(DaoWriter).Assembly.GetName().Name;
         private static readonly string Version = FileVersionInfo.GetVersionInfo(typeof(DaoWriter).Assembly.Location).FileVersion;
-        private readonly IList<IDaoWriter> _writers;
+        private readonly IList<IDaoChildWriter> _writers;
         #endregion
 
         #region Constructor
         public DaoWriter()
         {
-            this._writers = new Collection<IDaoWriter>();
+            this._writers = new Collection<IDaoChildWriter>();
             this._writers.AddRange(SelectWriters());
         }
         #endregion
@@ -25,7 +26,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Overrides
         protected override void Write(StringWriter writer, OutputConfiguration configuration, SourceArtifacts artifacts)
         {
-            IList<IDaoWriter> writers = this._writers.Where(x => x.HasContent(configuration, artifacts)).ToArray();
+            IList<IDaoChildWriter> writers = this._writers.Where(x => x.HasContent(artifacts)).ToArray();
             //if (!writers.Any())
             //    return;
 
@@ -35,11 +36,11 @@ namespace Dibix.Sdk.CodeGeneration
             IEnumerable<string> globalAnnotations = writers.SelectMany(x => x.GetGlobalAnnotations(configuration)).Distinct().OrderBy(x => x.Length);
             CSharpWriter output = new CSharpWriter(writer, configuration.Namespace, globalAnnotations);
 
-            DaoWriterContext context = new DaoWriterContext(output.Root, generatedCodeAnnotation, configuration, artifacts, Format);
+            WriterContext context = new WriterContext(output.Root, generatedCodeAnnotation, configuration, artifacts, Format);
 
             for (int i = 0; i < writers.Count; i++)
             {
-                IDaoWriter nestedWriter = writers[i];
+                IDaoChildWriter nestedWriter = writers[i];
 
                 using (output.Root.CreateRegion(nestedWriter.RegionName))
                 {
@@ -55,7 +56,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private static IEnumerable<IDaoWriter> SelectWriters()
+        private static IEnumerable<IDaoChildWriter> SelectWriters()
         {
             yield return new DaoExecutorWriter();
             yield return new DaoExecutorInputClassWriter();

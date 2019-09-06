@@ -1,4 +1,4 @@
-﻿namespace Dibix.Sdk.CodeGeneration
+﻿namespace Dibix.Sdk.CodeGeneration.CSharp
 {
     public class CSharpValue : CSharpStatement
     {

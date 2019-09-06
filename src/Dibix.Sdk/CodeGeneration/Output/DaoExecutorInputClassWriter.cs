@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dibix.Sdk.CodeGeneration.CSharp;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class DaoExecutorInputClassWriter : DaoWriterBase, IDaoWriter
+    internal sealed class DaoExecutorInputClassWriter : DaoChildWriterBase, IDaoChildWriter
     {
         #region Fields
         internal const string InputTypeSuffix = "Input";
@@ -15,9 +16,9 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Overrides
-        public override bool HasContent(OutputConfiguration configuration, SourceArtifacts artifacts) => artifacts.Statements.Any(RequiresInput);
+        public override bool HasContent(SourceArtifacts artifacts) => artifacts.Statements.Any(RequiresInput);
 
-        protected override void Write(DaoWriterContext context, HashSet<string> contracts)
+        protected override void Write(WriterContext context, HashSet<string> contracts)
         {
             var namespaceGroups = context.Artifacts
                                          .Statements

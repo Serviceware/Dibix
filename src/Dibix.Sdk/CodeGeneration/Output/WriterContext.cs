@@ -1,8 +1,9 @@
 ﻿using System;
+using Dibix.Sdk.CodeGeneration.CSharp;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    public sealed class DaoWriterContext
+    public sealed class WriterContext
     {
         private readonly Func<string, CommandTextFormatting, string> _commandTextFormatter;
 
@@ -12,7 +13,7 @@ namespace Dibix.Sdk.CodeGeneration
         public SourceArtifacts Artifacts { get; }
         public bool WriteGuardChecks { get; set; }
 
-        internal DaoWriterContext
+        internal WriterContext
         (
               CSharpRoot output
             , string generatedCodeAnnotation
