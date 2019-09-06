@@ -12,6 +12,7 @@ namespace Dibix.MSBuild
         public string[] Artifacts { get; set; }
         public string[] Contracts { get; set; }
         public string[] Endpoints { get; set; }
+        public string[] References { get; set; }
         public bool MultipleAreas { get; set; }
         public bool IsDML { get; set; }
 
@@ -26,6 +27,7 @@ namespace Dibix.MSBuild
             yield return this.Artifacts;
             yield return this.Contracts;
             yield return this.Endpoints;
+            yield return this.References;
             yield return this.MultipleAreas;
             yield return this.IsDML;
             yield return base.Log;
@@ -34,7 +36,7 @@ namespace Dibix.MSBuild
 
         protected override void ProcessParameters(object[] args)
         {
-            this.DetectedReferences = (string[])args[9];
+            this.DetectedReferences = (string[])args[10];
             for (int i = 0; i < this.DetectedReferences.Length; i++)
             {
                 string detectedReference = this.DetectedReferences[i];

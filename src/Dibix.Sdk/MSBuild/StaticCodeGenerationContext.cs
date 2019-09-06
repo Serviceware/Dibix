@@ -18,7 +18,7 @@ namespace Dibix.Sdk.MSBuild
         public IContractResolverFacade ContractResolverFacade { get; }
         public IErrorReporter ErrorReporter { get; }
 
-        public StaticCodeGenerationContext(string projectDirectory, string @namespace, ICollection<string> artifacts, IEnumerable<string> contracts, IEnumerable<string> endpoints, bool multipleAreas, bool isDml, IErrorReporter errorReporter)
+        public StaticCodeGenerationContext(string projectDirectory, string @namespace, ICollection<string> artifacts, IEnumerable<string> contracts, IEnumerable<string> endpoints, ICollection<string> references, bool multipleAreas, bool isDml, IErrorReporter errorReporter)
         {
             if (!String.IsNullOrEmpty(@namespace))
                 this.Namespace = @namespace;
@@ -43,7 +43,7 @@ namespace Dibix.Sdk.MSBuild
             artifacts.Where(x => MatchFile(projectDirectory, x, isDml, errorReporter)).Each(source.Include);
             this.Configuration.Input.Sources.Add(source);
 
-            this.ContractResolverFacade = new ContractResolverFacade(new UnsupportedAssemblyLocator());
+            this.ContractResolverFacade = new ContractResolverFacade(new DefaultAssemblyLocator(projectDirectory, references));
             this.ContractResolverFacade.RegisterContractResolver(new ContractDefinitionResolver(this._contractDefinitionProvider), 0);
             this.ErrorReporter = errorReporter;
         }

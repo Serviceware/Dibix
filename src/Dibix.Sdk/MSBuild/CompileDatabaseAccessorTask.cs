@@ -16,6 +16,7 @@ namespace Dibix.Sdk.MSBuild
           , ICollection<string> artifacts
           , ICollection<string> contracts
           , ICollection<string> endpoints
+          , ICollection<string> references
           , bool multipleAreas
           , bool isDML
           , TaskLoggingHelper logger
@@ -23,7 +24,7 @@ namespace Dibix.Sdk.MSBuild
         )
         {
             IErrorReporter errorReporter = new MSBuildErrorReporter(logger);
-            StaticCodeGenerationContext context = new StaticCodeGenerationContext(projectDirectory, @namespace, artifacts ?? new string[0], contracts ?? new string[0], endpoints ?? new string[0], multipleAreas, isDML, errorReporter);
+            StaticCodeGenerationContext context = new StaticCodeGenerationContext(projectDirectory, @namespace, artifacts ?? new string[0], contracts ?? new string[0], endpoints ?? new string[0], references ?? new string[0], multipleAreas, isDML, errorReporter);
             ICodeGenerator generator = new DaoCodeGenerator(context);
 
             string generated = generator.Generate();

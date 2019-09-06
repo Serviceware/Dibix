@@ -134,6 +134,7 @@
 
     <ItemGroup>
       <DatabaseAccessorSource Include="$(DatabaseAccessorIntermediateFilePath)" />
+      <DatabaseAccessorReference Include="@(ArtifactReference->'%(RelativeDir)%(Filename).dll')" Condition="!$([System.Text.RegularExpressions.Regex]::IsMatch('%(Filename)%(Extension)', '^master|msdb(\.dacpac)$'))" />
     </ItemGroup>
 
     <CompileDatabaseAccessorTask SdkPath="$(DibixSdkPath)"
@@ -144,6 +145,7 @@
                                  Artifacts="@(Build)"
                                  Contracts="@(Contract)"
                                  Endpoints="@(Endpoint)"
+                                 References="@(DatabaseAccessorReference)"
                                  MultipleAreas="$(MultipleAreas)"
                                  IsIDEBuild="$(BuildingInsideVisualStudio)"
                                  IsDML="$(IsDMLProject)">
@@ -152,7 +154,6 @@
 
     <ItemGroup>
       <DatabaseAccessorReference Include="$(DibixLibraryPath)" />
-      <DatabaseAccessorReference Include="@(ArtifactReference->'%(RelativeDir)%(Filename).dll')" Condition="!$([System.Text.RegularExpressions.Regex]::IsMatch('%(Filename)%(Extension)', '^master|msdb(\.dacpac)$'))" />
     </ItemGroup>
 
     <Csc DefineConstants="$(DefineConstants)"
