@@ -33,7 +33,8 @@ namespace Dibix.Sdk.CodeGeneration
 
                 // Class
                 CSharpModifiers classVisibility = context.Configuration.GeneratePublicArtifacts ? CSharpModifiers.Public : CSharpModifiers.Internal;
-                CSharpClass @class = scope.AddClass(context.Configuration.ClassName, classVisibility | CSharpModifiers.Static, context.GeneratedCodeAnnotation);
+                IEnumerable<string> annotations = new[] { context.GeneratedCodeAnnotation }.Where(x => x != null);
+                CSharpClass @class = scope.AddClass(context.Configuration.ClassName, classVisibility | CSharpModifiers.Static, annotations);
 
                 // Command text constants
                 AddCommandTextConstants(@class, context, statements);

@@ -82,6 +82,7 @@
       <CompileDataAccessArtifactsInput Include="@(Contract)" />
       <CompileDataAccessArtifactsInput Include="@(Endpoint)" />
       <CompileDataAccessArtifactsOutput Include="$(ServerIntermediateFilePath)" /> <!-- Generated CS file -->
+      <CompileDataAccessArtifactsOutput Include="$(ClientIntermediateFilePath)" /> <!-- Generated CS file -->
       <CompileDataAccessArtifactsOutput Include="$(IntermediateAssembly)" />       <!-- DLL in obj folder -->
       <CompileDataAccessArtifactsOutput Include="$(TargetPath)" />                 <!-- DLL in bin folder -->
     </ItemGroup>
@@ -111,6 +112,7 @@
   <Target Name="SetupCompilationArtifacts" BeforeTargets="SetupSqlBuildInputs" Condition="$(CompileDataAccessArtifacts) == 'true'">
     <PropertyGroup>
       <ServerIntermediateFilePath>$(IntermediateOutputPath)@(IntermediateAssembly->'%(Filename)').cs</ServerIntermediateFilePath>
+      <ClientIntermediateFilePath Condition="'$(ClientOutputName)' != ''">$(IntermediateOutputPath)$(ClientOutputName).cs</ClientIntermediateFilePath>
     </PropertyGroup>
 
     <ItemGroup>
@@ -145,15 +147,32 @@
                                     References="@(ServerCompilationReference)"
                                     MultipleAreas="$(MultipleAreas)"
                                     IsIDEBuild="$(BuildingInsideVisualStudio)"
-                                    IsDML="$(IsDMLProject)">
+                                    IsDML="$(IsDMLProject)"
+                                    ClientOutputFilePath="$(ClientIntermediateFilePath)">
       <Output TaskParameter="DetectedReferences" ItemName="ServerCompilationReference" />
     </CompileDataAccessArtifactsTask>
 
     <ItemGroup>
       <ServerCompilationSource Include="$(ServerIntermediateFilePath)" />
+      <ClientCompilationSource Include="$(ClientIntermediateFilePath)" />
       <ServerCompilationReference Include="$(DibixLibraryPath)" />
     </ItemGroup>
 
+    <ItemGroup Condition="'$(ClientOutputName)' != ''">
+      <ClientAssembly Include="$(IntermediateOutputPath)$(ClientOutputName).dll" />
+    </ItemGroup>
+
+    <!-- Compile contracts assembly if required -->
+    <Csc Condition="'$(ClientOutputName)' != ''"
+         DefineConstants="$(DefineConstants)"
+         EmitDebugInformation="$(DebugSymbols)"
+         KeyFile="$(AssemblyOriginatorKeyFile)"
+         LangVersion="$(LangVersion)"
+         OutputAssembly="@(ClientAssembly)"
+         Sources="@(ClientCompilationSource)"
+         TargetType="$(OutputType)" />
+
+    <!-- Compile main assembly -->
     <Csc DefineConstants="$(DefineConstants)"
          EmitDebugInformation="$(DebugSymbols)"
          KeyFile="$(AssemblyOriginatorKeyFile)"
@@ -163,7 +182,7 @@
          Sources="@(ServerCompilationSource)"
          TargetType="$(OutputType)" />
 
-    <!-- Copy the build product (.dll or .exe). -->
+    <!-- Deploy assembly/pdb -->
     <Copy SourceFiles="@(IntermediateAssembly)"
           DestinationFolder="$(OutDir)"
           SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
@@ -176,8 +195,6 @@
       <Output TaskParameter="DestinationFiles" ItemName="MainAssembly"/>
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
     </Copy>
-
-    <!-- Copy the debug information file (.pdb), if any -->
     <Copy SourceFiles="@(_DebugSymbolsIntermediatePath)"
           DestinationFiles="@(_DebugSymbolsOutputPath)"
           SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
@@ -187,6 +204,31 @@
           UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
           UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
           Condition="'$(_DebugSymbolsProduced)'=='true' and '$(SkipCopyingSymbolsToOutputDirectory)' != 'true' and '$(CopyOutputSymbolsToOutputDirectory)'=='true'">
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+    </Copy>
+
+    <!-- Deploy contracts assembly/pdb (if available -->
+    <Copy SourceFiles="@(ClientAssembly)"
+          DestinationFolder="$(OutDir)"
+          SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
+          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+          Retries="$(CopyRetryCount)"
+          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+          UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
+          UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
+          Condition="'$(ClientOutputName)' != '' and '$(CopyBuildOutputToOutputDirectory)' == 'true' and '$(SkipCopyBuildProduct)' != 'true'">
+      <Output TaskParameter="DestinationFiles" ItemName="MainAssembly"/>
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+    </Copy>
+    <Copy SourceFiles="@(_DebugSymbolsIntermediatePath->'%(RelativeDir)$(ClientOutputName)%(Extension)')"
+          DestinationFiles="@(_DebugSymbolsOutputPath)"
+          SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
+          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+          Retries="$(CopyRetryCount)"
+          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+          UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
+          UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
+          Condition="'$(ClientOutputName)' != '' and '$(_DebugSymbolsProduced)'=='true' and '$(SkipCopyingSymbolsToOutputDirectory)' != 'true' and '$(CopyOutputSymbolsToOutputDirectory)'=='true'">
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
     </Copy>
   </Target>

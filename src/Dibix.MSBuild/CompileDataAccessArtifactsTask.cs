@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.Build.Framework;
 
 namespace Dibix.MSBuild
@@ -15,6 +16,7 @@ namespace Dibix.MSBuild
         public string[] References { get; set; }
         public bool MultipleAreas { get; set; }
         public bool IsDML { get; set; }
+        public string ClientOutputFilePath { get; set; }
 
         [Output]
         public string[] DetectedReferences { get; set; }
@@ -30,13 +32,14 @@ namespace Dibix.MSBuild
             yield return this.References;
             yield return this.MultipleAreas;
             yield return this.IsDML;
+            yield return this.ClientOutputFilePath;
             yield return base.Log;
             yield return null;
         }
 
-        protected override void ProcessParameters(object[] args)
+        protected override void PostExecute(object[] args)
         {
-            this.DetectedReferences = (string[])args[10];
+            this.DetectedReferences = (string[])args.Last();
             for (int i = 0; i < this.DetectedReferences.Length; i++)
             {
                 string detectedReference = this.DetectedReferences[i];

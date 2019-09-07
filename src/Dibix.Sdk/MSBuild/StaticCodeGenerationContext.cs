@@ -8,6 +8,7 @@ namespace Dibix.Sdk.MSBuild
 {
     internal sealed class StaticCodeGenerationContext : ICodeGenerationContext
     {
+        private readonly CompilationMode _compilationMode;
         private readonly IContractDefinitionProvider _contractDefinitionProvider;
         private readonly IControllerDefinitionProvider _controllerDefinitionProvider;
         private readonly IUserDefinedTypeProvider _userDefinedTypeProvider;
@@ -18,8 +19,20 @@ namespace Dibix.Sdk.MSBuild
         public IContractResolverFacade ContractResolverFacade { get; }
         public IErrorReporter ErrorReporter { get; }
 
-        public StaticCodeGenerationContext(string projectDirectory, string @namespace, ICollection<string> sources, IEnumerable<string> contracts, IEnumerable<string> endpoints, ICollection<string> references, bool multipleAreas, bool isDml, IErrorReporter errorReporter)
+        public StaticCodeGenerationContext
+        (
+            string projectDirectory
+          , string @namespace
+          , ICollection<string> sources
+          , IEnumerable<string> contracts
+          , IEnumerable<string> endpoints
+          , IEnumerable<string> references
+          , CompilationMode compilationMode
+          , bool multipleAreas
+          , bool isDml
+          , IErrorReporter errorReporter)
         {
+            this._compilationMode = compilationMode;
             if (!String.IsNullOrEmpty(@namespace))
                 this.Namespace = @namespace;
 
@@ -30,6 +43,9 @@ namespace Dibix.Sdk.MSBuild
 
             this.Configuration = new GeneratorConfiguration();
             this.Configuration.Output.GeneratePublicArtifacts = true;
+            if (compilationMode == CompilationMode.Client)
+                this.Configuration.Output.Writer = typeof(ClientContractCSWriter);
+
             if (this._contractDefinitionProvider.HasSchemaErrors || this._controllerDefinitionProvider.HasSchemaErrors)
             {
                 errorReporter.ReportErrors();
@@ -40,8 +56,11 @@ namespace Dibix.Sdk.MSBuild
             if (!isDml)
                 source.Formatter = typeof(ExecStoredProcedureSqlStatementFormatter);
 
-            sources.Where(x => MatchFile(projectDirectory, x, isDml, errorReporter)).Each(source.Include);
-            this.Configuration.Input.Sources.Add(source);
+            if (compilationMode == CompilationMode.Server)
+            {
+                sources.Where(x => MatchFile(projectDirectory, x, isDml, errorReporter)).Each(source.Include);
+                this.Configuration.Input.Sources.Add(source);
+            }
 
             this.ContractResolverFacade = new ContractResolverFacade(new DefaultAssemblyLocator(projectDirectory, references));
             this.ContractResolverFacade.RegisterContractResolver(new ContractDefinitionResolver(this._contractDefinitionProvider), 0);
@@ -51,8 +70,12 @@ namespace Dibix.Sdk.MSBuild
         public void CollectAdditionalArtifacts(SourceArtifacts artifacts)
         {
             artifacts.Contracts.AddRange(this._contractDefinitionProvider.Contracts);
-            artifacts.UserDefinedTypes.AddRange(this._userDefinedTypeProvider.Types);
-            artifacts.Controllers.AddRange(this._controllerDefinitionProvider.Controllers);
+
+            if (this._compilationMode == CompilationMode.Server)
+            {
+                artifacts.UserDefinedTypes.AddRange(this._userDefinedTypeProvider.Types);
+                artifacts.Controllers.AddRange(this._controllerDefinitionProvider.Controllers);
+            }
         }
 
         private static bool MatchFile(string projectDirectory, string relativeFilePath, bool isDML, IErrorReporter errorReporter)

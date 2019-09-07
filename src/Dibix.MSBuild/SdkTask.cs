@@ -55,7 +55,7 @@ namespace Dibix.MSBuild
                 AppDomain.CurrentDomain.AssemblyResolve += this.OnAssemblyResolve;
 
                 bool result = (bool)adapterType.InvokeMember("Execute", BindingFlags.InvokeMethod, null, null, args);
-                this.ProcessParameters(args);
+                this.PostExecute(args);
                 return result;
             }
             finally
@@ -66,7 +66,7 @@ namespace Dibix.MSBuild
 
         protected abstract IEnumerable<object> CollectParameters();
 
-        protected virtual void ProcessParameters(object[] args) { }
+        protected virtual void PostExecute(object[] args) { }
 
         private Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
         {
