@@ -35,12 +35,15 @@
     <DibixToolsDirectory Condition="$(DibixToolsDirectory) == ''">$(MSBuildThisFileDirectory)..\tools\net46\</DibixToolsDirectory>
     <DibixLibraryPath>$(DibixToolsDirectory)Dibix.dll</DibixLibraryPath>
     <DibixBuildToolsPath>$(DibixToolsDirectory)Dibix.MSBuild.dll</DibixBuildToolsPath>
+
+    <ClientTargetPath Condition="'$(ClientOutputName)' != ''">$(TargetDir)$(ClientOutputName).dll</ClientTargetPath>
   </PropertyGroup>
 
   <ItemGroup>
     <!-- Clean target assembly, which is required to force rebuild of CompileDataAccessArtifactsTask -->
     <!-- This is probably not included, because we skip copying it to output -->
     <Clean Include="$(TargetPath)" />
+    <Clean Include="$(ClientTargetPath)" />
   </ItemGroup>
 
   <UsingTask TaskName="SqlCodeAnalysisTask" AssemblyFile="$(DibixBuildToolsPath)" />
@@ -81,10 +84,8 @@
       <CompileDataAccessArtifactsInput Include="@(Build)" />
       <CompileDataAccessArtifactsInput Include="@(Contract)" />
       <CompileDataAccessArtifactsInput Include="@(Endpoint)" />
-      <CompileDataAccessArtifactsOutput Include="$(ServerIntermediateFilePath)" /> <!-- Generated CS file -->
-      <CompileDataAccessArtifactsOutput Include="$(ClientIntermediateFilePath)" /> <!-- Generated CS file -->
-      <CompileDataAccessArtifactsOutput Include="$(IntermediateAssembly)" />       <!-- DLL in obj folder -->
       <CompileDataAccessArtifactsOutput Include="$(TargetPath)" />                 <!-- DLL in bin folder -->
+      <CompileDataAccessArtifactsOutput Include="$(ClientTargetPath)" />           <!-- DLL in bin folder -->
     </ItemGroup>
   </Target>
 
@@ -110,11 +111,6 @@
 
   <!-- Compile database accessors for stored procedures including their contracts and an API endpoint configuration -->
   <Target Name="SetupCompilationArtifacts" BeforeTargets="SetupSqlBuildInputs" Condition="$(CompileDataAccessArtifacts) == 'true'">
-    <PropertyGroup>
-      <ServerIntermediateFilePath>$(IntermediateOutputPath)@(IntermediateAssembly->'%(Filename)').cs</ServerIntermediateFilePath>
-      <ClientIntermediateFilePath Condition="'$(ClientOutputName)' != ''">$(IntermediateOutputPath)$(ClientOutputName).cs</ClientIntermediateFilePath>
-    </PropertyGroup>
-
     <ItemGroup>
       <Contract Include="@(None)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(RelativeDir)', '^Contracts\\')) and %(Extension) == '.json'" />
       <Endpoint Include="@(None)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(RelativeDir)', '^Endpoints\\')) and %(Extension) == '.json'" />
@@ -130,6 +126,8 @@
       <LangVersion>latest</LangVersion>
       <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
       <CopyOutputSymbolsToOutputDirectory>true</CopyOutputSymbolsToOutputDirectory>
+      <ServerIntermediateFilePath>$(IntermediateOutputPath)@(IntermediateAssembly->'%(Filename)').cs</ServerIntermediateFilePath>
+      <ClientIntermediateFilePath Condition="'$(ClientOutputName)' != ''">$(IntermediateOutputPath)$(ClientOutputName).cs</ClientIntermediateFilePath>
     </PropertyGroup>
 
     <ItemGroup>
@@ -221,7 +219,7 @@
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
     </Copy>
     <Copy SourceFiles="@(_DebugSymbolsIntermediatePath->'%(RelativeDir)$(ClientOutputName)%(Extension)')"
-          DestinationFiles="@(_DebugSymbolsOutputPath)"
+          DestinationFolder="$(OutDir)"
           SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
           OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
           Retries="$(CopyRetryCount)"
