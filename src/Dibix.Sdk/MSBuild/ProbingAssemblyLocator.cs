@@ -2,7 +2,7 @@
 
 namespace Dibix.Sdk.MSBuild
 {
-    // Loading foreign assemblies is not supported in CompileDatabaseAccessorTask.
+    // Loading foreign assemblies is not supported in CompileDataAccessArtifactsTask.
     // Instead contracts should be defined within the same project in JSON format.
     internal sealed class UnsupportedAssemblyLocator : IAssemblyLocator
     {

@@ -4,12 +4,12 @@ using Microsoft.Build.Framework;
 
 namespace Dibix.MSBuild
 {
-    public sealed class CompileDatabaseAccessorTask : SdkTask, ITask
+    public sealed class CompileDataAccessArtifactsTask : SdkTask, ITask
     {
         public string ProjectDirectory { get; set; }
         public string Namespace { get; set; }
         public string OutputFilePath { get; set; }
-        public string[] Artifacts { get; set; }
+        public string[] Sources { get; set; }
         public string[] Contracts { get; set; }
         public string[] Endpoints { get; set; }
         public string[] References { get; set; }
@@ -24,7 +24,7 @@ namespace Dibix.MSBuild
             yield return this.ProjectDirectory;
             yield return this.Namespace;
             yield return this.OutputFilePath;
-            yield return this.Artifacts;
+            yield return this.Sources;
             yield return this.Contracts;
             yield return this.Endpoints;
             yield return this.References;

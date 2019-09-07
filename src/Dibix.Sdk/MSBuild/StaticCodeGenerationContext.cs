@@ -18,7 +18,7 @@ namespace Dibix.Sdk.MSBuild
         public IContractResolverFacade ContractResolverFacade { get; }
         public IErrorReporter ErrorReporter { get; }
 
-        public StaticCodeGenerationContext(string projectDirectory, string @namespace, ICollection<string> artifacts, IEnumerable<string> contracts, IEnumerable<string> endpoints, ICollection<string> references, bool multipleAreas, bool isDml, IErrorReporter errorReporter)
+        public StaticCodeGenerationContext(string projectDirectory, string @namespace, ICollection<string> sources, IEnumerable<string> contracts, IEnumerable<string> endpoints, ICollection<string> references, bool multipleAreas, bool isDml, IErrorReporter errorReporter)
         {
             if (!String.IsNullOrEmpty(@namespace))
                 this.Namespace = @namespace;
@@ -26,7 +26,7 @@ namespace Dibix.Sdk.MSBuild
             IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(projectDirectory);
             this._contractDefinitionProvider = new ContractDefinitionProvider(fileSystemProvider, errorReporter, contracts, multipleAreas);
             this._controllerDefinitionProvider = new ControllerDefinitionProvider(fileSystemProvider, errorReporter, endpoints);
-            this._userDefinedTypeProvider = new UserDefinedTypeProvider(artifacts, errorReporter, multipleAreas);
+            this._userDefinedTypeProvider = new UserDefinedTypeProvider(sources, errorReporter, multipleAreas);
 
             this.Configuration = new GeneratorConfiguration();
             this.Configuration.Output.GeneratePublicArtifacts = true;
@@ -40,7 +40,7 @@ namespace Dibix.Sdk.MSBuild
             if (!isDml)
                 source.Formatter = typeof(ExecStoredProcedureSqlStatementFormatter);
 
-            artifacts.Where(x => MatchFile(projectDirectory, x, isDml, errorReporter)).Each(source.Include);
+            sources.Where(x => MatchFile(projectDirectory, x, isDml, errorReporter)).Each(source.Include);
             this.Configuration.Input.Sources.Add(source);
 
             this.ContractResolverFacade = new ContractResolverFacade(new DefaultAssemblyLocator(projectDirectory, references));
