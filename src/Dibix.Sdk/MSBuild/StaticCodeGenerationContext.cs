@@ -29,7 +29,7 @@ namespace Dibix.Sdk.MSBuild
           , IEnumerable<string> references
           , CompilationMode compilationMode
           , bool multipleAreas
-          , bool isDml
+          , bool embedStatements
           , IErrorReporter errorReporter)
         {
             this._compilationMode = compilationMode;
@@ -53,12 +53,12 @@ namespace Dibix.Sdk.MSBuild
             }
 
             PhysicalSourceConfiguration source = new PhysicalSourceConfiguration(fileSystemProvider, null, multipleAreas, this.Configuration.Output.GeneratePublicArtifacts);
-            if (!isDml)
+            if (!embedStatements)
                 source.Formatter = typeof(ExecStoredProcedureSqlStatementFormatter);
 
             if (compilationMode == CompilationMode.Server)
             {
-                sources.Where(x => MatchFile(projectDirectory, x, isDml, errorReporter)).Each(source.Include);
+                sources.Where(x => MatchFile(projectDirectory, x, embedStatements, errorReporter)).Each(source.Include);
                 this.Configuration.Input.Sources.Add(source);
             }
 
@@ -78,13 +78,13 @@ namespace Dibix.Sdk.MSBuild
             }
         }
 
-        private static bool MatchFile(string projectDirectory, string relativeFilePath, bool isDML, IErrorReporter errorReporter)
+        private static bool MatchFile(string projectDirectory, string relativeFilePath, bool embedStatements, IErrorReporter errorReporter)
         {
             string inputFilePath = Path.Combine(projectDirectory, relativeFilePath);
             ICollection<SqlHint> hints = SqlHintParser.FromFile(inputFilePath, errorReporter).ToArray();
             bool hasHints = hints.Any();
             bool hasNoCompileHint = hints.Any(x => x.Kind == SqlHint.NoCompile);
-            return (isDML || hasHints) && !hasNoCompileHint;
+            return (embedStatements || hasHints) && !hasNoCompileHint;
         }
     }
 }

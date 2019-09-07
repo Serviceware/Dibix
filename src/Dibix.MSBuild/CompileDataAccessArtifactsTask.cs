@@ -15,7 +15,7 @@ namespace Dibix.MSBuild
         public string[] Endpoints { get; set; }
         public string[] References { get; set; }
         public bool MultipleAreas { get; set; }
-        public bool IsDML { get; set; }
+        public bool EmbedStatements { get; set; }
         public string ClientOutputFilePath { get; set; }
 
         [Output]
@@ -31,7 +31,7 @@ namespace Dibix.MSBuild
             yield return this.Endpoints;
             yield return this.References;
             yield return this.MultipleAreas;
-            yield return this.IsDML;
+            yield return this.EmbedStatements;
             yield return this.ClientOutputFilePath;
             yield return base.Log;
             yield return null;

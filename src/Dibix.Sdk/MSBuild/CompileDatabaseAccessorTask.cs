@@ -20,7 +20,7 @@ namespace Dibix.Sdk.MSBuild
           , ICollection<string> endpoints
           , ICollection<string> references
           , bool multipleAreas
-          , bool isDML
+          , bool embedStatements
           , string clientOutputFilePath
           , TaskLoggingHelper logger
           , out string[] detectedReferences
@@ -30,12 +30,12 @@ namespace Dibix.Sdk.MSBuild
             bool failed = false;
             ICollection<string> detectedOutputReferences = new Collection<string>();
 
-            if (!Execute(projectDirectory, @namespace, outputFilePath, sources, contracts, endpoints, references, CompilationMode.Server, multipleAreas, isDML, logger, detectedOutputReferences, errorReporter))
+            if (!Execute(projectDirectory, @namespace, outputFilePath, sources, contracts, endpoints, references, CompilationMode.Server, multipleAreas, embedStatements, logger, detectedOutputReferences, errorReporter))
                 failed = true;
 
             if (!String.IsNullOrEmpty(clientOutputFilePath))
             {
-                if (!Execute(projectDirectory, @namespace, clientOutputFilePath, sources, contracts, endpoints, references, CompilationMode.Client, multipleAreas, isDML, logger, detectedOutputReferences, errorReporter))
+                if (!Execute(projectDirectory, @namespace, clientOutputFilePath, sources, contracts, endpoints, references, CompilationMode.Client, multipleAreas, embedStatements, logger, detectedOutputReferences, errorReporter))
                     failed = true;
             }
 
@@ -43,9 +43,9 @@ namespace Dibix.Sdk.MSBuild
             return !failed;
         }
 
-        private static bool Execute(string projectDirectory, string @namespace, string outputFilePath, ICollection<string> sources, ICollection<string> contracts, ICollection<string> endpoints, ICollection<string> references, CompilationMode compilationMode, bool multipleAreas, bool isDML, TaskLoggingHelper logger, ICollection<string> detectedReferences, IErrorReporter errorReporter)
+        private static bool Execute(string projectDirectory, string @namespace, string outputFilePath, ICollection<string> sources, ICollection<string> contracts, ICollection<string> endpoints, ICollection<string> references, CompilationMode compilationMode, bool multipleAreas, bool embedStatements, TaskLoggingHelper logger, ICollection<string> detectedReferences, IErrorReporter errorReporter)
         {
-            StaticCodeGenerationContext context = new StaticCodeGenerationContext(projectDirectory, @namespace, sources ?? new string[0], contracts ?? new string[0], endpoints ?? new string[0], references ?? new string[0], compilationMode, multipleAreas, isDML, errorReporter);
+            StaticCodeGenerationContext context = new StaticCodeGenerationContext(projectDirectory, @namespace, sources ?? new string[0], contracts ?? new string[0], endpoints ?? new string[0], references ?? new string[0], compilationMode, multipleAreas, embedStatements, errorReporter);
             ICodeGenerator generator = new DaoCodeGenerator(context);
 
             string generated = generator.Generate();

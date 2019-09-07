@@ -145,7 +145,7 @@
                                     References="@(ServerCompilationReference)"
                                     MultipleAreas="$(MultipleAreas)"
                                     IsIDEBuild="$(BuildingInsideVisualStudio)"
-                                    IsDML="$(IsDMLProject)"
+                                    EmbedStatements="$(EmbedStatements)"
                                     ClientOutputFilePath="$(ClientIntermediateFilePath)">
       <Output TaskParameter="DetectedReferences" ItemName="ServerCompilationReference" />
     </CompileDataAccessArtifactsTask>
