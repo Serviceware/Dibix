@@ -84,8 +84,8 @@
       <CompileDataAccessArtifactsInput Include="@(Build)" />
       <CompileDataAccessArtifactsInput Include="@(Contract)" />
       <CompileDataAccessArtifactsInput Include="@(Endpoint)" />
-      <CompileDataAccessArtifactsOutput Include="$(TargetPath)" />                 <!-- DLL in bin folder -->
-      <CompileDataAccessArtifactsOutput Include="$(ClientTargetPath)" />           <!-- DLL in bin folder -->
+      <CompileDataAccessArtifactsOutput Include="$(TargetPath)" />
+      <CompileDataAccessArtifactsOutput Include="$(ClientTargetPath)" />
     </ItemGroup>
   </Target>
 
