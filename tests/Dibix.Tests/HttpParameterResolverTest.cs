@@ -89,7 +89,7 @@ at GET api/Dibix/Test", Assert.Throws<InvalidOperationException>(() => Compile(x
         private static void Compile_PropertySource_WithUnknownSource_Throws_Target(IDatabaseAccessorFactory databaseAccessorFactory, int lcid) { }
 
         [Fact]
-        public void Compile_BodySource()
+        public void Compile_ExplicitBodySource()
         {
             IHttpParameterResolutionMethod result = Compile(x =>
             {
@@ -143,7 +143,7 @@ at GET api/Dibix/Test", Assert.Throws<InvalidOperationException>(() => Compile(x
             Assert.Equal(1033, arguments["lcid"]);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
-        private static void Compile_BodySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] HttpParameterInput input, int lcid) { }
+        private static void Compile_ExplicitBodySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] HttpParameterInput input, int lcid) { }
 
         [Fact]
         public void Compile_BodyConverter()
@@ -159,7 +159,7 @@ at GET api/Dibix/Test", Assert.Throws<InvalidOperationException>(() => Compile(x
     Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
     .Block(
         Dibix.IDatabaseAccessorFactory $databaseaccessorfactory,
-        Dibix.Tests.HttpParameterResolverTest+AnotherHttpParameterInput $input) {
+        Dibix.Tests.HttpParameterResolverTest+XmlHttpParameterInput $input) {
         $databaseaccessorfactory = .Call $dependencyResolver.Resolve();
         .Call $arguments.Add(
             ""databaseAccessorFactory"",
@@ -167,7 +167,7 @@ at GET api/Dibix/Test", Assert.Throws<InvalidOperationException>(() => Compile(x
         .Call Dibix.Http.HttpParameterResolver.AddParameterFromBody(
             $arguments,
             ""value"");
-        $input = .New Dibix.Tests.HttpParameterResolverTest+AnotherHttpParameterInput();
+        $input = .New Dibix.Tests.HttpParameterResolverTest+XmlHttpParameterInput();
         $input.data = .Call Dibix.Http.HttpParameterResolver.ConvertParameterFromBody($arguments);
         .Call $arguments.Add(
             ""input"",
@@ -190,11 +190,11 @@ at GET api/Dibix/Test", Assert.Throws<InvalidOperationException>(() => Compile(x
             Assert.Equal(body, arguments["$body"]);
             Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             Assert.Equal("<id>5</id>", arguments["value"].ToString());
-            Assert.IsType<AnotherHttpParameterInput>(arguments["input"]);
-            Assert.Equal("<id>5</id>", ((AnotherHttpParameterInput)arguments["input"]).data.ToString());
+            Assert.IsType<XmlHttpParameterInput>(arguments["input"]);
+            Assert.Equal("<id>5</id>", ((XmlHttpParameterInput)arguments["input"]).data.ToString());
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
-        private static void Compile_BodyConverter_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] AnotherHttpParameterInput input, XElement value) { }
+        private static void Compile_BodyConverter_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] XmlHttpParameterInput input, XElement value) { }
 
         [Fact]
         public void Compile_BodyBinder()

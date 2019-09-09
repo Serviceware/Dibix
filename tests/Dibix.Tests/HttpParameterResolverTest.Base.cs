@@ -70,7 +70,7 @@ namespace Dibix.Tests
             public int targetid { get; set; }
         }
 
-        private sealed class AnotherHttpParameterInput
+        private sealed class XmlHttpParameterInput
         {
             public XElement data { get; set; }
         }
