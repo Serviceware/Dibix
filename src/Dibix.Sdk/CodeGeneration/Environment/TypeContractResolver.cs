@@ -18,6 +18,9 @@ namespace Dibix.Sdk.CodeGeneration
         #region IContractResolver Members
         public ContractInfo ResolveContract(string input, Action<string> errorHandler)
         {
+            if (input[0] == '#')
+                return null;
+
             bool isAssemblyQualified = input.IndexOf(',') >= 0;
             return !isAssemblyQualified ? TryLocalType(input) : this.TryForeignType(input, errorHandler);
         }

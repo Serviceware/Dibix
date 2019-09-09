@@ -23,7 +23,10 @@ namespace Dibix.Sdk.CodeGeneration
 
             string normalizedInput = input.Substring(1, input.Length - 1);
             if (!this._contractDefinitionProvider.TryGetContract(normalizedInput, out ContractDefinition contractDefinition))
-                throw new InvalidOperationException($"Cannot resolve contract '{normalizedInput}'");
+            {
+                errorHandler($"Could not resolve contract '{normalizedInput}'");
+                return null;
+            }
 
             ContractName contractName = new ContractName(input, $"{contractDefinition.Namespace}.{contractDefinition.DefinitionName}");
             ContractInfo contract = new ContractInfo(contractName, contractDefinition.IsPrimitive);

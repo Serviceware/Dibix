@@ -25,10 +25,16 @@ namespace Dibix.Sdk.VisualStudio
         #region IContractResolver Members
         public ContractInfo ResolveContract(string input, Action<string> errorHandler)
         {
+            if (input[0] == '#')
+                return null;
+
             ContractName name = new ContractName(input);
             CodeElement codeItem = this._codeItemAccessor.Value.FirstOrDefault(x => x.FullName == name.TypeName);
             if (codeItem == null)
+            {
+                errorHandler($"Could not find class '{input}' in current project");
                 return null;
+            }
 
             ContractInfo contract = CreateContractInfo(name, codeItem);
             return contract;

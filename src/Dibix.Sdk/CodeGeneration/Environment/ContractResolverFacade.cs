@@ -25,8 +25,15 @@ namespace Dibix.Sdk.CodeGeneration
 
         public ContractInfo ResolveContract(string input, Action<string> errorHandler)
         {
+            bool hasHandledError = false;
+            Action<string> handler = errorHandler;
+            errorHandler = x =>
+            {
+                hasHandledError = true;
+                handler(x);
+            };
             ContractInfo contract = this._contractResolvers.Select(x => x.ResolveContract(input, errorHandler)).FirstOrDefault(x => x != null);
-            if (contract == null)
+            if (contract == null && !hasHandledError)
                 errorHandler($"Could not resolve contract '{input}'");
 
             return contract;
