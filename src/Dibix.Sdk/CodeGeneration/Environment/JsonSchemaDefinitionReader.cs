@@ -9,16 +9,15 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal abstract class JsonSchemaDefinitionReader
     {
-        private readonly IErrorReporter _errorReporter;
-
         public bool HasSchemaErrors { get; private set; }
         protected IFileSystemProvider FileSystemProvider { get; }
+        protected IErrorReporter ErrorReporter { get; }
         protected abstract string SchemaName { get; }
 
         protected JsonSchemaDefinitionReader(IFileSystemProvider fileSystemProvider, IErrorReporter errorReporter)
         {
             this.FileSystemProvider = fileSystemProvider;
-            this._errorReporter = errorReporter;
+            this.ErrorReporter = errorReporter;
         }
 
         protected void Collect(IEnumerable<string> inputs)
@@ -38,7 +37,7 @@ namespace Dibix.Sdk.CodeGeneration
                                 foreach (ValidationError error in errors.Flatten())
                                 {
                                     string errorMessage = $"[JSON] {error.Message} ({error.Path})";
-                                    this._errorReporter.RegisterError(filePath, error.LineNumber, error.LinePosition, error.ErrorType.ToString(), errorMessage);
+                                    this.ErrorReporter.RegisterError(filePath, error.LineNumber, error.LinePosition, error.ErrorType.ToString(), errorMessage);
                                 }
                                 this.HasSchemaErrors = true;
                                 continue;

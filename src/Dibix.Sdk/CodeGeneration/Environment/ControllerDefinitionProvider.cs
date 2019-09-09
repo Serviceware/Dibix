@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Text;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -23,23 +25,23 @@ namespace Dibix.Sdk.CodeGeneration
         #region Overrides
         protected override void Read(string filePath, JObject json)
         {
-            this.ReadControllers(json);
+            this.ReadControllers(filePath, json);
         }
         #endregion
 
         #region Private Methods
-        private void ReadControllers(JObject apis)
+        private void ReadControllers(string filePath, JObject apis)
         {
             foreach (JProperty apiProperty in apis.Properties())
             {
                 if (apiProperty.Name == "$schema")
                     continue;
 
-                this.ReadController(apiProperty.Name, (JArray)apiProperty.Value);
+                this.ReadController(filePath, apiProperty.Name, (JArray)apiProperty.Value);
             }
         }
 
-        private void ReadController(string controllerName, JArray actions)
+        private void ReadController(string filePath, string controllerName, JArray actions)
         {
             ControllerDefinition controller = new ControllerDefinition(controllerName);
             foreach (JToken action in actions)
@@ -47,7 +49,7 @@ namespace Dibix.Sdk.CodeGeneration
                 switch (action.Type)
                 {
                     case JTokenType.Object:
-                        ReadControllerAction(controller, (JObject)action);
+                        this.ReadControllerAction(filePath, controller, (JObject)action);
                         break;
 
                     case JTokenType.String:
@@ -61,7 +63,7 @@ namespace Dibix.Sdk.CodeGeneration
             this.Controllers.Add(controller);
         }
 
-        private static void ReadControllerAction(ControllerDefinition controller, JObject action)
+        private void ReadControllerAction(string filePath, ControllerDefinition controller, JObject action)
         {
             string target = (string)action.Property("target").Value;
             ActionDefinitionTarget actionTarget = new ActionDefinitionTarget(target.Contains(","), target);
@@ -76,7 +78,19 @@ namespace Dibix.Sdk.CodeGeneration
                 IsAnonymous = (bool?)action.Property("isAnonymous")?.Value ?? default
             };
             ReadControllerActionParameters(actionDefinition, (JObject)action.Property("params")?.Value);
-            controller.Actions.Add(actionDefinition);
+            if (controller.Actions.Add(actionDefinition))
+                return;
+
+            StringBuilder sb = new StringBuilder();
+            sb.Append(actionDefinition.Method.ToString().ToUpperInvariant())
+              .Append(' ')
+              .Append(controller.Name);
+
+            if (!String.IsNullOrEmpty(actionDefinition.ChildRoute))
+                sb.Append('/').Append(actionDefinition.ChildRoute);
+
+            IJsonLineInfo lineInfo = action;
+            base.ErrorReporter.RegisterError(filePath, lineInfo.LineNumber, lineInfo.LinePosition, null, $"Duplicate action registration: {sb}");
         }
 
         private static void ReadControllerImport(ControllerDefinition controller, string typeName)

@@ -12,6 +12,7 @@
     <EmbeddedResource Include="CodeGeneration\Configuration\dibix.configuration.schema.simple.json" />
     <EmbeddedResource Include="CodeGeneration\Environment\dibix.contracts.schema.json" />
     <EmbeddedResource Include="CodeGeneration\Environment\dibix.endpoints.schema.json" />
+    <Compile Include="..\Dibix\Collections\FuncEqualityComparer.cs" Link="Collections\FuncEqualityComparer.cs" />
     <Compile Include="..\Dibix\Diagnostics\Guard.cs" Link="Diagnostics\Guard.cs" />
     <Compile Include="..\Dibix\Extensions\EnumerableExtensions.cs" Link="Extensions\EnumerableExtensions.cs" />
     <Compile Include="..\Dibix\Reflection\TypeExtensions.cs" Link="Extensions\TypeExtensions.Base.cs" />
