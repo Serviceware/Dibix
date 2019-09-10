@@ -59,15 +59,30 @@ namespace Dibix.Tests
             public int LocaleId => 1033;
         }
 
-        private sealed class HttpBody
+        private sealed class ExplicitHttpBody
         {
             public short SourceId { get; set; }
             public int LocaleId { get; set; }
         }
 
-        private sealed class HttpParameterInput
+        private sealed class ExplicitHttpParameterInput
         {
             public int targetid { get; set; }
+        }
+
+        private sealed class ImplicitHttpBody
+        {
+            public short SourceId { get; set; }
+            public int LocaleId { get; set; }
+            public int UserId { get; set; }
+            public int CannotBeMapped { get; set; }
+        }
+
+        private sealed class ImplicitBodyHttpParameterInput
+        {
+            public int sourceid { get; set; }
+            public int localeid { get; set; }
+            public int fromuri { get; set; }
         }
 
         private sealed class XmlHttpParameterInput
@@ -80,9 +95,9 @@ namespace Dibix.Tests
             public XElement Convert(JObject source) => JsonConvert.DeserializeXNode(source.ToString()).Root;
         }
 
-        private sealed class FormattedInputBinder : IFormattedInputBinder<HttpBody, HttpParameterInput>
+        private sealed class FormattedInputBinder : IFormattedInputBinder<ExplicitHttpBody, ExplicitHttpParameterInput>
         {
-            public void Bind(HttpBody source, HttpParameterInput target) => target.targetid = source.SourceId;
+            public void Bind(ExplicitHttpBody source, ExplicitHttpParameterInput target) => target.targetid = source.SourceId;
         }
     }
 }

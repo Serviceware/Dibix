@@ -7,6 +7,8 @@ namespace Dibix.Http
     [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses")]
     internal sealed class BodySourceProvider : IHttpParameterSourceProvider
     {
+        public const string SourceName = "BODY";
+
         public Type GetInstanceType(HttpActionDefinition action) => action.SafeGetBodyContract();
 
         public Expression GetInstanceValue(Type instanceType, ParameterExpression argumentsParameter, ParameterExpression dependencyProviderParameter) => Expression.Call(typeof(HttpParameterResolverUtility), nameof(HttpParameterResolverUtility.ReadBody), new [] { instanceType }, argumentsParameter);

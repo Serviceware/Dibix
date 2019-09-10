@@ -11,7 +11,7 @@ namespace Dibix.Http
         [SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static HttpParameterSourceProviderRegistry()
         {
-            Register<BodySourceProvider>("BODY");
+            Register<BodySourceProvider>(BodySourceProvider.SourceName);
         }
 
         public static void Register<T>(string name) where T : IHttpParameterSourceProvider, new() => Map.Add(name, new Lazy<IHttpParameterSourceProvider>(() => new T()));

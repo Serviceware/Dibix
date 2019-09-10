@@ -83,7 +83,7 @@ namespace Dibix.Http
                         if (action.DynamicParameters.TryGetValue(property.Name, out HttpParameterSource propertySource))
                         {
                             // [internal] SomeInputParameterClass.lcid, etc..
-                            yield return CollectParameter(action, propertySource, parameter, property.Name, property.PropertyType);
+                            yield return CollectNonUserParameter(action, propertySource, parameter, property.Name, property.PropertyType);
                         }
                         else if (action.BodyBinder != null)
                         {
@@ -93,7 +93,7 @@ namespace Dibix.Http
                         else
                         {
                             // [user] SomeInputParameterClass.id
-                            yield return HttpParameterInfo.Uri(parameter, property.PropertyType, property.Name);
+                            yield return CollectUserParameter(action, parameter, property.PropertyType, property.Name);
                         }
                     }
                 }
@@ -102,7 +102,7 @@ namespace Dibix.Http
                     if (action.DynamicParameters.TryGetValue(parameter.Name, out HttpParameterSource parameterSource))
                     {
                         // [internal] lcid, etc..
-                        yield return CollectParameter(action, parameterSource, null, parameter.Name, parameter.ParameterType);
+                        yield return CollectNonUserParameter(action, parameterSource, null, parameter.Name, parameter.ParameterType);
                     }
                     else if (action.BodyBinder != null)
                     {
@@ -111,21 +111,34 @@ namespace Dibix.Http
                     else
                     {
                         // [user] id
-                        yield return HttpParameterInfo.Uri(null, parameter.ParameterType, parameter.Name);
+                        yield return CollectUserParameter(action, null, parameter.ParameterType, parameter.Name);
                     }
                 }
             }
         }
 
+        private static HttpParameterInfo CollectUserParameter(HttpActionDefinition action, ParameterInfo contractParameter, Type parameterType, string parameterName)
+        {
+            if (action.BodyContract == null)
+                return HttpParameterInfo.Uri(contractParameter, parameterType, parameterName);
+
+            string sourcePropertyName = parameterName;
+            PropertyInfo sourceProperty = action.BodyContract.GetTypeInfo().GetProperty(sourcePropertyName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+            if (sourceProperty == null)
+                return HttpParameterInfo.Uri(contractParameter, parameterType, parameterName);
+
+            sourcePropertyName = sourceProperty.Name;
+            IHttpParameterSourceProvider sourceProvider = GetSourceProvider(action, BodySourceProvider.SourceName, parameterName, parameterName);
+            return HttpParameterInfo.SourceProperty(contractParameter, parameterType, parameterName, sourceProvider, BodySourceProvider.SourceName, sourcePropertyName);
+        }
+
         [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Helpline.Server.Application.HttpParameterResolver.CreateException(Helpline.Server.Common.Infrastructure.HttpActionDefinition,System.String,System.String)")]
-        private static HttpParameterInfo CollectParameter(HttpActionDefinition action, HttpParameterSource source, ParameterInfo contractParameter, string parameterName, Type parameterType)
+        private static HttpParameterInfo CollectNonUserParameter(HttpActionDefinition action, HttpParameterSource source, ParameterInfo contractParameter, string parameterName, Type parameterType)
         {
             switch (source)
             {
                 case HttpParameterPropertySource propertySource:
-                    if (!HttpParameterSourceProviderRegistry.TryGetProvider(propertySource.SourceName, out IHttpParameterSourceProvider sourceProvider))
-                        throw HttpParameterResolverUtility.CreateException(action, $"Unknown source provider '{propertySource.SourceName}' for property '{propertySource.PropertyName}'", parameterName);
-
+                    IHttpParameterSourceProvider sourceProvider = GetSourceProvider(action, propertySource.SourceName, propertySource.PropertyName, parameterName);
                     return HttpParameterInfo.SourceProperty(contractParameter, parameterType, parameterName, sourceProvider, propertySource.SourceName, propertySource.PropertyName);
 
                 case HttpParameterBodySource bodySource:
@@ -138,6 +151,14 @@ namespace Dibix.Http
                 default:
                     throw HttpParameterResolverUtility.CreateException(action, $"Unsupported parameter source type: '{source.GetType()}'", parameterName);
             }
+        }
+
+        private static IHttpParameterSourceProvider GetSourceProvider(HttpActionDefinition action, string sourceName, string sourcePropertyName, string parameterName)
+        {
+            if (!HttpParameterSourceProviderRegistry.TryGetProvider(sourceName, out IHttpParameterSourceProvider sourceProvider))
+                throw HttpParameterResolverUtility.CreateException(action, $"Unknown source provider '{sourceName}' for property '{sourcePropertyName}'", parameterName);
+
+            return sourceProvider;
         }
 
         private static IDictionary<string, HttpParameterSourceExpression> CollectParameterSources(HttpActionDefinition action, IEnumerable<HttpParameterInfo> @params, ParameterExpression dependencyResolverParameter, ParameterExpression argumentsParameter, HttpParameterResolverCompilationContext context)
