@@ -40,8 +40,8 @@ namespace Dibix
             Guard.IsNotNull(accessor, nameof(accessor));
 
             MultiMapper multiMapper = new MultiMapper();
-            return accessor.QueryMany<TReturn, TSecond, TReturn>(sql, CommandType.Text, parameters, (a, b) => multiMapper.AutoMap<TReturn>(false, a, b), splitOn)
-                           .Distinct(new EntityComparer<TReturn>())
+            return accessor.QueryMany<TReturn, TSecond, TReturn>(sql, CommandType.Text, parameters, (a, b) => multiMapper.MapRow<TReturn>(false, a, b), splitOn)
+                           .PostProcess(multiMapper)
                            .Single();
         }
         public static TReturn QuerySingle<TReturn, TSecond, TThird>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, string splitOn) where TReturn : new()
@@ -49,8 +49,8 @@ namespace Dibix
             Guard.IsNotNull(accessor, nameof(accessor));
 
             MultiMapper multiMapper = new MultiMapper();
-            return accessor.QueryMany<TReturn, TSecond, TThird, TReturn>(sql, CommandType.Text, parameters, (a, b, c) => multiMapper.AutoMap<TReturn>(false, a, b, c), splitOn)
-                           .Distinct(new EntityComparer<TReturn>())
+            return accessor.QueryMany<TReturn, TSecond, TThird, TReturn>(sql, CommandType.Text, parameters, (a, b, c) => multiMapper.MapRow<TReturn>(false, a, b, c), splitOn)
+                           .PostProcess(multiMapper)
                            .Single();
         }
 
@@ -77,8 +77,8 @@ namespace Dibix
             Guard.IsNotNull(accessor, nameof(accessor));
 
             MultiMapper multiMapper = new MultiMapper();
-            return accessor.QueryMany<TReturn, TSecond, TThird, TFourth, TReturn>(sql, CommandType.Text, parameters, (a, b, c, d) => multiMapper.AutoMap<TReturn>(false, a, b, c, d), splitOn)
-                           .Distinct(new EntityComparer<TReturn>())
+            return accessor.QueryMany<TReturn, TSecond, TThird, TFourth, TReturn>(sql, CommandType.Text, parameters, (a, b, c, d) => multiMapper.MapRow<TReturn>(false, a, b, c, d), splitOn)
+                           .PostProcess(multiMapper)
                            .Single();
         }
         public static TReturn QuerySingle<TReturn, TSecond, TThird, TFourth>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, Action<TReturn, TSecond, TThird, TFourth> map, string splitOn)

@@ -1,9 +1,12 @@
 using System;
+using System.Collections.Generic;
 
 namespace Dibix
 {
     public static partial class DatabaseAccessorExtensions
     {
+        private static IEnumerable<TReturn> PostProcess<TReturn>(this IEnumerable<TReturn> source, MultiMapper multiMapper) => multiMapper.PostProcess(source);
+
         private static IParametersVisitor Build(this Action<IParameterBuilder> configureParameters)
         {
             IParameterBuilder builder = new ParameterBuilder();

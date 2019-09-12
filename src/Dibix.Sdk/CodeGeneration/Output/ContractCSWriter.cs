@@ -78,6 +78,11 @@ namespace Dibix.Sdk.CodeGeneration
                         context.Configuration.DetectedReferences.Add("System.ComponentModel.DataAnnotations.dll");
                         propertyAnnotations.Add("Key");
                     }
+                    else if (property.IsDiscriminator)
+                    {
+                        context.Output.AddUsing("Dibix");
+                        propertyAnnotations.Add("Discriminator");
+                    }
 
                     switch (property.SerializationBehavior)
                     {

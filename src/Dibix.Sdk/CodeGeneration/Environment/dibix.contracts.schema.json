@@ -44,6 +44,23 @@
                 "type"
               ],
               "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "minProperties": 1,
+              "properties": {
+                "type": {
+                  "$ref": "#/definitions/TypeName"
+                },
+                "isDiscriminator": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "type",
+                "isDiscriminator"
+              ],
+              "additionalProperties": false
             }
           ]
         }

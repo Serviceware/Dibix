@@ -20,13 +20,26 @@ namespace Dibix
             foreach (PropertyInfo property in type.GetRuntimeProperties())
             {
                 if (property.IsDefined(typeof(KeyAttribute)))
+                {
                     descriptor.Keys.Add(BuildEntityKey(property));
+                }
+                else if (property.IsDefined(typeof(DiscriminatorAttribute)))
+                {
+                    if (descriptor.Discriminator != null)
+                        throw new InvalidOperationException($"Composite discriminator keys are not supported: {type}");
+
+                    descriptor.Discriminator = BuildEntityKey(property);
+                }
                 else if (!property.PropertyType.IsPrimitive())
                 {
                     EntityProperty entityProperty = BuildEntityProperty(property);
                     descriptor.ComplexProperties.Add(entityProperty);
                 }
             }
+
+            if (descriptor.Discriminator != null && descriptor.Keys.Count != 1)
+                throw new InvalidOperationException($"To match a discriminator, exactly one key property should be defined: {type}");
+
             return descriptor;
         }
 

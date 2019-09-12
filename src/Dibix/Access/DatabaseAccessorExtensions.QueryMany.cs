@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 
 namespace Dibix
 {
@@ -35,8 +34,8 @@ namespace Dibix
         {
             Guard.IsNotNull(accessor, nameof(accessor));
             MultiMapper multiMapper = new MultiMapper();
-            return accessor.QueryMany<TReturn, TSecond, TReturn>(sql, commandType, parameters, (a, b) => multiMapper.AutoMap<TReturn>(false, a, b), splitOn)
-                           .Distinct(new EntityComparer<TReturn>());
+            return accessor.QueryMany<TReturn, TSecond, TReturn>(sql, commandType, parameters, (a, b) => multiMapper.MapRow<TReturn>(false, a, b), splitOn)
+                           .PostProcess(multiMapper);
         }
         public static IEnumerable<TReturn> QueryMany<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, CommandType commandType, IParametersVisitor parameters, Action<TReturn, TSecond> map, string splitOn)
         {

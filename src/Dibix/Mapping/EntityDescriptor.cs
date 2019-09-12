@@ -6,6 +6,7 @@ namespace Dibix
     internal sealed class EntityDescriptor
     {
         public ICollection<EntityKey> Keys { get; }
+        public EntityKey Discriminator { get; set; }
         public IList<EntityProperty> ComplexProperties { get; }
 
         public EntityDescriptor()

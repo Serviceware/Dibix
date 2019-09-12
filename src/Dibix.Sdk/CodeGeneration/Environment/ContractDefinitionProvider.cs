@@ -96,6 +96,7 @@ namespace Dibix.Sdk.CodeGeneration
                 {
                     string typeName;
                     bool isPartOfKey = false;
+                    bool isDiscriminator = false;
                     SerializationBehavior serializationBehavior = default;
                     switch (property.Value.Type)
                     {
@@ -103,6 +104,7 @@ namespace Dibix.Sdk.CodeGeneration
                             JObject propertyInfo = (JObject)property.Value;
                             typeName = (string)propertyInfo.Property("type").Value;
                             isPartOfKey = (bool?)propertyInfo.Property("isPartOfKey")?.Value ?? default;
+                            isDiscriminator = (bool?)propertyInfo.Property("isDiscriminator")?.Value ?? default;
                             Enum.TryParse((string)propertyInfo.Property("serialize")?.Value, true, out serializationBehavior);
                             break;
 
@@ -114,7 +116,7 @@ namespace Dibix.Sdk.CodeGeneration
                             throw new ArgumentOutOfRangeException(nameof(property.Type), property.Type, null);
                     }
                     bool isEnumerable = TryGetArrayType(typeName, ref typeName);
-                    contract.Properties.Add(new ObjectContractProperty(property.Name, typeName, isPartOfKey, serializationBehavior, isEnumerable));
+                    contract.Properties.Add(new ObjectContractProperty(property.Name, typeName, isPartOfKey, isDiscriminator, serializationBehavior, isEnumerable));
                 }
             }
 

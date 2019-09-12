@@ -12,7 +12,7 @@ namespace Dibix
         #endregion
 
         #region Public Methods
-        public TReturn AutoMap<TReturn>(bool useProjection, params object[] args) where TReturn : new()
+        public TReturn MapRow<TReturn>(bool useProjection, params object[] args) where TReturn : new()
         {
             // LEFT JOIN => related entities can be null
             object[] relevantArgs = args.Where(x => x != null).ToArray();
@@ -42,6 +42,35 @@ namespace Dibix
 
             return ProjectResult<TReturn>(relevantArgs);
         }
+
+        public IEnumerable<TReturn> PostProcess<TReturn>(IEnumerable<TReturn> source)
+        {
+            // Distinct because the root might be duplicated because of 1->n related rows
+            IEnumerable<TReturn> results = source.Distinct(new EntityComparer<TReturn>());
+            EntityDescriptor entityDescriptor = EntityDescriptorCache.GetDescriptor(typeof(TReturn));
+            if (entityDescriptor.Discriminator == null)
+                return results;
+
+            ICollection<TReturn> resolved = results.ToArray();
+            ICollection<EntityProperty> matchedProperties = new HashSet<EntityProperty>();
+            if (!TryMatchProperty(entityDescriptor, typeof(TReturn), matchedProperties, out EntityProperty property))
+                return resolved;
+
+            // Map recursive relational model to a hierarchical tree model based on a 'ParentId' like discriminator
+            EntityKey key = entityDescriptor.Keys.Single();
+            IDictionary<object, TReturn> entityMap = resolved.ToDictionary(x => key.GetValue(x));
+            ILookup<object, TReturn> childEntityMap = resolved.ToLookup(x => entityDescriptor.Discriminator.GetValue(x), x => entityMap[key.GetValue(x)]);
+
+            foreach (TReturn entity in entityMap.Values)
+            {
+                foreach (TReturn childEntity in childEntityMap[key.GetValue(entity)])
+                {
+                    property.SetValue(entity, childEntity);
+                }
+            }
+
+            return childEntityMap[null]; // Return the root collection
+        }
         #endregion
 
         #region Private Methods
@@ -57,7 +86,10 @@ namespace Dibix
 
         private static bool TryMatchProperty(EntityDescriptor descriptor, Type sourceType, ICollection<EntityProperty> usedProperties, out EntityProperty property)
         {
-            property = descriptor.ComplexProperties.Reverse().FirstOrDefault(x => x.EntityType == sourceType && !usedProperties.Contains(x));
+            property = descriptor.ComplexProperties
+                                 .Reverse()
+                                 .FirstOrDefault(x => x.EntityType == sourceType && !usedProperties.Contains(x) /* Skip properties that have already been matched */);
+                                                                                                                /* i.E.: multiple properties of the same type */
             if (property == null)
                 return false;
 
