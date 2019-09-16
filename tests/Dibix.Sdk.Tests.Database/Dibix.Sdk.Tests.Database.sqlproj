@@ -109,6 +109,7 @@
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_031.sql" />
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_032.sql" />
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_033.sql" />
+    <Build Include="CodeAnalysis\dbx_codeanalysis_error_034.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CodeAnalysis" />

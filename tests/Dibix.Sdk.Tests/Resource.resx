@@ -173,7 +173,7 @@
     column="5" /&gt;
   &lt;error
     message="[025] Please specify the clustering (CLUSTERED/NONCLUSTERED) for the index 'IX_dbx_codeanalysis_error_025_table_fail_b' and don't rely on the default"
-    line="25"
+    line="24"
     column="1" /&gt;
 &lt;/errors&gt;</value>
   </data>
@@ -209,6 +209,19 @@
     message="[015] Missing column specification for INSERT statement"
     line="10"
     column="4" /&gt;
+&lt;/errors&gt;</value>
+  </data>
+  <data name="IsNullSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="[034] Nullable columns in expressions should be wrapped with ISNULL(column, default value): dbx_codeanalysis_error_034.b"
+    line="8"
+    column="60" /&gt;
+  &lt;error
+    message="[034] Nullable columns in expressions should be wrapped with ISNULL(column, default value): dbx_codeanalysis_error_034.b"
+    line="9"
+    column="64" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="KeywordCasingSqlCodeAnalysisRule" xml:space="preserve">

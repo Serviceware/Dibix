@@ -16,9 +16,11 @@ namespace Dibix.Sdk.Sql
         #region Properties
         public abstract string TypeDisplayName { get; }
         public abstract ModelTypeClass ObjectType { get; }
+        public abstract ModelTypeClass ColumnType { get; }
         public abstract ModelRelationshipClass ColumnDataType { get; }
         public abstract ModelPropertyClass ColumnLength { get; }
         public abstract ModelPropertyClass ColumnPrecision { get; }
+        public abstract ModelPropertyClass Nullable { get; }
         #endregion
 
         #region Public Methods
@@ -34,25 +36,6 @@ namespace Dibix.Sdk.Sql
             IEnumerable<Index> indexes = table.GetReferencing(Microsoft.SqlServer.Dac.Model.Index.IndexedObject)
                                               .Select(this.MapIndex);
             return indexes;
-        }
-
-        public Column MapColumn(TSqlObject model)
-        {
-            string columnName = model.Name.Parts.Last();
-            bool isComputed = this.IsComputed(model);
-            int length = model.GetProperty<int>(this.ColumnLength);
-            int precision = model.GetProperty<int>(this.ColumnPrecision);
-            SqlDataType sqlDataType = SqlDataType.Unknown;
-            string dataTypeName = null;
-            if (!isComputed)
-            {
-                TSqlObject columnType = model.GetReferenced(this.ColumnDataType).Single();
-                sqlDataType = columnType.GetProperty<SqlDataType>(DataType.SqlDataType);
-                dataTypeName = String.Join(".", columnType.Name.Parts);
-            }
-            TSqlFragment scriptDom = model.GetScriptDom();
-            Column column = new Column(columnName, sqlDataType, dataTypeName, isComputed, length, precision, scriptDom);
-            return column;
         }
 
         public bool HasPrimaryKey(TSqlModel model, SchemaObjectName tableName)
@@ -76,7 +59,9 @@ namespace Dibix.Sdk.Sql
             ConstraintDefinition definition = GetConstraintDefinition(constraintModel, name);
             Constraint constraint = new Constraint(constraintSelector.Kind, name, isClustered, constraintModel.GetSourceInformation(), definition);
             if (constraintSelector.Columns != null)
-                constraint.Columns?.AddRange(constraintModel.GetReferenced(constraintSelector.Columns).Select(this.MapColumn));
+                constraint.Columns?.AddRange(constraintModel.GetReferenced(constraintSelector.Columns)
+                                                            .Where(this.IsColumn)
+                                                            .Select(this.MapColumn));
 
             return constraint;
         }
@@ -87,7 +72,7 @@ namespace Dibix.Sdk.Sql
         {
             ObjectIdentifier id = new ObjectIdentifier(name.Identifiers.Select(x => x.Value));
             if (name.SchemaIdentifier == null)
-                id.Parts.Insert(0, "dbo");
+                id.Parts.Insert(0, SqlModel.DefaultSchemaName);
 
             TSqlObject table = model.GetObject(this.ObjectType, id, DacQueryScopes.UserDefined);
             if (table == null)
@@ -112,6 +97,28 @@ namespace Dibix.Sdk.Sql
                 default:
                     throw new ArgumentOutOfRangeException(nameof(scriptDom), scriptDom, null);
             }
+        }
+
+        private bool IsColumn(TSqlObject model) => model.ObjectType == this.ColumnType;
+
+        private Column MapColumn(TSqlObject model)
+        {
+            string columnName = model.Name.Parts.Last();
+            bool isNullable = model.GetProperty<bool>(this.Nullable);
+            bool isComputed = this.IsComputed(model);
+            int length = model.GetProperty<int>(this.ColumnLength);
+            int precision = model.GetProperty<int>(this.ColumnPrecision);
+            SqlDataType sqlDataType = SqlDataType.Unknown;
+            string dataTypeName = null;
+            if (!isComputed)
+            {
+                TSqlObject columnType = model.GetReferenced(this.ColumnDataType).Single();
+                sqlDataType = columnType.GetProperty<SqlDataType>(DataType.SqlDataType);
+                dataTypeName = String.Join(".", columnType.Name.Parts);
+            }
+            TSqlFragment scriptDom = model.GetScriptDom();
+            Column column = new Column(columnName, sqlDataType, dataTypeName, isNullable, isComputed, length, precision, scriptDom);
+            return column;
         }
 
         private Index MapIndex(TSqlObject model)

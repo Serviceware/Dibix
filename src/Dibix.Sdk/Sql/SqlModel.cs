@@ -6,6 +6,7 @@ namespace Dibix.Sdk.Sql
 {
     public sealed class SqlModel
     {
+        internal const string DefaultSchemaName = "dbo";
         private readonly TSqlModel _model;
 
         internal SqlModel(TSqlModel model) => this._model = model;

@@ -102,5 +102,8 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
 
         [Fact]
         public void RedundantIndexSqlCodeAnalysisRule() => base.Execute();
+
+        [Fact]
+        public void IsNullSqlCodeAnalysisRule() => base.Execute();
     }
 }
