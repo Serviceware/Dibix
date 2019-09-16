@@ -105,5 +105,8 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
 
         [Fact]
         public void IsNullSqlCodeAnalysisRule() => base.Execute();
+
+        [Fact]
+        public void AmbiguousCheckConstraintSqlCodeAnalysisRule() => base.Execute();
     }
 }

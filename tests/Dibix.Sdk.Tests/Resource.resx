@@ -117,6 +117,15 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AmbiguousCheckConstraintSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="[035] Ambiguous check constraints: CK_dbx_codeanalysis_error_035_1_fail1, CK_dbx_codeanalysis_error_035_1_fail2"
+    line="5"
+    column="5" /&gt;
+&lt;/errors&gt;</value>
+  </data>
   <data name="ConsistentlyQuotedIdentifierSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
