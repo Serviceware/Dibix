@@ -9,7 +9,7 @@
       "type": "string",
       "enum": [
         "Always",
-        "IfNotSet",
+        "IfNotEmpty",
         "Never"
       ]
     },

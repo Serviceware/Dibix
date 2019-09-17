@@ -89,7 +89,7 @@ namespace Dibix.Sdk.CodeGeneration
                         case SerializationBehavior.Always:
                             break;
 
-                        case SerializationBehavior.IfNotSet:
+                        case SerializationBehavior.IfNotEmpty:
                             if (!property.IsEnumerable)
                             {
                                 AddJsonReference(context);
