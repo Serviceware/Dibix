@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Dibix.Sdk.CodeGeneration;
 
-namespace Dibix.Sdk.MSBuild
+namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class StaticCodeGenerationContext : ICodeGenerationContext
     {
-        private readonly CompilationMode _compilationMode;
+        private readonly CodeArtifactKind _codeArtifactKind;
         private readonly IContractDefinitionProvider _contractDefinitionProvider;
         private readonly IControllerDefinitionProvider _controllerDefinitionProvider;
         private readonly IUserDefinedTypeProvider _userDefinedTypeProvider;
@@ -27,12 +26,12 @@ namespace Dibix.Sdk.MSBuild
           , IEnumerable<string> contracts
           , IEnumerable<string> endpoints
           , IEnumerable<string> references
-          , CompilationMode compilationMode
+          , CodeArtifactKind codeArtifactKind
           , bool multipleAreas
           , bool embedStatements
           , IErrorReporter errorReporter)
         {
-            this._compilationMode = compilationMode;
+            this._codeArtifactKind = codeArtifactKind;
             if (!String.IsNullOrEmpty(@namespace))
                 this.Namespace = @namespace;
 
@@ -43,7 +42,7 @@ namespace Dibix.Sdk.MSBuild
 
             this.Configuration = new GeneratorConfiguration();
             this.Configuration.Output.GeneratePublicArtifacts = true;
-            if (compilationMode == CompilationMode.Client)
+            if (codeArtifactKind == CodeArtifactKind.Client)
                 this.Configuration.Output.Writer = typeof(ClientContractCSWriter);
 
             if (this._contractDefinitionProvider.HasSchemaErrors || this._controllerDefinitionProvider.HasSchemaErrors)
@@ -56,7 +55,7 @@ namespace Dibix.Sdk.MSBuild
             if (!embedStatements)
                 source.Formatter = typeof(ExecStoredProcedureSqlStatementFormatter);
 
-            if (compilationMode == CompilationMode.Server)
+            if (codeArtifactKind == CodeArtifactKind.Server)
             {
                 sources.Where(x => MatchFile(projectDirectory, x, embedStatements, errorReporter)).Each(source.Include);
                 this.Configuration.Input.Sources.Add(source);
@@ -71,7 +70,7 @@ namespace Dibix.Sdk.MSBuild
         {
             artifacts.Contracts.AddRange(this._contractDefinitionProvider.Contracts);
 
-            if (this._compilationMode == CompilationMode.Server)
+            if (this._codeArtifactKind == CodeArtifactKind.Server)
             {
                 artifacts.UserDefinedTypes.AddRange(this._userDefinedTypeProvider.Types);
                 artifacts.Controllers.AddRange(this._controllerDefinitionProvider.Controllers);

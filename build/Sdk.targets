@@ -40,21 +40,21 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Clean target assembly, which is required to force rebuild of CompileDataAccessArtifactsTask -->
+    <!-- Clean target assembly, which is required to force rebuild of CompileArtifacts target -->
     <!-- This is probably not included, because we skip copying it to output -->
     <Clean Include="$(TargetPath)" />
     <Clean Include="$(ClientTargetPath)" />
   </ItemGroup>
 
   <UsingTask TaskName="SqlCodeAnalysisTask" AssemblyFile="$(DibixBuildToolsPath)" />
-  <UsingTask TaskName="CompileDataAccessArtifactsTask" AssemblyFile="$(DibixBuildToolsPath)" />
+  <UsingTask TaskName="CodeGenerationTask" AssemblyFile="$(DibixBuildToolsPath)" />
 
   <!-- Define inputs and outputs so the targets know when they need to be rebuilt -->
   <Target Name="SetupSqlBuildInputs" AfterTargets="_SetupSqlBuildInputs">
     <ItemGroup>
       <!-- 
         The intermediate assembly/pdb is used as an input,
-        therefore each time we run the CompileDataAccessArtifactsTask,
+        therefore each time we run the CompileArtifacts target,
         both these inputs are newer than the dacpac, and all targets
         are forced to rebuild.
       -->
@@ -79,13 +79,13 @@
       <SqlCodeAnalysisInput Include="@(SqlReferencePath)" />
       <SqlCodeAnalysisOutput Include="@(SqlTarget)" /> <!-- dacpac -->
 
-      <!-- CompileDataAccessArtifacts -->
-      <CompileDataAccessArtifactsInput Include="@(_SqlTargetInput)" />
-      <CompileDataAccessArtifactsInput Include="@(Build)" />
-      <CompileDataAccessArtifactsInput Include="@(Contract)" />
-      <CompileDataAccessArtifactsInput Include="@(Endpoint)" />
-      <CompileDataAccessArtifactsOutput Include="$(TargetPath)" />
-      <CompileDataAccessArtifactsOutput Include="$(ClientTargetPath)" />
+      <!-- CompileArtifacts -->
+      <CompileArtifactsInput Include="@(_SqlTargetInput)" />
+      <CompileArtifactsInput Include="@(Build)" />
+      <CompileArtifactsInput Include="@(Contract)" />
+      <CompileArtifactsInput Include="@(Endpoint)" />
+      <CompileArtifactsOutput Include="$(TargetPath)" />
+      <CompileArtifactsOutput Include="$(ClientTargetPath)" />
     </ItemGroup>
   </Target>
 
@@ -110,18 +110,18 @@
   </Target>
 
   <!-- Compile database accessors for stored procedures including their contracts and an API endpoint configuration -->
-  <Target Name="SetupCompilationArtifacts" BeforeTargets="SetupSqlBuildInputs" Condition="$(CompileDataAccessArtifacts) == 'true'">
+  <Target Name="SetupCompilationArtifacts" BeforeTargets="SetupSqlBuildInputs" Condition="$(CompileArtifacts) == 'true'">
     <ItemGroup>
       <Contract Include="@(None)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(RelativeDir)', '^Contracts\\')) and %(Extension) == '.json'" />
       <Endpoint Include="@(None)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(RelativeDir)', '^Endpoints\\')) and %(Extension) == '.json'" />
     </ItemGroup>
   </Target>
-  <Target Name="CompileDataAccessArtifacts" 
+  <Target Name="CompileArtifacts" 
           AfterTargets="PostBuildEvent" 
           DependsOnTargets="SetupSqlBuildInputs"
-          Inputs="@(CompileDataAccessArtifactsInput)"
-          Outputs="@(CompileDataAccessArtifactsOutput)"
-          Condition="$(CompileDataAccessArtifacts) == 'true'">
+          Inputs="@(CompileArtifactsInput)"
+          Outputs="@(CompileArtifactsOutput)"
+          Condition="$(CompileArtifacts) == 'true'">
     <PropertyGroup>
       <LangVersion>latest</LangVersion>
       <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
@@ -134,21 +134,21 @@
       <ServerCompilationReference Include="@(ArtifactReference->'%(RelativeDir)%(Filename).dll')" Condition="!$([System.Text.RegularExpressions.Regex]::IsMatch('%(Filename)%(Extension)', '^master|msdb(\.dacpac)$'))" />
     </ItemGroup>
 
-    <CompileDataAccessArtifactsTask SdkPath="$(DibixSdkPath)"
-                                    SSDTDirectory="$(SqlServerRedistPath)"
-                                    ProjectDirectory="$(MSBuildProjectDirectory)"
-                                    Namespace="$(RootNamespace)"
-                                    OutputFilePath="$(ServerIntermediateFilePath)"
-                                    Sources="@(Build)"
-                                    Contracts="@(Contract)"
-                                    Endpoints="@(Endpoint)"
-                                    References="@(ServerCompilationReference)"
-                                    MultipleAreas="$(MultipleAreas)"
-                                    IsIDEBuild="$(BuildingInsideVisualStudio)"
-                                    EmbedStatements="$(EmbedStatements)"
-                                    ClientOutputFilePath="$(ClientIntermediateFilePath)">
+    <CodeGenerationTask SdkPath="$(DibixSdkPath)"
+                        SSDTDirectory="$(SqlServerRedistPath)"
+                        ProjectDirectory="$(MSBuildProjectDirectory)"
+                        Namespace="$(RootNamespace)"
+                        DefaultOutputFilePath="$(ServerIntermediateFilePath)"
+                        ClientOutputFilePath="$(ClientIntermediateFilePath)"
+                        Sources="@(Build)"
+                        Contracts="@(Contract)"
+                        Endpoints="@(Endpoint)"
+                        References="@(ServerCompilationReference)"
+                        MultipleAreas="$(MultipleAreas)"
+                        IsIDEBuild="$(BuildingInsideVisualStudio)"
+                        EmbedStatements="$(EmbedStatements)">
       <Output TaskParameter="DetectedReferences" ItemName="ServerCompilationReference" />
-    </CompileDataAccessArtifactsTask>
+    </CodeGenerationTask>
 
     <ItemGroup>
       <ServerCompilationSource Include="$(ServerIntermediateFilePath)" />
