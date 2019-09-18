@@ -16,11 +16,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public IEnumerable<string> GetGlobalAnnotations(OutputConfiguration configuration)
         {
-            string[] parts = configuration.Namespace.Split('.');
-            if (parts.Length < 2)
-                throw new InvalidOperationException("Could not detect area name of project. The project namespace should have the following format: <PRODUCTNAME>.<AREANAME>");
-
-            string areaName = parts[1];
+            string areaName = NamespaceUtility.GetAreaName(configuration.Namespace);
             yield return $"ApiRegistration(\"{areaName}\")";
         }
 

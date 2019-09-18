@@ -1,13 +1,17 @@
 <Project>
   <PropertyGroup>
+    <!-- Runtime -->
     <ReflectionVersion>4.3.0</ReflectionVersion>
     <DataAnnotationsVersion>4.1.0</DataAnnotationsVersion>
     <SqlClientVersion>4.5.1</SqlClientVersion>
     <DapperVersion>1.50.5</DapperVersion>
-    <NewtonsoftJsonSchemaVersion>3.0.10</NewtonsoftJsonSchemaVersion>
-    <DacFxVersion>150.4200.1</DacFxVersion>
     <AspNetWebApiVersion>5.2.3</AspNetWebApiVersion>
 
+    <!-- Sdk -->
+    <DacFxVersion>150.4200.1</DacFxVersion>
+    <NewtonsoftJsonSchemaVersion>3.0.10</NewtonsoftJsonSchemaVersion>
+
+    <!-- VS integration -->
     <VisualStudioShellVersion>15.9.28307</VisualStudioShellVersion>
     <EnvDTEVersion>8.0.2</EnvDTEVersion>
     <VSLangProjVersion>7.0.3301</VSLangProjVersion>
@@ -16,8 +20,10 @@
     <VSSDKBuildToolsVersion>15.9.3039</VSSDKBuildToolsVersion>
     <VisualStudioDesignerInterfacesVersion>1.1.4323</VisualStudioDesignerInterfacesVersion>
 
+    <!-- MSBuild -->
     <MSBuildUtilitiesVersion>15.9.20</MSBuildUtilitiesVersion>
 
+    <!-- Testing -->
     <ConfigurationBinderVersion>2.1.1</ConfigurationBinderVersion>
     <UserSecretsVersion>2.1.1</UserSecretsVersion>
     <MicrosoftTestSdkVersion>15.9.0</MicrosoftTestSdkVersion>
