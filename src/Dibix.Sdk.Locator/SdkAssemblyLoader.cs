@@ -28,7 +28,15 @@ namespace Dibix.Sdk
                 targetPath = Path.Combine(targetDirectory, Path.GetFileName(packagePath));
                 File.Copy(packagePath, targetPath);
             }
-            return Assembly.LoadFrom(targetPath);
+
+            Assembly assembly = Assembly.LoadFrom(targetPath);
+            if (targetPath != assembly.Location)
+            {
+                throw new InvalidOperationException($@"Unexpected location of Dibix.Sdk: {assembly.Location}
+To make sure the correct version is loaded, please move the assembly out of this location");
+            }
+
+            return assembly;
         }
 
         private static string LocatePackage(string rootDirectory, string packageName)
