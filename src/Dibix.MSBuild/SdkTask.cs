@@ -70,27 +70,30 @@ namespace Dibix.MSBuild
 
         private Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
         {
-            string assemblyName = new AssemblyName(args.Name).Name;
+            AssemblyName assemblyName = new AssemblyName(args.Name);
+            string name = assemblyName.Name;
             string directory = null;
 
             // Load SSDT assemblies from installation, if running from MSBuild
-            if (!this.IsIDEBuild && SSDTAssemblies.Contains(assemblyName))
+            if (!this.IsIDEBuild && SSDTAssemblies.Contains(name))
                 directory = this.SSDTDirectory;
 
             // Newtonsoft.Json.Schema is unknown to both devenv and MSBuild
-            if (assemblyName == "Newtonsoft.Json.Schema")
+            if (name == "Newtonsoft.Json.Schema")
                 directory = CurrentDirectory;
 
             // In some occasions, the previous loading of Newtonsoft.Json.Schema,
             // does include loading the dependent assembly Newtonsoft.Json
-            if (assemblyName == "Newtonsoft.Json")
+            if (name == "Newtonsoft.Json")
                 directory = CurrentDirectory;
 
             if (directory == null)
                 return null;
 
-            string path = Path.Combine(directory, $"{assemblyName}.dll");
-            return Assembly.LoadFrom(path);
+            string path = Path.Combine(directory, $"{name}.dll");
+
+            assemblyName.CodeBase = path;
+            return Assembly.Load(assemblyName);
         }
     }
 }

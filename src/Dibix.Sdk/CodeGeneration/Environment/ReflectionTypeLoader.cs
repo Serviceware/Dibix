@@ -50,7 +50,9 @@ namespace Dibix.Sdk.CodeGeneration
 
         private TypeInfo GetTypeInfo(string assemblyName, string typeName, string assemblyPath)
         {
-            Assembly assembly = !String.IsNullOrEmpty(assemblyPath) ? Assembly.LoadFrom(assemblyPath) : Assembly.Load(assemblyName);
+            AssemblyName name = new AssemblyName(assemblyName);
+            name.CodeBase = assemblyPath;
+            Assembly assembly = Assembly.Load(name);
             Type type = assembly.GetType(typeName, true);
             TypeInfo info = new TypeInfo(type.IsPrimitive(), type.ToCSharpTypeName(), type.GetProperties().Select(x => x.Name));
             return info;

@@ -29,7 +29,8 @@ namespace Dibix.Sdk
                 File.Copy(packagePath, targetPath);
             }
 
-            Assembly assembly = Assembly.LoadFrom(targetPath);
+            AssemblyName assemblyName = AssemblyName.GetAssemblyName(targetPath);
+            Assembly assembly = Assembly.Load(assemblyName);
             if (targetPath != assembly.Location)
             {
                 throw new InvalidOperationException($@"Unexpected location of Dibix.Sdk: {assembly.Location}
