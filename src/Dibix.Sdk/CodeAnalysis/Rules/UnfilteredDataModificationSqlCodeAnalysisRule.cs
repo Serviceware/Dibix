@@ -17,8 +17,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             if (node.WhereClause != null)
                 return;
 
-            // Table variables are allowed for update
-            if (IsTableVariableReference(node))
+            if (IsValid(node))
                 return;
 
             base.Fail(node, "UPDATE");
@@ -29,8 +28,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             if (node.WhereClause != null)
                 return;
 
-            // Table variables are allowed for delete
-            if (IsTableVariableReference(node))
+            if (IsValid(node))
                 return;
 
             // We don't investigate complex join filter logic and concentrate on simple DELETE FROM x WHERE
@@ -40,24 +38,28 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             base.Fail(node, "DELETE");
         }
 
-        private static bool IsTableVariableReference(UpdateDeleteSpecificationBase node)
+        private static bool IsValid(UpdateDeleteSpecificationBase node)
         {
             // UPDATE @x
-            if (node.Target is VariableTableReference)
+            bool isTableVariableTarget = node.Target is VariableTableReference;
+            if (isTableVariableTarget)
                 return true;
 
-            // UPDATE [x] .. FROM @x AS [x]
-            if (!(node.Target is NamedTableReference tableName)) // UPDATE [x]
+            // UPDATE [dbo].[table] or UPDATE [alias]
+            if (!(node.Target is NamedTableReference tableName))
                 return false;
 
-            if (node.FromClause == null)
+            if (node.FromClause == null) // ?
                 return false;
 
-            if (node.FromClause
-                    .TableReferences
-                    .Recursive()
-                    .OfType<TableReferenceWithAlias>() // FROM @x AS [x]
-                    .Any(x => x.Alias.Value /* FROM @x AS [x] */ == tableName.SchemaObject.BaseIdentifier.Value /* UPDATE [x] */))
+            // UPDATE [x] .. FROM [dbo].[table] AS [x]
+            bool isAliasedTarget = node.FromClause
+                                       .TableReferences
+                                       .Recursive()
+                                       .OfType<TableReferenceWithAlias>() // FROM @x AS [x]
+                                       .Any(x => x.Alias.Value /* FROM @x AS [x] */ == tableName.SchemaObject.BaseIdentifier.Value /* UPDATE [x] */);
+
+            if (isAliasedTarget)
                 return true;
 
             return false;
