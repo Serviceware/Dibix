@@ -2,7 +2,7 @@
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class ClientCodeArtifactsGenerationUnit : CodeArtifactsGenerationUnit
+    internal sealed class ClientCodeArtifactGenerationUnit : CodeTextArtifactGenerationUnit
     {
         protected override CodeArtifactKind CodeArtifactKind => CodeArtifactKind.Client;
         public override bool ShouldGenerate(CodeArtifactsGenerationContext context) => !String.IsNullOrEmpty(context.ClientOutputFilePath);

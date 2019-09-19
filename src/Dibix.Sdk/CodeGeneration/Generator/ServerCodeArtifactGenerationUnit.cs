@@ -1,6 +1,6 @@
 ﻿namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class ServerCodeArtifactsGenerationUnit : CodeArtifactsGenerationUnit
+    internal sealed class ServerCodeArtifactGenerationUnit : CodeTextArtifactGenerationUnit
     {
         protected override CodeArtifactKind CodeArtifactKind => CodeArtifactKind.Server;
         public override bool ShouldGenerate(CodeArtifactsGenerationContext context) => true;

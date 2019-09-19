@@ -6,8 +6,8 @@ namespace Dibix.Sdk.CodeGeneration
     {
         private static readonly Type[] Units =
         {
-            typeof(ServerCodeArtifactsGenerationUnit)
-          , typeof(ClientCodeArtifactsGenerationUnit)
+            typeof(ServerCodeArtifactGenerationUnit)
+          , typeof(ClientCodeArtifactGenerationUnit)
         };
 
         public bool Generate(CodeArtifactsGenerationContext context)
