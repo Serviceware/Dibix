@@ -56,11 +56,11 @@ namespace Dibix.Sdk.CodeGeneration
             if (this._context.Configuration.Output.Writer == null)
                 this._context.Configuration.Output.Writer = typeof(DaoWriter);
 
-            if (this._context.Configuration.Output.Namespace == null)
-                this._context.Configuration.Output.Namespace = this._context.Namespace;
+            if (this._context.Configuration.Output.RootNamespace == null)
+                this._context.Configuration.Output.RootNamespace = this._context.RootNamespace;
 
-            if (this._context.Configuration.Output.ClassName == null)
-                this._context.Configuration.Output.ClassName = this._context.ClassName;
+            if (this._context.Configuration.Output.DefaultClassName == null)
+                this._context.Configuration.Output.DefaultClassName = this._context.DefaultClassName;
 
             if (this._context.Configuration.Output.Formatting == default)
                 this._context.Configuration.Output.Formatting = CommandTextFormatting.Singleline;

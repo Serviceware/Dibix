@@ -16,7 +16,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public IEnumerable<string> GetGlobalAnnotations(OutputConfiguration configuration)
         {
-            string areaName = NamespaceUtility.GetAreaName(configuration.Namespace);
+            string areaName = NamespaceUtility.EnsureAreaName(configuration.AreaName);
             yield return $"ApiRegistration(\"{areaName}\")";
         }
 
@@ -63,7 +63,7 @@ namespace Dibix.Sdk.CodeGeneration
                         if (statementNameIndex >= 0)
                             @namespace = action.Target.Target.Substring(0, statementNameIndex);
 
-                        string typeName = $"{@namespace}.{context.Configuration.ClassName}";
+                        string typeName = $"{@namespace}.{context.Configuration.DefaultClassName}";
                         writer.WriteRaw($"typeof({typeName}), nameof({typeName}.")
                               .WriteRaw(action.Target.Target.Substring(statementNameIndex + 1))
                               .WriteRaw(')');
@@ -81,8 +81,8 @@ namespace Dibix.Sdk.CodeGeneration
                     if (!String.IsNullOrEmpty(action.BodyContract))
                     {
                         string bodyContractName = action.BodyContract;
-                        if (!bodyContractName.StartsWith(context.Configuration.Namespace, StringComparison.Ordinal))
-                            bodyContractName = $"{context.Configuration.Namespace}.{LayerName.DomainModel}.{bodyContractName}";
+                        if (!bodyContractName.StartsWith(context.Configuration.RootNamespace, StringComparison.Ordinal))
+                            bodyContractName = $"{context.Configuration.RootNamespace}.{LayerName.DomainModel}.{bodyContractName}";
 
                         writer.WriteLine($"y.BodyContract = typeof({bodyContractName});");
                     }

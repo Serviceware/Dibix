@@ -7,8 +7,8 @@ namespace Dibix.Sdk.VisualStudio
     {
         #region Properties
         public GeneratorConfiguration Configuration { get; }
-        public string Namespace { get; }
-        public string ClassName { get; }
+        public string RootNamespace { get; }
+        public string DefaultClassName { get; }
         public IContractResolverFacade ContractResolverFacade { get; }
         public IErrorReporter ErrorReporter { get; }
         #endregion
@@ -18,9 +18,9 @@ namespace Dibix.Sdk.VisualStudio
         {
             this.Configuration = configuration;
             this.ErrorReporter = errorReporter;
-            this.Namespace = @namespace;
+            this.RootNamespace = @namespace;
             this.ContractResolverFacade = contractResolverFacade;
-            this.ClassName = Path.GetFileNameWithoutExtension(inputFilePath);
+            this.DefaultClassName = Path.GetFileNameWithoutExtension(inputFilePath);
         }
         #endregion
 

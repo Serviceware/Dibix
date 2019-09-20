@@ -20,7 +20,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Overrides
         public override bool HasContent(SourceArtifacts artifacts) => artifacts.Statements.Any(IsGridResult);
 
-        protected override void Write(WriterContext context, HashSet<string> contracts)
+        public override void Write(WriterContext context)
         {
             var namespaceGroups = context.Artifacts
                                          .Statements
@@ -31,7 +31,7 @@ namespace Dibix.Sdk.CodeGeneration
             for (int i = 0; i < namespaceGroups.Length; i++)
             {
                 IGrouping<string, SqlStatementInfo> namespaceGroup = namespaceGroups[i];
-                CSharpStatementScope scope = namespaceGroup.Key != null ? context.Output.BeginScope(namespaceGroup.Key) : context.Output;
+                CSharpStatementScope scope = namespaceGroup.Key != null ? context.Output.BeginScope(NamespaceUtility.BuildRelativeNamespace(context.Configuration.RootNamespace, namespaceGroup.Key)) : context.Output;
                 IList<SqlStatementInfo> statements = namespaceGroup.DistinctBy(x => x.GeneratedResultTypeName ?? x.Name).ToArray();
                 for (int j = 0; j < statements.Count; j++)
                 {
@@ -49,7 +49,7 @@ namespace Dibix.Sdk.CodeGeneration
                             propertyTypeName = MakeCollectionInterfaceType(result.ResultType.ToString());
                         else
                         {
-                            propertyTypeName = base.PrefixWithRootNamespace(context, result.Contracts.First().Name, contracts);
+                            propertyTypeName = result.Contracts.First().Name.ToString();
                             if (isEnumerable)
                                 propertyTypeName = MakeCollectionInterfaceType(propertyTypeName);
                         }
@@ -72,7 +72,7 @@ namespace Dibix.Sdk.CodeGeneration
                     for (int k = 0; k < collectionProperties.Count; k++)
                     {
                         SqlQueryResult property = collectionProperties[k];
-                        string innerTypeName = property.ResultType?.ToString() ?? base.PrefixWithRootNamespace(context, property.Contracts.First().Name, contracts);
+                        string innerTypeName = property.ResultType?.ToString() ?? property.Contracts.First().Name.ToString();
                         string collectionTypeName = MakeCollectionType(innerTypeName);
                         ctorBodyWriter.Append("this.")
                                       .Append(property.Name)

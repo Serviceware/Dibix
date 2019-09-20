@@ -10,18 +10,20 @@ namespace Dibix.Sdk.CodeGeneration
     internal sealed class SqlUserDefinedTypeParser
     {
         private readonly IErrorReporter _errorReporter;
-        private readonly bool _multipleAreas;
+        private readonly string _productName;
+        private readonly string _areaName;
 
-        public SqlUserDefinedTypeParser(IErrorReporter errorReporter, bool multipleAreas)
+        public SqlUserDefinedTypeParser(IErrorReporter errorReporter, string productName, string areaName)
         {
             this._errorReporter = errorReporter;
-            this._multipleAreas = multipleAreas;
+            this._productName = productName;
+            this._areaName = areaName;
         }
 
         public UserDefinedTypeDefinition Parse(string filePath)
         {
             TSqlFragment fragment = ScriptDomFacade.Load(filePath);
-            UserDefinedTypeVisitor visitor = new UserDefinedTypeVisitor(() => SqlHintParser.FromFragment(filePath, this._errorReporter, fragment).ToArray(), this._multipleAreas);
+            UserDefinedTypeVisitor visitor = new UserDefinedTypeVisitor(() => SqlHintParser.FromFragment(filePath, this._errorReporter, fragment).ToArray(), this._productName, this._areaName);
             fragment.Accept(visitor);
             return visitor.Definition;
         }
@@ -39,14 +41,16 @@ namespace Dibix.Sdk.CodeGeneration
         private class UserDefinedTypeVisitor : TSqlFragmentVisitor
         {
             private readonly Lazy<ICollection<SqlHint>> _hintsAccessor;
-            private readonly bool _multipleAreas;
+            private readonly string _productName;
+            private readonly string _areaName;
 
             public UserDefinedTypeDefinition Definition { get; private set; }
 
-            public UserDefinedTypeVisitor(Func<ICollection<SqlHint>> hintsProvider, bool multipleAreas)
+            public UserDefinedTypeVisitor(Func<ICollection<SqlHint>> hintsProvider, string productName, string areaName)
             {
+                this._productName = productName;
+                this._areaName = areaName;
                 this._hintsAccessor = new Lazy<ICollection<SqlHint>>(hintsProvider);
-                this._multipleAreas = multipleAreas;
             }
 
             public override void Visit(CreateTypeTableStatement node)
@@ -57,7 +61,7 @@ namespace Dibix.Sdk.CodeGeneration
                 if (String.IsNullOrEmpty(displayName))
                     displayName = GenerateDisplayName(typeName);
 
-                @namespace = NamespaceUtility.BuildNamespace(@namespace, this._multipleAreas, LayerName.Data);
+                @namespace = NamespaceUtility.BuildFullNamespace(this._productName, this._areaName, LayerName.Data, @namespace);
                 ICollection<string> notNullableColumns = new HashSet<string>(GetNotNullableColumns(node.Definition));
                 this.Definition = new UserDefinedTypeDefinition(typeName, @namespace, displayName);
                 this.Definition.Columns.AddRange(node.Definition.ColumnDefinitions.Select(x => MapColumn(x, notNullableColumns)));

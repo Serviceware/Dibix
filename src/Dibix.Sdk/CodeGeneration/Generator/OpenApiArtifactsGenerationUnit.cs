@@ -13,21 +13,20 @@ namespace Dibix.Sdk.CodeGeneration
 
         public override bool Generate(CodeArtifactsGenerationContext context)
         {
-            string areaName = NamespaceUtility.GetAreaName(context.Namespace);
-            OpenApiDocument document = OpenApiGenerator.Generate(context.Namespace, areaName, context.Controllers, context.Contracts);
+            OpenApiDocument document = OpenApiGenerator.Generate(context.ProductName, NamespaceUtility.EnsureAreaName(context.AreaName), context.Controllers, context.Contracts);
 
             if (context.ErrorReporter.HasErrors)
                 return false;
 
             string targetDirectory = Path.GetDirectoryName(context.DefaultOutputFilePath);
 
-            string jsonFilePath = Path.Combine(targetDirectory, $"{areaName}.json");
+            string jsonFilePath = Path.Combine(targetDirectory, $"{context.AreaName}.json");
             using (Stream stream = File.OpenWrite(jsonFilePath))
             {
                 document.SerializeAsJson(stream, OpenApiSpecVersion.OpenApi3_0);
             }
 
-            string yamlFilePath = Path.Combine(targetDirectory, $"{areaName}.yml");
+            string yamlFilePath = Path.Combine(targetDirectory, $"{context.AreaName}.yml");
             using (Stream stream = File.OpenWrite(yamlFilePath))
             {
                 document.SerializeAsYaml(stream, OpenApiSpecVersion.OpenApi3_0);

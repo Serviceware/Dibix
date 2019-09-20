@@ -430,7 +430,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Reflection;
 using Dibix;
 
 namespace Dibix.Sdk.Tests
@@ -535,13 +534,13 @@ UNION ALL
         // dbx_tests_parser_xmlparam
         public const string dbx_tests_parser_xmlparamCommandText = @"";
 
-        public static Dibix.Sdk.Tests.dbx_tests_parser_invalidcolumnsforentityResult dbx_tests_parser_invalidcolumnsforentity(this IDatabaseAccessorFactory databaseAccessorFactory)
+        public static dbx_tests_parser_invalidcolumnsforentityResult dbx_tests_parser_invalidcolumnsforentity(this IDatabaseAccessorFactory databaseAccessorFactory)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
                 using (IMultipleResultReader reader = accessor.QueryMultiple(dbx_tests_parser_invalidcolumnsforentityCommandText))
                 {
-                    Dibix.Sdk.Tests.dbx_tests_parser_invalidcolumnsforentityResult result = new Dibix.Sdk.Tests.dbx_tests_parser_invalidcolumnsforentityResult();
+                    dbx_tests_parser_invalidcolumnsforentityResult result = new dbx_tests_parser_invalidcolumnsforentityResult();
                     result.A.ReplaceWith(reader.ReadMany&lt;int?&gt;());
                     result.B.ReplaceWith(reader.ReadMany&lt;int&gt;());
                     result.C.ReplaceWith(reader.ReadMany&lt;string&gt;());
@@ -552,13 +551,13 @@ UNION ALL
             }
         }
 
-        public static Dibix.Sdk.Tests.dbx_tests_parser_nestedifsResult dbx_tests_parser_nestedifs(this IDatabaseAccessorFactory databaseAccessorFactory)
+        public static dbx_tests_parser_nestedifsResult dbx_tests_parser_nestedifs(this IDatabaseAccessorFactory databaseAccessorFactory)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
                 using (IMultipleResultReader reader = accessor.QueryMultiple(dbx_tests_parser_nestedifsCommandText))
                 {
-                    Dibix.Sdk.Tests.dbx_tests_parser_nestedifsResult result = new Dibix.Sdk.Tests.dbx_tests_parser_nestedifsResult();
+                    dbx_tests_parser_nestedifsResult result = new dbx_tests_parser_nestedifsResult();
                     result.A.ReplaceWith(reader.ReadMany&lt;int&gt;());
                     result.B.ReplaceWith(reader.ReadMany&lt;int&gt;());
                     return result;
@@ -566,7 +565,7 @@ UNION ALL
             }
         }
 
-        public static Dibix.Sdk.Tests.dbx_tests_parser_nobeginendResult dbx_tests_parser_nobeginend(this IDatabaseAccessorFactory databaseAccessorFactory, Dibix.Sdk.Tests.CodeGeneration.Direction param1)
+        public static dbx_tests_parser_nobeginendResult dbx_tests_parser_nobeginend(this IDatabaseAccessorFactory databaseAccessorFactory, Dibix.Sdk.Tests.CodeGeneration.Direction param1)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
@@ -578,7 +577,7 @@ UNION ALL
                                                      .Build();
                 using (IMultipleResultReader reader = accessor.QueryMultiple(dbx_tests_parser_nobeginendCommandText, @params))
                 {
-                    Dibix.Sdk.Tests.dbx_tests_parser_nobeginendResult result = new Dibix.Sdk.Tests.dbx_tests_parser_nobeginendResult();
+                    dbx_tests_parser_nobeginendResult result = new dbx_tests_parser_nobeginendResult();
                     result.A.ReplaceWith(reader.ReadMany&lt;int&gt;());
                     result.B = reader.ReadSingle&lt;int&gt;();
                     result.C.ReplaceWith(reader.ReadMany&lt;int&gt;());
@@ -587,13 +586,13 @@ UNION ALL
             }
         }
 
-        public static Dibix.Sdk.Tests.dbx_tests_parser_typenamesResult dbx_tests_parser_typenames(this IDatabaseAccessorFactory databaseAccessorFactory)
+        public static dbx_tests_parser_typenamesResult dbx_tests_parser_typenames(this IDatabaseAccessorFactory databaseAccessorFactory)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
                 using (IMultipleResultReader reader = accessor.QueryMultiple(dbx_tests_parser_typenamesCommandText))
                 {
-                    Dibix.Sdk.Tests.dbx_tests_parser_typenamesResult result = new Dibix.Sdk.Tests.dbx_tests_parser_typenamesResult();
+                    dbx_tests_parser_typenamesResult result = new dbx_tests_parser_typenamesResult();
                     result.A.ReplaceWith(reader.ReadMany&lt;string&gt;());
                     result.B.ReplaceWith(reader.ReadMany&lt;int?&gt;());
                     result.C.ReplaceWith(reader.ReadMany&lt;Dibix.Sdk.Tests.CodeGeneration.Direction&gt;());
@@ -628,13 +627,6 @@ UNION ALL
                 return accessor.Execute(dbx_tests_parser_xmlparamCommandText, @params);
             }
         }
-
-        public static readonly MethodInfo dbx_tests_parser_invalidcolumnsforentityMethodInfo = typeof(ParserTest).GetMethod("dbx_tests_parser_invalidcolumnsforentity");
-        public static readonly MethodInfo dbx_tests_parser_nestedifsMethodInfo = typeof(ParserTest).GetMethod("dbx_tests_parser_nestedifs");
-        public static readonly MethodInfo dbx_tests_parser_nobeginendMethodInfo = typeof(ParserTest).GetMethod("dbx_tests_parser_nobeginend");
-        public static readonly MethodInfo dbx_tests_parser_typenamesMethodInfo = typeof(ParserTest).GetMethod("dbx_tests_parser_typenames");
-        public static readonly MethodInfo dbx_tests_parser_unionreturnMethodInfo = typeof(ParserTest).GetMethod("dbx_tests_parser_unionreturn");
-        public static readonly MethodInfo dbx_tests_parser_xmlparamMethodInfo = typeof(ParserTest).GetMethod("dbx_tests_parser_xmlparam");
     }
     #endregion
 
@@ -837,7 +829,6 @@ UNION ALL
 // &lt;/auto-generated&gt;
 //----------------------------------------------------------------------------*/
 using System.CodeDom.Compiler;
-using System.Reflection;
 using Dibix;
 
 namespace This.Is.A.Custom.Namespace
@@ -902,11 +893,6 @@ namespace This.Is.A.Custom.Namespace
                 return accessor.Execute(DeleteProjectCommandText, System.Data.CommandType.StoredProcedure, @params);
             }
         }
-
-        public static readonly MethodInfo dbx_tests_sources_includednestedMethodInfo = typeof(Accessor).GetMethod("dbx_tests_sources_includednested");
-        public static readonly MethodInfo dbx_tests_sources_excludednestedMethodInfo = typeof(Accessor).GetMethod("dbx_tests_sources_excludednested");
-        public static readonly MethodInfo dbx_tests_sources_externalspMethodInfo = typeof(Accessor).GetMethod("dbx_tests_sources_externalsp");
-        public static readonly MethodInfo DeleteProjectMethodInfo = typeof(Accessor).GetMethod("DeleteProject");
     }
     #endregion
 }</value>

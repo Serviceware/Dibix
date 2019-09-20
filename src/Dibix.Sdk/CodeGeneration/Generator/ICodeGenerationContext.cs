@@ -3,8 +3,8 @@
     public interface ICodeGenerationContext
     {
         GeneratorConfiguration Configuration { get; }
-        string Namespace { get; }
-        string ClassName { get; }
+        string RootNamespace { get; }
+        string DefaultClassName { get; }
         IContractResolverFacade ContractResolverFacade { get; }
         IErrorReporter ErrorReporter { get; }
 

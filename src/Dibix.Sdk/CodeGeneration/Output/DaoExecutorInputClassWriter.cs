@@ -18,7 +18,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Overrides
         public override bool HasContent(SourceArtifacts artifacts) => artifacts.Statements.Any(RequiresInput);
 
-        protected override void Write(WriterContext context, HashSet<string> contracts)
+        public override void Write(WriterContext context)
         {
             var namespaceGroups = context.Artifacts
                                          .Statements

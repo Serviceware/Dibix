@@ -22,26 +22,26 @@ namespace Dibix.Sdk.CodeGeneration
         #region Overrides
         public override bool HasContent(SourceArtifacts artifacts) => artifacts.Statements.Any();
 
-        protected override void Write(WriterContext context, HashSet<string> contracts)
+        public override void Write(WriterContext context)
         {
             context.Output.AddUsing(typeof(GeneratedCodeAttribute).Namespace);
 
             foreach (IGrouping<string, SqlStatementInfo> namespaceGroup in context.Artifacts.Statements.GroupBy(x => x.Namespace))
             {
-                CSharpStatementScope scope = namespaceGroup.Key != null ? context.Output.BeginScope(namespaceGroup.Key) : context.Output;
+                CSharpStatementScope scope = namespaceGroup.Key != null ? context.Output.BeginScope(NamespaceUtility.BuildRelativeNamespace(context.Configuration.RootNamespace, namespaceGroup.Key)) : context.Output;
                 IList<SqlStatementInfo> statements = namespaceGroup.ToArray();
 
                 // Class
                 CSharpModifiers classVisibility = context.Configuration.GeneratePublicArtifacts ? CSharpModifiers.Public : CSharpModifiers.Internal;
                 IEnumerable<string> annotations = new[] { context.GeneratedCodeAnnotation }.Where(x => x != null);
-                CSharpClass @class = scope.AddClass(context.Configuration.ClassName, classVisibility | CSharpModifiers.Static, annotations);
+                CSharpClass @class = scope.AddClass(context.Configuration.DefaultClassName, classVisibility | CSharpModifiers.Static, annotations);
 
                 // Command text constants
                 AddCommandTextConstants(@class, context, statements);
 
                 // Execution methods
                 @class.AddSeparator();
-                this.AddExecutionMethods(@class, context, statements, contracts);
+                AddExecutionMethods(@class, context, statements);
             }
         }
         #endregion
@@ -65,11 +65,11 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private void AddExecutionMethods(CSharpClass @class, WriterContext context, IList<SqlStatementInfo> statements, HashSet<string> contracts)
+        private static void AddExecutionMethods(CSharpClass @class, WriterContext context, IList<SqlStatementInfo> statements)
         {
             context.Output.AddUsing("Dibix");
 
-            IDictionary<SqlStatementInfo, string> methodReturnTypeMap = statements.ToDictionary(x => x, x => this.DetermineResultTypeName(context, x, contracts));
+            IDictionary<SqlStatementInfo, string> methodReturnTypeMap = statements.ToDictionary(x => x, DetermineResultTypeName);
 
             for (int i = 0; i < statements.Count; i++)
             {
@@ -85,7 +85,7 @@ namespace Dibix.Sdk.CodeGeneration
                 string resultTypeName = methodReturnTypeMap[statement];
                 CSharpMethod method = @class.AddMethod(name: String.Concat(MethodPrefix, statement.Name)
                                                      , type: resultTypeName
-                                                     , body: this.GenerateMethodBody(statement, context, contracts)
+                                                     , body: GenerateMethodBody(statement, context)
                                                      , isExtension: true
                                                      , modifiers: CSharpModifiers.Public | CSharpModifiers.Static);
                 method.AddParameter("databaseAccessorFactory", "IDatabaseAccessorFactory");
@@ -103,7 +103,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private string DetermineResultTypeName(WriterContext context, SqlStatementInfo query, HashSet<string> contracts)
+        private static string DetermineResultTypeName(SqlStatementInfo query)
         {
             if (query.IsFileApi)
             {
@@ -118,7 +118,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (query.Results.Count == 1) // Query<T>/QuerySingle/etc.
             {
                 ContractInfo resultContract = query.Results[0].Contracts.First();
-                string resultContractName = base.PrefixWithRootNamespace(context, resultContract.Name, contracts);
+                string resultContractName = resultContract.Name.ToString();
 
                 if (query.Results[0].ResultMode == SqlQueryResultMode.Many)
                     resultContractName = MakeEnumerableType(resultContractName);
@@ -127,10 +127,10 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             // GridReader
-            return this.GetComplexTypeName(context, query, contracts);
+            return GetComplexTypeName(query);
         }
 
-        private string GenerateMethodBody(SqlStatementInfo statement, WriterContext context, HashSet<string> contracts)
+        private static string GenerateMethodBody(SqlStatementInfo statement, WriterContext context)
         {
             StringWriter writer = new StringWriter();
 
@@ -151,7 +151,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (statement.Parameters.Any())
                 WriteParameters(writer, statement);
 
-            this.WriteExecutor(context, writer, statement, contracts);
+            WriteExecutor(writer, statement);
 
             writer.PopIndent()
                   .Write("}");
@@ -218,7 +218,7 @@ namespace Dibix.Sdk.CodeGeneration
                   .ResetTemporaryIndent();
         }
 
-        private void WriteExecutor(WriterContext context, StringWriter writer, SqlStatementInfo query, HashSet<string> contracts)
+        private static void WriteExecutor(StringWriter writer, SqlStatementInfo query)
         {
             if (query.IsFileApi)
             {
@@ -234,7 +234,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
             else if (query.Results.Count > 1) // GridReader
             {
-                this.WriteComplexResult(context, writer, query, contracts);
+                WriteComplexResult(writer, query);
             }
         }
 
@@ -299,7 +299,7 @@ namespace Dibix.Sdk.CodeGeneration
             writer.WriteLineRaw(");");
         }
 
-        private void WriteComplexResult(WriterContext context, StringWriter writer, SqlStatementInfo query, HashSet<string> contracts)
+        private static void WriteComplexResult(StringWriter writer, SqlStatementInfo query)
         {
             writer.Write("using (IMultipleResultReader reader = accessor.QueryMultiple(")
                   .WriteRaw(query.Name)
@@ -316,15 +316,15 @@ namespace Dibix.Sdk.CodeGeneration
                   .WriteLine("{")
                   .PushIndent();
 
-            this.WriteComplexResultBody(context, writer, query, contracts);
+            WriteComplexResultBody(writer, query);
 
             writer.PopIndent()
                   .WriteLine("}");
         }
 
-        private void WriteComplexResultBody(WriterContext context, StringWriter writer, SqlStatementInfo query, HashSet<string> contracts)
+        private static void WriteComplexResultBody(StringWriter writer, SqlStatementInfo query)
         {
-            string resultTypeName = this.GetComplexTypeName(context, query, contracts);
+            string resultTypeName = GetComplexTypeName(query);
 
             writer.Write(resultTypeName)
                   .WriteRaw(" result = ");
@@ -428,7 +428,7 @@ namespace Dibix.Sdk.CodeGeneration
             return String.Concat("IEnumerable<", typeName, '>');
         }
 
-        private string GetComplexTypeName(WriterContext context, SqlStatementInfo statement, HashSet<string> contracts)
+        private static string GetComplexTypeName(SqlStatementInfo statement)
         {
             if (statement.MergeGridResult)
                 return statement.Results[0].Contracts[0].Name.ToString();
@@ -438,14 +438,10 @@ namespace Dibix.Sdk.CodeGeneration
             // Explicit existing type specified
             if (statement.ResultType != null)
             {
-                sb.Append(base.PrefixWithRootNamespace(context, statement.ResultType, contracts));
+                sb.Append(statement.ResultType);
             }
             else
             {
-                // Use absolute namespaces to make it more stable
-                sb.Append(context.Configuration.Namespace)
-                  .Append('.');
-
                 // Control generated type name (includes namespace)
                 if (statement.GeneratedResultTypeName != null)
                 {

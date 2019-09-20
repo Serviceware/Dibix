@@ -7,8 +7,14 @@ namespace Dibix.MSBuild
 {
     public sealed class CodeGenerationTask : SdkTask, ITask
     {
+        [Required]
         public string ProjectDirectory { get; set; }
-        public string Namespace { get; set; }
+
+        [Required]
+        public string ProductName { get; set; }
+        public string AreaName { get; set; }
+
+        [Required]
         public string DefaultOutputFilePath { get; set; }
         public string ClientOutputFilePath { get; set; }
         public string[] Sources { get; set; }
@@ -24,7 +30,8 @@ namespace Dibix.MSBuild
         protected override IEnumerable<object> CollectParameters()
         {
             yield return this.ProjectDirectory;
-            yield return this.Namespace;
+            yield return this.ProductName;
+            yield return this.AreaName;
             yield return this.DefaultOutputFilePath;
             yield return this.ClientOutputFilePath;
             yield return this.Sources;

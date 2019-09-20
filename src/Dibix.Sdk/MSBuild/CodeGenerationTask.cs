@@ -10,7 +10,8 @@ namespace Dibix.Sdk.MSBuild
         public static bool Execute
         (
             string projectDirectory
-          , string @namespace
+          , string productName
+          , string areaName
           , string defaultOutputFilePath
           , string clientOutputFilePath
           , ICollection<string> sources
@@ -27,7 +28,8 @@ namespace Dibix.Sdk.MSBuild
             CodeArtifactsGenerationContext context = new CodeArtifactsGenerationContext
             (
                 projectDirectory
-              , @namespace
+              , productName
+              , areaName
               , defaultOutputFilePath
               , clientOutputFilePath
               , sources ?? new string[0]

@@ -8,11 +8,11 @@ namespace Dibix.Sdk.CodeGeneration
     {
         public ICollection<UserDefinedTypeDefinition> Types { get; }
 
-        public UserDefinedTypeProvider(IEnumerable<string> inputs, IErrorReporter errorReporter, bool multipleAreas)
+        public UserDefinedTypeProvider(IEnumerable<string> inputs, IErrorReporter errorReporter, string productName, string areaName)
         {
             this.Types = new Collection<UserDefinedTypeDefinition>();
 
-            SqlUserDefinedTypeParser parser = new SqlUserDefinedTypeParser(errorReporter, multipleAreas);
+            SqlUserDefinedTypeParser parser = new SqlUserDefinedTypeParser(errorReporter, productName, areaName);
             this.Types.AddRange(inputs.Select(x => parser.Parse(x)).Where(x => x != null));
         }
     }

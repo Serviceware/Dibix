@@ -8,7 +8,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Overrides
         protected override void Write(StringWriter writer, OutputConfiguration configuration, SourceArtifacts artifacts)
         {
-            CSharpWriter output = new CSharpWriter(writer, configuration.Namespace, Enumerable.Empty<string>());
+            CSharpWriter output = new CSharpWriter(writer, configuration.RootNamespace, Enumerable.Empty<string>());
 
             WriterContext context = new WriterContext(output.Root, null, configuration, artifacts, Format);
 

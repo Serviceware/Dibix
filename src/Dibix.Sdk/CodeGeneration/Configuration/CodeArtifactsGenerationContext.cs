@@ -6,7 +6,8 @@ namespace Dibix.Sdk.CodeGeneration
     internal sealed class CodeArtifactsGenerationContext
     {
         public string ProjectDirectory { get; }
-        public string Namespace { get; }
+        public string ProductName { get; }
+        public string AreaName { get; }
         public string DefaultOutputFilePath { get; }
         public string ClientOutputFilePath { get; }
         public ICollection<string> Sources { get; }
@@ -23,7 +24,8 @@ namespace Dibix.Sdk.CodeGeneration
         public CodeArtifactsGenerationContext
         (
             string projectDirectory
-          , string @namespace
+          , string productName
+          , string areaName
           , string defaultOutputFilePath
           , string clientOutputFilePath
           , ICollection<string> sources
@@ -36,7 +38,8 @@ namespace Dibix.Sdk.CodeGeneration
         )
         {
             this.ProjectDirectory = projectDirectory;
-            this.Namespace = @namespace;
+            this.ProductName = productName;
+            this.AreaName = areaName;
             this.DefaultOutputFilePath = defaultOutputFilePath;
             this.ClientOutputFilePath = clientOutputFilePath;
             this.Sources = sources;
@@ -47,7 +50,7 @@ namespace Dibix.Sdk.CodeGeneration
             this.ErrorReporter = errorReporter;
             this.DetectedReferences = new Collection<string>();
 
-            ContractDefinitionProvider contractDefinitionProvider = new ContractDefinitionProvider(this.FileSystemProvider, errorReporter, contracts, multipleAreas);
+            ContractDefinitionProvider contractDefinitionProvider = new ContractDefinitionProvider(this.FileSystemProvider, errorReporter, contracts, productName, areaName);
             ControllerDefinitionProvider controllerDefinitionProvider = new ControllerDefinitionProvider(this.FileSystemProvider, errorReporter, endpoints);
 
             if (contractDefinitionProvider.HasSchemaErrors || controllerDefinitionProvider.HasSchemaErrors)

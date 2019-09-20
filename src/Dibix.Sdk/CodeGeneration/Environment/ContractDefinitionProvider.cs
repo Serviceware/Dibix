@@ -10,7 +10,8 @@ namespace Dibix.Sdk.CodeGeneration
     internal sealed class ContractDefinitionProvider : JsonSchemaDefinitionReader, IContractDefinitionProvider
     {
         #region Fields
-        private readonly bool _multipleAreas;
+        private readonly string _productName;
+        private readonly string _areaName;
         private readonly IDictionary<string, ContractDefinition> _definitions;
         #endregion
 
@@ -20,9 +21,10 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public ContractDefinitionProvider(IFileSystemProvider fileSystemProvider, IErrorReporter errorReporter, IEnumerable<string> contracts, bool multipleAreas) : base(fileSystemProvider, errorReporter)
+        public ContractDefinitionProvider(IFileSystemProvider fileSystemProvider, IErrorReporter errorReporter, IEnumerable<string> contracts, string productName, string areaName) : base(fileSystemProvider, errorReporter)
         {
-            this._multipleAreas = multipleAreas;
+            this._productName = productName;
+            this._areaName = areaName;
             this._definitions = new Dictionary<string, ContractDefinition>();
             this.Contracts = new Collection<ContractDefinition>();
             base.Collect(contracts);
@@ -47,7 +49,7 @@ namespace Dibix.Sdk.CodeGeneration
                 string virtualPathRoot = virtualPath.Substring(virtualPathRootIndex);
                 namespaceKey = virtualPathRoot.Replace(Path.DirectorySeparatorChar, '.');
             }
-            string @namespace = NamespaceUtility.BuildNamespace(namespaceKey, this._multipleAreas, LayerName.DomainModel);
+            string @namespace = NamespaceUtility.BuildFullNamespace(this._productName, this._areaName, LayerName.DomainModel, namespaceKey);
             this.ReadContracts(namespaceKey, @namespace, json);
         }
         #endregion

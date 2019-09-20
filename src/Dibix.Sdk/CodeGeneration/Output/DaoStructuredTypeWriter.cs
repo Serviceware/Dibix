@@ -29,7 +29,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 IGrouping<string, UserDefinedTypeDefinition> group = namespaceGroups[i];
                 IList<UserDefinedTypeDefinition> userDefinedTypes = group.ToArray();
-                CSharpStatementScope scope = context.Output.BeginScope(group.Key);
+                CSharpStatementScope scope = context.Output.BeginScope(NamespaceUtility.BuildRelativeNamespace(context.Configuration.RootNamespace, group.Key));
                 for (int j = 0; j < userDefinedTypes.Count; j++)
                 {
                     UserDefinedTypeDefinition userDefinedType = userDefinedTypes[j];

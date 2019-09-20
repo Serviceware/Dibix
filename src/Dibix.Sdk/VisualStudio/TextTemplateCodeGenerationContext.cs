@@ -14,8 +14,8 @@ namespace Dibix.Sdk.VisualStudio
 
         #region Properties
         public GeneratorConfiguration Configuration { get; }
-        public string Namespace { get; }
-        public string ClassName { get; }
+        public string RootNamespace { get; }
+        public string DefaultClassName { get; }
         public IContractResolverFacade ContractResolverFacade { get; }
         public IErrorReporter ErrorReporter { get; }
         #endregion
@@ -26,8 +26,8 @@ namespace Dibix.Sdk.VisualStudio
             this.Configuration = configuration;
             this.ContractResolverFacade = contractResolverFacade;
             this.ErrorReporter = errorReporter;
-            this.Namespace = GetProjectDefaultNamespace(textTemplatingEngineHost, serviceProvider);
-            this.ClassName = Path.GetFileNameWithoutExtension(textTemplatingEngineHost.TemplateFile);
+            this.RootNamespace = GetProjectDefaultNamespace(textTemplatingEngineHost, serviceProvider);
+            this.DefaultClassName = Path.GetFileNameWithoutExtension(textTemplatingEngineHost.TemplateFile);
         }
         #endregion
 

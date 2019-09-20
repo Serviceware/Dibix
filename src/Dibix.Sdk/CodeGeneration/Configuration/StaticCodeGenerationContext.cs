@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -13,15 +12,16 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly IUserDefinedTypeProvider _userDefinedTypeProvider;
 
         public GeneratorConfiguration Configuration { get; }
-        public string Namespace { get; } = "Dibix";
-        public string ClassName => "SqlQueryAccessor";
+        public string RootNamespace { get; }
+        public string DefaultClassName => "SqlQueryAccessor";
         public IContractResolverFacade ContractResolverFacade { get; }
         public IErrorReporter ErrorReporter { get; }
 
         public StaticCodeGenerationContext
         (
             string projectDirectory
-          , string @namespace
+          , string productName
+          , string areaName
           , ICollection<string> sources
           , IEnumerable<ContractDefinition> contracts
           , IEnumerable<ControllerDefinition> endpoints
@@ -36,17 +36,18 @@ namespace Dibix.Sdk.CodeGeneration
             this._contracts = contracts;
             this._controllers = endpoints;
             this._codeArtifactKind = codeArtifactKind;
-            if (!String.IsNullOrEmpty(@namespace))
-                this.Namespace = @namespace;
+            this.RootNamespace = NamespaceUtility.BuildRootNamespace(productName, areaName);
 
-            this._userDefinedTypeProvider = new UserDefinedTypeProvider(sources, errorReporter, multipleAreas);
+            this._userDefinedTypeProvider = new UserDefinedTypeProvider(sources, errorReporter, productName, areaName);
 
             this.Configuration = new GeneratorConfiguration();
             this.Configuration.Output.GeneratePublicArtifacts = true;
+            this.Configuration.Output.ProductName = productName;
+            this.Configuration.Output.AreaName = areaName;
             if (codeArtifactKind == CodeArtifactKind.Client)
                 this.Configuration.Output.Writer = typeof(ClientContractCSWriter);
 
-            PhysicalSourceConfiguration source = new PhysicalSourceConfiguration(fileSystemProvider, null, multipleAreas, this.Configuration.Output.GeneratePublicArtifacts);
+            PhysicalSourceConfiguration source = new PhysicalSourceConfiguration(fileSystemProvider, null, this.Configuration.Output.ProductName, this.Configuration.Output.AreaName, this.Configuration.Output.GeneratePublicArtifacts);
             if (!embedStatements)
                 source.Formatter = typeof(ExecStoredProcedureSqlStatementFormatter);
 

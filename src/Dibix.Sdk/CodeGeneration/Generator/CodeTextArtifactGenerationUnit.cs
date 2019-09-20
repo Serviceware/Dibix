@@ -11,7 +11,8 @@ namespace Dibix.Sdk.CodeGeneration
             StaticCodeGenerationContext generationContext = new StaticCodeGenerationContext
             (
                 context.ProjectDirectory
-              , context.Namespace
+              , context.ProductName
+              , context.AreaName
               , context.Sources
               , context.Contracts
               , context.Controllers

@@ -22,13 +22,13 @@
 
         public IOutputConfigurationExpression Namespace(string @namespace)
         {
-            this._outputConfiguration.Namespace = @namespace;
+            this._outputConfiguration.RootNamespace = @namespace;
             return this;
         }
 
         public IOutputConfigurationExpression ClassName(string className)
         {
-            this._outputConfiguration.ClassName = className;
+            this._outputConfiguration.DefaultClassName = className;
             return this;
         }
         #endregion

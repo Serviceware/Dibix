@@ -26,7 +26,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 IGrouping<string, ContractDefinition> group = namespaceGroups[i];
                 IList<ContractDefinition> contracts = group.ToArray();
-                CSharpStatementScope scope = context.Output.BeginScope(group.Key);
+                CSharpStatementScope scope = context.Output.BeginScope(NamespaceUtility.BuildRelativeNamespace(context.Configuration.RootNamespace, group.Key));
                 for (int j = 0; j < contracts.Count; j++)
                 {
                     ContractDefinition contract = contracts[j];

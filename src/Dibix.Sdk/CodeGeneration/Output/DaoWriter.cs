@@ -34,7 +34,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             // Prepare writer
             IEnumerable<string> globalAnnotations = writers.SelectMany(x => x.GetGlobalAnnotations(configuration)).Distinct().OrderBy(x => x.Length);
-            CSharpWriter output = new CSharpWriter(writer, configuration.Namespace, globalAnnotations);
+            CSharpWriter output = new CSharpWriter(writer, configuration.RootNamespace, globalAnnotations);
 
             WriterContext context = new WriterContext(output.Root, generatedCodeAnnotation, configuration, artifacts, Format);
 

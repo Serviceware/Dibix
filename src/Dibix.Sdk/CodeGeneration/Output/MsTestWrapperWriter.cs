@@ -29,8 +29,8 @@ namespace %namespace%
 
             string methods = String.Join(String.Format("{0}{0}", Environment.NewLine), statements.Select(x => BuildTestMethod(x.Name, Format(x.Content, configuration.Formatting), configuration.Formatting)));
 
-            return template.Replace("%namespace%", configuration.Namespace)
-                           .Replace("%className%", configuration.ClassName)
+            return template.Replace("%namespace%", configuration.RootNamespace)
+                           .Replace("%className%", configuration.DefaultClassName)
                            .Replace("%methods%", methods);
         }
 

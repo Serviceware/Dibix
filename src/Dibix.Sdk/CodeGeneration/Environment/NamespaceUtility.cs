@@ -1,51 +1,60 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text;
 
 namespace Dibix.Sdk.CodeGeneration
 {
     internal static class NamespaceUtility
     {
-        public static string GetAreaName(string @namespace)
+        public static string EnsureAreaName(string areaName)
         {
-            string[] parts = @namespace.Split('.');
-            if (parts.Length < 2)
-                throw new InvalidOperationException("Could not detect area name of project. The project namespace should have the following format: <PRODUCTNAME>.<AREANAME>");
+            if (String.IsNullOrEmpty(areaName))
+                throw new InvalidOperationException("The project does not support areas since no 'AreaName' property was specified");
 
-            string areaName = parts[1];
             return areaName;
         }
 
-        public static string BuildNamespace(string @namespace, bool multipleAreas, string layerName)
+        public static string BuildRootNamespace(string productName, string areaName)
         {
-            if (String.IsNullOrEmpty(@namespace))
-                return layerName;
+            StringBuilder sb = new StringBuilder(productName);
+            if (!String.IsNullOrEmpty(areaName))
+                sb.Append('.')
+                  .Append(areaName);
 
-            if (!String.IsNullOrEmpty(layerName))
+            return sb.ToString();
+        }
+
+        public static string BuildFullNamespace(string productName, string areaName, string layerName, string relativeNamespace)
+        {
+            Guard.IsNotNullOrEmpty(productName, nameof(productName));
+            Guard.IsNotNullOrEmpty(layerName, nameof(layerName));
+
+            ICollection<string> segments = new Collection<string>();
+            segments.Add(productName);
+
+            if (String.IsNullOrEmpty(areaName) && !String.IsNullOrEmpty(relativeNamespace))
             {
-                StringBuilder sb = new StringBuilder();
-                if (multipleAreas)
-                {
-                    string[] parts = @namespace.Split(new[] { '.' }, 2);
-
-                    sb.Append(parts[0])
-                      .Append('.')
-                      .Append(layerName);
-
-                    if (parts.Length > 1)
-                        sb.Append('.')
-                          .Append(parts[1]);
-                }
-                else
-                {
-                    sb.Append(layerName)
-                      .Append('.')
-                      .Append(@namespace);
-                }
-
-                @namespace = sb.ToString();
+                string[] parts = relativeNamespace.Split(new[] { '.' }, 2);
+                areaName = parts[0];
+                relativeNamespace = parts.Length > 1 ? parts[1] : null;
             }
 
+            if (!String.IsNullOrEmpty(areaName))
+                segments.Add(areaName);
+
+            segments.Add(layerName);
+
+            if (!String.IsNullOrEmpty(relativeNamespace))
+                segments.Add(relativeNamespace);
+
+            string @namespace = String.Join(".", segments);
             return @namespace;
+        }
+
+        public static string BuildRelativeNamespace(string rootNamespace, string itemNamespace)
+        {
+            return itemNamespace.Substring(rootNamespace.Length + 1);
         }
     }
 }

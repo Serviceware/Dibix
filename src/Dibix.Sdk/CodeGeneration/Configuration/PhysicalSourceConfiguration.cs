@@ -9,7 +9,8 @@ namespace Dibix.Sdk.CodeGeneration
     {
         #region Fields
         private readonly string _projectName;
-        private readonly bool _multipleAreas;
+        private readonly string _productName;
+        private readonly string _areaName;
         private readonly bool _generatePublicArtifacts;
         private readonly IFileSystemProvider _fileSystemProvider;
         private readonly ICollection<VirtualPath> _include;
@@ -22,11 +23,12 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public PhysicalSourceConfiguration(IFileSystemProvider fileSystemProvider, string projectName, bool multipleAreas, bool generatePublicArtifacts)
+        public PhysicalSourceConfiguration(IFileSystemProvider fileSystemProvider, string projectName, string productName, string areaName, bool generatePublicArtifacts)
         {
             this._fileSystemProvider = fileSystemProvider;
             this._projectName = projectName;
-            this._multipleAreas = multipleAreas;
+            this._productName = productName;
+            this._areaName = areaName;
             this._generatePublicArtifacts = generatePublicArtifacts;
             this._include = new HashSet<VirtualPath>();
             this._exclude = new HashSet<VirtualPath>();
@@ -65,10 +67,10 @@ namespace Dibix.Sdk.CodeGeneration
             bool result = parser.Read(SqlParserSourceKind.Stream, File.OpenRead(filePath), statement, formatter, contractResolverFacade, errorReporter);
 
             if (this._generatePublicArtifacts)
-                statement.Namespace = NamespaceUtility.BuildNamespace(statement.Namespace, this._multipleAreas, LayerName.Data);
+                statement.Namespace = NamespaceUtility.BuildFullNamespace(this._productName, this._areaName, LayerName.Data, statement.Namespace);
 
             if (!String.IsNullOrEmpty(statement.GeneratedResultTypeName))
-                statement.GeneratedResultTypeName = NamespaceUtility.BuildNamespace(statement.GeneratedResultTypeName, this._multipleAreas, LayerName.DomainModel);
+                statement.GeneratedResultTypeName = NamespaceUtility.BuildFullNamespace(this._productName, this._areaName, LayerName.DomainModel, statement.GeneratedResultTypeName);
 
             return result ? statement : null;
         }
