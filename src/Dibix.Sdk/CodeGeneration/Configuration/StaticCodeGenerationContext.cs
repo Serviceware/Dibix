@@ -7,9 +7,9 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class StaticCodeGenerationContext : ICodeGenerationContext
     {
+        private readonly IEnumerable<ContractDefinition> _contracts;
+        private readonly IEnumerable<ControllerDefinition> _controllers;
         private readonly CodeArtifactKind _codeArtifactKind;
-        private readonly IContractDefinitionProvider _contractDefinitionProvider;
-        private readonly IControllerDefinitionProvider _controllerDefinitionProvider;
         private readonly IUserDefinedTypeProvider _userDefinedTypeProvider;
 
         public GeneratorConfiguration Configuration { get; }
@@ -23,33 +23,28 @@ namespace Dibix.Sdk.CodeGeneration
             string projectDirectory
           , string @namespace
           , ICollection<string> sources
-          , IEnumerable<string> contracts
-          , IEnumerable<string> endpoints
+          , IEnumerable<ContractDefinition> contracts
+          , IEnumerable<ControllerDefinition> endpoints
           , IEnumerable<string> references
           , CodeArtifactKind codeArtifactKind
           , bool multipleAreas
           , bool embedStatements
+          , IFileSystemProvider fileSystemProvider
+          , IContractDefinitionProvider contractDefinitionProvider
           , IErrorReporter errorReporter)
         {
+            this._contracts = contracts;
+            this._controllers = endpoints;
             this._codeArtifactKind = codeArtifactKind;
             if (!String.IsNullOrEmpty(@namespace))
                 this.Namespace = @namespace;
 
-            IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(projectDirectory);
-            this._contractDefinitionProvider = new ContractDefinitionProvider(fileSystemProvider, errorReporter, contracts, multipleAreas);
-            this._controllerDefinitionProvider = new ControllerDefinitionProvider(fileSystemProvider, errorReporter, endpoints);
             this._userDefinedTypeProvider = new UserDefinedTypeProvider(sources, errorReporter, multipleAreas);
 
             this.Configuration = new GeneratorConfiguration();
             this.Configuration.Output.GeneratePublicArtifacts = true;
             if (codeArtifactKind == CodeArtifactKind.Client)
                 this.Configuration.Output.Writer = typeof(ClientContractCSWriter);
-
-            if (this._contractDefinitionProvider.HasSchemaErrors || this._controllerDefinitionProvider.HasSchemaErrors)
-            {
-                errorReporter.ReportErrors();
-                this.Configuration.IsInvalid = true;
-            }
 
             PhysicalSourceConfiguration source = new PhysicalSourceConfiguration(fileSystemProvider, null, multipleAreas, this.Configuration.Output.GeneratePublicArtifacts);
             if (!embedStatements)
@@ -62,18 +57,18 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             this.ContractResolverFacade = new ContractResolverFacade(new DefaultAssemblyLocator(projectDirectory, references));
-            this.ContractResolverFacade.RegisterContractResolver(new ContractDefinitionResolver(this._contractDefinitionProvider), 0);
+            this.ContractResolverFacade.RegisterContractResolver(new ContractDefinitionResolver(contractDefinitionProvider), 0);
             this.ErrorReporter = errorReporter;
         }
 
         public void CollectAdditionalArtifacts(SourceArtifacts artifacts)
         {
-            artifacts.Contracts.AddRange(this._contractDefinitionProvider.Contracts);
+            artifacts.Contracts.AddRange(this._contracts);
 
             if (this._codeArtifactKind == CodeArtifactKind.Server)
             {
                 artifacts.UserDefinedTypes.AddRange(this._userDefinedTypeProvider.Types);
-                artifacts.Controllers.AddRange(this._controllerDefinitionProvider.Controllers);
+                artifacts.Controllers.AddRange(this._controllers);
             }
         }
 

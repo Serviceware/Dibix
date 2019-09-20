@@ -4,7 +4,6 @@
     {
         public InputConfiguration Input { get; }
         public OutputConfiguration Output { get; }
-        public bool IsInvalid { get; internal set; }
 
         public GeneratorConfiguration()
         {

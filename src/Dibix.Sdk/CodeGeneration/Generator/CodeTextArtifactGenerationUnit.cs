@@ -14,11 +14,13 @@ namespace Dibix.Sdk.CodeGeneration
               , context.Namespace
               , context.Sources
               , context.Contracts
-              , context.Endpoints
+              , context.Controllers
               , context.References
               , this.CodeArtifactKind
               , context.MultipleAreas
               , context.EmbedStatements
+              , context.FileSystemProvider
+              , context.ContractDefinitionProvider
               , context.ErrorReporter
             );
 

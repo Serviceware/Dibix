@@ -8,6 +8,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             typeof(ServerCodeArtifactGenerationUnit)
           , typeof(ClientCodeArtifactGenerationUnit)
+          , typeof(OpenApiArtifactsGenerationUnit)
         };
 
         public bool Generate(CodeArtifactsGenerationContext context)

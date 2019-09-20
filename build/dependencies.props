@@ -10,6 +10,7 @@
     <!-- Sdk -->
     <DacFxVersion>150.4200.1</DacFxVersion>
     <NewtonsoftJsonSchemaVersion>3.0.10</NewtonsoftJsonSchemaVersion>
+    <OpenApiVersion>1.1.4</OpenApiVersion>
 
     <!-- VS integration -->
     <VisualStudioShellVersion>15.9.28307</VisualStudioShellVersion>

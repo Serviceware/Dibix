@@ -52,7 +52,6 @@ namespace Dibix.Sdk.CodeGeneration
                     string errorMessage = $"JSON configuration error: {error.Message}";
                     this._errorReporter.RegisterError(error.Path, error.LineNumber, error.LinePosition, error.ErrorType.ToString(), errorMessage);
                 }
-                configuration.IsInvalid = true;
                 this._errorReporter.ReportErrors();
                 return;
             }

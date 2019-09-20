@@ -36,6 +36,12 @@ namespace Dibix.MSBuild
           , "Microsoft.SqlServer.TransactSql.ScriptDom"
           , "Microsoft.SqlServer.Dac.Extensions"
         };
+        private static readonly string[] OtherAssemblies =
+        {
+            "Newtonsoft.Json.Schema"
+          , "Newtonsoft.Json" // In some occasions, loading Newtonsoft.Json.Schema does include loading the dependent assembly Newtonsoft.Json
+          , "Microsoft.OpenApi"
+        };
 
         public string SdkPath { get; set; }
         public string SSDTDirectory { get; set; }
@@ -78,13 +84,8 @@ namespace Dibix.MSBuild
             if (!this.IsIDEBuild && SSDTAssemblies.Contains(name))
                 directory = this.SSDTDirectory;
 
-            // Newtonsoft.Json.Schema is unknown to both devenv and MSBuild
-            if (name == "Newtonsoft.Json.Schema")
-                directory = CurrentDirectory;
-
-            // In some occasions, the previous loading of Newtonsoft.Json.Schema,
-            // does include loading the dependent assembly Newtonsoft.Json
-            if (name == "Newtonsoft.Json")
+            // These are completely unknown to both devenv and MSBuild
+            if (OtherAssemblies.Contains(name))
                 directory = CurrentDirectory;
 
             if (directory == null)

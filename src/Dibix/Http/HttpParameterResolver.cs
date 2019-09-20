@@ -368,7 +368,7 @@ namespace Dibix.Http
         private static void CollectExpectedParameters(IDictionary<string, Type> target, IEnumerable<HttpParameterInfo> parameters, Type bodyContract)
         {
             if (bodyContract != null)
-                target.Add(HttpParameterResolverUtility.BodyKey, bodyContract);
+                target.Add(HttpParameterName.Body, bodyContract);
 
             foreach (HttpParameterInfo parameter in parameters.Where(x => x.IsUserParameter))
             {

@@ -20,7 +20,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             const string errorContent = "\"Please fix the errors first\"";
             string output;
-            if (this._context.Configuration.IsInvalid)
+            if (this._context.ErrorReporter.HasErrors)
             {
                 output = errorContent;
                 return output;
