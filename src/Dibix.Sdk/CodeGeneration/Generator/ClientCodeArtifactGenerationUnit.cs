@@ -6,6 +6,6 @@ namespace Dibix.Sdk.CodeGeneration
     {
         protected override CodeArtifactKind CodeArtifactKind => CodeArtifactKind.Client;
         public override bool ShouldGenerate(CodeArtifactsGenerationContext context) => !String.IsNullOrEmpty(context.ClientOutputFilePath);
-        protected override string GetOutputFilePath(CodeArtifactsGenerationContext context) => context.DefaultOutputFilePath;
+        protected override string GetOutputFilePath(CodeArtifactsGenerationContext context) => context.ClientOutputFilePath;
     }
 }
