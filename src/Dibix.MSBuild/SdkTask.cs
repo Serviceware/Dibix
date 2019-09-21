@@ -93,7 +93,11 @@ namespace Dibix.MSBuild
 
             string path = Path.Combine(directory, $"{name}.dll");
 
+            if (!File.Exists(path))
+                return null;
+
             assemblyName.CodeBase = path;
+
             return Assembly.Load(assemblyName);
         }
     }
