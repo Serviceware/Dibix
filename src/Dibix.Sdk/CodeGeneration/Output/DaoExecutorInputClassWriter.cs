@@ -29,7 +29,7 @@ namespace Dibix.Sdk.CodeGeneration
             for (int i = 0; i < namespaceGroups.Length; i++)
             {
                 IGrouping<string, SqlStatementInfo> namespaceGroup = namespaceGroups[i];
-                CSharpStatementScope scope = namespaceGroup.Key != null ? context.Output.BeginScope(namespaceGroup.Key) : context.Output;
+                CSharpStatementScope scope = namespaceGroup.Key != null ? context.Output.BeginScope(NamespaceUtility.BuildRelativeNamespace(context.Configuration.RootNamespace, namespaceGroup.Key)) : context.Output;
                 IList<SqlStatementInfo> statements = namespaceGroup.ToArray();
                 for (int j = 0; j < statements.Count; j++)
                 {
