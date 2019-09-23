@@ -67,10 +67,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                 }
 
                 if (filter != null)
-                    this.Filter = NormalizeFilterCondition(filter);
+                    this.Filter = filter.Normalize();
             }
-
-            private static string NormalizeFilterCondition(BooleanExpression filter) => ScriptDomFacade.Generate(filter);
         }
 
         private sealed class IndexHitComparer : IEqualityComparer<IndexHit>

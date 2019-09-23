@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
@@ -15,13 +13,6 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
     public sealed class AmbiguousCheckConstraintSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
     {
-        private readonly ICollection<CheckConstraintDefinition> _constraints;
-
-        public AmbiguousCheckConstraintSqlCodeAnalysisRuleVisitor()
-        {
-            this._constraints = new Collection<CheckConstraintDefinition>();
-        }
-
         public override void Visit(CreateTableStatement node)
         {
             if (node.IsTemporaryTable())
@@ -30,7 +21,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             var query = base.Model
                             .GetConstraints(node.SchemaObjectName)
                             .Where(x => x.Kind == ConstraintKind.Check)
-                            .Select(x => new { Definition = x, Expression = ((CheckConstraintDefinition)x.Definition).CheckCondition.Dump() })
+                            .Select(x => new { Definition = x, Expression = ((CheckConstraintDefinition)x.Definition).CheckCondition.Normalize() })
                             .GroupBy(x => x.Expression)
                             .Where(x => x.Count() > 1);
 

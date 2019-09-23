@@ -17,6 +17,13 @@ namespace Dibix.Sdk.Sql
             return sb.ToString();
         }
 
+        public static string Normalize(this TSqlFragment fragment)
+        {
+            IdentifierVisitor visitor = new IdentifierVisitor();
+            fragment.Accept(visitor);
+            return ScriptDomFacade.Generate(fragment);
+        }
+
         public static IEnumerable<TSqlParserToken> AsEnumerable(this TSqlFragment fragment) => AsEnumerable(fragment, fragment.FirstTokenIndex);
         public static IEnumerable<TSqlParserToken> AsEnumerable(this TSqlFragment fragment, int startIndex)
         {
@@ -58,6 +65,15 @@ namespace Dibix.Sdk.Sql
         }
 
         public static bool IsTemporaryTable(this CreateTableStatement node) => node.SchemaObjectName.BaseIdentifier.Value[0] == '#';
+
+        private class IdentifierVisitor : TSqlFragmentVisitor
+        {
+            public override void Visit(Identifier node)
+            {
+                if (node.QuoteType == QuoteType.NotQuoted)
+                    node.QuoteType = QuoteType.SquareBracket;
+            }
+        }
 
         private class IfStatementVisitor : TSqlFragmentVisitor
         {
