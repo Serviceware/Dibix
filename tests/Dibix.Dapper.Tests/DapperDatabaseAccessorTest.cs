@@ -11,7 +11,7 @@ namespace Dibix.Dapper.Tests
         [Fact]
         public void QuerySingle_WithMultipleRows_ThrowsException()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
+            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
             {
                 const string commandText = "SELECT 1 UNION ALL SELECT 2";
                 InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => accessor.QuerySingle<byte>(commandText));
@@ -22,7 +22,7 @@ namespace Dibix.Dapper.Tests
         [Fact]
         public void QueryMany_WithXElementParameter_Success()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
+            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
             {
                 const string commandText = "SELECT [x].[v].value('@value', 'INT') FROM @xml.nodes(N'root/item') AS [x]([v])";
                 XElement xml = XElement.Parse("<root><item value=\"1\" /><item value=\"2\" /></root>");
@@ -37,7 +37,7 @@ namespace Dibix.Dapper.Tests
         [Fact]
         public void QuerySingle_MissingColumnName_ThrowsException()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
+            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
             {
                 const string commandText = @"SELECT 1";
                 InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => accessor.QuerySingle<Entity>(commandText));
@@ -48,7 +48,7 @@ namespace Dibix.Dapper.Tests
         [Fact]
         public void QuerySingle_InvalidColumnName_ThrowsException()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
+            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
             {
                 const string commandText = @"SELECT 1 AS [idx]";
                 InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => accessor.QuerySingle<Entity>(commandText));
@@ -59,7 +59,7 @@ namespace Dibix.Dapper.Tests
         [Fact]
         public void QuerySingle_Success()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
+            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
             {
                 const string commandText = @"SELECT 1 AS [id]";
                 Entity result = accessor.QuerySingle<Entity>(commandText);
@@ -71,7 +71,7 @@ namespace Dibix.Dapper.Tests
         [Fact]
         public void QuerySingle_WithPrimitiveParameter_UsingLambdaSyntax_Success()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
+            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
             {
                 const string commandText = @"SELECT @agentid AS [id], N'beef' AS [name]";
                 IParametersVisitor parameters = accessor.Parameters().SetInt32("agentid", 6).Build();
@@ -85,7 +85,7 @@ namespace Dibix.Dapper.Tests
         [Fact]
         public void QuerySingle_WithPrimitiveParameter_UsingLambdaAndTemplateSyntax_Success()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
+            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
             {
                 const string commandText = @"SELECT @agentid AS [id], N'beef' AS [name]";
                 IParametersVisitor parameters = accessor.Parameters().SetFromTemplate(new { agentid = 6 }).Build();
@@ -99,7 +99,7 @@ namespace Dibix.Dapper.Tests
         [Fact]
         public void QuerySingle_WithPrimitiveParameter_UsingVariableSyntax_Success()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
+            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
             {
                 const string commandText = @"SELECT @agentid AS [id], N'beef' AS [name]";
                 IParametersVisitor @params = accessor.Parameters()
@@ -115,7 +115,7 @@ namespace Dibix.Dapper.Tests
         [Fact]
         public void QuerySingle_WithPrimitiveParameter_UsingVariableAndTemplateSyntax_Success()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
+            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
             {
                 const string commandText = @"SELECT @agentid AS [id], N'beef' AS [name]";
                 IParametersVisitor @params = accessor.Parameters()
@@ -131,7 +131,7 @@ namespace Dibix.Dapper.Tests
         [Fact]
         public void QueryMany_WithTableValueParameter_Success()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
+            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
             {
                 const string commandText = @"SELECT [intvalue] AS [id], [stringvalue] AS [name]
 FROM @translations";
@@ -156,7 +156,7 @@ FROM @translations";
         [Fact]
         public void QueryMultiple_Success()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
+            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
             {
                 const string commandText = @"SELECT @agentid AS [id], N'beef' AS [name], [decimalvalue] AS [price]
 FROM @values
@@ -187,7 +187,7 @@ FROM @ids";
         [Fact]
         public void QuerySingle_WithMultiMap_Success()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
+            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
             {
                 const string commandText = @"SELECT [intvalue] AS [id], 0 AS [id], [stringvalue] AS [name], 0 AS [id], [decimalvalue] AS [price]
 FROM @values";
@@ -220,7 +220,7 @@ FROM @values";
         [Fact]
         public void QueryMultiple_WithMultiMap_Success()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
+            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
             {
                 const string commandText = @"SELECT [intvalue] AS [id], 0 AS [id], [stringvalue] AS [name], 0 AS [id], [decimalvalue] AS [price]
 FROM @values";
@@ -256,7 +256,7 @@ FROM @values";
         [Fact]
         public void CustomSqlMetadata_MaxLength_TextIsTrimmed()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
+            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
             {
                 const string commandText = @"SELECT [stringvalue]
 FROM @values";
@@ -270,7 +270,7 @@ FROM @values";
         [Fact]
         public void CustomSqlMetadata_Scale_DecimalValueIsRounded()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
+            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
             {
                 const string commandText = @"SELECT [decimalvalue]
 FROM @values";

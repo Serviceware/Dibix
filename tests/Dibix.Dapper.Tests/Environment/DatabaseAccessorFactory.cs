@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Dibix.Dapper.Tests
 {
-    internal static class DatabaseAccessor
+    internal static class DatabaseAccessorFactory
     {
         public static IDatabaseAccessor Create()
         {

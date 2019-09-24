@@ -10,7 +10,7 @@ namespace Dibix.Dapper.Tests
         [Fact]
         public void QuerySingle_WithAutoMultiMap_T2_Success()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
+            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
             {
                 const string commandText = @"SELECT N'desks' AS [identifier], N'agentdesk' AS [identifier]
 UNION ALL
@@ -26,7 +26,7 @@ SELECT N'desks' AS [identifier], N'workingdesk' AS [identifier]";
         [Fact]
         public void QuerySingle_WithAutoMultiMap_T3_Success()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessor.Create())
+            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
             {
                 const string commandText = @"SELECT [name] = N'feature1', [name] = N'black', [name] = N'dependentfeaturex'
 UNION ALL

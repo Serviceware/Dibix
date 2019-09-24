@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace Dibix
 {
-    internal sealed class MultiMapper
+    internal sealed class MultiMapper : IPostProcessor
     {
         #region Fields
         private readonly HashCollection<object> _entityCache = new HashCollection<object>(new EntityComparer());
@@ -17,7 +16,7 @@ namespace Dibix
             // LEFT JOIN => related entities can be null
             object[] relevantArgs = args.Where(x => x != null).ToArray();
 
-            ICollection<EntityProperty> matchedProperties = new HashSet<EntityProperty>();
+            PropertyMatcher propertyMatcher = new PropertyMatcher();
             for (int i = relevantArgs.Length - 1; i > 0; i--)
             {
                 object item = this.GetCachedEntity(relevantArgs[i]);
@@ -26,7 +25,7 @@ namespace Dibix
                     object previousItem = this.GetCachedEntity(relevantArgs[j]);
                     EntityDescriptor descriptor = EntityDescriptorCache.GetDescriptor(previousItem.GetType());
 
-                    if (!TryMatchProperty(descriptor, item.GetType(), matchedProperties, out EntityProperty property))
+                    if (!propertyMatcher.TryMatchProperty(descriptor, item.GetType(), out EntityProperty property))
                         continue;
 
                     if (property.IsCollection && this.IsInCollection(previousItem, property.Name, item))
@@ -42,34 +41,14 @@ namespace Dibix
 
             return ProjectResult<TReturn>(relevantArgs);
         }
+        #endregion
 
+        #region IPostProcessor Members
         public IEnumerable<TReturn> PostProcess<TReturn>(IEnumerable<TReturn> source)
         {
             // Distinct because the root might be duplicated because of 1->n related rows
             IEnumerable<TReturn> results = source.Distinct(new EntityComparer<TReturn>());
-            EntityDescriptor entityDescriptor = EntityDescriptorCache.GetDescriptor(typeof(TReturn));
-            if (entityDescriptor.Discriminator == null)
-                return results;
-
-            ICollection<TReturn> resolved = results.ToArray();
-            ICollection<EntityProperty> matchedProperties = new HashSet<EntityProperty>();
-            if (!TryMatchProperty(entityDescriptor, typeof(TReturn), matchedProperties, out EntityProperty property))
-                return resolved;
-
-            // Map recursive relational model to a hierarchical tree model based on a 'ParentId' like discriminator
-            EntityKey key = entityDescriptor.Keys.Single();
-            IDictionary<object, TReturn> entityMap = resolved.ToDictionary(x => key.GetValue(x));
-            ILookup<object, TReturn> childEntityMap = resolved.ToLookup(x => entityDescriptor.Discriminator.GetValue(x), x => entityMap[key.GetValue(x)]);
-
-            foreach (TReturn entity in entityMap.Values)
-            {
-                foreach (TReturn childEntity in childEntityMap[key.GetValue(entity)])
-                {
-                    property.SetValue(entity, childEntity);
-                }
-            }
-
-            return childEntityMap[null]; // Return the root collection
+            return results;
         }
         #endregion
 
@@ -82,19 +61,6 @@ namespace Dibix
                 this._entityCache.Add(item);
             }
             return existingValue;
-        }
-
-        private static bool TryMatchProperty(EntityDescriptor descriptor, Type sourceType, ICollection<EntityProperty> usedProperties, out EntityProperty property)
-        {
-            property = descriptor.ComplexProperties
-                                 .Reverse()
-                                 .FirstOrDefault(x => x.EntityType == sourceType && !usedProperties.Contains(x) /* Skip properties that have already been matched */);
-                                                                                                                /* i.E.: multiple properties of the same type */
-            if (property == null)
-                return false;
-
-            usedProperties.Add(property);
-            return true;
         }
 
         private bool IsInCollection(object instance, string property, object item)
@@ -119,10 +85,10 @@ namespace Dibix
         {
             EntityDescriptor descriptor = EntityDescriptorCache.GetDescriptor(typeof(TReturn));
             TReturn result = new TReturn();
-            ICollection<EntityProperty> matchedProperties = new HashSet<EntityProperty>();
+            PropertyMatcher propertyMatcher = new PropertyMatcher();
             foreach (object arg in args.Reverse())
             {
-                if (!TryMatchProperty(descriptor, arg.GetType(), matchedProperties, out EntityProperty property))
+                if (!propertyMatcher.TryMatchProperty(descriptor, arg.GetType(), out EntityProperty property))
                     continue;
 
                 property.SetValue(result, arg);

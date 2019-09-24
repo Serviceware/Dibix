@@ -2,16 +2,19 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
+using System.Data.Common;
 using System.Linq;
-using System.Reflection;
+using Moq;
+using Moq.Protected;
 using Xunit;
 
 namespace Dibix.Tests
 {
-    public class MultiMapperTest
+    public class MappingTest
     {
         [Fact]
-        public void AutoMap_WithoutProjection()
+        public void MultiMapper_WithoutProjection()
         {
             object[][] rows =
             {
@@ -21,7 +24,17 @@ namespace Dibix.Tests
               , new object[] { new Character { Id = 1 }, new Name { FirstName = "Luke", LastName = "Skywalker" }, "New Republic", new Name { FirstName = "Yoda" } }
             };
 
-            Character result = InvokeMultiMapFirst<Character>(false, rows);
+            Mock<DbConnection> connection = new Mock<DbConnection>(MockBehavior.Strict);
+            Mock<DatabaseAccessor> accessor = new Mock<DatabaseAccessor>(MockBehavior.Strict, connection.Object);
+            Mock<IParametersVisitor> parametersVisitor = new Mock<IParametersVisitor>(MockBehavior.Strict);
+
+            connection.Protected().Setup("Dispose", false);
+            accessor.Protected()
+                    .As<IDatabaseAccessor>()
+                    .Setup(x => x.QueryMany("sql", CommandType.Text, parametersVisitor.Object, It.IsAny<Func<Character, Name, string, Name, Character>>(), "splitOn"))
+                    .Returns<string, CommandType, IParametersVisitor, Func<Character, Name, string, Name, Character>, string>((sql, commandType, parameters, map, splitOn) => rows.Select(x => map((Character)x[0], (Name)x[1], (string)x[2], (Name)x[3])));
+
+            Character result = accessor.Object.QuerySingle<Character, Name, string, Name>("sql", parametersVisitor.Object, "splitOn");
             Assert.NotNull(result.Name);
             Assert.Equal("Luke", result.Name.FirstName);
             Assert.Equal("Skywalker", result.Name.LastName);
@@ -36,7 +49,7 @@ namespace Dibix.Tests
         }
 
         [Fact]
-        public void AutoMap_WithRecursiveDiscriminator()
+        public void MultiMapper_And_RecursiveMapper_WithoutProjection()
         {
             object[][] rows =
             {
@@ -52,7 +65,17 @@ namespace Dibix.Tests
               , new object[] { new Category { Id = 8, Name = "Visual Studio", ParentCategoryId = 6 },   null }
             };
 
-            IList<Category> categories = InvokeMultiMap<Category>(false, rows).ToArray();
+            Mock<DbConnection> connection = new Mock<DbConnection>(MockBehavior.Strict);
+            Mock<DatabaseAccessor> accessor = new Mock<DatabaseAccessor>(connection.Object);
+            Mock<IParametersVisitor> parametersVisitor = new Mock<IParametersVisitor>(MockBehavior.Strict);
+
+            connection.Protected().Setup("Dispose", false);
+            accessor.Protected()
+                    .As<IDatabaseAccessor>()
+                    .Setup(x => x.QueryMany("sql", CommandType.Text, parametersVisitor.Object, It.IsAny<Func<Category, CategoryBlacklistEntry, Category>>(), "splitOn"))
+                    .Returns<string, CommandType, IParametersVisitor, Func<Category, CategoryBlacklistEntry, Category>, string>((sql, commandType, parameters, map, splitOn) => rows.Select(x => map((Category)x[0], (CategoryBlacklistEntry)x[1])));
+
+            IList<Category> categories = accessor.Object.QueryMany<Category, CategoryBlacklistEntry>("sql", CommandType.Text, parametersVisitor.Object, "splitOn").ToArray();
             Assert.NotNull(categories);
             Assert.Equal(3, categories.Count);
 
@@ -106,37 +129,36 @@ namespace Dibix.Tests
         }
 
         [Fact]
-        public void AutoMap_WithProjection()
+        public void MultiMapper_WithProjection()
         {
             object[][] rows =
             {
                 new object[] { new Name { FirstName = "Darth", LastName = "Vader" }, new Name { FirstName = "Anakin", LastName = "Skywalker" } }
             };
 
-            CharacterInfo result = InvokeMultiMapFirst<CharacterInfo>(true, rows);
-            Assert.NotNull(result.Name);
-            Assert.Equal("Darth", result.Name.FirstName);
-            Assert.Equal("Vader", result.Name.LastName);
-            Assert.NotNull(result.Name);
-            Assert.Equal("Anakin", result.AlternateName.FirstName);
-            Assert.Equal("Skywalker", result.AlternateName.LastName);
-        }
+            Mock<DbConnection> connection = new Mock<DbConnection>(MockBehavior.Strict);
+            Mock<DatabaseAccessor> accessor = new Mock<DatabaseAccessor>(MockBehavior.Strict, connection.Object);
+            Mock<MultipleResultReader> multipleResultReader = new Mock<MultipleResultReader>(MockBehavior.Strict);
 
-        private static TReturn InvokeMultiMapFirst<TReturn>(bool useProjection, object[][] rows) => InvokeMultiMap<TReturn>(useProjection, rows).ToArray().First();
-        private static IEnumerable<TReturn> InvokeMultiMap<TReturn>(bool useProjection, IEnumerable<object[]> rows)
-        {
-            Type type = Type.GetType("Dibix.MultiMapper,Dibix", true);
-            object instance = Activator.CreateInstance(type);
-            MethodInfo mapRowMethod = type.GetMethod("MapRow").MakeGenericMethod(typeof(TReturn));
-            MethodInfo postProcessMethod = type.GetMethod("PostProcess").MakeGenericMethod(typeof(TReturn));
+            connection.Protected().Setup("Dispose", false);
+            accessor.Setup(x => x.QueryMultiple("sql", CommandType.Text, It.IsAny<IParametersVisitor>()))
+                    .Returns(multipleResultReader.Object);
+            multipleResultReader.Setup(x => x.Dispose());
+            multipleResultReader.Protected()
+                                .As<IMultipleResultReader>()
+                                .Setup(x => x.ReadMany(It.IsAny<Func<Name, Name, CharacterInfo>>(), "splitOn"))
+                                .Returns<Func<Name, Name, CharacterInfo>, string>((map, splitOn) => rows.Select(x => map((Name)x[0], (Name)x[1])));
 
-            IEnumerable<TReturn> results = InvokeMultiMap<TReturn>(mapRowMethod, instance, useProjection, rows);
-            results = (IEnumerable<TReturn>)postProcessMethod.Invoke(instance, new[] { results });
-            return results;
-        }
-        private static IEnumerable<TReturn> InvokeMultiMap<TReturn>(MethodInfo method, object instance, bool useProjection, IEnumerable<object[]> rows)
-        {
-            return rows.Select(row => (TReturn)method.Invoke(instance, new object[] { useProjection, row }));
+            using (IMultipleResultReader reader = accessor.Object.QueryMultiple("sql"))
+            {
+                CharacterInfo result = reader.ReadMany<Name, Name, CharacterInfo>("splitOn").Single();
+                Assert.NotNull(result.Name);
+                Assert.Equal("Darth", result.Name.FirstName);
+                Assert.Equal("Vader", result.Name.LastName);
+                Assert.NotNull(result.Name);
+                Assert.Equal("Anakin", result.AlternateName.FirstName);
+                Assert.Equal("Skywalker", result.AlternateName.LastName);
+            }
         }
 
         private sealed class Character

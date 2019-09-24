@@ -5,7 +5,8 @@ namespace Dibix
 {
     public static partial class DatabaseAccessorExtensions
     {
-        private static IEnumerable<TReturn> PostProcess<TReturn>(this IEnumerable<TReturn> source, MultiMapper multiMapper) => multiMapper.PostProcess(source);
+        internal static IEnumerable<TReturn> PostProcess<TReturn>(this IEnumerable<TReturn> source) => PostProcessor.PostProcess(source);
+        internal static IEnumerable<TReturn> PostProcess<TReturn>(this IEnumerable<TReturn> source, MultiMapper multiMapper) => PostProcessor.PostProcess(source, multiMapper);
 
         private static IParametersVisitor Build(this Action<IParameterBuilder> configureParameters)
         {
