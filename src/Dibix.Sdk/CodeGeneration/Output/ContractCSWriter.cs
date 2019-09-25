@@ -83,13 +83,16 @@ namespace Dibix.Sdk.CodeGeneration
                         context.Output.AddUsing("Dibix");
                         propertyAnnotations.Add("Discriminator");
                     }
+                }
 
-                    switch (property.SerializationBehavior)
-                    {
-                        case SerializationBehavior.Always:
-                            break;
+                switch (property.SerializationBehavior)
+                {
+                    case SerializationBehavior.Always:
+                        break;
 
-                        case SerializationBehavior.IfNotEmpty:
+                    case SerializationBehavior.IfNotEmpty:
+                        if (withAnnotations)
+                        {
                             if (!property.IsEnumerable)
                             {
                                 AddJsonReference(context);
@@ -99,17 +102,23 @@ namespace Dibix.Sdk.CodeGeneration
                             {
                                 shouldSerializeMethods.Add(property.Name);
                             }
+                        }
 
-                            break;
+                        break;
 
-                        case SerializationBehavior.Never:
+                    case SerializationBehavior.Never:
+                        if (withAnnotations)
+                        {
                             AddJsonReference(context);
                             propertyAnnotations.Add("JsonIgnore");
-                            break;
+                        }
+                        else
+                            continue;
 
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(property.SerializationBehavior), property.SerializationBehavior, null);
-                    }
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(property.SerializationBehavior), property.SerializationBehavior, null);
                 }
 
                 @class.AddProperty(property.Name, !property.IsEnumerable ? property.Type : $"ICollection<{property.Type}>", propertyAnnotations)
