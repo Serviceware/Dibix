@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Dibix.Sdk.CodeGeneration.CSharp;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -69,7 +70,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             context.Output.AddUsing("Dibix");
 
-            IDictionary<SqlStatementInfo, string> methodReturnTypeMap = statements.ToDictionary(x => x, DetermineResultTypeName);
+            IDictionary<SqlStatementInfo, string> methodReturnTypeMap = statements.ToDictionary(x => x, x => DetermineResultTypeName(context, x));
 
             for (int i = 0; i < statements.Count; i++)
             {
@@ -103,7 +104,17 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static string DetermineResultTypeName(SqlStatementInfo query)
+        private static string DetermineResultTypeName(WriterContext context, SqlStatementInfo query)
+        {
+            string resultTypeName = DetermineResultTypeNameCore(query);
+            if (query.Async)
+            {
+                context.Output.AddUsing(typeof(Task<>).Namespace);
+                resultTypeName = $"async Task<{resultTypeName}>";
+            }
+            return resultTypeName;
+        }
+        private static string DetermineResultTypeNameCore(SqlStatementInfo query)
         {
             if (query.IsFileApi)
             {
@@ -240,7 +251,17 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static void WriteNoResult(StringWriter writer, SqlStatementInfo query)
         {
-            writer.Write("return accessor.Execute(")
+            writer.Write("return ");
+
+            if (query.Async)
+                writer.WriteRaw("await ");
+
+            writer.WriteRaw("accessor.Execute");
+
+            if (query.Async)
+                writer.WriteRaw("Async");
+
+            writer.WriteRaw('(')
                   .WriteRaw(query.Name)
                   .WriteRaw(ConstantSuffix);
 
@@ -251,16 +272,29 @@ namespace Dibix.Sdk.CodeGeneration
             if (query.Parameters.Any())
                 writer.WriteRaw(", @params");
 
-            writer.WriteLineRaw(");");
+            writer.WriteRaw(')');
+
+            if (query.Async)
+                writer.WriteRaw(".ConfigureAwait(false)");
+
+            writer.WriteLineRaw(";");
         }
 
         private static void WriteSingleResult(StringWriter writer, SqlStatementInfo query)
         {
             SqlQueryResult singleResult = query.Results.Single();
+            writer.Write("return ");
 
-            writer.Write("return accessor.")
-                  .WriteRaw(GetExecutorMethodName(query.Results[0].ResultMode))
-                  .WriteRaw('<');
+            if (query.Async)
+                writer.WriteRaw("await ");
+
+            writer.WriteRaw("accessor.")
+                  .WriteRaw(GetExecutorMethodName(query.Results[0].ResultMode));
+
+            if (query.Async)
+                writer.WriteRaw("Async");
+
+            writer.WriteRaw('<');
 
             for (int i = 0; i < singleResult.Contracts.Count; i++)
             {
@@ -296,12 +330,27 @@ namespace Dibix.Sdk.CodeGeneration
                       .WriteRaw('"');
             }
 
-            writer.WriteLineRaw(");");
+            writer.WriteRaw(')');
+
+            if (query.Async)
+                writer.WriteRaw(".ConfigureAwait(false)");
+
+            writer.WriteLineRaw(";");
         }
 
         private static void WriteComplexResult(StringWriter writer, SqlStatementInfo query)
         {
-            writer.Write("using (IMultipleResultReader reader = accessor.QueryMultiple(")
+            writer.Write("using (IMultipleResultReader reader = ");
+
+            if (query.Async)
+                writer.WriteRaw("await ");
+
+            writer.WriteRaw("accessor.QueryMultiple");
+
+            if (query.Async)
+                writer.WriteRaw("Async");
+
+            writer.WriteRaw('(')
                   .WriteRaw(query.Name)
                   .WriteRaw(ConstantSuffix);
 
@@ -312,7 +361,12 @@ namespace Dibix.Sdk.CodeGeneration
             if (query.Parameters.Any())
                 writer.WriteRaw(", @params");
 
-            writer.WriteLineRaw("))")
+            writer.WriteRaw(")");
+
+            if (query.Async)
+                writer.WriteRaw(".ConfigureAwait(false)");
+
+            writer.WriteLineRaw(")")
                   .WriteLine("{")
                   .PushIndent();
 

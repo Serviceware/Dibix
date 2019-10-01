@@ -14,6 +14,7 @@ namespace Dibix.Sdk.CodeGeneration
         public bool MergeGridResult { get; set; }
         public bool IsFileApi { get; set; }
         public bool GenerateInputClass { get; set; }
+        public bool Async { get; set; }
         public CommandType? CommandType { get; set; }
         public ContractName ResultType { get; set; }
         public string GeneratedResultTypeName { get; set; }

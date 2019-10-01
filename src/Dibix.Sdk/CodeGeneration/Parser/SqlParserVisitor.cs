@@ -35,6 +35,7 @@ namespace Dibix.Sdk.CodeGeneration
             this.Target.MergeGridResult = this.Hints.IsSet(SqlHint.MergeGridResult);
             this.Target.IsFileApi = this.Hints.IsSet(SqlHint.FileApi);
             this.Target.GenerateInputClass = this.Hints.IsSet(SqlHint.GenerateInputClass);
+            this.Target.Async = this.Hints.IsSet(SqlHint.Async);
             SqlHint resultTypeHint = this.Hints.SingleHint(SqlHint.ResultTypeName);
             if (resultTypeHint != null)
             {

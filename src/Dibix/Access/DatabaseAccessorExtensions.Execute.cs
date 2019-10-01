@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+using System.Threading.Tasks;
 
 namespace Dibix
 {
@@ -26,6 +27,12 @@ namespace Dibix
         {
             Guard.IsNotNull(accessor, nameof(accessor));
             return accessor.Execute(sql, CommandType.Text, parameters);
+        }
+        // Configurator (UpdateKnowledgeBaseServiceConfiguration)
+        public static Task<int> ExecuteAsync(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters)
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
+            return accessor.ExecuteAsync(sql, CommandType.Text, parameters);
         }
     }
 }

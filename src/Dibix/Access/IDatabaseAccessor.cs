@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Threading.Tasks;
 
 namespace Dibix
 {
@@ -8,6 +9,7 @@ namespace Dibix
     {
         IParameterBuilder Parameters();
         int Execute(string sql, CommandType commandType, IParametersVisitor parameters);
+        Task<int> ExecuteAsync(string sql, CommandType commandType, IParametersVisitor parameters);
         IEnumerable<T> QueryMany<T>(string sql, CommandType commandType, IParametersVisitor parameters);
         IEnumerable<TReturn> QueryMany<TReturn, TSecond>(string sql, CommandType commandType, IParametersVisitor parameters, string splitOn) where TReturn : new();
         IEnumerable<TReturn> QueryMany<TFirst, TSecond, TReturn>(string sql, CommandType commandType, IParametersVisitor parameters, Func<TFirst, TSecond, TReturn> map, string splitOn);
@@ -22,6 +24,7 @@ namespace Dibix
         TReturn QuerySingle<TReturn, TSecond, TThird>(string sql, IParametersVisitor parameters, string splitOn) where TReturn : new();
         TReturn QuerySingle<TReturn, TSecond, TThird, TFourth>(string sql, IParametersVisitor parameters, string splitOn) where TReturn : new();
         T QuerySingleOrDefault<T>(string sql, CommandType commandType, IParametersVisitor parameters);
+        Task<T> QuerySingleOrDefaultAsync<T>(string sql, CommandType commandType, IParametersVisitor parameters);
         IMultipleResultReader QueryMultiple(string sql, CommandType commandType, IParametersVisitor parameters);
     }
 }

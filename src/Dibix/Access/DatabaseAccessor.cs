@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Dibix
 {
@@ -29,6 +30,8 @@ namespace Dibix
         public IParameterBuilder Parameters() => new ParameterBuilder();
 
         public abstract int Execute(string sql, CommandType commandType, IParametersVisitor parameters);
+
+        public abstract Task<int> ExecuteAsync(string sql, CommandType commandType, IParametersVisitor parameters);
 
         IEnumerable<T> IDatabaseAccessor.QueryMany<T>(string sql, CommandType commandType, IParametersVisitor parameters) => this.QueryMany<T>(sql, commandType, parameters).PostProcess();
 
@@ -82,6 +85,8 @@ namespace Dibix
         }
 
         public abstract T QuerySingleOrDefault<T>(string sql, CommandType commandType, IParametersVisitor parameters);
+
+        public abstract Task<T> QuerySingleOrDefaultAsync<T>(string sql, CommandType commandType, IParametersVisitor parameters);
 
         public abstract IMultipleResultReader QueryMultiple(string sql, CommandType commandType, IParametersVisitor parameters);
         #endregion

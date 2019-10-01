@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Threading.Tasks;
 using Dapper;
 
 namespace Dibix.Dapper
@@ -25,6 +26,11 @@ namespace Dibix.Dapper
         public override int Execute(string sql, CommandType commandType, IParametersVisitor parameters)
         {
             return base.Connection.Execute(sql, parameters.AsDapperParams(), commandType: commandType);
+        }
+
+        public override Task<int> ExecuteAsync(string sql, CommandType commandType, IParametersVisitor parameters)
+        {
+            return base.Connection.ExecuteAsync(sql, parameters.AsDapperParams(), commandType: commandType);
         }
 
         protected override IEnumerable<T> QueryMany<T>(string sql, CommandType commandType, IParametersVisitor parameters)
@@ -89,6 +95,12 @@ namespace Dibix.Dapper
         {
             this._mappingCheck.Check<T>();
             return base.Connection.QuerySingleOrDefault<T>(sql, parameters.AsDapperParams(), commandType: commandType);
+        }
+
+        public override Task<T> QuerySingleOrDefaultAsync<T>(string sql, CommandType commandType, IParametersVisitor parameters)
+        {
+            this._mappingCheck.Check<T>();
+            return base.Connection.QuerySingleOrDefaultAsync<T>(sql, parameters.AsDapperParams(), commandType: commandType);
         }
 
         public override IMultipleResultReader QueryMultiple(string sql, CommandType commandType, IParametersVisitor parameters)
