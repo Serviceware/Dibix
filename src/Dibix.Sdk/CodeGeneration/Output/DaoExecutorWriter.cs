@@ -83,8 +83,12 @@ namespace Dibix.Sdk.CodeGeneration
                 if (statement.IsFileApi)
                     context.Output.AddUsing("Dibix.Http");
 
+                string methodName = String.Concat(MethodPrefix, statement.Name);
+                if (statement.Async)
+                    methodName = $"{methodName}Async";
+
                 string resultTypeName = methodReturnTypeMap[statement];
-                CSharpMethod method = @class.AddMethod(name: String.Concat(MethodPrefix, statement.Name)
+                CSharpMethod method = @class.AddMethod(name: methodName
                                                      , type: resultTypeName
                                                      , body: GenerateMethodBody(statement, context)
                                                      , isExtension: true
