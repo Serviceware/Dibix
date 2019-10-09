@@ -91,16 +91,16 @@ namespace Dibix.Dapper
             return base.Connection.QuerySingle<T>(sql, parameters.AsDapperParams(), commandType: commandType);
         }
 
+        public override Task<T> QuerySingleAsync<T>(string sql, CommandType commandType, IParametersVisitor parameters)
+        {
+            this._mappingCheck.Check<T>();
+            return base.Connection.QuerySingleAsync<T>(sql, parameters.AsDapperParams(), commandType: commandType);
+        }
+
         public override T QuerySingleOrDefault<T>(string sql, CommandType commandType, IParametersVisitor parameters)
         {
             this._mappingCheck.Check<T>();
             return base.Connection.QuerySingleOrDefault<T>(sql, parameters.AsDapperParams(), commandType: commandType);
-        }
-
-        public override Task<T> QuerySingleOrDefaultAsync<T>(string sql, CommandType commandType, IParametersVisitor parameters)
-        {
-            this._mappingCheck.Check<T>();
-            return base.Connection.QuerySingleOrDefaultAsync<T>(sql, parameters.AsDapperParams(), commandType: commandType);
         }
 
         public override IMultipleResultReader QueryMultiple(string sql, CommandType commandType, IParametersVisitor parameters)

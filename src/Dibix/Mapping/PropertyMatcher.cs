@@ -19,8 +19,8 @@ namespace Dibix
             property = descriptor.ComplexProperties
                                  .Reverse()
                                  .FirstOrDefault(x => x.EntityType == sourceType && !this._matchedProperties.Contains(x) /* Skip properties that have already been matched */);
-            
-            /* i.E.: multiple properties of the same type */
+                                                                                                                         /* i.E.: multiple properties of the same type     */
+
             if (property == null)
                 return false;
 

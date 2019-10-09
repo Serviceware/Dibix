@@ -19,10 +19,10 @@ namespace Dibix
             return accessor.QuerySingleOrDefault<T>(sql, commandType, EmptyParameters.Instance);
         }
         // Configurator (GetKnowledgeBaseServiceConfiguration)
-        public static Task<T> QuerySingleOrDefaultAsync<T>(this IDatabaseAccessor accessor, string sql, CommandType commandType)
+        public static Task<T> QuerySingleAsync<T>(this IDatabaseAccessor accessor, string sql, CommandType commandType)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.QuerySingleOrDefaultAsync<T>(sql, commandType, EmptyParameters.Instance);
+            return accessor.QuerySingleAsync<T>(sql, commandType, EmptyParameters.Instance);
         }
         public static T QuerySingleOrDefault<T>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters)
         {

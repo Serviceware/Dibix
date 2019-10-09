@@ -57,7 +57,9 @@ namespace Dibix
         IEnumerable<TReturn> IDatabaseAccessor.QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TEleventh, TReturn>(string sql, CommandType commandType, IParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TEleventh, TReturn> map, string splitOn) => this.QueryMany(sql, commandType, parameters, map, splitOn).PostProcess();
 
         public abstract T QuerySingle<T>(string sql, CommandType commandType, IParametersVisitor parameters);
-       
+
+        public abstract Task<T> QuerySingleAsync<T>(string sql, CommandType commandType, IParametersVisitor parameters);
+
         // SubProcessOverview
         public TReturn QuerySingle<TReturn, TSecond>(string sql, IParametersVisitor parameters, string splitOn) where TReturn : new()
         {
@@ -85,8 +87,6 @@ namespace Dibix
         }
 
         public abstract T QuerySingleOrDefault<T>(string sql, CommandType commandType, IParametersVisitor parameters);
-
-        public abstract Task<T> QuerySingleOrDefaultAsync<T>(string sql, CommandType commandType, IParametersVisitor parameters);
 
         public abstract IMultipleResultReader QueryMultiple(string sql, CommandType commandType, IParametersVisitor parameters);
         #endregion
