@@ -1,4 +1,5 @@
-﻿using Microsoft.SqlServer.TransactSql.ScriptDom;
+﻿using Dibix.Sdk.Sql;
+using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
@@ -17,7 +18,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
             for (int i = node.Alias.FirstTokenIndex; i > node.FirstTokenIndex; i--)
             {
-                if (node.ScriptTokenStream[i].TokenType == TSqlTokenType.As)
+                if (node.ScriptTokenStream[i].TokenType == SqlTokenType.As)
                     return;
             }
             base.Fail(node.Alias);
@@ -34,7 +35,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
             for (int i = node.ColumnName.FirstTokenIndex; i > node.FirstTokenIndex; i--)
             {
-                if (node.ScriptTokenStream[i].TokenType == TSqlTokenType.As)
+                if (node.ScriptTokenStream[i].TokenType == SqlTokenType.As)
                     return;
             }
             base.Fail(node.ColumnName);

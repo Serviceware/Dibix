@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -20,7 +21,7 @@ namespace Dibix.Sdk.CodeGeneration
                 for (int j = startIndex; j <= endIndex; j++)
                 {
                     TSqlParserToken token = body.ScriptTokenStream[j];
-                    if (token.TokenType == TSqlTokenType.SingleLineComment || token.TokenType == TSqlTokenType.MultilineComment)
+                    if (token.TokenType == SqlTokenType.SingleLineComment || token.TokenType == SqlTokenType.MultilineComment)
                         continue;
 
                     sb.Append(token.Text);

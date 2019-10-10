@@ -16,32 +16,32 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         private static readonly HashSet<TSqlTokenType> TokenWhiteList = new HashSet<TSqlTokenType>
         {
-            TSqlTokenType.AsciiStringLiteral,
-            TSqlTokenType.Bang,
-            TSqlTokenType.Comma,
-            TSqlTokenType.Dot,
-            TSqlTokenType.EndOfFile,
-            TSqlTokenType.EqualsSign,
-            TSqlTokenType.GreaterThan,
-            TSqlTokenType.HexLiteral,
-            TSqlTokenType.Identifier,
-            TSqlTokenType.Integer,
-            TSqlTokenType.LeftCurly,
-            TSqlTokenType.LeftParenthesis,
-            TSqlTokenType.LessThan,
-            TSqlTokenType.Minus,
-            TSqlTokenType.MultilineComment,
-            TSqlTokenType.Plus,
-            TSqlTokenType.PseudoColumn,
-            TSqlTokenType.QuotedIdentifier,
-            TSqlTokenType.RightCurly,
-            TSqlTokenType.RightParenthesis,
-            TSqlTokenType.Semicolon,
-            TSqlTokenType.SingleLineComment,
-            TSqlTokenType.Star,
-            TSqlTokenType.UnicodeStringLiteral,
-            TSqlTokenType.Variable,
-            TSqlTokenType.WhiteSpace
+            SqlTokenType.AsciiStringLiteral,
+            SqlTokenType.Bang,
+            SqlTokenType.Comma,
+            SqlTokenType.Dot,
+            SqlTokenType.EndOfFile,
+            SqlTokenType.EqualsSign,
+            SqlTokenType.GreaterThan,
+            SqlTokenType.HexLiteral,
+            SqlTokenType.Identifier,
+            SqlTokenType.Integer,
+            SqlTokenType.LeftCurly,
+            SqlTokenType.LeftParenthesis,
+            SqlTokenType.LessThan,
+            SqlTokenType.Minus,
+            SqlTokenType.MultilineComment,
+            SqlTokenType.Plus,
+            SqlTokenType.PseudoColumn,
+            SqlTokenType.QuotedIdentifier,
+            SqlTokenType.RightCurly,
+            SqlTokenType.RightParenthesis,
+            SqlTokenType.Semicolon,
+            SqlTokenType.SingleLineComment,
+            SqlTokenType.Star,
+            SqlTokenType.UnicodeStringLiteral,
+            SqlTokenType.Variable,
+            SqlTokenType.WhiteSpace
         };
         private IdentifierVisitor _identifierVisitor;
 
@@ -94,7 +94,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             public override void Visit(SqlDataTypeReference node)
             {
                 node.AsEnumerable()
-                    .Where(x => x.TokenType == TSqlTokenType.Identifier)
+                    .Where(x => x.TokenType == SqlTokenType.Identifier)
                     .Each(this._tokenVisitor);
             }
 
@@ -117,7 +117,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             public override void Visit(PredicateSetStatement node)
             {
                 node.AsEnumerable()
-                    .Where(x => x.TokenType == TSqlTokenType.Identifier)
+                    .Where(x => x.TokenType == SqlTokenType.Identifier)
                     .Each(this._tokenVisitor);
             }
 

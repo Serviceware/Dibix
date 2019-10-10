@@ -1,4 +1,5 @@
-﻿using Microsoft.SqlServer.TransactSql.ScriptDom;
+﻿using Dibix.Sdk.Sql;
+using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
@@ -12,7 +13,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         protected override void Visit(TSqlParserToken token)
         {
-            if (token.TokenType == TSqlTokenType.Cursor)
+            if (token.TokenType == SqlTokenType.Cursor)
                 base.Fail(token);
         }
     }

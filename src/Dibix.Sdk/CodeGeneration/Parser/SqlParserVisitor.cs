@@ -66,11 +66,11 @@ namespace Dibix.Sdk.CodeGeneration
             // Parse type name hint
             int startIndex = node.FirstTokenIndex;
             TSqlParserToken previousToken = node.ScriptTokenStream[--startIndex];
-            if (previousToken.TokenType == TSqlTokenType.WhiteSpace)
+            if (previousToken.TokenType == SqlTokenType.WhiteSpace)
                 previousToken = node.ScriptTokenStream[--startIndex];
 
             ICollection<SqlHint> hints = SqlHintParser.FromToken(this.Target.Source, this.ErrorReporter, previousToken).ToArray();
-            if (previousToken.TokenType == TSqlTokenType.MultilineComment)
+            if (previousToken.TokenType == SqlTokenType.MultilineComment)
                 parameter.ClrTypeName = hints.SingleHintValue(SqlHint.ClrType);
 
             parameter.ClrType = node.DataType.ToClrType();
