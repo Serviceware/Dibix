@@ -22,10 +22,13 @@
 
             writer.WriteRaw(this._type)
                   .WriteRaw(' ')
-                  .WriteRaw(this._name)
-                  .WriteRaw(" = ");
+                  .WriteRaw(this._name);
 
-            this._value.Write(writer);
+            if (this._value != null)
+            {
+                writer.WriteRaw(" = ");
+                this._value.Write(writer);
+            }
 
             writer.WriteRaw(';');
         }

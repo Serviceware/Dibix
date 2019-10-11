@@ -56,9 +56,9 @@ namespace Dibix
 
         IEnumerable<TReturn> IDatabaseAccessor.QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TEleventh, TReturn>(string sql, CommandType commandType, IParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TEleventh, TReturn> map, string splitOn) => this.QueryMany(sql, commandType, parameters, map, splitOn).PostProcess();
 
-        public abstract T QuerySingle<T>(string sql, CommandType commandType, IParametersVisitor parameters);
+        T IDatabaseAccessor.QuerySingle<T>(string sql, CommandType commandType, IParametersVisitor parameters) => this.QuerySingle<T>(sql, commandType, parameters).PostProcess();
 
-        public abstract Task<T> QuerySingleAsync<T>(string sql, CommandType commandType, IParametersVisitor parameters);
+        Task<T> IDatabaseAccessor.QuerySingleAsync<T>(string sql, CommandType commandType, IParametersVisitor parameters) => this.QuerySingleAsync<T>(sql, commandType, parameters).PostProcess();
 
         // SubProcessOverview
         public TReturn QuerySingle<TReturn, TSecond>(string sql, IParametersVisitor parameters, string splitOn) where TReturn : new()
@@ -86,7 +86,7 @@ namespace Dibix
                        .Single();
         }
 
-        public abstract T QuerySingleOrDefault<T>(string sql, CommandType commandType, IParametersVisitor parameters);
+        T IDatabaseAccessor.QuerySingleOrDefault<T>(string sql, CommandType commandType, IParametersVisitor parameters) => this.QuerySingleOrDefault<T>(sql, commandType, parameters).PostProcess();
 
         public abstract IMultipleResultReader QueryMultiple(string sql, CommandType commandType, IParametersVisitor parameters);
         #endregion
@@ -107,6 +107,12 @@ namespace Dibix
         protected abstract IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TReturn>(string sql, CommandType commandType, IParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TReturn> map, string splitOn);
 
         protected abstract IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TEleventh, TReturn>(string sql, CommandType commandType, IParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TEleventh, TReturn> map, string splitOn);
+
+        protected abstract T QuerySingle<T>(string sql, CommandType commandType, IParametersVisitor parameters);
+
+        protected abstract Task<T> QuerySingleAsync<T>(string sql, CommandType commandType, IParametersVisitor parameters);
+
+        protected abstract T QuerySingleOrDefault<T>(string sql, CommandType commandType, IParametersVisitor parameters);
         #endregion
 
         #region Private Methods

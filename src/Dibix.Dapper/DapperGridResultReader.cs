@@ -60,13 +60,13 @@ namespace Dibix.Dapper
             return this._reader.Read(map, splitOn);
         }
 
-        public override T ReadSingle<T>()
+        protected override T ReadSingle<T>()
         {
             this._mappingCheck.Check<T>();
             return this._reader.ReadSingle<T>();
         }
 
-        public override T ReadSingleOrDefault<T>()
+        protected override T ReadSingleOrDefault<T>()
         {
             this._mappingCheck.Check<T>();
             return this._reader.ReadSingleOrDefault<T>();

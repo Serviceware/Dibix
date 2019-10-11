@@ -85,19 +85,19 @@ namespace Dibix.Dapper
             return base.Connection.Query(sql, types, mapWrapper, parameters.AsDapperParams(), commandType: commandType, splitOn: splitOn);
         }
 
-        public override T QuerySingle<T>(string sql, CommandType commandType, IParametersVisitor parameters)
+        protected override T QuerySingle<T>(string sql, CommandType commandType, IParametersVisitor parameters)
         {
             this._mappingCheck.Check<T>();
             return base.Connection.QuerySingle<T>(sql, parameters.AsDapperParams(), commandType: commandType);
         }
 
-        public override Task<T> QuerySingleAsync<T>(string sql, CommandType commandType, IParametersVisitor parameters)
+        protected override Task<T> QuerySingleAsync<T>(string sql, CommandType commandType, IParametersVisitor parameters)
         {
             this._mappingCheck.Check<T>();
             return base.Connection.QuerySingleAsync<T>(sql, parameters.AsDapperParams(), commandType: commandType);
         }
 
-        public override T QuerySingleOrDefault<T>(string sql, CommandType commandType, IParametersVisitor parameters)
+        protected override T QuerySingleOrDefault<T>(string sql, CommandType commandType, IParametersVisitor parameters)
         {
             this._mappingCheck.Check<T>();
             return base.Connection.QuerySingleOrDefault<T>(sql, parameters.AsDapperParams(), commandType: commandType);

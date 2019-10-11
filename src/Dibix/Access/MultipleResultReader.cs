@@ -44,7 +44,7 @@ namespace Dibix
 
         IEnumerable<TReturn> IMultipleResultReader.ReadMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> map, string splitOn) => this.ReadMany(map, splitOn).PostProcess();
 
-        public abstract T ReadSingle<T>();
+        T IMultipleResultReader.ReadSingle<T>() => this.ReadSingle<T>().PostProcess();
 
         public TReturn ReadSingle<TReturn, TSecond>(string splitOn) where TReturn : new()
         {
@@ -63,7 +63,7 @@ namespace Dibix
                        .Single();
         }
 
-        public abstract T ReadSingleOrDefault<T>();
+        T IMultipleResultReader.ReadSingleOrDefault<T>() => this.ReadSingleOrDefault<T>().PostProcess();
         #endregion
         
         #region Abstract Methods
@@ -78,6 +78,10 @@ namespace Dibix
         protected abstract IEnumerable<TReturn> ReadMany<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> map, string splitOn);
 
         protected abstract IEnumerable<TReturn> ReadMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> map, string splitOn);
+
+        protected abstract T ReadSingle<T>();
+
+        protected abstract T ReadSingleOrDefault<T>();
         #endregion
 
         #region IDisposable Members

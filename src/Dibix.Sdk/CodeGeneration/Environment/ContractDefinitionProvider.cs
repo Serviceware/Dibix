@@ -100,6 +100,7 @@ namespace Dibix.Sdk.CodeGeneration
                     bool isPartOfKey = false;
                     bool isDiscriminator = false;
                     SerializationBehavior serializationBehavior = default;
+                    bool obfuscated = false;
                     switch (property.Value.Type)
                     {
                         case JTokenType.Object:
@@ -108,6 +109,7 @@ namespace Dibix.Sdk.CodeGeneration
                             isPartOfKey = (bool?)propertyInfo.Property("isPartOfKey")?.Value ?? default;
                             isDiscriminator = (bool?)propertyInfo.Property("isDiscriminator")?.Value ?? default;
                             Enum.TryParse((string)propertyInfo.Property("serialize")?.Value, true, out serializationBehavior);
+                            obfuscated = (bool?)propertyInfo.Property("obfuscated")?.Value ?? default;
                             break;
 
                         case JTokenType.String:
@@ -118,7 +120,7 @@ namespace Dibix.Sdk.CodeGeneration
                             throw new ArgumentOutOfRangeException(nameof(property.Type), property.Type, null);
                     }
                     bool isEnumerable = TryGetArrayType(typeName, ref typeName);
-                    contract.Properties.Add(new ObjectContractProperty(property.Name, typeName, isPartOfKey, isDiscriminator, serializationBehavior, isEnumerable));
+                    contract.Properties.Add(new ObjectContractProperty(property.Name, typeName, isPartOfKey, isDiscriminator, serializationBehavior, obfuscated, isEnumerable));
                 }
             }
 

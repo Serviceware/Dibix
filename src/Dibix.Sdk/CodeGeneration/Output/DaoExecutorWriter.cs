@@ -216,6 +216,9 @@ namespace Dibix.Sdk.CodeGeneration
                 for (int i = 0; i < query.Parameters.Count; i++)
                 {
                     SqlQueryParameter parameter = query.Parameters[i];
+                    if (parameter.Obfuscate)
+                        continue;
+
                     writer.Write(parameter.Name);
 
                     if (i + 1 < query.Parameters.Count)
@@ -228,8 +231,14 @@ namespace Dibix.Sdk.CodeGeneration
                       .Write("}");
             }
 
-            writer.WriteLineRaw(")")
-                  .WriteLine(".Build();")
+            writer.WriteLineRaw(")");
+
+            foreach (SqlQueryParameter parameter in query.Parameters.Where(x => x.Obfuscate))
+            {
+                writer.WriteLine($".SetString(nameof({parameter.Name}), {parameter.Name}, true)");
+            }
+
+            writer.WriteLine(".Build();")
                   .ResetTemporaryIndent();
         }
 

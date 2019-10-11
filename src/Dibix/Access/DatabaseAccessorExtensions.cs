@@ -1,10 +1,22 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Dibix
 {
     public static partial class DatabaseAccessorExtensions
     {
+        internal static Task<TReturn> PostProcess<TReturn>(this Task<TReturn> source) => source.ContinueWith(x => PostProcess(x.Result));
+
+        internal static TReturn PostProcess<TReturn>(this TReturn source)
+        {
+            if (Equals(source, default(TReturn)))
+                return source;
+
+            return PostProcessor.PostProcess(Enumerable.Repeat(source, 1)).FirstOrDefault();
+        }
+
         internal static IEnumerable<TReturn> PostProcess<TReturn>(this IEnumerable<TReturn> source) => PostProcessor.PostProcess(source);
         internal static IEnumerable<TReturn> PostProcess<TReturn>(this IEnumerable<TReturn> source, MultiMapper multiMapper) => PostProcessor.PostProcess(source, multiMapper);
 

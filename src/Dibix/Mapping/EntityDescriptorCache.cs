@@ -35,6 +35,9 @@ namespace Dibix
                     EntityProperty entityProperty = BuildEntityProperty(property);
                     descriptor.ComplexProperties.Add(entityProperty);
                 }
+
+                if (property.IsDefined(typeof(ObfuscatedAttribute)))
+                    descriptor.ObfuscatedProperties.Add(BuildObfuscatedPropertyAccessor(property));
             }
 
             if (descriptor.Discriminator != null && descriptor.Keys.Count != 1)
@@ -117,5 +120,17 @@ namespace Dibix
         }
 
         private static bool IsCollectionType(Type type) => type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(ICollection<>);
+
+        private static ObfuscatedProperty BuildObfuscatedPropertyAccessor(PropertyInfo propertyInfo)
+        {
+            ParameterExpression instanceParameter = Expression.Parameter(typeof(object), "instance");
+            Expression instance = Expression.Convert(instanceParameter, propertyInfo.DeclaringType);
+            Expression property = Expression.Property(instance, propertyInfo);
+            Expression deobfuscator = Expression.Call(typeof(TextObfuscator), nameof(TextObfuscator.Deobfuscate), new Type[0], property);
+            Expression assign = Expression.Assign(property, deobfuscator);
+            Expression<Action<object>> expression = Expression.Lambda<Action<object>>(assign, instanceParameter);
+            Action<object> compiled = expression.Compile();
+            return new ObfuscatedProperty(compiled);
+        }
     }
 }

@@ -38,6 +38,9 @@
                 },
                 "serialize": {
                   "$ref": "#/definitions/SerializationBehavior"
+                },
+                "obfuscated": {
+                  "type": "boolean"
                 }
               },
               "required": [

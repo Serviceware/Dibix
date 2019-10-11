@@ -10,6 +10,7 @@ namespace Dibix
     {
         #region Fields
         private readonly IDictionary<string, ParameterValue> _parameters;
+        private IParameterBuilder _parameterBuilderImplementation;
         #endregion
 
         #region Constructor
@@ -53,8 +54,11 @@ namespace Dibix
             return this.Set(parameterName, parameterValue);
         }
 
-        IParameterBuilder IParameterBuilder.SetString(string parameterName, string parameterValue)
+        IParameterBuilder IParameterBuilder.SetString(string parameterName, string parameterValue, bool obfuscate)
         {
+            if (parameterValue != null && obfuscate)
+                parameterValue = TextObfuscator.Obfuscate(parameterValue);
+
             return this.Set(parameterName, parameterValue);
         }
         IParameterBuilder IParameterBuilder.SetBoolean(string parameterName, bool? parameterValue)

@@ -17,6 +17,7 @@ namespace Dibix.Sdk.CodeGeneration
         public const string GenerateInputClass = "GenerateInputClass";
         public const string ClrType = "ClrType";
         public const string Nullable = "Nullable";
+        public const string Obfuscate = "Obfuscate";
 
         public string Kind { get; set; }
         public string Value

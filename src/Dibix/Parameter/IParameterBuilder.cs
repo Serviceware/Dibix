@@ -5,7 +5,7 @@ namespace Dibix
     public interface IParameterBuilder
     {
         IParameterBuilder SetInt32(string parameterName, int? parameterValue);
-        IParameterBuilder SetString(string parameterName, string parameterValue);
+        IParameterBuilder SetString(string parameterName, string parameterValue, bool obfuscate = false);
         IParameterBuilder SetBoolean(string parameterName, bool? parameterValue);
         IParameterBuilder SetLong(string parameterName, long? parameterValue);
         IParameterBuilder SetShort(string parameterName, short? parameterValue);

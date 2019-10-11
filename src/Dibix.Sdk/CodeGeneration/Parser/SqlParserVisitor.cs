@@ -73,6 +73,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (previousToken.TokenType == SqlTokenType.MultilineComment)
                 parameter.ClrTypeName = hints.SingleHintValue(SqlHint.ClrType);
 
+            parameter.Obfuscate = hints.IsSet(SqlHint.Obfuscate);
             parameter.ClrType = node.DataType.ToClrType();
             if (parameter.ClrType == null)
             {

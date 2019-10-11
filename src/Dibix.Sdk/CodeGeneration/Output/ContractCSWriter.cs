@@ -121,6 +121,9 @@ namespace Dibix.Sdk.CodeGeneration
                         throw new ArgumentOutOfRangeException(nameof(property.SerializationBehavior), property.SerializationBehavior, null);
                 }
 
+                if (property.Obfuscated) 
+                    propertyAnnotations.Add("Obfuscated");
+
                 @class.AddProperty(property.Name, !property.IsEnumerable ? property.Type : $"ICollection<{property.Type}>", propertyAnnotations)
                       .Getter(null)
                       .Setter(null, property.IsEnumerable ? CSharpModifiers.Private : default);

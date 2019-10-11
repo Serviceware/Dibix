@@ -12,6 +12,7 @@ namespace Dibix
         static PostProcessor()
         {
             PostProcessors = new Collection<Func<IPostProcessor>>();
+            Register<TextObfuscator>();
             Register<RecursiveMapper>();
         }
 

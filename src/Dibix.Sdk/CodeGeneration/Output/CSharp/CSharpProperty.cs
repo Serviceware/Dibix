@@ -38,7 +38,10 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
                   .WriteRaw(' ')
                   .WriteRaw(this._name);
 
-            bool isMultiline = this._getter != null && this._getter.HasMultilineBody || this._setter != null && this._setter.HasMultilineBody;
+            bool isMultiline = Equals(this._getter?.HasBody, true) && Equals(this._setter?.HasBody, true)
+                            || Equals(this._getter?.HasMultilineBody, true)
+                            || Equals(this._setter?.HasMultilineBody, true);
+
             if (isMultiline)
             {
                 writer.WriteLine()

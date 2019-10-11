@@ -6,6 +6,7 @@
         private readonly string _body;
         private readonly CSharpModifiers _modifiers;
 
+        public bool HasBody { get; }
         public bool HasMultilineBody { get; }
 
         public CSharpPropertyMethod(string name, string body, CSharpModifiers modifiers)
@@ -13,6 +14,7 @@
             this._name = name;
             this._body = body;
             this._modifiers = modifiers;
+            this.HasBody = body != null;
             this.HasMultilineBody = body != null && body.Contains("\n");
         }
 

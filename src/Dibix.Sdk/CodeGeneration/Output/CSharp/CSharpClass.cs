@@ -19,7 +19,7 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             this._members = new Collection<CSharpStatement>();
         }
 
-        public CSharpClass AddField(string name, string type, CSharpValue value, CSharpModifiers modifiers = CSharpModifiers.Public)
+        public CSharpClass AddField(string name, string type, CSharpValue value = null, CSharpModifiers modifiers = CSharpModifiers.Public)
         {
             CSharpField constant = new CSharpField(name, type, value, modifiers);
             this._members.Add(constant);
