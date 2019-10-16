@@ -11,6 +11,11 @@
     <Compile Include="..\..\src\Dibix.Sdk.Locator\*.cs" Link="Locator\%(Filename)%(Extension)" />
     <Compile Include="..\..\src\Dibix\Reflection\TypeExtensions.cs" Link="TypeExtensions.cs" />
     <EmbeddedResource Update="Resource.resx" />
+    <EmbeddedResource Include="lib\Microsoft.Data.Tools.Components.dll" />
+    <EmbeddedResource Include="lib\Microsoft.Data.Tools.Contracts.dll" />
+    <EmbeddedResource Include="lib\Microsoft.Data.Tools.Schema.Tasks.Sql.dll" />
+    <EmbeddedResource Include="lib\Microsoft.Data.Tools.Schema.Utilities.Sql.dll" />
+    <EmbeddedResource Include="lib\Microsoft.SqlServer.ConnectionInfo.dll" />
 
     <None Update="CodeGeneration\CodeAnalysisTest.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
@@ -103,12 +108,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Dibix\Dibix.csproj" />
     <ProjectReference Include="..\..\src\Dibix.Sdk\Dibix.Sdk.csproj" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <Reference Include="Microsoft.Data.Tools.Schema.Tasks.Sql">
-      <HintPath>$(VsInstallRoot)\Common7\IDE\Extensions\Microsoft\SQLDB\Dac\150\Microsoft.Data.Tools.Schema.Tasks.Sql.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
   <ItemGroup>

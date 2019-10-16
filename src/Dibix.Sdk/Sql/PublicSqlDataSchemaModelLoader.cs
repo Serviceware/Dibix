@@ -35,6 +35,15 @@ namespace Dibix.Sdk.Sql
             MethodInfo loadMethod = hostLoaderType.GetMethod("Load");
             Guard.IsNotNull(loadMethod, nameof(loadMethod), "Could find method 'Load' on 'TaskHostLoader'");
 
+            // Improve logging
+            // SqlExceptionUtils._disableFiltering = true;
+            // SqlExceptionUtils._initialized = true;
+            Type sqlExceptionUtilsType = Type.GetType("Microsoft.Data.Tools.Schema.Utilities.Sql.Common.Exceptions.SqlExceptionUtils,Microsoft.Data.Tools.Schema.Utilities.Sql", true);
+            FieldInfo disableFilteringField = TryGetStaticField(sqlExceptionUtilsType, "_disableFiltering");
+            FieldInfo initializedField = TryGetStaticField(sqlExceptionUtilsType, "_initialized");
+            Expression disableFilteringAssign = Expression.Assign(Expression.Field(null, disableFilteringField), Expression.Constant(true));
+            Expression initializedAssign = Expression.Assign(Expression.Field(null, initializedField), Expression.Constant(true));
+
             // TaskLoggingHelper logger = new TaskLoggingHelper(task);
             // Since the TaskLoggingHelper exists in both Microsoft.Build.Utilities.Core or Microsoft.Build.Utilities.v4.0,
             // based on the MSBuild version, we have to inspect the target method parameter to specify it from the correct assembly.
@@ -134,6 +143,8 @@ namespace Dibix.Sdk.Sql
                   , hostLoaderVariable
                   , errorEnumeratorVariable
                 }
+              , disableFilteringAssign
+              , initializedAssign
               , loggerAssign
               , hostLoaderAssign
               , databaseSchemaProviderNameAssign
@@ -156,6 +167,15 @@ namespace Dibix.Sdk.Sql
             );
             LoadPublicDataSchemaModel compiled = lambda.Compile();
             return compiled;
+        }
+
+        private static FieldInfo TryGetStaticField(Type type, string fieldName)
+        {
+            FieldInfo fieldInfo = type.GetField(fieldName, BindingFlags.Static | BindingFlags.NonPublic);
+            if (fieldInfo == null)
+                throw new InvalidOperationException($"Invalid field {type}{fieldName}");
+
+            return fieldInfo;
         }
 
         private delegate TSqlModel LoadPublicDataSchemaModel(string databaseSchemaProviderName, string modelCollation, ITaskItem[] source, ITaskItem[] sqlReferencePath, ITask task, IErrorReporter errorReporter);
