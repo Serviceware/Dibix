@@ -33,6 +33,7 @@ namespace Dibix.MSBuild
         {
             "Microsoft.Data.Tools.Schema.Sql"
           , "Microsoft.Data.Tools.Schema.Tasks.Sql"
+          , "Microsoft.Data.Tools.Schema.Utilities.Sql"
           , "Microsoft.SqlServer.TransactSql.ScriptDom"
           , "Microsoft.SqlServer.Dac.Extensions"
         };
