@@ -38,7 +38,7 @@ namespace Dibix.Sdk.OpenApi
 
                         OpenApiOperation operation = new OpenApiOperation();
                         operation.Tags.Add(new OpenApiTag { Name = $"{areaName}/{controller.Name}" });
-                        operation.Summary = "Undocumented action";
+                        operation.Summary = action.Description ?? "Undocumented action";
                         operation.OperationId = $"{areaName}_{controller}_{operationName}";
                         if (action.BodyContract != null)
                         {

@@ -54,6 +54,9 @@
         "target": {
           "$ref": "#/definitions/NameIdentifier"
         },
+        "description": {
+          "type": "string" 
+        },
         "body": {
           "$ref": "#/definitions/NameIdentifier"
         },

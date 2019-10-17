@@ -71,6 +71,7 @@ namespace Dibix.Sdk.CodeGeneration
             ActionDefinition actionDefinition = new ActionDefinition(actionTarget)
             {
                 Method = method,
+                Description = (string)action.Property("description")?.Value,
                 ChildRoute = (string)action.Property("childRoute")?.Value,
                 BodyContract = (string)action.Property("body")?.Value,
                 BodyBinder = (string)action.Property("bindFromBody")?.Value,

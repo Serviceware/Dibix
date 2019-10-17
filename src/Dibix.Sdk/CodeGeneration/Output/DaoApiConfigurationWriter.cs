@@ -75,6 +75,9 @@ namespace Dibix.Sdk.CodeGeneration
 
                     writer.WriteLine($"y.Method = HttpApiMethod.{action.Method};");
 
+                    if (!String.IsNullOrEmpty(action.Description))
+                        writer.WriteLine($"y.Description = \"{action.Description}\";");
+
                     if (!String.IsNullOrEmpty(action.ChildRoute))
                         writer.WriteLine($"y.ChildRoute = \"{action.ChildRoute}\";");
 
