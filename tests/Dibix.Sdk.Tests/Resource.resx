@@ -156,6 +156,15 @@
     column="84" /&gt;
 &lt;/errors&gt;</value>
   </data>
+  <data name="EmptyReturnSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="[003] Please specify a return code for the RETURN expression"
+    line="3"
+    column="2" /&gt;
+&lt;/errors&gt;</value>
+  </data>
   <data name="ImplicitAliasSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
@@ -393,15 +402,6 @@
     message="[013] Found use of CURSOR statement"
     line="3"
     column="19" /&gt;
-&lt;/errors&gt;</value>
-  </data>
-  <data name="NoReturnSqlCodeAnalysisRule" xml:space="preserve">
-    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
-&lt;errors&gt;
-  &lt;error
-    message="[003] The use of RETURN expressions is not allowed"
-    line="3"
-    column="2" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="ObsoleteDataTypeSqlCodeAnalysisRule" xml:space="preserve">

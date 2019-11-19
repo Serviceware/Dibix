@@ -10,7 +10,6 @@ namespace Dibix
     {
         #region Fields
         private readonly IDictionary<string, ParameterValue> _parameters;
-        private IParameterBuilder _parameterBuilderImplementation;
         #endregion
 
         #region Constructor

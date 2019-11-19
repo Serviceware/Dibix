@@ -11,7 +11,7 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
         public void SchemaSpecificationSqlCodeAnalysisRule() => base.Execute();
 
         [Fact]
-        public void NoReturnSqlCodeAnalysisRule() => base.Execute();
+        public void EmptyReturnSqlCodeAnalysisRule() => base.Execute();
 
         [Fact]
         public void UnicodeConstantSqlCodeAnalysisRule() => base.Execute();
