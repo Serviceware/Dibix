@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text;
 
 namespace Dibix.Http
 {
@@ -23,50 +24,59 @@ namespace Dibix.Http
         public static IHttpParameterResolutionMethod Compile(HttpActionDefinition action, ICollection<ParameterInfo> parameters)
         {
             HttpParameterResolverCompilationContext context = new HttpParameterResolverCompilationContext();
-            ICollection<HttpParameterInfo> @params = CollectParameters(action, parameters).ToArray();
+            try
+            {
+                ICollection<HttpParameterInfo> @params = CollectParameters(action, parameters, context).ToArray();
 
-            // (IDictionary<string, object> arguments, IParameterDependencyResolver dependencyResolver) => 
-            ParameterExpression argumentsParameter = Expression.Parameter(typeof(IDictionary<string, object>), "arguments");
-            ParameterExpression dependencyResolverParameter = Expression.Parameter(typeof(IParameterDependencyResolver), "dependencyResolver");
-            context.Parameters.Add(argumentsParameter);
-            context.Parameters.Add(dependencyResolverParameter);
+                // (IDictionary<string, object> arguments, IParameterDependencyResolver dependencyResolver) => 
+                ParameterExpression argumentsParameter = Expression.Parameter(typeof(IDictionary<string, object>), "arguments");
+                ParameterExpression dependencyResolverParameter = Expression.Parameter(typeof(IParameterDependencyResolver), "dependencyResolver");
+                context.Parameters.Add(argumentsParameter);
+                context.Parameters.Add(dependencyResolverParameter);
 
-            // IDatabaseAccesorFactory databaseAccesorFactory = dependencyResolver.Resolve<IDatabaseAccesorFactory>();
-            // IActionAuthorizationContext actionAuthorizationContext = dependencyResolver.Resolve<IActionAuthorizationContext>();
-            // ...
-            IDictionary<string, HttpParameterSourceExpression> sources = CollectParameterSources(action, @params, dependencyResolverParameter, argumentsParameter, context);
+                // IDatabaseAccesorFactory databaseAccesorFactory = dependencyResolver.Resolve<IDatabaseAccesorFactory>();
+                // IActionAuthorizationContext actionAuthorizationContext = dependencyResolver.Resolve<IActionAuthorizationContext>();
+                // ...
+                IDictionary<string, HttpParameterSourceExpression> sources = CollectParameterSources(action, @params, dependencyResolverParameter, argumentsParameter, context);
 
-            // SomeValueFromBody body = HttpParameterResolver.ReadBody<SomeValueFromBody>(arguments);
-            //
-            // arguments.Add("databaseAccessorFactory", databaseAccessorFactory);
-            // arguments.Add("lcid", actionAuthorizationContext.LocaleId);
-            // arguments.Add("id", body.Id);
-            //
-            // SomeInputParameterClass input = new SomeInputParameterClass();
-            // input.lcid = actionAuthorizationContext.LocaleId;
-            // input.id = (int)arguments["id"];
-            // HttpParameterResolver.BindParametersFromBody<SomeValueFromBody, SomeInputParameterClass, SomeInputBinder>(arguments, input, "input");
-            // arguments.Add("input", input);
-            //
-            // input.someUdt1 = HttpParameterResolver.ConvertParameterFromBody<SomeValueFromBody, SomeUdt1, SomeUdt1InputConverter>(arguments);
-            // HttpParameterResolver.AddParameterFromBody<SomeValueFromBody, SomeUdt1, SomeUdt1InputConverter>(arguments, "someUdt1");
-            // HttpParameterResolver.AddParameterFromBody<SomeValueFromBody, SomeUdt2, SomeUdt2InputConverter>(arguments, "someUdt2");
-            // ...
-            CollectParameterAssignments(action, @params, argumentsParameter, sources, context);
+                // SomeValueFromBody body = HttpParameterResolver.ReadBody<SomeValueFromBody>(arguments);
+                //
+                // arguments.Add("databaseAccessorFactory", databaseAccessorFactory);
+                // arguments.Add("lcid", actionAuthorizationContext.LocaleId);
+                // arguments.Add("id", body.Id);
+                //
+                // SomeInputParameterClass input = new SomeInputParameterClass();
+                // input.lcid = actionAuthorizationContext.LocaleId;
+                // input.id = HttpParameterResolver.ConvertValue<object, int>("id", arguments["id"]);
+                // HttpParameterResolver.BindParametersFromBody<SomeValueFromBody, SomeInputParameterClass, SomeInputBinder>(arguments, input, "input");
+                // arguments.Add("input", input);
+                //
+                // input.someUdt1 = HttpParameterResolver.ConvertParameterFromBody<SomeValueFromBody, SomeUdt1, SomeUdt1InputConverter>(arguments);
+                // HttpParameterResolver.AddParameterFromBody<SomeValueFromBody, SomeUdt1, SomeUdt1InputConverter>(arguments, "someUdt1");
+                // HttpParameterResolver.AddParameterFromBody<SomeValueFromBody, SomeUdt2, SomeUdt2InputConverter>(arguments, "someUdt2");
+                // ...
+                CollectParameterAssignments(action, @params, argumentsParameter, sources, context);
 
-            ResolveParameters compiled = Compile(context, out string source);
-            HttpParameterResolutionMethod method = new HttpParameterResolutionMethod(source, compiled);
-            CollectExpectedParameters(method.Parameters, @params, action.BodyContract);
-            return method;
+                ResolveParameters compiled = Compile(context, out string source);
+                HttpParameterResolutionMethod method = new HttpParameterResolutionMethod(source, compiled);
+                CollectExpectedParameters(method.Parameters, @params, action.BodyContract);
+                return method;
+            }
+            catch (Exception exception)
+            {
+                throw CreateException("Http parameter resolver compilation failed", exception, action, context.LastVisitedParameter);
+            }
         }
         #endregion
 
         #region Private Methods
         [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Helpline.Server.Application.HttpParameterResolverUtility.CreateException(Dibix.Http.HttpActionDefinition,System.String,System.String)")]
-        private static IEnumerable<HttpParameterInfo> CollectParameters(HttpActionDefinition action, IEnumerable<ParameterInfo> parameters)
+        private static IEnumerable<HttpParameterInfo> CollectParameters(HttpActionDefinition action, IEnumerable<ParameterInfo> parameters, HttpParameterResolverCompilationContext context)
         {
             foreach (ParameterInfo parameter in parameters)
             {
+                context.LastVisitedParameter = parameter.Name;
+
                 // [internal] IDatabaseAccessorFactory databaseAccessorFactory
                 if (KnownDependencies.Contains(parameter.ParameterType))
                 {
@@ -83,7 +93,7 @@ namespace Dibix.Http
                         if (action.DynamicParameters.TryGetValue(property.Name, out HttpParameterSource propertySource))
                         {
                             // [internal] SomeInputParameterClass.lcid, etc..
-                            yield return CollectNonUserParameter(action, propertySource, parameter, property.Name, property.PropertyType);
+                            yield return CollectNonUserParameter(propertySource, parameter, property.Name, property.PropertyType);
                         }
                         else if (action.BodyBinder != null)
                         {
@@ -102,11 +112,11 @@ namespace Dibix.Http
                     if (action.DynamicParameters.TryGetValue(parameter.Name, out HttpParameterSource parameterSource))
                     {
                         // [internal] lcid, etc..
-                        yield return CollectNonUserParameter(action, parameterSource, null, parameter.Name, parameter.ParameterType);
+                        yield return CollectNonUserParameter(parameterSource, null, parameter.Name, parameter.ParameterType);
                     }
                     else if (action.BodyBinder != null)
                     {
-                        throw HttpParameterResolverUtility.CreateException(action, $"Using a binder for the body is only supported if the target parameter is a class and is marked with the {typeof(InputClassAttribute)}", parameter.Name);
+                        throw new InvalidOperationException($"Using a binder for the body is only supported if the target parameter is a class and is marked with the {typeof(InputClassAttribute)}");
                     }
                     else
                     {
@@ -115,6 +125,8 @@ namespace Dibix.Http
                     }
                 }
             }
+
+            context.LastVisitedParameter = null;
         }
 
         private static HttpParameterInfo CollectUserParameter(HttpActionDefinition action, ParameterInfo contractParameter, Type parameterType, string parameterName)
@@ -128,17 +140,17 @@ namespace Dibix.Http
                 return HttpParameterInfo.Uri(contractParameter, parameterType, parameterName);
 
             sourcePropertyName = sourceProperty.Name;
-            IHttpParameterSourceProvider sourceProvider = GetSourceProvider(action, BodySourceProvider.SourceName, parameterName, parameterName);
+            IHttpParameterSourceProvider sourceProvider = GetSourceProvider(BodySourceProvider.SourceName, parameterName);
             return HttpParameterInfo.SourceProperty(contractParameter, parameterType, parameterName, sourceProvider, BodySourceProvider.SourceName, sourcePropertyName);
         }
 
         [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Helpline.Server.Application.HttpParameterResolver.CreateException(Helpline.Server.Common.Infrastructure.HttpActionDefinition,System.String,System.String)")]
-        private static HttpParameterInfo CollectNonUserParameter(HttpActionDefinition action, HttpParameterSource source, ParameterInfo contractParameter, string parameterName, Type parameterType)
+        private static HttpParameterInfo CollectNonUserParameter(HttpParameterSource source, ParameterInfo contractParameter, string parameterName, Type parameterType)
         {
             switch (source)
             {
                 case HttpParameterPropertySource propertySource:
-                    IHttpParameterSourceProvider sourceProvider = GetSourceProvider(action, propertySource.SourceName, propertySource.PropertyName, parameterName);
+                    IHttpParameterSourceProvider sourceProvider = GetSourceProvider(propertySource.SourceName, propertySource.PropertyName);
                     return HttpParameterInfo.SourceProperty(contractParameter, parameterType, parameterName, sourceProvider, propertySource.SourceName, propertySource.PropertyName);
 
                 case HttpParameterBodySource bodySource:
@@ -149,14 +161,14 @@ namespace Dibix.Http
                     return HttpParameterInfo.ConstantValue(contractParameter, parameterType, parameterName, constantSource.Value);
 
                 default:
-                    throw HttpParameterResolverUtility.CreateException(action, $"Unsupported parameter source type: '{source.GetType()}'", parameterName);
+                    throw new InvalidOperationException($"Unsupported parameter source type: '{source.GetType()}'");
             }
         }
 
-        private static IHttpParameterSourceProvider GetSourceProvider(HttpActionDefinition action, string sourceName, string sourcePropertyName, string parameterName)
+        private static IHttpParameterSourceProvider GetSourceProvider(string sourceName, string sourcePropertyName)
         {
             if (!HttpParameterSourceProviderRegistry.TryGetProvider(sourceName, out IHttpParameterSourceProvider sourceProvider))
-                throw HttpParameterResolverUtility.CreateException(action, $"Unknown source provider '{sourceName}' for property '{sourcePropertyName}'", parameterName);
+                throw new InvalidOperationException($"Unknown source provider '{sourceName}' for property '{sourcePropertyName}'");
 
             return sourceProvider;
         }
@@ -193,12 +205,16 @@ namespace Dibix.Http
                 ParameterExpression contractParameterVariable = null;
                 if (parameterGroup.Key != null)
                 {
+                    context.LastVisitedParameter = parameterGroup.Key.Name;
+
                     // SomeInputParameterClass input = new SomeInputParameterClass();
                     contractParameterVariable = CollectInputClass(context, parameterGroup.Key);
                 }
 
                 foreach (HttpParameterInfo parameter in parameterGroup)
                 {
+                    context.LastVisitedParameter = parameter.ParameterName;
+
                     if (contractParameterVariable == null)
                     {
                         if (parameter.SourceKind == HttpParameterSourceKind.Body)
@@ -209,7 +225,7 @@ namespace Dibix.Http
                         else if (!parameter.IsUserParameter)
                         {
                             // arguments.Add("lcid", actionAuthorizationContext.LocaleId);
-                            CollectNonUserParameterAssignment(context, action, parameter, argumentsParameter, sources);
+                            CollectNonUserParameterAssignment(context, parameter, argumentsParameter, sources);
                         }
                     }
                     else
@@ -225,11 +241,11 @@ namespace Dibix.Http
                         else if (!parameter.IsUserParameter)
                         {
                             // input.lcid = actionAuthorizationContext.LocaleId;
-                            CollectNonUserPropertyAssignment(context, action, parameter, contractParameterVariable, sources);
+                            CollectNonUserPropertyAssignment(context, parameter, contractParameterVariable, sources);
                         }
                         else
                         {
-                            // input.id = (int)arguments["id"];
+                            // input.id = HttpParameterResolver.ConvertValue<object, int>("id", arguments["id"]);
                             CollectUserPropertyAssignment(context, parameter, contractParameterVariable, argumentsParameter);
                         }
                     }
@@ -237,6 +253,8 @@ namespace Dibix.Http
 
                 if (contractParameterVariable != null)
                 {
+                    context.LastVisitedParameter = parameterGroup.Key.Name;
+
                     if (action.BodyBinder != null)
                     {
                         // HttpParameterResolver.BindParametersFromBody<SomeValueFromBody, SomeInputParameterClass, SomeInputBinder>(arguments, input);
@@ -247,6 +265,8 @@ namespace Dibix.Http
                     CollectParameterAssignment(context, contractParameterVariable.Name, argumentsParameter, contractParameterVariable);
                 }
             }
+
+            context.LastVisitedParameter = null;
         }
 
         private static ParameterExpression CollectInputClass(HttpParameterResolverCompilationContext context, ParameterInfo parameter)
@@ -259,30 +279,30 @@ namespace Dibix.Http
             return complexParameterVariable;
         }
 
-        private static void CollectNonUserParameterAssignment(HttpParameterResolverCompilationContext context, HttpActionDefinition action, HttpParameterInfo parameter, Expression target, IDictionary<string, HttpParameterSourceExpression> sources)
+        private static void CollectNonUserParameterAssignment(HttpParameterResolverCompilationContext context, HttpParameterInfo parameter, Expression target, IDictionary<string, HttpParameterSourceExpression> sources)
         {
             // arguments.Add("lcid", actionAuthorizationContext.LocaleId);
-            Expression value = CollectParameterValue(action, parameter, sources);
+            Expression value = CollectParameterValue(parameter, sources);
             CollectParameterAssignment(context, parameter.ParameterName, target, value);
         }
 
-        private static void CollectNonUserPropertyAssignment(HttpParameterResolverCompilationContext context, HttpActionDefinition action, HttpParameterInfo parameter, Expression target, IDictionary<string, HttpParameterSourceExpression> sources)
+        private static void CollectNonUserPropertyAssignment(HttpParameterResolverCompilationContext context, HttpParameterInfo parameter, Expression target, IDictionary<string, HttpParameterSourceExpression> sources)
         {
             // input.lcid = actionAuthorizationContext.LocaleId;
             Expression property = Expression.Property(target, parameter.ParameterName);
-            Expression value = CollectParameterValue(action, parameter, sources);
+            Expression value = CollectParameterValue(parameter, sources);
             Expression assign = Expression.Assign(property, value);
             context.Statements.Add(assign);
         }
 
         private static void CollectUserPropertyAssignment(HttpParameterResolverCompilationContext context, HttpParameterInfo parameter, Expression target, Expression argumentsParameter)
         {
-            // input.id = (int)arguments["id"];
+            // input.id = HttpParameterResolver.ConvertValue<object, int>("id", arguments["id"]);
             Expression argumentsKey = Expression.Constant(parameter.ParameterName);
             Expression property = Expression.Property(target, parameter.ParameterName);
             Expression value = Expression.Property(argumentsParameter, "Item", argumentsKey);
-            Expression valueCast = Expression.Convert(value, parameter.ParameterType);
-            Expression assign = Expression.Assign(property, valueCast);
+            Expression convertValueCall = Expression.Call(typeof(HttpParameterResolver), nameof(ConvertValue), new [] { typeof(object), parameter.ParameterType }, argumentsKey, value);
+            Expression assign = Expression.Assign(property, convertValueCall);
             context.Statements.Add(assign);
         }
 
@@ -321,7 +341,7 @@ namespace Dibix.Http
             context.Statements.Add(addArgument);
         }
 
-        private static Expression CollectParameterValue(HttpActionDefinition action, HttpParameterInfo parameter, IDictionary<string, HttpParameterSourceExpression> sources)
+        private static Expression CollectParameterValue(HttpParameterInfo parameter, IDictionary<string, HttpParameterSourceExpression> sources)
         {
             Expression value;
 
@@ -341,11 +361,11 @@ namespace Dibix.Http
                     break;
 
                 default:
-                    throw HttpParameterResolverUtility.CreateException(action, $"Value of parameter '{parameter.ParameterName}' could not be resolved");
+                    throw new InvalidOperationException($"Value of parameter '{parameter.ParameterName}' could not be resolved");
             }
 
             if (value.Type != parameter.ParameterType)
-                value = Expression.Convert(value, parameter.ParameterType);
+                value = Expression.Call(typeof(HttpParameterResolver), nameof(ConvertValue), new[] { value.Type, parameter.ParameterType }, Expression.Constant(parameter.ParameterName), value);
 
             return value;
         }
@@ -396,6 +416,41 @@ namespace Dibix.Http
             TTarget target = converter.Convert(source);
             return target;
         }
+
+        private static TTarget ConvertValue<TSource, TTarget>(string parameterName, TSource value)
+        {
+            try
+            {
+                object result = Convert.ChangeType(value, typeof(TTarget));
+                return (TTarget)result;
+            }
+            catch (Exception exception)
+            {
+                throw CreateException("Parameter mapping failed", exception, null, parameterName);
+            }
+        }
+
+        private static Exception CreateException(string message, Exception innerException, HttpActionDefinition action, string parameterName)
+        {
+            StringBuilder sb = new StringBuilder(message);
+            if (action != null)
+            {
+                sb.AppendLine()
+                  .Append("at ")
+                  .Append(action.Method.ToString().ToUpperInvariant())
+                  .Append(' ')
+                  .Append(action.ComputedUri);
+            }
+
+            if (parameterName != null)
+            {
+                sb.AppendLine()
+                  .Append("Parameter: ")
+                  .Append(parameterName);
+            }
+
+            return new InvalidOperationException(sb.ToString(), innerException);
+        }
         #endregion
 
         #region Nested Types
@@ -404,6 +459,7 @@ namespace Dibix.Http
             public ICollection<ParameterExpression> Parameters { get; }
             public ICollection<ParameterExpression> Variables { get; }
             public ICollection<Expression> Statements { get; }
+            public string LastVisitedParameter { get; set; }
 
             public HttpParameterResolverCompilationContext()
             {

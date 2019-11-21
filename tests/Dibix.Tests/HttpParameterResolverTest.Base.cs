@@ -47,16 +47,28 @@ namespace Dibix.Tests
             }
         }
 
-        private sealed class HttpParameterSourceProvider : IHttpParameterSourceProvider
+        private sealed class LocaleParameterHttpSourceProvider : IHttpParameterSourceProvider
         {
-            public Type GetInstanceType(HttpActionDefinition action) => typeof(HttpParameterSource);
+            public Type GetInstanceType(HttpActionDefinition action) => typeof(LocaleHttpParameterSource);
 
-            public Expression GetInstanceValue(Type instanceType, ParameterExpression argumentsParameter, ParameterExpression dependencyProviderParameter) => Expression.New(typeof(HttpParameterSource));
+            public Expression GetInstanceValue(Type instanceType, ParameterExpression argumentsParameter, ParameterExpression dependencyProviderParameter) => Expression.New(typeof(LocaleHttpParameterSource));
         }
 
-        private sealed class HttpParameterSource
+        private sealed class LocaleHttpParameterSource
         {
             public int LocaleId => 1033;
+        }
+
+        private sealed class ApplicationHttpParameterSourceProvider : IHttpParameterSourceProvider
+        {
+            public Type GetInstanceType(HttpActionDefinition action) => typeof(ApplicationHttpParameterSource);
+
+            public Expression GetInstanceValue(Type instanceType, ParameterExpression argumentsParameter, ParameterExpression dependencyProviderParameter) => Expression.New(typeof(ApplicationHttpParameterSource));
+        }
+
+        private sealed class ApplicationHttpParameterSource
+        {
+            public byte? ApplicationId { get; set; }
         }
 
         private sealed class ExplicitHttpBody

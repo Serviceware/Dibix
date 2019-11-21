@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
 
 namespace Dibix.Http
 {
@@ -11,7 +10,7 @@ namespace Dibix.Http
         public static Type SafeGetBodyContract(this HttpActionDefinition action)
         {
             if (action.BodyContract == null)
-                throw CreateException(action, "The body property on the action is not specified");
+                throw new InvalidOperationException("The body property on the action is not specified");
 
             return action.BodyContract;
         }
@@ -22,25 +21,6 @@ namespace Dibix.Http
                 throw new InvalidOperationException("Body is missing from arguments list");
 
             return (TBody)body;
-        }
-
-        public static Exception CreateException(HttpActionDefinition action, string message, string parameterName = null)
-        {
-            StringBuilder sb = new StringBuilder(message);
-            if (parameterName != null)
-            {
-                sb.AppendLine()
-                  .Append("Parameter: ")
-                  .Append(parameterName);
-            }
-
-            sb.AppendLine()
-              .Append("at ")
-              .Append(action.Method.ToString().ToUpperInvariant())
-              .Append(' ')
-              .Append(action.ComputedUri);
-
-            return new InvalidOperationException(sb.ToString());
         }
     }
 }

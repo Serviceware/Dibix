@@ -44,22 +44,22 @@ namespace Dibix.Tests
         [Fact]
         public void Compile_PropertySource()
         {
-            HttpParameterSourceProviderRegistry.Register<HttpParameterSourceProvider>("SESSION");
-            IHttpParameterResolutionMethod result = Compile(x => x.ResolveParameter("lcid", "SESSION", "LocaleId"));
+            HttpParameterSourceProviderRegistry.Register<LocaleParameterHttpSourceProvider>("LOCALE");
+            IHttpParameterResolutionMethod result = Compile(x => x.ResolveParameter("lcid", "LOCALE", "LocaleId"));
             Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
     Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
     .Block(
         Dibix.IDatabaseAccessorFactory $databaseaccessorfactory,
-        Dibix.Tests.HttpParameterResolverTest+HttpParameterSource $session) {
+        Dibix.Tests.HttpParameterResolverTest+LocaleHttpParameterSource $locale) {
         $databaseaccessorfactory = .Call $dependencyResolver.Resolve();
-        $session = .New Dibix.Tests.HttpParameterResolverTest+HttpParameterSource();
+        $locale = .New Dibix.Tests.HttpParameterResolverTest+LocaleHttpParameterSource();
         .Call $arguments.Add(
             ""databaseAccessorFactory"",
             (System.Object)$databaseaccessorfactory);
         .Call $arguments.Add(
             ""lcid"",
-            (System.Object)$session.LocaleId)
+            (System.Object)$locale.LocaleId)
     }
 }", result.Source);
             Assert.False(result.Parameters.Any());
@@ -80,11 +80,53 @@ namespace Dibix.Tests
         private static void Compile_PropertySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, int lcid) { }
 
         [Fact]
+        public void Compile_PropertySource_WithInvalidCast_Throws()
+        {
+            HttpParameterSourceProviderRegistry.Register<ApplicationHttpParameterSourceProvider>("APPLICATION");
+            IHttpParameterResolutionMethod result = Compile(x => x.ResolveParameter("applicationId", "APPLICATION", "ApplicationId"));
+            Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
+    System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
+    Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
+    .Block(
+        Dibix.IDatabaseAccessorFactory $databaseaccessorfactory,
+        Dibix.Tests.HttpParameterResolverTest+ApplicationHttpParameterSource $application) {
+        $databaseaccessorfactory = .Call $dependencyResolver.Resolve();
+        $application = .New Dibix.Tests.HttpParameterResolverTest+ApplicationHttpParameterSource();
+        .Call $arguments.Add(
+            ""databaseAccessorFactory"",
+            (System.Object)$databaseaccessorfactory);
+        .Call $arguments.Add(
+            ""applicationId"",
+            (System.Object).Call Dibix.Http.HttpParameterResolver.ConvertValue(
+                ""applicationId"",
+                $application.ApplicationId))
+    }
+}", result.Source);
+            Assert.False(result.Parameters.Any());
+
+            IDictionary<string, object> arguments = new Dictionary<string, object>();
+            Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
+            Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
+
+            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
+
+            Exception exception = Assert.Throws<InvalidOperationException>(() => result.PrepareParameters(arguments, dependencyResolver.Object));
+            Assert.Equal(@"Parameter mapping failed
+Parameter: applicationId", exception.Message);
+            Assert.NotNull(exception.InnerException);
+            Assert.Equal("Null object cannot be converted to a value type.", exception.InnerException.Message);
+        }
+        private static void Compile_PropertySource_WithInvalidCast_Throws_Target(IDatabaseAccessorFactory databaseAccessorFactory, byte applicationId) { }
+
+        [Fact]
         public void Compile_PropertySource_WithUnknownSource_Throws()
         {
-            Assert.Equal(@"Unknown source provider 'UNKNOWNSOURCE' for property 'LocaleId'
-Parameter: lcid
-at GET api/Dibix/Test", Assert.Throws<InvalidOperationException>(() => Compile(x => x.ResolveParameter("lcid", "UNKNOWNSOURCE", "LocaleId"))).Message);
+            Exception exception = Assert.Throws<InvalidOperationException>(() => Compile(x => x.ResolveParameter("lcid", "UNKNOWNSOURCE", "LocaleId")));
+            Assert.Equal(@"Http parameter resolver compilation failed
+at GET api/Dibix/Test
+Parameter: lcid", exception.Message);
+            Assert.NotNull(exception.InnerException);
+            Assert.Equal("Unknown source provider 'UNKNOWNSOURCE' for property 'LocaleId'", exception.InnerException.Message);
         }
         private static void Compile_PropertySource_WithUnknownSource_Throws_Target(IDatabaseAccessorFactory databaseAccessorFactory, int lcid) { }
 
@@ -113,7 +155,9 @@ at GET api/Dibix/Test", Assert.Throws<InvalidOperationException>(() => Compile(x
             ""lcid"",
             (System.Object)$body.LocaleId);
         $input = .New Dibix.Tests.HttpParameterResolverTest+ExplicitHttpParameterInput();
-        $input.targetid = (System.Int32)$body.SourceId;
+        $input.targetid = .Call Dibix.Http.HttpParameterResolver.ConvertValue(
+            ""targetid"",
+            $body.SourceId);
         .Call $arguments.Add(
             ""input"",
             (System.Object)$input)
@@ -165,9 +209,13 @@ at GET api/Dibix/Test", Assert.Throws<InvalidOperationException>(() => Compile(x
             ""userid"",
             (System.Object)$body.UserId);
         $input = .New Dibix.Tests.HttpParameterResolverTest+ImplicitBodyHttpParameterInput();
-        $input.sourceid = (System.Int32)$body.SourceId;
+        $input.sourceid = .Call Dibix.Http.HttpParameterResolver.ConvertValue(
+            ""sourceid"",
+            $body.SourceId);
         $input.localeid = $body.LocaleId;
-        $input.fromuri = (System.Int32)$arguments.Item[""fromuri""];
+        $input.fromuri = .Call Dibix.Http.HttpParameterResolver.ConvertValue(
+            ""fromuri"",
+            $arguments.Item[""fromuri""]);
         .Call $arguments.Add(
             ""input"",
             (System.Object)$input)
@@ -312,13 +360,16 @@ at GET api/Dibix/Test", Assert.Throws<InvalidOperationException>(() => Compile(x
         [Fact]
         public void Compile_BodyBinder_WithoutInputClass_Throws()
         {
-            Assert.Equal(@"Using a binder for the body is only supported if the target parameter is a class and is marked with the Dibix.InputClassAttribute
-Parameter: input
-at GET api/Dibix/Test", Assert.Throws<InvalidOperationException>(() => Compile(x =>
+            Exception exception = Assert.Throws<InvalidOperationException>(() => Compile(x =>
             {
                 x.BodyContract = typeof(ExplicitHttpBody);
                 x.BodyBinder = typeof(FormattedInputBinder);
-            })).Message);
+            }));
+            Assert.Equal(@"Http parameter resolver compilation failed
+at GET api/Dibix/Test
+Parameter: input", exception.Message);
+            Assert.NotNull(exception.InnerException);
+            Assert.Equal("Using a binder for the body is only supported if the target parameter is a class and is marked with the Dibix.InputClassAttribute", exception.InnerException.Message);
         }
         private static void Compile_BodyBinder_WithoutInputClass_Throws_Target(IDatabaseAccessorFactory databaseAccessorFactory, ExplicitHttpParameterInput input) { }
 
@@ -371,7 +422,9 @@ at GET api/Dibix/Test", Assert.Throws<InvalidOperationException>(() => Compile(x
             ""databaseAccessorFactory"",
             (System.Object)$databaseaccessorfactory);
         $input = .New Dibix.Tests.HttpParameterResolverTest+ExplicitHttpParameterInput();
-        $input.targetid = (System.Int32)$arguments.Item[""targetid""];
+        $input.targetid = .Call Dibix.Http.HttpParameterResolver.ConvertValue(
+            ""targetid"",
+            $arguments.Item[""targetid""]);
         .Call $arguments.Add(
             ""input"",
             (System.Object)$input)
