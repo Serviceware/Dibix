@@ -21,9 +21,9 @@ namespace Dibix
         IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TEleventh, TReturn>(string sql, CommandType commandType, IParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TEleventh, TReturn> map, string splitOn);
         T QuerySingle<T>(string sql, CommandType commandType, IParametersVisitor parameters);
         Task<T> QuerySingleAsync<T>(string sql, CommandType commandType, IParametersVisitor parameters);
-        TReturn QuerySingle<TReturn, TSecond>(string sql, IParametersVisitor parameters, string splitOn) where TReturn : new();
-        TReturn QuerySingle<TReturn, TSecond, TThird>(string sql, IParametersVisitor parameters, string splitOn) where TReturn : new();
-        TReturn QuerySingle<TReturn, TSecond, TThird, TFourth>(string sql, IParametersVisitor parameters, string splitOn) where TReturn : new();
+        TReturn QuerySingle<TReturn, TSecond>(string sql, CommandType commandType, IParametersVisitor parameters, string splitOn) where TReturn : new();
+        TReturn QuerySingle<TReturn, TSecond, TThird>(string sql, CommandType commandType, IParametersVisitor parameters, string splitOn) where TReturn : new();
+        TReturn QuerySingle<TReturn, TSecond, TThird, TFourth>(string sql, CommandType commandType, IParametersVisitor parameters, string splitOn) where TReturn : new();
         T QuerySingleOrDefault<T>(string sql, CommandType commandType, IParametersVisitor parameters);
         IMultipleResultReader QueryMultiple(string sql, CommandType commandType, IParametersVisitor parameters);
     }

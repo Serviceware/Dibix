@@ -60,28 +60,26 @@ namespace Dibix
 
         Task<T> IDatabaseAccessor.QuerySingleAsync<T>(string sql, CommandType commandType, IParametersVisitor parameters) => this.QuerySingleAsync<T>(sql, commandType, parameters).PostProcess();
 
-        // SubProcessOverview
-        public TReturn QuerySingle<TReturn, TSecond>(string sql, IParametersVisitor parameters, string splitOn) where TReturn : new()
+        public TReturn QuerySingle<TReturn, TSecond>(string sql, CommandType commandType, IParametersVisitor parameters, string splitOn) where TReturn : new()
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.QueryMany<TReturn, TSecond, TReturn>(sql, CommandType.Text, parameters, (a, b) => multiMapper.MapRow<TReturn>(false, a, b), splitOn)
+            return this.QueryMany<TReturn, TSecond, TReturn>(sql, commandType, parameters, (a, b) => multiMapper.MapRow<TReturn>(false, a, b), splitOn)
                        .PostProcess(multiMapper)
                        .Single();
         }
 
-        public TReturn QuerySingle<TReturn, TSecond, TThird>(string sql, IParametersVisitor parameters, string splitOn) where TReturn : new()
+        public TReturn QuerySingle<TReturn, TSecond, TThird>(string sql, CommandType commandType, IParametersVisitor parameters, string splitOn) where TReturn : new()
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.QueryMany<TReturn, TSecond, TThird, TReturn>(sql, CommandType.Text, parameters, (a, b, c) => multiMapper.MapRow<TReturn>(false, a, b, c), splitOn)
+            return this.QueryMany<TReturn, TSecond, TThird, TReturn>(sql, commandType, parameters, (a, b, c) => multiMapper.MapRow<TReturn>(false, a, b, c), splitOn)
                        .PostProcess(multiMapper)
                        .Single();
         }
 
-        // OrderManagement (GetCategoryDetail)
-        public TReturn QuerySingle<TReturn, TSecond, TThird, TFourth>(string sql, IParametersVisitor parameters, string splitOn) where TReturn : new()
+        public TReturn QuerySingle<TReturn, TSecond, TThird, TFourth>(string sql, CommandType commandType, IParametersVisitor parameters, string splitOn) where TReturn : new()
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.QueryMany<TReturn, TSecond, TThird, TFourth, TReturn>(sql, CommandType.Text, parameters, (a, b, c, d) => multiMapper.MapRow<TReturn>(false, a, b, c, d), splitOn)
+            return this.QueryMany<TReturn, TSecond, TThird, TFourth, TReturn>(sql, commandType, parameters, (a, b, c, d) => multiMapper.MapRow<TReturn>(false, a, b, c, d), splitOn)
                        .PostProcess(multiMapper)
                        .Single();
         }
