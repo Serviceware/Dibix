@@ -6,6 +6,6 @@ namespace Dibix.Http
     public interface IHttpParameterSourceProvider
     {
         Type GetInstanceType(HttpActionDefinition action);
-        Expression GetInstanceValue(Type instanceType, ParameterExpression argumentsParameter, ParameterExpression dependencyProviderParameter);
+        Expression GetInstanceValue(Type instanceType, ParameterExpression requestParameter, ParameterExpression argumentsParameter, ParameterExpression dependencyProviderParameter);
     }
 }

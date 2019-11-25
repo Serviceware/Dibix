@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
 
 namespace Dibix.Http
 {
@@ -8,6 +9,6 @@ namespace Dibix.Http
         string Source { get; }
         IDictionary<string, Type> Parameters { get; }
 
-        void PrepareParameters(IDictionary<string, object> arguments, IParameterDependencyResolver dependencyResolver);
+        void PrepareParameters(HttpRequestMessage request, IDictionary<string, object> arguments, IParameterDependencyResolver dependencyResolver);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Xml.Linq;
 using Dibix.Http;
 using Moq;
@@ -16,24 +17,26 @@ namespace Dibix.Tests
         {
             IHttpParameterResolutionMethod result = Compile();
             Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
+    System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
     Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
-    .Block(Dibix.IDatabaseAccessorFactory $databaseaccessorfactory) {
-        $databaseaccessorfactory = .Call $dependencyResolver.Resolve();
+    .Block(Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource) {
+        $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
         .Call $arguments.Add(
             ""databaseAccessorFactory"",
-            (System.Object)$databaseaccessorfactory)
+            (System.Object)$databaseaccessorfactorySource)
     }
 }", result.Source);
             Assert.False(result.Parameters.Any());
 
+            HttpRequestMessage request = new HttpRequestMessage();
             IDictionary<string, object> arguments = new Dictionary<string, object>();
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
             dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
 
-            result.PrepareParameters(arguments, dependencyResolver.Object);
+            result.PrepareParameters(request, arguments, dependencyResolver.Object);
 
             Assert.Equal(1, arguments.Count);
             Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
@@ -47,30 +50,32 @@ namespace Dibix.Tests
             HttpParameterSourceProviderRegistry.Register<LocaleParameterHttpSourceProvider>("LOCALE");
             IHttpParameterResolutionMethod result = Compile(x => x.ResolveParameter("lcid", "LOCALE", "LocaleId"));
             Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
+    System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
     Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
     .Block(
-        Dibix.IDatabaseAccessorFactory $databaseaccessorfactory,
-        Dibix.Tests.HttpParameterResolverTest+LocaleHttpParameterSource $locale) {
-        $databaseaccessorfactory = .Call $dependencyResolver.Resolve();
-        $locale = .New Dibix.Tests.HttpParameterResolverTest+LocaleHttpParameterSource();
+        Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
+        Dibix.Tests.HttpParameterResolverTest+LocaleHttpParameterSource $localeSource) {
+        $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
+        $localeSource = .New Dibix.Tests.HttpParameterResolverTest+LocaleHttpParameterSource();
         .Call $arguments.Add(
             ""databaseAccessorFactory"",
-            (System.Object)$databaseaccessorfactory);
+            (System.Object)$databaseaccessorfactorySource);
         .Call $arguments.Add(
             ""lcid"",
-            (System.Object)$locale.LocaleId)
+            (System.Object)$localeSource.LocaleId)
     }
 }", result.Source);
             Assert.False(result.Parameters.Any());
 
+            HttpRequestMessage request = new HttpRequestMessage();
             IDictionary<string, object> arguments = new Dictionary<string, object>();
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
             dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
 
-            result.PrepareParameters(arguments, dependencyResolver.Object);
+            result.PrepareParameters(request, arguments, dependencyResolver.Object);
 
             Assert.Equal(2, arguments.Count);
             Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
@@ -85,32 +90,34 @@ namespace Dibix.Tests
             HttpParameterSourceProviderRegistry.Register<ApplicationHttpParameterSourceProvider>("APPLICATION");
             IHttpParameterResolutionMethod result = Compile(x => x.ResolveParameter("applicationId", "APPLICATION", "ApplicationId"));
             Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
+    System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
     Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
     .Block(
-        Dibix.IDatabaseAccessorFactory $databaseaccessorfactory,
-        Dibix.Tests.HttpParameterResolverTest+ApplicationHttpParameterSource $application) {
-        $databaseaccessorfactory = .Call $dependencyResolver.Resolve();
-        $application = .New Dibix.Tests.HttpParameterResolverTest+ApplicationHttpParameterSource();
+        Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
+        Dibix.Tests.HttpParameterResolverTest+ApplicationHttpParameterSource $applicationSource) {
+        $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
+        $applicationSource = .New Dibix.Tests.HttpParameterResolverTest+ApplicationHttpParameterSource();
         .Call $arguments.Add(
             ""databaseAccessorFactory"",
-            (System.Object)$databaseaccessorfactory);
+            (System.Object)$databaseaccessorfactorySource);
         .Call $arguments.Add(
             ""applicationId"",
             (System.Object).Call Dibix.Http.HttpParameterResolver.ConvertValue(
                 ""applicationId"",
-                $application.ApplicationId))
+                $applicationSource.ApplicationId))
     }
 }", result.Source);
             Assert.False(result.Parameters.Any());
 
+            HttpRequestMessage request = new HttpRequestMessage();
             IDictionary<string, object> arguments = new Dictionary<string, object>();
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
             dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
 
-            Exception exception = Assert.Throws<InvalidOperationException>(() => result.PrepareParameters(arguments, dependencyResolver.Object));
+            Exception exception = Assert.Throws<InvalidOperationException>(() => result.PrepareParameters(request, arguments, dependencyResolver.Object));
             Assert.Equal(@"Parameter mapping failed
 Parameter: applicationId", exception.Message);
             Assert.NotNull(exception.InnerException);
@@ -140,24 +147,25 @@ Parameter: lcid", exception.Message);
                 x.ResolveParameter("lcid", "BODY", "LocaleId");
             });
             Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
+    System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
     Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
     .Block(
-        Dibix.IDatabaseAccessorFactory $databaseaccessorfactory,
-        Dibix.Tests.HttpParameterResolverTest+ExplicitHttpBody $body,
+        Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
+        Dibix.Tests.HttpParameterResolverTest+ExplicitHttpBody $bodySource,
         Dibix.Tests.HttpParameterResolverTest+ExplicitHttpParameterInput $input) {
-        $databaseaccessorfactory = .Call $dependencyResolver.Resolve();
-        $body = .Call Dibix.Http.HttpParameterResolverUtility.ReadBody($arguments);
+        $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
+        $bodySource = .Call Dibix.Http.HttpParameterResolverUtility.ReadBody($arguments);
         .Call $arguments.Add(
             ""databaseAccessorFactory"",
-            (System.Object)$databaseaccessorfactory);
+            (System.Object)$databaseaccessorfactorySource);
         .Call $arguments.Add(
             ""lcid"",
-            (System.Object)$body.LocaleId);
+            (System.Object)$bodySource.LocaleId);
         $input = .New Dibix.Tests.HttpParameterResolverTest+ExplicitHttpParameterInput();
         $input.targetid = .Call Dibix.Http.HttpParameterResolver.ConvertValue(
             ""targetid"",
-            $body.SourceId);
+            $bodySource.SourceId);
         .Call $arguments.Add(
             ""input"",
             (System.Object)$input)
@@ -171,13 +179,14 @@ Parameter: lcid", exception.Message);
                 SourceId = 7,
                 LocaleId = 1033
             };
+            HttpRequestMessage request = new HttpRequestMessage();
             IDictionary<string, object> arguments = new Dictionary<string, object> { { "$body", body } };
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
             dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
 
-            result.PrepareParameters(arguments, dependencyResolver.Object);
+            result.PrepareParameters(request, arguments, dependencyResolver.Object);
 
             Assert.Equal(4, arguments.Count);
             Assert.Equal(body, arguments["$body"]);
@@ -194,25 +203,26 @@ Parameter: lcid", exception.Message);
         {
             IHttpParameterResolutionMethod result = Compile(x => x.BodyContract = typeof(ImplicitHttpBody));
             Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
+    System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
     Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
     .Block(
-        Dibix.IDatabaseAccessorFactory $databaseaccessorfactory,
-        Dibix.Tests.HttpParameterResolverTest+ImplicitHttpBody $body,
+        Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
+        Dibix.Tests.HttpParameterResolverTest+ImplicitHttpBody $bodySource,
         Dibix.Tests.HttpParameterResolverTest+ImplicitBodyHttpParameterInput $input) {
-        $databaseaccessorfactory = .Call $dependencyResolver.Resolve();
-        $body = .Call Dibix.Http.HttpParameterResolverUtility.ReadBody($arguments);
+        $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
+        $bodySource = .Call Dibix.Http.HttpParameterResolverUtility.ReadBody($arguments);
         .Call $arguments.Add(
             ""databaseAccessorFactory"",
-            (System.Object)$databaseaccessorfactory);
+            (System.Object)$databaseaccessorfactorySource);
         .Call $arguments.Add(
             ""userid"",
-            (System.Object)$body.UserId);
+            (System.Object)$bodySource.UserId);
         $input = .New Dibix.Tests.HttpParameterResolverTest+ImplicitBodyHttpParameterInput();
         $input.sourceid = .Call Dibix.Http.HttpParameterResolver.ConvertValue(
             ""sourceid"",
-            $body.SourceId);
-        $input.localeid = $body.LocaleId;
+            $bodySource.SourceId);
+        $input.localeid = $bodySource.LocaleId;
         $input.fromuri = .Call Dibix.Http.HttpParameterResolver.ConvertValue(
             ""fromuri"",
             $arguments.Item[""fromuri""]);
@@ -232,6 +242,7 @@ Parameter: lcid", exception.Message);
                 LocaleId = 1033,
                 UserId = 5
             };
+            HttpRequestMessage request = new HttpRequestMessage();
             IDictionary<string, object> arguments = new Dictionary<string, object>
             {
                 { "$body", body }
@@ -243,7 +254,7 @@ Parameter: lcid", exception.Message);
 
             dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
 
-            result.PrepareParameters(arguments, dependencyResolver.Object);
+            result.PrepareParameters(request, arguments, dependencyResolver.Object);
 
             Assert.Equal(6, arguments.Count);
             Assert.Equal(2, arguments["id"]);
@@ -268,15 +279,16 @@ Parameter: lcid", exception.Message);
                 x.ResolveParameter("value", typeof(JsonToXmlConverter).AssemblyQualifiedName);
             });
             Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
+    System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
     Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
     .Block(
-        Dibix.IDatabaseAccessorFactory $databaseaccessorfactory,
+        Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
         Dibix.Tests.HttpParameterResolverTest+XmlHttpParameterInput $input) {
-        $databaseaccessorfactory = .Call $dependencyResolver.Resolve();
+        $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
         .Call $arguments.Add(
             ""databaseAccessorFactory"",
-            (System.Object)$databaseaccessorfactory);
+            (System.Object)$databaseaccessorfactorySource);
         .Call Dibix.Http.HttpParameterResolver.AddParameterFromBody(
             $arguments,
             ""value"");
@@ -291,13 +303,14 @@ Parameter: lcid", exception.Message);
             Assert.Equal(typeof(JObject), result.Parameters["$body"]);
 
             object body = JObject.Parse("{\"id\":5}");
+            HttpRequestMessage request = new HttpRequestMessage();
             IDictionary<string, object> arguments = new Dictionary<string, object> { { "$body", body } };
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
             dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
 
-            result.PrepareParameters(arguments, dependencyResolver.Object);
+            result.PrepareParameters(request, arguments, dependencyResolver.Object);
 
             Assert.Equal(4, arguments.Count);
             Assert.Equal(body, arguments["$body"]);
@@ -318,15 +331,16 @@ Parameter: lcid", exception.Message);
                 x.BodyBinder = typeof(FormattedInputBinder);
             });
             Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
+    System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
     Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
     .Block(
-        Dibix.IDatabaseAccessorFactory $databaseaccessorfactory,
+        Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
         Dibix.Tests.HttpParameterResolverTest+ExplicitHttpParameterInput $input) {
-        $databaseaccessorfactory = .Call $dependencyResolver.Resolve();
+        $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
         .Call $arguments.Add(
             ""databaseAccessorFactory"",
-            (System.Object)$databaseaccessorfactory);
+            (System.Object)$databaseaccessorfactorySource);
         $input = .New Dibix.Tests.HttpParameterResolverTest+ExplicitHttpParameterInput();
         .Call Dibix.Http.HttpParameterResolver.BindParametersFromBody(
             $arguments,
@@ -340,13 +354,14 @@ Parameter: lcid", exception.Message);
             Assert.Equal(typeof(ExplicitHttpBody), result.Parameters["$body"]);
 
             object body = new ExplicitHttpBody { SourceId = 7 };
+            HttpRequestMessage request = new HttpRequestMessage();
             IDictionary<string, object> arguments = new Dictionary<string, object> { { "$body", body } };
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
             dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
 
-            result.PrepareParameters(arguments, dependencyResolver.Object);
+            result.PrepareParameters(request, arguments, dependencyResolver.Object);
 
             Assert.Equal(3, arguments.Count);
             Assert.Equal(body, arguments["$body"]);
@@ -378,13 +393,14 @@ Parameter: input", exception.Message);
         {
             IHttpParameterResolutionMethod result = Compile(x => x.ResolveParameter("value", true));
             Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
+    System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
     Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
-    .Block(Dibix.IDatabaseAccessorFactory $databaseaccessorfactory) {
-        $databaseaccessorfactory = .Call $dependencyResolver.Resolve();
+    .Block(Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource) {
+        $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
         .Call $arguments.Add(
             ""databaseAccessorFactory"",
-            (System.Object)$databaseaccessorfactory);
+            (System.Object)$databaseaccessorfactorySource);
         .Call $arguments.Add(
             ""value"",
             (System.Object)True)
@@ -392,13 +408,14 @@ Parameter: input", exception.Message);
 }", result.Source);
             Assert.False(result.Parameters.Any());
 
+            HttpRequestMessage request = new HttpRequestMessage();
             IDictionary<string, object> arguments = new Dictionary<string, object>();
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
             dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
 
-            result.PrepareParameters(arguments, dependencyResolver.Object);
+            result.PrepareParameters(request, arguments, dependencyResolver.Object);
 
             Assert.Equal(2, arguments.Count);
             Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
@@ -412,15 +429,16 @@ Parameter: input", exception.Message);
         {
             IHttpParameterResolutionMethod result = Compile();
             Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
+    System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
     Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
     .Block(
-        Dibix.IDatabaseAccessorFactory $databaseaccessorfactory,
+        Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
         Dibix.Tests.HttpParameterResolverTest+ExplicitHttpParameterInput $input) {
-        $databaseaccessorfactory = .Call $dependencyResolver.Resolve();
+        $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
         .Call $arguments.Add(
             ""databaseAccessorFactory"",
-            (System.Object)$databaseaccessorfactory);
+            (System.Object)$databaseaccessorfactorySource);
         $input = .New Dibix.Tests.HttpParameterResolverTest+ExplicitHttpParameterInput();
         $input.targetid = .Call Dibix.Http.HttpParameterResolver.ConvertValue(
             ""targetid"",
@@ -434,13 +452,14 @@ Parameter: input", exception.Message);
             Assert.Equal(typeof(int), result.Parameters["targetid"]);
             Assert.Equal(typeof(int), result.Parameters["id"]);
 
+            HttpRequestMessage request = new HttpRequestMessage();
             IDictionary<string, object> arguments = new Dictionary<string, object> { { "targetid", 9 } };
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
             dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
 
-            result.PrepareParameters(arguments, dependencyResolver.Object);
+            result.PrepareParameters(request, arguments, dependencyResolver.Object);
 
             Assert.Equal(3, arguments.Count);
             Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
@@ -450,5 +469,48 @@ Parameter: input", exception.Message);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
         private static void Compile_UriSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpParameterInput input, int id) { }
+
+        [Fact]
+        public void Compile_RequestSource()
+        {
+            IHttpParameterResolutionMethod result = Compile(x =>
+            {
+                x.ResolveParameter("regionLanguage", "REQUEST", "Language");
+            });
+            Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
+    System.Net.Http.HttpRequestMessage $request,
+    System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
+    Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
+    .Block(
+        Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
+        Dibix.Http.RequestParameterSource $requestSource) {
+        $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
+        $requestSource = .New Dibix.Http.RequestParameterSource($request);
+        .Call $arguments.Add(
+            ""databaseAccessorFactory"",
+            (System.Object)$databaseaccessorfactorySource);
+        .Call $arguments.Add(
+            ""regionLanguage"",
+            (System.Object)$requestSource.Language)
+    }
+}", result.Source);
+            Assert.False(result.Parameters.Any());
+
+            HttpRequestMessage request = new HttpRequestMessage();
+            request.Headers.Add("Accept-Language", "en-US,en;q=0.5");
+            IDictionary<string, object> arguments = new Dictionary<string, object>();
+            Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
+            Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
+
+            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
+
+            result.PrepareParameters(request, arguments, dependencyResolver.Object);
+
+            Assert.Equal(2, arguments.Count);
+            Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
+            Assert.Equal("en-US", arguments["regionLanguage"]);
+            dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
+        }
+        private static void Compile_RequestSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, string regionLanguage) { }
     }
 }

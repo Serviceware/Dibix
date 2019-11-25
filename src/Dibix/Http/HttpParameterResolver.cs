@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Net.Http;
 using System.Reflection;
 using System.Text;
 
@@ -17,7 +18,7 @@ namespace Dibix.Http
         #endregion
 
         #region Delegates
-        private delegate void ResolveParameters(IDictionary<string, object> arguments, IParameterDependencyResolver dependencyResolver);
+        private delegate void ResolveParameters(HttpRequestMessage request, IDictionary<string, object> arguments, IParameterDependencyResolver dependencyResolver);
         #endregion
 
         #region Public Methods
@@ -28,16 +29,18 @@ namespace Dibix.Http
             {
                 ICollection<HttpParameterInfo> @params = CollectParameters(action, parameters, context).ToArray();
 
-                // (IDictionary<string, object> arguments, IParameterDependencyResolver dependencyResolver) => 
+                // (HttpRequestMessage request, IDictionary<string, object> arguments, IParameterDependencyResolver dependencyResolver) => 
+                ParameterExpression requestParameter = Expression.Parameter(typeof(HttpRequestMessage), "request");
                 ParameterExpression argumentsParameter = Expression.Parameter(typeof(IDictionary<string, object>), "arguments");
                 ParameterExpression dependencyResolverParameter = Expression.Parameter(typeof(IParameterDependencyResolver), "dependencyResolver");
+                context.Parameters.Add(requestParameter);
                 context.Parameters.Add(argumentsParameter);
                 context.Parameters.Add(dependencyResolverParameter);
 
                 // IDatabaseAccesorFactory databaseAccesorFactory = dependencyResolver.Resolve<IDatabaseAccesorFactory>();
                 // IActionAuthorizationContext actionAuthorizationContext = dependencyResolver.Resolve<IActionAuthorizationContext>();
                 // ...
-                IDictionary<string, HttpParameterSourceExpression> sources = CollectParameterSources(action, @params, dependencyResolverParameter, argumentsParameter, context);
+                IDictionary<string, HttpParameterSourceExpression> sources = CollectParameterSources(action, @params, requestParameter, argumentsParameter, dependencyResolverParameter, context);
 
                 // SomeValueFromBody body = HttpParameterResolver.ReadBody<SomeValueFromBody>(arguments);
                 //
@@ -140,8 +143,8 @@ namespace Dibix.Http
                 return HttpParameterInfo.Uri(contractParameter, parameterType, parameterName);
 
             sourcePropertyName = sourceProperty.Name;
-            IHttpParameterSourceProvider sourceProvider = GetSourceProvider(BodySourceProvider.SourceName, parameterName);
-            return HttpParameterInfo.SourceProperty(contractParameter, parameterType, parameterName, sourceProvider, BodySourceProvider.SourceName, sourcePropertyName);
+            IHttpParameterSourceProvider sourceProvider = GetSourceProvider(BodyParameterSourceProvider.SourceName, parameterName);
+            return HttpParameterInfo.SourceProperty(contractParameter, parameterType, parameterName, sourceProvider, BodyParameterSourceProvider.SourceName, sourcePropertyName);
         }
 
         [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Helpline.Server.Application.HttpParameterResolver.CreateException(Helpline.Server.Common.Infrastructure.HttpActionDefinition,System.String,System.String)")]
@@ -173,12 +176,12 @@ namespace Dibix.Http
             return sourceProvider;
         }
 
-        private static IDictionary<string, HttpParameterSourceExpression> CollectParameterSources(HttpActionDefinition action, IEnumerable<HttpParameterInfo> @params, ParameterExpression dependencyResolverParameter, ParameterExpression argumentsParameter, HttpParameterResolverCompilationContext context)
+        private static IDictionary<string, HttpParameterSourceExpression> CollectParameterSources(HttpActionDefinition action, IEnumerable<HttpParameterInfo> @params, ParameterExpression requestParameter, ParameterExpression argumentsParameter, ParameterExpression dependencyResolverParameter, HttpParameterResolverCompilationContext context)
         {
             IDictionary<string, HttpParameterSourceExpression> sources = @params.Where(x => x.SourceKind == HttpParameterSourceKind.SourceInstance
                                                                                          || x.SourceKind == HttpParameterSourceKind.SourceProperty)
                                                                                 .GroupBy(x => new { x.Source.SourceProvider, x.Source.Name })
-                                                                                .Select(x => BuildParameterSource(action, x.Key.Name, x.Key.SourceProvider, dependencyResolverParameter, argumentsParameter))
+                                                                                .Select(x => BuildParameterSource(action, x.Key.Name, x.Key.SourceProvider, requestParameter, argumentsParameter, dependencyResolverParameter))
                                                                                 .ToDictionary(x => x.Key, x => x.Value);
             foreach (HttpParameterSourceExpression source in sources.Values)
             {
@@ -190,11 +193,11 @@ namespace Dibix.Http
         }
 
         [SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase")]
-        private static KeyValuePair<string, HttpParameterSourceExpression> BuildParameterSource(HttpActionDefinition action, string sourceName, IHttpParameterSourceProvider sourceProvider, ParameterExpression dependencyResolverParameter, ParameterExpression argumentsParameter)
+        private static KeyValuePair<string, HttpParameterSourceExpression> BuildParameterSource(HttpActionDefinition action, string sourceName, IHttpParameterSourceProvider sourceProvider, ParameterExpression requestParameter, ParameterExpression argumentsParameter, ParameterExpression dependencyResolverParameter)
         {
             Type instanceType = sourceProvider.GetInstanceType(action);
-            ParameterExpression sourceVariable = Expression.Variable(instanceType, sourceName.ToLowerInvariant());
-            Expression sourceAssign = Expression.Assign(sourceVariable, sourceProvider.GetInstanceValue(instanceType, argumentsParameter, dependencyResolverParameter));
+            ParameterExpression sourceVariable = Expression.Variable(instanceType, $"{sourceName.ToLowerInvariant()}Source");
+            Expression sourceAssign = Expression.Assign(sourceVariable, sourceProvider.GetInstanceValue(instanceType, requestParameter, argumentsParameter, dependencyResolverParameter));
             return new KeyValuePair<string, HttpParameterSourceExpression>(sourceName, new HttpParameterSourceExpression(sourceVariable, sourceAssign));
         }
 
@@ -549,9 +552,9 @@ namespace Dibix.Http
                 this.Parameters = new Dictionary<string, Type>();
             }
 
-            public void PrepareParameters(IDictionary<string, object> arguments, IParameterDependencyResolver dependencyResolver)
+            public void PrepareParameters(HttpRequestMessage request, IDictionary<string, object> arguments, IParameterDependencyResolver dependencyResolver)
             {
-                this._compiled(arguments, dependencyResolver);
+                this._compiled(request, arguments, dependencyResolver);
             }
         }
         #endregion

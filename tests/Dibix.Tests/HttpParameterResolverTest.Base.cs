@@ -51,7 +51,7 @@ namespace Dibix.Tests
         {
             public Type GetInstanceType(HttpActionDefinition action) => typeof(LocaleHttpParameterSource);
 
-            public Expression GetInstanceValue(Type instanceType, ParameterExpression argumentsParameter, ParameterExpression dependencyProviderParameter) => Expression.New(typeof(LocaleHttpParameterSource));
+            public Expression GetInstanceValue(Type instanceType, ParameterExpression requestParameter, ParameterExpression argumentsParameter, ParameterExpression dependencyProviderParameter) => Expression.New(typeof(LocaleHttpParameterSource));
         }
 
         private sealed class LocaleHttpParameterSource
@@ -63,7 +63,7 @@ namespace Dibix.Tests
         {
             public Type GetInstanceType(HttpActionDefinition action) => typeof(ApplicationHttpParameterSource);
 
-            public Expression GetInstanceValue(Type instanceType, ParameterExpression argumentsParameter, ParameterExpression dependencyProviderParameter) => Expression.New(typeof(ApplicationHttpParameterSource));
+            public Expression GetInstanceValue(Type instanceType, ParameterExpression requestParameter, ParameterExpression argumentsParameter, ParameterExpression dependencyProviderParameter) => Expression.New(typeof(ApplicationHttpParameterSource));
         }
 
         private sealed class ApplicationHttpParameterSource

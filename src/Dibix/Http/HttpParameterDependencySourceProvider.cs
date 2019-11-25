@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
+using System.Net.Http;
 
 namespace Dibix.Http
 {
@@ -11,6 +12,6 @@ namespace Dibix.Http
 
         public Type GetInstanceType(HttpActionDefinition action) => this._type;
 
-        public Expression GetInstanceValue(Type instanceType, ParameterExpression argumentsParameter, ParameterExpression dependencyProviderParameter) => Expression.Call(dependencyProviderParameter, nameof(IParameterDependencyResolver.Resolve), new[] { instanceType });
+        public Expression GetInstanceValue(Type instanceType, ParameterExpression requestParameter, ParameterExpression argumentsParameter, ParameterExpression dependencyProviderParameter) => Expression.Call(dependencyProviderParameter, nameof(IParameterDependencyResolver.Resolve), new[] { instanceType });
     }
 }
