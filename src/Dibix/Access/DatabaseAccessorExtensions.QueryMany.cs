@@ -26,6 +26,12 @@ namespace Dibix
         {
             return QueryMany(accessor, sql, CommandType.Text, EmptyParameters.Instance, map, splitOn);
         }
+        // Workflow (GetPendingWorkflowActionRequests)
+        public static IEnumerable<TReturn> QueryMany<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, string splitOn) where TReturn : new()
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
+            return accessor.QueryMany<TReturn, TSecond>(sql, CommandType.Text, EmptyParameters.Instance, splitOn);
+        }
         // TaskMgmt (GetUserTaskAggregates)
         public static IEnumerable<TReturn> QueryMany<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, string splitOn) where TReturn : new()
         {
