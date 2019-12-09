@@ -21,7 +21,6 @@ namespace Dibix.MSBuild
         public string[] Contracts { get; set; }
         public string[] Endpoints { get; set; }
         public string[] References { get; set; }
-        public bool MultipleAreas { get; set; }
         public bool EmbedStatements { get; set; }
 
         [Output]
@@ -38,7 +37,6 @@ namespace Dibix.MSBuild
             yield return this.Contracts;
             yield return this.Endpoints;
             yield return this.References;
-            yield return this.MultipleAreas;
             yield return this.EmbedStatements;
             yield return base.Log;
             yield return null;

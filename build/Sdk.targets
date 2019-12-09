@@ -145,7 +145,6 @@
                         Contracts="@(Contract)"
                         Endpoints="@(Endpoint)"
                         References="@(ServerCompilationReference)"
-                        MultipleAreas="$(MultipleAreas)"
                         IsIDEBuild="$(BuildingInsideVisualStudio)"
                         EmbedStatements="$(EmbedStatements)">
       <Output TaskParameter="DetectedReferences" ItemName="ServerCompilationReference" />

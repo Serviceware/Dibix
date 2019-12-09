@@ -18,7 +18,6 @@ namespace Dibix.Sdk.MSBuild
           , ICollection<string> contracts
           , ICollection<string> endpoints
           , ICollection<string> references
-          , bool multipleAreas
           , bool embedStatements
           , TaskLoggingHelper logger
           , out string[] detectedReferences
@@ -36,7 +35,6 @@ namespace Dibix.Sdk.MSBuild
               , contracts ?? new string[0]
               , endpoints ?? new string[0]
               , references ?? new string[0]
-              , multipleAreas
               , embedStatements
               , errorReporter
             );

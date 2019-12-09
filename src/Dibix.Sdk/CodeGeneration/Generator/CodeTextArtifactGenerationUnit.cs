@@ -18,7 +18,6 @@ namespace Dibix.Sdk.CodeGeneration
               , context.Controllers
               , context.References
               , this.CodeArtifactKind
-              , context.MultipleAreas
               , context.EmbedStatements
               , context.FileSystemProvider
               , context.ContractDefinitionProvider

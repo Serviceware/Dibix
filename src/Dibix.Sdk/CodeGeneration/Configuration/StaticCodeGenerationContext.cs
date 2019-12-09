@@ -27,7 +27,6 @@ namespace Dibix.Sdk.CodeGeneration
           , IEnumerable<ControllerDefinition> endpoints
           , IEnumerable<string> references
           , CodeArtifactKind codeArtifactKind
-          , bool multipleAreas
           , bool embedStatements
           , IFileSystemProvider fileSystemProvider
           , IContractDefinitionProvider contractDefinitionProvider
