@@ -30,10 +30,11 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.5'">
     <Compile Remove="Http\DatabaseAccessorExtensions.Http.cs" />
     <Compile Remove="Http\Http*Response.cs" />
-    
-    <PackageReference Include="System.Reflection" Version="$(ReflectionVersion)" />
-    <PackageReference Include="System.Data.SqlClient" Version="$(SqlClientVersion)" />
+
     <PackageReference Include="System.ComponentModel.Annotations" Version="$(DataAnnotationsVersion)" />
+    <PackageReference Include="System.Data.SqlClient" Version="$(SqlClientVersion)" />
+    <PackageReference Include="System.Diagnostics.Process" Version="$(DiagnosticsProcessVersion)" />
+    <PackageReference Include="System.Reflection" Version="$(ReflectionVersion)" />
   </ItemGroup>
   
   <ItemGroup Condition="'$(TargetFramework)' == 'net451'">

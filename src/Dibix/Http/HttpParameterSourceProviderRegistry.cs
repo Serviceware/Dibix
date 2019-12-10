@@ -13,6 +13,7 @@ namespace Dibix.Http
         {
             Register<BodyParameterSourceProvider>(BodyParameterSourceProvider.SourceName);
             Register<RequestParameterSourceProvider>(RequestParameterSourceProvider.SourceName);
+            Register<EnvironmentParameterSourceProvider>(EnvironmentParameterSourceProvider.SourceName);
         }
 
         public static void Register<T>(string name) where T : IHttpParameterSourceProvider, new() => Map.Add(name, new Lazy<IHttpParameterSourceProvider>(() => new T()));

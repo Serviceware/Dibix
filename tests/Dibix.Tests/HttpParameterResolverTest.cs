@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Xml.Linq;
@@ -512,5 +513,52 @@ Parameter: input", exception.Message);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
         private static void Compile_RequestSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, string regionLanguage) { }
+
+        [Fact]
+        public void Compile_EnvironmentSource()
+        {
+            IHttpParameterResolutionMethod result = Compile(x =>
+            {
+                x.ResolveParameter("machineName", "ENV", "MachineName");
+                x.ResolveParameter("pid", "ENV", "CurrentProcessId");
+            });
+            Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
+    System.Net.Http.HttpRequestMessage $request,
+    System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
+    Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
+    .Block(
+        Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
+        Dibix.Http.EnvironmentParameterSource $envSource) {
+        $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
+        $envSource = .New Dibix.Http.EnvironmentParameterSource();
+        .Call $arguments.Add(
+            ""databaseAccessorFactory"",
+            (System.Object)$databaseaccessorfactorySource);
+        .Call $arguments.Add(
+            ""machineName"",
+            (System.Object)$envSource.MachineName);
+        .Call $arguments.Add(
+            ""pid"",
+            (System.Object)$envSource.CurrentProcessId)
+    }
+}", result.Source);
+            Assert.False(result.Parameters.Any());
+
+            HttpRequestMessage request = new HttpRequestMessage();
+            IDictionary<string, object> arguments = new Dictionary<string, object>();
+            Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
+            Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
+
+            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
+
+            result.PrepareParameters(request, arguments, dependencyResolver.Object);
+
+            Assert.Equal(3, arguments.Count);
+            Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
+            Assert.Equal(Environment.MachineName, arguments["machineName"]);
+            Assert.Equal(Process.GetCurrentProcess().Id, arguments["pid"]);
+            dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
+        }
+        private static void Compile_EnvironmentSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, string machineName, int pid) { }
     }
 }
