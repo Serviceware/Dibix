@@ -79,6 +79,8 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 if (node.DataType is UserDataTypeReference userDataType)
                 {
+                    parameter.TypeName = $"[{userDataType.Name.SchemaIdentifier.Value}].[{userDataType.Name.BaseIdentifier.Value}]";
+
                     // Type name hint is the only way to determine the UDT .NET type, that's why it's required
                     if (String.IsNullOrEmpty(parameter.ClrTypeName))
                         this.ErrorReporter.RegisterError(this.Target.Source, node.StartLine, node.StartColumn, null, $@"Could not determine CLR type for table value parameter
@@ -86,7 +88,6 @@ Parameter name: {parameter.Name}
 UDT type: {parameter.TypeName}
 Please mark it with /* @ClrType <ClrTypeName> */");
 
-                    parameter.TypeName = $"[{userDataType.Name.SchemaIdentifier.Value}].[{userDataType.Name.BaseIdentifier.Value}]";
                     parameter.Check = ContractCheck.NotNull;
                 }
                 else
