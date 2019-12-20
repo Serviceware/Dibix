@@ -24,10 +24,10 @@ namespace Dibix.Sdk.Sql
         #endregion
 
         #region Public Methods
-        public IEnumerable<Constraint> GetConstraints(TSqlModel model, SchemaObjectName tableName)
+        public IEnumerable<Constraint> GetConstraints(TSqlModel model, SchemaObjectName tableName, bool throwOnError)
         {
-            TSqlObject table = this.GetTable(model, tableName);
-            return this.GetConstraints(table);
+            TSqlObject table = this.GetTable(model, tableName, throwOnError);
+            return table != null ? this.GetConstraints(table) : Enumerable.Empty<Constraint>();
         }
 
         public IEnumerable<Index> GetIndexes(TSqlModel model, SchemaObjectName tableName)
@@ -68,14 +68,14 @@ namespace Dibix.Sdk.Sql
         #endregion
 
         #region Private Methods
-        private TSqlObject GetTable(TSqlModel model, SchemaObjectName name)
+        private TSqlObject GetTable(TSqlModel model, SchemaObjectName name, bool throwOnError = true)
         {
             ObjectIdentifier id = new ObjectIdentifier(name.Identifiers.Select(x => x.Value));
             if (name.SchemaIdentifier == null)
                 id.Parts.Insert(0, SqlModel.DefaultSchemaName);
 
             TSqlObject table = model.GetObject(this.ObjectType, id, DacQueryScopes.UserDefined);
-            if (table == null)
+            if (table == null && throwOnError)
                 throw new InvalidOperationException($"Could not find table in model: {id}");
 
             return table;

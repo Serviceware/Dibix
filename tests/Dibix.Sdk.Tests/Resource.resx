@@ -350,6 +350,15 @@
     column="2" /&gt;
 &lt;/errors&gt;</value>
   </data>
+  <data name="MisusedTopRowFilterSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="[022] Missing ORDER BY for SELECT TOP statement"
+    line="3"
+    column="3" /&gt;
+&lt;/errors&gt;</value>
+  </data>
   <data name="NamingConventionSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
@@ -930,15 +939,6 @@ namespace This.Is.A.Custom.Namespace
     message="[021] The use of temporary tables is not allowed: #dbx_codeanalysis_error_021"
     line="3"
     column="22" /&gt;
-&lt;/errors&gt;</value>
-  </data>
-  <data name="TopWithoutOrderBySqlCodeAnalysisRule" xml:space="preserve">
-    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
-&lt;errors&gt;
-  &lt;error
-    message="[022] Missing ORDER BY for SELECT TOP statement"
-    line="3"
-    column="3" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="TruncateTableSqlCodeAnalysisRule" xml:space="preserve">
