@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
@@ -13,6 +14,24 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
     public sealed class MisusedTopRowFilterSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
     {
+        private readonly IDictionary<string, TableVariable> _tableVariablesWithKey;
+
+        public MisusedTopRowFilterSqlCodeAnalysisRuleVisitor()
+        {
+            this._tableVariablesWithKey = new Dictionary<string, TableVariable>();
+        }
+
+        // Visit whole statement before this visitor
+        public override void ExplicitVisit(TSqlScript node)
+        {
+            TableVariableWithKeyVisitor tableVariableVisitor = new TableVariableWithKeyVisitor();
+            node.AcceptChildren(tableVariableVisitor);
+
+            this._tableVariablesWithKey.AddRange(tableVariableVisitor.TableVariables.ToDictionary(x => x.Name));
+
+            base.ExplicitVisit(node);
+        }
+
         public override void Visit(QuerySpecification node)
         {
             if (node.TopRowFilter == null) 
@@ -20,25 +39,112 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
             if (node.WhereClause != null
              && node.FromClause != null
-             && node.FromClause.TableReferences.Count == 1
-             && node.FromClause.TableReferences[0] is NamedTableReference namedTable)
+             && node.FromClause.TableReferences.Any()
+             && this.IsSingleEqualityCondition(node.FromClause.TableReferences[0], node.WhereClause))
             {
-                string tableAlias = namedTable.Alias?.Value;
-                Constraint primaryKey = base.Model.GetConstraints(namedTable.SchemaObject, throwOnError: false).SingleOrDefault(x => x.Kind == ConstraintKind.PrimaryKey);
-                if (primaryKey != null)
-                {
-                    KeyComparisonVisitor keyComparisonVisitor = new KeyComparisonVisitor(tableAlias, primaryKey.Columns.Select(x => x.Name).ToArray());
-                    node.WhereClause.Accept(keyComparisonVisitor);
-                    if (keyComparisonVisitor.Success)
-                    {
-                        base.Fail(node, "Invalid TOP filter for single row equality statement");
-                        return;
-                    }
-                }
+                base.Fail(node.TopRowFilter, "Invalid TOP filter for single row equality statement");
+                return;
             }
 
             if (node.OrderByClause == null) 
                 base.Fail(node.TopRowFilter, "Missing ORDER BY for SELECT TOP statement");
+        }
+
+        private bool IsSingleEqualityCondition(TableReference tableReference, WhereClause whereClause)
+        {
+            if (tableReference is QualifiedJoin joinReference)
+            {
+                return IsSingleEqualityConditionCore(joinReference.FirstTableReference, whereClause)
+                    || IsSingleEqualityConditionCore(joinReference.SecondTableReference, whereClause);
+            }
+
+            return IsSingleEqualityConditionCore(tableReference, whereClause);
+        }
+
+        private bool IsSingleEqualityConditionCore(TableReference tableReference, WhereClause whereClause)
+        {
+            ICollection<string> primaryKeyColumns = this.DeterminePrimaryKeyColumns(tableReference).ToArray();
+            if (!primaryKeyColumns.Any()) 
+                return false;
+
+            string alias = null;
+            if (tableReference is TableReferenceWithAlias tableReferenceWithAlias)
+                alias = tableReferenceWithAlias.Alias?.Value;
+
+            KeyComparisonVisitor keyComparisonVisitor = new KeyComparisonVisitor(alias, primaryKeyColumns);
+            whereClause.Accept(keyComparisonVisitor);
+            return keyComparisonVisitor.Success;
+        }
+
+        private IEnumerable<string> DeterminePrimaryKeyColumns(TableReference tableReference)
+        {
+            switch (tableReference)
+            {
+                case NamedTableReference namedTable:
+                {
+                    Constraint primaryKey = base.Model.GetConstraints(namedTable.SchemaObject, throwOnError: false).SingleOrDefault(x => x.Kind == ConstraintKind.PrimaryKey);
+                    if (primaryKey != null)
+                        return primaryKey.Columns.Select(x => x.Name);
+
+                    break;
+                }
+
+                case VariableTableReference variableTable:
+
+                    if (this._tableVariablesWithKey.TryGetValue(variableTable.Variable.Name, out TableVariable tableVariable))
+                        return tableVariable.PrimaryKeyColumns;
+
+                    break;
+            }
+
+            return Enumerable.Empty<string>();
+        }
+
+        private class TableVariableWithKeyVisitor : TSqlFragmentVisitor
+        {
+            public ICollection<TableVariable> TableVariables { get; }
+
+            public TableVariableWithKeyVisitor()
+            {
+                this.TableVariables = new Collection<TableVariable>();
+            }
+
+            public override void Visit(DeclareTableVariableBody node)
+            {
+                TableVariable tableVariable = new TableVariable(node.VariableName.Value);
+                tableVariable.PrimaryKeyColumns.AddRange(GetPrimaryKeyColumns(node.Definition));
+                this.TableVariables.Add(tableVariable);
+            }
+
+            private static IEnumerable<string> GetPrimaryKeyColumns(TableDefinition table)
+            {
+                // Look for global primary key constraint
+                UniqueConstraintDefinition primaryKeyConstraint = table.TableConstraints.OfType<UniqueConstraintDefinition>().SingleOrDefault(x => x.IsPrimaryKey);
+                if (primaryKeyConstraint != null)
+                {
+                    foreach (ColumnWithSortOrder column in primaryKeyConstraint.Columns)
+                    {
+                        yield return column.Column.GetName().Value;
+                    }
+                }
+
+                // Look for a primary key column
+                ColumnDefinition primaryKeyColumn = table.ColumnDefinitions.SingleOrDefault(x => x.Constraints.OfType<UniqueConstraintDefinition>().Any(y => y.IsPrimaryKey));
+                if (primaryKeyColumn != null)
+                    yield return primaryKeyColumn.ColumnIdentifier.Value;
+            }
+        }
+
+        private class TableVariable
+        {
+            public string Name { get; }
+            public ICollection<string> PrimaryKeyColumns { get; }
+
+            public TableVariable(string name)
+            {
+                this.Name = name;
+                this.PrimaryKeyColumns = new Collection<string>();
+            }
         }
 
         private class KeyComparisonVisitor : TSqlFragmentVisitor

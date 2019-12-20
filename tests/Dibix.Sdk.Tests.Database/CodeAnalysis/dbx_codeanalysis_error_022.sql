@@ -19,4 +19,8 @@ AS
   FROM [dbo].[dbx_codeanalysis_error_022_table]
   WHERE [a] = 1 AND [b] > 0 AND [b] = 2
 
-  DECLARE @t TABLE([i] INT NOT NULL, PRIMARY KEY([i]))
+  DECLARE @t TABLE([x] INT NOT NULL, [i] INT NOT NULL, PRIMARY KEY([i]))
+
+  SELECT TOP 1 1
+  FROM @t
+  WHERE [x] = 1 AND [i] = 5

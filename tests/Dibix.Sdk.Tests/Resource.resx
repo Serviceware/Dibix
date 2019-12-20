@@ -355,8 +355,16 @@
 &lt;errors&gt;
   &lt;error
     message="[022] Missing ORDER BY for SELECT TOP statement"
-    line="3"
-    column="3" /&gt;
+    line="10"
+    column="10" /&gt;
+  &lt;error
+    message="[022] Invalid TOP filter for single row equality statement"
+    line="18"
+    column="10" /&gt;
+  &lt;error
+    message="[022] Invalid TOP filter for single row equality statement"
+    line="24"
+    column="10" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="NamingConventionSqlCodeAnalysisRule" xml:space="preserve">

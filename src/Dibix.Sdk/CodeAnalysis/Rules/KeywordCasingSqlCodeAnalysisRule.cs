@@ -45,13 +45,16 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         };
         private IdentifierVisitor _identifierVisitor;
 
-        public override void Visit(TSqlStatement node)
+        // Visit whole statement before this visitor
+        public override void ExplicitVisit(TSqlScript node)
         {
             if (this._identifierVisitor != null)
                 return;
 
             this._identifierVisitor = new IdentifierVisitor(this.Check);
             node.AcceptChildren(this._identifierVisitor);
+
+            base.ExplicitVisit(node);
         }
 
         protected override void Visit(TSqlParserToken token)
