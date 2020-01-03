@@ -31,12 +31,12 @@ namespace Dibix.Sdk.CodeGeneration
             IWriter writer = (IWriter)Activator.CreateInstance(this._context.Configuration.Output.Writer);
             SourceArtifacts artifacts = new SourceArtifacts();
             foreach (InputSourceConfiguration input in this._context.Configuration.Input.Sources)
-                input.Collect(artifacts, this._context.ContractResolverFacade, this._context.ErrorReporter);
+                input.Collect(artifacts, this._context.ContractResolver, this._context.ErrorReporter);
 
             this._context.CollectAdditionalArtifacts(artifacts);
 
             output = writer.Write(this._context.Configuration.Output, artifacts);
-            if (this._context.ErrorReporter.ReportErrors())
+            if (this._context.ErrorReporter.HasErrors)
                 output = errorContent;
 
             return output;

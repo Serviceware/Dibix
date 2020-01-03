@@ -52,7 +52,6 @@ namespace Dibix.Sdk.CodeGeneration
                     string errorMessage = $"JSON configuration error: {error.Message}";
                     this._errorReporter.RegisterError(error.Path, error.LineNumber, error.LinePosition, error.ErrorType.ToString(), errorMessage);
                 }
-                this._errorReporter.ReportErrors();
                 return;
             }
 
@@ -92,7 +91,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Private Methods
         private IEnumerable<InputSourceConfiguration> ReadSqlProject(GeneratorConfiguration configuration, JProperty property)
         {
-            return this.ReadProject(configuration.Input, property, projectName => new PhysicalSourceConfiguration(this._fileSystemProvider, projectName, configuration.Output.ProductName, configuration.Output.AreaName, configuration.Output.GeneratePublicArtifacts), (source, value) =>
+            return this.ReadProject(configuration.Input, property, projectName => new PhysicalSourceConfiguration(this._fileSystemProvider, projectName, configuration.Output.ProductName, configuration.Output.AreaName), (source, value) =>
             {
                 value.GetPropertyValues("include").Each(source.Include);
                 value.GetPropertyValues("exclude").Each(source.Exclude);

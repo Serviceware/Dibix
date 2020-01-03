@@ -9,7 +9,7 @@ namespace Dibix.Sdk.CodeGeneration
         public string WcfNamespace { get; set; }
         public ICollection<ObjectContractProperty> Properties { get; }
 
-        public ObjectContract(string @namespace, string definitionName) : base(@namespace, definitionName)
+        public ObjectContract(Namespace @namespace, string definitionName) : base(@namespace, definitionName)
         {
             this.Properties = new Collection<ObjectContractProperty>();
         }

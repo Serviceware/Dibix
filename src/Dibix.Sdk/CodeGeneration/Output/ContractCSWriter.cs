@@ -15,18 +15,18 @@ namespace Dibix.Sdk.CodeGeneration
         #region Public Methods
         public static void Write(WriterContext context, bool withAnnotations)
         {
-            context.Output.AddUsing(typeof(DateTime).Namespace);
+            context.AddUsing(typeof(DateTime).Namespace);
 
             var namespaceGroups = context.Artifacts
                                          .Contracts
-                                         .GroupBy(x => x.Namespace)
+                                         .GroupBy(x => x.Namespace.RelativeNamespace)
                                          .ToArray();
 
             for (int i = 0; i < namespaceGroups.Length; i++)
             {
-                IGrouping<string, ContractDefinition> group = namespaceGroups[i];
-                IList<ContractDefinition> contracts = group.ToArray();
-                CSharpStatementScope scope = context.Output.BeginScope(NamespaceUtility.BuildRelativeNamespace(context.Configuration.RootNamespace, group.Key));
+                IGrouping<string, ContractDefinition> namespaceGroup = namespaceGroups[i];
+                CSharpStatementScope scope = namespaceGroup.Key != null ? context.Output.BeginScope(namespaceGroup.Key) : context.Output;
+                IList<ContractDefinition> contracts = namespaceGroup.ToArray();
                 for (int j = 0; j < contracts.Count; j++)
                 {
                     ContractDefinition contract = contracts[j];
@@ -57,7 +57,7 @@ namespace Dibix.Sdk.CodeGeneration
             ICollection<string> classAnnotations = new Collection<string>();
             if (withAnnotations && !String.IsNullOrEmpty(contract.WcfNamespace))
             {
-                context.Output.AddUsing(typeof(DataMemberAttribute).Namespace);
+                context.AddUsing(typeof(DataMemberAttribute).Namespace);
                 classAnnotations.Add($"DataContract(Namespace = \"{contract.WcfNamespace}\")");
             }
 
@@ -74,13 +74,13 @@ namespace Dibix.Sdk.CodeGeneration
 
                     if (property.IsPartOfKey)
                     {
-                        context.Output.AddUsing(typeof(KeyAttribute).Namespace);
+                        context.AddUsing(typeof(KeyAttribute).Namespace);
                         context.Configuration.DetectedReferences.Add("System.ComponentModel.DataAnnotations.dll");
                         propertyAnnotations.Add("Key");
                     }
                     else if (property.IsDiscriminator)
                     {
-                        context.Output.AddUsing("Dibix");
+                        context.AddUsing("Dibix");
                         propertyAnnotations.Add("Discriminator");
                     }
                 }
@@ -134,8 +134,8 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (ctorAssignments.Any())
             {
-                context.Output.AddUsing(typeof(ICollection<>).Namespace);
-                context.Output.AddUsing(typeof(Collection<>).Namespace);
+                context.AddUsing(typeof(ICollection<>).Namespace)
+                       .AddUsing(typeof(Collection<>).Namespace);
 
                 @class.AddSeparator()
                       .AddConstructor(String.Join(Environment.NewLine, ctorAssignments));
@@ -143,7 +143,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (withAnnotations && shouldSerializeMethods.Any())
             {
-                context.Output.AddUsing(typeof(Enumerable).Namespace);
+                context.AddUsing(typeof(Enumerable).Namespace);
 
                 @class.AddSeparator();
 
@@ -170,7 +170,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static void AddJsonReference(WriterContext context)
         {
-            context.Output.AddUsing(typeof(JsonPropertyAttribute).Namespace);
+            context.AddUsing(typeof(JsonPropertyAttribute).Namespace);
             context.Configuration.DetectedReferences.Add(Path.GetFileName(typeof(JsonPropertyAttribute).Assembly.Location));
         }
         #endregion

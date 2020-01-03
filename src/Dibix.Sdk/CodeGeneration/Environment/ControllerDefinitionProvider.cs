@@ -9,14 +9,19 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class ControllerDefinitionProvider : JsonSchemaDefinitionReader, IControllerDefinitionProvider
     {
+        #region Fields
+        private readonly IControllerActionTargetSelector _controllerActionTargetSelector;
+        #endregion
+
         #region Properties
         public ICollection<ControllerDefinition> Controllers { get; }
         protected override string SchemaName => "dibix.endpoints.schema";
         #endregion
 
         #region Constructor
-        public ControllerDefinitionProvider(IFileSystemProvider fileSystemProvider, IErrorReporter errorReporter, IEnumerable<string> endpoints) : base(fileSystemProvider, errorReporter)
+        public ControllerDefinitionProvider(IFileSystemProvider fileSystemProvider, IControllerActionTargetSelector controllerActionTargetSelector, IErrorReporter errorReporter, IEnumerable<string> endpoints) : base(fileSystemProvider, errorReporter)
         {
+            this._controllerActionTargetSelector = controllerActionTargetSelector;
             this.Controllers = new Collection<ControllerDefinition>();
             base.Collect(endpoints);
         }
@@ -65,8 +70,8 @@ namespace Dibix.Sdk.CodeGeneration
 
         private void ReadControllerAction(string filePath, ControllerDefinition controller, JObject action)
         {
-            string target = (string)action.Property("target").Value;
-            ActionDefinitionTarget actionTarget = new ActionDefinitionTarget(target.Contains(","), target);
+            JToken targetValue = action.Property("target").Value;
+            ActionDefinitionTarget actionTarget = this._controllerActionTargetSelector.Select((string)targetValue, filePath, targetValue);
             Enum.TryParse((string)action.Property("method")?.Value, true, out ActionMethod method);
             ActionDefinition actionDefinition = new ActionDefinition(actionTarget)
             {

@@ -4,10 +4,10 @@ using System.Data;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    public class SqlStatementInfo 
+    public sealed class SqlStatementInfo 
     {
         public string Source { get; set; }
-        public string Namespace { get; set; }
+        public Namespace Namespace { get; set; }
         public string Name { get; set; }
         public string Content { get; set; }
         public string ProcedureName { get; set; }
@@ -17,7 +17,7 @@ namespace Dibix.Sdk.CodeGeneration
         public bool Async { get; set; }
         public CommandType? CommandType { get; set; }
         public ContractName ResultType { get; set; }
-        public string GeneratedResultTypeName { get; set; }
+        public GridResultType GridResultType { get; set; }
         public IList<SqlQueryParameter> Parameters { get; }
         public IList<SqlQueryResult> Results { get; }
 

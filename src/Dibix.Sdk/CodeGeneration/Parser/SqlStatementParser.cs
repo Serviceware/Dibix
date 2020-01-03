@@ -18,13 +18,13 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region ISqlStatementParser Members
-        public bool Read(SqlParserSourceKind sourceKind, object source, SqlStatementInfo target, ISqlStatementFormatter formatter, IContractResolverFacade contractResolverFacade, IErrorReporter errorReporter)
+        public bool Read(SqlParserSourceKind sourceKind, object source, SqlStatementInfo target, string productName, string areaName, ISqlStatementFormatter formatter, IContractResolverFacade contractResolver, IErrorReporter errorReporter)
         {
             if (!SourceReaders.TryGetValue(sourceKind, out Func<object, TSqlFragment> reader))
                 throw new ArgumentOutOfRangeException(nameof(sourceKind), sourceKind, null);
 
             TSqlFragment fragment = reader(source);
-            return CollectStatementInfo(fragment, target, formatter, contractResolverFacade, errorReporter);
+            return CollectStatementInfo(fragment, target, productName, areaName, formatter, contractResolver, errorReporter);
         }
         #endregion
 
@@ -37,13 +37,15 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static TSqlFragment ReadFromTextReader(TextReader reader) => ScriptDomFacade.Load(reader);
 
-        private static bool CollectStatementInfo(TSqlFragment fragment, SqlStatementInfo target, ISqlStatementFormatter formatter, IContractResolverFacade contractResolverFacade, IErrorReporter errorReporter)
+        private static bool CollectStatementInfo(TSqlFragment fragment, SqlStatementInfo target, string productName, string areaName, ISqlStatementFormatter formatter, IContractResolverFacade contractResolver, IErrorReporter errorReporter)
         {
             TVisitor visitor = new TVisitor
             {
+                ProductName = productName,
+                AreaName = areaName,
                 Formatter = formatter,
                 Target = target,
-                ContractResolverFacade = contractResolverFacade,
+                ContractResolver = contractResolver,
                 ErrorReporter = errorReporter
             };
             visitor.Hints.AddRange(SqlHintParser.FromFragment(target.Source, errorReporter, fragment));

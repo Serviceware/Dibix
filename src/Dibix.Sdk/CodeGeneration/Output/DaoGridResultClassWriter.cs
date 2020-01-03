@@ -9,11 +9,8 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class DaoGridResultClassWriter : DaoChildWriterBase, IDaoChildWriter
     {
-        #region Fields
-        internal const string ComplexResultTypeSuffix = "Result";
-        #endregion
-
         #region Properties
+        public override string LayerName => CodeGeneration.LayerName.DomainModel;
         public override string RegionName => "Grid result types";
         #endregion
 
@@ -25,14 +22,14 @@ namespace Dibix.Sdk.CodeGeneration
             var namespaceGroups = context.Artifacts
                                          .Statements
                                          .Where(IsGridResult)
-                                         .GroupBy(x => x.GeneratedResultTypeName != null ? ExtractNamespace(x.GeneratedResultTypeName) : x.Namespace)
+                                         .GroupBy(x => x.GridResultType.Namespace.RelativeNamespace)
                                          .ToArray();
 
             for (int i = 0; i < namespaceGroups.Length; i++)
             {
                 IGrouping<string, SqlStatementInfo> namespaceGroup = namespaceGroups[i];
-                CSharpStatementScope scope = namespaceGroup.Key != null ? context.Output.BeginScope(NamespaceUtility.BuildRelativeNamespace(context.Configuration.RootNamespace, namespaceGroup.Key)) : context.Output;
-                IList<SqlStatementInfo> statements = namespaceGroup.DistinctBy(x => x.GeneratedResultTypeName ?? x.Name).ToArray();
+                CSharpStatementScope scope = namespaceGroup.Key != null ? context.Output.BeginScope(namespaceGroup.Key) : context.Output;
+                IList<SqlStatementInfo> statements = namespaceGroup.DistinctBy(x => x.GridResultType.TypeName ?? x.Name).ToArray();
                 for (int j = 0; j < statements.Count; j++)
                 {
                     SqlStatementInfo statement = statements[j];
@@ -64,8 +61,8 @@ namespace Dibix.Sdk.CodeGeneration
 
                     if (collectionProperties.Any())
                     {
-                        context.Output.AddUsing(typeof(ICollection<>).Namespace);
-                        context.Output.AddUsing(typeof(Collection<>).Namespace);
+                        context.AddUsing(typeof(ICollection<>).Namespace)
+                               .AddUsing(typeof(Collection<>).Namespace);
                     }
 
                     StringBuilder ctorBodyWriter = new StringBuilder();
@@ -98,19 +95,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private static bool IsGridResult(SqlStatementInfo statement)
-        {
-            return statement.Results.Count > 1 && statement.ResultType == null && !statement.MergeGridResult;
-        }
-
-        private static string ExtractNamespace(string resultContractName)
-        {
-            int index = resultContractName.LastIndexOf('.');
-            if (index < 0)
-                return resultContractName;
-
-            return resultContractName.Substring(0, index);
-        }
+        private static bool IsGridResult(SqlStatementInfo statement) => statement.GridResultType != null;
 
         private static string MakeCollectionInterfaceType(string typeName)
         {
@@ -127,10 +112,10 @@ namespace Dibix.Sdk.CodeGeneration
             if (statement.ResultType != null)
                 return statement.ResultType.ToString();
 
-            if (statement.GeneratedResultTypeName != null)
-                return statement.GeneratedResultTypeName.Split('.').Last();
+            if (statement.GridResultType.TypeName != null)
+                return statement.GridResultType.TypeName;
 
-            return String.Concat(statement.Name, ComplexResultTypeSuffix);
+            throw new InvalidOperationException($"Statement '{statement.Name}' has no result type");
         }
         #endregion
     }

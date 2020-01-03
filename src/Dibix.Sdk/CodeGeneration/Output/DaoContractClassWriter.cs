@@ -6,6 +6,7 @@ namespace Dibix.Sdk.CodeGeneration
     internal sealed class DaoContractClassWriter : IDaoChildWriter
     {
         #region Properties
+        public string LayerName => CodeGeneration.LayerName.DomainModel;
         public string RegionName => "Contracts";
         #endregion
 

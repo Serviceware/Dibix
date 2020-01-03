@@ -56,12 +56,12 @@ namespace Dibix.Sdk.CodeGeneration
             public override void Visit(CreateTypeTableStatement node)
             {
                 string typeName = node.Name.BaseIdentifier.Value;
-                string @namespace = this._hintsAccessor.Value.SingleHintValue(SqlHint.Namespace);
+                string relativeNamespace = this._hintsAccessor.Value.SingleHintValue(SqlHint.Namespace);
                 string displayName = this._hintsAccessor.Value.SingleHintValue(SqlHint.Name);
                 if (String.IsNullOrEmpty(displayName))
                     displayName = GenerateDisplayName(typeName);
 
-                @namespace = NamespaceUtility.BuildFullNamespace(this._productName, this._areaName, LayerName.Data, @namespace);
+                Namespace @namespace = Namespace.Create(this._productName, this._areaName, LayerName.Data, relativeNamespace);
                 ICollection<string> notNullableColumns = new HashSet<string>(GetNotNullableColumns(node.Definition));
                 this.Definition = new UserDefinedTypeDefinition(typeName, @namespace, displayName);
                 this.Definition.Columns.AddRange(node.Definition.ColumnDefinitions.Select(x => MapColumn(x, notNullableColumns)));

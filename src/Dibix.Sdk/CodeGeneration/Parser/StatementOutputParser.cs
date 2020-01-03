@@ -14,7 +14,7 @@ namespace Dibix.Sdk.CodeGeneration
         private const string ReturnHintConverter = "Converter";
         private const string ReturnHintResultType = "ResultType";
 
-        public static IEnumerable<SqlQueryResult> Parse(SqlStatementInfo target, TSqlStatement node, ICollection<SqlHint> hints, IContractResolverFacade contractResolverFacade, IErrorReporter errorReporter)
+        public static IEnumerable<SqlQueryResult> Parse(SqlStatementInfo target, TSqlStatement node, ICollection<SqlHint> hints, IContractResolverFacade contractResolver, IErrorReporter errorReporter)
         {
             StatementOutputVisitor visitor = new StatementOutputVisitor(target.Source, errorReporter);
             node.Accept(visitor);
@@ -78,12 +78,12 @@ namespace Dibix.Sdk.CodeGeneration
 
                 if (!String.IsNullOrEmpty(resultType))
                 {
-                    ContractInfo contract = contractResolverFacade.ResolveContract(resultType, x => errorReporter.RegisterError(target.Source, returnHint.Line, returnHint.Column, null, x));
+                    ContractInfo contract = contractResolver.ResolveContract(resultType, x => errorReporter.RegisterError(target.Source, returnHint.Line, returnHint.Column, null, x));
                     if (contract != null)
                         result.ResultType = contract.Name;
                 }
 
-                IList<ContractInfo> returnTypes = typeNames.Select(x => contractResolverFacade.ResolveContract(x, y => errorReporter.RegisterError(target.Source, returnHint.Line, returnHint.Column, null, y))).ToArray();
+                IList<ContractInfo> returnTypes = typeNames.Select(x => contractResolver.ResolveContract(x, y => errorReporter.RegisterError(target.Source, returnHint.Line, returnHint.Column, null, y))).ToArray();
                 if (returnTypes.Any(x => x == null))
                     continue;
 

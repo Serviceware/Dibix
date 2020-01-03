@@ -19,7 +19,7 @@ namespace Dibix.Sdk.VisualStudio
         #endregion
 
         #region Overrides
-        public override bool ReportErrors()
+        protected override void ReportErrors()
         {
             foreach (CompilerError error in base.Errors)
             {
@@ -28,7 +28,6 @@ namespace Dibix.Sdk.VisualStudio
                 error.ErrorText = String.Concat(error.ErrorText, ZeroWidthUtility.MaskText($" ({error.Line},{error.Column})"));
             }
             this._textTemplatingEngineHost.LogErrors(base.Errors);
-            return base.HasErrors;
         }
         #endregion
     }

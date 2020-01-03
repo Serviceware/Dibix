@@ -24,10 +24,9 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             fileSystemProvider.Setup(x => x.GetFiles("Dibix.Sdk.Tests.Database", It.IsAny<IEnumerable<VirtualPath>>(), It.IsAny<IEnumerable<VirtualPath>>()))
                               .Returns<string, IEnumerable<VirtualPath>, IEnumerable<VirtualPath>>(physicalFileSystemProvider.GetFiles);
             errorReporter.Setup(x => x.HasErrors).Returns(false);
-            errorReporter.Setup(x => x.ReportErrors()).Returns(false);
             codeGenerationContext.SetupGet(x => x.RootNamespace).Returns(ProjectName);
             codeGenerationContext.SetupGet(x => x.DefaultClassName).Returns(TestName);
-            codeGenerationContext.SetupGet(x => x.ContractResolverFacade).Returns(contractResolverFacade);
+            codeGenerationContext.SetupGet(x => x.ContractResolver).Returns(contractResolverFacade);
             codeGenerationContext.SetupGet(x => x.ErrorReporter).Returns(errorReporter.Object);
             codeGenerationContext.Setup(x => x.CollectAdditionalArtifacts(It.IsAny<SourceArtifacts>()));
             contractResolver.Setup(x => x.ResolveContract(It.IsAny<string>(), It.IsAny<Action<string>>()))
@@ -84,8 +83,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             fileSystemProvider.Setup(x => x.GetFiles("Dibix.Sdk.Tests.Database", It.IsAny<IEnumerable<VirtualPath>>(), It.IsAny<IEnumerable<VirtualPath>>()))
                               .Returns<string, IEnumerable<VirtualPath>, IEnumerable<VirtualPath>>(physicalFileSystemProvider.GetFiles);
             errorReporter.Setup(x => x.HasErrors).Returns(false);
-            errorReporter.Setup(x => x.ReportErrors()).Returns(false);
-            codeGenerationContext.SetupGet(x => x.ContractResolverFacade).Returns(contractResolverFacade);
+            codeGenerationContext.SetupGet(x => x.ContractResolver).Returns(contractResolverFacade);
             codeGenerationContext.SetupGet(x => x.ErrorReporter).Returns(errorReporter.Object);
             codeGenerationContext.Setup(x => x.CollectAdditionalArtifacts(It.IsAny<SourceArtifacts>()));
 
@@ -143,8 +141,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             fileSystemProvider.Setup(x => x.GetFiles("Dibix.Sdk.Tests.Database", It.IsAny<IEnumerable<VirtualPath>>(), It.IsAny<IEnumerable<VirtualPath>>()))
                               .Returns<string, IEnumerable<VirtualPath>, IEnumerable<VirtualPath>>(physicalFileSystemProvider.GetFiles);
             errorReporter.Setup(x => x.HasErrors).Returns(false);
-            errorReporter.Setup(x => x.ReportErrors()).Returns(false);
-            codeGenerationContext.SetupGet(x => x.ContractResolverFacade).Returns(contractResolverFacade);
+            codeGenerationContext.SetupGet(x => x.ContractResolver).Returns(contractResolverFacade);
             codeGenerationContext.SetupGet(x => x.ErrorReporter).Returns(errorReporter.Object);
             codeGenerationContext.Setup(x => x.CollectAdditionalArtifacts(It.IsAny<SourceArtifacts>()));
 
@@ -205,8 +202,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             fileSystemProvider.Setup(x => x.GetFiles("Dibix.Sdk.Tests.Database", It.IsAny<IEnumerable<VirtualPath>>(), It.IsAny<IEnumerable<VirtualPath>>()))
                               .Returns<string, IEnumerable<VirtualPath>, IEnumerable<VirtualPath>>(physicalFileSystemProvider.GetFiles);
             errorReporter.Setup(x => x.HasErrors).Returns(false);
-            errorReporter.Setup(x => x.ReportErrors()).Returns(false);
-            codeGenerationContext.SetupGet(x => x.ContractResolverFacade).Returns(contractResolverFacade);
+            codeGenerationContext.SetupGet(x => x.ContractResolver).Returns(contractResolverFacade);
             codeGenerationContext.SetupGet(x => x.ErrorReporter).Returns(errorReporter.Object);
             codeGenerationContext.Setup(x => x.CollectAdditionalArtifacts(It.IsAny<SourceArtifacts>()));
 

@@ -17,6 +17,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Properties
+        public override string LayerName => CodeGeneration.LayerName.Data;
         public override string RegionName => "Accessor";
         #endregion
 
@@ -25,16 +26,17 @@ namespace Dibix.Sdk.CodeGeneration
 
         public override void Write(WriterContext context)
         {
-            context.Output.AddUsing(typeof(GeneratedCodeAttribute).Namespace);
+            context.AddUsing(typeof(GeneratedCodeAttribute).Namespace)
+                   .AddUsing("Dibix");
 
-            foreach (IGrouping<string, SqlStatementInfo> namespaceGroup in context.Artifacts.Statements.GroupBy(x => x.Namespace))
+            foreach (IGrouping<string, SqlStatementInfo> namespaceGroup in context.Artifacts.Statements.GroupBy(x => x.Namespace.RelativeNamespace))
             {
-                CSharpStatementScope scope = namespaceGroup.Key != null ? context.Output.BeginScope(NamespaceUtility.BuildRelativeNamespace(context.Configuration.RootNamespace, namespaceGroup.Key)) : context.Output;
+                CSharpStatementScope scope = namespaceGroup.Key != null ? context.Output.BeginScope(namespaceGroup.Key) : context.Output;
                 IList<SqlStatementInfo> statements = namespaceGroup.ToArray();
 
                 // Class
                 CSharpModifiers classVisibility = context.Configuration.GeneratePublicArtifacts ? CSharpModifiers.Public : CSharpModifiers.Internal;
-                IEnumerable<string> annotations = new[] { context.GeneratedCodeAnnotation }.Where(x => x != null);
+                IEnumerable<string> annotations = new[] { context.GeneratedCodeAnnotation, "DatabaseAccessor" }.Where(x => x != null);
                 CSharpClass @class = scope.AddClass(context.Configuration.DefaultClassName, classVisibility | CSharpModifiers.Static, annotations);
 
                 // Command text constants
@@ -68,8 +70,6 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static void AddExecutionMethods(CSharpClass @class, WriterContext context, IList<SqlStatementInfo> statements)
         {
-            context.Output.AddUsing("Dibix");
-
             IDictionary<SqlStatementInfo, string> methodReturnTypeMap = statements.ToDictionary(x => x, x => DetermineResultTypeName(context, x));
 
             for (int i = 0; i < statements.Count; i++)
@@ -78,10 +78,10 @@ namespace Dibix.Sdk.CodeGeneration
                 bool isSingleResult = statement.Results.Count == 1;
 
                 if (isSingleResult && statement.Results[0].ResultMode == SqlQueryResultMode.Many)
-                    context.Output.AddUsing(typeof(IEnumerable<>).Namespace);
+                    context.AddUsing(typeof(IEnumerable<>).Namespace);
 
                 if (statement.IsFileApi)
-                    context.Output.AddUsing("Dibix.Http");
+                    context.AddUsing("Dibix.Http");
 
                 string methodName = String.Concat(MethodPrefix, statement.Name);
                 if (statement.Async)
@@ -113,7 +113,7 @@ namespace Dibix.Sdk.CodeGeneration
             string resultTypeName = DetermineResultTypeNameCore(query);
             if (query.Async)
             {
-                context.Output.AddUsing(typeof(Task<>).Namespace);
+                context.AddUsing(typeof(Task<>).Namespace);
                 resultTypeName = $"async Task<{resultTypeName}>";
             }
             return resultTypeName;
@@ -500,34 +500,13 @@ namespace Dibix.Sdk.CodeGeneration
             if (statement.MergeGridResult)
                 return statement.Results[0].Contracts[0].Name.ToString();
 
-            StringBuilder sb = new StringBuilder();
-
-            // Explicit existing type specified
             if (statement.ResultType != null)
-            {
-                sb.Append(statement.ResultType);
-            }
-            else
-            {
-                // Control generated type name (includes namespace)
-                if (statement.GeneratedResultTypeName != null)
-                {
-                    sb.Append(statement.GeneratedResultTypeName);
-                }
-                else
-                {
-                    // Use data accessor namespace if available
-                    if (statement.Namespace != null)
-                        sb.Append(statement.Namespace)
-                          .Append('.');
+                return statement.ResultType.ToString();
 
-                    // Generate type name based on statement name
-                    sb.Append(statement.Name)
-                      .Append(DaoGridResultClassWriter.ComplexResultTypeSuffix);
-                }
-            }
+            if (statement.GridResultType != null)
+                return statement.GridResultType.ToString();
 
-            return sb.ToString();
+            throw new InvalidOperationException($"Statement '{statement.Name}' has no result type");
         }
         #endregion
     }

@@ -13,7 +13,7 @@ namespace Dibix.Sdk.MSBuild
         {
             IErrorReporter errorReporter = new MSBuildErrorReporter(logger);
             ISqlCodeAnalysisRuleEngine codeAnalysis = SqlCodeAnalysisRuleEngine.Create(namingConventionPrefix, databaseSchemaProviderName, modelCollation, source, sqlReferencePath, task, errorReporter);
-            if (errorReporter.ReportErrors())
+            if (errorReporter.HasErrors)
                 return false;
 
             foreach (ITaskItem inputFile in source ?? Enumerable.Empty<ITaskItem>())
@@ -33,7 +33,7 @@ namespace Dibix.Sdk.MSBuild
                 }
             }
 
-            return !errorReporter.ReportErrors();
+            return !errorReporter.HasErrors;
         }
     }
 }

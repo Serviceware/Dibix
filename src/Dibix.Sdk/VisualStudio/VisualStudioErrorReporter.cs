@@ -36,7 +36,7 @@ namespace Dibix.Sdk.VisualStudio
         #endregion
 
         #region Overrides
-        public override bool ReportErrors()
+        protected override void ReportErrors()
         {
             this._currentErrors.Clear();
             this._errorProvider.Tasks.Clear();
@@ -85,8 +85,6 @@ namespace Dibix.Sdk.VisualStudio
             }
 
             base.Errors.Clear();
-
-            return base.HasErrors;
         }
         #endregion
 

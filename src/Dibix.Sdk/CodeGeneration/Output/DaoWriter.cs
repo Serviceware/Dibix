@@ -38,17 +38,30 @@ namespace Dibix.Sdk.CodeGeneration
 
             WriterContext context = new WriterContext(output.Root, generatedCodeAnnotation, configuration, artifacts, Format);
 
-            for (int i = 0; i < writers.Count; i++)
+            IList<IGrouping<string, IDaoChildWriter>> childWriterGroups = writers.GroupBy(x => x.LayerName).ToArray();
+            for (int i = 0; i < childWriterGroups.Count; i++)
             {
-                IDaoChildWriter nestedWriter = writers[i];
+                IGrouping<string, IDaoChildWriter> nestedWriterGroup = childWriterGroups[i];
+                
+                // Don't enter layer name if project has multiple areas
+                if (context.Configuration.AreaName != null)
+                    context.Output = output.Root.BeginScope(nestedWriterGroup.Key);
 
-                using (output.Root.CreateRegion(nestedWriter.RegionName))
+                IList<IDaoChildWriter> nestedWriters = nestedWriterGroup.ToArray();
+                for (int j = 0; j < nestedWriters.Count; j++)
                 {
-                    nestedWriter.Write(context);
+                    IDaoChildWriter nestedWriter = nestedWriters[j];
+                    using (context.Output.CreateRegion(nestedWriter.RegionName))
+                    {
+                        nestedWriter.Write(context);
+                    }
+
+                    if (j + 1 < nestedWriters.Count)
+                        context.Output.AddSeparator();
                 }
 
-                if (i + 1 < writers.Count)
-                    output.Root.AddSeparator();
+                if (i + 1 < childWriterGroups.Count)
+                    context.Output.AddSeparator();
             }
 
             output.Generate();

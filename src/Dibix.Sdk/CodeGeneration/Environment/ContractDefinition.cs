@@ -2,11 +2,11 @@
 {
     public abstract class ContractDefinition
     {
-        public string Namespace { get; set; }
+        public Namespace Namespace { get; set; }
         public string DefinitionName { get; }
         public abstract bool IsPrimitive { get; }
 
-        protected ContractDefinition(string @namespace, string definitionName)
+        protected ContractDefinition(Namespace @namespace, string definitionName)
         {
             this.Namespace = @namespace;
             this.DefinitionName = definitionName;

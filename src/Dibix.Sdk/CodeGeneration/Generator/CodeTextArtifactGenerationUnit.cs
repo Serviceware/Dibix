@@ -10,17 +10,15 @@ namespace Dibix.Sdk.CodeGeneration
         {
             StaticCodeGenerationContext generationContext = new StaticCodeGenerationContext
             (
-                context.ProjectDirectory
-              , context.ProductName
-              , context.AreaName
-              , context.Sources
+                context.RootNamespace
+              , context.DefaultOutputName
+              , context.Configuration
+              , context.Statements
               , context.Contracts
               , context.Controllers
-              , context.References
+              , context.UserDefinedTypes
               , this.CodeArtifactKind
-              , context.EmbedStatements
-              , context.FileSystemProvider
-              , context.ContractDefinitionProvider
+              , context.ContractResolver
               , context.ErrorReporter
             );
 

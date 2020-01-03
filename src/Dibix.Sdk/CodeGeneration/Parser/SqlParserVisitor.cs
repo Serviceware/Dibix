@@ -9,9 +9,15 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public abstract class SqlParserVisitor : TSqlFragmentVisitor
     {
+        #region Fields
+        private const string GridResultTypeSuffix = "Result";
+        #endregion
+
         #region Properties
+        internal string ProductName { get; set; }
+        internal string AreaName { get; set; }
         internal ISqlStatementFormatter Formatter { get; set; }
-        internal IContractResolverFacade ContractResolverFacade{ get; set; }
+        internal IContractResolverFacade ContractResolver { get; set; }
         internal IErrorReporter ErrorReporter { get; set; }
         internal SqlStatementInfo Target { get; set; }
         internal ICollection<SqlHint> Hints { get; }
@@ -27,7 +33,8 @@ namespace Dibix.Sdk.CodeGeneration
         #region Protected Methods
         protected internal void ParseContent(SqlStatementInfo target, TSqlStatement content, StatementList statements)
         {
-            this.Target.Namespace = this.Hints.SingleHintValue(SqlHint.Namespace);
+            string relativeNamespace = this.Hints.SingleHintValue(SqlHint.Namespace);
+            this.Target.Namespace = Namespace.Create(this.ProductName, this.AreaName, LayerName.Data, relativeNamespace);
             string name = this.Hints.SingleHintValue(SqlHint.Name);
             if (!String.IsNullOrEmpty(name))
                 this.Target.Name = name;
@@ -39,15 +46,17 @@ namespace Dibix.Sdk.CodeGeneration
             SqlHint resultTypeHint = this.Hints.SingleHint(SqlHint.ResultTypeName);
             if (resultTypeHint != null)
             {
-                ContractInfo contract = this.ContractResolverFacade.ResolveContract(resultTypeHint.Value, x => this.ErrorReporter.RegisterError(target.Source, resultTypeHint.Line, resultTypeHint.Column, null, x));
+                ContractInfo contract = this.ContractResolver.ResolveContract(resultTypeHint.Value, x => this.ErrorReporter.RegisterError(target.Source, resultTypeHint.Line, resultTypeHint.Column, null, x));
                 if (contract != null)
                     this.Target.ResultType = contract.Name;
             }
 
-            this.Target.GeneratedResultTypeName = this.Hints.SingleHintValue(SqlHint.GeneratedResultTypeName);
-
             this.ParseResults(content, this.Hints);
             this.ParseBody(statements ?? new StatementList());
+
+            bool isGridResult = this.Target.Results.Count > 1 && this.Target.ResultType == null && !this.Target.MergeGridResult;
+            if (isGridResult)
+                this.Target.GridResultType = this.GenerateGridResultType(relativeNamespace);
         }
 
         protected internal void ParseParameter(ProcedureParameter node)
@@ -133,7 +142,7 @@ ReferenceType: {node.DataType.GetType()}");
 
         private void ParseResults(TSqlStatement node, ICollection<SqlHint> hints)
         {
-            IEnumerable<SqlQueryResult> results = StatementOutputParser.Parse(this.Target, node, hints, this.ContractResolverFacade, this.ErrorReporter);
+            IEnumerable<SqlQueryResult> results = StatementOutputParser.Parse(this.Target, node, hints, this.ContractResolver, this.ErrorReporter);
             this.Target.Results.AddRange(results);
         }
 
@@ -144,6 +153,30 @@ ReferenceType: {node.DataType.GetType()}");
                 statementList = beginEndBlock.StatementList;
 
             this.Target.Content = this.Formatter.Format(this.Target, statementList);
+        }
+
+        private GridResultType GenerateGridResultType(string relativeNamespace)
+        {
+            string gridResultTypeNamespace;
+            string gridResultTypeName;
+
+            // Control grid result type name and namespace
+            string gridResultTypeNameHint = this.Hints.SingleHintValue(SqlHint.GeneratedResultTypeName);
+            if (gridResultTypeNameHint != null)
+            {
+                int typeNameIndex = gridResultTypeNameHint.LastIndexOf('.');
+                gridResultTypeNamespace = typeNameIndex < 0 ? null : gridResultTypeNameHint.Substring(0, typeNameIndex);
+                gridResultTypeName = typeNameIndex < 0 ? gridResultTypeNameHint : gridResultTypeNameHint.Substring(typeNameIndex + 1, gridResultTypeNameHint.Length - typeNameIndex - 1);
+            }
+            else
+            {
+                gridResultTypeNamespace = relativeNamespace;
+
+                // Generate type name based on statement name
+                gridResultTypeName = $"{this.Target.Name}{GridResultTypeSuffix}";
+            }
+
+            return new GridResultType(Namespace.Create(this.ProductName, this.AreaName, LayerName.DomainModel, gridResultTypeNamespace), gridResultTypeName);
         }
         #endregion
     }

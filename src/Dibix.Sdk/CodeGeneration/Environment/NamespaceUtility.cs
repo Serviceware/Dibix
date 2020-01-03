@@ -25,13 +25,13 @@ namespace Dibix.Sdk.CodeGeneration
             return sb.ToString();
         }
 
-        public static string BuildFullNamespace(string productName, string areaName, string layerName, string relativeNamespace)
+        public static string BuildNamespace(string productName, string areaName, string layerName, string relativeNamespace)
         {
-            Guard.IsNotNullOrEmpty(productName, nameof(productName));
             Guard.IsNotNullOrEmpty(layerName, nameof(layerName));
 
             ICollection<string> segments = new Collection<string>();
-            segments.Add(productName);
+            if (!String.IsNullOrEmpty(productName))
+                segments.Add(productName);
 
             if (String.IsNullOrEmpty(areaName) && !String.IsNullOrEmpty(relativeNamespace))
             {
@@ -50,11 +50,6 @@ namespace Dibix.Sdk.CodeGeneration
 
             string @namespace = String.Join(".", segments);
             return @namespace;
-        }
-
-        public static string BuildRelativeNamespace(string rootNamespace, string itemNamespace)
-        {
-            return itemNamespace.Substring(rootNamespace.Length + 1);
         }
     }
 }

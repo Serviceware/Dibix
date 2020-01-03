@@ -7,7 +7,7 @@ namespace Dibix.Sdk.MSBuild
         public GeneratorConfiguration Configuration { get; }
         public string RootNamespace { get; }
         public string DefaultClassName { get; }
-        public IContractResolverFacade ContractResolverFacade { get; }
+        public IContractResolverFacade ContractResolver { get; }
         public IErrorReporter ErrorReporter { get; }
 
         public ProjectFileCodeGenerationContext(GeneratorConfiguration configuration, string @namespace, string configurationName, IAssemblyLocator assemblyLocator, IErrorReporter errorReporter)
@@ -15,7 +15,7 @@ namespace Dibix.Sdk.MSBuild
             this.Configuration = configuration;
             this.RootNamespace = @namespace;
             this.DefaultClassName = configurationName;
-            this.ContractResolverFacade = new ContractResolverFacade(assemblyLocator);
+            this.ContractResolver = new ContractResolverFacade(assemblyLocator);
             this.ErrorReporter = errorReporter;
         }
 

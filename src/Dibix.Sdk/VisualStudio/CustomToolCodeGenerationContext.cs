@@ -9,17 +9,17 @@ namespace Dibix.Sdk.VisualStudio
         public GeneratorConfiguration Configuration { get; }
         public string RootNamespace { get; }
         public string DefaultClassName { get; }
-        public IContractResolverFacade ContractResolverFacade { get; }
+        public IContractResolverFacade ContractResolver { get; }
         public IErrorReporter ErrorReporter { get; }
         #endregion
 
         #region Constructor
-        public CustomToolCodeGenerationContext(GeneratorConfiguration configuration, IContractResolverFacade contractResolverFacade, IErrorReporter errorReporter, string inputFilePath, string @namespace)
+        public CustomToolCodeGenerationContext(GeneratorConfiguration configuration, IContractResolverFacade contractResolver, IErrorReporter errorReporter, string inputFilePath, string @namespace)
         {
             this.Configuration = configuration;
             this.ErrorReporter = errorReporter;
             this.RootNamespace = @namespace;
-            this.ContractResolverFacade = contractResolverFacade;
+            this.ContractResolver = contractResolver;
             this.DefaultClassName = Path.GetFileNameWithoutExtension(inputFilePath);
         }
         #endregion

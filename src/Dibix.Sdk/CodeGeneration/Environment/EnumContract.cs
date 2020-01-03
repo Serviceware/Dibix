@@ -9,7 +9,7 @@ namespace Dibix.Sdk.CodeGeneration
         public bool IsFlaggable { get; set; }
         public ICollection<EnumContractMember> Members { get; }
 
-        public EnumContract(string @namespace, string definitionName, bool isFlaggable) : base(@namespace, definitionName)
+        public EnumContract(Namespace @namespace, string definitionName, bool isFlaggable) : base(@namespace, definitionName)
         {
             this.IsFlaggable = isFlaggable;
             this.Members = new Collection<EnumContractMember>();

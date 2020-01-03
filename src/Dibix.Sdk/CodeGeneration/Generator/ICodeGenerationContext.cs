@@ -5,7 +5,7 @@
         GeneratorConfiguration Configuration { get; }
         string RootNamespace { get; }
         string DefaultClassName { get; }
-        IContractResolverFacade ContractResolverFacade { get; }
+        IContractResolverFacade ContractResolver { get; }
         IErrorReporter ErrorReporter { get; }
 
         void CollectAdditionalArtifacts(SourceArtifacts artifacts);

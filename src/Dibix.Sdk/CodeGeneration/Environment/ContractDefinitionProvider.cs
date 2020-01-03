@@ -43,19 +43,19 @@ namespace Dibix.Sdk.CodeGeneration
         {
             string virtualPath = Path.GetDirectoryName(filePath).Substring(base.FileSystemProvider.CurrentDirectory.Length + 1);
             int virtualPathRootIndex = virtualPath.IndexOf(Path.DirectorySeparatorChar) + 1;
-            string namespaceKey = String.Empty;
+            string namespaceKey = null;
             if (virtualPathRootIndex > 0)
             {
                 string virtualPathRoot = virtualPath.Substring(virtualPathRootIndex);
                 namespaceKey = virtualPathRoot.Replace(Path.DirectorySeparatorChar, '.');
             }
-            string @namespace = NamespaceUtility.BuildFullNamespace(this._productName, this._areaName, LayerName.DomainModel, namespaceKey);
+            Namespace @namespace = Namespace.Create(this._productName, this._areaName, LayerName.DomainModel, namespaceKey);
             this.ReadContracts(namespaceKey, @namespace, json);
         }
         #endregion
 
         #region Private Methods
-        private void ReadContracts(string namespaceKey, string @namespace, JObject contracts)
+        private void ReadContracts(string namespaceKey, Namespace @namespace, JObject contracts)
         {
             foreach (JProperty definitionProperty in contracts.Properties())
             {
@@ -64,7 +64,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private void ReadContract(string key, string @namespace, string definitionName, JToken value)
+        private void ReadContract(string key, Namespace @namespace, string definitionName, JToken value)
         {
             switch (value.Type)
             {
@@ -81,7 +81,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private void ReadObjectContract(string key, string @namespace, string definitionName, JToken value)
+        private void ReadObjectContract(string key, Namespace @namespace, string definitionName, JToken value)
         {
             ObjectContract contract = new ObjectContract(@namespace, definitionName);
             foreach (JProperty property in ((JObject)value).Properties())
@@ -128,7 +128,7 @@ namespace Dibix.Sdk.CodeGeneration
             this._definitions.Add(key, contract);
         }
 
-        private void ReadEnumContract(string key, string @namespace, string definitionName, JToken value)
+        private void ReadEnumContract(string key, Namespace @namespace, string definitionName, JToken value)
         {
             EnumContract contract = new EnumContract(@namespace, definitionName, false);
             foreach (JToken child in (JArray)value)

@@ -8,6 +8,7 @@ namespace Dibix.Sdk.CodeGeneration
     internal sealed class DaoStructuredTypeWriter : IDaoChildWriter
     {
         #region Properties
+        public string LayerName => CodeGeneration.LayerName.Data;
         public string RegionName => "Structured types";
         #endregion
 
@@ -18,18 +19,18 @@ namespace Dibix.Sdk.CodeGeneration
 
         public void Write(WriterContext context)
         {
-            context.Output.AddUsing("Dibix");
+            context.AddUsing("Dibix");
 
             var namespaceGroups = context.Artifacts
                                          .UserDefinedTypes
-                                         .GroupBy(x => x.Namespace)
+                                         .GroupBy(x => x.Namespace.RelativeNamespace)
                                          .ToArray();
 
             for (int i = 0; i < namespaceGroups.Length; i++)
             {
-                IGrouping<string, UserDefinedTypeDefinition> group = namespaceGroups[i];
-                IList<UserDefinedTypeDefinition> userDefinedTypes = group.ToArray();
-                CSharpStatementScope scope = context.Output.BeginScope(NamespaceUtility.BuildRelativeNamespace(context.Configuration.RootNamespace, group.Key));
+                IGrouping<string, UserDefinedTypeDefinition> namespaceGroup = namespaceGroups[i];
+                IList<UserDefinedTypeDefinition> userDefinedTypes = namespaceGroup.ToArray();
+                CSharpStatementScope scope = namespaceGroup.Key != null ? context.Output.BeginScope(namespaceGroup.Key) : context.Output;
                 for (int j = 0; j < userDefinedTypes.Count; j++)
                 {
                     UserDefinedTypeDefinition userDefinedType = userDefinedTypes[j];

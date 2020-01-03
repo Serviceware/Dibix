@@ -4,8 +4,23 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public abstract class ErrorReporter : IErrorReporter
     {
+        #region Fields
+        private bool _hasReportedErrors = false;
+        #endregion
+
         #region Properties
-        public bool HasErrors => this.Errors.HasErrors;
+        public bool HasErrors
+        {
+            get
+            {
+                if (!this._hasReportedErrors || !this.Errors.HasErrors)
+                {
+                    this.ReportErrors();
+                    this._hasReportedErrors = true;
+                }
+                return this.Errors.HasErrors;
+            }
+        }
         protected CompilerErrorCollection Errors { get; }
         #endregion
 
@@ -21,8 +36,10 @@ namespace Dibix.Sdk.CodeGeneration
         {
             this.Errors.Add(new CompilerError(fileName, line, column, errorNumber, errorText));
         }
+        #endregion
 
-        public abstract bool ReportErrors();
+        #region Protected Methods
+        protected abstract void ReportErrors();
         #endregion
     }
 }

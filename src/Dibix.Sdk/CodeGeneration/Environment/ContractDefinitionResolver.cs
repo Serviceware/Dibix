@@ -28,7 +28,7 @@ namespace Dibix.Sdk.CodeGeneration
                 return null;
             }
 
-            ContractName contractName = new ContractName(input, $"{contractDefinition.Namespace}.{contractDefinition.DefinitionName}");
+            ContractName contractName = new ContractName(input, $"{contractDefinition.Namespace.FullNamespace}.{contractDefinition.DefinitionName}");
             ContractInfo contract = new ContractInfo(contractName, contractDefinition.IsPrimitive);
             if (contractDefinition is ObjectContract objectContract)
             {

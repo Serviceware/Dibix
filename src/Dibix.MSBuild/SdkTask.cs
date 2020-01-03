@@ -43,6 +43,10 @@ namespace Dibix.MSBuild
           , "Newtonsoft.Json" // In some occasions, loading Newtonsoft.Json.Schema does include loading the dependent assembly Newtonsoft.Json
           , "Microsoft.OpenApi"
         };
+        private static readonly string[] ReflectionOnlyAssemblies =
+        {
+            "Dibix"
+        };
 
         public string SdkPath { get; set; }
         public string SSDTDirectory { get; set; }
@@ -60,6 +64,7 @@ namespace Dibix.MSBuild
             try
             {
                 AppDomain.CurrentDomain.AssemblyResolve += this.OnAssemblyResolve;
+                AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += OnReflectionOnlyAssemblyResolve;
 
                 bool result = (bool)adapterType.InvokeMember("Execute", BindingFlags.InvokeMethod, null, null, args);
                 this.PostExecute(args);
@@ -67,6 +72,7 @@ namespace Dibix.MSBuild
             }
             finally
             {
+                AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve -= OnReflectionOnlyAssemblyResolve;
                 AppDomain.CurrentDomain.AssemblyResolve -= this.OnAssemblyResolve;
             }
         }
@@ -100,6 +106,25 @@ namespace Dibix.MSBuild
             assemblyName.CodeBase = path;
 
             return Assembly.Load(assemblyName);
+        }
+
+        private static Assembly OnReflectionOnlyAssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            AssemblyName assemblyName = new AssemblyName(args.Name);
+            string name = assemblyName.Name;
+            string directory = null;
+
+            if (ReflectionOnlyAssemblies.Contains(name))
+                directory = CurrentDirectory;
+
+            if (directory != null)
+            {
+                string path = Path.Combine(directory, $"{name}.dll");
+                if (File.Exists(path)) 
+                    return Assembly.ReflectionOnlyLoadFrom(path);
+            }
+
+            return Assembly.ReflectionOnlyLoad(args.Name);
         }
     }
 }

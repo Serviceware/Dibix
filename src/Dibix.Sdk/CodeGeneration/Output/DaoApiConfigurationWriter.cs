@@ -8,6 +8,7 @@ namespace Dibix.Sdk.CodeGeneration
     internal sealed class DaoApiConfigurationWriter : IDaoChildWriter
     {
         #region Properties
+        public string LayerName => CodeGeneration.LayerName.Business;
         public string RegionName => "Endpoints";
         #endregion
 
@@ -22,15 +23,14 @@ namespace Dibix.Sdk.CodeGeneration
 
         public void Write(WriterContext context)
         {
-            context.Output.AddUsing("Dibix.Http");
+            context.AddUsing("Dibix.Http");
 
             if (context.Artifacts.Controllers.Any(x => x.ControllerImports.Any()))
-                context.Output.AddUsing(typeof(Type).Namespace);
+                context.AddUsing(typeof(Type).Namespace);
 
             string body = WriteBody(context, context.Artifacts.Controllers);
 
             context.Output
-                   .BeginScope(LayerName.Business)
                    .AddClass("ApiConfiguration", CSharpModifiers.Public | CSharpModifiers.Sealed)
                    .Inherits("HttpApiDescriptor")
                    .AddMethod("Configure", "void", body, modifiers: CSharpModifiers.Public | CSharpModifiers.Override);
@@ -58,14 +58,8 @@ namespace Dibix.Sdk.CodeGeneration
                     }
                     else
                     {
-                        string @namespace = LayerName.Data;
-                        int statementNameIndex = action.Target.Target.LastIndexOf('.');
-                        if (statementNameIndex >= 0)
-                            @namespace = action.Target.Target.Substring(0, statementNameIndex);
-
-                        string typeName = $"{@namespace}.{context.Configuration.DefaultClassName}";
-                        writer.WriteRaw($"typeof({typeName}), nameof({typeName}.")
-                              .WriteRaw(action.Target.Target.Substring(statementNameIndex + 1))
+                        writer.WriteRaw($"typeof({action.Target.TypeName}), nameof({action.Target.TypeName}.")
+                              .WriteRaw(action.Target.MethodName)
                               .WriteRaw(')');
                     }
 
@@ -85,14 +79,14 @@ namespace Dibix.Sdk.CodeGeneration
                     {
                         string bodyContractName = action.BodyContract;
                         if (!bodyContractName.StartsWith(context.Configuration.RootNamespace, StringComparison.Ordinal))
-                            bodyContractName = $"{context.Configuration.RootNamespace}.{LayerName.DomainModel}.{bodyContractName}";
+                            bodyContractName = $"{context.Configuration.RootNamespace}.{CodeGeneration.LayerName.DomainModel}.{bodyContractName}";
 
                         writer.WriteLine($"y.BodyContract = typeof({bodyContractName});");
                     }
 
                     if (!String.IsNullOrEmpty(action.BodyBinder))
                     {
-                        context.Output.AddUsing(typeof(Type).Namespace);
+                        context.AddUsing(typeof(Type).Namespace);
                         writer.WriteLine($"y.BodyBinder = Type.GetType(\"{action.BodyBinder}\", true);");
                     }
 

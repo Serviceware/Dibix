@@ -13,7 +13,7 @@ namespace Dibix.Sdk.MSBuild
             this._taskLoggingHelper = taskLoggingHelper;
         }
 
-        public override bool ReportErrors()
+        protected override void ReportErrors()
         {
             foreach (CompilerError error in base.Errors)
             {
@@ -22,8 +22,6 @@ namespace Dibix.Sdk.MSBuild
                 else
                     this._taskLoggingHelper.LogWarning(null, /*error.ErrorNumber*/null, null, error.FileName, error.Line, error.Column, 0, 0, error.ErrorText);
             }
-
-            return base.HasErrors;
         }
     }
 }
