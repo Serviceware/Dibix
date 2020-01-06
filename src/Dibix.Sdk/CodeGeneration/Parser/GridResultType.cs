@@ -10,7 +10,5 @@
             this.Namespace = @namespace;
             this.TypeName = typeName;
         }
-
-        public override string ToString() => $"{this.Namespace.FullNamespace}.{this.TypeName}";
     }
 }

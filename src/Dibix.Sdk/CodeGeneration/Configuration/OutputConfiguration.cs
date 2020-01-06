@@ -12,6 +12,7 @@ namespace Dibix.Sdk.CodeGeneration
         public string AreaName { get; set; }
         public CommandTextFormatting Formatting { get; set; }
         public bool GeneratePublicArtifacts { get; set; }
+        public bool WriteNamespaces { get; set; }
         public ICollection<string> DetectedReferences { get; }
 
         public OutputConfiguration()

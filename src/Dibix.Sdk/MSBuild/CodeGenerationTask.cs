@@ -65,6 +65,7 @@ namespace Dibix.Sdk.MSBuild
 
             GeneratorConfiguration configuration = new GeneratorConfiguration();
             configuration.Output.GeneratePublicArtifacts = true;
+            configuration.Output.WriteNamespaces = true;
             configuration.Output.ProductName = productName;
             configuration.Output.AreaName = areaName;
 
@@ -74,7 +75,7 @@ namespace Dibix.Sdk.MSBuild
             ContractDefinitionProvider contractDefinitionProvider = new ContractDefinitionProvider(fileSystemProvider, errorReporter, contracts, productName, areaName);
             IContractResolverFacade contractResolver = new ContractResolverFacade(new DefaultAssemblyLocator(projectDirectory, references));
             contractResolver.RegisterContractResolver(new ContractDefinitionResolver(contractDefinitionProvider), 0);
-            IDatabaseAccessorStatementProvider databaseAccessorStatementProvider = new DatabaseAccessorStatementProvider(parser, formatter, contractResolver, errorReporter, projectDirectory, generatePublicArtifacts: true, embedStatements, productName, areaName);
+            IDatabaseAccessorStatementProvider databaseAccessorStatementProvider = new DatabaseAccessorStatementProvider(parser, formatter, contractResolver, errorReporter, projectDirectory, embedStatements, productName, areaName);
             ICollection<SqlStatementInfo> statements = databaseAccessorStatementProvider.CollectStatements(sources).ToArray();
             IControllerActionTargetSelector controllerActionTargetSelector = new ControllerActionTargetSelector(productName, areaName, defaultOutputName, projectDirectory, statements, references, errorReporter);
             ControllerDefinitionProvider controllerDefinitionProvider = new ControllerDefinitionProvider(fileSystemProvider, controllerActionTargetSelector, errorReporter, endpoints);

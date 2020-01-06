@@ -22,7 +22,7 @@ namespace Dibix.Sdk.CodeGeneration
             var namespaceGroups = context.Artifacts
                                          .Statements
                                          .Where(IsGridResult)
-                                         .GroupBy(x => x.GridResultType.Namespace.RelativeNamespace)
+                                         .GroupBy(x => context.Configuration.WriteNamespaces ? x.GridResultType.Namespace.RelativeNamespace : null)
                                          .ToArray();
 
             for (int i = 0; i < namespaceGroups.Length; i++)

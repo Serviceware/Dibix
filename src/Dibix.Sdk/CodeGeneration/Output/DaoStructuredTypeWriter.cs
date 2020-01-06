@@ -23,7 +23,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             var namespaceGroups = context.Artifacts
                                          .UserDefinedTypes
-                                         .GroupBy(x => x.Namespace.RelativeNamespace)
+                                         .GroupBy(x => context.Configuration.WriteNamespaces ? x.Namespace.RelativeNamespace : null)
                                          .ToArray();
 
             for (int i = 0; i < namespaceGroups.Length; i++)

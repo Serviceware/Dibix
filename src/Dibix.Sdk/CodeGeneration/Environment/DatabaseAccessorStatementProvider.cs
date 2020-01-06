@@ -11,19 +11,17 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly IContractResolverFacade _contractResolverFacade;
         private readonly IErrorReporter _errorReporter;
         private readonly string _projectDirectory;
-        private readonly bool _generatePublicArtifacts;
         private readonly bool _embedStatements;
         private readonly string _productName;
         private readonly string _areaName;
 
-        public DatabaseAccessorStatementProvider(ISqlStatementParser parser, ISqlStatementFormatter formatter, IContractResolverFacade contractResolver, IErrorReporter errorReporter, string projectDirectory, bool generatePublicArtifacts, bool embedStatements, string productName, string areaName)
+        public DatabaseAccessorStatementProvider(ISqlStatementParser parser, ISqlStatementFormatter formatter, IContractResolverFacade contractResolver, IErrorReporter errorReporter, string projectDirectory, bool embedStatements, string productName, string areaName)
         {
             this._parser = parser;
             this._formatter = formatter;
             this._contractResolverFacade = contractResolver;
             this._errorReporter = errorReporter;
             this._projectDirectory = projectDirectory;
-            this._generatePublicArtifacts = generatePublicArtifacts;
             this._embedStatements = embedStatements;
             this._productName = productName;
             this._areaName = areaName;

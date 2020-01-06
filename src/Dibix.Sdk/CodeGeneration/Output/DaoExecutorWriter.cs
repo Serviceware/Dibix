@@ -29,7 +29,7 @@ namespace Dibix.Sdk.CodeGeneration
             context.AddUsing(typeof(GeneratedCodeAttribute).Namespace)
                    .AddUsing("Dibix");
 
-            foreach (IGrouping<string, SqlStatementInfo> namespaceGroup in context.Artifacts.Statements.GroupBy(x => x.Namespace.RelativeNamespace))
+            foreach (IGrouping<string, SqlStatementInfo> namespaceGroup in context.Artifacts.Statements.GroupBy(x => context.Configuration.WriteNamespaces ? x.Namespace.RelativeNamespace : null))
             {
                 CSharpStatementScope scope = namespaceGroup.Key != null ? context.Output.BeginScope(namespaceGroup.Key) : context.Output;
                 IList<SqlStatementInfo> statements = namespaceGroup.ToArray();
@@ -110,7 +110,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static string DetermineResultTypeName(WriterContext context, SqlStatementInfo query)
         {
-            string resultTypeName = DetermineResultTypeNameCore(query);
+            string resultTypeName = DetermineResultTypeNameCore(query, context.Configuration.WriteNamespaces);
             if (query.Async)
             {
                 context.AddUsing(typeof(Task<>).Namespace);
@@ -118,7 +118,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
             return resultTypeName;
         }
-        private static string DetermineResultTypeNameCore(SqlStatementInfo query)
+        private static string DetermineResultTypeNameCore(SqlStatementInfo query, bool writeNamespaces)
         {
             if (query.IsFileApi)
             {
@@ -142,7 +142,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             // GridReader
-            return GetComplexTypeName(query);
+            return GetComplexTypeName(query, writeNamespaces);
         }
 
         private static string GenerateMethodBody(SqlStatementInfo statement, WriterContext context)
@@ -166,7 +166,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (statement.Parameters.Any())
                 WriteParameters(writer, statement);
 
-            WriteExecutor(writer, statement);
+            WriteExecutor(writer, statement, context.Configuration.WriteNamespaces);
 
             writer.PopIndent()
                   .Write("}");
@@ -242,7 +242,7 @@ namespace Dibix.Sdk.CodeGeneration
                   .ResetTemporaryIndent();
         }
 
-        private static void WriteExecutor(StringWriter writer, SqlStatementInfo query)
+        private static void WriteExecutor(StringWriter writer, SqlStatementInfo query, bool writeNamespaces)
         {
             if (query.IsFileApi)
             {
@@ -258,7 +258,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
             else if (query.Results.Count > 1) // GridReader
             {
-                WriteComplexResult(writer, query);
+                WriteComplexResult(writer, query, writeNamespaces);
             }
         }
 
@@ -351,7 +351,7 @@ namespace Dibix.Sdk.CodeGeneration
             writer.WriteLineRaw(";");
         }
 
-        private static void WriteComplexResult(StringWriter writer, SqlStatementInfo query)
+        private static void WriteComplexResult(StringWriter writer, SqlStatementInfo query, bool writeNamespaces)
         {
             writer.Write("using (IMultipleResultReader reader = ");
 
@@ -383,15 +383,15 @@ namespace Dibix.Sdk.CodeGeneration
                   .WriteLine("{")
                   .PushIndent();
 
-            WriteComplexResultBody(writer, query);
+            WriteComplexResultBody(writer, query, writeNamespaces);
 
             writer.PopIndent()
                   .WriteLine("}");
         }
 
-        private static void WriteComplexResultBody(StringWriter writer, SqlStatementInfo query)
+        private static void WriteComplexResultBody(StringWriter writer, SqlStatementInfo query, bool writeNamespaces)
         {
-            string resultTypeName = GetComplexTypeName(query);
+            string resultTypeName = GetComplexTypeName(query, writeNamespaces);
 
             writer.Write(resultTypeName)
                   .WriteRaw(" result = ");
@@ -495,7 +495,7 @@ namespace Dibix.Sdk.CodeGeneration
             return String.Concat("IEnumerable<", typeName, '>');
         }
 
-        private static string GetComplexTypeName(SqlStatementInfo statement)
+        private static string GetComplexTypeName(SqlStatementInfo statement, bool writeNamespaces)
         {
             if (statement.MergeGridResult)
                 return statement.Results[0].Contracts[0].Name.ToString();
@@ -504,7 +504,14 @@ namespace Dibix.Sdk.CodeGeneration
                 return statement.ResultType.ToString();
 
             if (statement.GridResultType != null)
-                return statement.GridResultType.ToString();
+            {
+                StringBuilder sb = new StringBuilder();
+                if (writeNamespaces)
+                    sb.AppendFormat("{0}.", statement.GridResultType.Namespace.FullNamespace);
+
+                sb.Append(statement.GridResultType.TypeName);
+                return sb.ToString();
+            }
 
             throw new InvalidOperationException($"Statement '{statement.Name}' has no result type");
         }
