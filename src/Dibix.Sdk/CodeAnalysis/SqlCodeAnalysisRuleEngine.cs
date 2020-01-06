@@ -52,6 +52,12 @@ namespace Dibix.Sdk.CodeAnalysis
             TSqlFragment fragment = ScriptDomFacade.Load(scriptFilePath);
             return rule.Analyze(this._model, fragment, this._configuration);
         }
+
+        public IEnumerable<SqlCodeAnalysisError> AnalyzeScript(string scriptContent)
+        {
+            TSqlFragment fragment = ScriptDomFacade.Parse(scriptContent);
+            return this.Analyze(fragment);
+        }
         #endregion
 
         #region Private Methods

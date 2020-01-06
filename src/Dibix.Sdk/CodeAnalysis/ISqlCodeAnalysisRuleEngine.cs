@@ -8,5 +8,6 @@ namespace Dibix.Sdk.CodeAnalysis
         IEnumerable<SqlCodeAnalysisError> Analyze(TSqlFragment fragment);
         IEnumerable<SqlCodeAnalysisError> Analyze(string scriptFilePath);
         IEnumerable<SqlCodeAnalysisError> Analyze(string scriptFilePath, ISqlCodeAnalysisRule rule);
+        IEnumerable<SqlCodeAnalysisError> AnalyzeScript(string scriptContent);
     }
 }

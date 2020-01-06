@@ -13,10 +13,12 @@ namespace Dibix.Sdk.Sql
             TSqlParser parser = new TSql140Parser(true);
             using (reader)
             {
-                TSqlFragment fragment = parser.Parse(reader, out IList<ParseError> _);
+                TSqlFragment fragment = parser.Parse(reader, out IList<ParseError> errors);
                 return fragment;
             }
         }
+
+        public static TSqlFragment Parse(string scriptContent) => Load(new StringReader(scriptContent));
 
         public static string Generate(TSqlFragment fragment) => Generate(fragment, null);
         public static string Generate(TSqlFragment fragment, Action<SqlScriptGenerator> configuration)
