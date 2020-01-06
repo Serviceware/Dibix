@@ -10,7 +10,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             CSharpWriter output = new CSharpWriter(writer, configuration.RootNamespace, Enumerable.Empty<string>());
 
-            WriterContext context = new WriterContext(output.Root, null, configuration, artifacts, Format);
+            WriterContext context = new WriterContext(output.Root, null, configuration, artifacts, Format) { Output = output.Root.BeginScope(LayerName.DomainModel) };
 
             if (artifacts.Contracts.Any())
                 ContractCSWriter.Write(context, false);
