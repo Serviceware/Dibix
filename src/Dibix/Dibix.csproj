@@ -30,6 +30,7 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.5'">
     <Compile Remove="Http\DatabaseAccessorExtensions.Http.cs" />
     <Compile Remove="Http\Http*Response.cs" />
+    <Compile Remove="Http\HttpActionInvoker.cs" />
 
     <PackageReference Include="System.ComponentModel.Annotations" Version="$(DataAnnotationsVersion)" />
     <PackageReference Include="System.Data.SqlClient" Version="$(SqlClientVersion)" />
