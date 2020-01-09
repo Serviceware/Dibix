@@ -36,7 +36,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     public sealed class NamingConventionSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
     {
         // helpLine suppressions
-        private static readonly HashSet<string> Workarounds = new HashSet<string>
+        private static readonly ICollection<string> Workarounds = new HashSet<string>
         {
             "PK_hlsysobjecdata" // Renaming this PK would force rebuilding the full text catalog which would be very slow
             
@@ -48,7 +48,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
           , "spBlobSelect"
           , "spBlobTextSearch"
         };
-        private static readonly HashSet<string> ColumnWorkarounds = new HashSet<string>
+        private static readonly ICollection<string> ColumnWorkarounds = new HashSet<string>
         {
             "BlobDetail#blobmeta_identifier"
           , "hlsysbaselineattr#fixedvalue2"

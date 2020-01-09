@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using Dibix.Sdk.Sql;
+using Microsoft.SqlServer.Dac.Model;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
+using Column = Dibix.Sdk.Sql.Column;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
@@ -14,16 +16,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
     public sealed class PrimaryKeyDataTypeSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
     {
-        private static readonly HashSet<SqlDataTypeOption> AllowedPrimaryKeyTypes = new HashSet<SqlDataTypeOption>
-        {
-            SqlDataTypeOption.TinyInt
-          , SqlDataTypeOption.SmallInt
-          , SqlDataTypeOption.Int
-          , SqlDataTypeOption.BigInt
-          , SqlDataTypeOption.Date
-        };
         // helpLine suppressions
-        private static readonly HashSet<string> Workarounds = new HashSet<string>
+        private static readonly ICollection<string> Workarounds = new HashSet<string>
         {
             "PK_Blob#identifier"
           , "PK_BlobDetail#identifier"
@@ -321,7 +315,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                     identifier = String.Concat(tableName, '#', identifier);
 
                 if (columns[column.Name] is SqlDataTypeReference sqlDataType
-                 && !AllowedPrimaryKeyTypes.Contains(sqlDataType.SqlDataTypeOption)
+                 && !PrimaryKeyDataType.AllowedTypes.Contains((SqlDataType)sqlDataType.SqlDataTypeOption)
                  && !Workarounds.Contains(identifier))
                 {
                     UniqueConstraintDefinition definition = (UniqueConstraintDefinition)primaryKey.Definition;

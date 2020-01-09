@@ -12,7 +12,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
     public sealed class UnspecifiedDataTypeLengthSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
     {
-        private static readonly HashSet<SqlDataTypeOption> DataTypesThatRequireLength = new HashSet<SqlDataTypeOption>
+        private static readonly ICollection<SqlDataTypeOption> DataTypesThatRequireLength = new HashSet<SqlDataTypeOption>
         {
             SqlDataTypeOption.Char,
             SqlDataTypeOption.VarChar,

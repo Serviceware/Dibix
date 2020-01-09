@@ -33,7 +33,7 @@ namespace Dibix.Sdk.CodeGeneration
                 yield break;
             }
 
-            HashSet<string> usedOutputNames = new HashSet<string>();
+            ICollection<string> usedOutputNames = new HashSet<string>();
 
             if (target.MergeGridResult && returnHints.Count < 2)
             {
@@ -97,7 +97,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static void ValidateResult(int numberOfReturnHints, SqlHint returnHint, SqlQueryResult result, IList<ContractInfo> returnTypes, IEnumerable<OutputColumnResult> columns, HashSet<string> usedOutputNames, string sourcePath, IErrorReporter errorReporter)
+        private static void ValidateResult(int numberOfReturnHints, SqlHint returnHint, SqlQueryResult result, IList<ContractInfo> returnTypes, IEnumerable<OutputColumnResult> columns, ICollection<string> usedOutputNames, string sourcePath, IErrorReporter errorReporter)
         {
             // Validate return count/name
             if (!String.IsNullOrEmpty(result.Name))

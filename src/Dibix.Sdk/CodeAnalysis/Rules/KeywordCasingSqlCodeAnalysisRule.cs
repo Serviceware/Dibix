@@ -14,7 +14,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
     public sealed class KeywordCasingSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
     {
-        private static readonly HashSet<TSqlTokenType> TokenWhiteList = new HashSet<TSqlTokenType>
+        private static readonly ICollection<TSqlTokenType> TokenWhiteList = new HashSet<TSqlTokenType>
         {
             SqlTokenType.AsciiStringLiteral,
             SqlTokenType.Bang,

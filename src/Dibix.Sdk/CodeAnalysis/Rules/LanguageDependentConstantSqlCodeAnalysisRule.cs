@@ -13,7 +13,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
     public sealed class LanguageDependentConstantSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
     {
-        private static readonly HashSet<SqlDataTypeOption> LanguageDependentDataTypes = new HashSet<SqlDataTypeOption>
+        private static readonly ICollection<SqlDataTypeOption> LanguageDependentDataTypes = new HashSet<SqlDataTypeOption>
         {
             SqlDataTypeOption.Date
           , SqlDataTypeOption.DateTime
@@ -22,7 +22,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
           , SqlDataTypeOption.Time
           , SqlDataTypeOption.Timestamp
         };
-        private readonly HashSet<StringLiteral> _visitedLiterals;
+        private readonly ICollection<StringLiteral> _visitedLiterals;
 
         public LanguageDependentConstantSqlCodeAnalysisRuleVisitor()
         {

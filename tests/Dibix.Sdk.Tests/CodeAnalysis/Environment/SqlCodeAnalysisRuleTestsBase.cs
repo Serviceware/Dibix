@@ -63,7 +63,7 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
             buildEngine.Setup(x => x.LogMessageEvent(It.IsAny<BuildMessageEventArgs>()));
             errorReporter.Setup(x => x.RegisterError(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>()))
                          .Callback((string fileName, int line, int column, string errorNumber, string errorText) => loadErrors.Add(new CompilerError(fileName, line, column, errorNumber, errorText)));
-            errorReporter.Setup(x => x.ReportErrors())
+            errorReporter.SetupGet(x => x.HasErrors)
                          .Returns(() =>
                          {
                              if (!loadErrors.Any())

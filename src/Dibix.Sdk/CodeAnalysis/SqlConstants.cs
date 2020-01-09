@@ -5,7 +5,7 @@ namespace Dibix.Sdk.CodeAnalysis
 {
     public static class SqlConstants
     {
-        public static readonly HashSet<string> ReservedFunctionNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        public static readonly ICollection<string> ReservedFunctionNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             "nodes",   // XML
             "query",   // XML

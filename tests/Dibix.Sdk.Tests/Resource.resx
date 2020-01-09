@@ -929,6 +929,14 @@ namespace This.Is.A.Custom.Namespace
     message="[024] Surrogate keys are only allowed, if a business key is defined: dbx_codeanalysis_error_024_fail3"
     line="16"
     column="1" /&gt;
+  &lt;error
+    message="[024] Business key can be used as the primary key and should replace surrogate key: dbx_codeanalysis_error_024_fail4"
+    line="24"
+    column="1" /&gt;
+  &lt;error
+    message="[024] IDENTITY columns are only allowed for a valid surrogate key: dbx_codeanalysis_error_024_fail5.b"
+    line="35"
+    column="5" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="TableConstraintSqlCodeAnalysisRule" xml:space="preserve">

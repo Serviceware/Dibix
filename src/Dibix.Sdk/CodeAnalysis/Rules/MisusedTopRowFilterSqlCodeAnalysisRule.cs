@@ -154,7 +154,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         private class KeyComparisonVisitor : TSqlFragmentVisitor
         {
             private readonly string _tableAlias;
-            private readonly HashSet<string> _primaryKeyColumns;
+            private readonly ICollection<string> _primaryKeyColumns;
             private bool _foundExists;
 
             public bool Success => !this._foundExists && !this._primaryKeyColumns.Any();

@@ -29,7 +29,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         private const short UniqueIdentifierLength       = 16;   // bytes
 
         // helpLine suppressions
-        private static readonly HashSet<string> Workarounds = new HashSet<string>
+        private static readonly ICollection<string> Workarounds = new HashSet<string>
         {
             "PK_hlspparentprocattrmapping"
           , "UQ_hlsysportalconfig_cfg1"

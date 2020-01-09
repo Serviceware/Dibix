@@ -9,13 +9,13 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     public sealed class SurrogateKeySqlCodeAnalysisRule : SqlCodeAnalysisRule<SurrogateKeySqlCodeAnalysisRuleVisitor>
     {
         public override int Id => 24;
-        public override string ErrorMessage => "Surrogate keys are only allowed, if a business key is defined: {0}";
+        public override string ErrorMessage => "{0}";
     }
 
     public sealed class SurrogateKeySqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
     {
         // helpLine suppressions
-        private static readonly HashSet<string> Workarounds = new HashSet<string>
+        private static readonly ICollection<string> Workarounds = new HashSet<string>
         {
             "PK_hlbitomattribute(attributeconfigid)"
           , "PK_hlbitomtable(tableid)"
@@ -76,6 +76,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
           , "PK_hlsysworkeffortstatus(id)"
           , "PK_hlsyswrkeffortpriority(id)"
           , "PK_hlsyswrkeffrtciassgnmnts(id)"
+          , "PK_hlsyswrkeffrtprtyassgnmnts(id,workeffortroleid,fromdate)"
           , "PK_hlsyswrkeffrtprtyrle(id)"
           , "PK_hlsyswrkeffrt_location(id)"
           , "PK_hltmtablecfg(tablecfgid)"
@@ -90,51 +91,56 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             if (node.IsTemporaryTable())
                 return;
 
+            IDictionary<string, ColumnDefinition> identityColumns = node.Definition
+                                                                        .ColumnDefinitions
+                                                                        .Where(x => x.IdentityOptions != null)
+                                                                        .ToDictionary(x => x.ColumnIdentifier.Value, StringComparer.OrdinalIgnoreCase);
+
             ICollection<Constraint> constraints = base.Model.GetConstraints(node.SchemaObjectName).ToArray();
 
-            bool hasSurrogateKey = TryGetSurrogateKey(node, constraints, out Constraint primaryKey);
+            bool hasSurrogateKey = TryGetSurrogateKey(identityColumns.Keys, constraints, out Constraint primaryKey);
             if (!hasSurrogateKey)
+            {
+                foreach (KeyValuePair<string, ColumnDefinition> identityColumn in identityColumns)
+                {
+                    base.Fail(identityColumn.Value, $"IDENTITY columns are only allowed for a valid surrogate key: {node.SchemaObjectName.BaseIdentifier.Value}.{identityColumn.Key}");
+                }
                 return;
+            }
 
-            // We just assume here that a UQ could be a business key
-            bool hasBusinessKey = constraints.Any(x => IsValidBusinessKey(primaryKey, x));
-            if (hasBusinessKey)
+            Constraint businessKey = constraints.FirstOrDefault(x => IsValidBusinessKey(primaryKey, x));
+            if (businessKey != null)
+            {
+                // If we find this UQ to be valid PK, we suggest making the UQ the PK and replace the surrogate key
+                bool isPrimaryKeyCandidate = businessKey.Columns.Count == 1 && PrimaryKeyDataType.AllowedTypes.Contains(businessKey.Columns[0].SqlDataType);
+                if (isPrimaryKeyCandidate)
+                    base.Fail(node, $"Business key can be used as the primary key and should replace surrogate key: {node.SchemaObjectName.BaseIdentifier.Value}");
+                
                 return;
+            }
 
-            string identifier = $"({primaryKey.Columns.Single().Name})";
-            if (primaryKey.Definition.ConstraintIdentifier != null)
-                identifier = String.Concat(primaryKey.Definition.ConstraintIdentifier.Value, identifier);
-            else
-                identifier = String.Concat(node.SchemaObjectName.BaseIdentifier.Value, identifier);
+            string rootIdentifier = primaryKey.Definition.ConstraintIdentifier != null ? primaryKey.Definition.ConstraintIdentifier.Value : node.SchemaObjectName.BaseIdentifier.Value;
+            string identifier = $"{rootIdentifier}({String.Join(",", primaryKey.Columns.Select(x => x.Name))})";
 
             if (Workarounds.Contains(identifier))
                 return;
 
-            base.Fail(node, node.SchemaObjectName.BaseIdentifier.Value);
+            base.Fail(node, $"Surrogate keys are only allowed, if a business key is defined: {node.SchemaObjectName.BaseIdentifier.Value}");
         }
 
-        private static bool TryGetSurrogateKey(CreateTableStatement createTableStatement, IEnumerable<Constraint> constraints, out Constraint primaryKey)
+        private static bool TryGetSurrogateKey(ICollection<string> identityColumns, IEnumerable<Constraint> constraints, out Constraint primaryKey)
         {
-            // PK
             primaryKey = constraints.SingleOrDefault(x => x.Kind == ConstraintKind.PrimaryKey);
             if (primaryKey == null)
                 return false;
 
-            // We only support PK with one column
-            if (primaryKey.Columns.Count > 1)
-                return false;
-
-            // IDENTITY
-            string primaryKeyColumnName = primaryKey.Columns.Single().Name;
-            ColumnDefinition primaryKeyColumn = createTableStatement.Definition.ColumnDefinitions.Single(x => String.Equals(x.ColumnIdentifier.Value, primaryKeyColumnName, StringComparison.OrdinalIgnoreCase));
-            if (primaryKeyColumn.IdentityOptions == null)
-                return false;
-
-            return true;
+            bool hasIdentityColumn = primaryKey.Columns.Any(x => identityColumns.Contains(x.Name));
+            return hasIdentityColumn;
         }
 
         private static bool IsValidBusinessKey(Constraint primaryKey, Constraint constraint)
         {
+            // We just assume here that a UQ could be a business key
             if (constraint.Kind != ConstraintKind.Unique)
                 return false;
 

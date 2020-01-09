@@ -11,7 +11,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
     public sealed class ObsoleteDataTypeSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
     {
-        private static readonly HashSet<SqlDataTypeOption> ObsoleteDataTypes = new HashSet<SqlDataTypeOption>
+        private static readonly ICollection<SqlDataTypeOption> ObsoleteDataTypes = new HashSet<SqlDataTypeOption>
         {
             SqlDataTypeOption.NText,
             SqlDataTypeOption.Image

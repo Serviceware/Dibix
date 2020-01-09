@@ -14,7 +14,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         // helpLine suppressions
         // Adding a PK here would be very slow due to the size of the tables
-        private static readonly HashSet<string> Workarounds = new HashSet<string>
+        private static readonly ICollection<string> Workarounds = new HashSet<string>
         {
             "hlwfactivityevents"
           , "hlwfinstanceevents"
