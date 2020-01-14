@@ -60,6 +60,12 @@ namespace Dibix
             return cache;
         }
 
+        // SubProcess (GetCmdbFlows)
+        public static IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird>(this IDatabaseAccessor accessor, string sql, CommandType commandType, string splitOn) where TReturn : new()
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
+            return accessor.QueryMany<TReturn, TSecond, TThird>(sql, commandType, EmptyParameters.Instance, splitOn);
+        }
         // BPMNModeler
         public static IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird>(this IDatabaseAccessor accessor, string sql, Action<TReturn, TSecond, TThird> map, string splitOn)
         {

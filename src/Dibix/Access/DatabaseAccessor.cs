@@ -42,6 +42,13 @@ namespace Dibix
                        .PostProcess(multiMapper);
         }
 
+        public IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird>(string sql, CommandType commandType, IParametersVisitor parameters, string splitOn) where TReturn : new()
+        {
+            MultiMapper multiMapper = new MultiMapper();
+            return this.QueryMany<TReturn, TSecond, TThird, TReturn>(sql, commandType, parameters, (a, b, c) => multiMapper.MapRow<TReturn>(false, a, b, c), splitOn)
+                       .PostProcess(multiMapper);
+        }
+
         IEnumerable<TReturn> IDatabaseAccessor.QueryMany<TFirst, TSecond, TReturn>(string sql, CommandType commandType, IParametersVisitor parameters, Func<TFirst, TSecond, TReturn> map, string splitOn) => this.QueryMany(sql, commandType, parameters, map, splitOn).PostProcess();
 
         IEnumerable<TReturn> IDatabaseAccessor.QueryMany<TFirst, TSecond, TThird, TReturn>(string sql, CommandType commandType, IParametersVisitor parameters, Func<TFirst, TSecond, TThird, TReturn> map, string splitOn) => this.QueryMany(sql, commandType, parameters, map, splitOn).PostProcess();
