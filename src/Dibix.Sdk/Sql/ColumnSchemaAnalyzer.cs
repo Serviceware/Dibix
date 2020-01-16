@@ -182,6 +182,9 @@ namespace Dibix.Sdk.Sql
 
         private static void CompileSqlInterpretationVisitor90Results(ColumnSchemaAnalyzerCompilationContext context, Expression dataSchemaModelParameter, Expression sqlFragmentParameter, Expression resultVariable)
         {
+            ICollection<ParameterExpression> columnResolversIfConditionVariables = new Collection<ParameterExpression>();
+            ICollection<Expression> columnResolversIfConditionStatements = new Collection<Expression>();
+
             // SqlSchemaModel internalModel = SchemaAnalysisService.GetInternalModel(model);
             Type sqlSchemaModelType = SchemaSqlAssembly.GetType("Microsoft.Data.Tools.Schema.Sql.SchemaModel.SqlSchemaModel", true);
             ParameterExpression internalModelVariable = Expression.Variable(sqlSchemaModelType, "internalModel");
@@ -213,39 +216,32 @@ namespace Dibix.Sdk.Sql
             context.Variables.Add(sqlInterpreterVariable);
             context.Statements.Add(sqlInterpreterAssign);
 
-            // SelectStatementInterpretationVisitor interpretationVisitor = sqlInterpreter.InterpretationContext.VisitorFactory.CreateSelectStatementInterpretationVisitor(schemaAnalysisService._internalAnalyzer, sqlInterpreter.InterpretationContext);
-            Type selectStatementInterpretationVisitorType = SchemaSqlAssembly.GetType("Microsoft.Data.Tools.Schema.Sql.SchemaModel.InterpretationVisitors.SelectStatementInterpretationVisitor", true);
+            // SelectStatementInterpretationVisitor selectVisitor = sqlInterpreter.InterpretationContext.VisitorFactory.CreateSelectStatementInterpretationVisitor(schemaAnalysisService._internalAnalyzer, sqlInterpreter.InterpretationContext);
+            // sqlFragment.Accept(selectVisitor);
+            // result.Errors.AddRange(selectVisitor.InterpretationErrors.Select(InternalModelUtils.CreatExtensibilityError));
             Expression interpretationContextProperty = Expression.Property(sqlInterpreterVariable, "InterpretationContext");
-            Expression visitorFactoryProperty = Expression.Property(interpretationContextProperty, "VisitorFactory");
             Expression internalAnalyzerField = Expression.Field(context.SchemaAnalysisService, "_internalAnalyzer");
-            ParameterExpression interpretationVisitorVariable = Expression.Variable(selectStatementInterpretationVisitorType, "interpretationVisitor");
-            Expression interpretationVisitorValue = Expression.Call(visitorFactoryProperty, "CreateSelectStatementInterpretationVisitor", new Type[0], internalAnalyzerField, interpretationContextProperty);
-            Expression interpretationVisitorAssign = Expression.Assign(interpretationVisitorVariable, interpretationVisitorValue);
-            context.Variables.Add(interpretationVisitorVariable);
-            context.Statements.Add(interpretationVisitorAssign);
+            Type selectStatementInterpretationVisitorType = SchemaSqlAssembly.GetType("Microsoft.Data.Tools.Schema.Sql.SchemaModel.InterpretationVisitors.SelectStatementInterpretationVisitor", true);
+            Expression visitorVariable = CompileVisitorInvocation
+            (
+                selectStatementInterpretationVisitorType
+              , "selectVisitor"
+              , sqlFragmentParameter
+              , sqlInterpreterVariable
+              , resultVariable
+              , "CreateSelectStatementInterpretationVisitor"
+              , context.Variables
+              , context.Statements
+              , internalAnalyzerField
+              , interpretationContextProperty
+            );
 
-            // sqlFragment.Accept(interpretationVisitor);
-            Expression acceptCall = Expression.Call(sqlFragmentParameter, "Accept", new Type[0], interpretationVisitorVariable);
-            context.Statements.Add(acceptCall);
-
-            // result.Errors.AddRange(interpretationVisitor.InterpretationErrors.Select(InternalModelUtils.CreatExtensibilityError));
-            Type interpretationErrorType = SchemaSqlAssembly.GetType("Microsoft.Data.Tools.Schema.Sql.SchemaModel.InterpretationError", true);
-            Type internalModelUtils = DacExtensionsAssembly.GetType("Microsoft.SqlServer.Dac.Model.InternalModelUtils", true);
-            Type selectorType = typeof(Func<,>).MakeGenericType(interpretationErrorType, typeof(ExtensibilityError));
-            MethodInfo selectMethod = GenericMethodUtility.EnumerableSelectMethod.MakeGenericMethod(interpretationErrorType, typeof(ExtensibilityError));
-            MethodInfo creatExtensibilityErrorMethod = internalModelUtils.GetMethod("CreatExtensibilityError", BindingFlags.NonPublic | BindingFlags.Static);
-            Guard.IsNotNull(creatExtensibilityErrorMethod, nameof(creatExtensibilityErrorMethod), "Could not find method 'CreatExtensibilityError' on InternalModelUtils");
-            Expression interpretationErrorsProperty = Expression.Property(interpretationVisitorVariable, "InterpretationErrors");
-            Expression interpretationErrorToExtensibilityError = Expression.Constant(Delegate.CreateDelegate(selectorType, null, creatExtensibilityErrorMethod));
-            Expression errorsProperty = Expression.Property(resultVariable, nameof(ColumnSchemaAnalyzerResult.Errors));
-            Expression extensibilityErrors = Expression.Call(selectMethod, interpretationErrorsProperty, interpretationErrorToExtensibilityError);
-            Expression interpretationErrorsAddRange = Expression.Call(typeof(CollectionExtensions), nameof(CollectionExtensions.AddRange), new[] { typeof(ExtensibilityError) }, errorsProperty, extensibilityErrors);
-            context.Statements.Add(interpretationErrorsAddRange);
-
-            // if (interpretationVisitor.ColumnResolvers.Count > 0)
+            // if (selectVisitor.ColumnResolvers.Count > 0)
             // {
-            //     SqlColumnResolver columnResolver = interpretationVisitor.ColumnResolvers[0];
+            //     SqlColumnResolver columnResolver = selectVisitor.ColumnResolvers[0];
+            //
             //     IEnumerator<ResolvedDescriptor> selectColumnsEnumerator;
+            //
             //     try
             //     {
             //         selectColumnsEnumerator = columnResolver.SelectColumns.GetEnumerator();
@@ -266,12 +262,17 @@ namespace Dibix.Sdk.Sql
             //         selectColumnsEnumerator.Dispose();
             //     }
             // }
+
+            // SqlColumnResolver columnResolver = selectVisitor.ColumnResolvers[0];
             Type columnResolverType = SchemaSqlAssembly.GetType("Microsoft.Data.Tools.Schema.Sql.SchemaModel.SqlColumnResolver", true);
-            Expression columnResolversProperty = Expression.Property(interpretationVisitorVariable, "ColumnResolvers");
+            Expression columnResolversProperty = Expression.Property(visitorVariable, "ColumnResolvers");
             ParameterExpression columnResolverVariable = Expression.Variable(columnResolverType, "columnResolver");
             Expression columnResolverValue = Expression.Property(columnResolversProperty, "Item", Expression.Constant(0));
             Expression columnResolverAssign = Expression.Assign(columnResolverVariable, columnResolverValue);
+            columnResolversIfConditionVariables.Add(columnResolverVariable);
+            columnResolversIfConditionStatements.Add(columnResolverAssign);
 
+            // foreach
             Type resolvedDescriptorType = SchemaSqlAssembly.GetType("Microsoft.Data.Tools.Schema.Sql.SchemaModel.ResolvedDescriptor", true);
             Expression selectColumnsProperty = Expression.Property(columnResolverVariable, "SelectColumns");
             ExpressionUtils.Foreach
@@ -283,8 +284,10 @@ namespace Dibix.Sdk.Sql
               , out ParameterExpression enumeratorVariable
               , out Expression enumeratorStatement
             );
+            columnResolversIfConditionVariables.Add(enumeratorVariable);
+            columnResolversIfConditionStatements.Add(enumeratorStatement);
 
-            // if (interpretationVisitor.ColumnResolvers.Count > 0)
+            // if (selectVisitor.ColumnResolvers.Count > 0)
             // {
             //     ...
             // }
@@ -292,13 +295,8 @@ namespace Dibix.Sdk.Sql
             Expression columnResolversIfCondition = Expression.GreaterThan(columnResolversCountProperty, Expression.Constant(0));
             Expression columnResolversIfTrue = Expression.Block
             (
-                new[]
-                {
-                    columnResolverVariable
-                  , enumeratorVariable
-                }
-              , columnResolverAssign
-              , enumeratorStatement
+                columnResolversIfConditionVariables
+              , columnResolversIfConditionStatements
             );
             Expression columnResolversIf = Expression.IfThen(columnResolversIfCondition, columnResolversIfTrue);
             context.Statements.Add(columnResolversIf);
@@ -374,6 +372,49 @@ namespace Dibix.Sdk.Sql
                 this.Variables = new Collection<ParameterExpression>();
                 this.Statements = new Collection<Expression>();
             }
+        }
+
+        private static Expression CompileVisitorInvocation
+        (
+            Type visitorType
+          , string visitorName
+          , Expression sqlFragmentParameter
+          , Expression sqlInterpreterVariable
+          , Expression resultVariable
+          , string visitorFactoryName
+          , ICollection<ParameterExpression> variables
+          , ICollection<Expression> statements
+          , params Expression[] visitorFactoryParams
+        )
+        {
+            // TVisitor visitor = sqlInterpreter.InterpretationContext.VisitorFactory.Create...Visitor(...);
+            Expression interpretationContextProperty = Expression.Property(sqlInterpreterVariable, "InterpretationContext");
+            Expression visitorFactoryProperty = Expression.Property(interpretationContextProperty, "VisitorFactory");
+            ParameterExpression visitorVariable = Expression.Variable(visitorType, visitorName);
+            Expression visitorValue = Expression.Call(visitorFactoryProperty, visitorFactoryName, new Type[0], visitorFactoryParams);
+            Expression selectInterpretationVisitorAssign = Expression.Assign(visitorVariable, visitorValue);
+            variables.Add(visitorVariable);
+            statements.Add(selectInterpretationVisitorAssign);
+
+            // sqlFragment.Accept(visitor);
+            Expression acceptCall = Expression.Call(sqlFragmentParameter, "Accept", new Type[0], visitorVariable);
+            statements.Add(acceptCall);
+
+            // result.Errors.AddRange(visitor.InterpretationErrors.Select(InternalModelUtils.CreatExtensibilityError));
+            Type interpretationErrorType = SchemaSqlAssembly.GetType("Microsoft.Data.Tools.Schema.Sql.SchemaModel.InterpretationError", true);
+            Type internalModelUtils = DacExtensionsAssembly.GetType("Microsoft.SqlServer.Dac.Model.InternalModelUtils", true);
+            Type selectorType = typeof(Func<,>).MakeGenericType(interpretationErrorType, typeof(ExtensibilityError));
+            MethodInfo selectMethod = GenericMethodUtility.EnumerableSelectMethod.MakeGenericMethod(interpretationErrorType, typeof(ExtensibilityError));
+            MethodInfo creatExtensibilityErrorMethod = internalModelUtils.GetMethod("CreatExtensibilityError", BindingFlags.NonPublic | BindingFlags.Static);
+            Guard.IsNotNull(creatExtensibilityErrorMethod, nameof(creatExtensibilityErrorMethod), "Could not find method 'CreatExtensibilityError' on InternalModelUtils");
+            Expression interpretationErrorsProperty = Expression.Property(visitorVariable, "InterpretationErrors");
+            Expression interpretationErrorToExtensibilityError = Expression.Constant(Delegate.CreateDelegate(selectorType, null, creatExtensibilityErrorMethod));
+            Expression errorsProperty = Expression.Property(resultVariable, nameof(ColumnSchemaAnalyzerResult.Errors));
+            Expression extensibilityErrors = Expression.Call(selectMethod, interpretationErrorsProperty, interpretationErrorToExtensibilityError);
+            Expression interpretationErrorsAddRange = Expression.Call(typeof(CollectionExtensions), nameof(CollectionExtensions.AddRange), new[] { typeof(ExtensibilityError) }, errorsProperty, extensibilityErrors);
+            statements.Add(interpretationErrorsAddRange);
+
+            return visitorVariable;
         }
 
         private delegate ColumnSchemaAnalyzerResult AnalyzeColumns(TSqlModel dataSchemaModel, TSqlObject modelElement, TSqlFragment sqlFragment);
