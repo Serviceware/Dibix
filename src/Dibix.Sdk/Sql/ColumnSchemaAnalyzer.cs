@@ -1,9 +1,9 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq.Expressions;
 using System.Reflection;
+using Dibix.Sdk.Utilities;
 using Microsoft.Data.Tools.Schema.Extensibility;
 using Microsoft.SqlServer.Dac.CodeAnalysis;
 using Microsoft.SqlServer.Dac.Extensibility;
@@ -134,37 +134,36 @@ namespace Dibix.Sdk.Sql
             // {
             //     columnOffsetDescriptorEnumerator.Dispose();
             // }
-            CompileNullableColumnSchemaAnalyzerResultsIterator(context, dataSchemaModelParameter, resultVariable);
-        }
-
-        private static void CompileNullableColumnSchemaAnalyzerResultsIterator(ColumnSchemaAnalyzerCompilationContext context, Expression dataSchemaModelParameter, Expression resultVariable)
-        {
-            // IEnumerator<KeyValuePair<int, ElementDescriptor>> columnOffsetDescriptorEnumerator;
             Type elementDescriptorType = DacExtensionsAssembly.GetType("Microsoft.SqlServer.Dac.Model.ElementDescriptor", true);
             Type columnOffsetDescriptorType = typeof(KeyValuePair<,>).MakeGenericType(typeof(int), elementDescriptorType);
-            ParameterExpression columnOffsetDescriptorEnumeratorVariable = Expression.Variable(typeof(IEnumerator<>).MakeGenericType(columnOffsetDescriptorType), "columnOffsetDescriptorEnumerator");
-            context.Variables.Add(columnOffsetDescriptorEnumeratorVariable);
-
-            // columnOffsetDescriptorEnumerator = nullableColumnSchemaAnalyzer._columnOffsetToDescriptorMap.GetEnumerator();
             Expression columnOffsetToDescriptorMapField = Expression.Field(context.Analyzer, "_columnOffsetToDescriptorMap");
-            Expression columnOffsetDescriptorEnumeratorValue = Expression.Call(columnOffsetToDescriptorMapField, typeof(IEnumerable<>).MakeGenericType(columnOffsetDescriptorType).GetMethod(nameof(IEnumerable<object>.GetEnumerator)));
-            Expression columnOffsetDescriptorEnumeratorAssign = Expression.Assign(columnOffsetDescriptorEnumeratorVariable, columnOffsetDescriptorEnumeratorValue);
+            ExpressionUtils.Foreach
+            (
+                "columnOffsetDescriptor"
+              , columnOffsetToDescriptorMapField
+              , columnOffsetDescriptorType
+              , builder => CompileNullableColumnSchemaAnalyzerResultsIterator(dataSchemaModelParameter, resultVariable, builder)
+              , out ParameterExpression enumeratorVariable
+              , out Expression enumeratorStatement
+            );
+            context.Variables.Add(enumeratorVariable);
+            context.Statements.Add(enumeratorStatement);
+        }
 
-            // KeyValuePair<int, ElementDescriptor> columnOffsetDescriptor = columnOffsetDescriptorEnumerator.Current;
-            ParameterExpression columnOffsetDescriptorVariable = Expression.Variable(columnOffsetDescriptorType, "columnOffsetDescriptor");
-            Expression columnOffsetDescriptorValue = Expression.Property(columnOffsetDescriptorEnumeratorVariable, nameof(IEnumerator<object>.Current));
-            Expression columnOffsetDescriptorAssign = Expression.Assign(columnOffsetDescriptorVariable, columnOffsetDescriptorValue);
-
+        private static void CompileNullableColumnSchemaAnalyzerResultsIterator(Expression dataSchemaModelParameter, Expression resultVariable, IForeachBodyBuilder bodyBuilder)
+        {
             // int offset = columnOffsetDescriptor.Key;
             ParameterExpression offsetVariable = Expression.Variable(typeof(int), "offset");
-            Expression offsetValue = Expression.Property(columnOffsetDescriptorVariable, nameof(KeyValuePair<object, object>.Key));
+            Expression offsetValue = Expression.Property(bodyBuilder.Element, nameof(KeyValuePair<object, object>.Key));
             Expression offsetAssign = Expression.Assign(offsetVariable, offsetValue);
+            bodyBuilder.AddAssignStatement(offsetVariable, offsetAssign);
 
             // TSqlObject columnElement = columnOffsetDescriptor.Value.GetModelElement(dataSchemaModel);
-            Expression columnOffsetDescriptorValueProperty = Expression.Property(columnOffsetDescriptorVariable, nameof(KeyValuePair<object, object>.Value));
+            Expression columnOffsetDescriptorValueProperty = Expression.Property(bodyBuilder.Element, nameof(KeyValuePair<object, object>.Value));
             ParameterExpression columnElementVariable = Expression.Variable(TSqlObjectType, "columnElement");
             Expression columnElementValue = Expression.Call(columnOffsetDescriptorValueProperty, "GetModelElement", new Type[0], dataSchemaModelParameter);
             Expression columnElementAssign = Expression.Assign(columnElementVariable, columnElementValue);
+            bodyBuilder.AddAssignStatement(columnElementVariable, columnElementAssign);
 
             // ColumnElementDescriptor hit = new ColumnElementDescriptor(offset, columnElement);
             Type columnElementHitType = typeof(ColumnElementHit);
@@ -173,49 +172,12 @@ namespace Dibix.Sdk.Sql
             ParameterExpression hitVariable = Expression.Variable(columnElementHitType, "hit");
             Expression hitValue = Expression.New(columnElementHitCtor, offsetVariable, columnElementVariable);
             Expression hitAssign = Expression.Assign(hitVariable, hitValue);
+            bodyBuilder.AddAssignStatement(hitVariable, hitAssign);
 
             // result.Hits.Add(hit);
             Expression hitsProperty = Expression.Property(resultVariable, nameof(ColumnSchemaAnalyzerResult.Hits));
             Expression hitsAddCall = Expression.Call(hitsProperty, nameof(ICollection<object>.Add), new Type[0], hitVariable);
-
-            // while (columnOffsetDescriptorEnumerator.MoveNext())
-            // {
-            //     ...
-            // }
-            Expression propertyEnumeratorMoveNextCall = Expression.Call(columnOffsetDescriptorEnumeratorVariable, typeof(IEnumerator).GetMethod(nameof(IEnumerator.MoveNext)));
-            Expression enumeratorIfCondition = Expression.Equal(propertyEnumeratorMoveNextCall, Expression.Constant(true));
-            Expression enumeratorIfTrue = Expression.Block
-            (
-                new[]
-                {
-                    columnOffsetDescriptorVariable
-                  , offsetVariable
-                  , columnElementVariable
-                  , hitVariable
-                }
-              , columnOffsetDescriptorAssign
-              , offsetAssign
-              , columnElementAssign
-              , hitAssign
-              , hitsAddCall
-            );
-            LabelTarget enumeratorBreakLabel = Expression.Label("BreakColumnOffsetDescriptorEnumerator");
-            Expression enumeratorIfFalse = Expression.Break(enumeratorBreakLabel);
-            Expression enumeratorIfElse = Expression.IfThenElse(enumeratorIfCondition, enumeratorIfTrue, enumeratorIfFalse);
-            Expression enumeratorLoop = Expression.Loop(enumeratorIfElse, enumeratorBreakLabel);
-
-            // try
-            // {
-            //     ...
-            // }
-            // finally
-            // {
-            //     columnOffsetDescriptorEnumerator.Dispose();
-            // }
-            Expression tryBlock = Expression.Block(columnOffsetDescriptorEnumeratorAssign, enumeratorLoop);
-            Expression @finally = Expression.Call(columnOffsetDescriptorEnumeratorVariable, typeof(IDisposable).GetMethod(nameof(IDisposable.Dispose)));
-            Expression tryFinally = Expression.TryFinally(tryBlock, @finally);
-            context.Statements.Add(tryFinally);
+            bodyBuilder.AddStatement(hitsAddCall);
         }
 
         private static void CompileSqlInterpretationVisitor90Results(ColumnSchemaAnalyzerCompilationContext context, Expression dataSchemaModelParameter, Expression sqlFragmentParameter, Expression resultVariable)
@@ -282,10 +244,11 @@ namespace Dibix.Sdk.Sql
 
             // if (interpretationVisitor.ColumnResolvers.Count > 0)
             // {
+            //     SqlColumnResolver columnResolver = interpretationVisitor.ColumnResolvers[0];
             //     IEnumerator<ResolvedDescriptor> selectColumnsEnumerator;
             //     try
             //     {
-            //         selectColumnsEnumerator = interpretationVisitor.ColumnResolvers[0].SelectColumns.GetEnumerator();
+            //         selectColumnsEnumerator = columnResolver.SelectColumns.GetEnumerator();
             //         while (selectColumnsEnumerator.MoveNext())
             //         {
             //             ResolvedDescriptor selectColumn = selectColumnsEnumerator.Current;
@@ -303,29 +266,48 @@ namespace Dibix.Sdk.Sql
             //         selectColumnsEnumerator.Dispose();
             //     }
             // }
-            CompileSqlInterpretationVisitor90ResultsIterator(context, dataSchemaModelParameter, resultVariable, interpretationVisitorVariable);
+            Type columnResolverType = SchemaSqlAssembly.GetType("Microsoft.Data.Tools.Schema.Sql.SchemaModel.SqlColumnResolver", true);
+            Expression columnResolversProperty = Expression.Property(interpretationVisitorVariable, "ColumnResolvers");
+            ParameterExpression columnResolverVariable = Expression.Variable(columnResolverType, "columnResolver");
+            Expression columnResolverValue = Expression.Property(columnResolversProperty, "Item", Expression.Constant(0));
+            Expression columnResolverAssign = Expression.Assign(columnResolverVariable, columnResolverValue);
+
+            Type resolvedDescriptorType = SchemaSqlAssembly.GetType("Microsoft.Data.Tools.Schema.Sql.SchemaModel.ResolvedDescriptor", true);
+            Expression selectColumnsProperty = Expression.Property(columnResolverVariable, "SelectColumns");
+            ExpressionUtils.Foreach
+            (
+                "selectColumn"
+              , selectColumnsProperty
+              , resolvedDescriptorType
+              , builder => CompileSqlInterpretationVisitor90ResultsIterator(dataSchemaModelParameter, resultVariable, builder)
+              , out ParameterExpression enumeratorVariable
+              , out Expression enumeratorStatement
+            );
+
+            // if (interpretationVisitor.ColumnResolvers.Count > 0)
+            // {
+            //     ...
+            // }
+            Expression columnResolversCountProperty = Expression.Property(columnResolversProperty, nameof(List<object>.Count));
+            Expression columnResolversIfCondition = Expression.GreaterThan(columnResolversCountProperty, Expression.Constant(0));
+            Expression columnResolversIfTrue = Expression.Block
+            (
+                new[]
+                {
+                    columnResolverVariable
+                  , enumeratorVariable
+                }
+              , columnResolverAssign
+              , enumeratorStatement
+            );
+            Expression columnResolversIf = Expression.IfThen(columnResolversIfCondition, columnResolversIfTrue);
+            context.Statements.Add(columnResolversIf);
         }
 
-        private static void CompileSqlInterpretationVisitor90ResultsIterator(ColumnSchemaAnalyzerCompilationContext context, Expression dataSchemaModelParameter, Expression resultVariable, Expression interpretationVisitorVariable)
+        private static void CompileSqlInterpretationVisitor90ResultsIterator(Expression dataSchemaModelParameter, Expression resultVariable, IForeachBodyBuilder bodyBuilder)
         {
-            // IEnumerator<ResolvedDescriptor> selectColumnsEnumerator;
-            Type resolvedDescriptorType = SchemaSqlAssembly.GetType("Microsoft.Data.Tools.Schema.Sql.SchemaModel.ResolvedDescriptor", true);
-            ParameterExpression selectColumnsEnumeratorVariable = Expression.Variable(typeof(IEnumerator<>).MakeGenericType(resolvedDescriptorType), "selectColumnsEnumerator");
-            
-            // selectColumnsEnumerator = interpretationVisitor.ColumnResolvers[0].SelectColumns.GetEnumerator();
-            Expression columnResolversProperty = Expression.Property(interpretationVisitorVariable, "ColumnResolvers");
-            Expression firstColumnResolver = Expression.Property(columnResolversProperty, "Item", Expression.Constant(0));
-            Expression selectColumnsProperty = Expression.Property(firstColumnResolver, "SelectColumns");
-            Expression selectColumnsEnumeratorValue = Expression.Call(selectColumnsProperty, typeof(IEnumerable<>).MakeGenericType(resolvedDescriptorType).GetMethod(nameof(IEnumerable<object>.GetEnumerator)));
-            Expression selectColumnsEnumeratorAssign = Expression.Assign(selectColumnsEnumeratorVariable, selectColumnsEnumeratorValue);
-
-            // ResolvedDescriptor selectColumn = selectColumnsEnumerator.Current;
-            ParameterExpression selectColumnVariable = Expression.Variable(resolvedDescriptorType, "selectColumn");
-            Expression selectColumnValue = Expression.Property(selectColumnsEnumeratorVariable, nameof(IEnumerator<object>.Current));
-            Expression selectColumnAssign = Expression.Assign(selectColumnVariable, selectColumnValue);
-
             // int offset = selectColumn.Fragment.StartOffset;
-            Expression fragmentProperty = Expression.Property(selectColumnVariable, "Fragment");
+            Expression fragmentProperty = Expression.Property(bodyBuilder.Element, "Fragment");
             ParameterExpression offsetVariable = Expression.Variable(typeof(int), "offset");
             Expression offsetValue = Expression.Property(fragmentProperty, nameof(TSqlFragment.StartOffset));
             Expression offsetAssign = Expression.Assign(offsetVariable, offsetValue);
@@ -335,7 +317,7 @@ namespace Dibix.Sdk.Sql
             Type dacSqlElementDescriptorType = DacExtensionsAssembly.GetType("Microsoft.SqlServer.Dac.Model.SqlElementDescriptor", true);
             ConstructorInfo dacSqlElementDescriptorCtor = dacSqlElementDescriptorType.GetConstructor(new[] { schemaSqlElementDescriptorType });
             Guard.IsNotNull(dacSqlElementDescriptorCtor, nameof(dacSqlElementDescriptorCtor), "Could not find constructor on SqlElementDescriptor");
-            Expression potentialsProperty = Expression.Property(selectColumnVariable, "Potentials");
+            Expression potentialsProperty = Expression.Property(bodyBuilder.Element, "Potentials");
             Expression firstPotentialElement = Expression.Property(potentialsProperty, "Item", Expression.Constant(0));
             Expression sqlElementDescriptor = Expression.New(dacSqlElementDescriptorCtor, firstPotentialElement);
             ParameterExpression columnElementVariable = Expression.Variable(TSqlObjectType, "columnElement");
@@ -362,14 +344,12 @@ namespace Dibix.Sdk.Sql
             (
                 new[]
                 {
-                    offsetVariable
-                  , columnElementVariable
-                  , hitVariable
+                    offsetVariable, columnElementVariable, hitVariable
                 }
-              , offsetAssign
-              , columnElementAssign
-              , hitAssign
-              , hitsAddCall
+                , offsetAssign
+                , columnElementAssign
+                , hitAssign
+                , hitsAddCall
             );
             Type sqlElementDescriptorRelevanceType = SchemaSqlAssembly.GetType("Microsoft.Data.Tools.Schema.Sql.SchemaModel.SqlElementDescriptorRelevance", true);
             object sqlElementDescriptorRelevanceSelfId = Enum.Parse(sqlElementDescriptorRelevanceType, "SelfId");
@@ -379,48 +359,7 @@ namespace Dibix.Sdk.Sql
             Expression selectColumnConditionRight = Expression.Equal(relevanceProperty, Expression.Constant(sqlElementDescriptorRelevanceSelfId));
             Expression selectColumnCondition = Expression.And(selectColumnConditionLeft, selectColumnConditionRight);
             Expression selectColumnConditionBlock = Expression.IfThen(selectColumnCondition, selectColumnBlock);
-
-            // while (selectColumnsEnumerator.MoveNext())
-            // {
-            //     ...
-            // }
-            Expression propertyEnumeratorMoveNextCall = Expression.Call(selectColumnsEnumeratorVariable, typeof(IEnumerator).GetMethod(nameof(IEnumerator.MoveNext)));
-            Expression enumeratorIfCondition = Expression.Equal(propertyEnumeratorMoveNextCall, Expression.Constant(true));
-            Expression enumeratorIfTrue = Expression.Block
-            (
-                new[]
-                {
-                    selectColumnVariable
-                }
-              , selectColumnAssign
-              , selectColumnConditionBlock
-            );
-            LabelTarget enumeratorBreakLabel = Expression.Label("BreakSelectColumnsEnumerator");
-            Expression enumeratorIfFalse = Expression.Break(enumeratorBreakLabel);
-            Expression enumeratorIfElse = Expression.IfThenElse(enumeratorIfCondition, enumeratorIfTrue, enumeratorIfFalse);
-            Expression enumeratorLoop = Expression.Loop(enumeratorIfElse, enumeratorBreakLabel);
-
-            // try
-            // {
-            //     ...
-            // }
-            // finally
-            // {
-            //     selectColumnsEnumerator.Dispose();
-            // }
-            Expression tryBlock = Expression.Block(selectColumnsEnumeratorAssign, enumeratorLoop);
-            Expression @finally = Expression.Call(selectColumnsEnumeratorVariable, typeof(IDisposable).GetMethod(nameof(IDisposable.Dispose)));
-            Expression tryFinally = Expression.TryFinally(tryBlock, @finally);
-
-            // if (interpretationVisitor.ColumnResolvers.Count > 0)
-            // {
-            //     ...
-            // }
-            Expression columnResolversCountProperty = Expression.Property(columnResolversProperty, nameof(List<object>.Count));
-            Expression columnResolversIfCondition = Expression.GreaterThan(columnResolversCountProperty, Expression.Constant(0));
-            Expression columnResolversIfTrue = Expression.Block(new[] { selectColumnsEnumeratorVariable }, tryFinally);
-            Expression columnResolversIf = Expression.IfThen(columnResolversIfCondition, columnResolversIfTrue);
-            context.Statements.Add(columnResolversIf);
+            bodyBuilder.AddStatement(selectColumnConditionBlock);
         }
 
         private sealed class ColumnSchemaAnalyzerCompilationContext
