@@ -23,8 +23,6 @@ namespace Dibix.Sdk.CodeAnalysis
         {
             this.Errors.Clear();
 
-            ColumnSchemaAnalyzer.Analyze(model, scriptFragment);
-
             this.Analyze(model, scriptFragment, configuration);
 
             return this.Errors;

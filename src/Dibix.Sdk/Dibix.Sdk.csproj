@@ -5,6 +5,7 @@
   <PropertyGroup>
     <TargetFramework>net46</TargetFramework>
     <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>

@@ -4,15 +4,15 @@ using Microsoft.SqlServer.Dac.Extensibility;
 
 namespace Dibix.Sdk.Sql
 {
-    internal sealed class ColumnSchemaAnalyzerResult
+    internal sealed class SchemaAnalyzerResult
     {
         public ICollection<ExtensibilityError> Errors { get; }
-        public ICollection<ColumnElementHit> Hits { get; }
+        public ICollection<ElementDescriptor> Hits { get; }
 
-        public ColumnSchemaAnalyzerResult()
+        public SchemaAnalyzerResult()
         {
             this.Errors = new Collection<ExtensibilityError>();
-            this.Hits = new Collection<ColumnElementHit>();
+            this.Hits = new Collection<ElementDescriptor>();
         }
     }
 }
