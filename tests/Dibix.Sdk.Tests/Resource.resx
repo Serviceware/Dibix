@@ -734,6 +734,23 @@ UNION ALL
     column="72" /&gt;
 &lt;/errors&gt;</value>
   </data>
+  <data name="PrimaryKeyUpdateSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="[036] Primary keys should not be updated: [target].[id] = [source].[id]"
+    line="7"
+    column="20" /&gt;
+  &lt;error
+    message="[036] Primary keys should not be updated: [id] = 1"
+    line="10"
+    column="31" /&gt;
+  &lt;error
+    message="[036] Primary keys should not be updated: [id] = 1"
+    line="16"
+    column="21" /&gt;
+&lt;/errors&gt;</value>
+  </data>
   <data name="PrimitiveDataTypeIdentifierSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;

@@ -18,6 +18,7 @@ namespace Dibix.Sdk.Sql
         private static readonly Assembly SchemaSqlAssembly = typeof(IExtension).Assembly;
         private static readonly Type TSqlModelType = typeof(TSqlModel);
         private static readonly Type TSqlObjectType = typeof(TSqlObject);
+        private static readonly Type ElementDescriptorType = DacExtensionsAssembly.GetType("Microsoft.SqlServer.Dac.Model.ElementDescriptor", true);
         private static readonly Lazy<SqlAnalysisRule, ISqlAnalysisRuleMetadata> LazyExport = new Lazy<SqlAnalysisRule, ISqlAnalysisRuleMetadata>(() => null, new ExportCodeAnalysisRuleAttribute("0", null));
         private static readonly AnalyzeSchema Analyzer = CompileAnalyzer();
 
@@ -91,24 +92,24 @@ namespace Dibix.Sdk.Sql
             //     {
             //         KeyValuePair<int, ElementDescriptor> columnOffsetDescriptorElement = columnOffsetDescriptorEnumerator.Current;
             //         int offset = columnOffsetDescriptorElement.Key;
-            //         TSqlObject modelElement = columnOffsetDescriptorElement.Value.GetModelElement(dataSchemaModel);
-            //         ElementDescriptor hit = new ElementDescriptor(offset, modelElement);
-            //         result.Hits.Add(hit);
+            //         ElementDescriptor elementDescriptor = columnOffsetDescriptorElement.Value;
+            //         Func<TSqlModel, TSqlObject> elementAccessor = elementDescriptor.GetModelElement;
+            //         ElementLocation location = new ElementLocation(offset, elementDescriptor.Identifiers, elementAccessor);
+            //         result.Locations.Add(location);
             //     }
             // }
             // finally
             // {
             //     columnOffsetDescriptorEnumerator.Dispose();
             // }
-            Type elementDescriptorType = DacExtensionsAssembly.GetType("Microsoft.SqlServer.Dac.Model.ElementDescriptor", true);
-            Type columnOffsetDescriptorType = typeof(KeyValuePair<,>).MakeGenericType(typeof(int), elementDescriptorType);
+            Type columnOffsetDescriptorType = typeof(KeyValuePair<,>).MakeGenericType(typeof(int), ElementDescriptorType);
             Expression columnOffsetToDescriptorMapField = Expression.Field(nullableColumnSchemaAnalyzerVariable, "_columnOffsetToDescriptorMap");
             ExpressionUtils.Foreach
             (
                 "columnOffsetDescriptor"
               , columnOffsetToDescriptorMapField
               , columnOffsetDescriptorType
-              , builder => CompileSchemaAnalyzerResultsIterator(dataSchemaModelParameter, resultVariable, builder)
+              , builder => CompileSchemaAnalyzerResultsIterator(resultVariable, builder)
               , out ParameterExpression enumeratorVariable
               , out Expression enumeratorStatement
             );
@@ -146,7 +147,7 @@ namespace Dibix.Sdk.Sql
             return compiled;
         }
 
-        private static void CompileSchemaAnalyzerResultsIterator(Expression dataSchemaModelParameter, Expression resultVariable, IForeachBodyBuilder bodyBuilder)
+        private static void CompileSchemaAnalyzerResultsIterator(Expression resultVariable, IForeachBodyBuilder bodyBuilder)
         {
             // int offset = columnOffsetDescriptorElement.Key;
             ParameterExpression offsetVariable = Expression.Variable(typeof(int), "offset");
@@ -154,26 +155,35 @@ namespace Dibix.Sdk.Sql
             Expression offsetAssign = Expression.Assign(offsetVariable, offsetValue);
             bodyBuilder.AddAssignStatement(offsetVariable, offsetAssign);
 
-            // TSqlObject modelElement = columnOffsetDescriptorElement.Value.GetModelElement(dataSchemaModel);
-            Expression columnOffsetDescriptorValueProperty = Expression.Property(bodyBuilder.Element, nameof(KeyValuePair<object, object>.Value));
-            ParameterExpression modelElementVariable = Expression.Variable(TSqlObjectType, "modelElement");
-            Expression modelElementValue = Expression.Call(columnOffsetDescriptorValueProperty, "GetModelElement", new Type[0], dataSchemaModelParameter);
-            Expression modelElementAssign = Expression.Assign(modelElementVariable, modelElementValue);
-            bodyBuilder.AddAssignStatement(modelElementVariable, modelElementAssign);
+            // ElementDescriptor elementDescriptor = columnOffsetDescriptorElement.Value;
+            ParameterExpression elementDescriptorVariable = Expression.Variable(ElementDescriptorType, "elementDescriptor");
+            Expression elementDescriptorValue = Expression.Property(bodyBuilder.Element, nameof(KeyValuePair<object, object>.Value));
+            Expression elementDescriptorAsssign = Expression.Assign(elementDescriptorVariable, elementDescriptorValue);
+            bodyBuilder.AddAssignStatement(elementDescriptorVariable, elementDescriptorAsssign);
 
-            // ElementDescriptor hit = new ElementDescriptor(offset, modelElement);
-            Type elementDescriptorType = typeof(ElementDescriptor);
-            ConstructorInfo elementDescriptorCtor = elementDescriptorType.GetConstructor(new[] { typeof(int), TSqlObjectType });
-            Guard.IsNotNull(elementDescriptorCtor, nameof(elementDescriptorCtor), "Could not find constructor on ElementDescriptor");
-            ParameterExpression hitVariable = Expression.Variable(elementDescriptorType, "hit");
-            Expression hitValue = Expression.New(elementDescriptorCtor, offsetVariable, modelElementVariable);
-            Expression hitAssign = Expression.Assign(hitVariable, hitValue);
-            bodyBuilder.AddAssignStatement(hitVariable, hitAssign);
+            // Func<TSqlModel, TSqlObject> elementAccessor = elementDescriptor.GetModelElement;
+            MethodInfo getModelElementMethod = ElementDescriptorType.GetMethod("GetModelElement");
+            Guard.IsNotNull(getModelElementMethod, nameof(getModelElementMethod), "Could not find method 'GetModelElement' on ElementDescriptor");
+            Type elementAccessorType = typeof(Func<TSqlModel, TSqlObject>);
+            ParameterExpression elementAccessorVariable = Expression.Variable(elementAccessorType, "elementAccessor");
+            Expression elementAccessorValue = Expression.Call(Expression.Constant(getModelElementMethod), "CreateDelegate", new Type[0], Expression.Constant(elementAccessorType), elementDescriptorVariable);
+            Expression elementAccessorAssign = Expression.Assign(elementAccessorVariable, Expression.Convert(elementAccessorValue, elementAccessorType));
+            bodyBuilder.AddAssignStatement(elementAccessorVariable, elementAccessorAssign);
 
-            // result.Hits.Add(hit);
-            Expression hitsProperty = Expression.Property(resultVariable, nameof(SchemaAnalyzerResult.Hits));
-            Expression hitsAddCall = Expression.Call(hitsProperty, nameof(ICollection<object>.Add), new Type[0], hitVariable);
-            bodyBuilder.AddStatement(hitsAddCall);
+            // ElementLocation location = new ElementLocation(offset, elementDescriptor.Identifiers, elementAccessor);
+            Type elementLocationType = typeof(ElementLocation);
+            ConstructorInfo elementLocationCtor = elementLocationType.GetConstructor(new[] { typeof(int), typeof(IEnumerable<string>), elementAccessorType });
+            Guard.IsNotNull(elementLocationCtor, nameof(elementLocationCtor), "Could not find constructor on ElementLocation");
+            Expression identifiersProperty = Expression.Property(elementDescriptorVariable, "Identifiers");
+            ParameterExpression locationVariable = Expression.Variable(elementLocationType, "location");
+            Expression locationValue = Expression.New(elementLocationCtor, offsetVariable, identifiersProperty, elementAccessorVariable);
+            Expression locationAssign = Expression.Assign(locationVariable, locationValue);
+            bodyBuilder.AddAssignStatement(locationVariable, locationAssign);
+
+            // result.Locations.Add(location);
+            Expression locationsProperty = Expression.Property(resultVariable, nameof(SchemaAnalyzerResult.Locations));
+            Expression locationsAddCall = Expression.Call(locationsProperty, nameof(ICollection<object>.Add), new Type[0], locationVariable);
+            bodyBuilder.AddStatement(locationsAddCall);
         }
 
         private delegate SchemaAnalyzerResult AnalyzeSchema(TSqlModel dataSchemaModel, TSqlObject modelElement, TSqlFragment sqlFragment);
