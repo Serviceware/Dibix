@@ -387,6 +387,10 @@
     line="30"
     column="16" /&gt;
   &lt;error
+    message="[017] Unique constraint 'UQ_dbx_codeanalysis_error_017_failx_d' does not match naming convention 'UQ_&amp;lt;table&amp;gt;_*'. Also make sure the name is all lowercase."
+    line="34"
+    column="68" /&gt;
+  &lt;error
     message="[017] Check constraint 'CK_dbx_codeanalysis_error_017_failx_a' does not match naming convention 'CK_&amp;lt;table&amp;gt;_*'. Also make sure the name is all lowercase."
     line="29"
     column="16" /&gt;
@@ -400,15 +404,15 @@
     column="11" /&gt;
   &lt;error
     message="[017] Index 'IX_dbx_codeanalysis_error_017_failx_d' does not match naming convention 'IX_&amp;lt;table&amp;gt;_*'. Also make sure the name is all lowercase."
-    line="34"
+    line="36"
     column="27" /&gt;
   &lt;error
     message="[017] Unique index 'UQ_dbx_codeanalysis_error_017_failx_e' does not match naming convention 'UQ_&amp;lt;table&amp;gt;_*'. Also make sure the name is all lowercase."
-    line="36"
+    line="38"
     column="34" /&gt;
   &lt;error
     message="[017] Type 'dbx_codeanalysis_error_017_fail_udt' does not match naming convention 'dbx*_udt_*'. Also make sure the name is all lowercase."
-    line="39"
+    line="41"
     column="19" /&gt;
 &lt;/errors&gt;</value>
   </data>
@@ -726,12 +730,16 @@ UNION ALL
     column="72" /&gt;
   &lt;error
     message="[023] Only TINYINT/SMALLINT/INT/BIGINT are allowed as primary key: dbx_codeanalysis_error_023_fail2.b (NVARCHAR)"
-    line="11"
+    line="12"
     column="5" /&gt;
   &lt;error
     message="[023] Only TINYINT/SMALLINT/INT/BIGINT are allowed as primary key: dbx_codeanalysis_error_023_fail3.c (NVARCHAR)"
-    line="19"
+    line="20"
     column="72" /&gt;
+  &lt;error
+    message="[023] Only TINYINT/SMALLINT/INT/BIGINT are allowed as primary key: dbx_codeanalysis_error_023_fail4.a (NVARCHAR)"
+    line="30"
+    column="120" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="PrimaryKeyUpdateSqlCodeAnalysisRule" xml:space="preserve">

@@ -25,12 +25,12 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                 if (constraint.Kind != ConstraintKind.Check)
                     continue;
 
-                CheckConstraintDefinition definition = (CheckConstraintDefinition)constraint.Definition;
+                TSqlFragment target = node.FindChild(constraint.Source);
                 IDictionary<string, Column> dependentColumns = constraint.Columns.ToDictionary(x => x.Name);
                 IsNotNullVisitor isNotNullVisitor = new IsNotNullVisitor();
-                definition.Accept(isNotNullVisitor);
+                target.Accept(isNotNullVisitor);
                 BooleanComparisonVisitor booleanComparisonVisitor = new BooleanComparisonVisitor();
-                definition.Accept(booleanComparisonVisitor);
+                target.Accept(booleanComparisonVisitor);
                 foreach (ColumnReferenceExpression columnReference in booleanComparisonVisitor.PlainColumns)
                 {
                     string columnName = columnReference.GetName().Value;

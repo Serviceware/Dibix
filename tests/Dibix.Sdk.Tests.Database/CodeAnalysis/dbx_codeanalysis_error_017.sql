@@ -31,6 +31,8 @@ CREATE TABLE [dbo].[dbx_codeanalysis_error_017_fail]
   , INDEX [IX_dbx_codeanalysis_error_017_failx_c] ([c])
 )
 GO
+ALTER TABLE [dbo].[dbx_codeanalysis_error_017_fail] ADD CONSTRAINT [UQ_dbx_codeanalysis_error_017_failx_d] UNIQUE ([d])
+GO
 CREATE NONCLUSTERED INDEX [IX_dbx_codeanalysis_error_017_failx_d] ON [dbo].[dbx_codeanalysis_error_017_fail] ([d])
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [UQ_dbx_codeanalysis_error_017_failx_e] ON [dbo].[dbx_codeanalysis_error_017_fail] ([e]) INCLUDE ([A])

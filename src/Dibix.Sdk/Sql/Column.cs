@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
+using Microsoft.SqlServer.Dac;
 using Microsoft.SqlServer.Dac.Model;
-using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.Sql
 {
@@ -14,9 +14,9 @@ namespace Dibix.Sdk.Sql
         public bool IsComputed { get; }
         public int Length { get; }
         public int Precision { get; }
-        public TSqlFragment ScriptDom { get; }
+        public SourceInformation Source { get; }
 
-        internal Column(string name, SqlDataType sqlDataType, string dataTypeName, bool isNullable, bool isComputed, int length, int precision, TSqlFragment scriptDom)
+        internal Column(string name, SqlDataType sqlDataType, string dataTypeName, bool isNullable, bool isComputed, int length, int precision, SourceInformation source)
         {
             this.Name = name;
             this.SqlDataType = sqlDataType;
@@ -25,7 +25,7 @@ namespace Dibix.Sdk.Sql
             this.IsComputed = isComputed;
             this.Length = length;
             this.Precision = precision;
-            this.ScriptDom = scriptDom;
+            this.Source = source;
         }
     }
 }

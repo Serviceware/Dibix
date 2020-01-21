@@ -5,6 +5,7 @@ using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.Dac.Model;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 using Column = Dibix.Sdk.Sql.Column;
+using TableType = Dibix.Sdk.Sql.TableType;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
@@ -283,25 +284,41 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
           , "PK_hlwfrunningstagenotifmemo#instanceid"
           , "PK_hlwfrunningstagequeues#instanceid"
         };
+        private readonly IDictionary<string, TSqlFragment> _primaryKeyColumnLocations;
 
-        public override void Visit(CreateTableStatement node)
+        public PrimaryKeyDataTypeSqlCodeAnalysisRuleVisitor()
         {
-            if (node.IsTemporaryTable())
+            this._primaryKeyColumnLocations = new Dictionary<string, TSqlFragment>();
+        }
+
+        // Visit whole statement before this visitor
+        public override void ExplicitVisit(TSqlScript node)
+        {
+            PrimaryKeyColumnLocationVisitor visitor = new PrimaryKeyColumnLocationVisitor();
+            node.Accept(visitor);
+            this._primaryKeyColumnLocations.ReplaceWith(visitor.PrimaryKeyColumnLocations);
+
+            base.ExplicitVisit(node);
+        }
+
+        protected override void Visit(TableModel tableModel, SchemaObjectName tableName, TableDefinition tableDefinition)
+        {
+            // TODO: Clarify if this rule should also be applied for UDTs
+            if (tableModel is TableType)
                 return;
 
-            ICollection<Constraint> constraints = base.Model.GetConstraints(node.SchemaObjectName).ToArray();
+            ICollection<Constraint> constraints = base.Model.GetConstraints(tableModel, tableName).ToArray();
 
             Constraint primaryKey = constraints.SingleOrDefault(x => x.Kind == ConstraintKind.PrimaryKey);
             if (primaryKey == null)
                 return;
 
-            IDictionary<string, DataTypeReference> columns = node.Definition
-                                                                 .ColumnDefinitions
-                                                                 .ToDictionary(x => x.ColumnIdentifier.Value, x => x.DataType);
-
-            string tableName = node.SchemaObjectName.BaseIdentifier.Value;
+            string actualTableName = tableName.BaseIdentifier.Value;
             foreach (Column column in primaryKey.Columns)
             {
+                if (column.IsComputed)
+                    continue;
+
                 // If the PK is not the table's own key, and instead is a FK to a different table's key, no further analysis is needed
                 bool hasMatchingForeignKey = constraints.Where(x => x.Kind == ConstraintKind.ForeignKey)
                                                         .Any(x => x.Columns.Any(y => y.Name == column.Name));
@@ -312,15 +329,40 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                 if (primaryKey.Name != null)
                     identifier = String.Concat(primaryKey.Name, '#', identifier);
                 else
-                    identifier = String.Concat(tableName, '#', identifier);
+                    identifier = String.Concat(actualTableName, '#', identifier);
 
-                if (columns[column.Name] is SqlDataTypeReference sqlDataType
-                 && !PrimaryKeyDataType.AllowedTypes.Contains((SqlDataType)sqlDataType.SqlDataTypeOption)
+                if (!PrimaryKeyDataType.AllowedTypes.Contains(column.SqlDataType)
                  && !Workarounds.Contains(identifier))
                 {
-                    UniqueConstraintDefinition definition = (UniqueConstraintDefinition)primaryKey.Definition;
-                    TSqlFragment target = definition.Columns.SingleOrDefault(x => x.Column.GetName().Value == column.Name) ?? column.ScriptDom;
-                    base.Fail(target, tableName, column.Name, sqlDataType.SqlDataTypeOption.ToString().ToUpperInvariant());
+                    string dataTypeName = column.SqlDataType != SqlDataType.Unknown ? column.SqlDataType.ToString() : column.DataTypeName;
+                    if (primaryKey.Name != null && this._primaryKeyColumnLocations.TryGetValue($"{primaryKey.Name}.{column.Name}", out TSqlFragment target))
+                        base.Fail(target, actualTableName, column.Name, dataTypeName.ToUpperInvariant());
+                    else
+                        base.Fail(column.Source, actualTableName, column.Name, dataTypeName.ToUpperInvariant());
+                }
+            }
+        }
+
+        private sealed class PrimaryKeyColumnLocationVisitor : TSqlFragmentVisitor
+        {
+            public IDictionary<string, TSqlFragment> PrimaryKeyColumnLocations { get; }
+
+            public PrimaryKeyColumnLocationVisitor() => this.PrimaryKeyColumnLocations = new Dictionary<string, TSqlFragment>();
+
+            public override void Visit(TableDefinition node)
+            {
+                foreach (ConstraintDefinition constraint in node.TableConstraints)
+                {
+                    if (!(constraint is UniqueConstraintDefinition uniqueConstraint) || !uniqueConstraint.IsPrimaryKey) 
+                        continue;
+
+                    foreach (ColumnWithSortOrder column in uniqueConstraint.Columns)
+                    {
+                        if (constraint.ConstraintIdentifier == null) 
+                            continue;
+
+                        this.PrimaryKeyColumnLocations.Add($"{constraint.ConstraintIdentifier.Value}.{column.Column.GetName().Value}", column.Column.MultiPartIdentifier);
+                    }
                 }
             }
         }

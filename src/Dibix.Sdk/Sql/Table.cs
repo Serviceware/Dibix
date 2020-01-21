@@ -10,11 +10,11 @@ namespace Dibix.Sdk.Sql
     {
         private static readonly ICollection<ConstraintSelector> ConstraintMap = new Collection<ConstraintSelector>
         {
-            new ConstraintSelector(ConstraintKind.PrimaryKey, PrimaryKeyConstraint.Host, PrimaryKeyConstraint.Columns,             PrimaryKeyConstraint.Clustered)
-          , new ConstraintSelector(ConstraintKind.ForeignKey, ForeignKeyConstraint.Host, ForeignKeyConstraint.Columns,             null)
-          , new ConstraintSelector(ConstraintKind.Unique,         UniqueConstraint.Host,     UniqueConstraint.Columns,             UniqueConstraint.Clustered)
-          , new ConstraintSelector(ConstraintKind.Check,         D.CheckConstraint.Host, D.CheckConstraint.ExpressionDependencies, null)
-          , new ConstraintSelector(ConstraintKind.Default,       DefaultConstraint.Host, DefaultConstraint.TargetColumn,           null)
+            new ConstraintSelector(ConstraintKind.PrimaryKey, PrimaryKeyConstraint.Host, PrimaryKeyConstraint.Columns,             PrimaryKeyConstraint.Clustered, null)
+          , new ConstraintSelector(ConstraintKind.ForeignKey, ForeignKeyConstraint.Host, ForeignKeyConstraint.Columns,             null,                           null)
+          , new ConstraintSelector(ConstraintKind.Unique,         UniqueConstraint.Host,     UniqueConstraint.Columns,             UniqueConstraint.Clustered,     null)
+          , new ConstraintSelector(ConstraintKind.Check,         D.CheckConstraint.Host, D.CheckConstraint.ExpressionDependencies, null,                           D.CheckConstraint.Expression)
+          , new ConstraintSelector(ConstraintKind.Default,       DefaultConstraint.Host, DefaultConstraint.TargetColumn,           null,                           null)
         };
 
         public override string TypeDisplayName => "Table";

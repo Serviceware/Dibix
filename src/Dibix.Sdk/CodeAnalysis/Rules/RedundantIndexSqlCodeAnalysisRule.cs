@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Dibix.Sdk.Sql;
+using Microsoft.SqlServer.Dac;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
@@ -19,11 +20,11 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             IEnumerable<IndexHit> constraints = base.Model
                                                     .GetConstraints(tableModel, tableName)
                                                     .Where(x => x.Kind == ConstraintKind.PrimaryKey || x.Kind == ConstraintKind.Unique)
-                                                    .Select(x => new IndexHit(x.Definition.ConstraintIdentifier, x.Definition, x.Columns));
+                                                    .Select(x => new IndexHit(x));
 
             IEnumerable<IndexHit> indexes = base.Model
                                                 .GetIndexes(tableModel, tableName)
-                                                .Select(index => new IndexHit(index.Identifier, index.Definition, index.Columns));
+                                                .Select(x => new IndexHit(x));
 
             IEnumerable<IGrouping<IndexHit, IndexHit>> matches = constraints.Concat(indexes)
                                                                             .GroupBy(x => x, new IndexHitComparer())
@@ -31,43 +32,34 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             foreach (IGrouping<IndexHit, IndexHit> match in matches)
             {
                 bool differentIncludeColumns = match.Select(x => x.IncludeColumns).Distinct().Count() > 1;
-                base.Fail(match.First().Definition, $"Found duplicate indexes{(differentIncludeColumns ? " with different includes" : null)}: {String.Join(", ", match.Select(x => x.Identifier.Value))}");
+                base.Fail(match.First().Source, $"Found duplicate indexes{(differentIncludeColumns ? " with different includes" : null)}: {String.Join(", ", match.Select(x => x.Name))}");
             }
         }
 
         private class IndexHit
         {
-            public Identifier Identifier { get; }
-            public TSqlFragment Definition { get; }
+            public SourceInformation Source { get; }
+            public string Name { get; }
             public string Columns { get; }
-            public string Filter { get; private set; }
-            public string IncludeColumns { get; private set; }
+            public string Filter { get; }
+            public string IncludeColumns { get; }
 
-            public IndexHit(Identifier identifier, TSqlFragment definition, IEnumerable<Column> columns)
+            public IndexHit(Constraint constraint)
             {
-                this.Identifier = identifier;
-                this.Definition = definition;
-                this.Columns = String.Join(",", columns.Select(x => x.Name));
-                this.ApplyAdditionalIndexFeatures(definition);
+                this.Source = constraint.Source;
+                this.Name = constraint.Name;
+                this.Columns = String.Join(",", constraint.Columns.Select(x => x.Name));
             }
-
-            private void ApplyAdditionalIndexFeatures(TSqlFragment definition)
+            public IndexHit(Index index)
             {
-                BooleanExpression filter = null;
-                switch (definition)
-                {
-                    case IndexDefinition indexDefinition:
-                        filter = indexDefinition.FilterPredicate;
-                        break;
+                this.Source = index.Source;
+                this.Name = index.Name;
+                this.Columns = String.Join(",", index.Columns.Select(x => x.Name));
+                this.IncludeColumns = String.Join(",", index.IncludeColumns);
+                if (!this.IncludeColumns.Any())
+                    this.IncludeColumns = null;
 
-                    case CreateIndexStatement indexStatement:
-                        filter = indexStatement.FilterPredicate;
-                        this.IncludeColumns = String.Join(",", indexStatement.IncludeColumns.Select(x => x.MultiPartIdentifier.Identifiers.Last().Value));
-                        break;
-                }
-
-                if (filter != null)
-                    this.Filter = filter.Normalize();
+                this.Filter = index.Filter.NormalizeBooleanExpression();
             }
         }
 

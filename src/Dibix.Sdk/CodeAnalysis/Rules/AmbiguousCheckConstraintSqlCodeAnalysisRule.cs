@@ -21,13 +21,18 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             var query = base.Model
                             .GetConstraints(node.SchemaObjectName)
                             .Where(x => x.Kind == ConstraintKind.Check)
-                            .Select(x => new { Definition = x, Expression = ((CheckConstraintDefinition)x.Definition).CheckCondition.Normalize() })
+                            .Select(x => new
+                            {
+                                Name = x.Name, 
+                                Source = x.Source,
+                                Expression = x.CheckCondition.NormalizeBooleanExpression()
+                            })
                             .GroupBy(x => x.Expression)
                             .Where(x => x.Count() > 1);
 
             foreach (var constraintGroup in query)
             {
-                base.Fail(constraintGroup.First().Definition.Source, String.Join(", ", constraintGroup.Select(x => x.Definition.Name)));
+                base.Fail(constraintGroup.First().Source, String.Join(", ", constraintGroup.Select(x => x.Name)));
             }
         }
     }

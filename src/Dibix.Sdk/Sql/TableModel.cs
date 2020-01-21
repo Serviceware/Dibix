@@ -56,12 +56,12 @@ namespace Dibix.Sdk.Sql
         {
             string name = constraintModel.Name.HasName ? constraintModel.Name.Parts.Last() : null;
             bool? isClustered = constraintSelector.Clustered != null ? constraintModel.GetProperty<bool>(constraintSelector.Clustered) : (bool?)null;
-            ConstraintDefinition definition = GetConstraintDefinition(constraintModel, name);
-            Constraint constraint = new Constraint(constraintSelector.Kind, name, isClustered, constraintModel.GetSourceInformation(), definition);
+            string checkCondition = (string)(constraintSelector.CheckExpression != null ? constraintModel.GetProperty(constraintSelector.CheckExpression) : null);
+            Constraint constraint = new Constraint(constraintSelector.Kind, name, isClustered, constraintModel.GetSourceInformation(), checkCondition);
             if (constraintSelector.Columns != null)
-                constraint.Columns?.AddRange(constraintModel.GetReferenced(constraintSelector.Columns)
-                                                            .Where(this.IsColumn)
-                                                            .Select(this.MapColumn));
+                constraint.Columns.AddRange(constraintModel.GetReferenced(constraintSelector.Columns)
+                                                           .Where(this.IsColumn)
+                                                           .Select(this.MapColumn));
 
             return constraint;
         }
@@ -81,24 +81,6 @@ namespace Dibix.Sdk.Sql
             return table;
         }
 
-        private static ConstraintDefinition GetConstraintDefinition(TSqlObject model, string name)
-        {
-            TSqlFragment scriptDom = model.GetScriptDom();
-            switch (scriptDom)
-            {
-                case AlterTableAddTableElementStatement alterTableAddTableElementStatement:
-                    return alterTableAddTableElementStatement.Definition
-                                                             .TableConstraints
-                                                             .Single(x => x.ConstraintIdentifier.Value == name);
-
-                case ConstraintDefinition constraintDefinition:
-                    return constraintDefinition;
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(scriptDom), scriptDom, null);
-            }
-        }
-
         private bool IsColumn(TSqlObject model) => model.ObjectType == this.ColumnType;
 
         private Column MapColumn(TSqlObject model)
@@ -116,8 +98,7 @@ namespace Dibix.Sdk.Sql
                 sqlDataType = columnType.GetProperty<SqlDataType>(DataType.SqlDataType);
                 dataTypeName = String.Join(".", columnType.Name.Parts);
             }
-            TSqlFragment scriptDom = model.GetScriptDom();
-            Column column = new Column(columnName, sqlDataType, dataTypeName, isNullable, isComputed, length, precision, scriptDom);
+            Column column = new Column(columnName, sqlDataType, dataTypeName, isNullable, isComputed, length, precision, model.GetSourceInformation());
             return column;
         }
 
@@ -126,22 +107,11 @@ namespace Dibix.Sdk.Sql
             string name = model.Name.Parts.Last();
             bool isUnique = model.GetProperty<bool>(Microsoft.SqlServer.Dac.Model.Index.Unique);
             bool isClustered = model.GetProperty<bool>(Microsoft.SqlServer.Dac.Model.Index.Clustered);
-            TSqlFragment definition = model.GetScriptDom();
-            Identifier identifier = ExtractIndexIdentifier(definition);
-            Index index = new Index(name, isUnique, isClustered, model.GetSourceInformation(), identifier, definition);
-            index.Columns?.AddRange(model.GetReferenced(Microsoft.SqlServer.Dac.Model.Index.Columns).Select(this.MapColumn));
+            string filter = (string)model.GetProperty(Microsoft.SqlServer.Dac.Model.Index.FilterPredicate);
+            Index index = new Index(name, isUnique, isClustered, model.GetSourceInformation(), filter);
+            index.Columns.AddRange(model.GetReferenced(Microsoft.SqlServer.Dac.Model.Index.Columns).Select(this.MapColumn));
+            index.IncludeColumns.AddRange(model.GetReferenced(Microsoft.SqlServer.Dac.Model.Index.IncludedColumns).Select(x => x.Name.Parts.Last()));
             return index;
-        }
-
-        private static Identifier ExtractIndexIdentifier(TSqlFragment fragment)
-        {
-            switch (fragment)
-            {
-                case CreateIndexStatement createIndexStatement: return createIndexStatement.Name;
-                case IndexStatement indexStatement: return indexStatement.Name;
-                case IndexDefinition indexDefinition: return indexDefinition.Name;
-                default: throw new ArgumentOutOfRangeException(nameof(fragment), fragment, null);
-            }
         }
         #endregion
 
@@ -152,14 +122,16 @@ namespace Dibix.Sdk.Sql
             public ModelRelationshipClass Host { get; }
             public ModelRelationshipClass Columns { get; }
             public ModelPropertyClass Clustered { get; }
+            public ModelPropertyClass CheckExpression { get; }
 
-            public ConstraintSelector(ConstraintKind kind, ModelRelationshipClass columns, ModelPropertyClass clustered) : this(kind, null, columns, clustered) { }
-            public ConstraintSelector(ConstraintKind kind, ModelRelationshipClass host, ModelRelationshipClass columns, ModelPropertyClass clustered)
+            public ConstraintSelector(ConstraintKind kind, ModelRelationshipClass columns, ModelPropertyClass clustered, ModelPropertyClass checkExpression) : this(kind, null, columns, clustered, checkExpression) { }
+            public ConstraintSelector(ConstraintKind kind, ModelRelationshipClass host, ModelRelationshipClass columns, ModelPropertyClass clustered, ModelPropertyClass checkExpression)
             {
                 this.Kind = kind;
                 this.Host = host;
                 this.Columns = columns;
                 this.Clustered = clustered;
+                this.CheckExpression = checkExpression;
             }
         }
         #endregion

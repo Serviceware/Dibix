@@ -6,6 +6,7 @@
   , CONSTRAINT [UQ_dbx_codeanalysis_error_023_fail1_b] UNIQUE ([b])
 )
 GO
+
 CREATE TABLE [dbo].[dbx_codeanalysis_error_023_fail2] -- Same as 'fail1' but different PK syntax -> fail
 (
     [b] NVARCHAR(128) NOT NULL CONSTRAINT [PK_dbx_codeanalysis_error_023_fail2] PRIMARY KEY
@@ -19,6 +20,14 @@ CREATE TABLE [dbo].[dbx_codeanalysis_error_023_fail3] -- [b] is part of a FK, bu
   , CONSTRAINT [PK_dbx_codeanalysis_error_023_fail3] PRIMARY KEY ([b], [c])
   , CONSTRAINT [FK_dbx_codeanalysis_error_023_fail3_b] FOREIGN KEY ([b]) REFERENCES [dbo].[dbx_codeanalysis_error_023_fail1] ([b])
 )
+GO
+
+CREATE TABLE [dbo].[dbx_codeanalysis_error_023_fail4]
+(
+    [a] NVARCHAR(128) NOT NULL
+)
+GO
+ALTER TABLE [dbo].[dbx_codeanalysis_error_023_fail4] ADD CONSTRAINT [PK_dbx_codeanalysis_error_023_fail4] PRIMARY KEY ([a])
 GO
 
 CREATE TABLE [dbo].[dbx_codeanalysis_error_023_success1] -- PK = FK -> success

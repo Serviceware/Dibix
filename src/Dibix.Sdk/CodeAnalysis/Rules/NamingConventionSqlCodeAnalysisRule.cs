@@ -65,6 +65,19 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
           , "hlsysslmservicehoursentry#datetime1"
           , "hlsysslmservicehoursentry#datetime2"
         };
+        private readonly IDictionary<string, TSqlFragment> _looseConstraintDeclarations;
+
+        public NamingConventionSqlCodeAnalysisRuleVisitor() => this._looseConstraintDeclarations = new Dictionary<string, TSqlFragment>();
+
+        // Visit whole statement before this visitor
+        public override void ExplicitVisit(TSqlScript node)
+        {
+            LooseConstraintDeclarationVisitor visitor = new LooseConstraintDeclarationVisitor();
+            node.Accept(visitor);
+            this._looseConstraintDeclarations.ReplaceWith(visitor.LooseConstraintDeclarations);
+
+            base.ExplicitVisit(node);
+        }
 
         // Tables
         public override void Visit(CreateTableStatement node)
@@ -72,24 +85,24 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             if (node.IsTemporaryTable())
                 return;
 
-            this.Check(node.SchemaObjectName, nameof(NamingConventions.Table), NamingConventions.Table);
+            this.Check(node.SchemaObjectName, NamingConventions.Table, nameof(NamingConventions.Table));
             base.Visit(node);
         }
 
         // Views
-        public override void Visit(CreateViewStatement node) => this.Check(node.SchemaObjectName, nameof(NamingConventions.View), NamingConventions.View);
+        public override void Visit(CreateViewStatement node) => this.Check(node.SchemaObjectName, NamingConventions.View, nameof(NamingConventions.View));
 
         // UDTs
-        public override void Visit(CreateTypeStatement node) => this.Check(node.Name, nameof(NamingConventions.Type), NamingConventions.Type);
+        public override void Visit(CreateTypeStatement node) => this.Check(node.Name, NamingConventions.Type, nameof(NamingConventions.Type));
 
         // Sequences
-        public override void Visit(CreateSequenceStatement node) => this.Check(node.Name, nameof(NamingConventions.Sequence), NamingConventions.Sequence);
+        public override void Visit(CreateSequenceStatement node) => this.Check(node.Name, NamingConventions.Sequence, nameof(NamingConventions.Sequence));
 
         // Stored procedures
-        public override void Visit(CreateProcedureStatement node) => this.Check(node.ProcedureReference.Name, nameof(NamingConventions.Procedure), NamingConventions.Procedure);
+        public override void Visit(CreateProcedureStatement node) => this.Check(node.ProcedureReference.Name, NamingConventions.Procedure, nameof(NamingConventions.Procedure));
 
         // Functions
-        public override void Visit(CreateFunctionStatement node) => this.Check(node.Name, nameof(NamingConventions.Function), NamingConventions.Function);
+        public override void Visit(CreateFunctionStatement node) => this.Check(node.Name, NamingConventions.Function, nameof(NamingConventions.Function));
 
         // Table columns
         protected override void Visit(TableModel tableModel, SchemaObjectName tableName, TableDefinition tableDefinition)
@@ -104,12 +117,12 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                     base.Fail(column, $"Column names should only contain the characters 'a-z_' and have no trailing underscores: {tableName.BaseIdentifier.Value}.{column.ColumnIdentifier.Value}");
             }
 
-            this.VisitConstraints(tableModel, tableName);
-            this.VisitIndexes(tableModel, tableName);
+            this.VisitConstraints(tableModel, tableName, tableDefinition);
+            this.VisitIndexes(tableModel, tableName, tableDefinition);
         }
 
         // Constraints
-        private void VisitConstraints(TableModel tableModel, SchemaObjectName tableName)
+        private void VisitConstraints(TableModel tableModel, SchemaObjectName tableName, TableDefinition tableDefinition)
         {
             foreach (Constraint constraint in base.Model.GetConstraints(tableModel, tableName))
             {
@@ -120,12 +133,37 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                     return;
 
                 NamingConvention namingConvention = GetNamingConvention(constraint.Kind);
-                this.Check(constraint.Definition.ConstraintIdentifier, constraint.Name, constraint.KindDisplayName, namingConvention, x => ResolveConstraintPlaceholders(x, tableName.BaseIdentifier.Value, constraint.Columns));
+                if (!this._looseConstraintDeclarations.TryGetValue(constraint.Name, out TSqlFragment target))
+                {
+                    TSqlFragment sqlFragment = tableDefinition.FindChild(constraint.Source);
+                    target = ExtractConstraintIdentifier(sqlFragment, constraint.Name);
+                }
+
+                this.Check(constraint.Name, namingConvention, x => ResolveConstraintPlaceholders(x, tableName.BaseIdentifier.Value, constraint.Columns), target, constraint.KindDisplayName);
+            }
+        }
+
+        private static Identifier ExtractConstraintIdentifier(TSqlFragment fragment, string name) => GetConstraintDefinition(fragment, name).ConstraintIdentifier;
+
+        private static ConstraintDefinition GetConstraintDefinition(TSqlFragment fragment, string name)
+        {
+            switch (fragment)
+            {
+                case AlterTableAddTableElementStatement alterTableAddTableElementStatement:
+                    return alterTableAddTableElementStatement.Definition
+                                                             .TableConstraints
+                                                             .Single(x => x.ConstraintIdentifier.Value == name);
+
+                case ConstraintDefinition constraintDefinition:
+                    return constraintDefinition;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(fragment), fragment, null);
             }
         }
 
         // Indexes
-        private void VisitIndexes(TableModel tableModel, SchemaObjectName tableName)
+        private void VisitIndexes(TableModel tableModel, SchemaObjectName tableName, TableDefinition tableDefinition)
         {
             foreach (Index index in base.Model.GetIndexes(tableModel, tableName))
             {
@@ -141,13 +179,31 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                     displayName = nameof(NamingConventions.Index);
                     namingConvention = NamingConventions.Index;
                 }
-                this.Check(index.Identifier, index.Name, displayName, namingConvention, x => ResolveConstraintPlaceholders(x, tableName.BaseIdentifier.Value, index.Columns));
+
+                if (!this._looseConstraintDeclarations.TryGetValue(index.Name, out TSqlFragment target))
+                {
+                    TSqlFragment sqlFragment = tableDefinition.FindChild(index.Source);
+                    target = ExtractIndexIdentifier(sqlFragment);
+                }
+
+                this.Check(index.Name, namingConvention, x => ResolveConstraintPlaceholders(x, tableName.BaseIdentifier.Value, index.Columns), target, displayName);
             }
         }
 
-        private void Check(SchemaObjectName schemaObjectName, string displayName, NamingConvention namingConvention) => this.Check(schemaObjectName.BaseIdentifier, displayName, namingConvention, null);
-        private void Check(Identifier identifier, string displayName, NamingConvention namingConvention, Action<PatternNormalizer> replacements) => this.Check(identifier, identifier.Value, displayName, namingConvention, replacements);
-        private void Check(TSqlFragment target, string name, string displayName, NamingConvention namingConvention, Action<PatternNormalizer> replacements)
+        private static Identifier ExtractIndexIdentifier(TSqlFragment fragment)
+        {
+            switch (fragment)
+            {
+                case CreateIndexStatement createIndexStatement: return createIndexStatement.Name;
+                case IndexStatement indexStatement: return indexStatement.Name;
+                case IndexDefinition indexDefinition: return indexDefinition.Name;
+                default: throw new ArgumentOutOfRangeException(nameof(fragment), fragment, null);
+            }
+        }
+
+        private void Check(SchemaObjectName schemaObjectName, NamingConvention namingConvention, string displayName) => this.Check(schemaObjectName.BaseIdentifier.Value, namingConvention, null, base.Fail, schemaObjectName.BaseIdentifier, displayName);
+        private void Check(string name, NamingConvention namingConvention, Action<PatternNormalizer> replacements, TSqlFragment target, string displayName) => this.Check(name, namingConvention, replacements, base.Fail, target, displayName);
+        private void Check<T>(string name, NamingConvention namingConvention, Action<PatternNormalizer> replacements, Action<T, object[]> failAction, T target, string displayName)
         {
             if (Workarounds.Contains(name))
                 return;
@@ -156,7 +212,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             string description = namingConvention.NormalizeDescription(this.Configuration);
             if (!Regex.IsMatch(name, mask))
             {
-                base.Fail(target, $"{displayName} '{name}' does not match naming convention '{description}'. Also make sure the name is all lowercase.");
+                failAction(target, new object[] { $"{displayName} '{name}' does not match naming convention '{description}'. Also make sure the name is all lowercase." });
             }
         }
 
@@ -179,6 +235,22 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
             if (columns.Count == 1)
                 normalizer.ResolvePlaceholder(Placeholder.Column.Name, columns[0].Name);
+        }
+
+        private sealed class LooseConstraintDeclarationVisitor : TSqlFragmentVisitor
+        {
+            public IDictionary<string, TSqlFragment> LooseConstraintDeclarations { get; }
+
+            public LooseConstraintDeclarationVisitor() => this.LooseConstraintDeclarations = new Dictionary<string, TSqlFragment>();
+
+            public override void Visit(CreateIndexStatement node) => this.LooseConstraintDeclarations.Add(node.Name.Value, node.Name);
+            
+            public override void Visit(AlterTableAddTableElementStatement node)
+            {
+                node.Definition
+                    .TableConstraints
+                    .Each(x => this.LooseConstraintDeclarations.Add(x.ConstraintIdentifier.Value, x.ConstraintIdentifier));
+            }
         }
     }
 

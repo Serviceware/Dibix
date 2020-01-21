@@ -21,7 +21,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                 if (constraint.Kind == ConstraintKind.Nullable || constraint.Name != null)
                     continue;
 
-                base.Fail(constraint.Definition, node.SchemaObjectName.BaseIdentifier.Value, constraint.KindDisplayName.ToLowerInvariant());
+                base.Fail(constraint.Source, node.SchemaObjectName.BaseIdentifier.Value, constraint.KindDisplayName.ToLowerInvariant());
             }
         }
     }

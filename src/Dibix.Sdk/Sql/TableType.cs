@@ -8,10 +8,10 @@ namespace Dibix.Sdk.Sql
     {
         private static readonly IDictionary<ModelTypeClass, ConstraintSelector> ConstraintMap = new Dictionary<ModelTypeClass, ConstraintSelector>
         {
-            { ModelSchema.TableTypePrimaryKeyConstraint, new ConstraintSelector(ConstraintKind.PrimaryKey, TableTypePrimaryKeyConstraint.Columns,           TableTypePrimaryKeyConstraint.Clustered) }
-          , { ModelSchema.TableTypeUniqueConstraint,     new ConstraintSelector(ConstraintKind.Unique,         TableTypeUniqueConstraint.Columns,               TableTypeUniqueConstraint.Clustered) }
-          , { ModelSchema.TableTypeCheckConstraint,      new ConstraintSelector(ConstraintKind.Check,      TableTypeCheckConstraint.ExpressionDependencies, null) }
-          , { ModelSchema.TableTypeDefaultConstraint,    new ConstraintSelector(ConstraintKind.Default,    TableTypeDefaultConstraint.TargetColumn,         null) }
+            { ModelSchema.TableTypePrimaryKeyConstraint, new ConstraintSelector(ConstraintKind.PrimaryKey, TableTypePrimaryKeyConstraint.Columns,           TableTypePrimaryKeyConstraint.Clustered, null) }
+          , { ModelSchema.TableTypeUniqueConstraint,     new ConstraintSelector(ConstraintKind.Unique,         TableTypeUniqueConstraint.Columns,               TableTypeUniqueConstraint.Clustered, null) }
+          , { ModelSchema.TableTypeCheckConstraint,      new ConstraintSelector(ConstraintKind.Check,      TableTypeCheckConstraint.ExpressionDependencies, null                                   , TableTypeCheckConstraint.Expression) }
+          , { ModelSchema.TableTypeDefaultConstraint,    new ConstraintSelector(ConstraintKind.Default,    TableTypeDefaultConstraint.TargetColumn,         null                                   , null) }
         };
 
         public override string TypeDisplayName => "User defined table type";

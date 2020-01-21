@@ -2,7 +2,6 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using Microsoft.SqlServer.Dac;
-using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.Sql
 {
@@ -13,19 +12,19 @@ namespace Dibix.Sdk.Sql
         public bool IsUnique { get; }
         public bool IsClustered { get; }
         public SourceInformation Source { get; }
-        public Identifier Identifier { get; }
-        public TSqlFragment Definition { get; }
         public IList<Column> Columns { get; }
+        public string Filter { get; }
+        public ICollection<string> IncludeColumns { get; }
 
-        internal Index(string name, bool isUnique, bool isClustered, SourceInformation source, Identifier identifier, TSqlFragment definition)
+        internal Index(string name, bool isUnique, bool isClustered, SourceInformation source, string filter)
         {
             this.Name = name;
             this.IsUnique = isUnique;
             this.IsClustered = isClustered;
             this.Source = source;
-            this.Identifier = identifier;
-            this.Definition = definition;
             this.Columns = new Collection<Column>();
+            this.Filter = filter;
+            this.IncludeColumns = new Collection<string>();
         }
     }
 }
