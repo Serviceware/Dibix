@@ -117,6 +117,19 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AliasSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;errors&gt;
+  &lt;error
+    message="[010] Multiple table sources must be aliased"
+    line="7"
+    column="7" /&gt;
+  &lt;error
+    message="[010] Multiple table sources must be aliased"
+    line="11"
+    column="7" /&gt;
+&lt;/errors&gt;</value>
+  </data>
   <data name="AmbiguousCheckConstraintSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;errors&gt;
@@ -989,19 +1002,6 @@ namespace This.Is.A.Custom.Namespace
     message="[019] Found use of TRUNCATE TABLE statement"
     line="3"
     column="3" /&gt;
-&lt;/errors&gt;</value>
-  </data>
-  <data name="UnaliasedTableJoinSqlCodeAnalysisRule" xml:space="preserve">
-    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;
-&lt;errors&gt;
-  &lt;error
-    message="[010] Unaliased table reference found in multi table reference joins"
-    line="7"
-    column="7" /&gt;
-  &lt;error
-    message="[010] Unaliased table reference found in multi table reference joins"
-    line="11"
-    column="7" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="UnfilteredDataModificationSqlCodeAnalysisRule" xml:space="preserve">

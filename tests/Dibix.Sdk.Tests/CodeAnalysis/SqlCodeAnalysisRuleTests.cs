@@ -32,7 +32,7 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
         public void UnspecifiedDataTypeLengthSqlCodeAnalysisRule() => base.Execute();
 
         [Fact]
-        public void UnaliasedTableJoinSqlCodeAnalysisRule() => base.Execute();
+        public void AliasSqlCodeAnalysisRule() => base.Execute();
 
         [Fact]
         public void ConsistentlyQuotedIdentifierSqlCodeAnalysisRule() => base.Execute();

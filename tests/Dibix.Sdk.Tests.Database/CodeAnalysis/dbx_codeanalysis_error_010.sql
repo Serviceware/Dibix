@@ -18,3 +18,7 @@ AS
 	SELECT [a].[id]
 	FROM [dbo].[dbx_table] AS [a]
 	INNER JOIN [dbo].[dbx_anothertable] AS [b] ON [b].[id] = [a].[id]
+
+	/*SELECT [idx]
+	FROM [dbo].[dbx_table] AS [a]
+	INNER JOIN [dbo].[dbx_anothertable] AS [b] ON ISNULL([idx], 0) = [a].[id]*/
