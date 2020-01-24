@@ -16,8 +16,10 @@ namespace Dibix.Sdk.Sql
         private static readonly Delegate VisitFragmentHandler = CompileVisitFragment();
         private static readonly Delegate VisitAmbiguousFragmentHandler = CompileVisitAmbiguousFragment();
 
-        public static void Init() => SetupShims(nameof(VisitFragment), nameof(VisitAmbiguousFragment));
+        public static void Init() => SetupShims(nameof(BeginDdlStatement), nameof(VisitFragment), nameof(VisitAmbiguousFragment));
 
+        public static void BeginDdlStatement(object instance, object fragment) { }
+        
         public static void VisitFragment(object instance, object fragment, object sqlElementDescriptor, object relevance) => VisitFragmentHandler.DynamicInvoke(instance, fragment, sqlElementDescriptor);
 
         public static void VisitAmbiguousFragment(object instance, object fragment, object possibilities) => VisitAmbiguousFragmentHandler.DynamicInvoke(instance, fragment, possibilities);

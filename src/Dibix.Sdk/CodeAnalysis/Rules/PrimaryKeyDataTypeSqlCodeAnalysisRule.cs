@@ -291,14 +291,11 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             this._primaryKeyColumnLocations = new Dictionary<string, TSqlFragment>();
         }
 
-        // Visit whole statement before this visitor
-        public override void ExplicitVisit(TSqlScript node)
+        protected override void BeginStatement(TSqlScript node)
         {
             PrimaryKeyColumnLocationVisitor visitor = new PrimaryKeyColumnLocationVisitor();
             node.Accept(visitor);
             this._primaryKeyColumnLocations.ReplaceWith(visitor.PrimaryKeyColumnLocations);
-
-            base.ExplicitVisit(node);
         }
 
         protected override void Visit(TableModel tableModel, SchemaObjectName tableName, TableDefinition tableDefinition)

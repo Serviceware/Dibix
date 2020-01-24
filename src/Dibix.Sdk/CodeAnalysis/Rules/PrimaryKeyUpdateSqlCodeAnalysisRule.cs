@@ -22,13 +22,11 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             this._tableVariablePrimaryKeyColumns = new HashSet<string>();
         }
 
-        public override void ExplicitVisit(TSqlScript node)
+        protected override void BeginStatement(TSqlScript node)
         {
             TableVariableVisitor tableVariableVisitor = new TableVariableVisitor();
             node.Accept(tableVariableVisitor);
             this._tableVariablePrimaryKeyColumns.ReplaceWith(tableVariableVisitor.PrimaryKeyColumns);
-
-            base.ExplicitVisit(node);
         }
 
         public override void Visit(AssignmentSetClause node)

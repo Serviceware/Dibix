@@ -111,5 +111,8 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
 
         [Fact]
         public void PrimaryKeyUpdateSqlCodeAnalysisRule() => base.Execute();
+
+        [Fact]
+        public void InlineFunctionSqlCodeAnalysisRule() => base.Execute();
     }
 }

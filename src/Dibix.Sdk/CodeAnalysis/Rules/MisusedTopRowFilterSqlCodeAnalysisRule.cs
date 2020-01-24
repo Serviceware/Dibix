@@ -25,15 +25,12 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             this._tableVariablesWithKey = new Dictionary<string, TableVariable>();
         }
 
-        // Visit whole statement before this visitor
-        public override void ExplicitVisit(TSqlScript node)
+        protected override void BeginStatement(TSqlScript node)
         {
             TableVariableWithKeyVisitor tableVariableVisitor = new TableVariableWithKeyVisitor();
             node.AcceptChildren(tableVariableVisitor);
 
             this._tableVariablesWithKey.AddRange(tableVariableVisitor.TableVariables.ToDictionary(x => x.Name));
-
-            base.ExplicitVisit(node);
         }
 
         public override void Visit(QuerySpecification node)

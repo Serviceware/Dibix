@@ -69,14 +69,11 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         public NamingConventionSqlCodeAnalysisRuleVisitor() => this._looseConstraintDeclarations = new Dictionary<string, TSqlFragment>();
 
-        // Visit whole statement before this visitor
-        public override void ExplicitVisit(TSqlScript node)
+        protected override void BeginStatement(TSqlScript node)
         {
             LooseConstraintDeclarationVisitor visitor = new LooseConstraintDeclarationVisitor();
             node.Accept(visitor);
             this._looseConstraintDeclarations.ReplaceWith(visitor.LooseConstraintDeclarations);
-
-            base.ExplicitVisit(node);
         }
 
         // Tables

@@ -22,10 +22,10 @@ namespace Dibix.Sdk.CodeAnalysis
                                                                                                    .AnalyzeSchema(node)
                                                                                                    .Locations
                                                                                                    .ToDictionary(x => x.Offset));
-
+            this.BeginStatement(node);
             base.ExplicitVisit(node);
-
             this.VisitTokens(node);
+            this.EndStatement(node);
         }
 
         public override void Visit(CreateTableStatement node)
@@ -37,6 +37,10 @@ namespace Dibix.Sdk.CodeAnalysis
         }
 
         public override void Visit(CreateTypeTableStatement node) => this.Visit(TableModel.TableType, node.Name, node.Definition);
+
+        protected virtual void BeginStatement(TSqlScript node) { }
+
+        protected virtual void EndStatement(TSqlScript node) { }
 
         protected virtual void Visit(TableModel tableModel, SchemaObjectName tableName, TableDefinition tableDefinition) { }
 

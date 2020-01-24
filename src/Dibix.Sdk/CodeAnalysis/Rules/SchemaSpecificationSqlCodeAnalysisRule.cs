@@ -21,14 +21,11 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             "DELETED"
         };
 
-        // Visit whole statement before this visitor
-        public override void ExplicitVisit(TSqlScript node)
+        protected override void BeginStatement(TSqlScript node)
         {
             ChildAliasVisitor childAliasVisitor = new ChildAliasVisitor();
             node.AcceptChildren(childAliasVisitor);
             this._tableAliases.AddRange(childAliasVisitor.TableAliases);
-
-            base.ExplicitVisit(node);
         }
 
         public override void Visit(CreateTableStatement node)

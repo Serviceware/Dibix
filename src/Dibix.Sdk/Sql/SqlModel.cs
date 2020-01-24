@@ -35,6 +35,12 @@ namespace Dibix.Sdk.Sql
             return primaryKey?.GetReferenced(PrimaryKeyConstraint.Columns).Contains(columnElement) ?? default;
         }
 
+        public bool IsScalarFunction(ElementLocation element)
+        {
+            TSqlObject modelElement = element.GetModelElement(this._model);
+            return modelElement.ObjectType == ScalarFunction.TypeClass;
+        }
+
         public SchemaAnalyzerResult AnalyzeSchema(TSqlFragment sqlFragment) => SchemaAnalyzer.Analyze(this._model, sqlFragment);
     }
 }
