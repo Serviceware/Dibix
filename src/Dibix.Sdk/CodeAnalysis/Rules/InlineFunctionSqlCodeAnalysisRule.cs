@@ -85,8 +85,9 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             if (node == null)
                 return;
 
-            if (this._scalarFunctionCalls.ContainsKey(node.StartOffset))
-                this._scalarFunctionCalls.Remove(node.StartOffset);
+            TSqlFragment target = node.Expression;
+            if (this._scalarFunctionCalls.ContainsKey(target.StartOffset))
+                this._scalarFunctionCalls.Remove(target.StartOffset);
         }
 
         private void VisitQuerySpecification(QuerySpecification node)
