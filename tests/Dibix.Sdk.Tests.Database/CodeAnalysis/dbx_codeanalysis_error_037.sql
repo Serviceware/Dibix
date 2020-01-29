@@ -33,6 +33,7 @@ BEGIN
 	DECLARE @x INT = (SELECT [dbo].[dbx_codeanalysis_error_037_scalar]()) -- OK
 	SELECT @x = [dbo].[dbx_codeanalysis_error_037_scalar]() -- OK
 	SET @x = [dbo].[dbx_codeanalysis_error_037_scalar]() -- OK
+	SELECT [dbo].[dbx_codeanalysis_error_037_scalar]() -- OK
 
 	SELECT 1
 	FROM (VALUES (1), (2)) AS [x]([i])

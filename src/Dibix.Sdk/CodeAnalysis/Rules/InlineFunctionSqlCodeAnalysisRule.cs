@@ -70,26 +70,37 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         public override void Visit(DeclareVariableElement node)
         {
             if (node.Value is ScalarSubquery scalarSubquery
-             && scalarSubquery.QueryExpression is QuerySpecification querySpecification
-             && querySpecification.SelectElements.Count == 1)
-            {
-                SelectElement target = querySpecification.SelectElements[0];
-                if (this._scalarFunctionCalls.ContainsKey(target.StartOffset))
-                    this._scalarFunctionCalls.Remove(target.StartOffset);
-            }
+             && scalarSubquery.QueryExpression is QuerySpecification querySpecification)
+                this.VisitQuerySpecification(querySpecification);
         }
 
-        public override void Visit(SelectSetVariable node) => this.VisitScalarExpression(node.Expression);
+        public override void Visit(SelectStatement node)
+        {
+            if (node.QueryExpression is QuerySpecification querySpecification)
+                this.VisitQuerySpecification(querySpecification);
+        }
 
-        public override void Visit(SetVariableStatement node) => this.VisitScalarExpression(node.Expression);
-
-        private void VisitScalarExpression(ScalarExpression node)
+        public override void Visit(SetVariableStatement node)
         {
             if (node == null)
                 return;
 
             if (this._scalarFunctionCalls.ContainsKey(node.StartOffset))
                 this._scalarFunctionCalls.Remove(node.StartOffset);
+        }
+
+        private void VisitQuerySpecification(QuerySpecification node)
+        {
+            if (node.SelectElements.Count == 1
+             && node.FromClause == null)
+            {
+                TSqlFragment target = node.SelectElements[0];
+                if (target is SelectSetVariable selectSetVariable)
+                    target = selectSetVariable.Expression;
+
+                if (this._scalarFunctionCalls.ContainsKey(target.StartOffset))
+                    this._scalarFunctionCalls.Remove(target.StartOffset);
+            }
         }
 
         private bool IsScalarFunctionCall(FunctionCall call) => base.TryGetModelElement(call, out ElementLocation location) && base.Model.IsScalarFunction(location);
