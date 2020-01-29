@@ -18,6 +18,22 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         private const bool AllowNonInlineTableValuedFunctions = false;
         private readonly IDictionary<int, FunctionCall> _scalarFunctionCalls = new Dictionary<int, FunctionCall>();
 
+        // helpLine suppressions
+        private static readonly ICollection<string> Workarounds = new HashSet<string>
+        {
+            "fnSplit"
+          , "hlsysattachment_query_data_case"
+          , "hlsysattachment_query_data_contract"
+          , "hlsysattachment_query_data_orgunit"
+          , "hlsysattachment_query_data_person"
+          , "hlsysattachment_query_data_product"
+          , "hlsysattachment_query_data_su"
+          , "hlsysgetusercontext"
+          , "hlsyssec_query_agentsystemacl"
+          , "hlsysum_getcentraladminorgunits"
+          , "hltm_getreceiversfortask"
+        };
+
         protected override void BeginStatement(TSqlScript node)
         {
             ScalarFunctionCallVisitor visitor = new ScalarFunctionCallVisitor(this.IsScalarFunctionCall);
@@ -35,8 +51,9 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         public override void Visit(CreateFunctionStatement node)
         {
-            if (node.ReturnType is TableValuedFunctionReturnType && !AllowNonInlineTableValuedFunctions)
-                base.Fail(node, $"Make non inline table valued function inline or replace it with a stored procedure: {node.Name.BaseIdentifier.Value}");
+            string name = node.Name.BaseIdentifier.Value;
+            if (node.ReturnType is TableValuedFunctionReturnType && !AllowNonInlineTableValuedFunctions && !Workarounds.Contains(name)) 
+                base.Fail(node, $"Make non inline table valued function inline or replace it with a stored procedure: {name}");
         }
 
         public override void Visit(CheckConstraintDefinition node)
