@@ -31,10 +31,10 @@ namespace Dibix.Sdk
 
             AssemblyName assemblyName = AssemblyName.GetAssemblyName(targetPath);
             Assembly assembly = Assembly.Load(assemblyName);
-            if (targetPath != assembly.Location)
+            if (!assembly.Location.StartsWith(tempDirectory, StringComparison.OrdinalIgnoreCase))
             {
                 throw new InvalidOperationException($@"Unexpected location of Dibix.Sdk: {assembly.Location}
-To make sure the correct version is loaded, please move the assembly out of this location");
+This might happen, if the assembly was placed here manually, if so, please move it out of this location");
             }
 
             return assembly;
