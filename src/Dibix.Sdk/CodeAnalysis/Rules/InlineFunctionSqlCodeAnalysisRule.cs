@@ -82,10 +82,10 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         public override void Visit(SetVariableStatement node)
         {
-            if (node == null)
+            TSqlFragment target = node?.Expression;
+            if (target == null)
                 return;
 
-            TSqlFragment target = node.Expression;
             if (this._scalarFunctionCalls.ContainsKey(target.StartOffset))
                 this._scalarFunctionCalls.Remove(target.StartOffset);
         }
