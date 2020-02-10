@@ -16,7 +16,7 @@ namespace Dibix
 
         public bool TryMatchProperty(EntityDescriptor descriptor, Type sourceType, out EntityProperty property)
         {
-            property = descriptor.ComplexProperties
+            property = descriptor.Properties
                                  .Reverse()
                                  .FirstOrDefault(x => x.EntityType == sourceType && !this._matchedProperties.Contains(x) /* Skip properties that have already been matched */);
                                                                                                                          /* i.E.: multiple properties of the same type     */

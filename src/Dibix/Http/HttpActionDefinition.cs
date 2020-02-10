@@ -30,6 +30,10 @@ namespace Dibix.Http
         {
             this.ResolveParameter(targetParameterName, new HttpParameterConstantSource(value));
         }
+        public void ResolveParameter(string targetParameterName, int value)
+        {
+            this.ResolveParameter(targetParameterName, new HttpParameterConstantSource(value));
+        }
         public void ResolveParameter(string targetParameterName, string bodyConverterName)
         {
             this.ResolveParameter(targetParameterName, new HttpParameterBodySource(bodyConverterName));

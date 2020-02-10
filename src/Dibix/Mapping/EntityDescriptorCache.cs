@@ -30,10 +30,10 @@ namespace Dibix
 
                     descriptor.Discriminator = BuildEntityKey(property);
                 }
-                else if (!property.PropertyType.IsPrimitive())
+                else
                 {
                     EntityProperty entityProperty = BuildEntityProperty(property);
-                    descriptor.ComplexProperties.Add(entityProperty);
+                    descriptor.Properties.Add(entityProperty);
                 }
 
                 if (property.IsDefined(typeof(ObfuscatedAttribute)))
@@ -60,15 +60,15 @@ namespace Dibix
         private static EntityProperty BuildEntityProperty(PropertyInfo property)
         {
             if (!TryGetCollectionType(property.PropertyType, out Type collectionType))
-                return BuildComplexEntityProperty(property);
+                return BuildNonCollectionEntityProperty(property);
 
             return BuildCollectionEntityProperty(property, collectionType);
         }
 
-        private static EntityProperty BuildComplexEntityProperty(PropertyInfo property)
+        private static EntityProperty BuildNonCollectionEntityProperty(PropertyInfo property)
         {
             Type entityType = property.PropertyType;
-            return BuildEntityProperty(property, entityType, true, Expression.Assign);
+            return BuildEntityProperty(property, entityType, false, Expression.Assign);
         }
 
         private static EntityProperty BuildCollectionEntityProperty(PropertyInfo propertyInfo, Type collectionType)
@@ -83,11 +83,21 @@ namespace Dibix
             ParameterExpression valueParameter = Expression.Parameter(typeof(object), "value");
             Expression instanceCast = Expression.Convert(instanceParameter, property.DeclaringType);
             Expression valueCast = Expression.Convert(valueParameter, entityType);
-            Expression propertyAccessor = Expression.Property(instanceCast, property);
+            MemberExpression propertyAccessor = Expression.Property(instanceCast, property);
+            
+            Func<object, object> compiledValueGetter = null;
+            if (!isCollection)
+            {
+                Expression propertyValueCast = Expression.Convert(propertyAccessor, typeof(object));
+                Expression<Func<object, object>> getValueLambda = Expression.Lambda<Func<object, object>>(propertyValueCast, instanceParameter);
+                compiledValueGetter = getValueLambda.Compile();
+            }
+            
             Expression setValue = valueSetter(propertyAccessor, valueCast);
-            Expression<Action<object, object>> expression = Expression.Lambda<Action<object, object>>(setValue, instanceParameter, valueParameter);
-            Action<object, object> compiled = expression.Compile();
-            return new EntityProperty(property.Name, entityType, isCollection, compiled);
+            Expression<Action<object, object>> setValueLambda = Expression.Lambda<Action<object, object>>(setValue, instanceParameter, valueParameter);
+            Action<object, object> compiledValueSetter = setValueLambda.Compile();
+            
+            return new EntityProperty(property.Name, entityType, isCollection, compiledValueGetter, compiledValueSetter);
         }
 
         private static bool TryGetCollectionType(Type type, out Type collectionType)

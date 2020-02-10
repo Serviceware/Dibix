@@ -52,7 +52,7 @@ namespace Dibix
         {
             Guard.IsNotNull(accessor, nameof(accessor));
 
-            HashCollection<TReturn> cache = new HashCollection<TReturn>();
+            HashCollection<TReturn> cache = new HashCollection<TReturn>(EntityEqualityComparer<TReturn>.Create());
             accessor.QueryMany<TReturn, TSecond, TReturn>(sql, commandType, parameters, (a, b) =>
             {
                 if (!cache.TryGetValue(a, out TReturn instance))
@@ -85,7 +85,7 @@ namespace Dibix
         {
             Guard.IsNotNull(accessor, nameof(accessor));
 
-            HashCollection<TReturn> cache = new HashCollection<TReturn>();
+            HashCollection<TReturn> cache = new HashCollection<TReturn>(EntityEqualityComparer<TReturn>.Create());
             accessor.QueryMany<TReturn, TSecond, TThird, TReturn>(sql, commandType, parameters, (a, b, c) =>
             {
                 if (!cache.TryGetValue(a, out TReturn instance))
@@ -103,7 +103,7 @@ namespace Dibix
         {
             Guard.IsNotNull(accessor, nameof(accessor));
 
-            HashCollection<TReturn> cache = new HashCollection<TReturn>();
+            HashCollection<TReturn> cache = new HashCollection<TReturn>(EntityEqualityComparer<TReturn>.Create());
             accessor.QueryMany<TReturn, TSecond, TThird, TFourth, TReturn>(sql, CommandType.Text, parameters, (a, b, c, d) =>
             {
                 if (!cache.TryGetValue(a, out TReturn instance))
@@ -121,7 +121,7 @@ namespace Dibix
         {
             Guard.IsNotNull(accessor, nameof(accessor));
 
-            HashCollection<TReturn> cache = new HashCollection<TReturn>();
+            HashCollection<TReturn> cache = new HashCollection<TReturn>(EntityEqualityComparer<TReturn>.Create());
             accessor.QueryMany<TReturn, TSecond, TThird, TFourth, TFifth, TReturn>(sql, CommandType.Text, parameters, (a, b, c, d, e) =>
             {
                 if (!cache.TryGetValue(a, out TReturn instance))
@@ -139,7 +139,7 @@ namespace Dibix
         {
             Guard.IsNotNull(accessor, nameof(accessor));
 
-            HashCollection<TReturn> cache = new HashCollection<TReturn>();
+            HashCollection<TReturn> cache = new HashCollection<TReturn>(EntityEqualityComparer<TReturn>.Create());
             accessor.QueryMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(sql, CommandType.Text, parameters, (a, b, c, d, e, f) =>
             {
                 if (!cache.TryGetValue(a, out TReturn instance))
@@ -157,7 +157,7 @@ namespace Dibix
         {
             Guard.IsNotNull(accessor, nameof(accessor));
 
-            HashCollection<TReturn> cache = new HashCollection<TReturn>();
+            HashCollection<TReturn> cache = new HashCollection<TReturn>(EntityEqualityComparer<TReturn>.Create());
             accessor.QueryMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TReturn>(sql, CommandType.Text, parameters, (a, b, c, d, e, f, g, h, i) =>
             {
                 if (!cache.TryGetValue(a, out TReturn instance))
@@ -175,7 +175,7 @@ namespace Dibix
         { 
             Guard.IsNotNull(accessor, nameof(accessor));
 
-            HashCollection<TReturn> cache = new HashCollection<TReturn>();
+            HashCollection<TReturn> cache = new HashCollection<TReturn>(EntityEqualityComparer<TReturn>.Create());
             accessor.QueryMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TEleventh, TReturn>(sql, CommandType.Text, EmptyParameters.Instance, (a, b, c, d, e, f, g, h, i, j, k) =>
             {
                 if (!cache.TryGetValue(a, out TReturn instance))
