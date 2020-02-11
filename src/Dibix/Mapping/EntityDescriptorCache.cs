@@ -17,6 +17,9 @@ namespace Dibix
         private static EntityDescriptor BuildDescriptor(Type type)
         {
             EntityDescriptor descriptor = new EntityDescriptor();
+            if (type.IsPrimitive())
+                return descriptor;
+
             foreach (PropertyInfo property in type.GetRuntimeProperties())
             {
                 if (property.IsDefined(typeof(KeyAttribute)))
@@ -92,10 +95,14 @@ namespace Dibix
                 Expression<Func<object, object>> getValueLambda = Expression.Lambda<Func<object, object>>(propertyValueCast, instanceParameter);
                 compiledValueGetter = getValueLambda.Compile();
             }
-            
-            Expression setValue = valueSetter(propertyAccessor, valueCast);
-            Expression<Action<object, object>> setValueLambda = Expression.Lambda<Action<object, object>>(setValue, instanceParameter, valueParameter);
-            Action<object, object> compiledValueSetter = setValueLambda.Compile();
+
+            Action<object, object> compiledValueSetter = null;
+            if (property.CanWrite)
+            {
+                Expression setValue = valueSetter(propertyAccessor, valueCast);
+                Expression<Action<object, object>> setValueLambda = Expression.Lambda<Action<object, object>>(setValue, instanceParameter, valueParameter);
+                compiledValueSetter = setValueLambda.Compile();
+            }
             
             return new EntityProperty(property.Name, entityType, isCollection, compiledValueGetter, compiledValueSetter);
         }

@@ -28,6 +28,12 @@ namespace Dibix
             return this._valueGetter(instance);
         }
 
-        public void SetValue(object instance, object value) => this._valueSetter(instance, value);
+        public void SetValue(object instance, object value)
+        {
+            if (this._valueSetter == null)
+                throw new InvalidOperationException("Setting the value on this instance is not supported");
+
+            this._valueSetter(instance, value);
+        }
     }
 }

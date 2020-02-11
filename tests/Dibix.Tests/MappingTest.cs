@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Moq;
+using Moq.Protected;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
-using Moq;
-using Moq.Protected;
 using Xunit;
 
 namespace Dibix.Tests
