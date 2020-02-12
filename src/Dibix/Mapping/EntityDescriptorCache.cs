@@ -71,7 +71,7 @@ namespace Dibix
         private static EntityProperty BuildNonCollectionEntityProperty(PropertyInfo property)
         {
             Type entityType = property.PropertyType;
-            return BuildEntityProperty(property, entityType, false, Expression.Assign);
+            return BuildEntityProperty(property, entityType, false, property.CanWrite ? Expression.Assign : (Func<Expression, Expression, Expression>)null);
         }
 
         private static EntityProperty BuildCollectionEntityProperty(PropertyInfo propertyInfo, Type collectionType)
@@ -97,7 +97,7 @@ namespace Dibix
             }
 
             Action<object, object> compiledValueSetter = null;
-            if (property.CanWrite)
+            if (valueSetter != null)
             {
                 Expression setValue = valueSetter(propertyAccessor, valueCast);
                 Expression<Action<object, object>> setValueLambda = Expression.Lambda<Action<object, object>>(setValue, instanceParameter, valueParameter);
