@@ -93,7 +93,7 @@ namespace Dibix.Sdk.CodeGeneration
                     case SerializationBehavior.IfNotEmpty:
                         if (withAnnotations)
                         {
-                            if (!property.IsEnumerable)
+                            if (!property.Type.IsEnumerable)
                             {
                                 AddJsonReference(context);
                                 propertyAnnotations.Add("JsonProperty(NullValueHandling = NullValueHandling.Ignore)");
@@ -124,12 +124,13 @@ namespace Dibix.Sdk.CodeGeneration
                 if (property.Obfuscated) 
                     propertyAnnotations.Add("Obfuscated");
 
-                @class.AddProperty(property.Name, !property.IsEnumerable ? property.Type : $"ICollection<{property.Type}>", propertyAnnotations)
+                string clrTypeName = ToClrTypeName(property.Type);
+                @class.AddProperty(property.Name, !property.Type.IsEnumerable ? clrTypeName : $"ICollection<{clrTypeName}>", propertyAnnotations)
                       .Getter(null)
-                      .Setter(null, property.IsEnumerable ? CSharpModifiers.Private : default);
+                      .Setter(null, property.Type.IsEnumerable ? CSharpModifiers.Private : default);
 
-                if (property.IsEnumerable)
-                    ctorAssignments.Add($"this.{property.Name} = new Collection<{property.Type}>();");
+                if (property.Type.IsEnumerable)
+                    ctorAssignments.Add($"this.{property.Name} = new Collection<{clrTypeName}>();");
             }
 
             if (ctorAssignments.Any())
@@ -151,6 +152,49 @@ namespace Dibix.Sdk.CodeGeneration
                 {
                     @class.AddMethod($"ShouldSerialize{shouldSerializeMethod}", "bool", $"return {shouldSerializeMethod}.Any();");
                 }
+            }
+        }
+
+        private static string ToClrTypeName(ContractPropertyType propertyType)
+        {
+            string typeName;
+            switch (propertyType)
+            {
+                case PrimitiveContractPropertyType primitiveContractPropertyType: 
+                    typeName = ToClrTypeName(primitiveContractPropertyType.Type);
+                    break;
+
+                case ContractPropertyTypeReference contractPropertyTypeReference: 
+                    typeName = contractPropertyTypeReference.TypeName;
+                    break;
+
+                default: throw new ArgumentOutOfRangeException(nameof(propertyType), propertyType, $"Unexpected property type: {propertyType}");
+            }
+
+            if (propertyType.IsNullable)
+                typeName += '?';
+
+            return typeName;
+        }
+
+        private static string ToClrTypeName(ContractPropertyDataType type)
+        {
+            switch (type)
+            {
+                case ContractPropertyDataType.Byte:           return "byte";
+                case ContractPropertyDataType.Boolean:        return "bool";
+                case ContractPropertyDataType.Int16:          return "short";
+                case ContractPropertyDataType.Int32:          return "int";
+                case ContractPropertyDataType.Int64:          return "long";
+                case ContractPropertyDataType.Float:          return "float";
+                case ContractPropertyDataType.Double:         return "double";
+                case ContractPropertyDataType.Decimal:        return "decimal";
+                case ContractPropertyDataType.Binary:         return "byte[]";
+                case ContractPropertyDataType.DateTime:       return "DateTime";
+                case ContractPropertyDataType.DateTimeOffset: return "DateTimeOffset";
+                case ContractPropertyDataType.String:         return "string";
+                case ContractPropertyDataType.UUID:           return "Guid";
+                default: throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
         }
 

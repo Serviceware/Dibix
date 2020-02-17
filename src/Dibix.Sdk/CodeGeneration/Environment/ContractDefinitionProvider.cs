@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using Newtonsoft.Json.Linq;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -119,8 +119,9 @@ namespace Dibix.Sdk.CodeGeneration
                         default:
                             throw new ArgumentOutOfRangeException(nameof(property.Type), property.Type, null);
                     }
-                    bool isEnumerable = TryGetArrayType(typeName, ref typeName);
-                    contract.Properties.Add(new ObjectContractProperty(property.Name, typeName, isPartOfKey, isDiscriminator, serializationBehavior, obfuscated, isEnumerable));
+
+                    ContractPropertyType type = ParseType(typeName);
+                    contract.Properties.Add(new ObjectContractProperty(property.Name, type, isPartOfKey, isDiscriminator, serializationBehavior, obfuscated));
                 }
             }
 
@@ -153,14 +154,22 @@ namespace Dibix.Sdk.CodeGeneration
             this._definitions.Add(key, contract);
         }
 
-        private static bool TryGetArrayType(string type, ref string arrayType)
+        private static ContractPropertyType ParseType(string typeName)
         {
-            int index = type.LastIndexOf('*');
-            if (index < 0)
-                return false;
+            bool isEnumerable = typeName.EndsWith("*", StringComparison.Ordinal);
+            typeName = typeName.TrimEnd('*');
+            
+            bool isNullable = typeName.EndsWith("?", StringComparison.Ordinal);
+            typeName = typeName.TrimEnd('?');
 
-            arrayType = type.Substring(0, index);
-            return true;
+            bool isTypeReference = typeName.StartsWith("#", StringComparison.Ordinal);
+            typeName = typeName.TrimStart('#');
+
+            if (isTypeReference)
+                return new ContractPropertyTypeReference(typeName, isEnumerable, isNullable);
+
+            ContractPropertyDataType dataType = (ContractPropertyDataType)Enum.Parse(typeof(ContractPropertyDataType), typeName, true);
+            return new PrimitiveContractPropertyType(dataType, isEnumerable, isNullable);
         }
         #endregion
     }

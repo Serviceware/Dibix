@@ -1,9 +1,70 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "definitions": {
-    "TypeName": {
-      "type": "string",
-      "pattern": "^[A-Za-z]([\\w]+)?\\??(\\[\\]|\\*?)?$"
+    "PropertyType": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "boolean",
+            "byte",
+            "int16",
+            "int32",
+            "int64",
+            "float",
+            "double",
+            "decimal",
+            "binary",
+            "datetime",
+            "datetimeoffset",
+            "string",
+            "uuid",
+            "boolean?",
+            "byte?",
+            "int16?",
+            "int32?",
+            "int64?",
+            "float?",
+            "double?",
+            "decimal?",
+            "binary?",
+            "datetime?",
+            "datetimeoffset?",
+            "string?",
+            "uuid?",
+            "boolean*",
+            "byte*",
+            "int16*",
+            "int32*",
+            "int64*",
+            "float*",
+            "double*",
+            "decimal*",
+            "binary*",
+            "datetime*",
+            "datetimeoffset*",
+            "string*",
+            "uuid*",
+            "boolean?*",
+            "byte?*",
+            "int16?*",
+            "int32?*",
+            "int64?*",
+            "float?*",
+            "double?*",
+            "decimal?*",
+            "binary?*",
+            "datetime?*",
+            "datetimeoffset?*",
+            "string?*",
+            "uuid?*"
+          ]
+        },
+        {
+          "type": "string",
+          "pattern": "^#[A-Za-z]([\\w]+)?\\??(\\[\\]|\\*?)?$"
+        }
+      ]
     },
     "SerializationBehavior": {
       "type": "string",
@@ -24,14 +85,14 @@
         "^[A-Z]([\\w]+)?$": {
           "anyOf": [
             {
-              "$ref": "#/definitions/TypeName"
+              "$ref": "#/definitions/PropertyType"
             },
             {
               "type": "object",
               "minProperties": 1,
               "properties": {
                 "type": {
-                  "$ref": "#/definitions/TypeName"
+                  "$ref": "#/definitions/PropertyType"
                 },
                 "isPartOfKey": {
                   "type": "boolean"
@@ -53,7 +114,7 @@
               "minProperties": 1,
               "properties": {
                 "type": {
-                  "$ref": "#/definitions/TypeName"
+                  "$ref": "#/definitions/PropertyType"
                 },
                 "isDiscriminator": {
                   "type": "boolean"
