@@ -21,13 +21,13 @@ namespace Dibix.Sdk.CodeGeneration
             string targetDirectory = Path.GetDirectoryName(context.DefaultOutputFilePath);
 
             string jsonFilePath = Path.Combine(targetDirectory, $"{context.AreaName}.json");
-            using (Stream stream = File.OpenWrite(jsonFilePath))
+            using (Stream stream = File.Open(jsonFilePath, FileMode.Create))
             {
                 document.SerializeAsJson(stream, OpenApiSpecVersion.OpenApi3_0);
             }
 
             string yamlFilePath = Path.Combine(targetDirectory, $"{context.AreaName}.yml");
-            using (Stream stream = File.OpenWrite(yamlFilePath))
+            using (Stream stream = File.Open(yamlFilePath, FileMode.Create))
             {
                 document.SerializeAsYaml(stream, OpenApiSpecVersion.OpenApi3_0);
             }

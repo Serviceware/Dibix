@@ -2,7 +2,7 @@
 {
     public abstract class ContractDefinition
     {
-        public Namespace Namespace { get; set; }
+        public Namespace Namespace { get; }
         public string DefinitionName { get; }
         public abstract bool IsPrimitive { get; }
 
