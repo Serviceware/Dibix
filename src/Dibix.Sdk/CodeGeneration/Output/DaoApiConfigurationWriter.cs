@@ -5,30 +5,30 @@ using Dibix.Sdk.CodeGeneration.CSharp;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class DaoApiConfigurationWriter : IDaoChildWriter
+    internal sealed class DaoApiConfigurationWriter : DaoWriter
     {
         #region Properties
-        public string LayerName => CodeGeneration.LayerName.Business;
-        public string RegionName => "Endpoints";
+        public override string LayerName => CodeGeneration.LayerName.Business;
+        public override string RegionName => "Endpoints";
         #endregion
 
-        #region IDaoChildWriter Members
-        public bool HasContent(SourceArtifacts artifacts) => artifacts.Controllers.Any();
+        #region Overrides
+        public override bool HasContent(CodeGenerationModel model) => model.Controllers.Any();
 
-        public IEnumerable<string> GetGlobalAnnotations(OutputConfiguration configuration)
+        public override IEnumerable<string> GetGlobalAnnotations(CodeGenerationModel model)
         {
-            string areaName = NamespaceUtility.EnsureAreaName(configuration.AreaName);
+            string areaName = NamespaceUtility.EnsureAreaName(model.AreaName);
             yield return $"ApiRegistration(\"{areaName}\")";
         }
 
-        public void Write(WriterContext context)
+        public override void Write(DaoCodeGenerationContext context)
         {
             context.AddUsing("Dibix.Http");
 
-            if (context.Artifacts.Controllers.Any(x => x.ControllerImports.Any()))
+            if (context.Model.Controllers.Any(x => x.ControllerImports.Any()))
                 context.AddUsing(typeof(Type).Namespace);
 
-            string body = WriteBody(context, context.Artifacts.Controllers);
+            string body = WriteBody(context, context.Model.Controllers);
 
             context.Output
                    .AddClass("ApiConfiguration", CSharpModifiers.Public | CSharpModifiers.Sealed)
@@ -38,7 +38,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private static string WriteBody(WriterContext context, IList<ControllerDefinition> controllers)
+        private static string WriteBody(DaoCodeGenerationContext context, IList<ControllerDefinition> controllers)
         {
             StringWriter writer = new StringWriter();
             for (int i = 0; i < controllers.Count; i++)
@@ -78,8 +78,8 @@ namespace Dibix.Sdk.CodeGeneration
                     if (!String.IsNullOrEmpty(action.BodyContract))
                     {
                         string bodyContractName = action.BodyContract;
-                        if (!bodyContractName.StartsWith(context.Configuration.RootNamespace, StringComparison.Ordinal))
-                            bodyContractName = $"{context.Configuration.RootNamespace}.{CodeGeneration.LayerName.DomainModel}.{bodyContractName}";
+                        if (!bodyContractName.StartsWith(context.Model.RootNamespace, StringComparison.Ordinal))
+                            bodyContractName = $"{context.Model.RootNamespace}.{CodeGeneration.LayerName.DomainModel}.{bodyContractName}";
 
                         writer.WriteLine($"y.BodyContract = typeof({bodyContractName});");
                     }

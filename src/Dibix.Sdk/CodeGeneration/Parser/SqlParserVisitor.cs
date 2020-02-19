@@ -24,7 +24,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public SqlParserVisitor()
+        protected SqlParserVisitor()
         {
             this.Hints = new Collection<SqlHint>();
         }

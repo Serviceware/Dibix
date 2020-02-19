@@ -9,7 +9,7 @@ using Dibix.Sdk.CodeGeneration.CSharp;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class DaoExecutorWriter : DaoChildWriterBase, IDaoChildWriter
+    internal sealed class DaoExecutorWriter : DaoWriter
     {
         #region Fields
         private const string ConstantSuffix = "CommandText";
@@ -22,22 +22,22 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Overrides
-        public override bool HasContent(SourceArtifacts artifacts) => artifacts.Statements.Any();
+        public override bool HasContent(CodeGenerationModel model) => model.Statements.Any();
 
-        public override void Write(WriterContext context)
+        public override void Write(DaoCodeGenerationContext context)
         {
             context.AddUsing(typeof(GeneratedCodeAttribute).Namespace)
                    .AddUsing("Dibix");
 
-            foreach (IGrouping<string, SqlStatementInfo> namespaceGroup in context.Artifacts.Statements.GroupBy(x => context.Configuration.WriteNamespaces ? x.Namespace.RelativeNamespace : null))
+            foreach (IGrouping<string, SqlStatementInfo> namespaceGroup in context.Model.Statements.GroupBy(x => context.WriteNamespaces ? x.Namespace.RelativeNamespace : null))
             {
                 CSharpStatementScope scope = namespaceGroup.Key != null ? context.Output.BeginScope(namespaceGroup.Key) : context.Output;
                 IList<SqlStatementInfo> statements = namespaceGroup.ToArray();
 
                 // Class
-                CSharpModifiers classVisibility = context.Configuration.GeneratePublicArtifacts ? CSharpModifiers.Public : CSharpModifiers.Internal;
+                CSharpModifiers classVisibility = context.GeneratePublicArtifacts ? CSharpModifiers.Public : CSharpModifiers.Internal;
                 IEnumerable<string> annotations = new[] { context.GeneratedCodeAnnotation, "DatabaseAccessor" }.Where(x => x != null);
-                CSharpClass @class = scope.AddClass(context.Configuration.DefaultClassName, classVisibility | CSharpModifiers.Static, annotations);
+                CSharpClass @class = scope.AddClass(context.Model.DefaultClassName, classVisibility | CSharpModifiers.Static, annotations);
 
                 // Command text constants
                 AddCommandTextConstants(@class, context, statements);
@@ -50,17 +50,17 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private static void AddCommandTextConstants(CSharpClass @class, WriterContext context, IList<SqlStatementInfo> statements)
+        private static void AddCommandTextConstants(CSharpClass @class, DaoCodeGenerationContext context, IList<SqlStatementInfo> statements)
         {
             for (int i = 0; i < statements.Count; i++)
             {
                 SqlStatementInfo statement = statements[i];
                 //@class.AddComment(String.Concat("file:///", statement.SourcePath.Replace(" ", "%20").Replace(@"\", "/")), false);
                 @class.AddComment(statement.Name, false);
-                CSharpModifiers fieldVisibility = context.Configuration.GeneratePublicArtifacts ? CSharpModifiers.Private : CSharpModifiers.Public;
+                CSharpModifiers fieldVisibility = context.GeneratePublicArtifacts ? CSharpModifiers.Private : CSharpModifiers.Public;
                 @class.AddField(name: String.Concat(statement.Name, ConstantSuffix)
                               , type: typeof(string).ToCSharpTypeName()
-                              , value: new CSharpStringValue(context.FormatCommandText(statement.Content, context.Configuration.Formatting), context.Configuration.Formatting.HasFlag(CommandTextFormatting.Verbatim))
+                              , value: new CSharpStringValue(CodeGenerationUtility.FormatCommandText(statement.Content, context.Model.CommandTextFormatting), context.Model.CommandTextFormatting.HasFlag(CommandTextFormatting.Verbatim))
                               , modifiers: fieldVisibility | CSharpModifiers.Const);
 
                 if (i + 1 < statements.Count)
@@ -68,7 +68,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static void AddExecutionMethods(CSharpClass @class, WriterContext context, IList<SqlStatementInfo> statements)
+        private static void AddExecutionMethods(CSharpClass @class, DaoCodeGenerationContext context, IList<SqlStatementInfo> statements)
         {
             IDictionary<SqlStatementInfo, string> methodReturnTypeMap = statements.ToDictionary(x => x, x => DetermineResultTypeName(context, x));
 
@@ -108,9 +108,9 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static string DetermineResultTypeName(WriterContext context, SqlStatementInfo query)
+        private static string DetermineResultTypeName(DaoCodeGenerationContext context, SqlStatementInfo query)
         {
-            string resultTypeName = DetermineResultTypeNameCore(query, context.Configuration.WriteNamespaces);
+            string resultTypeName = DetermineResultTypeNameCore(query, context.WriteNamespaces);
             if (query.Async)
             {
                 context.AddUsing(typeof(Task<>).Namespace);
@@ -145,7 +145,7 @@ namespace Dibix.Sdk.CodeGeneration
             return GetComplexTypeName(query, writeNamespaces);
         }
 
-        private static string GenerateMethodBody(SqlStatementInfo statement, WriterContext context)
+        private static string GenerateMethodBody(SqlStatementInfo statement, DaoCodeGenerationContext context)
         {
             StringWriter writer = new StringWriter();
 
@@ -166,7 +166,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (statement.Parameters.Any())
                 WriteParameters(writer, statement);
 
-            WriteExecutor(writer, statement, context.Configuration.WriteNamespaces);
+            WriteExecutor(writer, statement, context.WriteNamespaces);
 
             writer.PopIndent()
                   .Write("}");

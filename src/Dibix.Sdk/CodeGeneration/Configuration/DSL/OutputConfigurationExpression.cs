@@ -3,32 +3,32 @@
     internal sealed class OutputConfigurationExpression : IOutputConfigurationExpression
     {
         #region Fields
-        private readonly OutputConfiguration _outputConfiguration;
+        private readonly CodeGenerationModel _model;
         #endregion
 
         #region Constructor
-        public OutputConfigurationExpression(OutputConfiguration outputConfiguration)
+        public OutputConfigurationExpression(CodeGenerationModel model)
         {
-            this._outputConfiguration = outputConfiguration;
+            this._model = model;
         }
         #endregion
 
         #region IOutputConfigurationExpression Members
         public IOutputConfigurationExpression Formatting(CommandTextFormatting formatting)
         {
-            this._outputConfiguration.Formatting = formatting;
+            this._model.CommandTextFormatting = formatting;
             return this;
         }
 
         public IOutputConfigurationExpression Namespace(string @namespace)
         {
-            this._outputConfiguration.RootNamespace = @namespace;
+            this._model.RootNamespace = @namespace;
             return this;
         }
 
         public IOutputConfigurationExpression ClassName(string className)
         {
-            this._outputConfiguration.DefaultClassName = className;
+            this._model.DefaultClassName = className;
             return this;
         }
         #endregion

@@ -9,20 +9,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="CodeGeneration\Configuration\dibix.configuration.schema.extended.json" />
-    <EmbeddedResource Include="CodeGeneration\Configuration\dibix.configuration.schema.simple.json" />
-    <EmbeddedResource Include="CodeGeneration\Environment\dibix.contracts.schema.json" />
-    <EmbeddedResource Include="CodeGeneration\Environment\dibix.endpoints.schema.json" />
+    <EmbeddedResource Include="CodeGeneration\Schema\dibix.contracts.schema.json" />
+    <EmbeddedResource Include="CodeGeneration\Schema\dibix.endpoints.schema.json" />
     <Compile Include="..\Dibix\Collections\FuncEqualityComparer.cs" Link="Collections\FuncEqualityComparer.cs" />
     <Compile Include="..\Dibix\Diagnostics\Guard.cs" Link="Diagnostics\Guard.cs" />
     <Compile Include="..\Dibix\Extensions\EnumerableExtensions.cs" Link="Extensions\EnumerableExtensions.cs" />
     <Compile Include="..\Dibix\Reflection\TypeExtensions.cs" Link="Extensions\TypeExtensions.Base.cs" />
     <Compile Include="..\Dibix\Http\RouteBuilder.cs" Link="OpenApi\RouteBuilder.cs" />
     <Compile Include="..\Dibix\Http\HttpParameterName.cs" Link="OpenApi\HttpParameterName.cs" />
-    <Content Include="CodeGeneration\Environment\dibix.contracts.schema.json">
+    <Content Include="CodeGeneration\Schema\dibix.contracts.schema.json">
       <PackagePath>content/dibix.contracts.schema.json</PackagePath>
     </Content>
-    <Content Include="CodeGeneration\Environment\dibix.endpoints.schema.json">
+    <Content Include="CodeGeneration\Schema\dibix.endpoints.schema.json">
       <PackagePath>content/dibix.endpoints.schema.json</PackagePath>
     </Content>
     <Content Include="..\..\build\Sdk.Targets">

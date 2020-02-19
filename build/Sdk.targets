@@ -155,7 +155,7 @@
                         References="@(ServerCompilationReference)"
                         IsIDEBuild="$(BuildingInsideVisualStudio)"
                         EmbedStatements="$(EmbedStatements)">
-      <Output TaskParameter="DetectedReferences" ItemName="ServerCompilationReference" />
+      <Output TaskParameter="AdditionalAssemblyReferences" ItemName="ServerCompilationReference" />
     </CodeGenerationTask>
 
     <ItemGroup>

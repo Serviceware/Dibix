@@ -13,13 +13,13 @@ namespace Dibix.Sdk.CodeGeneration
     internal static class ContractCSWriter
     {
         #region Public Methods
-        public static void Write(WriterContext context, bool withAnnotations)
+        public static void Write(DaoCodeGenerationContext context, bool withAnnotations)
         {
             context.AddUsing(typeof(DateTime).Namespace);
 
-            var namespaceGroups = context.Artifacts
+            var namespaceGroups = context.Model
                                          .Contracts
-                                         .GroupBy(x => context.Configuration.WriteNamespaces ? x.Namespace.RelativeNamespace : null)
+                                         .GroupBy(x => context.WriteNamespaces ? x.Namespace.RelativeNamespace : null)
                                          .ToArray();
 
             for (int i = 0; i < namespaceGroups.Length; i++)
@@ -52,7 +52,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private static void ProcessObjectContract(WriterContext context, CSharpStatementScope scope, ObjectContract contract, bool withAnnotations)
+        private static void ProcessObjectContract(DaoCodeGenerationContext context, CSharpStatementScope scope, ObjectContract contract, bool withAnnotations)
         {
             ICollection<string> classAnnotations = new Collection<string>();
             if (withAnnotations && !String.IsNullOrEmpty(contract.WcfNamespace))
@@ -75,7 +75,7 @@ namespace Dibix.Sdk.CodeGeneration
                     if (property.IsPartOfKey)
                     {
                         context.AddUsing(typeof(KeyAttribute).Namespace);
-                        context.Configuration.DetectedReferences.Add("System.ComponentModel.DataAnnotations.dll");
+                        context.Model.AdditionalAssemblyReferences.Add("System.ComponentModel.DataAnnotations.dll");
                         propertyAnnotations.Add("Key");
                     }
                     else if (property.IsDiscriminator)
@@ -212,10 +212,10 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static void AddJsonReference(WriterContext context)
+        private static void AddJsonReference(DaoCodeGenerationContext context)
         {
             context.AddUsing(typeof(JsonPropertyAttribute).Namespace);
-            context.Configuration.DetectedReferences.Add(Path.GetFileName(typeof(JsonPropertyAttribute).Assembly.Location));
+            context.Model.AdditionalAssemblyReferences.Add(Path.GetFileName(typeof(JsonPropertyAttribute).Assembly.Location));
         }
         #endregion
     }

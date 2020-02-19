@@ -5,25 +5,25 @@ using Dibix.Sdk.CodeGeneration.CSharp;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class DaoStructuredTypeWriter : IDaoChildWriter
+    internal sealed class DaoStructuredTypeWriter : DaoWriter
     {
         #region Properties
-        public string LayerName => CodeGeneration.LayerName.Data;
-        public string RegionName => "Structured types";
+        public override string LayerName => CodeGeneration.LayerName.Data;
+        public override string RegionName => "Structured types";
         #endregion
 
-        #region IDaoChildWriter Members
-        public bool HasContent(SourceArtifacts artifacts) => artifacts.UserDefinedTypes.Any();
+        #region Overrides
+        public override bool HasContent(CodeGenerationModel model) => model.UserDefinedTypes.Any();
 
-        public IEnumerable<string> GetGlobalAnnotations(OutputConfiguration context) { yield break; }
+        public override IEnumerable<string> GetGlobalAnnotations(CodeGenerationModel model) { yield break; }
 
-        public void Write(WriterContext context)
+        public override void Write(DaoCodeGenerationContext context)
         {
             context.AddUsing("Dibix");
 
-            var namespaceGroups = context.Artifacts
+            var namespaceGroups = context.Model
                                          .UserDefinedTypes
-                                         .GroupBy(x => context.Configuration.WriteNamespaces ? x.Namespace.RelativeNamespace : null)
+                                         .GroupBy(x => context.WriteNamespaces ? x.Namespace.RelativeNamespace : null)
                                          .ToArray();
 
             for (int i = 0; i < namespaceGroups.Length; i++)
@@ -48,7 +48,7 @@ namespace Dibix.Sdk.CodeGeneration
                         scope.AddSeparator();
                 }
 
-                if (i + 1 < context.Artifacts.UserDefinedTypes.Count)
+                if (i + 1 < context.Model.UserDefinedTypes.Count)
                     scope.AddSeparator();
             }
         }

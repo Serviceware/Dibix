@@ -483,9 +483,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Dibix;
 
-namespace Dibix.Sdk.Tests
+namespace Dibix.Sdk.Tests.CodeGeneration
 {
     #region Accessor
+    [DatabaseAccessor]
     [GeneratedCodeAttribute("Dibix.Sdk", "1.0.0.0")]
     internal static class ParserTest
     {
@@ -906,6 +907,7 @@ using Dibix;
 namespace This.Is.A.Custom.Namespace
 {
     #region Accessor
+    [DatabaseAccessor]
     [GeneratedCodeAttribute("Dibix.Sdk", "1.0.0.0")]
     internal static class Accessor
     {

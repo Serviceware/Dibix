@@ -3,16 +3,20 @@ using Dibix.Sdk.CodeGeneration.CSharp;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class ClientContractCSWriter : OutputWriter, IWriter
+    internal sealed class ClientContractCSWriter : CodeGenerator
     {
+        #region Constructor
+        public ClientContractCSWriter(IErrorReporter errorReporter) : base(errorReporter) { }
+        #endregion
+
         #region Overrides
-        protected override void Write(StringWriter writer, OutputConfiguration configuration, SourceArtifacts artifacts)
+        protected override void Write(StringWriter writer, CodeGenerationModel model)
         {
-            CSharpWriter output = new CSharpWriter(writer, configuration.RootNamespace, Enumerable.Empty<string>());
+            CSharpWriter output = new CSharpWriter(writer, model.RootNamespace, Enumerable.Empty<string>());
 
-            WriterContext context = new WriterContext(output.Root, null, configuration, artifacts, Format) { Output = output.Root.BeginScope(LayerName.DomainModel) };
+            DaoCodeGenerationContext context = new DaoCodeGenerationContext(output.Root, null, model) { Output = output.Root.BeginScope(LayerName.DomainModel) };
 
-            if (artifacts.Contracts.Any())
+            if (model.Contracts.Any())
                 ContractCSWriter.Write(context, false);
 
             output.Generate();

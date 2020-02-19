@@ -7,7 +7,7 @@ using Dibix.Sdk.CodeGeneration.CSharp;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class DaoGridResultClassWriter : DaoChildWriterBase, IDaoChildWriter
+    internal sealed class DaoGridResultClassWriter : DaoWriter
     {
         #region Properties
         public override string LayerName => CodeGeneration.LayerName.DomainModel;
@@ -15,14 +15,14 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Overrides
-        public override bool HasContent(SourceArtifacts artifacts) => artifacts.Statements.Any(IsGridResult);
+        public override bool HasContent(CodeGenerationModel model) => model.Statements.Any(IsGridResult);
 
-        public override void Write(WriterContext context)
+        public override void Write(DaoCodeGenerationContext context)
         {
-            var namespaceGroups = context.Artifacts
+            var namespaceGroups = context.Model
                                          .Statements
                                          .Where(IsGridResult)
-                                         .GroupBy(x => context.Configuration.WriteNamespaces ? x.GridResultType.Namespace.RelativeNamespace : null)
+                                         .GroupBy(x => context.WriteNamespaces ? x.GridResultType.Namespace.RelativeNamespace : null)
                                          .ToArray();
 
             for (int i = 0; i < namespaceGroups.Length; i++)
@@ -33,7 +33,7 @@ namespace Dibix.Sdk.CodeGeneration
                 for (int j = 0; j < statements.Count; j++)
                 {
                     SqlStatementInfo statement = statements[j];
-                    CSharpModifiers classVisibility = context.Configuration.GeneratePublicArtifacts ? CSharpModifiers.Public : CSharpModifiers.Internal;
+                    CSharpModifiers classVisibility = context.GeneratePublicArtifacts ? CSharpModifiers.Public : CSharpModifiers.Internal;
                     CSharpClass complexType = scope.AddClass(GetComplexTypeName(statement), classVisibility | CSharpModifiers.Sealed);
 
                     IList<SqlQueryResult> collectionProperties = statement.Results.Where(x => x.ResultMode == SqlQueryResultMode.Many).ToArray();

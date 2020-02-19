@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Dibix.Sdk.CodeGeneration;
 using EnvDTE;
+using VSLangProj;
 
 namespace Dibix.Sdk.VisualStudio
 {
@@ -45,27 +46,24 @@ namespace Dibix.Sdk.VisualStudio
             {
                 ProjectItems children;
                 Properties properties;
+                string kind;
                 if (virtualPath.IsCurrent)
                 {
                     children = project.ProjectItems;
                     properties = project.Properties;
+                    kind = Constants.vsProjectItemKindPhysicalFolder;
                 }
                 else
                 {
                     ProjectItem item = FindItem(project.ProjectItems, virtualPath);
                     children = item.ProjectItems;
                     properties = item.Properties;
+                    kind = item.Kind;
                 }
 
-                string physicalPath = properties.GetFullPath();
-                if (File.Exists(physicalPath))
+                foreach (string file in GetFiles(children, properties, kind, normalizedExclude, virtualPath))
                 {
-                    yield return physicalPath;
-                }
-                else
-                {
-                    foreach (string filePath in ScanFiles(children, physicalPath, normalizedExclude, virtualPath.IsRecursive))
-                        yield return filePath;
+                    yield return file;
                 }
             }
         }
@@ -129,27 +127,35 @@ namespace Dibix.Sdk.VisualStudio
             return item;
         }
 
-        private static IEnumerable<string> ScanFiles(ProjectItems root, string rootDirectory, IEnumerable<string> exclude, bool recursive)
+        private static IEnumerable<string> GetFiles(ProjectItems children, Properties properties, string itemKind, ICollection<string> normalizedExclude, VirtualPath virtualPath)
         {
-            IEnumerable<string> physicalFilePaths = root.GetChildren(recursive)
-                                                        .Where(x => MatchFile(x, rootDirectory, exclude))
-                                                        .OrderBy(x => x.Name)
-                                                        .Select(x => x.FileNames[0]);
+            string physicalPath = properties.GetFullPath();
+            switch (itemKind.ToUpperInvariant())
+            {
+                case Constants.vsProjectItemKindPhysicalFile:
+                    yield return physicalPath;
+                    break;
 
-            return physicalFilePaths;
+                case Constants.vsProjectItemKindPhysicalFolder:
+                    foreach (string filePath in ScanFiles(children, physicalPath, normalizedExclude, virtualPath.IsRecursive))
+                        yield return filePath;
+
+                    break;
+
+                default: throw new ArgumentOutOfRangeException(nameof(itemKind), itemKind, null);
+            }
         }
 
-        private static bool MatchFile(ProjectItem item, string rootDirectory, IEnumerable<string> exclude)
+        private static IEnumerable<string> ScanFiles(ProjectItems root, string rootDirectory, ICollection<string> exclude, bool recursive)
         {
-            if (item.Kind != Constants.vsProjectItemKindPhysicalFile)
-                return false;
-
-            string itemPath = item.Properties.GetFullPath();
-            string relativePath = itemPath.Substring(rootDirectory.Length).TrimStart(Path.DirectorySeparatorChar);
-            if (exclude.Any(x => relativePath.StartsWith(x, StringComparison.OrdinalIgnoreCase)))
-                return false;
-
-            return item.Name.EndsWith(".sql", StringComparison.OrdinalIgnoreCase);
+            return from item in root.GetChildren(recursive)
+                   where item.Kind == Constants.vsProjectItemKindPhysicalFile
+                   let itemPath = item.Properties.GetFullPath()
+                   let relativePath = itemPath.Substring(rootDirectory.Length).TrimStart(Path.DirectorySeparatorChar)
+                   where !exclude.Any(x => relativePath.StartsWith(x, StringComparison.OrdinalIgnoreCase))
+                   where item.Name.EndsWith(".sql", StringComparison.OrdinalIgnoreCase)
+                   orderby item.Name
+                   select itemPath;
         }
         #endregion
     }

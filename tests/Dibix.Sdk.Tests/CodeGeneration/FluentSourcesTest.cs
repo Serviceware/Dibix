@@ -8,12 +8,12 @@
 // </auto-generated>
 //----------------------------------------------------------------------------*/
 using System.CodeDom.Compiler;
-using System.Reflection;
 using Dibix;
 
 namespace This.Is.A.Custom.Namespace
 {
     #region Accessor
+    [DatabaseAccessor]
     [GeneratedCodeAttribute("Dibix.Sdk", "1.0.0.0")]
     internal static class Accessor
     {
@@ -73,11 +73,6 @@ namespace This.Is.A.Custom.Namespace
                 return accessor.Execute(DeleteProjectCommandText, System.Data.CommandType.StoredProcedure, @params);
             }
         }
-
-        public static readonly MethodInfo dbx_tests_sources_includednestedMethodInfo = typeof(Accessor).GetMethod("dbx_tests_sources_includednested");
-        public static readonly MethodInfo dbx_tests_sources_excludednestedMethodInfo = typeof(Accessor).GetMethod("dbx_tests_sources_excludednested");
-        public static readonly MethodInfo dbx_tests_sources_externalspMethodInfo = typeof(Accessor).GetMethod("dbx_tests_sources_externalsp");
-        public static readonly MethodInfo DeleteProjectMethodInfo = typeof(Accessor).GetMethod("DeleteProject");
     }
     #endregion
 }

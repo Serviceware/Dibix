@@ -1,0 +1,178 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "definitions": {
+    "PropertyType": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "boolean",
+            "byte",
+            "int16",
+            "int32",
+            "int64",
+            "float",
+            "double",
+            "decimal",
+            "binary",
+            "datetime",
+            "datetimeoffset",
+            "string",
+            "uuid",
+            "boolean?",
+            "byte?",
+            "int16?",
+            "int32?",
+            "int64?",
+            "float?",
+            "double?",
+            "decimal?",
+            "binary?",
+            "datetime?",
+            "datetimeoffset?",
+            "string?",
+            "uuid?",
+            "boolean*",
+            "byte*",
+            "int16*",
+            "int32*",
+            "int64*",
+            "float*",
+            "double*",
+            "decimal*",
+            "binary*",
+            "datetime*",
+            "datetimeoffset*",
+            "string*",
+            "uuid*",
+            "boolean?*",
+            "byte?*",
+            "int16?*",
+            "int32?*",
+            "int64?*",
+            "float?*",
+            "double?*",
+            "decimal?*",
+            "binary?*",
+            "datetime?*",
+            "datetimeoffset?*",
+            "string?*",
+            "uuid?*"
+          ]
+        },
+        {
+          "type": "string",
+          "pattern": "^#[A-Za-z]([\\w]+)?\\??(\\[\\]|\\*?)?$"
+        }
+      ]
+    },
+    "SerializationBehavior": {
+      "type": "string",
+      "enum": [
+        "Always",
+        "IfNotEmpty",
+        "Never"
+      ]
+    },
+    "Entity": {
+      "type": "object",
+      "properties": {
+        "$wcfNs": {
+          "type": "string"
+        }
+      },
+      "patternProperties": {
+        "^[A-Z]([\\w]+)?$": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/PropertyType"
+            },
+            {
+              "type": "object",
+              "minProperties": 1,
+              "properties": {
+                "type": {
+                  "$ref": "#/definitions/PropertyType"
+                },
+                "isPartOfKey": {
+                  "type": "boolean"
+                },
+                "serialize": {
+                  "$ref": "#/definitions/SerializationBehavior"
+                },
+                "obfuscated": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "type"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "minProperties": 1,
+              "properties": {
+                "type": {
+                  "$ref": "#/definitions/PropertyType"
+                },
+                "isDiscriminator": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "type",
+                "isDiscriminator"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "Enum": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "string",
+            "pattern": "^[A-Z]([\\w]+)?$"
+          },
+          {
+            "type": "object",
+            "minProperties": 1,
+            "maxProperties": 1,
+            "patternProperties": {
+              "^[A-Z]([\\w]+)?$": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        ]
+      }
+    }
+  },
+  "type": "object",
+  "patternProperties": {
+    "^[A-Z]([\\w]+)?$": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/Entity"
+        },
+        {
+          "$ref": "#/definitions/Enum"
+        }
+      ]
+    }
+  },
+  "additionalProperties": false
+}

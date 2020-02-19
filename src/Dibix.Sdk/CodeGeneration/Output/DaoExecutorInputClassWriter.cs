@@ -5,7 +5,7 @@ using Dibix.Sdk.CodeGeneration.CSharp;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class DaoExecutorInputClassWriter : DaoChildWriterBase, IDaoChildWriter
+    internal sealed class DaoExecutorInputClassWriter : DaoWriter
     {
         #region Fields
         internal const string InputTypeSuffix = "Input";
@@ -17,14 +17,14 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Overrides
-        public override bool HasContent(SourceArtifacts artifacts) => artifacts.Statements.Any(RequiresInput);
+        public override bool HasContent(CodeGenerationModel model) => model.Statements.Any(RequiresInput);
 
-        public override void Write(WriterContext context)
+        public override void Write(DaoCodeGenerationContext context)
         {
-            var namespaceGroups = context.Artifacts
+            var namespaceGroups = context.Model
                                          .Statements
                                          .Where(RequiresInput)
-                                         .GroupBy(x => context.Configuration.WriteNamespaces ? x.Namespace.RelativeNamespace : null)
+                                         .GroupBy(x => context.WriteNamespaces ? x.Namespace.RelativeNamespace : null)
                                          .ToArray();
 
             for (int i = 0; i < namespaceGroups.Length; i++)
@@ -35,7 +35,7 @@ namespace Dibix.Sdk.CodeGeneration
                 for (int j = 0; j < statements.Count; j++)
                 {
                     SqlStatementInfo statement = statements[j];
-                    CSharpModifiers classVisibility = context.Configuration.GeneratePublicArtifacts ? CSharpModifiers.Public : CSharpModifiers.Internal;
+                    CSharpModifiers classVisibility = context.GeneratePublicArtifacts ? CSharpModifiers.Public : CSharpModifiers.Internal;
                     CSharpClass inputType = scope.AddClass(GetInputTypeName(statement), classVisibility | CSharpModifiers.Sealed);
 
                     foreach (SqlQueryParameter parameter in statement.Parameters)

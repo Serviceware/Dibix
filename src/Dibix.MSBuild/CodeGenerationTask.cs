@@ -24,7 +24,7 @@ namespace Dibix.MSBuild
         public bool EmbedStatements { get; set; }
 
         [Output]
-        public string[] DetectedReferences { get; set; }
+        public string[] AdditionalAssemblyReferences { get; set; }
 
         protected override IEnumerable<object> CollectParameters()
         {
@@ -44,13 +44,13 @@ namespace Dibix.MSBuild
 
         protected override void PostExecute(object[] args)
         {
-            this.DetectedReferences = (string[])args.Last();
-            for (int i = 0; i < this.DetectedReferences.Length; i++)
+            this.AdditionalAssemblyReferences = (string[])args.Last();
+            for (int i = 0; i < this.AdditionalAssemblyReferences.Length; i++)
             {
-                string detectedReference = this.DetectedReferences[i];
-                string toolPath = Path.Combine(CurrentDirectory, detectedReference);
+                string assemblyReference = this.AdditionalAssemblyReferences[i];
+                string toolPath = Path.Combine(CurrentDirectory, assemblyReference);
                 if (File.Exists(toolPath))
-                    this.DetectedReferences[i] = toolPath;
+                    this.AdditionalAssemblyReferences[i] = toolPath;
             }
         }
     }

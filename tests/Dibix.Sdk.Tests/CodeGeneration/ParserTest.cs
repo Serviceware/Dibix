@@ -10,12 +10,12 @@
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Reflection;
 using Dibix;
 
 namespace Dibix.Sdk.Tests.CodeGeneration
 {
     #region Accessor
+    [DatabaseAccessor]
     [GeneratedCodeAttribute("Dibix.Sdk", "1.0.0.0")]
     internal static class ParserTest
     {
@@ -28,7 +28,9 @@ AS (SELECT 1 AS [i])
 SELECT [i] AS [y]
 FROM [x];
 
-IF 0 = 1
+DECLARE @true AS BIT = 1;
+
+IF @true = 1
     BEGIN
         SELECT 1 AS [action];
     END
@@ -37,7 +39,7 @@ ELSE
 
 MERGE INTO dbo.dbx_table
  AS target
-USING dbo.dbx_table AS source ON (1 = 0)
+USING dbo.dbx_table AS source ON (@true = 0)
 WHEN NOT MATCHED BY SOURCE THEN DELETE OUTPUT $ACTION AS [action];
 
 SELECT 1 AS id,
@@ -49,15 +51,17 @@ SELECT 2 AS id,
        16 AS [age];";
 
         // dbx_tests_parser_nestedifs
-        public const string dbx_tests_parser_nestedifsCommandText = @"IF 0 = 1
+        public const string dbx_tests_parser_nestedifsCommandText = @"DECLARE @true AS BIT = 1;
+
+IF @true = 1
     BEGIN
-        IF 1 = 0
+        IF @true = 0
             SELECT 1.0 AS [action];
         ELSE
             SELECT 1.1 AS [action];
     END
 ELSE
-    IF 0 = 1
+    IF @true = 1
         BEGIN
             DECLARE @x AS INT = 1;
             SELECT 2 AS [action];
@@ -67,10 +71,10 @@ ELSE
             SELECT 3 AS [action];
         END
 
-IF 0 = 1
+IF @true = 1
     SELECT 1;
 ELSE
-    IF 0 = 2
+    IF @true = 2
         SELECT 2;
     ELSE
         SELECT 3;";
@@ -204,13 +208,6 @@ UNION ALL
                 return accessor.Execute(dbx_tests_parser_xmlparamCommandText, @params);
             }
         }
-
-        public static readonly MethodInfo dbx_tests_parser_invalidcolumnsforentityMethodInfo = typeof(ParserTest).GetMethod("dbx_tests_parser_invalidcolumnsforentity");
-        public static readonly MethodInfo dbx_tests_parser_nestedifsMethodInfo = typeof(ParserTest).GetMethod("dbx_tests_parser_nestedifs");
-        public static readonly MethodInfo dbx_tests_parser_nobeginendMethodInfo = typeof(ParserTest).GetMethod("dbx_tests_parser_nobeginend");
-        public static readonly MethodInfo dbx_tests_parser_typenamesMethodInfo = typeof(ParserTest).GetMethod("dbx_tests_parser_typenames");
-        public static readonly MethodInfo dbx_tests_parser_unionreturnMethodInfo = typeof(ParserTest).GetMethod("dbx_tests_parser_unionreturn");
-        public static readonly MethodInfo dbx_tests_parser_xmlparamMethodInfo = typeof(ParserTest).GetMethod("dbx_tests_parser_xmlparam");
     }
     #endregion
 
