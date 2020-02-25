@@ -10,7 +10,7 @@ string output = TextTemplateCodeGenerator.Generate
   , (IServiceProvider)this.Host
   , cfg => cfg.AddSource("Dibix.Sdk.Tests.Database", x =>
               {
-                  x.SelectFolder(null, "CodeAnalysis", "Tables", "Types", "Tests/Parser", "Tests/Sources/Excluded", "Tests/Sources/dbx_tests_sources_externalsp")
+                  x.SelectFolder(null, "CodeAnalysis", "Tables", "Types", "Tests/Parser", "Tests/Sources/Excluded", "Tests/Sources/dbx_tests_sources_externalsp", "Tests/Syntax")
                    .SelectFile("Tests/Sources/Excluded/Nested/dbx_tests_sources_excludednested.sql");
               })
               .AddSource("Dibix.Sdk.Tests.Database", x =>

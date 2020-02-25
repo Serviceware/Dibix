@@ -6,21 +6,36 @@ namespace Dibix.Sdk.Tests.Utilities
 {
     public static class TestUtilities
     {
-        public static void AssertEqualWithDiffTool(string expected, string actual)
+        public static void AssertEqualWithDiffTool(string expectedText, string actualText)
         {
-            if (expected != actual)
-                RunWinMerge(expected, actual);
+            if (expectedText != actualText)
+                RunWinMerge(expectedText, actualText);
 
-            Assert.Equal(expected, actual);
+            Assert.Equal(expectedText, actualText);
+        }
+
+        public static void AssertFileEqualWithDiffTool(string expectedText, string actualFilePath)
+        {
+            string actualText = File.ReadAllText(actualFilePath);
+            if (expectedText != actualText)
+                RunWinMerge(expectedText, actualText);
+
+            Assert.Equal(expectedText, actualText);
         }
 
         private static void RunWinMerge(string expectedText, string actualText)
         {
-            string expectedFileName = Path.GetTempFileName();
-            string actualFileName = Path.GetTempFileName();
-            File.WriteAllText(expectedFileName, expectedText);
-            File.WriteAllText(actualFileName, actualText);
-            Process.Start("winmerge", $"\"{expectedFileName}\" \"{actualFileName}\"");
+            string actualFilePath = Path.GetTempFileName();
+            File.WriteAllText(actualFilePath, actualText);
+            RunWinMerge(expectedText, actualFilePath, actualText);
+        }
+
+        private static void RunWinMerge(string expectedText, string actualFilePath, string actualText)
+        {
+            string expectedFilePath = Path.GetTempFileName();
+            File.WriteAllText(expectedFilePath, expectedText);
+            File.WriteAllText(actualFilePath, actualText);
+            Process.Start("winmerge", $"\"{expectedFilePath}\" \"{actualFilePath}\"");
         }
     }
 }

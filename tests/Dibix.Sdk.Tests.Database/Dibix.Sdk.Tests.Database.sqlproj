@@ -113,6 +113,10 @@
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_035.sql" />
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_036.sql" />
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_037.sql" />
+    <Build Include="Tests\Syntax\dbx_tests_syntax_empty.sql" />
+    <Build Include="Tests\Syntax\dbx_tests_syntax_primitiveresult.sql" />
+    <Build Include="Tests\Syntax\dbx_tests_syntax_empty_undeclared.sql" />
+    <Build Include="Tests\Syntax\dbx_tests_syntax_primitiveresult_invaliddeclaration.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CodeAnalysis" />
@@ -125,5 +129,6 @@
     <Folder Include="Tests\Sources\Included\" />
     <Folder Include="Tests\Sources\Included\Nested\" />
     <Folder Include="Types" />
+    <Folder Include="Tests\Syntax" />
   </ItemGroup>
 </Project>

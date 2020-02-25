@@ -19,15 +19,10 @@ using Xunit;
 
 namespace Dibix.Sdk.Tests.CodeGeneration
 {
-    public sealed class TextTemplateCodeGeneratorTests
+    public sealed class TextTemplateCodeGeneratorTests : CodeGenerationTestBase
     {
-        private static readonly Assembly Assembly = typeof(TextTemplateCodeGeneratorTests).Assembly;
-        private static readonly string ProjectName = Assembly.GetName().Name;
-        private static readonly string ProjectDirectory = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "..", "..", ".."));
-        private static readonly string DatabaseProjectDirectory = Path.GetFullPath(Path.Combine(ProjectDirectory, "..", "Dibix.Sdk.Tests.Database"));
         private static readonly string OutputDirectory = Environment.CurrentDirectory.Substring(ProjectDirectory.Length + 1);
         private static readonly string OutputFileName = Path.GetFileName(Assembly.Location);
-        private static string TestName => DetermineTestName();
         private static string TemplateFile => Path.GetFullPath(Path.Combine(ProjectDirectory, "CodeGeneration", String.Concat(TestName, ".tt")));
 
         [Fact]
@@ -51,7 +46,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         {
             string generated = ExecuteTest(cfg => cfg.AddSource("Dibix.Sdk.Tests.Database", x =>
                                                      {
-                                                         x.SelectFolder(null, "CodeAnalysis", "Tables", "Types", "Tests/Parser", "Tests/Sources/Excluded", "Tests/Sources/dbx_tests_sources_externalsp")
+                                                         x.SelectFolder(null, "CodeAnalysis", "Tables", "Types", "Tests/Parser", "Tests/Sources/Excluded", "Tests/Sources/dbx_tests_sources_externalsp", "Tests/Syntax")
                                                           .SelectFile("Tests/Sources/Excluded/Nested/dbx_tests_sources_excludednested.sql");
                                                      })
                                                      .AddSource("Dibix.Sdk.Tests.Database", x =>
@@ -263,29 +258,5 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                 }
             }
         }
-
-        private static void Evaluate(string generated) => Evaluate(TestName, generated);
-        private static void Evaluate(string expectedTextKey, string generated)
-        {
-            string expectedText = GetExpectedText(expectedTextKey);
-            string actualText = generated;
-            TestUtilities.AssertEqualWithDiffTool(expectedText, actualText);
-        }
-
-        private static string GetExpectedText(string key)
-        {
-            ResourceManager resourceManager = new ResourceManager($"{ProjectName}.Resource", Assembly);
-            string resource = resourceManager.GetString(key);
-            if (resource == null)
-                throw new InvalidOperationException($"Invalid test resource name '{key}'");
-
-            return resource;
-        }
-
-        private static string DetermineTestName() => new StackTrace().GetFrames()
-                                                                     .Select(x => x.GetMethod())
-                                                                     .Where(x => x.IsDefined(typeof(FactAttribute)))
-                                                                     .Select(x => x.Name)
-                                                                     .Single();
     }
 }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Dibix.Sdk.CodeGeneration;
-using Microsoft.Build.Utilities;
 
 namespace Dibix.Sdk.MSBuild
 {
@@ -16,20 +15,25 @@ namespace Dibix.Sdk.MSBuild
           , string areaName
           , string defaultOutputFilePath
           , string clientOutputFilePath
-          , ICollection<string> sources
+          , IEnumerable<string> sources
           , IEnumerable<string> contracts
           , IEnumerable<string> endpoints
-          , ICollection<string> references
+          , IEnumerable<string> references
           , bool embedStatements
           , IErrorReporter errorReporter)
         {
             string rootNamespace = NamespaceUtility.BuildRootNamespace(productName, areaName);
             string defaultOutputName = Path.GetFileNameWithoutExtension(defaultOutputFilePath).Replace(".", String.Empty);
 
+            ICollection<string> normalizedSources = NormalizePaths(sources, projectDirectory).ToArray();
+            ICollection<string> normalizedContracts = NormalizePaths(contracts, projectDirectory).ToArray();
+            ICollection<string> normalizedEndpoints = NormalizePaths(endpoints, projectDirectory).ToArray();
+            ICollection<string> normalizedReferences = NormalizePaths(references, projectDirectory).ToArray();
+
             IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(projectDirectory);
             ISqlStatementFormatter formatter = embedStatements ? (ISqlStatementFormatter)new TakeSourceSqlStatementFormatter() : new ExecStoredProcedureSqlStatementFormatter();
-            IContractDefinitionProvider contractDefinitionProvider = new ContractDefinitionProvider(fileSystemProvider, errorReporter, contracts, productName, areaName);
-            IContractResolverFacade contractResolver = new ContractResolverFacade(new DefaultAssemblyLocator(projectDirectory, references));
+            IContractDefinitionProvider contractDefinitionProvider = new ContractDefinitionProvider(fileSystemProvider, errorReporter, normalizedContracts, productName, areaName);
+            IContractResolverFacade contractResolver = new ContractResolverFacade(new DefaultAssemblyLocator(projectDirectory, normalizedReferences));
             contractResolver.RegisterContractResolver(new ContractDefinitionResolver(contractDefinitionProvider), 0);
 
             CodeArtifactsGenerationModel model = new CodeArtifactsGenerationModel(CodeGeneratorCompatibilityLevel.Full)
@@ -41,13 +45,15 @@ namespace Dibix.Sdk.MSBuild
                 DefaultOutputFilePath = defaultOutputFilePath,
                 ClientOutputFilePath = clientOutputFilePath
             };
-            model.Statements.AddRange(CollectStatements(sources, projectDirectory, productName, areaName, embedStatements, formatter, contractResolver, errorReporter));
-            model.UserDefinedTypes.AddRange(CollectUserDefinedTypes(sources, productName, areaName, errorReporter));
+            model.Statements.AddRange(CollectStatements(normalizedSources, projectDirectory, productName, areaName, embedStatements, formatter, contractResolver, errorReporter));
+            model.UserDefinedTypes.AddRange(CollectUserDefinedTypes(normalizedSources, productName, areaName, errorReporter));
             model.Contracts.AddRange(contractDefinitionProvider.Contracts);
-            model.Controllers.AddRange(CollectControllers(endpoints, projectDirectory, productName, areaName, defaultOutputName, model.Statements, references, fileSystemProvider, errorReporter));
+            model.Controllers.AddRange(CollectControllers(normalizedEndpoints, projectDirectory, productName, areaName, defaultOutputName, model.Statements, normalizedReferences, fileSystemProvider, errorReporter));
 
             return model;
         }
+
+        private static IEnumerable<string> NormalizePaths(IEnumerable<string> paths, string projectDirectory) => paths.Select(x => Path.IsPathRooted(x) ? x : Path.Combine(projectDirectory, x));
 
         private static IEnumerable<SqlStatementInfo> CollectStatements
         (
