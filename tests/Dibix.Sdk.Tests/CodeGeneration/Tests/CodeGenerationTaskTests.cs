@@ -17,13 +17,13 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         [Fact]
         public void NoMatchingSources_EmptyStatement()
         {
-            ExecuteTest(@"Tests\Syntax\dbx_tests_syntax_empty_undeclared.sql");
+            ExecuteTest(@"Tests\Syntax\dbx_tests_syntax_empty_undeclared.sql", embedStatements: false);
         }
 
         [Fact]
         public void External_Empty()
         {
-            ExecuteTest(@"Tests\Syntax\dbx_tests_syntax_empty.sql");
+            ExecuteTest(@"Tests\Syntax\dbx_tests_syntax_empty.sql", embedStatements: false);
         }
 
         [Fact]
@@ -40,22 +40,33 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(2,1) 
         }
 
         [Fact]
-        public void Inline_SingleConcreteResult_WithBuiltinResultContract()
+        public void Inline_SingleConcreteResult()
         {
             ExecuteTest
             (
-                contract: @"Contracts\GenericContract.json"
-              , source: @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_builtinresultcontract.sql"
+                source: @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult.sql"
+              , @"Contracts\GenericContract.json"
             );
         }
 
         [Fact]
-        public void Inline_MultiConcreteResult_WithBuiltinResultContract()
+        public void Inline_MultiConcreteResult()
         {
             ExecuteTest
             (
-                contract: @"Contracts\GenericContract.json"
-              , source: @"Tests\Syntax\dbx_tests_syntax_multiconcreteresult_builtinresultcontract.sql"
+                source: @"Tests\Syntax\dbx_tests_syntax_multiconcreteresult.sql"
+              , @"Contracts\GenericContract.json"
+            );
+        }
+
+        [Fact]
+        public void Inline_SingleMultiMapResult()
+        {
+            ExecuteTest
+            (
+                source: @"Tests\Syntax\dbx_tests_syntax_singlemultimapresult.sql"
+              , @"Contracts\GenericContract.json"
+              , @"Contracts\MultiMapContract.json"
             );
         }
 
@@ -87,9 +98,9 @@ Contracts\Invalid.json(2,14) : error : [JSON] Invalid type. Expected Array but g
 Contracts\Invalid.json(2,14) : error : [JSON] JSON does not match any schemas from 'anyOf'. (Invalid)");
         }
 
-        private static void ExecuteTest(string source) => ExecuteTest(Enumerable.Repeat(source, 1), Enumerable.Empty<string>());
-        private static void ExecuteTest(string source, string contract) => ExecuteTest(Enumerable.Repeat(source, 1), Enumerable.Repeat(contract, 1));
-        private static void ExecuteTest(IEnumerable<string> sources, IEnumerable<string> contracts)
+        private static void ExecuteTest(string source, bool embedStatements = true) => ExecuteTest(Enumerable.Repeat(source, 1), Enumerable.Empty<string>(), embedStatements);
+        private static void ExecuteTest(string source, params string[] contracts) => ExecuteTest(Enumerable.Repeat(source, 1), contracts, true);
+        private static void ExecuteTest(IEnumerable<string> sources, IEnumerable<string> contracts, bool embedStatements)
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), $"dibix-sdk-tests-{Guid.NewGuid()}");
             string defaultOutputFilePath = Path.Combine(tempDirectory, "TestAccessor.cs");
@@ -115,7 +126,7 @@ Contracts\Invalid.json(2,14) : error : [JSON] JSON does not match any schemas fr
               , contracts: contracts
               , endpoints: null
               , references: null
-              , embedStatements: false
+              , embedStatements: embedStatements
               , logger: new TaskLoggingHelper(buildEngine.Object, nameof(CodeGenerationTask))
               , additionalAssemblyReferences: out string[] additionalAssemblyReferences
             );
@@ -133,7 +144,7 @@ Contracts\Invalid.json(2,14) : error : [JSON] JSON does not match any schemas fr
         {
             try
             {
-                ExecuteTest(sources, contracts);
+                ExecuteTest(sources, contracts, true);
                 Assert.True(false, "CodeGenerationException was expected but not thrown");
             }
             catch (CodeGenerationException ex)
