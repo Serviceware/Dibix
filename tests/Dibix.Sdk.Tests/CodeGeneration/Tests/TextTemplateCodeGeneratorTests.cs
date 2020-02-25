@@ -97,28 +97,6 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             Mock<ProjectItems> projectItems = new Mock<ProjectItems>(MockBehavior.Strict);
             Mock<ProjectItems> databaseProjectItems = new Mock<ProjectItems>(MockBehavior.Strict);
             Mock<ProjectItem> templateFileProjectItem = new Mock<ProjectItem>(MockBehavior.Strict);
-            Mock<ProjectItem> directionItem = new Mock<ProjectItem>(MockBehavior.Strict);
-            Mock<ProjectItems> directionItems = new Mock<ProjectItems>(MockBehavior.Strict);
-            Mock<FileCodeModel> directionCodeModel = new Mock<FileCodeModel>(MockBehavior.Strict);
-            Mock<CodeElements> directionCodeElements = new Mock<CodeElements>(MockBehavior.Strict);
-            Mock<CodeElement> directionCodeElement = new Mock<CodeElement>(MockBehavior.Strict);
-            Mock<ProjectItem> specialEntityItem = new Mock<ProjectItem>(MockBehavior.Strict);
-            Mock<ProjectItems> specialEntityItems = new Mock<ProjectItems>(MockBehavior.Strict);
-            Mock<FileCodeModel> specialEntityCodeModel = new Mock<FileCodeModel>(MockBehavior.Strict);
-            Mock<CodeElements> specialEntityCodeElements = new Mock<CodeElements>(MockBehavior.Strict);
-            Mock<CodeElement> specialEntityCodeElement = new Mock<CodeElement>(MockBehavior.Strict);
-            Mock<CodeClass> specialEntityCodeClass = specialEntityCodeElement.As<CodeClass>();
-            Mock<CodeElements> specialEntityProperties = new Mock<CodeElements>(MockBehavior.Strict);
-            Mock<CodeElement> specialEntityAgeProperty = new Mock<CodeElement>(MockBehavior.Strict);
-            Mock<CodeElements> specialEntityBases = new Mock<CodeElements>(MockBehavior.Strict);
-            Mock<CodeClass> entityClass = new Mock<CodeClass>(MockBehavior.Strict);
-            Mock<CodeElements> entityProperties = new Mock<CodeElements>(MockBehavior.Strict);
-            Mock<CodeElement> entityNameProperty = new Mock<CodeElement>(MockBehavior.Strict);
-            Mock<CodeElements> entityBases = new Mock<CodeElements>(MockBehavior.Strict);
-            Mock<CodeClass> baseEntityClass = new Mock<CodeClass>(MockBehavior.Strict);
-            Mock<CodeElements> baseEntityProperties = new Mock<CodeElements>(MockBehavior.Strict);
-            Mock<CodeElement> baseEntityIdProperty = new Mock<CodeElement>(MockBehavior.Strict);
-            Mock<CodeElements> baseEntityBases = new Mock<CodeElements>(MockBehavior.Strict);
 
             textTemplatingEngineHost.Setup(x => x.ResolveParameterValue("-", "-", "projectDefaultNamespace"))
                                     .Returns(ProjectName);
@@ -141,8 +119,8 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             project.SetupGet(x => x.Object).Returns(projectObject.Object);
             projectItems.As<IEnumerable>().Setup(x => x.GetEnumerator()).Returns(new[]
             {
-                directionItem.Object,
-                specialEntityItem.Object
+                CollectType<SpecialEntity>(),
+                CollectType<Direction>()
             }.GetEnumerator);
             configurationManager.SetupGet(x => x.ActiveConfiguration).Returns(activeConfiguration.Object);
             activeConfiguration.SetupGet(x => x.Properties).Returns(activeConfigurationProperties.Object);
@@ -179,40 +157,6 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                 project.Object,
                 databaseProject.Object
             }.GetEnumerator);
-            directionItem.SetupGet(x => x.Kind).Returns((string)null);
-            directionItem.SetupGet(x => x.FileCodeModel).Returns(directionCodeModel.Object);
-            directionItem.SetupGet(x => x.ProjectItems).Returns(directionItems.Object);
-            directionItems.As<IEnumerable>().Setup(x => x.GetEnumerator()).Returns(Enumerable.Empty<object>().GetEnumerator);
-            directionCodeModel.SetupGet(x => x.CodeElements).Returns(directionCodeElements.Object);
-            directionCodeElement.SetupGet(x => x.FullName).Returns("Dibix.Sdk.Tests.CodeGeneration.Direction");
-            directionCodeElement.SetupGet(x => x.Kind).Returns(vsCMElement.vsCMElementEnum);
-            directionCodeElements.As<IEnumerable>().Setup(x => x.GetEnumerator()).Returns(Enumerable.Repeat(directionCodeElement.Object, 1).GetEnumerator);
-            specialEntityItem.SetupGet(x => x.Kind).Returns((string)null);
-            specialEntityItem.SetupGet(x => x.FileCodeModel).Returns(specialEntityCodeModel.Object);
-            specialEntityItem.SetupGet(x => x.ProjectItems).Returns(specialEntityItems.Object);
-            specialEntityItems.As<IEnumerable>().Setup(x => x.GetEnumerator()).Returns(Enumerable.Empty<object>().GetEnumerator);
-            specialEntityCodeModel.SetupGet(x => x.CodeElements).Returns(specialEntityCodeElements.Object);
-            specialEntityCodeElement.SetupGet(x => x.FullName).Returns("Dibix.Sdk.Tests.CodeGeneration.SpecialEntity");
-            specialEntityCodeElement.SetupGet(x => x.Kind).Returns(vsCMElement.vsCMElementClass);
-            specialEntityCodeElements.As<IEnumerable>().Setup(x => x.GetEnumerator()).Returns(Enumerable.Repeat(specialEntityCodeElement.Object, 1).GetEnumerator);
-            specialEntityCodeClass.SetupGet(x => x.Members).Returns(specialEntityProperties.Object);
-            specialEntityProperties.As<IEnumerable>().Setup(x => x.GetEnumerator()).Returns(Enumerable.Repeat(specialEntityAgeProperty.Object, 1).GetEnumerator);
-            specialEntityAgeProperty.SetupGet(x => x.Name).Returns("Age");
-            specialEntityAgeProperty.SetupGet(x => x.Kind).Returns(vsCMElement.vsCMElementProperty);
-            specialEntityCodeClass.SetupGet(x => x.Bases).Returns(specialEntityBases.Object);
-            specialEntityBases.As<IEnumerable>().Setup(x => x.GetEnumerator()).Returns(Enumerable.Repeat(entityClass.Object, 1).GetEnumerator);
-            entityClass.SetupGet(x => x.Members).Returns(entityProperties.Object);
-            entityProperties.As<IEnumerable>().Setup(x => x.GetEnumerator()).Returns(Enumerable.Repeat(entityNameProperty.Object, 1).GetEnumerator);
-            entityNameProperty.SetupGet(x => x.Name).Returns("Name");
-            entityNameProperty.SetupGet(x => x.Kind).Returns(vsCMElement.vsCMElementProperty);
-            entityClass.SetupGet(x => x.Bases).Returns(entityBases.Object);
-            entityBases.As<IEnumerable>().Setup(x => x.GetEnumerator()).Returns(Enumerable.Repeat(baseEntityClass.Object, 1).GetEnumerator);
-            baseEntityClass.SetupGet(x => x.Members).Returns(baseEntityProperties.Object);
-            baseEntityProperties.As<IEnumerable>().Setup(x => x.GetEnumerator()).Returns(Enumerable.Repeat(baseEntityIdProperty.Object, 1).GetEnumerator);
-            baseEntityIdProperty.SetupGet(x => x.Name).Returns("Id");
-            baseEntityIdProperty.SetupGet(x => x.Kind).Returns(vsCMElement.vsCMElementProperty);
-            baseEntityClass.SetupGet(x => x.Bases).Returns(baseEntityBases.Object);
-            baseEntityBases.As<IEnumerable>().Setup(x => x.GetEnumerator()).Returns(Enumerable.Empty<object>().GetEnumerator);
 
             CollectProjectItems(DatabaseProjectDirectory, databaseProjectItems);
 
@@ -249,6 +193,74 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                 itemsSource.Add(projectItem.Object);
 
                 CollectProjectItems(item.FullName, projectItems);
+            }
+        }
+
+        private static ProjectItem CollectType<TType>()
+        {
+            Type type = typeof(TType);
+
+            Mock<ProjectItem> projectItem = new Mock<ProjectItem>(MockBehavior.Strict);
+            Mock<FileCodeModel> codeModel = new Mock<FileCodeModel>(MockBehavior.Strict);
+            Mock<ProjectItems> projectItems = new Mock<ProjectItems>(MockBehavior.Strict);
+            Mock<CodeElements> codeElements = new Mock<CodeElements>(MockBehavior.Strict);
+            Mock<CodeElement> codeElement = new Mock<CodeElement>(MockBehavior.Strict);
+
+            projectItem.SetupGet(x => x.Kind).Returns((string)null);
+            projectItem.SetupGet(x => x.FileCodeModel).Returns(codeModel.Object);
+            projectItem.SetupGet(x => x.ProjectItems).Returns(projectItems.Object);
+            codeModel.SetupGet(x => x.CodeElements).Returns(codeElements.Object);
+            projectItems.As<IEnumerable>().Setup(x => x.GetEnumerator()).Returns(Enumerable.Empty<object>().GetEnumerator);
+            codeElement.SetupGet(x => x.FullName).Returns(type.FullName);
+
+            if (type.IsEnum)
+                codeElement.SetupGet(x => x.Kind).Returns(vsCMElement.vsCMElementEnum);
+            else
+            {
+                codeElement.SetupGet(x => x.Kind).Returns(vsCMElement.vsCMElementClass);
+                CollectConcreteType(type, codeElement);
+            }
+
+            codeElements.As<IEnumerable>().Setup(x => x.GetEnumerator()).Returns(Enumerable.Repeat(codeElement.Object, 1).GetEnumerator);
+
+            return projectItem.Object;
+        }
+
+        private static void CollectConcreteType(Type type, Mock<CodeElement> codeElement)
+        {
+            Mock<CodeClass> codeClass = null;
+            Type currentType = type;
+            while (true)
+            {
+                if (codeClass == null)
+                    codeClass = codeElement.As<CodeClass>();
+
+                Mock<CodeElements> bases = new Mock<CodeElements>(MockBehavior.Strict);
+                Mock<CodeElements> properties = new Mock<CodeElements>(MockBehavior.Strict);
+
+                codeClass.SetupGet(x => x.Members).Returns(properties.Object);
+                properties.As<IEnumerable>().Setup(x => x.GetEnumerator()).Returns(currentType.GetProperties().Select(x =>
+                {
+                    Mock<CodeElement> property = new Mock<CodeElement>(MockBehavior.Strict);
+
+                    property.SetupGet(y => y.Name).Returns(x.Name);
+                    property.SetupGet(y => y.Kind).Returns(vsCMElement.vsCMElementProperty);
+
+                    return property.Object;
+                }).GetEnumerator);
+                codeClass.SetupGet(x => x.Bases).Returns(bases.Object);
+
+                if (currentType.BaseType != typeof(object))
+                {
+                    codeClass = new Mock<CodeClass>(MockBehavior.Strict);
+                    currentType = currentType.BaseType;
+                    bases.As<IEnumerable>().Setup(x => x.GetEnumerator()).Returns(Enumerable.Repeat(codeClass.Object, 1).GetEnumerator);
+                }
+                else
+                {
+                    bases.As<IEnumerable>().Setup(x => x.GetEnumerator()).Returns(Enumerable.Empty<CodeClass>().GetEnumerator);
+                    break;
+                }
             }
         }
 
