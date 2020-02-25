@@ -1,6 +1,5 @@
 ﻿using System;
 using System.CodeDom.Compiler;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -30,25 +29,67 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         [Fact]
         public void Inline_SinglePrimitiveResult()
         {
-            ExecuteTest(@"Tests\Syntax\dbx_tests_syntax_primitiveresult.sql");
+            ExecuteTest(@"Tests\Syntax\dbx_tests_syntax_singleprimitiveresult.sql");
         }
 
         [Fact]
         public void Inline_SinglePrimitiveResult_WithoutDeclaration_Error()
         {
-            try
-            {
-                ExecuteTest(@"Tests\Syntax\dbx_tests_syntax_primitiveresult_invaliddeclaration.sql");
-                Assert.True(false, "CodeGenerationException was expected but not thrown");
-            }
-            catch (CodeGenerationException ex)
-            {
-                Assert.Equal(@"One or more errors occured during code generation:
-D:\Serviceware\Common\Dibix\tests\Dibix.Sdk.Tests.Database\Tests\Syntax\dbx_tests_syntax_primitiveresult_invaliddeclaration.sql(2,1) : error : There are missing return declarations for the output statements. Please mark the header of the statement with a line per output containting this hint: -- @Return <ClrTypeName>", ex.Message);
-            }
+            ExecuteTestAndExpectError(@"Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql", @"One or more errors occured during code generation:
+D:\Serviceware\Common\Dibix\tests\Dibix.Sdk.Tests.Database\Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(2,1) : error : There are missing return declarations for the output statements. Please mark the header of the statement with a line per output containting this hint: -- @Return <ClrTypeName>");
         }
 
-        private static void ExecuteTest(params string[] sources)
+        [Fact]
+        public void Inline_SingleConcreteResult_WithBuiltinResultContract()
+        {
+            ExecuteTest
+            (
+                contract: @"Contracts\GenericContract.json"
+              , source: @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_builtinresultcontract.sql"
+            );
+        }
+
+        [Fact]
+        public void Inline_MultiConcreteResult_WithBuiltinResultContract()
+        {
+            ExecuteTest
+            (
+                contract: @"Contracts\GenericContract.json"
+              , source: @"Tests\Syntax\dbx_tests_syntax_multiconcreteresult_builtinresultcontract.sql"
+            );
+        }
+
+        [Fact]
+        public void Inline_SingleConcreteResult_WithUnknownResultContract_Error()
+        {
+            ExecuteTestAndExpectError(@"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontract.sql", @"One or more errors occured during code generation:
+D:\Serviceware\Common\Dibix\tests\Dibix.Sdk.Tests.Database\Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontract.sql(1,12) : error : Could not resolve contract 'X'");
+        }
+
+        [Fact]
+        public void Inline_SingleConcreteResult_WithUnknownResultContractAssembly_Error()
+        {
+            ExecuteTestAndExpectError(@"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly.sql", @"One or more errors occured during code generation:
+D:\Serviceware\Common\Dibix\tests\Dibix.Sdk.Tests.Database\Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly.sql(1,12) : error : Could not locate assembly: A");
+        }
+
+        [Fact]
+        public void InvalidContractSchema_Error()
+        {
+            ExecuteTestAndExpectError(Enumerable.Empty<string>(), Enumerable.Repeat(@"Contracts\Invalid.json", 1), @"One or more errors occured during code generation:
+D:\Serviceware\Common\Dibix\tests\Dibix.Sdk.Tests.Database\Contracts\Invalid.json(3,12) : error : [JSON] Value ""x"" is not defined in enum. (Invalid.A)
+D:\Serviceware\Common\Dibix\tests\Dibix.Sdk.Tests.Database\Contracts\Invalid.json(3,12) : error : [JSON] String 'x' does not match regex pattern '^#[A-Za-z]([\w]+)?\??(\[\]|\*?)?$'. (Invalid.A)
+D:\Serviceware\Common\Dibix\tests\Dibix.Sdk.Tests.Database\Contracts\Invalid.json(3,12) : error : [JSON] JSON does not match any schemas from 'anyOf'. (Invalid.A)
+D:\Serviceware\Common\Dibix\tests\Dibix.Sdk.Tests.Database\Contracts\Invalid.json(3,12) : error : [JSON] Invalid type. Expected Object but got String. (Invalid.A)
+D:\Serviceware\Common\Dibix\tests\Dibix.Sdk.Tests.Database\Contracts\Invalid.json(3,12) : error : [JSON] Invalid type. Expected Object but got String. (Invalid.A)
+D:\Serviceware\Common\Dibix\tests\Dibix.Sdk.Tests.Database\Contracts\Invalid.json(3,12) : error : [JSON] JSON does not match any schemas from 'anyOf'. (Invalid.A)
+D:\Serviceware\Common\Dibix\tests\Dibix.Sdk.Tests.Database\Contracts\Invalid.json(2,14) : error : [JSON] Invalid type. Expected Array but got Object. (Invalid)
+D:\Serviceware\Common\Dibix\tests\Dibix.Sdk.Tests.Database\Contracts\Invalid.json(2,14) : error : [JSON] JSON does not match any schemas from 'anyOf'. (Invalid)");
+        }
+
+        private static void ExecuteTest(string source) => ExecuteTest(Enumerable.Repeat(source, 1), Enumerable.Empty<string>());
+        private static void ExecuteTest(string source, string contract) => ExecuteTest(Enumerable.Repeat(source, 1), Enumerable.Repeat(contract, 1));
+        private static void ExecuteTest(IEnumerable<string> sources, IEnumerable<string> contracts)
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), $"dibix-sdk-tests-{Guid.NewGuid()}");
             string defaultOutputFilePath = Path.Combine(tempDirectory, "TestAccessor.cs");
@@ -71,7 +112,7 @@ D:\Serviceware\Common\Dibix\tests\Dibix.Sdk.Tests.Database\Tests\Syntax\dbx_test
               , defaultOutputFilePath: defaultOutputFilePath
               , clientOutputFilePath: null
               , sources: sources
-              , contracts: null
+              , contracts: contracts
               , endpoints: null
               , references: null
               , embedStatements: false
@@ -85,6 +126,20 @@ D:\Serviceware\Common\Dibix\tests\Dibix.Sdk.Tests.Database\Tests\Syntax\dbx_test
             Assert.True(result, "MSBuild task result was false");
             Assert.Empty(additionalAssemblyReferences);
             EvaluateFile(defaultOutputFilePath);
+        }
+
+        private static void ExecuteTestAndExpectError(string source, string expectedException) => ExecuteTestAndExpectError(Enumerable.Repeat(source, 1), Enumerable.Empty<string>(), expectedException);
+        private static void ExecuteTestAndExpectError(IEnumerable<string> sources, IEnumerable<string> contracts, string expectedException)
+        {
+            try
+            {
+                ExecuteTest(sources, contracts);
+                Assert.True(false, "CodeGenerationException was expected but not thrown");
+            }
+            catch (CodeGenerationException ex)
+            {
+                Assert.Equal(expectedException, ex.Message);
+            }
         }
     }
 }

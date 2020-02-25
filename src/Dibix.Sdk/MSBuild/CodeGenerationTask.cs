@@ -15,10 +15,10 @@ namespace Dibix.Sdk.MSBuild
           , string areaName
           , string defaultOutputFilePath
           , string clientOutputFilePath
-          , ICollection<string> sources
-          , ICollection<string> contracts
-          , ICollection<string> endpoints
-          , ICollection<string> references
+          , IEnumerable<string> sources
+          , IEnumerable<string> contracts
+          , IEnumerable<string> endpoints
+          , IEnumerable<string> references
           , bool embedStatements
           , TaskLoggingHelper logger
           , out string[] additionalAssemblyReferences
@@ -31,10 +31,10 @@ namespace Dibix.Sdk.MSBuild
               , areaName
               , defaultOutputFilePath
               , clientOutputFilePath
-              , sources ?? new string[0]
-              , contracts ?? new string[0]
-              , endpoints ?? new string[0]
-              , references ?? new string[0]
+              , sources
+              , contracts
+              , endpoints
+              , references
               , embedStatements
               , logger
               , out additionalAssemblyReferences
@@ -48,10 +48,10 @@ namespace Dibix.Sdk.MSBuild
           , string areaName
           , string defaultOutputFilePath
           , string clientOutputFilePath
-          , ICollection<string> sources
+          , IEnumerable<string> sources
           , IEnumerable<string> contracts
           , IEnumerable<string> endpoints
-          , ICollection<string> references
+          , IEnumerable<string> references
           , bool embedStatements
           , TaskLoggingHelper logger
           , out string[] additionalAssemblyReferences

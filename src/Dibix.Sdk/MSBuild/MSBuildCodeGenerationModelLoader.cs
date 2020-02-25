@@ -53,7 +53,10 @@ namespace Dibix.Sdk.MSBuild
             return model;
         }
 
-        private static IEnumerable<string> NormalizePaths(IEnumerable<string> paths, string projectDirectory) => paths.Select(x => Path.IsPathRooted(x) ? x : Path.Combine(projectDirectory, x));
+        private static IEnumerable<string> NormalizePaths(IEnumerable<string> paths, string projectDirectory)
+        {
+            return (paths ?? Enumerable.Empty<string>()).Select(x => Path.IsPathRooted(x) ? x : Path.Combine(projectDirectory, x));
+        }
 
         private static IEnumerable<SqlStatementInfo> CollectStatements
         (
