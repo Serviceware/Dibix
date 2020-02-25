@@ -44,7 +44,6 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             catch (CodeGenerationException ex)
             {
                 Assert.Equal(@"One or more errors occured during code generation:
-D:\Serviceware\Common\Dibix\tests\Dibix.Sdk.Tests.Database\Tests\Syntax\dbx_tests_syntax_primitiveresult_invaliddeclaration.sql(2,1) : error : There are missing return declarations for the output statements. Please mark the header of the statement with a line per output containting this hint: -- @Return <ClrTypeName>
 D:\Serviceware\Common\Dibix\tests\Dibix.Sdk.Tests.Database\Tests\Syntax\dbx_tests_syntax_primitiveresult_invaliddeclaration.sql(2,1) : error : There are missing return declarations for the output statements. Please mark the header of the statement with a line per output containting this hint: -- @Return <ClrTypeName>", ex.Message);
             }
         }
