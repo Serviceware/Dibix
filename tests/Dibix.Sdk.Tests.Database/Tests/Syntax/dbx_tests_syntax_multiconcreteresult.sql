@@ -1,4 +1,4 @@
 ﻿-- @Return #GenericContract
 CREATE PROCEDURE [dbo].[dbx_tests_syntax_multiconcreteresult]
 AS
-	SELECT [a] = 1
+	SELECT [id] = 1

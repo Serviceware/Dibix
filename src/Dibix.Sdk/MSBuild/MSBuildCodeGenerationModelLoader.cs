@@ -23,7 +23,7 @@ namespace Dibix.Sdk.MSBuild
           , IErrorReporter errorReporter)
         {
             string rootNamespace = NamespaceUtility.BuildRootNamespace(productName, areaName);
-            string defaultOutputName = Path.GetFileNameWithoutExtension(defaultOutputFilePath).Replace(".", String.Empty);
+            string defaultOutputName = defaultOutputFilePath != null ? Path.GetFileNameWithoutExtension(defaultOutputFilePath).Replace(".", String.Empty) : "SqlQueryAccessor";
 
             ICollection<string> normalizedSources = NormalizePaths(sources, projectDirectory).ToArray();
             ICollection<string> normalizedContracts = NormalizePaths(contracts, projectDirectory).ToArray();

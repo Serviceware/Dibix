@@ -22,7 +22,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         {
             string expectedText = GetExpectedText(expectedTextKey);
             string actualText = generated;
-            TestUtilities.AssertEqualWithDiffTool(expectedText, actualText);
+            TestUtilities.AssertEqualWithDiffTool(expectedText, actualText, "cs");
         }
 
         protected static void EvaluateFile(string generatedFilePath)

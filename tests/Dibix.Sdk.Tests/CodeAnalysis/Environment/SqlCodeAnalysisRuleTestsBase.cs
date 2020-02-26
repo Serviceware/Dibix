@@ -79,7 +79,7 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
             IEnumerable<SqlCodeAnalysisError> errors = engine.Analyze(violationScriptPath, ruleInstance);
 
             string actual = GenerateXmlFromResults(errors);
-            TestUtilities.AssertEqualWithDiffTool(expected, actual);
+            TestUtilities.AssertEqualWithDiffTool(expected, actual, "xml");
         }
 
         private static IEnumerable<KeyValuePair<string, Assembly>> LoadDependentAssemblies()
@@ -131,16 +131,16 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
                 )
             );
 
-            StringBuilder sb = new StringBuilder();
-            using (StringWriter stringWriter = new StringWriter(sb))
+            using (TextWriter stringWriter = new Utf8StringWriter())
             {
                 using (XmlWriter xmlWriter = XmlWriter.Create(stringWriter, new XmlWriterSettings { Indent = true, NewLineOnAttributes = true }))
                 {
                     doc.Save(xmlWriter);
                 }
+                return stringWriter.ToString();
             }
-
-            return sb.ToString();
         }
+
+        private sealed class Utf8StringWriter : StringWriter { public override Encoding Encoding => Encoding.UTF8; }
     }
 }

@@ -1,5 +1,13 @@
 ﻿{
   "GenericContract": {
-    "A": "int32?"
+    "Id": {
+      "type": "int32",
+      "isPartOfKey": true,
+      "serialize": "Never"
+    },
+    "Name": {
+      "type": "string",
+      "serialize": "IfNotEmpty" 
+    } 
   }
 }

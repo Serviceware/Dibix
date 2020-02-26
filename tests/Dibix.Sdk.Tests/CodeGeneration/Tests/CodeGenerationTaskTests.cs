@@ -45,7 +45,12 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(2,1) 
             ExecuteTest
             (
                 source: @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult.sql"
-              , @"Contracts\GenericContract.json"
+              , contract: @"Contracts\GenericContract.json"
+              , expectedAdditionalAssemblyReferences: new[]
+                {
+                    "System.ComponentModel.DataAnnotations.dll"
+                  , "Newtonsoft.Json.dll"
+                }
             );
         }
 
@@ -55,7 +60,12 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(2,1) 
             ExecuteTest
             (
                 source: @"Tests\Syntax\dbx_tests_syntax_multiconcreteresult.sql"
-              , @"Contracts\GenericContract.json"
+              , contract: @"Contracts\GenericContract.json"
+              , expectedAdditionalAssemblyReferences: new[]
+                {
+                    "System.ComponentModel.DataAnnotations.dll"
+                  , "Newtonsoft.Json.dll"
+                }
             );
         }
 
@@ -65,8 +75,36 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(2,1) 
             ExecuteTest
             (
                 source: @"Tests\Syntax\dbx_tests_syntax_singlemultimapresult.sql"
-              , @"Contracts\GenericContract.json"
-              , @"Contracts\MultiMapContract.json"
+              , contracts: new [] 
+                {
+                    @"Contracts\GenericContract.json"
+                  , @"Contracts\Extension\MultiMapContract.json"
+                }
+              , expectedAdditionalAssemblyReferences: new[]
+                {
+                    "System.ComponentModel.DataAnnotations.dll"
+                  , "Newtonsoft.Json.dll"
+                }
+            );
+        }
+
+        [Fact]
+        public void Inline_GridResult()
+        {
+            ExecuteTest
+            (
+                source: @"Tests\Syntax\dbx_tests_syntax_gridresult.sql"
+              , contracts: new [] 
+                {
+                    @"Contracts\Direction.json"
+                  , @"Contracts\GenericContract.json"
+                  , @"Contracts\Extension\MultiMapContract.json"
+                }
+              , expectedAdditionalAssemblyReferences: new[]
+                {
+                    "System.ComponentModel.DataAnnotations.dll"
+                  , "Newtonsoft.Json.dll"
+                }
             );
         }
 
@@ -85,6 +123,27 @@ Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly
         }
 
         [Fact]
+        public void Inline_FileApi()
+        {
+            ExecuteTest(@"Tests\Syntax\dbx_tests_syntax_fileapi.sql");
+        }
+
+        [Fact]
+        public void DomainModel()
+        {
+            ExecuteTest
+            (
+                new []
+                {
+                    @"Contracts\AccessRights.json"
+                  , @"Contracts\Direction.json"
+                  , @"Contracts\GenericContract.json"
+                  , @"Contracts\Extension\MultiMapContract.json"
+                }
+            );
+        }
+
+        [Fact]
         public void InvalidContractSchema_Error()
         {
             ExecuteTestAndExpectError(Enumerable.Empty<string>(), Enumerable.Repeat(@"Contracts\Invalid.json", 1), @"One or more errors occured during code generation:
@@ -98,12 +157,15 @@ Contracts\Invalid.json(2,14) : error : [JSON] Invalid type. Expected Array but g
 Contracts\Invalid.json(2,14) : error : [JSON] JSON does not match any schemas from 'anyOf'. (Invalid)");
         }
 
-        private static void ExecuteTest(string source, bool embedStatements = true) => ExecuteTest(Enumerable.Repeat(source, 1), Enumerable.Empty<string>(), embedStatements);
-        private static void ExecuteTest(string source, params string[] contracts) => ExecuteTest(Enumerable.Repeat(source, 1), contracts, true);
-        private static void ExecuteTest(IEnumerable<string> sources, IEnumerable<string> contracts, bool embedStatements)
+        private static void ExecuteTest(string source, bool embedStatements = true) => ExecuteTest(Enumerable.Repeat(source, 1), Enumerable.Empty<string>(), embedStatements, Enumerable.Empty<string>());
+        private static void ExecuteTest(string source, string contract, params string[] expectedAdditionalAssemblyReferences) => ExecuteTest(source, Enumerable.Repeat(contract, 1), expectedAdditionalAssemblyReferences);
+        private static void ExecuteTest(string source, IEnumerable<string> contracts, IEnumerable<string> expectedAdditionalAssemblyReferences) => ExecuteTest(Enumerable.Repeat(source, 1), contracts, true, expectedAdditionalAssemblyReferences);
+        private static void ExecuteTest(IEnumerable<string> contracts) => ExecuteTest(true, Enumerable.Empty<string>(), contracts, true, Enumerable.Empty<string>());
+        private static void ExecuteTest(IEnumerable<string> sources, IEnumerable<string> contracts, bool embedStatements, IEnumerable<string> expectedAdditionalAssemblyReferences) => ExecuteTest(false, sources, contracts, embedStatements, expectedAdditionalAssemblyReferences);
+        private static void ExecuteTest(bool generateClient, IEnumerable<string> sources, IEnumerable<string> contracts, bool embedStatements, IEnumerable<string> expectedAdditionalAssemblyReferences)
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), $"dibix-sdk-tests-{Guid.NewGuid()}");
-            string defaultOutputFilePath = Path.Combine(tempDirectory, "TestAccessor.cs");
+            string outputFilePath = Path.Combine(tempDirectory, "TestAccessor.cs");
             Directory.CreateDirectory(tempDirectory);
 
             ICollection<CompilerError> errors = new Collection<CompilerError>();
@@ -120,8 +182,8 @@ Contracts\Invalid.json(2,14) : error : [JSON] JSON does not match any schemas fr
                 projectDirectory: DatabaseProjectDirectory
               , productName: "Dibix.Sdk"
               , areaName: "Tests"
-              , defaultOutputFilePath: defaultOutputFilePath
-              , clientOutputFilePath: null
+              , defaultOutputFilePath: !generateClient ? outputFilePath : null
+              , clientOutputFilePath: generateClient ? outputFilePath : null
               , sources: sources
               , contracts: contracts
               , endpoints: null
@@ -135,8 +197,8 @@ Contracts\Invalid.json(2,14) : error : [JSON] JSON does not match any schemas fr
                 throw new CodeGenerationException(errors);
 
             Assert.True(result, "MSBuild task result was false");
-            Assert.Empty(additionalAssemblyReferences);
-            EvaluateFile(defaultOutputFilePath);
+            Assert.Equal(expectedAdditionalAssemblyReferences, additionalAssemblyReferences);
+            EvaluateFile(outputFilePath);
         }
 
         private static void ExecuteTestAndExpectError(string source, string expectedException) => ExecuteTestAndExpectError(Enumerable.Repeat(source, 1), Enumerable.Empty<string>(), expectedException);
@@ -144,7 +206,7 @@ Contracts\Invalid.json(2,14) : error : [JSON] JSON does not match any schemas fr
         {
             try
             {
-                ExecuteTest(sources, contracts, true);
+                ExecuteTest(sources, contracts, true, Enumerable.Empty<string>());
                 Assert.True(false, "CodeGenerationException was expected but not thrown");
             }
             catch (CodeGenerationException ex)
