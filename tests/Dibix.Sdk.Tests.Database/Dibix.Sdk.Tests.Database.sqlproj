@@ -125,6 +125,9 @@
     <Build Include="Tests\Syntax\dbx_tests_syntax_singlemultimapresult.sql" />
     <Build Include="Tests\Syntax\dbx_tests_syntax_fileapi.sql" />
     <Build Include="Tests\Syntax\dbx_tests_syntax_gridresult.sql" />
+    <Build Include="Tests\Syntax\dbx_tests_syntax_gridresult_customname.sql" />
+    <Build Include="Tests\Syntax\dbx_tests_syntax_empty_nocompile.sql" />
+    <Build Include="Tests\Syntax\dbx_tests_syntax_gridresult_merge.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CodeAnalysis" />

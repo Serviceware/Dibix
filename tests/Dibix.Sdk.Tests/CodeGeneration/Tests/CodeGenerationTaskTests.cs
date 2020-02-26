@@ -17,7 +17,12 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         [Fact]
         public void NoMatchingSources_EmptyStatement()
         {
-            ExecuteTest(@"Tests\Syntax\dbx_tests_syntax_empty_undeclared.sql", embedStatements: false);
+            ExecuteTest
+            (
+                embedStatements: false
+              , @"Tests\Syntax\dbx_tests_syntax_empty_undeclared.sql"
+              , @"Tests\Syntax\dbx_tests_syntax_empty_nocompile.sql"
+            );
         }
 
         [Fact]
@@ -109,6 +114,46 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(2,1) 
         }
 
         [Fact]
+        public void Inline_GridResult_WithCustomResultContractName()
+        {
+            ExecuteTest
+            (
+                source: @"Tests\Syntax\dbx_tests_syntax_gridresult_customname.sql"
+              , contracts: new [] 
+                {
+                    @"Contracts\Direction.json"
+                  , @"Contracts\GenericContract.json"
+                  , @"Contracts\Extension\MultiMapContract.json"
+                }
+              , expectedAdditionalAssemblyReferences: new[]
+                {
+                    "System.ComponentModel.DataAnnotations.dll"
+                  , "Newtonsoft.Json.dll"
+                }
+            );
+        }
+
+        [Fact]
+        public void Inline_GridResult_MergeResult()
+        {
+            ExecuteTest
+            (
+                source: @"Tests\Syntax\dbx_tests_syntax_gridresult_merge.sql"
+              , contracts: new [] 
+                {
+                    @"Contracts\Direction.json"
+                  , @"Contracts\GenericContract.json"
+                  , @"Contracts\Extension\MultiMapContract.json"
+                }
+              , expectedAdditionalAssemblyReferences: new[]
+                {
+                    "System.ComponentModel.DataAnnotations.dll"
+                  , "Newtonsoft.Json.dll"
+                }
+            );
+        }
+
+        [Fact]
         public void Inline_SingleConcreteResult_WithUnknownResultContract_Error()
         {
             ExecuteTestAndExpectError(@"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontract.sql", @"One or more errors occured during code generation:
@@ -148,7 +193,7 @@ Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly
         {
             ExecuteTestAndExpectError(Enumerable.Empty<string>(), Enumerable.Repeat(@"Contracts\Invalid.json", 1), @"One or more errors occured during code generation:
 Contracts\Invalid.json(3,12) : error : [JSON] Value ""x"" is not defined in enum. (Invalid.A)
-Contracts\Invalid.json(3,12) : error : [JSON] String 'x' does not match regex pattern '^#[A-Za-z]([\w]+)?\??(\[\]|\*?)?$'. (Invalid.A)
+Contracts\Invalid.json(3,12) : error : [JSON] String 'x' does not match regex pattern '^#([\w]+)(.([\w]+))*\??\*?$'. (Invalid.A)
 Contracts\Invalid.json(3,12) : error : [JSON] JSON does not match any schemas from 'anyOf'. (Invalid.A)
 Contracts\Invalid.json(3,12) : error : [JSON] Invalid type. Expected Object but got String. (Invalid.A)
 Contracts\Invalid.json(3,12) : error : [JSON] Invalid type. Expected Object but got String. (Invalid.A)
@@ -157,7 +202,8 @@ Contracts\Invalid.json(2,14) : error : [JSON] Invalid type. Expected Array but g
 Contracts\Invalid.json(2,14) : error : [JSON] JSON does not match any schemas from 'anyOf'. (Invalid)");
         }
 
-        private static void ExecuteTest(string source, bool embedStatements = true) => ExecuteTest(Enumerable.Repeat(source, 1), Enumerable.Empty<string>(), embedStatements, Enumerable.Empty<string>());
+        private static void ExecuteTest(string source, bool embedStatements = true) => ExecuteTest(embedStatements, source);
+        private static void ExecuteTest(bool embedStatements = true, params string[] sources) => ExecuteTest(false, sources, Enumerable.Empty<string>(), embedStatements, Enumerable.Empty<string>());
         private static void ExecuteTest(string source, string contract, params string[] expectedAdditionalAssemblyReferences) => ExecuteTest(source, Enumerable.Repeat(contract, 1), expectedAdditionalAssemblyReferences);
         private static void ExecuteTest(string source, IEnumerable<string> contracts, IEnumerable<string> expectedAdditionalAssemblyReferences) => ExecuteTest(Enumerable.Repeat(source, 1), contracts, true, expectedAdditionalAssemblyReferences);
         private static void ExecuteTest(IEnumerable<string> contracts) => ExecuteTest(true, Enumerable.Empty<string>(), contracts, true, Enumerable.Empty<string>());

@@ -56,14 +56,23 @@ namespace Dibix.Sdk.CodeGeneration
                     yield break;
                 }
 
+                string resultName = returnHint.SelectValueOrDefault(ReturnHintResultName);
                 SqlQueryResultMode[] supportedMergeGridResultModes = { SqlQueryResultMode.Single, SqlQueryResultMode.SingleOrDefault };
-                if (i == 0 && target.MergeGridResult && !supportedMergeGridResultModes.Contains(resultMode))
+                if (i == 0 && target.MergeGridResult)
                 {
-                    errorReporter.RegisterError(target.Source, node.StartLine, node.StartColumn, null, $"When using the @MergeGridResult option, the first result should specify one of the following result modes using the 'Mode' property: {String.Join(", ", supportedMergeGridResultModes)}");
-                    yield break;
+                    if (!supportedMergeGridResultModes.Contains(resultMode))
+                    {
+                        errorReporter.RegisterError(target.Source, node.StartLine, node.StartColumn, null, $"When using the @MergeGridResult option, the first result should specify one of the following result modes using the 'Mode' property: {String.Join(", ", supportedMergeGridResultModes)}");
+                        yield break;
+                    }
+
+                    if (!String.IsNullOrEmpty(resultName))
+                    {
+                        errorReporter.RegisterError(target.Source, node.StartLine, node.StartColumn, null, "When using the @MergeGridResult option, the 'Name' property must not be set on the first result");
+                        yield break;
+                    }
                 }
 
-                string resultName = returnHint.SelectValueOrDefault(ReturnHintResultName);
                 string converter = returnHint.SelectValueOrDefault(ReturnHintConverter);
                 string splitOn = returnHint.SelectValueOrDefault(ReturnHintSplitOn);
                 string resultType = returnHint.SelectValueOrDefault(ReturnHintResultType);
@@ -90,34 +99,45 @@ namespace Dibix.Sdk.CodeGeneration
                 result.Contracts.AddRange(returnTypes);
 
                 OutputSelectResult output = visitor.Results[i];
-                ValidateResult(returnHints.Count, returnHint, result, returnTypes, output.Columns, usedOutputNames, target.Source, errorReporter);
+                ValidateResult(i == 0, returnHints.Count, returnHint, result, returnTypes, output.Columns, usedOutputNames, target, errorReporter);
                 result.Columns.AddRange(output.Columns.Select(x => x.ColumnName));
 
                 yield return result;
             }
         }
 
-        private static void ValidateResult(int numberOfReturnHints, SqlHint returnHint, SqlQueryResult result, IList<ContractInfo> returnTypes, IEnumerable<OutputColumnResult> columns, ICollection<string> usedOutputNames, string sourcePath, IErrorReporter errorReporter)
+        private static void ValidateResult
+        (
+            bool isFirstResult
+          , int numberOfReturnHints
+          , SqlHint returnHint
+          , SqlQueryResult result
+          , IList<ContractInfo> returnTypes
+          , IEnumerable<OutputColumnResult> columns
+          , ICollection<string> usedOutputNames
+          , SqlStatementInfo target
+          , IErrorReporter errorReporter
+        )
         {
             // Validate return count/name
             if (!String.IsNullOrEmpty(result.Name))
             {
                 if (usedOutputNames.Contains(result.Name))
-                    errorReporter.RegisterError(sourcePath, returnHint.Line, returnHint.Column, null, $"The name '{result.Name}' is already defined for another output result");
+                    errorReporter.RegisterError(target.Source, returnHint.Line, returnHint.Column, null, $"The name '{result.Name}' is already defined for another output result");
                 else if (numberOfReturnHints == 1)
-                    errorReporter.RegisterError(sourcePath, returnHint.Line, returnHint.Column, null, "The 'Name' property is irrelevant when a single output is returned");
+                    errorReporter.RegisterError(target.Source, returnHint.Line, returnHint.Column, null, "The 'Name' property is irrelevant when a single output is returned");
                 else
                     usedOutputNames.Add(result.Name);
             }
-            else if (numberOfReturnHints > 1)
-                errorReporter.RegisterError(sourcePath, returnHint.Line, returnHint.Column, null, "The 'Name' property must be specified when multiple outputs are returned. Mark it in the @Return hint: -- @Return ClrTypes:<ClrTypeName> Name:<ResultName>");
+            else if (numberOfReturnHints > 1 && !isFirstResult)
+                errorReporter.RegisterError(target.Source, returnHint.Line, returnHint.Column, null, "The 'Name' property must be specified when multiple outputs are returned. Mark it in the @Return hint: -- @Return ClrTypes:<ClrTypeName> Name:<ResultName>");
 
             // Validate required properties for MultiMap
             if (returnTypes.Count > 1)
             {
                 if (String.IsNullOrEmpty(result.SplitOn))
                 {
-                    errorReporter.RegisterError(sourcePath, returnHint.Line, returnHint.Column, null, "The 'SplitOn' property must be specified when using multiple return types. Mark it in the @Return hint: -- @Return ClrTypes:<ClrTypeName> Name:<ResultName> SplitOn:<SplitColumnName>");
+                    errorReporter.RegisterError(target.Source, returnHint.Line, returnHint.Column, null, "The 'SplitOn' property must be specified when using multiple return types. Mark it in the @Return hint: -- @Return ClrTypes:<ClrTypeName> Name:<ResultName> SplitOn:<SplitColumnName>");
                     return;
                 }
 
@@ -131,12 +151,12 @@ namespace Dibix.Sdk.CodeGeneration
             IList<ICollection<OutputColumnResult>> columnGroups = SplitColumns(columns, result.SplitOn).ToArray();
             if (columnGroups.Count > 1 && columnGroups.Any(x => !x.Any()))
             {
-                errorReporter.RegisterError(sourcePath, returnHint.Line, returnHint.Column, null, "Part of the SplitOn property value did not match a column in the output expression");
+                errorReporter.RegisterError(target.Source, returnHint.Line, returnHint.Column, null, "Part of the SplitOn property value did not match a column in the output expression");
                 return;
             }
             if (columnGroups.Count != returnTypes.Count)
             {
-                errorReporter.RegisterError(sourcePath, returnHint.Line, returnHint.Column, null, "The SplitOn property does not match the number of return types");
+                errorReporter.RegisterError(target.Source, returnHint.Line, returnHint.Column, null, "The SplitOn property does not match the number of return types");
                 return;
             }
 
@@ -156,13 +176,13 @@ namespace Dibix.Sdk.CodeGeneration
                     // i.E.: SELECT COUNT(*) no alias
                     if (!columnResult.Result)
                     {
-                        errorReporter.RegisterError(sourcePath, columnResult.Line, columnResult.Column, null, $"Missing alias for expression '{columnResult.Expression}'");
+                        errorReporter.RegisterError(target.Source, columnResult.Line, columnResult.Column, null, $"Missing alias for expression '{columnResult.Expression}'");
                         continue;
                     }
 
                     // Validate if entity property exists
                     if (returnType.Properties.All(x => !String.Equals(x, columnResult.ColumnName, StringComparison.OrdinalIgnoreCase)))
-                        errorReporter.RegisterError(sourcePath, columnResult.Line, columnResult.Column, null, $"Property '{columnResult.ColumnName}' not found on return type '{returnType.Name}'");
+                        errorReporter.RegisterError(target.Source, columnResult.Line, columnResult.Column, null, $"Property '{columnResult.ColumnName}' not found on return type '{returnType.Name}'");
                 }
             }
         }

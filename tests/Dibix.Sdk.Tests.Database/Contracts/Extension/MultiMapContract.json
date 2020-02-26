@@ -1,6 +1,7 @@
 ﻿{
   "MultiMapContract": {
     "X": "uuid?",
-    "Y": "#GenericContract*" 
+    "Y": "#GenericContract*",
+    "Directions": "#Direction*"
   }
 }
