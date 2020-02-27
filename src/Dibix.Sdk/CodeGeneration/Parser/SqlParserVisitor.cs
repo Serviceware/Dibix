@@ -52,11 +52,12 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             this.ParseResults(content, this.Hints);
-            this.ParseBody(statements ?? new StatementList());
 
             bool isGridResult = this.Target.Results.Count > 1 && this.Target.ResultType == null && !this.Target.MergeGridResult;
             if (isGridResult)
                 this.Target.GridResultType = this.GenerateGridResultType(relativeNamespace);
+
+            this.ParseBody(statements ?? new StatementList());
         }
 
         protected internal void ParseParameter(ProcedureParameter node)
@@ -83,6 +84,15 @@ namespace Dibix.Sdk.CodeGeneration
                 parameter.ClrTypeName = hints.SingleHintValue(SqlHint.ClrType);
 
             parameter.Obfuscate = hints.IsSet(SqlHint.Obfuscate);
+            
+            // NOTE: Uncomment line dbx_tests_syntax_empty_params_inputclass line 5, whenever this is implemented
+            if (parameter.Obfuscate && this.Target.GenerateInputClass) 
+            {
+                this.ErrorReporter.RegisterError(this.Target.Source, node.StartLine, node.StartColumn, null, $@"Parameter obfuscation is currently not supported with input classes
+Either remove the @GenerateInputClass hint on the statement or the @Obfuscate hint on the parameter
+Parameter: {parameter.Name}");
+            }
+
             parameter.ClrType = node.DataType.ToClrType();
             if (parameter.ClrType == null)
             {
@@ -93,7 +103,7 @@ namespace Dibix.Sdk.CodeGeneration
                     // Type name hint is the only way to determine the UDT .NET type, that's why it's required
                     if (String.IsNullOrEmpty(parameter.ClrTypeName))
                         this.ErrorReporter.RegisterError(this.Target.Source, node.StartLine, node.StartColumn, null, $@"Could not determine CLR type for table value parameter
-Parameter name: {parameter.Name}
+Parameter: {parameter.Name}
 UDT type: {parameter.TypeName}
 Please mark it with /* @ClrType <ClrTypeName> */");
 

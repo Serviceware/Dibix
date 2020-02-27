@@ -4,7 +4,7 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public class SqlHint
     {
-        public const string Default = "";
+        public const string DefaultProperty = "";
         public const string Namespace = "Namespace";
         public const string Name = "Name";
         public const string NoCompile = "NoCompile";
@@ -24,7 +24,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             get
             {
-                if (this.Properties.TryGetValue(Default, out var value))
+                if (this.Properties.TryGetValue(DefaultProperty, out string value))
                     return value;
 
                 return null;

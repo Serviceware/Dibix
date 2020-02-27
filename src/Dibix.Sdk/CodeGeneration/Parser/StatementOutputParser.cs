@@ -77,6 +77,21 @@ namespace Dibix.Sdk.CodeGeneration
                 string splitOn = returnHint.SelectValueOrDefault(ReturnHintSplitOn);
                 string resultType = returnHint.SelectValueOrDefault(ReturnHintResultType);
 
+                SqlQueryResultMode[] supportedResultTypeResultModes = { SqlQueryResultMode.Many };
+                if (!String.IsNullOrEmpty(resultType))
+                {
+                    if (returnHints.Count <= 1)
+                    {
+                        // NOTE: Uncomment the Inline_SingleMultiMapResult_WithProjection test, whenever this is implemented
+                        errorReporter.RegisterError(target.Source, node.StartLine, node.StartColumn, null, "Projection using the 'ResultType' property is currently only supported in a part of a grid result");
+                    }
+
+                    if (!supportedResultTypeResultModes.Contains(resultMode))
+                    {
+                        errorReporter.RegisterError(target.Source, node.StartLine, node.StartColumn, null, $"Projection using the 'ResultType' property is currently only supported for the following result modes using the 'Mode' property: {String.Join(", ", supportedResultTypeResultModes)}");
+                    }
+                }
+
                 SqlQueryResult result = new SqlQueryResult
                 {
                     Name = resultName,
@@ -129,7 +144,7 @@ namespace Dibix.Sdk.CodeGeneration
                 else
                     usedOutputNames.Add(result.Name);
             }
-            else if (numberOfReturnHints > 1 && !isFirstResult)
+            else if (numberOfReturnHints > 1 && (!target.MergeGridResult || !isFirstResult))
                 errorReporter.RegisterError(target.Source, returnHint.Line, returnHint.Column, null, "The 'Name' property must be specified when multiple outputs are returned. Mark it in the @Return hint: -- @Return ClrTypes:<ClrTypeName> Name:<ResultName>");
 
             // Validate required properties for MultiMap

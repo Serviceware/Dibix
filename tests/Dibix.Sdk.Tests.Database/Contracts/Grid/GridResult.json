@@ -1,0 +1,6 @@
+﻿{
+  "GridResult": {
+    "Item": "#GenericContract",
+    "Directions": "#Direction*"
+  }
+}

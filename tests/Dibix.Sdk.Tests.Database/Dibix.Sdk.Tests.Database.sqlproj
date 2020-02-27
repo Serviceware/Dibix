@@ -128,6 +128,12 @@
     <Build Include="Tests\Syntax\dbx_tests_syntax_gridresult_customname.sql" />
     <Build Include="Tests\Syntax\dbx_tests_syntax_empty_nocompile.sql" />
     <Build Include="Tests\Syntax\dbx_tests_syntax_gridresult_merge.sql" />
+    <Build Include="Tests\Syntax\dbx_tests_syntax_empty_params.sql" />
+    <Build Include="Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_async.sql" />
+    <Build Include="Tests\Syntax\dbx_tests_syntax_gridresult_existingresultcontract.sql" />
+    <Build Include="Tests\Syntax\dbx_tests_syntax_empty_params_inputclass.sql" />
+    <Build Include="Tests\Syntax\dbx_tests_syntax_singlemultimapresult_projection.sql" />
+    <Build Include="Tests\Syntax\dbx_tests_syntax_gridresult_projection.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CodeAnalysis" />
@@ -143,11 +149,14 @@
     <Folder Include="Tests\Syntax" />
     <Folder Include="Contracts" />
     <Folder Include="Contracts\Extension" />
+    <Folder Include="Contracts\Grid" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Contracts\Invalid.json" />
     <None Include="Contracts\Extension\MultiMapContract.json" />
     <None Include="Contracts\AccessRights.json" />
     <None Include="Contracts\Direction.json" />
+    <None Include="Contracts\Grid\GridResult.json" />
+    <None Include="Contracts\JointContract.json" />
   </ItemGroup>
 </Project>

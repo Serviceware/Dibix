@@ -76,7 +76,7 @@ namespace Dibix.Sdk.CodeGeneration
                 SqlHint hint = new SqlHint(keyGroup.Value, token.Line, column);
                 if (singleValueGroup.Success)
                 {
-                    hint.Properties.Add(SqlHint.Default, singleValueGroup.Value);
+                    hint.Properties.Add(SqlHint.DefaultProperty, singleValueGroup.Value);
                 }
                 else if (multiValueGroup.Success)
                 {
@@ -84,10 +84,10 @@ namespace Dibix.Sdk.CodeGeneration
                     {
                         string[] parts = property.Split(':');
                         bool hasPropertyName = parts.Length > 1;
-                        string key = hasPropertyName ? parts[0] : SqlHint.Default;
+                        string key = hasPropertyName ? parts[0] : SqlHint.DefaultProperty;
                         if (hint.Properties.ContainsKey(key))
                         {
-                            string errorMessage = key != SqlHint.Default ? $"Duplicate property for @{hint.Kind}.{key}" : $"Multiple default properties specified for @{hint.Kind}";
+                            string errorMessage = key != SqlHint.DefaultProperty ? $"Duplicate property for @{hint.Kind}.{key}" : $"Multiple default properties specified for @{hint.Kind}";
                             this._errorReporter.RegisterError(this._source, token.Line, multiValueGroup.Index + 1, null, errorMessage);
                             yield break;
                         }

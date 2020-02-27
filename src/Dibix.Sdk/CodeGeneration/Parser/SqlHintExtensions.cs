@@ -25,7 +25,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (hint.Properties.TryGetValue(key, out result))
                 return true;
 
-            if (hint.Properties.TryGetValue(SqlHint.Default, out result))
+            if (hint.Properties.TryGetValue(SqlHint.DefaultProperty, out result))
                 return true;
 
             errorHandler($"Missing property '{key}'");

@@ -32,16 +32,42 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         }
 
         [Fact]
+        public void External_Empty_WithParams()
+        {
+            ExecuteTest
+            (
+                embedStatements: false
+              , @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
+              , @"Types\dbx_codeanalysis_udt_generic.sql");
+        }
+
+        [Fact]
+        public void External_Empty_WithParamsAndInputClass()
+        {
+            ExecuteTest
+            (
+                embedStatements: false
+              , @"Tests\Syntax\dbx_tests_syntax_empty_params_inputclass.sql"
+              , @"Types\dbx_codeanalysis_udt_generic.sql");
+        }
+
+        [Fact]
         public void Inline_SinglePrimitiveResult()
         {
             ExecuteTest(@"Tests\Syntax\dbx_tests_syntax_singleprimitiveresult.sql");
         }
 
         [Fact]
+        public void Inline_SinglePrimitiveResult_Async()
+        {
+            ExecuteTest(@"Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_async.sql");
+        }
+
+        [Fact]
         public void Inline_SinglePrimitiveResult_WithoutDeclaration_Error()
         {
             ExecuteTestAndExpectError(@"Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql", @"One or more errors occured during code generation:
-Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(2,1) : error : There are missing return declarations for the output statements. Please mark the header of the statement with a line per output containting this hint: -- @Return <ClrTypeName>");
+Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(3,1) : error : There are missing return declarations for the output statements. Please mark the header of the statement with a line per output containting this hint: -- @Return <ClrTypeName>");
         }
 
         [Fact]
@@ -93,6 +119,26 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(2,1) 
             );
         }
 
+        //[Fact]
+        public void Inline_SingleMultiMapResult_WithProjection()
+        {
+            ExecuteTest
+            (
+                source: @"Tests\Syntax\dbx_tests_syntax_singlemultimapresult_projection.sql"
+              , contracts: new [] 
+                {
+                    @"Contracts\Direction.json"
+                  , @"Contracts\GenericContract.json"
+                  , @"Contracts\JointContract.json"
+                }
+              , expectedAdditionalAssemblyReferences: new[]
+                {
+                    "System.ComponentModel.DataAnnotations.dll"
+                  , "Newtonsoft.Json.dll"
+                }
+            );
+        }
+
         [Fact]
         public void Inline_GridResult()
         {
@@ -134,6 +180,27 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(2,1) 
         }
 
         [Fact]
+        public void Inline_GridResult_WithExistingResultContract()
+        {
+            ExecuteTest
+            (
+                source: @"Tests\Syntax\dbx_tests_syntax_gridresult_existingresultcontract.sql"
+              , contracts: new [] 
+                {
+                    @"Contracts\Direction.json"
+                  , @"Contracts\GenericContract.json"
+                  , @"Contracts\Extension\MultiMapContract.json"
+                  , @"Contracts\Grid\GridResult.json"
+                }
+              , expectedAdditionalAssemblyReferences: new[]
+                {
+                    "System.ComponentModel.DataAnnotations.dll"
+                  , "Newtonsoft.Json.dll"
+                }
+            );
+        }
+
+        [Fact]
         public void Inline_GridResult_MergeResult()
         {
             ExecuteTest
@@ -144,6 +211,27 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(2,1) 
                     @"Contracts\Direction.json"
                   , @"Contracts\GenericContract.json"
                   , @"Contracts\Extension\MultiMapContract.json"
+                }
+              , expectedAdditionalAssemblyReferences: new[]
+                {
+                    "System.ComponentModel.DataAnnotations.dll"
+                  , "Newtonsoft.Json.dll"
+                }
+            );
+        }
+
+        [Fact]
+        public void Inline_GridResult_WithProjection()
+        {
+            ExecuteTest
+            (
+                source: @"Tests\Syntax\dbx_tests_syntax_gridresult_projection.sql"
+              , contracts: new [] 
+                {
+                    @"Contracts\AccessRights.json"
+                  , @"Contracts\Direction.json"
+                  , @"Contracts\GenericContract.json"
+                  , @"Contracts\JointContract.json"
                 }
               , expectedAdditionalAssemblyReferences: new[]
                 {

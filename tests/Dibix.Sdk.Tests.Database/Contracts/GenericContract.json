@@ -8,6 +8,10 @@
     "Name": {
       "type": "string",
       "serialize": "IfNotEmpty" 
+    },
+    "ParentId": {
+      "type": "int32?",
+      "isDiscriminator": true  
     } 
   }
 }
