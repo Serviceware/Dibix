@@ -484,7 +484,7 @@ namespace Dibix.Sdk.Tests
         public static class TestAccessor
         {
             // dbx_tests_syntax_fileapi
-            private const string dbx_tests_syntax_fileapiCommandText = "";
+            private const string dbx_tests_syntax_fileapiCommandText = "SELECT 1";
 
             public static HttpFileResponse dbx_tests_syntax_fileapi(this IDatabaseAccessorFactory databaseAccessorFactory)
             {
