@@ -104,7 +104,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             }
         }
 
-        private bool IsScalarFunctionCall(FunctionCall call) => base.TryGetModelElement(call, out ElementLocation location) && base.Model.IsScalarFunction(location);
+        private bool IsScalarFunctionCall(FunctionCall call) => base.Model.IsScalarFunction(call);
 
         private sealed class ScalarFunctionCallVisitor : TSqlFragmentVisitor
         {

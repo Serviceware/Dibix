@@ -1,20 +1,15 @@
 ﻿using System;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Resources;
-using Dibix.Sdk.Tests.Utilities;
 using Xunit;
 
 namespace Dibix.Sdk.Tests.CodeGeneration
 {
-    public abstract class CodeGenerationTestBase
+    public abstract class CodeGenerationTestBase : DatabaseTestBase
     {
-        protected static Assembly Assembly { get; } = typeof(TextTemplateCodeGeneratorTests).Assembly;
         protected static string ProjectName { get; } = Assembly.GetName().Name;
-        protected static string ProjectDirectory { get; } = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "..", "..", ".."));
-        protected static string DatabaseProjectDirectory { get; } = Path.GetFullPath(Path.Combine(ProjectDirectory, "..", "Dibix.Sdk.Tests.Database"));
         protected static string TestName => DetermineTestName();
 
         protected static void Evaluate(string generated) => Evaluate(TestName, generated);
@@ -22,13 +17,13 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         {
             string expectedText = GetExpectedText(expectedTextKey);
             string actualText = generated;
-            TestUtilities.AssertEqualWithDiffTool(expectedText, actualText, "cs");
+            TestUtility.AssertEqualWithDiffTool(expectedText, actualText, "cs");
         }
 
         protected static void EvaluateFile(string generatedFilePath)
         {
             string expectedText = GetExpectedText(TestName);
-            TestUtilities.AssertFileEqualWithDiffTool(expectedText, generatedFilePath);
+            TestUtility.AssertFileEqualWithDiffTool(expectedText, generatedFilePath);
         }
 
         private static string GetExpectedText(string key)

@@ -21,11 +21,11 @@ namespace Dibix.Sdk.MSBuild
 
             foreach (ITaskItem inputFile in source ?? Enumerable.Empty<ITaskItem>())
             {
-                string inputFilePath = GetFullPath(inputFile);
+                string inputFilePath = inputFile.GetFullPath();
                 AnalyzeItem(inputFilePath, codeAnalysisEngine, errorReporter);
             }
 
-            AnalyzeScripts(null, (scriptSource ?? Enumerable.Empty<ITaskItem>()).Select(GetFullPath), codeAnalysisEngine, errorReporter);
+            AnalyzeScripts(null, (scriptSource ?? Enumerable.Empty<ITaskItem>()).Select(x => x.GetFullPath()), codeAnalysisEngine, errorReporter);
 
             return !errorReporter.HasErrors;
         }
@@ -60,7 +60,5 @@ namespace Dibix.Sdk.MSBuild
 {inputFilePath}", e);
             }
         }
-
-        private static string GetFullPath(ITaskItem scriptFile) => scriptFile.GetMetadata("FullPath");
     }
 }

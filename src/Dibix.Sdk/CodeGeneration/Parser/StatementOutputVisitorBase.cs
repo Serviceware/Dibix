@@ -14,14 +14,16 @@ namespace Dibix.Sdk.CodeGeneration
 
         #region Properties
         public string Statement { get; private set; }
+        protected TSqlElementLocator ElementLocator { get; }
         protected IList<OutputSelectResult> Outputs { get; }
         protected IErrorReporter ErrorReporter { get; }
         #endregion
 
         #region Constructor
-        protected StatementOutputVisitorBase(string sourcePath, IErrorReporter errorReporter)
+        protected StatementOutputVisitorBase(string sourcePath, TSqlElementLocator elementLocator, IErrorReporter errorReporter)
         {
             this._sourcePath = sourcePath;
+            this.ElementLocator = elementLocator;
             this.ErrorReporter = errorReporter;
             this.Outputs = new Collection<OutputSelectResult>();
         }
@@ -81,8 +83,7 @@ namespace Dibix.Sdk.CodeGeneration
                 return null;
             }
 
-            SelectScalarExpression scalar = selectElement as SelectScalarExpression;
-            if (scalar == null)
+            if (!(selectElement is SelectScalarExpression scalar))
                 return null;
 
             if (scalar.ColumnName == null)
@@ -90,13 +91,13 @@ namespace Dibix.Sdk.CodeGeneration
                 if (scalar.Expression is ColumnReferenceExpression columnReference)
                 {
                     Identifier identifier = columnReference.GetName();
-                    return OutputColumnResult.Success(identifier.Value, identifier.StartLine, identifier.StartColumn);
+                    return new OutputColumnResult(identifier.Value, selectElement, scalar.Expression, this.ElementLocator);
                 }
 
-                return OutputColumnResult.Fail(scalar.Dump(), scalar.StartLine, scalar.StartColumn);
+                return new OutputColumnResult(null, scalar, null, this.ElementLocator);
             }
 
-            return OutputColumnResult.Success(scalar.ColumnName.Value, scalar.ColumnName.Identifier.StartLine, scalar.ColumnName.Identifier.StartColumn);
+            return new OutputColumnResult(scalar.ColumnName.Value, selectElement, scalar.ColumnName, this.ElementLocator);
         }
         #endregion
     }

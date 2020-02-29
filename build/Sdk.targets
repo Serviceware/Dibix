@@ -86,6 +86,7 @@
       <CompileArtifactsInput Include="@(Build)" />
       <CompileArtifactsInput Include="@(Contract)" />
       <CompileArtifactsInput Include="@(Endpoint)" />
+      <CompileArtifactsInput Include="@(SqlReferencePath)" />
       <CompileArtifactsOutput Include="$(TargetPath)" />
       <CompileArtifactsOutput Include="$(ClientTargetPath)" />
     </ItemGroup>
@@ -126,7 +127,7 @@
   </Target>
   <Target Name="CompileArtifacts" 
           AfterTargets="PostBuildEvent" 
-          DependsOnTargets="SetupSqlBuildInputs"
+          DependsOnTargets="ResolveArtifactReferences;SetupSqlBuildInputs"
           Inputs="@(CompileArtifactsInput)"
           Outputs="@(CompileArtifactsOutput)"
           Condition="$(CompileArtifacts) == 'true'">
@@ -149,12 +150,15 @@
                         AreaName="$(AreaName)"
                         DefaultOutputFilePath="$(ServerIntermediateFilePath)"
                         ClientOutputFilePath="$(ClientIntermediateFilePath)"
-                        Sources="@(Build)"
+                        Source="@(Build)"
                         Contracts="@(Contract)"
                         Endpoints="@(Endpoint)"
                         References="@(ServerCompilationReference)"
                         IsIDEBuild="$(BuildingInsideVisualStudio)"
-                        EmbedStatements="$(EmbedStatements)">
+                        DatabaseSchemaProviderName="$(DSP)"
+                        ModelCollation="$(ModelCollation)"
+                        EmbedStatements="$(EmbedStatements)"
+                        SqlReferencePath="@(SqlReferencePath)">
       <Output TaskParameter="AdditionalAssemblyReferences" ItemName="ServerCompilationReference" />
     </CodeGenerationTask>
 

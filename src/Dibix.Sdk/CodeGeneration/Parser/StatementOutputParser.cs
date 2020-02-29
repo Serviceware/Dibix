@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dibix.Sdk.Sql;
+using Microsoft.SqlServer.Dac.Model;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -14,9 +16,9 @@ namespace Dibix.Sdk.CodeGeneration
         private const string ReturnHintConverter = "Converter";
         private const string ReturnHintResultType = "ResultType";
 
-        public static IEnumerable<SqlQueryResult> Parse(SqlStatementInfo target, TSqlFragment node, ICollection<SqlHint> hints, IContractResolverFacade contractResolver, IErrorReporter errorReporter)
+        public static IEnumerable<SqlQueryResult> Parse(SqlStatementInfo target, TSqlFragment node, TSqlElementLocator elementLocator, ICollection<SqlHint> hints, IContractResolverFacade contractResolver, IErrorReporter errorReporter)
         {
-            StatementOutputVisitor visitor = new StatementOutputVisitor(target.Source, errorReporter);
+            StatementOutputVisitor visitor = new StatementOutputVisitor(target.Source, elementLocator, errorReporter);
             node.Accept(visitor);
 
             IList<SqlHint> returnHints = hints.Where(x => x.Kind == SqlHint.Return).ToArray();
@@ -32,20 +34,49 @@ namespace Dibix.Sdk.CodeGeneration
                 yield return result;
         }
 
-        private static void ValidateFileApi(SqlStatementInfo target, TSqlFragment node, IEnumerable<SqlHint> returnHints, ICollection<OutputSelectResult> results, IErrorReporter errorReporter)
+        private static void ValidateFileApi(SqlStatementInfo target, TSqlFragment node, IEnumerable<SqlHint> returnHints, IList<OutputSelectResult> results, IErrorReporter errorReporter)
         {
             if (!target.IsFileApi) 
                 return;
             
-            if (returnHints.Any() || results.Count != 1)
+            if (returnHints.Any())
             {
-                errorReporter.RegisterError(target.Source, node.StartLine, node.StartColumn, null, "When using the @FileApi option, the query should return only one output statement and no return declarations should be defined");
+                errorReporter.RegisterError(target.Source, node.StartLine, node.StartColumn, null, "When using the @FileApi option, no return declarations should be defined");
+            }
+            
+            if (!IsValidFileApiResult(results))
+            {
+                errorReporter.RegisterError(target.Source, node.StartLine, node.StartColumn, null, "When using the @FileApi option, the query should return only one output statement with the following schema: ([type] NVARCHAR, [data] VARBINARY)");
             }
 
             if (target.MergeGridResult)
             {
                 errorReporter.RegisterError(target.Source, node.StartLine, node.StartColumn, null, "When using the @FileApi option, the @MergeGridResult option is invalid");
             }
+        }
+
+        private static bool IsValidFileApiResult(IList<OutputSelectResult> results)
+        {
+            if (results.Count != 1) 
+                return false;
+
+            if (results[0].Columns.Count != 2) 
+                return false;
+
+            IList<OutputColumnResult> columns = results[0].Columns.OrderByDescending(x => x.ColumnName).ToArray();
+            return ValidateColumn(columns[0], "type", SqlDataType.Char, SqlDataType.NChar, SqlDataType.VarChar, SqlDataType.NVarChar)
+                && ValidateColumn(columns[1], "data", SqlDataType.Binary, SqlDataType.VarBinary);
+        }
+
+        private static bool ValidateColumn(OutputColumnResult column, string expectedColumnName, params SqlDataType[] expectedColumnTypes)
+        {
+            if (column.ColumnName.ToLowerInvariant() != expectedColumnName)
+                return false;
+
+            if (!expectedColumnTypes.Contains(column.DataTypeAccessor.Value))
+                return false;
+
+            return true;
         }
 
         private static void ValidateMergeGridResult(SqlStatementInfo target, TSqlFragment node, IList<SqlHint> returnHints, IErrorReporter errorReporter)
@@ -217,15 +248,15 @@ namespace Dibix.Sdk.CodeGeneration
                 {
                     // Validate alias
                     // i.E.: SELECT COUNT(*) no alias
-                    if (!columnResult.Result)
+                    if (!columnResult.HasName)
                     {
-                        errorReporter.RegisterError(target.Source, columnResult.Line, columnResult.Column, null, $"Missing alias for expression '{columnResult.Expression}'");
+                        errorReporter.RegisterError(target.Source, columnResult.PrimarySource.StartLine, columnResult.PrimarySource.StartColumn, null, $"Missing alias for expression '{columnResult.PrimarySource.Dump()}'");
                         continue;
                     }
 
                     // Validate if entity property exists
                     if (returnType.Properties.All(x => !String.Equals(x, columnResult.ColumnName, StringComparison.OrdinalIgnoreCase)))
-                        errorReporter.RegisterError(target.Source, columnResult.Line, columnResult.Column, null, $"Property '{columnResult.ColumnName}' not found on return type '{returnType.Name}'");
+                        errorReporter.RegisterError(target.Source, columnResult.ColumnNameSource.StartLine, columnResult.ColumnNameSource.StartColumn, null, $"Property '{columnResult.ColumnName}' not found on return type '{returnType.Name}'");
                 }
             }
         }

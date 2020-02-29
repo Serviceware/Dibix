@@ -34,7 +34,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             if (node.Column == null)
                 return;
 
-            if (!base.TryGetModelElement(node.Column, out ElementLocation elementLocation))
+            if (!base.Model.TryGetModelElement(node.Column, out ElementLocation elementLocation))
                 return;
 
             bool isPartOfPrimaryKey = base.Model.IsPartOfPrimaryKey(elementLocation, this.IsPartOfTableVariablePrimaryKey);

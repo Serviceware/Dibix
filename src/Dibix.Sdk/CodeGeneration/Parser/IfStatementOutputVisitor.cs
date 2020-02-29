@@ -36,8 +36,8 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public IfStatementOutputVisitor(string sourcePath, IErrorReporter errorReporter) : this(sourcePath, new IfOutputResolutionContext(), errorReporter) { }
-        public IfStatementOutputVisitor(string sourcePath, IfOutputResolutionContext context, IErrorReporter errorReporter) : base(sourcePath, errorReporter)
+        public IfStatementOutputVisitor(string sourcePath, TSqlElementLocator elementLocator, IErrorReporter errorReporter) : this(sourcePath, elementLocator, errorReporter, new IfOutputResolutionContext()) { }
+        public IfStatementOutputVisitor(string sourcePath, TSqlElementLocator elementLocator, IErrorReporter errorReporter, IfOutputResolutionContext context) : base(sourcePath, elementLocator, errorReporter)
         {
             this._sourcePath = sourcePath;
             this._context = context;
@@ -53,14 +53,14 @@ namespace Dibix.Sdk.CodeGeneration
 
         public override void ExplicitVisit(IfStatement node)
         {
-            IfStatementOutputVisitor left = new IfStatementOutputVisitor(this._sourcePath, this._context, base.ErrorReporter);
+            IfStatementOutputVisitor left = new IfStatementOutputVisitor(this._sourcePath, base.ElementLocator, base.ErrorReporter, this._context);
             left.Accept(node.ThenStatement);
 
             // This might be an IF block without ELSE
             // This is only allowed, if the IF block is not producing any outputs (i.E. RAISERROR)
             if (node.ElseStatement != null)
             {
-                IfStatementOutputVisitor right = new IfStatementOutputVisitor(this._sourcePath, this._context, base.ErrorReporter);
+                IfStatementOutputVisitor right = new IfStatementOutputVisitor(this._sourcePath, base.ElementLocator, base.ErrorReporter, this._context);
                 right.Accept(node.ElseStatement);
 
                 // Compare output statements between IF..THEN and ELSE
@@ -90,7 +90,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                         if (leftColumn.ColumnName != rightColumn.ColumnName)
                         {
-                            base.ErrorReporter.RegisterError(this._sourcePath, leftColumn.Line, leftColumn.Column, null, $@"The column names in output statement in IF THEN block do not match those in ELSE block
+                            base.ErrorReporter.RegisterError(this._sourcePath, leftColumn.ColumnNameSource.StartLine, leftColumn.ColumnNameSource.StartColumn, null, $@"The column names in output statement in IF THEN block do not match those in ELSE block
 Column in THEN: {leftColumn.ColumnName}
 Column in ELSE: {rightColumn.ColumnName}");
                             break;

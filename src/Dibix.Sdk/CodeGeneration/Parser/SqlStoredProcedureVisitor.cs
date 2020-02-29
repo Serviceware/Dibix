@@ -112,7 +112,7 @@ ReferenceType: {node.DataType.GetType()}");
             return ContractCheck.NotNull;
         }
 
-        private void ParseContent(TSqlStatement content, StatementList statements)
+        private void ParseContent(TSqlFragment content, StatementList statements)
         {
             string relativeNamespace = this.Hints.SingleHintValue(SqlHint.Namespace);
 
@@ -182,9 +182,9 @@ ReferenceType: {node.DataType.GetType()}");
             return new GridResultType(Namespace.Create(this.ProductName, this.AreaName, LayerName.DomainModel, gridResultTypeNamespace), gridResultTypeName);
         }
 
-        private void ParseResults(TSqlStatement node, ICollection<SqlHint> hints)
+        private void ParseResults(TSqlFragment node, ICollection<SqlHint> hints)
         {
-            IEnumerable<SqlQueryResult> results = StatementOutputParser.Parse(this.Target, node, hints, this.ContractResolver, this.ErrorReporter);
+            IEnumerable<SqlQueryResult> results = StatementOutputParser.Parse(this.Target, node, this.ElementLocator, hints, this.ContractResolver, this.ErrorReporter);
             this.Target.Results.AddRange(results);
         }
 

@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.SqlServer.Dac.Model;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -13,6 +15,7 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly IContractResolverFacade _contractResolver;
         private readonly IErrorReporter _errorReporter;
         private readonly IEnumerable<string> _files;
+        private readonly Lazy<TSqlModel> _modelAccessor;
 
         public PhysicalFileSqlStatementCollector
         (
@@ -22,7 +25,9 @@ namespace Dibix.Sdk.CodeGeneration
           , ISqlStatementFormatter formatter
           , IContractResolverFacade contractResolver
           , IErrorReporter errorReporter
-          , IEnumerable<string> files)
+          , IEnumerable<string> files
+          , Lazy<TSqlModel> modelAccessor
+        )
         {
             this._productName = productName;
             this._areaName = areaName;
@@ -30,6 +35,7 @@ namespace Dibix.Sdk.CodeGeneration
             this._formatter = formatter;
             this._contractResolver = contractResolver;
             this._files = files;
+            this._modelAccessor = modelAccessor;
             this._errorReporter = errorReporter;
         }
 
@@ -46,7 +52,7 @@ namespace Dibix.Sdk.CodeGeneration
                 Name = Path.GetFileNameWithoutExtension(file)
             };
 
-            bool result = this._parser.Read(SqlParserSourceKind.Stream, File.OpenRead(file), statement, this._productName, this._areaName, this._formatter, this._contractResolver, this._errorReporter);
+            bool result = this._parser.Read(SqlParserSourceKind.Stream, File.OpenRead(file), this._modelAccessor, statement, this._productName, this._areaName, this._formatter, this._contractResolver, this._errorReporter);
 
             return result ? statement : null;
         }

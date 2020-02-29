@@ -10,8 +10,13 @@ namespace Dibix.Sdk.Sql
     {
         internal const string DefaultSchemaName = "dbo";
         private readonly TSqlModel _model;
+        private readonly TSqlElementLocator _elementLocator;
 
-        internal SqlModel(TSqlModel model) => this._model = model;
+        internal SqlModel(TSqlModel model, TSqlFragment scriptFragment)
+        {
+            this._model = model;
+            this._elementLocator = new TSqlElementLocator(new Lazy<TSqlModel>(() => model), scriptFragment);
+        }
 
         public IEnumerable<Constraint> GetConstraints(SchemaObjectName tableName, bool throwOnError = true) => this.GetConstraints(TableModel.Table, tableName, throwOnError);
         public IEnumerable<Constraint> GetConstraints(TableModel tableDefinition, SchemaObjectName tableName, bool throwOnError = true) => tableDefinition.GetConstraints(this._model, tableName, throwOnError);
@@ -35,12 +40,8 @@ namespace Dibix.Sdk.Sql
             return primaryKey?.GetReferenced(PrimaryKeyConstraint.Columns).Contains(columnElement) ?? default;
         }
 
-        public bool IsScalarFunction(ElementLocation element)
-        {
-            TSqlObject modelElement = element.GetModelElement(this._model);
-            return modelElement.ObjectType == ScalarFunction.TypeClass;
-        }
+        public bool IsScalarFunction(FunctionCall functionCall) => this._elementLocator.TryGetModelElement(functionCall, out TSqlObject element) && element.ObjectType == ScalarFunction.TypeClass;
 
-        public SchemaAnalyzerResult AnalyzeSchema(TSqlFragment sqlFragment) => SchemaAnalyzer.Analyze(this._model, sqlFragment);
+        public bool TryGetModelElement(TSqlFragment fragment, out ElementLocation element) => this._elementLocator.TryGetElementLocation(fragment, out element);
     }
 }

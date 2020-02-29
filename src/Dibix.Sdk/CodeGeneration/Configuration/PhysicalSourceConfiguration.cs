@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.SqlServer.Dac.Model;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -46,6 +48,7 @@ namespace Dibix.Sdk.CodeGeneration
               , contractResolver: contractResolver
               , errorReporter: errorReporter
               , files: files
+              , modelAccessor: new Lazy<TSqlModel>(() => throw new NotSupportedException())
             );
             return statementCollector.CollectStatements();
         }

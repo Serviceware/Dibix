@@ -2,6 +2,7 @@
 using System.Linq;
 using Dibix.Sdk.CodeGeneration;
 using Dibix.Sdk.CodeGeneration.MSBuild;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
 namespace Dibix.Sdk.MSBuild
@@ -15,44 +16,15 @@ namespace Dibix.Sdk.MSBuild
           , string areaName
           , string defaultOutputFilePath
           , string clientOutputFilePath
-          , IEnumerable<string> sources
+          , ITaskItem[] source
           , IEnumerable<string> contracts
           , IEnumerable<string> endpoints
           , IEnumerable<string> references
           , bool embedStatements
-          , TaskLoggingHelper logger
-          , out string[] additionalAssemblyReferences
-        )
-        {
-            return ExecuteCore
-            (
-                projectDirectory
-              , productName
-              , areaName
-              , defaultOutputFilePath
-              , clientOutputFilePath
-              , sources
-              , contracts
-              , endpoints
-              , references
-              , embedStatements
-              , logger
-              , out additionalAssemblyReferences
-            );
-        }
-
-        private static bool ExecuteCore
-        (
-            string projectDirectory
-          , string productName
-          , string areaName
-          , string defaultOutputFilePath
-          , string clientOutputFilePath
-          , IEnumerable<string> sources
-          , IEnumerable<string> contracts
-          , IEnumerable<string> endpoints
-          , IEnumerable<string> references
-          , bool embedStatements
+          , string databaseSchemaProviderName
+          , string modelCollation
+          , ITaskItem[] sqlReferencePath
+          , ITask task
           , TaskLoggingHelper logger
           , out string[] additionalAssemblyReferences
         )
@@ -65,11 +37,15 @@ namespace Dibix.Sdk.MSBuild
               , areaName
               , defaultOutputFilePath
               , clientOutputFilePath
-              , sources
+              , source
               , contracts
               , endpoints
               , references
               , embedStatements
+              , databaseSchemaProviderName
+              , modelCollation
+              , sqlReferencePath
+              , task
               , errorReporter
             );
 

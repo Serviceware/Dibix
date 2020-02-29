@@ -17,11 +17,14 @@ namespace Dibix.MSBuild
         [Required]
         public string DefaultOutputFilePath { get; set; }
         public string ClientOutputFilePath { get; set; }
-        public string[] Sources { get; set; }
+        public ITaskItem[] Source { get; set; }
         public string[] Contracts { get; set; }
         public string[] Endpoints { get; set; }
         public string[] References { get; set; }
         public bool EmbedStatements { get; set; }
+        public string DatabaseSchemaProviderName { get; set; }
+        public string ModelCollation { get; set; }
+        public ITaskItem[] SqlReferencePath { get; set; }
 
         [Output]
         public string[] AdditionalAssemblyReferences { get; set; }
@@ -33,11 +36,15 @@ namespace Dibix.MSBuild
             yield return this.AreaName;
             yield return this.DefaultOutputFilePath;
             yield return this.ClientOutputFilePath;
-            yield return this.Sources;
+            yield return this.Source;
             yield return this.Contracts;
             yield return this.Endpoints;
             yield return this.References;
             yield return this.EmbedStatements;
+            yield return this.DatabaseSchemaProviderName;
+            yield return this.ModelCollation;
+            yield return this.SqlReferencePath;
+            yield return this;
             yield return base.Log;
             yield return null;
         }

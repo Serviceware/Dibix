@@ -9,7 +9,6 @@ using System.Linq;
 using System.Reflection;
 using System.Resources;
 using Dibix.Sdk.CodeGeneration;
-using Dibix.Sdk.Tests.Utilities;
 using Dibix.Sdk.VisualStudio;
 using EnvDTE;
 using Microsoft.VisualStudio.TextTemplating;

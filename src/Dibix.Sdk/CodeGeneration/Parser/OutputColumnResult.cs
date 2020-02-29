@@ -1,30 +1,25 @@
-﻿namespace Dibix.Sdk.CodeGeneration
+﻿using System;
+using Dibix.Sdk.Sql;
+using Microsoft.SqlServer.Dac.Model;
+using Microsoft.SqlServer.TransactSql.ScriptDom;
+
+namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class OutputColumnResult
     {
-        public bool Result { get; }
+        public bool HasName { get; }
         public string ColumnName { get; }
-        public string Expression { get; }
-        public int Line { get; set; }
-        public int Column { get; set; }
+        public TSqlFragment PrimarySource { get; }
+        public TSqlFragment ColumnNameSource { get; }
+        public Lazy<SqlDataType> DataTypeAccessor { get; }
 
-        private OutputColumnResult(bool result, string columnName, string expression, int line, int column)
+        public OutputColumnResult(string columnName, TSqlFragment primarySource, TSqlFragment columnNameSource, TSqlElementLocator elementLocator)
         {
-            this.Result = result;
+            this.HasName = !String.IsNullOrEmpty(columnName);
             this.ColumnName = columnName;
-            this.Expression = expression;
-            this.Line = line;
-            this.Column = column;
-        }
-
-        public static OutputColumnResult Success(string columnName, int line, int column)
-        {
-            return new OutputColumnResult(true, columnName, null, line, column);
-        }
-
-        public static OutputColumnResult Fail(string expression, int line, int column)
-        {
-            return new OutputColumnResult(false, null, expression, line, column);
+            this.ColumnNameSource = columnNameSource;
+            this.PrimarySource = primarySource;
+            this.DataTypeAccessor = new Lazy<SqlDataType>(() => primarySource.GetDataType(elementLocator));
         }
     }
 }

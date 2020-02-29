@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.SqlServer.Dac.Model;
@@ -55,7 +56,7 @@ namespace Dibix.Sdk.CodeGeneration
                 Source = this._packagePath
             };
 
-            bool result = this._parser.Read(SqlParserSourceKind.String, script, statement, this._productName, this._areaName, this._formatter, this._contractResolver, this._errorReporter);
+            bool result = this._parser.Read(SqlParserSourceKind.String, script, new Lazy<TSqlModel>(() => model), statement, this._productName, this._areaName, this._formatter, this._contractResolver, this._errorReporter);
             return result ? statement : null;
         }
     }
