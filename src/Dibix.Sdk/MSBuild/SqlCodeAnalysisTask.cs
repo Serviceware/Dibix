@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Dibix.Sdk.CodeAnalysis;
 using Dibix.Sdk.CodeGeneration;
 using Dibix.Sdk.Sql;
@@ -25,20 +27,46 @@ namespace Dibix.Sdk.MSBuild
                 AnalyzeItem(inputFilePath, codeAnalysisEngine, errorReporter);
             }
 
-            AnalyzeScripts(null, (scriptSource ?? Enumerable.Empty<ITaskItem>()).Select(x => x.GetFullPath()), codeAnalysisEngine, errorReporter);
+            AnalyzeScripts(null, (scriptSource ?? Enumerable.Empty<ITaskItem>()).Select(x => x.GetFullPath()), namingConventionPrefix, codeAnalysisEngine, errorReporter);
 
             return !errorReporter.HasErrors;
         }
 
-        private static void AnalyzeScripts(string parentFile, IEnumerable<string> scriptFiles, ISqlCodeAnalysisRuleEngine codeAnalysisEngine, IErrorReporter errorReporter)
+        private static void AnalyzeScripts(string parentFile, IEnumerable<string> scriptFiles, string namingConventionPrefix, ISqlCodeAnalysisRuleEngine codeAnalysisEngine, IErrorReporter errorReporter)
         {
             foreach (string scriptFile in scriptFiles)
             {
                 string scriptFilePath = Path.IsPathRooted(scriptFile) ? scriptFile : Path.GetFullPath(Path.Combine(Path.GetDirectoryName(parentFile), scriptFile));
-                string scriptContent = SqlCmdParser.ProcessSqlCmdScript(File.ReadAllText(scriptFilePath), out ICollection<string> includes);
+                string scriptContent = GetNormalizedScriptArtifact(scriptFilePath, namingConventionPrefix, out ICollection<string> includes);
                 AnalyzeItem(scriptFilePath, scriptContent, codeAnalysisEngine, errorReporter);
-                AnalyzeScripts(scriptFilePath, includes, codeAnalysisEngine, errorReporter);
+                AnalyzeScripts(scriptFilePath, includes, namingConventionPrefix, codeAnalysisEngine, errorReporter);
             }
+        }
+
+        private static string GetNormalizedScriptArtifact(string scriptFilePath, string namingConventionPrefix, out ICollection<string> includes)
+        {
+            string scriptContent = File.ReadAllText(scriptFilePath);
+            IList<string> _includes = new Collection<string>();
+
+            // GO is not T-SQL syntax
+            string normalizedScript = scriptContent.Replace("GO", ";");
+
+            // Parse SQLCMD syntax
+            normalizedScript = Regex.Replace(normalizedScript, @"^:r (?<include>[^\r|\n]+)", x =>
+            {
+                _includes.Add(x.Groups["include"].Value);
+                return null;
+            }, RegexOptions.Multiline);
+            includes = new Collection<string>(_includes);
+
+            // The DACFX model can only compile DDL artifacts
+            // This rule does not apply to artifacts with the special build action 'PreDeploy' or 'PostDeploy'
+            // To make it work we just make it a DDL statement by wrapping it in an SP
+            normalizedScript = $@"CREATE PROCEDURE [{namingConventionPrefix}_scriptwrapper] AS BEGIN
+{normalizedScript}
+END";
+
+            return normalizedScript;
         }
 
         private static void AnalyzeItem(string inputFilePath, ISqlCodeAnalysisRuleEngine codeAnalysisEngine, IErrorReporter errorReporter) => AnalyzeItem(inputFilePath, x => x.Analyze(inputFilePath), codeAnalysisEngine, errorReporter);

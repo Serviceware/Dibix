@@ -13,7 +13,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             get
             {
-                if (!this._hasReportedErrors)
+                if (!this._hasReportedErrors && this.Errors.HasErrors)
                 {
                     this.ReportErrors();
                     this._hasReportedErrors = true;

@@ -35,8 +35,8 @@ namespace Dibix.Sdk.Sql
         private static SchemaAnalyzerResult AnalyzeSchema(TSqlModel model, TSqlFragment sqlFragment)
         {
             SchemaAnalyzerResult schemaAnalyzerResult = SchemaAnalyzer.Analyze(model, sqlFragment);
-            //if (schemaAnalyzerResult.Errors.Any())
-            //    throw new AggregateException("One or more errors occured while validating model schema", schemaAnalyzerResult.Errors.Select(ToException));
+            if (schemaAnalyzerResult.Errors.Any())
+                throw new AggregateException("One or more errors occured while validating model schema", schemaAnalyzerResult.Errors.Select(ToException));
 
             return schemaAnalyzerResult;
         }
