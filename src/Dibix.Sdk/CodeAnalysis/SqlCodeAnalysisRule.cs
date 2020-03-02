@@ -32,7 +32,7 @@ namespace Dibix.Sdk.CodeAnalysis
         {
             TVisitor visitor = new TVisitor
             {
-                Model = new SqlModel(model, scriptFragment),
+                Model = new SqlModel(configuration.NamingConventionPrefix, model, scriptFragment),
                 Configuration = configuration,
                 ErrorHandler = this.Fail
             };

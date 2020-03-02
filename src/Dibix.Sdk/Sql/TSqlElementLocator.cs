@@ -12,10 +12,10 @@ namespace Dibix.Sdk.Sql
         private readonly Lazy<IDictionary<int, ElementLocation>> _elementLocationsAccessor;
         private readonly Lazy<TSqlModel> _modelAccessor;
 
-        public TSqlElementLocator(Lazy<TSqlModel> modelAccessor, TSqlFragment sqlFragment)
+        public TSqlElementLocator(string namingConventionPrefix, Lazy<TSqlModel> modelAccessor, TSqlFragment sqlFragment)
         {
             this._modelAccessor = modelAccessor;
-            this._elementLocationsAccessor = new Lazy<IDictionary<int, ElementLocation>>(() => AnalyzeSchema(modelAccessor.Value, sqlFragment).Locations.ToDictionary(x => x.Offset));
+            this._elementLocationsAccessor = new Lazy<IDictionary<int, ElementLocation>>(() => AnalyzeSchema(namingConventionPrefix, modelAccessor.Value, sqlFragment).Locations.ToDictionary(x => x.Offset));
         }
 
         public bool TryGetElementLocation(TSqlFragment fragment, out ElementLocation location) => this._elementLocationsAccessor.Value.TryGetValue(fragment.StartOffset, out location);
@@ -32,9 +32,28 @@ namespace Dibix.Sdk.Sql
             return false;
         }
 
-        private static SchemaAnalyzerResult AnalyzeSchema(TSqlModel model, TSqlFragment sqlFragment)
+        private static SchemaAnalyzerResult AnalyzeSchema(string namingConventionPrefix, TSqlModel model, TSqlFragment sqlFragment)
         {
             SchemaAnalyzerResult schemaAnalyzerResult = SchemaAnalyzer.Analyze(model, sqlFragment);
+
+            // The DACFX model can only compile DDL artifacts
+            // This rule does not apply to artifacts with the special build action 'PreDeploy' or 'PostDeploy'
+            // To make it work we just make it a DDL statement by wrapping it in an SP
+            if (schemaAnalyzerResult.Errors.Any(x => x.ErrorCode == 70501)) // 'The statement cannot be a top-level statement' for DeclareTableVariableStatement
+            {
+                if (!(sqlFragment is TSqlScript script) || script.Batches.Count != 1)
+                    throw new InvalidOperationException("Unable to determine DML statement from script artifact");
+                
+                CreateProcedureStatement proc = new CreateProcedureStatement
+                {
+                    ProcedureReference = new ProcedureReference { Name = new SchemaObjectName { Identifiers = { new Identifier { Value = $"{namingConventionPrefix}_scriptwrapper" } } } },
+                    StatementList = new StatementList()
+                };
+                proc.StatementList.Statements.AddRange(script.Batches[0].Statements);
+
+                schemaAnalyzerResult = SchemaAnalyzer.Analyze(model, proc);
+            }
+
             if (schemaAnalyzerResult.Errors.Any())
                 throw new AggregateException("One or more errors occured while validating model schema", schemaAnalyzerResult.Errors.Select(ToException));
 
