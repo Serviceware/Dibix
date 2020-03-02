@@ -69,6 +69,7 @@ namespace Dibix.Sdk.MSBuild
             // To make it work we just make it a DDL statement by wrapping it in an SP
             normalizedScript = $@"CREATE PROCEDURE [{namingConventionPrefix}_scriptwrapper] AS BEGIN
 {normalizedScript}
+_:
 END";
 
             return normalizedScript;
