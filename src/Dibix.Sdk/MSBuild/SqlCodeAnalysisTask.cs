@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Dibix.Sdk.CodeAnalysis;
 using Dibix.Sdk.CodeGeneration;
-using Dibix.Sdk.Sql;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
@@ -38,7 +37,10 @@ namespace Dibix.Sdk.MSBuild
             {
                 string scriptFilePath = Path.IsPathRooted(scriptFile) ? scriptFile : Path.GetFullPath(Path.Combine(Path.GetDirectoryName(parentFile), scriptFile));
                 string scriptContent = GetNormalizedScriptArtifact(scriptFilePath, namingConventionPrefix, out ICollection<string> includes);
-                AnalyzeItem(scriptFilePath, scriptContent, codeAnalysisEngine, errorReporter);
+                
+                if (scriptContent != null)
+                    AnalyzeItem(scriptFilePath, scriptContent, codeAnalysisEngine, errorReporter);
+
                 AnalyzeScripts(scriptFilePath, includes, namingConventionPrefix, codeAnalysisEngine, errorReporter);
             }
         }
@@ -58,6 +60,9 @@ namespace Dibix.Sdk.MSBuild
                 return null;
             }, RegexOptions.Multiline);
             includes = new Collection<string>(_includes);
+
+            if (String.IsNullOrWhiteSpace(normalizedScript))
+                return null;
 
             // The DACFX model can only compile DDL artifacts
             // This rule does not apply to artifacts with the special build action 'PreDeploy' or 'PostDeploy'
