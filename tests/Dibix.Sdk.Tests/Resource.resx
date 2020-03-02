@@ -513,6 +513,7 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
 using Dibix;
 using Newtonsoft.Json;
 
@@ -573,13 +574,17 @@ namespace Dibix.Sdk.Tests
             Descending
         }
 
+        [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
             [Key]
+            [DataMember]
             [JsonIgnore]
             public int Id { get; set; } 
+            [DataMember]
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public string Name { get; set; } 
+            [DataMember]
             [JsonIgnore]
             [Discriminator]
             public int? ParentId { get; set; } 
@@ -619,6 +624,7 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
 using Dibix;
 using Newtonsoft.Json;
 
@@ -662,13 +668,17 @@ namespace Dibix.Sdk.Tests
             Descending
         }
 
+        [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
             [Key]
+            [DataMember]
             [JsonIgnore]
             public int Id { get; set; } 
+            [DataMember]
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public string Name { get; set; } 
+            [DataMember]
             [JsonIgnore]
             [Discriminator]
             public int? ParentId { get; set; } 
@@ -708,6 +718,7 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
 using Dibix;
 using Newtonsoft.Json;
 
@@ -768,13 +779,17 @@ namespace Dibix.Sdk.Tests
             Descending
         }
 
+        [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
             [Key]
+            [DataMember]
             [JsonIgnore]
             public int Id { get; set; } 
+            [DataMember]
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public string Name { get; set; } 
+            [DataMember]
             [JsonIgnore]
             [Discriminator]
             public int? ParentId { get; set; } 
@@ -814,6 +829,7 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
 using Dibix;
 using Newtonsoft.Json;
 
@@ -858,13 +874,17 @@ namespace Dibix.Sdk.Tests
             Descending
         }
 
+        [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
             [Key]
+            [DataMember]
             [JsonIgnore]
             public int Id { get; set; } 
+            [DataMember]
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public string Name { get; set; } 
+            [DataMember]
             [JsonIgnore]
             [Discriminator]
             public int? ParentId { get; set; } 
@@ -918,6 +938,7 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
 using Dibix;
 using Newtonsoft.Json;
 
@@ -987,13 +1008,17 @@ namespace Dibix.Sdk.Tests
             Descending
         }
 
+        [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
             [Key]
+            [DataMember]
             [JsonIgnore]
             public int Id { get; set; } 
+            [DataMember]
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public string Name { get; set; } 
+            [DataMember]
             [JsonIgnore]
             [Discriminator]
             public int? ParentId { get; set; } 
@@ -1022,6 +1047,7 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
 using Dibix;
 using Newtonsoft.Json;
 
@@ -1051,13 +1077,17 @@ namespace Dibix.Sdk.Tests
     namespace DomainModel
     {
         #region Contracts
+        [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
             [Key]
+            [DataMember]
             [JsonIgnore]
             public int Id { get; set; } 
+            [DataMember]
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public string Name { get; set; } 
+            [DataMember]
             [JsonIgnore]
             [Discriminator]
             public int? ParentId { get; set; } 
@@ -1079,6 +1109,7 @@ namespace Dibix.Sdk.Tests
 using System;
 using System.CodeDom.Compiler;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
 using Dibix;
 using Newtonsoft.Json;
 
@@ -1108,13 +1139,17 @@ namespace Dibix.Sdk.Tests
     namespace DomainModel
     {
         #region Contracts
+        [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
             [Key]
+            [DataMember]
             [JsonIgnore]
             public int Id { get; set; } 
+            [DataMember]
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public string Name { get; set; } 
+            [DataMember]
             [JsonIgnore]
             [Discriminator]
             public int? ParentId { get; set; } 
@@ -1138,6 +1173,7 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
 using Dibix;
 using Newtonsoft.Json;
 
@@ -1167,13 +1203,17 @@ namespace Dibix.Sdk.Tests
     namespace DomainModel
     {
         #region Contracts
+        [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
             [Key]
+            [DataMember]
             [JsonIgnore]
             public int Id { get; set; } 
+            [DataMember]
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public string Name { get; set; } 
+            [DataMember]
             [JsonIgnore]
             [Discriminator]
             public int? ParentId { get; set; } 
@@ -1211,6 +1251,7 @@ namespace Dibix.Sdk.Tests
 using System;
 using System.CodeDom.Compiler;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
 using Dibix;
 using Newtonsoft.Json;
 
@@ -1246,13 +1287,17 @@ namespace Dibix.Sdk.Tests
             Descending
         }
 
+        [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
             [Key]
+            [DataMember]
             [JsonIgnore]
             public int Id { get; set; } 
+            [DataMember]
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public string Name { get; set; } 
+            [DataMember]
             [JsonIgnore]
             [Discriminator]
             public int? ParentId { get; set; } 

@@ -1,5 +1,6 @@
 ﻿{
   "GenericContract": {
+    "$wcfNs": "https://schemas.dibix.com/GenericContract",
     "Id": {
       "type": "int32",
       "isPartOfKey": true,
@@ -7,11 +8,11 @@
     },
     "Name": {
       "type": "string",
-      "serialize": "IfNotEmpty" 
+      "serialize": "IfNotEmpty"
     },
     "ParentId": {
       "type": "int32?",
-      "isDiscriminator": true  
-    } 
+      "isDiscriminator": true
+    }
   }
 }

@@ -25,12 +25,12 @@ namespace Dibix.Sdk.MSBuild
                 AnalyzeItem(inputFilePath, codeAnalysisEngine, errorReporter);
             }
 
-            AnalyzeScripts(null, (scriptSource ?? Enumerable.Empty<ITaskItem>()).Select(x => x.GetFullPath()), namingConventionPrefix, codeAnalysisEngine, errorReporter);
+            AnalyzeScripts(null, (scriptSource ?? Enumerable.Empty<ITaskItem>()).Select(x => x.GetFullPath()), codeAnalysisEngine, errorReporter);
 
             return !errorReporter.HasErrors;
         }
 
-        private static void AnalyzeScripts(string parentFile, IEnumerable<string> scriptFiles, string namingConventionPrefix, ISqlCodeAnalysisRuleEngine codeAnalysisEngine, IErrorReporter errorReporter)
+        private static void AnalyzeScripts(string parentFile, IEnumerable<string> scriptFiles, ISqlCodeAnalysisRuleEngine codeAnalysisEngine, IErrorReporter errorReporter)
         {
             foreach (string scriptFile in scriptFiles)
             {
@@ -40,7 +40,7 @@ namespace Dibix.Sdk.MSBuild
                 if (scriptContent != null)
                     AnalyzeItem(scriptFilePath, scriptContent, codeAnalysisEngine, errorReporter);
 
-                AnalyzeScripts(scriptFilePath, includes, namingConventionPrefix, codeAnalysisEngine, errorReporter);
+                AnalyzeScripts(scriptFilePath, includes, codeAnalysisEngine, errorReporter);
             }
         }
 

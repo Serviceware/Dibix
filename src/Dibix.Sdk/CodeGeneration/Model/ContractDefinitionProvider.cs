@@ -87,13 +87,7 @@ namespace Dibix.Sdk.CodeGeneration
             foreach (JProperty property in ((JObject)value).Properties())
             {
                 if (property.Name == "$wcfNs")
-                {
-                    string wcfNamespace = (string)property.Value;
-                    if (!wcfNamespace.StartsWith("http://", StringComparison.Ordinal))
-                        wcfNamespace = $"http://schemas.datacontract.org/2004/07/{wcfNamespace}";
-
-                    contract.WcfNamespace = wcfNamespace;
-                }
+                    contract.WcfNamespace = (string)property.Value;
                 else
                 {
                     string typeName;
