@@ -36,6 +36,10 @@ namespace Dibix.Sdk.Sql
         {
             SchemaAnalyzerResult schemaAnalyzerResult = SchemaAnalyzer.Analyze(model, sqlFragment);
 
+            // Suppress 'Warning 70588: WITH CHECK | NOCHECK option for existing data check enforcement is ignored'
+            foreach (ExtensibilityError withCheckError in schemaAnalyzerResult.Errors.Where(x => x.ErrorCode == 70588).ToArray())
+                schemaAnalyzerResult.Errors.Remove(withCheckError);
+
             // The DACFX model can only compile DDL artifacts
             // This rule does not apply to artifacts with the special build action 'PreDeploy' or 'PostDeploy'
             // To make it work we just make it a DDL statement by wrapping it in an SP
