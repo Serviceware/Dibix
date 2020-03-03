@@ -12,10 +12,10 @@ namespace Dibix.Sdk.Sql
         private readonly TSqlModel _model;
         private readonly TSqlElementLocator _elementLocator;
 
-        internal SqlModel(string namingConventionPrefix, TSqlModel model, TSqlFragment scriptFragment)
+        internal SqlModel(TSqlModel model, TSqlFragment scriptFragment, string namingConventionPrefix, bool isScriptArtifact)
         {
             this._model = model;
-            this._elementLocator = new TSqlElementLocator(namingConventionPrefix, new Lazy<TSqlModel>(() => model), scriptFragment);
+            this._elementLocator = new TSqlElementLocator(new Lazy<TSqlModel>(() => model), scriptFragment, namingConventionPrefix, isScriptArtifact);
         }
 
         public IEnumerable<Constraint> GetConstraints(SchemaObjectName tableName, bool throwOnError = true) => this.GetConstraints(TableModel.Table, tableName, throwOnError);

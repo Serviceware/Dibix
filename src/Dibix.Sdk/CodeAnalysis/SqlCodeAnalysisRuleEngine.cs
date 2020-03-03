@@ -36,27 +36,27 @@ namespace Dibix.Sdk.CodeAnalysis
         #endregion
 
         #region Public Methods
-        public IEnumerable<SqlCodeAnalysisError> Analyze(TSqlFragment fragment)
+        public IEnumerable<SqlCodeAnalysisError> Analyze(TSqlFragment fragment, bool isScriptArtifact)
         {
-            return this._rules.SelectMany(x => x.Analyze(this._model, fragment, this._configuration));
+            return this._rules.SelectMany(x => x.Analyze(this._model, fragment, this._configuration, isScriptArtifact));
         }
 
         public IEnumerable<SqlCodeAnalysisError> Analyze(string scriptFilePath)
         {
             TSqlFragment fragment = ScriptDomFacade.Load(scriptFilePath);
-            return this.Analyze(fragment);
+            return this.Analyze(fragment, false);
         }
 
         public IEnumerable<SqlCodeAnalysisError> Analyze(string scriptFilePath, ISqlCodeAnalysisRule rule)
         {
             TSqlFragment fragment = ScriptDomFacade.Load(scriptFilePath);
-            return rule.Analyze(this._model, fragment, this._configuration);
+            return rule.Analyze(this._model, fragment, this._configuration, false);
         }
 
         public IEnumerable<SqlCodeAnalysisError> AnalyzeScript(string scriptContent)
         {
             TSqlFragment fragment = ScriptDomFacade.Parse(scriptContent);
-            return this.Analyze(fragment);
+            return this.Analyze(fragment, true);
         }
         #endregion
 

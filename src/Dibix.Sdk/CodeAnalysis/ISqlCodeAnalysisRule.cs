@@ -9,6 +9,6 @@ namespace Dibix.Sdk.CodeAnalysis
         int Id { get; }
         bool IsEnabled { get; }
 
-        IEnumerable<SqlCodeAnalysisError> Analyze(TSqlModel model, TSqlFragment scriptFragment, SqlCodeAnalysisConfiguration configuration);
+        IEnumerable<SqlCodeAnalysisError> Analyze(TSqlModel model, TSqlFragment scriptFragment, SqlCodeAnalysisConfiguration configuration, bool isScriptArtifact);
     }
 }

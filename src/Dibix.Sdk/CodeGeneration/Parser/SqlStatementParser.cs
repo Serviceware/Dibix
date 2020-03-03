@@ -25,7 +25,7 @@ namespace Dibix.Sdk.CodeGeneration
                 throw new ArgumentOutOfRangeException(nameof(sourceKind), sourceKind, null);
 
             TSqlFragment fragment = reader(source);
-            TSqlElementLocator elementLocator = new TSqlElementLocator(null, modelAccessor, fragment);
+            TSqlElementLocator elementLocator = new TSqlElementLocator(modelAccessor, fragment, null, false);
             return CollectStatementInfo(fragment, elementLocator, target, productName, areaName, formatter, contractResolver, errorReporter);
         }
         #endregion

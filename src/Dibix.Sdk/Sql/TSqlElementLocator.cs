@@ -12,10 +12,10 @@ namespace Dibix.Sdk.Sql
         private readonly Lazy<IDictionary<int, ElementLocation>> _elementLocationsAccessor;
         private readonly Lazy<TSqlModel> _modelAccessor;
 
-        public TSqlElementLocator(string namingConventionPrefix, Lazy<TSqlModel> modelAccessor, TSqlFragment sqlFragment)
+        public TSqlElementLocator(Lazy<TSqlModel> modelAccessor, TSqlFragment sqlFragment, string namingConventionPrefix, bool isScriptArtifact)
         {
             this._modelAccessor = modelAccessor;
-            this._elementLocationsAccessor = new Lazy<IDictionary<int, ElementLocation>>(() => AnalyzeSchema(namingConventionPrefix, modelAccessor.Value, sqlFragment).Locations.ToDictionary(x => x.Offset));
+            this._elementLocationsAccessor = new Lazy<IDictionary<int, ElementLocation>>(() => AnalyzeSchema(modelAccessor.Value, sqlFragment, namingConventionPrefix, isScriptArtifact).Locations.ToDictionary(x => x.Offset));
         }
 
         public bool TryGetElementLocation(TSqlFragment fragment, out ElementLocation location) => this._elementLocationsAccessor.Value.TryGetValue(fragment.StartOffset, out location);
@@ -32,30 +32,39 @@ namespace Dibix.Sdk.Sql
             return false;
         }
 
-        private static SchemaAnalyzerResult AnalyzeSchema(string namingConventionPrefix, TSqlModel model, TSqlFragment sqlFragment)
+        private static SchemaAnalyzerResult AnalyzeSchema(TSqlModel model, TSqlFragment sqlFragment, string namingConventionPrefix, bool isScriptArtifact)
         {
             SchemaAnalyzerResult schemaAnalyzerResult = SchemaAnalyzer.Analyze(model, sqlFragment);
 
-            // Suppress 'Warning 70588: WITH CHECK | NOCHECK option for existing data check enforcement is ignored'
-            foreach (ExtensibilityError withCheckError in schemaAnalyzerResult.Errors.Where(x => x.ErrorCode == 70588).ToArray())
-                schemaAnalyzerResult.Errors.Remove(withCheckError);
-
-            // The DACFX model can only compile DDL artifacts
-            // This rule does not apply to artifacts with the special build action 'PreDeploy' or 'PostDeploy'
-            // To make it work we just make it a DDL statement by wrapping it in an SP
-            if (schemaAnalyzerResult.Errors.Any(x => x.ErrorCode == 70501)) // 'The statement cannot be a top-level statement' for DeclareTableVariableStatement
+            // Loading the model of a PreDeploy/PostDeploy script is not officially supported, that's why these scripts aren't analyzed in the SQL projects.
+            // We still wan't to be able to ensure our guidelines/patterns and apply our analysis rules to these artifacts aswell.
+            // Therefore we have to implement a couple of workarounds.
+            if (isScriptArtifact)
             {
-                if (!(sqlFragment is TSqlScript script) || script.Batches.Count != 1)
-                    throw new InvalidOperationException("Unable to determine DML statement from script artifact");
-                
-                CreateProcedureStatement proc = new CreateProcedureStatement
+                // 'The statement cannot be a top-level statement' for DeclareTableVariableStatement
+                // Just wrap the whole script in an SP, to make it a DDL statement
+                if (schemaAnalyzerResult.Errors.Any(x => x.ErrorCode == 70501))
                 {
-                    ProcedureReference = new ProcedureReference { Name = new SchemaObjectName { Identifiers = { new Identifier { Value = $"{namingConventionPrefix}_scriptwrapper" } } } },
-                    StatementList = new StatementList()
-                };
-                proc.StatementList.Statements.AddRange(script.Batches[0].Statements);
+                    if (!(sqlFragment is TSqlScript script) || script.Batches.Count != 1)
+                        throw new InvalidOperationException("Unable to determine DML statement from script artifact");
 
-                schemaAnalyzerResult = SchemaAnalyzer.Analyze(model, proc);
+                    CreateProcedureStatement proc = new CreateProcedureStatement
+                    {
+                        ProcedureReference = new ProcedureReference { Name = new SchemaObjectName { Identifiers = { new Identifier { Value = $"{namingConventionPrefix}_scriptwrapper" } } } },
+                        StatementList = new StatementList()
+                    };
+                    proc.StatementList.Statements.AddRange(script.Batches[0].Statements);
+
+                    schemaAnalyzerResult = SchemaAnalyzer.Analyze(model, proc);
+                }
+
+                // 'Warning 70588: WITH CHECK | NOCHECK option for existing data check enforcement is ignored'
+                // This rule was designed for compilable DDL artifacts and keeping in mind, that the project is in the ideal desired state of the DDL schema.
+                // So it's saying here that this statement is essentially meaningless, because when the dacpac is being published,
+                // these constraints will be enforced during the check phase at the end.
+                // Since we are in a PreDeploy/PostDeploy script, we can safely suppress it here.
+                foreach (ExtensibilityError withCheckError in schemaAnalyzerResult.Errors.Where(x => x.ErrorCode == 70588).ToArray())
+                    schemaAnalyzerResult.Errors.Remove(withCheckError);
             }
 
             if (schemaAnalyzerResult.Errors.Any())
