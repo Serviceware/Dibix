@@ -277,6 +277,26 @@ Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly
         }
 
         [Fact]
+        public void Endpoints()
+        {
+            this.ExecuteTest
+            (
+                sources: new [] 
+                { 
+                    @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
+                  , @"Types\dbx_codeanalysis_udt_generic.sql"
+                }
+              , contracts: new [] { @"Contracts\GenericContract.json" }
+              , endpoints: new [] { @"Endpoints\GenericEndpoint.json" }
+              , expectedAdditionalAssemblyReferences: new[]
+                {
+                    "System.ComponentModel.DataAnnotations.dll"
+                  , "Newtonsoft.Json.dll"
+                }
+            );
+        }
+
+        [Fact]
         public void InvalidContractSchema_Error()
         {
             this.ExecuteTestAndExpectError(Enumerable.Empty<string>(), Enumerable.Repeat(@"Contracts\Invalid.json", 1), @"One or more errors occured during code generation:
@@ -291,12 +311,13 @@ Contracts\Invalid.json(2,14) : error : [JSON] JSON does not match any schemas fr
         }
 
         private void ExecuteTest(string source, bool embedStatements = true) => this.ExecuteTest(embedStatements, source);
-        private void ExecuteTest(bool embedStatements = true, params string[] sources) => this.ExecuteTest(false, sources, Enumerable.Empty<string>(), embedStatements, Enumerable.Empty<string>());
+        private void ExecuteTest(bool embedStatements = true, params string[] sources) => this.ExecuteTest(false, sources, Enumerable.Empty<string>(), Enumerable.Empty<string>(), embedStatements, Enumerable.Empty<string>());
         private void ExecuteTest(string source, string contract, params string[] expectedAdditionalAssemblyReferences) => this.ExecuteTest(source, Enumerable.Repeat(contract, 1), expectedAdditionalAssemblyReferences);
         private void ExecuteTest(string source, IEnumerable<string> contracts, IEnumerable<string> expectedAdditionalAssemblyReferences) => this.ExecuteTest(Enumerable.Repeat(source, 1), contracts, true, expectedAdditionalAssemblyReferences);
-        private void ExecuteTest(IEnumerable<string> contracts) => this.ExecuteTest(true, Enumerable.Empty<string>(), contracts, true, Enumerable.Empty<string>());
-        private void ExecuteTest(IEnumerable<string> sources, IEnumerable<string> contracts, bool embedStatements, IEnumerable<string> expectedAdditionalAssemblyReferences) => this.ExecuteTest(false, sources, contracts, embedStatements, expectedAdditionalAssemblyReferences);
-        private void ExecuteTest(bool generateClient, IEnumerable<string> sources, IEnumerable<string> contracts, bool embedStatements, IEnumerable<string> expectedAdditionalAssemblyReferences)
+        private void ExecuteTest(IEnumerable<string> contracts) => this.ExecuteTest(true, Enumerable.Empty<string>(), contracts, Enumerable.Empty<string>(), true, Enumerable.Empty<string>());
+        private void ExecuteTest(IEnumerable<string> sources, IEnumerable<string> contracts, bool embedStatements, IEnumerable<string> expectedAdditionalAssemblyReferences) => this.ExecuteTest(false, sources, contracts, Enumerable.Empty<string>(), embedStatements, expectedAdditionalAssemblyReferences);
+        private void ExecuteTest(IEnumerable<string> sources, IEnumerable<string> contracts, IEnumerable<string> endpoints, IEnumerable<string> expectedAdditionalAssemblyReferences) => this.ExecuteTest(false, sources, contracts, endpoints, true, expectedAdditionalAssemblyReferences);
+        private void ExecuteTest(bool generateClient, IEnumerable<string> sources, IEnumerable<string> contracts, IEnumerable<string> endpoints, bool embedStatements, IEnumerable<string> expectedAdditionalAssemblyReferences)
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), $"dibix-sdk-tests-{Guid.NewGuid()}");
             string outputFilePath = Path.Combine(tempDirectory, "TestAccessor.cs");
@@ -327,7 +348,7 @@ Contracts\Invalid.json(2,14) : error : [JSON] JSON does not match any schemas fr
                     return item.Object;
                 }).ToArray()
               , contracts: contracts
-              , endpoints: null
+              , endpoints: endpoints
               , references: null
               , embedStatements: embedStatements
               , databaseSchemaProviderName: this.DatabaseSchemaProviderName

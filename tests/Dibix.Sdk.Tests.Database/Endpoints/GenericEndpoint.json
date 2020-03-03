@@ -1,0 +1,26 @@
+﻿{
+  "$schema": "../../../src/Dibix.Sdk/CodeGeneration/Schema/dibix.endpoints.schema.json",
+  "GenericEndpoint": [
+    "Dibix.GenericEndpoint",
+    {
+      "target": "EmptyWithParams",
+      "childRoute": "{password}",
+      "params": {
+        "x": "DBX.X",
+        "y": true,
+        "z": 5
+      }
+    },
+    {
+      "method": "POST",
+      "target": "EmptyWithParams",
+      "body": "GenericContract",
+      "params": {
+        "ids": {
+          "convertFromBody": "Dibix.GenericContractIdsInputConverter"
+        }
+      },
+      "omitResult": true
+    }
+  ]
+}

@@ -150,6 +150,7 @@
     <Folder Include="Contracts" />
     <Folder Include="Contracts\Extension" />
     <Folder Include="Contracts\Grid" />
+    <Folder Include="Endpoints" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Contracts\Invalid.json" />
@@ -158,5 +159,6 @@
     <None Include="Contracts\Direction.json" />
     <None Include="Contracts\Grid\GridResult.json" />
     <None Include="Contracts\JointContract.json" />
+    <None Include="Endpoints\GenericEndpoint.json" />
   </ItemGroup>
 </Project>
