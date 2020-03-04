@@ -20,9 +20,10 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             TestUtility.AssertEqualWithDiffTool(expectedText, actualText, "cs");
         }
 
-        protected static void EvaluateFile(string generatedFilePath)
+        protected static void EvaluateFile(string generatedFilePath) => EvaluateFile(TestName, generatedFilePath);
+        protected static void EvaluateFile(string expectedTextKey, string generatedFilePath)
         {
-            string expectedText = GetExpectedText(TestName);
+            string expectedText = GetExpectedText(expectedTextKey);
             TestUtility.AssertFileEqualWithDiffTool(expectedText, generatedFilePath);
         }
 

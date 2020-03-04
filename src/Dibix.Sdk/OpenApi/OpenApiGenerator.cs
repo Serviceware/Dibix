@@ -13,19 +13,19 @@ namespace Dibix.Sdk.OpenApi
     {
         private static readonly Dictionary<ContractPropertyDataType, Func<OpenApiSchema>> PrimitiveTypeMap = new Dictionary<ContractPropertyDataType, Func<OpenApiSchema>>
         {
-            [ContractPropertyDataType.Boolean]        = () => new OpenApiSchema { Type = "boolean" },
-            [ContractPropertyDataType.Byte]           = () => new OpenApiSchema { Type = "integer", Format = "int32" },
-            [ContractPropertyDataType.Int16]          = () => new OpenApiSchema { Type = "integer", Format = "int32" },
-            [ContractPropertyDataType.Int32]          = () => new OpenApiSchema { Type = "integer", Format = "int32" },
-            [ContractPropertyDataType.Int64]          = () => new OpenApiSchema { Type = "integer", Format = "int64" },
-            [ContractPropertyDataType.Float]          = () => new OpenApiSchema { Type = "number", Format = "float" },
-            [ContractPropertyDataType.Double]         = () => new OpenApiSchema { Type = "number", Format = "double" },
-            [ContractPropertyDataType.Decimal]        = () => new OpenApiSchema { Type = "number", Format = "double" },
-            [ContractPropertyDataType.Binary]         = () => new OpenApiSchema { Type = "string", Format = "byte" },
-            [ContractPropertyDataType.DateTime]       = () => new OpenApiSchema { Type = "string", Format = "date-time" },
-            [ContractPropertyDataType.DateTimeOffset] = () => new OpenApiSchema { Type = "string", Format = "date-time" },
-            [ContractPropertyDataType.String]         = () => new OpenApiSchema { Type = "string" },
-            [ContractPropertyDataType.UUID]           = () => new OpenApiSchema { Type = "string", Format = "uuid" }
+            [ContractPropertyDataType.Boolean]        = () => new OpenApiSchema { Type = "boolean"                       }
+          , [ContractPropertyDataType.Byte]           = () => new OpenApiSchema { Type = "integer", Format = "int32"     }
+          , [ContractPropertyDataType.Int16]          = () => new OpenApiSchema { Type = "integer", Format = "int32"     }
+          , [ContractPropertyDataType.Int32]          = () => new OpenApiSchema { Type = "integer", Format = "int32"     }
+          , [ContractPropertyDataType.Int64]          = () => new OpenApiSchema { Type = "integer", Format = "int64"     }
+          , [ContractPropertyDataType.Float]          = () => new OpenApiSchema { Type = "number",  Format = "float"     }
+          , [ContractPropertyDataType.Double]         = () => new OpenApiSchema { Type = "number",  Format = "double"    }
+          , [ContractPropertyDataType.Decimal]        = () => new OpenApiSchema { Type = "number",  Format = "double"    }
+          , [ContractPropertyDataType.Binary]         = () => new OpenApiSchema { Type = "string",  Format = "byte"      }
+          , [ContractPropertyDataType.DateTime]       = () => new OpenApiSchema { Type = "string",  Format = "date-time" }
+          , [ContractPropertyDataType.DateTimeOffset] = () => new OpenApiSchema { Type = "string",  Format = "date-time" }
+          , [ContractPropertyDataType.String]         = () => new OpenApiSchema { Type = "string"                        }
+          , [ContractPropertyDataType.UUID]           = () => new OpenApiSchema { Type = "string",  Format = "uuid"      }
         };
 
         public static OpenApiDocument Generate
@@ -149,6 +149,9 @@ namespace Dibix.Sdk.OpenApi
 
             foreach (ObjectContractProperty property in objectContract.Properties)
             {
+                if (property.SerializationBehavior == SerializationBehavior.Never)
+                    continue;
+
                 OpenApiSchema propertySchema = CreateObjectPropertySchema(property, objectContract.Namespace.RelativeNamespace);
                 schema.Properties.Add(property.Name, propertySchema);
             }

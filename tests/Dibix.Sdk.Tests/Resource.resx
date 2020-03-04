@@ -353,6 +353,35 @@ namespace Dibix.Sdk.Tests
     }
 }</value>
   </data>
+  <data name="Endpoints_OpenApi" xml:space="preserve">
+    <value>openapi: 3.0.1
+info:
+  title: Dibix.Sdk
+  version: 1.0.0
+paths:
+  '/api/Tests/GenericEndpoint/{password}':
+    get:
+      tags:
+        - Tests/GenericEndpoint
+      summary: Undocumented action
+      operationId: Tests_Dibix.Sdk.CodeGeneration.ControllerDefinition_EmptyWithParams
+      responses: { }
+  /api/Tests/GenericEndpoint:
+    post:
+      tags:
+        - Tests/GenericEndpoint
+      summary: Undocumented action
+      operationId: Tests_Dibix.Sdk.CodeGeneration.ControllerDefinition_EmptyWithParams
+      responses: { }
+components:
+  schemas:
+    GenericContract:
+      type: object
+      properties:
+        Name:
+          type: string
+      additionalProperties: false</value>
+  </data>
   <data name="External_Empty" xml:space="preserve">
     <value>/*------------------------------------------------------------------------------
 // &lt;auto-generated&gt;
