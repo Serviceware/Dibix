@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
@@ -107,7 +106,7 @@ namespace Dibix.Http
                         else
                         {
                             // [user] SomeInputParameterClass.id
-                            yield return CollectUserParameter(action, parameter, property.PropertyType, property.Name);
+                            yield return CollectUserParameter(action, parameter, property.PropertyType, property.Name, false);
                         }
                     }
                 }
@@ -125,7 +124,7 @@ namespace Dibix.Http
                     else
                     {
                         // [user] id
-                        yield return CollectUserParameter(action, null, parameter.ParameterType, parameter.Name);
+                        yield return CollectUserParameter(action, null, parameter.ParameterType, parameter.Name, parameter.IsOptional);
                     }
                 }
             }
@@ -133,15 +132,15 @@ namespace Dibix.Http
             context.LastVisitedParameter = null;
         }
 
-        private static HttpParameterInfo CollectUserParameter(HttpActionDefinition action, ParameterInfo contractParameter, Type parameterType, string parameterName)
+        private static HttpParameterInfo CollectUserParameter(HttpActionDefinition action, ParameterInfo contractParameter, Type parameterType, string parameterName, bool isOptional)
         {
             if (action.BodyContract == null)
-                return HttpParameterInfo.Uri(contractParameter, parameterType, parameterName);
+                return HttpParameterInfo.Uri(contractParameter, parameterType, parameterName, isOptional);
 
             string sourcePropertyName = parameterName;
             PropertyInfo sourceProperty = action.BodyContract.GetTypeInfo().GetProperty(sourcePropertyName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
             if (sourceProperty == null)
-                return HttpParameterInfo.Uri(contractParameter, parameterType, parameterName);
+                return HttpParameterInfo.Uri(contractParameter, parameterType, parameterName, isOptional);
 
             sourcePropertyName = sourceProperty.Name;
             IHttpParameterSourceProvider sourceProvider = GetSourceProvider(BodyParameterSourceProvider.SourceName, parameterName);
@@ -394,38 +393,8 @@ namespace Dibix.Http
             if (bodyContract != null)
                 method.AddParameter(HttpParameterName.Body, bodyContract, false);
 
-            foreach (HttpParameterInfo parameter in parameters.Where(x => x.IsUserParameter))
-            {
-                bool isOptional = IsOptional(parameter);
-                method.AddParameter(parameter.ParameterName, parameter.ParameterType, isOptional);
-            }
-        }
-
-        private static bool IsOptional(HttpParameterInfo parameter)
-        {
-            // We consider all query string parameters as optional and bodies as required
-            if (parameter.SourceKind != HttpParameterSourceKind.Uri)
-                return false;
-
-            // We might detect complex types of a reflection target method as an uri source, even though ASP.NET will treat it as a body
-            return CanConvertFromString(parameter.ParameterType);
-        }
-
-        private static bool CanConvertFromString(Type type)
-        {
-            Type underlyingType = Nullable.GetUnderlyingType(type);
-            if (underlyingType != null) 
-                type = underlyingType;
-
-            bool isSimpleType = type.GetTypeInfo().IsPrimitive
-                             || type == typeof(string)
-                             || type == typeof(DateTime)
-                             || type == typeof(decimal)
-                             || type == typeof(Guid)
-                             || type == typeof(DateTimeOffset)
-                             || type == typeof(TimeSpan);
-
-            return isSimpleType || TypeDescriptor.GetConverter(type).CanConvertFrom(typeof(string));
+            foreach (HttpParameterInfo parameter in parameters.Where(x => x.IsUserParameter)) 
+                method.AddParameter(parameter.ParameterName, parameter.ParameterType, parameter.IsOptional);
         }
 
         private static void AddParameterFromBody<TSource, TTarget, TConverter>(IDictionary<string, object> arguments, string parameterName) where TConverter : IFormattedInputConverter<TSource, TTarget>, new()
@@ -544,11 +513,12 @@ namespace Dibix.Http
             public ParameterInfo ContractParameter { get; }    // InputParameterClass
             public Type ParameterType { get; }                 
             public string ParameterName { get; }               
-            public object Value { get; }                       
+            public object Value { get; }
+            public bool IsOptional { get; }
             public Type InputConverter { get; }                // IFormattedInputConverter<TSource, TTarget>
             public HttpParameterSourceInfo Source { get; }     // HLSESSION.LocaleId / databaseAccessorFactory
 
-            private HttpParameterInfo(bool isUserParameter, HttpParameterSourceKind sourceKind, ParameterInfo contractParameter, Type parameterType, string parameterName, object value, Type inputConverter, HttpParameterSourceInfo source)
+            private HttpParameterInfo(bool isUserParameter, HttpParameterSourceKind sourceKind, ParameterInfo contractParameter, Type parameterType, string parameterName, object value, bool isOptional, Type inputConverter, HttpParameterSourceInfo source)
             {
                 this.IsUserParameter = isUserParameter;
                 this.SourceKind = sourceKind;
@@ -556,15 +526,16 @@ namespace Dibix.Http
                 this.ParameterType = parameterType;
                 this.ParameterName = parameterName;
                 this.Value = value;
+                this.IsOptional = isOptional;
                 this.InputConverter = inputConverter;
                 this.Source = source;
             }
 
-            public static HttpParameterInfo Uri(ParameterInfo contractParameter, Type parameterType, string parameterName) => new HttpParameterInfo(true, HttpParameterSourceKind.Uri, contractParameter, parameterType, parameterName, null, null, null);
-            public static HttpParameterInfo SourceInstance(Type parameterType, string parameterName, IHttpParameterSourceProvider sourceProvider, string sourceName) => new HttpParameterInfo(false, HttpParameterSourceKind.SourceInstance, null, parameterType, parameterName, null, null, new HttpParameterSourceInfo(sourceProvider, sourceName));
-            public static HttpParameterInfo SourceProperty(ParameterInfo contractParameter, Type parameterType, string parameterName, IHttpParameterSourceProvider sourceProvider, string sourceName, string sourcePropertyName) => new HttpParameterInfo(false, HttpParameterSourceKind.SourceProperty, contractParameter, parameterType, parameterName, null, null, new HttpParameterSourceInfo(sourceProvider, sourceName, sourcePropertyName));
-            public static HttpParameterInfo ConstantValue(ParameterInfo contractParameter, Type parameterType, string parameterName, object value) => new HttpParameterInfo(false, HttpParameterSourceKind.ConstantValue, contractParameter, parameterType, parameterName, value, null, null);
-            public static HttpParameterInfo Body(ParameterInfo contractParameter, Type parameterType, string parameterName, Type inputConverter = null) => new HttpParameterInfo(false, HttpParameterSourceKind.Body, contractParameter, parameterType, parameterName, null, inputConverter, null);
+            public static HttpParameterInfo Uri(ParameterInfo contractParameter, Type parameterType, string parameterName, bool isOptional) => new HttpParameterInfo(true, HttpParameterSourceKind.Uri, contractParameter, parameterType, parameterName, null, isOptional, null, null);
+            public static HttpParameterInfo SourceInstance(Type parameterType, string parameterName, IHttpParameterSourceProvider sourceProvider, string sourceName) => new HttpParameterInfo(false, HttpParameterSourceKind.SourceInstance, null, parameterType, parameterName, null, false, null, new HttpParameterSourceInfo(sourceProvider, sourceName));
+            public static HttpParameterInfo SourceProperty(ParameterInfo contractParameter, Type parameterType, string parameterName, IHttpParameterSourceProvider sourceProvider, string sourceName, string sourcePropertyName) => new HttpParameterInfo(false, HttpParameterSourceKind.SourceProperty, contractParameter, parameterType, parameterName, null, false, null, new HttpParameterSourceInfo(sourceProvider, sourceName, sourcePropertyName));
+            public static HttpParameterInfo ConstantValue(ParameterInfo contractParameter, Type parameterType, string parameterName, object value) => new HttpParameterInfo(false, HttpParameterSourceKind.ConstantValue, contractParameter, parameterType, parameterName, value, false, null, null);
+            public static HttpParameterInfo Body(ParameterInfo contractParameter, Type parameterType, string parameterName, Type inputConverter = null) => new HttpParameterInfo(false, HttpParameterSourceKind.Body, contractParameter, parameterType, parameterName, null, false, inputConverter, null);
         }
 
         private sealed class HttpParameterResolutionMethod : IHttpParameterResolutionMethod

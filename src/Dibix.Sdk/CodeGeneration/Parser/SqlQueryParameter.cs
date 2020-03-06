@@ -9,6 +9,8 @@ namespace Dibix.Sdk.CodeGeneration
         public string Name { get; set; }
         public string TypeName { get; set; }
         public ContractCheck Check { get; set; }
+        public bool HasDefaultValue { get; set; }
+        public object DefaultValue { get; set; }
         public bool IsStructured => !String.IsNullOrEmpty(this.TypeName);
         public bool Obfuscate { get; set; }
     }

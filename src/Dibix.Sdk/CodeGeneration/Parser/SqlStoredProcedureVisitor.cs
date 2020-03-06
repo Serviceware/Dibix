@@ -95,6 +95,18 @@ ReferenceType: {node.DataType.GetType()}");
                 parameter.Check = EvaluateContractCheck(parameter.Check, !shouldBeNullable && isNullable, parameter.ClrType);
             }
 
+            if (node.Value != null)
+            {
+                if (!(node.Value is Literal literal))
+                {
+                    base.ErrorReporter.RegisterError(this.Target.Source, node.Value.StartLine, node.Value.StartColumn, null, $"Only literals are supported for default values: {node.Value.Dump()}");
+                    return;
+                }
+
+                parameter.HasDefaultValue = this.TryParseDefaultValue(literal, parameter.ClrType, out object defaultValue);
+                parameter.DefaultValue = defaultValue;
+            }
+
             this.Target.Parameters.Add(parameter);
         }
 
@@ -110,6 +122,33 @@ ReferenceType: {node.DataType.GetType()}");
                 return ContractCheck.NotNullOrEmpty;
 
             return ContractCheck.NotNull;
+        }
+
+        private bool TryParseDefaultValue(Literal literal, Type targetType, out object defaultValue)
+        {
+            switch (literal.LiteralType)
+            {
+                case LiteralType.Integer when targetType == typeof(bool):
+                    defaultValue = literal.Value == "1";
+                    return true;
+
+                case LiteralType.Integer:
+                    defaultValue = Int32.Parse(literal.Value);
+                    return true;
+
+                case LiteralType.String:
+                    defaultValue = literal.Value;
+                    return true;
+
+                case LiteralType.Null:
+                    defaultValue = null;
+                    return true;
+
+                default:
+                    base.ErrorReporter.RegisterError(this.Target.Source, literal.StartLine, literal.StartColumn, null, $"Literal type not supported for default value: {literal.LiteralType}");
+                    defaultValue = null;
+                    return false;
+            }
         }
 
         private void ParseContent(TSqlFragment content, StatementList statements)

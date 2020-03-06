@@ -100,12 +100,26 @@ namespace Dibix.Sdk.CodeGeneration
                 else
                 {
                     foreach (SqlQueryParameter parameter in statement.Parameters)
-                        method.AddParameter(parameter.Name, parameter.ClrTypeName);
+                    {
+                        CSharpValue defaultValue = parameter.HasDefaultValue ? ParseDefaultValue(parameter.DefaultValue) : null;
+                        method.AddParameter(parameter.Name, parameter.ClrTypeName, defaultValue);
+                    }
                 }
 
                 if (i + 1 < statements.Count)
                     @class.AddSeparator();
             }
+        }
+
+        private static CSharpValue ParseDefaultValue(object defaultValue)
+        {
+            if (defaultValue == null)
+                return new CSharpValue("null");
+
+            if (defaultValue is bool)
+                return new CSharpValue(defaultValue.ToString().ToLowerInvariant());
+
+            return new CSharpStringValue(defaultValue.ToString(), false);
         }
 
         private static string DetermineResultTypeName(DaoCodeGenerationContext context, SqlStatementInfo query)

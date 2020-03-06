@@ -240,10 +240,10 @@ Parameter: lcid", exception.Message);
             Assert.False(result.Parameters["$body"].IsOptional);
             Assert.Equal("id", result.Parameters["id"].Name);
             Assert.Equal(typeof(int), result.Parameters["id"].Type);
-            Assert.True(result.Parameters["id"].IsOptional);
+            Assert.False(result.Parameters["id"].IsOptional);
             Assert.Equal("fromuri", result.Parameters["fromuri"].Name);
             Assert.Equal(typeof(int), result.Parameters["fromuri"].Type);
-            Assert.True(result.Parameters["fromuri"].IsOptional);
+            Assert.False(result.Parameters["fromuri"].IsOptional);
 
             object body = new ImplicitHttpBody
             {
@@ -464,7 +464,7 @@ Parameter: input", exception.Message);
             Assert.Equal(2, result.Parameters.Count);
             Assert.Equal("targetid", result.Parameters["targetid"].Name);
             Assert.Equal(typeof(int), result.Parameters["targetid"].Type);
-            Assert.True(result.Parameters["targetid"].IsOptional);
+            Assert.False(result.Parameters["targetid"].IsOptional);
             Assert.Equal("id", result.Parameters["id"].Name);
             Assert.Equal(typeof(int), result.Parameters["id"].Type);
             Assert.True(result.Parameters["id"].IsOptional);
@@ -485,7 +485,7 @@ Parameter: input", exception.Message);
             Assert.Equal(9, ((ExplicitHttpParameterInput)arguments["input"]).targetid);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
-        private static void Compile_UriSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpParameterInput input, int id) { }
+        private static void Compile_UriSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpParameterInput input, int id = 0) { }
 
         [Fact]
         public void Compile_RequestSource()

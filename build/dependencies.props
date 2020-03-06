@@ -2,7 +2,6 @@
   <PropertyGroup>
     <!-- Runtime -->
     <ReflectionVersion>4.3.0</ReflectionVersion>
-    <TypeConverterVersion>4.1.0</TypeConverterVersion>
     <DataAnnotationsVersion>4.1.0</DataAnnotationsVersion>
     <SqlClientVersion>4.5.1</SqlClientVersion>
     <DiagnosticsProcessVersion>4.3.0</DiagnosticsProcessVersion>

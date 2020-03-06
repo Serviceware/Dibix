@@ -265,7 +265,7 @@ namespace Dibix.Sdk.Tests
             // EmptyWithParams
             private const string EmptyWithParamsCommandText = "";
 
-            public static int EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, System.Guid? x, bool y, int z, string password, GenericParameterSet ids)
+            public static int EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, System.Guid? x, string password, GenericParameterSet ids, bool y = true, int? z = null)
             {
                 using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                 {
@@ -273,9 +273,9 @@ namespace Dibix.Sdk.Tests
                                                          .SetFromTemplate(new
                                                          {
                                                              x,
+                                                             ids,
                                                              y,
-                                                             z,
-                                                             ids
+                                                             z
                                                          })
                                                          .SetString(nameof(password), password, true)
                                                          .Build();
@@ -444,7 +444,7 @@ namespace Dibix.Sdk.Tests
             // EmptyWithParams
             private const string EmptyWithParamsCommandText = "[dbo].[dbx_tests_syntax_empty_params]";
 
-            public static int EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, System.Guid? x, bool y, int z, string password, GenericParameterSet ids)
+            public static int EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, System.Guid? x, string password, GenericParameterSet ids, bool y = true, int? z = null)
             {
                 using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                 {
@@ -452,9 +452,9 @@ namespace Dibix.Sdk.Tests
                                                          .SetFromTemplate(new
                                                          {
                                                              x,
+                                                             ids,
                                                              y,
-                                                             z,
-                                                             ids
+                                                             z
                                                          })
                                                          .SetString(nameof(password), password, true)
                                                          .Build();
