@@ -116,10 +116,15 @@ namespace Dibix.Sdk.CodeGeneration
             if (defaultValue == null)
                 return new CSharpValue("null");
 
-            if (defaultValue is bool)
-                return new CSharpValue(defaultValue.ToString().ToLowerInvariant());
+            string defailtValueStr = defaultValue.ToString();
 
-            return new CSharpStringValue(defaultValue.ToString(), false);
+            if (defaultValue is bool)
+                return new CSharpValue(defailtValueStr.ToLowerInvariant());
+
+            if (defaultValue is string)
+                return new CSharpStringValue(defailtValueStr, false);
+
+            return new CSharpValue(defailtValueStr);
         }
 
         private static string DetermineResultTypeName(DaoCodeGenerationContext context, SqlStatementInfo query)
