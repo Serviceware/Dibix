@@ -1,7 +1,7 @@
 ﻿-- @Name EmptyWithParams
 -- @GenerateInputClass
 CREATE PROCEDURE [dbo].[dbx_tests_syntax_empty_params_inputclass]
-	/* @Nullable */ @x UNIQUEIDENTIFIER
+	@x UNIQUEIDENTIFIER NULL
   , @y BIT
   , @z INT
 --, /* @Obfuscate */ @password NVARCHAR(128)

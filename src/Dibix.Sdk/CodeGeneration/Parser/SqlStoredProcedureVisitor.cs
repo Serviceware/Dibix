@@ -83,7 +83,7 @@ ReferenceType: {node.DataType.GetType()}");
 
             if (parameter.ClrType != null)
             {
-                bool shouldBeNullable = hints.IsSet(SqlHint.Nullable);
+                bool shouldBeNullable = node.Nullable?.Nullable ?? false;
                 bool isNullable = parameter.ClrType.IsNullable();
                 bool makeNullable = shouldBeNullable && !isNullable;
                 if (makeNullable)
