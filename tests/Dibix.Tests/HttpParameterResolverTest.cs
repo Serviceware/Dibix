@@ -173,7 +173,9 @@ Parameter: lcid", exception.Message);
     }
 }", result.Source);
             Assert.Equal(1, result.Parameters.Count);
-            Assert.Equal(typeof(ExplicitHttpBody), result.Parameters["$body"]);
+            Assert.Equal("$body", result.Parameters["$body"].Name);
+            Assert.Equal(typeof(ExplicitHttpBody), result.Parameters["$body"].Type);
+            Assert.False(result.Parameters["$body"].IsOptional);
 
             object body = new ExplicitHttpBody
             {
@@ -233,9 +235,15 @@ Parameter: lcid", exception.Message);
     }
 }", result.Source);
             Assert.Equal(3, result.Parameters.Count);
-            Assert.Equal(typeof(ImplicitHttpBody), result.Parameters["$body"]);
-            Assert.Equal(typeof(int), result.Parameters["id"]);
-            Assert.Equal(typeof(int), result.Parameters["fromuri"]);
+            Assert.Equal("$body", result.Parameters["$body"].Name);
+            Assert.Equal(typeof(ImplicitHttpBody), result.Parameters["$body"].Type);
+            Assert.False(result.Parameters["$body"].IsOptional);
+            Assert.Equal("id", result.Parameters["id"].Name);
+            Assert.Equal(typeof(int), result.Parameters["id"].Type);
+            Assert.True(result.Parameters["id"].IsOptional);
+            Assert.Equal("fromuri", result.Parameters["fromuri"].Name);
+            Assert.Equal(typeof(int), result.Parameters["fromuri"].Type);
+            Assert.True(result.Parameters["fromuri"].IsOptional);
 
             object body = new ImplicitHttpBody
             {
@@ -301,7 +309,9 @@ Parameter: lcid", exception.Message);
     }
 }", result.Source);
             Assert.Equal(1, result.Parameters.Count);
-            Assert.Equal(typeof(JObject), result.Parameters["$body"]);
+            Assert.Equal("$body", result.Parameters["$body"].Name);
+            Assert.Equal(typeof(JObject), result.Parameters["$body"].Type);
+            Assert.False(result.Parameters["$body"].IsOptional);
 
             object body = JObject.Parse("{\"id\":5}");
             HttpRequestMessage request = new HttpRequestMessage();
@@ -352,7 +362,9 @@ Parameter: lcid", exception.Message);
     }
 }", result.Source);
             Assert.Equal(1, result.Parameters.Count);
-            Assert.Equal(typeof(ExplicitHttpBody), result.Parameters["$body"]);
+            Assert.Equal("$body", result.Parameters["$body"].Name);
+            Assert.Equal(typeof(ExplicitHttpBody), result.Parameters["$body"].Type);
+            Assert.False(result.Parameters["$body"].IsOptional);
 
             object body = new ExplicitHttpBody { SourceId = 7 };
             HttpRequestMessage request = new HttpRequestMessage();
@@ -450,8 +462,12 @@ Parameter: input", exception.Message);
     }
 }", result.Source);
             Assert.Equal(2, result.Parameters.Count);
-            Assert.Equal(typeof(int), result.Parameters["targetid"]);
-            Assert.Equal(typeof(int), result.Parameters["id"]);
+            Assert.Equal("targetid", result.Parameters["targetid"].Name);
+            Assert.Equal(typeof(int), result.Parameters["targetid"].Type);
+            Assert.True(result.Parameters["targetid"].IsOptional);
+            Assert.Equal("id", result.Parameters["id"].Name);
+            Assert.Equal(typeof(int), result.Parameters["id"].Type);
+            Assert.True(result.Parameters["id"].IsOptional);
 
             HttpRequestMessage request = new HttpRequestMessage();
             IDictionary<string, object> arguments = new Dictionary<string, object> { { "targetid", 9 } };

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
@@ -62,7 +63,7 @@ namespace Dibix.Http
 
                 ResolveParameters compiled = Compile(context, out string source);
                 HttpParameterResolutionMethod method = new HttpParameterResolutionMethod(source, compiled);
-                CollectExpectedParameters(method.Parameters, @params, action.BodyContract);
+                CollectExpectedParameters(method, @params, action.BodyContract);
                 return method;
             }
             catch (Exception exception)
@@ -388,15 +389,43 @@ namespace Dibix.Http
             return compiled;
         }
 
-        private static void CollectExpectedParameters(IDictionary<string, Type> target, IEnumerable<HttpParameterInfo> parameters, Type bodyContract)
+        private static void CollectExpectedParameters(HttpParameterResolutionMethod method, IEnumerable<HttpParameterInfo> parameters, Type bodyContract)
         {
             if (bodyContract != null)
-                target.Add(HttpParameterName.Body, bodyContract);
+                method.AddParameter(HttpParameterName.Body, bodyContract, false);
 
             foreach (HttpParameterInfo parameter in parameters.Where(x => x.IsUserParameter))
             {
-                target.Add(parameter.ParameterName, parameter.ParameterType);
+                bool isOptional = IsOptional(parameter);
+                method.AddParameter(parameter.ParameterName, parameter.ParameterType, isOptional);
             }
+        }
+
+        private static bool IsOptional(HttpParameterInfo parameter)
+        {
+            // We consider all query string parameters as optional and bodies as required
+            if (parameter.SourceKind != HttpParameterSourceKind.Uri)
+                return false;
+
+            // We might detect complex types of a reflection target method as an uri source, even though ASP.NET will treat it as a body
+            return CanConvertFromString(parameter.ParameterType);
+        }
+
+        private static bool CanConvertFromString(Type type)
+        {
+            Type underlyingType = Nullable.GetUnderlyingType(type);
+            if (underlyingType != null) 
+                type = underlyingType;
+
+            bool isSimpleType = type.GetTypeInfo().IsPrimitive
+                             || type == typeof(string)
+                             || type == typeof(DateTime)
+                             || type == typeof(decimal)
+                             || type == typeof(Guid)
+                             || type == typeof(DateTimeOffset)
+                             || type == typeof(TimeSpan);
+
+            return isSimpleType || TypeDescriptor.GetConverter(type).CanConvertFrom(typeof(string));
         }
 
         private static void AddParameterFromBody<TSource, TTarget, TConverter>(IDictionary<string, object> arguments, string parameterName) where TConverter : IFormattedInputConverter<TSource, TTarget>, new()
@@ -543,14 +572,16 @@ namespace Dibix.Http
             private readonly ResolveParameters _compiled;
 
             public string Source { get; }
-            public IDictionary<string, Type> Parameters { get; }
+            public IDictionary<string, HttpActionParameter> Parameters { get; }
 
             public HttpParameterResolutionMethod(string source, ResolveParameters compiled)
             {
                 this._compiled = compiled;
                 this.Source = source;
-                this.Parameters = new Dictionary<string, Type>();
+                this.Parameters = new Dictionary<string, HttpActionParameter>();
             }
+
+            public void AddParameter(string name, Type type, bool isOptional) => this.Parameters.Add(name, new HttpActionParameter(name, type, isOptional));
 
             public void PrepareParameters(HttpRequestMessage request, IDictionary<string, object> arguments, IParameterDependencyResolver dependencyResolver)
             {
