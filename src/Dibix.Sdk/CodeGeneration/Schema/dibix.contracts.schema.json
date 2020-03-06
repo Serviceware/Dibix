@@ -5,60 +5,7 @@
       "anyOf": [
         {
           "type": "string",
-          "enum": [
-            "boolean",
-            "byte",
-            "int16",
-            "int32",
-            "int64",
-            "float",
-            "double",
-            "decimal",
-            "binary",
-            "datetime",
-            "datetimeoffset",
-            "string",
-            "uuid",
-            "boolean?",
-            "byte?",
-            "int16?",
-            "int32?",
-            "int64?",
-            "float?",
-            "double?",
-            "decimal?",
-            "binary?",
-            "datetime?",
-            "datetimeoffset?",
-            "string?",
-            "uuid?",
-            "boolean*",
-            "byte*",
-            "int16*",
-            "int32*",
-            "int64*",
-            "float*",
-            "double*",
-            "decimal*",
-            "binary*",
-            "datetime*",
-            "datetimeoffset*",
-            "string*",
-            "uuid*",
-            "boolean?*",
-            "byte?*",
-            "int16?*",
-            "int32?*",
-            "int64?*",
-            "float?*",
-            "double?*",
-            "decimal?*",
-            "binary?*",
-            "datetime?*",
-            "datetimeoffset?*",
-            "string?*",
-            "uuid?*"
-          ]
+          "pattern": "^(boolean|int32|int64|double|float|byte|binary|date|datetime|datetimeoffset|string|uuid)\\??\\*?$"
         },
         {
           "type": "string",
@@ -78,7 +25,8 @@
       "type": "object",
       "properties": {
         "$wcfNs": {
-          "type": "string"
+          "type": "string",
+          "pattern": "^https?:\/\/.+"
         }
       },
       "patternProperties": {
