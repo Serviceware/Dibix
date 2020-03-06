@@ -5,7 +5,7 @@
       "anyOf": [
         {
           "type": "string",
-          "pattern": "^(boolean|int32|int64|double|float|byte|binary|date|datetime|datetimeoffset|string|uuid)\\??\\*?$"
+          "pattern": "^(binary|boolean|byte|datetime|datetimeoffset|decimal|double|float|int16|int32|int64|string|uuid)\\??\\*?$"
         },
         {
           "type": "string",
