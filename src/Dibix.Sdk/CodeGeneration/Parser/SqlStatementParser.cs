@@ -19,14 +19,14 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region ISqlStatementParser Members
-        public bool Read(SqlParserSourceKind sourceKind, object source, Lazy<TSqlModel> modelAccessor, SqlStatementInfo target, string productName, string areaName, ISqlStatementFormatter formatter, IContractResolverFacade contractResolver, IErrorReporter errorReporter)
+        public bool Read(SqlParserSourceKind sourceKind, object source, Lazy<TSqlModel> modelAccessor, SqlStatementInfo target, string productName, string areaName, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, IErrorReporter errorReporter)
         {
             if (!SourceReaders.TryGetValue(sourceKind, out Func<object, TSqlFragment> reader))
                 throw new ArgumentOutOfRangeException(nameof(sourceKind), sourceKind, null);
 
             TSqlFragment fragment = reader(source);
             TSqlElementLocator elementLocator = new TSqlElementLocator(modelAccessor, fragment, null, false);
-            return CollectStatementInfo(fragment, elementLocator, target, productName, areaName, formatter, contractResolver, errorReporter);
+            return CollectStatementInfo(fragment, elementLocator, target, productName, areaName, formatter, typeResolver, schemaRegistry, errorReporter);
         }
         #endregion
 
@@ -39,7 +39,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static TSqlFragment ReadFromTextReader(TextReader reader) => ScriptDomFacade.Load(reader);
 
-        private static bool CollectStatementInfo(TSqlFragment fragment, TSqlElementLocator elementLocator, SqlStatementInfo target, string productName, string areaName, ISqlStatementFormatter formatter, IContractResolverFacade contractResolver, IErrorReporter errorReporter)
+        private static bool CollectStatementInfo(TSqlFragment fragment, TSqlElementLocator elementLocator, SqlStatementInfo target, string productName, string areaName, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, IErrorReporter errorReporter)
         {
             TVisitor visitor = new TVisitor
             {
@@ -48,7 +48,8 @@ namespace Dibix.Sdk.CodeGeneration
                 ElementLocator = elementLocator,
                 Formatter = formatter,
                 Target = target,
-                ContractResolver = contractResolver,
+                TypeResolver = typeResolver,
+                SchemaRegistry = schemaRegistry,
                 ErrorReporter = errorReporter
             };
             visitor.Hints.AddRange(SqlHintParser.FromFragment(target.Source, errorReporter, fragment));

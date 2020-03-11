@@ -11,34 +11,6 @@ namespace Dibix.Sdk
     {
         private static readonly IDictionary<string, Type> CSharpTypeNames = LoadCSharpTypeNames().ToDictionary(x => x.Key, x => x.Value);
 
-        internal static bool IsNullable(this Type type)
-        {
-            return !type.IsValueType || Nullable.GetUnderlyingType(type) != null;
-        }
-
-        internal static Type MakeNullable(this Type type)
-        {
-            Type nullableType = typeof(Nullable<>).MakeGenericType(type);
-            return nullableType;
-        }
-
-        public static string ToCSharpTypeName(this Type clrType)
-        {
-            Type nullableType = Nullable.GetUnderlyingType(clrType);
-            if (nullableType != null)
-                clrType = nullableType;
-
-            using (CSharpCodeProvider compiler = new CSharpCodeProvider())
-            {
-                CodeTypeReference type = new CodeTypeReference(clrType);
-                string result = compiler.GetTypeOutput(type);
-                if (nullableType != null)
-                    result = String.Concat(result, '?');
-
-                return result;
-            }
-        }
-
         internal static Type ToClrType(this string cSharpTypeName)
         {
             CSharpTypeNames.TryGetValue(cSharpTypeName, out Type clrType);

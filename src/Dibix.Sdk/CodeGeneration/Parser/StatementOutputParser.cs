@@ -16,7 +16,7 @@ namespace Dibix.Sdk.CodeGeneration
         private const string ReturnHintConverter = "Converter";
         private const string ReturnHintResultType = "ResultType";
 
-        public static IEnumerable<SqlQueryResult> Parse(SqlStatementInfo target, TSqlFragment node, TSqlElementLocator elementLocator, ICollection<SqlHint> hints, IContractResolverFacade contractResolver, IErrorReporter errorReporter)
+        public static IEnumerable<SqlQueryResult> Parse(SqlStatementInfo target, TSqlFragment node, TSqlElementLocator elementLocator, ICollection<SqlHint> hints, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, IErrorReporter errorReporter)
         {
             StatementOutputVisitor visitor = new StatementOutputVisitor(target.Source, elementLocator, errorReporter);
             node.Accept(visitor);
@@ -30,7 +30,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (!ValidateReturnHints(target, node, returnHints, visitor.Results, errorReporter)) 
                 yield break;
 
-            foreach (SqlQueryResult result in CollectResults(target, node, contractResolver, errorReporter, returnHints, visitor)) 
+            foreach (SqlQueryResult result in CollectResults(target, node, typeResolver, schemaRegistry, errorReporter, returnHints, visitor)) 
                 yield return result;
         }
 
@@ -107,7 +107,7 @@ namespace Dibix.Sdk.CodeGeneration
             return true;
         }
 
-        private static IEnumerable<SqlQueryResult> CollectResults(SqlStatementInfo target, TSqlFragment node, IContractResolverFacade contractResolver, IErrorReporter errorReporter, IList<SqlHint> returnHints, StatementOutputVisitor visitor)
+        private static IEnumerable<SqlQueryResult> CollectResults(SqlStatementInfo target, TSqlFragment node, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, IErrorReporter errorReporter, IList<SqlHint> returnHints, StatementOutputVisitor visitor)
         {
             ICollection<string> usedOutputNames = new HashSet<string>();
             for (int i = 0; i < returnHints.Count; i++)
@@ -131,16 +131,16 @@ namespace Dibix.Sdk.CodeGeneration
                     ResultMode = resultMode,
                     Converter = converter,
                     SplitOn = splitOn,
-                    ResultType = ParseResultType(target, node, returnHints, resultMode, returnHint, contractResolver, errorReporter)
+                    ProjectToType = ParseProjectionContract(target, node, returnHints, resultMode, returnHint, typeResolver, errorReporter)
                 };
 
-                if (!TryParseResultContracts(target, returnHint, typeNamesStr, contractResolver, errorReporter, out IEnumerable<ContractInfo> contracts))
+                if (!TryParseResultTypes(target, resultMode, returnHint, typeNamesStr, typeResolver, out IEnumerable<TypeReference> types))
                     continue;
-                
-                result.Contracts.AddRange(contracts);
+
+                result.Types.AddRange(types);
 
                 OutputSelectResult output = visitor.Results[i];
-                ValidateResult(i == 0, returnHints.Count, returnHint, result, output.Columns, usedOutputNames, target, errorReporter);
+                ValidateResult(i == 0, returnHints.Count, returnHint, result, output.Columns, usedOutputNames, target, schemaRegistry, errorReporter);
                 result.Columns.AddRange(output.Columns.Select(x => x.ColumnName));
 
                 yield return result;
@@ -175,11 +175,11 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static ContractName ParseResultType(SqlStatementInfo target, TSqlFragment node, ICollection<SqlHint> returnHints, SqlQueryResultMode resultMode, SqlHint returnHint, IContractResolverFacade contractResolver, IErrorReporter errorReporter)
+        private static TypeReference ParseProjectionContract(SqlStatementInfo target, TSqlFragment node, ICollection<SqlHint> returnHints, SqlQueryResultMode resultMode, SqlHint returnHint, ITypeResolverFacade typeResolver, IErrorReporter errorReporter)
         {
             SqlQueryResultMode[] supportedResultTypeResultModes = { SqlQueryResultMode.Many };
             string resultTypeStr = returnHint.SelectValueOrDefault(ReturnHintResultType);
-            if (String.IsNullOrEmpty(resultTypeStr)) 
+            if (String.IsNullOrEmpty(resultTypeStr))
                 return null;
 
             bool singleResult = returnHints.Count <= 1;
@@ -199,21 +199,20 @@ namespace Dibix.Sdk.CodeGeneration
             if (singleResult || isResultTypeSupported) 
                 return null;
 
-            ContractInfo contract = contractResolver.ResolveContract(resultTypeStr, x => errorReporter.RegisterError(target.Source, returnHint.Line, returnHint.Column, null, x));
-            return contract?.Name;
+            return typeResolver.ResolveType(resultTypeStr, target.Namespace, target.Source, returnHint.Line, returnHint.Column, resultMode == SqlQueryResultMode.Many);
         }
 
-        private static bool TryParseResultContracts(SqlStatementInfo target, SqlHint returnHint, string typeNamesStr, IContractResolverFacade contractResolver, IErrorReporter errorReporter, out IEnumerable<ContractInfo> contracts)
+        private static bool TryParseResultTypes(SqlStatementInfo target, SqlQueryResultMode resultMode, SqlHint returnHint, string typeNamesStr, ITypeResolverFacade typeResolver, out IEnumerable<TypeReference> types)
         {
             string[] typeNames = typeNamesStr.Split(';');
-            IList<ContractInfo> returnTypes = typeNames.Select(x => contractResolver.ResolveContract(x, y => errorReporter.RegisterError(target.Source, returnHint.Line, returnHint.Column, null, y))).ToArray();
+            IList<TypeReference> returnTypes = typeNames.Select(x => typeResolver.ResolveType(x, target.Namespace, target.Source, returnHint.Line, returnHint.Column, resultMode == SqlQueryResultMode.Many)).ToArray();
             if (returnTypes.All(x => x != null))
             {
-                contracts = returnTypes;
+                types = returnTypes;
                 return true;
             }
 
-            contracts = Enumerable.Empty<ContractInfo>();
+            types = Enumerable.Empty<TypeReference>();
             return false;
         }
 
@@ -226,6 +225,7 @@ namespace Dibix.Sdk.CodeGeneration
           , IEnumerable<OutputColumnResult> columns
           , ICollection<string> usedOutputNames
           , SqlStatementInfo target
+          , ISchemaRegistry schemaRegistry
           , IErrorReporter errorReporter
         )
         {
@@ -234,15 +234,25 @@ namespace Dibix.Sdk.CodeGeneration
             IList<ICollection<OutputColumnResult>> columnGroups = SplitColumns(columns, result.SplitOn).ToArray();
             ValidateSplitOn(returnHint, result, columnGroups, target, errorReporter);
 
-            for (int i = 0; i < result.Contracts.Count; i++)
+            for (int i = 0; i < result.Types.Count; i++)
             {
-                ContractInfo returnType = result.Contracts[i];
+                TypeReference returnType = result.Types[i];
                 ICollection<OutputColumnResult> columnGroup = columnGroups[i];
+                SchemaDefinition schema = null;
+                if (returnType is SchemaTypeReference schemaTypeReference)
+                    schema = schemaRegistry.GetSchema(schemaTypeReference);
 
                 // SELECT 1 => Query<int>/Single<int> => No entity property validation + No missing alias validation
                 bool singleColumn = columnGroup.Count == 1;
-                if (singleColumn && returnType.IsPrimitiveType)
+                bool isPrimitive = returnType is PrimitiveTypeReference || schema is EnumSchema;
+                if (singleColumn && isPrimitive)
                     continue;
+
+                if (schema == null)
+                    continue;
+
+                if (!(schema is ObjectSchema objectSchema))
+                    throw new NotSupportedException($"Unsupported return type for result validation: {returnType.GetType()}");
 
                 foreach (OutputColumnResult columnResult in columnGroup)
                 {
@@ -255,8 +265,8 @@ namespace Dibix.Sdk.CodeGeneration
                     }
 
                     // Validate if entity property exists
-                    if (returnType.Properties.All(x => !String.Equals(x, columnResult.ColumnName, StringComparison.OrdinalIgnoreCase)))
-                        errorReporter.RegisterError(target.Source, columnResult.ColumnNameSource.StartLine, columnResult.ColumnNameSource.StartColumn, null, $"Property '{columnResult.ColumnName}' not found on return type '{returnType.Name}'");
+                    if (objectSchema.Properties.All(x => !String.Equals(x.Name, columnResult.ColumnName, StringComparison.OrdinalIgnoreCase)))
+                        errorReporter.RegisterError(target.Source, columnResult.ColumnNameSource.StartLine, columnResult.ColumnNameSource.StartColumn, null, $"Property '{columnResult.ColumnName}' not found on return type '{schema.FullName}'");
                 }
             }
         }
@@ -278,7 +288,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static void ValidateSplitOn(SqlHint returnHint, SqlQueryResult result, IList<ICollection<OutputColumnResult>> columnGroups, SqlStatementInfo target, IErrorReporter errorReporter)
         {
-            if (result.Contracts.Count > 1 && String.IsNullOrEmpty(result.SplitOn))
+            if (result.Types.Count > 1 && String.IsNullOrEmpty(result.SplitOn))
             {
                 errorReporter.RegisterError(target.Source, returnHint.Line, returnHint.Column, null, "The 'SplitOn' property must be specified when using multiple return types. Mark it in the @Return hint: -- @Return ClrTypes:<ClrTypeName> Name:<ResultName> SplitOn:<SplitColumnName>");
                 return;
@@ -289,7 +299,7 @@ namespace Dibix.Sdk.CodeGeneration
                 errorReporter.RegisterError(target.Source, returnHint.Line, returnHint.Column, null, "Part of the 'SplitOn' property value did not match a column in the output expression");
             }
 
-            if (columnGroups.Count != result.Contracts.Count)
+            if (columnGroups.Count != result.Types.Count)
             {
                 errorReporter.RegisterError(target.Source, returnHint.Line, returnHint.Column, null, "The 'SplitOn' property does not match the number of return types");
             }

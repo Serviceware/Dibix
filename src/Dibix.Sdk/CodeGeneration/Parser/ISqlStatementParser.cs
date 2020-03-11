@@ -5,6 +5,6 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public interface ISqlStatementParser
     {
-        bool Read(SqlParserSourceKind sourceKind, object source, Lazy<TSqlModel> modelAccessor, SqlStatementInfo target, string productName, string areaName, ISqlStatementFormatter formatter, IContractResolverFacade contractResolver, IErrorReporter errorReporter);
+        bool Read(SqlParserSourceKind sourceKind, object source, Lazy<TSqlModel> modelAccessor, SqlStatementInfo target, string productName, string areaName, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, IErrorReporter errorReporter);
     }
 }

@@ -23,26 +23,26 @@ namespace Dibix.Sdk.CodeGeneration
 
             var namespaceGroups = context.Model
                                          .UserDefinedTypes
-                                         .GroupBy(x => context.WriteNamespaces ? x.Namespace.RelativeNamespace : null)
+                                         .GroupBy(x => context.WriteNamespaces ? NamespaceUtility.BuildRelativeNamespace(context.Model.RootNamespace, this.LayerName, x.Namespace) : null)
                                          .ToArray();
 
             for (int i = 0; i < namespaceGroups.Length; i++)
             {
-                IGrouping<string, UserDefinedTypeDefinition> namespaceGroup = namespaceGroups[i];
-                IList<UserDefinedTypeDefinition> userDefinedTypes = namespaceGroup.ToArray();
+                IGrouping<string, UserDefinedTypeSchema> namespaceGroup = namespaceGroups[i];
+                IList<UserDefinedTypeSchema> userDefinedTypes = namespaceGroup.ToArray();
                 CSharpStatementScope scope = namespaceGroup.Key != null ? context.Output.BeginScope(namespaceGroup.Key) : context.Output;
                 for (int j = 0; j < userDefinedTypes.Count; j++)
                 {
-                    UserDefinedTypeDefinition userDefinedType = userDefinedTypes[j];
-                    CSharpClass @class = scope.AddClass(userDefinedType.DisplayName, CSharpModifiers.Public | CSharpModifiers.Sealed)
-                                              .Inherits($"StructuredType<{userDefinedType.DisplayName}, {String.Join(", ", userDefinedType.Columns.Select(x => x.Type))}>");
+                    UserDefinedTypeSchema userDefinedType = userDefinedTypes[j];
+                    CSharpClass @class = scope.AddClass(userDefinedType.DefinitionName, CSharpModifiers.Public | CSharpModifiers.Sealed)
+                                              .Inherits($"StructuredType<{userDefinedType.DefinitionName}, {String.Join(", ", userDefinedType.Properties.Select(x => context.ResolveTypeName(x.Type)))}>");
 
-                    @class.AddConstructor(body: $"base.ImportSqlMetadata(() => this.Add({String.Join(", ", userDefinedType.Columns.Select(x => "default"))}));"
-                                        , baseConstructorParameters: $"\"{userDefinedType.TypeName}\"");
+                    @class.AddConstructor(body: $"base.ImportSqlMetadata(() => this.Add({String.Join(", ", userDefinedType.Properties.Select(x => "default"))}));"
+                                        , baseConstructorParameters: $"\"{userDefinedType.UdtTypeName}\"");
 
-                    CSharpMethod method = @class.AddMethod("Add", "void", $"base.AddValues({String.Join(", ", userDefinedType.Columns.Select(x => x.Name))});");
-                    foreach (UserDefinedTypeColumn column in userDefinedType.Columns)
-                        method.AddParameter(column.Name, column.Type);
+                    CSharpMethod method = @class.AddMethod("Add", "void", $"base.AddValues({String.Join(", ", userDefinedType.Properties.Select(x => x.Name))});");
+                    foreach (ObjectSchemaProperty column in userDefinedType.Properties)
+                        method.AddParameter(column.Name, context.ResolveTypeName(column.Type));
 
                     if (j + 1 < userDefinedTypes.Count)
                         scope.AddSeparator();

@@ -17,10 +17,11 @@ namespace Dibix.Sdk.CodeGeneration
         {
             base.Target.ProcedureName = String.Join(".", node.ProcedureReference.Name.Identifiers.Select(x => Identifier.EncodeIdentifier(x.Value)));
 
+            this.ParseContent(node, node.StatementList);
+
             foreach (ProcedureParameter parameter in node.Parameters)
                 this.ParseParameter(parameter);
 
-            this.ParseContent(node, node.StatementList);
             base.ExplicitVisit(node);
         }
         #endregion
@@ -33,9 +34,6 @@ namespace Dibix.Sdk.CodeGeneration
             if (node.Modifier == ParameterModifier.Output) 
                 this.ErrorReporter.RegisterError(this.Target.Source, node.StartLine, node.StartColumn, null, $"Output parameters are not supported: {parameterName}");
 
-            // Determine parameter type
-            SqlQueryParameter parameter = new SqlQueryParameter { Name = parameterName };
-
             // Parse type name hint
             int startIndex = node.FirstTokenIndex;
             TSqlParserToken previousToken = node.ScriptTokenStream[--startIndex];
@@ -43,92 +41,60 @@ namespace Dibix.Sdk.CodeGeneration
                 previousToken = node.ScriptTokenStream[--startIndex];
 
             ICollection<SqlHint> hints = SqlHintParser.FromToken(this.Target.Source, this.ErrorReporter, previousToken).ToArray();
-            if (previousToken.TokenType == SqlTokenType.MultilineComment)
-                parameter.ClrTypeName = hints.SingleHintValue(SqlHint.ClrType);
 
-            parameter.Obfuscate = hints.IsSet(SqlHint.Obfuscate);
+            SqlQueryParameter parameter = new SqlQueryParameter { Name = parameterName };
             
-            // NOTE: Uncomment line dbx_tests_syntax_empty_params_inputclass line 5, whenever this is implemented
-            if (parameter.Obfuscate && this.Target.GenerateInputClass) 
-            {
-                this.ErrorReporter.RegisterError(this.Target.Source, node.StartLine, node.StartColumn, null, $@"Parameter obfuscation is currently not supported with input classes: {parameter.Name}
-Either remove the @GenerateInputClass hint on the statement or the @Obfuscate hint on the parameter");
-            }
-
-            parameter.ClrType = node.DataType.ToClrType();
-            if (parameter.ClrType == null)
-            {
-                if (node.DataType is UserDataTypeReference userDataType)
-                {
-                    parameter.TypeName = $"[{userDataType.Name.SchemaIdentifier.Value}].[{userDataType.Name.BaseIdentifier.Value}]";
-
-                    // Type name hint is the only way to determine the UDT .NET type, that's why it's required
-                    if (String.IsNullOrEmpty(parameter.ClrTypeName))
-                    {
-                        this.ErrorReporter.RegisterError(this.Target.Source, node.StartLine, node.StartColumn, null, $@"Could not determine CLR type for table value parameter
-Parameter: {parameter.Name}
-UDT type: {parameter.TypeName}
-Please mark it with /* @ClrType <ClrTypeName> */");
-                    }
-
-                    parameter.Check = ContractCheck.NotNull;
-                }
-                else
-                {
-                    throw new InvalidOperationException($@"Unknown data type reference for parameter
-Parameter: {parameter.Name}
-ReferenceType: {node.DataType.GetType()}");
-                }
-            }
-
-            if (parameter.ClrType != null)
-            {
-                bool shouldBeNullable = node.Nullable?.Nullable ?? false;
-                bool isNullable = parameter.ClrType.IsNullable();
-                bool makeNullable = shouldBeNullable && !isNullable;
-                if (makeNullable)
-                    parameter.ClrType = parameter.ClrType.MakeNullable();
-
-                if (String.IsNullOrEmpty(parameter.ClrTypeName) || makeNullable)
-                    parameter.ClrTypeName = parameter.ClrType.ToCSharpTypeName();
-
-                parameter.Check = EvaluateContractCheck(parameter.Check, !shouldBeNullable && isNullable, parameter.ClrType);
-            }
-
-            if (node.Value != null)
-            {
-                if (!(node.Value is Literal literal))
-                {
-                    base.ErrorReporter.RegisterError(this.Target.Source, node.Value.StartLine, node.Value.StartColumn, null, $"Only literals are supported for default values: {node.Value.Dump()}");
-                    return;
-                }
-
-                parameter.HasDefaultValue = this.TryParseDefaultValue(literal, parameter.ClrType, out object defaultValue);
-                parameter.DefaultValue = defaultValue;
-            }
+            this.ParseParameterObfuscate(node, parameter, hints);
+            this.ParseParameterType(node, parameter, hints);
+            this.ParseDefaultValue(node, parameter);
 
             this.Target.Parameters.Add(parameter);
         }
 
-        private static ContractCheck EvaluateContractCheck(ContractCheck currentValue, bool requiresCheck, Type clrType)
+        private void ParseParameterType(DeclareVariableElement parameter, SqlQueryParameter target, IEnumerable<SqlHint> hints)
         {
-            if (currentValue != ContractCheck.None)
-                return currentValue;
-
-            if (!requiresCheck)
-                return ContractCheck.None;
-
-            if (clrType == typeof(string))
-                return ContractCheck.NotNullOrEmpty;
-
-            return ContractCheck.NotNull;
+            bool isNullable = parameter.Nullable?.Nullable ?? false;
+            target.Type = parameter.DataType.ToTypeReference(isNullable, target.Name, this.Target.Namespace, this.Target.Source, hints, base.TypeResolver, base.ErrorReporter, out string udtTypeName);
+            target.UdtTypeName = udtTypeName;
         }
 
-        private bool TryParseDefaultValue(Literal literal, Type targetType, out object defaultValue)
+        private void ParseParameterObfuscate(TSqlFragment parameter, SqlQueryParameter target, IEnumerable<SqlHint> hints)
+        {
+            target.Obfuscate = hints.IsSet(SqlHint.Obfuscate);
+
+            // NOTE: Uncomment line dbx_tests_syntax_empty_params_inputclass line 5, whenever this is implemented
+            if (target.Obfuscate && this.Target.GenerateInputClass)
+            {
+                this.ErrorReporter.RegisterError(this.Target.Source, parameter.StartLine, parameter.StartColumn, null, $@"Parameter obfuscation is currently not supported with input classes: {target.Name}
+Either remove the @GenerateInputClass hint on the statement or the @Obfuscate hint on the parameter");
+            }
+        }
+
+        private void ParseDefaultValue(DeclareVariableElement parameter, SqlQueryParameter target)
+        {
+            if (parameter.Value == null)
+                return;
+
+            if (!(parameter.Value is Literal literal))
+            {
+                base.ErrorReporter.RegisterError(this.Target.Source, parameter.Value.StartLine, parameter.Value.StartColumn, null, $"Only literals are supported for default values: {parameter.Value.Dump()}");
+                return;
+            }
+
+            if (!(target.Type is PrimitiveTypeReference primitiveTypeReference))
+                throw new InvalidOperationException($@"Unexpected parameter type for default value
+Parameter: {target.Name}
+DataType: {target.Type.GetType()}");
+
+            target.HasDefaultValue = this.TryParseParameterDefaultValue(literal, primitiveTypeReference.Type, out object defaultValue);
+            target.DefaultValue = defaultValue;
+        }
+
+        private bool TryParseParameterDefaultValue(Literal literal, PrimitiveDataType targetType, out object defaultValue)
         {
             switch (literal.LiteralType)
             {
-                case LiteralType.Integer when targetType == typeof(bool):
+                case LiteralType.Integer when targetType == PrimitiveDataType.Boolean:
                     defaultValue = literal.Value == "1";
                     return true;
 
@@ -161,19 +127,17 @@ ReferenceType: {node.DataType.GetType()}");
             this.Target.IsFileApi = this.Hints.IsSet(SqlHint.FileApi);
             this.Target.GenerateInputClass = this.Hints.IsSet(SqlHint.GenerateInputClass);
             this.Target.Async = this.Hints.IsSet(SqlHint.Async);
-            this.Target.ResultType = this.ParseResultType(base.Target.Source);
 
             this.ParseResults(content, this.Hints);
 
-            this.Target.GridResultType = this.ParseGridResultType(relativeNamespace);
+            bool generateResultClass = false;
+            this.Target.ResultType = this.DetermineResultType(relativeNamespace, ref generateResultClass);
+            this.Target.GenerateResultClass = generateResultClass;
 
             this.ParseBody(statements ?? new StatementList());
         }
 
-        private Namespace ParseNamespace(string relativeNamespace)
-        {
-            return Namespace.Create(this.ProductName, this.AreaName, LayerName.Data, relativeNamespace);
-        }
+        private string ParseNamespace(string relativeNamespace) => NamespaceUtility.BuildAbsoluteNamespace(this.ProductName, this.AreaName, LayerName.Data, relativeNamespace);
 
         private string ParseName()
         {
@@ -181,23 +145,38 @@ ReferenceType: {node.DataType.GetType()}");
             return !String.IsNullOrEmpty(name) ? name : base.Target.Name;
         }
 
-        private ContractName ParseResultType(string source)
+        private TypeReference DetermineResultType(string relativeNamespace, ref bool generateResultClass)
         {
             SqlHint resultTypeHint = this.Hints.SingleHint(SqlHint.ResultTypeName);
-            if (resultTypeHint == null) 
-                return null;
             
-            ContractInfo contract = this.ContractResolver.ResolveContract(resultTypeHint.Value, x => this.ErrorReporter.RegisterError(source, resultTypeHint.Line, resultTypeHint.Column, null, x));
-            return contract?.Name;
+            // Explicit result type
+            if (resultTypeHint != null)
+            {
+                TypeReference type = this.TypeResolver.ResolveType(resultTypeHint.Value, this.Target.Namespace, this.Target.Source, resultTypeHint.Line, resultTypeHint.Column, false);
+                return type;
+            }
+
+            if (this.Target.IsFileApi)
+                return null;
+
+            if (this.Target.Results.Count == 0)
+                return null;
+
+            // Grid result is merged to first result type
+            if (this.Target.MergeGridResult)
+                return this.Target.Results[0].Types[0];
+
+            // Generate grid result type
+            if (this.Target.Results.Count > 1)
+            {
+                generateResultClass = true;
+                return this.GenerateGridResultType(relativeNamespace);
+            }
+
+            return this.Target.Results[0].Types[0];
         }
 
-        private GridResultType ParseGridResultType(string relativeNamespace)
-        {
-            bool isGridResult = this.Target.Results.Count > 1 && this.Target.ResultType == null && !this.Target.MergeGridResult;
-            return isGridResult ? this.GenerateGridResultType(relativeNamespace) : null;
-        }
-
-        private GridResultType GenerateGridResultType(string relativeNamespace)
+        private TypeReference GenerateGridResultType(string relativeNamespace)
         {
             string gridResultTypeNamespace;
             string gridResultTypeName;
@@ -218,12 +197,23 @@ ReferenceType: {node.DataType.GetType()}");
                 gridResultTypeName = $"{this.Target.Name}{GridResultTypeSuffix}";
             }
 
-            return new GridResultType(Namespace.Create(this.ProductName, this.AreaName, LayerName.DomainModel, gridResultTypeNamespace), gridResultTypeName);
+            string @namespace = NamespaceUtility.BuildAbsoluteNamespace(this.ProductName, this.AreaName, LayerName.DomainModel, gridResultTypeNamespace);
+            SchemaTypeReference typeReference = SchemaTypeReference.WithNamespace(@namespace, gridResultTypeName, this.Target.Source, 0, 0, false, false);
+            if (base.SchemaRegistry.IsRegistered(typeReference.Key)) 
+                return typeReference;
+
+            ObjectSchema schema = new ObjectSchema(@namespace, gridResultTypeName);
+            schema.Properties.AddRange(this.Target
+                                           .Results
+                                           .Select(x => new ObjectSchemaProperty(x.Name, x.ResultType, false, false, SerializationBehavior.Always, false)));
+            base.SchemaRegistry.Populate(schema);
+
+            return typeReference;
         }
 
         private void ParseResults(TSqlFragment node, ICollection<SqlHint> hints)
         {
-            IEnumerable<SqlQueryResult> results = StatementOutputParser.Parse(this.Target, node, this.ElementLocator, hints, this.ContractResolver, this.ErrorReporter);
+            IEnumerable<SqlQueryResult> results = StatementOutputParser.Parse(this.Target, node, this.ElementLocator, hints, this.TypeResolver, this.SchemaRegistry, this.ErrorReporter);
             this.Target.Results.AddRange(results);
         }
 

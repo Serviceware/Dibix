@@ -13,7 +13,7 @@ namespace Dibix.Sdk.CodeGeneration
             { SqlParserSourceKind.Stream, ReadFromStream }
         };
 
-        public bool Read(SqlParserSourceKind sourceKind, object source, Lazy<TSqlModel> modelAccessor, SqlStatementInfo target, string productName, string areaName, ISqlStatementFormatter formatter, IContractResolverFacade contractResolver, IErrorReporter errorReporter)
+        public bool Read(SqlParserSourceKind sourceKind, object source, Lazy<TSqlModel> modelAccessor, SqlStatementInfo target, string productName, string areaName, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, IErrorReporter errorReporter)
         {
             if (!SourceReaders.TryGetValue(sourceKind, out Func<object, string> reader))
                 throw new ArgumentOutOfRangeException(nameof(sourceKind), sourceKind, null);

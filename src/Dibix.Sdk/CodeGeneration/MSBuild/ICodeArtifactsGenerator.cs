@@ -4,6 +4,6 @@ namespace Dibix.Sdk.CodeGeneration.MSBuild
 {
     internal interface ICodeArtifactsGenerator
     {
-        bool Generate(CodeArtifactsGenerationModel model, IErrorReporter errorReporter);
+        bool Generate(CodeArtifactsGenerationModel model, ISchemaRegistry schemaRegistry, IErrorReporter errorReporter);
     }
 }

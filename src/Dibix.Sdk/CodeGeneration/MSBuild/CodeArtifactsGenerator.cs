@@ -12,7 +12,7 @@ namespace Dibix.Sdk.CodeGeneration.MSBuild
           , typeof(OpenApiArtifactsGenerationUnit)
         };
 
-        public bool Generate(CodeArtifactsGenerationModel model, IErrorReporter errorReporter)
+        public bool Generate(CodeArtifactsGenerationModel model, ISchemaRegistry schemaRegistry, IErrorReporter errorReporter)
         {
             bool failed = false;
             foreach (Type unitType in Units)
@@ -21,7 +21,7 @@ namespace Dibix.Sdk.CodeGeneration.MSBuild
                 if (!unit.ShouldGenerate(model))
                     continue;
 
-                if (!unit.Generate(model, errorReporter))
+                if (!unit.Generate(model, schemaRegistry, errorReporter))
                     failed = true;
             }
             return !failed;

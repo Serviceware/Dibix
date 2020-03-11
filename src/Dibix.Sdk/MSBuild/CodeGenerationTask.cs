@@ -30,6 +30,7 @@ namespace Dibix.Sdk.MSBuild
         )
         {
             IErrorReporter errorReporter = new MSBuildErrorReporter(logger);
+            ISchemaRegistry schemaRegistry = new SchemaRegistry(errorReporter);
             CodeArtifactsGenerationModel model = MSBuildCodeGenerationModelLoader.Create
             (
                 projectDirectory
@@ -46,11 +47,12 @@ namespace Dibix.Sdk.MSBuild
               , modelCollation
               , sqlReferencePath
               , task
+              , schemaRegistry
               , errorReporter
             );
 
             ICodeArtifactsGenerator generator = new CodeArtifactsGenerator();
-            bool result = generator.Generate(model, errorReporter);
+            bool result = generator.Generate(model, schemaRegistry, errorReporter);
             additionalAssemblyReferences = model.AdditionalAssemblyReferences.ToArray();
             return result;
         }

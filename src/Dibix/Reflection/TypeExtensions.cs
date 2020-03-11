@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace Dibix
 {
-    internal static partial class TypeExtensions
+    internal static class TypeExtensions
     {
         public static bool IsPrimitive(this Type type)
         {

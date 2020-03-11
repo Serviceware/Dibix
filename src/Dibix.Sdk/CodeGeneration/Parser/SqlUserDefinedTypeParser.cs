@@ -12,30 +12,22 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly IErrorReporter _errorReporter;
         private readonly string _productName;
         private readonly string _areaName;
+        private readonly ITypeResolverFacade _typeResolver;
 
-        public SqlUserDefinedTypeParser(IErrorReporter errorReporter, string productName, string areaName)
+        public SqlUserDefinedTypeParser(string productName, string areaName, ITypeResolverFacade typeResolver, IErrorReporter errorReporter)
         {
-            this._errorReporter = errorReporter;
             this._productName = productName;
             this._areaName = areaName;
+            this._typeResolver = typeResolver;
+            this._errorReporter = errorReporter;
         }
 
-        public UserDefinedTypeDefinition Parse(string filePath)
+        public UserDefinedTypeSchema Parse(string filePath)
         {
             TSqlFragment fragment = ScriptDomFacade.Load(filePath);
-            UserDefinedTypeVisitor visitor = new UserDefinedTypeVisitor(() => SqlHintParser.FromFragment(filePath, this._errorReporter, fragment).ToArray(), this._productName, this._areaName);
+            UserDefinedTypeVisitor visitor = new UserDefinedTypeVisitor(this._productName, this._areaName, filePath, fragment, this._typeResolver, this._errorReporter);
             fragment.Accept(visitor);
             return visitor.Definition;
-        }
-
-        private static string GenerateDisplayName(string udtTypeName)
-        {
-            const string delimiter = "_udt_";
-            int index = udtTypeName.IndexOf(delimiter, StringComparison.Ordinal);
-            if (index >= 0)
-                udtTypeName = udtTypeName.Substring(index + delimiter.Length);
-
-            return CultureInfo.InvariantCulture.TextInfo.ToTitleCase(udtTypeName).Replace("_", String.Empty);
         }
 
         private class UserDefinedTypeVisitor : TSqlFragmentVisitor
@@ -43,28 +35,44 @@ namespace Dibix.Sdk.CodeGeneration
             private readonly Lazy<ICollection<SqlHint>> _hintsAccessor;
             private readonly string _productName;
             private readonly string _areaName;
+            private readonly string _source;
+            private readonly ITypeResolverFacade _typeResolver;
+            private readonly IErrorReporter _errorReporter;
 
-            public UserDefinedTypeDefinition Definition { get; private set; }
+            public UserDefinedTypeSchema Definition { get; private set; }
 
-            public UserDefinedTypeVisitor(Func<ICollection<SqlHint>> hintsProvider, string productName, string areaName)
+            public UserDefinedTypeVisitor(string productName, string areaName, string source, TSqlFragment fragment, ITypeResolverFacade typeResolver, IErrorReporter errorReporter)
             {
                 this._productName = productName;
                 this._areaName = areaName;
-                this._hintsAccessor = new Lazy<ICollection<SqlHint>>(hintsProvider);
+                this._source = source;
+                this._typeResolver = typeResolver;
+                this._errorReporter = errorReporter;
+                this._hintsAccessor = new Lazy<ICollection<SqlHint>>(() => SqlHintParser.FromFragment(source, errorReporter, fragment).ToArray());
             }
 
             public override void Visit(CreateTypeTableStatement node)
             {
                 string typeName = node.Name.BaseIdentifier.Value;
                 string relativeNamespace = this._hintsAccessor.Value.SingleHintValue(SqlHint.Namespace);
-                string displayName = this._hintsAccessor.Value.SingleHintValue(SqlHint.Name);
-                if (String.IsNullOrEmpty(displayName))
-                    displayName = GenerateDisplayName(typeName);
+                string definitionName = this._hintsAccessor.Value.SingleHintValue(SqlHint.Name);
+                if (String.IsNullOrEmpty(definitionName))
+                    definitionName = GenerateDefinitionName(typeName);
 
-                Namespace @namespace = Namespace.Create(this._productName, this._areaName, LayerName.Data, relativeNamespace);
+                string @namespace = NamespaceUtility.BuildAbsoluteNamespace(this._productName, this._areaName, LayerName.Data, relativeNamespace);
                 ICollection<string> notNullableColumns = new HashSet<string>(GetNotNullableColumns(node.Definition));
-                this.Definition = new UserDefinedTypeDefinition(typeName, @namespace, displayName);
-                this.Definition.Columns.AddRange(node.Definition.ColumnDefinitions.Select(x => MapColumn(x, notNullableColumns)));
+                this.Definition = new UserDefinedTypeSchema(@namespace, definitionName, typeName);
+                this.Definition.Properties.AddRange(node.Definition.ColumnDefinitions.Select(x => this.MapColumn(x, relativeNamespace, notNullableColumns)));
+            }
+
+            private static string GenerateDefinitionName(string udtTypeName)
+            {
+                const string delimiter = "_udt_";
+                int index = udtTypeName.IndexOf(delimiter, StringComparison.Ordinal);
+                if (index >= 0)
+                    udtTypeName = udtTypeName.Substring(index + delimiter.Length);
+
+                return CultureInfo.InvariantCulture.TextInfo.ToTitleCase(udtTypeName).Replace("_", String.Empty);
             }
 
             private static IEnumerable<string> GetNotNullableColumns(TableDefinition table)
@@ -85,17 +93,12 @@ namespace Dibix.Sdk.CodeGeneration
                 }
             }
 
-            private static UserDefinedTypeColumn MapColumn(ColumnDefinition column, ICollection<string> notNullableColumns)
+            private ObjectSchemaProperty MapColumn(ColumnDefinition column, string relativeNamespace, ICollection<string> notNullableColumns)
             {
-                Type clrType = column.DataType.ToClrType();
                 string columnName = column.ColumnIdentifier.Value;
-                bool shouldBeNullable = !notNullableColumns.Contains(columnName);
-                bool isNullable = clrType.IsNullable();
-                bool makeNullable = shouldBeNullable && !isNullable;
-                if (makeNullable)
-                    clrType = clrType.MakeNullable();
-
-                return new UserDefinedTypeColumn(columnName, clrType.ToCSharpTypeName());
+                bool isNullable = !notNullableColumns.Contains(columnName);
+                TypeReference typeReference = column.DataType.ToTypeReference(isNullable, columnName, relativeNamespace, this._source, this._hintsAccessor.Value, this._typeResolver, this._errorReporter, out string udtTypeName);
+                return new ObjectSchemaProperty(columnName, typeReference, false, false, SerializationBehavior.Always, false);
             }
         }
     }

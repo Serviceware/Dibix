@@ -3,11 +3,8 @@ using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Resources;
 using Dibix.Sdk.CodeGeneration;
 using Dibix.Sdk.VisualStudio;
 using EnvDTE;
@@ -199,20 +196,26 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             Mock<ProjectItems> projectItems = new Mock<ProjectItems>(MockBehavior.Strict);
             Mock<CodeElements> codeElements = new Mock<CodeElements>(MockBehavior.Strict);
             Mock<CodeElement> codeElement = new Mock<CodeElement>(MockBehavior.Strict);
+            Mock<CodeNamespace> codeNamespace = new Mock<CodeNamespace>(MockBehavior.Strict);
 
             projectItem.SetupGet(x => x.Kind).Returns((string)null);
             projectItem.SetupGet(x => x.FileCodeModel).Returns(codeModel.Object);
             projectItem.SetupGet(x => x.ProjectItems).Returns(projectItems.Object);
             codeModel.SetupGet(x => x.CodeElements).Returns(codeElements.Object);
             projectItems.As<IEnumerable>().Setup(x => x.GetEnumerator()).Returns(Enumerable.Empty<object>().GetEnumerator);
+            codeElement.SetupGet(x => x.Name).Returns(type.Name);
             codeElement.SetupGet(x => x.FullName).Returns(type.FullName);
+            codeNamespace.SetupGet(x => x.FullName).Returns(type.Namespace);
 
             if (type.IsEnum)
+            {
                 codeElement.SetupGet(x => x.Kind).Returns(vsCMElement.vsCMElementEnum);
+                codeElement.As<CodeEnum>().SetupGet(x => x.Namespace).Returns(codeNamespace.Object);
+            }
             else
             {
                 codeElement.SetupGet(x => x.Kind).Returns(vsCMElement.vsCMElementClass);
-                CollectConcreteType(type, codeElement);
+                CollectConcreteType(type, codeElement, codeNamespace.Object);
             }
 
             codeElements.As<IEnumerable>().Setup(x => x.GetEnumerator()).Returns(Enumerable.Repeat(codeElement.Object, 1).GetEnumerator);
@@ -220,14 +223,17 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             return projectItem.Object;
         }
 
-        private static void CollectConcreteType(Type type, Mock<CodeElement> codeElement)
+        private static void CollectConcreteType(Type type, Mock<CodeElement> codeElement, CodeNamespace codeNamespace)
         {
             Mock<CodeClass> codeClass = null;
             Type currentType = type;
             while (true)
             {
                 if (codeClass == null)
+                {
                     codeClass = codeElement.As<CodeClass>();
+                    codeClass.SetupGet(x => x.Namespace).Returns(codeNamespace);
+                }
 
                 Mock<CodeElements> bases = new Mock<CodeElements>(MockBehavior.Strict);
                 Mock<CodeElements> properties = new Mock<CodeElements>(MockBehavior.Strict);

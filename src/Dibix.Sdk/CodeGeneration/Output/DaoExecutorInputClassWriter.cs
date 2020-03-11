@@ -24,7 +24,7 @@ namespace Dibix.Sdk.CodeGeneration
             var namespaceGroups = context.Model
                                          .Statements
                                          .Where(RequiresInput)
-                                         .GroupBy(x => context.WriteNamespaces ? x.Namespace.RelativeNamespace : null)
+                                         .GroupBy(x => context.WriteNamespaces ? NamespaceUtility.BuildRelativeNamespace(context.Model.RootNamespace, this.LayerName, x.Namespace) : null)
                                          .ToArray();
 
             for (int i = 0; i < namespaceGroups.Length; i++)
@@ -40,7 +40,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                     foreach (SqlQueryParameter parameter in statement.Parameters)
                     {
-                        inputType.AddProperty(parameter.Name, parameter.ClrTypeName)
+                        inputType.AddProperty(parameter.Name, context.ResolveTypeName(parameter.Type))
                                  .Getter(null)
                                  .Setter(null);
                     }

@@ -11,29 +11,30 @@ namespace Dibix.Sdk.OpenApi
 {
     internal static class OpenApiGenerator
     {
-        private static readonly Dictionary<ContractPropertyDataType, Func<OpenApiSchema>> PrimitiveTypeMap = new Dictionary<ContractPropertyDataType, Func<OpenApiSchema>>
+        private static readonly IDictionary<PrimitiveDataType, Func<OpenApiSchema>> PrimitiveTypeMap = new Dictionary<PrimitiveDataType, Func<OpenApiSchema>>
         {
-            [ContractPropertyDataType.Boolean]        = () => new OpenApiSchema { Type = "boolean"                       }
-          , [ContractPropertyDataType.Byte]           = () => new OpenApiSchema { Type = "integer", Format = "int32"     }
-          , [ContractPropertyDataType.Int16]          = () => new OpenApiSchema { Type = "integer", Format = "int32"     }
-          , [ContractPropertyDataType.Int32]          = () => new OpenApiSchema { Type = "integer", Format = "int32"     }
-          , [ContractPropertyDataType.Int64]          = () => new OpenApiSchema { Type = "integer", Format = "int64"     }
-          , [ContractPropertyDataType.Float]          = () => new OpenApiSchema { Type = "number",  Format = "float"     }
-          , [ContractPropertyDataType.Double]         = () => new OpenApiSchema { Type = "number",  Format = "double"    }
-          , [ContractPropertyDataType.Decimal]        = () => new OpenApiSchema { Type = "number",  Format = "double"    }
-          , [ContractPropertyDataType.Binary]         = () => new OpenApiSchema { Type = "string",  Format = "byte"      }
-          , [ContractPropertyDataType.DateTime]       = () => new OpenApiSchema { Type = "string",  Format = "date-time" }
-          , [ContractPropertyDataType.DateTimeOffset] = () => new OpenApiSchema { Type = "string",  Format = "date-time" }
-          , [ContractPropertyDataType.String]         = () => new OpenApiSchema { Type = "string"                        }
-          , [ContractPropertyDataType.UUID]           = () => new OpenApiSchema { Type = "string",  Format = "uuid"      }
+            [PrimitiveDataType.Boolean]        = () => new OpenApiSchema { Type = "boolean"                       }
+          , [PrimitiveDataType.Byte]           = () => new OpenApiSchema { Type = "integer", Format = "int32"     }
+          , [PrimitiveDataType.Int16]          = () => new OpenApiSchema { Type = "integer", Format = "int32"     }
+          , [PrimitiveDataType.Int32]          = () => new OpenApiSchema { Type = "integer", Format = "int32"     }
+          , [PrimitiveDataType.Int64]          = () => new OpenApiSchema { Type = "integer", Format = "int64"     }
+          , [PrimitiveDataType.Float]          = () => new OpenApiSchema { Type = "number",  Format = "float"     }
+          , [PrimitiveDataType.Double]         = () => new OpenApiSchema { Type = "number",  Format = "double"    }
+          , [PrimitiveDataType.Decimal]        = () => new OpenApiSchema { Type = "number",  Format = "double"    }
+          , [PrimitiveDataType.Binary]         = () => new OpenApiSchema { Type = "string",  Format = "byte"      }
+          , [PrimitiveDataType.DateTime]       = () => new OpenApiSchema { Type = "string",  Format = "date-time" }
+          , [PrimitiveDataType.DateTimeOffset] = () => new OpenApiSchema { Type = "string",  Format = "date-time" }
+          , [PrimitiveDataType.String]         = () => new OpenApiSchema { Type = "string"                        }
+          , [PrimitiveDataType.UUID]           = () => new OpenApiSchema { Type = "string",  Format = "uuid"      }
         };
 
         public static OpenApiDocument Generate
         (
             string title
           , string areaName
+          , string rootNamespace
           , IEnumerable<ControllerDefinition> controllers
-          , IEnumerable<ContractDefinition> contracts
+          , IEnumerable<SchemaDefinition> contracts
         )
         {
             OpenApiDocument document = new OpenApiDocument
@@ -45,7 +46,7 @@ namespace Dibix.Sdk.OpenApi
                 }
             };
             AppendPaths(document, areaName, controllers);
-            AppendSchemas(document, contracts);
+            AppendSchemas(document, contracts, rootNamespace);
             return document;
         }
 
@@ -101,34 +102,35 @@ namespace Dibix.Sdk.OpenApi
             }
         }
 
-        private static void AppendSchemas(OpenApiDocument document, IEnumerable<ContractDefinition> contracts)
+        private static void AppendSchemas(OpenApiDocument document, IEnumerable<SchemaDefinition> contracts, string rootNamespace)
         {
-            foreach (ContractDefinition contract in contracts)
+            foreach (SchemaDefinition contract in contracts)
             {
                 if (document.Components == null)
                     document.Components = new OpenApiComponents();
 
                 string schemaName = contract.DefinitionName;
-                if (!String.IsNullOrEmpty(contract.Namespace.RelativeNamespace))
-                    schemaName = $"{contract.Namespace.RelativeNamespace}.{schemaName}";
+                string relativeNamespace = NamespaceUtility.BuildRelativeNamespace(rootNamespace, LayerName.DomainModel, contract.Namespace);
+                if (!String.IsNullOrEmpty(relativeNamespace))
+                    schemaName = $"{relativeNamespace}.{schemaName}";
 
-                OpenApiSchema schema = CreateSchema(contract);
+                OpenApiSchema schema = CreateSchema(contract, relativeNamespace);
 
                 document.Components.Schemas.Add(schemaName, schema);
             }
         }
 
-        private static OpenApiSchema CreateSchema(ContractDefinition contract)
+        private static OpenApiSchema CreateSchema(SchemaDefinition contract, string relativeNamespace)
         {
             OpenApiSchema schema;
 
             switch (contract)
             {
-                case ObjectContract objectContract:
-                    schema = CreateObjectSchema(objectContract);
+                case ObjectSchema objectContract:
+                    schema = CreateObjectSchema(objectContract, relativeNamespace);
                     break;
 
-                case EnumContract enumContract:
+                case EnumSchema enumContract:
                     schema = CreateEnumSchema(enumContract);
                     break;
 
@@ -139,7 +141,7 @@ namespace Dibix.Sdk.OpenApi
             return schema;
         }
 
-        private static OpenApiSchema CreateObjectSchema(ObjectContract objectContract)
+        private static OpenApiSchema CreateObjectSchema(ObjectSchema objectContract, string relativeNamespace)
         {
             OpenApiSchema schema = new OpenApiSchema
             {
@@ -147,19 +149,19 @@ namespace Dibix.Sdk.OpenApi
                 AdditionalPropertiesAllowed = false
             };
 
-            foreach (ObjectContractProperty property in objectContract.Properties)
+            foreach (ObjectSchemaProperty property in objectContract.Properties)
             {
                 if (property.SerializationBehavior == SerializationBehavior.Never)
                     continue;
 
-                OpenApiSchema propertySchema = CreateObjectPropertySchema(property, objectContract.Namespace.RelativeNamespace);
+                OpenApiSchema propertySchema = CreateObjectPropertySchema(property, relativeNamespace);
                 schema.Properties.Add(property.Name, propertySchema);
             }
 
             return schema;
         }
 
-        private static OpenApiSchema CreateObjectPropertySchema(ObjectContractProperty property, string @namespace)
+        private static OpenApiSchema CreateObjectPropertySchema(ObjectSchemaProperty property, string @namespace)
         {
             OpenApiSchema schema = CreateObjectPropertySchema(property.Type, @namespace);
             schema.Nullable = property.Type.IsNullable;
@@ -174,17 +176,17 @@ namespace Dibix.Sdk.OpenApi
             return schema;
         }
 
-        private static OpenApiSchema CreateObjectPropertySchema(ContractPropertyType propertyType, string @namespace)
+        private static OpenApiSchema CreateObjectPropertySchema(TypeReference propertyType, string @namespace)
         {
             switch (propertyType)
             {
-                case PrimitiveContractPropertyType primitiveContractPropertyType: return CreatePrimitiveTypeSchema(primitiveContractPropertyType);
-                case ContractPropertyTypeReference contractPropertyTypeReference: return CreateReferenceSchema(contractPropertyTypeReference, @namespace);
+                case PrimitiveTypeReference primitiveContractPropertyType: return CreatePrimitiveTypeSchema(primitiveContractPropertyType);
+                case SchemaTypeReference contractPropertyTypeReference: return CreateReferenceSchema(contractPropertyTypeReference, @namespace);
                 default: throw new ArgumentOutOfRangeException(nameof(propertyType), propertyType, $"Unexpected property type: {propertyType}");
             }
         }
 
-        private static OpenApiSchema CreatePrimitiveTypeSchema(PrimitiveContractPropertyType type)
+        private static OpenApiSchema CreatePrimitiveTypeSchema(PrimitiveTypeReference type)
         {
             if (!PrimitiveTypeMap.TryGetValue(type.Type, out Func<OpenApiSchema> schemaFactory))
                 throw new InvalidOperationException($"Unexpected primitive type: {type.Type}");
@@ -192,9 +194,9 @@ namespace Dibix.Sdk.OpenApi
             return schemaFactory();
         }
 
-        private static OpenApiSchema CreateReferenceSchema(ContractPropertyTypeReference type, string @namespace)
+        private static OpenApiSchema CreateReferenceSchema(SchemaTypeReference type, string @namespace)
         {
-            string typeName = type.TypeName;
+            string typeName = type.Key;
             if (!String.IsNullOrEmpty(@namespace))
                 typeName = $"{@namespace}.{typeName}";
 
@@ -208,12 +210,12 @@ namespace Dibix.Sdk.OpenApi
             };
         }
 
-        private static OpenApiSchema CreateEnumSchema(EnumContract enumContract)
+        private static OpenApiSchema CreateEnumSchema(EnumSchema enumContract)
         {
             bool isFlagged = enumContract.Members.Any(x => x.Value != null);
-            OpenApiSchema schema = isFlagged ? PrimitiveTypeMap[ContractPropertyDataType.Int32]() : new OpenApiSchema { Type = "string" };
+            OpenApiSchema schema = isFlagged ? PrimitiveTypeMap[PrimitiveDataType.Int32]() : new OpenApiSchema { Type = "string" };
             
-            foreach (EnumContractMember member in enumContract.Members)
+            foreach (EnumSchemaMember member in enumContract.Members)
             {
                 if (member.Value != null)
                 {
@@ -229,7 +231,7 @@ namespace Dibix.Sdk.OpenApi
             return schema;
         }
 
-        private static bool TryComputeEnumValueReference(EnumContract enumContract, string memberValue, out int value)
+        private static bool TryComputeEnumValueReference(EnumSchema enumContract, string memberValue, out int value)
         {
             value = 0;
 
@@ -248,7 +250,7 @@ namespace Dibix.Sdk.OpenApi
                 }
 
                 string memberNameReference = memberNameSb.ToString();
-                EnumContractMember currentMember = enumContract.Members.SingleOrDefault(x => x.Name == memberNameReference);
+                EnumSchemaMember currentMember = enumContract.Members.SingleOrDefault(x => x.Name == memberNameReference);
                 if (currentMember == null)
                     throw new InvalidOperationException($"Unexpected enum member name value reference: {memberNameReference}");
 

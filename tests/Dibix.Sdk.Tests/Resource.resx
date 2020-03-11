@@ -211,14 +211,14 @@ namespace Dibix.Sdk.Tests
         {
             public sealed class MultiMapContract
             {
-                public Guid? X { get; set; } 
-                public ICollection&lt;GenericContract&gt; Y { get; private set; } 
-                public ICollection&lt;Direction&gt; Directions { get; private set; } 
+                public System.Guid? X { get; set; } 
+                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; } 
+                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; } 
 
                 public MultiMapContract()
                 {
-                    this.Y = new Collection&lt;GenericContract&gt;();
-                    this.Directions = new Collection&lt;Direction&gt;();
+                    this.Y = new Collection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;();
+                    this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
                 }
             }
         }
@@ -265,7 +265,7 @@ namespace Dibix.Sdk.Tests
             // EmptyWithParams
             private const string EmptyWithParamsCommandText = "";
 
-            public static int EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, System.Guid? x, string password, GenericParameterSet ids, bool y = true, int? z = null)
+            public static int EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, System.Guid? x, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, bool y = true, int? z = null)
             {
                 using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                 {
@@ -286,15 +286,15 @@ namespace Dibix.Sdk.Tests
         #endregion
 
         #region Structured types
-        public sealed class GenericParameterSet : StructuredType&lt;GenericParameterSet, int&gt;
+        public sealed class GenericParameterSet : StructuredType&lt;GenericParameterSet, int, string&gt;
         {
             public GenericParameterSet() : base("dbx_codeanalysis_udt_generic")
             {
-                base.ImportSqlMetadata(() =&gt; this.Add(default));
+                base.ImportSqlMetadata(() =&gt; this.Add(default, default));
             }
-            public void Add(int id)
+            public void Add(int id, string name)
             {
-                base.AddValues(id);
+                base.AddValues(id, name);
             }
         }
         #endregion
@@ -444,7 +444,7 @@ namespace Dibix.Sdk.Tests
             // EmptyWithParams
             private const string EmptyWithParamsCommandText = "[dbo].[dbx_tests_syntax_empty_params]";
 
-            public static int EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, System.Guid? x, string password, GenericParameterSet ids, bool y = true, int? z = null)
+            public static int EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, System.Guid? x, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, bool y = true, int? z = null)
             {
                 using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                 {
@@ -465,15 +465,15 @@ namespace Dibix.Sdk.Tests
         #endregion
 
         #region Structured types
-        public sealed class GenericParameterSet : StructuredType&lt;GenericParameterSet, int&gt;
+        public sealed class GenericParameterSet : StructuredType&lt;GenericParameterSet, int, string&gt;
         {
             public GenericParameterSet() : base("dbx_codeanalysis_udt_generic")
             {
-                base.ImportSqlMetadata(() =&gt; this.Add(default));
+                base.ImportSqlMetadata(() =&gt; this.Add(default, default));
             }
-            public void Add(int id)
+            public void Add(int id, string name)
             {
-                base.AddValues(id);
+                base.AddValues(id, name);
             }
         }
         #endregion
@@ -524,20 +524,20 @@ namespace Dibix.Sdk.Tests
             public System.Guid? x { get; set; } 
             public bool y { get; set; } 
             public int z { get; set; } 
-            public GenericParameterSet ids { get; set; } 
+            public Dibix.Sdk.Tests.Data.GenericParameterSet ids { get; set; } 
         }
         #endregion
 
         #region Structured types
-        public sealed class GenericParameterSet : StructuredType&lt;GenericParameterSet, int&gt;
+        public sealed class GenericParameterSet : StructuredType&lt;GenericParameterSet, int, string&gt;
         {
             public GenericParameterSet() : base("dbx_codeanalysis_udt_generic")
             {
-                base.ImportSqlMetadata(() =&gt; this.Add(default));
+                base.ImportSqlMetadata(() =&gt; this.Add(default, default));
             }
-            public void Add(int id)
+            public void Add(int id, string name)
             {
-                base.AddValues(id);
+                base.AddValues(id, name);
             }
         }
         #endregion
@@ -746,14 +746,14 @@ namespace Dibix.Sdk.Tests
         {
             public sealed class MultiMapContract
             {
-                public Guid? X { get; set; } 
-                public ICollection&lt;GenericContract&gt; Y { get; private set; } 
-                public ICollection&lt;Direction&gt; Directions { get; private set; } 
+                public System.Guid? X { get; set; } 
+                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; } 
+                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; } 
 
                 public MultiMapContract()
                 {
-                    this.Y = new Collection&lt;GenericContract&gt;();
-                    this.Directions = new Collection&lt;Direction&gt;();
+                    this.Y = new Collection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;();
+                    this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
                 }
             }
         }
@@ -840,14 +840,14 @@ namespace Dibix.Sdk.Tests
         {
             public sealed class MultiMapContract
             {
-                public Guid? X { get; set; } 
-                public ICollection&lt;GenericContract&gt; Y { get; private set; } 
-                public ICollection&lt;Direction&gt; Directions { get; private set; } 
+                public System.Guid? X { get; set; } 
+                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; } 
+                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; } 
 
                 public MultiMapContract()
                 {
-                    this.Y = new Collection&lt;GenericContract&gt;();
-                    this.Directions = new Collection&lt;Direction&gt;();
+                    this.Y = new Collection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;();
+                    this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
                 }
             }
         }
@@ -951,14 +951,14 @@ namespace Dibix.Sdk.Tests
         {
             public sealed class MultiMapContract
             {
-                public Guid? X { get; set; } 
-                public ICollection&lt;GenericContract&gt; Y { get; private set; } 
-                public ICollection&lt;Direction&gt; Directions { get; private set; } 
+                public System.Guid? X { get; set; } 
+                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; } 
+                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; } 
 
                 public MultiMapContract()
                 {
-                    this.Y = new Collection&lt;GenericContract&gt;();
-                    this.Directions = new Collection&lt;Direction&gt;();
+                    this.Y = new Collection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;();
+                    this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
                 }
             }
         }
@@ -1046,14 +1046,14 @@ namespace Dibix.Sdk.Tests
         {
             public sealed class MultiMapContract
             {
-                public Guid? X { get; set; } 
-                public ICollection&lt;GenericContract&gt; Y { get; private set; } 
-                public ICollection&lt;Direction&gt; Directions { get; private set; } 
+                public System.Guid? X { get; set; } 
+                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; } 
+                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; } 
 
                 public MultiMapContract()
                 {
-                    this.Y = new Collection&lt;GenericContract&gt;();
-                    this.Directions = new Collection&lt;Direction&gt;();
+                    this.Y = new Collection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;();
+                    this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
                 }
             }
         }
@@ -1062,12 +1062,12 @@ namespace Dibix.Sdk.Tests
         {
             public sealed class GridResult
             {
-                public GenericContract Item { get; set; } 
-                public ICollection&lt;Direction&gt; Directions { get; private set; } 
+                public Dibix.Sdk.Tests.DomainModel.GenericContract Item { get; set; } 
+                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; } 
 
                 public GridResult()
                 {
-                    this.Directions = new Collection&lt;Direction&gt;();
+                    this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
                 }
             }
         }
@@ -1178,8 +1178,8 @@ namespace Dibix.Sdk.Tests
 
         public sealed class JointContract
         {
-            public GenericContract A { get; set; } 
-            public Direction B { get; set; } 
+            public Dibix.Sdk.Tests.DomainModel.GenericContract A { get; set; } 
+            public Dibix.Sdk.Tests.DomainModel.Direction B { get; set; } 
         }
         #endregion
     }
@@ -1355,6 +1355,12 @@ namespace Dibix.Sdk.Tests
     namespace DomainModel
     {
         #region Contracts
+        public enum Direction : int
+        {
+            Ascending,
+            Descending
+        }
+
         [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
@@ -1375,14 +1381,14 @@ namespace Dibix.Sdk.Tests
         {
             public sealed class MultiMapContract
             {
-                public Guid? X { get; set; } 
-                public ICollection&lt;GenericContract&gt; Y { get; private set; } 
-                public ICollection&lt;Direction&gt; Directions { get; private set; } 
+                public System.Guid? X { get; set; } 
+                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; } 
+                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; } 
 
                 public MultiMapContract()
                 {
-                    this.Y = new Collection&lt;GenericContract&gt;();
-                    this.Directions = new Collection&lt;Direction&gt;();
+                    this.Y = new Collection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;();
+                    this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
                 }
             }
         }

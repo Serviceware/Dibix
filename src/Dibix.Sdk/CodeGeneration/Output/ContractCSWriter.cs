@@ -19,29 +19,29 @@ namespace Dibix.Sdk.CodeGeneration
 
             var namespaceGroups = context.Model
                                          .Contracts
-                                         .GroupBy(x => context.WriteNamespaces ? x.Namespace.RelativeNamespace : null)
+                                         .GroupBy(x => context.WriteNamespaces ? NamespaceUtility.BuildRelativeNamespace(context.Model.RootNamespace, LayerName.DomainModel, x.Namespace) : null)
                                          .ToArray();
 
             for (int i = 0; i < namespaceGroups.Length; i++)
             {
-                IGrouping<string, ContractDefinition> namespaceGroup = namespaceGroups[i];
+                IGrouping<string, SchemaDefinition> namespaceGroup = namespaceGroups[i];
                 CSharpStatementScope scope = namespaceGroup.Key != null ? context.Output.BeginScope(namespaceGroup.Key) : context.Output;
-                IList<ContractDefinition> contracts = namespaceGroup.ToArray();
-                for (int j = 0; j < contracts.Count; j++)
+                IList<SchemaDefinition> schemas = namespaceGroup.ToArray();
+                for (int j = 0; j < schemas.Count; j++)
                 {
-                    ContractDefinition contract = contracts[j];
-                    switch (contract)
+                    SchemaDefinition schema = schemas[j];
+                    switch (schema)
                     {
-                        case ObjectContract objectContract:
-                            ProcessObjectContract(context, scope, objectContract, withAnnotations);
+                        case ObjectSchema objectSchema:
+                            ProcessObjectSchema(context, scope, objectSchema, withAnnotations);
                             break;
 
-                        case EnumContract enumContract:
-                            ProcessEnumContract(scope, enumContract);
+                        case EnumSchema enumSchema:
+                            ProcessEnumSchema(scope, enumSchema);
                             break;
                     }
 
-                    if (j + 1 < contracts.Count)
+                    if (j + 1 < schemas.Count)
                         scope.AddSeparator();
                 }
 
@@ -52,24 +52,24 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private static void ProcessObjectContract(DaoCodeGenerationContext context, CSharpStatementScope scope, ObjectContract contract, bool withAnnotations)
+        private static void ProcessObjectSchema(DaoCodeGenerationContext context, CSharpStatementScope scope, ObjectSchema schema, bool withAnnotations)
         {
             ICollection<string> classAnnotations = new Collection<string>();
-            if (withAnnotations && !String.IsNullOrEmpty(contract.WcfNamespace))
+            if (withAnnotations && !String.IsNullOrEmpty(schema.WcfNamespace))
             {
                 context.AddUsing(typeof(DataMemberAttribute).Namespace);
-                classAnnotations.Add($"DataContract(Namespace = \"{contract.WcfNamespace}\")");
+                classAnnotations.Add($"DataContract(Namespace = \"{schema.WcfNamespace}\")");
             }
 
-            CSharpClass @class = scope.AddClass(contract.DefinitionName, CSharpModifiers.Public | CSharpModifiers.Sealed, classAnnotations);
+            CSharpClass @class = scope.AddClass(schema.DefinitionName, CSharpModifiers.Public | CSharpModifiers.Sealed, classAnnotations);
             ICollection<string> ctorAssignments = new Collection<string>();
             ICollection<string> shouldSerializeMethods = new Collection<string>();
-            foreach (ObjectContractProperty property in contract.Properties)
+            foreach (ObjectSchemaProperty property in schema.Properties)
             {
                 ICollection<string> propertyAnnotations = new Collection<string>();
                 if (withAnnotations)
                 {
-                    if (!String.IsNullOrEmpty(contract.WcfNamespace))
+                    if (!String.IsNullOrEmpty(schema.WcfNamespace))
                         propertyAnnotations.Add("DataMember");
 
                     if (property.IsPartOfKey)
@@ -124,7 +124,7 @@ namespace Dibix.Sdk.CodeGeneration
                 if (property.Obfuscated) 
                     propertyAnnotations.Add("Obfuscated");
 
-                string clrTypeName = ToClrTypeName(property.Type);
+                string clrTypeName = context.ResolveTypeName(property.Type);
                 @class.AddProperty(property.Name, !property.Type.IsEnumerable ? clrTypeName : $"ICollection<{clrTypeName}>", propertyAnnotations)
                       .Getter(null)
                       .Setter(null, property.Type.IsEnumerable ? CSharpModifiers.Private : default);
@@ -155,57 +155,14 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static string ToClrTypeName(ContractPropertyType propertyType)
-        {
-            string typeName;
-            switch (propertyType)
-            {
-                case PrimitiveContractPropertyType primitiveContractPropertyType: 
-                    typeName = ToClrTypeName(primitiveContractPropertyType.Type);
-                    break;
-
-                case ContractPropertyTypeReference contractPropertyTypeReference: 
-                    typeName = contractPropertyTypeReference.TypeName;
-                    break;
-
-                default: throw new ArgumentOutOfRangeException(nameof(propertyType), propertyType, $"Unexpected property type: {propertyType}");
-            }
-
-            if (propertyType.IsNullable)
-                typeName += '?';
-
-            return typeName;
-        }
-
-        private static string ToClrTypeName(ContractPropertyDataType type)
-        {
-            switch (type)
-            {
-                case ContractPropertyDataType.Byte:           return "byte";
-                case ContractPropertyDataType.Boolean:        return "bool";
-                case ContractPropertyDataType.Int16:          return "short";
-                case ContractPropertyDataType.Int32:          return "int";
-                case ContractPropertyDataType.Int64:          return "long";
-                case ContractPropertyDataType.Float:          return "float";
-                case ContractPropertyDataType.Double:         return "double";
-                case ContractPropertyDataType.Decimal:        return "decimal";
-                case ContractPropertyDataType.Binary:         return "byte[]";
-                case ContractPropertyDataType.DateTime:       return "DateTime";
-                case ContractPropertyDataType.DateTimeOffset: return "DateTimeOffset";
-                case ContractPropertyDataType.String:         return "string";
-                case ContractPropertyDataType.UUID:           return "Guid";
-                default: throw new ArgumentOutOfRangeException(nameof(type), type, null);
-            }
-        }
-
-        private static void ProcessEnumContract(CSharpStatementScope scope, EnumContract contract)
+        private static void ProcessEnumSchema(CSharpStatementScope scope, EnumSchema schema)
         {
             ICollection<string> annotations = new Collection<string>();
-            if (contract.IsFlaggable)
+            if (schema.IsFlaggable)
                 annotations.Add("Flags");
 
-            CSharpEnum @enum = scope.AddEnum(contract.DefinitionName, CSharpModifiers.Public, annotations);
-            foreach (EnumContractMember member in contract.Members)
+            CSharpEnum @enum = scope.AddEnum(schema.DefinitionName, CSharpModifiers.Public, annotations);
+            foreach (EnumSchemaMember member in schema.Members)
             {
                 @enum.AddMember(member.Name, member.Value)
                      .Inherits("int");

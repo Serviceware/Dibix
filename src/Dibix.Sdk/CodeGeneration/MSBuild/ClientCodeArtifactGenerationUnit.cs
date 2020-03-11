@@ -7,6 +7,6 @@ namespace Dibix.Sdk.CodeGeneration.MSBuild
     {
         public override bool ShouldGenerate(CodeArtifactsGenerationModel model) => !String.IsNullOrEmpty(model.ClientOutputFilePath);
         protected override string GetOutputFilePath(CodeArtifactsGenerationModel model) => model.ClientOutputFilePath;
-        protected override ClientContractCSWriter CreateGenerator(IErrorReporter errorReporter) => new ClientContractCSWriter(errorReporter);
+        protected override ClientContractCSWriter CreateGenerator(ISchemaRegistry schemaRegistry, IErrorReporter errorReporter) => new ClientContractCSWriter(errorReporter, schemaRegistry);
     }
 }

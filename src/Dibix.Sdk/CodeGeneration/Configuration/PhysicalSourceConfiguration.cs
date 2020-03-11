@@ -33,7 +33,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Overrides
-        protected override IEnumerable<SqlStatementInfo> CollectStatements(ISqlStatementParser parser, ISqlStatementFormatter formatter, IContractResolverFacade contractResolver, IErrorReporter errorReporter)
+        protected override IEnumerable<SqlStatementInfo> CollectStatements(ISqlStatementParser parser, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, IErrorReporter errorReporter)
         {
             IEnumerable<string> files = this._fileSystemProvider
                                             .GetFiles(this._projectName, this._include, this._exclude)
@@ -45,7 +45,8 @@ namespace Dibix.Sdk.CodeGeneration
               , areaName: null
               , parser: parser
               , formatter: formatter
-              , contractResolver: contractResolver
+              , typeResolver: typeResolver
+              , schemaRegistry: schemaRegistry
               , errorReporter: errorReporter
               , files: files
               , modelAccessor: new Lazy<TSqlModel>(() => throw new NotSupportedException())

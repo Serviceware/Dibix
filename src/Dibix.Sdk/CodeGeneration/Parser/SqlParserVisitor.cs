@@ -11,7 +11,8 @@ namespace Dibix.Sdk.CodeGeneration
         internal string AreaName { get; set; }
         internal TSqlElementLocator ElementLocator { get; set; }
         internal ISqlStatementFormatter Formatter { get; set; }
-        internal IContractResolverFacade ContractResolver { get; set; }
+        internal ITypeResolverFacade TypeResolver { get; set; }
+        internal ISchemaRegistry SchemaRegistry { get; set; }
         internal IErrorReporter ErrorReporter { get; set; }
         internal SqlStatementInfo Target { get; set; }
         internal ICollection<SqlHint> Hints { get; }

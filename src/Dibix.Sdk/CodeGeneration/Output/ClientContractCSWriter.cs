@@ -5,8 +5,15 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class ClientContractCSWriter : CodeGenerator
     {
+        #region Fields
+        private readonly ISchemaRegistry _schemaRegistry;
+        #endregion
+
         #region Constructor
-        public ClientContractCSWriter(IErrorReporter errorReporter) : base(errorReporter) { }
+        public ClientContractCSWriter(IErrorReporter errorReporter, ISchemaRegistry schemaRegistry) : base(errorReporter)
+        {
+            this._schemaRegistry = schemaRegistry;
+        }
         #endregion
 
         #region Overrides
@@ -14,7 +21,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             CSharpWriter output = new CSharpWriter(writer, model.RootNamespace, Enumerable.Empty<string>());
 
-            DaoCodeGenerationContext context = new DaoCodeGenerationContext(output.Root, null, model) { Output = output.Root.BeginScope(LayerName.DomainModel) };
+            DaoCodeGenerationContext context = new DaoCodeGenerationContext(output.Root, null, model, this._schemaRegistry) { Output = output.Root.BeginScope(LayerName.DomainModel) };
 
             if (model.Contracts.Any())
                 ContractCSWriter.Write(context, false);

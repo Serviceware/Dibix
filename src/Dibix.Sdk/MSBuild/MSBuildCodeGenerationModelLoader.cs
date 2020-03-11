@@ -27,7 +27,9 @@ namespace Dibix.Sdk.MSBuild
           , string modelCollation
           , ITaskItem[] sqlReferencePath
           , ITask task
-          , IErrorReporter errorReporter)
+          , ISchemaRegistry schemaRegistry
+          , IErrorReporter errorReporter
+        )
         {
             string rootNamespace = NamespaceUtility.BuildRootNamespace(productName, areaName);
             string defaultOutputName = defaultOutputFilePath != null ? Path.GetFileNameWithoutExtension(defaultOutputFilePath).Replace(".", String.Empty) : "SqlQueryAccessor";
@@ -40,9 +42,13 @@ namespace Dibix.Sdk.MSBuild
             Lazy<TSqlModel> modelAccessor = new Lazy<TSqlModel>(() => PublicSqlDataSchemaModelLoader.Load(databaseSchemaProviderName, modelCollation, source, sqlReferencePath, task, errorReporter));
             IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(projectDirectory);
             ISqlStatementFormatter formatter = embedStatements ? (ISqlStatementFormatter)new TakeSourceSqlStatementFormatter() : new ExecStoredProcedureSqlStatementFormatter();
+            DefaultAssemblyResolver assemblyResolver = new DefaultAssemblyResolver(projectDirectory, normalizedReferences);
+            ITypeResolverFacade typeResolver = new TypeResolverFacade(assemblyResolver, schemaRegistry, errorReporter);
             IContractDefinitionProvider contractDefinitionProvider = new ContractDefinitionProvider(fileSystemProvider, errorReporter, normalizedContracts, productName, areaName);
-            IContractResolverFacade contractResolver = new ContractResolverFacade(new DefaultAssemblyLocator(projectDirectory, normalizedReferences));
-            contractResolver.RegisterContractResolver(new ContractDefinitionResolver(contractDefinitionProvider), 0);
+            IUserDefinedTypeProvider userDefinedTypeProvider = new UserDefinedTypeProvider(productName, areaName, normalizedSources, typeResolver, errorReporter);
+
+            schemaRegistry.ImportSchemas(contractDefinitionProvider, userDefinedTypeProvider);
+            typeResolver.Register(new SchemaTypeResolver(schemaRegistry, contractDefinitionProvider, userDefinedTypeProvider), 0);
 
             CodeArtifactsGenerationModel model = new CodeArtifactsGenerationModel(CodeGeneratorCompatibilityLevel.Full)
             {
@@ -53,10 +59,10 @@ namespace Dibix.Sdk.MSBuild
                 DefaultOutputFilePath = defaultOutputFilePath,
                 ClientOutputFilePath = clientOutputFilePath
             };
-            model.Statements.AddRange(CollectStatements(normalizedSources, projectDirectory, productName, areaName, embedStatements, formatter, contractResolver, errorReporter, modelAccessor));
-            model.UserDefinedTypes.AddRange(CollectUserDefinedTypes(normalizedSources, productName, areaName, errorReporter));
+            model.Statements.AddRange(CollectStatements(normalizedSources, projectDirectory, productName, areaName, embedStatements, formatter, typeResolver, schemaRegistry, errorReporter, modelAccessor));
+            model.UserDefinedTypes.AddRange(userDefinedTypeProvider.Types);
             model.Contracts.AddRange(contractDefinitionProvider.Contracts);
-            model.Controllers.AddRange(CollectControllers(normalizedEndpoints, projectDirectory, productName, areaName, defaultOutputName, model.Statements, normalizedReferences, fileSystemProvider, errorReporter));
+            model.Controllers.AddRange(CollectControllers(normalizedEndpoints, projectDirectory, productName, areaName, defaultOutputName, model.Statements, assemblyResolver, fileSystemProvider, errorReporter));
 
             return model;
         }
@@ -69,14 +75,15 @@ namespace Dibix.Sdk.MSBuild
           , string areaName
           , bool embedStatements
           , ISqlStatementFormatter formatter
-          , IContractResolverFacade contractResolver
+          , ITypeResolverFacade typeResolver
+          , ISchemaRegistry schemaRegistry
           , IErrorReporter errorReporter
           , Lazy<TSqlModel> modelAccessor
         )
         {
             IEnumerable<string> files = sources.Where(x => MatchStatement(projectDirectory, x, embedStatements, errorReporter));
             ISqlStatementParser parser = new SqlStoredProcedureParser();
-            SqlStatementCollector statementCollector = new PhysicalFileSqlStatementCollector(productName, areaName, parser, formatter, contractResolver, errorReporter, files, modelAccessor);
+            SqlStatementCollector statementCollector = new PhysicalFileSqlStatementCollector(productName, areaName, parser, formatter, typeResolver, schemaRegistry, errorReporter, files, modelAccessor);
             return statementCollector.CollectStatements();
         }
 
@@ -89,11 +96,6 @@ namespace Dibix.Sdk.MSBuild
             return (embedStatements || hasHints) && !hasNoCompileHint;
         }
 
-        private static IEnumerable<UserDefinedTypeDefinition> CollectUserDefinedTypes(IEnumerable<string> sources, string productName, string areaName, IErrorReporter errorReporter)
-        {
-            return new UserDefinedTypeProvider(sources, errorReporter, productName, areaName).Types;
-        }
-
         private static IEnumerable<ControllerDefinition> CollectControllers
         (
             IEnumerable<string> endpoints
@@ -102,11 +104,11 @@ namespace Dibix.Sdk.MSBuild
           , string areaName
           , string defaultOutputName
           , ICollection<SqlStatementInfo> statements
-          , IEnumerable<string> references
+          , IReferencedAssemblyProvider referencedAssemblyProvider
           , IFileSystemProvider fileSystemProvider
           , IErrorReporter errorReporter)
         {
-            IControllerActionTargetSelector controllerActionTargetSelector = new ControllerActionTargetSelector(productName, areaName, defaultOutputName, projectDirectory, statements, references, errorReporter);
+            IControllerActionTargetSelector controllerActionTargetSelector = new ControllerActionTargetSelector(productName, areaName, defaultOutputName, projectDirectory, statements, referencedAssemblyProvider, errorReporter);
             return new ControllerDefinitionProvider(fileSystemProvider, controllerActionTargetSelector, errorReporter, endpoints).Controllers;
         }
     }

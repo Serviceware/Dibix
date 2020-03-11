@@ -15,13 +15,13 @@ namespace Dibix.Sdk.VisualStudio
         #endregion
 
         #region Methods
-        public static CodeGenerationModel Create(ITextTemplatingEngineHost textTemplatingEngineHost, IServiceProvider serviceProvider, IErrorReporter errorReporter, Action<ICodeGeneratorConfigurationExpression> configure)
+        public static CodeGenerationModel Create(ITextTemplatingEngineHost textTemplatingEngineHost, IServiceProvider serviceProvider, ISchemaRegistry schemaRegistry, IErrorReporter errorReporter, Action<ICodeGeneratorConfigurationExpression> configure)
         {
             IFileSystemProvider fileSystemProvider = new ProjectFileSystemProvider(serviceProvider, textTemplatingEngineHost.TemplateFile);
-            IContractResolver contractResolver = new CodeElementContractResolver(serviceProvider, textTemplatingEngineHost.TemplateFile);
-            IAssemblyLocator assemblyLocator = new ProjectReferenceAssemblyLocator(serviceProvider, textTemplatingEngineHost.TemplateFile);
-            IContractResolverFacade contractResolverFacade = new ContractResolverFacade(assemblyLocator);
-            contractResolverFacade.RegisterContractResolver(contractResolver, 0);
+            ITypeResolver typeResolver = new CodeElementTypeResolver(serviceProvider, textTemplatingEngineHost.TemplateFile, schemaRegistry);
+            AssemblyResolver assemblyResolver = new ProjectReferenceAssemblyResolver(serviceProvider, textTemplatingEngineHost.TemplateFile);
+            ITypeResolverFacade typeResolverFacade = new TypeResolverFacade(assemblyResolver, schemaRegistry, errorReporter);
+            typeResolverFacade.Register(typeResolver, 0);
 
             CodeGenerationModel model = new CodeGenerationModel(CodeGeneratorCompatibilityLevel.Legacy);
 
@@ -38,7 +38,7 @@ namespace Dibix.Sdk.VisualStudio
                 if (input.Formatter == null)
                     input.Formatter = typeof(TakeSourceSqlStatementFormatter);
 
-                input.Collect(model, contractResolverFacade, errorReporter);
+                input.Collect(model, typeResolverFacade, schemaRegistry, errorReporter);
             }
 
             // Apply configuration defaults

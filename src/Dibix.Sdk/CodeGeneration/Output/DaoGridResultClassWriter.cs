@@ -15,45 +15,50 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Overrides
-        public override bool HasContent(CodeGenerationModel model) => model.Statements.Any(IsGridResult);
+        public override bool HasContent(CodeGenerationModel model) => model.Statements.Any(GenerateGridResultContract);
 
         public override void Write(DaoCodeGenerationContext context)
         {
             var namespaceGroups = context.Model
                                          .Statements
-                                         .Where(IsGridResult)
-                                         .GroupBy(x => context.WriteNamespaces ? x.GridResultType.Namespace.RelativeNamespace : null)
+                                         .Where(GenerateGridResultContract)
+                                         .Select(x =>
+                                         {
+                                             if (!(x.ResultType is SchemaTypeReference schemaTypeReference))
+                                                 throw new InvalidOperationException($"Unexpected result type for grid result: {x.ResultType}");
+
+                                             return (ObjectSchema)context.GetSchema(schemaTypeReference);
+                                         })
+                                         .Where(x => x != null)
+                                         .GroupBy(x => context.WriteNamespaces ? NamespaceUtility.BuildRelativeNamespace(context.Model.RootNamespace, this.LayerName, x.Namespace) : null)
                                          .ToArray();
 
             for (int i = 0; i < namespaceGroups.Length; i++)
             {
-                IGrouping<string, SqlStatementInfo> namespaceGroup = namespaceGroups[i];
+                IGrouping<string, ObjectSchema> namespaceGroup = namespaceGroups[i];
                 CSharpStatementScope scope = namespaceGroup.Key != null ? context.Output.BeginScope(namespaceGroup.Key) : context.Output;
-                IList<SqlStatementInfo> statements = namespaceGroup.DistinctBy(x => x.GridResultType.TypeName ?? x.Name).ToArray();
-                for (int j = 0; j < statements.Count; j++)
+                IList<ObjectSchema> schemas = namespaceGroup.DistinctBy(x => x.FullName).ToArray();
+                for (int j = 0; j < schemas.Count; j++)
                 {
-                    SqlStatementInfo statement = statements[j];
+                    ObjectSchema schema = schemas[j];
                     CSharpModifiers classVisibility = context.GeneratePublicArtifacts ? CSharpModifiers.Public : CSharpModifiers.Internal;
-                    CSharpClass complexType = scope.AddClass(GetComplexTypeName(statement), classVisibility | CSharpModifiers.Sealed);
+                    CSharpClass complexType = scope.AddClass(schema.DefinitionName, classVisibility | CSharpModifiers.Sealed);
 
-                    IList<SqlQueryResult> collectionProperties = statement.Results.Where(x => x.ResultMode == SqlQueryResultMode.Many).ToArray();
+                    IList<KeyValuePair<string, string>> collectionProperties = new Collection<KeyValuePair<string, string>>();
 
-                    foreach (SqlQueryResult result in statement.Results)
+                    foreach (ObjectSchemaProperty property in schema.Properties)
                     {
-                        bool isEnumerable = result.ResultMode == SqlQueryResultMode.Many;
-                        string propertyTypeName;
-                        if (result.ResultType != null)
-                            propertyTypeName = MakeCollectionInterfaceType(result.ResultType.ToString());
-                        else
+                        string propertyTypeName = context.ResolveTypeName(property.Type);
+
+                        if (property.Type.IsEnumerable)
                         {
-                            propertyTypeName = result.Contracts.First().Name.ToString();
-                            if (isEnumerable)
-                                propertyTypeName = MakeCollectionInterfaceType(propertyTypeName);
+                            collectionProperties.Add(new KeyValuePair<string, string>(property.Name, propertyTypeName));
+                            propertyTypeName = MakeCollectionInterfaceType(propertyTypeName);
                         }
 
-                        complexType.AddProperty(result.Name, propertyTypeName)
+                        complexType.AddProperty(property.Name, propertyTypeName)
                                    .Getter(null)
-                                   .Setter(null, isEnumerable ? CSharpModifiers.Private : default);
+                                   .Setter(null, property.Type.IsEnumerable ? CSharpModifiers.Private : default);
                     }
 
                     if (!collectionProperties.Any())
@@ -68,11 +73,10 @@ namespace Dibix.Sdk.CodeGeneration
                     StringBuilder ctorBodyWriter = new StringBuilder();
                     for (int k = 0; k < collectionProperties.Count; k++)
                     {
-                        SqlQueryResult property = collectionProperties[k];
-                        string innerTypeName = property.ResultType?.ToString() ?? property.Contracts.First().Name.ToString();
-                        string collectionTypeName = MakeCollectionType(innerTypeName);
+                        KeyValuePair<string, string> property = collectionProperties[k];
+                        string collectionTypeName = MakeCollectionType(property.Value);
                         ctorBodyWriter.Append("this.")
-                                      .Append(property.Name)
+                                      .Append(property.Key)
                                       .Append(" = new ")
                                       .Append(collectionTypeName)
                                       .Append("();");
@@ -84,7 +88,7 @@ namespace Dibix.Sdk.CodeGeneration
                     complexType.AddSeparator()
                                .AddConstructor(ctorBodyWriter.ToString());
 
-                    if (j + 1 < statements.Count)
+                    if (j + 1 < schemas.Count)
                         scope.AddSeparator();
                 }
 
@@ -95,7 +99,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private static bool IsGridResult(SqlStatementInfo statement) => statement.GridResultType != null;
+        private static bool GenerateGridResultContract(SqlStatementInfo statement) => statement.GenerateResultClass;
 
         private static string MakeCollectionInterfaceType(string typeName)
         {
@@ -105,17 +109,6 @@ namespace Dibix.Sdk.CodeGeneration
         private static string MakeCollectionType(string typeName)
         {
             return String.Concat("Collection<", typeName, '>');
-        }
-
-        private static string GetComplexTypeName(SqlStatementInfo statement)
-        {
-            if (statement.ResultType != null)
-                return statement.ResultType.ToString();
-
-            if (statement.GridResultType.TypeName != null)
-                return statement.GridResultType.TypeName;
-
-            throw new InvalidOperationException($"Statement '{statement.Name}' has no result type");
         }
         #endregion
     }

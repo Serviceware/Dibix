@@ -12,9 +12,9 @@ namespace Dibix.Sdk.CodeGeneration.MSBuild
     {
         public override bool ShouldGenerate(CodeArtifactsGenerationModel model) => model.Controllers.Any();
 
-        public override bool Generate(CodeArtifactsGenerationModel model, IErrorReporter errorReporter)
+        public override bool Generate(CodeArtifactsGenerationModel model, ISchemaRegistry schemaRegistry, IErrorReporter errorReporter)
         {
-            OpenApiDocument document = OpenApiGenerator.Generate(model.ProductName, NamespaceUtility.EnsureAreaName(model.AreaName), model.Controllers, model.Contracts);
+            OpenApiDocument document = OpenApiGenerator.Generate(model.ProductName, NamespaceUtility.EnsureAreaName(model.AreaName), model.RootNamespace, model.Controllers, model.Contracts);
 
             if (errorReporter.HasErrors)
                 return false;

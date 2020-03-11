@@ -13,11 +13,13 @@ namespace Dibix.Sdk.CodeGeneration
         private static readonly string GeneratorName = typeof(DaoCodeGenerator).Assembly.GetName().Name;
         private static readonly string Version = FileVersionInfo.GetVersionInfo(typeof(DaoCodeGenerator).Assembly.Location).FileVersion;
         private readonly IList<DaoWriter> _writers;
+        private readonly ISchemaRegistry _schemaRegistry;
         #endregion
 
         #region Constructor
-        public DaoCodeGenerator(IErrorReporter errorReporter) : base(errorReporter)
+        public DaoCodeGenerator(IErrorReporter errorReporter, ISchemaRegistry schemaRegistry) : base(errorReporter)
         {
+            this._schemaRegistry = schemaRegistry;
             this._writers = new Collection<DaoWriter>();
             this._writers.AddRange(SelectWriters());
         }
@@ -36,7 +38,7 @@ namespace Dibix.Sdk.CodeGeneration
             IEnumerable<string> globalAnnotations = writers.SelectMany(x => x.GetGlobalAnnotations(model)).Distinct().OrderBy(x => x.Length);
             CSharpWriter output = new CSharpWriter(writer, model.RootNamespace, globalAnnotations);
 
-            DaoCodeGenerationContext context = new DaoCodeGenerationContext(output.Root, generatedCodeAnnotation, model);
+            DaoCodeGenerationContext context = new DaoCodeGenerationContext(output.Root, generatedCodeAnnotation, model, this._schemaRegistry);
 
             IList<IGrouping<string, DaoWriter>> childWriterGroups = writers.GroupBy(x => x.LayerName).ToArray();
             for (int i = 0; i < childWriterGroups.Count; i++)
