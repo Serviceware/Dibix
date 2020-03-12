@@ -16,7 +16,7 @@ namespace Dibix.Dapper
         #region Constructor
         public DapperDatabaseAccessor(DbConnection connection) : this(connection, null, null) { }
         public DapperDatabaseAccessor(DbConnection connection, Action onDispose) : this(connection, null, onDispose) { }
-        private DapperDatabaseAccessor(DbConnection connection, IDbTransaction transaction, Action onDispose) : base(connection, onDispose)
+        public DapperDatabaseAccessor(DbConnection connection, IDbTransaction transaction, Action onDispose) : base(connection, onDispose)
         {
             this._transaction = transaction;
         }
