@@ -60,7 +60,9 @@ namespace Dibix
             if (descriptor.Discriminator != null && descriptor.Keys.Count != 1)
                 throw new InvalidOperationException($"To match a discriminator, exactly one key property should be defined: {type}");
 
-            descriptor.InitPostProcessor(CompilePostProcessor(type, formattableProperties));
+            if (formattableProperties.Any())
+                descriptor.InitPostProcessor(CompilePostProcessor(type, formattableProperties));
+
             return descriptor;
         }
 

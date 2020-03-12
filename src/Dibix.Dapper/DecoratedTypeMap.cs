@@ -53,6 +53,9 @@ namespace Dibix.Dapper
 
         SqlMapper.IMemberMap SqlMapper.ITypeMap.GetMember(string columnName)
         {
+            if (String.IsNullOrEmpty(columnName))
+                throw new InvalidOperationException($"Column name was not specified, therefore it cannot be mapped to type '{this._type}'");
+
             SqlMapper.IMemberMap member = this._inner.GetMember(columnName);
             if (member == null)
                 throw new InvalidOperationException($"Column '{columnName}' does not match a property on type '{this._type}'");
