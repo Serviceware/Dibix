@@ -65,14 +65,14 @@ namespace Dibix.Sdk.CodeGeneration
                 this.Definition.Properties.AddRange(node.Definition.ColumnDefinitions.Select(x => this.MapColumn(x, relativeNamespace, notNullableColumns)));
             }
 
-            private static string GenerateDefinitionName(string udtTypeName)
+            private static string GenerateDefinitionName(string udtName)
             {
                 const string delimiter = "_udt_";
-                int index = udtTypeName.IndexOf(delimiter, StringComparison.Ordinal);
+                int index = udtName.IndexOf(delimiter, StringComparison.Ordinal);
                 if (index >= 0)
-                    udtTypeName = udtTypeName.Substring(index + delimiter.Length);
+                    udtName = udtName.Substring(index + delimiter.Length);
 
-                return CultureInfo.InvariantCulture.TextInfo.ToTitleCase(udtTypeName).Replace("_", String.Empty);
+                return CultureInfo.InvariantCulture.TextInfo.ToTitleCase(udtName).Replace("_", String.Empty);
             }
 
             private static IEnumerable<string> GetNotNullableColumns(TableDefinition table)
@@ -97,8 +97,8 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 string columnName = column.ColumnIdentifier.Value;
                 bool isNullable = !notNullableColumns.Contains(columnName);
-                TypeReference typeReference = column.DataType.ToTypeReference(isNullable, columnName, relativeNamespace, this._source, this._hintsAccessor.Value, this._typeResolver, this._errorReporter, out string udtTypeName);
-                return new ObjectSchemaProperty(columnName, typeReference, false, false, SerializationBehavior.Always, false);
+                TypeReference typeReference = column.DataType.ToTypeReference(isNullable, columnName, relativeNamespace, this._source, this._hintsAccessor.Value, this._typeResolver, this._errorReporter, out string udtName);
+                return new ObjectSchemaProperty(columnName, typeReference);
             }
         }
     }

@@ -99,10 +99,11 @@ namespace Dibix.Sdk.CodeGeneration
                 else
                 {
                     string typeName;
-                    bool isPartOfKey = false;
-                    bool isDiscriminator = false;
+                    bool isPartOfKey = default;
+                    bool isDiscriminator = default;
                     SerializationBehavior serializationBehavior = default;
-                    bool obfuscated = false;
+                    DateTimeKind dateTimeKind = default;
+                    bool obfuscated = default;
                     switch (property.Value.Type)
                     {
                         case JTokenType.Object:
@@ -111,6 +112,9 @@ namespace Dibix.Sdk.CodeGeneration
                             isPartOfKey = (bool?)propertyInfo.Property("isPartOfKey")?.Value ?? default;
                             isDiscriminator = (bool?)propertyInfo.Property("isDiscriminator")?.Value ?? default;
                             Enum.TryParse((string)propertyInfo.Property("serialize")?.Value, true, out serializationBehavior);
+                            if (String.Equals(typeName, nameof(PrimitiveDataType.DateTime), StringComparison.OrdinalIgnoreCase))
+                                Enum.TryParse((string)propertyInfo.Property("kind")?.Value, true, out dateTimeKind);
+
                             obfuscated = (bool?)propertyInfo.Property("obfuscated")?.Value ?? default;
                             break;
 
@@ -123,7 +127,7 @@ namespace Dibix.Sdk.CodeGeneration
                     }
 
                     TypeReference type = ParseType(typeName, rootNamespace, filePath, property.Value);
-                    contract.Properties.Add(new ObjectSchemaProperty(property.Name, type, isPartOfKey, isDiscriminator, serializationBehavior, obfuscated));
+                    contract.Properties.Add(new ObjectSchemaProperty(property.Name, type, isPartOfKey, isDiscriminator, serializationBehavior, dateTimeKind, obfuscated));
                 }
             }
 

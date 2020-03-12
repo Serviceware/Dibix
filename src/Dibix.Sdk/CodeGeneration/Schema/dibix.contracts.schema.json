@@ -1,5 +1,5 @@
 {
-  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$schema": "http://json-schema.org/draft-05/schema#",
   "definitions": {
     "PropertyType": {
       "anyOf": [
@@ -26,7 +26,7 @@
       "properties": {
         "$wcfNs": {
           "type": "string",
-          "pattern": "^https?:\/\/.+"
+          "pattern": "^https?://.+"
         }
       },
       "patternProperties": {
@@ -37,7 +37,7 @@
             },
             {
               "type": "object",
-              "minProperties": 1,
+              "minProperties": 2,
               "properties": {
                 "type": {
                   "$ref": "#/definitions/PropertyType"
@@ -59,7 +59,7 @@
             },
             {
               "type": "object",
-              "minProperties": 1,
+              "minProperties": 2,
               "properties": {
                 "type": {
                   "$ref": "#/definitions/PropertyType"
@@ -71,6 +71,26 @@
               "required": [
                 "type",
                 "isDiscriminator"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "minProperties": 2,
+              "properties": {
+                "type": {
+                  "const": "datetime"
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "utc"
+                  ]
+                }
+              },
+              "required": [
+                "type",
+                "kind"
               ],
               "additionalProperties": false
             }

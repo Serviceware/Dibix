@@ -1,29 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace Dibix
 {
-    internal sealed class TextObfuscator : IPostProcessor
+    internal sealed class TextObfuscator
     {
-        #region IPostProcessor
-        public IEnumerable<TReturn> PostProcess<TReturn>(IEnumerable<TReturn> source)
-        {
-            EntityDescriptor descriptor = EntityDescriptorCache.GetDescriptor(typeof(TReturn));
-            if (!descriptor.ObfuscatedProperties.Any())
-                return source;
-
-            return source.Select(x =>
-            {
-                foreach (ObfuscatedProperty obfuscatedProperty in descriptor.ObfuscatedProperties)
-                    obfuscatedProperty.DeobfuscateValue(x);
-
-                return x;
-            });
-        }
-        #endregion
-
         #region Public Methods
         public static string Obfuscate(string input)
         {

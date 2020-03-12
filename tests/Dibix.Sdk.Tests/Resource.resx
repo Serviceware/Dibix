@@ -204,16 +204,17 @@ namespace Dibix.Sdk.Tests
 
         public sealed class GenericContract
         {
-            public string Name { get; set; } 
+            public string Name { get; set; }
+            public System.DateTime CreationTime { get; set; }
         }
 
         namespace Extension
         {
             public sealed class MultiMapContract
             {
-                public System.Guid? X { get; set; } 
-                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; } 
-                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; } 
+                public System.Guid? X { get; set; }
+                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; }
+                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
 
                 public MultiMapContract()
                 {
@@ -309,14 +310,17 @@ namespace Dibix.Sdk.Tests
             [Key]
             [DataMember]
             [JsonIgnore]
-            public int Id { get; set; } 
+            public int Id { get; set; }
             [DataMember]
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; } 
+            public string Name { get; set; }
             [DataMember]
             [JsonIgnore]
             [Discriminator]
-            public int? ParentId { get; set; } 
+            public int? ParentId { get; set; }
+            [DataMember]
+            [DateTimeKind(DateTimeKind.Utc)]
+            public System.DateTime CreationTime { get; set; }
         }
         #endregion
 
@@ -380,6 +384,9 @@ components:
       properties:
         Name:
           type: string
+        CreationTime:
+          type: string
+          format: date-time
       additionalProperties: false</value>
   </data>
   <data name="External_Empty" xml:space="preserve">
@@ -521,10 +528,10 @@ namespace Dibix.Sdk.Tests
         #region Input types
         public sealed class EmptyWithParamsInput
         {
-            public System.Guid? x { get; set; } 
-            public bool y { get; set; } 
-            public int z { get; set; } 
-            public Dibix.Sdk.Tests.Data.GenericParameterSet ids { get; set; } 
+            public System.Guid? x { get; set; }
+            public bool y { get; set; }
+            public int z { get; set; }
+            public Dibix.Sdk.Tests.Data.GenericParameterSet ids { get; set; }
         }
         #endregion
 
@@ -708,8 +715,8 @@ namespace Dibix.Sdk.Tests
         {
             public sealed class GetGridResult
             {
-                public Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract Item { get; set; } 
-                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; } 
+                public Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract Item { get; set; }
+                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
 
                 public GetGridResult()
                 {
@@ -732,23 +739,26 @@ namespace Dibix.Sdk.Tests
             [Key]
             [DataMember]
             [JsonIgnore]
-            public int Id { get; set; } 
+            public int Id { get; set; }
             [DataMember]
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; } 
+            public string Name { get; set; }
             [DataMember]
             [JsonIgnore]
             [Discriminator]
-            public int? ParentId { get; set; } 
+            public int? ParentId { get; set; }
+            [DataMember]
+            [DateTimeKind(DateTimeKind.Utc)]
+            public System.DateTime CreationTime { get; set; }
         }
 
         namespace Extension
         {
             public sealed class MultiMapContract
             {
-                public System.Guid? X { get; set; } 
-                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; } 
-                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; } 
+                public System.Guid? X { get; set; }
+                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; }
+                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
 
                 public MultiMapContract()
                 {
@@ -826,23 +836,26 @@ namespace Dibix.Sdk.Tests
             [Key]
             [DataMember]
             [JsonIgnore]
-            public int Id { get; set; } 
+            public int Id { get; set; }
             [DataMember]
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; } 
+            public string Name { get; set; }
             [DataMember]
             [JsonIgnore]
             [Discriminator]
-            public int? ParentId { get; set; } 
+            public int? ParentId { get; set; }
+            [DataMember]
+            [DateTimeKind(DateTimeKind.Utc)]
+            public System.DateTime CreationTime { get; set; }
         }
 
         namespace Extension
         {
             public sealed class MultiMapContract
             {
-                public System.Guid? X { get; set; } 
-                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; } 
-                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; } 
+                public System.Guid? X { get; set; }
+                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; }
+                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
 
                 public MultiMapContract()
                 {
@@ -913,8 +926,8 @@ namespace Dibix.Sdk.Tests
         {
             public sealed class GridResult
             {
-                public Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract Item { get; set; } 
-                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; } 
+                public Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract Item { get; set; }
+                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
 
                 public GridResult()
                 {
@@ -937,23 +950,26 @@ namespace Dibix.Sdk.Tests
             [Key]
             [DataMember]
             [JsonIgnore]
-            public int Id { get; set; } 
+            public int Id { get; set; }
             [DataMember]
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; } 
+            public string Name { get; set; }
             [DataMember]
             [JsonIgnore]
             [Discriminator]
-            public int? ParentId { get; set; } 
+            public int? ParentId { get; set; }
+            [DataMember]
+            [DateTimeKind(DateTimeKind.Utc)]
+            public System.DateTime CreationTime { get; set; }
         }
 
         namespace Extension
         {
             public sealed class MultiMapContract
             {
-                public System.Guid? X { get; set; } 
-                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; } 
-                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; } 
+                public System.Guid? X { get; set; }
+                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; }
+                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
 
                 public MultiMapContract()
                 {
@@ -1032,23 +1048,26 @@ namespace Dibix.Sdk.Tests
             [Key]
             [DataMember]
             [JsonIgnore]
-            public int Id { get; set; } 
+            public int Id { get; set; }
             [DataMember]
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; } 
+            public string Name { get; set; }
             [DataMember]
             [JsonIgnore]
             [Discriminator]
-            public int? ParentId { get; set; } 
+            public int? ParentId { get; set; }
+            [DataMember]
+            [DateTimeKind(DateTimeKind.Utc)]
+            public System.DateTime CreationTime { get; set; }
         }
 
         namespace Extension
         {
             public sealed class MultiMapContract
             {
-                public System.Guid? X { get; set; } 
-                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; } 
-                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; } 
+                public System.Guid? X { get; set; }
+                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; }
+                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
 
                 public MultiMapContract()
                 {
@@ -1062,8 +1081,8 @@ namespace Dibix.Sdk.Tests
         {
             public sealed class GridResult
             {
-                public Dibix.Sdk.Tests.DomainModel.GenericContract Item { get; set; } 
-                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; } 
+                public Dibix.Sdk.Tests.DomainModel.GenericContract Item { get; set; }
+                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
 
                 public GridResult()
                 {
@@ -1133,8 +1152,8 @@ namespace Dibix.Sdk.Tests
         {
             public sealed class GetGridResult
             {
-                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.JointContract&gt; Items { get; private set; } 
-                public Dibix.Sdk.Tests.DomainModel.AccessRights AccessRights { get; set; } 
+                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.JointContract&gt; Items { get; private set; }
+                public Dibix.Sdk.Tests.DomainModel.AccessRights AccessRights { get; set; }
 
                 public GetGridResult()
                 {
@@ -1166,20 +1185,23 @@ namespace Dibix.Sdk.Tests
             [Key]
             [DataMember]
             [JsonIgnore]
-            public int Id { get; set; } 
+            public int Id { get; set; }
             [DataMember]
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; } 
+            public string Name { get; set; }
             [DataMember]
             [JsonIgnore]
             [Discriminator]
-            public int? ParentId { get; set; } 
+            public int? ParentId { get; set; }
+            [DataMember]
+            [DateTimeKind(DateTimeKind.Utc)]
+            public System.DateTime CreationTime { get; set; }
         }
 
         public sealed class JointContract
         {
-            public Dibix.Sdk.Tests.DomainModel.GenericContract A { get; set; } 
-            public Dibix.Sdk.Tests.DomainModel.Direction B { get; set; } 
+            public Dibix.Sdk.Tests.DomainModel.GenericContract A { get; set; }
+            public Dibix.Sdk.Tests.DomainModel.Direction B { get; set; }
         }
         #endregion
     }
@@ -1235,14 +1257,17 @@ namespace Dibix.Sdk.Tests
             [Key]
             [DataMember]
             [JsonIgnore]
-            public int Id { get; set; } 
+            public int Id { get; set; }
             [DataMember]
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; } 
+            public string Name { get; set; }
             [DataMember]
             [JsonIgnore]
             [Discriminator]
-            public int? ParentId { get; set; } 
+            public int? ParentId { get; set; }
+            [DataMember]
+            [DateTimeKind(DateTimeKind.Utc)]
+            public System.DateTime CreationTime { get; set; }
         }
         #endregion
     }
@@ -1297,14 +1322,17 @@ namespace Dibix.Sdk.Tests
             [Key]
             [DataMember]
             [JsonIgnore]
-            public int Id { get; set; } 
+            public int Id { get; set; }
             [DataMember]
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; } 
+            public string Name { get; set; }
             [DataMember]
             [JsonIgnore]
             [Discriminator]
-            public int? ParentId { get; set; } 
+            public int? ParentId { get; set; }
+            [DataMember]
+            [DateTimeKind(DateTimeKind.Utc)]
+            public System.DateTime CreationTime { get; set; }
         }
         #endregion
     }
@@ -1367,23 +1395,26 @@ namespace Dibix.Sdk.Tests
             [Key]
             [DataMember]
             [JsonIgnore]
-            public int Id { get; set; } 
+            public int Id { get; set; }
             [DataMember]
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; } 
+            public string Name { get; set; }
             [DataMember]
             [JsonIgnore]
             [Discriminator]
-            public int? ParentId { get; set; } 
+            public int? ParentId { get; set; }
+            [DataMember]
+            [DateTimeKind(DateTimeKind.Utc)]
+            public System.DateTime CreationTime { get; set; }
         }
 
         namespace Extension
         {
             public sealed class MultiMapContract
             {
-                public System.Guid? X { get; set; } 
-                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; } 
-                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; } 
+                public System.Guid? X { get; set; }
+                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; }
+                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
 
                 public MultiMapContract()
                 {
@@ -1451,20 +1482,23 @@ namespace Dibix.Sdk.Tests
             [Key]
             [DataMember]
             [JsonIgnore]
-            public int Id { get; set; } 
+            public int Id { get; set; }
             [DataMember]
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; } 
+            public string Name { get; set; }
             [DataMember]
             [JsonIgnore]
             [Discriminator]
-            public int? ParentId { get; set; } 
+            public int? ParentId { get; set; }
+            [DataMember]
+            [DateTimeKind(DateTimeKind.Utc)]
+            public System.DateTime CreationTime { get; set; }
         }
 
         public sealed class JointContract
         {
-            public GenericContract A { get; set; } 
-            public Direction B { get; set; } 
+            public GenericContract A { get; set; }
+            public Direction B { get; set; }
         }
         #endregion
     }
@@ -2004,11 +2038,11 @@ UNION ALL
     #region Grid result types
     internal sealed class dbx_tests_parser_invalidcolumnsforentityResult
     {
-        public ICollection&lt;int?&gt; A { get; private set; } 
-        public ICollection&lt;int&gt; B { get; private set; } 
-        public ICollection&lt;string&gt; C { get; private set; } 
-        public ICollection&lt;Dibix.Sdk.Tests.CodeGeneration.Direction?&gt; D { get; private set; } 
-        public ICollection&lt;Dibix.Sdk.Tests.CodeGeneration.SpecialEntity&gt; E { get; private set; } 
+        public ICollection&lt;int?&gt; A { get; private set; }
+        public ICollection&lt;int&gt; B { get; private set; }
+        public ICollection&lt;string&gt; C { get; private set; }
+        public ICollection&lt;Dibix.Sdk.Tests.CodeGeneration.Direction?&gt; D { get; private set; }
+        public ICollection&lt;Dibix.Sdk.Tests.CodeGeneration.SpecialEntity&gt; E { get; private set; }
 
         public dbx_tests_parser_invalidcolumnsforentityResult()
         {
@@ -2022,8 +2056,8 @@ UNION ALL
 
     internal sealed class dbx_tests_parser_nestedifsResult
     {
-        public ICollection&lt;int&gt; A { get; private set; } 
-        public ICollection&lt;int&gt; B { get; private set; } 
+        public ICollection&lt;int&gt; A { get; private set; }
+        public ICollection&lt;int&gt; B { get; private set; }
 
         public dbx_tests_parser_nestedifsResult()
         {
@@ -2034,9 +2068,9 @@ UNION ALL
 
     internal sealed class dbx_tests_parser_nobeginendResult
     {
-        public ICollection&lt;int&gt; A { get; private set; } 
-        public int B { get; set; } 
-        public ICollection&lt;int&gt; C { get; private set; } 
+        public ICollection&lt;int&gt; A { get; private set; }
+        public int B { get; set; }
+        public ICollection&lt;int&gt; C { get; private set; }
 
         public dbx_tests_parser_nobeginendResult()
         {
@@ -2047,14 +2081,14 @@ UNION ALL
 
     internal sealed class dbx_tests_parser_typenamesResult
     {
-        public ICollection&lt;string&gt; A { get; private set; } 
-        public ICollection&lt;int?&gt; B { get; private set; } 
-        public ICollection&lt;Dibix.Sdk.Tests.CodeGeneration.Direction&gt; C { get; private set; } 
-        public ICollection&lt;Dibix.Sdk.Tests.CodeGeneration.Direction?&gt; D { get; private set; } 
-        public ICollection&lt;Dibix.Sdk.Tests.CodeGeneration.Direction&gt; E { get; private set; } 
-        public ICollection&lt;Dibix.Sdk.Tests.CodeGeneration.Direction?&gt; F { get; private set; } 
-        public ICollection&lt;string&gt; G { get; private set; } 
-        public ICollection&lt;Dibix.Sdk.Tests.CodeGeneration.Direction?&gt; H { get; private set; } 
+        public ICollection&lt;string&gt; A { get; private set; }
+        public ICollection&lt;int?&gt; B { get; private set; }
+        public ICollection&lt;Dibix.Sdk.Tests.CodeGeneration.Direction&gt; C { get; private set; }
+        public ICollection&lt;Dibix.Sdk.Tests.CodeGeneration.Direction?&gt; D { get; private set; }
+        public ICollection&lt;Dibix.Sdk.Tests.CodeGeneration.Direction&gt; E { get; private set; }
+        public ICollection&lt;Dibix.Sdk.Tests.CodeGeneration.Direction?&gt; F { get; private set; }
+        public ICollection&lt;string&gt; G { get; private set; }
+        public ICollection&lt;Dibix.Sdk.Tests.CodeGeneration.Direction?&gt; H { get; private set; }
 
         public dbx_tests_parser_typenamesResult()
         {

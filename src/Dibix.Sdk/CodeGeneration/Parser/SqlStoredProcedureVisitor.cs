@@ -42,20 +42,22 @@ namespace Dibix.Sdk.CodeGeneration
 
             ICollection<SqlHint> hints = SqlHintParser.FromToken(this.Target.Source, this.ErrorReporter, previousToken).ToArray();
 
-            SqlQueryParameter parameter = new SqlQueryParameter { Name = parameterName };
+            SqlQueryParameter parameter = new SqlQueryParameter
+            {
+                Name = parameterName,
+                Type = this.ParseParameterType(parameterName, node, hints)
+            };
             
             this.ParseParameterObfuscate(node, parameter, hints);
-            this.ParseParameterType(node, parameter, hints);
             this.ParseDefaultValue(node, parameter);
 
             this.Target.Parameters.Add(parameter);
         }
 
-        private void ParseParameterType(DeclareVariableElement parameter, SqlQueryParameter target, IEnumerable<SqlHint> hints)
+        private TypeReference ParseParameterType(string parameterName, DeclareVariableElement parameter, IEnumerable<SqlHint> hints)
         {
             bool isNullable = parameter.Nullable?.Nullable ?? false;
-            target.Type = parameter.DataType.ToTypeReference(isNullable, target.Name, this.Target.Namespace, this.Target.Source, hints, base.TypeResolver, base.ErrorReporter, out string udtTypeName);
-            target.UdtTypeName = udtTypeName;
+            return parameter.DataType.ToTypeReference(isNullable, parameterName, this.Target.Namespace, this.Target.Source, hints, base.TypeResolver, base.ErrorReporter, out string udtName);
         }
 
         private void ParseParameterObfuscate(TSqlFragment parameter, SqlQueryParameter target, IEnumerable<SqlHint> hints)
@@ -205,7 +207,7 @@ DataType: {target.Type.GetType()}");
             ObjectSchema schema = new ObjectSchema(@namespace, gridResultTypeName);
             schema.Properties.AddRange(this.Target
                                            .Results
-                                           .Select(x => new ObjectSchemaProperty(x.Name, x.ResultType, false, false, SerializationBehavior.Always, false)));
+                                           .Select(x => new ObjectSchemaProperty(x.Name, x.ResultType)));
             base.SchemaRegistry.Populate(schema);
 
             return typeReference;

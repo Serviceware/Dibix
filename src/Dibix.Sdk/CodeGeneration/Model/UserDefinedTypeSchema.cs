@@ -2,11 +2,11 @@
 {
     public sealed class UserDefinedTypeSchema : ObjectSchema
     {
-        public string UdtTypeName { get; }
+        public string UdtName { get; }
 
-        public UserDefinedTypeSchema(string @namespace, string definitionName, string udtTypeName) : base(@namespace, definitionName)
+        public UserDefinedTypeSchema(string @namespace, string definitionName, string udtName) : base(@namespace, definitionName)
         {
-            this.UdtTypeName = udtTypeName;
+            this.UdtName = udtName;
         }
     }
 }

@@ -4,7 +4,6 @@
     {
         public string Name { get; set; }
         public TypeReference Type { get; set; }
-        public string UdtTypeName { get; set; }
         public ContractCheck Check { get; set; }
         public bool HasDefaultValue { get; set; }
         public object DefaultValue { get; set; }

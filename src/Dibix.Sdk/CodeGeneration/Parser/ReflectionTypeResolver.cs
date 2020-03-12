@@ -109,7 +109,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 ObjectSchema objectSchema = new ObjectSchema(type.Namespace, type.Name);
                 objectSchema.Properties.AddRange(type.GetProperties()
-                                                     .Select(x => new ObjectSchemaProperty(x.Name, null, false, false, SerializationBehavior.Always, false)));
+                                                     .Select(x => new ObjectSchemaProperty(x.Name)));
                 schemaDefinition = objectSchema;
             }
 

@@ -12,19 +12,19 @@ namespace Dibix.Dapper
     {
         #region Fields
         private readonly string _schemaName;
-        private readonly string _udtTypeName;
+        private readonly string _udtName;
         private readonly Func<IEnumerable<SqlDataRecord>> _recordsProvider;
         #endregion
 
         #region Properties
-        public string TypeName => $"[{this._schemaName}].[{this._udtTypeName}]";
+        public string TypeName => $"[{this._schemaName}].[{this._udtName}]";
         #endregion
 
         #region Constructor
-        public DapperStructuredTypeParameter(string schemaName, string udtTypeName, Func<IEnumerable<SqlDataRecord>> recordsProvider)
+        public DapperStructuredTypeParameter(string schemaName, string udtName, Func<IEnumerable<SqlDataRecord>> recordsProvider)
         {
             this._schemaName = schemaName;
-            this._udtTypeName = udtTypeName;
+            this._udtName = udtName;
             this._recordsProvider = recordsProvider;
         }
         #endregion

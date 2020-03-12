@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Dibix
@@ -19,7 +20,7 @@ namespace Dibix
             PropertyMatcher propertyMatcher = new PropertyMatcher();
             for (int i = relevantArgs.Length - 1; i > 0; i--)
             {
-                object item = this.GetCachedEntity(relevantArgs[i]);
+                object item = this.GetCachedEntity(relevantArgs[i]).PostProcess();
                 for (int j = i - 1; j >= 0; j--)
                 {
                     object previousItem = this.GetCachedEntity(relevantArgs[j]);
@@ -44,10 +45,10 @@ namespace Dibix
         #endregion
 
         #region IPostProcessor Members
-        public IEnumerable<TReturn> PostProcess<TReturn>(IEnumerable<TReturn> source)
+        public IEnumerable<object> PostProcess(IEnumerable<object> source, Type type)
         {
             // Distinct because the root might be duplicated because of 1->n related rows
-            IEnumerable<TReturn> results = source.Distinct(new EntityComparer<TReturn>());
+            IEnumerable<object> results = source.Distinct(new EntityComparer());
             return results;
         }
         #endregion

@@ -38,7 +38,7 @@ namespace Dibix.Sdk.CodeGeneration
                                               .Inherits($"StructuredType<{userDefinedType.DefinitionName}, {String.Join(", ", userDefinedType.Properties.Select(x => context.ResolveTypeName(x.Type)))}>");
 
                     @class.AddConstructor(body: $"base.ImportSqlMetadata(() => this.Add({String.Join(", ", userDefinedType.Properties.Select(x => "default"))}));"
-                                        , baseConstructorParameters: $"\"{userDefinedType.UdtTypeName}\"");
+                                        , baseConstructorParameters: $"\"{userDefinedType.UdtName}\"");
 
                     CSharpMethod method = @class.AddMethod("Add", "void", $"base.AddValues({String.Join(", ", userDefinedType.Properties.Select(x => x.Name))});");
                     foreach (ObjectSchemaProperty column in userDefinedType.Properties)

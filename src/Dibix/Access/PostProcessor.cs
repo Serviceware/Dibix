@@ -12,14 +12,15 @@ namespace Dibix
         static PostProcessor()
         {
             PostProcessors = new Collection<Func<IPostProcessor>>();
-            Register<TextObfuscator>();
+            Register<EntityDescriptorPostProcessor>();
             Register<RecursiveMapper>();
         }
 
-        public static IEnumerable<TReturn> PostProcess<TReturn>(IEnumerable<TReturn> source, params IPostProcessor[] prePostProcessors)
+        public static IEnumerable<TReturn> PostProcess<TReturn>(IEnumerable<TReturn> source, params IPostProcessor[] prePostProcessors) => PostProcess(source.Cast<object>(), typeof(TReturn), prePostProcessors).Cast<TReturn>();
+        public static IEnumerable<object> PostProcess(IEnumerable<object> source, Type type, params IPostProcessor[] prePostProcessors)
         {
-            IEnumerable<IPostProcessor> postProcessors = (prePostProcessors ?? new IPostProcessor[0]).Concat(PostProcessors.Select(postProcessorFactory => postProcessorFactory()));
-            return postProcessors.Aggregate(source, (current, postProcessor) => postProcessor.PostProcess(current));
+            IEnumerable<IPostProcessor> postProcessors = prePostProcessors.Concat(PostProcessors.Select(postProcessorFactory => postProcessorFactory()));
+            return postProcessors.Aggregate(source, (current, postProcessor) => postProcessor.PostProcess(current, type));
         }
 
         private static void Register<T>() where T : IPostProcessor, new()

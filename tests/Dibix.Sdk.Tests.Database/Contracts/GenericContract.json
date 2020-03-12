@@ -13,6 +13,10 @@
     "ParentId": {
       "type": "int32?",
       "isDiscriminator": true
+    },
+    "CreationTime": {
+      "type": "datetime",
+      "kind": "utc"
     }
   }
 }

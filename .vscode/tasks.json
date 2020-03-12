@@ -22,7 +22,7 @@
                 "build",
                 "${workspaceFolder}/src/Dibix.Dapper",
                 "-f",
-                "netstandard1.3",
+                "netstandard1.5",
                 "/p:GenerateFullPaths=true"
             ],
             "problemMatcher": "$msCompile"

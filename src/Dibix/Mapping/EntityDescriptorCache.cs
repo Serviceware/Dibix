@@ -1,6 +1,7 @@
 ﻿﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
@@ -11,6 +12,11 @@ namespace Dibix
     internal static class EntityDescriptorCache
     {
         private static readonly ConcurrentDictionary<Type, EntityDescriptor> Cache = new ConcurrentDictionary<Type, EntityDescriptor>();
+        private static readonly IEntityPropertyFormatter[] PropertyFormatters =
+        {
+            new DateTimeKindEntityPropertyFormatter()
+          , new TextObfuscationEntityPropertyFormatter()
+        };
 
         public static EntityDescriptor GetDescriptor(Type type) => Cache.GetOrAdd(type, BuildDescriptor);
 
@@ -20,6 +26,7 @@ namespace Dibix
             if (type.IsPrimitive())
                 return descriptor;
 
+            IDictionary<PropertyInfo, ICollection<IEntityPropertyFormatter>> formattableProperties = new Dictionary<PropertyInfo, ICollection<IEntityPropertyFormatter>>();
             foreach (PropertyInfo property in type.GetRuntimeProperties())
             {
                 if (property.IsDefined(typeof(KeyAttribute)))
@@ -39,13 +46,21 @@ namespace Dibix
                     descriptor.Properties.Add(entityProperty);
                 }
 
-                if (property.IsDefined(typeof(ObfuscatedAttribute)))
-                    descriptor.ObfuscatedProperties.Add(BuildObfuscatedPropertyAccessor(property));
+                foreach (IEntityPropertyFormatter propertyFormatter in PropertyFormatters.Where(x => x.RequiresFormatting(property)))
+                {
+                    if (!formattableProperties.TryGetValue(property, out ICollection<IEntityPropertyFormatter> formatters))
+                    {
+                        formatters = new Collection<IEntityPropertyFormatter>();
+                        formattableProperties.Add(property, formatters);
+                    }
+                    formatters.Add(propertyFormatter);
+                }
             }
 
             if (descriptor.Discriminator != null && descriptor.Keys.Count != 1)
                 throw new InvalidOperationException($"To match a discriminator, exactly one key property should be defined: {type}");
 
+            descriptor.InitPostProcessor(CompilePostProcessor(type, formattableProperties));
             return descriptor;
         }
 
@@ -138,16 +153,20 @@ namespace Dibix
 
         private static bool IsCollectionType(Type type) => type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(ICollection<>);
 
-        private static ObfuscatedProperty BuildObfuscatedPropertyAccessor(PropertyInfo propertyInfo)
+        private static Delegate CompilePostProcessor(Type type, IDictionary<PropertyInfo, ICollection<IEntityPropertyFormatter>> formattableProperties)
         {
-            ParameterExpression instanceParameter = Expression.Parameter(typeof(object), "instance");
-            Expression instance = Expression.Convert(instanceParameter, propertyInfo.DeclaringType);
-            Expression property = Expression.Property(instance, propertyInfo);
-            Expression deobfuscator = Expression.Call(typeof(TextObfuscator), nameof(TextObfuscator.Deobfuscate), new Type[0], property);
-            Expression assign = Expression.Assign(property, deobfuscator);
-            Expression<Action<object>> expression = Expression.Lambda<Action<object>>(assign, instanceParameter);
-            Action<object> compiled = expression.Compile();
-            return new ObfuscatedProperty(compiled);
+            ParameterExpression instanceParameter = Expression.Parameter(type, "instance");
+
+            IEnumerable<Expression> statements = from formattableProperty in formattableProperties
+                                                 let propertyInfo = formattableProperty.Key
+                                                 from formatter in formattableProperty.Value
+                                                 let propertyExpression = Expression.Property(instanceParameter, propertyInfo)
+                                                 select Expression.Assign(propertyExpression, formatter.BuildFormattingExpression(propertyInfo, propertyExpression));
+
+            Expression block = Expression.Block(statements);
+            LambdaExpression lambda = Expression.Lambda(block, instanceParameter);
+            Delegate compiled = lambda.Compile();
+            return compiled;
         }
     }
 }

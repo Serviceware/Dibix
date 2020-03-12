@@ -8,7 +8,6 @@ namespace Dibix.Dapper
     {
         #region Fields
         private readonly SqlMapper.GridReader _reader;
-        private readonly DapperMappingCheck _mappingCheck;
         #endregion
 
         #region Properties
@@ -16,59 +15,58 @@ namespace Dibix.Dapper
         #endregion
 
         #region Constructor
-        public DapperGridResultReader(SqlMapper.GridReader reader, DapperMappingCheck mappingCheck)
+        public DapperGridResultReader(SqlMapper.GridReader reader)
         {
             this._reader = reader;
-            this._mappingCheck = mappingCheck;
         }
         #endregion
 
         #region IMultipleResultReader Members
         protected override IEnumerable<T> ReadMany<T>()
         {
-            this._mappingCheck.Check<T>();
+            DecoratedTypeMap.Adapt<T>();
             return this._reader.Read<T>();
         }
 
         protected override IEnumerable<TReturn> ReadMany<TFirst, TSecond, TReturn>(Func<TFirst, TSecond, TReturn> map, string splitOn)
         {
-            this._mappingCheck.Check<TFirst, TSecond>();
+            DecoratedTypeMap.Adapt<TFirst, TSecond>();
             return this._reader.Read(map, splitOn);
         }
 
         protected override IEnumerable<TReturn> ReadMany<TFirst, TSecond, TThird, TReturn>(Func<TFirst, TSecond, TThird, TReturn> map, string splitOn)
         {
-            this._mappingCheck.Check<TFirst, TSecond, TThird>();
+            DecoratedTypeMap.Adapt<TFirst, TSecond, TThird>();
             return this._reader.Read(map, splitOn);
         }
 
         protected override IEnumerable<TReturn> ReadMany<TFirst, TSecond, TThird, TFourth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TReturn> map, string splitOn)
         {
-            this._mappingCheck.Check<TFirst, TSecond, TThird, TFourth>();
+            DecoratedTypeMap.Adapt<TFirst, TSecond, TThird, TFourth>();
             return this._reader.Read(map, splitOn);
         }
 
         protected override IEnumerable<TReturn> ReadMany<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> map, string splitOn)
         {
-            this._mappingCheck.Check<TFirst, TSecond, TThird, TFourth, TFifth>();
+            DecoratedTypeMap.Adapt<TFirst, TSecond, TThird, TFourth, TFifth>();
             return this._reader.Read(map, splitOn);
         }
 
         protected override IEnumerable<TReturn> ReadMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> map, string splitOn)
         {
-            this._mappingCheck.Check<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>();
+            DecoratedTypeMap.Adapt<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>();
             return this._reader.Read(map, splitOn);
         }
 
         protected override T ReadSingle<T>()
         {
-            this._mappingCheck.Check<T>();
+            DecoratedTypeMap.Adapt<T>();
             return this._reader.ReadSingle<T>();
         }
 
         protected override T ReadSingleOrDefault<T>()
         {
-            this._mappingCheck.Check<T>();
+            DecoratedTypeMap.Adapt<T>();
             return this._reader.ReadSingleOrDefault<T>();
         }
         #endregion

@@ -1,9 +1,10 @@
+using System;
 using System.Collections.Generic;
 
 namespace Dibix
 {
     internal interface IPostProcessor
     {
-        IEnumerable<TReturn> PostProcess<TReturn>(IEnumerable<TReturn> source);
+        IEnumerable<object> PostProcess(IEnumerable<object> source, Type type);
     }
 }

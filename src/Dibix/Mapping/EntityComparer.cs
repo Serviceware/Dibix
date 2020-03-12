@@ -35,15 +35,4 @@ namespace Dibix
             return hashCode;
         }
     }
-
-    internal sealed class EntityComparer<T> : IEqualityComparer<T>
-    {
-        private readonly IEqualityComparer<object> _inner;
-
-        public EntityComparer() => this._inner = new EntityComparer();
-
-        bool IEqualityComparer<T>.Equals(T x, T y) => this._inner.Equals(x, y);
-
-        int IEqualityComparer<T>.GetHashCode(T obj) => this._inner.GetHashCode(obj);
-    }
 }

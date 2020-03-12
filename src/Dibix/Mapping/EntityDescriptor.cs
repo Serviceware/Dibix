@@ -1,20 +1,25 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace Dibix
 {
     internal sealed class EntityDescriptor
     {
+        private Delegate _postProcessor;
+
         public ICollection<EntityKey> Keys { get; }
         public EntityKey Discriminator { get; set; }
         public IList<EntityProperty> Properties { get; }
-        public ICollection<ObfuscatedProperty> ObfuscatedProperties { get; }
 
         public EntityDescriptor()
         {
             this.Keys = new Collection<EntityKey>();
             this.Properties = new Collection<EntityProperty>();
-            this.ObfuscatedProperties = new Collection<ObfuscatedProperty>();
         }
+
+        public void PostProcess(object instance) => this._postProcessor?.DynamicInvoke(instance);
+
+        public void InitPostProcessor(Delegate postProcessor) => this._postProcessor = postProcessor;
     }
 }

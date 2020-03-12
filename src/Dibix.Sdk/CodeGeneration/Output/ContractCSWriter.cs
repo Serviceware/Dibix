@@ -83,6 +83,13 @@ namespace Dibix.Sdk.CodeGeneration
                         context.AddUsing("Dibix");
                         propertyAnnotations.Add("Discriminator");
                     }
+
+                    if (property.DateTimeKind != default)
+                    {
+                        context.AddUsing("Dibix");
+                        context.AddUsing(typeof(DateTimeKind).Namespace);
+                        propertyAnnotations.Add($"DateTimeKind(DateTimeKind.{property.DateTimeKind})");
+                    }
                 }
 
                 switch (property.SerializationBehavior)

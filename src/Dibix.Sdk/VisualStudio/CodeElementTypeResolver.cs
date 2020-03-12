@@ -104,7 +104,7 @@ namespace Dibix.Sdk.VisualStudio
         {
             foreach (CodeElement element in @class.Members.Cast<CodeElement>().Where(element => element.Kind == vsCMElement.vsCMElementProperty))
             {
-                yield return new ObjectSchemaProperty(element.Name, null, false, false, SerializationBehavior.Always, false);
+                yield return new ObjectSchemaProperty(element.Name);
             }
 
             foreach (ObjectSchemaProperty property in @class.Bases.OfType<CodeClass>().SelectMany(TraverseProperties))

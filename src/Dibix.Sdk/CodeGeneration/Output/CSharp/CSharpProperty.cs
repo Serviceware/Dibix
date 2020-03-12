@@ -83,7 +83,7 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
                       .Write("}");
             }
             else
-                writer.WriteRaw(" } ");
+                writer.WriteRaw(" }");
         }
     }
 }

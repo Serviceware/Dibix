@@ -46,7 +46,8 @@ namespace Dibix.Sdk.Sql
           , IEnumerable<SqlHint> hints
           , ITypeResolverFacade typeResolver
           , IErrorReporter errorReporter
-          , out string udtTypeName)
+          , out string udtName
+        )
         {
             string typeImplementationName = hints.SingleHintValue(SqlHint.ClrType);
             TypeReference typeReference = null;
@@ -56,7 +57,7 @@ namespace Dibix.Sdk.Sql
             switch (dataTypeReference)
             {
                 case SqlDataTypeReference sqlDataTypeReference:
-                    udtTypeName = null;
+                    udtName = null;
 
                     if (typeReference != null)
                         return typeReference;
@@ -72,22 +73,22 @@ DataType: {sqlDataTypeReference.SqlDataTypeOption}");
                 case UserDataTypeReference userDataTypeReference:
                     if (String.Equals(userDataTypeReference.Name.BaseIdentifier.Value, "SYSNAME", StringComparison.OrdinalIgnoreCase))
                     {
-                        udtTypeName = null;
+                        udtName = null;
                         return new PrimitiveTypeReference(PrimitiveDataType.String, isNullable, false);
                     }
 
-                    udtTypeName = $"[{userDataTypeReference.Name.SchemaIdentifier.Value}].[{userDataTypeReference.Name.BaseIdentifier.Value}]";
+                    udtName = $"[{userDataTypeReference.Name.SchemaIdentifier.Value}].[{userDataTypeReference.Name.BaseIdentifier.Value}]";
                     if (typeReference == null)
                     {
                         errorReporter.RegisterError(source, dataTypeReference.StartLine, dataTypeReference.StartColumn, null, $@"Could not determine type implementation for user defined type
 Name: {name}
-UDT type: {udtTypeName}
+UDT type: {udtName}
 Please mark it with /* @ClrType <ClrTypeName> */");
                     }
                     return typeReference;
 
                 case XmlDataTypeReference _:
-                    udtTypeName = null;
+                    udtName = null;
                     return new PrimitiveTypeReference(PrimitiveDataType.Xml, false, false);
 
                 default:
