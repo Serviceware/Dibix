@@ -22,13 +22,13 @@ namespace Dibix.Dapper
         }
         #endregion
 
-        #region IDatabaseAccessor Members
-        public override int Execute(string sql, CommandType commandType, IParametersVisitor parameters)
+        #region Overrides
+        protected override int Execute(string sql, CommandType commandType, IParametersVisitor parameters)
         {
             return base.Connection.Execute(sql, parameters.AsDapperParams(), this._transaction, commandType: commandType);
         }
 
-        public override Task<int> ExecuteAsync(string sql, CommandType commandType, IParametersVisitor parameters)
+        protected override Task<int> ExecuteAsync(string sql, CommandType commandType, IParametersVisitor parameters)
         {
             return base.Connection.ExecuteAsync(sql, parameters.AsDapperParams(), this._transaction, commandType: commandType);
         }
@@ -103,7 +103,7 @@ namespace Dibix.Dapper
             return base.Connection.QuerySingleOrDefault<T>(sql, parameters.AsDapperParams(), this._transaction, commandType: commandType);
         }
 
-        public override IMultipleResultReader QueryMultiple(string sql, CommandType commandType, IParametersVisitor parameters)
+        protected override IMultipleResultReader QueryMultiple(string sql, CommandType commandType, IParametersVisitor parameters)
         {
             SqlMapper.GridReader reader = base.Connection.QueryMultiple(sql, parameters.AsDapperParams(), this._transaction, commandType: commandType);
             return new DapperGridResultReader(reader);

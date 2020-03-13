@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Linq.Expressions;
 using Microsoft.SqlServer.Server;
 
@@ -10,6 +11,7 @@ namespace Dibix
     public abstract class StructuredType : IEnumerable<SqlDataRecord>
     {
         #region Fields
+        private const string DefaultSchemaName = "dbo";
         private readonly ICollection<SqlDataRecord> _records;
         private SqlMetaData[] _metadata;
         #endregion
@@ -22,7 +24,7 @@ namespace Dibix
         protected StructuredType(string typeName)
         {
             this._records = new Collection<SqlDataRecord>();
-            this.TypeName = typeName;
+            this.TypeName = NormalizeTypeName(typeName);
         }
         #endregion
 
@@ -52,6 +54,17 @@ namespace Dibix
             SqlDataRecord record = new SqlDataRecord(this._metadata);
             record.SetValues(values);
             this._records.Add(record);
+        }
+        #endregion
+
+        #region Private Methods
+        private static string NormalizeTypeName(string typeName)
+        {
+            IList<string> parts = typeName.Split('.').Select(x => x.TrimStart('[').TrimEnd(']')).ToList();
+            if (parts.Count < 2)
+                parts.Insert(0, DefaultSchemaName);
+
+            return String.Join(".", parts.Select(x => $"[{x}]"));
         }
         #endregion
 

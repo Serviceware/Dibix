@@ -11,20 +11,17 @@ namespace Dibix.Dapper
     internal sealed class DapperStructuredTypeParameter : SqlMapper.ICustomQueryParameter
     {
         #region Fields
-        private readonly string _schemaName;
-        private readonly string _udtName;
         private readonly Func<IEnumerable<SqlDataRecord>> _recordsProvider;
         #endregion
 
         #region Properties
-        public string TypeName => $"[{this._schemaName}].[{this._udtName}]";
+        public string UdtName { get; }
         #endregion
 
         #region Constructor
-        public DapperStructuredTypeParameter(string schemaName, string udtName, Func<IEnumerable<SqlDataRecord>> recordsProvider)
+        public DapperStructuredTypeParameter(string udtName, Func<IEnumerable<SqlDataRecord>> recordsProvider)
         {
-            this._schemaName = schemaName;
-            this._udtName = udtName;
+            this.UdtName = udtName;
             this._recordsProvider = recordsProvider;
         }
         #endregion
@@ -47,7 +44,7 @@ namespace Dibix.Dapper
             if (param is SqlParameter sqlParam)
             {
                 sqlParam.SqlDbType = SqlDbType.Structured;
-                sqlParam.TypeName = this.TypeName;
+                sqlParam.TypeName = this.UdtName;
             }
 
             return param;

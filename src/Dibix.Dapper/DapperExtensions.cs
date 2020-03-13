@@ -1,4 +1,3 @@
-using System;
 using System.Data;
 using Dapper;
 
@@ -10,15 +9,14 @@ namespace Dibix.Dapper
         {
             Guard.IsNotNull(parametersVisitor, nameof(parametersVisitor));
             DynamicParameters @params = new DynamicParameters();
-            parametersVisitor.VisitParameters((name, value, type, suggestedDataType) => @params.Add(name, NormalizeParameterValue(value), NormalizeParameterDbType(suggestedDataType)));
+            parametersVisitor.VisitParameters((name, value, clrType, suggestedDataType) => @params.Add(name, NormalizeParameterValue(value), NormalizeParameterDbType(suggestedDataType)));
             return @params;
         }
 
         private static object NormalizeParameterValue(object value)
         {
-            const string schemaName = "dbo";
             if (value is StructuredType tvp)
-                return new DapperStructuredTypeParameter(schemaName, tvp.TypeName, tvp.GetRecords);
+                return new DapperStructuredTypeParameter(tvp.TypeName, tvp.GetRecords);
 
             return value;
         }
