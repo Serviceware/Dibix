@@ -53,7 +53,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             public override void Visit(CreateTypeTableStatement node)
             {
-                string typeName = node.Name.BaseIdentifier.Value;
+                string typeName = node.Name.ToFullName();
                 string relativeNamespace = this._hintsAccessor.Value.SingleHintValue(SqlHint.Namespace);
                 string definitionName = this._hintsAccessor.Value.SingleHintValue(SqlHint.Name);
                 if (String.IsNullOrEmpty(definitionName))
@@ -68,11 +68,12 @@ namespace Dibix.Sdk.CodeGeneration
             private static string GenerateDefinitionName(string udtName)
             {
                 const string delimiter = "_udt_";
-                int index = udtName.IndexOf(delimiter, StringComparison.Ordinal);
+                string udtBaseName = udtName.Split('.').Select(x => x.TrimStart('[').TrimEnd(']')).Last();
+                int index = udtBaseName.IndexOf(delimiter, StringComparison.Ordinal);
                 if (index >= 0)
-                    udtName = udtName.Substring(index + delimiter.Length);
+                    udtBaseName = udtBaseName.Substring(index + delimiter.Length);
 
-                return CultureInfo.InvariantCulture.TextInfo.ToTitleCase(udtName).Replace("_", String.Empty);
+                return CultureInfo.InvariantCulture.TextInfo.ToTitleCase(udtBaseName).Replace("_", String.Empty);
             }
 
             private static IEnumerable<string> GetNotNullableColumns(TableDefinition table)

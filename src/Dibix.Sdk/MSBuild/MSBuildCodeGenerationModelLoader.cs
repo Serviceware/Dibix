@@ -48,7 +48,8 @@ namespace Dibix.Sdk.MSBuild
             IUserDefinedTypeProvider userDefinedTypeProvider = new UserDefinedTypeProvider(productName, areaName, normalizedSources, typeResolver, errorReporter);
 
             schemaRegistry.ImportSchemas(contractDefinitionProvider, userDefinedTypeProvider);
-            typeResolver.Register(new SchemaTypeResolver(schemaRegistry, contractDefinitionProvider, userDefinedTypeProvider), 0);
+            typeResolver.Register(new ContractDefinitionSchemaTypeResolver(schemaRegistry, contractDefinitionProvider), 0);
+            typeResolver.Register(new UserDefinedTypeSchemaTypeResolver(schemaRegistry, userDefinedTypeProvider, assemblyResolver), 1);
 
             CodeArtifactsGenerationModel model = new CodeArtifactsGenerationModel(CodeGeneratorCompatibilityLevel.Full)
             {
@@ -62,7 +63,7 @@ namespace Dibix.Sdk.MSBuild
             model.Statements.AddRange(CollectStatements(normalizedSources, projectDirectory, productName, areaName, embedStatements, formatter, typeResolver, schemaRegistry, errorReporter, modelAccessor));
             model.UserDefinedTypes.AddRange(userDefinedTypeProvider.Types);
             model.Contracts.AddRange(contractDefinitionProvider.Contracts);
-            model.Controllers.AddRange(CollectControllers(normalizedEndpoints, projectDirectory, productName, areaName, defaultOutputName, model.Statements, assemblyResolver, fileSystemProvider, errorReporter));
+            model.Controllers.AddRange(CollectControllers(normalizedEndpoints, productName, areaName, defaultOutputName, model.Statements, assemblyResolver, fileSystemProvider, errorReporter));
 
             return model;
         }
@@ -99,7 +100,6 @@ namespace Dibix.Sdk.MSBuild
         private static IEnumerable<ControllerDefinition> CollectControllers
         (
             IEnumerable<string> endpoints
-          , string projectDirectory
           , string productName
           , string areaName
           , string defaultOutputName
@@ -108,7 +108,7 @@ namespace Dibix.Sdk.MSBuild
           , IFileSystemProvider fileSystemProvider
           , IErrorReporter errorReporter)
         {
-            IControllerActionTargetSelector controllerActionTargetSelector = new ControllerActionTargetSelector(productName, areaName, defaultOutputName, projectDirectory, statements, referencedAssemblyProvider, errorReporter);
+            IControllerActionTargetSelector controllerActionTargetSelector = new ControllerActionTargetSelector(productName, areaName, defaultOutputName, statements, referencedAssemblyProvider, errorReporter);
             return new ControllerDefinitionProvider(fileSystemProvider, controllerActionTargetSelector, errorReporter, endpoints).Controllers;
         }
     }

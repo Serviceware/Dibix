@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class ReflectionTypeResolver : ITypeResolver
+    internal sealed class ReflectionTypeResolver : TypeResolver
     {
         #region Fields
         private static readonly IDictionary<Type, PrimitiveDataType> PrimitiveTypeMap = new Dictionary<Type, PrimitiveDataType>
@@ -38,11 +38,41 @@ namespace Dibix.Sdk.CodeGeneration
         }
         #endregion
 
-        #region ITypeResolver Members
-        public TypeReference ResolveType(string input, string @namespace, string source, int line, int column, bool isEnumerable)
+        #region Overrides
+        public override TypeReference ResolveType(string input, string @namespace, string source, int line, int column, bool isEnumerable)
         {
             bool isAssemblyQualified = input.IndexOf(',') >= 0;
             return !isAssemblyQualified ? this.TryLocalType(input, source, line, column, isEnumerable) : this.TryForeignType(input, source, line, column, isEnumerable);
+        }
+        #endregion
+
+        #region Public Methods
+        public static TypeReference ResolveType(Type type, string source, int line, int column, bool isNullable, bool isEnumerable, ISchemaRegistry schemaRegistry)
+        {
+            if (PrimitiveTypeMap.TryGetValue(type, out PrimitiveDataType dataType))
+                return new PrimitiveTypeReference(dataType, isNullable, isEnumerable);
+
+            SchemaTypeReference schemaTypeReference = SchemaTypeReference.WithNamespace(type.Namespace, type.Name, source, line, column, isNullable, isEnumerable);
+            if (schemaRegistry.IsRegistered(schemaTypeReference.Key))
+                return schemaTypeReference;
+
+            SchemaDefinition schemaDefinition;
+            if (type.IsEnum)
+            {
+                EnumSchema enumSchema = new EnumSchema(type.Namespace, type.Name, false);
+                schemaDefinition = enumSchema;
+            }
+            else
+            {
+                ObjectSchema objectSchema = new ObjectSchema(type.Namespace, type.Name);
+                objectSchema.Properties.AddRange(type.GetProperties()
+                                                     .Select(x => new ObjectSchemaProperty(x.Name)));
+                schemaDefinition = objectSchema;
+            }
+
+            schemaRegistry.Populate(schemaDefinition);
+
+            return schemaTypeReference;
         }
         #endregion
 
@@ -90,33 +120,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private TypeReference ResolveType(Type type, string source, int line, int column, bool isNullable, bool isEnumerable)
-        {
-            if (PrimitiveTypeMap.TryGetValue(type, out PrimitiveDataType dataType))
-                return new PrimitiveTypeReference(dataType, isNullable, isEnumerable);
-
-            SchemaTypeReference schemaTypeReference = SchemaTypeReference.WithNamespace(type.Namespace, type.Name, source, line, column, isNullable, isEnumerable);
-            if (this._schemaRegistry.IsRegistered(schemaTypeReference.Key))
-                return schemaTypeReference;
-
-            SchemaDefinition schemaDefinition;
-            if (type.IsEnum)
-            {
-                EnumSchema enumSchema = new EnumSchema(type.Namespace, type.Name, false);
-                schemaDefinition = enumSchema;
-            }
-            else
-            {
-                ObjectSchema objectSchema = new ObjectSchema(type.Namespace, type.Name);
-                objectSchema.Properties.AddRange(type.GetProperties()
-                                                     .Select(x => new ObjectSchemaProperty(x.Name)));
-                schemaDefinition = objectSchema;
-            }
-
-            this._schemaRegistry.Populate(schemaDefinition);
-
-            return schemaTypeReference;
-        }
+        private TypeReference ResolveType(Type type, string source, int line, int column, bool isNullable, bool isEnumerable) => ResolveType(type, source, line, column, isNullable, isEnumerable, this._schemaRegistry);
         #endregion
     }
 }

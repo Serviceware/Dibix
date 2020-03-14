@@ -253,6 +253,7 @@ using Dibix;
 using Dibix.Http;
 using Newtonsoft.Json;
 
+[assembly: ArtifactAssembly]
 [assembly: ApiRegistration("Tests")]
 namespace Dibix.Sdk.Tests
 {
@@ -287,9 +288,10 @@ namespace Dibix.Sdk.Tests
         #endregion
 
         #region Structured types
+        [StructuredType("[dbo].[dbx_codeanalysis_udt_generic]")]
         public sealed class GenericParameterSet : StructuredType&lt;GenericParameterSet, int, string&gt;
         {
-            public GenericParameterSet() : base("dbx_codeanalysis_udt_generic")
+            public GenericParameterSet() : base("[dbo].[dbx_codeanalysis_udt_generic]")
             {
                 base.ImportSqlMetadata(() =&gt; this.Add(default, default));
             }
@@ -402,6 +404,7 @@ components:
 using System.CodeDom.Compiler;
 using Dibix;
 
+[assembly: ArtifactAssembly]
 namespace Dibix.Sdk.Tests
 {
     namespace Data
@@ -439,6 +442,7 @@ namespace Dibix.Sdk.Tests
 using System.CodeDom.Compiler;
 using Dibix;
 
+[assembly: ArtifactAssembly]
 namespace Dibix.Sdk.Tests
 {
     namespace Data
@@ -472,9 +476,10 @@ namespace Dibix.Sdk.Tests
         #endregion
 
         #region Structured types
+        [StructuredType("[dbo].[dbx_codeanalysis_udt_generic]")]
         public sealed class GenericParameterSet : StructuredType&lt;GenericParameterSet, int, string&gt;
         {
-            public GenericParameterSet() : base("dbx_codeanalysis_udt_generic")
+            public GenericParameterSet() : base("[dbo].[dbx_codeanalysis_udt_generic]")
             {
                 base.ImportSqlMetadata(() =&gt; this.Add(default, default));
             }
@@ -500,6 +505,7 @@ namespace Dibix.Sdk.Tests
 using System.CodeDom.Compiler;
 using Dibix;
 
+[assembly: ArtifactAssembly]
 namespace Dibix.Sdk.Tests
 {
     namespace Data
@@ -536,9 +542,10 @@ namespace Dibix.Sdk.Tests
         #endregion
 
         #region Structured types
+        [StructuredType("[dbo].[dbx_codeanalysis_udt_generic]")]
         public sealed class GenericParameterSet : StructuredType&lt;GenericParameterSet, int, string&gt;
         {
-            public GenericParameterSet() : base("dbx_codeanalysis_udt_generic")
+            public GenericParameterSet() : base("[dbo].[dbx_codeanalysis_udt_generic]")
             {
                 base.ImportSqlMetadata(() =&gt; this.Add(default, default));
             }
@@ -633,6 +640,7 @@ using System.CodeDom.Compiler;
 using Dibix;
 using Dibix.Http;
 
+[assembly: ArtifactAssembly]
 namespace Dibix.Sdk.Tests
 {
     namespace Data
@@ -676,6 +684,7 @@ using System.Runtime.Serialization;
 using Dibix;
 using Newtonsoft.Json;
 
+[assembly: ArtifactAssembly]
 namespace Dibix.Sdk.Tests
 {
     namespace Data
@@ -790,6 +799,7 @@ using System.Runtime.Serialization;
 using Dibix;
 using Newtonsoft.Json;
 
+[assembly: ArtifactAssembly]
 namespace Dibix.Sdk.Tests
 {
     namespace Data
@@ -887,6 +897,7 @@ using System.Runtime.Serialization;
 using Dibix;
 using Newtonsoft.Json;
 
+[assembly: ArtifactAssembly]
 namespace Dibix.Sdk.Tests
 {
     namespace Data
@@ -1001,6 +1012,7 @@ using System.Runtime.Serialization;
 using Dibix;
 using Newtonsoft.Json;
 
+[assembly: ArtifactAssembly]
 namespace Dibix.Sdk.Tests
 {
     namespace Data
@@ -1113,6 +1125,7 @@ using System.Runtime.Serialization;
 using Dibix;
 using Newtonsoft.Json;
 
+[assembly: ArtifactAssembly]
 namespace Dibix.Sdk.Tests
 {
     namespace Data
@@ -1225,6 +1238,7 @@ using System.Runtime.Serialization;
 using Dibix;
 using Newtonsoft.Json;
 
+[assembly: ArtifactAssembly]
 namespace Dibix.Sdk.Tests
 {
     namespace Data
@@ -1290,6 +1304,7 @@ using System.Runtime.Serialization;
 using Dibix;
 using Newtonsoft.Json;
 
+[assembly: ArtifactAssembly]
 namespace Dibix.Sdk.Tests
 {
     namespace Data
@@ -1357,6 +1372,7 @@ using System.Runtime.Serialization;
 using Dibix;
 using Newtonsoft.Json;
 
+[assembly: ArtifactAssembly]
 namespace Dibix.Sdk.Tests
 {
     namespace Data
@@ -1444,6 +1460,7 @@ using System.Runtime.Serialization;
 using Dibix;
 using Newtonsoft.Json;
 
+[assembly: ArtifactAssembly]
 namespace Dibix.Sdk.Tests
 {
     namespace Data
@@ -1517,6 +1534,7 @@ namespace Dibix.Sdk.Tests
 using System.CodeDom.Compiler;
 using Dibix;
 
+[assembly: ArtifactAssembly]
 namespace Dibix.Sdk.Tests
 {
     namespace Data
@@ -1558,6 +1576,7 @@ using System.CodeDom.Compiler;
 using System.Threading.Tasks;
 using Dibix;
 
+[assembly: ArtifactAssembly]
 namespace Dibix.Sdk.Tests
 {
     namespace Data
@@ -1804,6 +1823,7 @@ namespace Dibix.Sdk.Tests
 //     the code is regenerated.
 // &lt;/auto-generated&gt;
 //----------------------------------------------------------------------------*/
+[assembly: ArtifactAssembly]
 namespace Dibix.Sdk.Tests
 {
 }</value>

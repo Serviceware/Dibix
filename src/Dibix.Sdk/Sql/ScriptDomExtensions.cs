@@ -36,6 +36,8 @@ namespace Dibix.Sdk.Sql
 
         public static Identifier GetName(this ColumnReferenceExpression column) => column.MultiPartIdentifier?.Identifiers.Last();
 
+        public static string ToFullName(this MultiPartIdentifier multiPartIdentifier) => String.Join(".", multiPartIdentifier.Identifiers.Select(x => $"[{x.Value}]"));
+
         public static QuerySpecification FindQuerySpecification(this QueryExpression expression)
         {
             if (expression is QuerySpecification query)

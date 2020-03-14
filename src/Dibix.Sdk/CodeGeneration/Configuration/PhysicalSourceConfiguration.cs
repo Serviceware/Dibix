@@ -13,7 +13,6 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly IFileSystemProvider _fileSystemProvider;
         private readonly ICollection<VirtualPath> _include;
         private readonly ICollection<VirtualPath> _exclude;
-        private IEnumerable<string> _files;
         #endregion
 
         #region Constructor

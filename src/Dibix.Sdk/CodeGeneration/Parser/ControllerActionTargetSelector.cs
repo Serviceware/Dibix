@@ -15,14 +15,14 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly IErrorReporter _errorReporter;
         private readonly Lazy<IDictionary<string, string>> _neighborStatementMapAccessor;
 
-        public ControllerActionTargetSelector(string productName, string areaName, string outputName, string projectDirectory, ICollection<SqlStatementInfo> statements, IReferencedAssemblyProvider referencedAssemblyProvider, IErrorReporter errorReporter)
+        public ControllerActionTargetSelector(string productName, string areaName, string outputName, ICollection<SqlStatementInfo> statements, IReferencedAssemblyProvider referencedAssemblyProvider, IErrorReporter errorReporter)
         {
             this._productName = productName;
             this._areaName = areaName;
             this._outputName = outputName;
             this._statements = statements;
             this._errorReporter = errorReporter;
-            this._neighborStatementMapAccessor = new Lazy<IDictionary<string, string>>(() => CreateNeighborStatementMap(projectDirectory, referencedAssemblyProvider));
+            this._neighborStatementMapAccessor = new Lazy<IDictionary<string, string>>(() => CreateNeighborStatementMap(referencedAssemblyProvider));
         }
 
         public ActionDefinitionTarget Select(string target, string filePath, IJsonLineInfo lineInfo)
@@ -69,11 +69,12 @@ Tried: {normalizedNamespace}.{methodName}");
             return ActionDefinitionTarget.Local(target, neighborTypeName, methodName);
         }
 
-        private static IDictionary<string, string> CreateNeighborStatementMap(string projectDirectory, IReferencedAssemblyProvider referencedAssemblyProvider) => CreateNeighborStatementMapCore(projectDirectory, referencedAssemblyProvider).ToDictionary(x => x.Key, x => x.Value);
+        private static IDictionary<string, string> CreateNeighborStatementMap(IReferencedAssemblyProvider referencedAssemblyProvider) => CreateNeighborStatementMapCore(referencedAssemblyProvider).ToDictionary(x => x.Key, x => x.Value);
 
-        private static IEnumerable<KeyValuePair<string, string>> CreateNeighborStatementMapCore(string projectDirectory, IReferencedAssemblyProvider referencedAssemblyProvider)
+        private static IEnumerable<KeyValuePair<string, string>> CreateNeighborStatementMapCore(IReferencedAssemblyProvider referencedAssemblyProvider)
         {
             return from assembly in referencedAssemblyProvider.ReferencedAssemblies
+                   where CustomAttributeData.GetCustomAttributes(assembly).Any(x => x.AttributeType.FullName == "Dibix.ArtifactAssemblyAttribute")
                    from type in assembly.GetTypes() 
                    where CustomAttributeData.GetCustomAttributes(type)
                                             .Any(x => x.AttributeType.FullName == "Dibix.DatabaseAccessorAttribute") 

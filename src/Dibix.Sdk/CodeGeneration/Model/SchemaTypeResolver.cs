@@ -1,48 +1,42 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class SchemaTypeResolver : ITypeResolver
+    internal abstract class SchemaTypeResolver : TypeResolver
     {
         #region Fields
         private readonly ISchemaRegistry _schemaRegistry;
-        private readonly ICollection<ISchemaProvider> _schemaProviders;
+        private readonly ISchemaProvider _schemaProvider;
         #endregion
 
         #region Constructor
-        public SchemaTypeResolver(ISchemaRegistry schemaRegistry, IContractDefinitionProvider contractDefinitionProvider, IUserDefinedTypeProvider userDefinedTypeProvider)
+        protected SchemaTypeResolver(ISchemaRegistry schemaRegistry, ISchemaProvider schemaProvider)
         {
             this._schemaRegistry = schemaRegistry;
-            this._schemaProviders = new ISchemaProvider[] { contractDefinitionProvider, userDefinedTypeProvider };
+            this._schemaProvider = schemaProvider;
         }
         #endregion
 
-        #region ITypeResolver Members
-        public TypeReference ResolveType(string input, string @namespace, string source, int line, int column, bool isEnumerable)
+        #region Overrides
+        public override TypeReference ResolveType(string input, string @namespace, string source, int line, int column, bool isEnumerable)
         {
             NullableTypeName typeName = input;
 
-            foreach (ISchemaProvider schemaProvider in this._schemaProviders)
+            if (!this._schemaProvider.TryGetSchema(typeName.Name, out SchemaDefinition schema))
             {
-                if (!schemaProvider.TryGetSchema(typeName.Name, out SchemaDefinition schema))
-                {
-                    if (String.IsNullOrEmpty(@namespace))
-                        continue;
+                if (String.IsNullOrEmpty(@namespace))
+                    return null;
 
-                    // Try relative to local namespace
-                    if (!schemaProvider.TryGetSchema($"{@namespace}.{typeName.Name}", out schema))
-                        continue;
-                }
-
-                SchemaTypeReference type = new SchemaTypeReference(schema.FullName, source, line, column, typeName.IsNullable, isEnumerable);
-                if (!this._schemaRegistry.IsRegistered(type.Key))
-                    this._schemaRegistry.Populate(schema);
-
-                return type;
+                // Try relative to local namespace
+                if (!this._schemaProvider.TryGetSchema($"{@namespace}.{typeName.Name}", out schema))
+                    return null;
             }
 
-            return null;
+            SchemaTypeReference type = new SchemaTypeReference(schema.FullName, source, line, column, typeName.IsNullable, isEnumerable);
+            if (!this._schemaRegistry.IsRegistered(type.Key))
+                this._schemaRegistry.Populate(schema);
+
+            return type;
         }
         #endregion
     }

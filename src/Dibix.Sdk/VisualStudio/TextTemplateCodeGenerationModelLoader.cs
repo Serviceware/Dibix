@@ -18,10 +18,11 @@ namespace Dibix.Sdk.VisualStudio
         public static CodeGenerationModel Create(ITextTemplatingEngineHost textTemplatingEngineHost, IServiceProvider serviceProvider, ISchemaRegistry schemaRegistry, IErrorReporter errorReporter, Action<ICodeGeneratorConfigurationExpression> configure)
         {
             IFileSystemProvider fileSystemProvider = new ProjectFileSystemProvider(serviceProvider, textTemplatingEngineHost.TemplateFile);
-            ITypeResolver typeResolver = new CodeElementTypeResolver(serviceProvider, textTemplatingEngineHost.TemplateFile, schemaRegistry);
-            AssemblyResolver assemblyResolver = new ProjectReferenceAssemblyResolver(serviceProvider, textTemplatingEngineHost.TemplateFile);
+            TypeResolver typeResolver = new CodeElementTypeResolver(serviceProvider, textTemplatingEngineHost.TemplateFile, schemaRegistry);
+            ProjectReferenceAssemblyResolver assemblyResolver = new ProjectReferenceAssemblyResolver(serviceProvider, textTemplatingEngineHost.TemplateFile);
             ITypeResolverFacade typeResolverFacade = new TypeResolverFacade(assemblyResolver, schemaRegistry, errorReporter);
             typeResolverFacade.Register(typeResolver, 0);
+            typeResolverFacade.Register(new UserDefinedTypeSchemaTypeResolver(schemaRegistry, new UnsupportedUserDefinedTypeProvider(), assemblyResolver), 1);
 
             CodeGenerationModel model = new CodeGenerationModel(CodeGeneratorCompatibilityLevel.Legacy);
 

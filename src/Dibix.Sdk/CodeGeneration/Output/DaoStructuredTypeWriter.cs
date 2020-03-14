@@ -34,7 +34,7 @@ namespace Dibix.Sdk.CodeGeneration
                 for (int j = 0; j < userDefinedTypes.Count; j++)
                 {
                     UserDefinedTypeSchema userDefinedType = userDefinedTypes[j];
-                    CSharpClass @class = scope.AddClass(userDefinedType.DefinitionName, CSharpModifiers.Public | CSharpModifiers.Sealed)
+                    CSharpClass @class = scope.AddClass(userDefinedType.DefinitionName, CSharpModifiers.Public | CSharpModifiers.Sealed, $"StructuredType(\"{userDefinedType.UdtName}\")")
                                               .Inherits($"StructuredType<{userDefinedType.DefinitionName}, {String.Join(", ", userDefinedType.Properties.Select(x => context.ResolveTypeName(x.Type)))}>");
 
                     @class.AddConstructor(body: $"base.ImportSqlMetadata(() => this.Add({String.Join(", ", userDefinedType.Properties.Select(x => "default"))}));"

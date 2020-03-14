@@ -50,42 +50,49 @@ namespace Dibix.Sdk.Sql
         )
         {
             string typeImplementationName = hints.SingleHintValue(SqlHint.ClrType);
-            TypeReference typeReference = null;
-            if (!String.IsNullOrEmpty(typeImplementationName)) 
-                typeReference = typeResolver.ResolveType(typeImplementationName, @namespace, source, dataTypeReference.StartLine, dataTypeReference.StartColumn, false);
+            if (!String.IsNullOrEmpty(typeImplementationName) && !(dataTypeReference is SqlDataTypeReference))
+            {
+                udtName = null;
+                errorReporter.RegisterError(source, dataTypeReference.StartLine, dataTypeReference.StartColumn, null, $@"The @ClrType hint is only supported for primitive types and is used to specify an enum type implementation
+Name: {name}
+DataType: {dataTypeReference.GetType()}");
+                return null;
+            }
 
             switch (dataTypeReference)
             {
                 case SqlDataTypeReference sqlDataTypeReference:
+                {
                     udtName = null;
 
-                    if (typeReference != null)
+                    // Most likely a primitive parameter that should be generated using a known enum, therefore specific type implementation hint
+                    if (!String.IsNullOrEmpty(typeImplementationName))
+                    {
+                        TypeReference typeReference = typeResolver.ResolveType(typeImplementationName, @namespace, source, dataTypeReference.StartLine, dataTypeReference.StartColumn, false);
                         return typeReference;
+                    }
 
-                    if (PrimitiveTypeMap.TryGetValue(sqlDataTypeReference.SqlDataTypeOption, out PrimitiveDataType dataType)) 
+                    if (PrimitiveTypeMap.TryGetValue(sqlDataTypeReference.SqlDataTypeOption, out PrimitiveDataType dataType))
                         return new PrimitiveTypeReference(dataType, isNullable, false);
 
                     errorReporter.RegisterError(source, dataTypeReference.StartLine, dataTypeReference.StartColumn, null, $@"Unsupported sql data type
 Name: {name}
 DataType: {sqlDataTypeReference.SqlDataTypeOption}");
                     return null;
+                }
 
                 case UserDataTypeReference userDataTypeReference:
+                {
                     if (String.Equals(userDataTypeReference.Name.BaseIdentifier.Value, "SYSNAME", StringComparison.OrdinalIgnoreCase))
                     {
                         udtName = null;
                         return new PrimitiveTypeReference(PrimitiveDataType.String, isNullable, false);
                     }
 
-                    udtName = $"[{userDataTypeReference.Name.SchemaIdentifier.Value}].[{userDataTypeReference.Name.BaseIdentifier.Value}]";
-                    if (typeReference == null)
-                    {
-                        errorReporter.RegisterError(source, dataTypeReference.StartLine, dataTypeReference.StartColumn, null, $@"Could not determine type implementation for user defined type
-Name: {name}
-UDT type: {udtName}
-Please mark it with /* @ClrType <ClrTypeName> */");
-                    }
+                    udtName = userDataTypeReference.Name.ToFullName();
+                    TypeReference typeReference = typeResolver.ResolveType(TypeResolutionScope.UserDefinedType, udtName, @namespace, source, dataTypeReference.StartLine, dataTypeReference.StartColumn, false);
                     return typeReference;
+                }
 
                 case XmlDataTypeReference _:
                     udtName = null;

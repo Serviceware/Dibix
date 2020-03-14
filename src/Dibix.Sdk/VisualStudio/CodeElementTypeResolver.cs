@@ -6,7 +6,7 @@ using EnvDTE;
 
 namespace Dibix.Sdk.VisualStudio
 {
-    internal sealed class CodeElementTypeResolver : ITypeResolver
+    internal sealed class CodeElementTypeResolver : TypeResolver
     {
         #region Fields
         private readonly Lazy<ICollection<CodeElement>> _codeItemAccessor;
@@ -24,8 +24,8 @@ namespace Dibix.Sdk.VisualStudio
         }
         #endregion
 
-        #region ITypeResolver Members
-        public TypeReference ResolveType(string input, string @namespace, string source, int line, int column, bool isEnumerable)
+        #region Overrides
+        public override TypeReference ResolveType(string input, string @namespace, string source, int line, int column, bool isEnumerable)
         {
             NullableTypeName typeName = input;
 

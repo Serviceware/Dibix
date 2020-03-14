@@ -35,7 +35,9 @@ namespace Dibix.Sdk.CodeGeneration
             string generatedCodeAnnotation = $"{typeof(GeneratedCodeAttribute).Name}(\"{GeneratorName}\", \"{Version}\")";
 
             // Prepare writer
-            IEnumerable<string> globalAnnotations = writers.SelectMany(x => x.GetGlobalAnnotations(model)).Distinct().OrderBy(x => x.Length);
+            bool isArtifactAssembly = model.CompatibilityLevel == CodeGeneratorCompatibilityLevel.Full;
+            IEnumerable<string> globalAnnotations = isArtifactAssembly ? Enumerable.Repeat("ArtifactAssembly", 1) : Enumerable.Empty<string>();
+            globalAnnotations = globalAnnotations.Concat(writers.SelectMany(x => x.GetGlobalAnnotations(model)).Distinct().OrderBy(x => x.Length));
             CSharpWriter output = new CSharpWriter(writer, model.RootNamespace, globalAnnotations);
 
             DaoCodeGenerationContext context = new DaoCodeGenerationContext(output.Root, generatedCodeAnnotation, model, this._schemaRegistry);
