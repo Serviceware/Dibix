@@ -1,7 +1,7 @@
 ﻿-- @Namespace Grid
 -- @Name GetGrid
--- @Return ClrTypes:#Extension.MultiMapContract;#GenericContract SplitOn:id Mode:Single
--- @Return ClrTypes:#Direction Name:Directions
+-- @Return ClrTypes:Extension.MultiMapContract;GenericContract SplitOn:id Mode:Single
+-- @Return ClrTypes:Direction Name:Directions
 -- @MergeGridResult
 CREATE PROCEDURE [dbo].[dbx_tests_syntax_gridresult_merge]
 AS

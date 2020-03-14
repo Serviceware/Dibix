@@ -1,4 +1,4 @@
-﻿-- @Return ClrTypes:#GenericContract Mode:Single
+﻿-- @Return ClrTypes:GenericContract Mode:Single
 CREATE PROCEDURE [dbo].[dbx_tests_syntax_singleconcreteresult]
 AS
 	SELECT [id] = 1

@@ -14,8 +14,10 @@ namespace Dibix.Dapper.Tests
             using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
             {
                 const string commandText = "SELECT 1 UNION ALL SELECT 2";
-                InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => accessor.QuerySingle<byte>(commandText));
-                Assert.Equal("Sequence contains more than one element", exception.Message);
+                DatabaseAccessException exception = Assert.Throws<DatabaseAccessException>(() => accessor.QuerySingle<byte>(commandText));
+                Assert.Equal(@"Sequence contains more than one element
+CommandType: Text
+CommandText: <Dynamic>", exception.Message);
             }
         }
 
@@ -40,8 +42,10 @@ namespace Dibix.Dapper.Tests
             using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
             {
                 const string commandText = @"SELECT 1";
-                InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => accessor.QuerySingle<Entity>(commandText));
-                Assert.Equal("Column name was not specified, therefore it cannot be mapped to type 'Dibix.Dapper.Tests.Entity'", exception.Message);
+                DatabaseAccessException exception = Assert.Throws<DatabaseAccessException>(() => accessor.QuerySingle<Entity>(commandText));
+                Assert.Equal(@"Column name was not specified, therefore it cannot be mapped to type 'Dibix.Dapper.Tests.Entity'
+CommandType: Text
+CommandText: <Dynamic>", exception.Message);
             }
         }
 
@@ -51,8 +55,10 @@ namespace Dibix.Dapper.Tests
             using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
             {
                 const string commandText = @"SELECT 1 AS [idx]";
-                InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => accessor.QuerySingle<Entity>(commandText));
-                Assert.Equal("Column 'idx' does not match a property on type 'Dibix.Dapper.Tests.Entity'", exception.Message);
+                DatabaseAccessException exception = Assert.Throws<DatabaseAccessException>(() => accessor.QuerySingle<Entity>(commandText));
+                Assert.Equal(@"Column 'idx' does not match a property on type 'Dibix.Dapper.Tests.Entity'
+CommandType: Text
+CommandText: <Dynamic>", exception.Message);
             }
         }
 

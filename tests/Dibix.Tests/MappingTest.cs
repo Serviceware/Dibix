@@ -141,7 +141,8 @@ namespace Dibix.Tests
             Mock<MultipleResultReader> multipleResultReader = new Mock<MultipleResultReader>(MockBehavior.Strict);
 
             connection.Protected().Setup("Dispose", false);
-            accessor.Setup(x => x.QueryMultiple("sql", CommandType.Text, It.IsAny<IParametersVisitor>()))
+            accessor.As<IDatabaseAccessor>()
+                    .Setup(x => x.QueryMultiple("sql", CommandType.Text, It.IsAny<IParametersVisitor>()))
                     .Returns(multipleResultReader.Object);
             multipleResultReader.Setup(x => x.Dispose());
             multipleResultReader.Protected()

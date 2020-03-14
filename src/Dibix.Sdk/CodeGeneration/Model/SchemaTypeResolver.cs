@@ -21,8 +21,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region ITypeResolver Members
         public TypeReference ResolveType(string input, string @namespace, string source, int line, int column, bool isEnumerable)
         {
-            string normalizedInput = input.TrimStart('#');
-            NullableTypeName typeName = normalizedInput;
+            NullableTypeName typeName = input;
 
             foreach (ISchemaProvider schemaProvider in this._schemaProviders)
             {

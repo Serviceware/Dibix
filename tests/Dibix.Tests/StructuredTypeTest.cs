@@ -22,7 +22,7 @@ namespace Dibix.Tests
 
         private class X : StructuredType<X, int, string>
         {
-            public X() : base(null) => base.ImportSqlMetadata(() => this.Add(default, default));
+            public X() : base("x") => base.ImportSqlMetadata(() => this.Add(default, default));
 
             public void Add(int intValue, string stringValue) => base.AddValues(intValue, stringValue);
         }

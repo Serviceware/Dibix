@@ -60,6 +60,7 @@ namespace Dibix
         #region Private Methods
         private static string NormalizeTypeName(string typeName)
         {
+            Guard.IsNotNullOrEmpty(typeName, nameof(typeName));
             IList<string> parts = typeName.Split('.').Select(x => x.TrimStart('[').TrimEnd(']')).ToList();
             if (parts.Count < 2)
                 parts.Insert(0, DefaultSchemaName);
