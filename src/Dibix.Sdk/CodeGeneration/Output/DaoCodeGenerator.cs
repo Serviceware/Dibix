@@ -41,6 +41,8 @@ namespace Dibix.Sdk.CodeGeneration
             CSharpWriter output = new CSharpWriter(writer, model.RootNamespace, globalAnnotations);
 
             DaoCodeGenerationContext context = new DaoCodeGenerationContext(output.Root, generatedCodeAnnotation, model, this._schemaRegistry);
+            if (isArtifactAssembly)
+                context.AddUsing("Dibix");
 
             IList<IGrouping<string, DaoWriter>> childWriterGroups = writers.GroupBy(x => x.LayerName).ToArray();
             for (int i = 0; i < childWriterGroups.Count; i++)
