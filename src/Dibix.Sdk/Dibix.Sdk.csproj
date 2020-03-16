@@ -16,30 +16,10 @@
     <Compile Include="..\Dibix\Extensions\EnumerableExtensions.cs" Link="Extensions\EnumerableExtensions.cs" />
     <Compile Include="..\Dibix\Http\RouteBuilder.cs" Link="OpenApi\RouteBuilder.cs" />
     <Compile Include="..\Dibix\Http\HttpParameterName.cs" Link="OpenApi\HttpParameterName.cs" />
-    <Content Include="CodeGeneration\Schema\dibix.contracts.schema.json">
-      <PackagePath>content/dibix.contracts.schema.json</PackagePath>
-    </Content>
-    <Content Include="CodeGeneration\Schema\dibix.endpoints.schema.json">
-      <PackagePath>content/dibix.endpoints.schema.json</PackagePath>
-    </Content>
-    <Content Include="..\..\build\Sdk.Targets">
-      <PackagePath>build</PackagePath>
-    </Content>
-    <Content Include="..\Dibix\bin\$(Configuration)\net451\Dibix.dll">
-      <PackagePath>tools/net46</PackagePath>
-    </Content>
-    <Content Include="..\Dibix.MSBuild\bin\$(Configuration)\$(TargetFramework)\Dibix.MSBuild.dll">
-      <PackagePath>tools/net46</PackagePath>
-    </Content>
-    <Content Include="$(OutDir)Microsoft.OpenApi.dll">
-      <PackagePath>tools/net46</PackagePath>
-    </Content>
-    <Content Include="$(OutDir)Newtonsoft.Json.dll">
-      <PackagePath>tools/net46</PackagePath>
-    </Content>
-    <Content Include="$(OutDir)Newtonsoft.Json.Schema.dll">
-      <PackagePath>tools/net46</PackagePath>
-    </Content>
+    
+    <Content Include="CodeGeneration\Schema\dibix.contracts.schema.json" PackagePath="content/dibix.contracts.schema.json" />
+    <Content Include="CodeGeneration\Schema\dibix.endpoints.schema.json" PackagePath="content/dibix.endpoints.schema.json" />
+    <Content Include="..\..\build\*.Targets" PackagePath="build" />
   </ItemGroup>
 
   <ItemGroup>
@@ -57,5 +37,26 @@
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
   </ItemGroup>
+
+  <!-- See: https://github.com/NuGet/Home/issues/5063 -->
+  <Target Name="PackTaskDependencies" BeforeTargets="GenerateNuspec">
+    <!--
+    The include needs to happen after output has been copied to build output folder
+    but before NuGet generates a nuspec. See https://github.com/NuGet/Home/issues/4704.
+    -->
+    <ItemGroup>
+      <PackageToolsDependency Include="..\Dibix\bin\$(Configuration)\net451\Dibix.dll" />
+      <PackageToolsDependency Include="..\Dibix.MSBuild\bin\$(Configuration)\$(TargetFramework)\Dibix.MSBuild.dll" />
+      <PackageToolsDependency Include="$(OutDir)Microsoft.OpenApi.dll" />
+      <PackageToolsDependency Include="$(OutDir)Newtonsoft.Json.dll" />
+      <PackageToolsDependency Include="$(OutDir)Newtonsoft.Json.Schema.dll" />
+
+      <_PackageFiles Include="@(PackageToolsDependency)">
+        <PackagePath>tools</PackagePath>
+        <Visible>false</Visible>
+        <BuildAction>Content</BuildAction>
+      </_PackageFiles>
+    </ItemGroup>
+  </Target>
   
 </Project>

@@ -31,5 +31,5 @@
 	  <XUnitCliVersion>2.3.1</XUnitCliVersion>
     <CoverletVersion>2.3.1</CoverletVersion>
   
-</PropertyGroup>
+  </PropertyGroup>
 </Project>
