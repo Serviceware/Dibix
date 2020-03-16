@@ -52,15 +52,19 @@ namespace Dibix.Sdk.CodeGeneration
                 {
                     writer.Write("x.AddAction(ReflectionHttpActionTarget.Create(");
 
-                    if (action.Target.IsExternal)
+                    if (action.Target is ReferencedActionTarget referencedActionTarget)
                     {
-                        writer.WriteRaw($"\"{action.Target.Target}\"");
+                        writer.WriteRaw($"typeof({referencedActionTarget.AccessorFullName}), nameof({referencedActionTarget.AccessorFullName}.")
+                              .WriteRaw(referencedActionTarget.Name)
+                              .WriteRaw(')');
+                    }
+                    else if (action.Target is ReflectionActionTarget reflectionActionTarget)
+                    {
+                        writer.WriteRaw($"\"{reflectionActionTarget.AssemblyAndTypeQualifiedMethodName}\"");
                     }
                     else
                     {
-                        writer.WriteRaw($"typeof({action.Target.TypeName}), nameof({action.Target.TypeName}.")
-                              .WriteRaw(action.Target.MethodName)
-                              .WriteRaw(')');
+                        throw new InvalidOperationException($"Unexpected action target: {action.Target?.GetType()}");
                     }
 
                     writer.WriteLineRaw("), y =>")

@@ -30,7 +30,7 @@ namespace Dibix.Sdk.CodeGeneration
             // 1. Target is a reflection target within a foreign assembly
             bool isExternal = target.Contains(",");
             if (isExternal)
-                return ActionDefinitionTarget.External(target);
+                return new ReflectionActionTarget(target);
 
             // Use explicit namespace if it can be extracted
             int statementNameIndex = target.LastIndexOf('.');
@@ -47,26 +47,26 @@ namespace Dibix.Sdk.CodeGeneration
             string methodName = target.Substring(statementNameIndex + 1);
 
             // 2. Target is a SQL statement within the current project
-            bool isLocal = this._statements.Any(x => x.Namespace == normalizedNamespace && x.Name == methodName);
-            if (isLocal)
-                return ActionDefinitionTarget.Local(target, typeName, methodName);
+            SqlStatementInfo statement = this._statements.FirstOrDefault(x => x.Namespace == normalizedNamespace && x.Name == methodName);
+            if (statement != null)
+                return new LocalActionTarget(statement, this._outputName);
 
             // Relative namespaces can not be resolved in neighbor projects
             if (!isAbsolute)
             {
                 this._errorReporter.RegisterError(filePath, lineInfo.LineNumber, lineInfo.LinePosition, null, $@"Could not find action target: {target}
 Tried: {normalizedNamespace}.{methodName}");
-                return CreateFailedTarget(target);
+                return null;
             }
 
             // 3. Target 'could' be a compiled method in a neighbour project
             if (!this._neighborStatementMapAccessor.Value.TryGetValue(methodName, out string neighborTypeName))
             {
                 this._errorReporter.RegisterError(filePath, lineInfo.LineNumber, lineInfo.LinePosition, null, $"Could not find a method name '{methodName}' on database accessor type '{typeName}'");
-                return CreateFailedTarget(target);
+                return null;
             }
 
-            return ActionDefinitionTarget.Local(target, neighborTypeName, methodName);
+            return new ExternalActionTarget(neighborTypeName, methodName);
         }
 
         private static IDictionary<string, string> CreateNeighborStatementMap(IReferencedAssemblyProvider referencedAssemblyProvider) => CreateNeighborStatementMapCore(referencedAssemblyProvider).ToDictionary(x => x.Key, x => x.Value);
@@ -82,11 +82,6 @@ Tried: {normalizedNamespace}.{methodName}");
                    let parameters = method.GetParameters() 
                    where parameters.Any() && parameters[0].ParameterType.FullName == "Dibix.IDatabaseAccessorFactory" 
                    select new KeyValuePair<string, string>(method.Name, type.FullName);
-        }
-
-        private static ActionDefinitionTarget CreateFailedTarget(string target)
-        {
-            return ActionDefinitionTarget.External(target);
         }
     }
 }

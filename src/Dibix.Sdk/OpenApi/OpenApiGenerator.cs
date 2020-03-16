@@ -61,7 +61,7 @@ namespace Dibix.Sdk.OpenApi
                     foreach (ActionDefinition action in path)
                     {
                         OperationType operationType = (OperationType)Enum.Parse(typeof(OperationType), action.Method.ToString());
-                        string operationName = action.Target.Target.Split(',').First().Split('.').Last();
+                        string operationName = action.Target.Name;
 
                         OpenApiOperation operation = new OpenApiOperation();
                         operation.Tags.Add(new OpenApiTag { Name = $"{areaName}/{controller.Name}" });

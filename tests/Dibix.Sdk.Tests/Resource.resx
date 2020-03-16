@@ -1823,6 +1823,8 @@ namespace Dibix.Sdk.Tests
 //     the code is regenerated.
 // &lt;/auto-generated&gt;
 //----------------------------------------------------------------------------*/
+using Dibix;
+
 [assembly: ArtifactAssembly]
 namespace Dibix.Sdk.Tests
 {
