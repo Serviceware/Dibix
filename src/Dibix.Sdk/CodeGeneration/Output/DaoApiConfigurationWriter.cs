@@ -75,13 +75,12 @@ namespace Dibix.Sdk.CodeGeneration
                     if (!String.IsNullOrEmpty(action.ChildRoute))
                         writer.WriteLine($"y.ChildRoute = \"{action.ChildRoute}\";");
 
-                    if (!String.IsNullOrEmpty(action.BodyContract))
+                    if (action.BodyContract != null)
                     {
-                        string bodyContractName = action.BodyContract;
-                        if (!bodyContractName.StartsWith(context.Model.RootNamespace, StringComparison.Ordinal))
-                            bodyContractName = $"{context.Model.RootNamespace}.{CodeGeneration.LayerName.DomainModel}.{bodyContractName}";
+                        if (!(action.BodyContract is SchemaTypeReference bodySchemaReference))
+                            throw new InvalidOperationException($"Unexpected body type: {action.BodyContract?.GetType()}");
 
-                        writer.WriteLine($"y.BodyContract = typeof({bodyContractName});");
+                        writer.WriteLine($"y.BodyContract = typeof({bodySchemaReference.Key});");
                     }
 
                     if (!String.IsNullOrEmpty(action.BodyBinder))

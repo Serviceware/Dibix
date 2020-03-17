@@ -8,7 +8,7 @@ namespace Dibix.Sdk.CodeGeneration
         public ActionMethod Method { get; set; }
         public string Description { get; set; }
         public string ChildRoute { get; set; }
-        public string BodyContract { get; set; }
+        public TypeReference BodyContract { get; set; }
         public string BodyBinder { get; set; }
         public bool OmitResult { get; set; }
         public bool IsAnonymous { get; set; }

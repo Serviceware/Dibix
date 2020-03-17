@@ -11,6 +11,7 @@ namespace Dibix.Sdk.CodeGeneration
     {
         #region Fields
         private readonly IControllerActionTargetSelector _controllerActionTargetSelector;
+        private readonly ITypeResolverFacade _typeResolver;
         #endregion
 
         #region Properties
@@ -19,9 +20,10 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public ControllerDefinitionProvider(IFileSystemProvider fileSystemProvider, IControllerActionTargetSelector controllerActionTargetSelector, IErrorReporter errorReporter, IEnumerable<string> endpoints) : base(fileSystemProvider, errorReporter)
+        public ControllerDefinitionProvider(IFileSystemProvider fileSystemProvider, IControllerActionTargetSelector controllerActionTargetSelector, ITypeResolverFacade typeResolver, IErrorReporter errorReporter, IEnumerable<string> endpoints) : base(fileSystemProvider, errorReporter)
         {
             this._controllerActionTargetSelector = controllerActionTargetSelector;
+            this._typeResolver = typeResolver;
             this.Controllers = new Collection<ControllerDefinition>();
             base.Collect(endpoints);
         }
@@ -70,15 +72,15 @@ namespace Dibix.Sdk.CodeGeneration
 
         private void ReadControllerAction(string filePath, ControllerDefinition controller, JObject action)
         {
-            JToken targetValue = action.Property("target").Value;
-            ActionDefinitionTarget actionTarget = this._controllerActionTargetSelector.Select((string)targetValue, filePath, targetValue);
+            ActionDefinitionTarget actionTarget = this.ReadActionTarget(action, filePath);
             Enum.TryParse((string)action.Property("method")?.Value, true, out ActionMethod method);
+
             ActionDefinition actionDefinition = new ActionDefinition(actionTarget)
             {
                 Method = method,
                 Description = (string)action.Property("description")?.Value,
                 ChildRoute = (string)action.Property("childRoute")?.Value,
-                BodyContract = (string)action.Property("body")?.Value,
+                BodyContract = this.ReadBodyContract(action, filePath),
                 BodyBinder = (string)action.Property("bindFromBody")?.Value,
                 OmitResult = (bool?)action.Property("omitResult")?.Value ?? default,
                 IsAnonymous = (bool?)action.Property("isAnonymous")?.Value ?? default
@@ -97,6 +99,27 @@ namespace Dibix.Sdk.CodeGeneration
 
             IJsonLineInfo lineInfo = action;
             base.ErrorReporter.RegisterError(filePath, lineInfo.LineNumber, lineInfo.LinePosition, null, $"Duplicate action registration: {sb}");
+        }
+
+        private ActionDefinitionTarget ReadActionTarget(JObject action, string filePath)
+        {
+            JToken targetValue = action.Property("target").Value;
+            ActionDefinitionTarget actionTarget = this._controllerActionTargetSelector.Select((string)targetValue, filePath, targetValue);
+            return actionTarget;
+        }
+
+        private TypeReference ReadBodyContract(JObject action, string filePath)
+        {
+            JToken bodyContractValue = action.Property("body")?.Value;
+            if (bodyContractValue == null) 
+                return null;
+
+            string bodyContractTypeName = (string)bodyContractValue;
+            IJsonLineInfo bodyContractLocation = bodyContractValue;
+            bool isEnumerable = bodyContractTypeName.EndsWith("*", StringComparison.Ordinal);
+            bodyContractTypeName = bodyContractTypeName.TrimEnd('*');
+            TypeReference bodyContract = this._typeResolver.ResolveType(bodyContractTypeName, null, filePath, bodyContractLocation.LineNumber, bodyContractLocation.LinePosition, isEnumerable);
+            return bodyContract;
         }
 
         private static void ReadControllerImport(ControllerDefinition controller, string typeName)

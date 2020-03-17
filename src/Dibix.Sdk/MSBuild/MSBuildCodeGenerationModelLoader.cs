@@ -63,7 +63,7 @@ namespace Dibix.Sdk.MSBuild
             model.Statements.AddRange(CollectStatements(normalizedSources, projectDirectory, productName, areaName, embedStatements, formatter, typeResolver, schemaRegistry, errorReporter, modelAccessor));
             model.UserDefinedTypes.AddRange(userDefinedTypeProvider.Types);
             model.Contracts.AddRange(contractDefinitionProvider.Contracts);
-            model.Controllers.AddRange(CollectControllers(normalizedEndpoints, productName, areaName, defaultOutputName, model.Statements, assemblyResolver, fileSystemProvider, errorReporter));
+            model.Controllers.AddRange(CollectControllers(normalizedEndpoints, productName, areaName, defaultOutputName, model.Statements, assemblyResolver, fileSystemProvider, typeResolver, errorReporter));
 
             return model;
         }
@@ -106,10 +106,12 @@ namespace Dibix.Sdk.MSBuild
           , ICollection<SqlStatementInfo> statements
           , IReferencedAssemblyProvider referencedAssemblyProvider
           , IFileSystemProvider fileSystemProvider
-          , IErrorReporter errorReporter)
+          , ITypeResolverFacade typeResolver
+          , IErrorReporter errorReporter
+        )
         {
             IControllerActionTargetSelector controllerActionTargetSelector = new ControllerActionTargetSelector(productName, areaName, defaultOutputName, statements, referencedAssemblyProvider, errorReporter);
-            return new ControllerDefinitionProvider(fileSystemProvider, controllerActionTargetSelector, errorReporter, endpoints).Controllers;
+            return new ControllerDefinitionProvider(fileSystemProvider, controllerActionTargetSelector, typeResolver, errorReporter, endpoints).Controllers;
         }
     }
 }
