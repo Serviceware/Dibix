@@ -1,0 +1,52 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <!-- 
+      Skip compilation of default SQL CLR .NET assembly.
+      The empty line in between by default contains:
+      
+      CoreCompile;
+    -->
+    <BuildDependsOn>
+      BuildOnlySettings;
+      BeforeBuild;
+      PrepareForBuild;
+      PreBuildEvent;
+      ResolveReferences;
+      ResolveArtifactReferences;
+      GenerateSqlTargetFrameworkMoniker;
+      ResolveKeySource;
+
+      GenerateSerializationAssemblies;
+      SqlBuild;
+      GetTargetPath;
+      PrepareForRun;
+      SqlPrepareForRun;
+      IncrementalClean;
+      PostBuildEvent;
+      AfterBuild;
+    </BuildDependsOn>
+
+    <!-- Skip copying the default SQL CLR .NET assembly to output -->
+    <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
+    <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
+
+    <DibixToolsDirectory Condition="$(DibixToolsDirectory) == ''">$(MSBuildThisFileDirectory)..\tools\</DibixToolsDirectory>
+    <DibixBuildToolsPath>$(DibixToolsDirectory)netstandard2.0\Dibix.MSBuild.dll</DibixBuildToolsPath>
+    <DibixSdkPath>$(DibixToolsDirectory)net46\Dibix.Sdk.dll</DibixSdkPath>
+    <DibixRuntimePath>$(DibixToolsDirectory)net451\Dibix.dll</DibixRuntimePath>
+
+    <ClientTargetPath Condition="'$(ClientOutputName)' != ''">$(TargetDir)$(ClientOutputName).dll</ClientTargetPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Clean target assembly, which is required to force rebuild of CompileArtifacts target -->
+    <!-- This is probably not included, because we skip copying it to output -->
+    <Clean Include="$(TargetPath)" />
+    <Clean Include="$(ClientTargetPath)" />
+  </ItemGroup>
+
+  <UsingTask TaskName="SqlCodeAnalysisTask" AssemblyFile="$(DibixBuildToolsPath)" />
+  <UsingTask TaskName="CodeGenerationTask" AssemblyFile="$(DibixBuildToolsPath)" />
+
+</Project>

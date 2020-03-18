@@ -1,54 +1,5 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <PropertyGroup>
-    <!-- 
-      Skip compilation of default SQL CLR .NET assembly.
-      The empty line in between by default contains:
-      
-      CoreCompile;
-    -->
-    <BuildDependsOn>
-      BuildOnlySettings;
-      BeforeBuild;
-      PrepareForBuild;
-      PreBuildEvent;
-      ResolveReferences;
-      ResolveArtifactReferences;
-      GenerateSqlTargetFrameworkMoniker;
-      ResolveKeySource;
-
-      GenerateSerializationAssemblies;
-      SqlBuild;
-      GetTargetPath;
-      PrepareForRun;
-      SqlPrepareForRun;
-      IncrementalClean;
-      PostBuildEvent;
-      AfterBuild;
-    </BuildDependsOn>
-
-    <!-- Skip copying the default SQL CLR .NET assembly to output -->
-    <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
-    <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
-
-    <DibixSdkPath>$(MSBuildThisFileDirectory)..\lib\net46\Dibix.Sdk.dll</DibixSdkPath>
-    <DibixToolsDirectory Condition="$(DibixToolsDirectory) == ''">$(MSBuildThisFileDirectory)..\tools\net46\</DibixToolsDirectory>
-    <DibixLibraryPath>$(DibixToolsDirectory)Dibix.dll</DibixLibraryPath>
-    <DibixBuildToolsPath>$(DibixToolsDirectory)Dibix.MSBuild.dll</DibixBuildToolsPath>
-
-    <ClientTargetPath Condition="'$(ClientOutputName)' != ''">$(TargetDir)$(ClientOutputName).dll</ClientTargetPath>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <!-- Clean target assembly, which is required to force rebuild of CompileArtifacts target -->
-    <!-- This is probably not included, because we skip copying it to output -->
-    <Clean Include="$(TargetPath)" />
-    <Clean Include="$(ClientTargetPath)" />
-  </ItemGroup>
-
-  <UsingTask TaskName="SqlCodeAnalysisTask" AssemblyFile="$(DibixBuildToolsPath)" />
-  <UsingTask TaskName="CodeGenerationTask" AssemblyFile="$(DibixBuildToolsPath)" />
-
   <!-- Define inputs and outputs so the targets know when they need to be rebuilt -->
   <Target Name="SetupSqlBuildInputs" AfterTargets="_SetupSqlBuildInputs">
     <ItemGroup>
@@ -108,6 +59,7 @@
     </ItemGroup>
 
     <SqlCodeAnalysisTask SdkPath="$(DibixSdkPath)"
+                         RuntimePath="$(DibixRuntimePath)"
                          SSDTDirectory="$(SqlServerRedistPath)"
                          NamingConventionPrefix="$(SqlNamingConventionPrefix)"
                          DatabaseSchemaProviderName="$(DSP)"
@@ -144,6 +96,7 @@
     </ItemGroup>
 
     <CodeGenerationTask SdkPath="$(DibixSdkPath)"
+                        RuntimePath="$(DibixRuntimePath)"
                         SSDTDirectory="$(SqlServerRedistPath)"
                         ProjectDirectory="$(MSBuildProjectDirectory)"
                         ProductName="$(ProductName)"
@@ -165,7 +118,7 @@
     <ItemGroup>
       <ServerCompilationSource Include="$(ServerIntermediateFilePath)" />
       <ClientCompilationSource Include="$(ClientIntermediateFilePath)" />
-      <ServerCompilationReference Include="$(DibixLibraryPath)" />
+      <ServerCompilationReference Include="$(DibixRuntimePath)" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(ClientOutputName)' != ''">

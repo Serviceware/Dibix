@@ -6,6 +6,10 @@
     <TargetFramework>net46</TargetFramework>
     <LangVersion>latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    
+    <!-- Be quiet NuGet. I don't want assemblies in lib/ and yes I'm sure this is right. -->
+    <NoPackageAnalysis>true</NoPackageAnalysis>
+    <BuildOutputTargetFolder>tools</BuildOutputTargetFolder>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,7 +23,7 @@
     
     <Content Include="CodeGeneration\Schema\dibix.contracts.schema.json" PackagePath="content/dibix.contracts.schema.json" />
     <Content Include="CodeGeneration\Schema\dibix.endpoints.schema.json" PackagePath="content/dibix.endpoints.schema.json" />
-    <Content Include="..\..\build\$(MSBuildProjectName).Targets" PackagePath="build" />
+    <Content Include="..\..\build\$(MSBuildProjectName).*" PackagePath="build" />
   </ItemGroup>
 
   <ItemGroup>
@@ -45,14 +49,14 @@
     but before NuGet generates a nuspec. See https://github.com/NuGet/Home/issues/4704.
     -->
     <ItemGroup>
-      <PackageToolsDependency Include="..\Dibix\bin\$(Configuration)\net451\Dibix.dll" />
-      <PackageToolsDependency Include="..\Dibix.MSBuild\bin\$(Configuration)\$(TargetFramework)\Dibix.MSBuild.dll" />
-      <PackageToolsDependency Include="$(OutDir)Microsoft.OpenApi.dll" />
-      <PackageToolsDependency Include="$(OutDir)Newtonsoft.Json.dll" />
-      <PackageToolsDependency Include="$(OutDir)Newtonsoft.Json.Schema.dll" />
+      <PackageToolsDependency Include="..\Dibix\bin\$(Configuration)\net451\Dibix.dll" TargetDirectory="net451" />
+      <PackageToolsDependency Include="..\Dibix.MSBuild\bin\$(Configuration)\netstandard2.0\Dibix.MSBuild.dll" TargetDirectory="netstandard2.0" />
+      <PackageToolsDependency Include="$(NuGetPackageRoot)Microsoft.OpenApi\$(OpenApiVersion)\lib\netstandard2.0\Microsoft.OpenApi.dll" TargetDirectory="netstandard2.0" />
+      <PackageToolsDependency Include="$(NuGetPackageRoot)Newtonsoft.Json\11.0.1\lib\net45\Newtonsoft.Json.dll" TargetDirectory="netstandard2.0" />
+      <PackageToolsDependency Include="$(NuGetPackageRoot)Newtonsoft.Json.Schema\$(NewtonsoftJsonSchemaVersion)\lib\netstandard2.0\Newtonsoft.Json.Schema.dll" TargetDirectory="netstandard2.0" />
 
       <_PackageFiles Include="@(PackageToolsDependency)">
-        <PackagePath>tools</PackagePath>
+        <PackagePath>tools/%(PackageToolsDependency.TargetDirectory)</PackagePath>
         <Visible>false</Visible>
         <BuildAction>Content</BuildAction>
       </_PackageFiles>
