@@ -19,12 +19,12 @@
     
     <Content Include="CodeGeneration\Schema\dibix.contracts.schema.json" PackagePath="content/dibix.contracts.schema.json" />
     <Content Include="CodeGeneration\Schema\dibix.endpoints.schema.json" PackagePath="content/dibix.endpoints.schema.json" />
-    <Content Include="..\..\build\*.Targets" PackagePath="build" />
+    <Content Include="..\..\build\$(MSBuildProjectName).Targets" PackagePath="build" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json.Schema" Version="$(NewtonsoftJsonSchemaVersion)" />
-    <PackageReference Include="Microsoft.SqlServer.DacFx.x64" Version="$(DacFxVersion)" />
+    <PackageReference Include="Microsoft.SqlServer.DacFx" Version="$(DacFxVersion)" />
     <PackageReference Include="Microsoft.OpenApi" Version="$(OpenApiVersion)" />
     <PackageReference Include="EnvDTE" Version="$(EnvDTEVersion)" />
     <PackageReference Include="VSLangProj" Version="$(VSLangProjVersion)" />

@@ -9,7 +9,7 @@
     <AspNetWebApiVersion>5.2.3</AspNetWebApiVersion>
 
     <!-- Sdk -->
-    <DacFxVersion>150.4200.1</DacFxVersion>
+    <DacFxVersion>150.4573.2</DacFxVersion>
     <NewtonsoftJsonSchemaVersion>3.0.10</NewtonsoftJsonSchemaVersion>
     <OpenApiVersion>1.1.4</OpenApiVersion>
 
