@@ -42,7 +42,7 @@ namespace Dibix
             for (int i = 0; i < columns.Length; i++)
             {
                 int columnHeaderSize = columns[i].Length;
-                int maxCellSize = rows.Max(x => x[i].Length);
+                int maxCellSize = rows.Any() ? rows.Max(x => x[i].Length) : 0;
                 sizes[i] = Math.Max(columnHeaderSize, maxCellSize);
             }
 
@@ -62,21 +62,19 @@ namespace Dibix
                 if (i + 1 < sizes.Length)
                     sb.Append(separator);
             }
-            sb.AppendLine();
 
             // Write rows
-            for (int rowIndex = 0; rowIndex < rows.Length; rowIndex++)
+            foreach (string[] row in rows)
             {
+                sb.AppendLine();
+
                 // Write cells
-                for (int cellIndex = 0; cellIndex < rows[rowIndex].Length; cellIndex++)
+                for (int cellIndex = 0; cellIndex < row.Length; cellIndex++)
                 {
-                    sb.Append(rows[rowIndex][cellIndex].PadRight(sizes[cellIndex]));
-                    if (cellIndex + 1 < rows[rowIndex].Length)
+                    sb.Append(row[cellIndex].PadRight(sizes[cellIndex]));
+                    if (cellIndex + 1 < row.Length)
                         sb.Append(separator);
                 }
-
-                if (rowIndex + 1 < rows.Length)
-                    sb.AppendLine();
             }
 
             return sb.ToString();
