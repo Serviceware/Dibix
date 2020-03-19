@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class SchemaRegistry : ISchemaRegistry
+    public sealed class SchemaRegistry : ISchemaRegistry
     {
         #region Fields
         private readonly IErrorReporter _errorReporter;

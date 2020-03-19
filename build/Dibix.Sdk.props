@@ -33,7 +33,7 @@
 
     <DibixToolsDirectory Condition="$(DibixToolsDirectory) == ''">$(MSBuildThisFileDirectory)..\tools\</DibixToolsDirectory>
     <DibixBuildToolsPath>$(DibixToolsDirectory)netstandard2.0\Dibix.MSBuild.dll</DibixBuildToolsPath>
-    <DibixSdkPath>$(DibixToolsDirectory)net46\Dibix.Sdk.dll</DibixSdkPath>
+    <DibixSdkPath>$(DibixToolsDirectory)netstandard2.0\Dibix.Sdk.dll</DibixSdkPath>
     <DibixRuntimePath>$(DibixToolsDirectory)net451\Dibix.dll</DibixRuntimePath>
 
     <ClientTargetPath Condition="'$(ClientOutputName)' != ''">$(TargetDir)$(ClientOutputName).dll</ClientTargetPath>

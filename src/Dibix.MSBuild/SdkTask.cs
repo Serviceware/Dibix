@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Dibix.Sdk;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 

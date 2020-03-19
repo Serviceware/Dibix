@@ -1,0 +1,44 @@
+﻿<#@ template debug="false" hostspecific="true" language="C#" #>
+<#@ output extension=".cs" #>
+<#@ assembly name="$(SolutionDir)\src\Dibix.Sdk.VisualStudio\bin\Debug\net472\Dibix.Sdk.VisualStudio.dll" #>
+<#@ assembly name="$(SolutionDir)\src\Dibix.Sdk\bin\Debug\netstandard2.0\Dibix.Sdk.dll" #>
+<#@ assembly name="netstandard" #>
+<#@ import namespace="Dibix.Sdk.CodeGeneration" #>
+<#@ import namespace="Dibix.Sdk.VisualStudio" #><#
+
+string output = TextTemplateCodeGenerator.Generate
+(
+    this.Host
+  , (IServiceProvider)this.Host
+  , cfg => cfg.AddSource("Dibix.Sdk.Tests.Database", x =>
+              {
+                  x.SelectFolder(null, "CodeAnalysis", "Tables", "Types", "Tests/Parser", "Tests/Sources/Excluded", "Tests/Sources/dbx_tests_sources_externalsp", "Tests/Syntax")
+                   .SelectFile("Tests/Sources/Excluded/Nested/dbx_tests_sources_excludednested.sql");
+              })
+              .AddSource("Dibix.Sdk.Tests.Database", x =>
+              {
+                  x.SelectFile("Tests/Sources/dbx_tests_sources_externalsp.sql")
+                   .SelectParser<SqlStoredProcedureParser>(y => 
+                   { 
+                       y.Formatter<ExecStoredProcedureSqlStatementFormatter>(); 
+                   });
+              })
+              .AddDacPac("SSISDB.dacpac", x =>
+              {
+                  x.SelectProcedure("[catalog].[delete_project]", "DeleteProject")
+                   .SelectParser<SqlStoredProcedureParser>(y => 
+                   { 
+                       y.Formatter<ExecStoredProcedureSqlStatementFormatter>(); 
+                   });
+              })
+              .SelectOutputWriter<DaoWriter>(x =>
+              {
+                  x.Namespace("This.Is.A.Custom.Namespace")
+                   .ClassName("Accessor")
+                   .Formatting(CommandTextFormatting.Verbatim);
+              })
+);
+
+Write(output);
+
+#>

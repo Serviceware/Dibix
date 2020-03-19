@@ -1,4 +1,6 @@
-﻿using System.CodeDom.Compiler;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -13,28 +15,28 @@ namespace Dibix.Sdk.CodeGeneration
         {
             get
             {
-                if (!this._hasReportedErrors && this.Errors.HasErrors)
+                if (!this._hasReportedErrors && this.Errors.Any())
                 {
                     this.ReportErrors();
                     this._hasReportedErrors = true;
                 }
-                return this.Errors.HasErrors;
+                return this.Errors.Any();
             }
         }
-        protected CompilerErrorCollection Errors { get; }
+        protected ICollection<Error> Errors { get; }
         #endregion
 
         #region Constructor
         protected ErrorReporter()
         {
-            this.Errors = new CompilerErrorCollection();
+            this.Errors = new Collection<Error>();
         }
         #endregion
 
         #region IErrorReporter Members
         public void RegisterError(string fileName, int line, int column, string errorNumber, string errorText)
         {
-            this.Errors.Add(new CompilerError(fileName, line, column, errorNumber, errorText));
+            this.Errors.Add(new Error(fileName, line, column, errorNumber, errorText));
         }
         #endregion
 

@@ -1,0 +1,54 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\build\common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resource.resx" />
+    <Compile Include="..\Dibix.Sdk.Tests\TestUtility.cs" Link="TestUtility.cs" />
+    <Compile Include="..\Dibix.Sdk.Tests\CodeGeneration\CodeGenerationException.cs" Link="CodeGenerationException.cs" />
+    <Compile Update="TextTemplateCodeGeneratorTests.Base.cs">
+      <DependentUpon>TextTemplateCodeGeneratorTests.cs</DependentUpon>
+    </Compile>
+
+    <None Update="FluentSourcesTest.tt">
+      <LastGenOutput>FluentSourcesTest.cs</LastGenOutput>
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
+    <Compile Update="FluentSourcesTest.cs">
+      <DependentUpon>FluentSourcesTest.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+
+    <None Update="ParserTest.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ParserTest.cs</LastGenOutput>
+    </None>
+    <Compile Update="ParserTest.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ParserTest.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftTestSdkVersion)" />
+    <PackageReference Include="Moq" Version="$(MoqVersion)" />
+    <PackageReference Include="xunit" Version="$(XUnitVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(XUnitVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Dibix\Dibix.csproj" />
+    <ProjectReference Include="..\..\src\Dibix.Sdk.VisualStudio\Dibix.Sdk.VisualStudio.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+</Project>

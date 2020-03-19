@@ -3,8 +3,7 @@
   <Import Project="..\..\build\common.props" />
 
   <PropertyGroup>
-    <TargetFramework>net46</TargetFramework>
-    <LangVersion>latest</LangVersion>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     
     <!-- Be quiet NuGet. I don't want assemblies in lib/ and yes I'm sure this is right. -->
@@ -23,23 +22,14 @@
     
     <Content Include="CodeGeneration\Schema\dibix.contracts.schema.json" PackagePath="content/dibix.contracts.schema.json" />
     <Content Include="CodeGeneration\Schema\dibix.endpoints.schema.json" PackagePath="content/dibix.endpoints.schema.json" />
-    <Content Include="..\..\build\$(MSBuildProjectName).*" PackagePath="build" />
+    <Content Include="..\..\build\$(MSBuildProjectName).*" PackagePath="build" Visible="False" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json.Schema" Version="$(NewtonsoftJsonSchemaVersion)" />
-    <PackageReference Include="Microsoft.SqlServer.DacFx" Version="$(DacFxVersion)" />
-    <PackageReference Include="Microsoft.OpenApi" Version="$(OpenApiVersion)" />
-    <PackageReference Include="EnvDTE" Version="$(EnvDTEVersion)" />
-    <PackageReference Include="VSLangProj" Version="$(VSLangProjVersion)" />
-    <PackageReference Include="Microsoft.VisualStudio.Shell.15.0" Version="$(VisualStudioShellVersion)" />
-    <PackageReference Include="Microsoft.VisualStudio.TextTemplating.Interfaces.10.0" Version="$(VSTextTemplatingInterfacesVersion)" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MSBuildUtilitiesVersion)" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="System.ComponentModel.Composition" />
-    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <PackageReference Include="Microsoft.OpenApi" Version="$(OpenApiVersion)" />
+    <PackageReference Include="Microsoft.SqlServer.DacFx" Version="$(DacFxVersion)" />
+    <PackageReference Include="Newtonsoft.Json.Schema" Version="$(NewtonsoftJsonSchemaVersion)" />
   </ItemGroup>
 
   <!-- See: https://github.com/NuGet/Home/issues/5063 -->

@@ -6,7 +6,7 @@ using Microsoft.SqlServer.Dac.Model;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class PhysicalFileSqlStatementCollector : SqlStatementCollector
+    public sealed class PhysicalFileSqlStatementCollector : SqlStatementCollector
     {
         private readonly string _productName;
         private readonly string _areaName;

@@ -1,12 +1,12 @@
 <Project>
   <PropertyGroup>
     <!-- Runtime -->
-    <ReflectionVersion>4.3.0</ReflectionVersion>
-    <DataAnnotationsVersion>4.1.0</DataAnnotationsVersion>
-    <SqlClientVersion>4.5.1</SqlClientVersion>
-    <DiagnosticsProcessVersion>4.3.0</DiagnosticsProcessVersion>
-    <DapperVersion>1.50.5</DapperVersion>
     <AspNetWebApiVersion>5.2.3</AspNetWebApiVersion>
+    <DapperVersion>1.50.5</DapperVersion>
+    <DataAnnotationsVersion>4.7.0</DataAnnotationsVersion>
+    <DiagnosticsProcessVersion>4.3.0</DiagnosticsProcessVersion>
+    <ReflectionVersion>4.3.0</ReflectionVersion>
+    <SqlClientVersion>4.5.1</SqlClientVersion>
 
     <!-- Sdk -->
     <DacFxVersion>150.4573.2</DacFxVersion>
@@ -14,7 +14,6 @@
     <OpenApiVersion>1.1.4</OpenApiVersion>
 
     <!-- VS integration -->
-    <VisualStudioShellVersion>15.9.28307</VisualStudioShellVersion>
     <EnvDTEVersion>8.0.2</EnvDTEVersion>
     <VSLangProjVersion>7.0.3301</VSLangProjVersion>
     <VSTextTemplatingInterfacesVersion>10.0.30320</VSTextTemplatingInterfacesVersion>
@@ -24,12 +23,12 @@
 
     <!-- Testing -->
     <ConfigurationBinderVersion>2.1.1</ConfigurationBinderVersion>
-    <UserSecretsVersion>2.1.1</UserSecretsVersion>
-    <MicrosoftTestSdkVersion>15.9.0</MicrosoftTestSdkVersion>
-  	<MoqVersion>4.10.1</MoqVersion>
-  	<XUnitVersion>2.4.1</XUnitVersion>
-	  <XUnitCliVersion>2.3.1</XUnitCliVersion>
     <CoverletVersion>2.3.1</CoverletVersion>
-  
+    <MicrosoftTestSdkVersion>15.9.0</MicrosoftTestSdkVersion>
+    <MoqVersion>4.10.1</MoqVersion>
+    <UserSecretsVersion>2.1.1</UserSecretsVersion>
+    <XUnitVersion>2.4.1</XUnitVersion>
+    <XUnitCliVersion>2.3.1</XUnitCliVersion>
+
   </PropertyGroup>
 </Project>

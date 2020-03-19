@@ -40,8 +40,8 @@
   
   <ItemGroup Condition="'$(TargetFramework)' == 'net451'">
     <Reference Include="System.ComponentModel.DataAnnotations" Version="4.0" />
-    <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="$(AspNetWebApiVersion)" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="$(AspNetWebApiVersion)" />
+    <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="$(AspNetWebApiVersion)" />
   </ItemGroup>
   
 </Project>

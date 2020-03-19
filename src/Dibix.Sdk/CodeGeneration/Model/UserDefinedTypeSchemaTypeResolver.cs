@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class UserDefinedTypeSchemaTypeResolver : SchemaTypeResolver
+    public sealed class UserDefinedTypeSchemaTypeResolver : SchemaTypeResolver
     {
         private readonly ISchemaRegistry _schemaRegistry;
         private readonly IDictionary<string, string> _localUserDefinedTypes;

@@ -3,49 +3,23 @@
   <Import Project="..\..\build\common.props" />
 
   <PropertyGroup>
-    <TargetFramework>net46</TargetFramework>
-    <LangVersion>latest</LangVersion>
+    <TargetFramework>net472</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\src\Dibix.Sdk.Locator\*.cs" Link="Locator\%(Filename)%(Extension)" />
     <Compile Include="..\..\src\Dibix\Reflection\TypeExtensions.cs" Link="TypeExtensions.cs" />
+    <Compile Update="CodeAnalysis\SqlCodeAnalysisRuleTests.Base.cs">
+      <DependentUpon>CodeAnalysis\SqlCodeAnalysisRuleTests.cs</DependentUpon>
+    </Compile>
+    <Compile Update="CodeGeneration\CodeGenerationTaskTests.Base.cs">
+      <DependentUpon>CodeGeneration\CodeGenerationTaskTests.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Update="Resource.resx" />
     <EmbeddedResource Include="lib\Microsoft.Data.Tools.Components.dll" />
     <EmbeddedResource Include="lib\Microsoft.Data.Tools.Contracts.dll" />
     <EmbeddedResource Include="lib\Microsoft.Data.Tools.Schema.Tasks.Sql.dll" />
     <EmbeddedResource Include="lib\Microsoft.Data.Tools.Schema.Utilities.Sql.dll" />
     <EmbeddedResource Include="lib\Microsoft.SqlServer.ConnectionInfo.dll" />
-
-    <None Update="CodeGeneration\CodeAnalysisTest.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>CodeAnalysisTest.cs</LastGenOutput>
-    </None>
-    <Compile Update="CodeGeneration\CodeAnalysisTest.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>CodeAnalysisTest.tt</DependentUpon>
-    </Compile>
-
-    <None Update="CodeGeneration\FluentSourcesTest.tt">
-      <LastGenOutput>FluentSourcesTest.cs</LastGenOutput>
-      <Generator>TextTemplatingFileGenerator</Generator>
-    </None>
-    <Compile Update="CodeGeneration\FluentSourcesTest.cs">
-      <DependentUpon>FluentSourcesTest.tt</DependentUpon>
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-    </Compile>
-
-    <None Update="CodeGeneration\ParserTest.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>ParserTest.cs</LastGenOutput>
-    </None>
-    <Compile Update="CodeGeneration\ParserTest.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>ParserTest.tt</DependentUpon>
-    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -56,17 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Dibix\Dibix.csproj" />
     <ProjectReference Include="..\..\src\Dibix.Sdk\Dibix.Sdk.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
-  </ItemGroup>
-
-  <PropertyGroup>
-    <DibixToolsDirectory>..\src\Dibix.MSBuild\bin\$(Configuration)\$(TargetFramework)\</DibixToolsDirectory>
-  </PropertyGroup>
-  <!--<Import Project="..\..\build\Sdk.targets" />-->
 
 </Project>

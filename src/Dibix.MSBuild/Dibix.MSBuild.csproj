@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\Dibix.Sdk.Locator\*.cs" Link="Locator\%(Filename)%(Extension)" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MSBuildUtilitiesVersion)" />
   </ItemGroup>
 

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -74,7 +73,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                     if (property.IsPartOfKey)
                     {
-                        context.AddUsing(typeof(KeyAttribute).Namespace);
+                        context.AddUsing("System.ComponentModel.DataAnnotations");
                         context.Model.AdditionalAssemblyReferences.Add("System.ComponentModel.DataAnnotations.dll");
                         propertyAnnotations.Add("Key");
                     }

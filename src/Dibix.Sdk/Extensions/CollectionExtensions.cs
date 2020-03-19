@@ -4,10 +4,15 @@ namespace Dibix.Sdk
 {
     internal static class CollectionExtensions
     {
-        public static void AddRange<T>(this ICollection<T> source, IEnumerable<T> elements)
+        public static ICollection<TSource> AddRange<TSource>(this ICollection<TSource> source, IEnumerable<TSource> elements)
         {
-            foreach (T element in elements)
+            Guard.IsNotNull(source, nameof(source));
+            Guard.IsNotNull(elements, nameof(elements));
+
+            foreach (TSource element in elements)
                 source.Add(element);
+
+            return source;
         }
 
         public static ICollection<TSource> ReplaceWith<TSource>(this ICollection<TSource> source, IEnumerable<TSource> elements)

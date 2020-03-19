@@ -2,7 +2,7 @@
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal abstract class SchemaTypeResolver : TypeResolver
+    public abstract class SchemaTypeResolver : TypeResolver
     {
         #region Fields
         private readonly ISchemaRegistry _schemaRegistry;

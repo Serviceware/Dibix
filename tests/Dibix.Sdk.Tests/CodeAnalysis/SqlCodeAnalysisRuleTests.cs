@@ -2,117 +2,117 @@
 
 namespace Dibix.Sdk.Tests.CodeAnalysis
 {
-    public class SqlCodeAnalysisRuleTests : SqlCodeAnalysisRuleTestsBase
+    public sealed partial class SqlCodeAnalysisRuleTests
     {
         [Fact]
-        public void KeywordCasingSqlCodeAnalysisRule() => base.Execute();
+        public void KeywordCasingSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void SchemaSpecificationSqlCodeAnalysisRule() => base.Execute();
+        public void SchemaSpecificationSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void EmptyReturnSqlCodeAnalysisRule() => base.Execute();
+        public void EmptyReturnSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void UnicodeConstantSqlCodeAnalysisRule() => base.Execute();
+        public void UnicodeConstantSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void UnicodeDataTypeSqlCodeAnalysisRule() => base.Execute();
+        public void UnicodeDataTypeSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void RedundantAliasSqlCodeAnalysisRule() => base.Execute();
+        public void RedundantAliasSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void PrimitiveDataTypeIdentifierSqlCodeAnalysisRule() => base.Execute();
+        public void PrimitiveDataTypeIdentifierSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void ImplicitAliasSqlCodeAnalysisRule() => base.Execute();
+        public void ImplicitAliasSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void UnspecifiedDataTypeLengthSqlCodeAnalysisRule() => base.Execute();
+        public void UnspecifiedDataTypeLengthSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void AliasSqlCodeAnalysisRule() => base.Execute();
+        public void AliasSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void ConsistentlyQuotedIdentifierSqlCodeAnalysisRule() => base.Execute();
+        public void ConsistentlyQuotedIdentifierSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void MissingPrimaryKeySqlCodeAnalysisRule() => base.Execute();
+        public void MissingPrimaryKeySqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void NoCursorSqlCodeAnalysisRule() => base.Execute();
+        public void NoCursorSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void UnnamedConstraintSqlCodeAnalysisRule() => base.Execute();
+        public void UnnamedConstraintSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void InsertWithoutColumnSpecificationSqlCodeAnalysisRule() => base.Execute();
+        public void InsertWithoutColumnSpecificationSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void ObsoleteDataTypeSqlCodeAnalysisRule() => base.Execute();
+        public void ObsoleteDataTypeSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void NamingConventionSqlCodeAnalysisRule() => base.Execute();
+        public void NamingConventionSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void UnfilteredDataModificationSqlCodeAnalysisRule() => base.Execute();
+        public void UnfilteredDataModificationSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void TruncateTableSqlCodeAnalysisRule() => base.Execute();
+        public void TruncateTableSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void LanguageDependentConstantSqlCodeAnalysisRule() => base.Execute();
+        public void LanguageDependentConstantSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void TemporaryTableSqlCodeAnalysisRule() => base.Execute();
+        public void TemporaryTableSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void MisusedTopRowFilterSqlCodeAnalysisRule() => base.Execute();
+        public void MisusedTopRowFilterSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void PrimaryKeyDataTypeSqlCodeAnalysisRule() => base.Execute();
+        public void PrimaryKeyDataTypeSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void SurrogateKeySqlCodeAnalysisRule() => base.Execute();
+        public void SurrogateKeySqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void ImplicitDefaultSqlCodeAnalysisRule() => base.Execute();
+        public void ImplicitDefaultSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void LooseConstraintsSqlCodeAnalysisRule() => base.Execute();
+        public void LooseConstraintsSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void UniqueIndexSqlCodeAnalysisRule() => base.Execute();
+        public void UniqueIndexSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void DateTimeSqlCodeAnalysisRule() => base.Execute();
+        public void DateTimeSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void TableConstraintSqlCodeAnalysisRule() => base.Execute();
+        public void TableConstraintSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void SecurityAlgorithmSqlCodeAnalysisRule() => base.Execute();
+        public void SecurityAlgorithmSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void UnintentionalBooleanComparisonSqlCodeAnalysisRule() => base.Execute();
+        public void UnintentionalBooleanComparisonSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void IndexSizeSqlCodeAnalysisRule() => base.Execute();
+        public void IndexSizeSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void RedundantIndexSqlCodeAnalysisRule() => base.Execute();
+        public void RedundantIndexSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void IsNullSqlCodeAnalysisRule() => base.Execute();
+        public void IsNullSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void AmbiguousCheckConstraintSqlCodeAnalysisRule() => base.Execute();
+        public void AmbiguousCheckConstraintSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void PrimaryKeyUpdateSqlCodeAnalysisRule() => base.Execute();
+        public void PrimaryKeyUpdateSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void InlineFunctionSqlCodeAnalysisRule() => base.Execute();
+        public void InlineFunctionSqlCodeAnalysisRule() => this.Execute();
     }
 }

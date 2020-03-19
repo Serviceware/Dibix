@@ -5,7 +5,7 @@ using Microsoft.SqlServer.Dac.Model;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class DacPacSqlStatementCollector : SqlStatementCollector
+    public sealed class DacPacSqlStatementCollector : SqlStatementCollector
     {
         private readonly string _productName;
         private readonly string _areaName;

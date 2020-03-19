@@ -1,5 +1,4 @@
-﻿using System.CodeDom.Compiler;
-using Dibix.Sdk.CodeGeneration;
+﻿using Dibix.Sdk.CodeGeneration;
 using Microsoft.Build.Utilities;
 
 namespace Dibix.Sdk.MSBuild
@@ -8,20 +7,8 @@ namespace Dibix.Sdk.MSBuild
     {
         private readonly TaskLoggingHelper _taskLoggingHelper;
 
-        public MSBuildErrorReporter(TaskLoggingHelper taskLoggingHelper)
-        {
-            this._taskLoggingHelper = taskLoggingHelper;
-        }
+        public MSBuildErrorReporter(TaskLoggingHelper taskLoggingHelper) => this._taskLoggingHelper = taskLoggingHelper;
 
-        protected override void ReportErrors()
-        {
-            foreach (CompilerError error in base.Errors)
-            {
-                if (!error.IsWarning)
-                    this._taskLoggingHelper.LogError(null, /*error.ErrorNumber*/null, null, error.FileName, error.Line, error.Column, 0, 0, error.ErrorText);
-                else
-                    this._taskLoggingHelper.LogWarning(null, /*error.ErrorNumber*/null, null, error.FileName, error.Line, error.Column, 0, 0, error.ErrorText);
-            }
-        }
+        protected override void ReportErrors() => base.Errors.Each(x => this._taskLoggingHelper.LogError(null, /*error.ErrorNumber*/null, null, x.Source, x.Line, x.Column, 0, 0, x.Text));
     }
 }

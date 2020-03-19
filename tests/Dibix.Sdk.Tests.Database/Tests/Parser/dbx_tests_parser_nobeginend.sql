@@ -1,7 +1,7 @@
 ﻿-- @Return ClrTypes:int Name:A
 -- @Return ClrTypes:int Name:B Mode:Single
 -- @Return ClrTypes:int Name:C
-CREATE PROCEDURE [dbo].[dbx_tests_parser_nobeginend] /* @ClrType Dibix.Sdk.Tests.CodeGeneration.Direction */ @param1 INT
+CREATE PROCEDURE [dbo].[dbx_tests_parser_nobeginend] /* @ClrType Dibix.Sdk.VisualStudio.Tests.Direction */ @param1 INT
 AS
 	SET NOCOUNT ON
 
