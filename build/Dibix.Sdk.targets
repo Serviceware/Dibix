@@ -87,8 +87,12 @@
       <LangVersion>latest</LangVersion>
       <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
       <CopyOutputSymbolsToOutputDirectory>true</CopyOutputSymbolsToOutputDirectory>
-      <ServerIntermediateFilePath>$(IntermediateOutputPath)@(IntermediateAssembly->'%(Filename)').cs</ServerIntermediateFilePath>
-      <ClientIntermediateFilePath Condition="'$(ClientOutputName)' != ''">$(IntermediateOutputPath)$(ClientOutputName).cs</ClientIntermediateFilePath>
+
+      <ServerOutputName>@(IntermediateAssembly->'%(Filename)')</ServerOutputName>
+      <ServerIntermediateFilePathNoExt>$(IntermediateOutputPath)$(ServerOutputName)</ServerIntermediateFilePathNoExt>
+      <ServerIntermediateFilePath>$(ServerIntermediateFilePathNoExt).cs</ServerIntermediateFilePath>
+      <ClientIntermediateFilePathNoExt Condition="'$(ClientOutputName)' != ''">$(IntermediateOutputPath)$(ClientOutputName)</ClientIntermediateFilePathNoExt>
+      <ClientIntermediateFilePath Condition="'$(ClientOutputName)' != ''">$(ClientIntermediateFilePathNoExt).cs</ClientIntermediateFilePath>
     </PropertyGroup>
 
     <ItemGroup>
@@ -115,25 +119,42 @@
       <Output TaskParameter="AdditionalAssemblyReferences" ItemName="ServerCompilationReference" />
     </CodeGenerationTask>
 
+    <PropertyGroup>
+      <AssemblyProduct Condition="'$(AssemblyProduct)' == ''">$(ProductName)</AssemblyProduct>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <AssemblyAttribute Include="AssemblyCompany" Condition="'$(AssemblyCompany)' != ''">
+        <_Parameter1>$(AssemblyCompany)</_Parameter1>
+      </AssemblyAttribute>
+      <AssemblyAttribute Include="AssemblyProduct" Condition="'$(AssemblyProduct)' != ''">
+        <_Parameter1>$(AssemblyProduct)</_Parameter1>
+      </AssemblyAttribute>
+      <AssemblyAttribute Include="AssemblyCopyright" Condition="'$(AssemblyCopyright)' != ''">
+        <_Parameter1>$(AssemblyCopyright)</_Parameter1>
+      </AssemblyAttribute>
+    </ItemGroup>
+
+
+    <PropertyGroup>
+      <ServerAssemblyInfoFile>$(ServerIntermediateFilePathNoExt)_AssemblyInfo.cs</ServerAssemblyInfoFile>
+    </PropertyGroup>
+
     <ItemGroup>
       <ServerCompilationSource Include="$(ServerIntermediateFilePath)" />
-      <ClientCompilationSource Include="$(ClientIntermediateFilePath)" />
+      <ServerCompilationSource Include="$(ServerAssemblyInfoFile)" />
       <ServerCompilationReference Include="$(DibixRuntimePath)" />
+
+      <ServerAssemblyAttribute Include="@(AssemblyAttribute)" />
+      <ServerAssemblyAttribute Include="AssemblyTitle">
+        <_Parameter1>$(ServerOutputName)</_Parameter1>
+      </ServerAssemblyAttribute>
+      <ServerAssemblyAttribute Include="AssemblyFileVersion" Condition="'$(AssemblyFileVersion)' != ''">
+        <_Parameter1>$(AssemblyFileVersion)</_Parameter1>
+      </ServerAssemblyAttribute>
     </ItemGroup>
 
-    <ItemGroup Condition="'$(ClientOutputName)' != ''">
-      <ClientAssembly Include="$(IntermediateOutputPath)$(ClientOutputName).dll" />
-    </ItemGroup>
-
-    <!-- Compile contracts assembly if required -->
-    <Csc Condition="'$(ClientOutputName)' != ''"
-         DefineConstants="$(DefineConstants)"
-         EmitDebugInformation="$(DebugSymbols)"
-         KeyFile="$(AssemblyOriginatorKeyFile)"
-         LangVersion="$(LangVersion)"
-         OutputAssembly="@(ClientAssembly)"
-         Sources="@(ClientCompilationSource)"
-         TargetType="$(OutputType)" />
+    <WriteCodeFragment AssemblyAttributes="@(ServerAssemblyAttribute)" Language="C#" OutputFile="$(ServerAssemblyInfoFile)" />
 
     <!-- Compile main assembly -->
     <Csc DefineConstants="$(DefineConstants)"
@@ -169,6 +190,37 @@
           Condition="'$(_DebugSymbolsProduced)'=='true' and '$(SkipCopyingSymbolsToOutputDirectory)' != 'true' and '$(CopyOutputSymbolsToOutputDirectory)'=='true'">
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
     </Copy>
+
+
+    <PropertyGroup Condition="'$(ClientOutputName)' != ''">
+      <ClientAssemblyInfoFile>$(ClientIntermediateFilePathNoExt)_AssemblyInfo.cs</ClientAssemblyInfoFile>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(ClientOutputName)' != ''">
+      <ClientCompilationSource Include="$(ClientIntermediateFilePath)" />
+      <ClientCompilationSource Include="$(ClientAssemblyInfoFile)" />
+      <ClientAssembly Include="$(IntermediateOutputPath)$(ClientOutputName).dll" />
+
+      <ClientAssemblyAttribute Include="@(AssemblyAttribute)" />
+      <ClientAssemblyAttribute Include="AssemblyTitle">
+        <_Parameter1>$(ClientOutputName)</_Parameter1>
+      </ClientAssemblyAttribute>
+      <ClientAssemblyAttribute Include="AssemblyFileVersion" Condition="'$(ClientAssemblyFileVersion)' != ''">
+        <_Parameter1>$(ClientAssemblyFileVersion)</_Parameter1>
+      </ClientAssemblyAttribute>
+    </ItemGroup>
+
+    <WriteCodeFragment AssemblyAttributes="@(ClientAssemblyAttribute)" Language="C#" OutputFile="$(ClientAssemblyInfoFile)" Condition="'$(ClientOutputName)' != ''" />
+
+    <!-- Compile contracts assembly if required -->
+    <Csc Condition="'$(ClientOutputName)' != ''"
+         DefineConstants="$(DefineConstants)"
+         EmitDebugInformation="$(DebugSymbols)"
+         KeyFile="$(AssemblyOriginatorKeyFile)"
+         LangVersion="$(LangVersion)"
+         OutputAssembly="@(ClientAssembly)"
+         Sources="@(ClientCompilationSource)"
+         TargetType="$(OutputType)" />
 
     <!-- Deploy contracts assembly/pdb (if available -->
     <Copy SourceFiles="@(ClientAssembly)"
