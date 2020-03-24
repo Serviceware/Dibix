@@ -20,7 +20,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public ControllerDefinitionProvider(IFileSystemProvider fileSystemProvider, IControllerActionTargetSelector controllerActionTargetSelector, ITypeResolverFacade typeResolver, IErrorReporter errorReporter, IEnumerable<string> endpoints) : base(fileSystemProvider, errorReporter)
+        public ControllerDefinitionProvider(IFileSystemProvider fileSystemProvider, IControllerActionTargetSelector controllerActionTargetSelector, ITypeResolverFacade typeResolver, ILogger logger, IEnumerable<string> endpoints) : base(fileSystemProvider, logger)
         {
             this._controllerActionTargetSelector = controllerActionTargetSelector;
             this._typeResolver = typeResolver;
@@ -98,7 +98,7 @@ namespace Dibix.Sdk.CodeGeneration
                 sb.Append('/').Append(actionDefinition.ChildRoute);
 
             IJsonLineInfo lineInfo = action;
-            base.ErrorReporter.RegisterError(filePath, lineInfo.LineNumber, lineInfo.LinePosition, null, $"Duplicate action registration: {sb}");
+            base.Logger.LogError(null, $"Duplicate action registration: {sb}", filePath, lineInfo.LineNumber, lineInfo.LinePosition);
         }
 
         private ActionDefinitionTarget ReadActionTarget(JObject action, string filePath)

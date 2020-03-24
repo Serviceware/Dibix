@@ -13,7 +13,7 @@ namespace Dibix.Sdk.VisualStudio
         #endregion
 
         #region Public Methods
-        public void Collect(CodeGenerationModel model, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, IErrorReporter errorReporter)
+        public void Collect(CodeGenerationModel model, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             if (this.Parser == null)
                 throw new InvalidOperationException("No parser was configured");
@@ -23,13 +23,13 @@ namespace Dibix.Sdk.VisualStudio
 
             ISqlStatementParser parser = (ISqlStatementParser)Activator.CreateInstance(this.Parser);
             ISqlStatementFormatter formatter = (ISqlStatementFormatter)Activator.CreateInstance(this.Formatter);
-            foreach (SqlStatementInfo info in this.CollectStatements(parser, formatter, typeResolver, schemaRegistry, errorReporter).Where(x => x != null)) 
+            foreach (SqlStatementInfo info in this.CollectStatements(parser, formatter, typeResolver, schemaRegistry, logger).Where(x => x != null)) 
                 model.Statements.Add(info);
         }
         #endregion
 
         #region Protected Methods
-        protected abstract IEnumerable<SqlStatementInfo> CollectStatements(ISqlStatementParser parser, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, IErrorReporter errorReporter);
+        protected abstract IEnumerable<SqlStatementInfo> CollectStatements(ISqlStatementParser parser, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger);
         #endregion
     }
 }

@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Dibix.Sdk.CodeGeneration;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Utilities;
 using Microsoft.Data.Tools.Schema.Extensibility;
+using Microsoft.Data.Tools.Schema.Tasks.Sql;
+using Microsoft.Data.Tools.Schema.Utilities.Sql.Common;
 using Microsoft.SqlServer.Dac.Model;
 using Assembly = System.Reflection.Assembly;
 
@@ -13,41 +17,48 @@ namespace Dibix.Sdk.Sql
 {
     internal static class PublicSqlDataSchemaModelLoader
     {
+        #region Fields
         private static readonly Assembly SchemaSqlAssembly = typeof(IExtension).Assembly;
+        private static readonly Assembly TasksAssembly = typeof(SqlBuildTask).Assembly;
+        private static readonly Assembly UtilitiesAssembly = typeof(SqlConnectionInfoUtils).Assembly;
         private static readonly LoadPublicDataSchemaModel ModelFactory = CompileModelFactory();
+        private static readonly ConcurrentDictionary<ILogger, ITask> TaskCache = new ConcurrentDictionary<ILogger, ITask>();
+        #endregion
 
-        public static TSqlModel Load(string databaseSchemaProviderName, string modelCollation, ITaskItem[] source, ITaskItem[] sqlReferencePath, ITask task, IErrorReporter errorReporter)
+        #region Public Methods
+        public static TSqlModel Load(string databaseSchemaProviderName, string modelCollation, IEnumerable<string> source, IEnumerable<string> sqlReferencePath, ILogger logger)
         {
-            return ModelFactory(databaseSchemaProviderName, modelCollation, source, sqlReferencePath, task, errorReporter);
+            ITask task = TaskCache.GetOrAdd(logger, CreateTask);
+            return ModelFactory(databaseSchemaProviderName, modelCollation, source.ToTaskItems(), sqlReferencePath.ToTaskItems(), task, logger);
         }
+        #endregion
 
+        #region Private Methods
         private static LoadPublicDataSchemaModel CompileModelFactory()
         {
-            // (string databaseSchemaProviderName, ITaskItem[] source, ITaskItem[] sqlReferencePath, ITask task, IErrorReporter errorReporter) =>
+            // (string databaseSchemaProviderName, ITaskItem[] source, ITaskItem[] sqlReferencePath, ITask task, ILogger logger) =>
             ParameterExpression databaseSchemaProviderNameParameter = Expression.Parameter(typeof(string), "databaseSchemaProviderName");
             ParameterExpression modelCollationParameter = Expression.Parameter(typeof(string), "modelCollation");
             ParameterExpression sourceParameter = Expression.Parameter(typeof(ITaskItem[]), "source");
             ParameterExpression sqlReferencePathParameter = Expression.Parameter(typeof(ITaskItem[]), "sqlReferencePath");
             ParameterExpression taskParameter = Expression.Parameter(typeof(ITask), "task");
-            ParameterExpression errorReporterParameter = Expression.Parameter(typeof(IErrorReporter), "errorReporter");
+            ParameterExpression loggerParameter = Expression.Parameter(typeof(ILogger), "logger");
 
-            Type hostLoaderType = Type.GetType("Microsoft.Data.Tools.Schema.Tasks.Sql.TaskHostLoader,Microsoft.Data.Tools.Schema.Tasks.Sql", true);
+            Type hostLoaderType = TasksAssembly.GetType("Microsoft.Data.Tools.Schema.Tasks.Sql.TaskHostLoader", true);
             MethodInfo loadMethod = hostLoaderType.GetMethod("Load");
             Guard.IsNotNull(loadMethod, nameof(loadMethod), "Could find method 'Load' on 'TaskHostLoader'");
 
             // Improve logging
             // SqlExceptionUtils._disableFiltering = true;
             // SqlExceptionUtils._initialized = true;
-            Type sqlExceptionUtilsType = Type.GetType("Microsoft.Data.Tools.Schema.Utilities.Sql.Common.Exceptions.SqlExceptionUtils,Microsoft.Data.Tools.Schema.Utilities.Sql", true);
+            Type sqlExceptionUtilsType = UtilitiesAssembly.GetType("Microsoft.Data.Tools.Schema.Utilities.Sql.Common.Exceptions.SqlExceptionUtils", true);
             FieldInfo disableFilteringField = TryGetStaticField(sqlExceptionUtilsType, "_disableFiltering");
             FieldInfo initializedField = TryGetStaticField(sqlExceptionUtilsType, "_initialized");
             Expression disableFilteringAssign = Expression.Assign(Expression.Field(null, disableFilteringField), Expression.Constant(true));
             Expression initializedAssign = Expression.Assign(Expression.Field(null, initializedField), Expression.Constant(true));
 
             // TaskLoggingHelper logger = new TaskLoggingHelper(task);
-            // Since the TaskLoggingHelper exists in both Microsoft.Build.Utilities.Core or Microsoft.Build.Utilities.v4.0,
-            // based on the MSBuild version, we have to inspect the target method parameter to specify it from the correct assembly.
-            Type loggerType = loadMethod.GetParameters()[1].ParameterType;
+            Type loggerType = typeof(TaskLoggingHelper);
             ParameterExpression loggerVariable = Expression.Variable(loggerType, "logger");
             ConstructorInfo loggerCtor = loggerType.GetConstructor(new[] { typeof(ITask) });
             Expression loggerValue = Expression.New(loggerCtor, taskParameter);
@@ -84,7 +95,7 @@ namespace Dibix.Sdk.Sql
             //    while (errorEnumerator.MoveNext())
             //    {
             //        DataSchemaError error = errorEnumerator.Current;
-            //        errorReporter.RegisterError(error.Document, error.Line, error.Column, error.ErrorCode, error.ErrorText);
+            //        logger.LogError(error.ErrorCode, error.ErrorText, error.Document, error.Line, error.Column);
             //    }
             //}
             //finally
@@ -103,18 +114,18 @@ namespace Dibix.Sdk.Sql
             Expression errorValue = Expression.Property(errorEnumeratorVariable, nameof(IEnumerator<object>.Current));
             Expression errorAssign = Expression.Assign(errorVariable, errorValue);
 
-            Expression registerErrorCall = Expression.Call
+            Expression logErrorCall = Expression.Call
             (
-                errorReporterParameter
-              , "RegisterError"
+                loggerParameter
+              , nameof(ILogger.LogError)
               , new Type[0]
+              , Expression.Call(Expression.Property(errorValue, "ErrorCode"), "ToString", new Type[0])
+              , Expression.Property(errorValue, "Message")
               , Expression.Property(errorValue, "Document")
               , Expression.Property(errorValue, "Line")
               , Expression.Property(errorValue, "Column")
-              , Expression.Call(Expression.Property(errorValue, "ErrorCode"), "ToString", new Type[0])
-              , Expression.Property(errorValue, "Message")
             );
-            Expression itemBlock = Expression.Block(new[] { errorVariable }, errorAssign, registerErrorCall);
+            Expression itemBlock = Expression.Block(new[] { errorVariable }, errorAssign, logErrorCall);
 
             Expression propertyEnumeratorMoveNextCall = Expression.Call(errorEnumeratorVariable, typeof(IEnumerator).GetMethod(nameof(IEnumerator.MoveNext)));
             Expression loopCondition = Expression.Equal(propertyEnumeratorMoveNextCall, Expression.Constant(true));
@@ -163,7 +174,7 @@ namespace Dibix.Sdk.Sql
               , sourceParameter
               , sqlReferencePathParameter
               , taskParameter
-              , errorReporterParameter
+              , loggerParameter
             );
             LoadPublicDataSchemaModel compiled = lambda.Compile();
             return compiled;
@@ -178,6 +189,90 @@ namespace Dibix.Sdk.Sql
             return fieldInfo;
         }
 
-        private delegate TSqlModel LoadPublicDataSchemaModel(string databaseSchemaProviderName, string modelCollation, ITaskItem[] source, ITaskItem[] sqlReferencePath, ITask task, IErrorReporter errorReporter);
+        private static ITask CreateTask(ILogger logger) => new Task(logger);
+
+        private static ITaskItem[] ToTaskItems(this IEnumerable<string> source) => source.Select(ToTaskItem).ToArray();
+
+        private static ITaskItem ToTaskItem(string source) => new TaskItem(source);
+        #endregion
+
+        #region Delegates
+        private delegate TSqlModel LoadPublicDataSchemaModel(string databaseSchemaProviderName, string modelCollation, ITaskItem[] source, ITaskItem[] sqlReferencePath, ITask task, ILogger logger);
+        #endregion
+
+        #region Nested types
+        private sealed class BuildEngine : IBuildEngine
+        {
+            private readonly ILogger _logger;
+
+            bool IBuildEngine.ContinueOnError => throw new NotSupportedException();
+            int IBuildEngine.LineNumberOfTaskNode => throw new NotSupportedException();
+            int IBuildEngine.ColumnNumberOfTaskNode => throw new NotSupportedException();
+            string IBuildEngine.ProjectFileOfTaskNode => throw new NotSupportedException();
+
+            public BuildEngine(ILogger logger) => this._logger = logger;
+
+            void IBuildEngine.LogErrorEvent(BuildErrorEventArgs e) => this._logger.LogError(e.Code, e.Message, e.File, e.LineNumber, e.ColumnNumber);
+
+            void IBuildEngine.LogWarningEvent(BuildWarningEventArgs e) => this._logger.LogError(e.Code, e.Message, e.File, e.LineNumber, e.ColumnNumber);
+
+            void IBuildEngine.LogMessageEvent(BuildMessageEventArgs e) => this._logger.LogMessage(e.Message);
+
+            void IBuildEngine.LogCustomEvent(CustomBuildEventArgs e) => throw new NotSupportedException();
+
+            bool IBuildEngine.BuildProjectFile(string projectFileName, string[] targetNames, IDictionary globalProperties, IDictionary targetOutputs) => throw new NotSupportedException();
+        }
+
+        private sealed class Task : ITask
+        {
+            private readonly BuildEngine _buildEngine;
+
+            IBuildEngine ITask.BuildEngine
+            {
+                get => this._buildEngine;
+                set => throw new NotSupportedException();
+            }
+            ITaskHost ITask.HostObject
+            {
+                get => throw new NotSupportedException();
+                set => throw new NotSupportedException();
+            }
+
+            public Task(ILogger logger) => this._buildEngine = new BuildEngine(logger);
+
+            bool ITask.Execute() => throw new NotSupportedException();
+        }
+
+        private sealed class TaskItem : ITaskItem
+        {
+            private readonly string _source;
+
+            ICollection ITaskItem.MetadataNames { get; } = new object[0];
+            int ITaskItem.MetadataCount => throw new NotSupportedException();
+            string ITaskItem.ItemSpec
+            {
+                get => throw new NotSupportedException();
+                set => throw new NotSupportedException();
+            }
+
+            public TaskItem(string source) => this._source = source;
+
+            string ITaskItem.GetMetadata(string metadataName)
+            {
+                if (metadataName == "FullPath")
+                    return this._source;
+
+                throw new NotSupportedException();
+            }
+
+            void ITaskItem.SetMetadata(string metadataName, string metadataValue) => throw new NotSupportedException();
+
+            void ITaskItem.RemoveMetadata(string metadataName) => throw new NotSupportedException();
+
+            void ITaskItem.CopyMetadataTo(ITaskItem destinationItem) => throw new NotSupportedException();
+
+            IDictionary ITaskItem.CloneCustomMetadata() => new Dictionary<string, string>();
+        }
+        #endregion
     }
 }

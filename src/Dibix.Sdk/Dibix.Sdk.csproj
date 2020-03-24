@@ -5,23 +5,17 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    
-    <!-- Be quiet NuGet. I don't want assemblies in lib/ and yes I'm sure this is right. -->
-    <NoPackageAnalysis>true</NoPackageAnalysis>
-    <BuildOutputTargetFolder>tools</BuildOutputTargetFolder>
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="CodeGeneration\Schema\dibix.contracts.schema.json" />
-    <EmbeddedResource Include="CodeGeneration\Schema\dibix.endpoints.schema.json" />
+    <EmbeddedResource Include="CodeGeneration\Schema\dibix.contracts.schema.json" PackagePath="content/dibix.contracts.schema.json" />
+    <EmbeddedResource Include="CodeGeneration\Schema\dibix.endpoints.schema.json" PackagePath="content/dibix.endpoints.schema.json" />
     <Compile Include="..\Dibix\Collections\FuncEqualityComparer.cs" Link="Collections\FuncEqualityComparer.cs" />
     <Compile Include="..\Dibix\Diagnostics\Guard.cs" Link="Diagnostics\Guard.cs" />
     <Compile Include="..\Dibix\Extensions\EnumerableExtensions.cs" Link="Extensions\EnumerableExtensions.cs" />
     <Compile Include="..\Dibix\Http\RouteBuilder.cs" Link="OpenApi\RouteBuilder.cs" />
     <Compile Include="..\Dibix\Http\HttpParameterName.cs" Link="OpenApi\HttpParameterName.cs" />
-    
-    <Content Include="CodeGeneration\Schema\dibix.contracts.schema.json" PackagePath="content/dibix.contracts.schema.json" />
-    <Content Include="CodeGeneration\Schema\dibix.endpoints.schema.json" PackagePath="content/dibix.endpoints.schema.json" />
+    <None Remove="lib\**" />
     <Content Include="..\..\build\$(MSBuildProjectName).*" PackagePath="build" Visible="False" />
   </ItemGroup>
 
@@ -30,26 +24,89 @@
     <PackageReference Include="Microsoft.OpenApi" Version="$(OpenApiVersion)" />
     <PackageReference Include="Microsoft.SqlServer.DacFx" Version="$(DacFxVersion)" />
     <PackageReference Include="Newtonsoft.Json.Schema" Version="$(NewtonsoftJsonSchemaVersion)" />
+    
+    <PackageReference Include="ILMerge" Version="$(ILMergeVersion)" PrivateAssets="All" />
   </ItemGroup>
 
-  <!-- See: https://github.com/NuGet/Home/issues/5063 -->
-  <Target Name="PackTaskDependencies" BeforeTargets="GenerateNuspec">
-    <!--
-    The include needs to happen after output has been copied to build output folder
-    but before NuGet generates a nuspec. See https://github.com/NuGet/Home/issues/4704.
-    -->
-    <ItemGroup>
-      <PackageToolsDependency Include="..\Dibix\bin\$(Configuration)\net451\Dibix.dll" TargetDirectory="net451" />
-      <PackageToolsDependency Include="..\Dibix.MSBuild\bin\$(Configuration)\netstandard2.0\Dibix.MSBuild.dll" TargetDirectory="netstandard2.0" />
-      <PackageToolsDependency Include="$(NuGetPackageRoot)Microsoft.OpenApi\$(OpenApiVersion)\lib\netstandard2.0\Microsoft.OpenApi.dll" TargetDirectory="netstandard2.0" />
-      <PackageToolsDependency Include="$(NuGetPackageRoot)Newtonsoft.Json\11.0.1\lib\net45\Newtonsoft.Json.dll" TargetDirectory="netstandard2.0" />
-      <PackageToolsDependency Include="$(NuGetPackageRoot)Newtonsoft.Json.Schema\$(NewtonsoftJsonSchemaVersion)\lib\netstandard2.0\Newtonsoft.Json.Schema.dll" TargetDirectory="netstandard2.0" />
+  <ItemGroup>
+    <Reference Include="Microsoft.Data.Tools.Components" HintPath="lib\Microsoft.Data.Tools.Components.dll" />
+    <Reference Include="Microsoft.Data.Tools.Contracts" HintPath="lib\Microsoft.Data.Tools.Contracts.dll" />
+    <Reference Include="Microsoft.Data.Tools.Schema.Tasks.Sql" HintPath="lib\Microsoft.Data.Tools.Schema.Tasks.Sql.dll" />
+    <Reference Include="Microsoft.Data.Tools.Schema.Utilities.Sql" HintPath="lib\Microsoft.Data.Tools.Schema.Utilities.Sql.dll" />
+    <Reference Include="Microsoft.SqlServer.ConnectionInfo" HintPath="lib\Microsoft.SqlServer.ConnectionInfo.dll" />
+  </ItemGroup>
 
-      <_PackageFiles Include="@(PackageToolsDependency)">
-        <PackagePath>tools/%(PackageToolsDependency.TargetDirectory)</PackagePath>
-        <Visible>false</Visible>
-        <BuildAction>Content</BuildAction>
-      </_PackageFiles>
+  <Target Name="PreparePackage" BeforeTargets="GenerateNuspec">
+    <!-- Build Dibix SDK CLI -->
+    <PropertyGroup>
+      <_DibixCliProjectName>Dibix.Sdk.Cli</_DibixCliProjectName>
+      <_DibixCliProjectDir>..\$(_DibixCliProjectName)\</_DibixCliProjectDir>
+      <_DibixCliExeName>$(_DibixCliProjectName).exe</_DibixCliExeName>
+      <_DibixCliExeDirectory>$(_DibixCliProjectDir)bin\$(Configuration)\net472\</_DibixCliExeDirectory>
+      <_DibixCliExePath>$(_DibixCliExeDirectory)$(_DibixCliExeName)</_DibixCliExePath>
+    </PropertyGroup>
+
+    <MSBuild Projects="$(_DibixCliProjectDir)$(_DibixCliProjectName).csproj"
+             Targets="Restore;Build"
+             Properties="Configuration=$(Configuration)" />
+
+    <!-- Merge Dibix SDK + CLI into a single EXE -->
+    <ItemGroup>
+      <_DibixExeDependency Include="$(_DibixCliExeName)" />
+      <_DibixExeDependency Include="$(TargetFileName)" />
+      <_DibixExeDependency Include="Microsoft.Build.Framework.dll" />
+      <_DibixExeDependency Include="Microsoft.Build.Utilities.Core.dll" />
+      <_DibixExeDependency Include="Microsoft.Data.Tools.Components.dll" />
+      <_DibixExeDependency Include="Microsoft.Data.Tools.Contracts.dll" />
+      <_DibixExeDependency Include="Microsoft.Data.Tools.Schema.Sql.dll" />
+      <_DibixExeDependency Include="Microsoft.Data.Tools.Schema.Tasks.Sql.dll" />
+      <_DibixExeDependency Include="Microsoft.Data.Tools.Schema.Utilities.Sql.dll" />
+      <_DibixExeDependency Include="Microsoft.Data.Tools.Utilities.dll" />
+      <_DibixExeDependency Include="Microsoft.OpenApi.dll" />
+      <_DibixExeDependency Include="Microsoft.SqlServer.ConnectionInfo.dll" />
+      <_DibixExeDependency Include="Microsoft.SqlServer.Dac.dll" />
+      <_DibixExeDependency Include="Microsoft.SqlServer.Dac.Extensions.dll" />
+      <_DibixExeDependency Include="Microsoft.SqlServer.TransactSql.ScriptDom.dll" />
+      <_DibixExeDependency Include="Newtonsoft.Json.dll" />
+      <_DibixExeDependency Include="Newtonsoft.Json.Schema.dll" />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <_DibixExeName>Dibix.exe</_DibixExeName>
+      <_DibixExePath>$(BaseIntermediateOutputPath)$(Configuration)\$(_DibixExeName)</_DibixExePath>
+      <_DibixExeDependencies>@(_DibixExeDependency->'$(_DibixCliExeDirectory)%(Identity)', ' ')</_DibixExeDependencies>
+    </PropertyGroup>
+
+    <!-- 
+      Unfortunately the startup performance of the merged EXE is incredibly slow (~40 sec)
+      Since I have not yet found out what it is, we deploy dependencies side by side
+    -->
+    <!--<Exec Command="$(ILMergeConsolePath) /target:winexe /targetplatform:&quot;v4,c:\windows\Microsoft.NET\Framework\v4.0.30319&quot; /out:$(_DibixExePath) $(_DibixExeDependencies) /ndebug" />-->
+    <Copy SourceFiles="$(_DibixCliExePath)" DestinationFiles="$(_DibixExePath)" />
+
+    <!-- Build Dibix runtime -->
+    <PropertyGroup>
+      <_DibixRuntimeProjectName>Dibix</_DibixRuntimeProjectName>
+      <_DibixRuntimeProjectDir>..\$(_DibixRuntimeProjectName)\</_DibixRuntimeProjectDir>
+      <_DibixRuntimeTargetFramework>net451</_DibixRuntimeTargetFramework>
+      <_DibixRuntimePath>$(_DibixRuntimeProjectDir)bin\$(Configuration)\$(_DibixRuntimeTargetFramework)\$(_DibixRuntimeProjectName).dll</_DibixRuntimePath>
+    </PropertyGroup>
+
+    <MSBuild Projects="$(_DibixRuntimeProjectDir)$(_DibixRuntimeProjectName).csproj"
+             Targets="Restore;Build"
+             Properties="Configuration=$(Configuration);TargetFramework=$(_DibixRuntimeTargetFramework)" />
+
+    <!-- Register tools\ folder in package -->
+    <PropertyGroup>
+      <_PackageToolsDirectory>tools\</_PackageToolsDirectory>
+    </PropertyGroup>
+    <ItemGroup>
+      <_PackageFiles Include="$(_DibixExePath)" PackagePath="$(_PackageToolsDirectory)" />
+      <_PackageFiles Include="$(_DibixRuntimePath)" PackagePath="$(_PackageToolsDirectory)" />
+      <_PackageFiles Include="$(_DibixCliExePath).config" PackagePath="$(_PackageToolsDirectory)$(_DibixExeName).config" />
+
+      <!-- Remove this, once ILMerge works properly -->
+      <_PackageFiles Include="@(_DibixExeDependency->'$(_DibixCliExeDirectory)%(Identity)')" Condition="%(Identity) != '$(_DibixCliExeName)'" PackagePath="$(_PackageToolsDirectory)" />
     </ItemGroup>
   </Target>
   

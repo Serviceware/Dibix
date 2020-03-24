@@ -19,6 +19,9 @@
     <VSTextTemplatingInterfacesVersion>10.0.30320</VSTextTemplatingInterfacesVersion>
 
     <!-- MSBuild -->
+    <ILMergeVersion>3.0.29</ILMergeVersion>
+
+    <!-- MSBuild.Tasks -->
     <MSBuildUtilitiesVersion>15.9.20</MSBuildUtilitiesVersion>
 
     <!-- Testing -->

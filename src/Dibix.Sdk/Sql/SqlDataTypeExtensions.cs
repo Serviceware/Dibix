@@ -45,7 +45,7 @@ namespace Dibix.Sdk.Sql
           , string source
           , IEnumerable<SqlHint> hints
           , ITypeResolverFacade typeResolver
-          , IErrorReporter errorReporter
+          , ILogger logger
           , out string udtName
         )
         {
@@ -53,9 +53,9 @@ namespace Dibix.Sdk.Sql
             if (!String.IsNullOrEmpty(typeImplementationName) && !(dataTypeReference is SqlDataTypeReference))
             {
                 udtName = null;
-                errorReporter.RegisterError(source, dataTypeReference.StartLine, dataTypeReference.StartColumn, null, $@"The @ClrType hint is only supported for primitive types and is used to specify an enum type implementation
+                logger.LogError(null, $@"The @ClrType hint is only supported for primitive types and is used to specify an enum type implementation
 Name: {name}
-DataType: {dataTypeReference.GetType()}");
+DataType: {dataTypeReference.GetType()}", source, dataTypeReference.StartLine, dataTypeReference.StartColumn);
                 return null;
             }
 
@@ -75,9 +75,9 @@ DataType: {dataTypeReference.GetType()}");
                     if (PrimitiveTypeMap.TryGetValue(sqlDataTypeReference.SqlDataTypeOption, out PrimitiveDataType dataType))
                         return new PrimitiveTypeReference(dataType, isNullable, false);
 
-                    errorReporter.RegisterError(source, dataTypeReference.StartLine, dataTypeReference.StartColumn, null, $@"Unsupported sql data type
+                    logger.LogError(null, $@"Unsupported sql data type
 Name: {name}
-DataType: {sqlDataTypeReference.SqlDataTypeOption}");
+DataType: {sqlDataTypeReference.SqlDataTypeOption}", source, dataTypeReference.StartLine, dataTypeReference.StartColumn);
                     return null;
                 }
 

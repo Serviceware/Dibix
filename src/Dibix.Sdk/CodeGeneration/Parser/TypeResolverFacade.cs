@@ -7,16 +7,16 @@ namespace Dibix.Sdk.CodeGeneration
     public sealed class TypeResolverFacade : ITypeResolverFacade
     {
         #region Fields
-        private readonly IErrorReporter _errorReporter;
+        private readonly ILogger _logger;
         private readonly IList<TypeResolver> _typeResolvers;
         #endregion
 
         #region Constructor
         public TypeResolverFacade() => this._typeResolvers = new Collection<TypeResolver>();
-        public TypeResolverFacade(AssemblyResolver assemblyResolver, ISchemaRegistry schemaRegistry, IErrorReporter errorReporter)
+        public TypeResolverFacade(AssemblyResolver assemblyResolver, ISchemaRegistry schemaRegistry, ILogger logger)
         {
-            this._errorReporter = errorReporter;
-            this._typeResolvers = new Collection<TypeResolver> { new ReflectionTypeResolver(assemblyResolver, schemaRegistry, errorReporter) };
+            this._logger = logger;
+            this._typeResolvers = new Collection<TypeResolver> { new ReflectionTypeResolver(assemblyResolver, schemaRegistry, logger) };
         }
         #endregion
 
@@ -33,7 +33,7 @@ namespace Dibix.Sdk.CodeGeneration
                                      .FirstOrDefault(x => x != null);
 
             if (type == null)
-                this._errorReporter.RegisterError(source, line, column, null, $"Could not resolve type '{input}'");
+                this._logger.LogError(null, $"Could not resolve type '{input}'", source, line, column);
 
             return type;
         }

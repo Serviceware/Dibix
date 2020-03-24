@@ -6,14 +6,14 @@ namespace Dibix.Sdk.CodeGeneration
     public sealed class SchemaRegistry : ISchemaRegistry
     {
         #region Fields
-        private readonly IErrorReporter _errorReporter;
+        private readonly ILogger _logger;
         private readonly IDictionary<string, SchemaDefinition> _schemas;
         #endregion
 
         #region Constructor
-        public SchemaRegistry(IErrorReporter errorReporter)
+        public SchemaRegistry(ILogger logger)
         {
-            this._errorReporter = errorReporter;
+            this._logger = logger;
             this._schemas = new Dictionary<string, SchemaDefinition>();
         }
         #endregion
@@ -28,7 +28,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (this._schemas.TryGetValue(reference.Key, out SchemaDefinition schema)) 
                 return schema;
 
-            this._errorReporter.RegisterError(reference.Source, reference.Line, reference.Column, null, $"Schema is not registered: {reference.Key}");
+            this._logger.LogError(null, $"Schema is not registered: {reference.Key}", reference.Source, reference.Line, reference.Column);
             return null;
         }
 

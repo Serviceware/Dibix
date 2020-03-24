@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Microsoft.SqlServer.TransactSql.ScriptDom;
-
-namespace Dibix.Sdk.CodeAnalysis.Rules
+﻿namespace Dibix.Sdk.CodeAnalysis.Rules
 {
     /*public sealed class UnknownPrimaryKeySourceSqlCodeAnalysisRule : SqlCodeAnalysisRule<UnknownPrimaryKeySourceSqlCodeAnalysisRuleVisitor>
     {

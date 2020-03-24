@@ -13,7 +13,7 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly ISqlStatementFormatter _formatter;
         private readonly ITypeResolverFacade _typeResolver;
         private readonly ISchemaRegistry _schemaRegistry;
-        private readonly IErrorReporter _errorReporter;
+        private readonly ILogger _logger;
         private readonly string _packagePath;
         private readonly ICollection<KeyValuePair<string, string>> _procedureNames;
 
@@ -25,7 +25,7 @@ namespace Dibix.Sdk.CodeGeneration
           , ISqlStatementFormatter formatter
           , ITypeResolverFacade typeResolver
           , ISchemaRegistry schemaRegistry
-          , IErrorReporter errorReporter
+          , ILogger logger
           , string packagePath
           , ICollection<KeyValuePair<string, string>> procedureNames)
         {
@@ -35,7 +35,7 @@ namespace Dibix.Sdk.CodeGeneration
             this._formatter = formatter;
             this._typeResolver = typeResolver;
             this._schemaRegistry = schemaRegistry;
-            this._errorReporter = errorReporter;
+            this._logger = logger;
             this._packagePath = packagePath;
             this._procedureNames = procedureNames;
         }
@@ -59,7 +59,7 @@ namespace Dibix.Sdk.CodeGeneration
                 Source = this._packagePath
             };
 
-            bool result = this._parser.Read(SqlParserSourceKind.String, script, new Lazy<TSqlModel>(() => model), statement, this._productName, this._areaName, this._formatter, this._typeResolver, this._schemaRegistry, this._errorReporter);
+            bool result = this._parser.Read(SqlParserSourceKind.String, script, new Lazy<TSqlModel>(() => model), statement, this._productName, this._areaName, this._formatter, this._typeResolver, this._schemaRegistry, this._logger);
             return result ? statement : null;
         }
     }

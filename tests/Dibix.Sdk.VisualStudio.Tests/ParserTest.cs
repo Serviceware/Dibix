@@ -10,7 +10,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Dibix;
 
 namespace Dibix.Sdk.VisualStudio.Tests
 {

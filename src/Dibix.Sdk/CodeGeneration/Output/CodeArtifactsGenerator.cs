@@ -1,7 +1,6 @@
 ﻿using System;
-using Dibix.Sdk.MSBuild;
 
-namespace Dibix.Sdk.CodeGeneration.MSBuild
+namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class CodeArtifactsGenerator : ICodeArtifactsGenerator
     {
@@ -12,7 +11,7 @@ namespace Dibix.Sdk.CodeGeneration.MSBuild
           , typeof(OpenApiArtifactsGenerationUnit)
         };
 
-        public bool Generate(CodeArtifactsGenerationModel model, ISchemaRegistry schemaRegistry, IErrorReporter errorReporter)
+        public bool Generate(CodeArtifactsGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             bool failed = false;
             foreach (Type unitType in Units)
@@ -21,7 +20,7 @@ namespace Dibix.Sdk.CodeGeneration.MSBuild
                 if (!unit.ShouldGenerate(model))
                     continue;
 
-                if (!unit.Generate(model, schemaRegistry, errorReporter))
+                if (!unit.Generate(model, schemaRegistry, logger))
                     failed = true;
             }
             return !failed;

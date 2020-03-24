@@ -17,7 +17,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public DaoCodeGenerator(IErrorReporter errorReporter, ISchemaRegistry schemaRegistry) : base(errorReporter)
+        public DaoCodeGenerator(ILogger logger, ISchemaRegistry schemaRegistry) : base(logger)
         {
             this._schemaRegistry = schemaRegistry;
             this._writers = new Collection<DaoWriter>();

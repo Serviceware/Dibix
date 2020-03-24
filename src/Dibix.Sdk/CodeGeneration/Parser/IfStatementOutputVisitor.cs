@@ -36,8 +36,8 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public IfStatementOutputVisitor(string sourcePath, TSqlElementLocator elementLocator, IErrorReporter errorReporter) : this(sourcePath, elementLocator, errorReporter, new IfOutputResolutionContext()) { }
-        public IfStatementOutputVisitor(string sourcePath, TSqlElementLocator elementLocator, IErrorReporter errorReporter, IfOutputResolutionContext context) : base(sourcePath, elementLocator, errorReporter)
+        public IfStatementOutputVisitor(string sourcePath, TSqlElementLocator elementLocator, ILogger logger) : this(sourcePath, elementLocator, logger, new IfOutputResolutionContext()) { }
+        public IfStatementOutputVisitor(string sourcePath, TSqlElementLocator elementLocator, ILogger logger, IfOutputResolutionContext context) : base(sourcePath, elementLocator, logger)
         {
             this._sourcePath = sourcePath;
             this._context = context;
@@ -53,14 +53,14 @@ namespace Dibix.Sdk.CodeGeneration
 
         public override void ExplicitVisit(IfStatement node)
         {
-            IfStatementOutputVisitor left = new IfStatementOutputVisitor(this._sourcePath, base.ElementLocator, base.ErrorReporter, this._context);
+            IfStatementOutputVisitor left = new IfStatementOutputVisitor(this._sourcePath, base.ElementLocator, base.Logger, this._context);
             left.Accept(node.ThenStatement);
 
             // This might be an IF block without ELSE
             // This is only allowed, if the IF block is not producing any outputs (i.E. RAISERROR)
             if (node.ElseStatement != null)
             {
-                IfStatementOutputVisitor right = new IfStatementOutputVisitor(this._sourcePath, base.ElementLocator, base.ErrorReporter, this._context);
+                IfStatementOutputVisitor right = new IfStatementOutputVisitor(this._sourcePath, base.ElementLocator, base.Logger, this._context);
                 right.Accept(node.ElseStatement);
 
                 // Compare output statements between IF..THEN and ELSE
@@ -68,7 +68,7 @@ namespace Dibix.Sdk.CodeGeneration
                 IList<OutputSelectResult> rightResults = right._containsIf ? right.Results : right.Outputs;
                 if (leftResults.Count != rightResults.Count)
                 {
-                    base.ErrorReporter.RegisterError(this._sourcePath, node.StartLine, node.StartColumn, null, "The number of output statements in IF THEN block does not match the number in ELSE block");
+                    base.Logger.LogError(null, "The number of output statements in IF THEN block does not match the number in ELSE block", this._sourcePath, node.StartLine, node.StartColumn);
                     return;
                 }
 
@@ -79,7 +79,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                     if (leftResult.Columns.Count != rightResult.Columns.Count)
                     {
-                        base.ErrorReporter.RegisterError(this._sourcePath, leftResult.Line, leftResult.Column, null, "The number of columns in output statement in IF THEN block does not match the number in ELSE block");
+                        base.Logger.LogError(null, "The number of columns in output statement in IF THEN block does not match the number in ELSE block", this._sourcePath, leftResult.Line, leftResult.Column);
                         break;
                     }
 
@@ -90,9 +90,9 @@ namespace Dibix.Sdk.CodeGeneration
 
                         if (leftColumn.ColumnName != rightColumn.ColumnName)
                         {
-                            base.ErrorReporter.RegisterError(this._sourcePath, leftColumn.ColumnNameSource.StartLine, leftColumn.ColumnNameSource.StartColumn, null, $@"The column names in output statement in IF THEN block do not match those in ELSE block
+                            base.Logger.LogError(null, $@"The column names in output statement in IF THEN block do not match those in ELSE block
 Column in THEN: {leftColumn.ColumnName}
-Column in ELSE: {rightColumn.ColumnName}");
+Column in ELSE: {rightColumn.ColumnName}", this._sourcePath, leftColumn.ColumnNameSource.StartLine, leftColumn.ColumnNameSource.StartColumn);
                             break;
                         }
                     }
@@ -105,7 +105,7 @@ Column in ELSE: {rightColumn.ColumnName}");
                 //this._visitedStatements.AddRange(right.Results.Select(x => x.Index));
             }
             else if (left.Outputs.Any())
-                base.ErrorReporter.RegisterError(this._sourcePath, node.StartLine, node.StartColumn, null, "IF statements that produce outputs but do not have an ELSE block are not supported, because the number of output results isn't guaranteed");
+                base.Logger.LogError(null, "IF statements that produce outputs but do not have an ELSE block are not supported, because the number of output results isn't guaranteed", this._sourcePath, node.StartLine, node.StartColumn);
         }
         #endregion
     }

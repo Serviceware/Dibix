@@ -1,25 +1,24 @@
 ﻿using System.IO;
 using System.Linq;
-using Dibix.Sdk.MSBuild;
 using Dibix.Sdk.OpenApi;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Extensions;
 using Microsoft.OpenApi.Models;
 
-namespace Dibix.Sdk.CodeGeneration.MSBuild
+namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class OpenApiArtifactsGenerationUnit : CodeArtifactGenerationUnit
     {
         public override bool ShouldGenerate(CodeArtifactsGenerationModel model) => model.Controllers.Any();
 
-        public override bool Generate(CodeArtifactsGenerationModel model, ISchemaRegistry schemaRegistry, IErrorReporter errorReporter)
+        public override bool Generate(CodeArtifactsGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger)
         {
-            if (errorReporter.HasErrors)
+            if (logger.HasLoggedErrors)
                 return false;
 
             OpenApiDocument document = OpenApiGenerator.Generate(model.ProductName, NamespaceUtility.EnsureAreaName(model.AreaName), model.RootNamespace, model.Controllers, model.Contracts);
 
-            if (errorReporter.HasErrors)
+            if (logger.HasLoggedErrors)
                 return false;
 
             string targetDirectory = Path.GetDirectoryName(model.DefaultOutputFilePath);

@@ -8,7 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Resources;
-using Dibix.Sdk.CodeGeneration;
 using Dibix.Sdk.Tests;
 using Dibix.Sdk.Tests.CodeGeneration;
 using EnvDTE;
@@ -62,8 +61,7 @@ namespace Dibix.Sdk.VisualStudio.Tests
                                     .Callback((CompilerErrorCollection errors) =>
                                     {
                                         if (errors.HasErrors)
-                                            throw new CodeGenerationException(errors.Cast<CompilerError>()
-                                                                                    .Select(x => new Error(x.FileName, x.Line, x.Column, x.ErrorNumber, x.ErrorText)));
+                                            throw new CodeGenerationException(String.Join(Environment.NewLine, errors));
                                     });
             serviceProvider.Setup(x => x.GetService(typeof(DTE))).Returns(dte.Object);
             dte.SetupGet(x => x.Solution).Returns(solution.Object);

@@ -1,0 +1,67 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using Dibix.Sdk.Sql;
+
+namespace Dibix.Sdk.CodeAnalysis
+{
+    public static class SqlCodeAnalysisTask
+    {
+        public static bool Execute
+        (
+            string namingConventionPrefix
+          , string databaseSchemaProviderName
+          , string modelCollation
+          , ICollection<string> source
+          , IEnumerable<string> scriptSource
+          , IEnumerable<string> sqlReferencePath
+          , ILogger logger
+        )
+        {
+            ISqlCodeAnalysisRuleEngine codeAnalysisEngine = SqlCodeAnalysisRuleEngine.Create(namingConventionPrefix, databaseSchemaProviderName, modelCollation, source, sqlReferencePath, logger);
+            if (logger.HasLoggedErrors)
+                return false;
+
+            foreach (string inputFilePath in source) 
+                AnalyzeItem(inputFilePath, codeAnalysisEngine, logger);
+
+            AnalyzeScripts(null, scriptSource, codeAnalysisEngine, logger);
+
+            return !logger.HasLoggedErrors;
+        }
+
+        private static void AnalyzeScripts(string parentFile, IEnumerable<string> scriptFiles, ISqlCodeAnalysisRuleEngine codeAnalysisEngine, ILogger logger)
+        {
+            foreach (string scriptFile in scriptFiles)
+            {
+                string scriptFilePath = Path.IsPathRooted(scriptFile) ? scriptFile : Path.GetFullPath(Path.Combine(Path.GetDirectoryName(parentFile), scriptFile));
+                string scriptContent = SqlCmdParser.ProcessSqlCmdScript(File.ReadAllText(scriptFilePath), out ICollection<string> includes);
+
+                if (scriptContent != null)
+                    AnalyzeItem(scriptFilePath, scriptContent, codeAnalysisEngine, logger);
+
+                AnalyzeScripts(scriptFilePath, includes, codeAnalysisEngine, logger);
+            }
+        }
+
+        private static void AnalyzeItem(string inputFilePath, ISqlCodeAnalysisRuleEngine codeAnalysisEngine, ILogger logger) => AnalyzeItem(inputFilePath, x => x.Analyze(inputFilePath), codeAnalysisEngine, logger);
+
+        private static void AnalyzeItem(string inputFilePath, string scriptContent, ISqlCodeAnalysisRuleEngine codeAnalysisEngine, ILogger logger) => AnalyzeItem(inputFilePath, x => x.AnalyzeScript(scriptContent), codeAnalysisEngine, logger);
+
+        private static void AnalyzeItem(string inputFilePath, Func<ISqlCodeAnalysisRuleEngine, IEnumerable<SqlCodeAnalysisError>> analyzeFunction, ISqlCodeAnalysisRuleEngine codeAnalysisEngine, ILogger logger)
+        {
+            try
+            {
+                foreach (SqlCodeAnalysisError error in analyzeFunction(codeAnalysisEngine))
+                {
+                    logger.LogError($"DBX{error.RuleId:000}", error.Message, inputFilePath, error.Line, error.Column);
+                }
+            }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException($@"Code analysis execution failed at
+{inputFilePath}", e);
+            }
+        }
+    }
+}

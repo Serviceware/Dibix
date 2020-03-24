@@ -12,29 +12,29 @@ namespace Dibix.Sdk.CodeGeneration
     {
         private static readonly Regex ParseCommentRegex = new Regex(@"^(?:\/\*|--) ?@([\w]+)(?: (?:([#\w.[\],;?]+)|([#\w:.[\],;? ]+)))?(?: ?\*\/)?$", RegexOptions.Compiled);
         private readonly string _source;
-        private readonly IErrorReporter _errorReporter;
+        private readonly ILogger _logger;
 
-        private SqlHintParser(string source, IErrorReporter errorReporter)
+        private SqlHintParser(string source, ILogger logger)
         {
             this._source = source;
-            this._errorReporter = errorReporter;
+            this._logger = logger;
         }
 
-        public static IEnumerable<SqlHint> FromFragment(string source, IErrorReporter errorReporter, TSqlFragment fragment)
+        public static IEnumerable<SqlHint> FromFragment(string source, ILogger logger, TSqlFragment fragment)
         {
-            SqlHintParser parser = new SqlHintParser(source, errorReporter);
+            SqlHintParser parser = new SqlHintParser(source, logger);
             return parser.Read(fragment.AsEnumerable().Select(x => new SqlHintToken(x.Line, x.Text)));
         }
 
-        public static IEnumerable<SqlHint> FromToken(string source, IErrorReporter errorReporter, TSqlParserToken token)
+        public static IEnumerable<SqlHint> FromToken(string source, ILogger logger, TSqlParserToken token)
         {
-            SqlHintParser parser = new SqlHintParser(source, errorReporter);
+            SqlHintParser parser = new SqlHintParser(source, logger);
             return parser.Read(Enumerable.Repeat(new SqlHintToken(token.Line, token.Text), 1));
         }
 
-        public static IEnumerable<SqlHint> FromFile(string filePath, IErrorReporter errorReporter)
+        public static IEnumerable<SqlHint> FromFile(string filePath, ILogger logger)
         {
-            SqlHintParser parser = new SqlHintParser(filePath, errorReporter);
+            SqlHintParser parser = new SqlHintParser(filePath, logger);
             return parser.Read(File.ReadLines(filePath).Select((x, i) => new SqlHintToken(i + 1, x)));
         }
 
@@ -88,7 +88,7 @@ namespace Dibix.Sdk.CodeGeneration
                         if (hint.Properties.ContainsKey(key))
                         {
                             string errorMessage = key != SqlHint.DefaultProperty ? $"Duplicate property for @{hint.Kind}.{key}" : $"Multiple default properties specified for @{hint.Kind}";
-                            this._errorReporter.RegisterError(this._source, token.Line, multiValueGroup.Index + 1, null, errorMessage);
+                            this._logger.LogError(null, errorMessage, this._source, token.Line, multiValueGroup.Index + 1);
                             yield break;
                         }
 

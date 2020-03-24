@@ -9,23 +9,23 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class SqlUserDefinedTypeParser
     {
-        private readonly IErrorReporter _errorReporter;
+        private readonly ILogger _logger;
         private readonly string _productName;
         private readonly string _areaName;
         private readonly ITypeResolverFacade _typeResolver;
 
-        public SqlUserDefinedTypeParser(string productName, string areaName, ITypeResolverFacade typeResolver, IErrorReporter errorReporter)
+        public SqlUserDefinedTypeParser(string productName, string areaName, ITypeResolverFacade typeResolver, ILogger logger)
         {
             this._productName = productName;
             this._areaName = areaName;
             this._typeResolver = typeResolver;
-            this._errorReporter = errorReporter;
+            this._logger = logger;
         }
 
         public UserDefinedTypeSchema Parse(string filePath)
         {
             TSqlFragment fragment = ScriptDomFacade.Load(filePath);
-            UserDefinedTypeVisitor visitor = new UserDefinedTypeVisitor(this._productName, this._areaName, filePath, fragment, this._typeResolver, this._errorReporter);
+            UserDefinedTypeVisitor visitor = new UserDefinedTypeVisitor(this._productName, this._areaName, filePath, fragment, this._typeResolver, this._logger);
             fragment.Accept(visitor);
             return visitor.Definition;
         }
@@ -37,18 +37,18 @@ namespace Dibix.Sdk.CodeGeneration
             private readonly string _areaName;
             private readonly string _source;
             private readonly ITypeResolverFacade _typeResolver;
-            private readonly IErrorReporter _errorReporter;
+            private readonly ILogger _logger;
 
             public UserDefinedTypeSchema Definition { get; private set; }
 
-            public UserDefinedTypeVisitor(string productName, string areaName, string source, TSqlFragment fragment, ITypeResolverFacade typeResolver, IErrorReporter errorReporter)
+            public UserDefinedTypeVisitor(string productName, string areaName, string source, TSqlFragment fragment, ITypeResolverFacade typeResolver, ILogger logger)
             {
                 this._productName = productName;
                 this._areaName = areaName;
                 this._source = source;
                 this._typeResolver = typeResolver;
-                this._errorReporter = errorReporter;
-                this._hintsAccessor = new Lazy<ICollection<SqlHint>>(() => SqlHintParser.FromFragment(source, errorReporter, fragment).ToArray());
+                this._logger = logger;
+                this._hintsAccessor = new Lazy<ICollection<SqlHint>>(() => SqlHintParser.FromFragment(source, logger, fragment).ToArray());
             }
 
             public override void Visit(CreateTypeTableStatement node)
@@ -98,7 +98,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 string columnName = column.ColumnIdentifier.Value;
                 bool isNullable = !notNullableColumns.Contains(columnName);
-                TypeReference typeReference = column.DataType.ToTypeReference(isNullable, columnName, relativeNamespace, this._source, this._hintsAccessor.Value, this._typeResolver, this._errorReporter, out string udtName);
+                TypeReference typeReference = column.DataType.ToTypeReference(isNullable, columnName, relativeNamespace, this._source, this._hintsAccessor.Value, this._typeResolver, this._logger, out string udtName);
                 return new ObjectSchemaProperty(columnName, typeReference);
             }
         }

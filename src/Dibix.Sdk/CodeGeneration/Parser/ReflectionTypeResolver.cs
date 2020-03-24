@@ -26,15 +26,15 @@ namespace Dibix.Sdk.CodeGeneration
         };
         private readonly AssemblyResolver _assemblyResolver;
         private readonly ISchemaRegistry _schemaRegistry;
-        private readonly IErrorReporter _errorReporter;
+        private readonly ILogger _logger;
         #endregion
 
         #region Constructor
-        public ReflectionTypeResolver(AssemblyResolver assemblyResolver, ISchemaRegistry schemaRegistry, IErrorReporter errorReporter)
+        public ReflectionTypeResolver(AssemblyResolver assemblyResolver, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             this._assemblyResolver = assemblyResolver;
             this._schemaRegistry = schemaRegistry;
-            this._errorReporter = errorReporter;
+            this._logger = logger;
         }
         #endregion
 
@@ -110,12 +110,12 @@ namespace Dibix.Sdk.CodeGeneration
                     return this.ResolveType(type, source, line, column, typeName.IsNullable, isEnumerable);
                 }
 
-                this._errorReporter.RegisterError(source, line, column, null, $"Could not locate assembly: {assemblyName}");
+                this._logger.LogError(null, $"Could not locate assembly: {assemblyName}", source, line, column);
                 return null;
             }
             catch (Exception ex)
             {
-                this._errorReporter.RegisterError(source, line, column, null, ex.Message);
+                this._logger.LogError(null, ex.Message, source, line, column);
                 return null;
             }
         }

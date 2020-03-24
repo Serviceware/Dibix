@@ -12,16 +12,16 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly string _areaName;
         private readonly string _outputName;
         private readonly ICollection<SqlStatementInfo> _statements;
-        private readonly IErrorReporter _errorReporter;
+        private readonly ILogger _logger;
         private readonly Lazy<IDictionary<string, string>> _neighborStatementMapAccessor;
 
-        public ControllerActionTargetSelector(string productName, string areaName, string outputName, ICollection<SqlStatementInfo> statements, IReferencedAssemblyProvider referencedAssemblyProvider, IErrorReporter errorReporter)
+        public ControllerActionTargetSelector(string productName, string areaName, string outputName, ICollection<SqlStatementInfo> statements, IReferencedAssemblyProvider referencedAssemblyProvider, ILogger logger)
         {
             this._productName = productName;
             this._areaName = areaName;
             this._outputName = outputName;
             this._statements = statements;
-            this._errorReporter = errorReporter;
+            this._logger = logger;
             this._neighborStatementMapAccessor = new Lazy<IDictionary<string, string>>(() => CreateNeighborStatementMap(referencedAssemblyProvider));
         }
 
@@ -54,15 +54,15 @@ namespace Dibix.Sdk.CodeGeneration
             // Relative namespaces can not be resolved in neighbor projects
             if (!isAbsolute)
             {
-                this._errorReporter.RegisterError(filePath, lineInfo.LineNumber, lineInfo.LinePosition, null, $@"Could not find action target: {target}
-Tried: {normalizedNamespace}.{methodName}");
+                this._logger.LogError(null, $@"Could not find action target: {target}
+Tried: {normalizedNamespace}.{methodName}", filePath, lineInfo.LineNumber, lineInfo.LinePosition);
                 return null;
             }
 
             // 3. Target 'could' be a compiled method in a neighbour project
             if (!this._neighborStatementMapAccessor.Value.TryGetValue(methodName, out string neighborTypeName))
             {
-                this._errorReporter.RegisterError(filePath, lineInfo.LineNumber, lineInfo.LinePosition, null, $"Could not find a method name '{methodName}' on database accessor type '{typeName}'");
+                this._logger.LogError(null, $"Could not find a method name '{methodName}' on database accessor type '{typeName}'", filePath, lineInfo.LineNumber, lineInfo.LinePosition);
                 return null;
             }
 

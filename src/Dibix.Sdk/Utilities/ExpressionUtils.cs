@@ -6,7 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 
-namespace Dibix.Sdk.Utilities
+namespace Dibix.Sdk
 {
     internal static class ExpressionUtils
     {

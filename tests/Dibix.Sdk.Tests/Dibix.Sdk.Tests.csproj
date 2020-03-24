@@ -15,11 +15,6 @@
       <DependentUpon>CodeGeneration\CodeGenerationTaskTests.cs</DependentUpon>
     </Compile>
     <EmbeddedResource Update="Resource.resx" />
-    <EmbeddedResource Include="lib\Microsoft.Data.Tools.Components.dll" />
-    <EmbeddedResource Include="lib\Microsoft.Data.Tools.Contracts.dll" />
-    <EmbeddedResource Include="lib\Microsoft.Data.Tools.Schema.Tasks.Sql.dll" />
-    <EmbeddedResource Include="lib\Microsoft.Data.Tools.Schema.Utilities.Sql.dll" />
-    <EmbeddedResource Include="lib\Microsoft.SqlServer.ConnectionInfo.dll" />
   </ItemGroup>
 
   <ItemGroup>

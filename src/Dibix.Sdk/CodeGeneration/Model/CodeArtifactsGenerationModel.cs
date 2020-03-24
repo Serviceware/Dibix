@@ -1,6 +1,4 @@
-﻿using Dibix.Sdk.CodeGeneration;
-
-namespace Dibix.Sdk.MSBuild
+﻿namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class CodeArtifactsGenerationModel : CodeGenerationModel
     {

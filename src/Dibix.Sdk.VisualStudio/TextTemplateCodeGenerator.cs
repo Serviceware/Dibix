@@ -12,10 +12,10 @@ namespace Dibix.Sdk.VisualStudio
             Guard.IsNotNull(serviceProvider, nameof(serviceProvider));
             Guard.IsNotNull(configure, nameof(configure));
 
-            IErrorReporter errorReporter = new TextTemplatingEngineErrorReporter(textTemplatingEngineHost);
-            ISchemaRegistry schemaRegistry = new SchemaRegistry(errorReporter);
-            CodeGenerationModel model = TextTemplateCodeGenerationModelLoader.Create(textTemplatingEngineHost, serviceProvider, schemaRegistry, errorReporter, configure);
-            CodeGenerator generator = new DaoCodeGenerator(errorReporter, schemaRegistry);
+            ILogger logger = new TextTemplatingEngineLogger(textTemplatingEngineHost);
+            ISchemaRegistry schemaRegistry = new SchemaRegistry(logger);
+            CodeGenerationModel model = TextTemplateCodeGenerationModelLoader.Create(textTemplatingEngineHost, serviceProvider, schemaRegistry, logger, configure);
+            CodeGenerator generator = new DaoCodeGenerator(logger, schemaRegistry);
             return generator.Generate(model);
         }
     }

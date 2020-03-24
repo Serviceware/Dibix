@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -10,16 +9,20 @@ using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using Dibix.Sdk.CodeAnalysis;
-using Dibix.Sdk.CodeGeneration;
-using Microsoft.Build.Framework;
 using Moq;
-using Xunit;
-using StringWriter = System.IO.StringWriter;
+using Xunit.Abstractions;
 
 namespace Dibix.Sdk.Tests.CodeAnalysis
 {
     public sealed partial class SqlCodeAnalysisRuleTests : DatabaseTestBase
     {
+        private readonly ITestOutputHelper _output;
+
+        public SqlCodeAnalysisRuleTests(ITestOutputHelper output)
+        {
+            this._output = output;
+        }
+
         private void Execute()
         {
             // Determine rule by 'back in time development' and create instance
@@ -29,38 +32,20 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
             ISqlCodeAnalysisRule ruleInstance = (ISqlCodeAnalysisRule)Activator.CreateInstance(ruleType);
             string violationScriptPath = Path.Combine(DatabaseProjectDirectory, "CodeAnalysis", $"dbx_codeanalysis_error_{ruleInstance.Id:D3}.sql");
 
-            ITaskItem[] source = ((IEnumerable)base.QueryProject("x:Project/x:ItemGroup/x:Build/@Include"))
-                                                   .OfType<XAttribute>()
-                                                   .Select(x =>
-                                                   {
-                                                       Mock<ITaskItem> item = new Mock<ITaskItem>(MockBehavior.Strict);
-                                                       item.SetupGet(y => y.MetadataNames).Returns(new string[0]);
-                                                       item.Setup(y => y.GetMetadata("FullPath")).Returns(Path.Combine(DatabaseProjectDirectory, x.Value));
-                                                       return item.Object;
-                                                   })
-                                                   .ToArray();
+            IEnumerable<string> sources = ((IEnumerable)base.QueryProject("x:Project/x:ItemGroup/x:Build/@Include"))
+                                                            .OfType<XAttribute>()
+                                                            .Select(x => Path.Combine(DatabaseProjectDirectory, x.Value));
 
-            ICollection<Error> loadErrors = new Collection<Error>();
+            StringBuilder errorOutput = new StringBuilder();
 
-            Mock<ITask> task = new Mock<ITask>(MockBehavior.Strict);
-            Mock<IBuildEngine> buildEngine = new Mock<IBuildEngine>(MockBehavior.Strict);
-            Mock<IErrorReporter> errorReporter = new Mock<IErrorReporter>(MockBehavior.Strict);
+            Mock<ILogger> logger = new Mock<ILogger>(MockBehavior.Strict);
 
-            task.SetupGet(x => x.BuildEngine).Returns(buildEngine.Object);
-            buildEngine.Setup(x => x.LogMessageEvent(It.IsAny<BuildMessageEventArgs>()));
-            errorReporter.Setup(x => x.RegisterError(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>()))
-                         .Callback((string fileName, int line, int column, string errorNumber, string errorText) => loadErrors.Add(new Error(fileName, line, column, errorNumber, errorText)));
-            errorReporter.SetupGet(x => x.HasErrors)
-                         .Returns(() =>
-                         {
-                             if (!loadErrors.Any())
-                                 return false;
+            logger.Setup(x => x.LogMessage(It.IsAny<string>())).Callback<string>(this._output.WriteLine);
+            logger.Setup(x => x.LogError(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>()))
+                  .Callback((string code, string text, string source, int line, int column) => errorOutput.AppendLine(CanonicalLogFormat.ToErrorString(code, text, source, line, column)));
+            logger.SetupGet(x => x.HasLoggedErrors).Returns(errorOutput.Length > 0);
 
-                             Assert.True(false, String.Join(Environment.NewLine, loadErrors));
-                             return true;
-                         });
-
-            ISqlCodeAnalysisRuleEngine engine = SqlCodeAnalysisRuleEngine.Create("dbx", base.DatabaseSchemaProviderName, base.ModelCollation, source, new ITaskItem[0], task.Object, errorReporter.Object);
+            ISqlCodeAnalysisRuleEngine engine = SqlCodeAnalysisRuleEngine.Create("dbx", base.DatabaseSchemaProviderName, base.ModelCollation, sources, Enumerable.Empty<string>(), logger.Object);
             IEnumerable<SqlCodeAnalysisError> errors = engine.Analyze(violationScriptPath, ruleInstance);
 
             string actual = GenerateXmlFromResults(errors);

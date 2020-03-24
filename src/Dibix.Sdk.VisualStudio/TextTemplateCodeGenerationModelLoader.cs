@@ -15,12 +15,12 @@ namespace Dibix.Sdk.VisualStudio
         #endregion
 
         #region Methods
-        public static CodeGenerationModel Create(ITextTemplatingEngineHost textTemplatingEngineHost, IServiceProvider serviceProvider, ISchemaRegistry schemaRegistry, IErrorReporter errorReporter, Action<ICodeGeneratorConfigurationExpression> configure)
+        public static CodeGenerationModel Create(ITextTemplatingEngineHost textTemplatingEngineHost, IServiceProvider serviceProvider, ISchemaRegistry schemaRegistry, ILogger logger, Action<ICodeGeneratorConfigurationExpression> configure)
         {
             IFileSystemProvider fileSystemProvider = new ProjectFileSystemProvider(serviceProvider, textTemplatingEngineHost.TemplateFile);
             TypeResolver typeResolver = new CodeElementTypeResolver(serviceProvider, textTemplatingEngineHost.TemplateFile, schemaRegistry);
             ProjectReferenceAssemblyResolver assemblyResolver = new ProjectReferenceAssemblyResolver(serviceProvider, textTemplatingEngineHost.TemplateFile);
-            ITypeResolverFacade typeResolverFacade = new TypeResolverFacade(assemblyResolver, schemaRegistry, errorReporter);
+            ITypeResolverFacade typeResolverFacade = new TypeResolverFacade(assemblyResolver, schemaRegistry, logger);
             typeResolverFacade.Register(typeResolver, 0);
             typeResolverFacade.Register(new UserDefinedTypeSchemaTypeResolver(schemaRegistry, new UnsupportedUserDefinedTypeProvider(), assemblyResolver), 1);
 
@@ -39,7 +39,7 @@ namespace Dibix.Sdk.VisualStudio
                 if (input.Formatter == null)
                     input.Formatter = typeof(TakeSourceSqlStatementFormatter);
 
-                input.Collect(model, typeResolverFacade, schemaRegistry, errorReporter);
+                input.Collect(model, typeResolverFacade, schemaRegistry, logger);
             }
 
             // Apply configuration defaults

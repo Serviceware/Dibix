@@ -31,10 +31,9 @@
     <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
     <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
 
-    <DibixToolsDirectory Condition="$(DibixToolsDirectory) == ''">$(MSBuildThisFileDirectory)..\tools\</DibixToolsDirectory>
-    <DibixBuildToolsPath>$(DibixToolsDirectory)netstandard2.0\Dibix.MSBuild.dll</DibixBuildToolsPath>
-    <DibixSdkPath>$(DibixToolsDirectory)netstandard2.0\Dibix.Sdk.dll</DibixSdkPath>
-    <DibixRuntimePath>$(DibixToolsDirectory)net451\Dibix.dll</DibixRuntimePath>
+    <DibixToolsDirectory>$(MSBuildThisFileDirectory)..\tools\net472\</DibixToolsDirectory>
+    <DibixCliPath>$(DibixToolsDirectory)Dibix.exe</DibixCliPath>
+    <DibixRuntimePath>$(DibixToolsDirectory)Dibix.dll</DibixRuntimePath>
 
     <ClientTargetPath Condition="'$(ClientOutputName)' != ''">$(TargetDir)$(ClientOutputName).dll</ClientTargetPath>
   </PropertyGroup>
@@ -45,8 +44,5 @@
     <Clean Include="$(TargetPath)" />
     <Clean Include="$(ClientTargetPath)" />
   </ItemGroup>
-
-  <UsingTask TaskName="SqlCodeAnalysisTask" AssemblyFile="$(DibixBuildToolsPath)" />
-  <UsingTask TaskName="CodeGenerationTask" AssemblyFile="$(DibixBuildToolsPath)" />
 
 </Project>

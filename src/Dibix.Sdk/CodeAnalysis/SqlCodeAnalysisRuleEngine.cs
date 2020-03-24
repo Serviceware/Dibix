@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Dibix.Sdk.CodeGeneration;
 using Dibix.Sdk.Sql;
-using Microsoft.Build.Framework;
 using Microsoft.SqlServer.Dac.Model;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
@@ -27,9 +25,9 @@ namespace Dibix.Sdk.CodeAnalysis
         #endregion
 
         #region Factory Methods
-        public static SqlCodeAnalysisRuleEngine Create(string namingConventionPrefix, string databaseSchemaProviderName, string modelCollation, ITaskItem[] source, ITaskItem[] sqlReferencePath, ITask task, IErrorReporter errorReporter)
+        public static SqlCodeAnalysisRuleEngine Create(string namingConventionPrefix, string databaseSchemaProviderName, string modelCollation, IEnumerable<string> source, IEnumerable<string> sqlReferencePath, ILogger logger)
         {
-            TSqlModel model = PublicSqlDataSchemaModelLoader.Load(databaseSchemaProviderName, modelCollation, source, sqlReferencePath, task, errorReporter);
+            TSqlModel model = PublicSqlDataSchemaModelLoader.Load(databaseSchemaProviderName, modelCollation, source, sqlReferencePath, logger);
             SqlCodeAnalysisConfiguration configuration = new SqlCodeAnalysisConfiguration(namingConventionPrefix);
             return new SqlCodeAnalysisRuleEngine(model, configuration);
         }

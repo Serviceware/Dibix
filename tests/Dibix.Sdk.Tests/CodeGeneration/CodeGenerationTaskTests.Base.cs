@@ -1,24 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Resources;
+using System.Text;
 using Dibix.Sdk.CodeGeneration;
-using Dibix.Sdk.MSBuild;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Moq;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Dibix.Sdk.Tests.CodeGeneration
 {
     public sealed partial class CodeGenerationTaskTests : DatabaseTestBase
     {
+        private readonly ITestOutputHelper _output;
+
         private static string ProjectName { get; } = Assembly.GetName().Name;
         private static string TestName => DetermineTestName();
+
+        public CodeGenerationTaskTests(ITestOutputHelper output)
+        {
+            this._output = output;
+        }
 
         private void ExecuteTest(string source, bool embedStatements = true) => this.ExecuteTest(embedStatements, source);
         private void ExecuteTest(bool embedStatements = true, params string[] sources) => this.ExecuteTest(sources, Enumerable.Empty<string>(), Enumerable.Empty<string>(), embedStatements, false, false, Enumerable.Empty<string>());
@@ -33,15 +38,14 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             string outputFilePath = Path.Combine(tempDirectory, "TestAccessor.cs");
             Directory.CreateDirectory(tempDirectory);
 
-            ICollection<Error> errors = new Collection<Error>();
+            StringBuilder errorOutput = new StringBuilder();
 
-            Mock<ITask> task = new Mock<ITask>(MockBehavior.Strict);
-            Mock<IBuildEngine> buildEngine = new Mock<IBuildEngine>(MockBehavior.Strict);
+            Mock<ILogger> logger = new Mock<ILogger>(MockBehavior.Strict);
 
-            task.SetupGet(x => x.BuildEngine).Returns(buildEngine.Object);
-            buildEngine.Setup(x => x.LogMessageEvent(It.IsAny<BuildMessageEventArgs>()));
-            buildEngine.Setup(x => x.LogErrorEvent(It.IsAny<BuildErrorEventArgs>()))
-                       .Callback((BuildErrorEventArgs e) => errors.Add(new Error(e.File.Substring(DatabaseProjectDirectory.Length + 1), e.LineNumber, e.ColumnNumber, e.Code, e.Message)));
+            logger.Setup(x => x.LogMessage(It.IsAny<string>())).Callback<string>(this._output.WriteLine);
+            logger.Setup(x => x.LogError(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>()))
+                  .Callback((string code, string text, string source, int line, int column) => errorOutput.AppendLine(CanonicalLogFormat.ToErrorString(code, text, source, line, column)));
+            logger.SetupGet(x => x.HasLoggedErrors).Returns(errorOutput.Length > 0);
 
             bool result = CodeGenerationTask.Execute
             (
@@ -50,27 +54,20 @@ namespace Dibix.Sdk.Tests.CodeGeneration
               , areaName: "Tests"
               , defaultOutputFilePath: !generateClient ? outputFilePath : null
               , clientOutputFilePath: generateClient ? outputFilePath : null
-              , source: sources.Select(x =>
-              {
-                  Mock<ITaskItem> item = new Mock<ITaskItem>(MockBehavior.Strict);
-                  item.SetupGet(y => y.MetadataNames).Returns(new string[0]);
-                  item.Setup(y => y.GetMetadata("FullPath")).Returns(Path.Combine(DatabaseProjectDirectory, x));
-                  return item.Object;
-              }).ToArray()
+              , source: sources.Select(x => Path.Combine(DatabaseProjectDirectory, x)).ToArray()
               , contracts: contracts
               , endpoints: endpoints
-              , references: null
+              , references: Enumerable.Empty<string>()
               , embedStatements: embedStatements
               , databaseSchemaProviderName: this.DatabaseSchemaProviderName
               , modelCollation: this.ModelCollation
-              , sqlReferencePath: new ITaskItem[0]
-              , task: task.Object
-              , logger: new TaskLoggingHelper(buildEngine.Object, nameof(CodeGenerationTask))
+              , sqlReferencePath: Enumerable.Empty<string>()
+              , logger: logger.Object
               , additionalAssemblyReferences: out string[] additionalAssemblyReferences
             );
 
-            if (errors.Any())
-                throw new CodeGenerationException(errors);
+            if (errorOutput.Length > 0)
+                throw new CodeGenerationException(errorOutput.ToString());
 
             Assert.True(result, "MSBuild task result was false");
             Assert.Equal(expectedAdditionalAssemblyReferences, additionalAssemblyReferences);

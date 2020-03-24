@@ -19,14 +19,14 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region ISqlStatementParser Members
-        public bool Read(SqlParserSourceKind sourceKind, object source, Lazy<TSqlModel> modelAccessor, SqlStatementInfo target, string productName, string areaName, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, IErrorReporter errorReporter)
+        public bool Read(SqlParserSourceKind sourceKind, object source, Lazy<TSqlModel> modelAccessor, SqlStatementInfo target, string productName, string areaName, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             if (!SourceReaders.TryGetValue(sourceKind, out Func<object, TSqlFragment> reader))
                 throw new ArgumentOutOfRangeException(nameof(sourceKind), sourceKind, null);
 
             TSqlFragment fragment = reader(source);
             TSqlElementLocator elementLocator = new TSqlElementLocator(modelAccessor, fragment, null, false);
-            return CollectStatementInfo(fragment, elementLocator, target, productName, areaName, formatter, typeResolver, schemaRegistry, errorReporter);
+            return CollectStatementInfo(fragment, elementLocator, target, productName, areaName, formatter, typeResolver, schemaRegistry, logger);
         }
         #endregion
 
@@ -39,7 +39,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static TSqlFragment ReadFromTextReader(TextReader reader) => ScriptDomFacade.Load(reader);
 
-        private static bool CollectStatementInfo(TSqlFragment fragment, TSqlElementLocator elementLocator, SqlStatementInfo target, string productName, string areaName, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, IErrorReporter errorReporter)
+        private static bool CollectStatementInfo(TSqlFragment fragment, TSqlElementLocator elementLocator, SqlStatementInfo target, string productName, string areaName, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             TVisitor visitor = new TVisitor
             {
@@ -50,14 +50,14 @@ namespace Dibix.Sdk.CodeGeneration
                 Target = target,
                 TypeResolver = typeResolver,
                 SchemaRegistry = schemaRegistry,
-                ErrorReporter = errorReporter
+                Logger = logger
             };
-            visitor.Hints.AddRange(SqlHintParser.FromFragment(target.Source, errorReporter, fragment));
+            visitor.Hints.AddRange(SqlHintParser.FromFragment(target.Source, logger, fragment));
 
             fragment.Accept(visitor);
 
             //if (visitor.Target.Content == null)
-            //    errorReporter.RegisterError(target.Source, fragment.StartLine, fragment.StartColumn, null, "File could not be parsed");
+            //    logger.LogError(null, "File could not be parsed", target.Source, fragment.StartLine, fragment.StartColumn);
             return visitor.Target.Content != null;
         }
         #endregion

@@ -11,7 +11,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public IList<OutputSelectResult> Results { get; }
 
-        public StatementOutputVisitor(string sourcePath, TSqlElementLocator elementLocator, IErrorReporter errorReporter) : base(sourcePath, elementLocator, errorReporter)
+        public StatementOutputVisitor(string sourcePath, TSqlElementLocator elementLocator, ILogger logger) : base(sourcePath, elementLocator, logger)
         {
             this._sourcePath = sourcePath;
             this.Results = new Collection<OutputSelectResult>();
@@ -19,7 +19,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public override void ExplicitVisit(IfStatement node)
         {
-            IfStatementOutputVisitor visitor = new IfStatementOutputVisitor(this._sourcePath, base.ElementLocator, base.ErrorReporter);
+            IfStatementOutputVisitor visitor = new IfStatementOutputVisitor(this._sourcePath, base.ElementLocator, base.Logger);
             visitor.Accept(node);
             this.Results.AddRange(visitor.Results);
         }

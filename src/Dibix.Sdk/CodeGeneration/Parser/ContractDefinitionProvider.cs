@@ -23,7 +23,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public ContractDefinitionProvider(IFileSystemProvider fileSystemProvider, IErrorReporter errorReporter, IEnumerable<string> contracts, string productName, string areaName) : base(fileSystemProvider, errorReporter)
+        public ContractDefinitionProvider(IFileSystemProvider fileSystemProvider, ILogger logger, IEnumerable<string> contracts, string productName, string areaName) : base(fileSystemProvider, logger)
         {
             this._productName = productName;
             this._areaName = areaName;

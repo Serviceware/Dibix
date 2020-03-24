@@ -23,7 +23,7 @@ namespace Dibix.Sdk.VisualStudio
         #endregion
 
         #region Overrides
-        protected override IEnumerable<SqlStatementInfo> CollectStatements(ISqlStatementParser parser, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, IErrorReporter errorReporter)
+        protected override IEnumerable<SqlStatementInfo> CollectStatements(ISqlStatementParser parser, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             SqlStatementCollector statementCollector = new DacPacSqlStatementCollector
             (
@@ -33,7 +33,7 @@ namespace Dibix.Sdk.VisualStudio
               , formatter: formatter
               , typeResolver: typeResolver
               , schemaRegistry: schemaRegistry
-              , errorReporter: errorReporter
+              , logger: logger
               , packagePath: this._packagePath
               , procedureNames: this._procedureNames
             );

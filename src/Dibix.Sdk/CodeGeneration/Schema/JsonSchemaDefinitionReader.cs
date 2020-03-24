@@ -12,13 +12,13 @@ namespace Dibix.Sdk.CodeGeneration
     {
         public bool HasSchemaErrors { get; private set; }
         protected IFileSystemProvider FileSystemProvider { get; }
-        protected IErrorReporter ErrorReporter { get; }
+        protected ILogger Logger { get; }
         protected abstract string SchemaName { get; }
 
-        protected JsonSchemaDefinitionReader(IFileSystemProvider fileSystemProvider, IErrorReporter errorReporter)
+        protected JsonSchemaDefinitionReader(IFileSystemProvider fileSystemProvider, ILogger logger)
         {
             this.FileSystemProvider = fileSystemProvider;
-            this.ErrorReporter = errorReporter;
+            this.Logger = logger;
         }
 
         protected void Collect(IEnumerable<string> inputs)
@@ -37,8 +37,8 @@ namespace Dibix.Sdk.CodeGeneration
                             {
                                 foreach (ValidationError error in errors.Flatten())
                                 {
-                                    string errorMessage = $"[JSON] {error.Message} ({error.Path})";
-                                    this.ErrorReporter.RegisterError(filePath, error.LineNumber, error.LinePosition, error.ErrorType.ToString(), errorMessage);
+                                    string errorMessage = $"{error.Message} ({error.Path})";
+                                    this.Logger.LogError(null, errorMessage, filePath, error.LineNumber, error.LinePosition);
                                 }
                                 this.HasSchemaErrors = true;
                                 continue;

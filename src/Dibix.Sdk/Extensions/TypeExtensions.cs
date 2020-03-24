@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace Dibix.Sdk
 {
-    public static class TypeExtensions
+    internal static class TypeExtensions
     {
         private static readonly IDictionary<string, Type> CSharpTypeNames = new Dictionary<string, Type>
         {
@@ -28,7 +28,7 @@ namespace Dibix.Sdk
           , ["void"]    = typeof(void)
         };
 
-        internal static Type ToClrType(this string cSharpTypeName)
+        public static Type ToClrType(this string cSharpTypeName)
         {
             bool isArray = cSharpTypeName.EndsWith("[]", StringComparison.Ordinal);
             if (isArray)
@@ -40,7 +40,7 @@ namespace Dibix.Sdk
             return clrType;
         }
 
-        internal static IEnumerable<Type> GetLoadableTypes(this Assembly assembly)
+        public static IEnumerable<Type> GetLoadableTypes(this Assembly assembly)
         {
             Guard.IsNotNull(assembly, nameof(assembly));
             try
@@ -53,7 +53,7 @@ namespace Dibix.Sdk
             }
         }
 
-        internal static bool IsDefined(this Assembly assembly, string fullAttributeTypeName)
+        public static bool IsDefined(this Assembly assembly, string fullAttributeTypeName)
         {
             Guard.IsNotNull(assembly, nameof(assembly));
             try

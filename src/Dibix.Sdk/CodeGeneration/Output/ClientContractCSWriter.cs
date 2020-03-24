@@ -10,7 +10,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public ClientContractCSWriter(IErrorReporter errorReporter, ISchemaRegistry schemaRegistry) : base(errorReporter)
+        public ClientContractCSWriter(ILogger logger, ISchemaRegistry schemaRegistry) : base(logger)
         {
             this._schemaRegistry = schemaRegistry;
         }

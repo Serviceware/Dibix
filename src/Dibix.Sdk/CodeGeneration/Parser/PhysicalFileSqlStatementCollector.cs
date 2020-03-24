@@ -14,7 +14,7 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly ISqlStatementFormatter _formatter;
         private readonly ITypeResolverFacade _typeResolver;
         private readonly ISchemaRegistry _schemaRegistry;
-        private readonly IErrorReporter _errorReporter;
+        private readonly ILogger _logger;
         private readonly IEnumerable<string> _files;
         private readonly Lazy<TSqlModel> _modelAccessor;
 
@@ -26,7 +26,7 @@ namespace Dibix.Sdk.CodeGeneration
           , ISqlStatementFormatter formatter
           , ITypeResolverFacade typeResolver
           , ISchemaRegistry schemaRegistry
-          , IErrorReporter errorReporter
+          , ILogger logger
           , IEnumerable<string> files
           , Lazy<TSqlModel> modelAccessor
         )
@@ -39,7 +39,7 @@ namespace Dibix.Sdk.CodeGeneration
             this._schemaRegistry = schemaRegistry;
             this._files = files;
             this._modelAccessor = modelAccessor;
-            this._errorReporter = errorReporter;
+            this._logger = logger;
         }
 
         public override IEnumerable<SqlStatementInfo> CollectStatements()
@@ -55,7 +55,7 @@ namespace Dibix.Sdk.CodeGeneration
                 Name = Path.GetFileNameWithoutExtension(file)
             };
 
-            bool result = this._parser.Read(SqlParserSourceKind.Stream, File.OpenRead(file), this._modelAccessor, statement, this._productName, this._areaName, this._formatter, this._typeResolver, this._schemaRegistry, this._errorReporter);
+            bool result = this._parser.Read(SqlParserSourceKind.Stream, File.OpenRead(file), this._modelAccessor, statement, this._productName, this._areaName, this._formatter, this._typeResolver, this._schemaRegistry, this._logger);
 
             return result ? statement : null;
         }

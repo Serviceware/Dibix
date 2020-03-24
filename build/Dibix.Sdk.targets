@@ -12,7 +12,7 @@
       <SqlBuildInputItem Remove="$(IntermediateTargetFullFileName)" />
       <SqlBuildInputItem Remove="$(IntermediateSymbolsFullFileName)" />
 
-      <_SqlTargetInput Include="$(DibixSdkPath)" />
+      <_SqlTargetInput Include="$(DibixCliPath)" />
       <_SqlTargetInput Include="$(MSBuildProjectFullPath)" />
       <_SqlTargetInput Include="$(MSBuildAllProjects)" />
 
@@ -49,6 +49,7 @@
           DependsOnTargets="SetupSqlBuildInputs"
           Inputs="@(SqlCodeAnalysisInput)"
           Outputs="@(SqlCodeAnalysisOutput)">
+    <!-- Configuration -->
     <PropertyGroup>
       <SqlNamingConventionPrefix Condition="'$(SqlNamingConventionPrefix)' == ''">dbx</SqlNamingConventionPrefix>
     </PropertyGroup>
@@ -58,16 +59,27 @@
       <SqlCodeAnalysisScriptItem Include="@(PostDeploy)" />
     </ItemGroup>
 
-    <SqlCodeAnalysisTask SdkPath="$(DibixSdkPath)"
-                         RuntimePath="$(DibixRuntimePath)"
-                         SSDTDirectory="$(SqlServerRedistPath)"
-                         NamingConventionPrefix="$(SqlNamingConventionPrefix)"
-                         DatabaseSchemaProviderName="$(DSP)"
-                         ModelCollation="$(ModelCollation)"
-                         Source="@(Build)"
-                         ScriptSource="@(SqlCodeAnalysisScriptItem)"
-                         SqlReferencePath="@(SqlReferencePath)"
-                         IsIDEBuild="$(BuildingInsideVisualStudio)" />
+    <!-- Prepare & write input file then exec CLI -->
+    <PropertyGroup>
+      <_SqlCodeAnalysisInputFile>$(IntermediateOutputPath)sqlcodeanalysis.input</_SqlCodeAnalysisInputFile>
+
+      <_BuildItems>@(Build->'%(FullPath)', '|')</_BuildItems>
+      <_SqlCodeAnalysisScriptItems>@(SqlCodeAnalysisScriptItem->'%(FullPath)', '|')</_SqlCodeAnalysisScriptItems>
+      <_SqlReferencePathItems>@(SqlReferencePath->'%(FullPath)', '|')</_SqlReferencePathItems>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_SqlCodeAnalysisInputItem Include="NamingConventionPrefix $(SqlNamingConventionPrefix)" />
+      <_SqlCodeAnalysisInputItem Include="DatabaseSchemaProviderName $(DSP)" />
+      <_SqlCodeAnalysisInputItem Include="ModelCollation $(ModelCollation)" />
+      <_SqlCodeAnalysisInputItem Include="Source $(_BuildItems)" />
+      <_SqlCodeAnalysisInputItem Include="ScriptSource $(_SqlCodeAnalysisScriptItems)" />
+      <_SqlCodeAnalysisInputItem Include="SqlReferencePath $(_SqlReferencePathItems)" />
+    </ItemGroup>
+
+    <WriteLinesToFile File="$(_SqlCodeAnalysisInputFile)" Lines="@(_SqlCodeAnalysisInputItem)" Overwrite="True" />
+
+    <Exec Command="$(DibixCliPath) SqlCodeAnalysisTask &quot;$(_SqlCodeAnalysisInputFile)&quot;" />
   </Target>
 
   <!-- Compile database accessors for stored procedures including their contracts and an API endpoint configuration -->
@@ -83,6 +95,7 @@
           Inputs="@(CompileArtifactsInput)"
           Outputs="@(CompileArtifactsOutput)"
           Condition="$(CompileArtifacts) == 'true'">
+    <!-- Configuration -->
     <PropertyGroup>
       <LangVersion>latest</LangVersion>
       <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
@@ -99,26 +112,38 @@
       <ServerCompilationReference Include="@(ArtifactReference->'%(RelativeDir)%(Filename).dll')" Condition="!$([System.Text.RegularExpressions.Regex]::IsMatch('%(Filename)%(Extension)', '^master|msdb(\.dacpac)$'))" />
     </ItemGroup>
 
-    <CodeGenerationTask SdkPath="$(DibixSdkPath)"
-                        RuntimePath="$(DibixRuntimePath)"
-                        SSDTDirectory="$(SqlServerRedistPath)"
-                        ProjectDirectory="$(MSBuildProjectDirectory)"
-                        ProductName="$(ProductName)"
-                        AreaName="$(AreaName)"
-                        DefaultOutputFilePath="$(ServerIntermediateFilePath)"
-                        ClientOutputFilePath="$(ClientIntermediateFilePath)"
-                        Source="@(Build)"
-                        Contracts="@(Contract)"
-                        Endpoints="@(Endpoint)"
-                        References="@(ServerCompilationReference)"
-                        IsIDEBuild="$(BuildingInsideVisualStudio)"
-                        DatabaseSchemaProviderName="$(DSP)"
-                        ModelCollation="$(ModelCollation)"
-                        EmbedStatements="$(EmbedStatements)"
-                        SqlReferencePath="@(SqlReferencePath)">
-      <Output TaskParameter="AdditionalAssemblyReferences" ItemName="ServerCompilationReference" />
-    </CodeGenerationTask>
+    <!-- Prepare & write input file then exec CLI -->
+    <PropertyGroup>
+      <_CodeGenerationInputFile>$(IntermediateOutputPath)codegeneration.input</_CodeGenerationInputFile>
 
+      <_BuildItems>@(Build->'%(FullPath)', '|')</_BuildItems>
+      <_ContractItems>@(Contract->'%(FullPath)', '|')</_ContractItems>
+      <_EndpointItems>@(Endpoint->'%(FullPath)', '|')</_EndpointItems>
+      <_ServerCompilationReferenceItems>@(ServerCompilationReference->'%(FullPath)', '|')</_ServerCompilationReferenceItems>
+      <_SqlReferencePathItems>@(SqlReferencePath->'%(FullPath)', '|')</_SqlReferencePathItems>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_CodeGenerationInputItem Include="ProjectDirectory $(MSBuildProjectDirectory)" />
+      <_CodeGenerationInputItem Include="ProductName $(ProductName)" />
+      <_CodeGenerationInputItem Include="AreaName $(AreaName)" />
+      <_CodeGenerationInputItem Include="DefaultOutputFilePath $(ServerIntermediateFilePath)" />
+      <_CodeGenerationInputItem Include="ClientOutputFilePath $(ClientIntermediateFilePath)" />
+      <_CodeGenerationInputItem Include="Source $(_BuildItems)" />
+      <_CodeGenerationInputItem Include="Contracts $(_ContractItems)" />
+      <_CodeGenerationInputItem Include="Endpoints $(_EndpointItems)" />
+      <_CodeGenerationInputItem Include="References $(_ServerCompilationReferenceItems)" />
+      <_CodeGenerationInputItem Include="DatabaseSchemaProviderName $(DSP)" />
+      <_CodeGenerationInputItem Include="ModelCollation $(ModelCollation)" />
+      <_CodeGenerationInputItem Include="EmbedStatements $(EmbedStatements)" />
+      <_CodeGenerationInputItem Include="SqlReferencePath $(_SqlReferencePathItems)" />
+    </ItemGroup>
+
+    <WriteLinesToFile File="$(_CodeGenerationInputFile)" Lines="@(_CodeGenerationInputItem)" Overwrite="True" />
+
+    <Exec Command="$(DibixCliPath) CodeGenerationTask &quot;$(_CodeGenerationInputFile)&quot;" />
+
+    <!-- Shared assembly info -->
     <PropertyGroup>
       <AssemblyProduct Condition="'$(AssemblyProduct)' == ''">$(ProductName)</AssemblyProduct>
     </PropertyGroup>
@@ -135,7 +160,7 @@
       </AssemblyAttribute>
     </ItemGroup>
 
-
+    <!-- Server assembly info & DLL generation -->
     <PropertyGroup>
       <ServerAssemblyInfoFile>$(ServerIntermediateFilePathNoExt)_AssemblyInfo.cs</ServerAssemblyInfoFile>
     </PropertyGroup>
@@ -144,6 +169,8 @@
       <ServerCompilationSource Include="$(ServerIntermediateFilePath)" />
       <ServerCompilationSource Include="$(ServerAssemblyInfoFile)" />
       <ServerCompilationReference Include="$(DibixRuntimePath)" />
+      <ServerCompilationReference Include="System.ComponentModel.DataAnnotations.dll" />
+      <ServerCompilationReference Include="$(DibixToolsDirectory)Newtonsoft.Json.dll" />
 
       <ServerAssemblyAttribute Include="@(AssemblyAttribute)" />
       <ServerAssemblyAttribute Include="AssemblyTitle">
@@ -156,7 +183,6 @@
 
     <WriteCodeFragment AssemblyAttributes="@(ServerAssemblyAttribute)" Language="C#" OutputFile="$(ServerAssemblyInfoFile)" />
 
-    <!-- Compile main assembly -->
     <Csc DefineConstants="$(DefineConstants)"
          EmitDebugInformation="$(DebugSymbols)"
          KeyFile="$(AssemblyOriginatorKeyFile)"
@@ -166,7 +192,6 @@
          Sources="@(ServerCompilationSource)"
          TargetType="$(OutputType)" />
 
-    <!-- Deploy assembly/pdb -->
     <Copy SourceFiles="@(IntermediateAssembly)"
           DestinationFolder="$(OutDir)"
           SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
@@ -191,7 +216,7 @@
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
     </Copy>
 
-
+    <!-- Client assembly info & DLL generation -->
     <PropertyGroup Condition="'$(ClientOutputName)' != ''">
       <ClientAssemblyInfoFile>$(ClientIntermediateFilePathNoExt)_AssemblyInfo.cs</ClientAssemblyInfoFile>
     </PropertyGroup>
@@ -212,7 +237,6 @@
 
     <WriteCodeFragment AssemblyAttributes="@(ClientAssemblyAttribute)" Language="C#" OutputFile="$(ClientAssemblyInfoFile)" Condition="'$(ClientOutputName)' != ''" />
 
-    <!-- Compile contracts assembly if required -->
     <Csc Condition="'$(ClientOutputName)' != ''"
          DefineConstants="$(DefineConstants)"
          EmitDebugInformation="$(DebugSymbols)"
@@ -222,7 +246,6 @@
          Sources="@(ClientCompilationSource)"
          TargetType="$(OutputType)" />
 
-    <!-- Deploy contracts assembly/pdb (if available -->
     <Copy SourceFiles="@(ClientAssembly)"
           DestinationFolder="$(OutDir)"
           SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"

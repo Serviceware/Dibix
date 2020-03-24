@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
@@ -31,29 +28,8 @@ namespace Dibix.Sdk.Tests
 
             this.DatabaseSchemaProviderName = (string)this._databaseProject.XPathEvaluate("string(x:Project/x:PropertyGroup/x:DSP)", this._databaseProjectNamespaceManager);
             this.ModelCollation = (string)this._databaseProject.XPathEvaluate("string(x:Project/x:PropertyGroup/x:ModelCollation)", this._databaseProjectNamespaceManager);
-
-            IDictionary<string, Assembly> dependentAssemblies = LoadDependentAssemblies().ToDictionary(x => x.Key, x => x.Value);
-            AppDomain.CurrentDomain.AssemblyResolve += (sender, e) => dependentAssemblies.TryGetValue(new AssemblyName(e.Name).Name, out Assembly assembly) ? assembly : null;
-
         }
 
         protected object QueryProject(string expression) => this._databaseProject.XPathEvaluate(expression, this._databaseProjectNamespaceManager);
-
-        private static IEnumerable<KeyValuePair<string, Assembly>> LoadDependentAssemblies()
-        {
-            string pattern = $"^{Regex.Escape($"{Assembly.GetName().Name}.")}[A-Za-z.]+{Regex.Escape(".dll")}$";
-            foreach (string resourceName in Assembly.GetManifestResourceNames().Where(x => Regex.IsMatch(x, pattern)))
-            {
-                using (Stream sourceStream = Assembly.GetManifestResourceStream(resourceName))
-                {
-                    using (MemoryStream targetStream = new MemoryStream())
-                    {
-                        sourceStream.CopyTo(targetStream);
-                        Assembly assembly = Assembly.Load(targetStream.ToArray());
-                        yield return new KeyValuePair<string, Assembly>(assembly.GetName().Name, assembly);
-                    }
-                }
-            }
-        }
     }
 }

@@ -1,11 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Dibix.Sdk.CodeGeneration;
-using Dibix.Sdk.CodeGeneration.MSBuild;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 
-namespace Dibix.Sdk.MSBuild
+namespace Dibix.Sdk.CodeGeneration
 {
     public static class CodeGenerationTask
     { 
@@ -16,22 +12,20 @@ namespace Dibix.Sdk.MSBuild
           , string areaName
           , string defaultOutputFilePath
           , string clientOutputFilePath
-          , ITaskItem[] source
+          , ICollection<string> source
           , IEnumerable<string> contracts
           , IEnumerable<string> endpoints
           , IEnumerable<string> references
           , bool embedStatements
           , string databaseSchemaProviderName
           , string modelCollation
-          , ITaskItem[] sqlReferencePath
-          , ITask task
-          , TaskLoggingHelper logger
+          , IEnumerable<string> sqlReferencePath
+          , ILogger logger
           , out string[] additionalAssemblyReferences
         )
         {
-            IErrorReporter errorReporter = new MSBuildErrorReporter(logger);
-            ISchemaRegistry schemaRegistry = new SchemaRegistry(errorReporter);
-            CodeArtifactsGenerationModel model = MSBuildCodeGenerationModelLoader.Create
+            ISchemaRegistry schemaRegistry = new SchemaRegistry(logger);
+            CodeArtifactsGenerationModel model = CodeGenerationModelLoader.Create
             (
                 projectDirectory
               , productName
@@ -46,13 +40,12 @@ namespace Dibix.Sdk.MSBuild
               , databaseSchemaProviderName
               , modelCollation
               , sqlReferencePath
-              , task
               , schemaRegistry
-              , errorReporter
+              , logger
             );
 
             ICodeArtifactsGenerator generator = new CodeArtifactsGenerator();
-            bool result = generator.Generate(model, schemaRegistry, errorReporter);
+            bool result = generator.Generate(model, schemaRegistry, logger);
             additionalAssemblyReferences = model.AdditionalAssemblyReferences.ToArray();
             return result;
         }

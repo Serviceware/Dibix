@@ -32,7 +32,7 @@ namespace Dibix.Sdk.CodeGeneration
             string parameterName = node.VariableName.Value.TrimStart('@');
 
             if (node.Modifier == ParameterModifier.Output) 
-                this.ErrorReporter.RegisterError(this.Target.Source, node.StartLine, node.StartColumn, null, $"Output parameters are not supported: {parameterName}");
+                this.Logger.LogError(null, $"Output parameters are not supported: {parameterName}", this.Target.Source, node.StartLine, node.StartColumn);
 
             // Parse type name hint
             int startIndex = node.FirstTokenIndex;
@@ -40,7 +40,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (previousToken.TokenType == SqlTokenType.WhiteSpace)
                 previousToken = node.ScriptTokenStream[--startIndex];
 
-            ICollection<SqlHint> hints = SqlHintParser.FromToken(this.Target.Source, this.ErrorReporter, previousToken).ToArray();
+            ICollection<SqlHint> hints = SqlHintParser.FromToken(this.Target.Source, this.Logger, previousToken).ToArray();
 
             SqlQueryParameter parameter = new SqlQueryParameter
             {
@@ -57,7 +57,7 @@ namespace Dibix.Sdk.CodeGeneration
         private TypeReference ParseParameterType(string parameterName, DeclareVariableElement parameter, IEnumerable<SqlHint> hints)
         {
             bool isNullable = parameter.Nullable?.Nullable ?? false;
-            return parameter.DataType.ToTypeReference(isNullable, parameterName, this.Target.Namespace, this.Target.Source, hints, base.TypeResolver, base.ErrorReporter, out string udtName);
+            return parameter.DataType.ToTypeReference(isNullable, parameterName, this.Target.Namespace, this.Target.Source, hints, base.TypeResolver, base.Logger, out string udtName);
         }
 
         private void ParseParameterObfuscate(TSqlFragment parameter, SqlQueryParameter target, IEnumerable<SqlHint> hints)
@@ -67,8 +67,8 @@ namespace Dibix.Sdk.CodeGeneration
             // NOTE: Uncomment line dbx_tests_syntax_empty_params_inputclass line 5, whenever this is implemented
             if (target.Obfuscate && this.Target.GenerateInputClass)
             {
-                this.ErrorReporter.RegisterError(this.Target.Source, parameter.StartLine, parameter.StartColumn, null, $@"Parameter obfuscation is currently not supported with input classes: {target.Name}
-Either remove the @GenerateInputClass hint on the statement or the @Obfuscate hint on the parameter");
+                this.Logger.LogError(null, $@"Parameter obfuscation is currently not supported with input classes: {target.Name}
+Either remove the @GenerateInputClass hint on the statement or the @Obfuscate hint on the parameter", this.Target.Source, parameter.StartLine, parameter.StartColumn);
             }
         }
 
@@ -79,7 +79,7 @@ Either remove the @GenerateInputClass hint on the statement or the @Obfuscate hi
 
             if (!(parameter.Value is Literal literal))
             {
-                base.ErrorReporter.RegisterError(this.Target.Source, parameter.Value.StartLine, parameter.Value.StartColumn, null, $"Only literals are supported for default values: {parameter.Value.Dump()}");
+                base.Logger.LogError(null, $"Only literals are supported for default values: {parameter.Value.Dump()}", this.Target.Source, parameter.Value.StartLine, parameter.Value.StartColumn);
                 return;
             }
 
@@ -113,7 +113,7 @@ DataType: {target.Type.GetType()}");
                     return true;
 
                 default:
-                    base.ErrorReporter.RegisterError(this.Target.Source, literal.StartLine, literal.StartColumn, null, $"Literal type not supported for default value: {literal.LiteralType}");
+                    base.Logger.LogError(null, $"Literal type not supported for default value: {literal.LiteralType}", this.Target.Source, literal.StartLine, literal.StartColumn);
                     defaultValue = null;
                     return false;
             }
@@ -215,7 +215,7 @@ DataType: {target.Type.GetType()}");
 
         private void ParseResults(TSqlFragment node, ICollection<SqlHint> hints)
         {
-            IEnumerable<SqlQueryResult> results = StatementOutputParser.Parse(this.Target, node, this.ElementLocator, hints, this.TypeResolver, this.SchemaRegistry, this.ErrorReporter);
+            IEnumerable<SqlQueryResult> results = StatementOutputParser.Parse(this.Target, node, this.ElementLocator, hints, this.TypeResolver, this.SchemaRegistry, this.Logger);
             this.Target.Results.AddRange(results);
         }
 

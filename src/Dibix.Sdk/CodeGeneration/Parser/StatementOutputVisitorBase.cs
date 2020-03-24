@@ -16,15 +16,15 @@ namespace Dibix.Sdk.CodeGeneration
         public string Statement { get; private set; }
         protected TSqlElementLocator ElementLocator { get; }
         protected IList<OutputSelectResult> Outputs { get; }
-        protected IErrorReporter ErrorReporter { get; }
+        protected ILogger Logger { get; }
         #endregion
 
         #region Constructor
-        protected StatementOutputVisitorBase(string sourcePath, TSqlElementLocator elementLocator, IErrorReporter errorReporter)
+        protected StatementOutputVisitorBase(string sourcePath, TSqlElementLocator elementLocator, ILogger logger)
         {
             this._sourcePath = sourcePath;
             this.ElementLocator = elementLocator;
-            this.ErrorReporter = errorReporter;
+            this.Logger = logger;
             this.Outputs = new Collection<OutputSelectResult>();
         }
         #endregion
@@ -79,7 +79,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             if (selectElement is SelectStarExpression)
             {
-                this.ErrorReporter.RegisterError(this._sourcePath, selectElement.StartLine, selectElement.StartColumn, null, "Star expressions are not allowed");
+                this.Logger.LogError(null, "Star expressions are not allowed", this._sourcePath, selectElement.StartLine, selectElement.StartColumn);
                 return null;
             }
 
