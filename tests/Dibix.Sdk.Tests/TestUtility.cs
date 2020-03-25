@@ -1,11 +1,39 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Resources;
+using Moq;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Dibix.Sdk.Tests
 {
-    public static class TestUtility
+    internal static class TestUtility
     {
+        public static Assembly Assembly { get; } = typeof(TestUtility).Assembly;
+        public static string ProjectName { get; } = Assembly.GetName().Name;
+        public static string TestName => DetermineTestName();
+
+        public static void Evaluate(string generated) => Evaluate(TestName, generated);
+        public static void Evaluate(string expectedTextKey, string generated)
+        {
+            string expectedText = TestUtility.GetExpectedText(expectedTextKey);
+            string actualText = generated;
+            TestUtility.AssertEqualWithDiffTool(expectedText, actualText, "cs");
+        }
+
+        public static string GetExpectedText(string key)
+        {
+            ResourceManager resourceManager = new ResourceManager($"{ProjectName}.Resource", Assembly);
+            string resource = resourceManager.GetString(key);
+            if (resource == null)
+                throw new InvalidOperationException($"Invalid test resource name '{key}'");
+
+            return resource;
+        }
+
         public static void AssertEqualWithDiffTool(string expectedText, string actualText, string extension)
         {
             if (expectedText != actualText)
@@ -42,5 +70,11 @@ namespace Dibix.Sdk.Tests
             File.WriteAllText(expectedFilePath, expectedText);
             Process.Start("winmerge", $"\"{expectedFilePath}\" \"{actualFilePath}\"");
         }
+
+        private static string DetermineTestName() => new StackTrace().GetFrames()
+                                                                     .Select(x => x.GetMethod())
+                                                                     .Where(x => x.IsDefined(typeof(FactAttribute)))
+                                                                     .Select(x => x.Name)
+                                                                     .Single();
     }
 }

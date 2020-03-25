@@ -1,4 +1,5 @@
 ﻿using Dibix.Sdk.CodeGeneration;
+using Dibix.Sdk.Tests;
 using Xunit;
 
 namespace Dibix.Sdk.VisualStudio.Tests
@@ -18,7 +19,7 @@ namespace Dibix.Sdk.VisualStudio.Tests
                                                      })
                                                      .SelectOutputWriter<DaoWriter>(x => { x.Formatting(CommandTextFormatting.Verbatim); }));
 
-            Evaluate(generated);
+            TestUtility.Evaluate(generated);
         }
 
         [Fact]
@@ -46,7 +47,7 @@ namespace Dibix.Sdk.VisualStudio.Tests
                                                           .Formatting(CommandTextFormatting.Verbatim);
                                                      }));
 
-            Evaluate("SourcesTest", generated);
+            TestUtility.Evaluate("SourcesTest", generated);
         }
     }
 }

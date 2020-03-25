@@ -1,29 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Resources;
-using System.Text;
 using Dibix.Sdk.CodeGeneration;
-using Moq;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Dibix.Sdk.Tests.CodeGeneration
 {
-    public sealed partial class CodeGenerationTaskTests : DatabaseTestBase
+    public sealed partial class CodeGenerationTaskTests
     {
         private readonly ITestOutputHelper _output;
 
-        private static string ProjectName { get; } = Assembly.GetName().Name;
-        private static string TestName => DetermineTestName();
-
-        public CodeGenerationTaskTests(ITestOutputHelper output)
-        {
-            this._output = output;
-        }
+        public CodeGenerationTaskTests(ITestOutputHelper output) => this._output = output;
 
         private void ExecuteTest(string source, bool embedStatements = true) => this.ExecuteTest(embedStatements, source);
         private void ExecuteTest(bool embedStatements = true, params string[] sources) => this.ExecuteTest(sources, Enumerable.Empty<string>(), Enumerable.Empty<string>(), embedStatements, false, false, Enumerable.Empty<string>());
@@ -38,18 +27,11 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             string outputFilePath = Path.Combine(tempDirectory, "TestAccessor.cs");
             Directory.CreateDirectory(tempDirectory);
 
-            StringBuilder errorOutput = new StringBuilder();
-
-            Mock<ILogger> logger = new Mock<ILogger>(MockBehavior.Strict);
-
-            logger.Setup(x => x.LogMessage(It.IsAny<string>())).Callback<string>(this._output.WriteLine);
-            logger.Setup(x => x.LogError(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>()))
-                  .Callback((string code, string text, string source, int line, int column) => errorOutput.AppendLine(CanonicalLogFormat.ToErrorString(code, text, source, line, column)));
-            logger.SetupGet(x => x.HasLoggedErrors).Returns(errorOutput.Length > 0);
+            TestLogger logger = new TestLogger(this._output);
 
             bool result = CodeGenerationTask.Execute
             (
-                projectDirectory: DatabaseProjectDirectory
+                projectDirectory: DatabaseTestUtility.DatabaseProjectDirectory
               , productName: "Dibix.Sdk"
               , areaName: "Tests"
               , defaultOutputFilePath: !generateClient ? outputFilePath : null
@@ -59,15 +41,14 @@ namespace Dibix.Sdk.Tests.CodeGeneration
               , endpoints: endpoints.Select(ToTaskItem)
               , references: Enumerable.Empty<TaskItem>()
               , embedStatements: embedStatements
-              , databaseSchemaProviderName: this.DatabaseSchemaProviderName
-              , modelCollation: this.ModelCollation
+              , databaseSchemaProviderName: DatabaseTestUtility.DatabaseSchemaProviderName
+              , modelCollation: DatabaseTestUtility.ModelCollation
               , sqlReferencePath: Enumerable.Empty<TaskItem>()
-              , logger: logger.Object
+              , logger: logger
               , additionalAssemblyReferences: out string[] additionalAssemblyReferences
             );
 
-            if (errorOutput.Length > 0)
-                throw new CodeGenerationException(errorOutput.ToString());
+            logger.Verify();
 
             Assert.True(result, "MSBuild task result was false");
             Assert.Equal(expectedAdditionalAssemblyReferences, additionalAssemblyReferences);
@@ -76,7 +57,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             if (assertOpenApi)
             {
                 string openApiDocumentFilePath = Path.Combine(tempDirectory, "Tests.yml");
-                EvaluateFile($"{TestName}_OpenApi", openApiDocumentFilePath);
+                EvaluateFile($"{TestUtility.TestName}_OpenApi", openApiDocumentFilePath);
             }
         }
 
@@ -94,37 +75,13 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             }
         }
 
-        private static void Evaluate(string generated) => Evaluate(TestName, generated);
-        private static void Evaluate(string expectedTextKey, string generated)
-        {
-            string expectedText = GetExpectedText(expectedTextKey);
-            string actualText = generated;
-            TestUtility.AssertEqualWithDiffTool(expectedText, actualText, "cs");
-        }
-
-        private static void EvaluateFile(string generatedFilePath) => EvaluateFile(TestName, generatedFilePath);
+        private static void EvaluateFile(string generatedFilePath) => EvaluateFile(TestUtility.TestName, generatedFilePath);
         private static void EvaluateFile(string expectedTextKey, string generatedFilePath)
         {
-            string expectedText = GetExpectedText(expectedTextKey);
+            string expectedText = TestUtility.GetExpectedText(expectedTextKey);
             TestUtility.AssertFileEqualWithDiffTool(expectedText, generatedFilePath);
         }
 
-        private static string GetExpectedText(string key)
-        {
-            ResourceManager resourceManager = new ResourceManager($"{ProjectName}.Resource", Assembly);
-            string resource = resourceManager.GetString(key);
-            if (resource == null)
-                throw new InvalidOperationException($"Invalid test resource name '{key}'");
-
-            return resource;
-        }
-
-        private static string DetermineTestName() => new StackTrace().GetFrames()
-                                                                     .Select(x => x.GetMethod())
-                                                                     .Where(x => x.IsDefined(typeof(FactAttribute)))
-                                                                     .Select(x => x.Name)
-                                                                     .Single();
-
-        private static TaskItem ToTaskItem(string relativePath) => new TaskItem(relativePath) { ["FullPath"] = Path.Combine(DatabaseProjectDirectory, relativePath) };
+        private static TaskItem ToTaskItem(string relativePath) => new TaskItem(relativePath) { ["FullPath"] = Path.Combine(DatabaseTestUtility.DatabaseProjectDirectory, relativePath) };
     }
 }

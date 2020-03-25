@@ -4,63 +4,41 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Resources;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using Dibix.Sdk.CodeAnalysis;
-using Moq;
 using Xunit.Abstractions;
 
 namespace Dibix.Sdk.Tests.CodeAnalysis
 {
-    public sealed partial class SqlCodeAnalysisRuleTests : DatabaseTestBase
+    public sealed partial class SqlCodeAnalysisRuleTests
     {
         private readonly ITestOutputHelper _output;
 
-        public SqlCodeAnalysisRuleTests(ITestOutputHelper output)
-        {
-            this._output = output;
-        }
+        public SqlCodeAnalysisRuleTests(ITestOutputHelper output) => this._output = output;
 
         private void Execute()
         {
             // Determine rule by 'back in time development' and create instance
             string ruleName = new StackTrace().GetFrame(1).GetMethod().Name;
-            string expected = GetExpectedText(ruleName);
+            string expected = TestUtility.GetExpectedText(ruleName);
             Type ruleType = Type.GetType($"Dibix.Sdk.CodeAnalysis.Rules.{ruleName},{typeof(ISqlCodeAnalysisRule).Assembly.GetName().Name}");
             ISqlCodeAnalysisRule ruleInstance = (ISqlCodeAnalysisRule)Activator.CreateInstance(ruleType);
-            string violationScriptPath = Path.Combine(DatabaseProjectDirectory, "CodeAnalysis", $"dbx_codeanalysis_error_{ruleInstance.Id:D3}.sql");
+            string violationScriptPath = Path.Combine(DatabaseTestUtility.DatabaseProjectDirectory, "CodeAnalysis", $"dbx_codeanalysis_error_{ruleInstance.Id:D3}.sql");
 
-            IEnumerable<TaskItem> sources = ((IEnumerable)base.QueryProject("x:Project/x:ItemGroup/x:Build/@Include"))
-                                                              .OfType<XAttribute>()
-                                                              .Select(x => new TaskItem(x.Value) { ["FullPath"] = Path.Combine(DatabaseProjectDirectory, x.Value) })
-                                                              .ToArray();
+            IEnumerable<TaskItem> sources = ((IEnumerable)DatabaseTestUtility.QueryProject("x:Project/x:ItemGroup/x:Build/@Include"))
+                                                                             .OfType<XAttribute>()
+                                                                             .Select(x => new TaskItem(x.Value) { ["FullPath"] = Path.Combine(DatabaseTestUtility.DatabaseProjectDirectory, x.Value) })
+                                                                             .ToArray();
 
-            StringBuilder errorOutput = new StringBuilder();
+            TestLogger logger = new TestLogger(this._output);
 
-            Mock<ILogger> logger = new Mock<ILogger>(MockBehavior.Strict);
-
-            logger.Setup(x => x.LogMessage(It.IsAny<string>())).Callback<string>(this._output.WriteLine);
-            logger.Setup(x => x.LogError(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>()))
-                  .Callback((string code, string text, string source, int line, int column) => errorOutput.AppendLine(CanonicalLogFormat.ToErrorString(code, text, source, line, column)));
-            logger.SetupGet(x => x.HasLoggedErrors).Returns(errorOutput.Length > 0);
-
-            ISqlCodeAnalysisRuleEngine engine = SqlCodeAnalysisRuleEngine.Create("dbx", base.DatabaseSchemaProviderName, base.ModelCollation, sources, Enumerable.Empty<TaskItem>(), logger.Object);
+            ISqlCodeAnalysisRuleEngine engine = SqlCodeAnalysisRuleEngine.Create("dbx", DatabaseTestUtility.DatabaseSchemaProviderName, DatabaseTestUtility.ModelCollation, sources, Enumerable.Empty<TaskItem>(), logger);
             IEnumerable<SqlCodeAnalysisError> errors = engine.Analyze(violationScriptPath, ruleInstance);
 
             string actual = GenerateXmlFromResults(errors);
             TestUtility.AssertEqualWithDiffTool(expected, actual, "xml");
-        }
-
-        private static string GetExpectedText(string key)
-        {
-            ResourceManager resourceManager = new ResourceManager("Dibix.Sdk.Tests.Resource", typeof(SqlCodeAnalysisRuleTests).Assembly);
-            string resource = resourceManager.GetString(key);
-            if (resource == null)
-                throw new InvalidOperationException($"Invalid test resource name '{key}'");
-
-            return resource;
         }
 
         private static string GenerateXmlFromResults(IEnumerable<SqlCodeAnalysisError> result)

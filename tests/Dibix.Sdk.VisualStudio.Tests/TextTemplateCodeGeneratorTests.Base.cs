@@ -3,34 +3,26 @@ using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Resources;
 using Dibix.Sdk.Tests;
 using Dibix.Sdk.Tests.CodeGeneration;
 using EnvDTE;
 using Microsoft.VisualStudio.TextTemplating;
 using Moq;
 using VSLangProj;
-using Xunit;
 
 namespace Dibix.Sdk.VisualStudio.Tests
 {
     public partial class TextTemplateCodeGeneratorTests
     {
-        private static readonly Assembly Assembly = typeof(TextTemplateCodeGeneratorTests).Assembly;
-        private static readonly string ProjectName = Assembly.GetName().Name;
-        private static string TestName => DetermineTestName();
-
         private static string ExecuteTest(Action<ICodeGeneratorConfigurationExpression> configure)
         {
             string projectDirectory = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "..", "..", ".."));
             string databaseProjectDirectory = Path.GetFullPath(Path.Combine(projectDirectory, "..", "Dibix.Sdk.Tests.Database"));
-            string templateFile = Path.GetFullPath(Path.Combine(projectDirectory, String.Concat(TestName, ".tt")));
+            string templateFile = Path.GetFullPath(Path.Combine(projectDirectory, String.Concat(TestUtility.TestName, ".tt")));
             string outputDirectory = Environment.CurrentDirectory.Substring(projectDirectory.Length + 1);
-            string outputFileName = Path.GetFileName(Assembly.Location);
+            string outputFileName = Path.GetFileName(TestUtility.Assembly.Location);
 
             Mock<ITextTemplatingEngineHost> textTemplatingEngineHost = new Mock<ITextTemplatingEngineHost>(MockBehavior.Strict);
             Mock<IServiceProvider> serviceProvider = new Mock<IServiceProvider>(MockBehavior.Strict);
@@ -55,7 +47,7 @@ namespace Dibix.Sdk.VisualStudio.Tests
             Mock<ProjectItem> templateFileProjectItem = new Mock<ProjectItem>(MockBehavior.Strict);
 
             textTemplatingEngineHost.Setup(x => x.ResolveParameterValue("-", "-", "projectDefaultNamespace"))
-                                    .Returns(ProjectName);
+                                    .Returns(TestUtility.ProjectName);
             textTemplatingEngineHost.SetupGet(x => x.TemplateFile).Returns(templateFile);
             textTemplatingEngineHost.Setup(x => x.LogErrors(It.IsAny<CompilerErrorCollection>()))
                                     .Callback((CompilerErrorCollection errors) =>
@@ -228,29 +220,5 @@ namespace Dibix.Sdk.VisualStudio.Tests
                 }
             }
         }
-
-        private static void Evaluate(string generated) => Evaluate(TestName, generated);
-        private static void Evaluate(string expectedTextKey, string generated)
-        {
-            string expectedText = GetExpectedText(expectedTextKey);
-            string actualText = generated;
-            TestUtility.AssertEqualWithDiffTool(expectedText, actualText, "cs");
-        }
-
-        private static string GetExpectedText(string key)
-        {
-            ResourceManager resourceManager = new ResourceManager($"{ProjectName}.Resource", Assembly);
-            string resource = resourceManager.GetString(key);
-            if (resource == null)
-                throw new InvalidOperationException($"Invalid test resource name '{key}'");
-
-            return resource;
-        }
-
-        private static string DetermineTestName() => new StackTrace().GetFrames()
-                                                                     .Select(x => x.GetMethod())
-                                                                     .Where(x => x.IsDefined(typeof(FactAttribute)))
-                                                                     .Select(x => x.Name)
-                                                                     .Single();
     }
 }
