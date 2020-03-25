@@ -16,14 +16,14 @@ namespace Dibix.Sdk.CodeGeneration
           , string areaName
           , string defaultOutputFilePath
           , string clientOutputFilePath
-          , ICollection<string> source
-          , IEnumerable<string> contracts
-          , IEnumerable<string> endpoints
-          , IEnumerable<string> references
+          , ICollection<TaskItem> source
+          , IEnumerable<TaskItem> contracts
+          , IEnumerable<TaskItem> endpoints
+          , IEnumerable<TaskItem> references
           , bool embedStatements
           , string databaseSchemaProviderName
           , string modelCollation
-          , IEnumerable<string> sqlReferencePath
+          , IEnumerable<TaskItem> sqlReferencePath
           , ISchemaRegistry schemaRegistry
           , ILogger logger
         )
@@ -31,13 +31,18 @@ namespace Dibix.Sdk.CodeGeneration
             string rootNamespace = NamespaceUtility.BuildRootNamespace(productName, areaName);
             string defaultOutputName = defaultOutputFilePath != null ? Path.GetFileNameWithoutExtension(defaultOutputFilePath).Replace(".", String.Empty) : "SqlQueryAccessor";
 
+            ICollection<string> normalizedSources = source.Select(x => x.GetFullPath()).ToArray();
+            IEnumerable<string> normalizedContracts = contracts.Select(x => x.GetFullPath());
+            IEnumerable<string> normalizedEndpoints = endpoints.Select(x => x.GetFullPath());
+            ICollection<string> normalizedReferences = references.Select(x => x.GetFullPath()).ToArray();
+
             Lazy<TSqlModel> modelAccessor = new Lazy<TSqlModel>(() => PublicSqlDataSchemaModelLoader.Load(databaseSchemaProviderName, modelCollation, source, sqlReferencePath, logger));
             IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(projectDirectory);
             ISqlStatementFormatter formatter = embedStatements ? (ISqlStatementFormatter)new TakeSourceSqlStatementFormatter() : new ExecStoredProcedureSqlStatementFormatter();
-            DefaultAssemblyResolver assemblyResolver = new DefaultAssemblyResolver(projectDirectory, references);
+            DefaultAssemblyResolver assemblyResolver = new DefaultAssemblyResolver(projectDirectory, normalizedReferences);
             ITypeResolverFacade typeResolver = new TypeResolverFacade(assemblyResolver, schemaRegistry, logger);
-            IContractDefinitionProvider contractDefinitionProvider = new ContractDefinitionProvider(fileSystemProvider, logger, contracts, productName, areaName);
-            IUserDefinedTypeProvider userDefinedTypeProvider = new UserDefinedTypeProvider(productName, areaName, source, typeResolver, logger);
+            IContractDefinitionProvider contractDefinitionProvider = new ContractDefinitionProvider(fileSystemProvider, logger, normalizedContracts, productName, areaName);
+            IUserDefinedTypeProvider userDefinedTypeProvider = new UserDefinedTypeProvider(productName, areaName, normalizedSources, typeResolver, logger);
 
             schemaRegistry.ImportSchemas(contractDefinitionProvider, userDefinedTypeProvider);
             typeResolver.Register(new ContractDefinitionSchemaTypeResolver(schemaRegistry, contractDefinitionProvider), 0);
@@ -52,10 +57,10 @@ namespace Dibix.Sdk.CodeGeneration
                 DefaultOutputFilePath = defaultOutputFilePath,
                 ClientOutputFilePath = clientOutputFilePath
             };
-            model.Statements.AddRange(CollectStatements(source, projectDirectory, productName, areaName, embedStatements, formatter, typeResolver, schemaRegistry, logger, modelAccessor));
+            model.Statements.AddRange(CollectStatements(normalizedSources, projectDirectory, productName, areaName, embedStatements, formatter, typeResolver, schemaRegistry, logger, modelAccessor));
             model.UserDefinedTypes.AddRange(userDefinedTypeProvider.Types);
             model.Contracts.AddRange(contractDefinitionProvider.Contracts);
-            model.Controllers.AddRange(CollectControllers(endpoints, productName, areaName, defaultOutputName, model.Statements, assemblyResolver, fileSystemProvider, typeResolver, logger));
+            model.Controllers.AddRange(CollectControllers(normalizedEndpoints, productName, areaName, defaultOutputName, model.Statements, assemblyResolver, fileSystemProvider, typeResolver, logger));
 
             return model;
         }

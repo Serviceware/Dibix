@@ -12,14 +12,14 @@ namespace Dibix.Sdk.CodeGeneration
           , string areaName
           , string defaultOutputFilePath
           , string clientOutputFilePath
-          , ICollection<string> source
-          , IEnumerable<string> contracts
-          , IEnumerable<string> endpoints
-          , IEnumerable<string> references
+          , ICollection<TaskItem> source
+          , IEnumerable<TaskItem> contracts
+          , IEnumerable<TaskItem> endpoints
+          , IEnumerable<TaskItem> references
           , bool embedStatements
           , string databaseSchemaProviderName
           , string modelCollation
-          , IEnumerable<string> sqlReferencePath
+          , IEnumerable<TaskItem> sqlReferencePath
           , ILogger logger
           , out string[] additionalAssemblyReferences
         )

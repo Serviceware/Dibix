@@ -54,14 +54,14 @@ namespace Dibix.Sdk.Tests.CodeGeneration
               , areaName: "Tests"
               , defaultOutputFilePath: !generateClient ? outputFilePath : null
               , clientOutputFilePath: generateClient ? outputFilePath : null
-              , source: sources.Select(x => Path.Combine(DatabaseProjectDirectory, x)).ToArray()
-              , contracts: contracts
-              , endpoints: endpoints
-              , references: Enumerable.Empty<string>()
+              , source: sources.Select(ToTaskItem).ToArray()
+              , contracts: contracts.Select(ToTaskItem)
+              , endpoints: endpoints.Select(ToTaskItem)
+              , references: Enumerable.Empty<TaskItem>()
               , embedStatements: embedStatements
               , databaseSchemaProviderName: this.DatabaseSchemaProviderName
               , modelCollation: this.ModelCollation
-              , sqlReferencePath: Enumerable.Empty<string>()
+              , sqlReferencePath: Enumerable.Empty<TaskItem>()
               , logger: logger.Object
               , additionalAssemblyReferences: out string[] additionalAssemblyReferences
             );
@@ -124,5 +124,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                                                                      .Where(x => x.IsDefined(typeof(FactAttribute)))
                                                                      .Select(x => x.Name)
                                                                      .Single();
+
+        private static TaskItem ToTaskItem(string relativePath) => new TaskItem(relativePath) { ["FullPath"] = Path.Combine(DatabaseProjectDirectory, relativePath) };
     }
 }

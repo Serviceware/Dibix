@@ -26,10 +26,10 @@ namespace Dibix.Sdk.Sql
         #endregion
 
         #region Public Methods
-        public static TSqlModel Load(string databaseSchemaProviderName, string modelCollation, IEnumerable<string> source, IEnumerable<string> sqlReferencePath, ILogger logger)
+        public static TSqlModel Load(string databaseSchemaProviderName, string modelCollation, IEnumerable<TaskItem> source, IEnumerable<TaskItem> sqlReferencePath, ILogger logger)
         {
             ITask task = TaskCache.GetOrAdd(logger, CreateTask);
-            return ModelFactory(databaseSchemaProviderName, modelCollation, source.ToTaskItems(), sqlReferencePath.ToTaskItems(), task, logger);
+            return ModelFactory(databaseSchemaProviderName, modelCollation, source.ToMSBuildTaskItems(), sqlReferencePath.ToMSBuildTaskItems(), task, logger);
         }
         #endregion
 
@@ -191,9 +191,9 @@ namespace Dibix.Sdk.Sql
 
         private static ITask CreateTask(ILogger logger) => new Task(logger);
 
-        private static ITaskItem[] ToTaskItems(this IEnumerable<string> source) => source.Select(ToTaskItem).ToArray();
+        private static ITaskItem[] ToMSBuildTaskItems(this IEnumerable<TaskItem> source) => source.Select(ToMSBuildTaskItem).ToArray();
 
-        private static ITaskItem ToTaskItem(string source) => new TaskItem(source);
+        private static ITaskItem ToMSBuildTaskItem(TaskItem source) => new TaskItemWrapper(source);
         #endregion
 
         #region Delegates
@@ -243,9 +243,9 @@ namespace Dibix.Sdk.Sql
             bool ITask.Execute() => throw new NotSupportedException();
         }
 
-        private sealed class TaskItem : ITaskItem
+        private sealed class TaskItemWrapper : ITaskItem
         {
-            private readonly string _source;
+            private readonly TaskItem _item;
 
             ICollection ITaskItem.MetadataNames { get; } = new object[0];
             int ITaskItem.MetadataCount => throw new NotSupportedException();
@@ -255,15 +255,9 @@ namespace Dibix.Sdk.Sql
                 set => throw new NotSupportedException();
             }
 
-            public TaskItem(string source) => this._source = source;
+            public TaskItemWrapper(TaskItem item) => this._item = item;
 
-            string ITaskItem.GetMetadata(string metadataName)
-            {
-                if (metadataName == "FullPath")
-                    return this._source;
-
-                throw new NotSupportedException();
-            }
+            string ITaskItem.GetMetadata(string metadataName) => this._item[metadataName];
 
             void ITaskItem.SetMetadata(string metadataName, string metadataValue) => throw new NotSupportedException();
 
@@ -271,7 +265,7 @@ namespace Dibix.Sdk.Sql
 
             void ITaskItem.CopyMetadataTo(ITaskItem destinationItem) => throw new NotSupportedException();
 
-            IDictionary ITaskItem.CloneCustomMetadata() => new Dictionary<string, string>();
+            IDictionary ITaskItem.CloneCustomMetadata() => this._item;
         }
         #endregion
     }

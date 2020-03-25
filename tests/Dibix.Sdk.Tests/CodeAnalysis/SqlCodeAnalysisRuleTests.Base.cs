@@ -32,9 +32,10 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
             ISqlCodeAnalysisRule ruleInstance = (ISqlCodeAnalysisRule)Activator.CreateInstance(ruleType);
             string violationScriptPath = Path.Combine(DatabaseProjectDirectory, "CodeAnalysis", $"dbx_codeanalysis_error_{ruleInstance.Id:D3}.sql");
 
-            IEnumerable<string> sources = ((IEnumerable)base.QueryProject("x:Project/x:ItemGroup/x:Build/@Include"))
-                                                            .OfType<XAttribute>()
-                                                            .Select(x => Path.Combine(DatabaseProjectDirectory, x.Value));
+            IEnumerable<TaskItem> sources = ((IEnumerable)base.QueryProject("x:Project/x:ItemGroup/x:Build/@Include"))
+                                                              .OfType<XAttribute>()
+                                                              .Select(x => new TaskItem(x.Value) { ["FullPath"] = Path.Combine(DatabaseProjectDirectory, x.Value) })
+                                                              .ToArray();
 
             StringBuilder errorOutput = new StringBuilder();
 
@@ -45,7 +46,7 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
                   .Callback((string code, string text, string source, int line, int column) => errorOutput.AppendLine(CanonicalLogFormat.ToErrorString(code, text, source, line, column)));
             logger.SetupGet(x => x.HasLoggedErrors).Returns(errorOutput.Length > 0);
 
-            ISqlCodeAnalysisRuleEngine engine = SqlCodeAnalysisRuleEngine.Create("dbx", base.DatabaseSchemaProviderName, base.ModelCollation, sources, Enumerable.Empty<string>(), logger.Object);
+            ISqlCodeAnalysisRuleEngine engine = SqlCodeAnalysisRuleEngine.Create("dbx", base.DatabaseSchemaProviderName, base.ModelCollation, sources, Enumerable.Empty<TaskItem>(), logger.Object);
             IEnumerable<SqlCodeAnalysisError> errors = engine.Analyze(violationScriptPath, ruleInstance);
 
             string actual = GenerateXmlFromResults(errors);

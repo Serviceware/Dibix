@@ -11,8 +11,4 @@
     <ProjectReference Include="..\Dibix.Sdk\Dibix.Sdk.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>
-
 </Project>

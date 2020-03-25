@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using Dibix.Sdk.CodeAnalysis;
@@ -9,25 +10,26 @@ namespace Dibix.Sdk.Cli
 {
     internal static class Program
     {
+        private const int PropertyIndentation = 2;
+
         private static void Main(string[] args)
         {
 #if DEBUG
             System.Diagnostics.Debugger.Launch();
 #endif
-            IDictionary<string, string> arguments = ParseArguments(args[1]).ToDictionary(x => x.Key, x => x.Value, StringComparer.OrdinalIgnoreCase);
-            string[] additionalAssemblyReferences;
+            IDictionary<string, InputProperty> arguments = ParseArguments(args[1]).ToDictionary(x => x.PropertyName);
             ILogger logger = new ConsoleLogger();
             switch (args[0])
             {
                 case "SqlCodeAnalysisTask":
                     SqlCodeAnalysisTask.Execute
                     (
-                        namingConventionPrefix: GetArgument<string>(arguments, "NamingConventionPrefix")
-                      , databaseSchemaProviderName: GetArgument<string>(arguments, "DatabaseSchemaProviderName")
-                      , modelCollation: GetArgument<string>(arguments, "ModelCollation")
-                      , source: GetArgument<string>(arguments, "Source").AsEnumerable().ToArray()
-                      , scriptSource: GetArgument<string>(arguments, "ScriptSource").AsEnumerable()
-                      , sqlReferencePath: GetArgument<string>(arguments, "SqlReferencePath").AsEnumerable()
+                        namingConventionPrefix: arguments["NamingConventionPrefix"].GetSingleValue<string>()
+                      , databaseSchemaProviderName: arguments["DatabaseSchemaProviderName"].GetSingleValue<string>()
+                      , modelCollation: arguments["ModelCollation"].GetSingleValue<string>()
+                      , source: arguments["Source"].Values
+                      , scriptSource: arguments["ScriptSource"].Values
+                      , sqlReferencePath: arguments["SqlReferencePath"].Values
                       , logger: logger
                     );
                     break;
@@ -35,21 +37,21 @@ namespace Dibix.Sdk.Cli
                 case "CodeGenerationTask":
                     CodeGenerationTask.Execute
                     (
-                        projectDirectory: GetArgument<string>(arguments, "ProjectDirectory")
-                      , productName: GetArgument<string>(arguments, "ProductName")
-                      , areaName: GetArgument<string>(arguments, "AreaName")
-                      , defaultOutputFilePath: GetArgument<string>(arguments, "DefaultOutputFilePath")
-                      , clientOutputFilePath: GetArgument<string>(arguments, "ClientOutputFilePath")
-                      , source: GetArgument<string>(arguments, "Source").AsEnumerable().ToArray()
-                      , contracts: GetArgument<string>(arguments, "Contracts").AsEnumerable()
-                      , endpoints: GetArgument<string>(arguments, "Endpoints").AsEnumerable()
-                      , references: GetArgument<string>(arguments, "References").AsEnumerable()
-                      , embedStatements: GetArgument<bool>(arguments, "EmbedStatements")
-                      , databaseSchemaProviderName: GetArgument<string>(arguments, "DatabaseSchemaProviderName")
-                      , modelCollation: GetArgument<string>(arguments, "ModelCollation")
-                      , sqlReferencePath: GetArgument<string>(arguments, "SqlReferencePath").AsEnumerable()
+                        projectDirectory: arguments["ProjectDirectory"].GetSingleValue<string>()
+                      , productName: arguments["ProductName"].GetSingleValue<string>()
+                      , areaName: arguments["AreaName"].GetSingleValue<string>()
+                      , defaultOutputFilePath: arguments["DefaultOutputFilePath"].GetSingleValue<string>()
+                      , clientOutputFilePath: arguments["ClientOutputFilePath"].GetSingleValue<string>()
+                      , source: arguments["Source"].Values
+                      , contracts: arguments["Contracts"].Values
+                      , endpoints: arguments["Endpoints"].Values
+                      , references: arguments["References"].Values
+                      , embedStatements: arguments["EmbedStatements"].GetSingleValue<bool>()
+                      , databaseSchemaProviderName: arguments["DatabaseSchemaProviderName"].GetSingleValue<string>()
+                      , modelCollation: arguments["ModelCollation"].GetSingleValue<string>()
+                      , sqlReferencePath: arguments["SqlReferencePath"].Values
                       , logger: logger
-                      , additionalAssemblyReferences: out additionalAssemblyReferences
+                      , additionalAssemblyReferences: out string[] _
                     );
                     break;
 
@@ -58,21 +60,88 @@ namespace Dibix.Sdk.Cli
             }
         }
 
-        private static T GetArgument<T>(IDictionary<string, string> arguments, string item)
+        private static IEnumerable<InputProperty> ParseArguments(string inputFile)
         {
-            return (T)Convert.ChangeType(arguments[item], typeof(T));
+            using (Stream stream = File.OpenRead(inputFile))
+            {
+                using (TextReader reader = new StreamReader(stream))
+                {
+                    string line;
+                    InputProperty currentProperty = null;
+                    ICollection<InputProperty> properties = new Collection<InputProperty>();
+                    for (int i = 1; (line = reader.ReadLine()) != null; i++)
+                    {
+                        if (line.Length == 0)
+                            continue;
+
+                        int indentation = GetIndentation(line);
+                        bool isPropertyKey = indentation == 0;
+                        bool isPropertyValue = indentation == PropertyIndentation;
+                        bool isPropertyMetadata = indentation == PropertyIndentation * 2;
+                        if (isPropertyKey)
+                        {
+                            currentProperty = new InputProperty(line);
+                            properties.Add(currentProperty);
+                        }
+                        else if (isPropertyValue)
+                        {
+                            if (currentProperty == null)
+                                throw new InvalidOperationException($"Trying to read property value for an uninitialized property ({i}): {line}");
+
+                            currentProperty.Values.Add(new TaskItem(line.Substring(indentation)));
+                        }
+                        else if (isPropertyMetadata)
+                        {
+                            if (currentProperty == null)
+                                throw new InvalidOperationException($"Trying to read property metadata for an uninitialized property ({i}): {line}");
+
+                            if (!currentProperty.Values.Any())
+                                throw new InvalidOperationException($"Trying to read property metadata for an uninitialized property value ({i}): {line}");
+
+                            string[] parts = line.Substring(indentation).Split(new [] { ' ' }, 2);
+                            if (parts.Length < 2)
+                                throw new InvalidOperationException($"Property metadata not specified in the format \"Key=Value\" ({i}): {line}");
+
+                            currentProperty.Values.Last().Add(parts[0], parts[1]);
+                        }
+                    }
+
+                    return properties;
+                }
+            }
         }
 
-        private static IEnumerable<KeyValuePair<string, string>> ParseArguments(string inputFile)
+        private static int GetIndentation(string input)
         {
-            return from arg in File.ReadAllLines(inputFile)
-                   let parts = arg.Split(new [] { ' ' }, 2)
-                   select new KeyValuePair<string, string>(parts[0], parts.Length > 1 ? parts[1] : null);
+            for (int i = 0; i < input.Length; i++)
+            {
+                if (input[i] == ' ')
+                    continue;
+
+                return i;
+            }
+            return 0;
         }
 
-        private static IEnumerable<string> AsEnumerable(this string str)
+        private sealed class InputProperty
         {
-            return str?.Split('|') ?? Enumerable.Empty<string>();
+            public string PropertyName { get; }
+            public ICollection<TaskItem> Values { get; }
+
+            public InputProperty(string propertyName)
+            {
+                this.Values = new Collection<TaskItem>();
+                this.PropertyName = propertyName;
+            }
+
+            public T GetSingleValue<T>()
+            {
+                TaskItem item = this.Values.SingleOrDefault();
+                if (item == null)
+                    return default;
+
+                return (T)Convert.ChangeType(item.ItemSpec, typeof(T));
+            }
         }
     }
 }

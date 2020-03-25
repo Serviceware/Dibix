@@ -1,7 +1,42 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+  <!-- Utility to dump item including metadata -->
+  <UsingTask TaskName="DumpItem" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+    <ParameterGroup>
+      <Source ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+      <Result Output="true" />
+    </ParameterGroup>
+    <Task>
+      <Code Type="Fragment" Language="cs">
+        <![CDATA[
+          StringBuilder sb = new StringBuilder();
+          for (int i = 0; i < Source.Length; i++)
+          {
+              ITaskItem item = Source[i];
+              
+              sb.Append("  ")
+                .Append(item);
+              
+              foreach (string metadataName in item.MetadataNames)
+              {
+                  sb.AppendLine()
+                    .Append("    ")
+                    .Append(metadataName)
+                    .Append(' ')
+                    .Append(item.GetMetadata(metadataName));
+              }
+              
+              if (i + 1 < Source.Length)
+                sb.AppendLine();
+          }
+          Result = sb.ToString();
+      ]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
   <!-- Define inputs and outputs so the targets know when they need to be rebuilt -->
-  <Target Name="SetupSqlBuildInputs" AfterTargets="_SetupSqlBuildInputs">
+  <Target Name="SetupSqlBuildInputs" AfterTargets="_SetupSqlBuildInputs" DependsOnTargets="ResolveArtifactReferences">
     <ItemGroup>
       <!-- 
         The intermediate assembly/pdb is used as an input,
@@ -62,19 +97,31 @@
     <!-- Prepare & write input file then exec CLI -->
     <PropertyGroup>
       <_SqlCodeAnalysisInputFile>$(IntermediateOutputPath)sqlcodeanalysis.input</_SqlCodeAnalysisInputFile>
-
-      <_BuildItems>@(Build->'%(FullPath)', '|')</_BuildItems>
-      <_SqlCodeAnalysisScriptItems>@(SqlCodeAnalysisScriptItem->'%(FullPath)', '|')</_SqlCodeAnalysisScriptItems>
-      <_SqlReferencePathItems>@(SqlReferencePath->'%(FullPath)', '|')</_SqlReferencePathItems>
     </PropertyGroup>
 
+    <DumpItem Source="@(Build)">
+      <Output TaskParameter="Result" PropertyName="_Build"/>
+    </DumpItem>
+    <DumpItem Source="@(SqlCodeAnalysisScriptItem)">
+      <Output TaskParameter="Result" PropertyName="_SqlCodeAnalysisScriptItem"/>
+    </DumpItem>
+    <DumpItem Source="@(SqlReferencePath)">
+      <Output TaskParameter="Result" PropertyName="_SqlReferencePath"/>
+    </DumpItem>
+
     <ItemGroup>
-      <_SqlCodeAnalysisInputItem Include="NamingConventionPrefix $(SqlNamingConventionPrefix)" />
-      <_SqlCodeAnalysisInputItem Include="DatabaseSchemaProviderName $(DSP)" />
-      <_SqlCodeAnalysisInputItem Include="ModelCollation $(ModelCollation)" />
-      <_SqlCodeAnalysisInputItem Include="Source $(_BuildItems)" />
-      <_SqlCodeAnalysisInputItem Include="ScriptSource $(_SqlCodeAnalysisScriptItems)" />
-      <_SqlCodeAnalysisInputItem Include="SqlReferencePath $(_SqlReferencePathItems)" />
+      <_SqlCodeAnalysisInputItem Include="NamingConventionPrefix
+  $(SqlNamingConventionPrefix)" />
+      <_SqlCodeAnalysisInputItem Include="DatabaseSchemaProviderName
+  $(DSP)" />
+      <_SqlCodeAnalysisInputItem Include="ModelCollation
+  $(ModelCollation)" />
+      <_SqlCodeAnalysisInputItem Include="Source
+$(_Build)" />
+      <_SqlCodeAnalysisInputItem Include="ScriptSource
+$(_SqlCodeAnalysisScriptItem)" />
+      <_SqlCodeAnalysisInputItem Include="SqlReferencePath
+$(_SqlReferencePath)" />
     </ItemGroup>
 
     <WriteLinesToFile File="$(_SqlCodeAnalysisInputFile)" Lines="@(_SqlCodeAnalysisInputItem)" Overwrite="True" />
@@ -91,7 +138,7 @@
   </Target>
   <Target Name="CompileArtifacts" 
           AfterTargets="PostBuildEvent" 
-          DependsOnTargets="ResolveArtifactReferences;SetupSqlBuildInputs"
+          DependsOnTargets="SetupSqlBuildInputs"
           Inputs="@(CompileArtifactsInput)"
           Outputs="@(CompileArtifactsOutput)"
           Condition="$(CompileArtifacts) == 'true'">
@@ -115,28 +162,51 @@
     <!-- Prepare & write input file then exec CLI -->
     <PropertyGroup>
       <_CodeGenerationInputFile>$(IntermediateOutputPath)codegeneration.input</_CodeGenerationInputFile>
-
-      <_BuildItems>@(Build->'%(FullPath)', '|')</_BuildItems>
-      <_ContractItems>@(Contract->'%(FullPath)', '|')</_ContractItems>
-      <_EndpointItems>@(Endpoint->'%(FullPath)', '|')</_EndpointItems>
-      <_ServerCompilationReferenceItems>@(ServerCompilationReference->'%(FullPath)', '|')</_ServerCompilationReferenceItems>
-      <_SqlReferencePathItems>@(SqlReferencePath->'%(FullPath)', '|')</_SqlReferencePathItems>
     </PropertyGroup>
 
+    <DumpItem Source="@(Build)">
+      <Output TaskParameter="Result" PropertyName="_Build"/>
+    </DumpItem>
+    <DumpItem Source="@(Contract)">
+      <Output TaskParameter="Result" PropertyName="_Contract"/>
+    </DumpItem>
+    <DumpItem Source="@(Endpoint)">
+      <Output TaskParameter="Result" PropertyName="_Endpoint"/>
+    </DumpItem>
+    <DumpItem Source="@(ServerCompilationReference)">
+      <Output TaskParameter="Result" PropertyName="_ServerCompilationReference"/>
+    </DumpItem>
+    <DumpItem Source="@(SqlReferencePath)">
+      <Output TaskParameter="Result" PropertyName="_SqlReferencePath"/>
+    </DumpItem>
+
     <ItemGroup>
-      <_CodeGenerationInputItem Include="ProjectDirectory $(MSBuildProjectDirectory)" />
-      <_CodeGenerationInputItem Include="ProductName $(ProductName)" />
-      <_CodeGenerationInputItem Include="AreaName $(AreaName)" />
-      <_CodeGenerationInputItem Include="DefaultOutputFilePath $(ServerIntermediateFilePath)" />
-      <_CodeGenerationInputItem Include="ClientOutputFilePath $(ClientIntermediateFilePath)" />
-      <_CodeGenerationInputItem Include="Source $(_BuildItems)" />
-      <_CodeGenerationInputItem Include="Contracts $(_ContractItems)" />
-      <_CodeGenerationInputItem Include="Endpoints $(_EndpointItems)" />
-      <_CodeGenerationInputItem Include="References $(_ServerCompilationReferenceItems)" />
-      <_CodeGenerationInputItem Include="DatabaseSchemaProviderName $(DSP)" />
-      <_CodeGenerationInputItem Include="ModelCollation $(ModelCollation)" />
-      <_CodeGenerationInputItem Include="EmbedStatements $(EmbedStatements)" />
-      <_CodeGenerationInputItem Include="SqlReferencePath $(_SqlReferencePathItems)" />
+      <_CodeGenerationInputItem Include="ProjectDirectory
+  $(MSBuildProjectDirectory)" />
+      <_CodeGenerationInputItem Include="ProductName
+  $(ProductName)" />
+      <_CodeGenerationInputItem Include="AreaName
+  $(AreaName)" />
+      <_CodeGenerationInputItem Include="DefaultOutputFilePath
+  $(ServerIntermediateFilePath)" />
+      <_CodeGenerationInputItem Include="ClientOutputFilePath
+  $(ClientIntermediateFilePath)" />
+      <_CodeGenerationInputItem Include="Source
+$(_Build)" />
+      <_CodeGenerationInputItem Include="Contracts
+$(_Contract)" />
+      <_CodeGenerationInputItem Include="Endpoints
+$(_Endpoint)" />
+      <_CodeGenerationInputItem Include="References
+$(_ServerCompilationReference)" />
+      <_CodeGenerationInputItem Include="DatabaseSchemaProviderName
+  $(DSP)" />
+      <_CodeGenerationInputItem Include="ModelCollation
+  $(ModelCollation)" />
+      <_CodeGenerationInputItem Include="EmbedStatements
+  $(EmbedStatements)" />
+      <_CodeGenerationInputItem Include="SqlReferencePath
+$(_SqlReferencePath)" />
     </ItemGroup>
 
     <WriteLinesToFile File="$(_CodeGenerationInputFile)" Lines="@(_CodeGenerationInputItem)" Overwrite="True" />

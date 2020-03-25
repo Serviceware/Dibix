@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Dibix.Sdk.Sql;
 
 namespace Dibix.Sdk.CodeAnalysis
@@ -12,9 +13,9 @@ namespace Dibix.Sdk.CodeAnalysis
             string namingConventionPrefix
           , string databaseSchemaProviderName
           , string modelCollation
-          , ICollection<string> source
-          , IEnumerable<string> scriptSource
-          , IEnumerable<string> sqlReferencePath
+          , ICollection<TaskItem> source
+          , IEnumerable<TaskItem> scriptSource
+          , IEnumerable<TaskItem> sqlReferencePath
           , ILogger logger
         )
         {
@@ -22,10 +23,13 @@ namespace Dibix.Sdk.CodeAnalysis
             if (logger.HasLoggedErrors)
                 return false;
 
-            foreach (string inputFilePath in source) 
+            foreach (TaskItem inputFile in source)
+            {
+                string inputFilePath = inputFile.GetFullPath();
                 AnalyzeItem(inputFilePath, codeAnalysisEngine, logger);
+            }
 
-            AnalyzeScripts(null, scriptSource, codeAnalysisEngine, logger);
+            AnalyzeScripts(null, scriptSource.Select(x => x.GetFullPath()), codeAnalysisEngine, logger);
 
             return !logger.HasLoggedErrors;
         }
