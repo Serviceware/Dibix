@@ -126,7 +126,7 @@ $(_SqlReferencePath)" />
 
     <WriteLinesToFile File="$(_SqlCodeAnalysisInputFile)" Lines="@(_SqlCodeAnalysisInputItem)" Overwrite="True" />
 
-    <Exec Command="$(DibixCliPath) SqlCodeAnalysisTask &quot;$(_SqlCodeAnalysisInputFile)&quot;" />
+    <Exec Command="$(DibixCliPath) sqlca &quot;$(_SqlCodeAnalysisInputFile)&quot;" />
   </Target>
 
   <!-- Compile database accessors for stored procedures including their contracts and an API endpoint configuration -->
@@ -211,7 +211,7 @@ $(_SqlReferencePath)" />
 
     <WriteLinesToFile File="$(_CodeGenerationInputFile)" Lines="@(_CodeGenerationInputItem)" Overwrite="True" />
 
-    <Exec Command="$(DibixCliPath) CodeGenerationTask &quot;$(_CodeGenerationInputFile)&quot;" />
+    <Exec Command="$(DibixCliPath) codegen &quot;$(_CodeGenerationInputFile)&quot;" />
 
     <!-- Shared assembly info -->
     <PropertyGroup>
