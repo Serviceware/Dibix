@@ -32,12 +32,12 @@ namespace Dibix.Http
 
                 return result;
             }
-            catch (SqlException ex)
+            catch (DatabaseAccessException exception) when (exception.InnerException is SqlException sqlException)
             {
                 // Sample:
                 // THROW 50403, N'Web shop not licensed', 1
                 // Returns HttpStatusCode.Forbidden [403]
-                if (TryGetHttpStatusCode(ex.Number, out HttpStatusCode statusCode))
+                if (TryGetHttpStatusCode(sqlException.Number, out HttpStatusCode statusCode))
                     return request.CreateResponse(statusCode);
 
                 throw;

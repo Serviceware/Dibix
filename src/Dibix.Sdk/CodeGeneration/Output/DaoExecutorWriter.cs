@@ -220,7 +220,6 @@ namespace Dibix.Sdk.CodeGeneration
                 writer.WriteRaw("input");
             else
             {
-
                 writer.WriteLineRaw("new")
                       .WriteLine("{")
                       .PushIndent();
