@@ -145,7 +145,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (query.Results.Count == 0) // Execute/ExecutePrimitive.
                 return "int";
             
-            if (query.Results.Count > 1) // GridResult
+            if (query.Results.Any(x => x.Name != null)) // GridResult
                 return GetComplexTypeName(query, context);
 
             if (query.ResultType != null)
@@ -264,13 +264,13 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 WriteNoResult(writer, query);
             }
+            else if (query.Results.Any(x => x.Name != null)) // GridReader
+            {
+                WriteComplexResult(writer, query, context);
+            }
             else if (query.Results.Count == 1) // Query<T>/QuerySingle/etc.
             {
                 WriteSingleResult(writer, query, context);
-            }
-            else if (query.Results.Count > 1) // GridReader
-            {
-                WriteComplexResult(writer, query, context);
             }
         }
 

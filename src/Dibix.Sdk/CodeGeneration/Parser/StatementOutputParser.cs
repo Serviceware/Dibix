@@ -277,8 +277,8 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 if (usedOutputNames.Contains(result.Name))
                     logger.LogError(null, $"The name '{result.Name}' is already defined for another output result", target.Source, returnHint.Line, returnHint.Column);
-                else if (numberOfReturnHints == 1)
-                    logger.LogError(null, "The 'Name' property is irrelevant when a single output is returned", target.Source, returnHint.Line, returnHint.Column);
+                //else if (numberOfReturnHints == 1)
+                //    logger.LogError(null, "The 'Name' property is irrelevant when a single output is returned", target.Source, returnHint.Line, returnHint.Column);
                 else
                     usedOutputNames.Add(result.Name);
             }
