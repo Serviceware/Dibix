@@ -144,15 +144,18 @@ $(_SqlReferencePath)" />
           Condition="$(CompileArtifacts) == 'true'">
     <!-- Configuration -->
     <PropertyGroup>
+      <ProductName Condition="'$(ProductName)' == ''">$(RootNamespace.Split('.')[0])</ProductName>
+      <AreaName Condition="$(AreaName) == '' and $(RootNamespace.Split('.').Length) > 1">$(RootNamespace.Split('.')[1])</AreaName>
+      <EmbedStatements Condition="'$(EmbedStatements)' == ''">$(MSBuildProjectName.EndsWith('.DML'))</EmbedStatements>
       <LangVersion>latest</LangVersion>
       <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
       <CopyOutputSymbolsToOutputDirectory>true</CopyOutputSymbolsToOutputDirectory>
 
-      <ServerOutputName>@(IntermediateAssembly->'%(Filename)')</ServerOutputName>
-      <ServerIntermediateFilePathNoExt>$(IntermediateOutputPath)$(ServerOutputName)</ServerIntermediateFilePathNoExt>
-      <ServerIntermediateFilePath>$(ServerIntermediateFilePathNoExt).cs</ServerIntermediateFilePath>
-      <ClientIntermediateFilePathNoExt Condition="'$(ClientOutputName)' != ''">$(IntermediateOutputPath)$(ClientOutputName)</ClientIntermediateFilePathNoExt>
-      <ClientIntermediateFilePath Condition="'$(ClientOutputName)' != ''">$(ClientIntermediateFilePathNoExt).cs</ClientIntermediateFilePath>
+      <_ServerOutputName>@(IntermediateAssembly->'%(Filename)')</_ServerOutputName>
+      <_ServerIntermediateFilePathNoExt>$(IntermediateOutputPath)$(_ServerOutputName)</_ServerIntermediateFilePathNoExt>
+      <_ServerIntermediateFilePath>$(_ServerIntermediateFilePathNoExt).cs</_ServerIntermediateFilePath>
+      <_ClientIntermediateFilePathNoExt Condition="'$(ClientOutputName)' != ''">$(IntermediateOutputPath)$(ClientOutputName)</_ClientIntermediateFilePathNoExt>
+      <_ClientIntermediateFilePath Condition="'$(ClientOutputName)' != ''">$(_ClientIntermediateFilePathNoExt).cs</_ClientIntermediateFilePath>
     </PropertyGroup>
 
     <ItemGroup>
@@ -188,9 +191,9 @@ $(_SqlReferencePath)" />
       <_CodeGenerationInputItem Include="AreaName
   $(AreaName)" />
       <_CodeGenerationInputItem Include="DefaultOutputFilePath
-  $(ServerIntermediateFilePath)" />
+  $(_ServerIntermediateFilePath)" />
       <_CodeGenerationInputItem Include="ClientOutputFilePath
-  $(ClientIntermediateFilePath)" />
+  $(_ClientIntermediateFilePath)" />
       <_CodeGenerationInputItem Include="Source
 $(_Build)" />
       <_CodeGenerationInputItem Include="Contracts
@@ -232,13 +235,13 @@ $(_SqlReferencePath)" />
 
     <!-- Server assembly info & DLL generation -->
     <PropertyGroup>
-      <_ServerAssemblyInfoFile>$(ServerIntermediateFilePathNoExt)_AssemblyInfo.cs</_ServerAssemblyInfoFile>
+      <_ServerAssemblyInfoFile>$(_ServerIntermediateFilePathNoExt)_AssemblyInfo.cs</_ServerAssemblyInfoFile>
       <_ServerAssemblyFileVersion Condition="'$(ServerAssemblyFileVersion)' != ''">$(ServerAssemblyFileVersion)</_ServerAssemblyFileVersion>
       <_ServerAssemblyFileVersion Condition="'$(ServerAssemblyFileVersion)' == ''" >$(AssemblyFileVersion)</_ServerAssemblyFileVersion>
     </PropertyGroup>
 
     <ItemGroup>
-      <ServerCompilationSource Include="$(ServerIntermediateFilePath)" />
+      <ServerCompilationSource Include="$(_ServerIntermediateFilePath)" />
       <ServerCompilationSource Include="$(_ServerAssemblyInfoFile)" />
       <ServerCompilationReference Include="$(DibixRuntimePath)" />
       <ServerCompilationReference Include="System.ComponentModel.DataAnnotations.dll" />
@@ -246,7 +249,7 @@ $(_SqlReferencePath)" />
 
       <ServerAssemblyAttribute Include="@(AssemblyAttribute)" />
       <ServerAssemblyAttribute Include="AssemblyTitle">
-        <_Parameter1>$(ServerOutputName)</_Parameter1>
+        <_Parameter1>$(_ServerOutputName)</_Parameter1>
       </ServerAssemblyAttribute>
       <ServerAssemblyAttribute Include="AssemblyFileVersion" Condition="'$(_ServerAssemblyFileVersion)' != ''">
         <_Parameter1>$(_ServerAssemblyFileVersion)</_Parameter1>
@@ -290,13 +293,13 @@ $(_SqlReferencePath)" />
 
     <!-- Client assembly info & DLL generation -->
     <PropertyGroup Condition="'$(ClientOutputName)' != ''">
-      <_ClientAssemblyInfoFile>$(ClientIntermediateFilePathNoExt)_AssemblyInfo.cs</_ClientAssemblyInfoFile>
+      <_ClientAssemblyInfoFile>$(_ClientIntermediateFilePathNoExt)_AssemblyInfo.cs</_ClientAssemblyInfoFile>
       <_ClientAssemblyFileVersion Condition="'$(ClientAssemblyFileVersion)' != ''">$(ClientAssemblyFileVersion)</_ClientAssemblyFileVersion>
       <_ClientAssemblyFileVersion Condition="'$(ClientAssemblyFileVersion)' == ''" >$(AssemblyFileVersion)</_ClientAssemblyFileVersion>
     </PropertyGroup>
 
     <ItemGroup Condition="'$(ClientOutputName)' != ''">
-      <ClientCompilationSource Include="$(ClientIntermediateFilePath)" />
+      <ClientCompilationSource Include="$(_ClientIntermediateFilePath)" />
       <ClientCompilationSource Include="$(_ClientAssemblyInfoFile)" />
       <ClientAssembly Include="$(IntermediateOutputPath)$(ClientOutputName).dll" />
 
