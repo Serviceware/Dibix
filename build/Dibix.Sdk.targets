@@ -232,12 +232,14 @@ $(_SqlReferencePath)" />
 
     <!-- Server assembly info & DLL generation -->
     <PropertyGroup>
-      <ServerAssemblyInfoFile>$(ServerIntermediateFilePathNoExt)_AssemblyInfo.cs</ServerAssemblyInfoFile>
+      <_ServerAssemblyInfoFile>$(ServerIntermediateFilePathNoExt)_AssemblyInfo.cs</_ServerAssemblyInfoFile>
+      <_ServerAssemblyFileVersion Condition="'$(ServerAssemblyFileVersion)' != ''">$(ServerAssemblyFileVersion)</_ServerAssemblyFileVersion>
+      <_ServerAssemblyFileVersion Condition="'$(ServerAssemblyFileVersion)' == ''" >$(AssemblyFileVersion)</_ServerAssemblyFileVersion>
     </PropertyGroup>
 
     <ItemGroup>
       <ServerCompilationSource Include="$(ServerIntermediateFilePath)" />
-      <ServerCompilationSource Include="$(ServerAssemblyInfoFile)" />
+      <ServerCompilationSource Include="$(_ServerAssemblyInfoFile)" />
       <ServerCompilationReference Include="$(DibixRuntimePath)" />
       <ServerCompilationReference Include="System.ComponentModel.DataAnnotations.dll" />
       <ServerCompilationReference Include="$(DibixToolsDirectory)Newtonsoft.Json.dll" />
@@ -246,12 +248,12 @@ $(_SqlReferencePath)" />
       <ServerAssemblyAttribute Include="AssemblyTitle">
         <_Parameter1>$(ServerOutputName)</_Parameter1>
       </ServerAssemblyAttribute>
-      <ServerAssemblyAttribute Include="AssemblyFileVersion" Condition="'$(AssemblyFileVersion)' != ''">
-        <_Parameter1>$(AssemblyFileVersion)</_Parameter1>
+      <ServerAssemblyAttribute Include="AssemblyFileVersion" Condition="'$(_ServerAssemblyFileVersion)' != ''">
+        <_Parameter1>$(_ServerAssemblyFileVersion)</_Parameter1>
       </ServerAssemblyAttribute>
     </ItemGroup>
 
-    <WriteCodeFragment AssemblyAttributes="@(ServerAssemblyAttribute)" Language="C#" OutputFile="$(ServerAssemblyInfoFile)" />
+    <WriteCodeFragment AssemblyAttributes="@(ServerAssemblyAttribute)" Language="C#" OutputFile="$(_ServerAssemblyInfoFile)" />
 
     <Csc DefineConstants="$(DefineConstants)"
          EmitDebugInformation="$(DebugSymbols)"
@@ -288,24 +290,26 @@ $(_SqlReferencePath)" />
 
     <!-- Client assembly info & DLL generation -->
     <PropertyGroup Condition="'$(ClientOutputName)' != ''">
-      <ClientAssemblyInfoFile>$(ClientIntermediateFilePathNoExt)_AssemblyInfo.cs</ClientAssemblyInfoFile>
+      <_ClientAssemblyInfoFile>$(ClientIntermediateFilePathNoExt)_AssemblyInfo.cs</_ClientAssemblyInfoFile>
+      <_ClientAssemblyFileVersion Condition="'$(ClientAssemblyFileVersion)' != ''">$(ClientAssemblyFileVersion)</_ClientAssemblyFileVersion>
+      <_ClientAssemblyFileVersion Condition="'$(ClientAssemblyFileVersion)' == ''" >$(AssemblyFileVersion)</_ClientAssemblyFileVersion>
     </PropertyGroup>
 
     <ItemGroup Condition="'$(ClientOutputName)' != ''">
       <ClientCompilationSource Include="$(ClientIntermediateFilePath)" />
-      <ClientCompilationSource Include="$(ClientAssemblyInfoFile)" />
+      <ClientCompilationSource Include="$(_ClientAssemblyInfoFile)" />
       <ClientAssembly Include="$(IntermediateOutputPath)$(ClientOutputName).dll" />
 
       <ClientAssemblyAttribute Include="@(AssemblyAttribute)" />
       <ClientAssemblyAttribute Include="AssemblyTitle">
         <_Parameter1>$(ClientOutputName)</_Parameter1>
       </ClientAssemblyAttribute>
-      <ClientAssemblyAttribute Include="AssemblyFileVersion" Condition="'$(ClientAssemblyFileVersion)' != ''">
-        <_Parameter1>$(ClientAssemblyFileVersion)</_Parameter1>
+      <ClientAssemblyAttribute Include="AssemblyFileVersion" Condition="'$(_ClientAssemblyFileVersion)' != ''">
+        <_Parameter1>$(_ClientAssemblyFileVersion)</_Parameter1>
       </ClientAssemblyAttribute>
     </ItemGroup>
 
-    <WriteCodeFragment AssemblyAttributes="@(ClientAssemblyAttribute)" Language="C#" OutputFile="$(ClientAssemblyInfoFile)" Condition="'$(ClientOutputName)' != ''" />
+    <WriteCodeFragment AssemblyAttributes="@(ClientAssemblyAttribute)" Language="C#" OutputFile="$(_ClientAssemblyInfoFile)" Condition="'$(ClientOutputName)' != ''" />
 
     <Csc Condition="'$(ClientOutputName)' != ''"
          DefineConstants="$(DefineConstants)"
