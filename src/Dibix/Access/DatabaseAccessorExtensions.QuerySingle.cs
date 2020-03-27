@@ -16,6 +16,12 @@ namespace Dibix
             Guard.IsNotNull(accessor, nameof(accessor));
             return accessor.QuerySingle<T>(sql, CommandType.Text, parameters);
         }
+        // QueryServerProductVersion (DataImport.Data.DML.IntegrationServices)
+        public static T QuerySingle<T>(this IDatabaseAccessor accessor, string sql, CommandType commandType)
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
+            return accessor.QuerySingle<T>(sql, commandType, EmptyParameters.Instance);
+        }
 
         // SubProcessOverview
         public static TReturn QuerySingle<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, string splitOn) where TReturn : new()
