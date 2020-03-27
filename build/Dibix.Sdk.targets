@@ -96,7 +96,7 @@
 
     <!-- Prepare & write input file then exec CLI -->
     <PropertyGroup>
-      <_SqlCodeAnalysisInputFile>$(IntermediateOutputPath)sqlcodeanalysis.input</_SqlCodeAnalysisInputFile>
+      <_SqlCodeAnalysisInputFile>$(IntermediateOutputPath)analyze.input</_SqlCodeAnalysisInputFile>
     </PropertyGroup>
 
     <DumpItem Source="@(Build)">
@@ -126,7 +126,7 @@ $(_SqlReferencePath)" />
 
     <WriteLinesToFile File="$(_SqlCodeAnalysisInputFile)" Lines="@(_SqlCodeAnalysisInputItem)" Overwrite="True" />
 
-    <Exec Command="$(DibixCliPath) sqlca &quot;$(_SqlCodeAnalysisInputFile)&quot;" />
+    <Exec Command="$(DibixCliPath) analyze &quot;$(_SqlCodeAnalysisInputFile)&quot;" />
   </Target>
 
   <!-- Compile database accessors for stored procedures including their contracts and an API endpoint configuration -->
@@ -159,12 +159,13 @@ $(_SqlReferencePath)" />
     </PropertyGroup>
 
     <ItemGroup>
-      <ServerCompilationReference Include="@(ArtifactReference->'%(RelativeDir)%(Filename).dll')" Condition="!$([System.Text.RegularExpressions.Regex]::IsMatch('%(Filename)%(Extension)', '^master|msdb(\.dacpac)$'))" />
+      <ServerCompilationReference Include="@(ArtifactReference->'%(RelativeDir)%(Filename).dll')" 
+                                  Condition="Exists('%(RelativeDir)%(Filename).dll') AND !$([System.Text.RegularExpressions.Regex]::IsMatch('%(Filename)%(Extension)', '^master|msdb(\.dacpac)$'))" />
     </ItemGroup>
 
     <!-- Prepare & write input file then exec CLI -->
     <PropertyGroup>
-      <_CodeGenerationInputFile>$(IntermediateOutputPath)codegeneration.input</_CodeGenerationInputFile>
+      <_CodeGenerationInputFile>$(IntermediateOutputPath)compile.input</_CodeGenerationInputFile>
     </PropertyGroup>
 
     <DumpItem Source="@(Build)">
@@ -214,7 +215,7 @@ $(_SqlReferencePath)" />
 
     <WriteLinesToFile File="$(_CodeGenerationInputFile)" Lines="@(_CodeGenerationInputItem)" Overwrite="True" />
 
-    <Exec Command="$(DibixCliPath) codegen &quot;$(_CodeGenerationInputFile)&quot;" />
+    <Exec Command="$(DibixCliPath) compile &quot;$(_CodeGenerationInputFile)&quot;" />
 
     <!-- Shared assembly info -->
     <PropertyGroup>

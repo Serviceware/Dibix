@@ -2,7 +2,7 @@
 
 namespace Dibix.Sdk.Cli
 {
-    [TaskRunner("sqlca")]
+    [TaskRunner("analyze")]
     internal sealed class SqlCodeAnalysisTaskRunner : TaskRunner
     {
         public SqlCodeAnalysisTaskRunner(ILogger logger) : base(logger) { }
