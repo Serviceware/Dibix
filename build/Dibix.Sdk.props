@@ -35,7 +35,6 @@
     <DibixCliPath>$(DibixToolsDirectory)Dibix.exe</DibixCliPath>
     <DibixRuntimePath>$(DibixToolsDirectory)Dibix.dll</DibixRuntimePath>
     
-    <CompileArtifacts Condition="'$(CompileArtifacts)' == ''">true</CompileArtifacts>
     <ClientTargetPath Condition="'$(ClientOutputName)' != ''">$(TargetDir)$(ClientOutputName).dll</ClientTargetPath>
   </PropertyGroup>
 

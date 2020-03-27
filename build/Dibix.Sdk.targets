@@ -130,7 +130,7 @@ $(_SqlReferencePath)" />
   </Target>
 
   <!-- Compile database accessors for stored procedures including their contracts and an API endpoint configuration -->
-  <Target Name="SetupCompilationArtifacts" BeforeTargets="SetupSqlBuildInputs" Condition="$(CompileArtifacts) == 'true'">
+  <Target Name="SetupCompilationArtifacts" BeforeTargets="SetupSqlBuildInputs">
     <ItemGroup>
       <Contract Include="@(None)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(RelativeDir)', '^Contracts\\')) and %(Extension) == '.json'" />
       <Endpoint Include="@(None)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(RelativeDir)', '^Endpoints\\')) and %(Extension) == '.json'" />
@@ -140,8 +140,7 @@ $(_SqlReferencePath)" />
           AfterTargets="PostBuildEvent" 
           DependsOnTargets="SetupSqlBuildInputs"
           Inputs="@(CompileArtifactsInput)"
-          Outputs="@(CompileArtifactsOutput)"
-          Condition="$(CompileArtifacts) == 'true'">
+          Outputs="@(CompileArtifactsOutput)">
     <!-- Configuration -->
     <PropertyGroup>
       <ProductName Condition="'$(ProductName)' == ''">$(RootNamespace.Split('.')[0])</ProductName>
