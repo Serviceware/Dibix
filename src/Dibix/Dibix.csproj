@@ -3,7 +3,7 @@
   <Import Project="..\..\build\common.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.5;net451</TargetFrameworks>
+    <TargetFrameworks>netstandard1.5;net452</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -38,7 +38,7 @@
     <PackageReference Include="System.Reflection" Version="$(ReflectionVersion)" />
   </ItemGroup>
   
-  <ItemGroup Condition="'$(TargetFramework)' == 'net451'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net452'">
     <Reference Include="System.ComponentModel.DataAnnotations" Version="4.0" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="$(AspNetWebApiVersion)" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="$(AspNetWebApiVersion)" />

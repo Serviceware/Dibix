@@ -88,7 +88,7 @@
     <PropertyGroup>
       <_DibixRuntimeProjectName>Dibix</_DibixRuntimeProjectName>
       <_DibixRuntimeProjectDir>..\$(_DibixRuntimeProjectName)\</_DibixRuntimeProjectDir>
-      <_DibixRuntimeTargetFramework>net451</_DibixRuntimeTargetFramework>
+      <_DibixRuntimeTargetFramework>net452</_DibixRuntimeTargetFramework>
       <_DibixRuntimePath>$(_DibixRuntimeProjectDir)bin\$(Configuration)\$(_DibixRuntimeTargetFramework)\$(_DibixRuntimeProjectName).dll</_DibixRuntimePath>
     </PropertyGroup>
 
