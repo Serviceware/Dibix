@@ -132,8 +132,14 @@ namespace Dibix.Sdk.CodeGeneration
             string resultTypeName = ResolveTypeNameCore(query, context);
             if (query.Async)
             {
-                context.AddUsing(typeof(Task<>).Namespace);
-                resultTypeName = $"async Task<{resultTypeName}>";
+                context.AddUsing(typeof(Task).Namespace);
+                StringBuilder sb = new StringBuilder("async Task");
+                if (query.ResultType != null)
+                    sb.Append('<')
+                      .Append(resultTypeName)
+                      .Append('>');
+
+                resultTypeName = sb.ToString();
             }
             return resultTypeName;
         }
@@ -142,19 +148,14 @@ namespace Dibix.Sdk.CodeGeneration
             if (query.IsFileApi)
                 return "HttpFileResponse";
 
-            if (query.Results.Count == 0) // Execute/ExecutePrimitive.
-                return "int";
+            if (query.ResultType == null) // Execute
+                return "void";
             
             if (query.Results.Any(x => x.Name != null)) // GridResult
                 return GetComplexTypeName(query, context);
 
-            if (query.ResultType != null)
-            {
-                string typeName = context.ResolveTypeName(query.ResultType);
-                return query.Results[0].ResultMode == SqlQueryResultMode.Many ? MakeEnumerableType(typeName) : typeName;
-            }
-
-            throw new InvalidOperationException($"Could not determine result type name: {query.Name}");
+            string typeName = context.ResolveTypeName(query.ResultType);
+            return query.Results[0].ResultMode == SqlQueryResultMode.Many ? MakeEnumerableType(typeName) : typeName;
         }
 
         private static string GenerateMethodBody(SqlStatementInfo statement, DaoCodeGenerationContext context)
@@ -259,7 +260,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 WriteFileApiResult(writer, query);
             }
-            else if (query.Results.Count == 0) // Execute/ExecutePrimitive.
+            else if (query.ResultType == null) // Execute
             {
                 WriteNoResult(writer, query);
             }
@@ -275,7 +276,10 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static void WriteNoResult(StringWriter writer, SqlStatementInfo query)
         {
-            writer.Write("return ");
+            writer.WriteIndent();
+            
+            if (query.ResultType != null)
+                writer.WriteRaw("return ");
 
             if (query.Async)
                 writer.WriteRaw("await ");

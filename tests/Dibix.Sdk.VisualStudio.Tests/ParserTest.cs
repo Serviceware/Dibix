@@ -10,6 +10,7 @@
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Dibix;
 
 namespace Dibix.Sdk.VisualStudio.Tests
 {
@@ -194,7 +195,7 @@ UNION ALL
             }
         }
 
-        public static int dbx_tests_parser_xmlparam(this IDatabaseAccessorFactory databaseAccessorFactory, System.Xml.Linq.XElement x)
+        public static void dbx_tests_parser_xmlparam(this IDatabaseAccessorFactory databaseAccessorFactory, System.Xml.Linq.XElement x)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
@@ -204,7 +205,7 @@ UNION ALL
                                                          x
                                                      })
                                                      .Build();
-                return accessor.Execute(dbx_tests_parser_xmlparamCommandText, @params);
+                accessor.Execute(dbx_tests_parser_xmlparamCommandText, @params);
             }
         }
     }

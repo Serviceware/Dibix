@@ -58,7 +58,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         public void Inline_SinglePrimitiveResult_WithoutDeclaration_Error()
         {
             this.ExecuteTestAndExpectError(@"Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql", @"One or more errors occured during code generation:
-G:\~Code\Dibix\tests\Dibix.Sdk.Tests.Database\Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(3,1) : Error : There are missing return declarations for the output statements. Please mark the header of the statement with a line per output containting this hint: -- @Return <ClrTypeName>");
+Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(3,1) : Error : There are missing return declarations for the output statements. Please mark the header of the statement with a line per output containting this hint: -- @Return <ClrTypeName>");
         }
 
         [Fact]
@@ -237,15 +237,15 @@ G:\~Code\Dibix\tests\Dibix.Sdk.Tests.Database\Tests\Syntax\dbx_tests_syntax_sing
         public void Inline_SingleConcreteResult_WithUnknownResultContract_Error()
         {
             this.ExecuteTestAndExpectError(@"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontract.sql", @"One or more errors occured during code generation:
-G:\~Code\Dibix\tests\Dibix.Sdk.Tests.Database\Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontract.sql(1,12) : Error : Could not resolve type 'X'");
+Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontract.sql(1,12) : Error : Could not resolve type 'X'");
         }
 
         [Fact]
         public void Inline_SingleConcreteResult_WithUnknownResultContractAssembly_Error()
         {
             this.ExecuteTestAndExpectError(@"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly.sql", @"One or more errors occured during code generation:
-G:\~Code\Dibix\tests\Dibix.Sdk.Tests.Database\Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly.sql(1,12) : Error : Could not locate assembly: A
-G:\~Code\Dibix\tests\Dibix.Sdk.Tests.Database\Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly.sql(1,12) : Error : Could not resolve type 'X,A'");
+Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly.sql(1,12) : Error : Could not locate assembly: A
+Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly.sql(1,12) : Error : Could not resolve type 'X,A'");
         }
 
         [Fact]
@@ -293,15 +293,15 @@ G:\~Code\Dibix\tests\Dibix.Sdk.Tests.Database\Tests\Syntax\dbx_tests_syntax_sing
         public void InvalidContractSchema_Error()
         {
             this.ExecuteTestAndExpectError(Enumerable.Empty<string>(), Enumerable.Repeat(@"Contracts\Invalid.json", 1), @"One or more errors occured during code generation:
-G:\~Code\Dibix\tests\Dibix.Sdk.Tests.Database\Contracts\Invalid.json(3,12) : Error : String 'x' does not match regex pattern '^(binary|boolean|byte|datetime|datetimeoffset|decimal|double|float|int16|int32|int64|string|uuid)\??\*?$'. (Invalid.A)
-G:\~Code\Dibix\tests\Dibix.Sdk.Tests.Database\Contracts\Invalid.json(3,12) : Error : String 'x' does not match regex pattern '^#([\w]+)(.([\w]+))*\??\*?$'. (Invalid.A)
-G:\~Code\Dibix\tests\Dibix.Sdk.Tests.Database\Contracts\Invalid.json(3,12) : Error : JSON does not match any schemas from 'anyOf'. (Invalid.A)
-G:\~Code\Dibix\tests\Dibix.Sdk.Tests.Database\Contracts\Invalid.json(3,12) : Error : Invalid type. Expected Object but got String. (Invalid.A)
-G:\~Code\Dibix\tests\Dibix.Sdk.Tests.Database\Contracts\Invalid.json(3,12) : Error : Invalid type. Expected Object but got String. (Invalid.A)
-G:\~Code\Dibix\tests\Dibix.Sdk.Tests.Database\Contracts\Invalid.json(3,12) : Error : Invalid type. Expected Object but got String. (Invalid.A)
-G:\~Code\Dibix\tests\Dibix.Sdk.Tests.Database\Contracts\Invalid.json(3,12) : Error : JSON does not match any schemas from 'anyOf'. (Invalid.A)
-G:\~Code\Dibix\tests\Dibix.Sdk.Tests.Database\Contracts\Invalid.json(2,14) : Error : Invalid type. Expected Array but got Object. (Invalid)
-G:\~Code\Dibix\tests\Dibix.Sdk.Tests.Database\Contracts\Invalid.json(2,14) : Error : JSON does not match any schemas from 'anyOf'. (Invalid)");
+Contracts\Invalid.json(3,12) : Error : String 'x' does not match regex pattern '^(binary|boolean|byte|datetime|datetimeoffset|decimal|double|float|int16|int32|int64|string|uuid)\??\*?$'. (Invalid.A)
+Contracts\Invalid.json(3,12) : Error : String 'x' does not match regex pattern '^#([\w]+)(.([\w]+))*\??\*?$'. (Invalid.A)
+Contracts\Invalid.json(3,12) : Error : JSON does not match any schemas from 'anyOf'. (Invalid.A)
+Contracts\Invalid.json(3,12) : Error : Invalid type. Expected Object but got String. (Invalid.A)
+Contracts\Invalid.json(3,12) : Error : Invalid type. Expected Object but got String. (Invalid.A)
+Contracts\Invalid.json(3,12) : Error : Invalid type. Expected Object but got String. (Invalid.A)
+Contracts\Invalid.json(3,12) : Error : JSON does not match any schemas from 'anyOf'. (Invalid.A)
+Contracts\Invalid.json(2,14) : Error : Invalid type. Expected Array but got Object. (Invalid)
+Contracts\Invalid.json(2,14) : Error : JSON does not match any schemas from 'anyOf'. (Invalid)");
         }
     }
 }

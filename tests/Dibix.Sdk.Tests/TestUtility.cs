@@ -4,9 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Resources;
-using Moq;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Dibix.Sdk.Tests
 {

@@ -94,9 +94,6 @@
         "bindFromBody": {
           "$ref": "#/definitions/NameIdentifier"
         },
-        "omitResult": {
-          "type": "boolean"
-        },
         "isAnonymous": {
           "type": "boolean"
         }

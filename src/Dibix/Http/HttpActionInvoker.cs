@@ -24,7 +24,7 @@ namespace Dibix.Http
             {
                 parameterResolver.PrepareParameters(request, arguments, parameterDependencyResolver);
                 object result = await executor().ConfigureAwait(false);
-                if (action.OmitResult || result == null)
+                if (result == null)
                     return request.CreateResponse(HttpStatusCode.NoContent);
 
                 if (result is HttpResponse httpResponse)

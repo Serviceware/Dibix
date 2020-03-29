@@ -29,23 +29,23 @@ namespace This.Is.A.Custom.Namespace
         // DeleteProject
         public const string DeleteProjectCommandText = @"[catalog].[delete_project]";
 
-        public static int dbx_tests_sources_includednested(this IDatabaseAccessorFactory databaseAccessorFactory)
+        public static void dbx_tests_sources_includednested(this IDatabaseAccessorFactory databaseAccessorFactory)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
-                return accessor.Execute(dbx_tests_sources_includednestedCommandText);
+                accessor.Execute(dbx_tests_sources_includednestedCommandText);
             }
         }
 
-        public static int dbx_tests_sources_excludednested(this IDatabaseAccessorFactory databaseAccessorFactory)
+        public static void dbx_tests_sources_excludednested(this IDatabaseAccessorFactory databaseAccessorFactory)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
-                return accessor.Execute(dbx_tests_sources_excludednestedCommandText);
+                accessor.Execute(dbx_tests_sources_excludednestedCommandText);
             }
         }
 
-        public static int dbx_tests_sources_externalsp(this IDatabaseAccessorFactory databaseAccessorFactory, int x)
+        public static void dbx_tests_sources_externalsp(this IDatabaseAccessorFactory databaseAccessorFactory, int x)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
@@ -55,11 +55,11 @@ namespace This.Is.A.Custom.Namespace
                                                          x
                                                      })
                                                      .Build();
-                return accessor.Execute(dbx_tests_sources_externalspCommandText, System.Data.CommandType.StoredProcedure, @params);
+                accessor.Execute(dbx_tests_sources_externalspCommandText, System.Data.CommandType.StoredProcedure, @params);
             }
         }
 
-        public static int DeleteProject(this IDatabaseAccessorFactory databaseAccessorFactory, string folder_name, string project_name)
+        public static void DeleteProject(this IDatabaseAccessorFactory databaseAccessorFactory, string folder_name, string project_name)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
@@ -70,7 +70,7 @@ namespace This.Is.A.Custom.Namespace
                                                          project_name
                                                      })
                                                      .Build();
-                return accessor.Execute(DeleteProjectCommandText, System.Data.CommandType.StoredProcedure, @params);
+                accessor.Execute(DeleteProjectCommandText, System.Data.CommandType.StoredProcedure, @params);
             }
         }
     }

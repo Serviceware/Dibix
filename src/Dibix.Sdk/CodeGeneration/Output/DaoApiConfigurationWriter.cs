@@ -98,9 +98,6 @@ namespace Dibix.Sdk.CodeGeneration
                         WriteParameter(writer, parameter.Key, parameter.Value);
                     }
 
-                    if (action.OmitResult)
-                        writer.WriteLine("y.OmitResult = true;");
-
                     if (action.IsAnonymous)
                         writer.WriteLine("y.IsAnonymous = true;");
 

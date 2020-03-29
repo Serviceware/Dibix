@@ -11,7 +11,6 @@ namespace Dibix.Http
         public IHttpActionTarget Target { get; }
         public HttpApiMethod Method { get; set; }
         public string ChildRoute { get; set; }
-        public bool OmitResult { get; set; }
         public Type BodyContract { get; set; }
         public Type BodyBinder { get; set; }
         public bool IsAnonymous { get; set; }

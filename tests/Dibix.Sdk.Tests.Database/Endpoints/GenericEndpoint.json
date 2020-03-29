@@ -3,6 +3,7 @@
   "GenericEndpoint": [
     "Dibix.GenericEndpoint",
     {
+      "method": "GET",
       "target": "EmptyWithParams",
       "childRoute": "{password}",
       "params": {
@@ -19,8 +20,7 @@
         "ids": {
           "convertFromBody": "Dibix.GenericContractIdsInputConverter"
         }
-      },
-      "omitResult": true
+      }
     }
   ]
 }

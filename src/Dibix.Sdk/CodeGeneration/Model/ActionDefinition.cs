@@ -10,7 +10,6 @@ namespace Dibix.Sdk.CodeGeneration
         public string ChildRoute { get; set; }
         public TypeReference BodyContract { get; set; }
         public string BodyBinder { get; set; }
-        public bool OmitResult { get; set; }
         public bool IsAnonymous { get; set; }
         public IDictionary<string, ActionParameterSource> DynamicParameters { get; }
 

@@ -82,7 +82,6 @@ namespace Dibix.Sdk.CodeGeneration
                 ChildRoute = (string)action.Property("childRoute")?.Value,
                 BodyContract = this.ReadBodyContract(action, filePath),
                 BodyBinder = (string)action.Property("bindFromBody")?.Value,
-                OmitResult = (bool?)action.Property("omitResult")?.Value ?? default,
                 IsAnonymous = (bool?)action.Property("isAnonymous")?.Value ?? default
             };
             ReadControllerActionParameters(actionDefinition, (JObject)action.Property("params")?.Value);

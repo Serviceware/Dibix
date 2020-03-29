@@ -267,7 +267,7 @@ namespace Dibix.Sdk.Tests
             // EmptyWithParams
             private const string EmptyWithParamsCommandText = "";
 
-            public static int EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, System.Guid? x, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, bool y = true, int? z = null)
+            public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, System.Guid? x, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, bool y = true, int? z = null)
             {
                 using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                 {
@@ -281,7 +281,7 @@ namespace Dibix.Sdk.Tests
                                                          })
                                                          .SetString(nameof(password), password, true)
                                                          .Build();
-                    return accessor.Execute(EmptyWithParamsCommandText, @params);
+                    accessor.Execute(EmptyWithParamsCommandText, @params);
                 }
             }
         }
@@ -349,7 +349,6 @@ namespace Dibix.Sdk.Tests
                         y.Method = HttpApiMethod.Post;
                         y.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.GenericContract);
                         y.ResolveParameter("ids", "Dibix.GenericContractIdsInputConverter");
-                        y.OmitResult = true;
                     });
                     x.ControllerImports.Add("Dibix.GenericEndpoint");
                 });
@@ -417,11 +416,11 @@ namespace Dibix.Sdk.Tests
             // Empty
             private const string EmptyCommandText = "[dbo].[dbx_tests_syntax_empty]";
 
-            public static int Empty(this IDatabaseAccessorFactory databaseAccessorFactory)
+            public static void Empty(this IDatabaseAccessorFactory databaseAccessorFactory)
             {
                 using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                 {
-                    return accessor.Execute(EmptyCommandText, System.Data.CommandType.StoredProcedure);
+                    accessor.Execute(EmptyCommandText, System.Data.CommandType.StoredProcedure);
                 }
             }
         }
@@ -455,7 +454,7 @@ namespace Dibix.Sdk.Tests
             // EmptyWithParams
             private const string EmptyWithParamsCommandText = "[dbo].[dbx_tests_syntax_empty_params]";
 
-            public static int EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, System.Guid? x, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, bool y = true, int? z = null)
+            public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, System.Guid? x, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, bool y = true, int? z = null)
             {
                 using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                 {
@@ -469,7 +468,7 @@ namespace Dibix.Sdk.Tests
                                                          })
                                                          .SetString(nameof(password), password, true)
                                                          .Build();
-                    return accessor.Execute(EmptyWithParamsCommandText, System.Data.CommandType.StoredProcedure, @params);
+                    accessor.Execute(EmptyWithParamsCommandText, System.Data.CommandType.StoredProcedure, @params);
                 }
             }
         }
@@ -518,14 +517,14 @@ namespace Dibix.Sdk.Tests
             // EmptyWithParams
             private const string EmptyWithParamsCommandText = "[dbo].[dbx_tests_syntax_empty_params_inputclass]";
 
-            public static int EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] EmptyWithParamsInput input)
+            public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] EmptyWithParamsInput input)
             {
                 using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                 {
                     IParametersVisitor @params = accessor.Parameters()
                                                          .SetFromTemplate(input)
                                                          .Build();
-                    return accessor.Execute(EmptyWithParamsCommandText, System.Data.CommandType.StoredProcedure, @params);
+                    accessor.Execute(EmptyWithParamsCommandText, System.Data.CommandType.StoredProcedure, @params);
                 }
             }
         }
