@@ -72,7 +72,6 @@
       <CompileArtifactsInput Include="@(Build)" />
       <CompileArtifactsInput Include="@(Contract)" />
       <CompileArtifactsInput Include="@(Endpoint)" />
-      <CompileArtifactsInput Include="@(Converter)" />
       <CompileArtifactsInput Include="@(SqlReferencePath)" />
       <CompileArtifactsOutput Include="$(TargetPath)" />
       <CompileArtifactsOutput Include="$(ClientTargetPath)" />
@@ -135,7 +134,6 @@ $(_SqlReferencePath)" />
     <ItemGroup>
       <Contract Include="@(None)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(RelativeDir)', '^Contracts\\')) and %(Extension) == '.json'" />
       <Endpoint Include="@(None)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(RelativeDir)', '^Endpoints\\')) and %(Extension) == '.json'" />
-      <Converter Include="@(None)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(RelativeDir)', '^Converters\\')) and %(Extension) == '.cs'" />
     </ItemGroup>
   </Target>
   <Target Name="CompileArtifacts" 
@@ -245,7 +243,6 @@ $(_SqlReferencePath)" />
     <ItemGroup>
       <ServerCompilationSource Include="$(_ServerIntermediateFilePath)" />
       <ServerCompilationSource Include="$(_ServerAssemblyInfoFile)" />
-      <ServerCompilationSource Include="@(Converter)" />
       <ServerCompilationReference Include="$(DibixRuntimePath)" />
       <ServerCompilationReference Include="System.ComponentModel.DataAnnotations.dll" />
       <ServerCompilationReference Include="$(DibixToolsDirectory)Newtonsoft.Json.dll" />
