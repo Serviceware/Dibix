@@ -243,6 +243,7 @@ $(_SqlReferencePath)" />
     <ItemGroup>
       <ServerCompilationSource Include="$(_ServerIntermediateFilePath)" />
       <ServerCompilationSource Include="$(_ServerAssemblyInfoFile)" />
+      <ServerCompilationSource Include="@(Compile)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(RelativeDir)', '^Converters\\'))" />
       <ServerCompilationReference Include="$(DibixRuntimePath)" />
       <ServerCompilationReference Include="System.ComponentModel.DataAnnotations.dll" />
       <ServerCompilationReference Include="$(DibixToolsDirectory)Newtonsoft.Json.dll" />

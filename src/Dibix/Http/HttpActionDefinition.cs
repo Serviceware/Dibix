@@ -25,19 +25,20 @@ namespace Dibix.Http
             this.DynamicParameters = new Dictionary<string, HttpParameterSource>(StringComparer.OrdinalIgnoreCase);
         }
 
-        public void ResolveParameter(string targetParameterName, bool value)
+        public void ResolveParameterFromConstant(string targetParameterName, bool value)
         {
             this.ResolveParameter(targetParameterName, new HttpParameterConstantSource(value));
         }
-        public void ResolveParameter(string targetParameterName, int value)
+        public void ResolveParameterFromConstant(string targetParameterName, int value)
         {
             this.ResolveParameter(targetParameterName, new HttpParameterConstantSource(value));
         }
-        public void ResolveParameter(string targetParameterName, string bodyConverterName)
+        public void ResolveParameterFromBody<TConverter>(string targetParameterName) => this.ResolveParameterFromBody(targetParameterName, typeof(TConverter).AssemblyQualifiedName);
+        public void ResolveParameterFromBody(string targetParameterName, string bodyConverterName)
         {
             this.ResolveParameter(targetParameterName, new HttpParameterBodySource(bodyConverterName));
         }
-        public void ResolveParameter(string targetParameterName, string sourceName, string sourcePropertyName)
+        public void ResolveParameterFromSource(string targetParameterName, string sourceName, string sourcePropertyName)
         {
             this.ResolveParameter(targetParameterName, new HttpParameterPropertySource(sourceName, sourcePropertyName));
         }

@@ -120,26 +120,29 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static void WriteParameter(StringWriter writer, string parameterName, ActionParameterSource value)
         {
-            writer.Write($"y.ResolveParameter(\"{parameterName}\", ");
             switch (value)
             {
                 case ActionParameterConstantSource constant:
                     string constantValue = constant.Value is bool boolValue ? boolValue.ToString().ToLowerInvariant() : constant.Value.ToString();
-                    writer.WriteRaw(constantValue);
+                    writer.WriteLine($"y.ResolveParameterFromConstant(\"{parameterName}\", {constantValue});");
                     break;
 
                 case ActionParameterBodySource body:
-                    writer.WriteRaw($"\"{body.ConverterName}\"");
+                    bool isExternalType = body.ConverterName.Contains(',');
+                    if (isExternalType)
+                        writer.WriteLine($"y.ResolveParameterFromBody(\"{parameterName}\", \"{body.ConverterName}\");");
+                    else
+                        writer.WriteLine($"y.ResolveParameterFromBody<{body.ConverterName}>(\"{parameterName}\");");
+
                     break;
 
                 case ActionParameterPropertySource property:
-                    writer.WriteRaw($"\"{property.SourceName}\", \"{property.PropertyName}\"");
+                    writer.WriteLine($"y.ResolveParameterFromSource(\"{parameterName}\", \"{property.SourceName}\", \"{property.PropertyName}\");");
                     break;
 
                 default:
                     throw new InvalidOperationException($"Unsupported parameter source for {parameterName}: {value.GetType()}");
             }
-            writer.WriteLineRaw(");");
         }
         #endregion
     }
