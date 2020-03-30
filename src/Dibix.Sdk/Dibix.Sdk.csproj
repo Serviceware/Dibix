@@ -1,7 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   
-  <Import Project="..\..\build\common.props" />
-
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -16,7 +14,7 @@
     <Compile Include="..\Dibix\Http\RouteBuilder.cs" Link="OpenApi\RouteBuilder.cs" />
     <Compile Include="..\Dibix\Http\HttpParameterName.cs" Link="OpenApi\HttpParameterName.cs" />
     <None Remove="lib\**" />
-    <Content Include="..\..\build\$(MSBuildProjectName).*" PackagePath="build" Visible="False" />
+    <Content Include="targets\" PackagePath="build" />
   </ItemGroup>
 
   <ItemGroup>

@@ -49,7 +49,7 @@ namespace Dibix.Tests
         public void Compile_PropertySource()
         {
             HttpParameterSourceProviderRegistry.Register<LocaleParameterHttpSourceProvider>("LOCALE");
-            IHttpParameterResolutionMethod result = Compile(x => x.ResolveParameter("lcid", "LOCALE", "LocaleId"));
+            IHttpParameterResolutionMethod result = Compile(x => x.ResolveParameterFromSource("lcid", "LOCALE", "LocaleId"));
             Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
@@ -89,7 +89,7 @@ namespace Dibix.Tests
         public void Compile_PropertySource_WithInvalidCast_Throws()
         {
             HttpParameterSourceProviderRegistry.Register<ApplicationHttpParameterSourceProvider>("APPLICATION");
-            IHttpParameterResolutionMethod result = Compile(x => x.ResolveParameter("applicationId", "APPLICATION", "ApplicationId"));
+            IHttpParameterResolutionMethod result = Compile(x => x.ResolveParameterFromSource("applicationId", "APPLICATION", "ApplicationId"));
             Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
@@ -129,7 +129,7 @@ Parameter: applicationId", exception.Message);
         [Fact]
         public void Compile_PropertySource_WithUnknownSource_Throws()
         {
-            Exception exception = Assert.Throws<InvalidOperationException>(() => Compile(x => x.ResolveParameter("lcid", "UNKNOWNSOURCE", "LocaleId")));
+            Exception exception = Assert.Throws<InvalidOperationException>(() => Compile(x => x.ResolveParameterFromSource("lcid", "UNKNOWNSOURCE", "LocaleId")));
             Assert.Equal(@"Http parameter resolver compilation failed
 at GET api/Dibix/Test
 Parameter: lcid", exception.Message);
@@ -144,8 +144,8 @@ Parameter: lcid", exception.Message);
             IHttpParameterResolutionMethod result = Compile(x =>
             {
                 x.BodyContract = typeof(ExplicitHttpBody);
-                x.ResolveParameter("targetId", "BODY", "SourceId");
-                x.ResolveParameter("lcid", "BODY", "LocaleId");
+                x.ResolveParameterFromSource("targetId", "BODY", "SourceId");
+                x.ResolveParameterFromSource("lcid", "BODY", "LocaleId");
             });
             Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
@@ -284,8 +284,8 @@ Parameter: lcid", exception.Message);
             IHttpParameterResolutionMethod result = Compile(x =>
             {
                 x.BodyContract = typeof(JObject);
-                x.ResolveParameter("data", typeof(JsonToXmlConverter).AssemblyQualifiedName);
-                x.ResolveParameter("value", typeof(JsonToXmlConverter).AssemblyQualifiedName);
+                x.ResolveParameterFromBody<JsonToXmlConverter>("data");
+                x.ResolveParameterFromBody<JsonToXmlConverter>("value");
             });
             Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
@@ -404,7 +404,7 @@ Parameter: input", exception.Message);
         [Fact]
         public void Compile_ConstantSource()
         {
-            IHttpParameterResolutionMethod result = Compile(x => x.ResolveParameter("value", true));
+            IHttpParameterResolutionMethod result = Compile(x => x.ResolveParameterFromConstant("value", true));
             Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
@@ -492,7 +492,7 @@ Parameter: input", exception.Message);
         {
             IHttpParameterResolutionMethod result = Compile(x =>
             {
-                x.ResolveParameter("regionLanguage", "REQUEST", "Language");
+                x.ResolveParameterFromSource("regionLanguage", "REQUEST", "Language");
             });
             Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
@@ -535,8 +535,8 @@ Parameter: input", exception.Message);
         {
             IHttpParameterResolutionMethod result = Compile(x =>
             {
-                x.ResolveParameter("machineName", "ENV", "MachineName");
-                x.ResolveParameter("pid", "ENV", "CurrentProcessId");
+                x.ResolveParameterFromSource("machineName", "ENV", "MachineName");
+                x.ResolveParameterFromSource("pid", "ENV", "CurrentProcessId");
             });
             Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,

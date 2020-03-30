@@ -340,15 +340,15 @@ namespace Dibix.Sdk.Tests
                     {
                         y.Method = HttpApiMethod.Get;
                         y.ChildRoute = "{password}";
-                        y.ResolveParameter("x", "DBX", "X");
-                        y.ResolveParameter("y", true);
-                        y.ResolveParameter("z", 5);
+                        y.ResolveParameterFromSource("x", "DBX", "X");
+                        y.ResolveParameterFromConstant("y", true);
+                        y.ResolveParameterFromConstant("z", 5);
                     });
                     x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), y =&gt;
                     {
                         y.Method = HttpApiMethod.Post;
                         y.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.GenericContract);
-                        y.ResolveParameter("ids", "Dibix.GenericContractIdsInputConverter");
+                        y.ResolveParameterFromBody&lt;Dibix.GenericContractIdsInputConverter&gt;("ids");
                     });
                     x.ControllerImports.Add("Dibix.GenericEndpoint");
                 });
