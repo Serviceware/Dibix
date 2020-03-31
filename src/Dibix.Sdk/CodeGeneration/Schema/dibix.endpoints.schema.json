@@ -5,6 +5,65 @@
       "type": "string",
       "pattern": "^[A-Z]([A-Za-z.]+)?(,[A-Z]([A-Za-z.]+)?)?$"
     },
+    "ConstantSource": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        }
+      ]
+    },
+    "PropertySource": {
+      "type": "string",
+      "pattern": "^[A-Z]+.[A-Z]([A-Za-z]+)?$"
+    },
+    "ItemsPropertySource": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "$ref": "#/definitions/PropertySource"
+        },
+        "items": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-z]+$": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/Source"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "required": [
+        "source",
+        "items"
+      ]
+    },
+    "BodySource": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "properties": {
+        "convertFromBody": {
+          "$ref": "#/definitions/NameIdentifier"
+        }
+      }
+    },
+    "Source": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/ConstantSource"
+        },
+        {
+          "$ref": "#/definitions/PropertySource"
+        }
+      ]
+    },
     "Api": {
       "type": "object",
       "properties": {
@@ -55,7 +114,7 @@
           "$ref": "#/definitions/NameIdentifier"
         },
         "description": {
-          "type": "string" 
+          "type": "string"
         },
         "body": {
           "$ref": "#/definitions/NameIdentifier"
@@ -63,27 +122,16 @@
         "params": {
           "type": "object",
           "patternProperties": {
-            "^[a-z]([A-Za-z]+)?$": {
+            "^[a-z]+$": {
               "anyOf": [
                 {
-                  "type": "string",
-                  "pattern": "^[A-Z]+.[A-Z]([A-Za-z]+)?$"
+                  "$ref": "#/definitions/Source"
                 },
                 {
-                  "type": "number"
+                  "$ref": "#/definitions/ItemsPropertySource"
                 },
                 {
-                  "type": "boolean"
-                },
-                {
-                  "type": "object",
-                  "minProperties": 1,
-                  "additionalProperties": false,
-                  "properties": {
-                    "convertFromBody": {
-                      "$ref": "#/definitions/NameIdentifier"
-                    }
-                  }
+                  "$ref": "#/definitions/BodySource"
                 }
               ]
             }

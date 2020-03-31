@@ -348,7 +348,7 @@ namespace Dibix.Sdk.Tests
                     {
                         y.Method = HttpApiMethod.Post;
                         y.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.GenericContract);
-                        y.ResolveParameterFromBody&lt;Dibix.GenericContractIdsInputConverter&gt;("ids");
+                        y.ResolveParameterFromBody("ids", "Dibix.GenericContractIdsInputConverter");
                     });
                     x.ControllerImports.Add("Dibix.GenericEndpoint");
                 });

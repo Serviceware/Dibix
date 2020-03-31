@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
@@ -75,6 +77,24 @@ namespace Dibix.Tests
         {
             public short SourceId { get; set; }
             public int LocaleId { get; set; }
+            public ICollection<ExplicitHttpBodyItem> ItemsA { get; }
+
+            public ExplicitHttpBody()
+            {
+                this.ItemsA = new Collection<ExplicitHttpBodyItem>();
+            }
+        }
+
+        private sealed class ExplicitHttpBodyItem
+        {
+            public int Id { get; }
+            public string Name { get; }
+
+            public ExplicitHttpBodyItem(int id, string name)
+            {
+                this.Id = id;
+                this.Name = name;
+            }
         }
 
         private sealed class ExplicitHttpParameterInput
@@ -88,6 +108,24 @@ namespace Dibix.Tests
             public int LocaleId { get; set; }
             public int UserId { get; set; }
             public int CannotBeMapped { get; set; }
+            public ICollection<ImplicitHttpBodyItem> ItemsA { get; }
+
+            public ImplicitHttpBody()
+            {
+                this.ItemsA = new Collection<ImplicitHttpBodyItem>();
+            }
+        }
+
+        private sealed class ImplicitHttpBodyItem
+        {
+            public int Id { get; }
+            public string Name { get; }
+
+            public ImplicitHttpBodyItem(int id, string name)
+            {
+                this.Id = id;
+                this.Name = name;
+            }
         }
 
         private sealed class ImplicitBodyHttpParameterInput
@@ -100,6 +138,20 @@ namespace Dibix.Tests
         private sealed class XmlHttpParameterInput
         {
             public XElement data { get; set; }
+        }
+        
+        private sealed class ExplicitHttpBodyItemSet : StructuredType<ExplicitHttpBodyItemSet, int, int, string>
+        {
+            public ExplicitHttpBodyItemSet() : base("x") => base.ImportSqlMetadata(() => this.Add(default, default, default));
+
+            public void Add(int id_, int age_, string name_) => base.AddValues(id_, age_, name_);
+        }
+        
+        private sealed class ImplicitHttpBodyItemSet : StructuredType<ImplicitHttpBodyItemSet, int, string>
+        {
+            public ImplicitHttpBodyItemSet() : base("x") => base.ImportSqlMetadata(() => this.Add(default, default));
+
+            public void Add(int id, string name) => base.AddValues(id, name);
         }
 
         private sealed class JsonToXmlConverter : IFormattedInputConverter<JObject, XElement>

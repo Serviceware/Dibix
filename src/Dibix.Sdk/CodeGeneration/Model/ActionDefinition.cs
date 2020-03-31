@@ -11,12 +11,12 @@ namespace Dibix.Sdk.CodeGeneration
         public TypeReference BodyContract { get; set; }
         public string BodyBinder { get; set; }
         public bool IsAnonymous { get; set; }
-        public IDictionary<string, ActionParameterSource> DynamicParameters { get; }
+        public IDictionary<string, ActionParameterSource> ParameterSources { get; }
 
         public ActionDefinition(ActionDefinitionTarget target)
         {
             this.Target = target;
-            this.DynamicParameters = new Dictionary<string, ActionParameterSource>();
+            this.ParameterSources = new Dictionary<string, ActionParameterSource>();
         }
     }
 }

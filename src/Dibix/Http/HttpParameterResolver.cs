@@ -15,6 +15,7 @@ namespace Dibix.Http
         #region Fields
         private static readonly ICollection<Type> KnownDependencies = new[] { typeof(IDatabaseAccessorFactory) };
         private static readonly Lazy<PropertyAccessor> DebugViewAccessor = new Lazy<PropertyAccessor>(BuildDebugViewAccessor);
+        private const string ItemSourceName = "ITEM";
         #endregion
 
         #region Delegates
@@ -80,7 +81,6 @@ namespace Dibix.Http
             {
                 context.LastVisitedParameter = parameter.Name;
 
-                // [internal] IDatabaseAccessorFactory databaseAccessorFactory
                 if (KnownDependencies.Contains(parameter.ParameterType))
                 {
                     string sourceName = parameter.ParameterType.Name.TrimStart('I');
@@ -93,29 +93,25 @@ namespace Dibix.Http
                 {
                     foreach (PropertyInfo property in parameter.ParameterType.GetRuntimeProperties())
                     {
-                        if (action.DynamicParameters.TryGetValue(property.Name, out HttpParameterSource propertySource))
+                        if (action.ParameterSources.TryGetValue(property.Name, out HttpParameterSource parameterSource))
                         {
-                            // [internal] SomeInputParameterClass.lcid, etc..
-                            yield return CollectNonUserParameter(propertySource, parameter, property.Name, property.PropertyType);
+                            yield return CollectExplicitParameter(parameterSource, parameter, property.PropertyType, property.Name);
                         }
                         else if (action.BodyBinder != null)
                         {
-                            // [body] SomeInputParameterClass.id
                             yield return HttpParameterInfo.Body(parameter, property.PropertyType, property.Name);
                         }
                         else
                         {
-                            // [user] SomeInputParameterClass.id
-                            yield return CollectUserParameter(action, parameter, property.PropertyType, property.Name, false);
+                            yield return CollectImplicitParameter(action, parameter, property.PropertyType, property.Name, false);
                         }
                     }
                 }
                 else
                 {
-                    if (action.DynamicParameters.TryGetValue(parameter.Name, out HttpParameterSource parameterSource))
+                    if (action.ParameterSources.TryGetValue(parameter.Name, out HttpParameterSource parameterSource))
                     {
-                        // [internal] lcid, etc..
-                        yield return CollectNonUserParameter(parameterSource, null, parameter.Name, parameter.ParameterType);
+                        yield return CollectExplicitParameter(parameterSource, null, parameter.ParameterType, parameter.Name);
                     }
                     else if (action.BodyBinder != null)
                     {
@@ -123,8 +119,7 @@ namespace Dibix.Http
                     }
                     else
                     {
-                        // [user] id
-                        yield return CollectUserParameter(action, null, parameter.ParameterType, parameter.Name, parameter.IsOptional);
+                        yield return CollectImplicitParameter(action, null, parameter.ParameterType, parameter.Name, parameter.IsOptional);
                     }
                 }
             }
@@ -132,29 +127,18 @@ namespace Dibix.Http
             context.LastVisitedParameter = null;
         }
 
-        private static HttpParameterInfo CollectUserParameter(HttpActionDefinition action, ParameterInfo contractParameter, Type parameterType, string parameterName, bool isOptional)
-        {
-            if (action.BodyContract == null)
-                return HttpParameterInfo.Uri(contractParameter, parameterType, parameterName, isOptional);
-
-            string sourcePropertyName = parameterName;
-            PropertyInfo sourceProperty = action.BodyContract.GetTypeInfo().GetProperty(sourcePropertyName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
-            if (sourceProperty == null)
-                return HttpParameterInfo.Uri(contractParameter, parameterType, parameterName, isOptional);
-
-            sourcePropertyName = sourceProperty.Name;
-            IHttpParameterSourceProvider sourceProvider = GetSourceProvider(BodyParameterSourceProvider.SourceName, parameterName);
-            return HttpParameterInfo.SourceProperty(contractParameter, parameterType, parameterName, sourceProvider, BodyParameterSourceProvider.SourceName, sourcePropertyName);
-        }
-
         [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Helpline.Server.Application.HttpParameterResolver.CreateException(Helpline.Server.Common.Infrastructure.HttpActionDefinition,System.String,System.String)")]
-        private static HttpParameterInfo CollectNonUserParameter(HttpParameterSource source, ParameterInfo contractParameter, string parameterName, Type parameterType)
+        private static HttpParameterInfo CollectExplicitParameter(HttpParameterSource source, ParameterInfo contractParameter, Type parameterType, string parameterName)
         {
             switch (source)
             {
                 case HttpParameterPropertySource propertySource:
                     IHttpParameterSourceProvider sourceProvider = GetSourceProvider(propertySource.SourceName, propertySource.PropertyName);
-                    return HttpParameterInfo.SourceProperty(contractParameter, parameterType, parameterName, sourceProvider, propertySource.SourceName, propertySource.PropertyName);
+                    bool isItemsParameter = typeof(StructuredType).GetTypeInfo().IsAssignableFrom(parameterType);
+                    if (!isItemsParameter)
+                        return HttpParameterInfo.SourceProperty(contractParameter, parameterType, parameterName, sourceProvider, propertySource.SourceName, propertySource.PropertyName);
+
+                    return CollectItemsParameter(contractParameter, parameterType, parameterName, propertySource, sourceProvider);
 
                 case HttpParameterBodySource bodySource:
                     Type inputConverter = Type.GetType(bodySource.ConverterName, true);
@@ -168,12 +152,53 @@ namespace Dibix.Http
             }
         }
 
+        private static HttpParameterInfo CollectImplicitParameter(HttpActionDefinition action, ParameterInfo contractParameter, Type parameterType, string parameterName, bool isOptional)
+        {
+            if (action.BodyContract == null)
+                return HttpParameterInfo.Uri(contractParameter, parameterType, parameterName, isOptional);
+
+            string sourcePropertyName = parameterName;
+            PropertyInfo sourceProperty = action.BodyContract.GetTypeInfo().GetProperty(sourcePropertyName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+            if (sourceProperty == null)
+                return HttpParameterInfo.Uri(contractParameter, parameterType, parameterName, isOptional);
+
+            sourcePropertyName = sourceProperty.Name;
+            IHttpParameterSourceProvider sourceProvider = GetSourceProvider(BodyParameterSourceProvider.SourceName, parameterName);
+
+            bool isItemsParameter = typeof(StructuredType).GetTypeInfo().IsAssignableFrom(parameterType);
+            if (isItemsParameter)
+                return CollectItemsParameter(contractParameter, parameterType, parameterName, new HttpParameterPropertySource(BodyParameterSourceProvider.SourceName, sourcePropertyName), sourceProvider);
+
+            return HttpParameterInfo.SourceProperty(contractParameter, parameterType, parameterName, sourceProvider, BodyParameterSourceProvider.SourceName, sourcePropertyName);
+        }
+
         private static IHttpParameterSourceProvider GetSourceProvider(string sourceName, string sourcePropertyName)
         {
+            if (sourceName == ItemSourceName)
+                return null;
+
             if (!HttpParameterSourceProviderRegistry.TryGetProvider(sourceName, out IHttpParameterSourceProvider sourceProvider))
                 throw new InvalidOperationException($"Unknown source provider '{sourceName}' for property '{sourcePropertyName}'");
 
             return sourceProvider;
+        }
+
+        private static HttpParameterInfo CollectItemsParameter(ParameterInfo contractParameter, Type parameterType, string parameterName, HttpParameterPropertySource propertySource, IHttpParameterSourceProvider sourceProvider)
+        {
+            string udtName = parameterType.GetTypeInfo().GetCustomAttribute<StructuredTypeAttribute>()?.UdtName;
+            MethodInfo addMethod = parameterType.GetTypeInfo().GetMethod("Add");
+            if (addMethod == null)
+                throw new InvalidOperationException($"Could not find 'Add' method on type: {parameterType}");
+
+            IDictionary<string, Type> parameterMap = addMethod.GetParameters().ToDictionary(x => x.Name, x => x.ParameterType);
+            IEnumerable<HttpParameterInfo> itemSources = propertySource.ItemSources.Select(x =>
+            {
+                if (!parameterMap.TryGetValue(x.Key, out Type itemParameterType))
+                    throw new InvalidOperationException($"Target name does not match a UDT column: {udtName ?? parameterType.ToString()}.{x.Key}");
+
+                return CollectExplicitParameter(x.Value, null, itemParameterType, x.Key);
+            });
+            return HttpParameterInfo.SourcePropertyItemsSource(contractParameter, parameterType, parameterName, sourceProvider, propertySource.SourceName, propertySource.PropertyName, udtName, addMethod, itemSources);
         }
 
         private static IDictionary<string, HttpParameterSourceExpression> CollectParameterSources(HttpActionDefinition action, IEnumerable<HttpParameterInfo> @params, ParameterExpression requestParameter, ParameterExpression argumentsParameter, ParameterExpression dependencyResolverParameter, HttpParameterResolverCompilationContext context)
@@ -359,8 +384,10 @@ namespace Dibix.Http
                     HttpParameterSourceExpression source = sources[parameter.Source.Name];
                     value = source.Variable;
                     if (parameter.SourceKind == HttpParameterSourceKind.SourceProperty)
-                        value = Expression.Property(value, parameter.Source.PropertyName);
-
+                    {
+                        MemberExpression sourcePropertyExpression = Expression.Property(value, parameter.Source.PropertyName);
+                        value = parameter.Items != null ? CollectItemsParameterValue(parameter, sourcePropertyExpression, sources) : sourcePropertyExpression;
+                    }
                     break;
 
                 default:
@@ -370,6 +397,42 @@ namespace Dibix.Http
             if (value.Type != parameter.ParameterType)
                 value = Expression.Call(typeof(HttpParameterResolver), nameof(ConvertValue), new[] { value.Type, parameter.ParameterType }, Expression.Constant(parameter.ParameterName), value);
 
+            return value;
+        }
+
+        private static Expression CollectItemsParameterValue(HttpParameterInfo parameter, MemberExpression sourcePropertyExpression, IDictionary<string, HttpParameterSourceExpression> sources)
+        {
+            Type itemType = GetItemType(sourcePropertyExpression.Type);
+            MethodInfo structuredTypeFactoryMethod = GetStructuredTypeFactoryMethod(parameter.ParameterType, itemType);
+            IDictionary<string, Expression> addMethodParameters = parameter.Items.AddItemMethod.GetParameters().ToDictionary(x => x.Name, x => (Expression)null);
+
+            ParameterExpression addItemFuncSetParameter = Expression.Parameter(parameter.ParameterType, "x");
+            ParameterExpression addItemFuncItemParameter = Expression.Parameter(itemType, "y");
+
+            foreach (HttpParameterInfo itemSource in parameter.Items.ParameterSources)
+            {
+                Expression source;
+                if (itemSource.SourceKind == HttpParameterSourceKind.SourceProperty && itemSource.Source.Name == ItemSourceName)
+                    source = Expression.Property(addItemFuncItemParameter, itemSource.Source.PropertyName);
+                else
+                    source = CollectParameterValue(itemSource, sources);
+
+                addMethodParameters[itemSource.ParameterName] = source;
+            }
+
+            foreach (KeyValuePair<string, Expression> addMethodParameter in addMethodParameters.Where(x => x.Value == null).ToArray())
+            {
+                PropertyInfo property = itemType.GetTypeInfo().GetProperty(addMethodParameter.Key, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                if (property == null)
+                    throw new InvalidOperationException($@"Can not map UDT column: {parameter.Items.UdtName ?? parameter.ParameterType.ToString()}.{addMethodParameter.Key}
+Either create a mapping or make sure a property of the same name exists in the source: {parameter.Source.Name}.{parameter.Source.PropertyName}");
+
+                addMethodParameters[addMethodParameter.Key] = Expression.Property(addItemFuncItemParameter, property);
+            }
+
+            MethodCallExpression addItemCall = Expression.Call(addItemFuncSetParameter, parameter.Items.AddItemMethod, addMethodParameters.Values);
+            Expression addItemLambda = Expression.Lambda(addItemCall, addItemFuncSetParameter, addItemFuncItemParameter);
+            Expression value = Expression.Call(null, structuredTypeFactoryMethod, sourcePropertyExpression, addItemLambda);
             return value;
         }
 
@@ -452,6 +515,34 @@ namespace Dibix.Http
 
             return new InvalidOperationException(sb.ToString(), innerException);
         }
+
+        private static MethodInfo GetStructuredTypeFactoryMethod(Type implementationType, Type itemType)
+        {
+            foreach (MethodInfo method in typeof(StructuredType<>).MakeGenericType(implementationType).GetRuntimeMethods())
+            {
+                if (method.Name != "From")
+                    continue;
+
+                IList<ParameterInfo> parameters = method.GetParameters();
+                if (parameters.Count != 2)
+                    continue;
+
+                if (parameters[0].ParameterType.GetGenericTypeDefinition() == typeof(IEnumerable<>)
+                 && parameters[1].ParameterType.GetGenericTypeDefinition() == typeof(Action<,>))
+                {
+                    return method.MakeGenericMethod(itemType);
+                }
+            }
+            throw new InvalidOperationException("Could not find structured type factory method 'StructuredType<>.From()'");
+        }
+
+        private static Type GetItemType(Type enumerableType)
+        {
+            if (enumerableType.GetTypeInfo().GetInterfaces().All(x => x.GetGenericTypeDefinition() != typeof(IEnumerable<>)))
+                throw new InvalidOperationException($"Type does not implement IEnumerable<>: {enumerableType}");
+
+            return enumerableType.GenericTypeArguments[0];
+        }
         #endregion
 
         #region Nested Types
@@ -496,6 +587,21 @@ namespace Dibix.Http
             }
         }
 
+        private sealed class HttpItemsParameterInfo
+        {
+            public string UdtName { get; }
+            public MethodInfo AddItemMethod { get; }
+            public ICollection<HttpParameterInfo> ParameterSources { get; }
+
+            public HttpItemsParameterInfo(string udtName, MethodInfo addItemMethod, IEnumerable<HttpParameterInfo> parameterSources)
+            {
+                this.ParameterSources = new Collection<HttpParameterInfo>();
+                this.UdtName = udtName;
+                this.AddItemMethod = addItemMethod;
+                this.ParameterSources.AddRange(parameterSources);
+            }
+        }
+
         private enum HttpParameterSourceKind
         {
             None,
@@ -517,8 +623,9 @@ namespace Dibix.Http
             public bool IsOptional { get; }
             public Type InputConverter { get; }                // IFormattedInputConverter<TSource, TTarget>
             public HttpParameterSourceInfo Source { get; }     // HLSESSION.LocaleId / databaseAccessorFactory
+            public HttpItemsParameterInfo Items { get; }       // udt_columnname = ITEM.SomePropertyName
 
-            private HttpParameterInfo(bool isUserParameter, HttpParameterSourceKind sourceKind, ParameterInfo contractParameter, Type parameterType, string parameterName, object value, bool isOptional, Type inputConverter, HttpParameterSourceInfo source)
+            private HttpParameterInfo(bool isUserParameter, HttpParameterSourceKind sourceKind, ParameterInfo contractParameter, Type parameterType, string parameterName, object value, bool isOptional, Type inputConverter, HttpParameterSourceInfo source, HttpItemsParameterInfo items)
             {
                 this.IsUserParameter = isUserParameter;
                 this.SourceKind = sourceKind;
@@ -529,13 +636,15 @@ namespace Dibix.Http
                 this.IsOptional = isOptional;
                 this.InputConverter = inputConverter;
                 this.Source = source;
+                this.Items = items;
             }
 
-            public static HttpParameterInfo Uri(ParameterInfo contractParameter, Type parameterType, string parameterName, bool isOptional) => new HttpParameterInfo(true, HttpParameterSourceKind.Uri, contractParameter, parameterType, parameterName, null, isOptional, null, null);
-            public static HttpParameterInfo SourceInstance(Type parameterType, string parameterName, IHttpParameterSourceProvider sourceProvider, string sourceName) => new HttpParameterInfo(false, HttpParameterSourceKind.SourceInstance, null, parameterType, parameterName, null, false, null, new HttpParameterSourceInfo(sourceProvider, sourceName));
-            public static HttpParameterInfo SourceProperty(ParameterInfo contractParameter, Type parameterType, string parameterName, IHttpParameterSourceProvider sourceProvider, string sourceName, string sourcePropertyName) => new HttpParameterInfo(false, HttpParameterSourceKind.SourceProperty, contractParameter, parameterType, parameterName, null, false, null, new HttpParameterSourceInfo(sourceProvider, sourceName, sourcePropertyName));
-            public static HttpParameterInfo ConstantValue(ParameterInfo contractParameter, Type parameterType, string parameterName, object value) => new HttpParameterInfo(false, HttpParameterSourceKind.ConstantValue, contractParameter, parameterType, parameterName, value, false, null, null);
-            public static HttpParameterInfo Body(ParameterInfo contractParameter, Type parameterType, string parameterName, Type inputConverter = null) => new HttpParameterInfo(false, HttpParameterSourceKind.Body, contractParameter, parameterType, parameterName, null, false, inputConverter, null);
+            public static HttpParameterInfo Uri(ParameterInfo contractParameter, Type parameterType, string parameterName, bool isOptional) => new HttpParameterInfo(true, HttpParameterSourceKind.Uri, contractParameter, parameterType, parameterName, null, isOptional, null, null, null);
+            public static HttpParameterInfo SourceInstance(Type parameterType, string parameterName, IHttpParameterSourceProvider sourceProvider, string sourceName) => new HttpParameterInfo(false, HttpParameterSourceKind.SourceInstance, null, parameterType, parameterName, null, false, null, new HttpParameterSourceInfo(sourceProvider, sourceName), null);
+            public static HttpParameterInfo SourceProperty(ParameterInfo contractParameter, Type parameterType, string parameterName, IHttpParameterSourceProvider sourceProvider, string sourceName, string sourcePropertyName) => new HttpParameterInfo(false, HttpParameterSourceKind.SourceProperty, contractParameter, parameterType, parameterName, null, false, null, new HttpParameterSourceInfo(sourceProvider, sourceName, sourcePropertyName), null);
+            public static HttpParameterInfo SourcePropertyItemsSource(ParameterInfo contractParameter, Type parameterType, string parameterName, IHttpParameterSourceProvider sourceProvider, string sourceName, string sourcePropertyName, string udtName, MethodInfo addItemMethod, IEnumerable<HttpParameterInfo> itemSources) => new HttpParameterInfo(false, HttpParameterSourceKind.SourceProperty, contractParameter, parameterType, parameterName, null, false, null, new HttpParameterSourceInfo(sourceProvider, sourceName, sourcePropertyName), new HttpItemsParameterInfo(udtName, addItemMethod, itemSources));
+            public static HttpParameterInfo ConstantValue(ParameterInfo contractParameter, Type parameterType, string parameterName, object value) => new HttpParameterInfo(false, HttpParameterSourceKind.ConstantValue, contractParameter, parameterType, parameterName, value, false, null, null, null);
+            public static HttpParameterInfo Body(ParameterInfo contractParameter, Type parameterType, string parameterName, Type inputConverter = null) => new HttpParameterInfo(false, HttpParameterSourceKind.Body, contractParameter, parameterType, parameterName, null, false, inputConverter, null, null);
         }
 
         private sealed class HttpParameterResolutionMethod : IHttpParameterResolutionMethod

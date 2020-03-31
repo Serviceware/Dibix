@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Resources;
 using Xunit;
 
-namespace Dibix.Sdk.Tests
+namespace Dibix.Tests
 {
     internal static class TestUtility
     {
@@ -32,7 +32,7 @@ namespace Dibix.Sdk.Tests
             return resource;
         }
 
-        public static void AssertEqualWithDiffTool(string expectedText, string actualText, string extension)
+        public static void AssertEqualWithDiffTool(string expectedText, string actualText, string extension = null)
         {
             if (expectedText != actualText)
                 RunDiffTool(expectedText, actualText, extension);
@@ -51,7 +51,10 @@ namespace Dibix.Sdk.Tests
 
         private static void RunDiffTool(string expectedText, string actualText, string extension)
         {
-            string actualFilePath = Path.ChangeExtension(Path.GetTempFileName(), extension);
+            string actualFilePath = Path.GetTempFileName();
+            if (extension != null)
+                actualFilePath = Path.ChangeExtension(actualFilePath, extension);
+            
             File.WriteAllText(actualFilePath, actualText);
             RunWinMerge(expectedText, actualFilePath);
         }
@@ -66,7 +69,7 @@ namespace Dibix.Sdk.Tests
                 expectedFilePath = Path.ChangeExtension(expectedFilePath, actualFilePathExtension);
 
             File.WriteAllText(expectedFilePath, expectedText);
-            Process.Start("winmerge", $"\"{expectedFilePath}\" \"{actualFilePath}\"");
+            Process.Start("WinMergeU", $"\"{expectedFilePath}\" \"{actualFilePath}\"");
         }
 
         private static string DetermineTestName() => new StackTrace().GetFrames()

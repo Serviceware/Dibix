@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net.Http;
+using System.Reflection;
 using System.Xml.Linq;
 using Dibix.Http;
 using Moq;
@@ -17,7 +19,7 @@ namespace Dibix.Tests
         public void Compile_Default()
         {
             IHttpParameterResolutionMethod result = Compile();
-            Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
+            TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
     Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
@@ -50,7 +52,7 @@ namespace Dibix.Tests
         {
             HttpParameterSourceProviderRegistry.Register<LocaleParameterHttpSourceProvider>("LOCALE");
             IHttpParameterResolutionMethod result = Compile(x => x.ResolveParameterFromSource("lcid", "LOCALE", "LocaleId"));
-            Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
+            TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
     Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
@@ -90,7 +92,7 @@ namespace Dibix.Tests
         {
             HttpParameterSourceProviderRegistry.Register<ApplicationHttpParameterSourceProvider>("APPLICATION");
             IHttpParameterResolutionMethod result = Compile(x => x.ResolveParameterFromSource("applicationId", "APPLICATION", "ApplicationId"));
-            Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
+            TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
     Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
@@ -144,10 +146,16 @@ Parameter: lcid", exception.Message);
             IHttpParameterResolutionMethod result = Compile(x =>
             {
                 x.BodyContract = typeof(ExplicitHttpBody);
-                x.ResolveParameterFromSource("targetId", "BODY", "SourceId");
+                x.ResolveParameterFromSource("targetid", "BODY", "SourceId");
                 x.ResolveParameterFromSource("lcid", "BODY", "LocaleId");
+                x.ResolveParameterFromSource("itemsa_", "BODY", "ItemsA", y =>
+                {
+                    y.ResolveParameterFromSource("id_", "BODY", "LocaleId");
+                    y.ResolveParameterFromConstant("age_", 5);
+                    y.ResolveParameterFromSource("name_", "ITEM", "Name");
+                });
             });
-            Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
+            TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
     Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
@@ -163,6 +171,12 @@ Parameter: lcid", exception.Message);
         .Call $arguments.Add(
             ""lcid"",
             (System.Object)$bodySource.LocaleId);
+        .Call $arguments.Add(
+            ""itemsa_"",
+            (System.Object).Call Dibix.StructuredType`1[Dibix.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemSet].From(
+                $bodySource.ItemsA,
+                .Lambda #Lambda2<System.Action`2[Dibix.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemSet,Dibix.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem]>)
+        );
         $input = .New Dibix.Tests.HttpParameterResolverTest+ExplicitHttpParameterInput();
         $input.targetid = .Call Dibix.Http.HttpParameterResolver.ConvertValue(
             ""targetid"",
@@ -171,6 +185,15 @@ Parameter: lcid", exception.Message);
             ""input"",
             (System.Object)$input)
     }
+}
+
+.Lambda #Lambda2<System.Action`2[Dibix.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemSet,Dibix.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem]>(
+    Dibix.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemSet $x,
+    Dibix.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem $y) {
+    .Call $x.Add(
+        $bodySource.LocaleId,
+        5,
+        $y.Name)
 }", result.Source);
             Assert.Equal(1, result.Parameters.Count);
             Assert.Equal("$body", result.Parameters["$body"].Name);
@@ -180,7 +203,12 @@ Parameter: lcid", exception.Message);
             object body = new ExplicitHttpBody
             {
                 SourceId = 7,
-                LocaleId = 1033
+                LocaleId = 1033,
+                ItemsA =
+                {
+                    new ExplicitHttpBodyItem(1, "X"),
+                    new ExplicitHttpBodyItem(2, "Y")
+                }
             };
             HttpRequestMessage request = new HttpRequestMessage();
             IDictionary<string, object> arguments = new Dictionary<string, object> { { "$body", body } };
@@ -191,21 +219,26 @@ Parameter: lcid", exception.Message);
 
             result.PrepareParameters(request, arguments, dependencyResolver.Object);
 
-            Assert.Equal(4, arguments.Count);
+            Assert.Equal(5, arguments.Count);
             Assert.Equal(body, arguments["$body"]);
             Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             Assert.IsType<ExplicitHttpParameterInput>(arguments["input"]);
             Assert.Equal(7, ((ExplicitHttpParameterInput)arguments["input"]).targetid);
             Assert.Equal(1033, arguments["lcid"]);
+            Assert.IsType<ExplicitHttpBodyItemSet>(arguments["itemsa_"]);
+            Assert.Equal(@"id_ INT(4)  age_ INT(4)  name_ NVARCHAR(MAX)
+----------  -----------  -------------------
+1033        5            X                  
+1033        5            Y                  ", ((ExplicitHttpBodyItemSet)arguments["itemsa_"]).Dump());
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
-        private static void Compile_ExplicitBodySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpParameterInput input, int lcid) { }
+        private static void Compile_ExplicitBodySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpParameterInput input, int lcid, ExplicitHttpBodyItemSet itemsa_) { }
 
         [Fact]
         public void Compile_ImplicitBodySource()
         {
             IHttpParameterResolutionMethod result = Compile(x => x.BodyContract = typeof(ImplicitHttpBody));
-            Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
+            TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
     Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
@@ -221,6 +254,12 @@ Parameter: lcid", exception.Message);
         .Call $arguments.Add(
             ""userid"",
             (System.Object)$bodySource.UserId);
+        .Call $arguments.Add(
+            ""itemsa"",
+            (System.Object).Call Dibix.StructuredType`1[Dibix.Tests.HttpParameterResolverTest+ImplicitHttpBodyItemSet].From(
+                $bodySource.ItemsA,
+                .Lambda #Lambda2<System.Action`2[Dibix.Tests.HttpParameterResolverTest+ImplicitHttpBodyItemSet,Dibix.Tests.HttpParameterResolverTest+ImplicitHttpBodyItem]>)
+        );
         $input = .New Dibix.Tests.HttpParameterResolverTest+ImplicitBodyHttpParameterInput();
         $input.sourceid = .Call Dibix.Http.HttpParameterResolver.ConvertValue(
             ""sourceid"",
@@ -233,6 +272,14 @@ Parameter: lcid", exception.Message);
             ""input"",
             (System.Object)$input)
     }
+}
+
+.Lambda #Lambda2<System.Action`2[Dibix.Tests.HttpParameterResolverTest+ImplicitHttpBodyItemSet,Dibix.Tests.HttpParameterResolverTest+ImplicitHttpBodyItem]>(
+    Dibix.Tests.HttpParameterResolverTest+ImplicitHttpBodyItemSet $x,
+    Dibix.Tests.HttpParameterResolverTest+ImplicitHttpBodyItem $y) {
+    .Call $x.Add(
+        $y.Id,
+        $y.Name)
 }", result.Source);
             Assert.Equal(3, result.Parameters.Count);
             Assert.Equal("$body", result.Parameters["$body"].Name);
@@ -249,7 +296,12 @@ Parameter: lcid", exception.Message);
             {
                 SourceId = 7,
                 LocaleId = 1033,
-                UserId = 5
+                UserId = 5,
+                ItemsA =
+                {
+                    new ImplicitHttpBodyItem(1, "X"),
+                    new ImplicitHttpBodyItem(2, "Y")
+                }
             };
             HttpRequestMessage request = new HttpRequestMessage();
             IDictionary<string, object> arguments = new Dictionary<string, object>
@@ -265,7 +317,7 @@ Parameter: lcid", exception.Message);
 
             result.PrepareParameters(request, arguments, dependencyResolver.Object);
 
-            Assert.Equal(6, arguments.Count);
+            Assert.Equal(7, arguments.Count);
             Assert.Equal(2, arguments["id"]);
             Assert.Equal(5, arguments["userid"]);
             Assert.Equal(3, arguments["fromuri"]);
@@ -275,8 +327,13 @@ Parameter: lcid", exception.Message);
             Assert.Equal(7, ((ImplicitBodyHttpParameterInput)arguments["input"]).sourceid);
             Assert.Equal(1033, ((ImplicitBodyHttpParameterInput)arguments["input"]).localeid);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
+            Assert.IsType<ImplicitHttpBodyItemSet>(arguments["itemsa"]);
+            Assert.Equal(@"id INT(4)  name NVARCHAR(MAX)
+---------  ------------------
+1          X                 
+2          Y                 ", ((ImplicitHttpBodyItemSet)arguments["itemsa"]).Dump());
         }
-        private static void Compile_ImplicitBodySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, int id, [InputClass] ImplicitBodyHttpParameterInput input, int userid) { }
+        private static void Compile_ImplicitBodySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, int id, [InputClass] ImplicitBodyHttpParameterInput input, int userid, ImplicitHttpBodyItemSet itemsa) { }
 
         [Fact]
         public void Compile_BodyConverter()
@@ -284,10 +341,10 @@ Parameter: lcid", exception.Message);
             IHttpParameterResolutionMethod result = Compile(x =>
             {
                 x.BodyContract = typeof(JObject);
-                x.ResolveParameterFromBody<JsonToXmlConverter>("data");
-                x.ResolveParameterFromBody<JsonToXmlConverter>("value");
+                x.ResolveParameterFromBody("data", typeof(JsonToXmlConverter).AssemblyQualifiedName);
+                x.ResolveParameterFromBody("value", typeof(JsonToXmlConverter).AssemblyQualifiedName);
             });
-            Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
+            TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
     Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
@@ -341,7 +398,7 @@ Parameter: lcid", exception.Message);
                 x.BodyContract = typeof(ExplicitHttpBody);
                 x.BodyBinder = typeof(FormattedInputBinder);
             });
-            Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
+            TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
     Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
@@ -405,7 +462,7 @@ Parameter: input", exception.Message);
         public void Compile_ConstantSource()
         {
             IHttpParameterResolutionMethod result = Compile(x => x.ResolveParameterFromConstant("value", true));
-            Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
+            TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
     Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
@@ -441,7 +498,7 @@ Parameter: input", exception.Message);
         public void Compile_UriSource()
         {
             IHttpParameterResolutionMethod result = Compile();
-            Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
+            TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
     Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
@@ -494,7 +551,7 @@ Parameter: input", exception.Message);
             {
                 x.ResolveParameterFromSource("regionLanguage", "REQUEST", "Language");
             });
-            Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
+            TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
     Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
@@ -538,7 +595,7 @@ Parameter: input", exception.Message);
                 x.ResolveParameterFromSource("machineName", "ENV", "MachineName");
                 x.ResolveParameterFromSource("pid", "ENV", "CurrentProcessId");
             });
-            Assert.Equal(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
+            TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
     Dibix.Http.IParameterDependencyResolver $dependencyResolver) {

@@ -93,7 +93,7 @@ namespace Dibix.Sdk.CodeGeneration
                         writer.WriteLine($"y.BodyBinder = Type.GetType(\"{action.BodyBinder}\", true);");
                     }
 
-                    foreach (KeyValuePair<string, ActionParameterSource> parameter in action.DynamicParameters)
+                    foreach (KeyValuePair<string, ActionParameterSource> parameter in action.ParameterSources)
                     {
                         WriteParameter(writer, parameter.Key, parameter.Value);
                     }
@@ -118,26 +118,45 @@ namespace Dibix.Sdk.CodeGeneration
             return writer.ToString();
         }
 
-        private static void WriteParameter(StringWriter writer, string parameterName, ActionParameterSource value)
+        private static void WriteParameter(StringWriter writer, string parameterName, ActionParameterSource value, char? parentSourceSelectorVariable = null)
         {
+            char sourceSelectorVariable = parentSourceSelectorVariable ?? 'y';
             switch (value)
             {
                 case ActionParameterConstantSource constant:
                     string constantValue = constant.Value is bool boolValue ? boolValue.ToString().ToLowerInvariant() : constant.Value.ToString();
-                    writer.WriteLine($"y.ResolveParameterFromConstant(\"{parameterName}\", {constantValue});");
+                    writer.WriteLine($"{sourceSelectorVariable}.ResolveParameterFromConstant(\"{parameterName}\", {constantValue});");
                     break;
 
                 case ActionParameterBodySource body:
-                    bool isExternalType = body.ConverterName.Contains(',');
-                    if (isExternalType)
-                        writer.WriteLine($"y.ResolveParameterFromBody(\"{parameterName}\", \"{body.ConverterName}\");");
-                    else
-                        writer.WriteLine($"y.ResolveParameterFromBody<{body.ConverterName}>(\"{parameterName}\");");
-
+                    writer.WriteLine($"{sourceSelectorVariable}.ResolveParameterFromBody(\"{parameterName}\", \"{body.ConverterName}\");");
                     break;
 
                 case ActionParameterPropertySource property:
-                    writer.WriteLine($"y.ResolveParameterFromSource(\"{parameterName}\", \"{property.SourceName}\", \"{property.PropertyName}\");");
+                    writer.Write($"{sourceSelectorVariable}.ResolveParameterFromSource(\"{parameterName}\", \"{property.SourceName}\", \"{property.PropertyName}\"");
+
+                    if (property.ItemSources.Any())
+                    {
+                        if (parentSourceSelectorVariable != null)
+                            throw new InvalidOperationException("Nested item sources are not supported");
+
+                        char itemSourceSelectorVariable = 'z';
+                        writer.WriteRaw($", {itemSourceSelectorVariable} => ")
+                              .WriteLine()
+                              .WriteLine("{")
+                              .PushIndent();
+
+                        foreach (KeyValuePair<string, ActionParameterSource> parameterSource in property.ItemSources)
+                        {
+                            WriteParameter(writer, parameterSource.Key, parameterSource.Value, itemSourceSelectorVariable);
+                        }
+
+                        writer.PopIndent()
+                              .Write("}");
+                    }
+
+                    writer.WriteLineRaw(");");
+
                     break;
 
                 default:

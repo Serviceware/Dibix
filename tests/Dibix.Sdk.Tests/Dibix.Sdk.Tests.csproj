@@ -5,7 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\src\Dibix\Reflection\TypeExtensions.cs" Link="TypeExtensions.cs" />
     <Compile Update="CodeAnalysis\SqlCodeAnalysisRuleTests.Base.cs">
       <DependentUpon>CodeAnalysis\SqlCodeAnalysisRuleTests.cs</DependentUpon>
     </Compile>
@@ -13,6 +12,8 @@
       <DependentUpon>CodeGeneration\CodeGenerationTaskTests.cs</DependentUpon>
     </Compile>
     <EmbeddedResource Update="Resource.resx" />
+    <Compile Include="..\Dibix.Tests\TestUtility.cs" Link="TestUtility.cs" />
+    <Compile Include="..\..\src\Dibix\Reflection\TypeExtensions.cs" Link="TypeExtensions.cs" />
   </ItemGroup>
 
   <ItemGroup>

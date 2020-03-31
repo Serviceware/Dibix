@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Dibix.Sdk.CodeGeneration;
+using Dibix.Tests;
 using Xunit;
 using Xunit.Abstractions;
 

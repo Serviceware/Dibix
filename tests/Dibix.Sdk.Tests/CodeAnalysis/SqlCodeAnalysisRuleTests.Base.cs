@@ -8,6 +8,7 @@ using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using Dibix.Sdk.CodeAnalysis;
+using Dibix.Tests;
 using Xunit.Abstractions;
 
 namespace Dibix.Sdk.Tests.CodeAnalysis

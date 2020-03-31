@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Dibix.Http
 {
-    public sealed class HttpActionDefinition
+    public sealed class HttpActionDefinition : HttpParameterSourceSelector
     {
         private Uri _computedUri;
 
@@ -15,42 +14,32 @@ namespace Dibix.Http
         public Type BodyBinder { get; set; }
         public bool IsAnonymous { get; set; }
         public string Description { get; set; }
-        public IDictionary<string, HttpParameterSource> DynamicParameters { get; }
         public Uri ComputedUri => this._computedUri ?? (this._computedUri = this.BuildUri());
 
         internal HttpActionDefinition(HttpControllerDefinition controller, IHttpActionTarget target)
         {
             this.Controller = controller;
             this.Target = target;
-            this.DynamicParameters = new Dictionary<string, HttpParameterSource>(StringComparer.OrdinalIgnoreCase);
         }
 
-        public void ResolveParameterFromConstant(string targetParameterName, bool value)
-        {
-            this.ResolveParameter(targetParameterName, new HttpParameterConstantSource(value));
-        }
-        public void ResolveParameterFromConstant(string targetParameterName, int value)
-        {
-            this.ResolveParameter(targetParameterName, new HttpParameterConstantSource(value));
-        }
-        public void ResolveParameterFromBody<TConverter>(string targetParameterName) => this.ResolveParameterFromBody(targetParameterName, typeof(TConverter).AssemblyQualifiedName);
         public void ResolveParameterFromBody(string targetParameterName, string bodyConverterName)
         {
-            this.ResolveParameter(targetParameterName, new HttpParameterBodySource(bodyConverterName));
+            base.ResolveParameter(targetParameterName, new HttpParameterBodySource(bodyConverterName));
         }
-        public void ResolveParameterFromSource(string targetParameterName, string sourceName, string sourcePropertyName)
+        public void ResolveParameterFromSource(string targetParameterName, string sourceName, string sourcePropertyName, Action<IHttpParameterSourceSelector> itemSources)
         {
-            this.ResolveParameter(targetParameterName, new HttpParameterPropertySource(sourceName, sourcePropertyName));
+            HttpParameterPropertySource source = base.ResolveParameterFromSourceCore(targetParameterName, sourceName, sourcePropertyName);
+            if (itemSources == null) 
+                return;
+
+            HttpParameterSourceSelector sourceSelector = new HttpParameterSourceSelector();
+            itemSources.Invoke(sourceSelector);
+            source.ItemSources.AddRange(sourceSelector.ParameterSources);
         }
 
         private Uri BuildUri()
         {
             return new Uri(RouteBuilder.BuildRoute(this.Controller.AreaName, this.Controller.ControllerName, this.ChildRoute), UriKind.Relative);
-        }
-
-        private void ResolveParameter(string targetParameterName, HttpParameterSource source)
-        {
-            this.DynamicParameters.Add(targetParameterName, source);
         }
     }
 }

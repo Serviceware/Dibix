@@ -1,5 +1,5 @@
 ﻿using Dibix.Sdk.CodeGeneration;
-using Dibix.Sdk.Tests;
+using Dibix.Tests;
 using Xunit;
 
 namespace Dibix.Sdk.VisualStudio.Tests

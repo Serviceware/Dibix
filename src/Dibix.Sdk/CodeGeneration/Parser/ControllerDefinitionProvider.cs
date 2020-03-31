@@ -133,17 +133,11 @@ namespace Dibix.Sdk.CodeGeneration
 
             foreach (JProperty property in mappings.Properties())
             {
+                if (TryReadSource(property, action.ParameterSources))
+                    continue;
+
                 switch (property.Value.Type)
                 {
-                    case JTokenType.Boolean:
-                    case JTokenType.Integer:
-                        ReadConstantActionParameter(action, property.Name, (JValue)property.Value);
-                        break;
-
-                    case JTokenType.String:
-                        ReadPropertyActionParameter(action, property.Name, (JValue)property.Value);
-                        break;
-
                     case JTokenType.Object:
                         ReadComplexActionParameter(action, property.Name, (JObject)property.Value);
                         break;
@@ -154,21 +148,73 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static void ReadConstantActionParameter(ActionDefinition action, string parameterName, JValue value)
+        private static bool TryReadSource(JProperty property, IDictionary<string, ActionParameterSource> target)
         {
-            action.DynamicParameters.Add(parameterName, new ActionParameterConstantSource(value.Value));
+            switch (property.Value.Type)
+            {
+                case JTokenType.Boolean:
+                case JTokenType.Integer:
+                    ReadConstantSource(property.Name, (JValue)property.Value, target);
+                    return true;
+
+                case JTokenType.String:
+                    ReadPropertySource(property.Name, (JValue)property.Value, target);
+                    return true;
+
+                default:
+                    return false;
+            }
         }
 
-        private static void ReadPropertyActionParameter(ActionDefinition action, string parameterName, JValue value)
+        private static void ReadConstantSource(string parameterName, JValue value, IDictionary<string, ActionParameterSource> target)
         {
-            string[] parts = ((string)value.Value).Split(new [] { '.' }, 2);
-            action.DynamicParameters.Add(parameterName, new ActionParameterPropertySource(parts[0], parts[1]));
+            target.Add(parameterName, new ActionParameterConstantSource(value.Value));
+        }
+
+        private static ActionParameterPropertySource ReadPropertySource(string parameterName, JValue value, IDictionary<string, ActionParameterSource> target)
+        {
+            string[] parts = ((string)value.Value).Split(new[] { '.' }, 2);
+            ActionParameterPropertySource propertySource = new ActionParameterPropertySource(parts[0], parts[1]);
+            target.Add(parameterName, propertySource);
+            return propertySource;
         }
 
         private static void ReadComplexActionParameter(ActionDefinition action, string parameterName, JObject @object)
         {
-            string bodyConverterTypeName = (string)((JValue)@object.Property("convertFromBody").Value).Value;
-            action.DynamicParameters.Add(parameterName, new ActionParameterBodySource(bodyConverterTypeName));
+            JProperty sourceProperty = @object.Property("source");
+            if (sourceProperty != null)
+            {
+                ReadPropertyActionParameter(action, parameterName, sourceProperty);
+                return;
+            }
+            
+            JProperty bodyConverterProperty = @object.Property("convertFromBody");
+            if (bodyConverterProperty != null)
+            {
+                ReadBodyActionParameter(action, parameterName, bodyConverterProperty);
+                return;
+            }
+        }
+
+        private static void ReadPropertyActionParameter(ActionDefinition action, string parameterName, JProperty sourceProperty)
+        {
+            ActionParameterPropertySource propertySource = ReadPropertySource(parameterName, (JValue)sourceProperty.Value, action.ParameterSources);
+
+            JProperty itemsProperty = ((JObject)sourceProperty.Parent).Property("items");
+            if (itemsProperty != null)
+            {
+                JObject itemsObject = (JObject)itemsProperty.Value;
+                foreach (JProperty itemProperty in itemsObject.Properties())
+                {
+                    TryReadSource(itemProperty, propertySource.ItemSources);
+                }
+            }
+        }
+
+        private static void ReadBodyActionParameter(ActionDefinition action, string parameterName, JProperty bodyConverterProperty)
+        {
+            string bodyConverterTypeName = (string)((JValue)bodyConverterProperty.Value).Value;
+            action.ParameterSources.Add(parameterName, new ActionParameterBodySource(bodyConverterTypeName));
         }
         #endregion
     }

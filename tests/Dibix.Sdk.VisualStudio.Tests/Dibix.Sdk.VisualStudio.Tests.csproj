@@ -6,11 +6,11 @@
 
   <ItemGroup>
     <EmbeddedResource Update="Resource.resx" />
-    <Compile Include="..\Dibix.Sdk.Tests\TestUtility.cs" Link="TestUtility.cs" />
     <Compile Include="..\Dibix.Sdk.Tests\CodeGeneration\CodeGenerationException.cs" Link="CodeGenerationException.cs" />
     <Compile Update="TextTemplateCodeGeneratorTests.Base.cs">
       <DependentUpon>TextTemplateCodeGeneratorTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="..\Dibix.Tests\TestUtility.cs" Link="TestUtility.cs" />
 
     <None Update="FluentSourcesTest.tt">
       <LastGenOutput>FluentSourcesTest.cs</LastGenOutput>
