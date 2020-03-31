@@ -17,7 +17,7 @@
     },
     "PropertySource": {
       "type": "string",
-      "pattern": "^[A-Z]+.[A-Z]([A-Za-z]+)?$"
+      "pattern": "^[A-Z]+((\\.\\$[A-Z]+)|(\\.[A-Z]([A-Za-z]+)?){1,})$"
     },
     "ItemsPropertySource": {
       "type": "object",

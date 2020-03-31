@@ -140,11 +140,11 @@ namespace Dibix.Tests
             public XElement data { get; set; }
         }
         
-        private sealed class ExplicitHttpBodyItemSet : StructuredType<ExplicitHttpBodyItemSet, int, int, string>
+        private sealed class ExplicitHttpBodyItemSet : StructuredType<ExplicitHttpBodyItemSet, int, int, int, string>
         {
-            public ExplicitHttpBodyItemSet() : base("x") => base.ImportSqlMetadata(() => this.Add(default, default, default));
+            public ExplicitHttpBodyItemSet() : base("x") => base.ImportSqlMetadata(() => this.Add(default, default, default, default));
 
-            public void Add(int id_, int age_, string name_) => base.AddValues(id_, age_, name_);
+            public void Add(int id_, int idx, int age_, string name_) => base.AddValues(id_, idx, age_, name_);
         }
         
         private sealed class ImplicitHttpBodyItemSet : StructuredType<ImplicitHttpBodyItemSet, int, string>

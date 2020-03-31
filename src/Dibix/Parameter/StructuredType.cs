@@ -99,7 +99,7 @@ namespace Dibix
             Guard.IsNotNull(addItemFunc, nameof(addItemFunc));
 
             TDefinition type = new TDefinition();
-            int index = 0;
+            int index = 1;
             foreach (TSource item in source)
             {
                 addItemFunc(type, item, index++);

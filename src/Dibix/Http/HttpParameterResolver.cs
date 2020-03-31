@@ -16,6 +16,7 @@ namespace Dibix.Http
         private static readonly ICollection<Type> KnownDependencies = new[] { typeof(IDatabaseAccessorFactory) };
         private static readonly Lazy<PropertyAccessor> DebugViewAccessor = new Lazy<PropertyAccessor>(BuildDebugViewAccessor);
         private const string ItemSourceName = "ITEM";
+        private const string ItemIndexPropertyName = "$INDEX";
         #endregion
 
         #region Delegates
@@ -408,12 +409,18 @@ namespace Dibix.Http
 
             ParameterExpression addItemFuncSetParameter = Expression.Parameter(parameter.ParameterType, "x");
             ParameterExpression addItemFuncItemParameter = Expression.Parameter(itemType, "y");
+            ParameterExpression addItemFuncIndexParameter = Expression.Parameter(typeof(int), "i");
 
             foreach (HttpParameterInfo itemSource in parameter.Items.ParameterSources)
             {
                 Expression source;
                 if (itemSource.SourceKind == HttpParameterSourceKind.SourceProperty && itemSource.Source.Name == ItemSourceName)
-                    source = Expression.Property(addItemFuncItemParameter, itemSource.Source.PropertyName);
+                {
+                    if (itemSource.Source.PropertyName == ItemIndexPropertyName)
+                        source = addItemFuncIndexParameter;
+                    else
+                        source = Expression.Property(addItemFuncItemParameter, itemSource.Source.PropertyName);
+                }
                 else
                     source = CollectParameterValue(itemSource, sources);
 
@@ -431,7 +438,7 @@ Either create a mapping or make sure a property of the same name exists in the s
             }
 
             MethodCallExpression addItemCall = Expression.Call(addItemFuncSetParameter, parameter.Items.AddItemMethod, addMethodParameters.Values);
-            Expression addItemLambda = Expression.Lambda(addItemCall, addItemFuncSetParameter, addItemFuncItemParameter);
+            Expression addItemLambda = Expression.Lambda(addItemCall, addItemFuncSetParameter, addItemFuncItemParameter, addItemFuncIndexParameter);
             Expression value = Expression.Call(null, structuredTypeFactoryMethod, sourcePropertyExpression, addItemLambda);
             return value;
         }
@@ -528,7 +535,7 @@ Either create a mapping or make sure a property of the same name exists in the s
                     continue;
 
                 if (parameters[0].ParameterType.GetGenericTypeDefinition() == typeof(IEnumerable<>)
-                 && parameters[1].ParameterType.GetGenericTypeDefinition() == typeof(Action<,>))
+                 && parameters[1].ParameterType.GetGenericTypeDefinition() == typeof(Action<,,>))
                 {
                     return method.MakeGenericMethod(itemType);
                 }
