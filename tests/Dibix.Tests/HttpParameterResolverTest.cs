@@ -282,7 +282,9 @@ Parameter: lcid", exception.Message);
     Dibix.Tests.HttpParameterResolverTest+ImplicitHttpBodyItem $y,
     System.Int32 $i) {
     .Call $x.Add(
-        $y.Id,
+        .Call Dibix.Http.HttpParameterResolver.ConvertValue(
+            ""type"",
+            $y.Type),
         $y.Name)
 }", result.Source);
             Assert.Equal(3, result.Parameters.Count);
@@ -303,8 +305,8 @@ Parameter: lcid", exception.Message);
                 UserId = 5,
                 ItemsA =
                 {
-                    new ImplicitHttpBodyItem(1, "X"),
-                    new ImplicitHttpBodyItem(2, "Y")
+                    new ImplicitHttpBodyItem(ImplicitHttpBodyItemType.A, "X"),
+                    new ImplicitHttpBodyItem(ImplicitHttpBodyItemType.B, "Y")
                 }
             };
             HttpRequestMessage request = new HttpRequestMessage();
@@ -332,10 +334,10 @@ Parameter: lcid", exception.Message);
             Assert.Equal(1033, ((ImplicitBodyHttpParameterInput)arguments["input"]).localeid);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
             Assert.IsType<ImplicitHttpBodyItemSet>(arguments["itemsa"]);
-            Assert.Equal(@"id INT(4)  name NVARCHAR(MAX)
----------  ------------------
-1          X                 
-2          Y                 ", ((ImplicitHttpBodyItemSet)arguments["itemsa"]).Dump());
+            Assert.Equal(@"type SMALLINT(2)  name NVARCHAR(MAX)
+----------------  ------------------
+1                 X                 
+2                 Y                 ", ((ImplicitHttpBodyItemSet)arguments["itemsa"]).Dump());
         }
         private static void Compile_ImplicitBodySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, int id, [InputClass] ImplicitBodyHttpParameterInput input, int userid, ImplicitHttpBodyItemSet itemsa) { }
 

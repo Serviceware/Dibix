@@ -23,7 +23,7 @@
     <PackageReference Include="Microsoft.SqlServer.DacFx" Version="$(DacFxVersion)" />
     <PackageReference Include="Newtonsoft.Json.Schema" Version="$(NewtonsoftJsonSchemaVersion)" />
     
-    <PackageReference Include="ILMerge" Version="$(ILMergeVersion)" PrivateAssets="All" />
+    <PackageReference Include="ILRepack" Version="$(ILRepackVersion)" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
@@ -76,10 +76,10 @@
     </PropertyGroup>
 
     <!-- 
-      Unfortunately the startup performance of the merged EXE is incredibly slow (~40 sec)
-      Since I have not yet found out what it is, we deploy dependencies side by side
+      ILMerge/ILRepack introduces various issues including problems with dynamic loaded assemblies.
+      We'll keep this open as an option for the future but right now it's not stable enough yet.
     -->
-    <!--<Exec Command="$(ILMergeConsolePath) /target:winexe /targetplatform:&quot;v4,c:\windows\Microsoft.NET\Framework\v4.0.30319&quot; /out:$(_DibixExePath) $(_DibixExeDependencies) /ndebug" />-->
+    <!--<Exec Command="$(ILRepack) /out:$(_DibixExePath) /target:winexe $(_DibixExeDependencies)" />-->
     <Copy SourceFiles="$(_DibixCliExePath)" DestinationFiles="$(_DibixExePath)" />
 
     <!-- Build Dibix runtime -->

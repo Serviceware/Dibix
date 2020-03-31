@@ -405,7 +405,8 @@ namespace Dibix.Http
         {
             Type itemType = GetItemType(sourcePropertyExpression.Type);
             MethodInfo structuredTypeFactoryMethod = GetStructuredTypeFactoryMethod(parameter.ParameterType, itemType);
-            IDictionary<string, Expression> addMethodParameters = parameter.Items.AddItemMethod.GetParameters().ToDictionary(x => x.Name, x => (Expression)null);
+            IDictionary<string, Expression> addMethodParameterValues = parameter.Items.AddItemMethod.GetParameters().ToDictionary(x => x.Name, x => (Expression)null);
+            IDictionary<string, Type> addMethodParameterTypes = parameter.Items.AddItemMethod.GetParameters().ToDictionary(x => x.Name, x => x.ParameterType);
 
             ParameterExpression addItemFuncSetParameter = Expression.Parameter(parameter.ParameterType, "x");
             ParameterExpression addItemFuncItemParameter = Expression.Parameter(itemType, "y");
@@ -424,20 +425,29 @@ namespace Dibix.Http
                 else
                     source = CollectParameterValue(itemSource, sources);
 
-                addMethodParameters[itemSource.ParameterName] = source;
+                Type targetType = addMethodParameterTypes[itemSource.ParameterName];
+                if (targetType != source.Type)
+                    source = Expression.Call(typeof(HttpParameterResolver), nameof(ConvertValue), new[] { source.Type, targetType }, Expression.Constant(itemSource.ParameterName), source);
+
+                addMethodParameterValues[itemSource.ParameterName] = source;
             }
 
-            foreach (KeyValuePair<string, Expression> addMethodParameter in addMethodParameters.Where(x => x.Value == null).ToArray())
+            foreach (KeyValuePair<string, Expression> addMethodParameter in addMethodParameterValues.Where(x => x.Value == null).ToArray())
             {
                 PropertyInfo property = itemType.GetTypeInfo().GetProperty(addMethodParameter.Key, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
                 if (property == null)
                     throw new InvalidOperationException($@"Can not map UDT column: {parameter.Items.UdtName ?? parameter.ParameterType.ToString()}.{addMethodParameter.Key}
 Either create a mapping or make sure a property of the same name exists in the source: {parameter.Source.Name}.{parameter.Source.PropertyName}");
 
-                addMethodParameters[addMethodParameter.Key] = Expression.Property(addItemFuncItemParameter, property);
+                Expression source = Expression.Property(addItemFuncItemParameter, property);
+                Type targetType = addMethodParameterTypes[addMethodParameter.Key];
+                if (targetType != source.Type)
+                    source = Expression.Call(typeof(HttpParameterResolver), nameof(ConvertValue), new[] { source.Type, targetType }, Expression.Constant(addMethodParameter.Key), source);
+
+                addMethodParameterValues[addMethodParameter.Key] = source;
             }
 
-            MethodCallExpression addItemCall = Expression.Call(addItemFuncSetParameter, parameter.Items.AddItemMethod, addMethodParameters.Values);
+            MethodCallExpression addItemCall = Expression.Call(addItemFuncSetParameter, parameter.Items.AddItemMethod, addMethodParameterValues.Values);
             Expression addItemLambda = Expression.Lambda(addItemCall, addItemFuncSetParameter, addItemFuncItemParameter, addItemFuncIndexParameter);
             Expression value = Expression.Call(null, structuredTypeFactoryMethod, sourcePropertyExpression, addItemLambda);
             return value;

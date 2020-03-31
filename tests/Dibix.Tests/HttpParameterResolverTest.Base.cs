@@ -116,14 +116,20 @@ namespace Dibix.Tests
             }
         }
 
+        private enum ImplicitHttpBodyItemType
+        {
+            A = 1,
+            B = 2,
+        }
+
         private sealed class ImplicitHttpBodyItem
         {
-            public int Id { get; }
+            public ImplicitHttpBodyItemType Type { get; }
             public string Name { get; }
 
-            public ImplicitHttpBodyItem(int id, string name)
+            public ImplicitHttpBodyItem(ImplicitHttpBodyItemType type, string name)
             {
-                this.Id = id;
+                this.Type = type;
                 this.Name = name;
             }
         }
@@ -147,11 +153,11 @@ namespace Dibix.Tests
             public void Add(int id_, int idx, int age_, string name_) => base.AddValues(id_, idx, age_, name_);
         }
         
-        private sealed class ImplicitHttpBodyItemSet : StructuredType<ImplicitHttpBodyItemSet, int, string>
+        private sealed class ImplicitHttpBodyItemSet : StructuredType<ImplicitHttpBodyItemSet, short, string>
         {
             public ImplicitHttpBodyItemSet() : base("x") => base.ImportSqlMetadata(() => this.Add(default, default));
 
-            public void Add(int id, string name) => base.AddValues(id, name);
+            public void Add(short type, string name) => base.AddValues(type, name);
         }
 
         private sealed class JsonToXmlConverter : IFormattedInputConverter<JObject, XElement>
