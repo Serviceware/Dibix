@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Dibix.Http
 {
@@ -8,7 +9,7 @@ namespace Dibix.Http
 
         public HttpParameterSourceSelector()
         {
-            this.ParameterSources = new Dictionary<string, HttpParameterSource>();
+            this.ParameterSources = new Dictionary<string, HttpParameterSource>(StringComparer.OrdinalIgnoreCase);
         }
 
         public void ResolveParameterFromConstant(string targetParameterName, bool value)

@@ -13,7 +13,7 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly string _outputName;
         private readonly ICollection<SqlStatementInfo> _statements;
         private readonly ILogger _logger;
-        private readonly Lazy<IDictionary<string, string>> _neighborStatementMapAccessor;
+        private readonly Lazy<IDictionary<string, NeighborActionTarget>> _neighborStatementMapAccessor;
 
         public ControllerActionTargetSelector(string productName, string areaName, string outputName, ICollection<SqlStatementInfo> statements, IReferencedAssemblyProvider referencedAssemblyProvider, ILogger logger)
         {
@@ -22,7 +22,7 @@ namespace Dibix.Sdk.CodeGeneration
             this._outputName = outputName;
             this._statements = statements;
             this._logger = logger;
-            this._neighborStatementMapAccessor = new Lazy<IDictionary<string, string>>(() => CreateNeighborStatementMap(referencedAssemblyProvider));
+            this._neighborStatementMapAccessor = new Lazy<IDictionary<string, NeighborActionTarget>>(() => CreateNeighborStatementMap(referencedAssemblyProvider));
         }
 
         public ActionDefinitionTarget Select(string target, string filePath, IJsonLineInfo lineInfo)
@@ -60,18 +60,18 @@ Tried: {normalizedNamespace}.{methodName}", filePath, lineInfo.LineNumber, lineI
             }
 
             // 3. Target 'could' be a compiled method in a neighbour project
-            if (!this._neighborStatementMapAccessor.Value.TryGetValue(methodName, out string neighborTypeName))
+            if (!this._neighborStatementMapAccessor.Value.TryGetValue(methodName, out NeighborActionTarget neighborAction))
             {
                 this._logger.LogError(null, $"Could not find a method name '{methodName}' on database accessor type '{typeName}'", filePath, lineInfo.LineNumber, lineInfo.LinePosition);
                 return null;
             }
 
-            return new ExternalActionTarget(neighborTypeName, methodName);
+            return neighborAction;
         }
 
-        private static IDictionary<string, string> CreateNeighborStatementMap(IReferencedAssemblyProvider referencedAssemblyProvider) => CreateNeighborStatementMapCore(referencedAssemblyProvider).ToDictionary(x => x.Key, x => x.Value);
+        private static IDictionary<string, NeighborActionTarget> CreateNeighborStatementMap(IReferencedAssemblyProvider referencedAssemblyProvider) => CreateNeighborStatementMapCore(referencedAssemblyProvider).ToDictionary(x => x.Name);
 
-        private static IEnumerable<KeyValuePair<string, string>> CreateNeighborStatementMapCore(IReferencedAssemblyProvider referencedAssemblyProvider)
+        private static IEnumerable<NeighborActionTarget> CreateNeighborStatementMapCore(IReferencedAssemblyProvider referencedAssemblyProvider)
         {
             return from assembly in referencedAssemblyProvider.ReferencedAssemblies
                    where CustomAttributeData.GetCustomAttributes(assembly).Any(x => x.AttributeType.FullName == "Dibix.ArtifactAssemblyAttribute")
@@ -81,7 +81,18 @@ Tried: {normalizedNamespace}.{methodName}", filePath, lineInfo.LineNumber, lineI
                    from method in type.GetMethods() 
                    let parameters = method.GetParameters() 
                    where parameters.Any() && parameters[0].ParameterType.FullName == "Dibix.IDatabaseAccessorFactory" 
-                   select new KeyValuePair<string, string>(method.Name, type.FullName);
+                   select CreateNeighborActionTarget(method);
+        }
+
+        private static NeighborActionTarget CreateNeighborActionTarget(MethodInfo method)
+        {
+            IList<ParameterInfo> parameters = method.GetParameters().ToList();
+            if (parameters[0].ParameterType.FullName == "Dibix.IDatabaseAccessorFactory") 
+                parameters.RemoveAt(0);
+
+            NeighborActionTarget target = new NeighborActionTarget(method.DeclaringType.FullName, method.Name);
+            target.Parameters.AddRange(parameters.Select(x => x.Name));
+            return target;
         }
     }
 }

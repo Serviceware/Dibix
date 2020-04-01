@@ -52,7 +52,7 @@ namespace Dibix.Sdk.CodeGeneration
                 {
                     writer.Write("x.AddAction(ReflectionHttpActionTarget.Create(");
 
-                    if (action.Target is ReferencedActionTarget referencedActionTarget)
+                    if (action.Target is GeneratedAccessorMethodTarget referencedActionTarget)
                     {
                         writer.WriteRaw($"typeof({referencedActionTarget.AccessorFullName}), nameof({referencedActionTarget.AccessorFullName}.")
                               .WriteRaw(referencedActionTarget.Name)

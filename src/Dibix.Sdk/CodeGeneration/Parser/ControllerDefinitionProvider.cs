@@ -84,7 +84,7 @@ namespace Dibix.Sdk.CodeGeneration
                 BodyBinder = (string)action.Property("bindFromBody")?.Value,
                 IsAnonymous = (bool?)action.Property("isAnonymous")?.Value ?? default
             };
-            ReadControllerActionParameters(actionDefinition, (JObject)action.Property("params")?.Value);
+            this.ReadControllerActionParameters(actionDefinition, (JObject)action.Property("params")?.Value, filePath);
             if (controller.Actions.Add(actionDefinition))
                 return;
 
@@ -126,13 +126,21 @@ namespace Dibix.Sdk.CodeGeneration
             controller.ControllerImports.Add(typeName);
         }
 
-        private static void ReadControllerActionParameters(ActionDefinition action, JObject mappings)
+        private void ReadControllerActionParameters(ActionDefinition action, JObject mappings, string filePath)
         {
             if (mappings == null)
                 return;
 
+            GeneratedAccessorMethodTarget generatedAccessorMethodTarget = action.Target as GeneratedAccessorMethodTarget;
+
             foreach (JProperty property in mappings.Properties())
             {
+                if (generatedAccessorMethodTarget?.Parameters.Contains(property.Name) == false)
+                {
+                    IJsonLineInfo propertyLocation = property;
+                    base.Logger.LogError(null, $"Parameter '{property.Name}' not found on action: {action.Target.Name}", filePath, propertyLocation.LineNumber, propertyLocation.LinePosition);
+                }
+
                 if (TryReadSource(property, action.ParameterSources))
                     continue;
 

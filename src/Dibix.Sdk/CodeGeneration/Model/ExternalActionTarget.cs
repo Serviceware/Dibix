@@ -1,8 +1,8 @@
 ﻿namespace Dibix.Sdk.CodeGeneration
 {
-    public sealed class ExternalActionTarget : ReferencedActionTarget
+    public sealed class NeighborActionTarget : GeneratedAccessorMethodTarget
     {
-        public ExternalActionTarget(string assemblyAndTypeQualifiedMethodName, string methodName) : base(assemblyAndTypeQualifiedMethodName, methodName)
+        public NeighborActionTarget(string accessorFullName, string methodName) : base(accessorFullName, methodName)
         {
         }
     }
