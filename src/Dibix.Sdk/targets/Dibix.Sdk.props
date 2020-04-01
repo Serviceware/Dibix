@@ -32,7 +32,7 @@
     <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
 
     <DibixToolsDirectory>$(MSBuildThisFileDirectory)..\tools\net472\</DibixToolsDirectory>
-    <DibixCliPath>$(DibixToolsDirectory)Dibix.exe</DibixCliPath>
+    <DibixCliPath Condition="'$(DibixCliPath)' == ''">$(DibixToolsDirectory)Dibix.exe</DibixCliPath>
     <DibixRuntimePath>$(DibixToolsDirectory)Dibix.dll</DibixRuntimePath>
     
     <ClientTargetPath Condition="'$(ClientOutputName)' != ''">$(TargetDir)$(ClientOutputName).dll</ClientTargetPath>

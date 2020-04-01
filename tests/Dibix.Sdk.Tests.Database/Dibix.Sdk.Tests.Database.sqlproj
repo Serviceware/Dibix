@@ -61,7 +61,11 @@
   </PropertyGroup>
   <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
   <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
-  <Import Project="..\..\src\Dibix.Sdk\targets\Dibix.Sdk.Targets" />
+  <PropertyGroup>
+    <DibixCliPath>..\..\src\Dibix.Sdk.Cli\bin\$(Configuration)\net472\Dibix.Sdk.Cli.exe</DibixCliPath>
+  </PropertyGroup>
+  <Import Project="..\..\src\Dibix.Sdk\targets\Dibix.Sdk.props" />
+  <Import Project="..\..\src\Dibix.Sdk\targets\Dibix.Sdk.targets" />
   <ItemGroup>
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_001.sql" />
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_002.sql" />

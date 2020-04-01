@@ -41,7 +41,7 @@ namespace Dibix.Sdk.CodeAnalysis
 
         private void Fail(int line, int column, params object[] args)
         {
-            string errorText = $"[{this.Id:d3}] {String.Format(this.ErrorMessage, args)}";
+            string errorText = String.Format(this.ErrorMessage, args);
             SqlCodeAnalysisError problem = new SqlCodeAnalysisError(this.Id, errorText, line, column);
             this.Errors.Add(problem);
         }
