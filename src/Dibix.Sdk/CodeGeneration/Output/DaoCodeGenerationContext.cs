@@ -84,5 +84,13 @@ namespace Dibix.Sdk.CodeGeneration
 
             return sb.ToString();
         }
+
+        public string GetRelativeNamespace(string layerName, string relativeNamespace)
+        {
+            if (!this.WriteNamespaces)
+                return null;
+                
+            return NamespaceUtility.BuildRelativeNamespace(this.Model.RootNamespace, layerName, relativeNamespace);
+        }
     }
 }

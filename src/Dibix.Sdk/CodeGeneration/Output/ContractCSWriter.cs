@@ -16,10 +16,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             context.AddUsing(typeof(DateTime).Namespace);
 
-            var namespaceGroups = context.Model
-                                         .Contracts
-                                         .GroupBy(x => context.WriteNamespaces ? NamespaceUtility.BuildRelativeNamespace(context.Model.RootNamespace, LayerName.DomainModel, x.Namespace) : null)
-                                         .ToArray();
+            var namespaceGroups = CollectContracts(context).GroupBy(x => context.GetRelativeNamespace(LayerName.DomainModel, x.Namespace)).ToArray();
 
             for (int i = 0; i < namespaceGroups.Length; i++)
             {
@@ -51,6 +48,20 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
+        private static IEnumerable<SchemaDefinition> CollectContracts(DaoCodeGenerationContext context)
+        {
+            foreach (SchemaDefinition contract in context.Model.Contracts)
+                yield return contract;
+
+            foreach (SqlStatementInfo statement in context.Model.Statements.Where(x => x.GenerateResultClass))
+            {
+                if (!(statement.ResultType is SchemaTypeReference schemaTypeReference))
+                    throw new InvalidOperationException($"Unexpected type for result contract that should be generated: {statement.ResultType}");
+
+                yield return context.GetSchema(schemaTypeReference);
+            }
+        }
+
         private static void ProcessObjectSchema(DaoCodeGenerationContext context, CSharpStatementScope scope, ObjectSchema schema, bool withAnnotations)
         {
             ICollection<string> classAnnotations = new Collection<string>();

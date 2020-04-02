@@ -79,7 +79,6 @@ namespace Dibix.Sdk.CodeGeneration
         {
             yield return new DaoExecutorWriter();
             yield return new DaoExecutorInputClassWriter();
-            yield return new DaoGridResultClassWriter();
             yield return new DaoContractClassWriter();
             yield return new DaoStructuredTypeWriter();
             yield return new DaoApiConfigurationWriter();

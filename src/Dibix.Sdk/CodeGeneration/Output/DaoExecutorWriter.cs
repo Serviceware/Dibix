@@ -29,7 +29,7 @@ namespace Dibix.Sdk.CodeGeneration
             context.AddUsing(typeof(GeneratedCodeAttribute).Namespace)
                    .AddUsing("Dibix");
 
-            foreach (IGrouping<string, SqlStatementInfo> namespaceGroup in context.Model.Statements.GroupBy(x => context.WriteNamespaces ? NamespaceUtility.BuildRelativeNamespace(context.Model.RootNamespace, this.LayerName, x.Namespace) : null))
+            foreach (IGrouping<string, SqlStatementInfo> namespaceGroup in context.Model.Statements.GroupBy(x => context.GetRelativeNamespace(this.LayerName, x.Namespace)))
             {
                 CSharpStatementScope scope = namespaceGroup.Key != null ? context.Output.BeginScope(namespaceGroup.Key) : context.Output;
                 IList<SqlStatementInfo> statements = namespaceGroup.ToArray();

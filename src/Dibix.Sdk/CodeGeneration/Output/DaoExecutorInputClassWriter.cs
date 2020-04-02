@@ -24,7 +24,7 @@ namespace Dibix.Sdk.CodeGeneration
             var namespaceGroups = context.Model
                                          .Statements
                                          .Where(RequiresInput)
-                                         .GroupBy(x => context.WriteNamespaces ? NamespaceUtility.BuildRelativeNamespace(context.Model.RootNamespace, this.LayerName, x.Namespace) : null)
+                                         .GroupBy(x => context.GetRelativeNamespace(this.LayerName, x.Namespace))
                                          .ToArray();
 
             for (int i = 0; i < namespaceGroups.Length; i++)
