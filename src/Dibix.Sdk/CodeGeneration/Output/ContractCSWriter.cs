@@ -14,8 +14,6 @@ namespace Dibix.Sdk.CodeGeneration
         #region Public Methods
         public static void Write(DaoCodeGenerationContext context, bool withAnnotations)
         {
-            context.AddUsing(typeof(DateTime).Namespace);
-
             var namespaceGroups = CollectContracts(context).GroupBy(x => context.GetRelativeNamespace(LayerName.DomainModel, x.Namespace)).ToArray();
 
             for (int i = 0; i < namespaceGroups.Length; i++)
@@ -70,7 +68,8 @@ namespace Dibix.Sdk.CodeGeneration
                 classAnnotations.Add($"DataContract(Namespace = \"{schema.WcfNamespace}\")");
             }
 
-            CSharpClass @class = scope.AddClass(schema.DefinitionName, CSharpModifiers.Public | CSharpModifiers.Sealed, classAnnotations);
+            CSharpModifiers classVisibility = context.GeneratePublicArtifacts ? CSharpModifiers.Public : CSharpModifiers.Internal;
+            CSharpClass @class = scope.AddClass(schema.DefinitionName, classVisibility | CSharpModifiers.Sealed, classAnnotations);
             ICollection<string> ctorAssignments = new Collection<string>();
             ICollection<string> shouldSerializeMethods = new Collection<string>();
             foreach (ObjectSchemaProperty property in schema.Properties)

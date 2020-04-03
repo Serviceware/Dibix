@@ -54,6 +54,7 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
                         x => new XElement
                         (
                             "error"
+                          , new XAttribute("ruleid", x.RuleId)
                           , new XAttribute("message", x.Message)
                           , new XAttribute("line", x.Line)
                           , new XAttribute("column", x.Column)

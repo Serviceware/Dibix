@@ -10,7 +10,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Overrides
-        public override bool HasContent(CodeGenerationModel model) => model.Contracts.Any();
+        public override bool HasContent(CodeGenerationModel model) => model.Contracts.Any() || model.Statements.Any(x => x.GenerateResultClass);
         public override void Write(DaoCodeGenerationContext context) => ContractCSWriter.Write(context, true);
         #endregion
     }

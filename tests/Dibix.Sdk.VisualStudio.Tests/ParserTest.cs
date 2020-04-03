@@ -211,7 +211,7 @@ UNION ALL
     }
     #endregion
 
-    #region Grid result types
+    #region Contracts
     internal sealed class dbx_tests_parser_invalidcolumnsforentityResult
     {
         public ICollection<int?> A { get; private set; }

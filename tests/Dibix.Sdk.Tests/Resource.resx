@@ -121,11 +121,13 @@
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[010] Multiple table sources must be aliased"
+    ruleid="10"
+    message="Multiple table sources must be aliased"
     line="7"
     column="7" /&gt;
   &lt;error
-    message="[010] Multiple table sources must be aliased"
+    ruleid="10"
+    message="Multiple table sources must be aliased"
     line="11"
     column="7" /&gt;
 &lt;/errors&gt;</value>
@@ -134,7 +136,8 @@
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[035] Ambiguous check constraints: CK_dbx_codeanalysis_error_035_1_fail1, CK_dbx_codeanalysis_error_035_1_fail2"
+    ruleid="35"
+    message="Ambiguous check constraints: CK_dbx_codeanalysis_error_035_1_fail1, CK_dbx_codeanalysis_error_035_1_fail2"
     line="5"
     column="5" /&gt;
 &lt;/errors&gt;</value>
@@ -143,19 +146,23 @@
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[011] Identifier quotation should be consistent and not mixed. Either use all square brackets or none: dbo.[dbx_codeanalysis_udt_generic]"
+    ruleid="11"
+    message="Identifier quotation should be consistent and not mixed. Either use all square brackets or none: dbo.[dbx_codeanalysis_udt_generic]"
     line="5"
     column="13" /&gt;
   &lt;error
-    message="[011] Identifier quotation should be consistent and not mixed. Either use all square brackets or none: [dbo].dbx_codeanalysis_udt_generic"
+    ruleid="11"
+    message="Identifier quotation should be consistent and not mixed. Either use all square brackets or none: [dbo].dbx_codeanalysis_udt_generic"
     line="6"
     column="13" /&gt;
   &lt;error
-    message="[011] Identifier quotation should be consistent and not mixed. Either use all square brackets or none: dbo.[dbx_table]"
+    ruleid="11"
+    message="Identifier quotation should be consistent and not mixed. Either use all square brackets or none: dbo.[dbx_table]"
     line="12"
     column="7" /&gt;
   &lt;error
-    message="[011] Identifier quotation should be consistent and not mixed. Either use all square brackets or none: [dbo].dbx_table"
+    ruleid="11"
+    message="Identifier quotation should be consistent and not mixed. Either use all square brackets or none: [dbo].dbx_table"
     line="15"
     column="7" /&gt;
 &lt;/errors&gt;</value>
@@ -164,7 +171,8 @@
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[028] Use of non UTC date/time function: GETDATE"
+    ruleid="28"
+    message="Use of non UTC date/time function: GETDATE"
     line="4"
     column="84" /&gt;
 &lt;/errors&gt;</value>
@@ -179,7 +187,6 @@
 //     the code is regenerated.
 // &lt;/auto-generated&gt;
 //----------------------------------------------------------------------------*/
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
@@ -230,7 +237,8 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[003] Please specify a return code for the RETURN expression"
+    ruleid="3"
+    message="Please specify a return code for the RETURN expression"
     line="3"
     column="2" /&gt;
 &lt;/errors&gt;</value>
@@ -561,11 +569,13 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[008] Aliases must be marked with 'AS'"
+    ruleid="8"
+    message="Aliases must be marked with 'AS'"
     line="3"
     column="28" /&gt;
   &lt;error
-    message="[008] Aliases must be marked with 'AS'"
+    ruleid="8"
+    message="Aliases must be marked with 'AS'"
     line="4"
     column="25" /&gt;
 &lt;/errors&gt;</value>
@@ -574,15 +584,18 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[025] Please specify a nullable constraint for the column 'dbx_codeanalysis_error_025_table_fail.a' and don't rely on the default"
+    ruleid="25"
+    message="Please specify a nullable constraint for the column 'dbx_codeanalysis_error_025_table_fail.a' and don't rely on the default"
     line="12"
     column="5" /&gt;
   &lt;error
-    message="[025] Please specify a nullable constraint for the column 'dbx_codeanalysis_error_025_table_fail.b' and don't rely on the default"
+    ruleid="25"
+    message="Please specify a nullable constraint for the column 'dbx_codeanalysis_error_025_table_fail.b' and don't rely on the default"
     line="13"
     column="5" /&gt;
   &lt;error
-    message="[025] Please specify the clustering (CLUSTERED/NONCLUSTERED) for the index 'IX_dbx_codeanalysis_error_025_table_fail_b' and don't rely on the default"
+    ruleid="25"
+    message="Please specify the clustering (CLUSTERED/NONCLUSTERED) for the index 'IX_dbx_codeanalysis_error_025_table_fail_b' and don't rely on the default"
     line="24"
     column="1" /&gt;
 &lt;/errors&gt;</value>
@@ -591,19 +604,23 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[032] Clustered index PK_dbx_codeanalysis_error_032_fail1 size is 901 bytes. The maximum key length is 900 bytes"
+    ruleid="32"
+    message="Clustered index PK_dbx_codeanalysis_error_032_fail1 size is 901 bytes. The maximum key length is 900 bytes"
     line="18"
     column="5" /&gt;
   &lt;error
-    message="[032] Clustered index PK_dbx_codeanalysis_error_032_fail2 size is 901 bytes. The maximum key length is 900 bytes"
+    ruleid="32"
+    message="Clustered index PK_dbx_codeanalysis_error_032_fail2 size is 901 bytes. The maximum key length is 900 bytes"
     line="35"
     column="5" /&gt;
   &lt;error
-    message="[032] Nonclustered index UQ_dbx_codeanalysis_error_032_fail2_ab size is 1701 bytes. The maximum key length is 1700 bytes"
+    ruleid="32"
+    message="Nonclustered index UQ_dbx_codeanalysis_error_032_fail2_ab size is 1701 bytes. The maximum key length is 1700 bytes"
     line="36"
     column="5" /&gt;
   &lt;error
-    message="[032] Nonclustered index IX_dbx_codeanalysis_error_032_fail2_ac size is 1701 bytes. The maximum key length is 1700 bytes"
+    ruleid="32"
+    message="Nonclustered index IX_dbx_codeanalysis_error_032_fail2_ac size is 1701 bytes. The maximum key length is 1700 bytes"
     line="37"
     column="5" /&gt;
 &lt;/errors&gt;</value>
@@ -612,15 +629,18 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[037] Make non inline table valued function inline or replace it with a stored procedure: dbx_codeanalysis_error_037_tvf_noninline"
+    ruleid="37"
+    message="Make non inline table valued function inline or replace it with a stored procedure: dbx_codeanalysis_error_037_tvf_noninline"
     line="14"
     column="1" /&gt;
   &lt;error
-    message="[037] Scalar functions should only be used for assignments or check constraints. Otherwise replace it with an inline table-valued function: dbx_codeanalysis_error_037_scalar"
+    ruleid="37"
+    message="Scalar functions should only be used for assignments or check constraints. Otherwise replace it with an inline table-valued function: dbx_codeanalysis_error_037_scalar"
     line="40"
     column="16" /&gt;
   &lt;error
-    message="[037] Scalar functions should only be used for assignments or check constraints. Otherwise replace it with an inline table-valued function: dbx_codeanalysis_error_037_scalar"
+    ruleid="37"
+    message="Scalar functions should only be used for assignments or check constraints. Otherwise replace it with an inline table-valued function: dbx_codeanalysis_error_037_scalar"
     line="42"
     column="18" /&gt;
 &lt;/errors&gt;</value>
@@ -718,22 +738,6 @@ namespace Dibix.Sdk.Tests
     }
     namespace DomainModel
     {
-        #region Grid result types
-        namespace Grid
-        {
-            public sealed class GetGridResult
-            {
-                public Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract Item { get; set; }
-                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
-
-                public GetGridResult()
-                {
-                    this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
-                }
-            }
-        }
-        #endregion
-
         #region Contracts
         public enum Direction : int
         {
@@ -771,6 +775,20 @@ namespace Dibix.Sdk.Tests
                 public MultiMapContract()
                 {
                     this.Y = new Collection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;();
+                    this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
+                }
+            }
+        }
+
+        namespace Grid
+        {
+            public sealed class GetGridResult
+            {
+                public Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract Item { get; set; }
+                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
+
+                public GetGridResult()
+                {
                     this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
                 }
             }
@@ -931,22 +949,6 @@ namespace Dibix.Sdk.Tests
     }
     namespace DomainModel
     {
-        #region Grid result types
-        namespace Grid
-        {
-            public sealed class GridResult
-            {
-                public Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract Item { get; set; }
-                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
-
-                public GridResult()
-                {
-                    this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
-                }
-            }
-        }
-        #endregion
-
         #region Contracts
         public enum Direction : int
         {
@@ -984,6 +986,20 @@ namespace Dibix.Sdk.Tests
                 public MultiMapContract()
                 {
                     this.Y = new Collection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;();
+                    this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
+                }
+            }
+        }
+
+        namespace Grid
+        {
+            public sealed class GridResult
+            {
+                public Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract Item { get; set; }
+                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
+
+                public GridResult()
+                {
                     this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
                 }
             }
@@ -1159,22 +1175,6 @@ namespace Dibix.Sdk.Tests
     }
     namespace DomainModel
     {
-        #region Grid result types
-        namespace Grid
-        {
-            public sealed class GetGridResult
-            {
-                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.JointContract&gt; Items { get; private set; }
-                public Dibix.Sdk.Tests.DomainModel.AccessRights AccessRights { get; set; }
-
-                public GetGridResult()
-                {
-                    this.Items = new Collection&lt;Dibix.Sdk.Tests.DomainModel.JointContract&gt;();
-                }
-            }
-        }
-        #endregion
-
         #region Contracts
         public enum AccessRights : int
         {
@@ -1214,6 +1214,20 @@ namespace Dibix.Sdk.Tests
         {
             public Dibix.Sdk.Tests.DomainModel.GenericContract A { get; set; }
             public Dibix.Sdk.Tests.DomainModel.Direction B { get; set; }
+        }
+
+        namespace Grid
+        {
+            public sealed class GetGridResult
+            {
+                public ICollection&lt;Dibix.Sdk.Tests.DomainModel.JointContract&gt; Items { get; private set; }
+                public Dibix.Sdk.Tests.DomainModel.AccessRights AccessRights { get; set; }
+
+                public GetGridResult()
+                {
+                    this.Items = new Collection&lt;Dibix.Sdk.Tests.DomainModel.JointContract&gt;();
+                }
+            }
         }
         #endregion
     }
@@ -1607,11 +1621,13 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[015] Missing column specification for INSERT statement"
+    ruleid="15"
+    message="Missing column specification for INSERT statement"
     line="4"
     column="3" /&gt;
   &lt;error
-    message="[015] Missing column specification for INSERT statement"
+    ruleid="15"
+    message="Missing column specification for INSERT statement"
     line="10"
     column="4" /&gt;
 &lt;/errors&gt;</value>
@@ -1620,11 +1636,13 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[034] Nullable columns in expressions should be wrapped with ISNULL(column, default value): dbx_codeanalysis_error_034.b"
+    ruleid="34"
+    message="Nullable columns in expressions should be wrapped with ISNULL(column, default value): dbx_codeanalysis_error_034.b"
     line="8"
     column="60" /&gt;
   &lt;error
-    message="[034] Nullable columns in expressions should be wrapped with ISNULL(column, default value): dbx_codeanalysis_error_034.b"
+    ruleid="34"
+    message="Nullable columns in expressions should be wrapped with ISNULL(column, default value): dbx_codeanalysis_error_034.b"
     line="9"
     column="64" /&gt;
 &lt;/errors&gt;</value>
@@ -1633,67 +1651,83 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[001] Invalid casing for 'nocount' [Identifier]"
+    ruleid="1"
+    message="Invalid casing for 'nocount' [Identifier]"
     line="3"
     column="6" /&gt;
   &lt;error
-    message="[001] Invalid casing for 'sysname' [Identifier]"
+    ruleid="1"
+    message="Invalid casing for 'sysname' [Identifier]"
     line="6"
     column="13" /&gt;
   &lt;error
-    message="[001] Invalid casing for 'nvarchar' [Identifier]"
+    ruleid="1"
+    message="Invalid casing for 'nvarchar' [Identifier]"
     line="7"
     column="13" /&gt;
   &lt;error
-    message="[001] Invalid casing for 'max' [Identifier]"
+    ruleid="1"
+    message="Invalid casing for 'max' [Identifier]"
     line="7"
     column="22" /&gt;
   &lt;error
-    message="[001] Invalid casing for 'decimal' [Identifier]"
+    ruleid="1"
+    message="Invalid casing for 'decimal' [Identifier]"
     line="8"
     column="13" /&gt;
   &lt;error
-    message="[001] Invalid casing for 'cast' [Identifier]"
+    ruleid="1"
+    message="Invalid casing for 'cast' [Identifier]"
     line="15"
     column="25" /&gt;
   &lt;error
-    message="[001] Invalid casing for 'count' [Identifier]"
+    ruleid="1"
+    message="Invalid casing for 'count' [Identifier]"
     line="17"
     column="14" /&gt;
   &lt;error
-    message="[001] Invalid casing for 'row_number' [Identifier]"
+    ruleid="1"
+    message="Invalid casing for 'row_number' [Identifier]"
     line="28"
     column="9" /&gt;
   &lt;error
-    message="[001] Invalid casing for 'partition' [Identifier]"
+    ruleid="1"
+    message="Invalid casing for 'partition' [Identifier]"
     line="28"
     column="27" /&gt;
   &lt;error
-    message="[001] Invalid casing for 'set' [Set]"
+    ruleid="1"
+    message="Invalid casing for 'set' [Set]"
     line="3"
     column="2" /&gt;
   &lt;error
-    message="[001] Invalid casing for 'on' [On]"
+    ruleid="1"
+    message="Invalid casing for 'on' [On]"
     line="3"
     column="14" /&gt;
   &lt;error
-    message="[001] Invalid casing for 'SeLeCT' [Select]"
+    ruleid="1"
+    message="Invalid casing for 'SeLeCT' [Select]"
     line="17"
     column="2" /&gt;
   &lt;error
-    message="[001] Invalid casing for 'over' [Over]"
+    ruleid="1"
+    message="Invalid casing for 'over' [Over]"
     line="28"
     column="22" /&gt;
   &lt;error
-    message="[001] Invalid casing for 'by' [By]"
+    ruleid="1"
+    message="Invalid casing for 'by' [By]"
     line="28"
     column="37" /&gt;
   &lt;error
-    message="[001] Invalid casing for 'order' [Order]"
+    ruleid="1"
+    message="Invalid casing for 'order' [Order]"
     line="28"
     column="43" /&gt;
   &lt;error
-    message="[001] Invalid casing for 'by' [By]"
+    ruleid="1"
+    message="Invalid casing for 'by' [By]"
     line="28"
     column="49" /&gt;
 &lt;/errors&gt;</value>
@@ -1702,15 +1736,18 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[020] Found language dependent expression: CAST(N'1990-01-01' AS DATETIME)"
+    ruleid="20"
+    message="Found language dependent expression: CAST(N'1990-01-01' AS DATETIME)"
     line="3"
     column="30" /&gt;
   &lt;error
-    message="[020] Found language dependent expression: 1990-01-01"
+    ruleid="20"
+    message="Found language dependent expression: 1990-01-01"
     line="4"
     column="25" /&gt;
   &lt;error
-    message="[020] Found language dependent expression: CONSTRAINT [DF_dbx_codeanalysis_error_020_table_value] DEFAULT N'1990-01-01'"
+    ruleid="20"
+    message="Found language dependent expression: CONSTRAINT [DF_dbx_codeanalysis_error_020_table_value] DEFAULT N'1990-01-01'"
     line="9"
     column="90" /&gt;
 &lt;/errors&gt;</value>
@@ -1719,7 +1756,8 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[026] Constraints should be defined within the CREATE TABLE statement: UQ_dbx_codeanalysis_error_026_table_b"
+    ruleid="26"
+    message="Constraints should be defined within the CREATE TABLE statement: UQ_dbx_codeanalysis_error_026_table_b"
     line="7"
     column="58" /&gt;
 &lt;/errors&gt;</value>
@@ -1728,11 +1766,13 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[012] Table 'dbx_codeanalysis_error_012_table' does not have a primary key"
+    ruleid="12"
+    message="Table 'dbx_codeanalysis_error_012_table' does not have a primary key"
     line="3"
     column="2" /&gt;
   &lt;error
-    message="[012] User defined table type 'dbx_codeanalysis_udt_error_012' does not have a primary key"
+    ruleid="12"
+    message="User defined table type 'dbx_codeanalysis_udt_error_012' does not have a primary key"
     line="8"
     column="2" /&gt;
 &lt;/errors&gt;</value>
@@ -1741,15 +1781,18 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[022] Missing ORDER BY for SELECT TOP statement"
+    ruleid="22"
+    message="Missing ORDER BY for SELECT TOP statement"
     line="10"
     column="10" /&gt;
   &lt;error
-    message="[022] Invalid TOP filter for single row equality statement"
+    ruleid="22"
+    message="Invalid TOP filter for single row equality statement"
     line="18"
     column="10" /&gt;
   &lt;error
-    message="[022] Invalid TOP filter for single row equality statement"
+    ruleid="22"
+    message="Invalid TOP filter for single row equality statement"
     line="24"
     column="10" /&gt;
 &lt;/errors&gt;</value>
@@ -1758,47 +1801,58 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[017] Column names should only contain the characters 'a-z_' and have no trailing underscores: dbx_codeanalysis_error_017_fail.A"
+    ruleid="17"
+    message="Column names should only contain the characters 'a-z_' and have no trailing underscores: dbx_codeanalysis_error_017_fail.A"
     line="22"
     column="5" /&gt;
   &lt;error
-    message="[017] Primary key constraint 'PK_dbx_codeanalysis_error_017_failx' does not match naming convention 'PK_&amp;lt;table&amp;gt;'. Also make sure the name is all lowercase."
+    ruleid="17"
+    message="Primary key constraint 'PK_dbx_codeanalysis_error_017_failx' does not match naming convention 'PK_&amp;lt;table&amp;gt;'. Also make sure the name is all lowercase."
     line="27"
     column="16" /&gt;
   &lt;error
-    message="[017] Foreign key constraint 'FK_dbx_codeanalysis_error_017_failx_a' does not match naming convention 'FK_&amp;lt;table&amp;gt;_*'. Also make sure the name is all lowercase."
+    ruleid="17"
+    message="Foreign key constraint 'FK_dbx_codeanalysis_error_017_failx_a' does not match naming convention 'FK_&amp;lt;table&amp;gt;_*'. Also make sure the name is all lowercase."
     line="28"
     column="16" /&gt;
   &lt;error
-    message="[017] Unique constraint 'UQ_dbx_codeanalysis_error_017_failx_b' does not match naming convention 'UQ_&amp;lt;table&amp;gt;_*'. Also make sure the name is all lowercase."
+    ruleid="17"
+    message="Unique constraint 'UQ_dbx_codeanalysis_error_017_failx_b' does not match naming convention 'UQ_&amp;lt;table&amp;gt;_*'. Also make sure the name is all lowercase."
     line="30"
     column="16" /&gt;
   &lt;error
-    message="[017] Unique constraint 'UQ_dbx_codeanalysis_error_017_failx_d' does not match naming convention 'UQ_&amp;lt;table&amp;gt;_*'. Also make sure the name is all lowercase."
+    ruleid="17"
+    message="Unique constraint 'UQ_dbx_codeanalysis_error_017_failx_d' does not match naming convention 'UQ_&amp;lt;table&amp;gt;_*'. Also make sure the name is all lowercase."
     line="34"
     column="68" /&gt;
   &lt;error
-    message="[017] Check constraint 'CK_dbx_codeanalysis_error_017_failx_a' does not match naming convention 'CK_&amp;lt;table&amp;gt;_*'. Also make sure the name is all lowercase."
+    ruleid="17"
+    message="Check constraint 'CK_dbx_codeanalysis_error_017_failx_a' does not match naming convention 'CK_&amp;lt;table&amp;gt;_*'. Also make sure the name is all lowercase."
     line="29"
     column="16" /&gt;
   &lt;error
-    message="[017] Default constraint 'DF_dbx_codeanalysis_error_017_fail_idx' does not match naming convention 'DF_&amp;lt;table&amp;gt;_&amp;lt;column&amp;gt;'. Also make sure the name is all lowercase."
+    ruleid="17"
+    message="Default constraint 'DF_dbx_codeanalysis_error_017_fail_idx' does not match naming convention 'DF_&amp;lt;table&amp;gt;_&amp;lt;column&amp;gt;'. Also make sure the name is all lowercase."
     line="22"
     column="33" /&gt;
   &lt;error
-    message="[017] Index 'IX_dbx_codeanalysis_error_017_failx_c' does not match naming convention 'IX_&amp;lt;table&amp;gt;_*'. Also make sure the name is all lowercase."
+    ruleid="17"
+    message="Index 'IX_dbx_codeanalysis_error_017_failx_c' does not match naming convention 'IX_&amp;lt;table&amp;gt;_*'. Also make sure the name is all lowercase."
     line="31"
     column="11" /&gt;
   &lt;error
-    message="[017] Index 'IX_dbx_codeanalysis_error_017_failx_d' does not match naming convention 'IX_&amp;lt;table&amp;gt;_*'. Also make sure the name is all lowercase."
+    ruleid="17"
+    message="Index 'IX_dbx_codeanalysis_error_017_failx_d' does not match naming convention 'IX_&amp;lt;table&amp;gt;_*'. Also make sure the name is all lowercase."
     line="36"
     column="27" /&gt;
   &lt;error
-    message="[017] Unique index 'UQ_dbx_codeanalysis_error_017_failx_e' does not match naming convention 'UQ_&amp;lt;table&amp;gt;_*'. Also make sure the name is all lowercase."
+    ruleid="17"
+    message="Unique index 'UQ_dbx_codeanalysis_error_017_failx_e' does not match naming convention 'UQ_&amp;lt;table&amp;gt;_*'. Also make sure the name is all lowercase."
     line="38"
     column="34" /&gt;
   &lt;error
-    message="[017] Type 'dbx_codeanalysis_error_017_fail_udt' does not match naming convention 'dbx*_udt_*'. Also make sure the name is all lowercase."
+    ruleid="17"
+    message="Type 'dbx_codeanalysis_error_017_fail_udt' does not match naming convention 'dbx*_udt_*'. Also make sure the name is all lowercase."
     line="41"
     column="19" /&gt;
 &lt;/errors&gt;</value>
@@ -1807,7 +1861,8 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[013] Found use of CURSOR statement"
+    ruleid="13"
+    message="Found use of CURSOR statement"
     line="3"
     column="19" /&gt;
 &lt;/errors&gt;</value>
@@ -1833,11 +1888,13 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[016] The data type 'NTEXT' is obsolete and should not be used"
+    ruleid="16"
+    message="The data type 'NTEXT' is obsolete and should not be used"
     line="3"
     column="14" /&gt;
   &lt;error
-    message="[016] The data type 'IMAGE' is obsolete and should not be used"
+    ruleid="16"
+    message="The data type 'IMAGE' is obsolete and should not be used"
     line="4"
     column="14" /&gt;
 &lt;/errors&gt;</value>
@@ -1846,19 +1903,23 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[023] Only TINYINT/SMALLINT/INT/BIGINT are allowed as primary key: dbx_codeanalysis_error_023_fail1.b (NVARCHAR)"
+    ruleid="23"
+    message="Only TINYINT/SMALLINT/INT/BIGINT are allowed as primary key: dbx_codeanalysis_error_023_fail1.b (NVARCHAR)"
     line="5"
     column="72" /&gt;
   &lt;error
-    message="[023] Only TINYINT/SMALLINT/INT/BIGINT are allowed as primary key: dbx_codeanalysis_error_023_fail2.b (NVARCHAR)"
+    ruleid="23"
+    message="Only TINYINT/SMALLINT/INT/BIGINT are allowed as primary key: dbx_codeanalysis_error_023_fail2.b (NVARCHAR)"
     line="12"
     column="5" /&gt;
   &lt;error
-    message="[023] Only TINYINT/SMALLINT/INT/BIGINT are allowed as primary key: dbx_codeanalysis_error_023_fail3.c (NVARCHAR)"
+    ruleid="23"
+    message="Only TINYINT/SMALLINT/INT/BIGINT are allowed as primary key: dbx_codeanalysis_error_023_fail3.c (NVARCHAR)"
     line="20"
     column="72" /&gt;
   &lt;error
-    message="[023] Only TINYINT/SMALLINT/INT/BIGINT are allowed as primary key: dbx_codeanalysis_error_023_fail4.a (NVARCHAR)"
+    ruleid="23"
+    message="Only TINYINT/SMALLINT/INT/BIGINT are allowed as primary key: dbx_codeanalysis_error_023_fail4.a (NVARCHAR)"
     line="30"
     column="120" /&gt;
 &lt;/errors&gt;</value>
@@ -1867,15 +1928,18 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[036] Primary keys should not be updated: [target].[id] = [source].[id]"
+    ruleid="36"
+    message="Primary keys should not be updated: [target].[id] = [source].[id]"
     line="7"
     column="20" /&gt;
   &lt;error
-    message="[036] Primary keys should not be updated: [id] = 1"
+    ruleid="36"
+    message="Primary keys should not be updated: [id] = 1"
     line="10"
     column="31" /&gt;
   &lt;error
-    message="[036] Primary keys should not be updated: [id] = 1"
+    ruleid="36"
+    message="Primary keys should not be updated: [id] = 1"
     line="16"
     column="21" /&gt;
 &lt;/errors&gt;</value>
@@ -1884,7 +1948,8 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[007] Primitive data type identifiers must not be quoted: [int]"
+    ruleid="7"
+    message="Primitive data type identifiers must not be quoted: [int]"
     line="4"
     column="13" /&gt;
 &lt;/errors&gt;</value>
@@ -1893,7 +1958,8 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[006] The alias is redundant"
+    ruleid="6"
+    message="The alias is redundant"
     line="3"
     column="17" /&gt;
 &lt;/errors&gt;</value>
@@ -1902,15 +1968,18 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[033] Found duplicate indexes: PK_dbx_codeanalysis_error_033_fail1, UQ_dbx_codeanalysis_error_033_fail1_a, IX_dbx_codeanalysis_error_033_fail1_a"
+    ruleid="33"
+    message="Found duplicate indexes: PK_dbx_codeanalysis_error_033_fail1, UQ_dbx_codeanalysis_error_033_fail1_a, IX_dbx_codeanalysis_error_033_fail1_a"
     line="5"
     column="5" /&gt;
   &lt;error
-    message="[033] Found duplicate indexes: IX_dbx_codeanalysis_error_033_fail1_b1, IX_dbx_codeanalysis_error_033_fail1_b2"
+    ruleid="33"
+    message="Found duplicate indexes: IX_dbx_codeanalysis_error_033_fail1_b1, IX_dbx_codeanalysis_error_033_fail1_b2"
     line="10"
     column="1" /&gt;
   &lt;error
-    message="[033] Found duplicate indexes with different includes: PK_dbx_codeanalysis_error_033_fail2, IX_dbx_codeanalysis_error_033_fail2_a"
+    ruleid="33"
+    message="Found duplicate indexes with different includes: PK_dbx_codeanalysis_error_033_fail2, IX_dbx_codeanalysis_error_033_fail2_a"
     line="19"
     column="5" /&gt;
 &lt;/errors&gt;</value>
@@ -1919,55 +1988,68 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[002] Missing schema specification"
+    ruleid="2"
+    message="Missing schema specification"
     line="9"
     column="7" /&gt;
   &lt;error
-    message="[002] Missing schema specification"
+    ruleid="2"
+    message="Missing schema specification"
     line="17"
     column="7" /&gt;
   &lt;error
-    message="[002] Missing schema specification"
+    ruleid="2"
+    message="Missing schema specification"
     line="22"
     column="14" /&gt;
   &lt;error
-    message="[002] Missing schema specification"
+    ruleid="2"
+    message="Missing schema specification"
     line="24"
     column="14" /&gt;
   &lt;error
-    message="[002] Missing schema specification"
+    ruleid="2"
+    message="Missing schema specification"
     line="24"
     column="44" /&gt;
   &lt;error
-    message="[002] Missing schema specification"
+    ruleid="2"
+    message="Missing schema specification"
     line="26"
     column="28" /&gt;
   &lt;error
-    message="[002] Missing schema specification"
+    ruleid="2"
+    message="Missing schema specification"
     line="28"
     column="9" /&gt;
   &lt;error
-    message="[002] Missing schema specification"
+    ruleid="2"
+    message="Missing schema specification"
     line="32"
     column="28" /&gt;
   &lt;error
-    message="[002] Missing schema specification"
+    ruleid="2"
+    message="Missing schema specification"
     line="35"
     column="7" /&gt;
   &lt;error
-    message="[002] Missing schema specification"
+    ruleid="2"
+    message="Missing schema specification"
     line="39"
     column="7" /&gt;
   &lt;error
-    message="[002] Missing schema specification"
+    ruleid="2"
+    message="Missing schema specification"
     line="54"
     column="8" /&gt;
   &lt;error
-    message="[002] Missing schema specification"
+    ruleid="2"
+    message="Missing schema specification"
     line="58"
     column="8" /&gt;
   &lt;error
-    message="[002] Missing schema specification"
+    ruleid="2"
+    message="Missing schema specification"
     line="74"
     column="14" /&gt;
 &lt;/errors&gt;</value>
@@ -1976,7 +2058,8 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[030] Found use of old security algorithm 'SHA1'. Please use any of these algorithms: SHA2_512"
+    ruleid="30"
+    message="Found use of old security algorithm 'SHA1'. Please use any of these algorithms: SHA2_512"
     line="3"
     column="10" /&gt;
 &lt;/errors&gt;</value>
@@ -1985,23 +2068,28 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[024] Surrogate keys are only allowed, if a business key is defined: dbx_codeanalysis_error_024_fail1"
+    ruleid="24"
+    message="Surrogate keys are only allowed, if a business key is defined: dbx_codeanalysis_error_024_fail1"
     line="1"
     column="1" /&gt;
   &lt;error
-    message="[024] Surrogate keys are only allowed, if a business key is defined: dbx_codeanalysis_error_024_fail2"
+    ruleid="24"
+    message="Surrogate keys are only allowed, if a business key is defined: dbx_codeanalysis_error_024_fail2"
     line="8"
     column="1" /&gt;
   &lt;error
-    message="[024] Surrogate keys are only allowed, if a business key is defined: dbx_codeanalysis_error_024_fail3"
+    ruleid="24"
+    message="Surrogate keys are only allowed, if a business key is defined: dbx_codeanalysis_error_024_fail3"
     line="16"
     column="1" /&gt;
   &lt;error
-    message="[024] Business key can be used as the primary key and should replace surrogate key: dbx_codeanalysis_error_024_fail4"
+    ruleid="24"
+    message="Business key can be used as the primary key and should replace surrogate key: dbx_codeanalysis_error_024_fail4"
     line="24"
     column="1" /&gt;
   &lt;error
-    message="[024] IDENTITY columns are only allowed for a valid surrogate key: dbx_codeanalysis_error_024_fail5.b"
+    ruleid="24"
+    message="IDENTITY columns are only allowed for a valid surrogate key: dbx_codeanalysis_error_024_fail5.b"
     line="35"
     column="5" /&gt;
 &lt;/errors&gt;</value>
@@ -2010,7 +2098,8 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[029] The constraint 'PK_dbx_codeanalysis_error_029_table_fail' should be defined on the table, instead of the column 'name'"
+    ruleid="29"
+    message="The constraint 'PK_dbx_codeanalysis_error_029_table_fail' should be defined on the table, instead of the column 'name'"
     line="11"
     column="3" /&gt;
 &lt;/errors&gt;</value>
@@ -2019,7 +2108,8 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[021] The use of temporary tables is not allowed: #dbx_codeanalysis_error_021"
+    ruleid="21"
+    message="The use of temporary tables is not allowed: #dbx_codeanalysis_error_021"
     line="3"
     column="22" /&gt;
 &lt;/errors&gt;</value>
@@ -2028,7 +2118,8 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[019] Found use of TRUNCATE TABLE statement"
+    ruleid="19"
+    message="Found use of TRUNCATE TABLE statement"
     line="3"
     column="3" /&gt;
 &lt;/errors&gt;</value>
@@ -2037,11 +2128,13 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[018] Missing where clause in UPDATE statement"
+    ruleid="18"
+    message="Missing where clause in UPDATE statement"
     line="5"
     column="3" /&gt;
   &lt;error
-    message="[018] Missing where clause in DELETE statement"
+    ruleid="18"
+    message="Missing where clause in DELETE statement"
     line="6"
     column="3" /&gt;
 &lt;/errors&gt;</value>
@@ -2050,7 +2143,8 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[004] Invalid ascii string literal. Please specify unicode (N'')"
+    ruleid="4"
+    message="Invalid ascii string literal. Please specify unicode (N'')"
     line="3"
     column="28" /&gt;
 &lt;/errors&gt;</value>
@@ -2059,19 +2153,23 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[005] Use unicode data types instead of ascii. Replace 'CHAR' with 'NCHAR'."
+    ruleid="5"
+    message="Use unicode data types instead of ascii. Replace 'CHAR' with 'NCHAR'."
     line="1"
     column="56" /&gt;
   &lt;error
-    message="[005] Use unicode data types instead of ascii. Replace 'VARCHAR' with 'NVARCHAR'."
+    ruleid="5"
+    message="Use unicode data types instead of ascii. Replace 'VARCHAR' with 'NVARCHAR'."
     line="1"
     column="70" /&gt;
   &lt;error
-    message="[005] Use unicode data types instead of ascii. Replace 'CHAR' with 'NCHAR'."
+    ruleid="5"
+    message="Use unicode data types instead of ascii. Replace 'CHAR' with 'NCHAR'."
     line="4"
     column="13" /&gt;
   &lt;error
-    message="[005] Use unicode data types instead of ascii. Replace 'VARCHAR' with 'NVARCHAR'."
+    ruleid="5"
+    message="Use unicode data types instead of ascii. Replace 'VARCHAR' with 'NVARCHAR'."
     line="6"
     column="13" /&gt;
 &lt;/errors&gt;</value>
@@ -2080,35 +2178,43 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[031] Unintentional boolean comparison: 1 = 1"
+    ruleid="31"
+    message="Unintentional boolean comparison: 1 = 1"
     line="4"
     column="9" /&gt;
   &lt;error
-    message="[031] Unintentional boolean comparison: @a = @a"
+    ruleid="31"
+    message="Unintentional boolean comparison: @a = @a"
     line="9"
     column="9" /&gt;
   &lt;error
-    message="[031] Unintentional boolean comparison: @b = @b"
+    ruleid="31"
+    message="Unintentional boolean comparison: @b = @b"
     line="9"
     column="21" /&gt;
   &lt;error
-    message="[031] Unintentional boolean comparison: 1 = 2"
+    ruleid="31"
+    message="Unintentional boolean comparison: 1 = 2"
     line="12"
     column="9" /&gt;
   &lt;error
-    message="[031] Unintentional boolean comparison: 1 &amp;gt; 2"
+    ruleid="31"
+    message="Unintentional boolean comparison: 1 &amp;gt; 2"
     line="15"
     column="9" /&gt;
   &lt;error
-    message="[031] Unintentional boolean comparison: 1 &amp;lt;&amp;gt; 2"
+    ruleid="31"
+    message="Unintentional boolean comparison: 1 &amp;lt;&amp;gt; 2"
     line="18"
     column="9" /&gt;
   &lt;error
-    message="[031] Unintentional boolean comparison: 1 &amp;lt; 2"
+    ruleid="31"
+    message="Unintentional boolean comparison: 1 &amp;lt; 2"
     line="21"
     column="9" /&gt;
   &lt;error
-    message="[031] Unintentional boolean comparison: 1 IS NOT NULL"
+    ruleid="31"
+    message="Unintentional boolean comparison: 1 IS NOT NULL"
     line="24"
     column="9" /&gt;
 &lt;/errors&gt;</value>
@@ -2117,7 +2223,8 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[027] Unique index should be replaced by a unique constraint on the table definition: UQ_dbx_codeanalysis_error_027_table_id_fail"
+    ruleid="27"
+    message="Unique index should be replaced by a unique constraint on the table definition: UQ_dbx_codeanalysis_error_027_table_id_fail"
     line="13"
     column="1" /&gt;
 &lt;/errors&gt;</value>
@@ -2126,15 +2233,18 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[014] Table 'dbx_codeanalysis_error_014_fail1' has an unnamed primary key constraint"
+    ruleid="14"
+    message="Table 'dbx_codeanalysis_error_014_fail1' has an unnamed primary key constraint"
     line="3"
     column="20" /&gt;
   &lt;error
-    message="[014] Table 'dbx_codeanalysis_error_014_fail1' has an unnamed default constraint"
+    ruleid="14"
+    message="Table 'dbx_codeanalysis_error_014_fail1' has an unnamed default constraint"
     line="3"
     column="32" /&gt;
   &lt;error
-    message="[014] Table 'dbx_codeanalysis_error_014_fail2' has an unnamed primary key constraint"
+    ruleid="14"
+    message="Table 'dbx_codeanalysis_error_014_fail2' has an unnamed primary key constraint"
     line="14"
     column="5" /&gt;
 &lt;/errors&gt;</value>
@@ -2143,31 +2253,38 @@ namespace Dibix.Sdk.Tests
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
-    message="[009] Data type length not specified: NVARCHAR"
+    ruleid="9"
+    message="Data type length not specified: NVARCHAR"
     line="5"
     column="13" /&gt;
   &lt;error
-    message="[009] Data type length not specified: NCHAR"
+    ruleid="9"
+    message="Data type length not specified: NCHAR"
     line="6"
     column="13" /&gt;
   &lt;error
-    message="[009] Data type length not specified: BINARY"
+    ruleid="9"
+    message="Data type length not specified: BINARY"
     line="7"
     column="13" /&gt;
   &lt;error
-    message="[009] Data type length not specified: VARBINARY"
+    ruleid="9"
+    message="Data type length not specified: VARBINARY"
     line="8"
     column="13" /&gt;
   &lt;error
-    message="[009] Data type length not specified: DECIMAL"
+    ruleid="9"
+    message="Data type length not specified: DECIMAL"
     line="9"
     column="13" /&gt;
   &lt;error
-    message="[009] Data type length not specified: NUMERIC"
+    ruleid="9"
+    message="Data type length not specified: NUMERIC"
     line="10"
     column="13" /&gt;
   &lt;error
-    message="[009] Data type length not specified: FLOAT"
+    ruleid="9"
+    message="Data type length not specified: FLOAT"
     line="11"
     column="13" /&gt;
 &lt;/errors&gt;</value>
