@@ -225,14 +225,14 @@ Parameter: lcid", exception.Message);
             Assert.Equal(5, arguments.Count);
             Assert.Equal(body, arguments["$body"]);
             Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
-            Assert.IsType<ExplicitHttpParameterInput>(arguments["input"]);
-            Assert.Equal(7, ((ExplicitHttpParameterInput)arguments["input"]).targetid);
+            ExplicitHttpParameterInput input = Assert.IsType<ExplicitHttpParameterInput>(arguments["input"]);
+            Assert.Equal(7, input.targetid);
             Assert.Equal(1033, arguments["lcid"]);
-            Assert.IsType<ExplicitHttpBodyItemSet>(arguments["itemsa_"]);
+            ExplicitHttpBodyItemSet itemsa_ = Assert.IsType<ExplicitHttpBodyItemSet>(arguments["itemsa_"]);
             Assert.Equal(@"id_ INT(4)  idx INT(4)  age_ INT(4)  name_ NVARCHAR(MAX)
 ----------  ----------  -----------  -------------------
 1033        1           5            X                  
-1033        2           5            Y                  ", ((ExplicitHttpBodyItemSet)arguments["itemsa_"]).Dump());
+1033        2           5            Y                  ", itemsa_.Dump());
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
         private static void Compile_ExplicitBodySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpParameterInput input, int lcid, ExplicitHttpBodyItemSet itemsa_) { }
@@ -329,15 +329,15 @@ Parameter: lcid", exception.Message);
             Assert.Equal(3, arguments["fromuri"]);
             Assert.Equal(body, arguments["$body"]);
             Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
-            Assert.IsType<ImplicitBodyHttpParameterInput>(arguments["input"]);
-            Assert.Equal(7, ((ImplicitBodyHttpParameterInput)arguments["input"]).sourceid);
-            Assert.Equal(1033, ((ImplicitBodyHttpParameterInput)arguments["input"]).localeid);
+            ImplicitBodyHttpParameterInput input = Assert.IsType<ImplicitBodyHttpParameterInput>(arguments["input"]);
+            Assert.Equal(7, input.sourceid);
+            Assert.Equal(1033, input.localeid);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
-            Assert.IsType<ImplicitHttpBodyItemSet>(arguments["itemsa"]);
+            ImplicitHttpBodyItemSet itemsa = Assert.IsType<ImplicitHttpBodyItemSet>(arguments["itemsa"]);
             Assert.Equal(@"type SMALLINT(2)  name NVARCHAR(MAX)
 ----------------  ------------------
 1                 X                 
-2                 Y                 ", ((ImplicitHttpBodyItemSet)arguments["itemsa"]).Dump());
+2                 Y                 ", itemsa.Dump());
         }
         private static void Compile_ImplicitBodySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, int id, [InputClass] ImplicitBodyHttpParameterInput input, int userid, ImplicitHttpBodyItemSet itemsa) { }
 
@@ -390,8 +390,8 @@ Parameter: lcid", exception.Message);
             Assert.Equal(body, arguments["$body"]);
             Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             Assert.Equal("<id>5</id>", arguments["value"].ToString());
-            Assert.IsType<XmlHttpParameterInput>(arguments["input"]);
-            Assert.Equal("<id>5</id>", ((XmlHttpParameterInput)arguments["input"]).data.ToString());
+            XmlHttpParameterInput input = Assert.IsType<XmlHttpParameterInput>(arguments["input"]);
+            Assert.Equal("<id>5</id>", input.data.ToString());
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
         private static void Compile_BodyConverter_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] XmlHttpParameterInput input, XElement value) { }
@@ -442,8 +442,8 @@ Parameter: lcid", exception.Message);
             Assert.Equal(3, arguments.Count);
             Assert.Equal(body, arguments["$body"]);
             Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
-            Assert.IsType<ExplicitHttpParameterInput>(arguments["input"]);
-            Assert.Equal(7, ((ExplicitHttpParameterInput)arguments["input"]).targetid);
+            ExplicitHttpParameterInput input = Assert.IsType<ExplicitHttpParameterInput>(arguments["input"]);
+            Assert.Equal(7, input.targetid);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
         private static void Compile_BodyBinder_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpParameterInput input) { }
@@ -544,8 +544,8 @@ Parameter: input", exception.Message);
             Assert.Equal(3, arguments.Count);
             Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             Assert.Equal(9, arguments["targetid"]);
-            Assert.IsType<ExplicitHttpParameterInput>(arguments["input"]);
-            Assert.Equal(9, ((ExplicitHttpParameterInput)arguments["input"]).targetid);
+            ExplicitHttpParameterInput input = Assert.IsType<ExplicitHttpParameterInput>(arguments["input"]);
+            Assert.Equal(9, input.targetid);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
         private static void Compile_UriSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpParameterInput input, int id = 0) { }

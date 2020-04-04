@@ -29,7 +29,7 @@ namespace Dibix
 
                 sb.Append("Parameter @").Append(name);
                 if (suggestedDataType.HasValue)
-                    sb.Append(' ').Append(suggestedDataType);
+                    sb.Append(' ').Append(suggestedDataType.ToString().ToUpperInvariant());
 
                 if (value is StructuredType structuredType)
                 {
