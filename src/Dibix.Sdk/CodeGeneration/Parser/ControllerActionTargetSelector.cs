@@ -69,7 +69,18 @@ Tried: {normalizedNamespace}.{methodName}", filePath, lineInfo.LineNumber, lineI
             return neighborAction;
         }
 
-        private static IDictionary<string, NeighborActionTarget> CreateNeighborStatementMap(IReferencedAssemblyProvider referencedAssemblyProvider) => CreateNeighborStatementMapCore(referencedAssemblyProvider).ToDictionary(x => x.Name);
+        private static IDictionary<string, NeighborActionTarget> CreateNeighborStatementMap(IReferencedAssemblyProvider referencedAssemblyProvider)
+        {
+            try
+            {
+                AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += OnReflectionOnlyAssemblyResolve;
+                return CreateNeighborStatementMapCore(referencedAssemblyProvider).ToDictionary(x => x.Name);
+            }
+            finally
+            {
+                AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve -= OnReflectionOnlyAssemblyResolve;
+            }
+        }
 
         private static IEnumerable<NeighborActionTarget> CreateNeighborStatementMapCore(IReferencedAssemblyProvider referencedAssemblyProvider)
         {
@@ -82,6 +93,21 @@ Tried: {normalizedNamespace}.{methodName}", filePath, lineInfo.LineNumber, lineI
                    let parameters = method.GetParameters() 
                    where parameters.Any() && parameters[0].ParameterType.FullName == "Dibix.IDatabaseAccessorFactory" 
                    select CreateNeighborActionTarget(method);
+        }
+
+        // Cannot resolve dependency to assembly '' because it has not been preloaded.
+        // When using the ReflectionOnly APIs, dependent assemblies must be pre-loaded or loaded on demand through the ReflectionOnlyAssemblyResolve event.
+        private static Assembly OnReflectionOnlyAssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            Assembly assembly = AppDomain.CurrentDomain.ReflectionOnlyGetAssemblies().FirstOrDefault(x => x.FullName == args.Name);
+            if (assembly != null)
+                return assembly;
+
+            assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.FullName == args.Name);
+            if (assembly != null)
+                return Assembly.ReflectionOnlyLoadFrom(assembly.Location);
+
+            return Assembly.ReflectionOnlyLoad(args.Name);
         }
 
         private static NeighborActionTarget CreateNeighborActionTarget(MethodInfo method)
