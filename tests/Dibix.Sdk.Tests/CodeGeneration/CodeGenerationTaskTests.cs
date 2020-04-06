@@ -58,7 +58,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         public void Inline_SinglePrimitiveResult_WithoutDeclaration_Error()
         {
             this.ExecuteTestAndExpectError(@"Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql", @"One or more errors occured during code generation:
-Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(3,1) : Error : There are missing return declarations for the output statements. Please mark the header of the statement with a line per output containting this hint: -- @Return <ClrTypeName>");
+Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(5,2) : Error : Missing return declaration for output. Please decorate the statement with the following hint to describe the output: -- @Return <ContractName>");
         }
 
         [Fact]

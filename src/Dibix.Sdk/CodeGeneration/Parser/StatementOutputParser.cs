@@ -27,7 +27,7 @@ namespace Dibix.Sdk.CodeGeneration
             ValidateMergeGridResult(target, node, returnHints, logger);
 
             // Incorrect number of return hints/results will make further execution fail
-            if (!ValidateReturnHints(target, node, returnHints, visitor.Results, logger)) 
+            if (!ValidateReturnHints(target, returnHints, visitor.Results, logger)) 
                 yield break;
 
             foreach (SqlQueryResult result in CollectResults(target, node, typeResolver, schemaRegistry, logger, returnHints, visitor)) 
@@ -87,24 +87,27 @@ namespace Dibix.Sdk.CodeGeneration
             logger.LogError(null, "The @MergeGridResult option only works with a grid result so at least two results should be specified with the @Return hint", target.Source, node.StartLine, node.StartColumn);
         }
 
-        private static bool ValidateReturnHints(SqlStatementInfo target, TSqlFragment node, IList<SqlHint> returnHints, ICollection<OutputSelectResult> results, ILogger logger)
+        private static bool ValidateReturnHints(SqlStatementInfo target, IList<SqlHint> returnHints, IList<OutputSelectResult> results, ILogger logger)
         {
             if (target.IsFileApi)
                 return true;
 
-            if (returnHints.Count > results.Count)
+            bool result = true;
+            for (int i = results.Count; i < returnHints.Count; i++)
             {
-                logger.LogError(null, "There are more return declarations than output statements being produced by the statement", target.Source, node.StartLine, node.StartColumn);
-                return false;
+                SqlHint redundantReturnHint = returnHints[i];
+                logger.LogError(null, "There are more output declarations than actual outputs being produced by the statement", target.Source, redundantReturnHint.Line, redundantReturnHint.Column);
+                result = false;
             }
 
-            if (returnHints.Count < results.Count)
+            for (int i = returnHints.Count; i < results.Count; i++)
             {
-                logger.LogError(null, "There are missing return declarations for the output statements. Please mark the header of the statement with a line per output containting this hint: -- @Return <ClrTypeName>", target.Source, node.StartLine, node.StartColumn);
-                return false;
+                OutputSelectResult output = results[i];
+                logger.LogError(null, "Missing return declaration for output. Please decorate the statement with the following hint to describe the output: -- @Return <ContractName>", target.Source, output.Line, output.Column);
+                result = false;
             }
 
-            return true;
+            return result;
         }
 
         private static IEnumerable<SqlQueryResult> CollectResults(SqlStatementInfo target, TSqlFragment node, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger, IList<SqlHint> returnHints, StatementOutputVisitor visitor)
