@@ -9,6 +9,13 @@ namespace Dibix.Sdk.Cli
 #if DEBUG
             System.Diagnostics.Debugger.Launch();
 #endif
+            AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+            {
+                Console.Error.WriteLine($"Unhandled Exception: {e.ExceptionObject}");
+                int exitCode = e.ExceptionObject is Exception ex ? ex.HResult : 1;
+                Environment.Exit(exitCode);
+            };
+
             if (args.Length != 2)
                 return PrintHelp();
 
