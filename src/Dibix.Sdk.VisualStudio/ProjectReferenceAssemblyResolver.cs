@@ -8,16 +8,12 @@ using EnvDTE;
 
 namespace Dibix.Sdk.VisualStudio
 {
-    internal sealed class ProjectReferenceAssemblyResolver : AssemblyResolver, IReferencedAssemblyProvider
+    internal sealed class ProjectReferenceAssemblyResolver : ReferencedAssemblyInspector
     {
         #region Fields
         private readonly ICollection<string> _assemblyReferenceCache;
         private readonly IDictionary<string, string> _assemblyLocationMap;
         private readonly Project _currentProject;
-        #endregion
-
-        #region Properties
-        public IEnumerable<Assembly> ReferencedAssemblies => this._assemblyReferenceCache.Select(base.LoadAssembly);
         #endregion
 
         #region Constructor
@@ -31,6 +27,8 @@ namespace Dibix.Sdk.VisualStudio
         #endregion
 
         #region Overrides
+        protected override IEnumerable<string> GetReferencedAssemblies() => this._assemblyReferenceCache;
+
         protected override bool TryGetAssemblyLocation(string assemblyName, out string assemblyPath) => this._assemblyLocationMap.TryGetValue(new AssemblyName(assemblyName).Name, out assemblyPath);
         #endregion
 

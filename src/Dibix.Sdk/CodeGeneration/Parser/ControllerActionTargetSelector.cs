@@ -15,14 +15,14 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly ILogger _logger;
         private readonly Lazy<IDictionary<string, NeighborActionTarget>> _neighborStatementMapAccessor;
 
-        public ControllerActionTargetSelector(string productName, string areaName, string outputName, ICollection<SqlStatementInfo> statements, IReferencedAssemblyProvider referencedAssemblyProvider, ILogger logger)
+        public ControllerActionTargetSelector(string productName, string areaName, string outputName, ICollection<SqlStatementInfo> statements, ReferencedAssemblyInspector referencedAssemblyInspector, ILogger logger)
         {
             this._productName = productName;
             this._areaName = areaName;
             this._outputName = outputName;
             this._statements = statements;
             this._logger = logger;
-            this._neighborStatementMapAccessor = new Lazy<IDictionary<string, NeighborActionTarget>>(() => CreateNeighborStatementMap(referencedAssemblyProvider));
+            this._neighborStatementMapAccessor = new Lazy<IDictionary<string, NeighborActionTarget>>(() => CreateNeighborStatementMap(referencedAssemblyInspector));
         }
 
         public ActionDefinitionTarget Select(string target, string filePath, IJsonLineInfo lineInfo)
@@ -69,45 +69,22 @@ Tried: {normalizedNamespace}.{methodName}", filePath, lineInfo.LineNumber, lineI
             return neighborAction;
         }
 
-        private static IDictionary<string, NeighborActionTarget> CreateNeighborStatementMap(IReferencedAssemblyProvider referencedAssemblyProvider)
+        private static IDictionary<string, NeighborActionTarget> CreateNeighborStatementMap(ReferencedAssemblyInspector referencedAssemblyInspector)
         {
-            try
+            return referencedAssemblyInspector.Inspect(referencedAssemblies =>
             {
-                AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += OnReflectionOnlyAssemblyResolve;
-                return CreateNeighborStatementMapCore(referencedAssemblyProvider).ToDictionary(x => x.Name);
-            }
-            finally
-            {
-                AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve -= OnReflectionOnlyAssemblyResolve;
-            }
-        }
+                var query = from assembly in referencedAssemblies
+                            where CustomAttributeData.GetCustomAttributes(assembly).Any(x => x.AttributeType.FullName == "Dibix.ArtifactAssemblyAttribute")
+                            from type in assembly.GetTypes()
+                            where CustomAttributeData.GetCustomAttributes(type)
+                                                     .Any(x => x.AttributeType.FullName == "Dibix.DatabaseAccessorAttribute")
+                            from method in type.GetMethods()
+                            let parameters = method.GetParameters()
+                            where parameters.Any() && parameters[0].ParameterType.FullName == "Dibix.IDatabaseAccessorFactory"
+                            select CreateNeighborActionTarget(method);
 
-        private static IEnumerable<NeighborActionTarget> CreateNeighborStatementMapCore(IReferencedAssemblyProvider referencedAssemblyProvider)
-        {
-            return from assembly in referencedAssemblyProvider.ReferencedAssemblies
-                   where CustomAttributeData.GetCustomAttributes(assembly).Any(x => x.AttributeType.FullName == "Dibix.ArtifactAssemblyAttribute")
-                   from type in assembly.GetTypes() 
-                   where CustomAttributeData.GetCustomAttributes(type)
-                                            .Any(x => x.AttributeType.FullName == "Dibix.DatabaseAccessorAttribute") 
-                   from method in type.GetMethods() 
-                   let parameters = method.GetParameters() 
-                   where parameters.Any() && parameters[0].ParameterType.FullName == "Dibix.IDatabaseAccessorFactory" 
-                   select CreateNeighborActionTarget(method);
-        }
-
-        // Cannot resolve dependency to assembly '' because it has not been preloaded.
-        // When using the ReflectionOnly APIs, dependent assemblies must be pre-loaded or loaded on demand through the ReflectionOnlyAssemblyResolve event.
-        private static Assembly OnReflectionOnlyAssemblyResolve(object sender, ResolveEventArgs args)
-        {
-            Assembly assembly = AppDomain.CurrentDomain.ReflectionOnlyGetAssemblies().FirstOrDefault(x => x.FullName == args.Name);
-            if (assembly != null)
-                return assembly;
-
-            assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.FullName == args.Name);
-            if (assembly != null)
-                return Assembly.ReflectionOnlyLoadFrom(assembly.Location);
-
-            return Assembly.ReflectionOnlyLoad(args.Name);
+                return query.ToDictionary(x => x.Name);
+            });
         }
 
         private static NeighborActionTarget CreateNeighborActionTarget(MethodInfo method)

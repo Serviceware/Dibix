@@ -101,13 +101,13 @@ namespace Dibix.Sdk.CodeGeneration
           , string areaName
           , string defaultOutputName
           , ICollection<SqlStatementInfo> statements
-          , IReferencedAssemblyProvider referencedAssemblyProvider
+          , ReferencedAssemblyInspector referencedAssemblyInspector
           , IFileSystemProvider fileSystemProvider
           , ITypeResolverFacade typeResolver
           , ILogger logger
         )
         {
-            IControllerActionTargetSelector controllerActionTargetSelector = new ControllerActionTargetSelector(productName, areaName, defaultOutputName, statements, referencedAssemblyProvider, logger);
+            IControllerActionTargetSelector controllerActionTargetSelector = new ControllerActionTargetSelector(productName, areaName, defaultOutputName, statements, referencedAssemblyInspector, logger);
             return new ControllerDefinitionProvider(fileSystemProvider, controllerActionTargetSelector, typeResolver, logger, endpoints).Controllers;
         }
     }

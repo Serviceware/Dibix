@@ -13,11 +13,11 @@ namespace Dibix.Sdk.CodeGeneration
 
         public override TypeResolutionScope Scope => TypeResolutionScope.UserDefinedType;
 
-        public UserDefinedTypeSchemaTypeResolver(ISchemaRegistry schemaRegistry, IUserDefinedTypeProvider userDefinedTypeProvider, IReferencedAssemblyProvider referencedAssemblyProvider) : base(schemaRegistry, userDefinedTypeProvider)
+        public UserDefinedTypeSchemaTypeResolver(ISchemaRegistry schemaRegistry, IUserDefinedTypeProvider userDefinedTypeProvider, ReferencedAssemblyInspector referencedAssemblyInspector) : base(schemaRegistry, userDefinedTypeProvider)
         {
             this._schemaRegistry = schemaRegistry;
             this._localUserDefinedTypes = ScanLocalTypes(userDefinedTypeProvider).ToDictionary(x => x.Key, x => x.Value);
-            this._externalUserDefinedTypes = ScanExternalTypes(referencedAssemblyProvider);
+            this._externalUserDefinedTypes = ScanExternalTypes(referencedAssemblyInspector);
         }
 
         public override TypeReference ResolveType(string input, string @namespace, string source, int line, int column, bool isEnumerable)
@@ -36,45 +36,22 @@ namespace Dibix.Sdk.CodeGeneration
             return userDefinedTypeProvider.Types.Select(x => new KeyValuePair<string, string>(x.UdtName, x.FullName));
         }
 
-        private static IDictionary<string, Type> ScanExternalTypes(IReferencedAssemblyProvider referencedAssemblyProvider)
+        private static IDictionary<string, Type> ScanExternalTypes(ReferencedAssemblyInspector referencedAssemblyInspector)
         {
-            try
+            return referencedAssemblyInspector.Inspect(referencedAssemblies =>
             {
-                AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += OnReflectionOnlyAssemblyResolve;
-                return ScanExternalTypesCore(referencedAssemblyProvider).ToDictionary(x => x.Key, x => x.Value).ToDictionary(x => x.Key, x => x.Value);
-            }
-            finally
-            {
-                AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve -= OnReflectionOnlyAssemblyResolve;
-            }
-        }
+                var query = from assembly in referencedAssemblies
+                            where assembly.IsDefined("Dibix.ArtifactAssemblyAttribute")
+                            from type in assembly.GetTypes()
+                            let udtName = CustomAttributeData.GetCustomAttributes(type)
+                                                             .Where(x => x.AttributeType.FullName == "Dibix.StructuredTypeAttribute")
+                                                             .Select(x => (string)x.ConstructorArguments.Select(y => y.Value).Single())
+                                                             .FirstOrDefault()
+                            where udtName != null
+                            select new KeyValuePair<string, Type>(udtName, type);
 
-        private static IEnumerable<KeyValuePair<string, Type>> ScanExternalTypesCore(IReferencedAssemblyProvider referencedAssemblyProvider)
-        {
-            return from assembly in referencedAssemblyProvider.ReferencedAssemblies
-                   where assembly.IsDefined("Dibix.ArtifactAssemblyAttribute")
-                   from type in assembly.GetTypes()
-                   let udtName = CustomAttributeData.GetCustomAttributes(type)
-                                                    .Where(x => x.AttributeType.FullName == "Dibix.StructuredTypeAttribute")
-                                                    .Select(x => (string)x.ConstructorArguments.Select(y => y.Value).Single())
-                                                    .FirstOrDefault()
-                   where udtName != null
-                   select new KeyValuePair<string, Type>(udtName, type);
-        }
-
-        // Cannot resolve dependency to assembly '' because it has not been preloaded.
-        // When using the ReflectionOnly APIs, dependent assemblies must be pre-loaded or loaded on demand through the ReflectionOnlyAssemblyResolve event.
-        private static Assembly OnReflectionOnlyAssemblyResolve(object sender, ResolveEventArgs args)
-        {
-            Assembly assembly = AppDomain.CurrentDomain.ReflectionOnlyGetAssemblies().FirstOrDefault(x => x.FullName == args.Name);
-            if (assembly != null)
-                return assembly;
-
-            assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.FullName == args.Name);
-            if (assembly != null)
-                return Assembly.ReflectionOnlyLoadFrom(assembly.Location);
-
-            return Assembly.ReflectionOnlyLoad(args.Name);
+                return query.ToDictionary(x => x.Key, x => x.Value);
+            });
         }
     }
 }
