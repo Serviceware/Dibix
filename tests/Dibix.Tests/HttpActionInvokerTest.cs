@@ -43,22 +43,6 @@ namespace Dibix.Tests
         }
 
         [Fact]
-        public async Task Invoke_Empty()
-        {
-            Mock<IHttpParameterResolutionMethod> parameterResolver = new Mock<IHttpParameterResolutionMethod>(MockBehavior.Strict);
-
-            HttpRequestMessage request = new HttpRequestMessage();
-            parameterResolver.Setup(x => x.PrepareParameters(request, null, null));
-
-            Func<Task<object>> executor = () => Task.FromResult<object>(null);
-
-            object result = await HttpActionInvoker.Invoke(null, request, null, parameterResolver.Object, executor, null).ConfigureAwait(false);
-            HttpResponseMessage response = Assert.IsType<HttpResponseMessage>(result);
-            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
-            Assert.Equal(request, response.RequestMessage);
-        }
-
-        [Fact]
         public async Task Invoke_DDL_WithCustomSqlException_IsMappedToHttpStatusCode()
         {
             SqlException sqlException = SqlExceptionFactory.Create(default, 50403, default, default, default, default, default, default);
