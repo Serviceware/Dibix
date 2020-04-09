@@ -1984,6 +1984,21 @@ namespace Dibix.Sdk.Tests
     column="5" /&gt;
 &lt;/errors&gt;</value>
   </data>
+  <data name="RedundantSymbolSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;errors&gt;
+  &lt;error
+    ruleid="38"
+    message="Unused parameter: @id"
+    line="1"
+    column="53" /&gt;
+  &lt;error
+    ruleid="38"
+    message="Unused variable: @var"
+    line="3"
+    column="10" /&gt;
+&lt;/errors&gt;</value>
+  </data>
   <data name="SchemaSpecificationSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;

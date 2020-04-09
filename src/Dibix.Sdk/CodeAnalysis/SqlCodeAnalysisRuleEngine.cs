@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.Dac.Model;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
@@ -34,27 +36,27 @@ namespace Dibix.Sdk.CodeAnalysis
         #endregion
 
         #region Public Methods
-        public IEnumerable<SqlCodeAnalysisError> Analyze(TSqlFragment fragment, bool isScriptArtifact)
+        public IEnumerable<SqlCodeAnalysisError> Analyze(TSqlFragment fragment, string hash, bool isScriptArtifact)
         {
-            return this._rules.SelectMany(x => x.Analyze(this._model, fragment, this._configuration, isScriptArtifact));
+            return this._rules.SelectMany(x => x.Analyze(this._model, fragment, hash, this._configuration, isScriptArtifact));
         }
 
         public IEnumerable<SqlCodeAnalysisError> Analyze(string scriptFilePath)
         {
             TSqlFragment fragment = ScriptDomFacade.Load(scriptFilePath);
-            return this.Analyze(fragment, false);
+            return this.Analyze(fragment, CalculateHash(scriptFilePath), false);
         }
 
         public IEnumerable<SqlCodeAnalysisError> Analyze(string scriptFilePath, ISqlCodeAnalysisRule rule)
         {
             TSqlFragment fragment = ScriptDomFacade.Load(scriptFilePath);
-            return rule.Analyze(this._model, fragment, this._configuration, false);
+            return rule.Analyze(this._model, fragment, null, this._configuration, false);
         }
 
         public IEnumerable<SqlCodeAnalysisError> AnalyzeScript(string scriptContent)
         {
             TSqlFragment fragment = ScriptDomFacade.Parse(scriptContent);
-            return this.Analyze(fragment, true);
+            return this.Analyze(fragment, null, true);
         }
         #endregion
 
@@ -77,6 +79,18 @@ namespace Dibix.Sdk.CodeAnalysis
                 ruleMap.Add(rule.Id, rule);
             }
             return ruleMap.Values;
+        }
+
+        private static string CalculateHash(string filename)
+        {
+            using (MD5 md5 = MD5.Create())
+            {
+                using (Stream stream = File.OpenRead(filename))
+                {
+                    byte[] hash = md5.ComputeHash(stream);
+                    return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+                }
+            }
         }
         #endregion
     }
