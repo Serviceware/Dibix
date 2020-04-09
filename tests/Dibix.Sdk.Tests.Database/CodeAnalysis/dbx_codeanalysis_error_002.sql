@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[dbx_codeanalysis_error_002]
 AS
-	DECLARE @t TABLE(x INT)
+	DECLARE @t TABLE(x INT, y XML)
 
 	SELECT id
 	FROM @t
@@ -69,9 +69,16 @@ AS
 	ON (@true = 0)
 	WHEN NOT MATCHED BY SOURCE THEN
 		DELETE
+	OUTPUT $action, [deleted].[x]
 	;
 GO
 CREATE TABLE dbxx 
 (
 	id INT NOT NULL CONSTRAINT [PK_dbxx] PRIMARY KEY 
+  , a XML NULL
 )
+GO
+CREATE PROCEDURE [dbo].[dbx_codeanalysis_error_002_x]
+AS
+	EXEC [dbx_codeanalysis_error_002]
+    EXEC sp_executesql N'';

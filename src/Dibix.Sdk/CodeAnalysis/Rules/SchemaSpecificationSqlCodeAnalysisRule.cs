@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
+using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
@@ -14,60 +12,25 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
     public sealed class SchemaSpecificationSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
     {
-        private readonly ICollection<string> _tableAliases = new Collection<string>
+        public override void Visit(SchemaObjectName name)
         {
-            "INSERTED",
-            "UPDATED",
-            "DELETED"
-        };
+            if (!base.Model.TryGetModelElement(name, out ElementLocation element)) 
+                return;
 
-        protected override void BeginStatement(TSqlScript node)
-        {
-            ChildAliasVisitor childAliasVisitor = new ChildAliasVisitor();
-            node.AcceptChildren(childAliasVisitor);
-            this._tableAliases.AddRange(childAliasVisitor.TableAliases);
-        }
-
-        public override void Visit(CreateTableStatement node)
-        {
-            this.Check(node.SchemaObjectName);
-        }
-
-        public override void Visit(NamedTableReference node)
-        {
-            this.Check(node.SchemaObject);
-        }
-
-        private void Check(SchemaObjectName name)
-        {
             if (name.SchemaIdentifier != null)
                 return;
 
-            // Exclude temp tables
-            if (name.BaseIdentifier.Value.Contains("#"))
+            if (base.Model.IsDataType(element))
                 return;
 
-            // Exclude aliased tables
-            if (this._tableAliases.Any(x => x.Equals(name.BaseIdentifier.Value, StringComparison.OrdinalIgnoreCase)))
+            // Unfortunately I haven't found a better way yet to check this properly
+            // This might allow table names like 'inserted' without schema specification
+            if (String.Equals(name.BaseIdentifier.Value, "inserted", StringComparison.OrdinalIgnoreCase)
+             || String.Equals(name.BaseIdentifier.Value, "updated", StringComparison.OrdinalIgnoreCase)
+             || String.Equals(name.BaseIdentifier.Value, "deleted", StringComparison.OrdinalIgnoreCase))
                 return;
 
             base.Fail(name);
-        }
-
-        private class ChildAliasVisitor : TSqlFragmentVisitor
-        {
-            public ICollection<string> TableAliases { get; } = new Collection<string>();
-
-            public override void Visit(TableReferenceWithAlias node)
-            {
-                if (node.Alias != null)
-                    this.TableAliases.Add(node.Alias.Value);
-            }
-
-            public override void Visit(CommonTableExpression node)
-            {
-                this.TableAliases.Add(node.ExpressionName.Value);
-            }
         }
     }
 }

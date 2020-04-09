@@ -43,5 +43,11 @@ namespace Dibix.Sdk.Sql
         public bool IsScalarFunction(FunctionCall functionCall) => this._elementLocator.TryGetModelElement(functionCall, out TSqlObject element) && element.ObjectType == ScalarFunction.TypeClass;
 
         public bool TryGetModelElement(TSqlFragment fragment, out ElementLocation element) => this._elementLocator.TryGetElementLocation(fragment, out element);
+
+        public bool IsDataType(ElementLocation element)
+        {
+            TSqlObject modelElement = element.GetModelElement(this._model);
+            return modelElement?.ObjectType == DataType.TypeClass;
+        }
     }
 }

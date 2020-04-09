@@ -2050,8 +2050,18 @@ namespace Dibix.Sdk.Tests
   &lt;error
     ruleid="2"
     message="Missing schema specification"
-    line="74"
+    line="75"
     column="14" /&gt;
+  &lt;error
+    ruleid="2"
+    message="Missing schema specification"
+    line="83"
+    column="7" /&gt;
+  &lt;error
+    ruleid="2"
+    message="Missing schema specification"
+    line="84"
+    column="10" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="SecurityAlgorithmSqlCodeAnalysisRule" xml:space="preserve">
