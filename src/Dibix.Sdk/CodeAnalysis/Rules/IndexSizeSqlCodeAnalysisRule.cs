@@ -29,10 +29,10 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         private const short UniqueIdentifierLength       = 16;   // bytes
 
         // helpLine suppressions
-        private static readonly ICollection<string> Workarounds = new HashSet<string>
+        private static readonly IDictionary<string, string> Suppressions = new Dictionary<string, string>
         {
-            "PK_hlspparentprocattrmapping"
-          , "UQ_hlsysportalconfig_cfg1"
+            ["PK_hlspparentprocattrmapping"] = "849a02e49f6cfb93a812208afee0d1ea"
+          , ["UQ_hlsysportalconfig_cfg1"] = "d3ba37ada7794db37d71df4b87547128"
         };
 
         public override void Visit(CreateTableStatement node)
@@ -76,8 +76,10 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             if (length <= maxSize)
                 return;
 
-            if (!Workarounds.Contains(indexName))
-                base.Fail(source, kind, indexName, length, maxSize);
+            if (Suppressions.TryGetValue(indexName, out string hash) && hash == base.Hash) 
+                return;
+
+            base.Fail(source, kind, indexName, length, maxSize);
         }
 
         private static int ComputeColumnLength(Column column)
