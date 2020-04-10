@@ -18,19 +18,19 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         private readonly IDictionary<int, FunctionCall> _scalarFunctionCalls = new Dictionary<int, FunctionCall>();
 
         // helpLine suppressions
-        private static readonly ICollection<string> Workarounds = new HashSet<string>
+        private static readonly IDictionary<string, string> Suppressions = new Dictionary<string, string>
         {
-            "fnSplit"
-          , "hlsysattachment_query_data_case"
-          , "hlsysattachment_query_data_contract"
-          , "hlsysattachment_query_data_orgunit"
-          , "hlsysattachment_query_data_person"
-          , "hlsysattachment_query_data_product"
-          , "hlsysattachment_query_data_su"
-          , "hlsysgetusercontext"
-          , "hlsyssec_query_agentsystemacl"
-          , "hlsysum_getcentraladminorgunits"
-          , "hltm_getreceiversfortask"
+            ["fnSplit"] = "fed12bdc66c86181947d415d57434dbf"
+          , ["hlsysattachment_query_data_case"] = "0d277c0c11a280b65c491e90a7b73896"
+          , ["hlsysattachment_query_data_contract"] = "086a6f84c1fe6810c42e7e61f38e608d"
+          , ["hlsysattachment_query_data_person"] = "f3daf9ac7d4da7e3acca5db139abe658"
+          , ["hlsysattachment_query_data_product"] = "130048ee6e980dc4271de293e5515695"
+          , ["hlsysattachment_query_data_orgunit"] = "42e2f30edb824b44014b96c1803538d4"
+          , ["hlsysattachment_query_data_su"] = "07dc107c4d6858c2efbb9fd078e8ff4e"
+          , ["hlsysgetusercontext"] = "94acc750635c6a6a1dd347da2b666b87"
+          , ["hlsyssec_query_agentsystemacl"] = "b4cea7900ab08592c536357724499706"
+          , ["hlsysum_getcentraladminorgunits"] = "ae9cdb9a23cc885575b24a9d0382bd93"
+          , ["hltm_getreceiversfortask"] = "c9d9f72724b5722216e1bc9f6415efbf"
         };
 
         protected override void BeginStatement(TSqlScript node)
@@ -50,9 +50,14 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         public override void Visit(CreateFunctionStatement node)
         {
+            if (!(node.ReturnType is TableValuedFunctionReturnType) || AllowNonInlineTableValuedFunctions) 
+                return;
+
             string name = node.Name.BaseIdentifier.Value;
-            if (node.ReturnType is TableValuedFunctionReturnType && !AllowNonInlineTableValuedFunctions && !Workarounds.Contains(name)) 
-                base.Fail(node, $"Make non inline table valued function inline or replace it with a stored procedure: {name}");
+            if (Suppressions.TryGetValue(name, out string hash) && hash == base.Hash) 
+                return;
+
+            base.Fail(node, $"Make non inline table valued function inline or replace it with a stored procedure: {name}");
         }
 
         public override void Visit(CheckConstraintDefinition node)
