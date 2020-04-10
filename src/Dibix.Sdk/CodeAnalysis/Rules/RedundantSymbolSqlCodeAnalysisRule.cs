@@ -43,17 +43,17 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             this._suppressions = new HashSet<int>();
         }
 
-        protected override void BeginStatement(TSqlScript node)
+        protected override void BeginBatch(TSqlBatch node)
         {
             VariableVisitor visitor = new VariableVisitor();
             node.Accept(visitor);
-            this._variables.AddRange(visitor.Variables.ToDictionary(x => x.VariableName.Value));
-            this._suppressions.AddRange(visitor.ParameterReferences.Where(x => Suppressions.TryGetValue(x.Key, out string hash) && base.Hash == hash).Select(x => x.Value));
+            this._variables.ReplaceWith(visitor.Variables.ToDictionary(x => x.VariableName.Value));
+            this._suppressions.ReplaceWith(visitor.ParameterReferences.Where(x => Suppressions.TryGetValue(x.Key, out string hash) && base.Hash == hash).Select(x => x.Value));
         }
 
         public override void Visit(VariableReference node) => this._variables.Remove(node.Name);
 
-        protected override void EndStatement(TSqlScript node)
+        protected override void EndBatch(TSqlBatch node)
         {
             foreach (DeclareVariableElement unusedVariable in this._variables.Values)
             {

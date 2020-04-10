@@ -20,6 +20,13 @@ namespace Dibix.Sdk.CodeAnalysis
             this.EndStatement(node);
         }
 
+        public override void ExplicitVisit(TSqlBatch node)
+        {
+            this.BeginBatch(node);
+            base.ExplicitVisit(node);
+            this.EndBatch(node);
+        }
+
         public override void Visit(CreateTableStatement node)
         {
             if (node.IsTemporaryTable())
@@ -33,6 +40,10 @@ namespace Dibix.Sdk.CodeAnalysis
         protected virtual void BeginStatement(TSqlScript node) { }
 
         protected virtual void EndStatement(TSqlScript node) { }
+
+        protected virtual void BeginBatch(TSqlBatch node) { }
+
+        protected virtual void EndBatch(TSqlBatch node) { }
 
         protected virtual void Visit(TableModel tableModel, SchemaObjectName tableName, TableDefinition tableDefinition) { }
 
