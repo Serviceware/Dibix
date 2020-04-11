@@ -16,7 +16,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             SqlDataTypeOption.NText,
             SqlDataTypeOption.Image
         };
-        private static readonly IDictionary<SqlDataTypeOption, HashSet<string>> Workarounds = new Dictionary<SqlDataTypeOption, HashSet<string>>
+        private static readonly IDictionary<SqlDataTypeOption, HashSet<string>> Suppressions = new Dictionary<SqlDataTypeOption, HashSet<string>>
         {
             {
                 SqlDataTypeOption.Image, new HashSet<string>
@@ -46,7 +46,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                 return;
 
             if (this._tableName != null
-             && Workarounds.TryGetValue(node.SqlDataTypeOption, out HashSet<string> workarounds)
+             && Suppressions.TryGetValue(node.SqlDataTypeOption, out HashSet<string> workarounds)
              && workarounds.Contains(this._tableName))
             {
                 return;
