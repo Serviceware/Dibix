@@ -3,13 +3,8 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class ObsoleteDataTypeSqlCodeAnalysisRule : SqlCodeAnalysisRule<ObsoleteDataTypeSqlCodeAnalysisRuleVisitor>
-    {
-        public override int Id => 16;
-        public override string ErrorMessage => "The data type '{0}' is obsolete and should not be used";
-    }
-
-    public sealed class ObsoleteDataTypeSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
+    [SqlCodeAnalysisRule(id: 16)]
+    public sealed class ObsoleteDataTypeSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
         private static readonly ICollection<SqlDataTypeOption> ObsoleteDataTypes = new HashSet<SqlDataTypeOption>
         {
@@ -34,6 +29,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             }
         };
         private string _tableName;
+
+        protected override string ErrorMessageTemplate => "The data type '{0}' is obsolete and should not be used";
 
         public override void Visit(CreateTableStatement node)
         {

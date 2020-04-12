@@ -18,19 +18,19 @@ namespace Dibix.Sdk.Sql
         };
 
         public override string TypeDisplayName => "Table";
-        public override ModelTypeClass ObjectType => ModelSchema.Table;
-        public override ModelTypeClass ColumnType => Microsoft.SqlServer.Dac.Model.Column.TypeClass;
-        public override ModelRelationshipClass ColumnDataType => Microsoft.SqlServer.Dac.Model.Column.DataType;
-        public override ModelPropertyClass ColumnLength => Microsoft.SqlServer.Dac.Model.Column.Length;
-        public override ModelPropertyClass ColumnPrecision => Microsoft.SqlServer.Dac.Model.Column.Precision;
-        public override ModelPropertyClass Nullable => Microsoft.SqlServer.Dac.Model.Column.Nullable;
+        protected override ModelTypeClass ObjectType => ModelSchema.Table;
+        protected override ModelTypeClass ColumnType => Microsoft.SqlServer.Dac.Model.Column.TypeClass;
+        protected override ModelRelationshipClass ColumnDataType => Microsoft.SqlServer.Dac.Model.Column.DataType;
+        protected override ModelPropertyClass ColumnLength => Microsoft.SqlServer.Dac.Model.Column.Length;
+        protected override ModelPropertyClass ColumnPrecision => Microsoft.SqlServer.Dac.Model.Column.Precision;
+        protected override ModelPropertyClass Nullable => Microsoft.SqlServer.Dac.Model.Column.Nullable;
 
         protected override bool IsComputed(TSqlObject column) => column.GetMetadata<ColumnType>(Microsoft.SqlServer.Dac.Model.Column.ColumnType) == Microsoft.SqlServer.Dac.Model.ColumnType.ComputedColumn;
-        protected override bool HasPrimaryKey(TSqlObject table) => table.GetReferencing(PrimaryKeyConstraint.Host).Any();
+        protected override bool HasPrimaryKey(TSqlObject table) => table.GetReferencing(PrimaryKeyConstraint.Host, DacQueryScopes.All).Any();
 
         protected override IEnumerable<Constraint> GetConstraints(TSqlObject table)
         {
-            IEnumerable<Constraint> constraints = ConstraintMap.SelectMany(x => table.GetReferencing(x.Host), base.ToConstraint);
+            IEnumerable<Constraint> constraints = ConstraintMap.SelectMany(x => table.GetReferencing(x.Host, DacQueryScopes.All), base.ToConstraint);
             return constraints;
         }
     }

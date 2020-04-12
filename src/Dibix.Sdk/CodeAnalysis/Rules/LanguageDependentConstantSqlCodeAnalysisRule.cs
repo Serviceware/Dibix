@@ -5,13 +5,8 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class LanguageDependentConstantSqlCodeAnalysisRule : SqlCodeAnalysisRule<LanguageDependentConstantSqlCodeAnalysisRuleVisitor>
-    {
-        public override int Id => 20;
-        public override string ErrorMessage => "Found language dependent expression: {0}";
-    }
-
-    public sealed class LanguageDependentConstantSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
+    [SqlCodeAnalysisRule(id: 20)]
+    public sealed class LanguageDependentConstantSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
         private static readonly ICollection<SqlDataTypeOption> LanguageDependentDataTypes = new HashSet<SqlDataTypeOption>
         {
@@ -24,7 +19,9 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         };
         private readonly ICollection<StringLiteral> _visitedLiterals;
 
-        public LanguageDependentConstantSqlCodeAnalysisRuleVisitor()
+        protected override string ErrorMessageTemplate => "Found language dependent expression: {0}";
+
+        public LanguageDependentConstantSqlCodeAnalysisRule()
         {
             this._visitedLiterals = new HashSet<StringLiteral>();
         }

@@ -15,12 +15,12 @@ namespace Dibix.Sdk.Sql
 
         #region Properties
         public abstract string TypeDisplayName { get; }
-        public abstract ModelTypeClass ObjectType { get; }
-        public abstract ModelTypeClass ColumnType { get; }
-        public abstract ModelRelationshipClass ColumnDataType { get; }
-        public abstract ModelPropertyClass ColumnLength { get; }
-        public abstract ModelPropertyClass ColumnPrecision { get; }
-        public abstract ModelPropertyClass Nullable { get; }
+        protected abstract ModelTypeClass ObjectType { get; }
+        protected abstract ModelTypeClass ColumnType { get; }
+        protected abstract ModelRelationshipClass ColumnDataType { get; }
+        protected abstract ModelPropertyClass ColumnLength { get; }
+        protected abstract ModelPropertyClass ColumnPrecision { get; }
+        protected abstract ModelPropertyClass Nullable { get; }
         #endregion
 
         #region Public Methods
@@ -33,7 +33,7 @@ namespace Dibix.Sdk.Sql
         public IEnumerable<Index> GetIndexes(TSqlModel model, SchemaObjectName tableName)
         {
             TSqlObject table = this.GetTable(model, tableName);
-            IEnumerable<Index> indexes = table.GetReferencing(Microsoft.SqlServer.Dac.Model.Index.IndexedObject)
+            IEnumerable<Index> indexes = table.GetReferencing(Microsoft.SqlServer.Dac.Model.Index.IndexedObject, DacQueryScopes.All)
                                               .Select(this.MapIndex);
             return indexes;
         }
@@ -59,7 +59,7 @@ namespace Dibix.Sdk.Sql
             string checkCondition = (string)(constraintSelector.CheckExpression != null ? constraintModel.GetProperty(constraintSelector.CheckExpression) : null);
             Constraint constraint = new Constraint(constraintSelector.Kind, name, isClustered, constraintModel.GetSourceInformation(), checkCondition);
             if (constraintSelector.Columns != null)
-                constraint.Columns.AddRange(constraintModel.GetReferenced(constraintSelector.Columns)
+                constraint.Columns.AddRange(constraintModel.GetReferenced(constraintSelector.Columns, DacQueryScopes.All)
                                                            .Where(this.IsColumn)
                                                            .Select(this.MapColumn));
 
@@ -74,7 +74,7 @@ namespace Dibix.Sdk.Sql
             if (name.SchemaIdentifier == null)
                 id.Parts.Insert(0, SqlModel.DefaultSchemaName);
 
-            TSqlObject table = model.GetObject(this.ObjectType, id, DacQueryScopes.UserDefined);
+            TSqlObject table = model.GetObject(this.ObjectType, id, DacQueryScopes.All);
             if (table == null && throwOnError)
                 throw new InvalidOperationException($"Could not find table in model: {id}");
 
@@ -94,7 +94,7 @@ namespace Dibix.Sdk.Sql
             string dataTypeName = null;
             if (!isComputed)
             {
-                TSqlObject columnType = model.GetReferenced(this.ColumnDataType).Single();
+                TSqlObject columnType = model.GetReferenced(this.ColumnDataType, DacQueryScopes.All).Single();
                 sqlDataType = columnType.GetProperty<SqlDataType>(DataType.SqlDataType);
                 dataTypeName = String.Join(".", columnType.Name.Parts);
             }
@@ -109,8 +109,8 @@ namespace Dibix.Sdk.Sql
             bool isClustered = model.GetProperty<bool>(Microsoft.SqlServer.Dac.Model.Index.Clustered);
             string filter = (string)model.GetProperty(Microsoft.SqlServer.Dac.Model.Index.FilterPredicate);
             Index index = new Index(name, isUnique, isClustered, model.GetSourceInformation(), filter);
-            index.Columns.AddRange(model.GetReferenced(Microsoft.SqlServer.Dac.Model.Index.Columns).Select(this.MapColumn));
-            index.IncludeColumns.AddRange(model.GetReferenced(Microsoft.SqlServer.Dac.Model.Index.IncludedColumns).Select(x => x.Name.Parts.Last()));
+            index.Columns.AddRange(model.GetReferenced(Microsoft.SqlServer.Dac.Model.Index.Columns, DacQueryScopes.All).Select(this.MapColumn));
+            index.IncludeColumns.AddRange(model.GetReferenced(Microsoft.SqlServer.Dac.Model.Index.IncludedColumns, DacQueryScopes.All).Select(x => x.Name.Parts.Last()));
             return index;
         }
         #endregion

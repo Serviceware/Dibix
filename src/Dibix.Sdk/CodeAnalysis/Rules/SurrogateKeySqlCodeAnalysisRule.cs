@@ -6,13 +6,8 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class SurrogateKeySqlCodeAnalysisRule : SqlCodeAnalysisRule<SurrogateKeySqlCodeAnalysisRuleVisitor>
-    {
-        public override int Id => 24;
-        public override string ErrorMessage => "{0}";
-    }
-
-    public sealed class SurrogateKeySqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
+    [SqlCodeAnalysisRule(id: 24)]
+    public sealed class SurrogateKeySqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
         // helpLine suppressions
         private static readonly IDictionary<string, string> Suppressions = new Dictionary<string, string>
@@ -82,6 +77,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
           , ["PK_hltmtaskerroritem(id)"] = "f121c1491a3806984525e47396536d30"
           , ["PK_hltmtaskreport(id)"] = "40707ef1ae1195933f625e0466d5d18d"
         };
+
+        protected override string ErrorMessageTemplate => "{0}";
 
         public override void Visit(CreateTableStatement node)
         {

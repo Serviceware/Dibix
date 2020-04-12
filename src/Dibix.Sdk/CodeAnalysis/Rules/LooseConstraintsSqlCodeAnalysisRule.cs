@@ -2,14 +2,11 @@
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class LooseConstraintsSqlCodeAnalysisRule : SqlCodeAnalysisRule<LooseConstraintsSqlCodeAnalysisRuleVisitor>
+    [SqlCodeAnalysisRule(id: 26)]
+    public sealed class LooseConstraintsSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
-        public override int Id => 26;
-        public override string ErrorMessage => "Constraints should be defined within the CREATE TABLE statement{0}";
-    }
+        protected override string ErrorMessageTemplate => "Constraints should be defined within the CREATE TABLE statement{0}";
 
-    public sealed class LooseConstraintsSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
-    {
         public override void Visit(AlterTableAddTableElementStatement node)
         {
             foreach (ConstraintDefinition constraint in node.Definition.TableConstraints)

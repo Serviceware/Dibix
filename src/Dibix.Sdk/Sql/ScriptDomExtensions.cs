@@ -100,7 +100,7 @@ namespace Dibix.Sdk.Sql
                 return SqlDataType.Unknown;
             }
 
-            TSqlObject columnType = element.GetReferenced(Microsoft.SqlServer.Dac.Model.Column.DataType).Single();
+            TSqlObject columnType = element.GetReferenced(Microsoft.SqlServer.Dac.Model.Column.DataType, DacQueryScopes.All).Single();
             return columnType.GetProperty<SqlDataType>(DataType.SqlDataType);
         }
 

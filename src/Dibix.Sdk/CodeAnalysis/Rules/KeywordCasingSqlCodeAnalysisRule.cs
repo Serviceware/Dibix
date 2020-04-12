@@ -6,13 +6,8 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class KeywordCasingSqlCodeAnalysisRule : SqlCodeAnalysisRule<KeywordCasingSqlCodeAnalysisRuleVisitor>
-    {
-        public override int Id => 1;
-        public override string ErrorMessage => "Invalid casing for '{0}' [{1}]";
-    }
-
-    public sealed class KeywordCasingSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
+    [SqlCodeAnalysisRule(id: 1)]
+    public sealed class KeywordCasingSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
         private static readonly ICollection<TSqlTokenType> TokenWhiteList = new HashSet<TSqlTokenType>
         {
@@ -44,6 +39,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             SqlTokenType.WhiteSpace
         };
         private IdentifierVisitor _identifierVisitor;
+
+        protected override string ErrorMessageTemplate => "Invalid casing for '{0}' [{1}]";
 
         protected override void BeginStatement(TSqlScript node)
         {

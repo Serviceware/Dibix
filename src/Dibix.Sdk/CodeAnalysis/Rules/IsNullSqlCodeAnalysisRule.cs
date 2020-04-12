@@ -7,14 +7,11 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class IsNullSqlCodeAnalysisRule : SqlCodeAnalysisRule<IsNullSqlCodeAnalysisRuleVisitor>
+    [SqlCodeAnalysisRule(id: 34)]
+    public sealed class IsNullSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
-        public override int Id => 34;
-        public override string ErrorMessage => "Nullable columns in expressions should be wrapped with ISNULL(column, default value): {0}.{1}";
-    }
+        protected override string ErrorMessageTemplate => "Nullable columns in expressions should be wrapped with ISNULL(column, default value): {0}.{1}";
 
-    public sealed class IsNullSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
-    {
         public override void Visit(CreateTableStatement node)
         {
             if (node.IsTemporaryTable())

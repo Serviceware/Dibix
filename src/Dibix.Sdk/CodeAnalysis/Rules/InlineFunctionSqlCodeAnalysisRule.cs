@@ -6,13 +6,8 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class InlineFunctionSqlCodeAnalysisRule : SqlCodeAnalysisRule<InlineFunctionSqlCodeAnalysisRuleVisitor>
-    {
-        public override int Id => 37;
-        public override string ErrorMessage => "{0}";
-    }
-
-    public sealed class InlineFunctionSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
+    [SqlCodeAnalysisRule(id: 37)]
+    public sealed class InlineFunctionSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
         private const bool AllowNonInlineTableValuedFunctions = false;
         private readonly IDictionary<int, FunctionCall> _scalarFunctionCalls = new Dictionary<int, FunctionCall>();
@@ -32,6 +27,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
           , ["hlsysum_getcentraladminorgunits"] = "ae9cdb9a23cc885575b24a9d0382bd93"
           , ["hltm_getreceiversfortask"] = "c9d9f72724b5722216e1bc9f6415efbf"
         };
+
+        protected override string ErrorMessageTemplate => "{0}";
 
         protected override void BeginStatement(TSqlScript node)
         {

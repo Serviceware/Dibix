@@ -12,10 +12,10 @@ namespace Dibix.Sdk.Sql
         private readonly TSqlModel _model;
         private readonly TSqlElementLocator _elementLocator;
 
-        internal SqlModel(TSqlModel model, TSqlFragment scriptFragment, string namingConventionPrefix, bool isScriptArtifact)
+        internal SqlModel(TSqlModel model, TSqlFragment scriptFragment, bool isScriptArtifact)
         {
             this._model = model;
-            this._elementLocator = new TSqlElementLocator(new Lazy<TSqlModel>(() => model), scriptFragment, namingConventionPrefix, isScriptArtifact);
+            this._elementLocator = new TSqlElementLocator(new Lazy<TSqlModel>(() => model), scriptFragment, isScriptArtifact);
         }
 
         public IEnumerable<Constraint> GetConstraints(SchemaObjectName tableName, bool throwOnError = true) => this.GetConstraints(TableModel.Table, tableName, throwOnError);
@@ -26,18 +26,12 @@ namespace Dibix.Sdk.Sql
 
         public bool HasPrimaryKey(TableModel tableDefinition, SchemaObjectName tableName) => tableDefinition.HasPrimaryKey(this._model, tableName);
 
-        public bool IsPartOfPrimaryKey(ElementLocation element, Func<ElementLocation, bool> elementNotFoundHandler)
+        public bool IsPartOfPrimaryKey(ElementLocation element)
         {
             TSqlObject columnElement = element.GetModelElement(this._model);
-            TSqlObject table = columnElement?.GetParent();
-            
-            // For some reason, it's not possible via the schema API to get the actual parent of a table variable column.
-            // Even though behind the API it is in fact a SqlDynamicColumnSource.
-            if (table == null) 
-                return elementNotFoundHandler(element);
-
-            TSqlObject primaryKey = table.GetReferencing(PrimaryKeyConstraint.Host).First();
-            return primaryKey?.GetReferenced(PrimaryKeyConstraint.Columns).Contains(columnElement) ?? default;
+            TSqlObject table = columnElement.GetParent(DacQueryScopes.All);
+            TSqlObject primaryKey = table.GetReferencing(PrimaryKeyConstraint.Host, DacQueryScopes.All).First();
+            return primaryKey?.GetReferenced(PrimaryKeyConstraint.Columns, DacQueryScopes.All).Contains(columnElement) ?? default;
         }
 
         public bool IsScalarFunction(FunctionCall functionCall) => this._elementLocator.TryGetModelElement(functionCall, out TSqlObject element) && element.ObjectType == ScalarFunction.TypeClass;

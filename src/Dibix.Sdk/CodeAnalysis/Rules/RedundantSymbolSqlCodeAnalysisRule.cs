@@ -5,13 +5,8 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class RedundantSymbolSqlCodeAnalysisRule : SqlCodeAnalysisRule<RedundantSymbolSqlCodeAnalysisRuleVisitor>
-    {
-        public override int Id => 38;
-        public override string ErrorMessage => "Unused {0}: {1}";
-    }
-
-    public sealed class RedundantSymbolSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
+    [SqlCodeAnalysisRule(id: 38)]
+    public sealed class RedundantSymbolSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
         // Removing parameters for these matches introduces breaking changes that require a significant amount of work
         private static readonly IDictionary<string, string> Suppressions = new Dictionary<string, string>
@@ -37,7 +32,9 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         private readonly IDictionary<string, DeclareVariableElement> _variables;
         private readonly ICollection<int> _suppressions;
 
-        public RedundantSymbolSqlCodeAnalysisRuleVisitor()
+        protected override string ErrorMessageTemplate => "Unused {0}: {1}";
+
+        public RedundantSymbolSqlCodeAnalysisRule()
         {
             this._variables = new Dictionary<string, DeclareVariableElement>();
             this._suppressions = new HashSet<int>();

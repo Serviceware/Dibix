@@ -3,14 +3,11 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class AliasSqlCodeAnalysisRule : SqlCodeAnalysisRule<AliasSqlCodeAnalysisRuleVisitor>
+    [SqlCodeAnalysisRule(id: 10)]
+    public sealed class AliasSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
-        public override int Id => 10;
-        public override string ErrorMessage => "{0}";
-    }
+        protected override string ErrorMessageTemplate => "{0}";
 
-    public sealed class AliasSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
-    {
         public override void Visit(JoinTableReference node)
         {
             TableReferenceWithAlias unaliasedTable = new[] { node.FirstTableReference, node.SecondTableReference }.OfType<TableReferenceWithAlias>().FirstOrDefault(x => x.Alias == null);

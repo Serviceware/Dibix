@@ -12,10 +12,10 @@ namespace Dibix.Sdk.Sql
         private readonly Lazy<IDictionary<int, ElementLocation>> _elementLocationsAccessor;
         private readonly Lazy<TSqlModel> _modelAccessor;
 
-        public TSqlElementLocator(Lazy<TSqlModel> modelAccessor, TSqlFragment sqlFragment, string namingConventionPrefix, bool isScriptArtifact)
+        public TSqlElementLocator(Lazy<TSqlModel> modelAccessor, TSqlFragment sqlFragment, bool isScriptArtifact)
         {
             this._modelAccessor = modelAccessor;
-            this._elementLocationsAccessor = new Lazy<IDictionary<int, ElementLocation>>(() => AnalyzeSchema(modelAccessor.Value, sqlFragment, namingConventionPrefix, isScriptArtifact).Locations.ToDictionary(x => x.Offset));
+            this._elementLocationsAccessor = new Lazy<IDictionary<int, ElementLocation>>(() => AnalyzeSchema(modelAccessor.Value, sqlFragment, isScriptArtifact).Locations.ToDictionary(x => x.Offset));
         }
 
         public bool TryGetElementLocation(TSqlFragment fragment, out ElementLocation location) => this._elementLocationsAccessor.Value.TryGetValue(fragment.StartOffset, out location);
@@ -32,7 +32,7 @@ namespace Dibix.Sdk.Sql
             return false;
         }
 
-        private static SchemaAnalyzerResult AnalyzeSchema(TSqlModel model, TSqlFragment sqlFragment, string namingConventionPrefix, bool isScriptArtifact)
+        private static SchemaAnalyzerResult AnalyzeSchema(TSqlModel model, TSqlFragment sqlFragment, bool isScriptArtifact)
         {
             SchemaAnalyzerResult schemaAnalyzerResult = SchemaAnalyzer.Analyze(model, sqlFragment);
 
@@ -50,7 +50,7 @@ namespace Dibix.Sdk.Sql
 
                     CreateProcedureStatement proc = new CreateProcedureStatement
                     {
-                        ProcedureReference = new ProcedureReference { Name = new SchemaObjectName { Identifiers = { new Identifier { Value = $"{namingConventionPrefix}_scriptwrapper" } } } },
+                        ProcedureReference = new ProcedureReference { Name = new SchemaObjectName { Identifiers = { new Identifier { Value = "<dbx_scriptwrapper>" } } } },
                         StatementList = new StatementList()
                     };
                     proc.StatementList.Statements.AddRange(script.Batches[0].Statements);

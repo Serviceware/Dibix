@@ -4,14 +4,11 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class SchemaSpecificationSqlCodeAnalysisRule : SqlCodeAnalysisRule<SchemaSpecificationSqlCodeAnalysisRuleVisitor>
+    [SqlCodeAnalysisRule(id: 2)]
+    public sealed class SchemaSpecificationSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
-        public override int Id => 2;
-        public override string ErrorMessage => "Missing schema specification";
-    }
+        protected override string ErrorMessageTemplate => "Missing schema specification";
 
-    public sealed class SchemaSpecificationSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
-    {
         public override void Visit(SchemaObjectName name)
         {
             if (!base.Model.TryGetModelElement(name, out ElementLocation element)) 

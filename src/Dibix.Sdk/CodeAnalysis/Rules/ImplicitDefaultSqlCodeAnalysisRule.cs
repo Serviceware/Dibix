@@ -4,14 +4,11 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class ImplicitDefaultSqlCodeAnalysisRule : SqlCodeAnalysisRule<ImplicitDefaultSqlCodeAnalysisRuleVisitor>
+    [SqlCodeAnalysisRule(id: 25)]
+    public sealed class ImplicitDefaultSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
-        public override int Id => 25;
-        public override string ErrorMessage => "{0}";
-    }
+        protected override string ErrorMessageTemplate => "{0}";
 
-    public sealed class ImplicitDefaultSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
-    {
         public override void Visit(CreateIndexStatement node)
         {
             if (!node.Clustered.HasValue)

@@ -3,14 +3,11 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class InsertWithoutColumnSpecificationSqlCodeAnalysisRule : SqlCodeAnalysisRule<InsertWithoutColumnSpecificationSqlCodeAnalysisRuleVisitor>
+    [SqlCodeAnalysisRule(id: 15)]
+    public sealed class InsertWithoutColumnSpecificationSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
-        public override int Id => 15;
-        public override string ErrorMessage => "Missing column specification for INSERT statement";
-    }
+        protected override string ErrorMessageTemplate => "Missing column specification for INSERT statement";
 
-    public sealed class InsertWithoutColumnSpecificationSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
-    {
         public override void Visit(InsertSpecification node)
         {
             if (!node.Columns.Any())

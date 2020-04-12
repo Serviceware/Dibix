@@ -3,14 +3,11 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class PrimitiveDataTypeIdentifierSqlCodeAnalysisRule : SqlCodeAnalysisRule<PrimitiveDataTypeIdentifierSqlCodeAnalysisRuleVisitor>
+    [SqlCodeAnalysisRule(id: 7)]
+    public sealed class PrimitiveDataTypeIdentifierSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
-        public override int Id => 7;
-        public override string ErrorMessage => "Primitive data type identifiers must not be quoted: {0}";
-    }
+        protected override string ErrorMessageTemplate => "Primitive data type identifiers must not be quoted: {0}";
 
-    public sealed class PrimitiveDataTypeIdentifierSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
-    {
         public override void Visit(SqlDataTypeReference node)
         {
             Identifier identifier = node.Name.BaseIdentifier;

@@ -1942,6 +1942,21 @@ namespace Dibix.Sdk.Tests
     message="Primary keys should not be updated: [id] = 1"
     line="16"
     column="21" /&gt;
+  &lt;error
+    ruleid="36"
+    message="Primary keys should not be updated: [r].[id_current] = [r].[id_new]"
+    line="20"
+    column="17" /&gt;
+  &lt;error
+    ruleid="36"
+    message="Primary keys should not be updated: [T].[id] = [S].[id]"
+    line="29"
+    column="14" /&gt;
+  &lt;error
+    ruleid="36"
+    message="Primary keys should not be updated: [T].[idx] = [S].[id]"
+    line="39"
+    column="14" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="PrimitiveDataTypeIdentifierSqlCodeAnalysisRule" xml:space="preserve">

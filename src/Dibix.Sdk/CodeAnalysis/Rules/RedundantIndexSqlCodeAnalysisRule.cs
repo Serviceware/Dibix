@@ -7,14 +7,11 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class RedundantIndexSqlCodeAnalysisRule : SqlCodeAnalysisRule<RedundantIndexSqlCodeAnalysisRuleVisitor>
+    [SqlCodeAnalysisRule(id: 33)]
+    public sealed class RedundantIndexSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
-        public override int Id => 33;
-        public override string ErrorMessage => "{0}";
-    }
+        protected override string ErrorMessageTemplate => "{0}";
 
-    public sealed class RedundantIndexSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
-    {
         protected override void Visit(TableModel tableModel, SchemaObjectName tableName, TableDefinition tableDefinition)
         {
             IEnumerable<IndexHit> constraints = base.Model

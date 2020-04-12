@@ -15,19 +15,19 @@ namespace Dibix.Sdk.Sql
         };
 
         public override string TypeDisplayName => "User defined table type";
-        public override ModelTypeClass ObjectType => ModelSchema.TableType;
-        public override ModelTypeClass ColumnType => TableTypeColumn.TypeClass;
-        public override ModelRelationshipClass ColumnDataType => TableTypeColumn.DataType;
-        public override ModelPropertyClass ColumnLength => TableTypeColumn.Length;
-        public override ModelPropertyClass ColumnPrecision => TableTypeColumn.Precision;
-        public override ModelPropertyClass Nullable => TableTypeColumn.Nullable;
+        protected override ModelTypeClass ObjectType => ModelSchema.TableType;
+        protected override ModelTypeClass ColumnType => TableTypeColumn.TypeClass;
+        protected override ModelRelationshipClass ColumnDataType => TableTypeColumn.DataType;
+        protected override ModelPropertyClass ColumnLength => TableTypeColumn.Length;
+        protected override ModelPropertyClass ColumnPrecision => TableTypeColumn.Precision;
+        protected override ModelPropertyClass Nullable => TableTypeColumn.Nullable;
 
         protected override bool IsComputed(TSqlObject column) => column.GetMetadata<TableTypeColumnType>(TableTypeColumn.TableTypeColumnType) == TableTypeColumnType.ComputedColumn;
-        protected override bool HasPrimaryKey(TSqlObject table) => table.GetReferenced(Microsoft.SqlServer.Dac.Model.TableType.Constraints).Any(x => x.ObjectType == TableTypePrimaryKeyConstraint.TypeClass);
+        protected override bool HasPrimaryKey(TSqlObject table) => table.GetReferenced(Microsoft.SqlServer.Dac.Model.TableType.Constraints, DacQueryScopes.All).Any(x => x.ObjectType == TableTypePrimaryKeyConstraint.TypeClass);
 
         protected override IEnumerable<Constraint> GetConstraints(TSqlObject table)
         {
-            IEnumerable<Constraint> constraints = table.GetReferenced(Microsoft.SqlServer.Dac.Model.TableType.Constraints)
+            IEnumerable<Constraint> constraints = table.GetReferenced(Microsoft.SqlServer.Dac.Model.TableType.Constraints, DacQueryScopes.All)
                                                        .Select(x => base.ToConstraint(ConstraintMap[x.ObjectType], x));
             return constraints;
         }

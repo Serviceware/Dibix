@@ -3,14 +3,11 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-     public sealed class EmptyReturnSqlCodeAnalysisRule : SqlCodeAnalysisRule<EmptyReturnSqlCodeAnalysisRuleVisitor>
-    {
-        public override int Id => 3;
-        public override string ErrorMessage => "Please specify a return code for the RETURN expression";
-    }
+     [SqlCodeAnalysisRule(id: 3)]
+     public sealed class EmptyReturnSqlCodeAnalysisRule : SqlCodeAnalysisRule
+     {
+        protected override string ErrorMessageTemplate => "Please specify a return code for the RETURN expression";
 
-    public sealed class EmptyReturnSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
-    {
         public override void Visit(ProcedureStatementBodyBase node)
         {
             if (node is FunctionStatementBody function && function.ReturnType is TableValuedFunctionReturnType)
@@ -32,5 +29,5 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                     this._errorHandler(node);
             }
         }
-    }
+     }
 }

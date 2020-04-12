@@ -4,13 +4,8 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class MissingPrimaryKeySqlCodeAnalysisRule : SqlCodeAnalysisRule<MissingPrimaryKeySqlCodeAnalysisRuleVisitor>
-    {
-        public override int Id => 12;
-        public override string ErrorMessage => "{0} '{1}' does not have a primary key";
-    }
-
-    public sealed class MissingPrimaryKeySqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
+    [SqlCodeAnalysisRule(id: 12)]
+    public sealed class MissingPrimaryKeySqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
         // helpLine suppressions
         // Adding a PK here would be very slow due to the size of the tables
@@ -20,6 +15,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
           , ["hlwfinstanceevents"] = "f0446a332d61e5557b635cc3090f9b89"
           , ["hlwfuserevents"] = "41fa48d0ecec2be844f4c45a416f9615"
         };
+
+        protected override string ErrorMessageTemplate => "{0} '{1}' does not have a primary key";
 
         protected override void Visit(TableModel tableModel, SchemaObjectName tableName, TableDefinition tableDefinition)
         {

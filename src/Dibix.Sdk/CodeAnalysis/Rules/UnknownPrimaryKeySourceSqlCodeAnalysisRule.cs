@@ -1,13 +1,10 @@
 ﻿namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    /*public sealed class UnknownPrimaryKeySourceSqlCodeAnalysisRule : SqlCodeAnalysisRule<UnknownPrimaryKeySourceSqlCodeAnalysisRuleVisitor>
+    /*[SqlCodeAnalysisRule(id: 29)]
+    public sealed class UnknownPrimaryKeySourceSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
-        public override int Id => 29;
         public override string ErrorMessage => "Unknown primary key source: {0}.{1}";
-    }
 
-    public sealed class UnknownPrimaryKeySourceSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
-    {
         public override void Visit(CreateTableStatement node)
         {
             if (node.IsTemporaryTable())

@@ -16,3 +16,25 @@ AS
 	UPDATE @table1 SET [id] = 1 -- Fail
 
 	UPDATE @table2 SET [id] = 1 -- OK
+
+	UPDATE [r] SET [r].[id_current] = [r].[id_new] -- Fail
+	FROM (
+		SELECT [id_current] = [id], [id_new] = 1
+		FROM @table1
+	) AS [r]
+
+	MERGE @table1 AS [T]
+	USING (VALUES(1)) AS [S]([id]) ON [T].[id] = [S].[id]
+	WHEN MATCHED THEN
+		UPDATE SET [T].[id] = [S].[id] -- Fail
+	;
+
+	;WITH [x] AS (
+		SELECT [idx] = [id]
+		FROM @table1
+	)
+	MERGE [x] AS [T]
+	USING (VALUES(1)) AS [S]([id]) ON [T].[idx] = [S].[id]
+	WHEN MATCHED THEN
+		UPDATE SET [T].[idx] = [S].[id] -- Fail
+	;

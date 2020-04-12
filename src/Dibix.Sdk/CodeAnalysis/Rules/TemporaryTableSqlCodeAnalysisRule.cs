@@ -3,14 +3,11 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class TemporaryTableSqlCodeAnalysisRule : SqlCodeAnalysisRule<TemporaryTableSqlCodeAnalysisRuleVisitor>
+    [SqlCodeAnalysisRule(id: 21)]
+    public sealed class TemporaryTableSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
-        public override int Id => 21;
-        public override string ErrorMessage => "The use of temporary tables is not allowed: {0}";
-    }
+        protected override string ErrorMessageTemplate => "The use of temporary tables is not allowed: {0}";
 
-    public sealed class TemporaryTableSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
-    {
         public override void Visit(CreateTableStatement node)
         {
             if (node.IsTemporaryTable())

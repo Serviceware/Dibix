@@ -4,19 +4,16 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class SecurityAlgorithmSqlCodeAnalysisRule : SqlCodeAnalysisRule<SecurityAlgorithmSqlCodeAnalysisRuleVisitor>
-    {
-        public override int Id => 30;
-        public override string ErrorMessage => "Found use of old security algorithm '{0}'. Please use any of these algorithms: {1}";
-    }
-
-    public sealed class SecurityAlgorithmSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
+    [SqlCodeAnalysisRule(id: 30)]
+    public sealed class SecurityAlgorithmSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
         private static readonly string[] SupportedAlgorithms =
         {
             "SHA2_512"
         };
         private static readonly string SupportedAlgorithmsCombined = String.Join(", ", SupportedAlgorithms);
+
+        protected override string ErrorMessageTemplate => "Found use of old security algorithm '{0}'. Please use any of these algorithms: {1}";
 
         public override void Visit(FunctionCall node)
         {

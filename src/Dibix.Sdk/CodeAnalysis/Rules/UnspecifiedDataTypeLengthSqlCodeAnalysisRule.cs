@@ -4,13 +4,8 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class UnspecifiedDataTypeLengthSqlCodeAnalysisRule : SqlCodeAnalysisRule<UnspecifiedDataTypeLengthSqlCodeAnalysisRuleVisitor>
-    {
-        public override int Id => 9;
-        public override string ErrorMessage => "Data type length not specified: {0}";
-    }
-
-    public sealed class UnspecifiedDataTypeLengthSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
+    [SqlCodeAnalysisRule(id: 9)]
+    public sealed class UnspecifiedDataTypeLengthSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
         private static readonly ICollection<SqlDataTypeOption> DataTypesThatRequireLength = new HashSet<SqlDataTypeOption>
         {
@@ -24,6 +19,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             SqlDataTypeOption.Numeric,
             SqlDataTypeOption.Float
         };
+
+        protected override string ErrorMessageTemplate => "Data type length not specified: {0}";
 
         public override void Visit(SqlDataTypeReference node)
         {

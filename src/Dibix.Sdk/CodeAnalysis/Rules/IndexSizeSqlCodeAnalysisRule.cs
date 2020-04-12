@@ -8,13 +8,8 @@ using SqlDataType = Microsoft.SqlServer.Dac.Model.SqlDataType;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class IndexSizeSqlCodeAnalysisRule : SqlCodeAnalysisRule<IndexSizeSqlCodeAnalysisRuleVisitor>
-    {
-        public override int Id => 32;
-        public override string ErrorMessage => "{0} index {1} size is {2} bytes. The maximum key length is {3} bytes";
-    }
-
-    public sealed class IndexSizeSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
+    [SqlCodeAnalysisRule(id: 32)]
+    public sealed class IndexSizeSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
         private const short MaximumClusteredIndexSize    = 900;  // bytes
         private const short MaximumNonClusteredIndexSize = 1700; // bytes
@@ -34,6 +29,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             ["PK_hlspparentprocattrmapping"] = "849a02e49f6cfb93a812208afee0d1ea"
           , ["UQ_hlsysportalconfig_cfg1"] = "d3ba37ada7794db37d71df4b87547128"
         };
+
+        protected override string ErrorMessageTemplate => "{0} index {1} size is {2} bytes. The maximum key length is {3} bytes";
 
         public override void Visit(CreateTableStatement node)
         {

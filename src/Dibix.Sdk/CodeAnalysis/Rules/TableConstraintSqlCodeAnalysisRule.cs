@@ -3,14 +3,11 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class TableConstraintSqlCodeAnalysisRule : SqlCodeAnalysisRule<TableConstraintSqlCodeAnalysisRuleVisitor>
+    [SqlCodeAnalysisRule(id: 29)]
+    public sealed class TableConstraintSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
-        public override int Id => 29;
-        public override string ErrorMessage => "The constraint '{0}' should be defined on the table, instead of the column '{1}'";
-    }
+        protected override string ErrorMessageTemplate => "The constraint '{0}' should be defined on the table, instead of the column '{1}'";
 
-    public sealed class TableConstraintSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
-    {
         public override void Visit(CreateTableStatement node)
         {
             foreach (ColumnDefinition column in node.Definition.ColumnDefinitions)

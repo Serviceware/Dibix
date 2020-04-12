@@ -5,14 +5,11 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class AmbiguousCheckConstraintSqlCodeAnalysisRule : SqlCodeAnalysisRule<AmbiguousCheckConstraintSqlCodeAnalysisRuleVisitor>
+    [SqlCodeAnalysisRule(id: 35)]
+    public sealed class AmbiguousCheckConstraintSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
-        public override int Id => 35;
-        public override string ErrorMessage => "Ambiguous check constraints: {0}";
-    }
+        protected override string ErrorMessageTemplate => "Ambiguous check constraints: {0}";
 
-    public sealed class AmbiguousCheckConstraintSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
-    {
         public override void Visit(CreateTableStatement node)
         {
             if (node.IsTemporaryTable())

@@ -25,7 +25,7 @@ namespace Dibix.Sdk.Sql
 
         public static SchemaAnalyzerResult Analyze(TSqlModel dataSchemaModel, TSqlFragment sqlFragment)
         {
-            TSqlObject modelElement = dataSchemaModel.GetObject(ModelSchema.User, new ObjectIdentifier("sys"), DacQueryScopes.BuiltIn);
+            TSqlObject modelElement = dataSchemaModel.GetObject(ModelSchema.User, new ObjectIdentifier("sys"), DacQueryScopes.BuiltIn); // Dummy
             return Analyzer(dataSchemaModel, modelElement, sqlFragment);
         }
 

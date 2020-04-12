@@ -3,14 +3,11 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class UniqueIndexSqlCodeAnalysisRule : SqlCodeAnalysisRule<UniqueIndexSqlCodeAnalysisRuleVisitor>
+    [SqlCodeAnalysisRule(id: 27)]
+    public sealed class UniqueIndexSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
-        public override int Id => 27;
-        public override string ErrorMessage => "Unique index should be replaced by a unique constraint on the table definition: {0}";
-    }
+        protected override string ErrorMessageTemplate => "Unique index should be replaced by a unique constraint on the table definition: {0}";
 
-    public sealed class UniqueIndexSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
-    {
         public override void Visit(CreateIndexStatement node)
         {
             if (node.Unique && node.FilterPredicate == null && !node.IncludeColumns.Any())

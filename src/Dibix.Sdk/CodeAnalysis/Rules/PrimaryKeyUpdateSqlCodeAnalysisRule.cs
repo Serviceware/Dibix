@@ -7,26 +7,23 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class PrimaryKeyUpdateSqlCodeAnalysisRule : SqlCodeAnalysisRule<PrimaryKeyUpdateSqlCodeAnalysisRuleVisitor>
+    [SqlCodeAnalysisRule(id: 36)]
+    public sealed class PrimaryKeyUpdateSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
-        public override int Id => 36;
-        public override string ErrorMessage => "Primary keys should not be updated: {0}";
-    }
+        private readonly IDictionary<string, IDictionary<string, TableVariableColumn>> _tableVariables;
 
-    public sealed class PrimaryKeyUpdateSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
-    {
-        private readonly ICollection<string> _tableVariablePrimaryKeyColumns;
+        protected override string ErrorMessageTemplate => "Primary keys should not be updated: {0}";
 
-        public PrimaryKeyUpdateSqlCodeAnalysisRuleVisitor()
+        public PrimaryKeyUpdateSqlCodeAnalysisRule()
         {
-            this._tableVariablePrimaryKeyColumns = new HashSet<string>();
+            this._tableVariables = new Dictionary<string, IDictionary<string, TableVariableColumn>>();
         }
 
         protected override void BeginStatement(TSqlScript node)
         {
             TableVariableVisitor tableVariableVisitor = new TableVariableVisitor();
             node.Accept(tableVariableVisitor);
-            this._tableVariablePrimaryKeyColumns.ReplaceWith(tableVariableVisitor.PrimaryKeyColumns);
+            this._tableVariables.ReplaceWith(tableVariableVisitor.TableVariables.Select(x => new KeyValuePair<string, IDictionary<string, TableVariableColumn>>(x.Name, x.Columns.ToDictionary(y => y.Name))));
         }
 
         public override void Visit(AssignmentSetClause node)
@@ -37,26 +34,40 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             if (!base.Model.TryGetModelElement(node.Column, out ElementLocation elementLocation))
                 return;
 
-            bool isPartOfPrimaryKey = base.Model.IsPartOfPrimaryKey(elementLocation, this.IsPartOfTableVariablePrimaryKey);
+            bool? isPartOfPrimaryKey = null;
 
-            if (isPartOfPrimaryKey)
+            // Try table variable source first
+            for (int i = 0; i < elementLocation.Identifiers.Count; i++)
+            {
+                string identifier = elementLocation.Identifiers[i];
+                if (!this._tableVariables.TryGetValue(identifier, out IDictionary<string, TableVariableColumn> tableVariableColumns)) 
+                    continue;
+
+                string columnName = elementLocation.Identifiers[i + 1];
+                if (tableVariableColumns.TryGetValue(columnName, out TableVariableColumn column)
+                 || tableVariableColumns.TryGetValue(node.Column.GetName().Value, out column)) // For MERGE statements the column identifier is not reliable
+                {
+                    isPartOfPrimaryKey = column.IsPartOfPrimaryKey;
+                }
+                break;
+            }
+
+            // 'Should' be a concrecte column
+            if (!isPartOfPrimaryKey.HasValue)
+                isPartOfPrimaryKey = base.Model.IsPartOfPrimaryKey(elementLocation);
+
+            if (!isPartOfPrimaryKey.HasValue)
+                throw new InvalidOperationException($"Could not determine column information for: {node.Column.Dump()}");
+
+            if (isPartOfPrimaryKey.Value)
                 base.Fail(node, node.Dump());
-        }
-
-        private bool IsPartOfTableVariablePrimaryKey(ElementLocation element)
-        {
-            if (!element.Identifiers.Any()) 
-                return false;
-
-            string key = String.Join(".", element.Identifiers.Skip(element.Identifiers.Count - 2));
-            return this._tableVariablePrimaryKeyColumns.Contains(key);
         }
 
         private sealed class TableVariableVisitor : TSqlFragmentVisitor
         {
-            public ICollection<string> PrimaryKeyColumns { get; }
+            public ICollection<TableVariable> TableVariables { get; }
 
-            public TableVariableVisitor() => this.PrimaryKeyColumns = new Collection<string>();
+            public TableVariableVisitor() => this.TableVariables = new Collection<TableVariable>();
 
             public override void Visit(DeclareTableVariableBody node)
             {
@@ -65,15 +76,41 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                                                             .OfType<UniqueConstraintDefinition>()
                                                             .SingleOrDefault(x => x.IsPrimaryKey);
 
-                if (primaryKey == null)
-                    return;
+                ICollection<string> primaryKeyColumns = new HashSet<string>();
+                if (primaryKey != null)
+                    primaryKeyColumns.AddRange(primaryKey.Columns.Select(x => x.Column.GetName().Value));
 
-                string tableName = node.VariableName.Value;
-                ICollection<string> columns = primaryKey.Columns
-                                                        .Select(x => $"{tableName}.{x.Column.GetName().Value}")
-                                                        .ToArray();
+                TableVariable table = new TableVariable(node.VariableName.Value);
+                foreach (ColumnDefinition column in node.Definition.ColumnDefinitions)
+                {
+                    bool isPartOfPrimaryKey = primaryKeyColumns.Contains(column.ColumnIdentifier.Value);
+                    table.Columns.Add(new TableVariableColumn(column.ColumnIdentifier.Value, isPartOfPrimaryKey));
+                }
+                this.TableVariables.Add(table);
+            }
+        }
 
-                this.PrimaryKeyColumns.AddRange(columns);
+        private sealed class TableVariable
+        {
+            public string Name { get; }
+            public ICollection<TableVariableColumn> Columns { get; }
+
+            public TableVariable(string name)
+            {
+                this.Name = name;
+                this.Columns = new Collection<TableVariableColumn>();
+            }
+        }
+
+        private sealed class TableVariableColumn
+        {
+            public string Name { get; }
+            public bool IsPartOfPrimaryKey { get; }
+
+            public TableVariableColumn(string name, bool isPartOfPrimaryKey)
+            {
+                this.Name = name;
+                this.IsPartOfPrimaryKey = isPartOfPrimaryKey;
             }
         }
     }

@@ -3,14 +3,11 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class ImplicitAliasSqlCodeAnalysisRule : SqlCodeAnalysisRule<ImplicitAliasSqlCodeAnalysisRuleVisitor>
+    [SqlCodeAnalysisRule(id: 8)]
+    public sealed class ImplicitAliasSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
-        public override int Id => 8;
-        public override string ErrorMessage => "Aliases must be marked with 'AS'";
-    }
-
-    public sealed class ImplicitAliasSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
-    {
+        protected override string ErrorMessageTemplate => "Aliases must be marked with 'AS'";
+        
         public override void Visit(TableReferenceWithAlias node)
         {
             if (node.Alias == null)

@@ -3,14 +3,11 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class NoCursorSqlCodeAnalysisRule : SqlCodeAnalysisRule<NoCursorSqlCodeAnalysisRuleVisitor>
+    [SqlCodeAnalysisRule(id: 13)]
+    public sealed class NoCursorSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
-        public override int Id => 13;
-        public override string ErrorMessage => "Found use of CURSOR statement";
-    }
+        protected override string ErrorMessageTemplate => "Found use of CURSOR statement";
 
-    public sealed class NoCursorSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
-    {
         protected override void Visit(TSqlParserToken token)
         {
             if (token.TokenType == SqlTokenType.Cursor)

@@ -9,18 +9,14 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     // Disabled, because it's not stable enough
     // 1. As with most other potential rules, it's still hard to determine the actual type of a column expression
     // 2. We can not clearly detect a single row equality WHERE expression 
-    public sealed class MisusedTopRowFilterSqlCodeAnalysisRule : SqlCodeAnalysisRule<MisusedTopRowFilterSqlCodeAnalysisRuleVisitor>
-    {
-        public override int Id => 22;
-        public override string ErrorMessage => "{0}";
-        public override bool IsEnabled => false;
-    }
-
-    public sealed class MisusedTopRowFilterSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
+    [SqlCodeAnalysisRule(id: 22, IsEnabled = false)]
+    public sealed class MisusedTopRowFilterSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
         private readonly IDictionary<string, TableVariable> _tableVariablesWithKey;
 
-        public MisusedTopRowFilterSqlCodeAnalysisRuleVisitor()
+        protected override string ErrorMessageTemplate => "{0}";
+
+        public MisusedTopRowFilterSqlCodeAnalysisRule()
         {
             this._tableVariablesWithKey = new Dictionary<string, TableVariable>();
         }

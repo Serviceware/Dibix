@@ -9,13 +9,8 @@ using TableType = Dibix.Sdk.Sql.TableType;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class PrimaryKeyDataTypeSqlCodeAnalysisRule : SqlCodeAnalysisRule<PrimaryKeyDataTypeSqlCodeAnalysisRuleVisitor>
-    {
-        public override int Id => 23;
-        public override string ErrorMessage => "Only TINYINT/SMALLINT/INT/BIGINT are allowed as primary key: {0}.{1} ({2})";
-    }
-
-    public sealed class PrimaryKeyDataTypeSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
+    [SqlCodeAnalysisRule(id: 23)]
+    public sealed class PrimaryKeyDataTypeSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
         // helpLine suppressions
         private static readonly IDictionary<string, string> Suppressions = new Dictionary<string, string>
@@ -195,7 +190,9 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         };
         private readonly IDictionary<string, TSqlFragment> _primaryKeyColumnLocations;
 
-        public PrimaryKeyDataTypeSqlCodeAnalysisRuleVisitor()
+        protected override string ErrorMessageTemplate => "Only TINYINT/SMALLINT/INT/BIGINT are allowed as primary key: {0}.{1} ({2})";
+
+        public PrimaryKeyDataTypeSqlCodeAnalysisRule()
         {
             this._primaryKeyColumnLocations = new Dictionary<string, TSqlFragment>();
         }

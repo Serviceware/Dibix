@@ -4,14 +4,11 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class UnfilteredDataModificationSqlCodeAnalysisRule : SqlCodeAnalysisRule<UnfilteredDataModificationSqlCodeAnalysisRuleVisitor>
+    [SqlCodeAnalysisRule(id: 18)]
+    public sealed class UnfilteredDataModificationSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
-        public override int Id => 18;
-        public override string ErrorMessage => "Missing where clause in {0} statement";
-    }
+        protected override string ErrorMessageTemplate => "Missing where clause in {0} statement";
 
-    public sealed class UnfilteredDataModificationSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
-    {
         public override void Visit(UpdateSpecification node)
         {
             if (node.WhereClause != null)

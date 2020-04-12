@@ -3,14 +3,11 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
 {
-    public sealed class UnnamedConstraintSqlCodeAnalysisRule : SqlCodeAnalysisRule<UnnamedConstraintSqlCodeAnalysisRuleVisitor>
+    [SqlCodeAnalysisRule(id: 14)]
+    public sealed class UnnamedConstraintSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
-        public override int Id => 14;
-        public override string ErrorMessage => "Table '{0}' has an unnamed {1}";
-    }
+        protected override string ErrorMessageTemplate => "Table '{0}' has an unnamed {1}";
 
-    public sealed class UnnamedConstraintSqlCodeAnalysisRuleVisitor : SqlCodeAnalysisRuleVisitor
-    {
         public override void Visit(CreateTableStatement node)
         {
             if (node.IsTemporaryTable())

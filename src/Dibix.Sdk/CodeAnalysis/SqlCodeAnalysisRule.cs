@@ -2,49 +2,102 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Dibix.Sdk.Sql;
-using Microsoft.SqlServer.Dac.Model;
+using Microsoft.SqlServer.Dac;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis
 {
-    public abstract class SqlCodeAnalysisRule<TVisitor> : ISqlCodeAnalysisRule where TVisitor : SqlCodeAnalysisRuleVisitor, new()
+    public abstract class SqlCodeAnalysisRule : TSqlFragmentVisitor, ISqlCodeAnalysisRule
     {
-        public abstract int Id { get; }
-        public abstract string ErrorMessage { get; }
-        public virtual bool IsEnabled => true;
-        public ICollection<SqlCodeAnalysisError> Errors { get; }
+        #region Fields
+        private readonly int _id;
+        private readonly Collection<SqlCodeAnalysisError> _errors;
+        private SqlCodeAnalysisContext _context;
+        #endregion
 
+        #region Properties
+        protected abstract string ErrorMessageTemplate { get; }
+
+        protected SqlModel Model => this._context.Model;
+        protected string Hash => this._context.Hash;
+        protected SqlCodeAnalysisConfiguration Configuration => this._context.Configuration;
+        #endregion
+
+        #region Constructor
         protected SqlCodeAnalysisRule()
         {
-            this.Errors = new Collection<SqlCodeAnalysisError>();
+            this._id = SqlCodeAnalysisRuleMap.GetRuleId(this.GetType());
+            this._errors = new Collection<SqlCodeAnalysisError>();
         }
+        #endregion
 
-        IEnumerable<SqlCodeAnalysisError> ISqlCodeAnalysisRule.Analyze(TSqlModel model, TSqlFragment scriptFragment, string hash, SqlCodeAnalysisConfiguration configuration, bool isScriptArtifact)
+        #region ISqlCodeAnalysisRule Members
+        IEnumerable<SqlCodeAnalysisError> ISqlCodeAnalysisRule.Analyze(SqlCodeAnalysisContext context)
         {
-            this.Errors.Clear();
-
-            this.Analyze(model, scriptFragment, hash, configuration, isScriptArtifact);
-
-            return this.Errors;
+            this._context = context;
+            context.Fragment.Accept(this);
+            return this._errors;
         }
+        #endregion
 
-        private void Analyze(TSqlModel model, TSqlFragment scriptFragment, string hash, SqlCodeAnalysisConfiguration configuration, bool isScriptArtifact)
+        #region Overrides
+        public override void ExplicitVisit(TSqlScript node)
         {
-            TVisitor visitor = new TVisitor
-            {
-                Hash = hash,
-                Model = new SqlModel(model, scriptFragment, configuration.NamingConventionPrefix, isScriptArtifact),
-                Configuration = configuration,
-                ErrorHandler = this.Fail
-            };
-            scriptFragment.Accept(visitor);
+            this.BeginStatement(node);
+            base.ExplicitVisit(node);
+            this.VisitTokens(node);
+            this.EndStatement(node);
         }
 
+        public override void ExplicitVisit(TSqlBatch node)
+        {
+            this.BeginBatch(node);
+            base.ExplicitVisit(node);
+            this.EndBatch(node);
+        }
+
+        public override void Visit(CreateTableStatement node)
+        {
+            if (node.IsTemporaryTable())
+                return;
+
+            this.Visit(TableModel.Table, node.SchemaObjectName, node.Definition);
+        }
+
+        public override void Visit(CreateTypeTableStatement node) => this.Visit(TableModel.TableType, node.Name, node.Definition);
+        #endregion
+
+        #region Protected Methods
+        protected virtual void BeginStatement(TSqlScript node) { }
+
+        protected virtual void EndStatement(TSqlScript node) { }
+
+        protected virtual void BeginBatch(TSqlBatch node) { }
+
+        protected virtual void EndBatch(TSqlBatch node) { }
+
+        protected virtual void Visit(TableModel tableModel, SchemaObjectName tableName, TableDefinition tableDefinition) { }
+
+        protected virtual void Visit(TSqlParserToken token) { }
+
+        protected void Fail(TSqlParserToken token, params object[] args) => this.Fail(token.Line, token.Column, args);
+        protected void Fail(TSqlFragment fragment, params object[] args) => this.Fail(fragment.StartLine, fragment.StartColumn, args);
+        protected void Fail(SourceInformation sourceInformation, params object[] args) => this.Fail(sourceInformation.StartLine, sourceInformation.StartColumn, args);
+        #endregion
+
+        #region Private Methods
         private void Fail(int line, int column, params object[] args)
         {
-            string errorText = String.Format(this.ErrorMessage, args);
-            SqlCodeAnalysisError problem = new SqlCodeAnalysisError(this.Id, errorText, line, column);
-            this.Errors.Add(problem);
+            string message = String.Format(this.ErrorMessageTemplate, args);
+            SqlCodeAnalysisError error = new SqlCodeAnalysisError(this._id, message, line, column);
+            this._errors.Add(error);
         }
+
+        private void VisitTokens(TSqlScript node)
+        {
+            foreach (TSqlParserToken token in node.AsEnumerable())
+                this.Visit(token);
+        }
+        #endregion
     }
 }

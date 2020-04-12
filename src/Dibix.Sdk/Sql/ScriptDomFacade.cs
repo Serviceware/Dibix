@@ -23,7 +23,7 @@ namespace Dibix.Sdk.Sql
             }
         }
 
-        public static TSqlFragment Parse(string scriptContent) => Load(new StringReader(scriptContent));
+        public static TSqlFragment Parse(string text) => Load(new StringReader(text));
 
         public static string Generate(TSqlFragment fragment) => Generate(fragment, null);
         public static string Generate(TSqlFragment fragment, Action<SqlScriptGenerator> configuration)
