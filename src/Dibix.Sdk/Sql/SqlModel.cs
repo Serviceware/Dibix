@@ -8,7 +8,6 @@ namespace Dibix.Sdk.Sql
 {
     public sealed class SqlModel
     {
-        internal const string DefaultSchemaName = "dbo";
         private readonly TSqlModel _model;
         private readonly TSqlElementLocator _elementLocator;
 
@@ -42,6 +41,39 @@ namespace Dibix.Sdk.Sql
         {
             TSqlObject modelElement = element.GetModelElement(this._model);
             return modelElement?.ObjectType == DataType.TypeClass;
+        }
+
+        public bool TryGetFunctionParameterNames(SchemaObjectName functionName, out IList<string> parameterNames)
+        {
+            if (!this._elementLocator.TryGetModelElement(functionName, out TSqlObject function))
+            {
+                parameterNames = null;
+                return false;
+            }
+
+            ModelRelationshipClass parametersRelationship = GetParametersRelationship(function.ObjectType);
+            parameterNames = function.GetReferenced(parametersRelationship, DacQueryScopes.All)
+                                     .Select(x => x.Name.Parts.Last())
+                                     .ToArray();
+
+            return true;
+        }
+
+        private static ModelRelationshipClass GetParametersRelationship(ModelTypeClass type)
+        {
+            if (type == ModelSchema.Procedure)
+                return Procedure.Parameters;
+
+            if (type == ModelSchema.ExtendedProcedure)
+                return Procedure.Parameters;
+
+            if (type == ModelSchema.ScalarFunction)
+                return ScalarFunction.Parameters;
+
+            if (type == ModelSchema.TableValuedFunction)
+                return TableValuedFunction.Parameters;
+            
+            throw new ArgumentOutOfRangeException($"Unexpected function type: {type}");
         }
     }
 }

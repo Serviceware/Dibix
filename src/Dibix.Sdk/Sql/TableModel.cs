@@ -70,10 +70,7 @@ namespace Dibix.Sdk.Sql
         #region Private Methods
         private TSqlObject GetTable(TSqlModel model, SchemaObjectName name, bool throwOnError = true)
         {
-            ObjectIdentifier id = new ObjectIdentifier(name.Identifiers.Select(x => x.Value));
-            if (name.SchemaIdentifier == null)
-                id.Parts.Insert(0, SqlModel.DefaultSchemaName);
-
+            ObjectIdentifier id = name.ToObjectIdentifier();
             TSqlObject table = model.GetObject(this.ObjectType, id, DacQueryScopes.All);
             if (table == null && throwOnError)
                 throw new InvalidOperationException($"Could not find table in model: {id}");

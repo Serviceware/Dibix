@@ -80,6 +80,8 @@ namespace Dibix.Sdk.CodeAnalysis
 
         protected virtual void Visit(TSqlParserToken token) { }
 
+        protected void LogError(TSqlFragment fragment, string code, string text) => this._context.LogError(code, text, fragment.StartLine, fragment.StartColumn);
+
         protected void Fail(TSqlParserToken token, params object[] args) => this.Fail(token.Line, token.Column, args);
         protected void Fail(TSqlFragment fragment, params object[] args) => this.Fail(fragment.StartLine, fragment.StartColumn, args);
         protected void Fail(SourceInformation sourceInformation, params object[] args) => this.Fail(sourceInformation.StartLine, sourceInformation.StartColumn, args);

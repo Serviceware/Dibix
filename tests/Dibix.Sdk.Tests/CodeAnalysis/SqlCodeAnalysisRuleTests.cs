@@ -117,5 +117,8 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
 
         [Fact]
         public void RedundantSymbolSqlCodeAnalysisRule() => this.Execute();
+
+        [Fact]
+        public void ExplicitProcedureArgumentSqlCodeAnalysisRule() => this.Execute();
     }
 }

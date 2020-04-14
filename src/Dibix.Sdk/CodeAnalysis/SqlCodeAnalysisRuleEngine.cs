@@ -14,14 +14,16 @@ namespace Dibix.Sdk.CodeAnalysis
         #region Fields
         private readonly TSqlModel _model;
         private readonly SqlCodeAnalysisConfiguration _configuration;
+        private readonly ILogger _logger;
         private readonly ICollection<Func<SqlCodeAnalysisContext, IEnumerable<SqlCodeAnalysisError>>> _rules;
         #endregion
 
         #region Constructor
-        private SqlCodeAnalysisRuleEngine(TSqlModel model, SqlCodeAnalysisConfiguration configuration)
+        private SqlCodeAnalysisRuleEngine(TSqlModel model, SqlCodeAnalysisConfiguration configuration, ILogger logger)
         {
             this._model = model;
             this._configuration = configuration;
+            this._logger = logger;
             this._rules = ScanRules().ToArray();
         }
         #endregion
@@ -31,7 +33,7 @@ namespace Dibix.Sdk.CodeAnalysis
         {
             TSqlModel model = PublicSqlDataSchemaModelLoader.Load(databaseSchemaProviderName, modelCollation, source, sqlReferencePath, logger);
             SqlCodeAnalysisConfiguration configuration = new SqlCodeAnalysisConfiguration(namingConventionPrefix);
-            return new SqlCodeAnalysisRuleEngine(model, configuration);
+            return new SqlCodeAnalysisRuleEngine(model, configuration, logger);
         }
         #endregion
 
@@ -65,7 +67,7 @@ namespace Dibix.Sdk.CodeAnalysis
 
         private SqlCodeAnalysisContext CreateContext(string source, TSqlFragment fragment, bool isScriptArtifact)
         {
-            return new SqlCodeAnalysisContext(this._model, source, fragment, isScriptArtifact, this._configuration);
+            return new SqlCodeAnalysisContext(this._model, source, fragment, isScriptArtifact, this._configuration, this._logger);
         }
 
         private static IEnumerable<Func<SqlCodeAnalysisContext, IEnumerable<SqlCodeAnalysisError>>> ScanRules()

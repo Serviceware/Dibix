@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using Microsoft.SqlServer.Dac;
@@ -37,6 +38,27 @@ namespace Dibix.Sdk.Sql
         public static Identifier GetName(this ColumnReferenceExpression column) => column.MultiPartIdentifier?.Identifiers.Last();
 
         public static string ToFullName(this MultiPartIdentifier multiPartIdentifier) => String.Join(".", multiPartIdentifier.Identifiers.Select(x => $"[{x.Value}]"));
+
+        public static ObjectIdentifier ToObjectIdentifier(this SchemaObjectName name)
+        {
+            IList<string> externalParts = new Collection<string>();
+            IList<string> parts = new Collection<string>();
+
+            if (name.ServerIdentifier != null)
+                externalParts.Add(name.ServerIdentifier.Value);
+
+            if (name.DatabaseIdentifier != null)
+                externalParts.Add(name.DatabaseIdentifier.Value);
+
+            if (name.SchemaIdentifier != null)
+                parts.Add(name.SchemaIdentifier.Value);
+
+            if (name.BaseIdentifier != null)
+                parts.Add(name.BaseIdentifier.Value);
+
+            ObjectIdentifier identifier = new ObjectIdentifier(externalParts, parts);
+            return identifier;
+        }
 
         public static QuerySpecification FindQuerySpecification(this QueryExpression expression)
         {

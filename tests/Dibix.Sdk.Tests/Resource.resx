@@ -398,6 +398,21 @@ components:
           format: date-time
       additionalProperties: false</value>
   </data>
+  <data name="ExplicitProcedureArgumentSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;errors&gt;
+  &lt;error
+    ruleid="39"
+    message="Procedure arguments should be named: @id = @x"
+    line="13"
+    column="44" /&gt;
+  &lt;error
+    ruleid="39"
+    message="Procedure arguments should be named: @name = @name"
+    line="13"
+    column="48" /&gt;
+&lt;/errors&gt;</value>
+  </data>
   <data name="External_Empty" xml:space="preserve">
     <value>/*------------------------------------------------------------------------------
 // &lt;auto-generated&gt;
