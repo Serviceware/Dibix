@@ -256,9 +256,13 @@ $(_SqlReferencePath)" />
       </ServerAssemblyAttribute>
     </ItemGroup>
 
-    <WriteCodeFragment AssemblyAttributes="@(ServerAssemblyAttribute)" Language="C#" OutputFile="$(_ServerAssemblyInfoFile)" />
+    <WriteCodeFragment Condition="'$(CompileArtifactsNetStandard)' == ''"
+                       AssemblyAttributes="@(ServerAssemblyAttribute)" 
+                       Language="C#"
+                       OutputFile="$(_ServerAssemblyInfoFile)" />
 
-    <Csc DefineConstants="$(DefineConstants)"
+    <Csc Condition="'$(CompileArtifactsNetStandard)' == ''"
+         DefineConstants="$(DefineConstants)"
          EmitDebugInformation="$(DebugSymbols)"
          KeyFile="$(AssemblyOriginatorKeyFile)"
          LangVersion="$(LangVersion)"
@@ -266,6 +270,51 @@ $(_SqlReferencePath)" />
          References="@(ServerCompilationReference)"
          Sources="@(ServerCompilationSource)"
          TargetType="$(OutputType)" />
+
+    <PropertyGroup Condition="'$(CompileArtifactsNetStandard)' == 'true'">
+      <_ServerIntermediateProjectFilePath>$(_ServerIntermediateFilePathNoExt).csproj</_ServerIntermediateProjectFilePath>
+      <_ServerIntermediateProjectFileContent>
+        <![CDATA[
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    
+    <OutDir>.</OutDir>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <AssemblyOriginatorKeyFile>$(AssemblyOriginatorKeyFile)</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
+    
+    <Product>$(AssemblyProduct)</Product>
+    <Company>$(AssemblyCompany)</Company>
+    <Copyright>$(AssemblyCopyright)</Copyright>
+    <FileVersion>$(_ServerAssemblyFileVersion)</FileVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="$(_ServerOutputName).cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Reflection" Version="4.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Dibix" HintPath="$(DibixRuntimeXplatPath)" Private="false" />
+  </ItemGroup>
+
+</Project>
+]]>
+      </_ServerIntermediateProjectFileContent>
+    </PropertyGroup>
+
+    <WriteLinesToFile Condition="'$(CompileArtifactsNetStandard)' == 'true'"
+                      File="$(_ServerIntermediateProjectFilePath)"
+                      Lines="$(_ServerIntermediateProjectFileContent)"
+                      Overwrite="True" />
+
+    <Exec Condition="'$(CompileArtifactsNetStandard)' == 'true'" Command="dotnet build $(_ServerIntermediateProjectFilePath) -c $(Configuration)" />
 
     <Copy SourceFiles="@(IntermediateAssembly)"
           DestinationFolder="$(OutDir)"

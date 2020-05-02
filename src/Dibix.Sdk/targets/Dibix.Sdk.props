@@ -34,6 +34,7 @@
     <DibixToolsDirectory>$(MSBuildThisFileDirectory)..\tools\net472\</DibixToolsDirectory>
     <DibixCliPath Condition="'$(DibixCliPath)' == ''">$(DibixToolsDirectory)Dibix.exe</DibixCliPath>
     <DibixRuntimePath>$(DibixToolsDirectory)Dibix.dll</DibixRuntimePath>
+    <DibixRuntimeXplatPath>$(DibixToolsDirectory)..\netstandard1.5\Dibix.dll</DibixRuntimeXplatPath>
     
     <ClientTargetPath Condition="'$(ClientOutputName)' != ''">$(TargetDir)$(ClientOutputName).dll</ClientTargetPath>
   </PropertyGroup>

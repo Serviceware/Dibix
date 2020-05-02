@@ -42,6 +42,7 @@
       <_DibixCliExeName>$(_DibixCliProjectName).exe</_DibixCliExeName>
       <_DibixCliExeDirectory>$(_DibixCliProjectDir)bin\$(Configuration)\net472\</_DibixCliExeDirectory>
       <_DibixCliExePath>$(_DibixCliExeDirectory)$(_DibixCliExeName)</_DibixCliExePath>
+      <_DibixCliTargetFramework>net472</_DibixCliTargetFramework>
     </PropertyGroup>
 
     <MSBuild Projects="$(_DibixCliProjectDir)$(_DibixCliProjectName).csproj"
@@ -87,7 +88,9 @@
       <_DibixRuntimeProjectName>Dibix</_DibixRuntimeProjectName>
       <_DibixRuntimeProjectDir>..\$(_DibixRuntimeProjectName)\</_DibixRuntimeProjectDir>
       <_DibixRuntimeTargetFramework>net452</_DibixRuntimeTargetFramework>
+      <_DibixRuntimeXplatTargetFramework>netstandard1.5</_DibixRuntimeXplatTargetFramework>
       <_DibixRuntimePath>$(_DibixRuntimeProjectDir)bin\$(Configuration)\$(_DibixRuntimeTargetFramework)\$(_DibixRuntimeProjectName).dll</_DibixRuntimePath>
+      <_DibixRuntimeXplatPath>$(_DibixRuntimeProjectDir)bin\$(Configuration)\$(_DibixRuntimeXplatTargetFramework)\$(_DibixRuntimeProjectName).dll</_DibixRuntimeXplatPath>
     </PropertyGroup>
 
     <MSBuild Projects="$(_DibixRuntimeProjectDir)$(_DibixRuntimeProjectName).csproj"
@@ -99,12 +102,13 @@
       <_PackageToolsDirectory>tools\</_PackageToolsDirectory>
     </PropertyGroup>
     <ItemGroup>
-      <_PackageFiles Include="$(_DibixExePath)" PackagePath="$(_PackageToolsDirectory)" />
-      <_PackageFiles Include="$(_DibixRuntimePath)" PackagePath="$(_PackageToolsDirectory)" />
-      <_PackageFiles Include="$(_DibixCliExePath).config" PackagePath="$(_PackageToolsDirectory)$(_DibixExeName).config" />
+      <_PackageFiles Include="$(_DibixExePath)" PackagePath="$(_PackageToolsDirectory)$(_DibixCliTargetFramework)" />
+      <_PackageFiles Include="$(_DibixRuntimePath)" PackagePath="$(_PackageToolsDirectory)$(_DibixCliTargetFramework)" />
+      <_PackageFiles Include="$(_DibixRuntimeXplatPath)" PackagePath="$(_PackageToolsDirectory)$(_DibixRuntimeXplatTargetFramework)" />
+      <_PackageFiles Include="$(_DibixCliExePath).config" PackagePath="$(_PackageToolsDirectory)$(_DibixCliTargetFramework)\$(_DibixExeName).config" />
 
       <!-- Remove this, once ILMerge works properly -->
-      <_PackageFiles Include="@(_DibixExeDependency->'$(_DibixCliExeDirectory)%(Identity)')" Condition="%(Identity) != '$(_DibixCliExeName)'" PackagePath="$(_PackageToolsDirectory)" />
+      <_PackageFiles Include="@(_DibixExeDependency->'$(_DibixCliExeDirectory)%(Identity)')" Condition="%(Identity) != '$(_DibixCliExeName)'" PackagePath="$(_PackageToolsDirectory)$(_DibixCliTargetFramework)" />
     </ItemGroup>
   </Target>
   
