@@ -24,6 +24,10 @@ namespace Dibix
         {
             return new FuncEqualityComparer<T>((x, y) => AreEqual(x, y, keySelector), x => GetHashCode(x, keySelector));
         }
+        public static IEqualityComparer<T> Create<TKey1, TKey2>(Func<T, TKey1> firstKeySelector, Func<T, TKey2> secondKeySelector)
+        {
+            return new FuncEqualityComparer<T>((x, y) => AreEqual(x, y, firstKeySelector, secondKeySelector), x => GetHashCode(x, firstKeySelector, secondKeySelector));
+        }
 
         bool IEqualityComparer<T>.Equals(T x, T y)
         {
@@ -44,6 +48,13 @@ namespace Dibix
 
             return value.GetHashCode();
         }
+        private static int GetHashCode<TKey1, TKey2>(T x, Func<T, TKey1> firstKeySelector, Func<T, TKey2> secondKeySelector)
+        {
+            unchecked
+            {
+                return (GetHashCode(x, firstKeySelector) * 397) ^ GetHashCode(x, secondKeySelector);
+            }
+        }
 
         private static bool AreEqual<TKey>(T a, T b, Func<T, TKey> keySelector)
         {
@@ -56,5 +67,6 @@ namespace Dibix
 
             return Equals(valueA, valueB);
         }
+        private static bool AreEqual<TKey1, TKey2>(T a, T b, Func<T, TKey1> firstKeySelector, Func<T, TKey2> secondKeySelector) => AreEqual(a, b, firstKeySelector) && AreEqual(a, b, secondKeySelector);
     }
 }
