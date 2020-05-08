@@ -231,6 +231,9 @@ $(_SqlReferencePath)" />
       <AssemblyAttribute Include="AssemblyCopyright" Condition="'$(AssemblyCopyright)' != ''">
         <_Parameter1>$(AssemblyCopyright)</_Parameter1>
       </AssemblyAttribute>
+      <AssemblyAttribute Include="AssemblyInformationalVersion" Condition="'$(AssemblyInformationalVersion)' != ''">
+        <_Parameter1>$(AssemblyInformationalVersion)</_Parameter1>
+      </AssemblyAttribute>
     </ItemGroup>
 
     <!-- Server assembly info & DLL generation -->
@@ -290,6 +293,7 @@ $(_SqlReferencePath)" />
     <Company>$(AssemblyCompany)</Company>
     <Copyright>$(AssemblyCopyright)</Copyright>
     <FileVersion>$(_ServerAssemblyFileVersion)</FileVersion>
+    <InformationalVersion>$(AssemblyInformationalVersion)</InformationalVersion>
   </PropertyGroup>
 
   <ItemGroup>
