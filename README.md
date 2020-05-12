@@ -24,7 +24,7 @@ Dibix provides [MSBuild](https://docs.microsoft.com/en-us/visualstudio/msbuild/m
 Unfortunately NuGet is [not supported](https://github.com/NuGet/Home/issues/545) in database projects (yet?). Therefore the import has to happen manually. Please check if there is any existing documentation in the product you are working on or ask [me](mailto:tommy.lohse@helpline.de) for assistance.
 
 
-### Creating a REST API
+## Creating a REST API
 In this walkthrough, we try to create the following endpoints, that make up a RESTful API:<br />
 Number|Method|URL|Description
 -|-|-|-
@@ -35,7 +35,7 @@ Number|Method|URL|Description
 [UpdatePersonName](#updatepersonname)|**PATCH**|api/Person/{personId}/Name|Update the name of a person (partial update)
 [DeletePersons](#deletepersons)|**DELETE**|api/Person?personIds={personIds}|Delete multiple persons
 
-### 1. Contracts
+### Contracts
 - Ensure, that there is a folder named "Contracts" at the root of the project
 - Create a new .json file named "Person.json" with the following content:
 ```json
@@ -98,7 +98,7 @@ The previous example demonstrates the following things:
 - Array properties (#BankAccounts*; always suffixed with '*')
 - Primary keys ('isPartOfKey')
 
-### 2. User-defined types
+### User-defined types
 To pass in multiple ids for the 'DeletePerson' endpoint, we need to create a user-defined table type. Create a new .sql file name 'udt_intset.sql' with the following content:
 ```sql
 -- @Name IdSet
@@ -119,7 +119,7 @@ CREATE TYPE [dbo].[udt_petset] AS TABLE
 )
 ```
 
-### 3. HTTP endpoints
+### HTTP endpoints
 - Ensure, that there is a folder named "Endpoints" at the root of the project
 - Create a new .json file named "Person.json" with the following content:
 ```json
@@ -171,7 +171,7 @@ CREATE TYPE [dbo].[udt_petset] AS TABLE
 }
 ```
 
-### 4. Stored procedures
+### Stored procedures
 In the following sections, each endpoint is implemented using a stored procedure. Each procedure is decorated with a few metadata properties inside T-SQL comments in the header.
 
 #### GetPersons
@@ -233,7 +233,7 @@ AS
 
 ##### Remarks
 The previous sample is a bit trickier. Here we expect a single result of the 'PersonDetail' contract. The related entity 'BankAccount' is loaded within the same query. This requires that two entity contracts are specified for the 'ClrTypes' property combined with the ';' separator. The 'SplitOn' is also required to mark where the next related entity starts. In this case 'id' is the bank account id column. If you have more related entities, the split on columns are combined with a ',' separator.<br />
-*Important*: If you are working with multi map, make sure to define a key on each parent entity using the `isPartOfKey` property as defined in the contracts [above](#1-contracts). Otherwise you might end up with duplicated results.
+*Important*: If you are working with multi map, make sure to define a key on each parent entity using the `isPartOfKey` property as defined in the contracts [above](#contracts). Otherwise you might end up with duplicated results.
 
 ##### HTTP request
 ```http
@@ -299,7 +299,7 @@ POST /api/Person
 ```
 
 ##### Remarks
-As you can see here the stored procedure parameter `accessrights` doesn't match a property on the body. It will however be mapped from `Rights`, because a custom parameter mapping using the `BODY` source was defined in the endpoint configuration [above](#3-http-endpoints). This is useful if the names of the client property and the parameter name in the target stored procedure differ.
+As you can see here the stored procedure parameter `accessrights` doesn't match a property on the body. It will however be mapped from `Rights`, because a custom parameter mapping using the `BODY` source was defined in the endpoint configuration [above](#http-endpoints). This is useful if the names of the client property and the parameter name in the target stored procedure differ.
 
 ##### HTTP response body
 ```json
@@ -338,7 +338,7 @@ PUT /api/Person/1
 
 ##### Remarks
 The body contains a collection property named `Pets`. Collections will be mapped to a UDT, which needs to exist in the target database. In this case `[dbo].[udt_petset]`. The properties of the collection items will be mapped to matching columns of the UDT.<br />
-For this endpoint there are some custom parameter mappings defined in the endpoint configuration [above](#3-http-endpoints):
+For this endpoint there are some custom parameter mappings defined in the endpoint configuration [above](#http-endpoints):
 - The `position` column of the UDT just serves as a primary key and will be mapped from the index of the item in the collection. This is done using the internal `$INDEX` property on the `ITEM` source.
 - The `type` column of the UDT will be mapped from the `Kind` property of each instance of `Pet`.
 - The `name` column doesn't require a mapping and will be automatically mapped from the matching `Name` property of each instance of `Pet`.
