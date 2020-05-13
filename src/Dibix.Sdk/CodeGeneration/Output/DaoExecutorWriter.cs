@@ -469,6 +469,16 @@ namespace Dibix.Sdk.CodeGeneration
                     writer.WriteRaw(')');
 
                 writer.WriteLineRaw(";");
+
+                // Make sure subsequent results are not merged, when the root result returned null
+                if (query.MergeGridResult && i == 0 && result.ResultMode == SqlQueryResultMode.SingleOrDefault)
+                {
+                    writer.WriteLine("if (result == null)")
+                          .PushIndent()
+                          .WriteLine("return null;")
+                          .PopIndent()
+                          .WriteLine();
+                }
             }
 
             writer.WriteLine("return result;");

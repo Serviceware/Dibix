@@ -33,7 +33,10 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             content = Regex.Replace(content, @"[^\r](\n)", "\r\n");
             foreach (string line in content.Split(new[] { Environment.NewLine }, StringSplitOptions.None))
             {
-                writer.WriteLine(line);
+                if (!String.IsNullOrEmpty(line)) // Don't indent empty lines
+                    writer.WriteLine(line);
+                else
+                    writer.WriteLine();
             }
         }
 
@@ -41,7 +44,7 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
         {
             IEnumerable<CSharpModifiers> flags = Enum.GetValues(typeof(CSharpModifiers))
                                                      .Cast<CSharpModifiers>()
-                                                     .Where(x => x != default(CSharpModifiers) && modifiers.HasFlag(x));
+                                                     .Where(x => x != default && modifiers.HasFlag(x));
 
             if (indent)
                 writer.WriteIndent();
