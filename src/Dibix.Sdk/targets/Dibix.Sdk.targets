@@ -218,29 +218,28 @@ $(_SqlReferencePath)" />
 
     <!-- Shared assembly info -->
     <PropertyGroup>
-      <AssemblyProduct Condition="'$(AssemblyProduct)' == ''">$(ProductName)</AssemblyProduct>
+      <Product Condition="'$(Product)' == ''">$(ProductName)</Product>
     </PropertyGroup>
 
     <ItemGroup>
-      <AssemblyAttribute Include="AssemblyCompany" Condition="'$(AssemblyCompany)' != ''">
-        <_Parameter1>$(AssemblyCompany)</_Parameter1>
+      <AssemblyAttribute Include="AssemblyCompany" Condition="'$(Company)' != ''">
+        <_Parameter1>$(Company)</_Parameter1>
       </AssemblyAttribute>
-      <AssemblyAttribute Include="AssemblyProduct" Condition="'$(AssemblyProduct)' != ''">
-        <_Parameter1>$(AssemblyProduct)</_Parameter1>
+      <AssemblyAttribute Include="AssemblyProduct" Condition="'$(Product)' != ''">
+        <_Parameter1>$(Product)</_Parameter1>
       </AssemblyAttribute>
-      <AssemblyAttribute Include="AssemblyCopyright" Condition="'$(AssemblyCopyright)' != ''">
-        <_Parameter1>$(AssemblyCopyright)</_Parameter1>
+      <AssemblyAttribute Include="AssemblyCopyright" Condition="'$(Copyright)' != ''">
+        <_Parameter1>$(Copyright)</_Parameter1>
       </AssemblyAttribute>
-      <AssemblyAttribute Include="AssemblyInformationalVersion" Condition="'$(AssemblyInformationalVersion)' != ''">
-        <_Parameter1>$(AssemblyInformationalVersion)</_Parameter1>
+      <AssemblyAttribute Include="AssemblyInformationalVersion" Condition="'$(InformationalVersion)' != ''">
+        <_Parameter1>$(InformationalVersion)</_Parameter1>
       </AssemblyAttribute>
     </ItemGroup>
 
     <!-- Server assembly info & DLL generation -->
     <PropertyGroup>
       <_ServerAssemblyInfoFile>$(_ServerIntermediateFilePathNoExt)_AssemblyInfo.cs</_ServerAssemblyInfoFile>
-      <_ServerAssemblyFileVersion Condition="'$(ServerAssemblyFileVersion)' != ''">$(ServerAssemblyFileVersion)</_ServerAssemblyFileVersion>
-      <_ServerAssemblyFileVersion Condition="'$(ServerAssemblyFileVersion)' == ''" >$(AssemblyFileVersion)</_ServerAssemblyFileVersion>
+      <_ServerFileVersion>$(FileVersion)</_ServerFileVersion>
     </PropertyGroup>
 
     <ItemGroup>
@@ -254,8 +253,8 @@ $(_SqlReferencePath)" />
       <ServerAssemblyAttribute Include="AssemblyTitle">
         <_Parameter1>$(_ServerOutputName)</_Parameter1>
       </ServerAssemblyAttribute>
-      <ServerAssemblyAttribute Include="AssemblyFileVersion" Condition="'$(_ServerAssemblyFileVersion)' != ''">
-        <_Parameter1>$(_ServerAssemblyFileVersion)</_Parameter1>
+      <ServerAssemblyAttribute Include="AssemblyFileVersion" Condition="'$(_ServerFileVersion)' != ''">
+        <_Parameter1>$(_ServerFileVersion)</_Parameter1>
       </ServerAssemblyAttribute>
     </ItemGroup>
 
@@ -286,14 +285,13 @@ $(_SqlReferencePath)" />
     <OutDir>.</OutDir>
     <EnableDefaultItems>false</EnableDefaultItems>
     <AssemblyOriginatorKeyFile>$(AssemblyOriginatorKeyFile)</AssemblyOriginatorKeyFile>
-    <SignAssembly>true</SignAssembly>
-    <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
+    <SignAssembly>$(SignAssembly)</SignAssembly>
     
-    <Product>$(AssemblyProduct)</Product>
-    <Company>$(AssemblyCompany)</Company>
-    <Copyright>$(AssemblyCopyright)</Copyright>
-    <FileVersion>$(_ServerAssemblyFileVersion)</FileVersion>
-    <InformationalVersion>$(AssemblyInformationalVersion)</InformationalVersion>
+    <Product>$(Product)</Product>
+    <Company>$(Company)</Company>
+    <Copyright>$(Copyright)</Copyright>
+    <FileVersion>$(_ServerFileVersion)</FileVersion>
+    <InformationalVersion>$(InformationalVersion)</InformationalVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -347,8 +345,8 @@ $(_SqlReferencePath)" />
     <!-- Client assembly info & DLL generation -->
     <PropertyGroup Condition="'$(ClientOutputName)' != ''">
       <_ClientAssemblyInfoFile>$(_ClientIntermediateFilePathNoExt)_AssemblyInfo.cs</_ClientAssemblyInfoFile>
-      <_ClientAssemblyFileVersion Condition="'$(ClientAssemblyFileVersion)' != ''">$(ClientAssemblyFileVersion)</_ClientAssemblyFileVersion>
-      <_ClientAssemblyFileVersion Condition="'$(ClientAssemblyFileVersion)' == ''" >$(AssemblyFileVersion)</_ClientAssemblyFileVersion>
+      <_ClientFileVersion Condition="'$(ClientFileVersion)' != ''">$(ClientFileVersion)</_ClientFileVersion>
+      <_ClientFileVersion Condition="'$(ClientFileVersion)' == ''" >$(FileVersion)</_ClientFileVersion>
     </PropertyGroup>
 
     <ItemGroup Condition="'$(ClientOutputName)' != ''">
@@ -360,8 +358,8 @@ $(_SqlReferencePath)" />
       <ClientAssemblyAttribute Include="AssemblyTitle">
         <_Parameter1>$(ClientOutputName)</_Parameter1>
       </ClientAssemblyAttribute>
-      <ClientAssemblyAttribute Include="AssemblyFileVersion" Condition="'$(_ClientAssemblyFileVersion)' != ''">
-        <_Parameter1>$(_ClientAssemblyFileVersion)</_Parameter1>
+      <ClientAssemblyAttribute Include="AssemblyFileVersion" Condition="'$(_ClientFileVersion)' != ''">
+        <_Parameter1>$(_ClientFileVersion)</_Parameter1>
       </ClientAssemblyAttribute>
     </ItemGroup>
 
