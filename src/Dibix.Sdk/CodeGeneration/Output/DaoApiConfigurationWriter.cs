@@ -154,6 +154,10 @@ namespace Dibix.Sdk.CodeGeneration
                         writer.PopIndent()
                               .Write("}");
                     }
+                    else if (!String.IsNullOrEmpty(property.Converter))
+                    {
+                        writer.WriteRaw($", \"{property.Converter}\"");
+                    }
 
                     writer.WriteLineRaw(");");
 

@@ -16,11 +16,37 @@
       ]
     },
     "PropertySource": {
-      "type": "string",
-      "pattern": "^[A-Z]+((\\.\\$[A-Z]+)|(\\.[A-Z]([A-Za-z]+)?){1,})$"
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[A-Z]+((\\.\\$[A-Z]+)|(\\.[A-Z]([A-Za-z]+)?){1,})$"
+        },
+        {
+          "$ref": "#/definitions/ComplexPropertySource"
+        }
+      ]
+    },
+    "ComplexPropertySource": {
+      "type": "object",
+      "minProperties": 2,
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "$ref": "#/definitions/PropertySource"
+        },
+        "converter": {
+          "type": "string",
+          "pattern": "^[A-Z]+$"
+        }
+      },
+      "required": [
+        "source",
+        "converter"
+      ]
     },
     "ItemsPropertySource": {
       "type": "object",
+      "minProperties": 2,
       "additionalProperties": false,
       "properties": {
         "source": {

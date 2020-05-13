@@ -187,28 +187,30 @@ namespace Dibix.Sdk.CodeGeneration
             return propertySource;
         }
 
-        private static void ReadComplexActionParameter(ActionDefinition action, string parameterName, JObject @object)
+        private static void ReadComplexActionParameter(ActionDefinition action, string parameterName, JObject container)
         {
-            JProperty sourceProperty = @object.Property("source");
-            if (sourceProperty != null)
-            {
-                ReadPropertyActionParameter(action, parameterName, sourceProperty);
-                return;
-            }
-            
-            JProperty bodyConverterProperty = @object.Property("convertFromBody");
+            JProperty bodyConverterProperty = container.Property("convertFromBody");
             if (bodyConverterProperty != null)
             {
                 ReadBodyActionParameter(action, parameterName, bodyConverterProperty);
                 return;
             }
+
+            JProperty sourceProperty = container.Property("source");
+            if (sourceProperty != null)
+            {
+                ReadPropertyActionParameter(action, parameterName, container, sourceProperty);
+                return;
+            }
+
+            throw new InvalidOperationException($"Invalid object for parameter: {parameterName}");
         }
 
-        private static void ReadPropertyActionParameter(ActionDefinition action, string parameterName, JProperty sourceProperty)
+        private static void ReadPropertyActionParameter(ActionDefinition action, string parameterName, JObject container, JProperty sourceProperty)
         {
             ActionParameterPropertySource propertySource = ReadPropertySource(parameterName, (JValue)sourceProperty.Value, action.ParameterSources);
 
-            JProperty itemsProperty = ((JObject)sourceProperty.Parent).Property("items");
+            JProperty itemsProperty = container.Property("items");
             if (itemsProperty != null)
             {
                 JObject itemsObject = (JObject)itemsProperty.Value;
@@ -216,7 +218,17 @@ namespace Dibix.Sdk.CodeGeneration
                 {
                     TryReadSource(itemProperty, propertySource.ItemSources);
                 }
+                return;
             }
+
+            JProperty converterProperty = container.Property("converter");
+            if (converterProperty != null)
+            {
+                propertySource.Converter = (string)((JValue)converterProperty.Value).Value;
+                return;
+            }
+
+            throw new InvalidOperationException($"Invalid object for parameter: {parameterName}");
         }
 
         private static void ReadBodyActionParameter(ActionDefinition action, string parameterName, JProperty bodyConverterProperty)

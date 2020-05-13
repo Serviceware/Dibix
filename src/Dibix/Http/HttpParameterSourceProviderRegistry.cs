@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Dibix.Http
 {
@@ -8,7 +7,6 @@ namespace Dibix.Http
     {
         private static readonly IDictionary<string, Lazy<IHttpParameterSourceProvider>> Map = new Dictionary<string, Lazy<IHttpParameterSourceProvider>>();
 
-        [SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static HttpParameterSourceProviderRegistry()
         {
             Register<BodyParameterSourceProvider>(BodyParameterSourceProvider.SourceName);

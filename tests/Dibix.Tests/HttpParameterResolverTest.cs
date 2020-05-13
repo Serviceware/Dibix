@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Net.Http;
-using System.Reflection;
 using System.Xml.Linq;
 using Dibix.Http;
 using Moq;
@@ -136,7 +134,7 @@ Parameter: applicationId", exception.Message);
 at GET api/Dibix/Test
 Parameter: lcid", exception.Message);
             Assert.NotNull(exception.InnerException);
-            Assert.Equal("Unknown source provider 'UNKNOWNSOURCE' for property 'LocaleId'", exception.InnerException.Message);
+            Assert.Equal("No source with the name 'UNKNOWNSOURCE' is registered", exception.InnerException.Message);
         }
         private static void Compile_PropertySource_WithUnknownSource_Throws_Target(IDatabaseAccessorFactory databaseAccessorFactory, int lcid) { }
 
@@ -341,6 +339,59 @@ Parameter: lcid", exception.Message);
         }
         private static void Compile_ImplicitBodySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, int id, [InputClass] ImplicitBodyHttpParameterInput input, int userid, ImplicitHttpBodyItemSet itemsa) { }
 
+        [Fact]
+        public void Compile_BodySource_WithConverter()
+        {
+            HttpParameterConverterRegistry.Register<EncryptionHttpParameterConverter>("CRYPT");
+            IHttpParameterResolutionMethod result = Compile(x =>
+            {
+                x.BodyContract = typeof(HttpBody);
+                x.ResolveParameterFromSource("encryptedpassword", "BODY", "Password", "CRYPT");
+            });
+            TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
+    System.Net.Http.HttpRequestMessage $request,
+    System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
+    Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
+    .Block(
+        Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
+        Dibix.Tests.HttpParameterResolverTest+HttpBody $bodySource) {
+        $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
+        $bodySource = .Call Dibix.Http.HttpParameterResolverUtility.ReadBody($arguments);
+        .Call $arguments.Add(
+            ""databaseAccessorFactory"",
+            (System.Object)$databaseaccessorfactorySource);
+        .Call $arguments.Add(
+            ""encryptedPassword"",
+            (System.Object).Call Dibix.Tests.HttpParameterResolverTest+EncryptionHttpParameterConverter.Convert($bodySource.Password)
+        )
+    }
+}", result.Source);
+            Assert.Equal(1, result.Parameters.Count);
+            Assert.Equal("$body", result.Parameters["$body"].Name);
+            Assert.Equal(typeof(HttpBody), result.Parameters["$body"].Type);
+            Assert.False(result.Parameters["$body"].IsOptional);
+
+            object body = new HttpBody
+            {
+                Password = "Cake"
+            };
+            HttpRequestMessage request = new HttpRequestMessage();
+            IDictionary<string, object> arguments = new Dictionary<string, object> { { "$body", body } };
+            Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
+            Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
+
+            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
+
+            result.PrepareParameters(request, arguments, dependencyResolver.Object);
+
+            Assert.Equal(3, arguments.Count);
+            Assert.Equal(body, arguments["$body"]);
+            Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
+            Assert.Equal("ENCRYPTED(Cake)", arguments["encryptedPassword"]);
+            dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
+        }
+        private static void Compile_BodySource_WithConverter_Target(IDatabaseAccessorFactory databaseAccessorFactory, string encryptedPassword) { }
+        
         [Fact]
         public void Compile_BodyConverter()
         {

@@ -102,6 +102,18 @@ namespace Dibix.Tests
             public int targetid { get; set; }
         }
 
+        private sealed class HttpBody
+        {
+            public string Password { get; set; }
+        }
+
+        private sealed class EncryptionHttpParameterConverter : IHttpParameterConverter
+        {
+            public Expression ConvertValue(Expression value) => Expression.Call(typeof(EncryptionHttpParameterConverter), nameof(Convert), new Type[0], value);
+
+            private static string Convert(string input) => $"ENCRYPTED({input})";
+        }
+
         private sealed class ImplicitHttpBody
         {
             public short SourceId { get; set; }

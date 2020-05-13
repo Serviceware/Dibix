@@ -7,6 +7,7 @@ namespace Dibix.Sdk.CodeGeneration
     {
         public string SourceName { get; }
         public string PropertyName { get; }
+        public string Converter { get; set; }
         public IDictionary<string, ActionParameterSource> ItemSources { get; }
 
         internal ActionParameterPropertySource(string sourceName, string propertyName)

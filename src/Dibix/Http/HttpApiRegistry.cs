@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 
 namespace Dibix.Http
 {
-    [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Api")]
     public sealed class HttpApiRegistry : IHttpApiRegistry
     {
         #region Fields
@@ -44,7 +42,6 @@ namespace Dibix.Http
         #endregion
 
         #region Private Methods
-        [SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "api", Scope = "member")]
         private static IEnumerable<HttpApiDescriptor> CollectHttpApiDescriptors(IEnumerable<Assembly> assemblies)
         {
             foreach (Assembly assembly in assemblies)
