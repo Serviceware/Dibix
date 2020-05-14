@@ -432,22 +432,21 @@ namespace Dibix.Http
 
             foreach (HttpParameterInfo itemSource in parameter.Items.ParameterSources)
             {
-                Expression source;
-                if (itemSource.SourceKind == HttpParameterSourceKind.SourceProperty && itemSource.Source.Name == ItemSourceName)
+                HttpParameterInfo itemParameter;
+                ParameterExpression itemSourceVariable;
+                if (itemSource.SourceKind == HttpParameterSourceKind.SourceProperty && itemSource.Source.PropertyName == ItemIndexPropertyName) // ITEM.$INDEX => i
                 {
-                    if (itemSource.Source.PropertyName == ItemIndexPropertyName)
-                        source = addItemFuncIndexParameter;
-                    else
-                        source = Expression.Property(addItemFuncItemParameter, itemSource.Source.PropertyName);
+                    itemParameter = HttpParameterInfo.SourceInstance(itemSource.ParameterType, itemSource.ParameterName, null, ItemSourceName);
+                    itemSourceVariable = addItemFuncIndexParameter;
                 }
                 else
-                    source = CollectParameterValue(itemSource, sources);
+                {
+                    itemParameter = itemSource;
+                    itemSourceVariable = addItemFuncItemParameter;
+                }
 
-                Type targetType = addMethodParameterTypes[itemSource.ParameterName];
-                if (targetType != source.Type)
-                    source = Expression.Call(typeof(HttpParameterResolver), nameof(ConvertValue), new[] { source.Type, targetType }, Expression.Constant(itemSource.ParameterName), source);
-
-                addMethodParameterValues[itemSource.ParameterName] = source;
+                sources[ItemSourceName] = new HttpParameterSourceExpression(itemSourceVariable, null);
+                addMethodParameterValues[itemSource.ParameterName] = CollectParameterValue(itemParameter, sources);
             }
 
             foreach (KeyValuePair<string, Expression> addMethodParameter in addMethodParameterValues.Where(x => x.Value == null).ToArray())

@@ -89,7 +89,7 @@ namespace Dibix.Tests
         public void Compile_PropertySource_WithInvalidCast_Throws()
         {
             HttpParameterSourceProviderRegistry.Register<ApplicationHttpParameterSourceProvider>("APPLICATION");
-            IHttpParameterResolutionMethod result = Compile(x => x.ResolveParameterFromSource("applicationId", "APPLICATION", "ApplicationId"));
+            IHttpParameterResolutionMethod result = Compile(x => x.ResolveParameterFromSource("applicationid", "APPLICATION", "ApplicationId"));
             TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
@@ -103,9 +103,9 @@ namespace Dibix.Tests
             ""databaseAccessorFactory"",
             (System.Object)$databaseaccessorfactorySource);
         .Call $arguments.Add(
-            ""applicationId"",
+            ""applicationid"",
             (System.Object).Call Dibix.Http.HttpParameterResolver.ConvertValue(
-                ""applicationId"",
+                ""applicationid"",
                 $applicationSource.ApplicationId))
     }
 }", result.Source);
@@ -120,11 +120,11 @@ namespace Dibix.Tests
 
             Exception exception = Assert.Throws<InvalidOperationException>(() => result.PrepareParameters(request, arguments, dependencyResolver.Object));
             Assert.Equal(@"Parameter mapping failed
-Parameter: applicationId", exception.Message);
+Parameter: applicationid", exception.Message);
             Assert.NotNull(exception.InnerException);
             Assert.Equal("Null object cannot be converted to a value type.", exception.InnerException.Message);
         }
-        private static void Compile_PropertySource_WithInvalidCast_Throws_Target(IDatabaseAccessorFactory databaseAccessorFactory, byte applicationId) { }
+        private static void Compile_PropertySource_WithInvalidCast_Throws_Target(IDatabaseAccessorFactory databaseAccessorFactory, byte applicationid) { }
 
         [Fact]
         public void Compile_PropertySource_WithUnknownSource_Throws()
@@ -347,6 +347,10 @@ Parameter: lcid", exception.Message);
             {
                 x.BodyContract = typeof(HttpBody);
                 x.ResolveParameterFromSource("encryptedpassword", "BODY", "Password", "CRYPT");
+                x.ResolveParameterFromSource("items", "BODY", "Items", y =>
+                {
+                    y.ResolveParameterFromSource("encryptedpassword", "ITEM", "Password", "CRYPT");
+                });
             });
             TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
@@ -361,10 +365,23 @@ Parameter: lcid", exception.Message);
             ""databaseAccessorFactory"",
             (System.Object)$databaseaccessorfactorySource);
         .Call $arguments.Add(
-            ""encryptedPassword"",
+            ""encryptedpassword"",
             (System.Object).Call Dibix.Tests.HttpParameterResolverTest+EncryptionHttpParameterConverter.Convert($bodySource.Password)
+        );
+        .Call $arguments.Add(
+            ""items"",
+            (System.Object).Call Dibix.StructuredType`1[Dibix.Tests.HttpParameterResolverTest+HttpBodyItemSet].From(
+                $bodySource.Items,
+                .Lambda #Lambda2<System.Action`3[Dibix.Tests.HttpParameterResolverTest+HttpBodyItemSet,Dibix.Tests.HttpParameterResolverTest+HttpBodyItem,System.Int32]>)
         )
     }
+}
+
+.Lambda #Lambda2<System.Action`3[Dibix.Tests.HttpParameterResolverTest+HttpBodyItemSet,Dibix.Tests.HttpParameterResolverTest+HttpBodyItem,System.Int32]>(
+    Dibix.Tests.HttpParameterResolverTest+HttpBodyItemSet $x,
+    Dibix.Tests.HttpParameterResolverTest+HttpBodyItem $y,
+    System.Int32 $i) {
+    .Call $x.Add(.Call Dibix.Tests.HttpParameterResolverTest+EncryptionHttpParameterConverter.Convert($y.Password))
 }", result.Source);
             Assert.Equal(1, result.Parameters.Count);
             Assert.Equal("$body", result.Parameters["$body"].Name);
@@ -373,7 +390,12 @@ Parameter: lcid", exception.Message);
 
             object body = new HttpBody
             {
-                Password = "Cake"
+                Password = "Cake",
+                Items =
+                {
+                    new HttpBodyItem("Item1")
+                  , new HttpBodyItem("Item2")
+                }
             };
             HttpRequestMessage request = new HttpRequestMessage();
             IDictionary<string, object> arguments = new Dictionary<string, object> { { "$body", body } };
@@ -384,13 +406,18 @@ Parameter: lcid", exception.Message);
 
             result.PrepareParameters(request, arguments, dependencyResolver.Object);
 
-            Assert.Equal(3, arguments.Count);
+            Assert.Equal(4, arguments.Count);
             Assert.Equal(body, arguments["$body"]);
             Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
-            Assert.Equal("ENCRYPTED(Cake)", arguments["encryptedPassword"]);
+            Assert.Equal("ENCRYPTED(Cake)", arguments["encryptedpassword"]);
+            HttpBodyItemSet items = Assert.IsType<HttpBodyItemSet>(arguments["items"]);
+            Assert.Equal(@"encryptedpassword NVARCHAR(MAX)
+-------------------------------
+ENCRYPTED(Item1)               
+ENCRYPTED(Item2)               ", items.Dump());
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
-        private static void Compile_BodySource_WithConverter_Target(IDatabaseAccessorFactory databaseAccessorFactory, string encryptedPassword) { }
+        private static void Compile_BodySource_WithConverter_Target(IDatabaseAccessorFactory databaseAccessorFactory, string encryptedpassword, HttpBodyItemSet items) { }
         
         [Fact]
         public void Compile_BodyConverter()
@@ -606,7 +633,7 @@ Parameter: input", exception.Message);
         {
             IHttpParameterResolutionMethod result = Compile(x =>
             {
-                x.ResolveParameterFromSource("regionLanguage", "REQUEST", "Language");
+                x.ResolveParameterFromSource("regionlanguage", "REQUEST", "Language");
             });
             TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
@@ -621,7 +648,7 @@ Parameter: input", exception.Message);
             ""databaseAccessorFactory"",
             (System.Object)$databaseaccessorfactorySource);
         .Call $arguments.Add(
-            ""regionLanguage"",
+            ""regionlanguage"",
             (System.Object)$requestSource.Language)
     }
 }", result.Source);
@@ -639,17 +666,17 @@ Parameter: input", exception.Message);
 
             Assert.Equal(2, arguments.Count);
             Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
-            Assert.Equal("en-US", arguments["regionLanguage"]);
+            Assert.Equal("en-US", arguments["regionlanguage"]);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
-        private static void Compile_RequestSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, string regionLanguage) { }
+        private static void Compile_RequestSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, string regionlanguage) { }
 
         [Fact]
         public void Compile_EnvironmentSource()
         {
             IHttpParameterResolutionMethod result = Compile(x =>
             {
-                x.ResolveParameterFromSource("machineName", "ENV", "MachineName");
+                x.ResolveParameterFromSource("machinename", "ENV", "MachineName");
                 x.ResolveParameterFromSource("pid", "ENV", "CurrentProcessId");
             });
             TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
@@ -665,7 +692,7 @@ Parameter: input", exception.Message);
             ""databaseAccessorFactory"",
             (System.Object)$databaseaccessorfactorySource);
         .Call $arguments.Add(
-            ""machineName"",
+            ""machinename"",
             (System.Object)$envSource.MachineName);
         .Call $arguments.Add(
             ""pid"",
@@ -685,10 +712,10 @@ Parameter: input", exception.Message);
 
             Assert.Equal(3, arguments.Count);
             Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
-            Assert.Equal(Environment.MachineName, arguments["machineName"]);
+            Assert.Equal(Environment.MachineName, arguments["machinename"]);
             Assert.Equal(Process.GetCurrentProcess().Id, arguments["pid"]);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
-        private static void Compile_EnvironmentSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, string machineName, int pid) { }
+        private static void Compile_EnvironmentSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, string machinename, int pid) { }
     }
 }

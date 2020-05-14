@@ -105,6 +105,29 @@ namespace Dibix.Tests
         private sealed class HttpBody
         {
             public string Password { get; set; }
+            public ICollection<HttpBodyItem> Items { get; }
+
+            public HttpBody()
+            {
+                this.Items = new Collection<HttpBodyItem>();
+            }
+        }
+
+        private sealed class HttpBodyItem
+        {
+            public string Password { get; }
+
+            public HttpBodyItem(string password)
+            {
+                this.Password = password;
+            }
+        }
+
+        private sealed class HttpBodyItemSet : StructuredType<HttpBodyItemSet, string>
+        {
+            public HttpBodyItemSet() : base("x") => base.ImportSqlMetadata(() => this.Add(default));
+
+            public void Add(string encryptedpassword) => base.AddValues(encryptedpassword);
         }
 
         private sealed class EncryptionHttpParameterConverter : IHttpParameterConverter
