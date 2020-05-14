@@ -52,10 +52,14 @@ namespace Dibix.Sdk.CodeGeneration
             if (parts[0] != RootFolderName)
                 throw new InvalidOperationException($"Expected contract root folder to be '{RootFolderName}' but got: {parts[0]}");
 
+            bool multipleAreas = this._areaName == null;
+            if (multipleAreas && parts.Length < 2)
+                throw new InvalidOperationException(@"Expected the following folder structure for projects with multiple areas: Contracts\Area\*.json
+If this is not a project that has multiple areas, please make sure to define the <RootNamespace> tag in the following format: Product.Area");
+
             string relativeNamespace = String.Join(".", parts.Skip(1));
             string currentNamespace = NamespaceUtility.BuildAbsoluteNamespace(this._productName, this._areaName, LayerName.DomainModel, relativeNamespace);
 
-            bool multipleAreas = this._areaName == null;
             string root = multipleAreas ? parts[1] : null;
             string rootNamespace = NamespaceUtility.BuildAbsoluteNamespace(this._productName, this._areaName, LayerName.DomainModel, root);
 
