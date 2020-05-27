@@ -431,3 +431,5 @@ This is the overall goal, which drives the whole project, since the idea at the 
 - Make it work with NuGet (see [above](#configuring-the-project))
 - Complete [OpenAPI](https://github.com/OAI/OpenAPI-Specification) generator<br />
 Right now a JSON and YAML file is generated for each project. It's not published to an output folder yet and can be found in the intermediate folder of the project (`obj\Debug`). The document itself is not yet completed and can currently only be consumed for contract generation (components.schemas).
+- Return different responses for each HTTP status code<br />
+When designing RESTful APIs, it is sometimes required that an endpoint returns a more meaningful response to the client, when validation fails, for example. This is currently only possible with throwing exceptions that result in 500.
