@@ -425,11 +425,11 @@ In this section the schema for defining contracts is described. The documentatio
 In this section the schema for defining endpoints is described. The documentation is still in progress. For now you can use [the JSON schema](/src/Dibix.Sdk/CodeGeneration/Schema/dibix.endpoints.schema.json) as a reference.
 
 ## Roadmap
-- Continue writing this documentation 🤓
-- Dibix.Server<br />
+- [ ] Continue writing this documentation 🤓
+- [ ] Dibix.Server<br />
 This is the overall goal, which drives the whole project, since the idea at the end is to have an independent lightweight server application, that consumes only declarative API registrations rather than DLLs.
-- Make it work with NuGet (see [above](#configuring-the-project))
-- Complete [OpenAPI](https://github.com/OAI/OpenAPI-Specification) generator<br />
+- [ ] Make it work with NuGet (see [above](#configuring-the-project))
+- [x] Complete [OpenAPI](https://github.com/OAI/OpenAPI-Specification) generator<br />
 Right now a JSON and YAML file is generated for each project. It's not published to an output folder yet and can be found in the intermediate folder of the project (`obj\Debug`). The document itself is not yet completed and can currently only be consumed for contract generation (components.schemas).
-- Return different responses for each HTTP status code<br />
+- [ ] Return different responses for each HTTP status code<br />
 When designing RESTful APIs, it is sometimes required that an endpoint returns a more meaningful response to the client, when validation fails, for example. This is currently only possible with throwing exceptions that result in 500.
