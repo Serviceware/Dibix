@@ -2,7 +2,7 @@
 {
     public sealed class NeighborActionTarget : GeneratedAccessorMethodTarget
     {
-        public NeighborActionTarget(string accessorFullName, string methodName) : base(accessorFullName, methodName)
+        public NeighborActionTarget(string accessorFullName, TypeReference resultType, string methodName) : base(accessorFullName, resultType, methodName)
         {
         }
     }

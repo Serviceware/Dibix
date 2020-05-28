@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 
@@ -50,23 +49,6 @@ namespace Dibix.Sdk
             catch (ReflectionTypeLoadException e)
             {
                 return e.Types.Where(t => t != null);
-            }
-        }
-
-        public static bool IsDefined(this Assembly assembly, string fullAttributeTypeName)
-        {
-            Guard.IsNotNull(assembly, nameof(assembly));
-            try
-            {
-                return assembly.CustomAttributes.Any(x => x.AttributeType.FullName == fullAttributeTypeName);
-            }
-            catch (FileNotFoundException)
-            {
-                return false;
-            }
-            catch (TypeLoadException)
-            {
-                return false;
             }
         }
     }

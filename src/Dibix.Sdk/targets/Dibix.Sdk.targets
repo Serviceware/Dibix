@@ -186,6 +186,8 @@ $(_SqlReferencePath)" />
     <ItemGroup>
       <_CodeGenerationInputItem Include="ProjectDirectory
   $(MSBuildProjectDirectory)" />
+      <_CodeGenerationInputItem Include="ProjectVersion
+  $(FileVersion)" />
       <_CodeGenerationInputItem Include="ProductName
   $(ProductName)" />
       <_CodeGenerationInputItem Include="AreaName

@@ -140,6 +140,8 @@
     <Build Include="Tests\Syntax\dbx_tests_syntax_gridresult_projection.sql" />
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_038.sql" />
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_039.sql" />
+    <Build Include="Tests\Syntax\dbx_tests_syntax_singleconcreteresult_params.sql" />
+    <Build Include="Types\dbx_codeanalysis_udt_int.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CodeAnalysis" />
@@ -166,5 +168,6 @@
     <None Include="Contracts\Grid\GridResult.json" />
     <None Include="Contracts\JointContract.json" />
     <None Include="Endpoints\GenericEndpoint.json" />
+    <None Include="Contracts\InputContract.json" />
   </ItemGroup>
 </Project>

@@ -12,6 +12,7 @@ namespace Dibix.Sdk.CodeGeneration
         public static CodeArtifactsGenerationModel Create
         (
             string projectDirectory
+          , string projectVersion
           , string productName
           , string areaName
           , string defaultOutputFilePath
@@ -50,6 +51,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             CodeArtifactsGenerationModel model = new CodeArtifactsGenerationModel(CodeGeneratorCompatibilityLevel.Full)
             {
+                ProjectVersion = projectVersion,
                 AreaName = areaName,
                 RootNamespace = rootNamespace,
                 DefaultClassName = defaultOutputName,
@@ -60,7 +62,7 @@ namespace Dibix.Sdk.CodeGeneration
             model.Statements.AddRange(CollectStatements(normalizedSources, projectDirectory, productName, areaName, embedStatements, formatter, typeResolver, schemaRegistry, logger, modelAccessor));
             model.UserDefinedTypes.AddRange(userDefinedTypeProvider.Types);
             model.Contracts.AddRange(contractDefinitionProvider.Contracts);
-            model.Controllers.AddRange(CollectControllers(normalizedEndpoints, productName, areaName, defaultOutputName, model.Statements, assemblyResolver, fileSystemProvider, typeResolver, logger));
+            model.Controllers.AddRange(CollectControllers(normalizedEndpoints, productName, areaName, defaultOutputName, model.Statements, assemblyResolver, fileSystemProvider, typeResolver, schemaRegistry, logger));
 
             return model;
         }
@@ -76,8 +78,7 @@ namespace Dibix.Sdk.CodeGeneration
           , ITypeResolverFacade typeResolver
           , ISchemaRegistry schemaRegistry
           , ILogger logger
-          , Lazy<TSqlModel> modelAccessor
-        )
+          , Lazy<TSqlModel> modelAccessor)
         {
             IEnumerable<string> files = sources.Where(x => MatchStatement(projectDirectory, x, embedStatements, logger));
             ISqlStatementParser parser = new SqlStoredProcedureParser();
@@ -104,10 +105,11 @@ namespace Dibix.Sdk.CodeGeneration
           , ReferencedAssemblyInspector referencedAssemblyInspector
           , IFileSystemProvider fileSystemProvider
           , ITypeResolverFacade typeResolver
+          , ISchemaRegistry schemaRegistry
           , ILogger logger
         )
         {
-            IControllerActionTargetSelector controllerActionTargetSelector = new ControllerActionTargetSelector(productName, areaName, defaultOutputName, statements, referencedAssemblyInspector, logger);
+            IControllerActionTargetSelector controllerActionTargetSelector = new ControllerActionTargetSelector(productName, areaName, defaultOutputName, statements, referencedAssemblyInspector, schemaRegistry, logger);
             return new ControllerDefinitionProvider(fileSystemProvider, controllerActionTargetSelector, typeResolver, logger, endpoints).Controllers;
         }
     }

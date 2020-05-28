@@ -5,6 +5,7 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public class CodeGenerationModel
     {
+        public string ProjectVersion { get; set; }
         public string AreaName { get; set; }
         public string RootNamespace { get; set; }
         public string DefaultClassName { get; set; }

@@ -104,7 +104,8 @@ Parameter @b [dbo].[x]
 intValue INT(4)  stringValue NVARCHAR(MAX)
 ---------------  -------------------------
 1                I                        
-2                II                       ", ex.Message);
+2                II                       
+", ex.Message);
             }
         }
 
@@ -150,7 +151,8 @@ Parameter @b [dbo].[x]
 intValue INT(4)  stringValue NVARCHAR(MAX)
 ---------------  -------------------------
 1                I                        
-2                II                       ", ex.Message);
+2                II                       
+", ex.Message);
             }
         }
 

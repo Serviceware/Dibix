@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -12,17 +13,21 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly string _areaName;
         private readonly string _outputName;
         private readonly ICollection<SqlStatementInfo> _statements;
+        private readonly ReferencedAssemblyInspector _referencedAssemblyInspector;
+        private readonly ISchemaRegistry _schemaRegistry;
         private readonly ILogger _logger;
-        private readonly Lazy<IDictionary<string, NeighborActionTarget>> _neighborStatementMapAccessor;
+        private readonly IDictionary<string, NeighborActionTarget> _neighborStatementMap;
 
-        public ControllerActionTargetSelector(string productName, string areaName, string outputName, ICollection<SqlStatementInfo> statements, ReferencedAssemblyInspector referencedAssemblyInspector, ILogger logger)
+        public ControllerActionTargetSelector(string productName, string areaName, string outputName, ICollection<SqlStatementInfo> statements, ReferencedAssemblyInspector referencedAssemblyInspector, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             this._productName = productName;
             this._areaName = areaName;
             this._outputName = outputName;
             this._statements = statements;
+            this._referencedAssemblyInspector = referencedAssemblyInspector;
+            this._schemaRegistry = schemaRegistry;
             this._logger = logger;
-            this._neighborStatementMapAccessor = new Lazy<IDictionary<string, NeighborActionTarget>>(() => CreateNeighborStatementMap(referencedAssemblyInspector));
+            this._neighborStatementMap = new ConcurrentDictionary<string, NeighborActionTarget>();
         }
 
         public ActionDefinitionTarget Select(string target, string filePath, IJsonLineInfo lineInfo)
@@ -60,7 +65,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, lineInfo.LineNumber, lineI
             }
 
             // 3. Target 'could' be a compiled method in a neighbour project
-            if (!this._neighborStatementMapAccessor.Value.TryGetValue(methodName, out NeighborActionTarget neighborAction))
+            if (!this.TryGetNeighborActionTarget(methodName, filePath, lineInfo, out NeighborActionTarget neighborAction))
             {
                 this._logger.LogError(null, $"Could not find a method name '{methodName}' on database accessor type '{typeName}'", filePath, lineInfo.LineNumber, lineInfo.LinePosition);
                 return null;
@@ -69,32 +74,53 @@ Tried: {normalizedNamespace}.{methodName}", filePath, lineInfo.LineNumber, lineI
             return neighborAction;
         }
 
-        private static IDictionary<string, NeighborActionTarget> CreateNeighborStatementMap(ReferencedAssemblyInspector referencedAssemblyInspector)
+        private bool TryGetNeighborActionTarget(string methodName, string filePath, IJsonLineInfo lineInfo, out NeighborActionTarget target)
         {
-            return referencedAssemblyInspector.Inspect(referencedAssemblies =>
+            if (this._neighborStatementMap.TryGetValue(methodName, out target))
+                return true;
+
+            NeighborActionTarget neighborActionTarget = this._referencedAssemblyInspector.Inspect(referencedAssemblies =>
             {
                 var query = from assembly in referencedAssemblies
-                            where CustomAttributeData.GetCustomAttributes(assembly).Any(x => x.AttributeType.FullName == "Dibix.ArtifactAssemblyAttribute")
+                            where assembly.IsArtifactAssembly()
                             from type in assembly.GetTypes()
-                            where CustomAttributeData.GetCustomAttributes(type)
-                                                     .Any(x => x.AttributeType.FullName == "Dibix.DatabaseAccessorAttribute")
+                            where type.IsDatabaseAccessor()
                             from method in type.GetMethods()
-                            let parameters = method.GetParameters()
-                            where parameters.Any() && parameters[0].ParameterType.FullName == "Dibix.IDatabaseAccessorFactory"
-                            select CreateNeighborActionTarget(method);
+                            where method.Name == methodName
+                            select this.CreateNeighborActionTarget(method, filePath, lineInfo);
 
-                return query.ToDictionary(x => x.Name);
+                return query.FirstOrDefault();
             });
+
+            if (neighborActionTarget != null)
+            {
+                this._neighborStatementMap.Add(neighborActionTarget.Name, neighborActionTarget);
+                target = neighborActionTarget;
+                return true;
+            }
+
+            return false;
         }
 
-        private static NeighborActionTarget CreateNeighborActionTarget(MethodInfo method)
+        private NeighborActionTarget CreateNeighborActionTarget(MethodInfo method, string filePath, IJsonLineInfo lineInfo)
         {
-            IList<ParameterInfo> parameters = method.GetParameters().ToList();
-            if (parameters[0].ParameterType.FullName == "Dibix.IDatabaseAccessorFactory") 
-                parameters.RemoveAt(0);
+            IEnumerable<ParameterInfo> parameters = method.GetExternalParameters();
 
-            NeighborActionTarget target = new NeighborActionTarget(method.DeclaringType.FullName, method.Name);
-            target.Parameters.AddRange(parameters.Select(x => x.Name));
+            TypeReference resultType = null;
+            if (method.ReturnType != typeof(void))
+                resultType = ReflectionTypeResolver.ResolveType(method.ReturnType, filePath, lineInfo.LineNumber, lineInfo.LinePosition, this._schemaRegistry);
+
+            NeighborActionTarget target = new NeighborActionTarget(method.DeclaringType.FullName, resultType, method.Name);
+
+            foreach (ParameterInfo parameter in parameters)
+            {
+                TypeReference parameterType = ReflectionTypeResolver.ResolveType(parameter.ParameterType, filePath, lineInfo.LineNumber, lineInfo.LinePosition, this._schemaRegistry);
+                
+                // ParameterInfo.HasDefaultValue/DefaultValue => It is illegal to reflect on the custom attributes of a Type loaded via ReflectionOnlyGetType (see Assembly.ReflectionOnly) -- use CustomAttributeData instead
+                bool hasDefaultValue = parameter.RawDefaultValue != DBNull.Value;
+                object defaultValue = parameter.RawDefaultValue;
+                target.Parameters.Add(parameter.Name, new ActionParameter(parameter.Name, parameterType, hasDefaultValue, defaultValue));
+            }
             return target;
         }
     }

@@ -275,6 +275,9 @@ namespace Dibix.Sdk.Tests
             // EmptyWithParams
             private const string EmptyWithParamsCommandText = "";
 
+            // SingleConrecteResultWithParams
+            private const string SingleConrecteResultWithParamsCommandText = "SELECT [id] = 1";
+
             public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, System.Guid? x, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, bool y = true, int? z = null)
             {
                 using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
@@ -290,6 +293,20 @@ namespace Dibix.Sdk.Tests
                                                          .SetString(nameof(password), password, true)
                                                          .Build();
                     accessor.Execute(EmptyWithParamsCommandText, @params);
+                }
+            }
+
+            public static Dibix.Sdk.Tests.DomainModel.GenericContract SingleConrecteResultWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, Dibix.Sdk.Tests.Data.IntParameterSet ids)
+            {
+                using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
+                {
+                    IParametersVisitor @params = accessor.Parameters()
+                                                         .SetFromTemplate(new
+                                                         {
+                                                             ids
+                                                         })
+                                                         .Build();
+                    return accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(SingleConrecteResultWithParamsCommandText, @params);
                 }
             }
         }
@@ -308,6 +325,20 @@ namespace Dibix.Sdk.Tests
                 base.AddValues(id, name);
             }
         }
+
+        [StructuredType("[dbo].[dbx_codeanalysis_udt_int]")]
+        public sealed class IntParameterSet : StructuredType&lt;IntParameterSet, int&gt;
+        {
+            public IntParameterSet() : base("[dbo].[dbx_codeanalysis_udt_int]")
+            {
+                base.ImportSqlMetadata(() =&gt; this.Add(default));
+            }
+            public void Add(int id)
+            {
+                base.AddValues(id);
+            }
+        }
+
         #endregion
 
     }
@@ -332,6 +363,14 @@ namespace Dibix.Sdk.Tests
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime CreationTime { get; set; }
         }
+
+        public sealed class InputContract
+        {
+            public System.Guid X { get; set; }
+            public string Password { get; set; }
+            public bool Y { get; set; }
+            public int Z { get; set; }
+        }
         #endregion
 
     }
@@ -347,15 +386,25 @@ namespace Dibix.Sdk.Tests
                     x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), y =&gt;
                     {
                         y.Method = HttpApiMethod.Get;
-                        y.ChildRoute = "{password}";
+                        y.ChildRoute = "{password}/Fixed";
                         y.ResolveParameterFromSource("x", "DBX", "X");
                         y.ResolveParameterFromConstant("y", true);
                         y.ResolveParameterFromConstant("z", 5);
                     });
                     x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), y =&gt;
                     {
+                        y.Method = HttpApiMethod.Get;
+                        y.ChildRoute = "{password}/User";
+                    });
+                    x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.SingleConrecteResultWithParams)), y =&gt;
+                    {
+                        y.Method = HttpApiMethod.Get;
+                        y.ChildRoute = "Array";
+                    });
+                    x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), y =&gt;
+                    {
                         y.Method = HttpApiMethod.Post;
-                        y.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.GenericContract);
+                        y.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.InputContract);
                         y.ResolveParameterFromBody("ids", "Dibix.GenericContractIdsInputConverter");
                     });
                     x.ControllerImports.Add("Dibix.GenericEndpoint");
@@ -369,26 +418,126 @@ namespace Dibix.Sdk.Tests
   <data name="Endpoints_OpenApi" xml:space="preserve">
     <value>openapi: 3.0.1
 info:
-  title: Dibix.Sdk
+  title: Dibix.Sdk Tests
   version: 1.0.0
 paths:
-  '/api/Tests/GenericEndpoint/{password}':
+  '/api/Tests/GenericEndpoint/{password}/Fixed':
     get:
       tags:
         - Tests/GenericEndpoint
       summary: Undocumented action
-      operationId: Tests_Dibix.Sdk.CodeGeneration.ControllerDefinition_EmptyWithParams
-      responses: { }
+      operationId: EmptyWithParams1
+      parameters:
+        - name: password
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: ids
+          in: query
+          required: true
+          style: deepObject
+          explode: true
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Dibix.Sdk.Tests.Data.GenericParameterSet'
+      responses:
+        '204':
+          description: NoContent
+  '/api/Tests/GenericEndpoint/{password}/User':
+    get:
+      tags:
+        - Tests/GenericEndpoint
+      summary: Undocumented action
+      operationId: EmptyWithParams2
+      parameters:
+        - name: password
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: x
+          in: query
+          schema:
+            type: string
+            format: uuid
+            nullable: true
+        - name: ids
+          in: query
+          required: true
+          style: deepObject
+          explode: true
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Dibix.Sdk.Tests.Data.GenericParameterSet'
+        - name: y
+          in: query
+          schema:
+            type: boolean
+            default: true
+        - name: z
+          in: query
+          schema:
+            type: integer
+            format: int32
+            default: 
+            nullable: true
+      responses:
+        '204':
+          description: NoContent
+  /api/Tests/GenericEndpoint/Array:
+    get:
+      tags:
+        - Tests/GenericEndpoint
+      summary: Undocumented action
+      operationId: SingleConrecteResultWithParams
+      parameters:
+        - name: ids
+          in: query
+          required: true
+          style: form
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dibix.Sdk.Tests.DomainModel.GenericContract'
   /api/Tests/GenericEndpoint:
     post:
       tags:
         - Tests/GenericEndpoint
       summary: Undocumented action
-      operationId: Tests_Dibix.Sdk.CodeGeneration.ControllerDefinition_EmptyWithParams
-      responses: { }
+      operationId: EmptyWithParams3
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Dibix.Sdk.Tests.DomainModel.InputContract'
+        required: true
+      responses:
+        '204':
+          description: NoContent
 components:
   schemas:
-    GenericContract:
+    Dibix.Sdk.Tests.Data.GenericParameterSet:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+          nullable: true
+      additionalProperties: false
+    Dibix.Sdk.Tests.DomainModel.GenericContract:
       type: object
       properties:
         Name:
@@ -396,6 +545,20 @@ components:
         CreationTime:
           type: string
           format: date-time
+      additionalProperties: false
+    Dibix.Sdk.Tests.DomainModel.InputContract:
+      type: object
+      properties:
+        X:
+          type: string
+          format: uuid
+        Password:
+          type: string
+        Y:
+          type: boolean
+        Z:
+          type: integer
+          format: int32
       additionalProperties: false</value>
   </data>
   <data name="ExplicitProcedureArgumentSqlCodeAnalysisRule" xml:space="preserve">

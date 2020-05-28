@@ -47,32 +47,22 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Public Methods
-        public static TypeReference ResolveType(Type type, string source, int line, int column, bool isNullable, bool isEnumerable, ISchemaRegistry schemaRegistry)
+        public static TypeReference ResolveType(Type type, string source, int line, int column, string udtName, ISchemaRegistry schemaRegistry) => ResolveType(type, source, line, column, false, false, udtName, schemaRegistry);
+        public static TypeReference ResolveType(Type type, string source, int line, int column, ISchemaRegistry schemaRegistry)
         {
-            if (PrimitiveTypeMap.TryGetValue(type, out PrimitiveDataType dataType))
-                return new PrimitiveTypeReference(dataType, isNullable, isEnumerable);
-
-            SchemaTypeReference schemaTypeReference = SchemaTypeReference.WithNamespace(type.Namespace, type.Name, source, line, column, isNullable, isEnumerable);
-            if (schemaRegistry.IsRegistered(schemaTypeReference.Key))
-                return schemaTypeReference;
-
-            SchemaDefinition schemaDefinition;
-            if (type.IsEnum)
+            string udtName = type.GetUdtName();
+            Type underlyingEnumerableType = null;
+            Type underlyingNullableType = null;
+            if (String.IsNullOrEmpty(udtName))
             {
-                EnumSchema enumSchema = new EnumSchema(type.Namespace, type.Name, false);
-                schemaDefinition = enumSchema;
-            }
-            else
-            {
-                ObjectSchema objectSchema = new ObjectSchema(type.Namespace, type.Name);
-                objectSchema.Properties.AddRange(type.GetProperties()
-                                                     .Select(x => new ObjectSchemaProperty(x.Name)));
-                schemaDefinition = objectSchema;
+                underlyingEnumerableType = GetUnderlyingEnumerableType(type);
+                underlyingNullableType = Nullable.GetUnderlyingType(underlyingEnumerableType ?? type);
             }
 
-            schemaRegistry.Populate(schemaDefinition);
-
-            return schemaTypeReference;
+            Type normalizedType = underlyingNullableType ?? underlyingEnumerableType ?? type;
+            bool isEnumerable = underlyingEnumerableType != null;
+            bool isNullable = underlyingNullableType != null;
+            return ResolveType(normalizedType, source, line, column, isNullable, isEnumerable, udtName, schemaRegistry);
         }
         #endregion
 
@@ -120,7 +110,62 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private TypeReference ResolveType(Type type, string source, int line, int column, bool isNullable, bool isEnumerable) => ResolveType(type, source, line, column, isNullable, isEnumerable, this._schemaRegistry);
+        private TypeReference ResolveType(Type type, string source, int line, int column, bool isNullable, bool isEnumerable) => ResolveType(type, source, line, column, isNullable, isEnumerable, null, this._schemaRegistry);
+        private static TypeReference ResolveType(Type type, string source, int line, int column, bool isNullable, bool isEnumerable, string udtName, ISchemaRegistry schemaRegistry)
+        {
+            if (PrimitiveTypeMap.TryGetValue(type, out PrimitiveDataType dataType))
+                return new PrimitiveTypeReference(dataType, isNullable, isEnumerable);
+
+            SchemaTypeReference schemaTypeReference = SchemaTypeReference.WithNamespace(type.Namespace, type.Name, source, line, column, isNullable, isEnumerable);
+            if (schemaRegistry.IsRegistered(schemaTypeReference.Key))
+                return schemaTypeReference;
+
+            if (!String.IsNullOrEmpty(udtName))
+            {
+                UserDefinedTypeSchema udtSchema = new UserDefinedTypeSchema(type.Namespace, type.Name, udtName);
+                udtSchema.Properties.AddRange(type.GetProperties()
+                                                  .Select(x => new ObjectSchemaProperty(x.Name, ResolveType(x.PropertyType, source, line, column, schemaRegistry))));
+                schemaRegistry.Populate(udtSchema);
+            }
+            else if (type.IsEnum)
+            {
+                EnumSchema enumSchema = new EnumSchema(type.Namespace, type.Name, false);
+
+                // Enum.GetValues() => "The requested operation is invalid in the ReflectionOnly context"
+                foreach (FieldInfo member in type.GetFields(BindingFlags.Public | BindingFlags.Static))
+                    enumSchema.Members.Add(new EnumSchemaMember(member.Name, (int)member.GetRawConstantValue(), null));
+
+                schemaRegistry.Populate(enumSchema);
+            }
+            else
+            {
+                ObjectSchema objectSchema = new ObjectSchema(type.Namespace, type.Name);
+                schemaRegistry.Populate(objectSchema); // Register schema before traversing properties to avoid endless recursions for self referencing properties
+                objectSchema.Properties.AddRange(type.GetProperties()
+                                                     .Select(x => new ObjectSchemaProperty(x.Name, ResolveType(x.PropertyType, source, line, column, schemaRegistry))));
+            }
+
+            return schemaTypeReference;
+        }
+
+        private static Type GetUnderlyingEnumerableType(Type type)
+        {
+            if (type == typeof(string))
+                return null; // string = IEnumerable<char>
+
+            return type.GetInterfaces()
+                       .Prepend(type)
+                       .Select(GetUnderlyingEnumerableTypeCore)
+                       .FirstOrDefault(x => x != null);
+        }
+
+        private static Type GetUnderlyingEnumerableTypeCore(Type type)
+        {
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>)) 
+                return type.GenericTypeArguments.Single();
+            
+            return null;
+        }
         #endregion
     }
 }

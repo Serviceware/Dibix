@@ -277,9 +277,15 @@ Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly
                 sources: new [] 
                 { 
                     @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_params.sql"
                   , @"Types\dbx_codeanalysis_udt_generic.sql"
+                  , @"Types\dbx_codeanalysis_udt_int.sql"
                 }
-              , contracts: new [] { @"Contracts\GenericContract.json" }
+              , contracts: new []
+                {
+                    @"Contracts\GenericContract.json"
+                  , @"Contracts\InputContract.json"
+                }
               , endpoints: new [] { @"Endpoints\GenericEndpoint.json" }
               , expectedAdditionalAssemblyReferences: new[]
                 {

@@ -5,7 +5,7 @@
     {
       "method": "GET",
       "target": "EmptyWithParams",
-      "childRoute": "{password}",
+      "childRoute": "{password}/Fixed",
       "params": {
         "x": "DBX.X",
         "y": true,
@@ -13,9 +13,19 @@
       }
     },
     {
+      "method": "GET",
+      "target": "EmptyWithParams",
+      "childRoute": "{password}/User"
+    },
+    {
+      "method": "GET",
+      "target": "SingleConrecteResultWithParams",
+      "childRoute": "Array"
+    },
+    {
       "method": "POST",
       "target": "EmptyWithParams",
-      "body": "GenericContract",
+      "body": "InputContract",
       "params": {
         "ids": {
           "convertFromBody": "Dibix.GenericContractIdsInputConverter"

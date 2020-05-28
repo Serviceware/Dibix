@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
@@ -138,28 +139,55 @@ If this is not a project that has multiple areas, please make sure to define the
             this._schemas.Add(contract.FullName, contract);
         }
 
-        private void ReadEnumContract(string currentNamespace, string definitionName, JToken value)
+        private void ReadEnumContract(string currentNamespace, string definitionName, JToken definitionValue)
         {
             EnumSchema contract = new EnumSchema(currentNamespace, definitionName, false);
-            foreach (JToken child in (JArray)value)
+
+            ICollection<EnumValue> values = ReadEnumValues(definitionValue).ToArray();
+            IDictionary<string, int> actualValues = values.Where(x => x.ActualValue.HasValue).ToDictionary(x => x.Name, x => x.ActualValue.Value);
+
+            foreach (EnumValue value in values)
             {
-                switch (child.Type)
-                {
-                    case JTokenType.Object:
-                        JProperty property = ((JObject)child).Properties().Single();
-                        contract.Members.Add(new EnumSchemaMember(property.Name, property.Value.Value<string>()));
-                        break;
-
-                    case JTokenType.String:
-                        contract.Members.Add(new EnumSchemaMember(child.Value<string>()));
-                        break;
-
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(child.Type), child.Type, null);
-                }
+                int actualValue = value.ActualValue ?? EnumValueParser.ParseDynamicValue(actualValues, value.StringValue);
+                contract.Members.Add(new EnumSchemaMember(value.Name, actualValue, value.StringValue));
             }
 
             this._schemas.Add(contract.FullName, contract);
+        }
+
+        private static IEnumerable<EnumValue> ReadEnumValues(JToken members)
+        {
+            for (int i = 0; i < ((JArray)members).Count; i++)
+            {
+                JToken member = ((JArray)members)[i];
+                yield return ReadEnumValue(i, member, member.Type);
+            }
+        }
+
+        private static EnumValue ReadEnumValue(int index, JToken member, JTokenType type)
+        {
+            switch (type)
+            {
+                case JTokenType.Object:
+                    JProperty property = ((JObject)member).Properties().Single();
+                    return ReadEnumValue(property.Name, (JValue)property.Value, property.Value.Type);
+
+                case JTokenType.String:
+                    return EnumValue.ImplicitValue((string)((JValue)member).Value, index);
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
+            }
+        }
+
+        private static EnumValue ReadEnumValue(string name, JValue value, JTokenType type)
+        {
+            switch (type)
+            {
+                case JTokenType.Integer: return EnumValue.ExplicitValue(name, value.Value<int>());
+                case JTokenType.String: return EnumValue.DynamicValue(name, (string)value.Value);
+                default: throw new ArgumentOutOfRangeException(nameof(type), type, null);
+            }
         }
 
         private static TypeReference ParseType(string typeName, string rootNamespace, string filePath, IJsonLineInfo location)
@@ -178,6 +206,26 @@ If this is not a project that has multiple areas, please make sure to define the
 
             PrimitiveDataType dataType = (PrimitiveDataType)Enum.Parse(typeof(PrimitiveDataType), typeName, true);
             return new PrimitiveTypeReference(dataType, isNullable, isEnumerable);
+        }
+        #endregion
+
+        #region Nested types
+        private sealed class EnumValue
+        {
+            public string Name { get; }
+            public int? ActualValue { get; }
+            public string StringValue { get; }
+
+            private EnumValue(string name, int? actualValue, string stringValue)
+            {
+                this.Name = name;
+                this.ActualValue = actualValue;
+                this.StringValue = stringValue;
+            }
+
+            public static EnumValue ImplicitValue(string name, int actualValue) => new EnumValue(name, actualValue, null);
+            public static EnumValue ExplicitValue(string name, int actualValue) => new EnumValue(name, actualValue, actualValue.ToString(CultureInfo.InvariantCulture));
+            public static EnumValue DynamicValue(string name, string stringValue) => new EnumValue(name, default, stringValue);
         }
         #endregion
     }

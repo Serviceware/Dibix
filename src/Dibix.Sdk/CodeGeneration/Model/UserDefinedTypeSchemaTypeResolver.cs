@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
 namespace Dibix.Sdk.CodeGeneration
 {
     public sealed class UserDefinedTypeSchemaTypeResolver : SchemaTypeResolver
     {
         private readonly ISchemaRegistry _schemaRegistry;
+        private readonly ReferencedAssemblyInspector _referencedAssemblyInspector;
         private readonly IDictionary<string, string> _localUserDefinedTypes;
         private readonly IDictionary<string, Type> _externalUserDefinedTypes;
 
@@ -16,8 +16,9 @@ namespace Dibix.Sdk.CodeGeneration
         public UserDefinedTypeSchemaTypeResolver(ISchemaRegistry schemaRegistry, IUserDefinedTypeProvider userDefinedTypeProvider, ReferencedAssemblyInspector referencedAssemblyInspector) : base(schemaRegistry, userDefinedTypeProvider)
         {
             this._schemaRegistry = schemaRegistry;
+            this._referencedAssemblyInspector = referencedAssemblyInspector;
             this._localUserDefinedTypes = ScanLocalTypes(userDefinedTypeProvider).ToDictionary(x => x.Key, x => x.Value);
-            this._externalUserDefinedTypes = ScanExternalTypes(referencedAssemblyInspector);
+            this._externalUserDefinedTypes = new Dictionary<string, Type>();
         }
 
         public override TypeReference ResolveType(string input, string @namespace, string source, int line, int column, bool isEnumerable)
@@ -25,33 +26,34 @@ namespace Dibix.Sdk.CodeGeneration
             if (this._localUserDefinedTypes.TryGetValue(input, out string key))
                 return new SchemaTypeReference(key, source, line, column, false, false);
 
-            if (this._externalUserDefinedTypes.TryGetValue(input, out Type type))
-                return ReflectionTypeResolver.ResolveType(type, source, line, column, false, false, this._schemaRegistry);
+            if (this.TryGetExternalType(input, out Type type))
+                return ReflectionTypeResolver.ResolveType(type, source, line, column, input, this._schemaRegistry);
 
             return base.ResolveType(input, @namespace, source, line, column, isEnumerable);
+        }
+
+        private bool TryGetExternalType(string input, out Type externalType)
+        {
+            if (this._externalUserDefinedTypes.TryGetValue(input, out externalType))
+                return true;
+
+            Type matchingType = this._referencedAssemblyInspector.Inspect(x => x.Where(y => y.IsArtifactAssembly())
+                                                                                .SelectMany(y => y.GetTypes())
+                                                                                .FirstOrDefault(y => y.GetUdtName() == input));
+
+            if (matchingType != null)
+            {
+                this._externalUserDefinedTypes.Add(input, matchingType);
+                externalType = matchingType;
+                return true;
+            }
+
+            return false;
         }
 
         private static IEnumerable<KeyValuePair<string, string>> ScanLocalTypes(IUserDefinedTypeProvider userDefinedTypeProvider)
         {
             return userDefinedTypeProvider.Types.Select(x => new KeyValuePair<string, string>(x.UdtName, x.FullName));
-        }
-
-        private static IDictionary<string, Type> ScanExternalTypes(ReferencedAssemblyInspector referencedAssemblyInspector)
-        {
-            return referencedAssemblyInspector.Inspect(referencedAssemblies =>
-            {
-                var query = from assembly in referencedAssemblies
-                            where assembly.IsDefined("Dibix.ArtifactAssemblyAttribute")
-                            from type in assembly.GetTypes()
-                            let udtName = CustomAttributeData.GetCustomAttributes(type)
-                                                             .Where(x => x.AttributeType.FullName == "Dibix.StructuredTypeAttribute")
-                                                             .Select(x => (string)x.ConstructorArguments.Select(y => y.Value).Single())
-                                                             .FirstOrDefault()
-                            where udtName != null
-                            select new KeyValuePair<string, Type>(udtName, type);
-
-                return query.ToDictionary(x => x.Key, x => x.Value);
-            });
         }
     }
 }

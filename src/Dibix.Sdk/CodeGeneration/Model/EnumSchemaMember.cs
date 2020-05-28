@@ -3,13 +3,14 @@
     public sealed class EnumSchemaMember
     {
         public string Name { get; }
-        public string Value { get; }
+        public int ActualValue { get; }
+        public string StringValue { get; }
 
-        public EnumSchemaMember(string name) : this(name, null) { }
-        public EnumSchemaMember(string name, string value)
+        public EnumSchemaMember(string name, int actualValue, string stringValue)
         {
             this.Name = name;
-            this.Value = value;
+            this.ActualValue = actualValue;
+            this.StringValue = stringValue;
         }
     }
 }

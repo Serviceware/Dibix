@@ -12,6 +12,7 @@ namespace Dibix.Sdk.Cli
             CodeGenerationTask.Execute
             (
                 projectDirectory: configuration.GetSingleValue<string>("ProjectDirectory")
+              , projectVersion: configuration.GetSingleValue<string>("ProjectVersion")
               , productName: configuration.GetSingleValue<string>("ProductName")
               , areaName: configuration.GetSingleValue<string>("AreaName")
               , defaultOutputFilePath: configuration.GetSingleValue<string>("DefaultOutputFilePath")

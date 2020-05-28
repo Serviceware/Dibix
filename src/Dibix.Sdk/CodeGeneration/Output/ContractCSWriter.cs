@@ -179,7 +179,7 @@ namespace Dibix.Sdk.CodeGeneration
             CSharpEnum @enum = scope.AddEnum(schema.DefinitionName, CSharpModifiers.Public, annotations);
             foreach (EnumSchemaMember member in schema.Members)
             {
-                @enum.AddMember(member.Name, member.Value)
+                @enum.AddMember(member.Name, member.StringValue)
                      .Inherits("int");
             }
         }

@@ -1,0 +1,8 @@
+﻿{
+  "InputContract": {
+    "X": "uuid",
+    "Password": "string",
+    "Y": "boolean",
+    "Z": "int32"
+  }
+}

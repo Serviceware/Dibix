@@ -135,7 +135,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             foreach (JProperty property in mappings.Properties())
             {
-                if (generatedAccessorMethodTarget?.Parameters.Contains(property.Name) == false)
+                if (generatedAccessorMethodTarget?.Parameters.ContainsKey(property.Name) == false)
                 {
                     IJsonLineInfo propertyLocation = property;
                     base.Logger.LogError(null, $"Parameter '{property.Name}' not found on action: {action.Target.Name}", filePath, propertyLocation.LineNumber, propertyLocation.LinePosition);

@@ -1,16 +1,18 @@
-﻿using Dibix.Http;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Text.RegularExpressions;
+using Dibix.Http;
 using Dibix.Sdk.CodeGeneration;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Dibix.Sdk.OpenApi
 {
     internal static class OpenApiGenerator
     {
+        private static bool _useRelativeNamespaces = false;
         private static readonly IDictionary<PrimitiveDataType, Func<OpenApiSchema>> PrimitiveTypeMap = new Dictionary<PrimitiveDataType, Func<OpenApiSchema>>
         {
             [PrimitiveDataType.Boolean]        = () => new OpenApiSchema { Type = "boolean"                       }
@@ -30,30 +32,41 @@ namespace Dibix.Sdk.OpenApi
 
         public static OpenApiDocument Generate
         (
-            string title
+            string projectVersion
+          , string productName
           , string areaName
           , string rootNamespace
           , IEnumerable<ControllerDefinition> controllers
-          , IEnumerable<SchemaDefinition> contracts
+          , ISchemaRegistry schemaRegistry
         )
         {
             OpenApiDocument document = new OpenApiDocument
             {
                 Info = new OpenApiInfo
                 {
-                    Title = title,
-                    Version = "1.0.0"
+                    Title = $"{productName} {areaName}",
+                    Version = !String.IsNullOrEmpty(projectVersion) ? projectVersion : "1.0.0"
                 }
             };
-            AppendPaths(document, areaName, controllers);
-            AppendSchemas(document, contracts, rootNamespace);
+            AppendPaths(document, areaName, controllers, rootNamespace, schemaRegistry);
             return document;
         }
 
-        private static void AppendPaths(OpenApiDocument document, string areaName, IEnumerable<ControllerDefinition> controllers)
+        private static void AppendPaths(OpenApiDocument document, string areaName, IEnumerable<ControllerDefinition> controllers, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
             foreach (ControllerDefinition controller in controllers)
             {
+                IDictionary<ActionDefinition, string> operationIds = controller.Actions
+                                                                               .GroupBy(x => x.Target.Name)
+                                                                               .SelectMany(x => x.Select((y, i) => new
+                                                                               {
+                                                                                   Position = i + 1,
+                                                                                   Name = x.Key,
+                                                                                   Action = y,
+                                                                                   IsAmbigous = x.Count() > 1
+                                                                               }))
+                                                                               .ToDictionary(x => x.Action, x => x.IsAmbigous ? $"{x.Name}{x.Position}" : x.Name);
+
                 foreach (IGrouping<string, ActionDefinition> path in controller.Actions.GroupBy(x => $"/{RouteBuilder.BuildRoute(areaName, controller.Name, x.ChildRoute)}"))
                 {
                     OpenApiPathItem value = new OpenApiPathItem();
@@ -61,35 +74,15 @@ namespace Dibix.Sdk.OpenApi
                     foreach (ActionDefinition action in path)
                     {
                         OperationType operationType = (OperationType)Enum.Parse(typeof(OperationType), action.Method.ToString());
-                        string operationName = action.Target.Name;
 
                         OpenApiOperation operation = new OpenApiOperation();
                         operation.Tags.Add(new OpenApiTag { Name = $"{areaName}/{controller.Name}" });
                         operation.Summary = action.Description ?? "Undocumented action";
-                        operation.OperationId = $"{areaName}_{controller}_{operationName}";
-                        if (action.BodyContract != null)
-                        {
-                            //operation.RequestBody = new OpenApiRequestBody
-                            //{
-                            //    Required = true,
-                            //    Content =
-                            //    {
-                            //        {
-                            //            HttpParameterResolverUtility.BodyKey, new OpenApiMediaType
-                            //            {
-                            //                Schema = new OpenApiSchema
-                            //                {
+                        operation.OperationId = operationIds[action];
 
-                            //                }
-                            //            }
-                            //        }
-                            //    }
-                            //};
-                        }
-                        //operation.Responses.Add(((int)HttpStatusCode.OK).ToString(), new OpenApiResponse
-                        //{
-
-                        //});
+                        AppendParameters(document, operation, action, rootNamespace, schemaRegistry);
+                        AppendBody(document, operation, action, rootNamespace, schemaRegistry);
+                        AppendResponses(document, operation, action, rootNamespace, schemaRegistry);
 
                         value.AddOperation(operationType, operation);
                     }
@@ -102,70 +95,190 @@ namespace Dibix.Sdk.OpenApi
             }
         }
 
-        private static void AppendSchemas(OpenApiDocument document, IEnumerable<SchemaDefinition> contracts, string rootNamespace)
+        private static void AppendParameters(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
-            foreach (SchemaDefinition contract in contracts)
+            ICollection<string> bodyProperties = GetBodyProperties(action.BodyContract, schemaRegistry);
+            IDictionary<string, ActionParameter> actionParameters = GetActionParameters(action.Target);
+            HashSet<string> visitedActionParameters = new HashSet<string>();
+            if (!String.IsNullOrEmpty(action.ChildRoute))
             {
-                if (document.Components == null)
-                    document.Components = new OpenApiComponents();
+                IEnumerable<string> pathParameters = Regex.Matches(action.ChildRoute, @"\{(?<parameter>[^}]+)\}")
+                                                          .Cast<Match>()
+                                                          .Select(x => x.Groups["parameter"].Value);
 
-                string schemaName = contract.DefinitionName;
-                string relativeNamespace = NamespaceUtility.BuildRelativeNamespace(rootNamespace, LayerName.DomainModel, contract.Namespace);
-                if (!String.IsNullOrEmpty(relativeNamespace))
-                    schemaName = $"{relativeNamespace}.{schemaName}";
+                foreach (string pathParameter in pathParameters)
+                {
+                    if (!actionParameters.TryGetValue(pathParameter, out ActionParameter actionParameter)) 
+                        continue;
 
-                OpenApiSchema schema = CreateSchema(contract, relativeNamespace);
+                    AppendPathParameter(document, operation, actionParameter, pathParameter, rootNamespace, schemaRegistry);
+                    visitedActionParameters.Add(actionParameter.Name);
+                }
+            }
 
-                document.Components.Schemas.Add(schemaName, schema);
+            foreach (ActionParameter actionParameter in actionParameters.Values)
+            {
+                if (visitedActionParameters.Contains(actionParameter.Name)     // Path segment
+                 || action.ParameterSources.ContainsKey(actionParameter.Name)  // Constant/Internal value
+                 || bodyProperties.Contains(actionParameter.Name))             // Body property
+                    continue;
+
+                AppendParameter(document, operation, actionParameter, actionParameter.Type, rootNamespace, schemaRegistry);
             }
         }
 
-        private static OpenApiSchema CreateSchema(SchemaDefinition contract, string relativeNamespace)
+        private static ICollection<string> GetBodyProperties(TypeReference bodyContract, ISchemaRegistry schemaRegistry)
         {
-            OpenApiSchema schema;
-
-            switch (contract)
+            HashSet<string> properties = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            if (bodyContract is SchemaTypeReference schemaTypeReference)
             {
-                case ObjectSchema objectContract:
-                    schema = CreateObjectSchema(objectContract, relativeNamespace);
+                SchemaDefinition schema = schemaRegistry.GetSchema(schemaTypeReference);
+                if (schema is ObjectSchema objectSchema)
+                    properties.AddRange(objectSchema.Properties.Select(x => x.Name));
+            }
+            return properties;
+        }
+
+        private static void AppendParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter actionParameter, TypeReference parameterType, string rootNamespace, ISchemaRegistry schemaRegistry)
+        {
+            switch (parameterType)
+            {
+                case PrimitiveTypeReference _:
+                    AppendQueryParameter(document, operation, actionParameter, rootNamespace, schemaRegistry);
                     break;
 
-                case EnumSchema enumContract:
-                    schema = CreateEnumSchema(enumContract);
+                case SchemaTypeReference schemaTypeReference:
+                    SchemaDefinition schema = schemaRegistry.GetSchema(schemaTypeReference);
+                    AppendComplexParameter(document, operation, actionParameter, schema, rootNamespace, schemaRegistry);
                     break;
 
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(contract), contract, "Unexpected contract definition");
+                    throw new ArgumentOutOfRangeException(nameof(parameterType), parameterType, null);
             }
-
-            return schema;
         }
 
-        private static OpenApiSchema CreateObjectSchema(ObjectSchema objectContract, string relativeNamespace)
+        private static void AppendPathParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter actionParameter, string parameterName, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
-            OpenApiSchema schema = new OpenApiSchema
+            AppendParameter(document, operation, actionParameter, parameterName, ParameterLocation.Path, true, rootNamespace, schemaRegistry);
+        }
+
+        private static void AppendQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter actionParameter, string rootNamespace, ISchemaRegistry schemaRegistry) => AppendQueryParameter(document, operation, actionParameter, actionParameter.Type, actionParameter.Type.IsEnumerable, rootNamespace, schemaRegistry);
+        private static OpenApiParameter AppendQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter actionParameter, TypeReference parameterType, bool isEnumerable, string rootNamespace, ISchemaRegistry schemaRegistry)
+        {
+            bool isRequired = !actionParameter.HasDefaultValue && !actionParameter.Type.IsNullable;
+            return AppendParameter(document, operation, actionParameter, actionParameter.Name, parameterType, isEnumerable, ParameterLocation.Query, isRequired, rootNamespace, schemaRegistry);
+        }
+
+        private static void AppendComplexParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter actionParameter, SchemaDefinition parameterSchema, string rootNamespace, ISchemaRegistry schemaRegistry)
+        {
+            switch (parameterSchema)
             {
-                Type = "object",
-                AdditionalPropertiesAllowed = false
+                case EnumSchema _:
+                    AppendQueryParameter(document, operation, actionParameter, rootNamespace, schemaRegistry);
+                    break;
+
+                case UserDefinedTypeSchema userDefinedTypeSchema:
+                    AppendQueryArrayParameter(document, operation, actionParameter, userDefinedTypeSchema, rootNamespace, schemaRegistry);
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(parameterSchema), parameterSchema, null);
+            }
+        }
+
+        private static void AppendQueryArrayParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter actionParameter, UserDefinedTypeSchema parameterSchema, string rootNamespace, ISchemaRegistry schemaRegistry)
+        {
+            TypeReference parameterType = parameterSchema.Properties.Count > 1 ? actionParameter.Type : parameterSchema.Properties[0].Type;
+            OpenApiParameter result = AppendQueryParameter(document, operation, actionParameter, parameterType, true, rootNamespace, schemaRegistry);
+            result.Explode = true;
+            result.Style = parameterSchema.Properties.Count > 1 ? ParameterStyle.DeepObject : ParameterStyle.Form;
+        }
+
+        private static void AppendParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter actionParameter, string parameterName, ParameterLocation parameterLocation, bool isRequired, string rootNamespace, ISchemaRegistry schemaRegistry) => AppendParameter(document, operation, actionParameter, parameterName, actionParameter.Type, actionParameter.Type.IsEnumerable, parameterLocation, isRequired, rootNamespace, schemaRegistry);
+        private static OpenApiParameter AppendParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter actionParameter, string parameterName, TypeReference parameterType, bool isEnumerable, ParameterLocation parameterLocation, bool isRequired, string rootNamespace, ISchemaRegistry schemaRegistry)
+        {
+            OpenApiParameter apiParameter = new OpenApiParameter
+            {
+                In = parameterLocation,
+                Required = isRequired,
+                Name = parameterName,
+                Schema = CreateSchema(document, parameterType, isEnumerable, actionParameter.HasDefaultValue, actionParameter.DefaultValue, rootNamespace, schemaRegistry)
             };
-
-            foreach (ObjectSchemaProperty property in objectContract.Properties)
-            {
-                if (property.SerializationBehavior == SerializationBehavior.Never)
-                    continue;
-
-                OpenApiSchema propertySchema = CreateObjectPropertySchema(property, relativeNamespace);
-                schema.Properties.Add(property.Name, propertySchema);
-            }
-
-            return schema;
+            operation.Parameters.Add(apiParameter);
+            return apiParameter;
         }
 
-        private static OpenApiSchema CreateObjectPropertySchema(ObjectSchemaProperty property, string @namespace)
+        private static IDictionary<string, ActionParameter> GetActionParameters(ActionDefinitionTarget actionTarget)
         {
-            OpenApiSchema schema = CreateObjectPropertySchema(property.Type, @namespace);
-            schema.Nullable = property.Type.IsNullable;
-            if (property.Type.IsEnumerable)
+            switch (actionTarget)
+            {
+                case GeneratedAccessorMethodTarget generatedAccessorActionTarget: return generatedAccessorActionTarget.Parameters;
+
+                //case ReflectionActionTarget reflectionActionTarget:
+                
+                default: return new Dictionary<string, ActionParameter>(); //throw new ArgumentOutOfRangeException(nameof(actionTarget), actionTarget, "Unsupported action target for Open API response");
+            }
+        }
+
+        private static void AppendBody(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, string rootNamespace, ISchemaRegistry schemaRegistry)
+        {
+            if (action.BodyContract == null)
+                return;
+
+            OpenApiRequestBody body = new OpenApiRequestBody { Required = true };
+            AppendContent(document, body.Content, action.BodyContract, rootNamespace, schemaRegistry);
+            operation.RequestBody = body;
+        }
+
+        private static void AppendResponses(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, string rootNamespace, ISchemaRegistry schemaRegistry)
+        {
+            TypeReference resultType = GetResultType(action.Target);
+            AppendResponse(document, operation, resultType, rootNamespace, schemaRegistry);
+        }
+
+        private static void AppendResponse(OpenApiDocument document, OpenApiOperation operation, TypeReference typeReference, string rootNamespace, ISchemaRegistry schemaRegistry)
+        {
+            HttpStatusCode statusCode = typeReference != null ? HttpStatusCode.OK : HttpStatusCode.NoContent;
+            operation.Responses.Add(((int)statusCode).ToString(), CreateResponse(document, statusCode, typeReference, rootNamespace, schemaRegistry));
+        }
+
+        private static OpenApiResponse CreateResponse(OpenApiDocument document, HttpStatusCode statusCode, TypeReference typeReference, string rootNamespace, ISchemaRegistry schemaRegistry)
+        {
+            OpenApiResponse response = new OpenApiResponse { Description = statusCode.ToString() };
+            if (typeReference != null)
+                AppendContent(document, response.Content, typeReference, rootNamespace, schemaRegistry);
+
+            return response;
+        }
+
+        private static void AppendContent(OpenApiDocument document, IDictionary<string, OpenApiMediaType> target, TypeReference typeReference, string rootNamespace, ISchemaRegistry schemaRegistry)
+        {
+            const string mediaType = "application/json";
+            target.Add(mediaType, new OpenApiMediaType { Schema = CreateSchema(document, typeReference, rootNamespace, schemaRegistry) });
+        }
+
+        private static TypeReference GetResultType(ActionDefinitionTarget actionTarget)
+        {
+            switch (actionTarget)
+            {
+                case GeneratedAccessorMethodTarget generatedAccessorActionTarget: return generatedAccessorActionTarget.ResultType;
+
+                //case ReflectionActionTarget reflectionActionTarget:
+
+                default: return null; //throw new ArgumentOutOfRangeException(nameof(actionTarget), actionTarget, "Unsupported action target for Open API response");
+            }
+        }
+
+        private static OpenApiSchema CreateSchema(OpenApiDocument document, TypeReference typeReference, string rootNamespace, ISchemaRegistry schemaRegistry) => CreateSchema(document, typeReference, typeReference.IsEnumerable, false, null, rootNamespace, schemaRegistry);
+        private static OpenApiSchema CreateSchema(OpenApiDocument document, TypeReference typeReference, bool isEnumerable, bool hasDefaultValue, object defaultValue, string rootNamespace, ISchemaRegistry schemaRegistry)
+        {
+            OpenApiSchema schema = CreateSchemaCore(document, typeReference, rootNamespace, schemaRegistry);
+            schema.Nullable = typeReference.IsNullable;
+
+            if (hasDefaultValue)
+                schema.Default = CreateDefaultValue(defaultValue);
+
+            if (isEnumerable)
             {
                 schema = new OpenApiSchema
                 {
@@ -173,32 +286,44 @@ namespace Dibix.Sdk.OpenApi
                     Items = schema
                 };
             }
+
             return schema;
         }
 
-        private static OpenApiSchema CreateObjectPropertySchema(TypeReference propertyType, string @namespace)
+        private static OpenApiSchema CreateSchemaCore(OpenApiDocument document, TypeReference typeReference, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
-            switch (propertyType)
+            switch (typeReference)
             {
                 case PrimitiveTypeReference primitiveContractPropertyType: return CreatePrimitiveTypeSchema(primitiveContractPropertyType);
-                case SchemaTypeReference contractPropertyTypeReference: return CreateReferenceSchema(contractPropertyTypeReference, @namespace);
-                default: throw new ArgumentOutOfRangeException(nameof(propertyType), propertyType, $"Unexpected property type: {propertyType}");
+                case SchemaTypeReference contractPropertyTypeReference: return CreateReferenceSchema(document, contractPropertyTypeReference, rootNamespace, schemaRegistry);
+                default: throw new ArgumentOutOfRangeException(nameof(typeReference), typeReference, $"Unexpected property type: {typeReference}");
             }
         }
 
-        private static OpenApiSchema CreatePrimitiveTypeSchema(PrimitiveTypeReference type)
+        private static OpenApiSchema CreatePrimitiveTypeSchema(PrimitiveTypeReference typeReference)
         {
-            if (!PrimitiveTypeMap.TryGetValue(type.Type, out Func<OpenApiSchema> schemaFactory))
-                throw new InvalidOperationException($"Unexpected primitive type: {type.Type}");
+            if (!PrimitiveTypeMap.TryGetValue(typeReference.Type, out Func<OpenApiSchema> schemaFactory))
+                throw new InvalidOperationException($"Unexpected primitive type: {typeReference.Type}");
 
             return schemaFactory();
         }
 
-        private static OpenApiSchema CreateReferenceSchema(SchemaTypeReference type, string @namespace)
+        private static OpenApiSchema CreateReferenceSchema(OpenApiDocument document, SchemaTypeReference typeReference, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
-            string typeName = type.Key;
-            if (!String.IsNullOrEmpty(@namespace))
-                typeName = $"{@namespace}.{typeName}";
+            SchemaDefinition schema = schemaRegistry.GetSchema(typeReference);
+            string typeName;
+
+            if (_useRelativeNamespaces)
+            {
+                typeName = schema.DefinitionName;
+                string relativeNamespace = NamespaceUtility.BuildRelativeNamespace(rootNamespace, LayerName.DomainModel, schema.Namespace);
+                if (!String.IsNullOrEmpty(relativeNamespace))
+                    typeName = $"{relativeNamespace}.{typeName}";
+            }
+            else
+                typeName = schema.FullName;
+
+            EnsureSchema(document, typeName, schema, rootNamespace, schemaRegistry);
 
             return new OpenApiSchema
             {
@@ -210,71 +335,76 @@ namespace Dibix.Sdk.OpenApi
             };
         }
 
-        private static OpenApiSchema CreateEnumSchema(EnumSchema enumContract)
+        private static void EnsureSchema(OpenApiDocument document, string schemaName, SchemaDefinition contract, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
-            bool isFlagged = enumContract.Members.Any(x => x.Value != null);
-            OpenApiSchema schema = isFlagged ? PrimitiveTypeMap[PrimitiveDataType.Int32]() : new OpenApiSchema { Type = "string" };
-            
-            foreach (EnumSchemaMember member in enumContract.Members)
-            {
-                if (member.Value != null)
-                {
-                    if (!Int32.TryParse(member.Value, out int value) && !TryComputeEnumValueReference(enumContract, member.Value, out value))
-                        throw new InvalidOperationException($"Unexpected enum value for '{enumContract.DefinitionName}.{member.Name}': {member.Value}");
+            if (document.Components == null)
+                document.Components = new OpenApiComponents();
 
-                    schema.Enum.Add(new OpenApiInteger(value));
-                }
-                else
-                    schema.Enum.Add(new OpenApiString(member.Name));
-            }
-
-            return schema;
+            if (!document.Components.Schemas.ContainsKey(schemaName))
+                AppendContractSchema(document, schemaName, contract, rootNamespace, schemaRegistry);
         }
 
-        private static bool TryComputeEnumValueReference(EnumSchema enumContract, string memberValue, out int value)
+        private static void AppendContractSchema(OpenApiDocument document, string schemaName, SchemaDefinition contract, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
-            value = 0;
-
-            Queue<char> tokens = new Queue<char>(memberValue);
-            char currentToken = default;
-            char? bitwiseOperator = null;
-            StringBuilder memberNameSb = new StringBuilder();
-            while (tokens.Any())
+            switch (contract)
             {
-                while (tokens.Any() && (currentToken = tokens.Dequeue()) != default && currentToken != '|' && currentToken != '&')
-                {
-                    if (currentToken == ' ')
-                        continue;
+                case ObjectSchema objectContract:
+                    AppendObjectSchema(document, schemaName, objectContract, rootNamespace, schemaRegistry);
+                    break;
 
-                    memberNameSb.Append(currentToken);
-                }
+                case EnumSchema enumContract:
+                    AppendEnumSchema(document, schemaName, enumContract);
+                    break;
 
-                string memberNameReference = memberNameSb.ToString();
-                EnumSchemaMember currentMember = enumContract.Members.SingleOrDefault(x => x.Name == memberNameReference);
-                if (currentMember == null)
-                    throw new InvalidOperationException($"Unexpected enum member name value reference: {memberNameReference}");
-
-                int currentMemberValue = Int32.Parse(currentMember.Value);
-                memberNameSb = new StringBuilder();
-
-                if (bitwiseOperator.HasValue)
-                {
-                    if (bitwiseOperator.Value == '|')
-                        value |= currentMemberValue;
-                    else if (bitwiseOperator.Value == '&')
-                        value &= currentMemberValue;
-
-                    bitwiseOperator = null;
-                }
-                else
-                    value = currentMemberValue;
-
-                if (currentToken == '|' || currentToken == '&')
-                {
-                    bitwiseOperator = currentToken;
-                }
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(contract), contract, "Unexpected contract definition");
             }
-            return true;
+        }
+
+        private static void AppendObjectSchema(OpenApiDocument document, string schemaName, ObjectSchema objectContract, string rootNamespace, ISchemaRegistry schemaRegistry)
+        {
+            OpenApiSchema schema = new OpenApiSchema
+            {
+                Type = "object",
+                AdditionalPropertiesAllowed = false
+            };
+
+            document.Components.Schemas.Add(schemaName, schema); // Register schema before traversing properties to avoid endless recursions for self referencing properties
+
+            foreach (ObjectSchemaProperty property in objectContract.Properties)
+            {
+                if (property.SerializationBehavior == SerializationBehavior.Never)
+                    continue;
+
+                OpenApiSchema propertySchema = CreateSchema(document, property.Type, rootNamespace, schemaRegistry);
+                schema.Properties.Add(property.Name, propertySchema);
+            }
+        }
+
+        private static void AppendEnumSchema(OpenApiDocument document, string schemaName, EnumSchema enumContract)
+        {
+            OpenApiSchema schema = PrimitiveTypeMap[PrimitiveDataType.Int32]();
+            OpenApiArray enumNames = new OpenApiArray();
+            schema.Extensions.Add("x-enum-varnames", enumNames);
+            foreach (EnumSchemaMember member in enumContract.Members)
+            {
+                schema.Enum.Add(new OpenApiInteger(member.ActualValue));
+                enumNames.Add(new OpenApiString(member.Name));
+            }
+
+            document.Components.Schemas.Add(schemaName, schema);
+        }
+
+        private static IOpenApiAny CreateDefaultValue(object defaultValue)
+        {
+            switch (defaultValue)
+            {
+                case bool boolValue: return new OpenApiBoolean(boolValue);
+                case int intValue: return new OpenApiInteger(intValue);
+                case string stringValue: return new OpenApiString(stringValue);
+                case null: return new OpenApiNull();
+                default: throw new ArgumentOutOfRangeException(nameof(defaultValue), defaultValue, null);
+            }
         }
     }
 }
