@@ -233,13 +233,52 @@ namespace Dibix.Sdk.OpenApi
         private static void AppendResponses(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
             TypeReference resultType = GetResultType(action.Target);
-            AppendResponse(document, operation, resultType, rootNamespace, schemaRegistry);
+            AppendDefaultResponse(document, operation, resultType, rootNamespace, schemaRegistry);
+            AppendErrorResponses(document, operation, action, rootNamespace, schemaRegistry);
         }
 
-        private static void AppendResponse(OpenApiDocument document, OpenApiOperation operation, TypeReference typeReference, string rootNamespace, ISchemaRegistry schemaRegistry)
+        private static void AppendDefaultResponse(OpenApiDocument document, OpenApiOperation operation, TypeReference typeReference, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
             HttpStatusCode statusCode = typeReference != null ? HttpStatusCode.OK : HttpStatusCode.NoContent;
             operation.Responses.Add(((int)statusCode).ToString(), CreateResponse(document, statusCode, typeReference, rootNamespace, schemaRegistry));
+        }
+
+        private static void AppendErrorResponses(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, string rootNamespace, ISchemaRegistry schemaRegistry)
+        {
+            if (!(action.Target is GeneratedAccessorMethodTarget generatedAccessorActionTarget))
+                return;
+            
+            foreach (ErrorResponse errorResponse in generatedAccessorActionTarget.ErrorResponses.DistinctBy(x => x.StatusCode))
+            {
+                AppendErrorResponse(document, operation, errorResponse, rootNamespace, schemaRegistry);
+            }
+        }
+
+        private static void AppendErrorResponse(OpenApiDocument document, OpenApiOperation operation, ErrorResponse errorResponse, string rootNamespace, ISchemaRegistry schemaRegistry)
+        {
+            OpenApiResponse response = CreateResponse(document, (HttpStatusCode)errorResponse.StatusCode, null, rootNamespace, schemaRegistry);
+
+            if (errorResponse.ErrorCode != 0)
+            {
+                response.Headers.Add(HttpErrorResponseParser.ClientErrorCodeHeaderName, new OpenApiHeader
+                {
+                    Description = "Additional error code to handle the error on the client",
+                    Schema = PrimitiveTypeMap[PrimitiveDataType.Int16]()
+                });
+            }
+
+            if (errorResponse.ErrorDescription != null)
+            {
+                response.Headers.Add(HttpErrorResponseParser.ClientErrorDescriptionHeaderName, new OpenApiHeader
+                {
+                    Description = "A mesage describing the cause of the error",
+                    Schema = PrimitiveTypeMap[PrimitiveDataType.String]()
+                });
+                const string mimeType = "text/plain";
+                response.Content.Add(mimeType, new OpenApiMediaType { Schema = PrimitiveTypeMap[PrimitiveDataType.String]() });
+            }
+
+            operation.Responses.Add(errorResponse.StatusCode.ToString(), response);
         }
 
         private static OpenApiResponse CreateResponse(OpenApiDocument document, HttpStatusCode statusCode, TypeReference typeReference, string rootNamespace, ISchemaRegistry schemaRegistry)

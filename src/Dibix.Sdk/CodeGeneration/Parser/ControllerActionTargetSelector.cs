@@ -111,6 +111,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, lineInfo.LineNumber, lineI
                 resultType = ReflectionTypeResolver.ResolveType(method.ReturnType, filePath, lineInfo.LineNumber, lineInfo.LinePosition, this._schemaRegistry);
 
             NeighborActionTarget target = new NeighborActionTarget(method.DeclaringType.FullName, resultType, method.Name);
+            method.CollectErrorResponses((statusCode, errorCode, errorDescription) => target.ErrorResponses.Add(new ErrorResponse(statusCode, errorCode, errorDescription)));
 
             foreach (ParameterInfo parameter in parameters)
             {

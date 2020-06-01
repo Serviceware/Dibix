@@ -88,9 +88,15 @@ namespace Dibix.Sdk.CodeGeneration
                     methodName = $"{methodName}Async";
 
                 string resultTypeName = methodReturnTypeMap[statement];
+
+                IEnumerable<string> annotations = statement.ErrorResponses.Select(x => $"ErrorResponse(statusCode: {x.StatusCode}, errorCode: {x.ErrorCode}, errorDescription: \"{x.ErrorDescription}\")");
+                if (statement.ErrorResponses.Any())
+                    context.AddUsing("Dibix.Http");
+
                 CSharpMethod method = @class.AddMethod(name: methodName
                                                      , type: resultTypeName
                                                      , body: GenerateMethodBody(statement, context)
+                                                     , annotations: annotations
                                                      , isExtension: true
                                                      , modifiers: CSharpModifiers.Public | CSharpModifiers.Static);
                 method.AddParameter("databaseAccessorFactory", "IDatabaseAccessorFactory");

@@ -12,7 +12,7 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
         private readonly bool _isExtension;
         private readonly CSharpModifiers _modifiers;
 
-        public CSharpMethod(string name, string returnType, string body, bool isExtension, CSharpModifiers modifiers)
+        public CSharpMethod(string name, string returnType, string body, bool isExtension, CSharpModifiers modifiers, IEnumerable<string> annotations) : base(annotations)
         {
             this._name = name;
             this._returnType = returnType;

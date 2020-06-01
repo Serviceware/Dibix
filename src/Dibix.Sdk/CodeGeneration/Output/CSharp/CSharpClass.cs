@@ -41,9 +41,10 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             return ctor;
         }
 
-        public CSharpMethod AddMethod(string name, string type, string body, bool isExtension = false, CSharpModifiers modifiers = CSharpModifiers.Public)
+        public CSharpMethod AddMethod(string name, string type, string body, bool isExtension = false, CSharpModifiers modifiers = CSharpModifiers.Public) => this.AddMethod(name, type, body, Enumerable.Empty<string>(), isExtension, modifiers);
+        public CSharpMethod AddMethod(string name, string type, string body, IEnumerable<string> annotations, bool isExtension = false, CSharpModifiers modifiers = CSharpModifiers.Public)
         {
-            CSharpMethod method = new CSharpMethod(name, type, body, isExtension, modifiers);
+            CSharpMethod method = new CSharpMethod(name, type, body, isExtension, modifiers, annotations);
             this._members.Add(method);
             return method;
         }

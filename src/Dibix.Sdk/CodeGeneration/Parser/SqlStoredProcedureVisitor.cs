@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using Dibix.Http;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
@@ -21,6 +23,8 @@ namespace Dibix.Sdk.CodeGeneration
 
             foreach (ProcedureParameter parameter in node.Parameters)
                 this.ParseParameter(parameter);
+
+            this.ParseErrorResponses(node.StatementList);
 
             base.ExplicitVisit(node);
         }
@@ -57,7 +61,7 @@ namespace Dibix.Sdk.CodeGeneration
         private TypeReference ParseParameterType(string parameterName, DeclareVariableElement parameter, IEnumerable<SqlHint> hints)
         {
             bool isNullable = parameter.Nullable?.Nullable ?? false;
-            return parameter.DataType.ToTypeReference(isNullable, parameterName, this.Target.Namespace, this.Target.Source, hints, base.TypeResolver, base.Logger, out string udtName);
+            return parameter.DataType.ToTypeReference(isNullable, parameterName, this.Target.Namespace, this.Target.Source, hints, base.TypeResolver, base.Logger, out _);
         }
 
         private void ParseParameterObfuscate(TSqlFragment parameter, SqlQueryParameter target, IEnumerable<SqlHint> hints)
@@ -226,6 +230,35 @@ DataType: {target.Type.GetType()}");
                 statementList = beginEndBlock.StatementList;
 
             this.Target.Content = this.Formatter.Format(this.Target, statementList);
+        }
+
+        private void ParseErrorResponses(TSqlFragment body)
+        {
+            ThrowVisitor visitor = new ThrowVisitor();
+            body.Accept(visitor);
+
+            this.Target.ErrorResponses.AddRange(visitor.ErrorResponses);
+        }
+        #endregion
+
+        #region Nested Types
+        private sealed class ThrowVisitor : TSqlFragmentVisitor
+        {
+            public ICollection<ErrorResponse> ErrorResponses { get; } = new Collection<ErrorResponse>();
+
+            public override void Visit(ThrowStatement node)
+            {
+                string errorMessage = String.Empty;
+                if (node.Message is StringLiteral literal)
+                    errorMessage = literal.Value;
+
+                if (node.ErrorNumber is Literal errorNumberLiteral
+                 && Int32.TryParse(errorNumberLiteral.Value, out int errorNumber)
+                 && HttpErrorResponseParser.TryParseErrorResponse(ref errorMessage, errorNumber, out int statusCode, out int errorCode))
+                {
+                    this.ErrorResponses.Add(new ErrorResponse(statusCode, errorCode, errorMessage));
+                }
+            }
         }
         #endregion
     }

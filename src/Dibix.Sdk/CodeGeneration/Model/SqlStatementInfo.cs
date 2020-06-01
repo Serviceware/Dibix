@@ -20,11 +20,13 @@ namespace Dibix.Sdk.CodeGeneration
         public TypeReference ResultType { get; set; }
         public IList<SqlQueryParameter> Parameters { get; }
         public IList<SqlQueryResult> Results { get; }
+        public ICollection<ErrorResponse> ErrorResponses { get; }
 
         public SqlStatementInfo() 
         {
             this.Parameters = new Collection<SqlQueryParameter>();
             this.Results = new Collection<SqlQueryResult>();
+            this.ErrorResponses = new Collection<ErrorResponse>();
         }
     }
 }
