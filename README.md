@@ -379,6 +379,39 @@ Once you have created all the necessary artifacts, you can build the database pr
 As of right now Dibix itself does not contain a runtime implementation for the web server. So again, please check if there is any existing documentation in the product you are working on or ask [me](mailto:tommy.lohse@helpline.de) for assistance.
 
 ## Syntax reference
+### HTTP status code
+By default Dibix endpoints return [200 OK](https://httpstatuses.com/200) for operations that have a result and [204 NoContent](https://httpstatuses.com/204) for those that do not return a result.<br />
+However sometimes you need to return a different HTTP status code, for example to indicate that the request is invalid. 
+Ideally you could return a different response body along with a specific HTTP status code, however this is not an easy task and gets very complex with the current way how response types are declared and also validated with the according T-SQL output statements.<br />
+Therefore currently it's only possible to return a custom status code (supported are currently some client and some server errors) and an additional error code along with a message. Both are returned as custom HTTP response headers. 
+
+To return an error response, use the T-SQL [THROW](https://docs.microsoft.com/en-us/sql/t-sql/language-elements/throw-transact-sql) statement
+#### 4xx client error (Supported: [400](https://httpstatuses.com/400), [404](https://httpstatuses.com/404), [409](https://httpstatuses.com/409), [422](https://httpstatuses.com/422))
+##### SQL
+```sql
+THROW 404017, N'Service not available', 1
+```
+The error code of the THROW statement is used to indicate the HTTP status code (first three digits) and a custom error code (last three digits) for the application/feature, which can be used for custom handling or resolve a translation for the error message on the client.<br />
+##### HTTP response
+``` http
+HTTP/1.1 404 Not Found
+X-Error-Code: 17
+X-Error-Description: Service not available
+```
+
+#### 5xx server error (Supported: [504](https://httpstatuses.com/504))
+For server errors, custom error codes are not supported, since they quite possibly cannot be fixed/handled by the client and could also disclose sensitive information.<br />
+##### SQL
+```sql
+THROW 504000, N'Request with id '' + @id + '' timed out', 1
+```
+##### HTTP response
+``` http
+HTTP/1.1 504 Gateway Timeout
+```
+
+---
+
 If you read until here, you are entering a dead end, meaning a totally incomplete section. Sorry.
 
 ### Stored procedure
@@ -431,5 +464,3 @@ This is the overall goal, which drives the whole project, since the idea at the 
 - [ ] Make it work with NuGet (see [above](#configuring-the-project))
 - [x] Complete [OpenAPI](https://github.com/OAI/OpenAPI-Specification) generator<br />
 Right now a JSON and YAML file is generated for each project. It's not published to an output folder yet and can be found in the intermediate folder of the project (`obj\Debug`). The document itself is not yet completed and can currently only be consumed for contract generation (components.schemas).
-- [ ] Return different responses for each HTTP status code<br />
-When designing RESTful APIs, it is sometimes required that an endpoint returns a more meaningful response to the client, when validation fails, for example. This is currently only possible with throwing exceptions that result in 500.

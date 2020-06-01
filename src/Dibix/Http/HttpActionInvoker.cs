@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -9,7 +10,19 @@ namespace Dibix.Http
 {
     public static class HttpActionInvoker
     {
-        private const int MinimumSqlThrowErrorNumber = 50000;
+        private const string ClientErrorCodeHeaderName = "X-Error-Code";
+        private const string ClientErrorDescriptionHeaderName = "X-Error-Description";
+        private static readonly int[] ClientErrorHttpStatuses =
+        {
+            (int)HttpStatusCode.BadRequest                 // Client syntax error (malformed request)
+          , (int)HttpStatusCode.NotFound                   // Feature not available/configured
+          , (int)HttpStatusCode.Conflict                   // Locks (might resolve by retry)
+          , 422 //(int)HttpStatusCode.UnprocessableEntity  // Client semantic error (schema error/validation)
+        };
+        private static readonly int[] ServerErrorHttpStatuses =
+        {
+            (int)HttpStatusCode.GatewayTimeout  // External service did not respond in time
+        };
 
         public static async Task<object> Invoke
         (
@@ -32,26 +45,50 @@ namespace Dibix.Http
             catch (DatabaseAccessException exception) when (exception.InnerException is SqlException sqlException)
             {
                 // Sample:
-                // THROW 50403, N'Web shop not licensed', 1
-                // Returns HttpStatusCode.Forbidden [403]
-                if (TryGetHttpStatusCode(sqlException.Number, out HttpStatusCode statusCode))
-                    return request.CreateResponse(statusCode);
+                // THROW 404017, N'Feature not configured', 1
+                // 404017 => 404 17 => HttpStatusCode.NotFound (ResultCode: 17) - ResultCode can be a more specific application/feature error code
+                // 
+                // HTTP/1.1 404 NotFound
+                // X-Result-Code: 17
+                if (TryParseValidationResponse(sqlException.Number, sqlException.Message, request, out HttpResponseMessage response))
+                    return response;
 
                 throw;
             }
         }
 
-        private static bool TryGetHttpStatusCode(int errorNumber, out HttpStatusCode statusCode)
+        private static bool TryParseValidationResponse(int errorNumber, string errorDescription, HttpRequestMessage request, out HttpResponseMessage response)
         {
-            int statusCodeNumber = errorNumber - MinimumSqlThrowErrorNumber;
-            if (Enum.IsDefined(typeof(HttpStatusCode), statusCodeNumber))
+            response = null;
+            if (errorNumber == 0)
+                return false;
+
+            const int expectedDigitLength = 6;
+            int length = (int)Math.Log10(Math.Abs(errorNumber)) + 1;
+            if (length != expectedDigitLength)
+                return false;
+
+            int httpStatusCode = errorNumber / 1000;
+            int errorCode = errorNumber % 1000;
+
+            bool isServerError = ServerErrorHttpStatuses.Contains(httpStatusCode) && errorCode == 0;
+            bool isClientError = ClientErrorHttpStatuses.Contains(httpStatusCode);
+
+            if (!isServerError && !isClientError)
+                return false;
+
+            response = request.CreateResponse((HttpStatusCode)httpStatusCode);
+
+            if (isClientError)
             {
-                statusCode = (HttpStatusCode)statusCodeNumber;
-                return true;
+                if (errorCode != 0)
+                    response.Headers.Add(ClientErrorCodeHeaderName, errorCode.ToString());
+                
+                response.Headers.Add(ClientErrorDescriptionHeaderName, errorDescription);
+                response.Content = new StringContent(errorDescription);
             }
 
-            statusCode = default;
-            return false;
+            return true;
         }
     }
 }
