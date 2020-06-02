@@ -248,19 +248,23 @@ namespace Dibix.Sdk.OpenApi
             if (!(action.Target is GeneratedAccessorMethodTarget generatedAccessorActionTarget))
                 return;
             
-            foreach (ErrorResponse errorResponse in generatedAccessorActionTarget.ErrorResponses.DistinctBy(x => x.StatusCode))
+            foreach (var errorResponseGroup in generatedAccessorActionTarget.ErrorResponses.GroupBy(x => new { x.StatusCode, x.IsClientError }))
             {
-                AppendErrorResponse(document, operation, errorResponse, rootNamespace, schemaRegistry);
+                AppendErrorResponse(document, operation, errorResponseGroup.Key.StatusCode, errorResponseGroup.Key.IsClientError, errorResponseGroup.ToArray(), rootNamespace, schemaRegistry);
             }
         }
 
-        private static void AppendErrorResponse(OpenApiDocument document, OpenApiOperation operation, ErrorResponse errorResponse, string rootNamespace, ISchemaRegistry schemaRegistry)
+        private static void AppendErrorResponse(OpenApiDocument document, OpenApiOperation operation, int statusCode, bool isClientError, ICollection<ErrorResponse> errorResponses, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
-            OpenApiResponse response = CreateResponse(document, (HttpStatusCode)errorResponse.StatusCode, null, rootNamespace, schemaRegistry);
+            OpenApiResponse response = CreateResponse(document, (HttpStatusCode)statusCode, null, rootNamespace, schemaRegistry);
 
-            if (errorResponse.IsClientError)
+            if (isClientError)
             {
-                if (errorResponse.ErrorCode != 0)
+                response.Description = $@"{HttpErrorResponseParser.ClientErrorCodeHeaderName}|{HttpErrorResponseParser.ClientErrorDescriptionHeaderName}
+-|-
+{String.Join(Environment.NewLine, errorResponses.Select(x => $"{(x.ErrorCode != 0 ? x.ErrorCode.ToString() : "n/a")}|{x.ErrorDescription}"))}";
+
+                if (errorResponses.Any(x => x.ErrorCode != 0))
                 {
                     response.Headers.Add(HttpErrorResponseParser.ClientErrorCodeHeaderName, new OpenApiHeader
                     {
@@ -269,7 +273,7 @@ namespace Dibix.Sdk.OpenApi
                     });
                 }
 
-                if (!String.IsNullOrEmpty(errorResponse.ErrorDescription))
+                if (errorResponses.Any(x => !String.IsNullOrEmpty(x.ErrorDescription)))
                 {
                     response.Headers.Add(HttpErrorResponseParser.ClientErrorDescriptionHeaderName, new OpenApiHeader
                     {
@@ -281,7 +285,7 @@ namespace Dibix.Sdk.OpenApi
                 }
             }
 
-            operation.Responses.Add(errorResponse.StatusCode.ToString(), response);
+            operation.Responses.Add(statusCode.ToString(), response);
         }
 
         private static OpenApiResponse CreateResponse(OpenApiDocument document, HttpStatusCode statusCode, TypeReference typeReference, string rootNamespace, ISchemaRegistry schemaRegistry)
