@@ -344,6 +344,22 @@ $(_SqlReferencePath)" />
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
     </Copy>
 
+    <!-- Publish docs -->
+    <ItemGroup>
+      <_DocsFiles Include="$(AreaName).yml" />
+      <_DocsFiles Include="$(AreaName).json" />
+
+      <_DocsFiles>
+        <SourcePath>$(IntermediateOutputPath)%(Filename)%(Extension)</SourcePath>
+        <TargetPath Condition="$(DocsDir) != ''">$(DocsDir)$([System.String]::Copy('%(Extension)').TrimStart('.'))\%(Filename)%(Extension)</TargetPath>
+      </_DocsFiles>
+
+      <_DocsSources Include="@(_DocsFiles->'%(SourcePath)')" Condition="$(DocsDir) != '' AND Exists('%(SourcePath)')" />
+      <_DocsTargets Include="@(_DocsSources->'%(TargetPath)')" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_DocsSources)"
+          DestinationFiles="@(_DocsTargets)" />
+
     <!-- Client assembly info & DLL generation -->
     <PropertyGroup Condition="'$(ClientOutputName)' != ''">
       <_ClientAssemblyInfoFile>$(_ClientIntermediateFilePathNoExt)_AssemblyInfo.cs</_ClientAssemblyInfoFile>
