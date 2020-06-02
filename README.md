@@ -383,7 +383,7 @@ As of right now Dibix itself does not contain a runtime implementation for the w
 By default Dibix endpoints return [200 OK](https://httpstatuses.com/200) for operations that have a result and [204 NoContent](https://httpstatuses.com/204) for those that do not return a result.<br />
 However sometimes you need to return a different HTTP status code, for example to indicate that the request is invalid. 
 Ideally you could return a different response body along with a specific HTTP status code, however this is not an easy task and gets very complex with the current way how response types are declared and also validated with the according T-SQL output statements.<br />
-Therefore currently it's only possible to return a custom status code (supported are currently some client and some server errors) and an additional error code along with a message. Both are returned as custom HTTP response headers. 
+Therefore currently it's only possible to return a specific HTTP status code (supported are currently some client and some server errors) along with an additional error code and a message, both which are returned as custom HTTP response headers. 
 
 To return an error response, use the T-SQL [THROW](https://docs.microsoft.com/en-us/sql/t-sql/language-elements/throw-transact-sql) statement
 #### 4xx client error (Supported: [400](https://httpstatuses.com/400), [404](https://httpstatuses.com/404), [409](https://httpstatuses.com/409), [422](https://httpstatuses.com/422))
