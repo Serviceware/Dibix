@@ -27,7 +27,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public static bool IsDatabaseAccessor(this Type type) => type.CustomAttributes.Any(x => x.AttributeType.FullName == "Dibix.DatabaseAccessorAttribute");
 
-        public static void CollectErrorResponses(this MethodInfo method, Action<int, int, string> errorResponseMatchHandler)
+        public static void CollectErrorResponses(this MethodInfo method, Action<int, int, string, bool> errorResponseMatchHandler)
         {
             foreach (CustomAttributeData attribute in method.GetCustomAttributesData())
             {
@@ -37,7 +37,8 @@ namespace Dibix.Sdk.CodeGeneration
                 int statusCode = (int)attribute.ConstructorArguments[0].Value;
                 int errorCode = (int)attribute.ConstructorArguments[1].Value;
                 string errorDescription = (string)attribute.ConstructorArguments[2].Value;
-                errorResponseMatchHandler(statusCode, errorCode, errorDescription);
+                bool isClientError = (bool)attribute.ConstructorArguments[3].Value;
+                errorResponseMatchHandler(statusCode, errorCode, errorDescription, isClientError);
             }
         }
 

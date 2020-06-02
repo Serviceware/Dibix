@@ -89,7 +89,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                 string resultTypeName = methodReturnTypeMap[statement];
 
-                IEnumerable<string> annotations = statement.ErrorResponses.Select(x => $"ErrorResponse(statusCode: {x.StatusCode}, errorCode: {x.ErrorCode}, errorDescription: \"{x.ErrorDescription}\")");
+                IEnumerable<string> annotations = statement.ErrorResponses.Select(x => $"ErrorResponse(statusCode: {x.StatusCode}, errorCode: {x.ErrorCode}, errorDescription: \"{x.ErrorDescription}\", isClientError: {x.IsClientError.ToString().ToLowerInvariant()})");
                 if (statement.ErrorResponses.Any())
                     context.AddUsing("Dibix.Http");
 

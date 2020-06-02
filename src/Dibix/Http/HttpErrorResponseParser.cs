@@ -21,13 +21,11 @@ namespace Dibix.Http
             (int)HttpStatusCode.GatewayTimeout  // External service did not respond in time
         };
 
-        public static bool TryParseErrorResponse(ref string errorMessage, int errorNumber, out int statusCode, out int errorCode)
+        public static bool TryParseErrorResponse(int errorNumber, out int statusCode, out int errorCode, out bool isClientError)
         {
-            string originalErrorMessage = errorMessage;
-
-            errorMessage = null;
             statusCode = 0;
             errorCode = 0;
+            isClientError = false;
             if (errorNumber == 0)
                 return false;
 
@@ -36,26 +34,13 @@ namespace Dibix.Http
             if (length != expectedDigitLength)
                 return false;
 
-            int parsedStatusCode = errorNumber / 1000;
-            int parsedErrorCode = errorNumber % 1000;
+            statusCode = errorNumber / 1000;
+            errorCode = errorNumber % 1000;
 
-            bool isServerError = ServerErrorHttpStatuses.Contains(parsedStatusCode) && errorCode == 0;
-            bool isClientError = ClientErrorHttpStatuses.Contains(parsedStatusCode);
+            bool isServerError = ServerErrorHttpStatuses.Contains(statusCode) && errorCode == 0;
+            isClientError = ClientErrorHttpStatuses.Contains(statusCode);
 
-            if (!isServerError && !isClientError)
-                return false;
-
-            statusCode = parsedStatusCode;
-
-            if (isClientError)
-            {
-                if (parsedErrorCode != 0)
-                    errorCode = parsedErrorCode;
-
-                errorMessage = originalErrorMessage;
-            }
-
-            return true;
+            return isServerError || isClientError;
         }
     }
 }

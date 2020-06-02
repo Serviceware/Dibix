@@ -258,24 +258,27 @@ namespace Dibix.Sdk.OpenApi
         {
             OpenApiResponse response = CreateResponse(document, (HttpStatusCode)errorResponse.StatusCode, null, rootNamespace, schemaRegistry);
 
-            if (errorResponse.ErrorCode != 0)
+            if (errorResponse.IsClientError)
             {
-                response.Headers.Add(HttpErrorResponseParser.ClientErrorCodeHeaderName, new OpenApiHeader
+                if (errorResponse.ErrorCode != 0)
                 {
-                    Description = "Additional error code to handle the error on the client",
-                    Schema = PrimitiveTypeMap[PrimitiveDataType.Int16]()
-                });
-            }
+                    response.Headers.Add(HttpErrorResponseParser.ClientErrorCodeHeaderName, new OpenApiHeader
+                    {
+                        Description = "Additional error code to handle the error on the client",
+                        Schema = PrimitiveTypeMap[PrimitiveDataType.Int16]()
+                    });
+                }
 
-            if (errorResponse.ErrorDescription != null)
-            {
-                response.Headers.Add(HttpErrorResponseParser.ClientErrorDescriptionHeaderName, new OpenApiHeader
+                if (!String.IsNullOrEmpty(errorResponse.ErrorDescription))
                 {
-                    Description = "A mesage describing the cause of the error",
-                    Schema = PrimitiveTypeMap[PrimitiveDataType.String]()
-                });
-                const string mimeType = "text/plain";
-                response.Content.Add(mimeType, new OpenApiMediaType { Schema = PrimitiveTypeMap[PrimitiveDataType.String]() });
+                    response.Headers.Add(HttpErrorResponseParser.ClientErrorDescriptionHeaderName, new OpenApiHeader
+                    {
+                        Description = "A mesage describing the cause of the error",
+                        Schema = PrimitiveTypeMap[PrimitiveDataType.String]()
+                    });
+                    const string mimeType = "text/plain";
+                    response.Content.Add(mimeType, new OpenApiMediaType { Schema = PrimitiveTypeMap[PrimitiveDataType.String]() });
+                }
             }
 
             operation.Responses.Add(errorResponse.StatusCode.ToString(), response);

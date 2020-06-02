@@ -35,32 +35,33 @@ namespace Dibix.Http
                 // 
                 // HTTP/1.1 404 NotFound
                 // X-Result-Code: 17
-                if (TryParseValidationResponse(sqlException.Number, sqlException.Message, request, out HttpResponseMessage response))
-                    return response;
+                if (TryParseHttpError(sqlException, request, out HttpRequestExecutionException httpException))
+                    throw httpException;
 
                 throw;
             }
         }
 
-        private static bool TryParseValidationResponse(int errorNumber, string errorDescription, HttpRequestMessage request, out HttpResponseMessage response)
+        private static bool TryParseHttpError(SqlException sqlException, HttpRequestMessage request, out HttpRequestExecutionException exception)
         {
-            if (!HttpErrorResponseParser.TryParseErrorResponse(ref errorDescription, errorNumber, out int statusCode, out int errorCode))
+            if (!HttpErrorResponseParser.TryParseErrorResponse(sqlException.Number, out int statusCode, out int errorCode, out bool isClientError))
             {
-                response = null;
+                exception = null;
                 return false;
             }
 
-            response = request.CreateResponse((HttpStatusCode)statusCode);
+            HttpResponseMessage errorResponse = request.CreateResponse((HttpStatusCode)statusCode);
 
-            if (errorCode != 0)
-                response.Headers.Add(HttpErrorResponseParser.ClientErrorCodeHeaderName, errorCode.ToString());
-
-            if (!String.IsNullOrEmpty(errorDescription))
+            if (isClientError)
             {
-                response.Headers.Add(HttpErrorResponseParser.ClientErrorDescriptionHeaderName, errorDescription);
-                response.Content = new StringContent(errorDescription);
+                if (errorCode != 0)
+                    errorResponse.Headers.Add(HttpErrorResponseParser.ClientErrorCodeHeaderName, errorCode.ToString());
+
+                errorResponse.Headers.Add(HttpErrorResponseParser.ClientErrorDescriptionHeaderName, sqlException.Message);
+                errorResponse.Content = new StringContent(sqlException.Message);
             }
 
+            exception = new HttpRequestExecutionException(errorResponse, isClientError, sqlException);
             return true;
         }
     }

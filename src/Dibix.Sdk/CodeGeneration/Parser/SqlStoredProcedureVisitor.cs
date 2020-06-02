@@ -254,9 +254,9 @@ DataType: {target.Type.GetType()}");
 
                 if (node.ErrorNumber is Literal errorNumberLiteral
                  && Int32.TryParse(errorNumberLiteral.Value, out int errorNumber)
-                 && HttpErrorResponseParser.TryParseErrorResponse(ref errorMessage, errorNumber, out int statusCode, out int errorCode))
+                 && HttpErrorResponseParser.TryParseErrorResponse(errorNumber, out int statusCode, out int errorCode, out bool isClientError))
                 {
-                    this.ErrorResponses.Add(new ErrorResponse(statusCode, errorCode, errorMessage));
+                    this.ErrorResponses.Add(new ErrorResponse(statusCode, errorCode, errorMessage, isClientError));
                 }
             }
         }
