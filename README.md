@@ -410,6 +410,40 @@ THROW 504000, N'Request with id '' + @id + '' timed out', 1
 HTTP/1.1 504 Gateway Timeout
 ```
 
+### Builtin parameter source providers
+This section describes known parameter sources that are already registered and can help to dynamically map a stored procedure parameter from. They are used in the [endpoint definition json](#http-endpoints) and are accessible within the parameter configuration.
+#### BODY
+This source provides access to the properties on a JSON object supplied in the body. It requires the body property to be set on the action definition to specify the expected contract of the body.
+
+Sample:
+```json
+{
+  "Person": [
+    {
+      "method": "POST",
+      "target": "CreatePerson",
+      "body": "CreatePersonRequest",
+      "params": {
+        "accessrights": "BODY.Rights"
+      }
+    }
+  ]
+}
+```
+
+#### REQUEST
+This source provides access to the HTTP request. It supports the following properties:
+PropertyName|Type|Value
+-|-|-
+Language|string|The value provided in the `Accept-Language` header
+
+#### ENV
+This source provides access to the server environment. It supports the following properties:
+PropertyName|Type|Value
+-|-|-
+MachineName|string|The value of [`System.Environment.MachineName`](https://docs.microsoft.com/en-us/dotnet/api/system.environment.machinename)
+CurrentProcessId|int|The value of [`System.Diagnostics.Process.GetCurrentProcess()`](https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.process.getcurrentprocess)[`.Id`](https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.process.id)
+
 ---
 
 If you read until here, you are entering a dead end, meaning a totally incomplete section. Sorry.
