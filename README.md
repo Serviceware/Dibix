@@ -386,7 +386,16 @@ Ideally you could return a different response body along with a specific HTTP st
 Therefore currently it's only possible to return a specific HTTP status code (supported are currently some client and some server errors) along with an additional error code and a message, both which are returned as custom HTTP response headers. 
 
 To return an error response, use the T-SQL [THROW](https://docs.microsoft.com/en-us/sql/t-sql/language-elements/throw-transact-sql) statement
-#### 4xx client error (Supported: [400](https://httpstatuses.com/400), [404](https://httpstatuses.com/404), [409](https://httpstatuses.com/409), [422](https://httpstatuses.com/422))
+#### 4xx client error
+Supported:
+Code|Name|Sample use cases
+-|-|-
+[400](https://httpstatuses.com/400)|BadRequest|Client syntax error (malformed request)
+[403](https://httpstatuses.com/403)|Forbidden|The authorized user is not allowed to access the current resource
+[404](https://httpstatuses.com/404)|NotFound|Resource with given ID not found, Feature not available/configured
+[409](https://httpstatuses.com/409)|Conflict|The resource is currently locked by another request (might resolve by retry)
+[422](https://httpstatuses.com/422)|UnprocessableEntity|The client content was not accepted because of a semantic error (i.E. schema validation)
+
 ##### SQL
 ```sql
 THROW 404017, N'Service not available', 1
@@ -401,6 +410,12 @@ X-Error-Description: Service not available
 
 #### 5xx server error (Supported: [504](https://httpstatuses.com/504))
 For server errors, custom error codes are not supported, since they quite possibly cannot be fixed/handled by the client and could also disclose sensitive information.<br />
+
+Supported:
+Code|Name|Sample use cases
+-|-|-
+[504](https://httpstatuses.com/504)|GatewayTimeout|External service did not respond in time
+
 ##### SQL
 ```sql
 THROW 504000, N'Request with id '' + @id + '' timed out', 1

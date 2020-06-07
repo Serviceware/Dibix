@@ -12,9 +12,10 @@ namespace Dibix.Http
         private static readonly int[] ClientErrorHttpStatuses =
         {
             (int)HttpStatusCode.BadRequest                 // Client syntax error (malformed request)
-          , (int)HttpStatusCode.NotFound                   // Feature not available/configured
-          , (int)HttpStatusCode.Conflict                   // Locks (might resolve by retry)
-          , 422 //(int)HttpStatusCode.UnprocessableEntity  // Client semantic error (schema error/validation)
+          , (int)HttpStatusCode.Forbidden                  // The authorized user is not allowed to access the current resource
+          , (int)HttpStatusCode.NotFound                   // Resource with given ID not found, Feature not available/configured
+          , (int)HttpStatusCode.Conflict                   // The resource is currently locked by another request (might resolve by retry)
+          , 422 //(int)HttpStatusCode.UnprocessableEntity  // The client content was not accepted because of a semantic error (i.E. schema validation)
         };
         private static readonly int[] ServerErrorHttpStatuses =
         {
