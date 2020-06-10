@@ -9,7 +9,7 @@ namespace Dibix
         public static string Obfuscate(string input)
         {
             string obfuscated = Convert(input, 14);
-            string encoded = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(obfuscated));
+            string encoded = System.Convert.ToBase64String(Encoding.Unicode.GetBytes(obfuscated));
             return encoded;
         }
         #endregion
@@ -20,7 +20,7 @@ namespace Dibix
             if (input == null)
                 return null;
 
-            string decoded = Encoding.UTF8.GetString(System.Convert.FromBase64String(input));
+            string decoded = Encoding.Unicode.GetString(System.Convert.FromBase64String(input));
             string deobfuscated = Convert(decoded, -14);
             return deobfuscated;
         }
