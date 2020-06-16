@@ -83,7 +83,7 @@ namespace Dibix.Sdk.Cli
 
                             string[] parts = line.Substring(indentation).Split(new[] { ' ' }, 2);
                             if (parts.Length < 2)
-                                throw new InvalidOperationException($"Property metadata not specified in the format \"Key=Value\" ({i}): {line}");
+                                throw new InvalidOperationException($"Property metadata not specified in the format \"Key Value\" ({i}): {line}");
 
                             currentProperty.Values.Last().Add(parts[0], parts[1]);
                         }

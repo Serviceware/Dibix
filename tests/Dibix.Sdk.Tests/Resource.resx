@@ -2062,7 +2062,7 @@ namespace Dibix.Sdk.Tests
 {
 }</value>
   </data>
-  <data name="ObsoleteDataTypeSqlCodeAnalysisRule" xml:space="preserve">
+  <data name="UnsupportedDataTypeSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;errors&gt;
   &lt;error
@@ -2074,6 +2074,11 @@ namespace Dibix.Sdk.Tests
     ruleid="16"
     message="The data type 'IMAGE' is obsolete and should not be used"
     line="4"
+    column="14" /&gt;
+  &lt;error
+    ruleid="16"
+    message="Please use DATETIME instead of DATETIME2"
+    line="5"
     column="14" /&gt;
 &lt;/errors&gt;</value>
   </data>

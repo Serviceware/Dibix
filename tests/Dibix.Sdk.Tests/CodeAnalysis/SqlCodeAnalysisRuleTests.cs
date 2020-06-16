@@ -50,7 +50,7 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
         public void InsertWithoutColumnSpecificationSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
-        public void ObsoleteDataTypeSqlCodeAnalysisRule() => this.Execute();
+        public void UnsupportedDataTypeSqlCodeAnalysisRule() => this.Execute();
 
         [Fact]
         public void NamingConventionSqlCodeAnalysisRule() => this.Execute();

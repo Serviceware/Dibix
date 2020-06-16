@@ -74,8 +74,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
           , ["PK_hlsyswrkeffrtprtyrle(id)"] = "58760f4b36184809fd3d859384763b33"
           , ["PK_hltmtablecfgcolumn(tablecfgcolumnid)"] = "f7d4530a07d587aa9ba07e2e66dbff30"
           , ["PK_hltmtablecfgextcolumn(tablecfgcolumnid)"] = "7e8454d5180cf364dc059b4cb652d87d"
-          , ["PK_hltmtaskerroritem(id)"] = "f121c1491a3806984525e47396536d30"
-          , ["PK_hltmtaskreport(id)"] = "40707ef1ae1195933f625e0466d5d18d"
+          , ["PK_hltmtaskerroritem(id)"] = "7e3f1c0c8ecebf0c08af85d1fa6ee427"
+          , ["PK_hltmtaskreport(id)"] = "0e770dcc99db36d60bc19b67f95fcf36"
         };
 
         protected override string ErrorMessageTemplate => "{0}";
