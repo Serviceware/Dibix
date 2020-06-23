@@ -16,7 +16,7 @@ namespace Dibix.Sdk.CodeGeneration
             for (int i = 0; i < statements.Count; i++)
             {
                 TSqlStatement statement = statements[i];
-                int startIndex = statement.FirstTokenIndex;
+                int startIndex = statement.GetFirstTokenIndex();
                 int endIndex = statement.LastTokenIndex;
                 for (int j = startIndex; j <= endIndex; j++)
                 {

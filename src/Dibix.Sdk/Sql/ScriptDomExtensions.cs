@@ -14,7 +14,7 @@ namespace Dibix.Sdk.Sql
         public static string Dump(this TSqlFragment fragment)
         {
             StringBuilder sb = new StringBuilder();
-            for (int i = fragment.FirstTokenIndex; i <= fragment.LastTokenIndex; i++)
+            for (int i = fragment.GetFirstTokenIndex(); i <= fragment.LastTokenIndex; i++)
                 sb.Append(fragment.ScriptTokenStream[i].Text);
 
             return sb.ToString();
@@ -28,11 +28,26 @@ namespace Dibix.Sdk.Sql
             return ScriptDomFacade.Generate(fragment);
         }
 
-        public static IEnumerable<TSqlParserToken> AsEnumerable(this TSqlFragment fragment) => AsEnumerable(fragment, fragment.FirstTokenIndex);
+        public static IEnumerable<TSqlParserToken> AsEnumerable(this TSqlFragment fragment) => AsEnumerable(fragment, fragment.GetFirstTokenIndex());
         public static IEnumerable<TSqlParserToken> AsEnumerable(this TSqlFragment fragment, int startIndex)
         {
             for (int i = startIndex; i <= fragment.LastTokenIndex; i++)
                 yield return fragment.ScriptTokenStream[i];
+        }
+
+        // For 'END CONVERSATION @conversationhandle' the start index of the variable is returned, which is wrong and sounds like a bug in ScriptDom
+        public static int GetFirstTokenIndex(this TSqlFragment fragment)
+        {
+            if (fragment is EndConversationStatement && fragment.ScriptTokenStream[fragment.FirstTokenIndex].TokenType != TSqlTokenType.End)
+            {
+                for (int i = fragment.FirstTokenIndex; i >= 0; i--)
+                {
+                    if (fragment.ScriptTokenStream[i].TokenType == TSqlTokenType.End)
+                        return i;
+                }
+                throw new InvalidOperationException("Could not determine correct FirstTokenIndex of EndConversationStatement");
+            }
+            return fragment.FirstTokenIndex;
         }
 
         public static Identifier GetName(this ColumnReferenceExpression column) => column.MultiPartIdentifier?.Identifiers.Last();
