@@ -64,8 +64,17 @@ namespace Dibix
         }
 
         T IMultipleResultReader.ReadSingleOrDefault<T>() => this.ReadSingleOrDefault<T>().PostProcess();
+
+        // AI (GetConfiguration)
+        public TReturn ReadSingleOrDefault<TReturn, TSecond>(string splitOn) where TReturn : new()
+        {
+            MultiMapper multiMapper = new MultiMapper();
+            return this.ReadMany<TReturn, TSecond, TReturn>((a, b) => multiMapper.MapRow<TReturn>(false, a, b), splitOn)
+                       .PostProcess(multiMapper)
+                       .SingleOrDefault();
+        }
         #endregion
-        
+
         #region Abstract Methods
         protected abstract IEnumerable<T> ReadMany<T>();
 
