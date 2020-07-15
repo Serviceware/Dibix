@@ -15,7 +15,7 @@ namespace Dibix.Http
 
         public Expression GetInstanceValue(Type instanceType, ParameterExpression requestParameter, ParameterExpression argumentsParameter, ParameterExpression dependencyProviderParameter)
         {
-            ConstructorInfo constructor = typeof(RequestParameterSource).GetTypeInfo().GetConstructor(new[] { typeof(HttpRequestMessage) });
+            ConstructorInfo constructor = typeof(RequestParameterSource).GetConstructor(new[] { typeof(HttpRequestMessage) });
             return Expression.New(constructor, requestParameter);
         }
     }

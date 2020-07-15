@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 
 namespace Dibix
 {
@@ -11,8 +10,7 @@ namespace Dibix
             if (nullableType != null)
                 type = nullableType;
 
-            TypeInfo typeInfo = type.GetTypeInfo();
-            return typeInfo.IsPrimitive || typeInfo.IsEnum || type == typeof(string) || type == typeof(Guid) || type == typeof(DateTime);
+            return type.IsPrimitive || type.IsEnum || type == typeof(string) || type == typeof(Guid) || type == typeof(DateTime);
         }
     }
 }

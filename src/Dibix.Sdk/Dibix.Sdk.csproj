@@ -89,7 +89,7 @@
       <_DibixRuntimeProjectName>Dibix</_DibixRuntimeProjectName>
       <_DibixRuntimeProjectDir>..\$(_DibixRuntimeProjectName)\</_DibixRuntimeProjectDir>
       <_DibixRuntimeTargetFramework>net452</_DibixRuntimeTargetFramework>
-      <_DibixRuntimeXplatTargetFramework>netstandard1.5</_DibixRuntimeXplatTargetFramework>
+      <_DibixRuntimeXplatTargetFramework>netstandard2.0</_DibixRuntimeXplatTargetFramework>
       <_DibixRuntimePath>$(_DibixRuntimeProjectDir)bin\$(Configuration)\$(_DibixRuntimeTargetFramework)\$(_DibixRuntimeProjectName).dll</_DibixRuntimePath>
       <_DibixRuntimeXplatPath>$(_DibixRuntimeProjectDir)bin\$(Configuration)\$(_DibixRuntimeXplatTargetFramework)\$(_DibixRuntimeProjectName).dll</_DibixRuntimeXplatPath>
     </PropertyGroup>

@@ -4,8 +4,6 @@
     <AspNetWebApiVersion>5.2.3</AspNetWebApiVersion>
     <DapperVersion>1.50.5</DapperVersion>
     <DataAnnotationsVersion>4.7.0</DataAnnotationsVersion>
-    <DiagnosticsProcessVersion>4.3.0</DiagnosticsProcessVersion>
-    <ReflectionVersion>4.3.0</ReflectionVersion>
     <SqlClientVersion>4.5.1</SqlClientVersion>
 
     <!-- Sdk -->

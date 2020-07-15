@@ -55,14 +55,14 @@ namespace Dibix.Http
 
                 ICollection<Type> types = GetLoadableTypes(assembly).ToArray();
 
-                Type apiDescriptorType = types.FirstOrDefault(typeof(HttpApiDescriptor).GetTypeInfo().IsAssignableFrom);
+                Type apiDescriptorType = types.FirstOrDefault(typeof(HttpApiDescriptor).IsAssignableFrom);
                 HttpApiDescriptor descriptor = apiDescriptorType != null ? (HttpApiDescriptor)Activator.CreateInstance(apiDescriptorType) : new HttpApiRegistration(assembly);
                 descriptor.Configure();
                 yield return descriptor;
             }
         }
 
-        private static Assembly GetAssembly(HttpApiDescriptor descriptor) => descriptor is HttpApiRegistration registration ? registration.Assembly : descriptor.GetType().GetTypeInfo().Assembly;
+        private static Assembly GetAssembly(HttpApiDescriptor descriptor) => descriptor is HttpApiRegistration registration ? registration.Assembly : descriptor.GetType().Assembly;
         private static bool IsDeclarative(HttpApiDescriptor descriptor) => !(descriptor is HttpApiRegistration);
         #endregion
 

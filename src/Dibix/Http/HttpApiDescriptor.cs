@@ -54,7 +54,7 @@ namespace Dibix.Http
         #region Private Methods
         private string ResolveAreaName()
         {
-            Assembly assembly = this.GetType().GetTypeInfo().Assembly;
+            Assembly assembly = this.GetType().Assembly;
             return this.ResolveAreaName(assembly);
         }
         #endregion

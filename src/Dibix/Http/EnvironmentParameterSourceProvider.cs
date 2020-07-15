@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq.Expressions;
+using System.Net;
 
 namespace Dibix.Http
 {
@@ -20,7 +21,7 @@ namespace Dibix.Http
 
         public EnvironmentParameterSource()
         {
-            this.MachineName = Environment.MachineName;
+            this.MachineName = Dns.GetHostEntry(String.Empty).HostName;
             this.CurrentProcessId = Process.GetCurrentProcess().Id;
         }
     }

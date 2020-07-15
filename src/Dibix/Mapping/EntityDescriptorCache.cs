@@ -94,7 +94,7 @@ namespace Dibix
         private static EntityProperty BuildCollectionEntityProperty(PropertyInfo propertyInfo, Type collectionType)
         {
             Type entityType = collectionType.GenericTypeArguments[0];
-            return BuildEntityProperty(propertyInfo, entityType, true, (property, value) => Expression.Call(property, collectionType.GetTypeInfo().GetDeclaredMethod("Add"), value));
+            return BuildEntityProperty(propertyInfo, entityType, true, (property, value) => Expression.Call(property, collectionType.GetMethod("Add"), value));
         }
 
         private static EntityProperty BuildEntityProperty(PropertyInfo property, Type entityType, bool isCollection, Func<Expression, Expression, Expression> valueSetter)
@@ -141,7 +141,7 @@ namespace Dibix
             }
 
             // Indirect ICollection<T> property, i.E.: IList<T>
-            Type baseCollectionType = type.GetTypeInfo().ImplementedInterfaces.FirstOrDefault(IsCollectionType);
+            Type baseCollectionType = type.GetInterfaces().FirstOrDefault(IsCollectionType);
             if (baseCollectionType != null)
             {
                 collectionType = baseCollectionType;
@@ -153,7 +153,7 @@ namespace Dibix
             return false;
         }
 
-        private static bool IsCollectionType(Type type) => type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(ICollection<>);
+        private static bool IsCollectionType(Type type) => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ICollection<>);
 
         private static Delegate CompilePostProcessor(Type type, IDictionary<PropertyInfo, ICollection<IEntityPropertyFormatter>> formattableProperties)
         {

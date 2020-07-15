@@ -19,7 +19,7 @@ namespace Dibix.Http
 
         public static IHttpActionTarget Create(Type type, string methodName)
         {
-            MethodInfo method = type.GetTypeInfo().GetMethod(methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo method = type.GetMethod(methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
             if (method == null)
                 throw new InvalidOperationException($"Could not find a public static method named '{methodName}' on {type}");
 

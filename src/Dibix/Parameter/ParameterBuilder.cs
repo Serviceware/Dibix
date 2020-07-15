@@ -94,7 +94,7 @@ namespace Dibix
 
         private static Type NormalizeType(Type type)
         {
-            if (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
                 return Nullable.GetUnderlyingType(type);
 
             return type;

@@ -132,7 +132,7 @@ namespace Dibix.Http
             {
                 case HttpParameterPropertySource propertySource:
                     IHttpParameterSourceProvider sourceProvider = GetSourceProvider(propertySource.SourceName);
-                    bool isItemsParameter = typeof(StructuredType).GetTypeInfo().IsAssignableFrom(parameterType);
+                    bool isItemsParameter = typeof(StructuredType).IsAssignableFrom(parameterType);
                     if (!isItemsParameter)
                     {
                         IHttpParameterConverter converter = null;
@@ -162,14 +162,14 @@ namespace Dibix.Http
                 return HttpParameterInfo.Uri(contractParameter, parameterType, parameterName, isOptional);
 
             string sourcePropertyName = parameterName;
-            PropertyInfo sourceProperty = action.BodyContract.GetTypeInfo().GetProperty(sourcePropertyName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+            PropertyInfo sourceProperty = action.BodyContract.GetProperty(sourcePropertyName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
             if (sourceProperty == null)
                 return HttpParameterInfo.Uri(contractParameter, parameterType, parameterName, isOptional);
 
             sourcePropertyName = sourceProperty.Name;
             IHttpParameterSourceProvider sourceProvider = GetSourceProvider(BodyParameterSourceProvider.SourceName);
 
-            bool isItemsParameter = typeof(StructuredType).GetTypeInfo().IsAssignableFrom(parameterType);
+            bool isItemsParameter = typeof(StructuredType).IsAssignableFrom(parameterType);
             if (isItemsParameter)
                 return CollectItemsParameter(contractParameter, parameterType, parameterName, new HttpParameterPropertySource(BodyParameterSourceProvider.SourceName, sourcePropertyName, null), sourceProvider);
 
@@ -197,8 +197,8 @@ namespace Dibix.Http
 
         private static HttpParameterInfo CollectItemsParameter(ParameterInfo contractParameter, Type parameterType, string parameterName, HttpParameterPropertySource propertySource, IHttpParameterSourceProvider sourceProvider)
         {
-            string udtName = parameterType.GetTypeInfo().GetCustomAttribute<StructuredTypeAttribute>()?.UdtName;
-            MethodInfo addMethod = parameterType.GetTypeInfo().GetMethod("Add");
+            string udtName = parameterType.GetCustomAttribute<StructuredTypeAttribute>()?.UdtName;
+            MethodInfo addMethod = parameterType.GetMethod("Add");
             if (addMethod == null)
                 throw new InvalidOperationException($"Could not find 'Add' method on type: {parameterType}");
 
@@ -451,7 +451,7 @@ namespace Dibix.Http
 
             foreach (KeyValuePair<string, Expression> addMethodParameter in addMethodParameterValues.Where(x => x.Value == null).ToArray())
             {
-                PropertyInfo property = itemType.GetTypeInfo().GetProperty(addMethodParameter.Key, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                PropertyInfo property = itemType.GetProperty(addMethodParameter.Key, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
                 if (property == null)
                     throw new InvalidOperationException($@"Can not map UDT column: {parameter.Items.UdtName ?? parameter.ParameterType.ToString()}.{addMethodParameter.Key}
 Either create a mapping or make sure a property of the same name exists in the source: {parameter.Source.Name}.{parameter.Source.PropertyName}");
@@ -472,7 +472,7 @@ Either create a mapping or make sure a property of the same name exists in the s
 
         private static PropertyAccessor BuildDebugViewAccessor()
         {
-            PropertyInfo property = typeof(Expression).GetTypeInfo().GetProperty("DebugView", BindingFlags.Instance | BindingFlags.NonPublic);
+            PropertyInfo property = typeof(Expression).GetProperty("DebugView", BindingFlags.Instance | BindingFlags.NonPublic);
             return PropertyAccessor.Create(property);
         }
 
@@ -572,7 +572,7 @@ Either create a mapping or make sure a property of the same name exists in the s
 
         private static Type GetItemType(Type enumerableType)
         {
-            if (enumerableType.GetTypeInfo().GetInterfaces().All(x => x.GetGenericTypeDefinition() != typeof(IEnumerable<>)))
+            if (enumerableType.GetInterfaces().All(x => x.GetGenericTypeDefinition() != typeof(IEnumerable<>)))
                 throw new InvalidOperationException($"Type does not implement IEnumerable<>: {enumerableType}");
 
             return enumerableType.GenericTypeArguments[0];
