@@ -19,6 +19,7 @@ namespace Dibix.Sdk.Sql
 
         public override string TypeDisplayName => "Table";
         protected override ModelTypeClass ObjectType => ModelSchema.Table;
+        protected override ModelRelationshipClass ColumnsRelationship => Microsoft.SqlServer.Dac.Model.Table.Columns;
         protected override ModelTypeClass ColumnType => Microsoft.SqlServer.Dac.Model.Column.TypeClass;
         protected override ModelRelationshipClass ColumnDataType => Microsoft.SqlServer.Dac.Model.Column.DataType;
         protected override ModelPropertyClass ColumnLength => Microsoft.SqlServer.Dac.Model.Column.Length;
@@ -26,12 +27,21 @@ namespace Dibix.Sdk.Sql
         protected override ModelPropertyClass Nullable => Microsoft.SqlServer.Dac.Model.Column.Nullable;
 
         protected override bool IsComputed(TSqlObject column) => column.GetMetadata<ColumnType>(Microsoft.SqlServer.Dac.Model.Column.ColumnType) == Microsoft.SqlServer.Dac.Model.ColumnType.ComputedColumn;
-        protected override bool HasPrimaryKey(TSqlObject table) => table.GetReferencing(PrimaryKeyConstraint.Host, DacQueryScopes.All).Any();
+        protected override bool HasPrimaryKeyConstraint(TSqlObject table) => GetPrimaryKeyConstraint(table) != null;
+        protected override IEnumerable<TSqlObject> GetPrimaryKeyColumns(TSqlObject table)
+        {
+            TSqlObject primaryKeyConstraint = GetPrimaryKeyConstraint(table);
+            if (primaryKeyConstraint == null)
+                return Enumerable.Empty<TSqlObject>();
 
+            return primaryKeyConstraint.GetReferenced(Microsoft.SqlServer.Dac.Model.PrimaryKeyConstraint.Columns, DacQueryScopes.All);
+        }
         protected override IEnumerable<Constraint> GetConstraints(TSqlObject table)
         {
             IEnumerable<Constraint> constraints = ConstraintMap.SelectMany(x => table.GetReferencing(x.Host, DacQueryScopes.All), base.ToConstraint);
             return constraints;
         }
+
+        private static TSqlObject GetPrimaryKeyConstraint(TSqlObject table) => table.GetReferencing(PrimaryKeyConstraint.Host, DacQueryScopes.All).SingleOrDefault();
     }
 }

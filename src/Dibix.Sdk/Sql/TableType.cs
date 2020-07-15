@@ -16,6 +16,7 @@ namespace Dibix.Sdk.Sql
 
         public override string TypeDisplayName => "User defined table type";
         protected override ModelTypeClass ObjectType => ModelSchema.TableType;
+        protected override ModelRelationshipClass ColumnsRelationship => Microsoft.SqlServer.Dac.Model.TableType.Columns;
         protected override ModelTypeClass ColumnType => TableTypeColumn.TypeClass;
         protected override ModelRelationshipClass ColumnDataType => TableTypeColumn.DataType;
         protected override ModelPropertyClass ColumnLength => TableTypeColumn.Length;
@@ -23,13 +24,26 @@ namespace Dibix.Sdk.Sql
         protected override ModelPropertyClass Nullable => TableTypeColumn.Nullable;
 
         protected override bool IsComputed(TSqlObject column) => column.GetMetadata<TableTypeColumnType>(TableTypeColumn.TableTypeColumnType) == TableTypeColumnType.ComputedColumn;
-        protected override bool HasPrimaryKey(TSqlObject table) => table.GetReferenced(Microsoft.SqlServer.Dac.Model.TableType.Constraints, DacQueryScopes.All).Any(x => x.ObjectType == TableTypePrimaryKeyConstraint.TypeClass);
+        protected override bool HasPrimaryKeyConstraint(TSqlObject table) => GetPrimaryKeyConstraint(table) != null;
+        protected override IEnumerable<TSqlObject> GetPrimaryKeyColumns(TSqlObject table)
+        {
+            TSqlObject primaryKeyConstraint = GetPrimaryKeyConstraint(table);
+            if (primaryKeyConstraint == null)
+                return Enumerable.Empty<TSqlObject>();
 
+            return primaryKeyConstraint.GetReferenced(TableTypePrimaryKeyConstraint.Columns, DacQueryScopes.All);
+        }
         protected override IEnumerable<Constraint> GetConstraints(TSqlObject table)
         {
             IEnumerable<Constraint> constraints = table.GetReferenced(Microsoft.SqlServer.Dac.Model.TableType.Constraints, DacQueryScopes.All)
                                                        .Select(x => base.ToConstraint(ConstraintMap[x.ObjectType], x));
             return constraints;
+        }
+
+        private static TSqlObject GetPrimaryKeyConstraint(TSqlObject table)
+        {
+            return table.GetReferenced(Microsoft.SqlServer.Dac.Model.TableType.Constraints, DacQueryScopes.All)
+                        .SingleOrDefault(x => x.ObjectType == TableTypePrimaryKeyConstraint.TypeClass);
         }
     }
 }

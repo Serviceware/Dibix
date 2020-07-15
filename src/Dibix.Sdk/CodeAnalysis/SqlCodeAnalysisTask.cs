@@ -10,16 +10,16 @@ namespace Dibix.Sdk.CodeAnalysis
     {
         public static bool Execute
         (
-            string namingConventionPrefix
-          , string databaseSchemaProviderName
+            string databaseSchemaProviderName
           , string modelCollation
+          , string namingConventionPrefix
           , ICollection<TaskItem> source
           , IEnumerable<TaskItem> scriptSource
           , IEnumerable<TaskItem> sqlReferencePath
           , ILogger logger
         )
         {
-            ISqlCodeAnalysisRuleEngine codeAnalysisEngine = SqlCodeAnalysisRuleEngine.Create(namingConventionPrefix, databaseSchemaProviderName, modelCollation, source, sqlReferencePath, logger);
+            ISqlCodeAnalysisRuleEngine codeAnalysisEngine = SqlCodeAnalysisRuleEngine.Create(databaseSchemaProviderName, modelCollation, namingConventionPrefix, source, sqlReferencePath, logger);
             if (logger.HasLoggedErrors)
                 return false;
 

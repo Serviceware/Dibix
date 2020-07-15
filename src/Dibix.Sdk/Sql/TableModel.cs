@@ -16,11 +16,25 @@ namespace Dibix.Sdk.Sql
         #region Properties
         public abstract string TypeDisplayName { get; }
         protected abstract ModelTypeClass ObjectType { get; }
+        protected abstract ModelRelationshipClass ColumnsRelationship { get; }
         protected abstract ModelTypeClass ColumnType { get; }
         protected abstract ModelRelationshipClass ColumnDataType { get; }
         protected abstract ModelPropertyClass ColumnLength { get; }
         protected abstract ModelPropertyClass ColumnPrecision { get; }
         protected abstract ModelPropertyClass Nullable { get; }
+        #endregion
+
+        #region Static Methods
+        public static TableModel GetAccessor(ModelTypeClass modelType)
+        {
+            if (modelType == ModelSchema.Table)
+                return Table;
+            
+            if (modelType == ModelSchema.TableType)
+                return TableType;
+            
+            throw new ArgumentOutOfRangeException(nameof(modelType), modelType, null);
+        }
         #endregion
 
         #region Public Methods
@@ -38,16 +52,27 @@ namespace Dibix.Sdk.Sql
             return indexes;
         }
 
-        public bool HasPrimaryKey(TSqlModel model, SchemaObjectName tableName)
+        public bool HasPrimaryKeyConstraint(TSqlModel model, SchemaObjectName tableName)
         {
             TSqlObject table = this.GetTable(model, tableName);
-            return this.HasPrimaryKey(table);
+            return this.HasPrimaryKeyConstraint(table);
+        }
+
+        public IEnumerable<KeyValuePair<string, bool>> GetColumnsWithPrimaryKeyInformation(TSqlObject table)
+        {
+            HashSet<string> primaryKeyColumns = new HashSet<string>(this.GetPrimaryKeyColumns(table).Select(x => x.Name.Parts.Last()));
+            foreach (TSqlObject column in table.GetReferenced(this.ColumnsRelationship, DacQueryScopes.All))
+            {
+                string columnName = column.Name.Parts.Last();
+                yield return new KeyValuePair<string, bool>(columnName, primaryKeyColumns.Contains(columnName));
+            }
         }
         #endregion
 
         #region Abstract Methods
         protected abstract bool IsComputed(TSqlObject column);
-        protected abstract bool HasPrimaryKey(TSqlObject table);
+        protected abstract bool HasPrimaryKeyConstraint(TSqlObject table);
+        protected abstract IEnumerable<TSqlObject> GetPrimaryKeyColumns(TSqlObject table);
         protected abstract IEnumerable<Constraint> GetConstraints(TSqlObject table);
         #endregion
 

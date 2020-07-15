@@ -11,9 +11,9 @@ namespace Dibix.Sdk.Cli
         {
             SqlCodeAnalysisTask.Execute
             (
-                namingConventionPrefix: configuration.GetSingleValue<string>("NamingConventionPrefix")
-              , databaseSchemaProviderName: configuration.GetSingleValue<string>("DatabaseSchemaProviderName")
+                databaseSchemaProviderName: configuration.GetSingleValue<string>("DatabaseSchemaProviderName")
               , modelCollation: configuration.GetSingleValue<string>("ModelCollation")
+              , namingConventionPrefix: configuration.GetSingleValue<string>("NamingConventionPrefix")
               , source: configuration.GetItems("Source")
               , scriptSource: configuration.GetItems("ScriptSource")
               , sqlReferencePath: configuration.GetItems("SqlReferencePath")

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Xml.Linq;
 using Dibix.Http;
@@ -712,7 +713,7 @@ Parameter: input", exception.Message);
 
             Assert.Equal(3, arguments.Count);
             Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
-            Assert.Equal(Environment.MachineName, arguments["machinename"]);
+            Assert.Equal(Dns.GetHostEntry(String.Empty).HostName, arguments["machinename"]);
             Assert.Equal(Process.GetCurrentProcess().Id, arguments["pid"]);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }

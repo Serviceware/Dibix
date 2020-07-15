@@ -10,20 +10,26 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     [SqlCodeAnalysisRule(id: 36)]
     public sealed class PrimaryKeyUpdateSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
-        private readonly IDictionary<string, IDictionary<string, TableVariableColumn>> _tableVariables;
+        private readonly IDictionary<string, IDictionary<string, DynamicColumn>> _dynamicColumnSourceVariables;
 
         protected override string ErrorMessageTemplate => "Primary keys should not be updated: {0}";
 
         public PrimaryKeyUpdateSqlCodeAnalysisRule()
         {
-            this._tableVariables = new Dictionary<string, IDictionary<string, TableVariableColumn>>();
+            this._dynamicColumnSourceVariables = new Dictionary<string, IDictionary<string, DynamicColumn>>();
         }
 
         protected override void BeginStatement(TSqlScript node)
         {
             TableVariableVisitor tableVariableVisitor = new TableVariableVisitor();
             node.Accept(tableVariableVisitor);
-            this._tableVariables.ReplaceWith(tableVariableVisitor.TableVariables.Select(x => new KeyValuePair<string, IDictionary<string, TableVariableColumn>>(x.Name, x.Columns.ToDictionary(y => y.Name))));
+
+            UserDefinedTableTypeVariableVisitor userDefinedTableTypeVariableVisitor = new UserDefinedTableTypeVariableVisitor(base.Model);
+            node.Accept(userDefinedTableTypeVariableVisitor);
+
+            this._dynamicColumnSourceVariables.ReplaceWith(tableVariableVisitor.TableVariables
+                                    .Concat(userDefinedTableTypeVariableVisitor.UserDefinedTableTypeVariables)
+                                                                               .Select(x => new KeyValuePair<string, IDictionary<string, DynamicColumn>>(x.Name, x.Columns.ToDictionary(y => y.Name))));
         }
 
         public override void Visit(AssignmentSetClause node)
@@ -36,15 +42,15 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
             bool? isPartOfPrimaryKey = null;
 
-            // Try table variable source first
+            // Try dynamic column source variable first (Table variable/User defined table type variable)
             for (int i = 0; i < elementLocation.Identifiers.Count; i++)
             {
                 string identifier = elementLocation.Identifiers[i];
-                if (!this._tableVariables.TryGetValue(identifier, out IDictionary<string, TableVariableColumn> tableVariableColumns)) 
+                if (!this._dynamicColumnSourceVariables.TryGetValue(identifier, out IDictionary<string, DynamicColumn> tableVariableColumns)) 
                     continue;
 
                 string columnName = elementLocation.Identifiers[i + 1];
-                if (tableVariableColumns.TryGetValue(columnName, out TableVariableColumn column)
+                if (tableVariableColumns.TryGetValue(columnName, out DynamicColumn column)
                  || tableVariableColumns.TryGetValue(node.Column.GetName().Value, out column)) // For MERGE statements the column identifier is not reliable
                 {
                     isPartOfPrimaryKey = column.IsPartOfPrimaryKey;
@@ -57,7 +63,10 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                 isPartOfPrimaryKey = base.Model.IsPartOfPrimaryKey(elementLocation);
 
             if (!isPartOfPrimaryKey.HasValue)
-                throw new InvalidOperationException($"Could not determine column information for: {node.Column.Dump()}");
+            {
+                base.LogError(node.Column, "71502", $"Cannot resolve reference to object {String.Join(".", elementLocation.Identifiers)}");
+                return;
+            }
 
             if (isPartOfPrimaryKey.Value)
                 base.Fail(node, node.Dump());
@@ -65,9 +74,9 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         private sealed class TableVariableVisitor : TSqlFragmentVisitor
         {
-            public ICollection<TableVariable> TableVariables { get; }
+            public ICollection<DynamicColumnSource> TableVariables { get; }
 
-            public TableVariableVisitor() => this.TableVariables = new Collection<TableVariable>();
+            public TableVariableVisitor() => this.TableVariables = new Collection<DynamicColumnSource>();
 
             public override void Visit(DeclareTableVariableBody node)
             {
@@ -80,34 +89,63 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                 if (primaryKey != null)
                     primaryKeyColumns.AddRange(primaryKey.Columns.Select(x => x.Column.GetName().Value));
 
-                TableVariable table = new TableVariable(node.VariableName.Value);
+                DynamicColumnSource table = new DynamicColumnSource(node.VariableName.Value);
                 foreach (ColumnDefinition column in node.Definition.ColumnDefinitions)
                 {
                     bool isPartOfPrimaryKey = primaryKeyColumns.Contains(column.ColumnIdentifier.Value);
-                    table.Columns.Add(new TableVariableColumn(column.ColumnIdentifier.Value, isPartOfPrimaryKey));
+                    table.Columns.Add(new DynamicColumn(column.ColumnIdentifier.Value, isPartOfPrimaryKey));
                 }
                 this.TableVariables.Add(table);
             }
         }
 
-        private sealed class TableVariable
+        private sealed class UserDefinedTableTypeVariableVisitor : TSqlFragmentVisitor
         {
-            public string Name { get; }
-            public ICollection<TableVariableColumn> Columns { get; }
+            private readonly SqlModel _model;
 
-            public TableVariable(string name)
+            public ICollection<DynamicColumnSource> UserDefinedTableTypeVariables { get; }
+
+            public UserDefinedTableTypeVariableVisitor(SqlModel model)
             {
-                this.Name = name;
-                this.Columns = new Collection<TableVariableColumn>();
+                this._model = model;
+                this.UserDefinedTableTypeVariables = new Collection<DynamicColumnSource>();
+            }
+
+            public override void Visit(DeclareVariableElement node)
+            {
+                if (!this._model.TryGetModelElement(node.DataType, out ElementLocation element)) 
+                    return;
+
+                IDictionary<string, bool> columns = this._model.GetUserDefinedTableTypeColumnsWithPrimaryKeyInformation(element);
+                if (columns == null)
+                    return;
+
+                DynamicColumnSource table = new DynamicColumnSource(node.VariableName.Value);
+                foreach (KeyValuePair<string, bool> column in columns) 
+                    table.Columns.Add(new DynamicColumn(column.Key, column.Value));
+
+                this.UserDefinedTableTypeVariables.Add(table);
             }
         }
 
-        private sealed class TableVariableColumn
+        private sealed class DynamicColumnSource
+        {
+            public string Name { get; }
+            public ICollection<DynamicColumn> Columns { get; }
+
+            public DynamicColumnSource(string name)
+            {
+                this.Name = name;
+                this.Columns = new Collection<DynamicColumn>();
+            }
+        }
+
+        private sealed class DynamicColumn
         {
             public string Name { get; }
             public bool IsPartOfPrimaryKey { get; }
 
-            public TableVariableColumn(string name, bool isPartOfPrimaryKey)
+            public DynamicColumn(string name, bool isPartOfPrimaryKey)
             {
                 this.Name = name;
                 this.IsPartOfPrimaryKey = isPartOfPrimaryKey;

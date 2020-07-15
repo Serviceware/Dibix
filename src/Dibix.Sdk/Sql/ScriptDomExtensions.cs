@@ -65,8 +65,7 @@ namespace Dibix.Sdk.Sql
             if (name.DatabaseIdentifier != null)
                 externalParts.Add(name.DatabaseIdentifier.Value);
 
-            if (name.SchemaIdentifier != null)
-                parts.Add(name.SchemaIdentifier.Value);
+            parts.Add(name.SchemaIdentifier?.Value ?? SchemaName.Default);
 
             if (name.BaseIdentifier != null)
                 parts.Add(name.BaseIdentifier.Value);

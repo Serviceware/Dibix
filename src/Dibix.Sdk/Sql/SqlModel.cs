@@ -23,14 +23,29 @@ namespace Dibix.Sdk.Sql
         public IEnumerable<Index> GetIndexes(SchemaObjectName tableName) => this.GetIndexes(TableModel.Table, tableName);
         public IEnumerable<Index> GetIndexes(TableModel tableDefinition, SchemaObjectName tableName) => tableDefinition.GetIndexes(this._model, tableName);
 
-        public bool HasPrimaryKey(TableModel tableDefinition, SchemaObjectName tableName) => tableDefinition.HasPrimaryKey(this._model, tableName);
+        public bool HasPrimaryKey(TableModel tableDefinition, SchemaObjectName tableName) => tableDefinition.HasPrimaryKeyConstraint(this._model, tableName);
 
-        public bool IsPartOfPrimaryKey(ElementLocation element)
+        public bool? IsPartOfPrimaryKey(ElementLocation element)
         {
             TSqlObject columnElement = element.GetModelElement(this._model);
+            if (columnElement == null)
+                return null;
+
             TSqlObject table = columnElement.GetParent(DacQueryScopes.All);
             TSqlObject primaryKey = table.GetReferencing(PrimaryKeyConstraint.Host, DacQueryScopes.All).First();
             return primaryKey?.GetReferenced(PrimaryKeyConstraint.Columns, DacQueryScopes.All).Contains(columnElement) ?? default;
+        }
+
+        public IDictionary<string, bool> GetUserDefinedTableTypeColumnsWithPrimaryKeyInformation(ElementLocation element)
+        {
+            TSqlObject modelElement = element.GetModelElement(this._model);
+            if (modelElement == null)
+                return null;
+
+            if (modelElement.ObjectType != ModelSchema.TableType)
+                return null;
+
+            return GetColumnsWithPrimaryKeyInformation(modelElement).ToDictionary(x => x.Key, x => x.Value);
         }
 
         public bool IsScalarFunction(FunctionCall functionCall) => this._elementLocator.TryGetModelElement(functionCall, out TSqlObject element) && element.ObjectType == ScalarFunction.TypeClass;
@@ -57,6 +72,12 @@ namespace Dibix.Sdk.Sql
                                      .ToArray();
 
             return true;
+        }
+
+        private static IEnumerable<KeyValuePair<string, bool>> GetColumnsWithPrimaryKeyInformation(TSqlObject modelElement)
+        {
+            TableModel tableModel = TableModel.GetAccessor(modelElement.ObjectType);
+            return tableModel.GetColumnsWithPrimaryKeyInformation(modelElement);
         }
 
         private static ModelRelationshipClass GetParametersRelationship(ModelTypeClass type)

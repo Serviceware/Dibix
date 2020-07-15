@@ -10,6 +10,7 @@
     <EmbeddedResource Include="CodeGeneration\Schema\dibix.endpoints.schema.json" PackagePath="content/dibix.endpoints.schema.json" />
     <Compile Include="..\Dibix\Collections\FuncEqualityComparer.cs" Link="Collections\FuncEqualityComparer.cs" />
     <Compile Include="..\Dibix\Diagnostics\Guard.cs" Link="Diagnostics\Guard.cs" />
+    <Compile Include="..\Dibix\Environment\SchemaName.cs" Link="Environment\SchemaName.cs" />
     <Compile Include="..\Dibix\Extensions\EnumerableExtensions.cs" Link="Extensions\EnumerableExtensions.cs" />
     <Compile Include="..\Dibix\Http\HttpErrorResponseParser.cs" Link="CodeGeneration\Parser\HttpErrorResponseParser.cs" />
     <Compile Include="..\Dibix\Http\HttpParameterName.cs" Link="OpenApi\HttpParameterName.cs" />

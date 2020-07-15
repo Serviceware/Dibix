@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
@@ -43,9 +44,9 @@ namespace Dibix.Tests
         }
 
         [Fact]
-        public async Task Invoke_DDL_WithCustomSqlException_IsMappedToHttpStatusCode()
+        public async Task Invoke_DDL_WithHttpServerError_IsMappedToHttpStatusCode()
         {
-            SqlException sqlException = SqlExceptionFactory.Create(default, 50403, default, default, default, default, default, default);
+            SqlException sqlException = SqlExceptionFactory.Create(default, 504000, default, default, default, "Too late", default, default);
 
             Mock<IParametersVisitor> parametersVisitor = new Mock<IParametersVisitor>(MockBehavior.Strict);
             Mock<IHttpParameterResolutionMethod> parameterResolver = new Mock<IHttpParameterResolutionMethod>(MockBehavior.Strict);
@@ -56,10 +57,48 @@ namespace Dibix.Tests
             Exception exception = (Exception)typeof(DatabaseAccessException).GetMethod("Create", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { null, null, parametersVisitor.Object, sqlException });
             parameterResolver.Setup(x => x.PrepareParameters(request, null, null)).Throws(exception);
 
-            object result = await HttpActionInvoker.Invoke(null, request, null, parameterResolver.Object, null, null).ConfigureAwait(false);
-            HttpResponseMessage response = Assert.IsType<HttpResponseMessage>(result);
-            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
-            Assert.Equal(request, response.RequestMessage);
+            try
+            {
+                await HttpActionInvoker.Invoke(null, request, null, parameterResolver.Object, null, null).ConfigureAwait(false);
+            }
+            catch (HttpRequestExecutionException requestException)
+            {
+                Assert.Equal("504 GatewayTimeout: Too late", requestException.Message);
+                Assert.False(requestException.IsClientError);
+                Assert.Equal(HttpStatusCode.GatewayTimeout, requestException.ErrorResponse.StatusCode);
+                Assert.False(requestException.ErrorResponse.Headers.Contains("X-Error-Code"));
+                Assert.False(requestException.ErrorResponse.Headers.Contains("X-Error-Description"));
+                Assert.Equal(request, requestException.ErrorResponse.RequestMessage);
+            }
+        }
+
+        [Fact]
+        public async Task Invoke_DDL_WithHttpClientError_IsMappedToHttpStatusCode()
+        {
+            SqlException sqlException = SqlExceptionFactory.Create(default, 403001, default, default, default, "Sorry", default, default);
+
+            Mock<IParametersVisitor> parametersVisitor = new Mock<IParametersVisitor>(MockBehavior.Strict);
+            Mock<IHttpParameterResolutionMethod> parameterResolver = new Mock<IHttpParameterResolutionMethod>(MockBehavior.Strict);
+
+            parametersVisitor.Setup(x => x.VisitParameters(It.IsAny<ParameterVisitor>()));
+
+            HttpRequestMessage request = new HttpRequestMessage();
+            Exception exception = (Exception)typeof(DatabaseAccessException).GetMethod("Create", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { null, null, parametersVisitor.Object, sqlException });
+            parameterResolver.Setup(x => x.PrepareParameters(request, null, null)).Throws(exception);
+
+            try
+            {
+                await HttpActionInvoker.Invoke(null, request, null, parameterResolver.Object, null, null).ConfigureAwait(false);
+            }
+            catch (HttpRequestExecutionException requestException)
+            {
+                Assert.Equal("403 Forbidden: Sorry", requestException.Message);
+                Assert.True(requestException.IsClientError);
+                Assert.Equal(HttpStatusCode.Forbidden, requestException.ErrorResponse.StatusCode);
+                Assert.Equal("1", requestException.ErrorResponse.Headers.GetValues("X-Error-Code").Single());
+                Assert.Equal("Sorry", requestException.ErrorResponse.Headers.GetValues("X-Error-Description").Single());
+                Assert.Equal(request, requestException.ErrorResponse.RequestMessage);
+            }
         }
 
         [Fact]
@@ -67,7 +106,7 @@ namespace Dibix.Tests
         {
             CommandType commandType = CommandType.StoredProcedure;
             string commandText = "x";
-            SqlException sqlException = SqlExceptionFactory.Create(default, default, default, default, default, "Oops", default, default);
+            SqlException sqlException = SqlExceptionFactory.Create(default, 50000, default, default, default, "Oops", default, default);
 
             Mock<IParametersVisitor> parametersVisitor = new Mock<IParametersVisitor>(MockBehavior.Strict);
             Mock<IHttpParameterResolutionMethod> parameterResolver = new Mock<IHttpParameterResolutionMethod>(MockBehavior.Strict);

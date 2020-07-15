@@ -11,7 +11,6 @@ namespace Dibix
     public abstract class StructuredType : IEnumerable<SqlDataRecord>
     {
         #region Fields
-        private const string DefaultSchemaName = "dbo";
         private readonly ICollection<SqlDataRecord> _records;
         private SqlMetaData[] _metadata;
         #endregion
@@ -63,7 +62,7 @@ namespace Dibix
             Guard.IsNotNullOrEmpty(typeName, nameof(typeName));
             IList<string> parts = typeName.Split('.').Select(x => x.TrimStart('[').TrimEnd(']')).ToList();
             if (parts.Count < 2)
-                parts.Insert(0, DefaultSchemaName);
+                parts.Insert(0, SchemaName.Default);
 
             return String.Join(".", parts.Select(x => $"[{x}]"));
         }

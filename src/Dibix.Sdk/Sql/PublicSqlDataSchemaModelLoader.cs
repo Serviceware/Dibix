@@ -36,7 +36,7 @@ namespace Dibix.Sdk.Sql
         #region Private Methods
         private static LoadPublicDataSchemaModel CompileModelFactory()
         {
-            // (string databaseSchemaProviderName, ITaskItem[] source, ITaskItem[] sqlReferencePath, ITask task, ILogger logger) =>
+            // (string databaseSchemaProviderName, string modelCollation, ITaskItem[] source, ITaskItem[] sqlReferencePath, ITask task, ILogger logger) =>
             ParameterExpression databaseSchemaProviderNameParameter = Expression.Parameter(typeof(string), "databaseSchemaProviderName");
             ParameterExpression modelCollationParameter = Expression.Parameter(typeof(string), "modelCollation");
             ParameterExpression sourceParameter = Expression.Parameter(typeof(ITaskItem[]), "source");

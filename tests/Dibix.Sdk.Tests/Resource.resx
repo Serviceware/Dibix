@@ -2123,22 +2123,42 @@ namespace Dibix.Sdk.Tests
   &lt;error
     ruleid="36"
     message="Primary keys should not be updated: [id] = 1"
-    line="16"
+    line="18"
+    column="21" /&gt;
+  &lt;error
+    ruleid="36"
+    message="Primary keys should not be updated: [id] = 1"
+    line="22"
     column="21" /&gt;
   &lt;error
     ruleid="36"
     message="Primary keys should not be updated: [r].[id_current] = [r].[id_new]"
-    line="20"
+    line="26"
+    column="17" /&gt;
+  &lt;error
+    ruleid="36"
+    message="Primary keys should not be updated: [r].[id_current] = [r].[id_new]"
+    line="32"
     column="17" /&gt;
   &lt;error
     ruleid="36"
     message="Primary keys should not be updated: [T].[id] = [S].[id]"
-    line="29"
+    line="41"
+    column="14" /&gt;
+  &lt;error
+    ruleid="36"
+    message="Primary keys should not be updated: [T].[id] = [S].[id]"
+    line="47"
     column="14" /&gt;
   &lt;error
     ruleid="36"
     message="Primary keys should not be updated: [T].[idx] = [S].[id]"
-    line="39"
+    line="57"
+    column="14" /&gt;
+  &lt;error
+    ruleid="36"
+    message="Primary keys should not be updated: [T].[idx] = [S].[id]"
+    line="67"
     column="14" /&gt;
 &lt;/errors&gt;</value>
   </data>

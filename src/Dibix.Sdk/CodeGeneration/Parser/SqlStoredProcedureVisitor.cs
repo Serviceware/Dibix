@@ -19,12 +19,13 @@ namespace Dibix.Sdk.CodeGeneration
         {
             base.Target.ProcedureName = String.Join(".", node.ProcedureReference.Name.Identifiers.Select(x => Identifier.EncodeIdentifier(x.Value)));
 
-            this.ParseContent(node, node.StatementList);
+            StatementList statements = node.StatementList ?? new StatementList();
+            this.ParseContent(node, statements);
 
             foreach (ProcedureParameter parameter in node.Parameters)
                 this.ParseParameter(parameter);
 
-            this.ParseErrorResponses(node.StatementList);
+            this.ParseErrorResponses(statements);
 
             base.ExplicitVisit(node);
         }
@@ -140,7 +141,7 @@ DataType: {target.Type.GetType()}");
             this.Target.ResultType = this.DetermineResultType(relativeNamespace, ref generateResultClass);
             this.Target.GenerateResultClass = generateResultClass;
 
-            this.ParseBody(statements ?? new StatementList());
+            this.ParseBody(statements);
         }
 
         private string ParseNamespace(string relativeNamespace) => NamespaceUtility.BuildAbsoluteNamespace(this.ProductName, this.AreaName, LayerName.Data, relativeNamespace);
