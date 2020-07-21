@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
@@ -7,28 +8,39 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     [SqlCodeAnalysisRule(id: 39)]
     public sealed class ExplicitProcedureArgumentSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
-        protected override string ErrorMessageTemplate => "Procedure arguments should be named: {0} = {1}";
+        protected override string ErrorMessageTemplate => "Procedure arguments should be named: {0} {1} = {2}";
         
-        public override void Visit(ExecutableProcedureReference node)
+        public override void Visit(ExecuteSpecification node)
         {
-            if (node.ProcedureReference.ProcedureReference == null)
+            if (!(node.ExecutableEntity is ExecutableProcedureReference procedureReference))
                 return;
 
-            if (!base.Model.TryGetFunctionParameterNames(node.ProcedureReference.ProcedureReference.Name, out IList<string> parameterNames))
+            IList<string> parameterNames = null;
+            if (procedureReference.ProcedureReference.ProcedureReference != null && !base.Model.TryGetFunctionParameterNames(procedureReference.ProcedureReference.ProcedureReference.Name, out parameterNames))
             {
-                base.LogError(node.ProcedureReference.ProcedureReference, "71502", $"Cannot resolve reference to object {node.ProcedureReference.ProcedureReference.Name.Dump()}");
+                base.LogError(procedureReference.ProcedureReference.ProcedureReference, "71502", $"Cannot resolve reference to object {procedureReference.ProcedureReference.ProcedureReference.Name.Dump()}");
                 return;
             }
 
-            for (int i = 0; i < node.Parameters.Count; i++)
+            string executeCall = ExtractExecuteCall(node, procedureReference);
+            for (int i = 0; i < procedureReference.Parameters.Count; i++)
             {
-                ExecuteParameter parameter = node.Parameters[i];
+                ExecuteParameter parameter = procedureReference.Parameters[i];
                 if (parameter.Variable != null)
                     continue;
 
-                string parameterName = parameterNames[i];
-                base.Fail(parameter, parameterName, parameter.ParameterValue.Dump());
+                string parameterName = parameterNames != null ? parameterNames[i] : $"[{i}]";
+                base.Fail(parameter, executeCall, parameterName, parameter.ParameterValue.Dump());
             }
+        }
+
+        private static string ExtractExecuteCall(ExecuteSpecification node, ExecutableProcedureReference procedureReference)
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = node.FirstTokenIndex; i <= procedureReference.ProcedureReference.LastTokenIndex; i++) 
+                sb.Append(node.ScriptTokenStream[i].Text);
+
+            return sb.ToString();
         }
     }
 }

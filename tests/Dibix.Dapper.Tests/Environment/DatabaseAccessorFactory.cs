@@ -28,7 +28,7 @@ namespace Dibix.Dapper.Tests
 
             using (DbCommand command = connection.CreateCommand())
             {
-                command.CommandText = @"IF TYPE_ID('[dbo].[_dibix_tests_structuredtype]') IS NOT NULL
+                command.CommandText = @"IF TYPE_ID('[dbo].[_dibix_tests_structuredtype]') IS NULL
 BEGIN
 	CREATE TYPE [dbo].[_dibix_tests_structuredtype] AS TABLE
 	(
