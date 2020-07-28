@@ -82,19 +82,29 @@ Either remove the @GenerateInputClass hint on the statement or the @Obfuscate hi
             if (parameter.Value == null)
                 return;
 
-            if (!(parameter.Value is Literal literal))
-            {
-                base.Logger.LogError(null, $"Only literals are supported for default values: {parameter.Value.Dump()}", this.Target.Source, parameter.Value.StartLine, parameter.Value.StartColumn);
-                return;
-            }
-
             if (!(target.Type is PrimitiveTypeReference primitiveTypeReference))
                 throw new InvalidOperationException($@"Unexpected parameter type for default value
 Parameter: {target.Name}
 DataType: {target.Type.GetType()}");
 
-            target.HasDefaultValue = this.TryParseParameterDefaultValue(literal, primitiveTypeReference.Type, out object defaultValue);
+            target.HasDefaultValue = this.TryParseParameterDefaultValue(parameter.Value, primitiveTypeReference.Type, out object defaultValue);
             target.DefaultValue = defaultValue;
+        }
+
+        private bool TryParseParameterDefaultValue(ScalarExpression value, PrimitiveDataType targetType, out object defaultValue)
+        {
+            switch (value)
+            {
+                case Literal literal:
+                    return this.TryParseParameterDefaultValue(literal, targetType, out defaultValue);
+
+                case VariableReference variableReference:
+                    defaultValue = variableReference.Name;
+                    return true;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(value), value, "Only literals and parameter references are supported for parameter defaults");
+            }
         }
 
         private bool TryParseParameterDefaultValue(Literal literal, PrimitiveDataType targetType, out object defaultValue)
