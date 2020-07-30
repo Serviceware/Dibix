@@ -167,7 +167,7 @@ SELECT 1 AS id,
        12 AS [age]
 UNION ALL
 SELECT 2 AS id,
-       N'Cookie' AS [name],
+       N'	Cookie' AS [name],
        16 AS [age];";
 
         // dbx_tests_parser_nestedifs

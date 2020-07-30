@@ -5,13 +5,16 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public sealed class GenerateScriptSqlStatementFormatter : SqlStatementFormatter, ISqlStatementFormatter
     {
-        public override string Format(SqlStatementInfo info, StatementList body)
+        public override string Format(SqlStatementInfo info, StatementList statementList)
         {
             TSqlBatch batch = new TSqlBatch();
-            batch.Statements.AddRange(base.GetStatements(body));
 
-            string output = ScriptDomFacade.Generate(batch, x => x.Options.AlignClauseBodies = false);
-            return output;
+            void StatementHandler(TSqlStatement statement, int statementIndex, int statementCount) => batch.Statements.Add(statement);
+
+            base.CollectStatements(statementList, StatementHandler);
+
+            string generated = ScriptDomFacade.Generate(batch, x => x.Options.AlignClauseBodies = false);
+            return generated;
         }
     }
 }

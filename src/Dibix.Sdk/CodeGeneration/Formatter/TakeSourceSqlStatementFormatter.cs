@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Dibix.Sdk.Sql;
@@ -9,47 +8,41 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public sealed class TakeSourceSqlStatementFormatter : SqlStatementFormatter, ISqlStatementFormatter
     {
-        public override string Format(SqlStatementInfo info, StatementList body)
+        public override string Format(SqlStatementInfo info, StatementList statementList)
         {
             StringBuilder sb = new StringBuilder();
-            IList<TSqlStatement> statements = base.GetStatements(body).ToArray();
-            for (int i = 0; i < statements.Count; i++)
+
+            void StatementHandler(TSqlStatement statement, int statementIndex, int statementCount)
             {
-                TSqlStatement statement = statements[i];
-                int startIndex = statement.GetFirstTokenIndex();
-                int endIndex = statement.LastTokenIndex;
-                for (int j = startIndex; j <= endIndex; j++)
-                {
-                    TSqlParserToken token = body.ScriptTokenStream[j];
-                    if (token.TokenType == SqlTokenType.SingleLineComment || token.TokenType == SqlTokenType.MultilineComment)
-                        continue;
-
-                    sb.Append(token.Text);
-                }
-
-                if (i + 1 < statements.Count)
+                if (statementIndex + 1 < statementCount)
                     sb.AppendLine()
                       .AppendLine();
             }
+
+            void TokenHandler(TSqlParserToken token)
+            {
+                if (token.TokenType == SqlTokenType.SingleLineComment || token.TokenType == SqlTokenType.MultilineComment) 
+                    return;
+
+                sb.Append(token.Text);
+            }
+
+            base.CollectStatements(statementList, StatementHandler, TokenHandler);
+
             return DecreaseIndentation(sb.ToString());
         }
 
-        private static string DecreaseIndentation(string text)
+        private static string DecreaseIndentation(string text) => String.Join("\n", text.Split('\n').Select((line, lineIndex) =>
         {
-            const int indentation = 4;
-            text = text.Replace("\t", new string(' ', indentation));
-            return String.Join("\n", text.Split('\n').Select((line, lineIndex) =>
-            {
-                if (lineIndex == 0)
-                    return line;
+            if (lineIndex == 0)
+                return line;
 
-                int index = line.Select((@char, charIndex) => new { Char = @char, CharIndex = charIndex })
-                                .Where(y => y.CharIndex >= indentation || y.Char != ' ')
-                                .Select(y => y.CharIndex)
-                                .FirstOrDefault();
+            int index = line.Select((@char, charIndex) => new { Char = @char, CharIndex = charIndex })
+                            .Where(y => y.CharIndex >= Indentation || y.Char != ' ')
+                            .Select(y => y.CharIndex)
+                            .FirstOrDefault();
 
-                return line.Substring(index);
-            }));
-        }
+            return line.Substring(index);
+        }));
     }
 }

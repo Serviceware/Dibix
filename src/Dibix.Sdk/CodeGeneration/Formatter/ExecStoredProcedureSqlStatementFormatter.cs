@@ -5,7 +5,7 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public sealed class ExecStoredProcedureSqlStatementFormatter : SqlStatementFormatter, ISqlStatementFormatter
     {
-        public override string Format(SqlStatementInfo info, StatementList body)
+        public override string Format(SqlStatementInfo info, StatementList statementList)
         {
             info.CommandType = CommandType.StoredProcedure;
             return info.ProcedureName;

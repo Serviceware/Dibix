@@ -71,7 +71,7 @@ AS
 
 	SELECT 1 AS id, N'Cake' AS [name] /* [namex] */, 12 AS [age]
 	UNION ALL
-	SELECT 2 AS id, N'Cookie' AS [name] /* [namex] */, 16 AS [age]
+	SELECT 2 AS id, N'	Cookie' AS [name] /* [namex] */, 16 AS [age]
 
 	/*
 	SELECT [x].[i]
