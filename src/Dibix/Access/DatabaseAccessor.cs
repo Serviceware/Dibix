@@ -93,6 +93,15 @@ namespace Dibix
 
         T IDatabaseAccessor.QuerySingleOrDefault<T>(string sql, CommandType commandType, IParametersVisitor parameters) => Execute(sql, commandType, parameters, () => this.QuerySingleOrDefault<T>(sql, commandType, parameters).PostProcess());
 
+        public Task<TReturn> QuerySingleOrDefaultAsync<TReturn, TSecond, TThird>(string sql, CommandType commandType, IParametersVisitor parameters, string splitOn) where TReturn : new() => Execute(sql, commandType, parameters, () =>
+        {
+            MultiMapper multiMapper = new MultiMapper();
+            return this.QueryManyAsync<TReturn, TSecond, TThird, TReturn>(sql, commandType, parameters, (a, b, c) => multiMapper.MapRow<TReturn>(false, a, b, c), splitOn)
+                       .ContinueWith(x => x.Result
+                                           .PostProcess(multiMapper)
+                                           .SingleOrDefault());
+        });
+
         IMultipleResultReader IDatabaseAccessor.QueryMultiple(string sql, CommandType commandType, IParametersVisitor parameters) => Execute(sql, commandType, parameters, () => this.QueryMultiple(sql, commandType, parameters));
         #endregion
 
@@ -106,6 +115,8 @@ namespace Dibix
         protected abstract IEnumerable<TReturn> QueryMany<TFirst, TSecond, TReturn>(string sql, CommandType commandType, IParametersVisitor parameters, Func<TFirst, TSecond, TReturn> map, string splitOn);
 
         protected abstract IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TReturn>(string sql, CommandType commandType, IParametersVisitor parameters, Func<TFirst, TSecond, TThird, TReturn> map, string splitOn);
+        
+        protected abstract Task<IEnumerable<TReturn>> QueryManyAsync<TFirst, TSecond, TThird, TReturn>(string sql, CommandType commandType, IParametersVisitor parameters, Func<TFirst, TSecond, TThird, TReturn> map, string splitOn);
 
         protected abstract IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TReturn>(string sql, CommandType commandType, IParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TReturn> map, string splitOn);
 
