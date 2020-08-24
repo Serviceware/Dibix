@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Dibix
@@ -31,7 +32,7 @@ namespace Dibix
 
         int IDatabaseAccessor.Execute(string sql, CommandType commandType, IParametersVisitor parameters) => Execute(sql, commandType, parameters, () => this.Execute(sql, commandType, parameters));
 
-        Task<int> IDatabaseAccessor.ExecuteAsync(string sql, CommandType commandType, IParametersVisitor parameters) => Execute(sql, commandType, parameters, () => this.ExecuteAsync(sql, commandType, parameters));
+        Task<int> IDatabaseAccessor.ExecuteAsync(string sql, CommandType commandType, IParametersVisitor parameters, CancellationToken cancellationToken) => Execute(sql, commandType, parameters, () => this.ExecuteAsync(sql, commandType, parameters, cancellationToken));
 
         IEnumerable<T> IDatabaseAccessor.QueryMany<T>(string sql, CommandType commandType, IParametersVisitor parameters) => Execute(sql, commandType, parameters, () => this.QueryMany<T>(sql, commandType, parameters).PostProcess());
 
@@ -108,7 +109,7 @@ namespace Dibix
         #region Abstract Methods
         protected abstract int Execute(string sql, CommandType commandType, IParametersVisitor parameters);
 
-        protected abstract Task<int> ExecuteAsync(string sql, CommandType commandType, IParametersVisitor parameters);
+        protected abstract Task<int> ExecuteAsync(string sql, CommandType commandType, IParametersVisitor parameters, CancellationToken cancellationToken);
 
         protected abstract IEnumerable<T> QueryMany<T>(string sql, CommandType commandType, IParametersVisitor parameters);
 

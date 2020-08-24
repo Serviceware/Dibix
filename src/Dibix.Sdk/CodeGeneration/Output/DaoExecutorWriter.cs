@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Dibix.Sdk.CodeGeneration.CSharp;
 
@@ -110,6 +111,12 @@ namespace Dibix.Sdk.CodeGeneration
                         CSharpValue defaultValue = parameter.HasDefaultValue ? ParseDefaultValue(parameter.DefaultValue) : null;
                         method.AddParameter(parameter.Name, context.ResolveTypeName(parameter.Type), defaultValue);
                     }
+                }
+
+                if (statement.Async)
+                {
+                    context.AddUsing(typeof(CancellationToken).Namespace);
+                    method.AddParameter("cancellationToken", "CancellationToken", new CSharpValue("default"));
                 }
 
                 if (i + 1 < statements.Count)
@@ -305,6 +312,9 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (query.Parameters.Any())
                 writer.WriteRaw(", @params");
+
+            if (query.Async)
+                writer.WriteRaw(", cancellationToken");
 
             writer.WriteRaw(')');
 

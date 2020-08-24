@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Dibix
@@ -24,6 +25,19 @@ namespace Dibix
             AddRange(source, elements);
 
             return source;
+        }
+
+        public static IDictionary<TKey, TSource> ReplaceWith<TKey, TSource>(this IDictionary<TKey, TSource> target, IEnumerable<TSource> elements, Func<TSource, TKey> keySelector)
+        {
+            Guard.IsNotNull(target, nameof(target));
+            Guard.IsNotNull(elements, nameof(elements));
+            Guard.IsNotNull(keySelector, nameof(keySelector));
+
+            target.Clear();
+            foreach (TSource element in elements)
+                target.Add(keySelector(element), element);
+
+            return target;
         }
     }
 }
