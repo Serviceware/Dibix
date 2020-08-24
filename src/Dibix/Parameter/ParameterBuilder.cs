@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Reflection;
 using System.Xml.Linq;
 
 namespace Dibix
@@ -19,39 +18,24 @@ namespace Dibix
         }
         #endregion
 
-        #region IQueryParameterBuilder Members
-        IParametersVisitor IParameterBuilder.Build()
-        {
-            return new ParametersAccessor(this._parameters);
-        }
+        #region IParameterBuilder Members
+        IParameterBuilder IParameterBuilder.SetBoolean(string parameterName, bool? parameterValue) => this.Set(parameterName, parameterValue);
 
-        IParameterBuilder IParameterBuilder.SetInt32(string parameterName, int? parameterValue)
-        {
-            return this.Set(parameterName, parameterValue);
-        }
+        IParameterBuilder IParameterBuilder.SetByte(string parameterName, byte? parameterValue) => this.Set(parameterName, parameterValue);
 
-        IParameterBuilder IParameterBuilder.SetShort(string parameterName, short? parameterValue)
-        {
-            return this.Set(parameterName, parameterValue);
-        }
-        IParameterBuilder IParameterBuilder.SetLong(string parameterName, long? parameterValue)
-        {
-            return this.Set(parameterName, parameterValue);
-        }
-        IParameterBuilder IParameterBuilder.SetByte(string parameterName, byte? parameterValue)
-        {
-            return this.Set(parameterName, parameterValue);
-        }
+        IParameterBuilder IParameterBuilder.SetInt16(string parameterName, short? parameterValue) => this.Set(parameterName, parameterValue);
 
-        IParameterBuilder IParameterBuilder.SetBytes(string parameterName, byte[] parameterValue)
-        {
-            return this.Set(parameterName, parameterValue);
-        }
+        IParameterBuilder IParameterBuilder.SetInt32(string parameterName, int? parameterValue) => this.Set(parameterName, parameterValue);
 
-        IParameterBuilder IParameterBuilder.SetXml(string parameterName, XElement parameterValue)
-        {
-            return this.Set(parameterName, parameterValue);
-        }
+        IParameterBuilder IParameterBuilder.SetInt64(string parameterName, long? parameterValue) => this.Set(parameterName, parameterValue);
+
+        IParameterBuilder IParameterBuilder.SetSingle(string parameterName, float? parameterValue) => this.Set(parameterName, parameterValue);
+
+        IParameterBuilder IParameterBuilder.SetDouble(string parameterName, double? parameterValue) => this.Set(parameterName, parameterValue);
+
+        IParameterBuilder IParameterBuilder.SetDecimal(string parameterName, decimal? parameterValue) => this.Set(parameterName, parameterValue);
+
+        IParameterBuilder IParameterBuilder.SetDateTime(string parameterName, DateTime? parameterValue) => this.Set(parameterName, parameterValue);
 
         IParameterBuilder IParameterBuilder.SetString(string parameterName, string parameterValue, bool obfuscate)
         {
@@ -60,15 +44,12 @@ namespace Dibix
 
             return this.Set(parameterName, parameterValue);
         }
-        IParameterBuilder IParameterBuilder.SetBoolean(string parameterName, bool? parameterValue)
-        {
-            return this.Set(parameterName, parameterValue);
-        }
 
-        IParameterBuilder IParameterBuilder.SetStructured(string name, StructuredType value)
-        {
-            return this.Set(name, value);
-        }
+        IParameterBuilder IParameterBuilder.SetBytes(string parameterName, byte[] parameterValue) => this.Set(parameterName, parameterValue);
+
+        IParameterBuilder IParameterBuilder.SetXml(string parameterName, XElement parameterValue) => this.Set(parameterName, parameterValue);
+
+        IParameterBuilder IParameterBuilder.SetStructured(string name, StructuredType parameterValue) => this.Set(name, parameterValue);
 
         IParameterBuilder IParameterBuilder.SetFromTemplate(object template)
         {
@@ -80,6 +61,8 @@ namespace Dibix
             }
             return this;
         }
+
+        IParametersVisitor IParameterBuilder.Build() => new ParametersAccessor(this._parameters);
         #endregion
 
         #region Private Methods
