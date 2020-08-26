@@ -546,7 +546,12 @@ Parameter: input", exception.Message);
         [Fact]
         public void Compile_ConstantSource()
         {
-            IHttpParameterResolutionMethod result = Compile(x => x.ResolveParameterFromConstant("value", true));
+            IHttpParameterResolutionMethod result = Compile(x =>
+            {
+                x.ResolveParameterFromConstant("boolValue", true);
+                x.ResolveParameterFromConstant("intValue", 2);
+                x.ResolveParameterFromNull("nullValue");
+            });
             TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
@@ -557,8 +562,14 @@ Parameter: input", exception.Message);
             ""databaseAccessorFactory"",
             (System.Object)$databaseaccessorfactorySource);
         .Call $arguments.Add(
-            ""value"",
-            (System.Object)True)
+            ""boolValue"",
+            (System.Object)True);
+        .Call $arguments.Add(
+            ""intValue"",
+            (System.Object)2);
+        .Call $arguments.Add(
+            ""nullValue"",
+            (System.Object)null)
     }
 }", result.Source);
             Assert.False(result.Parameters.Any());
@@ -572,12 +583,14 @@ Parameter: input", exception.Message);
 
             result.PrepareParameters(request, arguments, dependencyResolver.Object);
 
-            Assert.Equal(2, arguments.Count);
+            Assert.Equal(4, arguments.Count);
             Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
-            Assert.Equal(true, arguments["value"]);
+            Assert.Equal(true, arguments["boolValue"]);
+            Assert.Equal(2, arguments["intValue"]);
+            Assert.Equal(null, arguments["nullValue"]);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
-        private static void Compile_ConstantSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, bool value) { }
+        private static void Compile_ConstantSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, bool boolValue, int intValue, Guid? nullValue) { }
 
         [Fact]
         public void Compile_UriSource()

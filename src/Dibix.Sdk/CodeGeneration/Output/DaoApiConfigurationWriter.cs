@@ -123,9 +123,13 @@ namespace Dibix.Sdk.CodeGeneration
             char sourceSelectorVariable = parentSourceSelectorVariable ?? 'y';
             switch (value)
             {
-                case ActionParameterConstantSource constant:
-                    string constantValue = constant.Value is bool boolValue ? boolValue.ToString().ToLowerInvariant() : constant.Value.ToString();
-                    writer.WriteLine($"{sourceSelectorVariable}.ResolveParameterFromConstant(\"{parameterName}\", {constantValue});");
+                case ActionParameterConstantSource constant when constant.Value != null:
+                    string constantLiteral = ComputeConstantLiteral(constant);
+                    writer.WriteLine($"{sourceSelectorVariable}.ResolveParameterFromConstant(\"{parameterName}\", {constantLiteral});");
+                    break;
+
+                case ActionParameterConstantSource constant when constant.Value == null:
+                    writer.WriteLine($"{sourceSelectorVariable}.ResolveParameterFromNull(\"{parameterName}\");");
                     break;
 
                 case ActionParameterBodySource body:
@@ -165,6 +169,15 @@ namespace Dibix.Sdk.CodeGeneration
 
                 default:
                     throw new InvalidOperationException($"Unsupported parameter source for {parameterName}: {value.GetType()}");
+            }
+        }
+
+        private static string ComputeConstantLiteral(ActionParameterConstantSource constant)
+        {
+            switch (constant.Value)
+            {
+                case bool boolValue: return boolValue.ToString().ToLowerInvariant();
+                default: return constant.Value.ToString();
             }
         }
         #endregion

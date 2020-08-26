@@ -8,6 +8,7 @@
       "childRoute": "{password}/Fixed",
       "params": {
         "x": "DBX.X",
+        "password": null, 
         "y": true,
         "z": 5
       }

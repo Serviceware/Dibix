@@ -138,8 +138,8 @@ namespace Dibix.Tests
                 Assert.Equal(@"Oops
 CommandType: StoredProcedure
 CommandText: x
-Parameter @a BINARY: System.Byte[]
-Parameter @b [dbo].[x]
+Parameter a(BINARY): System.Byte[]
+Parameter b([dbo].[x]):
 intValue INT(4)  stringValue NVARCHAR(MAX)
 ---------------  -------------------------
 1                I                        
@@ -185,8 +185,8 @@ intValue INT(4)  stringValue NVARCHAR(MAX)
                 Assert.Equal(@"Oops
 CommandType: Text
 CommandText: <Dynamic>
-Parameter @a BINARY: System.Byte[]
-Parameter @b [dbo].[x]
+Parameter a(BINARY): System.Byte[]
+Parameter b([dbo].[x]):
 intValue INT(4)  stringValue NVARCHAR(MAX)
 ---------------  -------------------------
 1                I                        

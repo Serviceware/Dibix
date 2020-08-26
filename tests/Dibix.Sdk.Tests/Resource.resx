@@ -388,6 +388,7 @@ namespace Dibix.Sdk.Tests
                         y.Method = HttpApiMethod.Get;
                         y.ChildRoute = "{password}/Fixed";
                         y.ResolveParameterFromSource("x", "DBX", "X");
+                        y.ResolveParameterFromNull("password");
                         y.ResolveParameterFromConstant("y", true);
                         y.ResolveParameterFromConstant("z", 5);
                     });
@@ -1774,6 +1775,7 @@ namespace Dibix.Sdk.Tests
 // &lt;/auto-generated&gt;
 //----------------------------------------------------------------------------*/
 using System.CodeDom.Compiler;
+using System.Threading;
 using System.Threading.Tasks;
 using Dibix;
 
@@ -1792,7 +1794,7 @@ namespace Dibix.Sdk.Tests
                 // GetSinglePrimitiveResult
                 private const string GetSinglePrimitiveResultCommandText = "SELECT 1";
 
-                public static async Task&lt;bool&gt; GetSinglePrimitiveResultAsync(this IDatabaseAccessorFactory databaseAccessorFactory)
+                public static async Task&lt;bool&gt; GetSinglePrimitiveResultAsync(this IDatabaseAccessorFactory databaseAccessorFactory, CancellationToken cancellationToken = default)
                 {
                     using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                     {

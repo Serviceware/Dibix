@@ -20,6 +20,10 @@ namespace Dibix.Http
         {
             this.ResolveParameter(targetParameterName, new HttpParameterConstantSource(value));
         }
+        public void ResolveParameterFromNull(string targetParameterName)
+        {
+            this.ResolveParameter(targetParameterName, new HttpParameterConstantSource(null));
+        }
         public void ResolveParameterFromSource(string targetParameterName, string sourceName, string sourcePropertyName)
         {
             this.ResolveParameterFromSourceCore(targetParameterName, sourceName, sourcePropertyName, null);

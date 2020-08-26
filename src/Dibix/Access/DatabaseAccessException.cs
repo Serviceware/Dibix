@@ -27,17 +27,39 @@ namespace Dibix
             {
                 sb.AppendLine();
 
-                sb.Append("Parameter @").Append(name);
-                if (suggestedDataType.HasValue)
-                    sb.Append(' ').Append(suggestedDataType.ToString().ToUpperInvariant());
+                sb.Append("Parameter ").Append(name);
 
-                if (value is StructuredType structuredType)
+                string parameterType = null;
+                string parameterDescription = null;
+
+                if (suggestedDataType.HasValue)
+                    parameterType = suggestedDataType.ToString().ToUpperInvariant();
+                else if (value is StructuredType structuredType)
                 {
-                    sb.Append(' ').Append(structuredType.TypeName);
-                    sb.AppendLine().Append(structuredType.Dump());
+                    parameterType = structuredType.TypeName;
+                    parameterDescription = structuredType.Dump();
                 }
-                else    
-                    sb.Append(": ").Append(value);
+
+                if (parameterType != null)
+                {
+                    sb.Append('(')
+                      .Append(parameterType)
+                      .Append(')');
+                }
+                
+                sb.Append(":");
+
+                if (!(value is StructuredType))
+                {
+                    sb.Append(' ')
+                      .Append(value ?? "NULL");
+                }
+
+                if (parameterDescription != null)
+                {
+                    sb.AppendLine()
+                      .Append(parameterDescription);
+                }
             });
 
             return new DatabaseAccessException(sb.ToString(), commandType, commandText, parameters, innerException);

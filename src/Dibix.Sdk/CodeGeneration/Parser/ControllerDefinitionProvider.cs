@@ -162,6 +162,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 case JTokenType.Boolean:
                 case JTokenType.Integer:
+                case JTokenType.Null:
                     ReadConstantSource(property.Name, (JValue)property.Value, target);
                     return true;
 

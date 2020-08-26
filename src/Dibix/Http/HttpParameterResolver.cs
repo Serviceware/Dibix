@@ -413,8 +413,10 @@ namespace Dibix.Http
                     throw new InvalidOperationException($"Value of parameter '{parameter.ParameterName}' could not be resolved");
             }
 
-            if (value.Type != parameter.ParameterType)
+            if (value.Type != parameter.ParameterType && (parameter.SourceKind != HttpParameterSourceKind.ConstantValue || parameter.Value != null))
+            {
                 value = Expression.Call(typeof(HttpParameterResolver), nameof(ConvertValue), new[] { value.Type, parameter.ParameterType }, Expression.Constant(parameter.ParameterName), value);
+            }
 
             return value;
         }

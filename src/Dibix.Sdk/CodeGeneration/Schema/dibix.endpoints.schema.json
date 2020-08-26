@@ -8,10 +8,13 @@
     "ConstantSource": {
       "anyOf": [
         {
+          "type": "boolean"
+        },
+        {
           "type": "number"
         },
         {
-          "type": "boolean"
+          "type": "null"
         }
       ]
     },
