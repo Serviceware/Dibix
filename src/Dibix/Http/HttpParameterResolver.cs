@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net.Http;
@@ -521,7 +522,8 @@ Either create a mapping or make sure a property of the same name exists in the s
         {
             try
             {
-                object result = Convert.ChangeType(value, typeof(TTarget));
+                TypeConverter typeConverter = TypeDescriptor.GetConverter(typeof(TTarget));
+                object result = typeConverter.CanConvertFrom(typeof(TSource)) ? typeConverter.ConvertFrom(value) : Convert.ChangeType(value, typeof(TTarget));
                 return (TTarget)result;
             }
             catch (Exception exception)
