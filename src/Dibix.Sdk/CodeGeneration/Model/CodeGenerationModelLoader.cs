@@ -37,18 +37,6 @@ namespace Dibix.Sdk.CodeGeneration
             IEnumerable<string> normalizedEndpoints = endpoints.Select(x => x.GetFullPath());
             ICollection<string> normalizedReferences = references.Select(x => x.GetFullPath()).ToArray();
 
-            Lazy<TSqlModel> modelAccessor = new Lazy<TSqlModel>(() => PublicSqlDataSchemaModelLoader.Load(databaseSchemaProviderName, modelCollation, source, sqlReferencePath, logger));
-            IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(projectDirectory);
-            ISqlStatementFormatter formatter = embedStatements ? (ISqlStatementFormatter)new TakeSourceSqlStatementFormatter() : new ExecStoredProcedureSqlStatementFormatter();
-            DefaultAssemblyResolver assemblyResolver = new DefaultAssemblyResolver(projectDirectory, normalizedReferences);
-            ITypeResolverFacade typeResolver = new TypeResolverFacade(assemblyResolver, schemaRegistry, logger);
-            IContractDefinitionProvider contractDefinitionProvider = new ContractDefinitionProvider(fileSystemProvider, logger, normalizedContracts, productName, areaName);
-            IUserDefinedTypeProvider userDefinedTypeProvider = new UserDefinedTypeProvider(productName, areaName, normalizedSources, typeResolver, logger);
-
-            schemaRegistry.ImportSchemas(contractDefinitionProvider, userDefinedTypeProvider);
-            typeResolver.Register(new ContractDefinitionSchemaTypeResolver(schemaRegistry, contractDefinitionProvider), 0);
-            typeResolver.Register(new UserDefinedTypeSchemaTypeResolver(schemaRegistry, userDefinedTypeProvider, assemblyResolver), 1);
-
             CodeArtifactsGenerationModel model = new CodeArtifactsGenerationModel(CodeGeneratorCompatibilityLevel.Full)
             {
                 ProjectVersion = projectVersion,
@@ -59,6 +47,20 @@ namespace Dibix.Sdk.CodeGeneration
                 DefaultOutputFilePath = defaultOutputFilePath,
                 ClientOutputFilePath = clientOutputFilePath
             };
+
+            Lazy<TSqlModel> modelAccessor = new Lazy<TSqlModel>(() => PublicSqlDataSchemaModelLoader.Load(databaseSchemaProviderName, modelCollation, source, sqlReferencePath, logger));
+            IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(projectDirectory);
+            ISqlStatementFormatter formatter = embedStatements ? (ISqlStatementFormatter)new TakeSourceSqlStatementFormatter() : new ExecStoredProcedureSqlStatementFormatter();
+            formatter.StripWhiteSpace = model.CommandTextFormatting == CommandTextFormatting.StripWhiteSpace;
+            DefaultAssemblyResolver assemblyResolver = new DefaultAssemblyResolver(projectDirectory, normalizedReferences);
+            ITypeResolverFacade typeResolver = new TypeResolverFacade(assemblyResolver, schemaRegistry, logger);
+            IContractDefinitionProvider contractDefinitionProvider = new ContractDefinitionProvider(fileSystemProvider, logger, normalizedContracts, productName, areaName);
+            IUserDefinedTypeProvider userDefinedTypeProvider = new UserDefinedTypeProvider(productName, areaName, normalizedSources, typeResolver, logger);
+
+            schemaRegistry.ImportSchemas(contractDefinitionProvider, userDefinedTypeProvider);
+            typeResolver.Register(new ContractDefinitionSchemaTypeResolver(schemaRegistry, contractDefinitionProvider), 0);
+            typeResolver.Register(new UserDefinedTypeSchemaTypeResolver(schemaRegistry, userDefinedTypeProvider, assemblyResolver), 1);
+
             model.Statements.AddRange(CollectStatements(normalizedSources, projectDirectory, productName, areaName, embedStatements, formatter, typeResolver, schemaRegistry, logger, modelAccessor));
             model.UserDefinedTypes.AddRange(userDefinedTypeProvider.Types);
             model.Contracts.AddRange(contractDefinitionProvider.Contracts);

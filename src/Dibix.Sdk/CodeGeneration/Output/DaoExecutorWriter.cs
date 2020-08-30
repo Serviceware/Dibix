@@ -61,7 +61,7 @@ namespace Dibix.Sdk.CodeGeneration
                 CSharpModifiers fieldVisibility = context.GeneratePublicArtifacts ? CSharpModifiers.Private : CSharpModifiers.Public;
                 @class.AddField(name: String.Concat(statement.Name, ConstantSuffix)
                               , type: "string"
-                              , value: new CSharpStringValue(CodeGenerationUtility.FormatCommandText(statement.Content, context.Model.CommandTextFormatting), context.Model.CommandTextFormatting.HasFlag(CommandTextFormatting.Verbatim))
+                              , value: new CSharpStringValue(statement.Content, context.Model.CommandTextFormatting == CommandTextFormatting.MultiLine)
                               , modifiers: fieldVisibility | CSharpModifiers.Const);
 
                 if (i + 1 < statements.Count)

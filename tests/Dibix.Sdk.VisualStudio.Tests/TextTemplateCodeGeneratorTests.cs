@@ -17,7 +17,7 @@ namespace Dibix.Sdk.VisualStudio.Tests
                                                               y.Formatter<GenerateScriptSqlStatementFormatter>(); // Uses sql dom script generator
                                                           });
                                                      })
-                                                     .SelectOutputWriter<DaoWriter>(x => { x.Formatting(CommandTextFormatting.Verbatim); }));
+                                                     .SelectOutputWriter<DaoWriter>(x => { x.Formatting(CommandTextFormatting.MultiLine); }));
 
             TestUtility.Evaluate(generated);
         }
@@ -44,7 +44,7 @@ namespace Dibix.Sdk.VisualStudio.Tests
                                                      {
                                                          x.Namespace("This.Is.A.Custom.Namespace")
                                                           .ClassName("Accessor")
-                                                          .Formatting(CommandTextFormatting.Verbatim);
+                                                          .Formatting(CommandTextFormatting.MultiLine);
                                                      }));
 
             TestUtility.Evaluate("SourcesTest", generated);

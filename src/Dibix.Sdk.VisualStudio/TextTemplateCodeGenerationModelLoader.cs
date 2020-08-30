@@ -49,9 +49,6 @@ namespace Dibix.Sdk.VisualStudio
             if (model.DefaultClassName == null)
                 model.DefaultClassName = Path.GetFileNameWithoutExtension(textTemplatingEngineHost.TemplateFile);
 
-            if (model.CommandTextFormatting == default)
-                model.CommandTextFormatting = CommandTextFormatting.Singleline;
-
             return model;
         }
         #endregion

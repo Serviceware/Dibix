@@ -20,5 +20,20 @@
 
             writer.WriteRaw('"');
         }
+
+        protected override string FormatValue(string value) => SanitizeValue(this._verbatim, value);
+
+        internal static string SanitizeValue(bool verbatim, string value)
+        {
+            string sanitized = value;
+            if (!verbatim)
+                sanitized = sanitized.Replace("\\", "\\\\")     // Escape \
+                                     .Replace("\r\n", "\\r\\n") // Escape line breaks
+                                     .Replace("\"", "\\\"");    // Escape "
+            else
+                sanitized = sanitized.Replace("\"", "\"\"");    // Escape "
+            
+            return sanitized;
+        }
     }
 }

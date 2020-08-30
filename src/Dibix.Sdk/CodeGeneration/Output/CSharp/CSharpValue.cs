@@ -11,7 +11,10 @@
 
         public override void Write(StringWriter writer)
         {
-            writer.WriteRaw(this._value);
+            string value = this.FormatValue(this._value);
+            writer.WriteRaw(value);
         }
+
+        protected virtual string FormatValue(string value) => value;
     }
 }

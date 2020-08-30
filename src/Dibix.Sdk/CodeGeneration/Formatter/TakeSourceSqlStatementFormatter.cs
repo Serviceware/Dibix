@@ -8,15 +8,20 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public sealed class TakeSourceSqlStatementFormatter : SqlStatementFormatter, ISqlStatementFormatter
     {
-        public override string Format(SqlStatementInfo info, StatementList statementList)
+        protected override string Format(SqlStatementInfo info, StatementList statementList)
         {
             StringBuilder sb = new StringBuilder();
 
             void StatementHandler(TSqlStatement statement, int statementIndex, int statementCount)
             {
                 if (statementIndex + 1 < statementCount)
-                    sb.AppendLine()
-                      .AppendLine();
+                {
+                    if (base.StripWhiteSpace)
+                        sb.Append(';');
+                    else
+                        sb.AppendLine()
+                          .AppendLine();
+                }
             }
 
             void TokenHandler(TSqlParserToken token)

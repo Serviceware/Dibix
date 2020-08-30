@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Dibix.Sdk.CodeGeneration.CSharp;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -49,9 +50,10 @@ Please make sure the file has the following format: TC_%TESTCASEID%_*");
             base.Execute(%testCaseId%, commandText);
         }";
 
+            bool verbatim = formatting == CommandTextFormatting.MultiLine;
             return template.Replace("%testMethodName%", testMethodName)
-                           .Replace("%prefix%", formatting.HasFlag(CommandTextFormatting.Verbatim) ? "@" : String.Empty)
-                           .Replace("%commandText%", CodeGenerationUtility.FormatCommandText(commandText, formatting))
+                           .Replace("%prefix%", verbatim ? "@" : String.Empty)
+                           .Replace("%commandText%", CSharpStringValue.SanitizeValue(verbatim, commandText))
                            .Replace("%testCaseId%", testCaseId.ToString());
         }
     }

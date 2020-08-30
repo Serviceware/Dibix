@@ -8,7 +8,7 @@
 
         public CodeArtifactsGenerationModel(CodeGeneratorCompatibilityLevel compatibilityLevel) : base(compatibilityLevel)
         {
-            base.CommandTextFormatting = CommandTextFormatting.Singleline;
+            base.CommandTextFormatting = CommandTextFormatting.SingleLine;
         }
     }
 }

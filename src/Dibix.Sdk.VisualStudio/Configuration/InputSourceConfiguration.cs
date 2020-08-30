@@ -23,6 +23,7 @@ namespace Dibix.Sdk.VisualStudio
 
             ISqlStatementParser parser = (ISqlStatementParser)Activator.CreateInstance(this.Parser);
             ISqlStatementFormatter formatter = (ISqlStatementFormatter)Activator.CreateInstance(this.Formatter);
+            formatter.StripWhiteSpace = model.CommandTextFormatting == CommandTextFormatting.StripWhiteSpace;
             foreach (SqlStatementInfo info in this.CollectStatements(parser, formatter, typeResolver, schemaRegistry, logger).Where(x => x != null)) 
                 model.Statements.Add(info);
         }

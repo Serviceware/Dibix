@@ -15,7 +15,11 @@ namespace Dibix.Sdk.CodeGeneration
             typeof(PredicateSetStatement)
         };
 
-        public abstract string Format(SqlStatementInfo info, StatementList statementList);
+        public bool StripWhiteSpace { get; set; }
+
+        string ISqlStatementFormatter.Format(SqlStatementInfo info, StatementList statementList) => this.Format(info, statementList)?.Trim();
+
+        protected abstract string Format(SqlStatementInfo info, StatementList statementList);
 
         protected void CollectStatements(StatementList statementList, Action<TSqlStatement, int, int> statementHandler, Action<TSqlParserToken> tokenHandler = null)
         {
@@ -25,12 +29,23 @@ namespace Dibix.Sdk.CodeGeneration
                 TSqlStatement statement = statements[i];
                 int startIndex = statement.GetFirstTokenIndex();
                 int endIndex = statement.LastTokenIndex;
+
+                bool gotWhiteSpace = false;
                 for (int j = startIndex; j <= endIndex; j++)
                 {
                     TSqlParserToken token = statement.ScriptTokenStream[j];
 
                     if (token.TokenType == TSqlTokenType.WhiteSpace)
-                        token.Text = token.Text.Replace("\t", new string(' ', Indentation));
+                    {
+                        if (this.StripWhiteSpace)
+                            token.Text = !gotWhiteSpace ? " " : null; // Replace subsequent whitespace with one space
+                        else
+                            token.Text = token.Text.Replace("\t", new string(' ', Indentation));
+
+                        gotWhiteSpace = true;
+                    }
+                    else
+                        gotWhiteSpace = false;
 
                     tokenHandler?.Invoke(token);
                 }
