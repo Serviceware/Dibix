@@ -431,7 +431,10 @@ namespace Dibix.Sdk.OpenApi
         {
             OpenApiSchema schema = PrimitiveTypeMap[PrimitiveDataType.Int32]();
             OpenApiArray enumNames = new OpenApiArray();
+
+            schema.Description = String.Join("<br/>", enumContract.Members.Select(x => $"{x.ActualValue} = {x.Name}"));
             schema.Extensions.Add("x-enum-varnames", enumNames);
+            
             foreach (EnumSchemaMember member in enumContract.Members)
             {
                 schema.Enum.Add(new OpenApiInteger(member.ActualValue));
