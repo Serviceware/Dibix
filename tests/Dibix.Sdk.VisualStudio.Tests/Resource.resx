@@ -266,7 +266,7 @@ UNION ALL
             }
         }
 
-        public static dbx_tests_parser_nobeginendResult dbx_tests_parser_nobeginend(this IDatabaseAccessorFactory databaseAccessorFactory, Dibix.Sdk.VisualStudio.Tests.Direction param1)
+        public static dbx_tests_parser_nobeginendResult dbx_tests_parser_nobeginend(this IDatabaseAccessorFactory databaseAccessorFactory, Dibix.Sdk.VisualStudio.Tests.Direction? param1 = null)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {

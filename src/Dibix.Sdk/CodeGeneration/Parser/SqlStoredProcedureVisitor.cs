@@ -82,21 +82,20 @@ Either remove the @GenerateInputClass hint on the statement or the @Obfuscate hi
             if (parameter.Value == null)
                 return;
 
-            if (!(target.Type is PrimitiveTypeReference primitiveTypeReference))
-                throw new InvalidOperationException($@"Unexpected parameter type for default value
-Parameter: {target.Name}
-DataType: {target.Type.GetType()}");
-
-            target.HasDefaultValue = this.TryParseParameterDefaultValue(parameter.Value, primitiveTypeReference.Type, out object defaultValue);
+            target.HasDefaultValue = this.TryParseParameterDefaultValue(parameter.Value, target.Type, out object defaultValue);
             target.DefaultValue = defaultValue;
         }
 
-        private bool TryParseParameterDefaultValue(ScalarExpression value, PrimitiveDataType targetType, out object defaultValue)
+        private bool TryParseParameterDefaultValue(ScalarExpression value, TypeReference targetType, out object defaultValue)
         {
             switch (value)
             {
-                case Literal literal:
-                    return this.TryParseParameterDefaultValue(literal, targetType, out defaultValue);
+                case NullLiteral _:
+                    defaultValue = null;
+                    return true;
+
+                case Literal literal when targetType is PrimitiveTypeReference primitiveTypeReference:
+                    return this.TryParseParameterDefaultValue(literal, primitiveTypeReference.Type, out defaultValue);
 
                 case VariableReference variableReference:
                     defaultValue = variableReference.Name;
@@ -107,11 +106,11 @@ DataType: {target.Type.GetType()}");
             }
         }
 
-        private bool TryParseParameterDefaultValue(Literal literal, PrimitiveDataType targetType, out object defaultValue)
+        private bool TryParseParameterDefaultValue(Literal literal, PrimitiveDataType primitiveType, out object defaultValue)
         {
             switch (literal.LiteralType)
             {
-                case LiteralType.Integer when targetType == PrimitiveDataType.Boolean:
+                case LiteralType.Integer when primitiveType == PrimitiveDataType.Boolean:
                     defaultValue = literal.Value == "1";
                     return true;
 

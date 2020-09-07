@@ -69,6 +69,7 @@ DataType: {dataTypeReference.GetType()}", source, dataTypeReference.StartLine, d
                     if (!String.IsNullOrEmpty(typeImplementationName))
                     {
                         TypeReference typeReference = typeResolver.ResolveType(typeImplementationName, @namespace, source, dataTypeReference.StartLine, dataTypeReference.StartColumn, false);
+                        typeReference.IsNullable = isNullable;
                         return typeReference;
                     }
 

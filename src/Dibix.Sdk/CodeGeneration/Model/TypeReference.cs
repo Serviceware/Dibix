@@ -2,7 +2,7 @@
 {
     public abstract class TypeReference
     {
-        public bool IsNullable { get; }
+        public bool IsNullable { get; set; }
         public bool IsEnumerable { get; }
 
         protected TypeReference(bool isNullable, bool isEnumerable)
