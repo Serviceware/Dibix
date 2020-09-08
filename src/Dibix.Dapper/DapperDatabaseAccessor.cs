@@ -53,12 +53,6 @@ namespace Dibix.Dapper
             return base.Connection.Query(sql, map, parameters.AsDapperParams(), this._transaction, commandType: commandType, splitOn: splitOn);
         }
 
-        protected override Task<IEnumerable<TReturn>> QueryManyAsync<TFirst, TSecond, TThird, TReturn>(string sql, CommandType commandType, IParametersVisitor parameters, Func<TFirst, TSecond, TThird, TReturn> map, string splitOn)
-        {
-            DecoratedTypeMap.Adapt<TFirst, TSecond, TThird>();
-            return base.Connection.QueryAsync(sql, map, parameters.AsDapperParams(), this._transaction, commandType: commandType, splitOn: splitOn);
-        }
-
         protected override IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TReturn>(string sql, CommandType commandType, IParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TReturn> map, string splitOn)
         {
             DecoratedTypeMap.Adapt<TFirst, TSecond, TThird, TFourth>();

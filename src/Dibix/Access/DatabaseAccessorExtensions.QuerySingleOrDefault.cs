@@ -48,12 +48,6 @@ namespace Dibix
             return cache.SingleOrDefault();
         }
 
-        // Configurator: AI (GetConfigurationDesign)
-        public static Task<TReturn> QuerySingleOrDefaultAsync<TReturn, TSecond, TThird>(this IDatabaseAccessor accessor, string sql, string splitOn) where TReturn : new()
-        {
-            Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.QuerySingleOrDefaultAsync<TReturn, TSecond, TThird>(sql, CommandType.Text, EmptyParameters.Instance, splitOn);
-        }
         // BPMNModeler
         public static TReturn QuerySingleOrDefault<TReturn, TSecond, TThird>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, Action<TReturn, TSecond, TThird> map, string splitOn)
         {

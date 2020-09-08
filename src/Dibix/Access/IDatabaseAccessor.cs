@@ -27,7 +27,6 @@ namespace Dibix
         TReturn QuerySingle<TReturn, TSecond, TThird>(string sql, CommandType commandType, IParametersVisitor parameters, string splitOn) where TReturn : new();
         TReturn QuerySingle<TReturn, TSecond, TThird, TFourth>(string sql, CommandType commandType, IParametersVisitor parameters, string splitOn) where TReturn : new();
         T QuerySingleOrDefault<T>(string sql, CommandType commandType, IParametersVisitor parameters);
-        Task<TReturn> QuerySingleOrDefaultAsync<TReturn, TSecond, TThird>(string sql, CommandType commandType, IParametersVisitor parameters, string splitOn) where TReturn : new();
         IMultipleResultReader QueryMultiple(string sql, CommandType commandType, IParametersVisitor parameters);
     }
 }
