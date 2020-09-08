@@ -40,6 +40,10 @@ namespace Dibix
 
                     descriptor.Discriminator = BuildEntityKey(property);
                 }
+                else if (!IsPropertySupported(property))
+                {
+                    continue;
+                }
                 else
                 {
                     EntityProperty entityProperty = BuildEntityProperty(property);
@@ -64,6 +68,15 @@ namespace Dibix
                 descriptor.InitPostProcessor(CompilePostProcessor(type, formattableProperties));
 
             return descriptor;
+        }
+
+        private static bool IsPropertySupported(PropertyInfo property)
+        {
+            // Indexers are currently not supported
+            if (property.GetIndexParameters().Any())
+                return false;
+
+            return true;
         }
 
         private static EntityKey BuildEntityKey(PropertyInfo property)
