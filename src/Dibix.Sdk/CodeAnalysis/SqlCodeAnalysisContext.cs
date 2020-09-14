@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Security.Cryptography;
+using System.Text;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.Dac.Model;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
@@ -33,11 +34,9 @@ namespace Dibix.Sdk.CodeAnalysis
         {
             using (MD5 md5 = MD5.Create())
             {
-                using (Stream stream = File.OpenRead(filename))
-                {
-                    byte[] hash = md5.ComputeHash(stream);
-                    return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
-                }
+                string input = String.Join("\n", File.ReadAllLines(filename));
+                byte[] hash = md5.ComputeHash(Encoding.UTF8.GetBytes(input));
+                return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
             }
         }
     }

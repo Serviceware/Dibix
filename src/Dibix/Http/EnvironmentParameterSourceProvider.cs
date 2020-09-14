@@ -21,8 +21,12 @@ namespace Dibix.Http
 
         public EnvironmentParameterSource()
         {
-            this.MachineName = Dns.GetHostEntry(String.Empty).HostName;
-            this.CurrentProcessId = Process.GetCurrentProcess().Id;
+            this.MachineName = GetMachineName();
+            this.CurrentProcessId = GetProcessId();
         }
+
+        public static string GetMachineName() => Dns.GetHostEntry(String.Empty).HostName;
+
+        public static int GetProcessId() => Process.GetCurrentProcess().Id;
     }
 }

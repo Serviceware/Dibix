@@ -26,8 +26,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         // helpLine suppressions
         private static readonly IDictionary<string, string> Suppressions = new Dictionary<string, string>
         {
-            ["PK_hlspparentprocattrmapping"] = "849a02e49f6cfb93a812208afee0d1ea"
-          , ["UQ_hlsysportalconfig_cfg1"] = "d3ba37ada7794db37d71df4b87547128"
+            ["PK_hlspparentprocattrmapping"] = "9075f64c2381f1bef23969b5438a2e81"
+          , ["UQ_hlsysportalconfig_cfg1"] = "db00f56842f2864e3ece85c61306ede3"
         };
 
         protected override string ErrorMessageTemplate => "{0} index {1} size is {2} bytes. The maximum key length is {3} bytes";

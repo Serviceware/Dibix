@@ -17,27 +17,28 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             ["PK_hlsysobjecdata"] = ""
             
             // Temporary helpLine common blob component workarounds
-          , ["Blob"] = "c1a9c74d497321295a1ed6a008416ced"
-          , ["BlobDetail"] = "3f6d43d6d559c87c6a4ef26086a565f8"
-          , ["fnSplit"] = "fed12bdc66c86181947d415d57434dbf"
-          , ["spBlobSelect"] = "c27de7aa9d50d224e3dd141d652fa33a"
-          , ["spBlobTextSearch"] = "68eeb40f9c2da20652b639a0256ff7b1"
+          , ["Blob"] = "361af17b783120bf3a57eb875ad5fcfd"
+          , ["BlobDetail"] = "571cb352fdd9e58638c888cd8cfb6714"
+          , ["fnSplit"] = "88d0aa3b3a42962c453a447f75ec497e"
+          , ["spBlobSelect"] = "6e96ed9219fddff54c16ad757e32c0c5"
+          , ["spBlobTextSearch"] = "d8fdc1ddf76edad129d6b79b4bb82601"
+
         };
         private static readonly IDictionary<string, string> ColumnSuppressions = new Dictionary<string, string>
         {
-            ["hlsysbaselineattr#fixedvalue2"] = "12df732863664d9e5e27f81f1e78c669"
-          , ["hlsysportalconfig#attrpathapp1"] = "d3ba37ada7794db37d71df4b87547128"
-          , ["hlsysportalconfig#attrpathapp2"] = "d3ba37ada7794db37d71df4b87547128"
-          , ["hlsysportalconfig#attrpathacc1"] = "d3ba37ada7794db37d71df4b87547128"
-          , ["hlsysportalconfig#attrpathacc2"] = "d3ba37ada7794db37d71df4b87547128"
-          , ["hlsysportalconfig#attrpathpassword1"] = "d3ba37ada7794db37d71df4b87547128"
-          , ["hlsysportalconfig#attrpathpassword2"] = "d3ba37ada7794db37d71df4b87547128"
-          , ["hlsysslmservicehoursentry#time1"] = "137d1fc27aa091e2a7cda277d3083c3e"
-          , ["hlsysslmservicehoursentry#time2"] = "137d1fc27aa091e2a7cda277d3083c3e"
-          , ["hlsysslmservicehoursentry#dayofweek1"] = "137d1fc27aa091e2a7cda277d3083c3e"
-          , ["hlsysslmservicehoursentry#dayofweek2"] = "137d1fc27aa091e2a7cda277d3083c3e"
-          , ["hlsysslmservicehoursentry#datetime1"] = "137d1fc27aa091e2a7cda277d3083c3e"
-          , ["hlsysslmservicehoursentry#datetime2"] = "137d1fc27aa091e2a7cda277d3083c3e"
+            ["hlsysbaselineattr#fixedvalue2"] = "655bc34ce38a042f2a76c3cd47bdc35d"
+          , ["hlsysportalconfig#attrpathacc1"] = "db00f56842f2864e3ece85c61306ede3"
+          , ["hlsysportalconfig#attrpathacc2"] = "db00f56842f2864e3ece85c61306ede3"
+          , ["hlsysportalconfig#attrpathapp1"] = "db00f56842f2864e3ece85c61306ede3"
+          , ["hlsysportalconfig#attrpathapp2"] = "db00f56842f2864e3ece85c61306ede3"
+          , ["hlsysportalconfig#attrpathpassword1"] = "db00f56842f2864e3ece85c61306ede3"
+          , ["hlsysportalconfig#attrpathpassword2"] = "db00f56842f2864e3ece85c61306ede3"
+          , ["hlsysslmservicehoursentry#datetime1"] = "94a2e2bcc265aa23080876862d5ef58e"
+          , ["hlsysslmservicehoursentry#datetime2"] = "94a2e2bcc265aa23080876862d5ef58e"
+          , ["hlsysslmservicehoursentry#dayofweek1"] = "94a2e2bcc265aa23080876862d5ef58e"
+          , ["hlsysslmservicehoursentry#dayofweek2"] = "94a2e2bcc265aa23080876862d5ef58e"
+          , ["hlsysslmservicehoursentry#time1"] = "94a2e2bcc265aa23080876862d5ef58e"
+          , ["hlsysslmservicehoursentry#time2"] = "94a2e2bcc265aa23080876862d5ef58e"
         };
         private readonly IDictionary<string, TSqlFragment> _looseConstraintDeclarations;
 

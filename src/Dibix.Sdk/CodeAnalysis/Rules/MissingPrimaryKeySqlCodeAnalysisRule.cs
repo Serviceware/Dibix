@@ -11,9 +11,9 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         // Adding a PK here would be very slow due to the size of the tables
         private static readonly IDictionary<string, string> Suppressions = new Dictionary<string, string>
         {
-            ["hlwfactivityevents"] = "72ba2dc4e62d308ba557ffc9cd634b7b"
-          , ["hlwfinstanceevents"] = "f0446a332d61e5557b635cc3090f9b89"
-          , ["hlwfuserevents"] = "41fa48d0ecec2be844f4c45a416f9615"
+            ["hlwfactivityevents"] = "dce47ae78dd11da1d3ae3d995a22e146"
+          , ["hlwfinstanceevents"] = "7282a66a03bc842c287dafe48c4d63f3"
+          , ["hlwfuserevents"] = "88a7ceb79f31f43c31525ea8cd5a26cc"
         };
 
         protected override string ErrorMessageTemplate => "{0} '{1}' does not have a primary key";
@@ -21,7 +21,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         protected override void Visit(TableModel tableModel, SchemaObjectName tableName, TableDefinition tableDefinition)
         {
             string name = tableName.BaseIdentifier.Value;
-            if (Suppressions.TryGetValue(name, out string hash) && hash == base.Hash) 
+            if (Suppressions.TryGetValue(name, out string hash) && hash == base.Hash)
                 return;
 
             bool hasPrimaryKey = base.Model.HasPrimaryKey(tableModel, tableName);
