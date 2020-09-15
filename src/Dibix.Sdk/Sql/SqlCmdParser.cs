@@ -10,12 +10,12 @@ namespace Dibix.Sdk.Sql
         public static string ProcessSqlCmdScript(string script, out ICollection<string> includes)
         {
             IList<string> _includes = new Collection<string>();
-            string normalizedScript = Regex.Replace(script, @"^:r (?<include>[^\r|\n]+)", x =>
+            string normalizedScript = Regex.Replace(script, @"^:r (?<include>[^\r\n]+)", x =>
             {
                 _includes.Add(x.Groups["include"].Value);
                 return null;
             }, RegexOptions.Multiline);
-            includes = new Collection<string>(_includes); 
+            includes = new Collection<string>(_includes);
             
             return !String.IsNullOrWhiteSpace(normalizedScript) ? normalizedScript : null;
         }

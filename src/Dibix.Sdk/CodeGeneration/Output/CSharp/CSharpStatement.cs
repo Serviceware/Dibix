@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace Dibix.Sdk.CodeGeneration.CSharp
 {
@@ -30,8 +29,7 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
 
         protected static void WriteMultiline(StringWriter writer, string content)
         {
-            content = Regex.Replace(content, @"[^\r](\n)", "\r\n");
-            foreach (string line in content.Split(new[] { Environment.NewLine }, StringSplitOptions.None))
+            foreach (string line in content.Split('\n').Select(x => x.TrimEnd('\r')))
             {
                 if (!String.IsNullOrEmpty(line)) // Don't indent empty lines
                     writer.WriteLine(line);

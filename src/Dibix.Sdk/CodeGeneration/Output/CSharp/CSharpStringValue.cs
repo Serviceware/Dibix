@@ -27,11 +27,12 @@
         {
             string sanitized = value;
             if (!verbatim)
-                sanitized = sanitized.Replace("\\", "\\\\")     // Escape \
-                                     .Replace("\r\n", "\\r\\n") // Escape line breaks
-                                     .Replace("\"", "\\\"");    // Escape "
+                sanitized = sanitized.Replace("\\", "\\\\")  // Escape \
+                                     .Replace("\r", "\\r")   // Escape line breaks
+                                     .Replace("\n", "\\n")   // Escape line breaks
+                                     .Replace("\"", "\\\""); // Escape "
             else
-                sanitized = sanitized.Replace("\"", "\"\"");    // Escape "
+                sanitized = sanitized.Replace("\"", "\"\""); // Escape "
             
             return sanitized;
         }
