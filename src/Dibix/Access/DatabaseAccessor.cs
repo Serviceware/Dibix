@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,6 +13,7 @@ namespace Dibix
     public abstract class DatabaseAccessor : IDatabaseAccessor, IDisposable
     {
         #region Fields
+        private static readonly TraceSource TraceSource = new TraceSource("Dibix.Sql");
         private readonly Action _onDispose;
         #endregion
 
@@ -23,6 +26,9 @@ namespace Dibix
         protected DatabaseAccessor(DbConnection connection, Action onDispose)
         {
             this.Connection = connection;
+            if (this.Connection is SqlConnection sqlConnection)
+                sqlConnection.InfoMessage += OnInfoMessage;
+            
             this._onDispose = onDispose ?? this.DisposeConnection;
         }
         #endregion
@@ -134,11 +140,31 @@ namespace Dibix
             catch (Exception ex) { throw DatabaseAccessException.Create(commandType, sql, parameters, ex); }
         }
 
+        private static void OnInfoMessage(object sender, SqlInfoMessageEventArgs e)
+        {
+            TraceSource.TraceInformation(e.Message);
+        }
+
         private void DisposeConnection() => this.Connection?.Dispose();
         #endregion
 
         #region IDisposable Members
-        void IDisposable.Dispose() => this._onDispose?.Invoke();
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (this.Connection is SqlConnection sqlConnection) 
+                    sqlConnection.InfoMessage -= OnInfoMessage;
+
+                this._onDispose?.Invoke();
+            }
+        }
         #endregion
     }
 }
