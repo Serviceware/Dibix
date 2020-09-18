@@ -16,7 +16,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                 return;
 
             var query = base.Model
-                            .GetConstraints(node.SchemaObjectName)
+                            .GetTableConstraints(node.SchemaObjectName)
                             .Where(x => x.Kind == ConstraintKind.Check)
                             .Select(x => new
                             {

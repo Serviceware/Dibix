@@ -26,26 +26,45 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         // helpLine suppressions
         private static readonly IDictionary<string, string> Suppressions = new Dictionary<string, string>
         {
-            ["PK_hlspparentprocattrmapping"] = "9075f64c2381f1bef23969b5438a2e81"
-          , ["UQ_hlsysportalconfig_cfg1"] = "db00f56842f2864e3ece85c61306ede3"
+            ["PK_hlspparentprocattrmapping"]          = "9075f64c2381f1bef23969b5438a2e81"
+          , ["UQ_hlsysportalconfig_cfg1"]             = "db00f56842f2864e3ece85c61306ede3"
+          , ["PK_hlpe_udt_dynamiclaneconfig"]         = "b5241e20597d7baef6f130a4c4799c2c"
+          , ["PK_hlom_udt_dlgelementassocvalidation"] = "3113993656d9b3c1ff30d1efc5cb8b22"
         };
 
         protected override string ErrorMessageTemplate => "{0} index {1} size is {2} bytes. The maximum key length is {3} bytes";
 
-        public override void Visit(CreateTableStatement node)
+        protected override void Visit(TableModel tableModel, SchemaObjectName tableName, TableDefinition tableDefinition)
         {
-            if (node.IsTemporaryTable())
-                return;
-
-            foreach (Constraint constraint in base.Model.GetConstraints(node.SchemaObjectName))
+            foreach (Constraint constraint in base.Model.GetConstraints(tableModel, tableName))
             {
-                if (constraint.Kind != ConstraintKind.PrimaryKey && constraint.Kind != ConstraintKind.Unique)
-                    continue;
+                string indexName = constraint.Name;
+                switch (constraint.Kind)
+                {
+                    case ConstraintKind.PrimaryKey:
+                    {
+                        if (indexName == null)
+                            indexName = $"PK_{tableName.BaseIdentifier.Value}";
 
-                this.Check(constraint.Source, constraint.IsClustered.Value, constraint.Name, constraint.Columns);
+                        break;
+                    }
+                    
+                    case ConstraintKind.Unique:
+                    {
+                        if (indexName == null)
+                            indexName = $"UQ_{tableName.BaseIdentifier.Value}";
+
+                        break;
+                    }
+
+                    default:
+                        continue;
+                }
+
+                this.Check(constraint.Source, constraint.IsClustered.Value, indexName, constraint.Columns);
             }
 
-            foreach (Index index in base.Model.GetIndexes(node.SchemaObjectName))
+            foreach (Index index in base.Model.GetIndexes(tableModel, tableName))
             {
                 this.Check(index.Source, index.IsClustered, index.Name, index.Columns);
             }

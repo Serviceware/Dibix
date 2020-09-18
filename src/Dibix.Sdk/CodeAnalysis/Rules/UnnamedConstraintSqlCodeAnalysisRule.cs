@@ -13,7 +13,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             if (node.IsTemporaryTable())
                 return;
 
-            foreach (Constraint constraint in base.Model.GetConstraints(node.SchemaObjectName))
+            foreach (Constraint constraint in base.Model.GetTableConstraints(node.SchemaObjectName))
             {
                 if (constraint.Kind == ConstraintKind.Nullable || constraint.Name != null)
                     continue;

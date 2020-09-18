@@ -17,7 +17,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             if (node.IsTemporaryTable())
                 return;
 
-            foreach (Constraint constraint in this.Model.GetConstraints(node.SchemaObjectName))
+            foreach (Constraint constraint in this.Model.GetTableConstraints(node.SchemaObjectName))
             {
                 if (constraint.Kind != ConstraintKind.Check)
                     continue;

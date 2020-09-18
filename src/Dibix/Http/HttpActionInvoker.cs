@@ -35,14 +35,14 @@ namespace Dibix.Http
                 // 
                 // HTTP/1.1 404 NotFound
                 // X-Result-Code: 17
-                if (TryParseHttpError(sqlException, request, out HttpRequestExecutionException httpException))
+                if (TryParseHttpError(exception, sqlException, request, out HttpRequestExecutionException httpException))
                     throw httpException;
 
                 throw;
             }
         }
 
-        private static bool TryParseHttpError(SqlException sqlException, HttpRequestMessage request, out HttpRequestExecutionException exception)
+        private static bool TryParseHttpError(Exception innerException, SqlException sqlException, HttpRequestMessage request, out HttpRequestExecutionException exception)
         {
             if (!HttpErrorResponseParser.TryParseErrorResponse(sqlException.Number, out int statusCode, out int errorCode, out bool isClientError))
             {
@@ -61,7 +61,7 @@ namespace Dibix.Http
                 errorResponse.Content = new StringContent(sqlException.Message);
             }
 
-            exception = new HttpRequestExecutionException(errorResponse, isClientError, sqlException);
+            exception = new HttpRequestExecutionException(errorResponse, isClientError, innerException);
             return true;
         }
     }

@@ -63,7 +63,11 @@ namespace Dibix.Tests
             }
             catch (HttpRequestExecutionException requestException)
             {
-                Assert.Equal("504 GatewayTimeout: Too late", requestException.Message);
+                Assert.Equal(@"504 GatewayTimeout: Too late
+CommandType: 0
+CommandText: <Dynamic>
+", requestException.Message);
+                Assert.IsType<DatabaseAccessException>(requestException.InnerException);
                 Assert.False(requestException.IsClientError);
                 Assert.Equal(HttpStatusCode.GatewayTimeout, requestException.ErrorResponse.StatusCode);
                 Assert.False(requestException.ErrorResponse.Headers.Contains("X-Error-Code"));
@@ -92,7 +96,11 @@ namespace Dibix.Tests
             }
             catch (HttpRequestExecutionException requestException)
             {
-                Assert.Equal("403 Forbidden: Sorry", requestException.Message);
+                Assert.Equal(@"403 Forbidden: Sorry
+CommandType: 0
+CommandText: <Dynamic>
+", requestException.Message);
+                Assert.IsType<DatabaseAccessException>(requestException.InnerException);
                 Assert.True(requestException.IsClientError);
                 Assert.Equal(HttpStatusCode.Forbidden, requestException.ErrorResponse.StatusCode);
                 Assert.Equal("1", requestException.ErrorResponse.Headers.GetValues("X-Error-Code").Single());

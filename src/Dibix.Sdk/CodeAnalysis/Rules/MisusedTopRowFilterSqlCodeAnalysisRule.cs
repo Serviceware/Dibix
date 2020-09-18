@@ -79,7 +79,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             {
                 case NamedTableReference namedTable:
                 {
-                    Constraint primaryKey = base.Model.GetConstraints(namedTable.SchemaObject, throwOnError: false).SingleOrDefault(x => x.Kind == ConstraintKind.PrimaryKey);
+                    Constraint primaryKey = base.Model.GetTableConstraints(namedTable.SchemaObject, throwOnError: false).SingleOrDefault(x => x.Kind == ConstraintKind.PrimaryKey);
                     if (primaryKey != null)
                         return primaryKey.Columns.Select(x => x.Name);
 

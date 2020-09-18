@@ -17,13 +17,12 @@ namespace Dibix.Sdk.Sql
             this._elementLocator = new TSqlElementLocator(new Lazy<TSqlModel>(() => model), scriptFragment, isScriptArtifact);
         }
 
-        public IEnumerable<Constraint> GetConstraints(SchemaObjectName tableName, bool throwOnError = true) => this.GetConstraints(TableModel.Table, tableName, throwOnError);
-        public IEnumerable<Constraint> GetConstraints(TableModel tableDefinition, SchemaObjectName tableName, bool throwOnError = true) => tableDefinition.GetConstraints(this._model, tableName, throwOnError);
+        public IEnumerable<Constraint> GetTableConstraints(SchemaObjectName tableName, bool throwOnError = true) => this.GetConstraints(TableModel.Table, tableName, throwOnError);
+        public IEnumerable<Constraint> GetConstraints(TableModel tableModel, SchemaObjectName tableName, bool throwOnError = true) => tableModel.GetConstraints(this._model, tableName, throwOnError);
 
-        public IEnumerable<Index> GetIndexes(SchemaObjectName tableName) => this.GetIndexes(TableModel.Table, tableName);
-        public IEnumerable<Index> GetIndexes(TableModel tableDefinition, SchemaObjectName tableName) => tableDefinition.GetIndexes(this._model, tableName);
+        public IEnumerable<Index> GetIndexes(TableModel tableModel, SchemaObjectName tableName) => tableModel.GetIndexes(this._model, tableName);
 
-        public bool HasPrimaryKey(TableModel tableDefinition, SchemaObjectName tableName) => tableDefinition.HasPrimaryKeyConstraint(this._model, tableName);
+        public bool HasPrimaryKey(TableModel tableModel, SchemaObjectName tableName) => tableModel.HasPrimaryKeyConstraint(this._model, tableName);
 
         public bool? IsPartOfPrimaryKey(ElementLocation element)
         {

@@ -87,7 +87,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                                                                         .Where(x => x.IdentityOptions != null)
                                                                         .ToDictionary(x => x.ColumnIdentifier.Value, StringComparer.OrdinalIgnoreCase);
 
-            ICollection<Constraint> constraints = base.Model.GetConstraints(node.SchemaObjectName).ToArray();
+            ICollection<Constraint> constraints = base.Model.GetTableConstraints(node.SchemaObjectName).ToArray();
 
             string tableName = node.SchemaObjectName.BaseIdentifier.Value;
             bool hasSurrogateKey = TryGetSurrogateKey(identityColumns.Keys, constraints, out Constraint primaryKey);
