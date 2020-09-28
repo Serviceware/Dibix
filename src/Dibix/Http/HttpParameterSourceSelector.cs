@@ -24,18 +24,18 @@ namespace Dibix.Http
         {
             this.ResolveParameter(targetParameterName, new HttpParameterConstantSource(null));
         }
-        public void ResolveParameterFromSource(string targetParameterName, string sourceName, string sourcePropertyName)
+        public void ResolveParameterFromSource(string targetParameterName, string sourceName, string sourcePropertyPath)
         {
-            this.ResolveParameterFromSourceCore(targetParameterName, sourceName, sourcePropertyName, null);
+            this.ResolveParameterFromSourceCore(targetParameterName, sourceName, sourcePropertyPath, null);
         }
-        public void ResolveParameterFromSource(string targetParameterName, string sourceName, string sourcePropertyName, string converterName)
+        public void ResolveParameterFromSource(string targetParameterName, string sourceName, string sourcePropertyPath, string converterName)
         {
-            this.ResolveParameterFromSourceCore(targetParameterName, sourceName, sourcePropertyName, converterName);
+            this.ResolveParameterFromSourceCore(targetParameterName, sourceName, sourcePropertyPath, converterName);
         }
 
-        protected HttpParameterPropertySource ResolveParameterFromSourceCore(string targetParameterName, string sourceName, string sourcePropertyName, string converterName)
+        protected HttpParameterPropertySource ResolveParameterFromSourceCore(string targetParameterName, string sourceName, string sourcePropertyPath, string converterName)
         {
-            HttpParameterPropertySource source = new HttpParameterPropertySource(sourceName, sourcePropertyName, converterName);
+            HttpParameterPropertySource source = new HttpParameterPropertySource(sourceName, sourcePropertyPath, converterName);
             this.ResolveParameter(targetParameterName, source);
             return source;
         }

@@ -47,7 +47,7 @@
       <SqlBuildInputItem Remove="$(IntermediateTargetFullFileName)" />
       <SqlBuildInputItem Remove="$(IntermediateSymbolsFullFileName)" />
 
-      <_SqlTargetInput Include="$(DibixCliPath)" />
+      <_SqlTargetInput Include="$(DibixToolsDirectory)" />
       <_SqlTargetInput Include="$(MSBuildProjectFullPath)" />
       <_SqlTargetInput Include="$(MSBuildAllProjects)" />
 

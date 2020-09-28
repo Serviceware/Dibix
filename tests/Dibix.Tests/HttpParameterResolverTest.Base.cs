@@ -77,12 +77,18 @@ namespace Dibix.Tests
         {
             public short SourceId { get; set; }
             public int LocaleId { get; set; }
+            public ExplicitHttpBodyDetail Detail { get; set; }
             public ICollection<ExplicitHttpBodyItem> ItemsA { get; }
 
             public ExplicitHttpBody()
             {
                 this.ItemsA = new Collection<ExplicitHttpBodyItem>();
             }
+        }
+
+        private sealed class ExplicitHttpBodyDetail
+        {
+            public int AgentId { get; set; }
         }
 
         private sealed class ExplicitHttpBodyItem
@@ -102,9 +108,15 @@ namespace Dibix.Tests
             public int targetid { get; set; }
         }
 
+        private sealed class HttpBodyDetail
+        {
+            public string Password { get; set; }
+        }
+
         private sealed class HttpBody
         {
             public string Password { get; set; }
+            public HttpBodyDetail Detail { get; set; }
             public ICollection<HttpBodyItem> Items { get; }
 
             public HttpBody()

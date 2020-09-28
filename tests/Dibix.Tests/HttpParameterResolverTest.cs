@@ -147,6 +147,7 @@ Parameter: lcid", exception.Message);
                 x.BodyContract = typeof(ExplicitHttpBody);
                 x.ResolveParameterFromSource("targetid", "BODY", "SourceId");
                 x.ResolveParameterFromSource("lcid", "BODY", "LocaleId");
+                x.ResolveParameterFromSource("agentid", "BODY", "Detail.AgentId");
                 x.ResolveParameterFromSource("itemsa_", "BODY", "ItemsA", y =>
                 {
                     y.ResolveParameterFromSource("id_", "BODY", "LocaleId");
@@ -171,6 +172,9 @@ Parameter: lcid", exception.Message);
         .Call $arguments.Add(
             ""lcid"",
             (System.Object)$bodySource.LocaleId);
+        .Call $arguments.Add(
+            ""agentid"",
+            (System.Object)($bodySource.Detail).AgentId);
         .Call $arguments.Add(
             ""itemsa_"",
             (System.Object).Call Dibix.StructuredType`1[Dibix.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemSet].From(
@@ -206,6 +210,7 @@ Parameter: lcid", exception.Message);
             {
                 SourceId = 7,
                 LocaleId = 1033,
+                Detail = new ExplicitHttpBodyDetail { AgentId = 710 },
                 ItemsA =
                 {
                     new ExplicitHttpBodyItem(1, "X"),
@@ -221,12 +226,13 @@ Parameter: lcid", exception.Message);
 
             result.PrepareParameters(request, arguments, dependencyResolver.Object);
 
-            Assert.Equal(5, arguments.Count);
+            Assert.Equal(6, arguments.Count);
             Assert.Equal(body, arguments["$body"]);
             Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             ExplicitHttpParameterInput input = Assert.IsType<ExplicitHttpParameterInput>(arguments["input"]);
             Assert.Equal(7, input.targetid);
             Assert.Equal(1033, arguments["lcid"]);
+            Assert.Equal(710, arguments["agentid"]);
             ExplicitHttpBodyItemSet itemsa_ = Assert.IsType<ExplicitHttpBodyItemSet>(arguments["itemsa_"]);
             Assert.Equal(@"id_ INT(4)  idx INT(4)  age_ INT(4)  name_ NVARCHAR(MAX)
 ----------  ----------  -----------  -------------------
@@ -234,7 +240,7 @@ Parameter: lcid", exception.Message);
 1033        2           5            Y                  ", itemsa_.Dump());
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
-        private static void Compile_ExplicitBodySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpParameterInput input, int lcid, ExplicitHttpBodyItemSet itemsa_) { }
+        private static void Compile_ExplicitBodySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpParameterInput input, int lcid, int agentid, ExplicitHttpBodyItemSet itemsa_) { }
 
         [Fact]
         public void Compile_ImplicitBodySource()
@@ -348,6 +354,7 @@ Parameter: lcid", exception.Message);
             {
                 x.BodyContract = typeof(HttpBody);
                 x.ResolveParameterFromSource("encryptedpassword", "BODY", "Password", "CRYPT");
+                x.ResolveParameterFromSource("anotherencryptedpassword", "BODY", "Detail.Password", "CRYPT");
                 x.ResolveParameterFromSource("items", "BODY", "Items", y =>
                 {
                     y.ResolveParameterFromSource("encryptedpassword", "ITEM", "Password", "CRYPT");
@@ -368,6 +375,10 @@ Parameter: lcid", exception.Message);
         .Call $arguments.Add(
             ""encryptedpassword"",
             (System.Object).Call Dibix.Tests.HttpParameterResolverTest+EncryptionHttpParameterConverter.Convert($bodySource.Password)
+        );
+        .Call $arguments.Add(
+            ""anotherencryptedpassword"",
+            (System.Object).Call Dibix.Tests.HttpParameterResolverTest+EncryptionHttpParameterConverter.Convert(($bodySource.Detail).Password)
         );
         .Call $arguments.Add(
             ""items"",
@@ -392,6 +403,7 @@ Parameter: lcid", exception.Message);
             object body = new HttpBody
             {
                 Password = "Cake",
+                Detail = new HttpBodyDetail { Password = "Cookie" },
                 Items =
                 {
                     new HttpBodyItem("Item1")
@@ -407,10 +419,11 @@ Parameter: lcid", exception.Message);
 
             result.PrepareParameters(request, arguments, dependencyResolver.Object);
 
-            Assert.Equal(4, arguments.Count);
+            Assert.Equal(5, arguments.Count);
             Assert.Equal(body, arguments["$body"]);
             Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             Assert.Equal("ENCRYPTED(Cake)", arguments["encryptedpassword"]);
+            Assert.Equal("ENCRYPTED(Cookie)", arguments["anotherencryptedpassword"]);
             HttpBodyItemSet items = Assert.IsType<HttpBodyItemSet>(arguments["items"]);
             Assert.Equal(@"encryptedpassword NVARCHAR(MAX)
 -------------------------------
@@ -418,7 +431,7 @@ ENCRYPTED(Item1)
 ENCRYPTED(Item2)               ", items.Dump());
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
-        private static void Compile_BodySource_WithConverter_Target(IDatabaseAccessorFactory databaseAccessorFactory, string encryptedpassword, HttpBodyItemSet items) { }
+        private static void Compile_BodySource_WithConverter_Target(IDatabaseAccessorFactory databaseAccessorFactory, string encryptedpassword, string anotherencryptedpassword, HttpBodyItemSet items) { }
         
         [Fact]
         public void Compile_BodyConverter()

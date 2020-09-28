@@ -140,7 +140,7 @@ namespace Dibix.Http
                         if (!String.IsNullOrEmpty(propertySource.ConverterName))
                             converter = GetConverter(propertySource.ConverterName);
 
-                        return HttpParameterInfo.SourceProperty(contractParameter, parameterType, parameterName, propertySource.SourceName, sourceProvider, propertySource.PropertyName, propertySource.ConverterName, converter);
+                        return HttpParameterInfo.SourceProperty(contractParameter, parameterType, parameterName, propertySource.SourceName, sourceProvider, propertySource.PropertyPath, propertySource.ConverterName, converter);
                     }
 
                     return CollectItemsParameter(contractParameter, parameterType, parameterName, propertySource, sourceProvider);
@@ -211,7 +211,7 @@ namespace Dibix.Http
 
                 return CollectExplicitParameter(x.Value, null, itemParameterType, x.Key);
             });
-            return HttpParameterInfo.SourcePropertyItemsSource(contractParameter, parameterType, parameterName, sourceProvider, propertySource.SourceName, propertySource.PropertyName, udtName, addMethod, itemSources);
+            return HttpParameterInfo.SourcePropertyItemsSource(contractParameter, parameterType, parameterName, sourceProvider, propertySource.SourceName, propertySource.PropertyPath, udtName, addMethod, itemSources);
         }
 
         private static IDictionary<string, HttpParameterSourceExpression> CollectParameterSources(HttpActionDefinition action, IEnumerable<HttpParameterInfo> @params, ParameterExpression requestParameter, ParameterExpression argumentsParameter, ParameterExpression dependencyResolverParameter, HttpParameterResolverCompilationContext context)
@@ -397,16 +397,14 @@ namespace Dibix.Http
                     value = source.Variable;
                     if (parameter.SourceKind == HttpParameterSourceKind.SourceProperty)
                     {
-                        MemberExpression sourcePropertyExpression = Expression.Property(value, parameter.Source.PropertyName);
-                        if (parameter.Items != null)
-                            value = CollectItemsParameterValue(parameter, sourcePropertyExpression, sources);
-                        else
+                        foreach (string propertyName in parameter.Source.PropertyPath.Split('.'))
                         {
-                            value = sourcePropertyExpression;
-
-                            if (parameter.Converter != null)
-                                value = parameter.Converter.ConvertValue(value);
+                            MemberExpression sourcePropertyExpression = Expression.Property(value, propertyName);
+                            value = parameter.Items != null ? CollectItemsParameterValue(parameter, sourcePropertyExpression, sources) : sourcePropertyExpression;
                         }
+
+                        if (parameter.Converter != null)
+                            value = parameter.Converter.ConvertValue(value);
                     }
                     break;
 
@@ -437,7 +435,7 @@ namespace Dibix.Http
             {
                 HttpParameterInfo itemParameter;
                 ParameterExpression itemSourceVariable;
-                if (itemSource.SourceKind == HttpParameterSourceKind.SourceProperty && itemSource.Source.PropertyName == ItemIndexPropertyName) // ITEM.$INDEX => i
+                if (itemSource.SourceKind == HttpParameterSourceKind.SourceProperty && itemSource.Source.PropertyPath == ItemIndexPropertyName) // ITEM.$INDEX => i
                 {
                     itemParameter = HttpParameterInfo.SourceInstance(itemSource.ParameterType, itemSource.ParameterName, null, ItemSourceName);
                     itemSourceVariable = addItemFuncIndexParameter;
@@ -457,7 +455,7 @@ namespace Dibix.Http
                 PropertyInfo property = itemType.GetProperty(addMethodParameter.Key, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
                 if (property == null)
                     throw new InvalidOperationException($@"Can not map UDT column: {parameter.Items.UdtName ?? parameter.ParameterType.ToString()}.{addMethodParameter.Key}
-Either create a mapping or make sure a property of the same name exists in the source: {parameter.Source.Name}.{parameter.Source.PropertyName}");
+Either create a mapping or make sure a property of the same name exists in the source: {parameter.Source.Name}.{parameter.Source.PropertyPath}");
 
                 Expression source = Expression.Property(addItemFuncItemParameter, property);
                 Type targetType = addMethodParameterTypes[addMethodParameter.Key];
@@ -642,8 +640,8 @@ Either create a mapping or make sure a property of the same name exists in the s
 
             public static HttpParameterInfo Uri(ParameterInfo contractParameter, Type parameterType, string parameterName, bool isOptional) => new HttpParameterInfo(true, HttpParameterSourceKind.Uri, contractParameter, parameterType, parameterName, null, isOptional, null, null, null, null);
             public static HttpParameterInfo SourceInstance(Type parameterType, string parameterName, IHttpParameterSourceProvider sourceProvider, string sourceName) => new HttpParameterInfo(false, HttpParameterSourceKind.SourceInstance, null, parameterType, parameterName, null, false, null, new HttpParameterSourceInfo(sourceName, sourceProvider), null, null);
-            public static HttpParameterInfo SourceProperty(ParameterInfo contractParameter, Type parameterType, string parameterName, string sourceName, IHttpParameterSourceProvider sourceProvider, string sourcePropertyName, string converterName, IHttpParameterConverter converter) => new HttpParameterInfo(false, HttpParameterSourceKind.SourceProperty, contractParameter, parameterType, parameterName, null, false, null, new HttpParameterSourceInfo(sourceName, sourceProvider, sourcePropertyName), converter, null);
-            public static HttpParameterInfo SourcePropertyItemsSource(ParameterInfo contractParameter, Type parameterType, string parameterName, IHttpParameterSourceProvider sourceProvider, string sourceName, string sourcePropertyName, string udtName, MethodInfo addItemMethod, IEnumerable<HttpParameterInfo> itemSources) => new HttpParameterInfo(false, HttpParameterSourceKind.SourceProperty, contractParameter, parameterType, parameterName, null, false, null, new HttpParameterSourceInfo(sourceName, sourceProvider, sourcePropertyName), null, new HttpItemsParameterInfo(udtName, addItemMethod, itemSources));
+            public static HttpParameterInfo SourceProperty(ParameterInfo contractParameter, Type parameterType, string parameterName, string sourceName, IHttpParameterSourceProvider sourceProvider, string sourcePropertyPath, string converterName, IHttpParameterConverter converter) => new HttpParameterInfo(false, HttpParameterSourceKind.SourceProperty, contractParameter, parameterType, parameterName, null, false, null, new HttpParameterSourceInfo(sourceName, sourceProvider, sourcePropertyPath), converter, null);
+            public static HttpParameterInfo SourcePropertyItemsSource(ParameterInfo contractParameter, Type parameterType, string parameterName, IHttpParameterSourceProvider sourceProvider, string sourceName, string sourcePropertyPath, string udtName, MethodInfo addItemMethod, IEnumerable<HttpParameterInfo> itemSources) => new HttpParameterInfo(false, HttpParameterSourceKind.SourceProperty, contractParameter, parameterType, parameterName, null, false, null, new HttpParameterSourceInfo(sourceName, sourceProvider, sourcePropertyPath), null, new HttpItemsParameterInfo(udtName, addItemMethod, itemSources));
             public static HttpParameterInfo ConstantValue(ParameterInfo contractParameter, Type parameterType, string parameterName, object value) => new HttpParameterInfo(false, HttpParameterSourceKind.ConstantValue, contractParameter, parameterType, parameterName, value, false, null, null, null, null);
             public static HttpParameterInfo Body(ParameterInfo contractParameter, Type parameterType, string parameterName, Type inputConverter = null) => new HttpParameterInfo(false, HttpParameterSourceKind.Body, contractParameter, parameterType, parameterName, null, false, inputConverter, null, null, null);
         }
@@ -662,13 +660,13 @@ Either create a mapping or make sure a property of the same name exists in the s
         {
             public string Name { get; }
             public IHttpParameterSourceProvider Instance { get; }
-            public string PropertyName { get; }
+            public string PropertyPath { get; }
 
-            public HttpParameterSourceInfo(string name, IHttpParameterSourceProvider instance, string propertyName = null)
+            public HttpParameterSourceInfo(string name, IHttpParameterSourceProvider instance, string propertyPath = null)
             {
                 this.Name = name;
                 this.Instance = instance;
-                this.PropertyName = propertyName;
+                this.PropertyPath = propertyPath;
             }
         }
 
