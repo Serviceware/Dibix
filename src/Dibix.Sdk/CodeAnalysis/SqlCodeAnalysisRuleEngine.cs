@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Dibix.Sdk.CodeGeneration;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.Dac.Model;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Dibix.Sdk.CodeAnalysis
 {
@@ -16,6 +20,7 @@ namespace Dibix.Sdk.CodeAnalysis
         private readonly SqlCodeAnalysisConfiguration _configuration;
         private readonly ILogger _logger;
         private readonly ICollection<Func<SqlCodeAnalysisContext, IEnumerable<SqlCodeAnalysisError>>> _rules;
+        private readonly ICollection<SqlCodeAnalysisSuppression> _suppressions;
         #endregion
 
         #region Constructor
@@ -25,6 +30,7 @@ namespace Dibix.Sdk.CodeAnalysis
             this._configuration = configuration;
             this._logger = logger;
             this._rules = ScanRules().ToArray();
+            this._suppressions = LoadSuppressions().ToArray();
         }
         #endregion
 
@@ -67,7 +73,7 @@ namespace Dibix.Sdk.CodeAnalysis
 
         private SqlCodeAnalysisContext CreateContext(string source, TSqlFragment fragment, bool isScriptArtifact)
         {
-            return new SqlCodeAnalysisContext(this._model, source, fragment, isScriptArtifact, this._configuration, this._logger);
+            return new SqlCodeAnalysisContext(this._model, source, fragment, isScriptArtifact, this._configuration, this._logger, this._suppressions);
         }
 
         private static IEnumerable<Func<SqlCodeAnalysisContext, IEnumerable<SqlCodeAnalysisError>>> ScanRules()
@@ -82,6 +88,29 @@ namespace Dibix.Sdk.CodeAnalysis
                 Func<SqlCodeAnalysisContext, IEnumerable<SqlCodeAnalysisError>> compiled = lambda.Compile();
                 return compiled;
             });
+        }
+
+        private static IEnumerable<SqlCodeAnalysisSuppression> LoadSuppressions()
+        {
+            Type type = typeof(JsonSchemaDefinition);
+            string resourcePath = $"{typeof(SqlCodeAnalysisRuleEngine).Namespace}.Suppressions.json";
+            using (Stream stream = type.Assembly.GetManifestResourceStream(resourcePath))
+            {
+                using (TextReader textReader = new StreamReader(stream))
+                {
+                    using (JsonReader jsonReader = new JsonTextReader(textReader))
+                    {
+                        JObject json = JObject.Load(jsonReader);
+                        foreach (JProperty rule in json.Properties())
+                        {
+                            foreach (JProperty suppression in ((JObject)rule.Value).Properties())
+                            {
+                                yield return new SqlCodeAnalysisSuppression(rule.Name, suppression.Name, (string)((JValue)suppression.Value).Value);
+                            }
+                        }
+                    }
+                }
+            }
         }
         #endregion
     }

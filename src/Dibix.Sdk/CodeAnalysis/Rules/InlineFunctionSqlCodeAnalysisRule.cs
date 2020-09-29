@@ -12,22 +12,6 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         private const bool AllowNonInlineTableValuedFunctions = false;
         private readonly IDictionary<int, FunctionCall> _scalarFunctionCalls = new Dictionary<int, FunctionCall>();
 
-        // helpLine suppressions
-        private static readonly IDictionary<string, string> Suppressions = new Dictionary<string, string>
-        {
-            ["fnSplit"] = "88d0aa3b3a42962c453a447f75ec497e"
-          , ["hlsysattachment_query_data_case"] = "ee90fe914cfeb0db00052a05c8665c20"
-          , ["hlsysattachment_query_data_contract"] = "443884f67d3aba91ff1e349cd5e9ecd0"
-          , ["hlsysattachment_query_data_orgunit"] = "263a497418d134308f88fc9a614b7a41"
-          , ["hlsysattachment_query_data_person"] = "5c96c38d8ace9da3946867a743344ecf"
-          , ["hlsysattachment_query_data_product"] = "127f67d043cfa9c54a977813a2e5271b"
-          , ["hlsysattachment_query_data_su"] = "a137b10bac21a9873f71e91e97c85420"
-          , ["hlsysgetusercontext"] = "83638772ba6add448f0130e609531cf4"
-          , ["hlsyssec_query_agentsystemacl"] = "40a02f1fc6a88990d13827c3567e5b15"
-          , ["hlsysum_getcentraladminorgunits"] = "31d880c73db362bc15cf338c33dee422"
-          , ["hltm_getreceiversfortask"] = "85d0a2eb6f719bb4c987c1ecaf4d327b"
-        };
-
         protected override string ErrorMessageTemplate => "{0}";
 
         protected override void BeginStatement(TSqlScript node)
@@ -51,7 +35,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                 return;
 
             string name = node.Name.BaseIdentifier.Value;
-            if (Suppressions.TryGetValue(name, out string hash) && hash == base.Hash) 
+            if (base.IsSuppressed(name))
                 return;
 
             base.Fail(node, $"Make non inline table valued function inline or replace it with a stored procedure: {name}");

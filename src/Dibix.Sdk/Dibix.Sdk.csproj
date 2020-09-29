@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="CodeAnalysis\Suppressions.json" />
     <EmbeddedResource Include="CodeGeneration\Schema\dibix.contracts.schema.json" PackagePath="content/dibix.contracts.schema.json" />
     <EmbeddedResource Include="CodeGeneration\Schema\dibix.endpoints.schema.json" PackagePath="content/dibix.endpoints.schema.json" />
     <Compile Include="..\Dibix\Collections\FuncEqualityComparer.cs" Link="Collections\FuncEqualityComparer.cs" />

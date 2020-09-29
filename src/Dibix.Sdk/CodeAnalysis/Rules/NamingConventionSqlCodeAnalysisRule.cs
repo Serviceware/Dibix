@@ -10,36 +10,6 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     [SqlCodeAnalysisRule(id: 17)]
     public sealed class NamingConventionSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
-        // helpLine suppressions
-        private static readonly IDictionary<string, string> Suppressions = new Dictionary<string, string>
-        {
-            // Renaming this PK would force rebuilding the full text catalog which would be very slow
-            ["PK_hlsysobjecdata"] = ""
-            
-            // Temporary helpLine common blob component workarounds
-          , ["Blob"] = "361af17b783120bf3a57eb875ad5fcfd"
-          , ["BlobDetail"] = "571cb352fdd9e58638c888cd8cfb6714"
-          , ["fnSplit"] = "88d0aa3b3a42962c453a447f75ec497e"
-          , ["spBlobSelect"] = "6e96ed9219fddff54c16ad757e32c0c5"
-          , ["spBlobTextSearch"] = "d8fdc1ddf76edad129d6b79b4bb82601"
-
-        };
-        private static readonly IDictionary<string, string> ColumnSuppressions = new Dictionary<string, string>
-        {
-            ["hlsysbaselineattr#fixedvalue2"] = "655bc34ce38a042f2a76c3cd47bdc35d"
-          , ["hlsysportalconfig#attrpathacc1"] = "db00f56842f2864e3ece85c61306ede3"
-          , ["hlsysportalconfig#attrpathacc2"] = "db00f56842f2864e3ece85c61306ede3"
-          , ["hlsysportalconfig#attrpathapp1"] = "db00f56842f2864e3ece85c61306ede3"
-          , ["hlsysportalconfig#attrpathapp2"] = "db00f56842f2864e3ece85c61306ede3"
-          , ["hlsysportalconfig#attrpathpassword1"] = "db00f56842f2864e3ece85c61306ede3"
-          , ["hlsysportalconfig#attrpathpassword2"] = "db00f56842f2864e3ece85c61306ede3"
-          , ["hlsysslmservicehoursentry#datetime1"] = "94a2e2bcc265aa23080876862d5ef58e"
-          , ["hlsysslmservicehoursentry#datetime2"] = "94a2e2bcc265aa23080876862d5ef58e"
-          , ["hlsysslmservicehoursentry#dayofweek1"] = "94a2e2bcc265aa23080876862d5ef58e"
-          , ["hlsysslmservicehoursentry#dayofweek2"] = "94a2e2bcc265aa23080876862d5ef58e"
-          , ["hlsysslmservicehoursentry#time1"] = "94a2e2bcc265aa23080876862d5ef58e"
-          , ["hlsysslmservicehoursentry#time2"] = "94a2e2bcc265aa23080876862d5ef58e"
-        };
         private readonly IDictionary<string, TSqlFragment> _looseConstraintDeclarations;
 
         protected override string ErrorMessageTemplate => "{0}";
@@ -87,7 +57,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                 if (Regex.IsMatch(column.ColumnIdentifier.Value, NamingConventions.Column.Pattern))
                     continue;
 
-                if (ColumnSuppressions.TryGetValue($"{tableName.BaseIdentifier.Value}#{column.ColumnIdentifier.Value}", out string hash) && hash == base.Hash) 
+                if (base.IsSuppressed($"{tableName.BaseIdentifier.Value}#{column.ColumnIdentifier.Value}")) 
                     continue;
 
                 base.Fail(column, $"Column names should only contain the characters 'a-z_' and have no trailing underscores: {tableName.BaseIdentifier.Value}.{column.ColumnIdentifier.Value}");
@@ -186,7 +156,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             if (Regex.IsMatch(name, mask))
                 return;
 
-            if (Suppressions.TryGetValue(name, out string hash) && hash == base.Hash) 
+            if (base.IsSuppressed(name))
                 return;
 
             failAction(target, new object[] { $"{displayName} '{name}' does not match naming convention '{description}'. Also make sure the name is all lowercase." });
