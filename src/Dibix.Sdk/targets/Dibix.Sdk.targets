@@ -129,7 +129,12 @@ $(_SqlReferencePath)" />
 
     <WriteLinesToFile File="$(_SqlCodeAnalysisInputFile)" Lines="@(_SqlCodeAnalysisInputItem)" Overwrite="True" />
 
-    <Exec Command="$(DibixCliPath) analyze &quot;$(_SqlCodeAnalysisInputFile)&quot;" />
+    <PropertyGroup>
+      <_SqlCodeAnalysisCommand>$(DibixCliPath) analyze "$(_SqlCodeAnalysisInputFile)"</_SqlCodeAnalysisCommand>
+      <_SqlCodeAnalysisCommand Condition="'$(ResetSuppressions)' != ''">$(_SqlCodeAnalysisCommand) -s $(ResetSuppressions)</_SqlCodeAnalysisCommand>
+    </PropertyGroup>
+
+    <Exec Command="$(_SqlCodeAnalysisCommand)" />
   </Target>
 
   <!-- Compile database accessors for stored procedures including their contracts and an API endpoint configuration -->

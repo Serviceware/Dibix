@@ -19,7 +19,7 @@ namespace Dibix.Sdk.CodeAnalysis
           , ILogger logger
         )
         {
-            ISqlCodeAnalysisRuleEngine codeAnalysisEngine = SqlCodeAnalysisRuleEngine.Create(databaseSchemaProviderName, modelCollation, namingConventionPrefix, source, sqlReferencePath, logger);
+            SqlCodeAnalysisRuleEngine codeAnalysisEngine = SqlCodeAnalysisRuleEngine.Create(databaseSchemaProviderName, modelCollation, namingConventionPrefix, source, sqlReferencePath, logger);
             if (logger.HasLoggedErrors)
                 return false;
 
@@ -30,6 +30,8 @@ namespace Dibix.Sdk.CodeAnalysis
             }
 
             AnalyzeScripts(null, scriptSource.Select(x => x.GetFullPath()), codeAnalysisEngine, logger);
+
+            codeAnalysisEngine.ResetSuppressions();
 
             return !logger.HasLoggedErrors;
         }

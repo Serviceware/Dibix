@@ -9,14 +9,14 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     public sealed class RedundantSymbolSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
         private readonly IDictionary<string, DeclareVariableElement> _variables;
-        private readonly ICollection<int> _suppressions;
+        private readonly IDictionary<int, ParameterReference> _parameterReferences;
 
         protected override string ErrorMessageTemplate => "Unused {0}: {1}";
 
         public RedundantSymbolSqlCodeAnalysisRule()
         {
             this._variables = new Dictionary<string, DeclareVariableElement>();
-            this._suppressions = new HashSet<int>();
+            this._parameterReferences = new Dictionary<int, ParameterReference>();
         }
 
         protected override void BeginBatch(TSqlBatch node)
@@ -24,7 +24,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             VariableVisitor visitor = new VariableVisitor();
             node.Accept(visitor);
             this._variables.ReplaceWith(visitor.Variables.ToDictionary(x => x.VariableName.Value));
-            this._suppressions.ReplaceWith(visitor.ParameterReferences.Where(x => base.IsSuppressed(x.Key)).Select(x => x.Value));
+            this._parameterReferences.ReplaceWith(visitor.ParameterReferences.ToDictionary(x => x.Parameter.StartOffset));
         }
 
         public override void Visit(VariableReference node) => this._variables.Remove(node.Name);
@@ -33,22 +33,25 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         {
             foreach (DeclareVariableElement unusedVariable in this._variables.Values)
             {
-                if (this._suppressions.Contains(unusedVariable.StartOffset))
-                    continue;
-
-                base.Fail(unusedVariable, unusedVariable is ProcedureParameter ? "parameter" : "variable", unusedVariable.VariableName.Value);
+                if (this._parameterReferences.TryGetValue(unusedVariable.StartOffset, out ParameterReference parameterReference))
+                {
+                    string suppressionKey = $"{parameterReference.BaseName}{parameterReference.Parameter.VariableName.Value}";
+                    base.FailIfUnsuppressed(unusedVariable, suppressionKey, "parameter", unusedVariable.VariableName.Value);
+                }
+                else
+                    base.Fail(unusedVariable, "variable", unusedVariable.VariableName.Value);
             }
         }
 
         private sealed class VariableVisitor : TSqlFragmentVisitor
         {
             public ICollection<DeclareVariableElement> Variables { get; }
-            public IDictionary<string, int> ParameterReferences { get; }
+            public ICollection<ParameterReference> ParameterReferences { get; }
 
             public VariableVisitor()
             {
                 this.Variables = new Collection<DeclareVariableElement>();
-                this.ParameterReferences = new Dictionary<string, int>();
+                this.ParameterReferences = new Collection<ParameterReference>();
             }
 
             public override void Visit(DeclareVariableElement node) => this.Variables.Add(node);
@@ -58,7 +61,19 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             private void AddParameterReferences(SchemaObjectName name, IEnumerable<ProcedureParameter> parameters)
             {
                 foreach (ProcedureParameter parameter in parameters) 
-                    this.ParameterReferences.Add($"{name.BaseIdentifier.Value}{parameter.VariableName.Value}", parameter.StartOffset);
+                    this.ParameterReferences.Add(new ParameterReference(name.BaseIdentifier.Value, parameter));
+            }
+        }
+
+        private sealed class ParameterReference
+        {
+            public string BaseName { get; }
+            public ProcedureParameter Parameter { get; }
+
+            public ParameterReference(string baseName, ProcedureParameter parameter)
+            {
+                this.BaseName = baseName;
+                this.Parameter = parameter;
             }
         }
     }

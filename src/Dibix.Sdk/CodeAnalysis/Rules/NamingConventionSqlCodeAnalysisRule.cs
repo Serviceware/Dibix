@@ -57,10 +57,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                 if (Regex.IsMatch(column.ColumnIdentifier.Value, NamingConventions.Column.Pattern))
                     continue;
 
-                if (base.IsSuppressed($"{tableName.BaseIdentifier.Value}#{column.ColumnIdentifier.Value}")) 
-                    continue;
-
-                base.Fail(column, $"Column names should only contain the characters 'a-z_' and have no trailing underscores: {tableName.BaseIdentifier.Value}.{column.ColumnIdentifier.Value}");
+                string suppressionKey = $"{tableName.BaseIdentifier.Value}#{column.ColumnIdentifier.Value}";
+                base.FailIfUnsuppressed(column, suppressionKey, $"Column names should only contain the characters 'a-z_' and have no trailing underscores: {tableName.BaseIdentifier.Value}.{column.ColumnIdentifier.Value}");
             }
 
             this.VisitConstraints(tableModel, tableName, tableDefinition);
@@ -147,19 +145,16 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             }
         }
 
-        private void Check(SchemaObjectName schemaObjectName, NamingConvention namingConvention, string displayName) => this.Check(schemaObjectName.BaseIdentifier.Value, namingConvention, null, base.Fail, schemaObjectName.BaseIdentifier, displayName);
-        private void Check(string name, NamingConvention namingConvention, Action<PatternNormalizer> replacements, TSqlFragment target, string displayName) => this.Check(name, namingConvention, replacements, base.Fail, target, displayName);
-        private void Check<T>(string name, NamingConvention namingConvention, Action<PatternNormalizer> replacements, Action<T, object[]> failAction, T target, string displayName)
+        private void Check(SchemaObjectName schemaObjectName, NamingConvention namingConvention, string displayName) => this.Check(schemaObjectName.BaseIdentifier.Value, namingConvention, null, base.FailIfUnsuppressed, schemaObjectName.BaseIdentifier, displayName);
+        private void Check(string name, NamingConvention namingConvention, Action<PatternNormalizer> replacements, TSqlFragment target, string displayName) => this.Check(name, namingConvention, replacements, base.FailIfUnsuppressed, target, displayName);
+        private void Check<T>(string name, NamingConvention namingConvention, Action<PatternNormalizer> replacements, Action<T, string, object[]> failAction, T target, string displayName)
         {
             string mask = namingConvention.NormalizePattern(base.Configuration, replacements);
             string description = namingConvention.NormalizeDescription(this.Configuration);
             if (Regex.IsMatch(name, mask))
                 return;
 
-            if (base.IsSuppressed(name))
-                return;
-
-            failAction(target, new object[] { $"{displayName} '{name}' does not match naming convention '{description}'. Also make sure the name is all lowercase." });
+            failAction(target, name, new object[] { $"{displayName} '{name}' does not match naming convention '{description}'. Also make sure the name is all lowercase." });
         }
 
         private static NamingConvention GetNamingConvention(ConstraintKind constraintKind)

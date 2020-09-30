@@ -11,12 +11,10 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         protected override void Visit(TableModel tableModel, SchemaObjectName tableName, TableDefinition tableDefinition)
         {
             string name = tableName.BaseIdentifier.Value;
-            if (base.IsSuppressed(name))
-                return;
-
             bool hasPrimaryKey = base.Model.HasPrimaryKey(tableModel, tableName);
+
             if (!hasPrimaryKey)
-                base.Fail(tableDefinition, tableModel.TypeDisplayName, name);
+                base.FailIfUnsuppressed(tableDefinition, name, tableModel.TypeDisplayName, name);
         }
     }
 }

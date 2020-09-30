@@ -61,14 +61,11 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                 if (PrimaryKeyDataType.AllowedTypes.Contains(column.SqlDataType))
                     continue;
 
-                if (base.IsSuppressed(identifier))
-                    continue;
-                
                 string dataTypeName = column.SqlDataType != SqlDataType.Unknown ? column.SqlDataType.ToString() : column.DataTypeName;
                 if (primaryKey.Name != null && this._primaryKeyColumnLocations.TryGetValue($"{primaryKey.Name}.{column.Name}", out TSqlFragment target))
-                    base.Fail(target, actualTableName, column.Name, dataTypeName.ToUpperInvariant());
+                    base.FailIfUnsuppressed(target, identifier, actualTableName, column.Name, dataTypeName.ToUpperInvariant());
                 else
-                    base.Fail(column.Source, actualTableName, column.Name, dataTypeName.ToUpperInvariant());
+                    base.FailIfUnsuppressed(column.Source, identifier, actualTableName, column.Name, dataTypeName.ToUpperInvariant());
             }
         }
 

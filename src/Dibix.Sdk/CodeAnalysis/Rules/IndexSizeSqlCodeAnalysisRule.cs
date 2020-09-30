@@ -83,10 +83,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             if (length <= maxSize)
                 return;
 
-            if (base.IsSuppressed(indexName))
-                return;
-
-            base.Fail(source, kind, indexName, length, maxSize);
+            base.FailIfUnsuppressed(source, indexName, kind, indexName, length, maxSize);
         }
 
         private static int ComputeColumnLength(Column column)

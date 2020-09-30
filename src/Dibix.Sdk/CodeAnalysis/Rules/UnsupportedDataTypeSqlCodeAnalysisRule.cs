@@ -11,23 +11,6 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             SqlDataTypeOption.NText,
             SqlDataTypeOption.Image
         };
-        private static readonly IDictionary<SqlDataTypeOption, HashSet<string>> Suppressions = new Dictionary<SqlDataTypeOption, HashSet<string>>
-        {
-            {
-                SqlDataTypeOption.Image, new HashSet<string>
-                {
-                    "hlsysadhocprocessdefinition"
-                  , "hlsysdocument"
-                  , "hlsyslicexport"
-                  , "hlsyslicimport"
-                  , "hlsysobjectmodelassembly"
-                  , "hlsyssearchresult"
-                  , "hlwfactivityproject"
-                  , "hlwfcompletedscope"
-                  , "hlwfworkflowdefinition"
-                }
-            }
-        };
         private string _tableName;
 
         protected override string ErrorMessageTemplate => "{0}";
@@ -47,13 +30,15 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
             if (ObsoleteDataTypes.Contains(node.SqlDataTypeOption))
             {
-                if (this._tableName != null
-                 && Suppressions.TryGetValue(node.SqlDataTypeOption, out HashSet<string> workarounds)
-                 && workarounds.Contains(this._tableName))
+                string errorMessage = $"The data type '{node.SqlDataTypeOption.ToString().ToUpperInvariant()}' is obsolete and should not be used";
+                
+                if (this._tableName != null)
                 {
-                    return;
+                    string suppressionKey = $"{node.SqlDataTypeOption}_{this._tableName}";
+                    base.FailIfUnsuppressed(node, suppressionKey, errorMessage);
                 }
-                base.Fail(node, $"The data type '{node.SqlDataTypeOption.ToString().ToUpperInvariant()}' is obsolete and should not be used");
+                else
+                    base.Fail(node, errorMessage);
             }
         }
     }

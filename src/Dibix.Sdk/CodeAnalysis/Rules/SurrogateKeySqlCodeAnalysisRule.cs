@@ -48,10 +48,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             string rootIdentifier = primaryKey.Name ?? tableName;
             string identifier = $"{rootIdentifier}({String.Join(",", primaryKey.Columns.Select(x => x.Name))})";
 
-            if (base.IsSuppressed(identifier))
-                return;
-
-            base.Fail(node, $"Surrogate keys are only allowed, if a business key is defined: {tableName}");
+            base.FailIfUnsuppressed(node, identifier, $"Surrogate keys are only allowed, if a business key is defined: {tableName}");
         }
 
         private static bool TryGetSurrogateKey(ICollection<string> identityColumns, IEnumerable<Constraint> constraints, out Constraint primaryKey)

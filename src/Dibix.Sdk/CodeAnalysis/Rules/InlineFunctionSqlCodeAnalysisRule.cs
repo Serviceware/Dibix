@@ -35,10 +35,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                 return;
 
             string name = node.Name.BaseIdentifier.Value;
-            if (base.IsSuppressed(name))
-                return;
-
-            base.Fail(node, $"Make non inline table valued function inline or replace it with a stored procedure: {name}");
+            base.FailIfUnsuppressed(node, name, $"Make non inline table valued function inline or replace it with a stored procedure: {name}");
         }
 
         public override void Visit(CheckConstraintDefinition node)

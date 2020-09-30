@@ -16,7 +16,7 @@ namespace Dibix.Sdk.Cli
                 Environment.Exit(exitCode);
             };
 
-            if (args.Length != 2)
+            if (args.Length < 2)
                 return PrintHelp();
 
             string runnerName = args[0];

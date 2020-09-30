@@ -13,14 +13,15 @@ using Newtonsoft.Json.Linq;
 
 namespace Dibix.Sdk.CodeAnalysis
 {
-    public sealed class SqlCodeAnalysisRuleEngine : ISqlCodeAnalysisRuleEngine
+    public sealed class SqlCodeAnalysisRuleEngine : ISqlCodeAnalysisRuleEngine, ISqlCodeAnalysisSuppressionService
     {
         #region Fields
         private readonly TSqlModel _model;
         private readonly SqlCodeAnalysisConfiguration _configuration;
         private readonly ILogger _logger;
         private readonly ICollection<Func<SqlCodeAnalysisContext, IEnumerable<SqlCodeAnalysisError>>> _rules;
-        private readonly ICollection<SqlCodeAnalysisSuppression> _suppressions;
+        private readonly IDictionary<SqlCodeAnalysisSuppressionKey, SqlCodeAnalysisSuppression> _suppressionMap;
+        private readonly string _resetSuppressionsFilePath;
         #endregion
 
         #region Constructor
@@ -30,7 +31,9 @@ namespace Dibix.Sdk.CodeAnalysis
             this._configuration = configuration;
             this._logger = logger;
             this._rules = ScanRules().ToArray();
-            this._suppressions = LoadSuppressions().ToArray();
+            this._resetSuppressionsFilePath = CollectResetSuppressionFilePath();
+            this._suppressionMap = LoadSuppressions(this._resetSuppressionsFilePath).GroupBy(x => new SqlCodeAnalysisSuppressionKey(x.RuleName, x.Key))
+                                                                                    .ToDictionary(x => x.Key, x => x.Single());
         }
         #endregion
 
@@ -43,7 +46,7 @@ namespace Dibix.Sdk.CodeAnalysis
         }
         #endregion
 
-        #region Public Methods
+        #region ISqlCodeAnalysisRuleEngine Members
         public IEnumerable<SqlCodeAnalysisError> Analyze(string source)
         {
             TSqlFragment fragment = ScriptDomFacade.Load(source);
@@ -64,6 +67,65 @@ namespace Dibix.Sdk.CodeAnalysis
         }
         #endregion
 
+        #region ISqlCodeAnalysisSuppressionService Members
+        public bool IsSuppressed(string ruleName, string key, string hash)
+        {
+            bool resetSuppressions = !String.IsNullOrEmpty(this._resetSuppressionsFilePath);
+
+            if (this._suppressionMap.TryGetValue(new SqlCodeAnalysisSuppressionKey(ruleName, key), out SqlCodeAnalysisSuppression suppression))
+            {
+                if (suppression.Hash == hash)
+                    return true;
+
+                if (resetSuppressions)
+                {
+                    suppression.Hash = hash;
+                    return true;
+                }
+            }
+            else if (resetSuppressions)
+            {
+                this._suppressionMap.Add(new SqlCodeAnalysisSuppressionKey(ruleName, key), new SqlCodeAnalysisSuppression(ruleName, key, hash));
+                return true;
+            }
+
+            return false;
+        }
+
+        public void ResetSuppressions()
+        {
+            if (String.IsNullOrEmpty(this._resetSuppressionsFilePath))
+                return;
+
+            JObject json = new JObject();
+            var ruleGroups = this._suppressionMap
+                                 .Values
+                                 .OrderBy(x => x.RuleName)
+                                 .ThenBy(x => x.Key)
+                                 .GroupBy(x => x.RuleName);
+
+            foreach (IGrouping<string, SqlCodeAnalysisSuppression> ruleGroup in ruleGroups)
+            {
+                JObject rule = new JObject();
+                foreach (SqlCodeAnalysisSuppression suppression in ruleGroup) 
+                    rule.Add(suppression.Key, suppression.Hash);
+
+                json.Add(ruleGroup.Key, rule);
+            }
+
+            using (Stream stream = File.OpenWrite(this._resetSuppressionsFilePath))
+            {
+                using (TextWriter textWriter = new StreamWriter(stream))
+                {
+                    using (JsonWriter jsonWriter = new JsonTextWriter(textWriter) { Formatting = Formatting.Indented })
+                    {
+                        json.WriteTo(jsonWriter);
+                    }
+                }
+            }
+        }
+        #endregion
+
         #region Private Methods
         private IEnumerable<SqlCodeAnalysisError> Analyze(string source, TSqlFragment fragment, bool isScriptArtifact)
         {
@@ -73,7 +135,7 @@ namespace Dibix.Sdk.CodeAnalysis
 
         private SqlCodeAnalysisContext CreateContext(string source, TSqlFragment fragment, bool isScriptArtifact)
         {
-            return new SqlCodeAnalysisContext(this._model, source, fragment, isScriptArtifact, this._configuration, this._logger, this._suppressions);
+            return new SqlCodeAnalysisContext(this._model, source, fragment, isScriptArtifact, this._configuration, this, this._logger);
         }
 
         private static IEnumerable<Func<SqlCodeAnalysisContext, IEnumerable<SqlCodeAnalysisError>>> ScanRules()
@@ -90,11 +152,22 @@ namespace Dibix.Sdk.CodeAnalysis
             });
         }
 
-        private static IEnumerable<SqlCodeAnalysisSuppression> LoadSuppressions()
+        private static IEnumerable<SqlCodeAnalysisSuppression> LoadSuppressions(string filePath)
         {
             Type type = typeof(JsonSchemaDefinition);
-            string resourcePath = $"{typeof(SqlCodeAnalysisRuleEngine).Namespace}.Suppressions.json";
-            using (Stream stream = type.Assembly.GetManifestResourceStream(resourcePath))
+
+            Stream stream;
+            if (!String.IsNullOrEmpty(filePath))
+            {
+                if (!File.Exists(filePath))
+                    yield break;
+
+                stream = File.OpenRead(filePath);
+            }
+            else
+                stream = type.Assembly.GetManifestResourceStream($"{typeof(SqlCodeAnalysisRuleEngine).Namespace}.Suppressions.json");
+
+            using (stream)
             {
                 using (TextReader textReader = new StreamReader(stream))
                 {
@@ -110,6 +183,53 @@ namespace Dibix.Sdk.CodeAnalysis
                         }
                     }
                 }
+            }
+        }
+
+        private static string CollectResetSuppressionFilePath()
+        {
+            bool foundFlag = false;
+            foreach (string arg in Environment.GetCommandLineArgs().Skip(3))
+            {
+                if (arg == "-s")
+                {
+                    foundFlag = true;
+                    continue;
+                }
+
+                if (foundFlag)
+                {
+                    return arg;
+                }
+            }
+            return null;
+        }
+        #endregion
+
+        #region Nested Types
+        private sealed class SqlCodeAnalysisSuppression
+        {
+            public string RuleName { get; }
+            public string Key { get; }
+            public string Hash { get; set; }
+
+            public SqlCodeAnalysisSuppression(string ruleName, string key, string hash)
+            {
+                this.RuleName = ruleName;
+                this.Key = key;
+                this.Hash = hash;
+            }
+        }
+
+        private readonly struct SqlCodeAnalysisSuppressionKey
+        {
+            public string RuleName { get; }
+            public string Key { get; }
+
+            public SqlCodeAnalysisSuppressionKey(string ruleName, string key)
+            {
+                this.RuleName = ruleName;
+                this.Key = key;
             }
         }
         #endregion

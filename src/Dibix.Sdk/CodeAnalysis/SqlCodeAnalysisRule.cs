@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.Dac;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
@@ -14,7 +13,6 @@ namespace Dibix.Sdk.CodeAnalysis
         private readonly string _name;
         private readonly int _id;
         private readonly Collection<SqlCodeAnalysisError> _errors;
-        private readonly IDictionary<string, SqlCodeAnalysisSuppression> _suppressions;
         private SqlCodeAnalysisContext _context;
         #endregion
 
@@ -22,7 +20,6 @@ namespace Dibix.Sdk.CodeAnalysis
         protected abstract string ErrorMessageTemplate { get; }
 
         protected SqlModel Model => this._context.Model;
-        protected string Hash => this._context.Hash;
         protected SqlCodeAnalysisConfiguration Configuration => this._context.Configuration;
         #endregion
 
@@ -33,7 +30,6 @@ namespace Dibix.Sdk.CodeAnalysis
             this._name = type.Name;
             this._id = SqlCodeAnalysisRuleMap.GetRuleId(type);
             this._errors = new Collection<SqlCodeAnalysisError>();
-            this._suppressions = new Dictionary<string, SqlCodeAnalysisSuppression>();
         }
         #endregion
 
@@ -41,7 +37,6 @@ namespace Dibix.Sdk.CodeAnalysis
         IEnumerable<SqlCodeAnalysisError> ISqlCodeAnalysisRule.Analyze(SqlCodeAnalysisContext context)
         {
             this._context = context;
-            this._suppressions.ReplaceWith(context.GetSuppressions(this._name).ToDictionary(x => x.Key));
             context.Fragment.Accept(this);
             return this._errors;
         }
@@ -93,7 +88,22 @@ namespace Dibix.Sdk.CodeAnalysis
         protected void Fail(TSqlFragment fragment, params object[] args) => this.Fail(fragment.StartLine, fragment.StartColumn, args);
         protected void Fail(SourceInformation sourceInformation, params object[] args) => this.Fail(sourceInformation.StartLine, sourceInformation.StartColumn, args);
 
-        protected bool IsSuppressed(string key) => this._suppressions.TryGetValue(key, out SqlCodeAnalysisSuppression suppression) && suppression.Hash == this.Hash;
+        protected void FailIfUnsuppressed(TSqlFragment fragment, string suppressionKey, params object[] args)
+        {
+            if (this._context.IsSuppressed(this._name, suppressionKey))
+                return;
+
+            this.Fail(fragment, args);
+        }
+        protected void FailIfUnsuppressed(SourceInformation source, string suppressionKey, params object[] args)
+        {
+            if (this._context.IsSuppressed(this._name, suppressionKey))
+                return;
+
+            this.Fail(source, args);
+        }
+
+        //protected bool IsSuppressed(string key) => this._context.IsSuppressed(this._name, key);
         #endregion
 
         #region Private Methods
