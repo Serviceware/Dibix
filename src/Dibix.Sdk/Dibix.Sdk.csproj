@@ -97,6 +97,14 @@
     </PropertyGroup>
 
     <MSBuild Projects="$(_DibixRuntimeProjectDir)$(_DibixRuntimeProjectName).csproj"
+             Targets="Restore"
+             Properties="IsRestoring=true;Configuration=$(Configuration);TargetFramework=$(_DibixRuntimeXplatTargetFramework)" />
+
+    <MSBuild Projects="$(_DibixRuntimeProjectDir)$(_DibixRuntimeProjectName).csproj"
+             Targets="Build"
+             Properties="Configuration=$(Configuration);TargetFramework=$(_DibixRuntimeXplatTargetFramework)" />
+
+    <MSBuild Projects="$(_DibixRuntimeProjectDir)$(_DibixRuntimeProjectName).csproj"
              Targets="Restore;Build"
              Properties="Configuration=$(Configuration);TargetFramework=$(_DibixRuntimeTargetFramework)" />
 
