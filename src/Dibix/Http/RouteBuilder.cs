@@ -7,7 +7,8 @@ namespace Dibix.Http
     {
         public static string BuildRoute(string areaName, string controllerName, string childRoute)
         {
-            return $"api/{String.Join("/", new[] { areaName, controllerName, childRoute }.Where(x => !String.IsNullOrEmpty(x)))}";
+            string url = String.Join("/", new[] { areaName, controllerName, childRoute }.Where(x => !String.IsNullOrEmpty(x)));
+            return url;
         }
     }
 }

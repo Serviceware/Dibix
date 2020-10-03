@@ -32,8 +32,10 @@ namespace Dibix.Sdk.OpenApi
 
         public static OpenApiDocument Generate
         (
-            string projectVersion
-          , string productName
+            string title
+          , string version
+          , string description
+          , string baseUrl
           , string areaName
           , string rootNamespace
           , IEnumerable<ControllerDefinition> controllers
@@ -44,10 +46,15 @@ namespace Dibix.Sdk.OpenApi
             {
                 Info = new OpenApiInfo
                 {
-                    Title = $"{productName} {areaName}",
-                    Version = !String.IsNullOrEmpty(projectVersion) ? projectVersion : "1.0.0"
+                    Title = title,
+                    Version = !String.IsNullOrEmpty(version) ? version : "1.0.0",
+                    Description = description
                 }
             };
+            
+            if (!String.IsNullOrEmpty(baseUrl))
+                document.Servers.Add(new OpenApiServer { Url = baseUrl });
+
             AppendPaths(document, areaName, controllers, rootNamespace, schemaRegistry);
             return document;
         }
@@ -76,7 +83,7 @@ namespace Dibix.Sdk.OpenApi
                         OperationType operationType = (OperationType)Enum.Parse(typeof(OperationType), action.Method.ToString());
 
                         OpenApiOperation operation = new OpenApiOperation();
-                        operation.Tags.Add(new OpenApiTag { Name = $"{areaName}/{controller.Name}" });
+                        operation.Tags.Add(new OpenApiTag { Name = controller.Name });
                         operation.Summary = action.Description ?? "Undocumented action";
                         operation.OperationId = operationIds[action];
 

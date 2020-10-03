@@ -8,9 +8,12 @@ namespace Dibix.Sdk.CodeGeneration
         public static bool Execute
         (
             string projectDirectory
-          , string projectVersion
           , string productName
           , string areaName
+          , string title
+          , string version
+          , string description
+          , string baseUrl
           , string defaultOutputFilePath
           , string clientOutputFilePath
           , ICollection<TaskItem> source
@@ -29,9 +32,12 @@ namespace Dibix.Sdk.CodeGeneration
             CodeArtifactsGenerationModel model = CodeGenerationModelLoader.Create
             (
                 projectDirectory
-              , projectVersion
               , productName
               , areaName
+              , title
+              , version
+              , description
+              , baseUrl
               , defaultOutputFilePath
               , clientOutputFilePath
               , source

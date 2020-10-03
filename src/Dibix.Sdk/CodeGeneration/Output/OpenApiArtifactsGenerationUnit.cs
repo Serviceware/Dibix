@@ -16,7 +16,17 @@ namespace Dibix.Sdk.CodeGeneration
             if (logger.HasLoggedErrors)
                 return false;
 
-            OpenApiDocument document = OpenApiGenerator.Generate(model.ProjectVersion, model.ProductName, NamespaceUtility.EnsureAreaName(model.AreaName), model.RootNamespace, model.Controllers, schemaRegistry);
+            OpenApiDocument document = OpenApiGenerator.Generate
+            (
+                title: model.Title
+              , version: model.Version
+              , description: model.Description
+              , baseUrl: model.BaseUrl
+              , areaName: NamespaceUtility.EnsureAreaName(areaName: model.AreaName)
+              , rootNamespace: model.RootNamespace
+              , controllers: model.Controllers
+              , schemaRegistry: schemaRegistry
+            );
 
             // Unfortunately the validation of the Microsoft SDK is not as thorough as the one on https://editor.swagger.io
             // To catch all errors, like referencing missing schemas, we use swagger manually for now.

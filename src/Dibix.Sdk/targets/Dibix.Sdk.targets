@@ -153,6 +153,8 @@ $(_SqlReferencePath)" />
     <PropertyGroup>
       <ProductName Condition="'$(ProductName)' == ''">$(RootNamespace.Split('.')[0])</ProductName>
       <AreaName Condition="$(AreaName) == '' and $(RootNamespace.Split('.').Length) > 1">$(RootNamespace.Split('.')[1])</AreaName>
+      <Title Condition="$(Title) == ''">$(AreaName)</Title>
+      <Description Condition="$(Description) == '' and $(Build_Repository_Uri) != '' and $(Build_SourceVersion) != '' and $(Build_SourceBranch) != ''">__Build version:__ $([System.DateTime]::Now.ToString(G))\r\n\r\n__Source version:__ [$(Build_SourceVersion)]($(Build_Repository_Uri)/commit/$(Build_SourceVersion)?refName=$(Build_SourceBranch))</Description>
       <EmbedStatements Condition="'$(EmbedStatements)' == ''">$(MSBuildProjectName.EndsWith('.DML'))</EmbedStatements>
       <LangVersion>latest</LangVersion>
       <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
@@ -194,12 +196,18 @@ $(_SqlReferencePath)" />
     <ItemGroup>
       <_CodeGenerationInputItem Include="ProjectDirectory
   $(MSBuildProjectDirectory)" />
-      <_CodeGenerationInputItem Include="ProjectVersion
-  $(FileVersion)" />
       <_CodeGenerationInputItem Include="ProductName
   $(ProductName)" />
       <_CodeGenerationInputItem Include="AreaName
   $(AreaName)" />
+      <_CodeGenerationInputItem Include="Title
+  $(Title)" />
+      <_CodeGenerationInputItem Include="Version
+  $(FileVersion)" />
+      <_CodeGenerationInputItem Include="Description
+  $(Description)" />
+      <_CodeGenerationInputItem Include="BaseUrl
+  $(BaseUrl)" />
       <_CodeGenerationInputItem Include="DefaultOutputFilePath
   $(_ServerIntermediateFilePath)" />
       <_CodeGenerationInputItem Include="ClientOutputFilePath

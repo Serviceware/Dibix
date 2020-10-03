@@ -12,9 +12,12 @@ namespace Dibix.Sdk.CodeGeneration
         public static CodeArtifactsGenerationModel Create
         (
             string projectDirectory
-          , string projectVersion
           , string productName
           , string areaName
+          , string title
+          , string version
+          , string description
+          , string baseUrl
           , string defaultOutputFilePath
           , string clientOutputFilePath
           , ICollection<TaskItem> source
@@ -39,11 +42,14 @@ namespace Dibix.Sdk.CodeGeneration
 
             CodeArtifactsGenerationModel model = new CodeArtifactsGenerationModel(CodeGeneratorCompatibilityLevel.Full)
             {
-                ProjectVersion = projectVersion,
+                ProductName = productName,
                 AreaName = areaName,
+                Title = title,
+                Version = version,
+                Description = description,
+                BaseUrl = baseUrl,
                 RootNamespace = rootNamespace,
                 DefaultClassName = defaultOutputName,
-                ProductName = productName,
                 DefaultOutputFilePath = defaultOutputFilePath,
                 ClientOutputFilePath = clientOutputFilePath
             };
