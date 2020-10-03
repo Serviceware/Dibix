@@ -12,7 +12,7 @@ namespace Dibix.Sdk.OpenApi
 {
     internal static class OpenApiGenerator
     {
-        private static bool _useRelativeNamespaces = false;
+        private static bool _useRelativeNamespaces = true;
         private static readonly IDictionary<PrimitiveDataType, Func<OpenApiSchema>> PrimitiveTypeMap = new Dictionary<PrimitiveDataType, Func<OpenApiSchema>>
         {
             [PrimitiveDataType.Boolean]        = () => new OpenApiSchema { Type = "boolean"                       }
