@@ -16,6 +16,18 @@ namespace Dibix
             return source;
         }
 
+        public static IDictionary<TKey, TSource> AddRange<TKey, TSource>(this IDictionary<TKey, TSource> target, IEnumerable<TSource> elements, Func<TSource, TKey> keySelector)
+        {
+            Guard.IsNotNull(target, nameof(target));
+            Guard.IsNotNull(elements, nameof(elements));
+            Guard.IsNotNull(keySelector, nameof(keySelector));
+
+            foreach (TSource element in elements)
+                target.Add(keySelector(element), element);
+
+            return target;
+        }
+
         public static ICollection<TSource> ReplaceWith<TSource>(this ICollection<TSource> source, IEnumerable<TSource> elements)
         {
             Guard.IsNotNull(source, nameof(source));
@@ -25,19 +37,6 @@ namespace Dibix
             AddRange(source, elements);
 
             return source;
-        }
-
-        public static IDictionary<TKey, TSource> ReplaceWith<TKey, TSource>(this IDictionary<TKey, TSource> target, IEnumerable<TSource> elements, Func<TSource, TKey> keySelector)
-        {
-            Guard.IsNotNull(target, nameof(target));
-            Guard.IsNotNull(elements, nameof(elements));
-            Guard.IsNotNull(keySelector, nameof(keySelector));
-
-            target.Clear();
-            foreach (TSource element in elements)
-                target.Add(keySelector(element), element);
-
-            return target;
         }
     }
 }
