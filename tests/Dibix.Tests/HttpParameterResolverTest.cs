@@ -132,7 +132,7 @@ Parameter: applicationid", exception.Message);
         {
             Exception exception = Assert.Throws<InvalidOperationException>(() => Compile(x => x.ResolveParameterFromSource("lcid", "UNKNOWNSOURCE", "LocaleId")));
             Assert.Equal(@"Http parameter resolver compilation failed
-at GET api/Dibix/Test
+at GET Dibix/Test
 Parameter: lcid", exception.Message);
             Assert.NotNull(exception.InnerException);
             Assert.Equal("No source with the name 'UNKNOWNSOURCE' is registered", exception.InnerException.Message);
@@ -549,7 +549,7 @@ ENCRYPTED(Item2)               ", items.Dump());
                 x.BodyBinder = typeof(FormattedInputBinder);
             }));
             Assert.Equal(@"Http parameter resolver compilation failed
-at GET api/Dibix/Test
+at GET Dibix/Test
 Parameter: input", exception.Message);
             Assert.NotNull(exception.InnerException);
             Assert.Equal("Using a binder for the body is only supported if the target parameter is a class and is marked with the Dibix.InputClassAttribute", exception.InnerException.Message);

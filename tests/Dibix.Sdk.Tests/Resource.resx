@@ -419,13 +419,16 @@ namespace Dibix.Sdk.Tests
   <data name="Endpoints_OpenApi" xml:space="preserve">
     <value>openapi: 3.0.1
 info:
-  title: Dibix.Sdk Tests
-  version: 1.0.0
+  title: Dibix.Sdk.Tests API title
+  description: Dibix.Sdk.Tests API description
+  version: 1.0.1
+servers:
+  - url: https://localhost/api
 paths:
-  '/api/Tests/GenericEndpoint/{password}/Fixed':
+  '/Tests/GenericEndpoint/{password}/Fixed':
     get:
       tags:
-        - Tests/GenericEndpoint
+        - GenericEndpoint
       summary: Undocumented action
       operationId: EmptyWithParams1
       parameters:
@@ -442,14 +445,14 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/Dibix.Sdk.Tests.Data.GenericParameterSet'
+              $ref: '#/components/schemas/GenericParameterSet'
       responses:
         '204':
           description: NoContent
-  '/api/Tests/GenericEndpoint/{password}/User':
+  '/Tests/GenericEndpoint/{password}/User':
     get:
       tags:
-        - Tests/GenericEndpoint
+        - GenericEndpoint
       summary: Undocumented action
       operationId: EmptyWithParams2
       parameters:
@@ -472,7 +475,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/Dibix.Sdk.Tests.Data.GenericParameterSet'
+              $ref: '#/components/schemas/GenericParameterSet'
         - name: y
           in: query
           schema:
@@ -488,10 +491,10 @@ paths:
       responses:
         '204':
           description: NoContent
-  /api/Tests/GenericEndpoint/Array:
+  /Tests/GenericEndpoint/Array:
     get:
       tags:
-        - Tests/GenericEndpoint
+        - GenericEndpoint
       summary: Undocumented action
       operationId: SingleConrecteResultWithParams
       parameters:
@@ -510,25 +513,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Dibix.Sdk.Tests.DomainModel.GenericContract'
-  /api/Tests/GenericEndpoint:
+                $ref: '#/components/schemas/GenericContract'
+  /Tests/GenericEndpoint:
     post:
       tags:
-        - Tests/GenericEndpoint
+        - GenericEndpoint
       summary: Undocumented action
       operationId: EmptyWithParams3
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Dibix.Sdk.Tests.DomainModel.InputContract'
+              $ref: '#/components/schemas/InputContract'
         required: true
       responses:
         '204':
           description: NoContent
 components:
   schemas:
-    Dibix.Sdk.Tests.Data.GenericParameterSet:
+    GenericParameterSet:
       type: object
       properties:
         id:
@@ -538,7 +541,7 @@ components:
           type: string
           nullable: true
       additionalProperties: false
-    Dibix.Sdk.Tests.DomainModel.GenericContract:
+    GenericContract:
       type: object
       properties:
         Name:
@@ -547,7 +550,7 @@ components:
           type: string
           format: date-time
       additionalProperties: false
-    Dibix.Sdk.Tests.DomainModel.InputContract:
+    InputContract:
       type: object
       properties:
         X:

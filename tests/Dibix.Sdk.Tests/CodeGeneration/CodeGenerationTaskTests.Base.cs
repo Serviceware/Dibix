@@ -33,9 +33,12 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             bool result = CodeGenerationTask.Execute
             (
                 projectDirectory: DatabaseTestUtility.DatabaseProjectDirectory
-              , projectVersion: null
               , productName: "Dibix.Sdk"
               , areaName: "Tests"
+              , title: "Dibix.Sdk.Tests API title"
+              , version: "1.0.1"
+              , description: "Dibix.Sdk.Tests API description"
+              , baseUrl: "https://localhost/api"
               , defaultOutputFilePath: !generateClient ? outputFilePath : null
               , clientOutputFilePath: generateClient ? outputFilePath : null
               , source: sources.Select(ToTaskItem).ToArray()
