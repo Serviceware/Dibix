@@ -45,8 +45,8 @@ namespace Dibix.Sdk.Sql
         {
             unsafe
             {
-                ulong* methodDesc = (ulong*)(sourceMethod.MethodHandle.Value.ToPointer());
-                int index = (int)(((*methodDesc) >> 32) & 0xFF);
+                ulong* methodDesc = (ulong*)sourceMethod.MethodHandle.Value.ToPointer();
+                int index = (int)((*methodDesc >> 32) & 0xFF);
                 if (IntPtr.Size == 4)
                 {
                     uint* classStart = (uint*)sourceMethod.DeclaringType.TypeHandle.Value.ToPointer();

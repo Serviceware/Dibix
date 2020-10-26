@@ -67,7 +67,7 @@ namespace Dibix.Sdk.CodeGeneration
             typeResolver.Register(new ContractDefinitionSchemaTypeResolver(schemaRegistry, contractDefinitionProvider), 0);
             typeResolver.Register(new UserDefinedTypeSchemaTypeResolver(schemaRegistry, userDefinedTypeProvider, assemblyResolver), 1);
 
-            model.Statements.AddRange(CollectStatements(normalizedSources, projectDirectory, productName, areaName, embedStatements, formatter, typeResolver, schemaRegistry, logger, modelAccessor));
+            model.Statements.AddRange(CollectStatements(normalizedSources, productName, areaName, embedStatements, formatter, typeResolver, schemaRegistry, logger, modelAccessor));
             model.UserDefinedTypes.AddRange(userDefinedTypeProvider.Types);
             model.Contracts.AddRange(contractDefinitionProvider.Contracts);
             model.Controllers.AddRange(CollectControllers(normalizedEndpoints, productName, areaName, defaultOutputName, model.Statements, assemblyResolver, fileSystemProvider, typeResolver, schemaRegistry, logger));
@@ -78,7 +78,6 @@ namespace Dibix.Sdk.CodeGeneration
         private static IEnumerable<SqlStatementInfo> CollectStatements
         (
             IEnumerable<string> sources
-          , string projectDirectory
           , string productName
           , string areaName
           , bool embedStatements
@@ -88,19 +87,12 @@ namespace Dibix.Sdk.CodeGeneration
           , ILogger logger
           , Lazy<TSqlModel> modelAccessor)
         {
-            IEnumerable<string> files = sources.Where(x => MatchStatement(projectDirectory, x, embedStatements, logger));
-            ISqlStatementParser parser = new SqlStoredProcedureParser();
-            SqlStatementCollector statementCollector = new PhysicalFileSqlStatementCollector(productName, areaName, parser, formatter, typeResolver, schemaRegistry, logger, files, modelAccessor);
+            // Currently only DML statements are included automatically
+            // DDL statements however, need explicit markup, i.E. @Name at least
+            bool requireExplicitMarkup = !embedStatements;
+            ISqlStatementParser parser = new SqlStoredProcedureParser(requireExplicitMarkup);
+            SqlStatementCollector statementCollector = new PhysicalFileSqlStatementCollector(productName, areaName, parser, formatter, typeResolver, schemaRegistry, logger, sources, modelAccessor);
             return statementCollector.CollectStatements();
-        }
-
-        private static bool MatchStatement(string projectDirectory, string relativeFilePath, bool embedStatements, ILogger logger)
-        {
-            string inputFilePath = Path.Combine(projectDirectory, relativeFilePath);
-            ICollection<SqlHint> hints = SqlHintParser.FromFile(inputFilePath, logger).ToArray();
-            bool hasHints = hints.Any();
-            bool hasNoCompileHint = hints.Any(x => x.Kind == SqlHint.NoCompile);
-            return (embedStatements || hasHints) && !hasNoCompileHint;
         }
 
         private static IEnumerable<ControllerDefinition> CollectControllers

@@ -48,7 +48,7 @@ namespace Dibix.Sdk.CodeGeneration
                 this._source = source;
                 this._typeResolver = typeResolver;
                 this._logger = logger;
-                this._hintsAccessor = new Lazy<ICollection<SqlHint>>(() => SqlHintParser.FromFragment(source, logger, fragment).ToArray());
+                this._hintsAccessor = new Lazy<ICollection<SqlHint>>(() => SqlHintParser.ReadHeader(source, logger, fragment).ToArray());
             }
 
             public override void Visit(CreateTypeTableStatement node)

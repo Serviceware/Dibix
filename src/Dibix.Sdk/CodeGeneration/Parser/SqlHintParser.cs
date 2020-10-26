@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
@@ -20,48 +17,49 @@ namespace Dibix.Sdk.CodeGeneration
             this._logger = logger;
         }
 
-        public static IEnumerable<SqlHint> FromFragment(string source, ILogger logger, TSqlFragment fragment)
+        public static IEnumerable<SqlHint> ReadHeader(string source, ILogger logger, TSqlFragment fragment)
         {
             SqlHintParser parser = new SqlHintParser(source, logger);
-            return parser.Read(fragment.AsEnumerable().Select(x => new SqlHintToken(x.Line, x.Text)));
-        }
 
-        public static IEnumerable<SqlHint> FromToken(string source, ILogger logger, TSqlParserToken token)
-        {
-            SqlHintParser parser = new SqlHintParser(source, logger);
-            return parser.Read(Enumerable.Repeat(new SqlHintToken(token.Line, token.Text), 1));
-        }
-
-        public static IEnumerable<SqlHint> FromFile(string filePath, ILogger logger)
-        {
-            SqlHintParser parser = new SqlHintParser(filePath, logger);
-            return parser.Read(File.ReadLines(filePath).Select((x, i) => new SqlHintToken(i + 1, x)));
-        }
-
-        private IEnumerable<SqlHint> Read(IEnumerable<SqlHintToken> tokens)
-        {
-            foreach (SqlHintToken token in tokens)
+            foreach (TSqlParserToken token in fragment.AsEnumerable())
             {
-                string text = (token.Text ?? String.Empty).Trim();
-
-                // Skip whitespace
-                if (String.IsNullOrEmpty(text))
+                if (token.TokenType == TSqlTokenType.WhiteSpace)
                     continue;
 
-                Match match = ParseCommentRegex.Match(text);
-                if (!match.Success)
-                {
-                    // Skip non dibix comments but keep reading
-                    // i.E.:
-                    // -- DROP procedure
-                    // -- @Name procedure
-                    if (text.StartsWith("--", StringComparison.Ordinal))
-                        continue;
-
-                    // We couldn't find a dibix hint at the header of the file before actual content starts
+                // Since we are reading the header, stop processing, once any non-comment T-SQL token occurs
+                bool isComment = token.TokenType == TSqlTokenType.MultilineComment || TSqlTokenType.SingleLineComment == token.TokenType;
+                if (!isComment)
                     yield break;
-                }
 
+                IEnumerable<SqlHint> hints = parser.Read(token);
+                foreach (SqlHint hint in hints)
+                {
+                    yield return hint;
+                }
+            }
+        }
+
+        public static IEnumerable<SqlHint> ReadFragment(string source, ILogger logger, TSqlFragment fragment)
+        {
+            int startIndex = fragment.FirstTokenIndex;
+            TSqlParserToken token;
+            do
+            {
+                token = fragment.ScriptTokenStream[--startIndex];
+            } while (token.TokenType == TSqlTokenType.WhiteSpace);
+
+            SqlHintParser parser = new SqlHintParser(source, logger);
+            return parser.Read(token);
+        }
+
+        private IEnumerable<SqlHint> Read(TSqlParserToken token)
+        {
+            MatchCollection matches = ParseCommentRegex.Matches(token.Text);
+            if (matches.Count == 0)
+                yield break;
+
+            foreach (Match match in matches)
+            {
                 Group keyGroup = match.Groups[1];
                 Group singleValueGroup = match.Groups[2];
                 Group multiValueGroup = match.Groups[3];
@@ -98,18 +96,6 @@ namespace Dibix.Sdk.CodeGeneration
                 }
 
                 yield return hint;
-            }
-        }
-
-        private sealed class SqlHintToken
-        {
-            public int Line { get; }
-            public string Text { get; }
-
-            public SqlHintToken(int line, string text)
-            {
-                this.Line = line;
-                this.Text = text;
             }
         }
     }

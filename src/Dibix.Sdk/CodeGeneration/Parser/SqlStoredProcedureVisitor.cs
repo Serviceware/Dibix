@@ -36,16 +36,10 @@ namespace Dibix.Sdk.CodeGeneration
         {
             string parameterName = node.VariableName.Value.TrimStart('@');
 
-            if (node.Modifier == ParameterModifier.Output) 
+            if (node.Modifier == ParameterModifier.Output)
                 this.Logger.LogError(null, $"Output parameters are not supported: {parameterName}", this.Target.Source, node.StartLine, node.StartColumn);
 
-            // Parse type name hint
-            int startIndex = node.FirstTokenIndex;
-            TSqlParserToken previousToken = node.ScriptTokenStream[--startIndex];
-            if (previousToken.TokenType == SqlTokenType.WhiteSpace)
-                previousToken = node.ScriptTokenStream[--startIndex];
-
-            ICollection<SqlHint> hints = SqlHintParser.FromToken(this.Target.Source, this.Logger, previousToken).ToArray();
+            ICollection<SqlHint> hints = SqlHintParser.ReadFragment(this.Target.Source, this.Logger, node).ToArray();
 
             SqlQueryParameter parameter = new SqlQueryParameter
             {
