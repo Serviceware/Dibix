@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
@@ -78,7 +79,7 @@ namespace Dibix.Sdk.CodeGeneration
                 }
                 else if (multiValueGroup.Success)
                 {
-                    foreach (string property in multiValueGroup.Value.Split(' '))
+                    foreach (string property in multiValueGroup.Value.Split(new [] { ' ' }, StringSplitOptions.RemoveEmptyEntries))
                     {
                         string[] parts = property.Split(':');
                         bool hasPropertyName = parts.Length > 1;

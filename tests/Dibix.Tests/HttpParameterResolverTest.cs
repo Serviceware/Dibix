@@ -615,11 +615,31 @@ Parameter: input", exception.Message);
     Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
     .Block(
         Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
+        System.Object $idDefaultValue,
+        System.Object $trueDefaultValue,
         Dibix.Tests.HttpParameterResolverTest+ExplicitHttpParameterInput $input) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
         .Call $arguments.Add(
             ""databaseAccessorFactory"",
             (System.Object)$databaseaccessorfactorySource);
+        .If (
+            .Call $arguments.TryGetValue(
+                ""id"",
+                $idDefaultValue) & $idDefaultValue == null
+        ) {
+            $arguments.Item[""id""] = (System.Object)0
+        } .Else {
+            .Default(System.Void)
+        };
+        .If (
+            .Call $arguments.TryGetValue(
+                ""true"",
+                $trueDefaultValue) & $trueDefaultValue == null
+        ) {
+            $arguments.Item[""true""] = (System.Object)True
+        } .Else {
+            .Default(System.Void)
+        };
         $input = .New Dibix.Tests.HttpParameterResolverTest+ExplicitHttpParameterInput();
         $input.targetid = .Call Dibix.Http.HttpParameterResolver.ConvertValue(
             ""targetid"",
@@ -629,16 +649,28 @@ Parameter: input", exception.Message);
             (System.Object)$input)
     }
 }", result.Source);
-            Assert.Equal(2, result.Parameters.Count);
+            Assert.Equal(4, result.Parameters.Count);
             Assert.Equal("targetid", result.Parameters["targetid"].Name);
             Assert.Equal(typeof(int), result.Parameters["targetid"].Type);
             Assert.False(result.Parameters["targetid"].IsOptional);
             Assert.Equal("id", result.Parameters["id"].Name);
             Assert.Equal(typeof(int), result.Parameters["id"].Type);
             Assert.True(result.Parameters["id"].IsOptional);
+            Assert.Equal("true", result.Parameters["true"].Name);
+            Assert.Equal(typeof(bool?), result.Parameters["true"].Type);
+            Assert.True(result.Parameters["true"].IsOptional);
+            Assert.Equal("empty", result.Parameters["empty"].Name);
+            Assert.Equal(typeof(bool?), result.Parameters["empty"].Type);
+            Assert.True(result.Parameters["empty"].IsOptional);
 
             HttpRequestMessage request = new HttpRequestMessage();
-            IDictionary<string, object> arguments = new Dictionary<string, object> { { "targetid", 9 } };
+            IDictionary<string, object> arguments = new Dictionary<string, object>
+            {
+                { "targetid", 9 }
+              , { "id", 10 }
+              , { "true", null }  // Optional => Use default value
+              , { "empty", null } // Optional => Use default value
+            };
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
@@ -646,14 +678,17 @@ Parameter: input", exception.Message);
 
             result.PrepareParameters(request, arguments, dependencyResolver.Object);
 
-            Assert.Equal(3, arguments.Count);
+            Assert.Equal(6, arguments.Count);
             Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             Assert.Equal(9, arguments["targetid"]);
+            Assert.Equal(10, arguments["id"]);
+            Assert.Equal(true, arguments["true"]);
+            Assert.Equal(null, arguments["empty"]);
             ExplicitHttpParameterInput input = Assert.IsType<ExplicitHttpParameterInput>(arguments["input"]);
             Assert.Equal(9, input.targetid);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
-        private static void Compile_UriSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpParameterInput input, int id = 0) { }
+        private static void Compile_UriSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpParameterInput input, int id = 0, bool? @true = true, bool? empty = null) { }
 
         [Fact]
         public void Compile_RequestSource()
