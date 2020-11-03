@@ -16,7 +16,8 @@ namespace Dibix.Http
           , IDictionary<string, object> arguments
           , IHttpParameterResolutionMethod parameterResolver
           , Func<Task<object>> executor
-          , IParameterDependencyResolver parameterDependencyResolver)
+          , IParameterDependencyResolver parameterDependencyResolver
+        )
         {
             try
             {

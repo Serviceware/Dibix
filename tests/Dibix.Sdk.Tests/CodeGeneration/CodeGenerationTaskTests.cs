@@ -237,15 +237,15 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(5,2) 
         public void Inline_SingleConcreteResult_WithUnknownResultContract_Error()
         {
             this.ExecuteTestAndExpectError(@"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontract.sql", @"One or more errors occured during code generation:
-Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontract.sql(1,12) : Error : Could not resolve type 'X'");
+Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontract.sql(1,21) : Error : Could not resolve type 'X'");
         }
 
         [Fact]
         public void Inline_SingleConcreteResult_WithUnknownResultContractAssembly_Error()
         {
             this.ExecuteTestAndExpectError(@"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly.sql", @"One or more errors occured during code generation:
-Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly.sql(1,12) : Error : Could not locate assembly: A
-Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly.sql(1,12) : Error : Could not resolve type 'X,A'");
+Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly.sql(1,23) : Error : Could not locate assembly: A
+Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly.sql(1,21) : Error : Could not resolve type 'X,A'");
         }
 
         [Fact]

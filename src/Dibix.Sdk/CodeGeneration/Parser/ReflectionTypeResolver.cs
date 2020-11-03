@@ -100,7 +100,7 @@ namespace Dibix.Sdk.CodeGeneration
                     return this.ResolveType(type, source, line, column, typeName.IsNullable, isEnumerable);
                 }
 
-                this._logger.LogError(null, $"Could not locate assembly: {assemblyName}", source, line, column);
+                this._logger.LogError(null, $"Could not locate assembly: {assemblyName}", source, line, column + parts[0].Length + 1);
                 return null;
             }
             catch (Exception ex)

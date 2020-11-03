@@ -32,7 +32,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private class UserDefinedTypeVisitor : TSqlFragmentVisitor
         {
-            private readonly Lazy<ICollection<SqlHint>> _hintsAccessor;
+            private readonly Lazy<ISqlMarkupDeclaration> _markupAccessor;
             private readonly string _productName;
             private readonly string _areaName;
             private readonly string _source;
@@ -48,15 +48,15 @@ namespace Dibix.Sdk.CodeGeneration
                 this._source = source;
                 this._typeResolver = typeResolver;
                 this._logger = logger;
-                this._hintsAccessor = new Lazy<ICollection<SqlHint>>(() => SqlHintParser.ReadHeader(source, logger, fragment).ToArray());
+                this._markupAccessor = new Lazy<ISqlMarkupDeclaration>(() => SqlMarkupReader.ReadHeader(fragment, source, logger));
             }
 
             public override void Visit(CreateTypeTableStatement node)
             {
                 string typeName = node.Name.ToFullName();
-                string relativeNamespace = this._hintsAccessor.Value.SingleHintValue(SqlHint.Namespace);
-                string definitionName = this._hintsAccessor.Value.SingleHintValue(SqlHint.Name);
-                if (String.IsNullOrEmpty(definitionName))
+                _ = this._markupAccessor.Value.TryGetSingleElementValue(SqlMarkupKey.Namespace, this._source, this._logger, out string relativeNamespace);
+                
+                if (!this._markupAccessor.Value.TryGetSingleElementValue(SqlMarkupKey.Name, this._source, this._logger, out string definitionName))
                     definitionName = GenerateDefinitionName(typeName);
 
                 string @namespace = NamespaceUtility.BuildAbsoluteNamespace(this._productName, this._areaName, LayerName.Data, relativeNamespace);
@@ -98,7 +98,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 string columnName = column.ColumnIdentifier.Value;
                 bool isNullable = !notNullableColumns.Contains(columnName);
-                TypeReference typeReference = column.DataType.ToTypeReference(isNullable, columnName, relativeNamespace, this._source, this._hintsAccessor.Value, this._typeResolver, this._logger, out string udtName);
+                TypeReference typeReference = column.DataType.ToTypeReference(isNullable, columnName, relativeNamespace, this._source, this._markupAccessor.Value, this._typeResolver, this._logger, out string udtName);
                 return new ObjectSchemaProperty(columnName, typeReference);
             }
         }

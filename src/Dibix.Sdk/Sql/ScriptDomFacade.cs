@@ -6,10 +6,10 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.Sql
 {
-    internal static class ScriptDomFacade
+    public static class ScriptDomFacade
     {
-        public static TSqlFragment Load(string filePath) => Load(new StreamReader(filePath));
-        public static TSqlFragment Load(TextReader reader)
+        internal static TSqlFragment Load(string filePath) => Load(new StreamReader(filePath));
+        internal static TSqlFragment Load(TextReader reader)
         {
             TSqlParser parser = new TSql140Parser(true);
             using (reader)
@@ -25,8 +25,8 @@ namespace Dibix.Sdk.Sql
 
         public static TSqlFragment Parse(string text) => Load(new StringReader(text));
 
-        public static string Generate(TSqlFragment fragment) => Generate(fragment, null);
-        public static string Generate(TSqlFragment fragment, Action<SqlScriptGenerator> configuration)
+        internal static string Generate(TSqlFragment fragment) => Generate(fragment, null);
+        internal static string Generate(TSqlFragment fragment, Action<SqlScriptGenerator> configuration)
         {
             SqlScriptGenerator generator = new Sql140ScriptGenerator();
             configuration?.Invoke(generator);

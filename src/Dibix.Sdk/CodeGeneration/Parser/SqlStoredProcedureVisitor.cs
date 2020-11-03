@@ -37,37 +37,37 @@ namespace Dibix.Sdk.CodeGeneration
             string parameterName = node.VariableName.Value.TrimStart('@');
 
             if (node.Modifier == ParameterModifier.Output)
-                this.Logger.LogError(null, $"Output parameters are not supported: {parameterName}", this.Target.Source, node.StartLine, node.StartColumn);
+                base.Logger.LogError(null, $"Output parameters are not supported: {parameterName}", base.Target.Source, node.StartLine, node.StartColumn);
 
-            ICollection<SqlHint> hints = SqlHintParser.ReadFragment(this.Target.Source, this.Logger, node).ToArray();
+            ISqlMarkupDeclaration markup = SqlMarkupReader.ReadFragment(node, base.Target.Source, base.Logger);
 
             SqlQueryParameter parameter = new SqlQueryParameter
             {
                 Name = parameterName,
-                Type = this.ParseParameterType(parameterName, node, hints)
+                Type = this.ParseParameterType(parameterName, node, markup)
             };
             
-            this.ParseParameterObfuscate(node, parameter, hints);
+            this.ParseParameterObfuscate(node, parameter, markup);
             this.ParseDefaultValue(node, parameter);
 
-            this.Target.Parameters.Add(parameter);
+            base.Target.Parameters.Add(parameter);
         }
 
-        private TypeReference ParseParameterType(string parameterName, DeclareVariableElement parameter, IEnumerable<SqlHint> hints)
+        private TypeReference ParseParameterType(string parameterName, DeclareVariableElement parameter, ISqlMarkupDeclaration markup)
         {
             bool isNullable = parameter.Nullable?.Nullable ?? false;
-            return parameter.DataType.ToTypeReference(isNullable, parameterName, this.Target.Namespace, this.Target.Source, hints, base.TypeResolver, base.Logger, out _);
+            return parameter.DataType.ToTypeReference(isNullable, parameterName, base.Target.Namespace, base.Target.Source, markup, base.TypeResolver, base.Logger, out _);
         }
 
-        private void ParseParameterObfuscate(TSqlFragment parameter, SqlQueryParameter target, IEnumerable<SqlHint> hints)
+        private void ParseParameterObfuscate(TSqlFragment parameter, SqlQueryParameter target, ISqlMarkupDeclaration markup)
         {
-            target.Obfuscate = hints.IsSet(SqlHint.Obfuscate);
+            target.Obfuscate = markup.TryGetSingleElement(SqlMarkupKey.Obfuscate, base.Target.Source, base.Logger, out ISqlElement obfuscate);
 
-            // NOTE: Uncomment line dbx_tests_syntax_empty_params_inputclass line 5, whenever this is implemented
-            if (target.Obfuscate && this.Target.GenerateInputClass)
+            // NOTE: Uncomment line dbx_tests_syntax_empty_params_inputclass line 5, whenever base is implemented
+            if (target.Obfuscate && base.Target.GenerateInputClass)
             {
-                this.Logger.LogError(null, $@"Parameter obfuscation is currently not supported with input classes: {target.Name}
-Either remove the @GenerateInputClass hint on the statement or the @Obfuscate hint on the parameter", this.Target.Source, parameter.StartLine, parameter.StartColumn);
+                base.Logger.LogError(null, $@"Parameter obfuscation is currently not supported with input classes: {target.Name}
+Either remove the @GenerateInputClass hint on the statement or the @Obfuscate hint on the parameter", base.Target.Source, obfuscate.Line, obfuscate.Column);
             }
         }
 
@@ -121,7 +121,7 @@ Either remove the @GenerateInputClass hint on the statement or the @Obfuscate hi
                     return true;
 
                 default:
-                    base.Logger.LogError(null, $"Literal type not supported for default value: {literal.LiteralType}", this.Target.Source, literal.StartLine, literal.StartColumn);
+                    base.Logger.LogError(null, $"Literal type not supported for default value: {literal.LiteralType}", base.Target.Source, literal.StartLine, literal.StartColumn);
                     defaultValue = null;
                     return false;
             }
@@ -129,61 +129,55 @@ Either remove the @GenerateInputClass hint on the statement or the @Obfuscate hi
 
         private void ParseContent(TSqlFragment content, StatementList statements)
         {
-            string relativeNamespace = this.Hints.SingleHintValue(SqlHint.Namespace);
+            _ = base.Markup.TryGetSingleElementValue(SqlMarkupKey.Namespace, base.Target.Source, base.Logger, out string relativeNamespace);
 
-            this.Target.Namespace = this.ParseNamespace(relativeNamespace);
-            this.Target.Name = this.ParseName();
-            this.Target.MergeGridResult = this.Hints.IsSet(SqlHint.MergeGridResult);
-            this.Target.IsFileApi = this.Hints.IsSet(SqlHint.FileApi);
-            this.Target.GenerateInputClass = this.Hints.IsSet(SqlHint.GenerateInputClass);
-            this.Target.Async = this.Hints.IsSet(SqlHint.Async);
+            base.Target.Namespace = this.ParseNamespace(relativeNamespace);
+            base.Target.Name = this.ParseName();
+            base.Target.MergeGridResult = base.Markup.HasSingleElement(SqlMarkupKey.MergeGridResult, base.Target.Source, base.Logger);
+            base.Target.IsFileApi = base.Markup.HasSingleElement(SqlMarkupKey.FileApi, base.Target.Source, base.Logger);
+            base.Target.GenerateInputClass = base.Markup.HasSingleElement(SqlMarkupKey.GenerateInputClass, base.Target.Source, base.Logger);
+            base.Target.Async = base.Markup.HasSingleElement(SqlMarkupKey.Async, base.Target.Source, base.Logger);
 
-            this.ParseResults(content, this.Hints);
+            this.ParseResults(content, base.Markup);
 
             bool generateResultClass = false;
-            this.Target.ResultType = this.DetermineResultType(relativeNamespace, ref generateResultClass);
-            this.Target.GenerateResultClass = generateResultClass;
+            base.Target.ResultType = this.DetermineResultType(relativeNamespace, ref generateResultClass);
+            base.Target.GenerateResultClass = generateResultClass;
 
             this.ParseBody(statements);
         }
 
-        private string ParseNamespace(string relativeNamespace) => NamespaceUtility.BuildAbsoluteNamespace(this.ProductName, this.AreaName, LayerName.Data, relativeNamespace);
+        private string ParseNamespace(string relativeNamespace) => NamespaceUtility.BuildAbsoluteNamespace(base.ProductName, base.AreaName, LayerName.Data, relativeNamespace);
 
-        private string ParseName()
-        {
-            string name = this.Hints.SingleHintValue(SqlHint.Name);
-            return !String.IsNullOrEmpty(name) ? name : base.Target.Name;
-        }
+        private string ParseName() => base.Markup.TryGetSingleElementValue(SqlMarkupKey.Name, base.Target.Source, base.Logger, out string name) ? name : base.Target.Name;
 
         private TypeReference DetermineResultType(string relativeNamespace, ref bool generateResultClass)
         {
-            SqlHint resultTypeHint = this.Hints.SingleHint(SqlHint.ResultTypeName);
-            
             // Explicit result type
-            if (resultTypeHint != null)
+            if (base.Markup.TryGetSingleElementValue(SqlMarkupKey.ResultTypeName, base.Target.Source, base.Logger, out ISqlElementValue value))
             {
-                TypeReference type = this.TypeResolver.ResolveType(resultTypeHint.Value, this.Target.Namespace, this.Target.Source, resultTypeHint.Line, resultTypeHint.Column, false);
+                TypeReference type = base.TypeResolver.ResolveType(value.Value, base.Target.Namespace, base.Target.Source, value.Line, value.Column, false);
                 return type;
             }
 
-            if (this.Target.IsFileApi)
+            if (base.Target.IsFileApi)
                 return null;
 
-            if (this.Target.Results.Count == 0)
+            if (base.Target.Results.Count == 0)
                 return null;
 
             // Grid result is merged to first result type
-            if (this.Target.MergeGridResult)
-                return this.Target.Results[0].Types[0];
+            if (base.Target.MergeGridResult)
+                return base.Target.Results[0].Types[0];
 
             // Generate grid result type
-            if (this.Target.Results.Count > 1)
+            if (base.Target.Results.Count > 1)
             {
                 generateResultClass = true;
                 return this.GenerateGridResultType(relativeNamespace);
             }
 
-            return this.Target.Results[0].Types[0];
+            return base.Target.Results[0].Types[0];
         }
 
         private TypeReference GenerateGridResultType(string relativeNamespace)
@@ -192,8 +186,7 @@ Either remove the @GenerateInputClass hint on the statement or the @Obfuscate hi
             string gridResultTypeName;
 
             // Control grid result type name and namespace
-            string gridResultTypeNameHint = this.Hints.SingleHintValue(SqlHint.GeneratedResultTypeName);
-            if (gridResultTypeNameHint != null)
+            if (base.Markup.TryGetSingleElementValue(SqlMarkupKey.GeneratedResultTypeName, base.Target.Source, base.Logger, out string gridResultTypeNameHint))
             {
                 int typeNameIndex = gridResultTypeNameHint.LastIndexOf('.');
                 gridResultTypeNamespace = typeNameIndex < 0 ? null : gridResultTypeNameHint.Substring(0, typeNameIndex);
@@ -204,16 +197,16 @@ Either remove the @GenerateInputClass hint on the statement or the @Obfuscate hi
                 gridResultTypeNamespace = relativeNamespace;
 
                 // Generate type name based on statement name
-                gridResultTypeName = $"{this.Target.Name}{GridResultTypeSuffix}";
+                gridResultTypeName = $"{base.Target.Name}{GridResultTypeSuffix}";
             }
 
-            string @namespace = NamespaceUtility.BuildAbsoluteNamespace(this.ProductName, this.AreaName, LayerName.DomainModel, gridResultTypeNamespace);
-            SchemaTypeReference typeReference = SchemaTypeReference.WithNamespace(@namespace, gridResultTypeName, this.Target.Source, 0, 0, false, false);
+            string @namespace = NamespaceUtility.BuildAbsoluteNamespace(base.ProductName, base.AreaName, LayerName.DomainModel, gridResultTypeNamespace);
+            SchemaTypeReference typeReference = SchemaTypeReference.WithNamespace(@namespace, gridResultTypeName, base.Target.Source, 0, 0, false, false);
             if (base.SchemaRegistry.IsRegistered(typeReference.Key)) 
                 return typeReference;
 
             ObjectSchema schema = new ObjectSchema(@namespace, gridResultTypeName);
-            schema.Properties.AddRange(this.Target
+            schema.Properties.AddRange(base.Target
                                            .Results
                                            .Select(x => new ObjectSchemaProperty(x.Name, x.ResultType)));
             base.SchemaRegistry.Populate(schema);
@@ -221,10 +214,10 @@ Either remove the @GenerateInputClass hint on the statement or the @Obfuscate hi
             return typeReference;
         }
 
-        private void ParseResults(TSqlFragment node, ICollection<SqlHint> hints)
+        private void ParseResults(TSqlFragment node, ISqlMarkupDeclaration markup)
         {
-            IEnumerable<SqlQueryResult> results = StatementOutputParser.Parse(this.Target, node, this.ElementLocator, hints, this.TypeResolver, this.SchemaRegistry, this.Logger);
-            this.Target.Results.AddRange(results);
+            IEnumerable<SqlQueryResult> results = StatementOutputParser.Parse(base.Target, node, base.ElementLocator, markup, base.TypeResolver, base.SchemaRegistry, base.Logger);
+            base.Target.Results.AddRange(results);
         }
 
         private void ParseBody(StatementList statementList)
@@ -233,7 +226,7 @@ Either remove the @GenerateInputClass hint on the statement or the @Obfuscate hi
             if (beginEndBlock != null)
                 statementList = beginEndBlock.StatementList;
 
-            this.Target.Content = this.Formatter.Format(this.Target, statementList);
+            base.Target.Content = base.Formatter.Format(base.Target, statementList);
         }
 
         private void ParseErrorResponses(TSqlFragment body)
@@ -241,7 +234,7 @@ Either remove the @GenerateInputClass hint on the statement or the @Obfuscate hi
             ThrowVisitor visitor = new ThrowVisitor();
             body.Accept(visitor);
 
-            this.Target.ErrorResponses.AddRange(visitor.ErrorResponses);
+            base.Target.ErrorResponses.AddRange(visitor.ErrorResponses);
         }
         #endregion
 

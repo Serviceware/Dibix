@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.Dac.Model;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
@@ -39,10 +38,10 @@ namespace Dibix.Sdk.CodeGeneration
         #region Private Methods
         private bool CollectStatementInfo(TSqlFragment fragment, TSqlElementLocator elementLocator, SqlStatementInfo target, string productName, string areaName, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger)
         {
-            ICollection<SqlHint> hints = SqlHintParser.ReadHeader(target.Source, logger, fragment).ToArray();
-            bool hasHints = hints.Any();
-            bool hasNoCompileHint = hints.Any(x => x.Kind == SqlHint.NoCompile);
-            bool include = (!this._requireExplicitMarkup || hasHints) && !hasNoCompileHint;
+            ISqlMarkupDeclaration markup = SqlMarkupReader.ReadHeader(fragment, target.Source, logger);
+            bool hasMarkup = markup.HasElements;
+            bool hasNoCompileElement = markup.HasSingleElement(SqlMarkupKey.NoCompile, target.Source, logger);
+            bool include = (!this._requireExplicitMarkup || hasMarkup) && !hasNoCompileElement;
             if (!include)
                 return false;
 
@@ -55,9 +54,9 @@ namespace Dibix.Sdk.CodeGeneration
                 Target = target,
                 TypeResolver = typeResolver,
                 SchemaRegistry = schemaRegistry,
-                Logger = logger
+                Logger = logger,
+                Markup = markup
             };
-            visitor.Hints.AddRange(hints);
 
             fragment.Accept(visitor);
 

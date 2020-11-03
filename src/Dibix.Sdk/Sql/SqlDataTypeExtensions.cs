@@ -43,14 +43,13 @@ namespace Dibix.Sdk.Sql
           , string name
           , string @namespace
           , string source
-          , IEnumerable<SqlHint> hints
+          , ISqlMarkupDeclaration markup
           , ITypeResolverFacade typeResolver
           , ILogger logger
           , out string udtName
         )
         {
-            string typeImplementationName = hints.SingleHintValue(SqlHint.ClrType);
-            if (!String.IsNullOrEmpty(typeImplementationName) && !(dataTypeReference is SqlDataTypeReference))
+            if (markup.TryGetSingleElementValue(SqlMarkupKey.ClrType, source, logger, out ISqlElementValue typeImplementationName) && !(dataTypeReference is SqlDataTypeReference))
             {
                 udtName = null;
                 logger.LogError(null, $@"The @ClrType hint is only supported for primitive types and is used to specify an enum type implementation
@@ -66,9 +65,9 @@ DataType: {dataTypeReference.GetType()}", source, dataTypeReference.StartLine, d
                     udtName = null;
 
                     // Most likely a primitive parameter that should be generated using a known enum, therefore specific type implementation hint
-                    if (!String.IsNullOrEmpty(typeImplementationName))
+                    if (typeImplementationName != null)
                     {
-                        TypeReference typeReference = typeResolver.ResolveType(typeImplementationName, @namespace, source, dataTypeReference.StartLine, dataTypeReference.StartColumn, false);
+                        TypeReference typeReference = typeResolver.ResolveType(typeImplementationName.Value, @namespace, source, typeImplementationName.Line, typeImplementationName.Column, false);
                         typeReference.IsNullable = isNullable;
                         return typeReference;
                     }

@@ -222,7 +222,7 @@
     "hlobjectmanagement_getdialogdesignidsbyobjectdefs@parameterkind": "c919be0b57d8ba95c4802a028c31d9c3",
     "hlsubprocess_getnotificationtasks@fake": "e3bccb70ea83839a48cecaae0d06725b",
     "hlsubprocess_insertnotificationtemplateattribute@timestamp": "ec8d2d37f8b2f9d5e650843123786d10",
-    "hlsys_refresh_objectsearchdata@forcerefresh": "138e44ca08cebbcc49b39cb6d2d92851",
+    "hlsys_refresh_objectsearchdata@forcerefresh": "bb9a09ba20533dbfe2383b8646bd1431",
     "hlsys_store_configurationmodel@configid": "8c94babbeeda916035332362dd11d69d",
     "hlsyscal_fn_calculate_difference_formatted@caseid_casedefid": "d7d5779c6a6fb6a4436d7b91d6febdff",
     "hlsyscal_fn_calculate_token_add@caseid_casedefid": "a1fadf36adcbf3757c82925354cdf854",

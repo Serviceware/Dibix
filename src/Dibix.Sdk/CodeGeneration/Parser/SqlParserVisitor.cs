@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using Dibix.Sdk.Sql;
+﻿using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -15,11 +13,6 @@ namespace Dibix.Sdk.CodeGeneration
         internal ISchemaRegistry SchemaRegistry { get; set; }
         internal ILogger Logger { get; set; }
         internal SqlStatementInfo Target { get; set; }
-        internal ICollection<SqlHint> Hints { get; }
-
-        protected SqlParserVisitor()
-        {
-            this.Hints = new Collection<SqlHint>();
-        }
+        internal ISqlMarkupDeclaration Markup { get; set; }
     }
 }

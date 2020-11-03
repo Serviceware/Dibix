@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.Dac.Model;
@@ -9,37 +10,37 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal static class StatementOutputParser
     {
-        private const string ReturnHintClrTypes = "ClrTypes";
-        private const string ReturnHintMode = "Mode";
-        private const string ReturnHintResultName = "Name";
-        private const string ReturnHintSplitOn = "SplitOn";
-        private const string ReturnHintConverter = "Converter";
-        private const string ReturnHintResultType = "ResultType";
+        private const string ReturnPropertyClrTypes = "ClrTypes";
+        private const string ReturnPropertyMode = "Mode";
+        private const string ReturnPropertyResultName = "Name";
+        private const string ReturnPropertySplitOn = "SplitOn";
+        private const string ReturnPropertyConverter = "Converter";
+        private const string ReturnPropertyResultType = "ResultType";
 
-        public static IEnumerable<SqlQueryResult> Parse(SqlStatementInfo target, TSqlFragment node, TSqlElementLocator elementLocator, ICollection<SqlHint> hints, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger)
+        public static IEnumerable<SqlQueryResult> Parse(SqlStatementInfo target, TSqlFragment node, TSqlElementLocator elementLocator, ISqlMarkupDeclaration markup, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             StatementOutputVisitor visitor = new StatementOutputVisitor(target.Source, elementLocator, logger);
             node.Accept(visitor);
 
-            IList<SqlHint> returnHints = hints.Where(x => x.Kind == SqlHint.Return).ToArray();
+            IList<ISqlElement> returnElements = markup.GetElements(SqlMarkupKey.Return).ToArray();
 
-            ValidateFileApi(target, node, returnHints, visitor.Results, logger);
-            ValidateMergeGridResult(target, node, returnHints, logger);
+            ValidateFileApi(target, node, returnElements, visitor.Results, logger);
+            ValidateMergeGridResult(target, node, returnElements, logger);
 
-            // Incorrect number of return hints/results will make further execution fail
-            if (!ValidateReturnHints(target, returnHints, visitor.Results, logger)) 
+            // Incorrect number of return elements/results will make further execution fail
+            if (!ValidateReturnElements(target, returnElements, visitor.Results, logger)) 
                 yield break;
 
-            foreach (SqlQueryResult result in CollectResults(target, node, typeResolver, schemaRegistry, logger, returnHints, visitor)) 
+            foreach (SqlQueryResult result in CollectResults(target, node, typeResolver, schemaRegistry, logger, returnElements, visitor)) 
                 yield return result;
         }
 
-        private static void ValidateFileApi(SqlStatementInfo target, TSqlFragment node, IEnumerable<SqlHint> returnHints, IList<OutputSelectResult> results, ILogger logger)
+        private static void ValidateFileApi(SqlStatementInfo target, TSqlFragment node, IEnumerable<ISqlElement> returnElements, IList<OutputSelectResult> results, ILogger logger)
         {
             if (!target.IsFileApi) 
                 return;
             
-            if (returnHints.Any())
+            if (returnElements.Any())
             {
                 logger.LogError(null, "When using the @FileApi option, no return declarations should be defined", target.Source, node.StartLine, node.StartColumn);
             }
@@ -79,28 +80,28 @@ namespace Dibix.Sdk.CodeGeneration
             return true;
         }
 
-        private static void ValidateMergeGridResult(SqlStatementInfo target, TSqlFragment node, IList<SqlHint> returnHints, ILogger logger)
+        private static void ValidateMergeGridResult(SqlStatementInfo target, TSqlFragment node, IList<ISqlElement> returnElements, ILogger logger)
         {
-            if (!target.MergeGridResult || returnHints.Count > 1) 
+            if (!target.MergeGridResult || returnElements.Count > 1) 
                 return;
 
             logger.LogError(null, "The @MergeGridResult option only works with a grid result so at least two results should be specified with the @Return hint", target.Source, node.StartLine, node.StartColumn);
         }
 
-        private static bool ValidateReturnHints(SqlStatementInfo target, IList<SqlHint> returnHints, IList<OutputSelectResult> results, ILogger logger)
+        private static bool ValidateReturnElements(SqlStatementInfo target, IList<ISqlElement> returnElements, IList<OutputSelectResult> results, ILogger logger)
         {
             if (target.IsFileApi)
                 return true;
 
             bool result = true;
-            for (int i = results.Count; i < returnHints.Count; i++)
+            for (int i = results.Count; i < returnElements.Count; i++)
             {
-                SqlHint redundantReturnHint = returnHints[i];
-                logger.LogError(null, "There are more output declarations than actual outputs being produced by the statement", target.Source, redundantReturnHint.Line, redundantReturnHint.Column);
+                ISqlElement redundantReturnElement = returnElements[i];
+                logger.LogError(null, "There are more output declarations than actual outputs being produced by the statement", target.Source, redundantReturnElement.Line, redundantReturnElement.Column);
                 result = false;
             }
 
-            for (int i = returnHints.Count; i < results.Count; i++)
+            for (int i = returnElements.Count; i < results.Count; i++)
             {
                 OutputSelectResult output = results[i];
                 logger.LogError(null, "Missing return declaration for output. Please decorate the statement with the following hint to describe the output: -- @Return <ContractName>", target.Source, output.Line, output.Column);
@@ -110,54 +111,69 @@ namespace Dibix.Sdk.CodeGeneration
             return result;
         }
 
-        private static IEnumerable<SqlQueryResult> CollectResults(SqlStatementInfo target, TSqlFragment node, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger, IList<SqlHint> returnHints, StatementOutputVisitor visitor)
+        private static IEnumerable<SqlQueryResult> CollectResults(SqlStatementInfo target, TSqlFragment node, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger, IList<ISqlElement> returnElements, StatementOutputVisitor visitor)
         {
             ICollection<string> usedOutputNames = new HashSet<string>();
-            for (int i = 0; i < returnHints.Count; i++)
+            for (int i = 0; i < returnElements.Count; i++)
             {
-                SqlHint returnHint = returnHints[i];
-                if (!returnHint.TrySelectValueOrContent(ReturnHintClrTypes, x => logger.LogError(null, x, target.Source, node.StartLine, node.StartColumn), out string typeNamesStr))
+                ISqlElement returnElement = returnElements[i];
+                if (!returnElement.TryGetPropertyValue(ReturnPropertyClrTypes, isDefault: true, out ISqlElementValue typesHint))
+                {
+                    logger.LogError(null, $"Missing property '{ReturnPropertyClrTypes}'", target.Source, returnElement.Line, returnElement.Column);
+                    yield break;
+                }
+
+                if (!TryParseResultMode(target, returnElement, logger, out SqlQueryResultMode resultMode))
                     yield break;
 
-                if (!TryParseResultMode(target, node, returnHint, logger, out SqlQueryResultMode resultMode))
-                    yield break;
+                ISqlElementValue resultName = returnElement.GetPropertyValue(ReturnPropertyResultName);
+                ISqlElementValue converter = returnElement.GetPropertyValue(ReturnPropertyConverter);
+                ISqlElementValue splitOn = returnElement.GetPropertyValue(ReturnPropertySplitOn);
 
-                string resultName = returnHint.SelectValueOrDefault(ReturnHintResultName);
-                string converter = returnHint.SelectValueOrDefault(ReturnHintConverter);
-                string splitOn = returnHint.SelectValueOrDefault(ReturnHintSplitOn);
+                ValidateMergeGridResult(target, node, i == 0, resultMode, resultName?.Value, logger);
 
-                ValidateMergeGridResult(target, node, i == 0, resultMode, resultName, logger);
+                IList<TypeReference> resultTypes = ParseResultTypes(target, resultMode, typesHint, typeResolver).ToArray();
+                if (!resultTypes.Any())
+                    continue;
+
+                OutputSelectResult output = visitor.Results[i];
+                ValidateResult
+                (
+                    isFirstResult: i == 0
+                  , numberOfReturnElements: returnElements.Count
+                  , returnElement: returnElement
+                  , name: resultName
+                  , splitOn: splitOn
+                  , resultTypes: resultTypes
+                  , columns: output.Columns
+                  , usedOutputNames: usedOutputNames
+                  , target: target
+                  , schemaRegistry: schemaRegistry
+                  , logger: logger
+                );
 
                 SqlQueryResult result = new SqlQueryResult
                 {
-                    Name = resultName,
+                    Name = resultName?.Value,
                     ResultMode = resultMode,
-                    Converter = converter,
-                    SplitOn = splitOn,
-                    ProjectToType = ParseProjectionContract(target, node, returnHints, resultMode, returnHint, typeResolver, logger)
+                    Converter = converter?.Value,
+                    SplitOn = splitOn?.Value,
+                    ProjectToType = ParseProjectionContract(target, node, returnElements, resultMode, returnElement, typeResolver, logger)
                 };
-
-                if (!TryParseResultTypes(target, resultMode, returnHint, typeNamesStr, typeResolver, out IEnumerable<TypeReference> types))
-                    continue;
-
-                result.Types.AddRange(types);
-
-                OutputSelectResult output = visitor.Results[i];
-                ValidateResult(i == 0, returnHints.Count, returnHint, result, output.Columns, usedOutputNames, target, schemaRegistry, logger);
+                result.Types.AddRange(resultTypes);
                 result.Columns.AddRange(output.Columns.Select(x => x.ColumnName));
 
                 yield return result;
             }
         }
 
-        private static bool TryParseResultMode(SqlStatementInfo target, TSqlFragment node, SqlHint returnHint, ILogger logger, out SqlQueryResultMode resultMode)
+        private static bool TryParseResultMode(SqlStatementInfo target, ISqlElement returnElement, ILogger logger, out SqlQueryResultMode resultMode)
         {
-            string resultModeStr = returnHint.SelectValueOrDefault(ReturnHintMode);
             resultMode = SqlQueryResultMode.Many;
-            if (resultModeStr == null || Enum.TryParse(resultModeStr, out resultMode)) 
+            if (!returnElement.TryGetPropertyValue(ReturnPropertyMode, isDefault: false, out ISqlElementValue resultModeHint) || Enum.TryParse(resultModeHint.Value, out resultMode)) 
                 return true;
 
-            logger.LogError(null, $"Result mode not supported: {resultModeStr}", target.Source, node.StartLine, node.StartColumn);
+            logger.LogError(null, $"Result mode not supported: {resultModeHint.Value}", target.Source, resultModeHint.Line, resultModeHint.Column);
             return false;
         }
 
@@ -178,68 +194,47 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static TypeReference ParseProjectionContract(SqlStatementInfo target, TSqlFragment node, ICollection<SqlHint> returnHints, SqlQueryResultMode resultMode, SqlHint returnHint, ITypeResolverFacade typeResolver, ILogger logger)
+        private static IEnumerable<TypeReference> ParseResultTypes(SqlStatementInfo target, SqlQueryResultMode resultMode, ISqlElementValue typesHint, ITypeResolverFacade typeResolver)
         {
-            SqlQueryResultMode[] supportedResultTypeResultModes = { SqlQueryResultMode.Many };
-            string resultTypeStr = returnHint.SelectValueOrDefault(ReturnHintResultType);
-            if (String.IsNullOrEmpty(resultTypeStr))
-                return null;
+            string[] typeNames = typesHint.Value.Split(';');
+            int column = typesHint.Column;
 
-            bool singleResult = returnHints.Count <= 1;
-            bool isResultTypeSupported = !supportedResultTypeResultModes.Contains(resultMode);
-
-            if (singleResult)
+            foreach (string typeName in typeNames)
             {
-                // NOTE: Uncomment the Inline_SingleMultiMapResult_WithProjection test, whenever this is implemented
-                logger.LogError(null, "Projection using the 'ResultType' property is currently only supported in a part of a grid result", target.Source, node.StartLine, node.StartColumn);
+                TypeReference typeReference = typeResolver.ResolveType(typeName, target.Namespace, target.Source, typesHint.Line, column, resultMode == SqlQueryResultMode.Many);
+                if (typeReference != null)
+                    yield return typeReference;
+
+                column += typeName.Length + 1;
             }
-
-            if (isResultTypeSupported)
-            {
-                logger.LogError(null, $"Projection using the 'ResultType' property is currently only supported for the following result modes using the 'Mode' property: {String.Join(", ", supportedResultTypeResultModes)}", target.Source, node.StartLine, node.StartColumn);
-            }
-
-            if (singleResult || isResultTypeSupported) 
-                return null;
-
-            return typeResolver.ResolveType(resultTypeStr, target.Namespace, target.Source, returnHint.Line, returnHint.Column, resultMode == SqlQueryResultMode.Many);
-        }
-
-        private static bool TryParseResultTypes(SqlStatementInfo target, SqlQueryResultMode resultMode, SqlHint returnHint, string typeNamesStr, ITypeResolverFacade typeResolver, out IEnumerable<TypeReference> types)
-        {
-            string[] typeNames = typeNamesStr.Split(';');
-            IList<TypeReference> returnTypes = typeNames.Select(x => typeResolver.ResolveType(x, target.Namespace, target.Source, returnHint.Line, returnHint.Column, resultMode == SqlQueryResultMode.Many)).ToArray();
-            if (returnTypes.All(x => x != null))
-            {
-                types = returnTypes;
-                return true;
-            }
-
-            types = Enumerable.Empty<TypeReference>();
-            return false;
         }
 
         private static void ValidateResult
         (
             bool isFirstResult
-          , int numberOfReturnHints
-          , SqlHint returnHint
-          , SqlQueryResult result
-          , IEnumerable<OutputColumnResult> columns
+          , int numberOfReturnElements
+          , ISqlElement returnElement
+          , ISqlElementValue name
+          , ISqlElementValue splitOn
+          , IList<TypeReference> resultTypes
+          , IList<OutputColumnResult> columns
           , ICollection<string> usedOutputNames
           , SqlStatementInfo target
           , ISchemaRegistry schemaRegistry
           , ILogger logger
         )
         {
-            ValidateName(isFirstResult, numberOfReturnHints, returnHint, result, usedOutputNames, target, logger);
+            // Name:X
+            ValidateName(isFirstResult, numberOfReturnElements, returnElement, name, usedOutputNames, target, logger);
+            
+            // SplitOn:X
+            if (!TrySplitColumns(columns, resultTypes.Count, returnElement, splitOn, target.Source, logger, out IList<ICollection<OutputColumnResult>> columnGroups))
+                return;
 
-            IList<ICollection<OutputColumnResult>> columnGroups = SplitColumns(columns, result.SplitOn).ToArray();
-            ValidateSplitOn(returnHint, result, columnGroups, target, logger);
-
-            for (int i = 0; i < result.Types.Count; i++)
+            // Validate result columns
+            for (int i = 0; i < resultTypes.Count; i++)
             {
-                TypeReference returnType = result.Types[i];
+                TypeReference returnType = resultTypes[i];
                 ICollection<OutputColumnResult> columnGroup = columnGroups[i];
                 SchemaDefinition schema = null;
                 if (returnType is SchemaTypeReference schemaTypeReference)
@@ -274,67 +269,107 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static void ValidateName(bool isFirstResult, int numberOfReturnHints, SqlHint returnHint, SqlQueryResult result, ICollection<string> usedOutputNames, SqlStatementInfo target, ILogger logger)
+        private static void ValidateName(bool isFirstResult, int numberOfReturnElements, ISqlElement returnElement, ISqlElementValue name, ICollection<string> usedOutputNames, SqlStatementInfo target, ILogger logger)
         {
-            if (!String.IsNullOrEmpty(result.Name))
+            if (name != null)
             {
-                if (usedOutputNames.Contains(result.Name))
-                    logger.LogError(null, $"The name '{result.Name}' is already defined for another output result", target.Source, returnHint.Line, returnHint.Column);
-                //else if (numberOfReturnHints == 1)
-                //    logger.LogError(null, "The 'Name' property is irrelevant when a single output is returned", target.Source, returnHint.Line, returnHint.Column);
+                if (usedOutputNames.Contains(name.Value))
+                    logger.LogError(null, $"The name '{name.Value}' is already defined for another output result", target.Source, name.Line, name.Column);
+                //else if (numberOfReturnElements == 1)
+                //    logger.LogError(null, "The 'Name' property is irrelevant when a single output is returned", target.Source, name.Line, name.PropertyColumn);
                 else
-                    usedOutputNames.Add(result.Name);
+                    usedOutputNames.Add(name.Value);
             }
-            else if (numberOfReturnHints > 1 && (!target.MergeGridResult || !isFirstResult))
-                logger.LogError(null, "The 'Name' property must be specified when multiple outputs are returned. Mark it in the @Return hint: -- @Return ClrTypes:<ClrTypeName> Name:<ResultName>", target.Source, returnHint.Line, returnHint.Column);
+            else if (numberOfReturnElements > 1 && (!target.MergeGridResult || !isFirstResult))
+                logger.LogError(null, "The 'Name' property must be specified when multiple outputs are returned. Mark it in the @Return hint: -- @Return ClrTypes:<ClrTypeName> Name:<ResultName>", target.Source, returnElement.Line, returnElement.Column);
         }
 
-        private static void ValidateSplitOn(SqlHint returnHint, SqlQueryResult result, IList<ICollection<OutputColumnResult>> columnGroups, SqlStatementInfo target, ILogger logger)
+        private static bool TrySplitColumns(IList<OutputColumnResult> columns, int resultTypeCount, ISqlElement returnElement, ISqlElementValue splitOn, string source, ILogger logger, out IList<ICollection<OutputColumnResult>> columnGroups)
         {
-            if (result.Types.Count > 1 && String.IsNullOrEmpty(result.SplitOn))
+            columnGroups = new Collection<ICollection<OutputColumnResult>>();
+            if (splitOn == null)
             {
-                logger.LogError(null, "The 'SplitOn' property must be specified when using multiple return types. Mark it in the @Return hint: -- @Return ClrTypes:<ClrTypeName> Name:<ResultName> SplitOn:<SplitColumnName>", target.Source, returnHint.Line, returnHint.Column);
-                return;
+                if (resultTypeCount > 1)
+                {
+                    logger.LogError(null, "The 'SplitOn' property must be specified when using multiple return types. Mark it in the @Return hint: -- @Return ClrTypes:<ClrTypeName> Name:<ResultName> SplitOn:<SplitColumnName>", source, returnElement.Line, returnElement.Column);
+                    return false;
+                }
+
+                columnGroups.Add(columns);
+                return true;
             }
 
-            if (columnGroups.Count > 1 && columnGroups.Any(x => !x.Any()))
+            Queue<string> splitColumns = new Queue<string>(splitOn.Value.Split(','));
+            int expectedPageCount = splitColumns.Count + 1;
+            if (resultTypeCount != expectedPageCount)
             {
-                logger.LogError(null, "Part of the 'SplitOn' property value did not match a column in the output expression", target.Source, returnHint.Line, returnHint.Column);
+                logger.LogError(null, "The 'SplitOn' property does not match the number of return types", source, splitOn.Line, splitOn.Column);
+                return false;
             }
 
-            if (columnGroups.Count != result.Types.Count)
+            string splitColumn = null;
+            int position = splitOn.Column;
+            ICollection<OutputColumnResult> page = new Collection<OutputColumnResult>();
+            for (int i = 0; i < columns.Count; i++)
             {
-                logger.LogError(null, "The 'SplitOn' property does not match the number of return types", target.Source, returnHint.Line, returnHint.Column);
+                OutputColumnResult column = columns[i];
+
+                if (i == 1)
+                {
+                    splitColumn = splitColumns.Dequeue();
+                }
+
+                if (String.Equals(column.ColumnName, splitColumn, StringComparison.OrdinalIgnoreCase))
+                {
+                    columnGroups.Add(page);
+                    page = new Collection<OutputColumnResult>();
+                    if (splitColumns.Any())
+                    {
+                        position += 1 + splitColumn.Length;
+                        splitColumn = splitColumns.Dequeue();
+                    }
+                    else
+                        splitColumn = null;
+                }
+
+                page.Add(column);
             }
+
+            columnGroups.Add(page);
+
+            if (columnGroups.Count != expectedPageCount)
+            {
+                logger.LogError(null, $"SplitOn column '{splitColumn}' does not match any column on the result", source, splitOn.Line, position);
+                return false;
+            }
+
+            return true;
         }
 
-        private static IEnumerable<ICollection<OutputColumnResult>> SplitColumns(IEnumerable<OutputColumnResult> columns, string splitOn)
+        private static TypeReference ParseProjectionContract(SqlStatementInfo target, TSqlFragment node, ICollection<ISqlElement> returnElements, SqlQueryResultMode resultMode, ISqlElement returnElement, ITypeResolverFacade typeResolver, ILogger logger)
         {
-            Queue<OutputColumnResult> columnQueue = new Queue<OutputColumnResult>(columns);
-            foreach (string currentSplitOn in (splitOn ?? String.Empty).Split(new [] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+            SqlQueryResultMode[] supportedResultTypeResultModes = { SqlQueryResultMode.Many };
+            if (!returnElement.TryGetPropertyValue(ReturnPropertyResultType, isDefault: false, out ISqlElementValue resultType))
+                return null;
+
+            bool singleResult = returnElements.Count <= 1;
+            bool isResultTypeSupported = !supportedResultTypeResultModes.Contains(resultMode);
+
+            if (singleResult)
             {
-                ICollection<OutputColumnResult> results = SplitColumns(columnQueue, currentSplitOn).ToArray();
-                yield return results;
+                // NOTE: Uncomment the Inline_SingleMultiMapResult_WithProjection test, whenever this is implemented
+                logger.LogError(null, "Projection using the 'ResultType' property is currently only supported in a part of a grid result", target.Source, node.StartLine, node.StartColumn);
             }
-            yield return columnQueue.ToArray();
-        }
 
-        private static IEnumerable<OutputColumnResult> SplitColumns(Queue<OutputColumnResult> columnQueue, string currentSplitOn)
-        {
-            bool firstColumn = true;
-            while (true)
+            if (isResultTypeSupported)
             {
-                if (!columnQueue.Any())
-                    break;
-
-                // Don't start splitting until we at least iterated one column
-                if (firstColumn)
-                    firstColumn = false;
-                else if (String.Equals(columnQueue.Peek().ColumnName, currentSplitOn, StringComparison.OrdinalIgnoreCase))
-                    break;
-
-                yield return columnQueue.Dequeue();
+                logger.LogError(null, $"Projection using the 'ResultType' property is currently only supported for the following result modes using the 'Mode' property: {String.Join(", ", supportedResultTypeResultModes)}", target.Source, node.StartLine, node.StartColumn);
             }
+
+            if (singleResult || isResultTypeSupported) 
+                return null;
+
+            return typeResolver.ResolveType(resultType.Value, target.Namespace, target.Source, resultType.Line, resultType.Column, resultMode == SqlQueryResultMode.Many);
         }
     }
 }
