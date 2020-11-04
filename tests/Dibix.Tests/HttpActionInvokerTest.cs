@@ -51,7 +51,7 @@ namespace Dibix.Tests
             Mock<IParametersVisitor> parametersVisitor = new Mock<IParametersVisitor>(MockBehavior.Strict);
             Mock<IHttpParameterResolutionMethod> parameterResolver = new Mock<IHttpParameterResolutionMethod>(MockBehavior.Strict);
 
-            parametersVisitor.Setup(x => x.VisitParameters(It.IsAny<ParameterVisitor>()));
+            parametersVisitor.Setup(x => x.VisitInputParameters(It.IsAny<InputParameterVisitor>()));
 
             HttpRequestMessage request = new HttpRequestMessage();
             Exception exception = (Exception)typeof(DatabaseAccessException).GetMethod("Create", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { null, null, parametersVisitor.Object, sqlException });
@@ -84,7 +84,7 @@ CommandText: <Dynamic>
             Mock<IParametersVisitor> parametersVisitor = new Mock<IParametersVisitor>(MockBehavior.Strict);
             Mock<IHttpParameterResolutionMethod> parameterResolver = new Mock<IHttpParameterResolutionMethod>(MockBehavior.Strict);
 
-            parametersVisitor.Setup(x => x.VisitParameters(It.IsAny<ParameterVisitor>()));
+            parametersVisitor.Setup(x => x.VisitInputParameters(It.IsAny<InputParameterVisitor>()));
 
             HttpRequestMessage request = new HttpRequestMessage();
             Exception exception = (Exception)typeof(DatabaseAccessException).GetMethod("Create", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { null, null, parametersVisitor.Object, sqlException });
@@ -119,15 +119,15 @@ CommandText: <Dynamic>
             Mock<IParametersVisitor> parametersVisitor = new Mock<IParametersVisitor>(MockBehavior.Strict);
             Mock<IHttpParameterResolutionMethod> parameterResolver = new Mock<IHttpParameterResolutionMethod>(MockBehavior.Strict);
 
-            parametersVisitor.Setup(x => x.VisitParameters(It.IsAny<ParameterVisitor>()))
-                             .Callback((ParameterVisitor visitParameter) =>
+            parametersVisitor.Setup(x => x.VisitInputParameters(It.IsAny<InputParameterVisitor>()))
+                             .Callback((InputParameterVisitor visitParameter) =>
                              {
-                                 visitParameter("a", new byte[] { 1 }, typeof(byte[]), DbType.Binary);
+                                 visitParameter("a", new byte[] { 1 }, typeof(byte[]), DbType.Binary, false);
                                  visitParameter("b", new X
                                  {
                                      { 1, "I" },
                                      { 2, "II" }
-                                 }, typeof(StructuredType), null);
+                                 }, typeof(StructuredType), null, false);
                              });
 
             Exception exception = (Exception)typeof(DatabaseAccessException).GetMethod("Create", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { commandType, commandText, parametersVisitor.Object, sqlException });
@@ -166,15 +166,15 @@ intValue INT(4)  stringValue NVARCHAR(MAX)
             Mock<IParametersVisitor> parametersVisitor = new Mock<IParametersVisitor>(MockBehavior.Strict);
             Mock<IHttpParameterResolutionMethod> parameterResolver = new Mock<IHttpParameterResolutionMethod>(MockBehavior.Strict);
 
-            parametersVisitor.Setup(x => x.VisitParameters(It.IsAny<ParameterVisitor>()))
-                             .Callback((ParameterVisitor visitParameter) =>
+            parametersVisitor.Setup(x => x.VisitInputParameters(It.IsAny<InputParameterVisitor>()))
+                             .Callback((InputParameterVisitor visitParameter) =>
                              {
-                                 visitParameter("a", new byte[] { 1 }, typeof(byte[]), DbType.Binary);
+                                 visitParameter("a", new byte[] { 1 }, typeof(byte[]), DbType.Binary, false);
                                  visitParameter("b", new X
                                  {
                                      { 1, "I" },
                                      { 2, "II" }
-                                 }, typeof(StructuredType), null);
+                                 }, typeof(StructuredType), null, false);
                              });
 
             Exception exception = (Exception)typeof(DatabaseAccessException).GetMethod("Create", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { commandType, commandText, parametersVisitor.Object, sqlException });

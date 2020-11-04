@@ -23,7 +23,7 @@ namespace Dibix
             sb.Append("CommandType: ").Append(commandType).AppendLine()
               .Append("CommandText: ").Append(commandType == CommandType.StoredProcedure ? commandText : "<Dynamic>");
 
-            parameters.VisitParameters((name, value, clrType, suggestedDataType) =>
+            parameters.VisitInputParameters((name, value, clrType, suggestedDataType, isOutput) =>
             {
                 sb.AppendLine();
 

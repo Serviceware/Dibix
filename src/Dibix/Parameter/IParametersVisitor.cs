@@ -2,6 +2,7 @@ namespace Dibix
 {
     public interface IParametersVisitor
     {
-        void VisitParameters(ParameterVisitor visitParameter);
+        void VisitInputParameters(InputParameterVisitor visitParameter);
+        void VisitOutputParameters(OutputParameterVisitor visitParameter);
     }
 }

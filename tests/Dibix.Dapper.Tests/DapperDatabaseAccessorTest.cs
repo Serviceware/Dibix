@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Xml.Linq;
 using Xunit;
@@ -18,6 +19,20 @@ namespace Dibix.Dapper.Tests
 CommandType: Text
 CommandText: <Dynamic>
 ", exception.Message);
+            }
+        }
+
+        [Fact]
+        public void Execute_WithOutputParameter_OutputParameterValueIsReturned()
+        {
+            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            {
+                const string commandText = "[dbo].[_dibix_tests_sp1]";
+                IParametersVisitor parameters = accessor.Parameters()
+                                                        .SetInt32("out", out IOutParameter<int?> @out)
+                                                        .Build();
+                accessor.Execute(commandText, CommandType.StoredProcedure, parameters);
+                Assert.Equal(5, @out.Result);
             }
         }
 

@@ -37,7 +37,12 @@ BEGIN
 	  , [decimalvalue] DECIMAL(14,2) NOT NULL
 	  , PRIMARY KEY ([intvalue])
 	)
-END";
+END
+
+DROP PROCEDURE IF EXISTS [dbo].[_dibix_tests_sp1]
+EXEC(N'CREATE PROCEDURE [dbo].[_dibix_tests_sp1] @out INT OUTPUT
+AS
+	SET @out = 5')";
                 command.ExecuteNonQuery();
             }
 

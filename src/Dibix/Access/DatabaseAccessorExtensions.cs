@@ -31,14 +31,14 @@ namespace Dibix
         private sealed class EmptyParameters : IParametersVisitor
         {
             private static readonly EmptyParameters CachedInstance = new EmptyParameters();
+
             private EmptyParameters() { }
 
             public static IParametersVisitor Instance => CachedInstance;
 
-            void IParametersVisitor.VisitParameters(ParameterVisitor visitParameter)
-            {
-                // No parameters so nothing to do here
-            }
+            void IParametersVisitor.VisitInputParameters(InputParameterVisitor visitParameter) { }
+
+            void IParametersVisitor.VisitOutputParameters(OutputParameterVisitor visitParameter) { }
         }
     }
 }
