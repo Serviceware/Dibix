@@ -7,6 +7,7 @@
         public ContractCheck Check { get; set; }
         public bool HasDefaultValue { get; set; }
         public object DefaultValue { get; set; }
+        public bool IsOutput { get; set; }
         public bool Obfuscate { get; set; }
     }
 }

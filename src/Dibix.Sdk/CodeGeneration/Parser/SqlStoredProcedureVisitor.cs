@@ -36,15 +36,13 @@ namespace Dibix.Sdk.CodeGeneration
         {
             string parameterName = node.VariableName.Value.TrimStart('@');
 
-            if (node.Modifier == ParameterModifier.Output)
-                base.Logger.LogError(null, $"Output parameters are not supported: {parameterName}", base.Target.Source, node.StartLine, node.StartColumn);
-
             ISqlMarkupDeclaration markup = SqlMarkupReader.ReadFragment(node, base.Target.Source, base.Logger);
 
             SqlQueryParameter parameter = new SqlQueryParameter
             {
                 Name = parameterName,
-                Type = this.ParseParameterType(parameterName, node, markup)
+                Type = this.ParseParameterType(parameterName, node, markup),
+                IsOutput = node.Modifier == ParameterModifier.Output
             };
             
             this.ParseParameterObfuscate(node, parameter, markup);

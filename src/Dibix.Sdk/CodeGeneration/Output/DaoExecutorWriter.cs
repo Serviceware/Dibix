@@ -108,15 +108,16 @@ namespace Dibix.Sdk.CodeGeneration
                 {
                     foreach (SqlQueryParameter parameter in statement.Parameters)
                     {
+                        ParameterKind parameterKind = parameter.IsOutput ? ParameterKind.Out : ParameterKind.Value;
                         CSharpValue defaultValue = parameter.HasDefaultValue ? ParseDefaultValue(parameter.DefaultValue) : null;
-                        method.AddParameter(parameter.Name, context.ResolveTypeName(parameter.Type), defaultValue);
+                        method.AddParameter(parameter.Name, context.ResolveTypeName(parameter.Type), parameterKind, defaultValue);
                     }
                 }
 
                 if (statement.Async)
                 {
                     context.AddUsing(typeof(CancellationToken).Namespace);
-                    method.AddParameter("cancellationToken", "CancellationToken", new CSharpValue("default"));
+                    method.AddParameter("cancellationToken", "CancellationToken", default, new CSharpValue("default"));
                 }
 
                 if (i + 1 < statements.Count)
@@ -190,9 +191,11 @@ namespace Dibix.Sdk.CodeGeneration
                   .PushIndent();
 
             if (statement.Parameters.Any())
-                WriteParameters(writer, statement);
+                WriteParameters(writer, statement, context);
 
             WriteExecutor(writer, statement, context);
+
+            WriteOutputParameterAssignment(writer, statement, context);
 
             writer.PopIndent()
                   .Write("}");
@@ -222,7 +225,7 @@ namespace Dibix.Sdk.CodeGeneration
                   .WriteLine();
         }
 
-        private static void WriteParameters(StringWriter writer, SqlStatementInfo query)
+        private static void WriteParameters(StringWriter writer, SqlStatementInfo query, DaoCodeGenerationContext context)
         {
             writer.Write("IParametersVisitor @params = accessor.Parameters()")
                   .SetTemporaryIndent(37);
@@ -241,7 +244,7 @@ namespace Dibix.Sdk.CodeGeneration
                 for (int i = 0; i < query.Parameters.Count; i++)
                 {
                     SqlQueryParameter parameter = query.Parameters[i];
-                    if (parameter.Obfuscate)
+                    if (parameter.Obfuscate || parameter.IsOutput)
                         continue;
 
                     writer.Write(parameter.Name);
@@ -258,9 +261,17 @@ namespace Dibix.Sdk.CodeGeneration
 
             writer.WriteLineRaw(")");
 
-            foreach (SqlQueryParameter parameter in query.Parameters.Where(x => x.Obfuscate))
+            foreach (SqlQueryParameter parameter in query.Parameters)
             {
-                writer.WriteLine($".SetString(nameof({parameter.Name}), {parameter.Name}, true)");
+                if (parameter.IsOutput)
+                {
+                    string methodName = GetSetParameterMethodName(parameter.Type);
+                    string clrTypeName = context.ResolveTypeName(parameter.Type);
+                    writer.WriteLine($".{methodName}(nameof({parameter.Name}), out IOutParameter<{clrTypeName}> {parameter.Name}Output)");
+                }
+
+                if (parameter.Obfuscate)
+                    writer.WriteLine($".SetString(nameof({parameter.Name}), {parameter.Name}, true)");
             }
 
             writer.WriteLine(".Build();")
@@ -509,6 +520,19 @@ namespace Dibix.Sdk.CodeGeneration
                   .WriteLine();
         }
 
+        private static void WriteOutputParameterAssignment(StringWriter writer, SqlStatementInfo statement, DaoCodeGenerationContext context)
+        {
+            if (!statement.Parameters.Any(x => x.IsOutput))
+                return;
+
+            writer.WriteLine();
+
+            foreach (SqlQueryParameter parameter in statement.Parameters.Where(parameter => parameter.IsOutput))
+            {
+                writer.WriteLine($"{parameter.Name} = {parameter.Name}Output.Result;");
+            }
+        }
+
         private static string GetExecutorMethodName(SqlQueryResultMode mode)
         {
             switch (mode)
@@ -531,10 +555,25 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static string MakeEnumerableType(string typeName)
+        private static string GetSetParameterMethodName(TypeReference typeReference)
         {
-            return String.Concat("IEnumerable<", typeName, '>');
+            switch (typeReference)
+            {
+                case PrimitiveTypeReference primitiveTypeReference: return GetSetParameterMethodName(primitiveTypeReference.Type);
+                default: throw new ArgumentOutOfRangeException(nameof(typeReference), typeReference, null);
+            }
         }
+        private static string GetSetParameterMethodName(PrimitiveDataType dataType)
+        {
+            switch (dataType)
+            {
+                case PrimitiveDataType.Int32: return "SetInt32";
+                case PrimitiveDataType.UUID: return "SetGuid";
+                default: throw new ArgumentOutOfRangeException(nameof(dataType), dataType, null);
+            }
+        }
+
+        private static string MakeEnumerableType(string typeName) => $"IEnumerable<{typeName}>";
 
         private static string GetComplexTypeName(SqlStatementInfo statement, DaoCodeGenerationContext context)
         {

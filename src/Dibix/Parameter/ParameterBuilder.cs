@@ -28,7 +28,7 @@ namespace Dibix
 
         IParameterBuilder IParameterBuilder.SetInt32(string parameterName, int? parameterValue) => this.Set(parameterName, parameterValue);
         
-        IParameterBuilder IParameterBuilder.SetInt32(string parameterName, out IOutParameter<int?> parameterValue) => this.Set(parameterName, DbType.Int32, out parameterValue);
+        IParameterBuilder IParameterBuilder.SetInt32(string parameterName, out IOutParameter<int> parameterValue) => this.Set(parameterName, DbType.Int32, out parameterValue);
 
         IParameterBuilder IParameterBuilder.SetInt64(string parameterName, long? parameterValue) => this.Set(parameterName, parameterValue);
 
@@ -39,6 +39,8 @@ namespace Dibix
         IParameterBuilder IParameterBuilder.SetDecimal(string parameterName, decimal? parameterValue) => this.Set(parameterName, parameterValue);
 
         IParameterBuilder IParameterBuilder.SetDateTime(string parameterName, DateTime? parameterValue) => this.Set(parameterName, parameterValue);
+
+        IParameterBuilder IParameterBuilder.SetGuid(string parameterName, out IOutParameter<Guid> parameterValue) => this.Set(parameterName, DbType.Guid, out parameterValue);
 
         IParameterBuilder IParameterBuilder.SetString(string parameterName, string parameterValue, bool obfuscate)
         {

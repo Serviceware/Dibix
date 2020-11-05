@@ -29,7 +29,7 @@ CommandText: <Dynamic>
             {
                 const string commandText = "[dbo].[_dibix_tests_sp1]";
                 IParametersVisitor parameters = accessor.Parameters()
-                                                        .SetInt32("out", out IOutParameter<int?> @out)
+                                                        .SetInt32("out", out IOutParameter<int> @out)
                                                         .Build();
                 accessor.Execute(commandText, CommandType.StoredProcedure, parameters);
                 Assert.Equal(5, @out.Result);
