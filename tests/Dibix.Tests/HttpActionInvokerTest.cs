@@ -122,12 +122,12 @@ CommandText: <Dynamic>
             parametersVisitor.Setup(x => x.VisitInputParameters(It.IsAny<InputParameterVisitor>()))
                              .Callback((InputParameterVisitor visitParameter) =>
                              {
-                                 visitParameter("a", new byte[] { 1 }, typeof(byte[]), DbType.Binary, false);
-                                 visitParameter("b", new X
+                                 visitParameter("a", DbType.Binary, new byte[] { 1 }, false);
+                                 visitParameter("b", DbType.Object, new X
                                  {
                                      { 1, "I" },
                                      { 2, "II" }
-                                 }, typeof(StructuredType), null, false);
+                                 }, false);
                              });
 
             Exception exception = (Exception)typeof(DatabaseAccessException).GetMethod("Create", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { commandType, commandText, parametersVisitor.Object, sqlException });
@@ -169,12 +169,12 @@ intValue INT(4)  stringValue NVARCHAR(MAX)
             parametersVisitor.Setup(x => x.VisitInputParameters(It.IsAny<InputParameterVisitor>()))
                              .Callback((InputParameterVisitor visitParameter) =>
                              {
-                                 visitParameter("a", new byte[] { 1 }, typeof(byte[]), DbType.Binary, false);
-                                 visitParameter("b", new X
+                                 visitParameter("a", DbType.Binary, new byte[] { 1 }, false);
+                                 visitParameter("b", DbType.Object, new X
                                  {
                                      { 1, "I" },
                                      { 2, "II" }
-                                 }, typeof(StructuredType), null, false);
+                                 }, false);
                              });
 
             Exception exception = (Exception)typeof(DatabaseAccessException).GetMethod("Create", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { commandType, commandText, parametersVisitor.Object, sqlException });

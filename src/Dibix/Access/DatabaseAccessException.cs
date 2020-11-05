@@ -23,7 +23,7 @@ namespace Dibix
             sb.Append("CommandType: ").Append(commandType).AppendLine()
               .Append("CommandText: ").Append(commandType == CommandType.StoredProcedure ? commandText : "<Dynamic>");
 
-            parameters.VisitInputParameters((name, value, clrType, suggestedDataType, isOutput) =>
+            parameters.VisitInputParameters((name, type, value, isOutput) =>
             {
                 sb.AppendLine();
 
@@ -32,13 +32,13 @@ namespace Dibix
                 string parameterType = null;
                 string parameterDescription = null;
 
-                if (suggestedDataType.HasValue)
-                    parameterType = suggestedDataType.ToString().ToUpperInvariant();
-                else if (value is StructuredType structuredType)
+                if (value is StructuredType structuredType)
                 {
                     parameterType = structuredType.TypeName;
                     parameterDescription = structuredType.Dump();
                 }
+                else
+                    parameterType = type.ToString().ToUpperInvariant();
 
                 if (parameterType != null)
                 {

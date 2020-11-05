@@ -117,7 +117,7 @@ namespace Dibix.Dapper
         {
             Guard.IsNotNull(parametersVisitor, nameof(parametersVisitor));
             DynamicParameters @params = new DynamicParameters();
-            parametersVisitor.VisitInputParameters((name, value, clrType, suggestedDataType, isOutput) => @params.Add(name: name, value: NormalizeParameterValue(value), dbType: NormalizeParameterDbType(suggestedDataType), direction: isOutput ? ParameterDirection.Output : (ParameterDirection?)null));
+            parametersVisitor.VisitInputParameters((name, dataType, value, isOutput) => @params.Add(name: name, value: NormalizeParameterValue(value), dbType: NormalizeParameterDbType(dataType), direction: isOutput ? ParameterDirection.Output : (ParameterDirection?)null));
             return new DynamicParametersWrapper(@params, parametersVisitor);
         }
 
@@ -129,7 +129,7 @@ namespace Dibix.Dapper
             return value;
         }
 
-        private static DbType? NormalizeParameterDbType(DbType? dbType)
+        private static DbType? NormalizeParameterDbType(DbType dbType)
         {
             if (dbType == DbType.Xml)
                 return null; // You would guess DbType.Xml, but since Dapper treats .NET XML types (i.E. XElement) as custom types, DbType = null is expected

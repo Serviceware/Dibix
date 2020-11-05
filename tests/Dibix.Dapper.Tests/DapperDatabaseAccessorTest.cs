@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text;
 using System.Xml.Linq;
 using Xunit;
 
@@ -37,13 +38,41 @@ CommandText: <Dynamic>
         }
 
         [Fact]
-        public void QueryMany_WithXElementParameter_Success()
+        public void QueryMany_WithBinaryParameter_UsingTemplate_Success()
+        {
+            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            {
+                const string commandText = "SELECT CAST(@binary AS NVARCHAR(MAX))";
+                byte[] binary = Encoding.Unicode.GetBytes("Test");
+                IParametersVisitor parameters = accessor.Parameters().SetFromTemplate(new { binary }).Build();
+                string result = accessor.QuerySingle<string>(commandText, parameters);
+                Assert.Equal("Test", result);
+            }
+        }
+
+        [Fact]
+        public void QueryMany_WithXElementParameter_UsingTemplate_Success()
         {
             using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
             {
                 const string commandText = "SELECT [x].[v].value('@value', 'INT') FROM @xml.nodes(N'root/item') AS [x]([v])";
                 XElement xml = XElement.Parse("<root><item value=\"1\" /><item value=\"2\" /></root>");
                 IParametersVisitor parameters = accessor.Parameters().SetFromTemplate(new { xml }).Build();
+                IList<byte> results = accessor.QueryMany<byte>(commandText, parameters).ToArray();
+                Assert.Equal(2, results.Count);
+                Assert.Equal((byte)1, results[0]);
+                Assert.Equal((byte)2, results[1]);
+            }
+        }
+
+        [Fact]
+        public void QueryMany_WithXElementParameter_UsingTypedMethod_Success()
+        {
+            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            {
+                const string commandText = "SELECT [x].[v].value('@value', 'INT') FROM @xml.nodes(N'root/item') AS [x]([v])";
+                XElement xml = XElement.Parse("<root><item value=\"1\" /><item value=\"2\" /></root>");
+                IParametersVisitor parameters = accessor.Parameters().SetXml(nameof(xml), xml).Build();
                 IList<byte> results = accessor.QueryMany<byte>(commandText, parameters).ToArray();
                 Assert.Equal(2, results.Count);
                 Assert.Equal((byte)1, results[0]);
@@ -140,14 +169,19 @@ CommandText: <Dynamic>
         {
             using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
             {
-                const string commandText = @"SELECT @agentid AS [id], N'beef' AS [name]";
+                const string commandText = "SELECT @agentid AS [id], N'beef' AS [name], @direction AS [direction]";
                 IParametersVisitor @params = accessor.Parameters()
-                                                     .SetFromTemplate(new { agentid = 6 })
+                                                     .SetFromTemplate(new
+                                                     {
+                                                         agentid = 6
+                                                       , direction = (Direction?)Direction.Descending
+                                                     })
                                                      .Build();
                 Entity result = accessor.QuerySingle<Entity>(commandText, @params);
                 Assert.Equal(6, result.Id);
                 Assert.Equal("beef", result.Name);
                 Assert.Equal(default, result.Price);
+                Assert.Equal(Direction.Descending, result.Direction);
             }
         }
 
@@ -177,7 +211,41 @@ FROM @translations";
         }
 
         [Fact]
-        public void QueryMultiple_Success()
+        public void QueryMultiple_UsingTemplate_Success()
+        {
+            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            {
+                const string commandText = @"SELECT @agentid AS [id], N'beef' AS [name], [decimalvalue] AS [price]
+FROM @values
+SELECT [intvalue]
+FROM @ids";
+
+                StructuredType_IntStringDecimal valuesParam = new StructuredType_IntStringDecimal { { 5, "cake", 3.975M } };
+                StructuredType_Int idsParam = StructuredType_Int.From(new[] { 1, 2 }, (x, y) => x.Add(y));
+
+                IParametersVisitor parameters = accessor.Parameters()
+                                                        .SetFromTemplate(new
+                                                        {
+                                                            agentid = 6,
+                                                            values = valuesParam,
+                                                            ids = idsParam
+                                                        })
+                                                        .Build();
+                using (IMultipleResultReader reader = accessor.QueryMultiple(commandText, parameters))
+                {
+                    Entity entity = reader.ReadSingle<Entity>();
+                    IEnumerable<int> ids = reader.ReadMany<int>();
+
+                    Assert.Equal(6, entity.Id);
+                    Assert.Equal("beef", entity.Name);
+                    Assert.Equal(3.98M, entity.Price);
+                    Assert.Equal(new[] { 1, 2 }, ids);
+                }
+            }
+        }
+
+        [Fact]
+        public void QueryMultiple_UsingTypedMethod_Success()
         {
             using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
             {

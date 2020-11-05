@@ -26,9 +26,7 @@ namespace Dibix.Dapper.Tests
             connection.ConnectionString = connectionSection.ConnectionString;
             connection.Open();
 
-            using (DbCommand command = connection.CreateCommand())
-            {
-                command.CommandText = @"IF TYPE_ID('[dbo].[_dibix_tests_structuredtype]') IS NULL
+            const string commandText = @"IF TYPE_ID('[dbo].[_dibix_tests_structuredtype]') IS NULL
 BEGIN
 	CREATE TYPE [dbo].[_dibix_tests_structuredtype] AS TABLE
 	(
@@ -38,15 +36,25 @@ BEGIN
 	  , PRIMARY KEY ([intvalue])
 	)
 END
-
-DROP PROCEDURE IF EXISTS [dbo].[_dibix_tests_sp1]
-EXEC(N'CREATE PROCEDURE [dbo].[_dibix_tests_sp1] @out INT OUTPUT
+GO
+CREATE OR ALTER PROCEDURE [dbo].[_dibix_tests_sp1] @out INT OUTPUT
 AS
-	SET @out = 5')";
-                command.ExecuteNonQuery();
-            }
+    SET @out = 5";
+            ExecuteCommands(connection, commandText);
 
             return new DapperDatabaseAccessor(connection);
+        }
+
+        private static void ExecuteCommands(DbConnection connection, string commandText)
+        {
+            foreach (string currentCommandText in commandText.Split("GO"))
+            {
+                using (DbCommand command = connection.CreateCommand())
+                {
+                    command.CommandText = currentCommandText;
+                    command.ExecuteNonQuery();
+                }
+            }
         }
     }
 }

@@ -9,6 +9,30 @@ namespace Dibix
     public sealed class ParameterBuilder : IParameterBuilder
     {
         #region Fields
+        private static readonly IDictionary<Type, DbType> TypeMap = new Dictionary<Type, DbType>
+        {
+            [typeof(byte)]            = DbType.Byte
+          , [typeof(sbyte)]           = DbType.SByte
+          , [typeof(short)]           = DbType.Int16
+          , [typeof(ushort)]          = DbType.UInt16
+          , [typeof(int)]             = DbType.Int32
+          , [typeof(uint)]            = DbType.UInt32
+          , [typeof(long)]            = DbType.Int64
+          , [typeof(ulong)]           = DbType.UInt64
+          , [typeof(float)]           = DbType.Single
+          , [typeof(double)]          = DbType.Double
+          , [typeof(decimal)]         = DbType.Decimal
+          , [typeof(bool)]            = DbType.Boolean
+          , [typeof(string)]          = DbType.String
+          , [typeof(char)]            = DbType.StringFixedLength
+          , [typeof(byte[])]          = DbType.Binary
+          , [typeof(Guid)]            = DbType.Guid
+          , [typeof(DateTime)]        = DbType.DateTime
+          , [typeof(DateTimeOffset)]  = DbType.DateTimeOffset
+          , [typeof(TimeSpan)]        = DbType.Time
+          , [typeof(XElement)]        = DbType.Xml
+          , [typeof(object)]          = DbType.Object
+        };
         private readonly IDictionary<string, Parameter> _parameters;
         #endregion
 
@@ -20,49 +44,71 @@ namespace Dibix
         #endregion
 
         #region IParameterBuilder Members
-        IParameterBuilder IParameterBuilder.SetBoolean(string parameterName, bool? parameterValue) => this.Set(parameterName, parameterValue);
+        IParameterBuilder IParameterBuilder.SetBoolean(string parameterName, bool? parameterValue) => this.Set(parameterName, DbType.Boolean, parameterValue);
+        IParameterBuilder IParameterBuilder.SetBoolean(string parameterName, out IOutParameter<bool> parameterValue) => this.Set(parameterName, DbType.Boolean, out parameterValue);
+        IParameterBuilder IParameterBuilder.SetBoolean(string parameterName, out IOutParameter<bool?> parameterValue) => this.Set(parameterName, DbType.Boolean, out parameterValue);
 
-        IParameterBuilder IParameterBuilder.SetByte(string parameterName, byte? parameterValue) => this.Set(parameterName, parameterValue);
+        IParameterBuilder IParameterBuilder.SetByte(string parameterName, byte? parameterValue) => this.Set(parameterName, DbType.Byte, parameterValue);
+        IParameterBuilder IParameterBuilder.SetByte(string parameterName, out IOutParameter<byte> parameterValue) => this.Set(parameterName, DbType.Byte, out parameterValue);
+        IParameterBuilder IParameterBuilder.SetByte(string parameterName, out IOutParameter<byte?> parameterValue) => this.Set(parameterName, DbType.Byte, out parameterValue);
 
-        IParameterBuilder IParameterBuilder.SetInt16(string parameterName, short? parameterValue) => this.Set(parameterName, parameterValue);
+        IParameterBuilder IParameterBuilder.SetInt16(string parameterName, short? parameterValue) => this.Set(parameterName, DbType.Int16, parameterValue);
+        IParameterBuilder IParameterBuilder.SetInt16(string parameterName, out IOutParameter<short> parameterValue) => this.Set(parameterName, DbType.Int16, out parameterValue);
+        IParameterBuilder IParameterBuilder.SetInt16(string parameterName, out IOutParameter<short?> parameterValue) => this.Set(parameterName, DbType.Int16, out parameterValue);
 
-        IParameterBuilder IParameterBuilder.SetInt32(string parameterName, int? parameterValue) => this.Set(parameterName, parameterValue);
-        
+        IParameterBuilder IParameterBuilder.SetInt32(string parameterName, int? parameterValue) => this.Set(parameterName, DbType.Int32, parameterValue);
         IParameterBuilder IParameterBuilder.SetInt32(string parameterName, out IOutParameter<int> parameterValue) => this.Set(parameterName, DbType.Int32, out parameterValue);
+        IParameterBuilder IParameterBuilder.SetInt32(string parameterName, out IOutParameter<int?> parameterValue) => this.Set(parameterName, DbType.Int32, out parameterValue);
+        
+        IParameterBuilder IParameterBuilder.SetInt64(string parameterName, long? parameterValue) => this.Set(parameterName, DbType.Int64, parameterValue);
+        IParameterBuilder IParameterBuilder.SetInt64(string parameterName, out IOutParameter<long> parameterValue) => this.Set(parameterName, DbType.Int64, out parameterValue);
+        IParameterBuilder IParameterBuilder.SetInt64(string parameterName, out IOutParameter<long?> parameterValue) => this.Set(parameterName, DbType.Int64, out parameterValue);
 
-        IParameterBuilder IParameterBuilder.SetInt64(string parameterName, long? parameterValue) => this.Set(parameterName, parameterValue);
+        IParameterBuilder IParameterBuilder.SetSingle(string parameterName, float? parameterValue) => this.Set(parameterName, DbType.Single, parameterValue);
+        IParameterBuilder IParameterBuilder.SetSingle(string parameterName, out IOutParameter<float> parameterValue) => this.Set(parameterName, DbType.Single, out parameterValue);
+        IParameterBuilder IParameterBuilder.SetSingle(string parameterName, out IOutParameter<float?> parameterValue) => this.Set(parameterName, DbType.Single, out parameterValue);
 
-        IParameterBuilder IParameterBuilder.SetSingle(string parameterName, float? parameterValue) => this.Set(parameterName, parameterValue);
+        IParameterBuilder IParameterBuilder.SetDouble(string parameterName, double? parameterValue) => this.Set(parameterName, DbType.Double, parameterValue);
+        IParameterBuilder IParameterBuilder.SetDouble(string parameterName, out IOutParameter<double> parameterValue) => this.Set(parameterName, DbType.Double, out parameterValue);
+        IParameterBuilder IParameterBuilder.SetDouble(string parameterName, out IOutParameter<double?> parameterValue) => this.Set(parameterName, DbType.Double, out parameterValue);
 
-        IParameterBuilder IParameterBuilder.SetDouble(string parameterName, double? parameterValue) => this.Set(parameterName, parameterValue);
+        IParameterBuilder IParameterBuilder.SetDecimal(string parameterName, decimal? parameterValue) => this.Set(parameterName, DbType.Decimal, parameterValue);
+        IParameterBuilder IParameterBuilder.SetDecimal(string parameterName, out IOutParameter<decimal> parameterValue) => this.Set(parameterName, DbType.Decimal, out parameterValue);
+        IParameterBuilder IParameterBuilder.SetDecimal(string parameterName, out IOutParameter<decimal?> parameterValue) => this.Set(parameterName, DbType.Decimal, out parameterValue);
 
-        IParameterBuilder IParameterBuilder.SetDecimal(string parameterName, decimal? parameterValue) => this.Set(parameterName, parameterValue);
+        IParameterBuilder IParameterBuilder.SetDateTime(string parameterName, DateTime? parameterValue) => this.Set(parameterName, DbType.DateTime, parameterValue);
+        IParameterBuilder IParameterBuilder.SetDateTime(string parameterName, out IOutParameter<DateTime> parameterValue) => this.Set(parameterName, DbType.DateTime, out parameterValue);
+        IParameterBuilder IParameterBuilder.SetDateTime(string parameterName, out IOutParameter<DateTime?> parameterValue) => this.Set(parameterName, DbType.DateTime, out parameterValue);
 
-        IParameterBuilder IParameterBuilder.SetDateTime(string parameterName, DateTime? parameterValue) => this.Set(parameterName, parameterValue);
-
+        IParameterBuilder IParameterBuilder.SetGuid(string parameterName, Guid? parameterValue) => this.Set(parameterName, DbType.Guid, parameterValue);
         IParameterBuilder IParameterBuilder.SetGuid(string parameterName, out IOutParameter<Guid> parameterValue) => this.Set(parameterName, DbType.Guid, out parameterValue);
+        IParameterBuilder IParameterBuilder.SetGuid(string parameterName, out IOutParameter<Guid?> parameterValue) => this.Set(parameterName, DbType.Guid, out parameterValue);
 
-        IParameterBuilder IParameterBuilder.SetString(string parameterName, string parameterValue, bool obfuscate)
+        IParameterBuilder IParameterBuilder.SetString(string parameterName, string parameterValue) => this.SetStringCore(parameterName, parameterValue, obfuscate: false);
+        IParameterBuilder IParameterBuilder.SetString(string parameterName, out IOutParameter<string> parameterValue) => this.Set(parameterName, DbType.String, out parameterValue);
+        IParameterBuilder IParameterBuilder.SetString(string parameterName, string parameterValue, bool obfuscate) => this.SetStringCore(parameterName, parameterValue, obfuscate);
+        private IParameterBuilder SetStringCore(string parameterName, string parameterValue, bool obfuscate)
         {
             if (parameterValue != null && obfuscate)
                 parameterValue = TextObfuscator.Obfuscate(parameterValue);
 
-            return this.Set(parameterName, parameterValue);
+            return this.Set(parameterName, DbType.String, parameterValue);
         }
 
-        IParameterBuilder IParameterBuilder.SetBytes(string parameterName, byte[] parameterValue) => this.Set(parameterName, parameterValue);
+        IParameterBuilder IParameterBuilder.SetBytes(string parameterName, byte[] parameterValue) => this.Set(parameterName, DbType.Binary, parameterValue);
 
-        IParameterBuilder IParameterBuilder.SetXml(string parameterName, XElement parameterValue) => this.Set(parameterName, parameterValue);
+        IParameterBuilder IParameterBuilder.SetXml(string parameterName, XElement parameterValue) => this.Set(parameterName, DbType.Xml, parameterValue);
 
-        IParameterBuilder IParameterBuilder.SetStructured(string name, StructuredType parameterValue) => this.Set(name, parameterValue);
+        IParameterBuilder IParameterBuilder.SetStructured(string name, StructuredType parameterValue) => this.Set(name, DbType.String, parameterValue);
 
         IParameterBuilder IParameterBuilder.SetFromTemplate(object template)
         {
             Guard.IsNotNull(template, nameof(template));
             foreach (PropertyAccessor property in TypeAccessor.GetProperties(template.GetType()))
             {
+                DbType type = ResolveDbType(property.Type);
                 object value = property.GetValue(template);
-                this.Set(name: property.Name, dataType: null, type: property.Type, value: value, outParameter: null);
+                this.Set(property.Name, type, value);
             }
             return this;
         }
@@ -71,38 +117,34 @@ namespace Dibix
         #endregion
 
         #region Private Methods
-        private IParameterBuilder Set<T>(string name, T value) => this.Set(name, null, typeof(T), value, null);
-        private IParameterBuilder Set<T>(string parameterName, DbType dataType, out IOutParameter<T> parameterValue)
+        private IParameterBuilder Set<T>(string name, DbType type, out IOutParameter<T> parameterValue)
         {
             OutParameter<T> outParameter = new OutParameter<T>();
             parameterValue = outParameter;
-            return this.Set(parameterName, dataType, typeof(T), null, outParameter);
+            return this.Set(name, type, null, outParameter);
         }
-        private IParameterBuilder Set(string name, DbType? dataType, Type type, object value, OutParameter outParameter)
+        private IParameterBuilder Set(string name, DbType type, object value, OutParameter outParameter = null)
         {
-            type = NormalizeType(type);
-            DbType? suggestedDataType = TryOverrideDataType(dataType, type);
-            this._parameters[name] = new Parameter(name, type, value, suggestedDataType, outParameter);
+            this._parameters[name] = new Parameter(name, type, value, outParameter);
             return this;
         }
 
-        private static Type NormalizeType(Type type)
+        private static DbType ResolveDbType(Type clrType)
         {
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
-                return Nullable.GetUnderlyingType(type);
+            Type nullUnderlyingType = Nullable.GetUnderlyingType(clrType);
+            if (nullUnderlyingType != null) 
+                clrType = nullUnderlyingType;
+            
+            if (clrType.IsEnum && !TypeMap.ContainsKey(clrType)) 
+                clrType = Enum.GetUnderlyingType(clrType);
 
-            return type;
-        }
+            if (typeof(StructuredType).IsAssignableFrom(clrType))
+                return DbType.Object;
 
-        private static DbType? TryOverrideDataType(DbType? dataType, Type type)
-        {
-            if (type == typeof(byte[]))
-                return DbType.Binary;
+            if (TypeMap.TryGetValue(clrType, out DbType dbType))
+                return dbType;
 
-            if (type == typeof(XElement) || type == typeof(XDocument))
-                return DbType.Xml;
-
-            return dataType;
+            throw new ArgumentOutOfRangeException(nameof(clrType), clrType, null);
         }
         #endregion
 
@@ -118,7 +160,7 @@ namespace Dibix
 
             void IParametersVisitor.VisitInputParameters(InputParameterVisitor visitParameter)
             {
-                this._parameters.Each(x => visitParameter(x.Name, x.Value, x.Type, x.SuggestedDataType, x.OutputParameter != null));
+                this._parameters.Each(x => visitParameter(x.Name, x.Type, x.Value, x.OutputParameter != null));
             }
 
             public void VisitOutputParameters(OutputParameterVisitor visitParameter)
@@ -132,17 +174,15 @@ namespace Dibix
         private sealed class Parameter
         {
             public string Name { get; }
-            public Type Type { get; }
+            public DbType Type { get; }
             public object Value { get; }
-            public DbType? SuggestedDataType { get; }
             public OutParameter OutputParameter { get; }
 
-            public Parameter(string name, Type type, object value, DbType? suggestedDataType, OutParameter outParameter)
+            public Parameter(string name, DbType type, object value, OutParameter outParameter)
             {
                 this.Name = name;
                 this.Type = type;
                 this.Value = value;
-                this.SuggestedDataType = suggestedDataType;
                 this.OutputParameter = outParameter;
             }
         }
