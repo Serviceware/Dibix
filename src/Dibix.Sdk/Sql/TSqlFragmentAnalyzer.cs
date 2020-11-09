@@ -11,16 +11,18 @@ namespace Dibix.Sdk.Sql
         private readonly string _source;
         private readonly TSqlFragment _sqlFragment;
         private readonly bool _isScriptArtifact;
+        private readonly string _projectName;
         private readonly bool _isEmbedded;
         private readonly Lazy<TSqlModel> _modelAccessor;
         private readonly ILogger _logger;
         private SchemaAnalyzerResult _result;
 
-        public TSqlFragmentAnalyzer(string source, TSqlFragment sqlFragment, bool isScriptArtifact, bool isEmbedded, Lazy<TSqlModel> modelAccessor, ILogger logger)
+        public TSqlFragmentAnalyzer(string source, TSqlFragment sqlFragment, bool isScriptArtifact, string projectName, bool isEmbedded, Lazy<TSqlModel> modelAccessor, ILogger logger)
         {
             this._source = source;
             this._sqlFragment = sqlFragment;
             this._isScriptArtifact = isScriptArtifact;
+            this._projectName = projectName;
             this._isEmbedded = isEmbedded;
             this._modelAccessor = modelAccessor;
             this._logger = logger;
@@ -28,7 +30,7 @@ namespace Dibix.Sdk.Sql
             // Currently we always analyze. This ensures validating DML projects properly.
             // It is however prepared to be loaded in a lazy manner.
             // So if performance issues arise, optimizations can be evaluated and applied.
-            this._result = AnalyzeSchema(source, sqlFragment, isScriptArtifact, isEmbedded, this._modelAccessor.Value, logger);
+            this._result = AnalyzeSchema(source, sqlFragment, isScriptArtifact, projectName, isEmbedded, this._modelAccessor.Value, logger);
         }
 
         public bool TryGetElementLocation(TSqlFragment fragment, out ElementLocation location) => this.GetResult().Locations.TryGetValue(fragment.StartOffset, out location);
@@ -45,9 +47,9 @@ namespace Dibix.Sdk.Sql
             return false;
         }
 
-        private SchemaAnalyzerResult GetResult() => this._result ?? (this._result = AnalyzeSchema(this._source, this._sqlFragment, this._isScriptArtifact, this._isEmbedded, this._modelAccessor.Value, this._logger));
+        private SchemaAnalyzerResult GetResult() => this._result ?? (this._result = AnalyzeSchema(this._source, this._sqlFragment, this._isScriptArtifact, this._projectName, this._isEmbedded, this._modelAccessor.Value, this._logger));
 
-        private static SchemaAnalyzerResult AnalyzeSchema(string source, TSqlFragment sqlFragment, bool isScriptArtifact, bool isEmbedded, TSqlModel model, ILogger logger)
+        private static SchemaAnalyzerResult AnalyzeSchema(string source, TSqlFragment sqlFragment, bool isScriptArtifact, string projectName, bool isEmbedded, TSqlModel model, ILogger logger)
         {
             SchemaAnalyzerResult schemaAnalyzerResult = SchemaAnalyzer.Analyze(model, sqlFragment);
 
@@ -89,7 +91,7 @@ namespace Dibix.Sdk.Sql
             {
                 foreach (TSqlFragment statement in schemaAnalyzerResult.DDLStatements)
                 {
-                    if (IsSupportedDDLStatement(statement, source))
+                    if (IsSupportedDDLStatement(projectName, statement))
                         continue;
 
                     logger.LogError(null, "Only CREATE PROCEDURE is a supported DDL statement within a DML project", source, statement.StartLine, statement.StartColumn);
@@ -99,7 +101,7 @@ namespace Dibix.Sdk.Sql
             return schemaAnalyzerResult;
         }
 
-        private static bool IsSupportedDDLStatement(TSqlFragment fragment, string source)
+        private static bool IsSupportedDDLStatement(string projectName, TSqlFragment fragment)
         {
             // DML body is always defined in CREATE PROCEDURE
             if (fragment is CreateProcedureStatement)
@@ -113,8 +115,8 @@ namespace Dibix.Sdk.Sql
             if (fragment is AlterTableConstraintModificationStatement constrationModificationStatement && constrationModificationStatement.ConstraintEnforcement != ConstraintEnforcement.NotSpecified)
                 return true;
             
-            // TODO: Define database migration project exception to not allow this for all DML projects
-            if (source.Contains("VersionMigrator.Database.DML")) // DIRTY!
+            // TODO: Dirty suppression..
+            if (projectName == "VersionMigrator.Database.DML")
                 return true;
 
             return false;

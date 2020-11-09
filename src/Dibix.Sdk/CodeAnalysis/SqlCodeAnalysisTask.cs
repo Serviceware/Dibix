@@ -10,7 +10,8 @@ namespace Dibix.Sdk.CodeAnalysis
     {
         public static bool Execute
         (
-            string databaseSchemaProviderName
+            string projectName
+          , string databaseSchemaProviderName
           , string modelCollation
           , string namingConventionPrefix
           , bool isEmbedded
@@ -20,7 +21,7 @@ namespace Dibix.Sdk.CodeAnalysis
           , ILogger logger
         )
         {
-            SqlCodeAnalysisRuleEngine codeAnalysisEngine = SqlCodeAnalysisRuleEngine.Create(databaseSchemaProviderName, modelCollation, namingConventionPrefix, isEmbedded, source, sqlReferencePath, logger);
+            SqlCodeAnalysisRuleEngine codeAnalysisEngine = SqlCodeAnalysisRuleEngine.Create(projectName, databaseSchemaProviderName, modelCollation, namingConventionPrefix, isEmbedded, source, sqlReferencePath, logger);
             if (logger.HasLoggedErrors)
                 return false;
 

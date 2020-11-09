@@ -27,7 +27,8 @@ namespace Dibix.Sdk.VisualStudio
         {
             SqlStatementCollector statementCollector = new DacPacSqlStatementCollector
             (
-                productName: null
+                projectName: null
+              , productName: null
               , areaName: null
               , parser: parser
               , formatter: formatter

@@ -11,7 +11,8 @@ namespace Dibix.Sdk.CodeGeneration
     {
         public static CodeArtifactsGenerationModel Create
         (
-            string projectDirectory
+            string projectName
+          , string projectDirectory
           , string productName
           , string areaName
           , string title
@@ -54,7 +55,7 @@ namespace Dibix.Sdk.CodeGeneration
                 ClientOutputFilePath = clientOutputFilePath
             };
 
-            Lazy<TSqlModel> modelAccessor = new Lazy<TSqlModel>(() => PublicSqlDataSchemaModelLoader.Load(databaseSchemaProviderName, modelCollation, source, sqlReferencePath, logger));
+            Lazy<TSqlModel> modelAccessor = new Lazy<TSqlModel>(() => PublicSqlDataSchemaModelLoader.Load(projectName, databaseSchemaProviderName, modelCollation, source, sqlReferencePath, logger));
             IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(projectDirectory);
             ISqlStatementFormatter formatter = isEmbedded ? (ISqlStatementFormatter)new TakeSourceSqlStatementFormatter() : new ExecStoredProcedureSqlStatementFormatter();
             formatter.StripWhiteSpace = model.CommandTextFormatting == CommandTextFormatting.StripWhiteSpace;
@@ -67,7 +68,7 @@ namespace Dibix.Sdk.CodeGeneration
             typeResolver.Register(new ContractDefinitionSchemaTypeResolver(schemaRegistry, contractDefinitionProvider), 0);
             typeResolver.Register(new UserDefinedTypeSchemaTypeResolver(schemaRegistry, userDefinedTypeProvider, assemblyResolver), 1);
 
-            model.Statements.AddRange(CollectStatements(normalizedSources, productName, areaName, isEmbedded, formatter, typeResolver, schemaRegistry, logger, modelAccessor));
+            model.Statements.AddRange(CollectStatements(normalizedSources, projectName, productName, areaName, isEmbedded, formatter, typeResolver, schemaRegistry, logger, modelAccessor));
             model.UserDefinedTypes.AddRange(userDefinedTypeProvider.Types);
             model.Contracts.AddRange(contractDefinitionProvider.Contracts);
             model.Controllers.AddRange(CollectControllers(normalizedEndpoints, productName, areaName, defaultOutputName, model.Statements, assemblyResolver, fileSystemProvider, typeResolver, schemaRegistry, logger));
@@ -78,6 +79,7 @@ namespace Dibix.Sdk.CodeGeneration
         private static IEnumerable<SqlStatementInfo> CollectStatements
         (
             IEnumerable<string> sources
+          , string projectName
           , string productName
           , string areaName
           , bool isEmbedded
@@ -91,7 +93,7 @@ namespace Dibix.Sdk.CodeGeneration
             // DDL statements however, need explicit markup, i.E. @Name at least
             bool requireExplicitMarkup = !isEmbedded;
             ISqlStatementParser parser = new SqlStoredProcedureParser(requireExplicitMarkup);
-            SqlStatementCollector statementCollector = new PhysicalFileSqlStatementCollector(isEmbedded, productName, areaName, parser, formatter, typeResolver, schemaRegistry, logger, sources, modelAccessor);
+            SqlStatementCollector statementCollector = new PhysicalFileSqlStatementCollector(projectName, isEmbedded, productName, areaName, parser, formatter, typeResolver, schemaRegistry, logger, sources, modelAccessor);
             return statementCollector.CollectStatements();
         }
 

@@ -17,6 +17,7 @@ namespace Dibix.Sdk.CodeAnalysis
     {
         #region Fields
         private readonly TSqlModel _model;
+        private readonly string _projectName;
         private readonly string _namingConventionPrefix;
         private readonly bool _isEmbedded;
         private readonly ILogger _logger;
@@ -26,9 +27,10 @@ namespace Dibix.Sdk.CodeAnalysis
         #endregion
 
         #region Constructor
-        private SqlCodeAnalysisRuleEngine(TSqlModel model, string namingConventionPrefix, bool isEmbedded, ILogger logger)
+        private SqlCodeAnalysisRuleEngine(TSqlModel model, string projectName, string namingConventionPrefix, bool isEmbedded, ILogger logger)
         {
             this._model = model;
+            this._projectName = projectName;
             this._namingConventionPrefix = namingConventionPrefix;
             this._isEmbedded = isEmbedded;
             this._logger = logger;
@@ -40,10 +42,10 @@ namespace Dibix.Sdk.CodeAnalysis
         #endregion
 
         #region Factory Methods
-        public static SqlCodeAnalysisRuleEngine Create(string databaseSchemaProviderName, string modelCollation, string namingConventionPrefix, bool isEmbedded, IEnumerable<TaskItem> source, ICollection<TaskItem> sqlReferencePath, ILogger logger)
+        public static SqlCodeAnalysisRuleEngine Create(string projectName, string databaseSchemaProviderName, string modelCollation, string namingConventionPrefix, bool isEmbedded, IEnumerable<TaskItem> source, ICollection<TaskItem> sqlReferencePath, ILogger logger)
         {
-            TSqlModel model = PublicSqlDataSchemaModelLoader.Load(databaseSchemaProviderName, modelCollation, source, sqlReferencePath, logger);
-            return new SqlCodeAnalysisRuleEngine(model, namingConventionPrefix, isEmbedded, logger);
+            TSqlModel model = PublicSqlDataSchemaModelLoader.Load(projectName, databaseSchemaProviderName, modelCollation, source, sqlReferencePath, logger);
+            return new SqlCodeAnalysisRuleEngine(model, projectName, namingConventionPrefix, isEmbedded, logger);
         }
         #endregion
 
@@ -136,7 +138,7 @@ namespace Dibix.Sdk.CodeAnalysis
 
         private SqlCodeAnalysisContext CreateContext(string source, TSqlFragment fragment, bool isScriptArtifact)
         {
-            return new SqlCodeAnalysisContext(this._model, source, fragment, isScriptArtifact, this._namingConventionPrefix, this._isEmbedded, this, this._logger);
+            return new SqlCodeAnalysisContext(this._model, source, fragment, isScriptArtifact, this._projectName, this._namingConventionPrefix, this._isEmbedded, this, this._logger);
         }
 
         private static IEnumerable<Func<SqlCodeAnalysisContext, IEnumerable<SqlCodeAnalysisError>>> ScanRules()

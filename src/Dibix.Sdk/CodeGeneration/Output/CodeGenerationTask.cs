@@ -7,7 +7,8 @@ namespace Dibix.Sdk.CodeGeneration
     { 
         public static bool Execute
         (
-            string projectDirectory
+            string projectName
+          , string projectDirectory
           , string productName
           , string areaName
           , string title
@@ -31,7 +32,8 @@ namespace Dibix.Sdk.CodeGeneration
             ISchemaRegistry schemaRegistry = new SchemaRegistry(logger);
             CodeArtifactsGenerationModel model = CodeGenerationModelLoader.Create
             (
-                projectDirectory
+                projectName
+              , projectDirectory
               , productName
               , areaName
               , title

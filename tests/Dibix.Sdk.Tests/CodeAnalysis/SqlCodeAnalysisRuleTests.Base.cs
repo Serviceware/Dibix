@@ -37,7 +37,7 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
 
             TestLogger logger = new TestLogger(this._output);
 
-            ISqlCodeAnalysisRuleEngine engine = SqlCodeAnalysisRuleEngine.Create(DatabaseTestUtility.DatabaseSchemaProviderName, DatabaseTestUtility.ModelCollation, "dbx", false, sources, new TaskItem[0], logger);
+            ISqlCodeAnalysisRuleEngine engine = SqlCodeAnalysisRuleEngine.Create(DatabaseTestUtility.ProjectName, DatabaseTestUtility.DatabaseSchemaProviderName, DatabaseTestUtility.ModelCollation, "dbx", false, sources, new TaskItem[0], logger);
             IEnumerable<SqlCodeAnalysisError> errors = engine.Analyze(violationScriptPath, ruleInstance);
 
             string actual = GenerateXmlFromResults(errors);

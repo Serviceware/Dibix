@@ -113,6 +113,8 @@
     </DumpItem>
 
     <ItemGroup>
+      <_SqlCodeAnalysisInputItem Include="ProjectName
+  $(MSBuildProjectName)" />
       <_SqlCodeAnalysisInputItem Include="DatabaseSchemaProviderName
   $(DSP)" />
       <_SqlCodeAnalysisInputItem Include="ModelCollation
@@ -195,6 +197,8 @@ $(_SqlReferencePath)" />
     </DumpItem>
 
     <ItemGroup>
+      <_CodeGenerationInputItem Include="ProjectName
+  $(MSBuildProjectName)" />
       <_CodeGenerationInputItem Include="ProjectDirectory
   $(MSBuildProjectDirectory)" />
       <_CodeGenerationInputItem Include="ProductName

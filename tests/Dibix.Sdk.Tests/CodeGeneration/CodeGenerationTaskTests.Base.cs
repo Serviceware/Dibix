@@ -32,7 +32,8 @@ namespace Dibix.Sdk.Tests.CodeGeneration
 
             bool result = CodeGenerationTask.Execute
             (
-                projectDirectory: DatabaseTestUtility.DatabaseProjectDirectory
+                projectName: DatabaseTestUtility.ProjectName
+              , projectDirectory: DatabaseTestUtility.DatabaseProjectDirectory
               , productName: "Dibix.Sdk"
               , areaName: "Tests"
               , title: "Dibix.Sdk.Tests API title"

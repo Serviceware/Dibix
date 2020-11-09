@@ -27,6 +27,7 @@ namespace Dibix.Sdk.CodeAnalysis
           , string source
           , TSqlFragment fragment
           , bool isScriptArtifact
+          , string projectName
           , string namingConventionPrefix
           , bool isEmbedded
           , ISqlCodeAnalysisSuppressionService suppressionService
@@ -36,7 +37,7 @@ namespace Dibix.Sdk.CodeAnalysis
             this._source = source;
             this._suppressionService = suppressionService;
             this._logger = logger;
-            this.Model = new SqlModel(source, fragment, isScriptArtifact, isEmbedded, model, logger);
+            this.Model = new SqlModel(source, fragment, isScriptArtifact, projectName, isEmbedded, model, logger);
             this._hash = CalculateHash(source);
             this.Fragment = fragment;
             this.NamingConventionPrefix = namingConventionPrefix;

@@ -41,7 +41,8 @@ namespace Dibix.Sdk.VisualStudio
 
             SqlStatementCollector statementCollector = new PhysicalFileSqlStatementCollector
             (
-                isEmbedded: true
+                projectName: this._projectName
+              , isEmbedded: true
               , productName: null
               , areaName: null
               , parser: parser

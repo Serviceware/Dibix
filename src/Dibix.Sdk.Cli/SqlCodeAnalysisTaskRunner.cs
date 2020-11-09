@@ -11,7 +11,8 @@ namespace Dibix.Sdk.Cli
         {
             SqlCodeAnalysisTask.Execute
             (
-                databaseSchemaProviderName: configuration.GetSingleValue<string>("DatabaseSchemaProviderName")
+                projectName: configuration.GetSingleValue<string>("ProjectName")
+              , databaseSchemaProviderName: configuration.GetSingleValue<string>("DatabaseSchemaProviderName")
               , modelCollation: configuration.GetSingleValue<string>("ModelCollation")
               , namingConventionPrefix: configuration.GetSingleValue<string>("NamingConventionPrefix")
               , isEmbedded: configuration.GetSingleValue<bool>("IsEmbedded")

@@ -24,13 +24,13 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region ISqlStatementParser Members
-        public bool Read(SqlParserSourceKind sourceKind, object source, Lazy<TSqlModel> modelAccessor, SqlStatementInfo target, bool isEmbedded, string productName, string areaName, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger)
+        public bool Read(SqlParserSourceKind sourceKind, object source, Lazy<TSqlModel> modelAccessor, SqlStatementInfo target, string projectName, bool isEmbedded, string productName, string areaName, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             if (!SourceReaders.TryGetValue(sourceKind, out Func<object, TSqlFragment> reader))
                 throw new ArgumentOutOfRangeException(nameof(sourceKind), sourceKind, null);
 
             TSqlFragment fragment = reader(source);
-            TSqlFragmentAnalyzer fragmentAnalyzer = new TSqlFragmentAnalyzer(target.Source, fragment, isScriptArtifact: false, isEmbedded, modelAccessor, logger);
+            TSqlFragmentAnalyzer fragmentAnalyzer = new TSqlFragmentAnalyzer(target.Source, fragment, isScriptArtifact: false, projectName, isEmbedded, modelAccessor, logger);
             return this.CollectStatementInfo(fragment, fragmentAnalyzer, target, productName, areaName, formatter, typeResolver, schemaRegistry, logger);
         }
         #endregion

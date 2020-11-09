@@ -7,6 +7,7 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public sealed class DacPacSqlStatementCollector : SqlStatementCollector
     {
+        private readonly string _projectName;
         private readonly string _productName;
         private readonly string _areaName;
         private readonly ISqlStatementParser _parser;
@@ -19,7 +20,8 @@ namespace Dibix.Sdk.CodeGeneration
 
         public DacPacSqlStatementCollector
         (
-            string productName
+            string projectName
+          , string productName
           , string areaName
           , ISqlStatementParser parser
           , ISqlStatementFormatter formatter
@@ -29,6 +31,7 @@ namespace Dibix.Sdk.CodeGeneration
           , string packagePath
           , ICollection<KeyValuePair<string, string>> procedureNames)
         {
+            this._projectName = projectName;
             this._productName = productName;
             this._areaName = areaName;
             this._parser = parser;
@@ -59,7 +62,21 @@ namespace Dibix.Sdk.CodeGeneration
                 Source = this._packagePath
             };
 
-            bool result = this._parser.Read(SqlParserSourceKind.String, script, new Lazy<TSqlModel>(() => model), statement, isEmbedded: false, this._productName, this._areaName, this._formatter, this._typeResolver, this._schemaRegistry, this._logger);
+            bool result = this._parser.Read
+            (
+                sourceKind: SqlParserSourceKind.String
+              , source: script
+              , modelAccessor: new Lazy<TSqlModel>(() => model)
+              , target: statement
+              , projectName: this._projectName
+              , isEmbedded: false
+              , productName: this._productName
+              , areaName: this._areaName
+              , formatter: this._formatter
+              , typeResolver: this._typeResolver
+              , schemaRegistry: this._schemaRegistry
+              , logger: this._logger
+            );
             return result ? statement : null;
         }
     }
