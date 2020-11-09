@@ -31,6 +31,36 @@ namespace Dibix.Sdk.Sql
 
         private static AnalyzeSchema CompileAnalyzer()
         {
+            // SchemaAnalyzerResult result = new SchemaAnalyzerResult();
+            // ExtensionDescriptor<SqlAnalysisRule, ISqlAnalysisRuleMetadata> extensionDescriptor = new ExtensionDescriptor<SqlAnalysisRule, ISqlAnalysisRuleMetadata>(SchemaAnalyzer.LazyExport);
+            // RuleDescriptor ruleDescriptor = new RuleDescriptorImpl(extensionDescriptor);
+            // NullableColumnSchemaAnalyzer nullableColumnSchemaAnalyzer = new NullableColumnSchemaAnalyzer(ruleDescriptor, dataSchemaModel, modelElement);
+            // SchemaAnalysisService schemaAnalysisService = SchemaAnalysisService.CreateAnalysisService(nullableColumnSchemaAnalyzer);
+            // IList<ExtensibilityError> interpretationErrors = schemaAnalysisService.AnalyzeScript(dataSchemaModel, sqlFragment);
+            // result.Errors.AddRange(interpretationErrors);
+            // result.DDLStatements.AddRange(NullableColumnSchemaAnalyzerShim.GetDDLStatements(nullableColumnSchemaAnalyzer)));
+            // IEnumerator<KeyValuePair<int, ElementDescriptor>> columnOffsetDescriptorEnumerator;
+            // try
+            // {
+            //     columnOffsetDescriptorEnumerator = nullableColumnSchemaAnalyzer._columnOffsetToDescriptorMap.GetEnumerator();
+            //     while (columnOffsetDescriptorEnumerator.MoveNext())
+            //     {
+            //         KeyValuePair<int, ElementDescriptor> columnOffsetDescriptorElement = columnOffsetDescriptorEnumerator.Current;
+            //         int offset = columnOffsetDescriptorElement.Key;
+            //         ElementDescriptor elementDescriptor = columnOffsetDescriptorElement.Value;
+            //         Func<TSqlModel, TSqlObject> elementAccessor = elementDescriptor.GetModelElement;
+            //         ElementLocation location = new ElementLocation(offset, elementDescriptor.Identifiers, elementAccessor);
+            //         result.Locations.Add(location.Offset, location);
+            //     }
+            // }
+            // finally
+            // {
+            //     if (columnOffsetDescriptorEnumerator != null)
+            //         columnOffsetDescriptorEnumerator.Dispose();
+            // }
+            // return result;
+
+            // (TSqlModel dataSchemaModel, TSqlObject modelElement, TSqlFragement sqlFragment) => 
             ParameterExpression dataSchemaModelParameter = Expression.Parameter(TSqlModelType, "dataSchemaModel");
             ParameterExpression modelElementParameter = Expression.Parameter(TSqlObjectType, "modelElement");
             ParameterExpression sqlFragmentParameter = Expression.Parameter(typeof(TSqlFragment), "sqlFragment");
@@ -41,7 +71,7 @@ namespace Dibix.Sdk.Sql
             Expression resultValue = Expression.New(schemaAnalyzerResultType);
             Expression resultAssign = Expression.Assign(resultVariable, resultValue);
 
-            // ExtensionDescriptor<SqlAnalysisRule, ISqlAnalysisRuleMetadata> extensionDescriptor = new ExtensionDescriptor<SqlAnalysisRule, ISqlAnalysisRuleMetadata>(Analyzer.LazyExport);
+            // ExtensionDescriptor<SqlAnalysisRule, ISqlAnalysisRuleMetadata> extensionDescriptor = new ExtensionDescriptor<SqlAnalysisRule, ISqlAnalysisRuleMetadata>(SchemaAnalyzer.LazyExport);
             Expression lazyExport = Expression.Field(null, typeof(SchemaAnalyzer), nameof(LazyExport));
             Type extensionDescriptorType = SchemaSqlAssembly.GetType("Microsoft.SqlServer.Dac.Extensibility.ExtensionDescriptor`2", true)
                                                             .MakeGenericType(typeof(SqlAnalysisRule), typeof(ISqlAnalysisRuleMetadata));
@@ -74,7 +104,7 @@ namespace Dibix.Sdk.Sql
             Expression schemaAnalysisServiceValue = Expression.Call(schemaAnalysisServiceType, "CreateAnalysisService", new Type[0], nullableColumnSchemaAnalyzerVariable);
             Expression schemaAnalysisServiceAssign = Expression.Assign(schemaAnalysisServiceVariable, schemaAnalysisServiceValue);
 
-            // IList<ExtensibilityError> interpretationErrors = schemaAnalysisService.AnalyzeScript(model, sqlFragment);
+            // IList<ExtensibilityError> interpretationErrors = schemaAnalysisService.AnalyzeScript(dataSchemaModel, sqlFragment);
             ParameterExpression interpretationErrorsVariable = Expression.Variable(typeof(IList<ExtensibilityError>), "interpretationErrors");
             Expression interpretationErrorsValue = Expression.Call(schemaAnalysisServiceVariable, "AnalyzeScript", new Type[0], dataSchemaModelParameter, sqlFragmentParameter);
             Expression interpretationErrorsAssign = Expression.Assign(interpretationErrorsVariable, interpretationErrorsValue);
@@ -82,6 +112,11 @@ namespace Dibix.Sdk.Sql
             // result.Errors.AddRange(interpretationErrors);
             Expression errorsProperty = Expression.Property(resultVariable, nameof(SchemaAnalyzerResult.Errors));
             Expression interpretationErrorsAddRange = Expression.Call(typeof(CollectionExtensions), nameof(CollectionExtensions.AddRange), new[] { typeof(ExtensibilityError) }, errorsProperty, interpretationErrorsVariable);
+
+            // result.DDLStatements.AddRange(NullableColumnSchemaAnalyzerShim.GetDDLStatements(nullableColumnSchemaAnalyzer));
+            Expression ddlStatementsProperty = Expression.Property(resultVariable, nameof(SchemaAnalyzerResult.DDLStatements));
+            Expression ddlStatementsValue = Expression.Call(typeof(NullableColumnSchemaAnalyzerShim), nameof(NullableColumnSchemaAnalyzerShim.GetDDLStatements), new Type[0], nullableColumnSchemaAnalyzerVariable);
+            Expression ddlStatementsAddRange = Expression.Call(typeof(CollectionExtensions), nameof(CollectionExtensions.AddRange), new[] { typeof(TSqlFragment) }, ddlStatementsProperty, ddlStatementsValue);
 
             // IEnumerator<KeyValuePair<int, ElementDescriptor>> columnOffsetDescriptorEnumerator;
             // try
@@ -94,16 +129,17 @@ namespace Dibix.Sdk.Sql
             //         ElementDescriptor elementDescriptor = columnOffsetDescriptorElement.Value;
             //         Func<TSqlModel, TSqlObject> elementAccessor = elementDescriptor.GetModelElement;
             //         ElementLocation location = new ElementLocation(offset, elementDescriptor.Identifiers, elementAccessor);
-            //         result.Locations.Add(location);
+            //         result.Locations.Add(location.Offset, location);
             //     }
             // }
             // finally
             // {
-            //     columnOffsetDescriptorEnumerator.Dispose();
+            //     if (columnOffsetDescriptorEnumerator != null)
+            //         columnOffsetDescriptorEnumerator.Dispose();
             // }
             Type columnOffsetDescriptorType = typeof(KeyValuePair<,>).MakeGenericType(typeof(int), ElementDescriptorType);
             Expression columnOffsetToDescriptorMapField = Expression.Field(nullableColumnSchemaAnalyzerVariable, "_columnOffsetToDescriptorMap");
-            ExpressionUtils.Foreach
+            ExpressionUtility.Foreach
             (
                 "columnOffsetDescriptor"
               , columnOffsetToDescriptorMapField
@@ -132,6 +168,7 @@ namespace Dibix.Sdk.Sql
               , schemaAnalysisServiceAssign
               , interpretationErrorsAssign
               , interpretationErrorsAddRange
+              , ddlStatementsAddRange
               , enumeratorStatement
               , resultVariable
             );
@@ -179,9 +216,10 @@ namespace Dibix.Sdk.Sql
             Expression locationAssign = Expression.Assign(locationVariable, locationValue);
             bodyBuilder.AddAssignStatement(locationVariable, locationAssign);
 
-            // result.Locations.Add(location);
+            // result.Locations.Add(location.Offset, location);
             Expression locationsProperty = Expression.Property(resultVariable, nameof(SchemaAnalyzerResult.Locations));
-            Expression locationsAddCall = Expression.Call(locationsProperty, nameof(ICollection<object>.Add), new Type[0], locationVariable);
+            Expression offsetProperty = Expression.Property(locationVariable, nameof(ElementLocation.Offset));
+            Expression locationsAddCall = Expression.Call(locationsProperty, nameof(IDictionary<object, object>.Add), new Type[0], offsetProperty, locationVariable);
             bodyBuilder.AddStatement(locationsAddCall);
         }
 

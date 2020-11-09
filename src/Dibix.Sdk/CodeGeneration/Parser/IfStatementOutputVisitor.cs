@@ -36,8 +36,8 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public IfStatementOutputVisitor(string sourcePath, TSqlElementLocator elementLocator, ILogger logger) : this(sourcePath, elementLocator, logger, new IfOutputResolutionContext()) { }
-        public IfStatementOutputVisitor(string sourcePath, TSqlElementLocator elementLocator, ILogger logger, IfOutputResolutionContext context) : base(sourcePath, elementLocator, logger)
+        public IfStatementOutputVisitor(string sourcePath, TSqlFragmentAnalyzer fragmentAnalyzer, ILogger logger) : this(sourcePath, fragmentAnalyzer, logger, new IfOutputResolutionContext()) { }
+        public IfStatementOutputVisitor(string sourcePath, TSqlFragmentAnalyzer fragmentAnalyzer, ILogger logger, IfOutputResolutionContext context) : base(sourcePath, fragmentAnalyzer, logger)
         {
             this._sourcePath = sourcePath;
             this._context = context;
@@ -53,14 +53,14 @@ namespace Dibix.Sdk.CodeGeneration
 
         public override void ExplicitVisit(IfStatement node)
         {
-            IfStatementOutputVisitor left = new IfStatementOutputVisitor(this._sourcePath, base.ElementLocator, base.Logger, this._context);
+            IfStatementOutputVisitor left = new IfStatementOutputVisitor(this._sourcePath, base.FragmentAnalyzer, base.Logger, this._context);
             left.Accept(node.ThenStatement);
 
             // This might be an IF block without ELSE
             // This is only allowed, if the IF block is not producing any outputs (i.E. RAISERROR)
             if (node.ElseStatement != null)
             {
-                IfStatementOutputVisitor right = new IfStatementOutputVisitor(this._sourcePath, base.ElementLocator, base.Logger, this._context);
+                IfStatementOutputVisitor right = new IfStatementOutputVisitor(this._sourcePath, base.FragmentAnalyzer, base.Logger, this._context);
                 right.Accept(node.ElseStatement);
 
                 // Compare output statements between IF..THEN and ELSE

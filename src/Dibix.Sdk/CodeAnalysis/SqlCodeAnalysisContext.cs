@@ -18,17 +18,29 @@ namespace Dibix.Sdk.CodeAnalysis
 
         public SqlModel Model { get; }
         public TSqlFragment Fragment { get; }
-        public SqlCodeAnalysisConfiguration Configuration { get; }
+        public string NamingConventionPrefix { get; }
+        public bool IsEmbedded { get; }
 
-        public SqlCodeAnalysisContext(TSqlModel model, string source, TSqlFragment fragment, bool isScriptArtifact, SqlCodeAnalysisConfiguration configuration, ISqlCodeAnalysisSuppressionService suppressionService, ILogger logger)
+        public SqlCodeAnalysisContext
+        (
+            TSqlModel model
+          , string source
+          , TSqlFragment fragment
+          , bool isScriptArtifact
+          , string namingConventionPrefix
+          , bool isEmbedded
+          , ISqlCodeAnalysisSuppressionService suppressionService
+          , ILogger logger
+        )
         {
             this._source = source;
             this._suppressionService = suppressionService;
             this._logger = logger;
-            this.Model = new SqlModel(model, fragment, isScriptArtifact);
+            this.Model = new SqlModel(source, fragment, isScriptArtifact, isEmbedded, model, logger);
             this._hash = CalculateHash(source);
             this.Fragment = fragment;
-            this.Configuration = configuration;
+            this.NamingConventionPrefix = namingConventionPrefix;
+            this.IsEmbedded = isEmbedded;
         }
 
         public bool IsSuppressed(string ruleName, string key) => this._suppressionService.IsSuppressed(ruleName, key, this._hash);

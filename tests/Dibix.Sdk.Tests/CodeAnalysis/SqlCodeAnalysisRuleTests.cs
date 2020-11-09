@@ -120,5 +120,8 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
 
         [Fact]
         public void ExplicitProcedureArgumentSqlCodeAnalysisRule() => this.Execute();
+
+        [Fact]
+        public void UnsupportedEmbeddedSymbolReferenceSqlCodeAnalysisRule() => this.Execute();
     }
 }

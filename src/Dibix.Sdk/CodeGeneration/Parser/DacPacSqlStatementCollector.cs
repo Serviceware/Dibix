@@ -59,7 +59,7 @@ namespace Dibix.Sdk.CodeGeneration
                 Source = this._packagePath
             };
 
-            bool result = this._parser.Read(SqlParserSourceKind.String, script, new Lazy<TSqlModel>(() => model), statement, this._productName, this._areaName, this._formatter, this._typeResolver, this._schemaRegistry, this._logger);
+            bool result = this._parser.Read(SqlParserSourceKind.String, script, new Lazy<TSqlModel>(() => model), statement, isEmbedded: false, this._productName, this._areaName, this._formatter, this._typeResolver, this._schemaRegistry, this._logger);
             return result ? statement : null;
         }
     }

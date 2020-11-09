@@ -10,6 +10,7 @@ namespace Dibix.Sdk.CodeGeneration
     {
         private readonly string _productName;
         private readonly string _areaName;
+        private readonly bool _isEmbedded;
         private readonly ISqlStatementParser _parser;
         private readonly ISqlStatementFormatter _formatter;
         private readonly ITypeResolverFacade _typeResolver;
@@ -20,7 +21,8 @@ namespace Dibix.Sdk.CodeGeneration
 
         public PhysicalFileSqlStatementCollector
         (
-            string productName
+            bool isEmbedded
+          , string productName
           , string areaName
           , ISqlStatementParser parser
           , ISqlStatementFormatter formatter
@@ -31,6 +33,7 @@ namespace Dibix.Sdk.CodeGeneration
           , Lazy<TSqlModel> modelAccessor
         )
         {
+            this._isEmbedded = isEmbedded;
             this._productName = productName;
             this._areaName = areaName;
             this._parser = parser;
@@ -55,7 +58,7 @@ namespace Dibix.Sdk.CodeGeneration
                 Name = Path.GetFileNameWithoutExtension(file)
             };
 
-            bool result = this._parser.Read(SqlParserSourceKind.Stream, File.OpenRead(file), this._modelAccessor, statement, this._productName, this._areaName, this._formatter, this._typeResolver, this._schemaRegistry, this._logger);
+            bool result = this._parser.Read(SqlParserSourceKind.Stream, File.OpenRead(file), this._modelAccessor, statement, this._isEmbedded, this._productName, this._areaName, this._formatter, this._typeResolver, this._schemaRegistry, this._logger);
 
             return result ? statement : null;
         }

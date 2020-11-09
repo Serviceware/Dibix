@@ -214,7 +214,7 @@ Either remove the @GenerateInputClass hint on the statement or the @Obfuscate hi
 
         private void ParseResults(TSqlFragment node, ISqlMarkupDeclaration markup)
         {
-            IEnumerable<SqlQueryResult> results = StatementOutputParser.Parse(base.Target, node, base.ElementLocator, markup, base.TypeResolver, base.SchemaRegistry, base.Logger);
+            IEnumerable<SqlQueryResult> results = StatementOutputParser.Parse(base.Target, node, base.FragmentAnalyzer, markup, base.TypeResolver, base.SchemaRegistry, base.Logger);
             base.Target.Results.AddRange(results);
         }
 

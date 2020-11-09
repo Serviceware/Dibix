@@ -10,7 +10,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         {
             this.ExecuteTest
             (
-                embedStatements: false
+                isEmbedded: false
               , @"Tests\Syntax\dbx_tests_syntax_empty_undeclared.sql"
               , @"Tests\Syntax\dbx_tests_syntax_empty_nocompile.sql"
             );
@@ -19,7 +19,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         [Fact]
         public void External_Empty()
         {
-            this.ExecuteTest(@"Tests\Syntax\dbx_tests_syntax_empty.sql", embedStatements: false);
+            this.ExecuteTest(@"Tests\Syntax\dbx_tests_syntax_empty.sql", isEmbedded: false);
         }
 
         [Fact]
@@ -27,7 +27,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         {
             this.ExecuteTest
             (
-                embedStatements: false
+                isEmbedded: false
               , @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
               , @"Types\dbx_codeanalysis_udt_generic.sql");
         }
@@ -37,7 +37,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         {
             this.ExecuteTest
             (
-                embedStatements: false
+                isEmbedded: false
               , @"Tests\Syntax\dbx_tests_syntax_empty_params_inputclass.sql"
               , @"Types\dbx_codeanalysis_udt_generic.sql");
         }

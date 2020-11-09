@@ -9,12 +9,12 @@ namespace Dibix.Sdk.Sql
     public sealed class SqlModel
     {
         private readonly TSqlModel _model;
-        private readonly TSqlElementLocator _elementLocator;
+        private readonly TSqlFragmentAnalyzer _fragmentAnalyzer;
 
-        internal SqlModel(TSqlModel model, TSqlFragment scriptFragment, bool isScriptArtifact)
+        internal SqlModel(string source, TSqlFragment scriptFragment, bool isScriptArtifact, bool isEmbedded, TSqlModel model, ILogger logger)
         {
             this._model = model;
-            this._elementLocator = new TSqlElementLocator(new Lazy<TSqlModel>(() => model), scriptFragment, isScriptArtifact);
+            this._fragmentAnalyzer = new TSqlFragmentAnalyzer(source, scriptFragment, isScriptArtifact, isEmbedded, new Lazy<TSqlModel>(() => model), logger);
         }
 
         public IEnumerable<Constraint> GetTableConstraints(SchemaObjectName tableName, bool throwOnError = true) => this.GetConstraints(TableModel.Table, tableName, throwOnError);
@@ -47,9 +47,9 @@ namespace Dibix.Sdk.Sql
             return GetColumnsWithPrimaryKeyInformation(modelElement).ToDictionary(x => x.Key, x => x.Value);
         }
 
-        public bool IsScalarFunction(FunctionCall functionCall) => this._elementLocator.TryGetModelElement(functionCall, out TSqlObject element) && element.ObjectType == ScalarFunction.TypeClass;
+        public bool IsScalarFunction(FunctionCall functionCall) => this._fragmentAnalyzer.TryGetModelElement(functionCall, out TSqlObject element) && element.ObjectType == ScalarFunction.TypeClass;
 
-        public bool TryGetModelElement(TSqlFragment fragment, out ElementLocation element) => this._elementLocator.TryGetElementLocation(fragment, out element);
+        public bool TryGetModelElement(TSqlFragment fragment, out ElementLocation element) => this._fragmentAnalyzer.TryGetElementLocation(fragment, out element);
 
         public bool IsDataType(ElementLocation element)
         {
@@ -59,7 +59,7 @@ namespace Dibix.Sdk.Sql
 
         public bool TryGetFunctionParameterNames(SchemaObjectName functionName, out IList<string> parameterNames)
         {
-            if (!this._elementLocator.TryGetModelElement(functionName, out TSqlObject function))
+            if (!this._fragmentAnalyzer.TryGetModelElement(functionName, out TSqlObject function))
             {
                 parameterNames = null;
                 return false;
@@ -71,6 +71,12 @@ namespace Dibix.Sdk.Sql
                                      .ToArray();
 
             return true;
+        }
+
+        public bool IsExternal(ElementLocation element)
+        {
+            TSqlObject modelElement = element.GetModelElement(this._model);
+            return modelElement.IsExternal();
         }
 
         private static IEnumerable<KeyValuePair<string, bool>> GetColumnsWithPrimaryKeyInformation(TSqlObject modelElement)

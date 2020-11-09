@@ -14,16 +14,16 @@ namespace Dibix.Sdk.CodeGeneration
 
         #region Properties
         public string Statement { get; private set; }
-        protected TSqlElementLocator ElementLocator { get; }
+        protected TSqlFragmentAnalyzer FragmentAnalyzer { get; }
         protected IList<OutputSelectResult> Outputs { get; }
         protected ILogger Logger { get; }
         #endregion
 
         #region Constructor
-        protected StatementOutputVisitorBase(string sourcePath, TSqlElementLocator elementLocator, ILogger logger)
+        protected StatementOutputVisitorBase(string sourcePath, TSqlFragmentAnalyzer fragmentAnalyzer, ILogger logger)
         {
             this._sourcePath = sourcePath;
-            this.ElementLocator = elementLocator;
+            this.FragmentAnalyzer = fragmentAnalyzer;
             this.Logger = logger;
             this.Outputs = new Collection<OutputSelectResult>();
         }
@@ -97,13 +97,13 @@ namespace Dibix.Sdk.CodeGeneration
                     }
 
                     Identifier identifier = columnReference.GetName();
-                    return new OutputColumnResult(identifier.Value, selectElement, scalar.Expression, this.ElementLocator);
+                    return new OutputColumnResult(identifier.Value, selectElement, scalar.Expression, this.FragmentAnalyzer);
                 }
 
-                return new OutputColumnResult(null, scalar, null, this.ElementLocator);
+                return new OutputColumnResult(null, scalar, null, this.FragmentAnalyzer);
             }
 
-            return new OutputColumnResult(scalar.ColumnName.Value, selectElement, scalar.ColumnName, this.ElementLocator);
+            return new OutputColumnResult(scalar.ColumnName.Value, selectElement, scalar.ColumnName, this.FragmentAnalyzer);
         }
         #endregion
     }

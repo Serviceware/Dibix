@@ -24,19 +24,19 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region ISqlStatementParser Members
-        public bool Read(SqlParserSourceKind sourceKind, object source, Lazy<TSqlModel> modelAccessor, SqlStatementInfo target, string productName, string areaName, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger)
+        public bool Read(SqlParserSourceKind sourceKind, object source, Lazy<TSqlModel> modelAccessor, SqlStatementInfo target, bool isEmbedded, string productName, string areaName, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             if (!SourceReaders.TryGetValue(sourceKind, out Func<object, TSqlFragment> reader))
                 throw new ArgumentOutOfRangeException(nameof(sourceKind), sourceKind, null);
 
             TSqlFragment fragment = reader(source);
-            TSqlElementLocator elementLocator = new TSqlElementLocator(modelAccessor, fragment, false);
-            return this.CollectStatementInfo(fragment, elementLocator, target, productName, areaName, formatter, typeResolver, schemaRegistry, logger);
+            TSqlFragmentAnalyzer fragmentAnalyzer = new TSqlFragmentAnalyzer(target.Source, fragment, isScriptArtifact: false, isEmbedded, modelAccessor, logger);
+            return this.CollectStatementInfo(fragment, fragmentAnalyzer, target, productName, areaName, formatter, typeResolver, schemaRegistry, logger);
         }
         #endregion
 
         #region Private Methods
-        private bool CollectStatementInfo(TSqlFragment fragment, TSqlElementLocator elementLocator, SqlStatementInfo target, string productName, string areaName, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger)
+        private bool CollectStatementInfo(TSqlFragment fragment, TSqlFragmentAnalyzer fragmentAnalyzer, SqlStatementInfo target, string productName, string areaName, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             ISqlMarkupDeclaration markup = SqlMarkupReader.ReadHeader(fragment, target.Source, logger);
             bool hasMarkup = markup.HasElements;
@@ -49,7 +49,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 ProductName = productName,
                 AreaName = areaName,
-                ElementLocator = elementLocator,
+                FragmentAnalyzer = fragmentAnalyzer,
                 Formatter = formatter,
                 Target = target,
                 TypeResolver = typeResolver,

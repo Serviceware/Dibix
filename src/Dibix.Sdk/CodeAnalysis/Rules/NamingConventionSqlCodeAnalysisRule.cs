@@ -149,8 +149,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         private void Check(string name, NamingConvention namingConvention, Action<PatternNormalizer> replacements, TSqlFragment target, string displayName) => this.Check(name, namingConvention, replacements, base.FailIfUnsuppressed, target, displayName);
         private void Check<T>(string name, NamingConvention namingConvention, Action<PatternNormalizer> replacements, Action<T, string, object[]> failAction, T target, string displayName)
         {
-            string mask = namingConvention.NormalizePattern(base.Configuration, replacements);
-            string description = namingConvention.NormalizeDescription(this.Configuration);
+            string mask = namingConvention.NormalizePattern(base.NamingConventionPrefix, replacements);
+            string description = namingConvention.NormalizeDescription(this.NamingConventionPrefix);
             if (Regex.IsMatch(name, mask))
                 return;
 
@@ -215,7 +215,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         public static readonly NamingConvention Column               = new NamingConvention("^[a-z](([a-z_]+)?[a-z])?$");
     }
 
-    internal struct NamingConvention
+    internal readonly struct NamingConvention
     {
         public string Pattern { get; }
         public string Description { get; }
@@ -227,21 +227,21 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             this.Description = description;
         }
 
-        public string NormalizePattern(SqlCodeAnalysisConfiguration configuration, Action<PatternNormalizer> replacements)
+        public string NormalizePattern(string namingConventionPrefix, Action<PatternNormalizer> replacements)
         {
-            PatternNormalizer normalizer = new PatternNormalizer(this.Pattern, configuration);
+            PatternNormalizer normalizer = new PatternNormalizer(this.Pattern, namingConventionPrefix);
             replacements?.Invoke(normalizer);
             return normalizer.Normalize();
         }
 
-        public string NormalizeDescription(SqlCodeAnalysisConfiguration configuration)
+        public string NormalizeDescription(string namingConventionPrefix)
         {
-            PatternNormalizer normalizer = new PatternNormalizer(this.Description, configuration);
+            PatternNormalizer normalizer = new PatternNormalizer(this.Description, namingConventionPrefix);
             return normalizer.Normalize();
         }
     }
 
-    internal struct Placeholder
+    internal readonly struct Placeholder
     {
         public static readonly Placeholder Prefix = new Placeholder("prefix", true);
         public static readonly Placeholder Table  = new Placeholder("table");
@@ -264,10 +264,10 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         private readonly string _pattern;
         private readonly IDictionary<string, string> _map;
 
-        public PatternNormalizer(string pattern, SqlCodeAnalysisConfiguration configuration)
+        public PatternNormalizer(string pattern, string namingConventionPrefix)
         {
             this._pattern = pattern;
-            this._map = new Dictionary<string, string> { { Placeholder.Prefix.Name, configuration.NamingConventionPrefix } };
+            this._map = new Dictionary<string, string> { { Placeholder.Prefix.Name, namingConventionPrefix } };
         }
 
         public void ResolvePlaceholder(string name, string value) => this._map.Add(name, value);

@@ -36,7 +36,8 @@
     <DibixSdkPath>$(DibixToolsDirectory)Dibix.Sdk.dll</DibixSdkPath>
     <DibixRuntimePath>$(DibixToolsDirectory)Dibix.dll</DibixRuntimePath>
     <DibixRuntimeXplatPath>$(DibixToolsDirectory)..\netstandard2.0\Dibix.dll</DibixRuntimeXplatPath>
-    
+
+    <IsEmbedded Condition="'$(IsEmbedded)' == ''">$(MSBuildProjectName.EndsWith('.DML'))</IsEmbedded>
     <ClientTargetPath Condition="'$(ClientOutputName)' != ''">$(TargetDir)$(ClientOutputName).dll</ClientTargetPath>
   </PropertyGroup>
 
@@ -45,6 +46,8 @@
     <!-- This is probably not included, because we skip copying it to output -->
     <Clean Include="$(TargetPath)" />
     <Clean Include="$(ClientTargetPath)" />
+
+    <SqlCmdVariable Include="IsEmbedded" Value="True" Condition="'$(IsEmbedded)' == 'True'" />
   </ItemGroup>
 
 </Project>

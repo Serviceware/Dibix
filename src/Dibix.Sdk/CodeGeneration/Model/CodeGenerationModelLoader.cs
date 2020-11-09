@@ -24,10 +24,10 @@ namespace Dibix.Sdk.CodeGeneration
           , IEnumerable<TaskItem> contracts
           , IEnumerable<TaskItem> endpoints
           , IEnumerable<TaskItem> references
-          , bool embedStatements
+          , bool isEmbedded
           , string databaseSchemaProviderName
           , string modelCollation
-          , IEnumerable<TaskItem> sqlReferencePath
+          , ICollection<TaskItem> sqlReferencePath
           , ISchemaRegistry schemaRegistry
           , ILogger logger
         )
@@ -56,7 +56,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             Lazy<TSqlModel> modelAccessor = new Lazy<TSqlModel>(() => PublicSqlDataSchemaModelLoader.Load(databaseSchemaProviderName, modelCollation, source, sqlReferencePath, logger));
             IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(projectDirectory);
-            ISqlStatementFormatter formatter = embedStatements ? (ISqlStatementFormatter)new TakeSourceSqlStatementFormatter() : new ExecStoredProcedureSqlStatementFormatter();
+            ISqlStatementFormatter formatter = isEmbedded ? (ISqlStatementFormatter)new TakeSourceSqlStatementFormatter() : new ExecStoredProcedureSqlStatementFormatter();
             formatter.StripWhiteSpace = model.CommandTextFormatting == CommandTextFormatting.StripWhiteSpace;
             DefaultAssemblyResolver assemblyResolver = new DefaultAssemblyResolver(projectDirectory, normalizedReferences);
             ITypeResolverFacade typeResolver = new TypeResolverFacade(assemblyResolver, schemaRegistry, logger);
@@ -67,7 +67,7 @@ namespace Dibix.Sdk.CodeGeneration
             typeResolver.Register(new ContractDefinitionSchemaTypeResolver(schemaRegistry, contractDefinitionProvider), 0);
             typeResolver.Register(new UserDefinedTypeSchemaTypeResolver(schemaRegistry, userDefinedTypeProvider, assemblyResolver), 1);
 
-            model.Statements.AddRange(CollectStatements(normalizedSources, productName, areaName, embedStatements, formatter, typeResolver, schemaRegistry, logger, modelAccessor));
+            model.Statements.AddRange(CollectStatements(normalizedSources, productName, areaName, isEmbedded, formatter, typeResolver, schemaRegistry, logger, modelAccessor));
             model.UserDefinedTypes.AddRange(userDefinedTypeProvider.Types);
             model.Contracts.AddRange(contractDefinitionProvider.Contracts);
             model.Controllers.AddRange(CollectControllers(normalizedEndpoints, productName, areaName, defaultOutputName, model.Statements, assemblyResolver, fileSystemProvider, typeResolver, schemaRegistry, logger));
@@ -80,7 +80,7 @@ namespace Dibix.Sdk.CodeGeneration
             IEnumerable<string> sources
           , string productName
           , string areaName
-          , bool embedStatements
+          , bool isEmbedded
           , ISqlStatementFormatter formatter
           , ITypeResolverFacade typeResolver
           , ISchemaRegistry schemaRegistry
@@ -89,9 +89,9 @@ namespace Dibix.Sdk.CodeGeneration
         {
             // Currently only DML statements are included automatically
             // DDL statements however, need explicit markup, i.E. @Name at least
-            bool requireExplicitMarkup = !embedStatements;
+            bool requireExplicitMarkup = !isEmbedded;
             ISqlStatementParser parser = new SqlStoredProcedureParser(requireExplicitMarkup);
-            SqlStatementCollector statementCollector = new PhysicalFileSqlStatementCollector(productName, areaName, parser, formatter, typeResolver, schemaRegistry, logger, sources, modelAccessor);
+            SqlStatementCollector statementCollector = new PhysicalFileSqlStatementCollector(isEmbedded, productName, areaName, parser, formatter, typeResolver, schemaRegistry, logger, sources, modelAccessor);
             return statementCollector.CollectStatements();
         }
 

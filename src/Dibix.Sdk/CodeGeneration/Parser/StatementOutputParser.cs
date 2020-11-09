@@ -17,9 +17,9 @@ namespace Dibix.Sdk.CodeGeneration
         private const string ReturnPropertyConverter = "Converter";
         private const string ReturnPropertyResultType = "ResultType";
 
-        public static IEnumerable<SqlQueryResult> Parse(SqlStatementInfo target, TSqlFragment node, TSqlElementLocator elementLocator, ISqlMarkupDeclaration markup, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger)
+        public static IEnumerable<SqlQueryResult> Parse(SqlStatementInfo target, TSqlFragment node, TSqlFragmentAnalyzer fragmentAnalyzer, ISqlMarkupDeclaration markup, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger)
         {
-            StatementOutputVisitor visitor = new StatementOutputVisitor(target.Source, elementLocator, logger);
+            StatementOutputVisitor visitor = new StatementOutputVisitor(target.Source, fragmentAnalyzer, logger);
             node.Accept(visitor);
 
             IList<ISqlElement> returnElements = markup.GetElements(SqlMarkupKey.Return).ToArray();

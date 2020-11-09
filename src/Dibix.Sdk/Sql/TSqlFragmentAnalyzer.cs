@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Microsoft.SqlServer.Dac.Extensibility;
 using Microsoft.SqlServer.Dac.Model;
@@ -7,22 +6,36 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.Sql
 {
-    internal sealed class TSqlElementLocator
+    internal sealed class TSqlFragmentAnalyzer
     {
-        private readonly Lazy<IDictionary<int, ElementLocation>> _elementLocationsAccessor;
+        private readonly string _source;
+        private readonly TSqlFragment _sqlFragment;
+        private readonly bool _isScriptArtifact;
+        private readonly bool _isEmbedded;
         private readonly Lazy<TSqlModel> _modelAccessor;
+        private readonly ILogger _logger;
+        private SchemaAnalyzerResult _result;
 
-        public TSqlElementLocator(Lazy<TSqlModel> modelAccessor, TSqlFragment sqlFragment, bool isScriptArtifact)
+        public TSqlFragmentAnalyzer(string source, TSqlFragment sqlFragment, bool isScriptArtifact, bool isEmbedded, Lazy<TSqlModel> modelAccessor, ILogger logger)
         {
+            this._source = source;
+            this._sqlFragment = sqlFragment;
+            this._isScriptArtifact = isScriptArtifact;
+            this._isEmbedded = isEmbedded;
             this._modelAccessor = modelAccessor;
-            this._elementLocationsAccessor = new Lazy<IDictionary<int, ElementLocation>>(() => AnalyzeSchema(modelAccessor.Value, sqlFragment, isScriptArtifact).Locations.ToDictionary(x => x.Offset));
+            this._logger = logger;
+
+            // Currently we always analyze. This ensures validating DML projects properly.
+            // It is however prepared to be loaded in a lazy manner.
+            // So if performance issues arise, optimizations can be evaluated and applied.
+            this._result = AnalyzeSchema(source, sqlFragment, isScriptArtifact, isEmbedded, this._modelAccessor.Value, logger);
         }
 
-        public bool TryGetElementLocation(TSqlFragment fragment, out ElementLocation location) => this._elementLocationsAccessor.Value.TryGetValue(fragment.StartOffset, out location);
+        public bool TryGetElementLocation(TSqlFragment fragment, out ElementLocation location) => this.GetResult().Locations.TryGetValue(fragment.StartOffset, out location);
         
         public bool TryGetModelElement(TSqlFragment fragment, out TSqlObject element)
         {
-            if (this._elementLocationsAccessor.Value.TryGetValue(fragment.StartOffset, out ElementLocation location))
+            if (this.GetResult().Locations.TryGetValue(fragment.StartOffset, out ElementLocation location))
             {
                 element = location.GetModelElement(this._modelAccessor.Value);
                 return element != null;
@@ -32,7 +45,9 @@ namespace Dibix.Sdk.Sql
             return false;
         }
 
-        private static SchemaAnalyzerResult AnalyzeSchema(TSqlModel model, TSqlFragment sqlFragment, bool isScriptArtifact)
+        private SchemaAnalyzerResult GetResult() => this._result ?? (this._result = AnalyzeSchema(this._source, this._sqlFragment, this._isScriptArtifact, this._isEmbedded, this._modelAccessor.Value, this._logger));
+
+        private static SchemaAnalyzerResult AnalyzeSchema(string source, TSqlFragment sqlFragment, bool isScriptArtifact, bool isEmbedded, TSqlModel model, ILogger logger)
         {
             SchemaAnalyzerResult schemaAnalyzerResult = SchemaAnalyzer.Analyze(model, sqlFragment);
 
@@ -70,7 +85,39 @@ namespace Dibix.Sdk.Sql
             if (schemaAnalyzerResult.Errors.Any())
                 throw new AggregateException("One or more errors occured while validating model schema", schemaAnalyzerResult.Errors.Select(ToException));
 
+            if (isEmbedded)
+            {
+                foreach (TSqlFragment statement in schemaAnalyzerResult.DDLStatements)
+                {
+                    if (IsSupportedDDLStatement(statement, source))
+                        continue;
+
+                    logger.LogError(null, "Only CREATE PROCEDURE is a supported DDL statement within a DML project", source, statement.StartLine, statement.StartColumn);
+                }
+            }
+
             return schemaAnalyzerResult;
+        }
+
+        private static bool IsSupportedDDLStatement(TSqlFragment fragment, string source)
+        {
+            // DML body is always defined in CREATE PROCEDURE
+            if (fragment is CreateProcedureStatement)
+                return true;
+
+            // We support table variables
+            if (fragment is DeclareTableVariableStatement)
+                return true;
+
+            // We support NOCHECK/CHECK for CHECK constraints
+            if (fragment is AlterTableConstraintModificationStatement constrationModificationStatement && constrationModificationStatement.ConstraintEnforcement != ConstraintEnforcement.NotSpecified)
+                return true;
+            
+            // TODO: Define database migration project exception to not allow this for all DML projects
+            if (source.Contains("VersionMigrator.Database.DML")) // DIRTY!
+                return true;
+
+            return false;
         }
 
         private static Exception ToException(ExtensibilityError error)

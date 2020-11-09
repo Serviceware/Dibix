@@ -15,14 +15,14 @@ namespace Dibix.Sdk.Tests.CodeGeneration
 
         public CodeGenerationTaskTests(ITestOutputHelper output) => this._output = output;
 
-        private void ExecuteTest(string source, bool embedStatements = true) => this.ExecuteTest(embedStatements, source);
-        private void ExecuteTest(bool embedStatements = true, params string[] sources) => this.ExecuteTest(sources, Enumerable.Empty<string>(), Enumerable.Empty<string>(), embedStatements, false, false, Enumerable.Empty<string>());
+        private void ExecuteTest(string source, bool isEmbedded = true) => this.ExecuteTest(isEmbedded, source);
+        private void ExecuteTest(bool isEmbedded = true, params string[] sources) => this.ExecuteTest(sources, Enumerable.Empty<string>(), Enumerable.Empty<string>(), isEmbedded, false, false, Enumerable.Empty<string>());
         private void ExecuteTest(string source, string contract, params string[] expectedAdditionalAssemblyReferences) => this.ExecuteTest(source, Enumerable.Repeat(contract, 1), expectedAdditionalAssemblyReferences);
         private void ExecuteTest(string source, IEnumerable<string> contracts, IEnumerable<string> expectedAdditionalAssemblyReferences) => this.ExecuteTest(Enumerable.Repeat(source, 1), contracts, true, expectedAdditionalAssemblyReferences);
         private void ExecuteTest(IEnumerable<string> contracts) => this.ExecuteTest(Enumerable.Empty<string>(), contracts, Enumerable.Empty<string>(), true, true, false, Enumerable.Empty<string>());
-        private void ExecuteTest(IEnumerable<string> sources, IEnumerable<string> contracts, bool embedStatements, IEnumerable<string> expectedAdditionalAssemblyReferences) => this.ExecuteTest(sources, contracts, Enumerable.Empty<string>(), embedStatements, false, false, expectedAdditionalAssemblyReferences);
+        private void ExecuteTest(IEnumerable<string> sources, IEnumerable<string> contracts, bool isEmbedded, IEnumerable<string> expectedAdditionalAssemblyReferences) => this.ExecuteTest(sources, contracts, Enumerable.Empty<string>(), isEmbedded, false, false, expectedAdditionalAssemblyReferences);
         private void ExecuteTest(IEnumerable<string> sources, IEnumerable<string> contracts, IEnumerable<string> endpoints, IEnumerable<string> expectedAdditionalAssemblyReferences) => this.ExecuteTest(sources, contracts, endpoints, true, false, true, expectedAdditionalAssemblyReferences);
-        private void ExecuteTest(IEnumerable<string> sources, IEnumerable<string> contracts, IEnumerable<string> endpoints, bool embedStatements, bool generateClient, bool assertOpenApi, IEnumerable<string> expectedAdditionalAssemblyReferences)
+        private void ExecuteTest(IEnumerable<string> sources, IEnumerable<string> contracts, IEnumerable<string> endpoints, bool isEmbedded, bool generateClient, bool assertOpenApi, IEnumerable<string> expectedAdditionalAssemblyReferences)
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), $"dibix-sdk-tests-{Guid.NewGuid()}");
             string outputFilePath = Path.Combine(tempDirectory, "TestAccessor.cs");
@@ -45,10 +45,10 @@ namespace Dibix.Sdk.Tests.CodeGeneration
               , contracts: contracts.Select(ToTaskItem)
               , endpoints: endpoints.Select(ToTaskItem)
               , references: Enumerable.Empty<TaskItem>()
-              , embedStatements: embedStatements
+              , isEmbedded: isEmbedded
               , databaseSchemaProviderName: DatabaseTestUtility.DatabaseSchemaProviderName
               , modelCollation: DatabaseTestUtility.ModelCollation
-              , sqlReferencePath: Enumerable.Empty<TaskItem>()
+              , sqlReferencePath: new TaskItem[0]
               , logger: logger
               , additionalAssemblyReferences: out string[] additionalAssemblyReferences
             );

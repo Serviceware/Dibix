@@ -113,12 +113,14 @@
     </DumpItem>
 
     <ItemGroup>
-      <_SqlCodeAnalysisInputItem Include="NamingConventionPrefix
-  $(SqlNamingConventionPrefix)" />
       <_SqlCodeAnalysisInputItem Include="DatabaseSchemaProviderName
   $(DSP)" />
       <_SqlCodeAnalysisInputItem Include="ModelCollation
   $(ModelCollation)" />
+      <_SqlCodeAnalysisInputItem Include="NamingConventionPrefix
+  $(SqlNamingConventionPrefix)" />
+      <_SqlCodeAnalysisInputItem Include="IsEmbedded
+  $(IsEmbedded)" />
       <_SqlCodeAnalysisInputItem Include="Source
 $(_Build)" />
       <_SqlCodeAnalysisInputItem Include="ScriptSource
@@ -155,7 +157,6 @@ $(_SqlReferencePath)" />
       <AreaName Condition="$(AreaName) == '' and $(RootNamespace.Split('.').Length) > 1">$(RootNamespace.Split('.')[1])</AreaName>
       <Title Condition="$(Title) == ''">$(AreaName)</Title>
       <Description Condition="$(Description) == '' and $(Build_Repository_Uri) != '' and $(Build_SourceVersion) != '' and $(Build_SourceBranch) != ''">__Build version:__ $([System.DateTime]::Now.ToString(G))\r\n\r\n__Source version:__ [$(Build_SourceVersion)]($(Build_Repository_Uri)/commit/$(Build_SourceVersion)?refName=$(Build_SourceBranch))</Description>
-      <EmbedStatements Condition="'$(EmbedStatements)' == ''">$(MSBuildProjectName.EndsWith('.DML'))</EmbedStatements>
       <LangVersion>latest</LangVersion>
       <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
       <CopyOutputSymbolsToOutputDirectory>true</CopyOutputSymbolsToOutputDirectory>
@@ -224,8 +225,8 @@ $(_ServerCompilationReference)" />
   $(DSP)" />
       <_CodeGenerationInputItem Include="ModelCollation
   $(ModelCollation)" />
-      <_CodeGenerationInputItem Include="EmbedStatements
-  $(EmbedStatements)" />
+      <_CodeGenerationInputItem Include="IsEmbedded
+  $(IsEmbedded)" />
       <_CodeGenerationInputItem Include="SqlReferencePath
 $(_SqlReferencePath)" />
     </ItemGroup>

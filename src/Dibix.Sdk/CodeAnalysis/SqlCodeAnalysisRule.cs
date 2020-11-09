@@ -20,7 +20,8 @@ namespace Dibix.Sdk.CodeAnalysis
         protected abstract string ErrorMessageTemplate { get; }
 
         protected SqlModel Model => this._context.Model;
-        protected SqlCodeAnalysisConfiguration Configuration => this._context.Configuration;
+        protected string NamingConventionPrefix => this._context.NamingConventionPrefix;
+        protected bool IsEmbedded => this._context.IsEmbedded;
         #endregion
 
         #region Constructor

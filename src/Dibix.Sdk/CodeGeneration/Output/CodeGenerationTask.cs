@@ -20,10 +20,10 @@ namespace Dibix.Sdk.CodeGeneration
           , IEnumerable<TaskItem> contracts
           , IEnumerable<TaskItem> endpoints
           , IEnumerable<TaskItem> references
-          , bool embedStatements
+          , bool isEmbedded
           , string databaseSchemaProviderName
           , string modelCollation
-          , IEnumerable<TaskItem> sqlReferencePath
+          , ICollection<TaskItem> sqlReferencePath
           , ILogger logger
           , out string[] additionalAssemblyReferences
         )
@@ -44,7 +44,7 @@ namespace Dibix.Sdk.CodeGeneration
               , contracts
               , endpoints
               , references
-              , embedStatements
+              , isEmbedded
               , databaseSchemaProviderName
               , modelCollation
               , sqlReferencePath

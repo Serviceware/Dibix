@@ -2557,4 +2557,8 @@ namespace Dibix.Sdk.Tests
     column="13" /&gt;
 &lt;/errors&gt;</value>
   </data>
+  <data name="UnsupportedEmbeddedSymbolReferenceSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;errors /&gt;</value>
+  </data>
 </root>

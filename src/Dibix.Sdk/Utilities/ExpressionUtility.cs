@@ -4,11 +4,12 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 
 namespace Dibix.Sdk
 {
-    internal static class ExpressionUtils
+    internal static class ExpressionUtility
     {
         public static void Foreach
         (
@@ -42,7 +43,7 @@ namespace Dibix.Sdk
             //     ...
             // }
             Expression moveNextCall = Expression.Call(enumeratorVariable, typeof(IEnumerator).GetMethod(nameof(IEnumerator.MoveNext)));
-            Expression enumeratorIfCondition = Expression.Equal(moveNextCall, Expression.Constant(true));
+            Expression enumeratorIfCondition = Expression.IsTrue(moveNextCall);
             Expression enumeratorIfTrue = Expression.Block
             (
                 Enumerable.Repeat(elementVariable, 1).Concat(bodyBuilderContext.Variables)
@@ -60,10 +61,14 @@ namespace Dibix.Sdk
             // }
             // finally
             // {
-            //     enumerator.Dispose();
+            //     if (enumerator != null)
+            //         enumerator.Dispose();
             // }
+            MethodInfo disposeMethod = typeof(IDisposable).GetMethod(nameof(IDisposable.Dispose));
+            Expression disposeEnumerator = Expression.Call(enumeratorVariable, disposeMethod);
+            Expression disposeEnumeratorIf = Expression.IfThen(Expression.NotEqual(enumeratorVariable, Expression.Constant(null)), disposeEnumerator);
             Expression tryBlock = Expression.Block(enumeratorAssign, enumeratorLoop);
-            Expression @finally = Expression.Call(enumeratorVariable, typeof(IDisposable).GetMethod(nameof(IDisposable.Dispose)));
+            Expression @finally = disposeEnumeratorIf;
             Expression tryFinally = Expression.TryFinally(tryBlock, @finally);
             enumeratorStatement = tryFinally;
         }

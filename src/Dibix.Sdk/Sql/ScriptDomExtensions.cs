@@ -122,9 +122,9 @@ namespace Dibix.Sdk.Sql
             return child;
         }
 
-        public static SqlDataType GetDataType(this TSqlFragment sqlFragment, TSqlElementLocator elementLocator)
+        public static SqlDataType GetDataType(this TSqlFragment sqlFragment, TSqlFragmentAnalyzer fragmentAnalyzer)
         {
-            if (!elementLocator.TryGetModelElement(sqlFragment, out TSqlObject element))
+            if (!fragmentAnalyzer.TryGetModelElement(sqlFragment, out TSqlObject element))
             {
                 TSqlFragment target = sqlFragment;
                 if (target is SelectScalarExpression scalarExpression)

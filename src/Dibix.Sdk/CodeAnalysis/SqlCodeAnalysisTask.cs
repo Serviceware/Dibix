@@ -13,13 +13,14 @@ namespace Dibix.Sdk.CodeAnalysis
             string databaseSchemaProviderName
           , string modelCollation
           , string namingConventionPrefix
+          , bool isEmbedded
           , ICollection<TaskItem> source
           , IEnumerable<TaskItem> scriptSource
-          , IEnumerable<TaskItem> sqlReferencePath
+          , ICollection<TaskItem> sqlReferencePath
           , ILogger logger
         )
         {
-            SqlCodeAnalysisRuleEngine codeAnalysisEngine = SqlCodeAnalysisRuleEngine.Create(databaseSchemaProviderName, modelCollation, namingConventionPrefix, source, sqlReferencePath, logger);
+            SqlCodeAnalysisRuleEngine codeAnalysisEngine = SqlCodeAnalysisRuleEngine.Create(databaseSchemaProviderName, modelCollation, namingConventionPrefix, isEmbedded, source, sqlReferencePath, logger);
             if (logger.HasLoggedErrors)
                 return false;
 

@@ -13,13 +13,13 @@ namespace Dibix.Sdk.CodeGeneration
         public TSqlFragment ColumnNameSource { get; }
         public Lazy<SqlDataType> DataTypeAccessor { get; }
 
-        public OutputColumnResult(string columnName, TSqlFragment primarySource, TSqlFragment columnNameSource, TSqlElementLocator elementLocator)
+        public OutputColumnResult(string columnName, TSqlFragment primarySource, TSqlFragment columnNameSource, TSqlFragmentAnalyzer fragmentAnalyzer)
         {
             this.HasName = !String.IsNullOrEmpty(columnName);
             this.ColumnName = columnName;
             this.ColumnNameSource = columnNameSource;
             this.PrimarySource = primarySource;
-            this.DataTypeAccessor = new Lazy<SqlDataType>(() => primarySource.GetDataType(elementLocator));
+            this.DataTypeAccessor = new Lazy<SqlDataType>(() => primarySource.GetDataType(fragmentAnalyzer));
         }
     }
 }

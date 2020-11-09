@@ -7,7 +7,7 @@ namespace Dibix.Sdk.CodeGeneration
     {
         internal string ProductName { get; set; }
         internal string AreaName { get; set; }
-        internal TSqlElementLocator ElementLocator { get; set; }
+        internal TSqlFragmentAnalyzer FragmentAnalyzer { get; set; }
         internal ISqlStatementFormatter Formatter { get; set; }
         internal ITypeResolverFacade TypeResolver { get; set; }
         internal ISchemaRegistry SchemaRegistry { get; set; }

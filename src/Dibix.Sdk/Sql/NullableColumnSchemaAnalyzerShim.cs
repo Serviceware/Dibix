@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Microsoft.SqlServer.Dac.Model;
@@ -15,14 +18,27 @@ namespace Dibix.Sdk.Sql
         private static readonly Type NullableColumnSchemaAnalyzerType = DacExtensionsAssembly.GetType("Microsoft.SqlServer.Dac.CodeAnalysis.Rules.Performance.NullableColumnSchemaAnalyzer");
         private static readonly Delegate VisitFragmentHandler = CompileVisitFragment();
         private static readonly Delegate VisitAmbiguousFragmentHandler = CompileVisitAmbiguousFragment();
+        private static readonly ConcurrentDictionary<object, ICollection<TSqlFragment>> DDLStatementStore = new ConcurrentDictionary<object, ICollection<TSqlFragment>>();
 
         public static void Init() => SetupShims(nameof(BeginDdlStatement), nameof(VisitFragment), nameof(VisitAmbiguousFragment));
 
-        public static void BeginDdlStatement(object instance, object fragment) { }
-        
+        public static void BeginDdlStatement(object instance, object fragment)
+        {
+            ICollection<TSqlFragment> UpdateValueFactory(object _, ICollection<TSqlFragment> ddlStatements)
+            {
+                ddlStatements.Add((TSqlFragment)fragment);
+                return ddlStatements;
+            }
+            ICollection<TSqlFragment> AddValueFactory(object _) => UpdateValueFactory(_, new Collection<TSqlFragment>());
+
+            DDLStatementStore.AddOrUpdate(instance, AddValueFactory, UpdateValueFactory);
+        }
+
         public static void VisitFragment(object instance, object fragment, object sqlElementDescriptor, object relevance) => VisitFragmentHandler.DynamicInvoke(instance, fragment, sqlElementDescriptor);
 
         public static void VisitAmbiguousFragment(object instance, object fragment, object possibilities) => VisitAmbiguousFragmentHandler.DynamicInvoke(instance, fragment, possibilities);
+
+        public static IEnumerable<TSqlFragment> GetDDLStatements(object instance) => DDLStatementStore.TryRemove(instance, out ICollection<TSqlFragment> ddlStatements) ? ddlStatements : Enumerable.Empty<TSqlFragment>();
 
         private static void SetupShims(params string[] methodNames)
         {

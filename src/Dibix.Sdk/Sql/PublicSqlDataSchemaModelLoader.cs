@@ -2,12 +2,12 @@
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using Microsoft.Data.Tools.Schema.Extensibility;
 using Microsoft.Data.Tools.Schema.Tasks.Sql;
 using Microsoft.Data.Tools.Schema.Utilities.Sql.Common;
 using Microsoft.SqlServer.Dac.Model;
@@ -18,7 +18,6 @@ namespace Dibix.Sdk.Sql
     internal static class PublicSqlDataSchemaModelLoader
     {
         #region Fields
-        private static readonly Assembly SchemaSqlAssembly = typeof(IExtension).Assembly;
         private static readonly Assembly TasksAssembly = typeof(SqlBuildTask).Assembly;
         private static readonly Assembly UtilitiesAssembly = typeof(SqlConnectionInfoUtils).Assembly;
         private static readonly LoadPublicDataSchemaModel ModelFactory = CompileModelFactory();
@@ -26,16 +25,56 @@ namespace Dibix.Sdk.Sql
         #endregion
 
         #region Public Methods
-        public static TSqlModel Load(string databaseSchemaProviderName, string modelCollation, IEnumerable<TaskItem> source, IEnumerable<TaskItem> sqlReferencePath, ILogger logger)
+        public static TSqlModel Load(string databaseSchemaProviderName, string modelCollation, IEnumerable<TaskItem> source, ICollection<TaskItem> sqlReferencePath, ILogger logger)
         {
+            RestrictEmbeddedReferences(sqlReferencePath, logger);
             ITask task = TaskCache.GetOrAdd(logger, CreateTask);
             return ModelFactory(databaseSchemaProviderName, modelCollation, source.ToMSBuildTaskItems(), sqlReferencePath.ToMSBuildTaskItems(), task, logger);
         }
         #endregion
 
         #region Private Methods
+        private static void RestrictEmbeddedReferences(IEnumerable<TaskItem> sqlReferencePath, ILogger logger)
+        {
+            foreach (TaskItem reference in sqlReferencePath)
+            {
+                string path = reference.GetFullPath();
+                if (Path.GetExtension(path) != ".dacpac")
+                    continue;
+
+                if (DacCustomDataHeaderReader.IsEmbedded(path))
+                    logger.LogError(null, $"Unsupported reference to DML package: {path}", null, default, default);
+            }
+        }
+
         private static LoadPublicDataSchemaModel CompileModelFactory()
         {
+            // IEnumerator<DataSchemaError> errorEnumerator;
+            // SqlExceptionUtils._disableFiltering = true;
+            // SqlExceptionUtils._initialized = true;
+            // TaskLoggingHelper loggingHelper = new TaskLoggingHelper(task);
+            // TaskHostLoader hostLoader = new TaskHostLoader();
+            // hostLoader.DatabaseSchemaProviderName = databaseSchemaProviderName;
+            // hostLoader.ModelCollation = modelCollation;
+            // hostLoader.Source = source;
+            // hostLoader.SqlReferencePath = sqlReferencePath;
+            // hostLoader.Load(null, loggingHelper);
+            // try
+            // {
+            //     errorEnumerator = hostLoader.LoadedErrorManager.GetAllErrors().GetEnumerator();
+            //     while (errorEnumerator.MoveNext())
+            //     {
+            //         DataSchemaError errorElement = errorEnumerator.Current;
+            //         logger.LogError(errorElement.ErrorCode.ToString(), errorElement.Message, errorElement.Document, errorElement.Line, errorElement.Column);
+            //     }
+            // }
+            // finally
+            // {
+            //     if (errorEnumerator != null)
+            //         errorEnumerator.Dispose();
+            // }
+            // return new TSqlModel(hostLoader.LoadedTaskHost.Model);
+
             // (string databaseSchemaProviderName, string modelCollation, ITaskItem[] source, ITaskItem[] sqlReferencePath, ITask task, ILogger logger) =>
             ParameterExpression databaseSchemaProviderNameParameter = Expression.Parameter(typeof(string), "databaseSchemaProviderName");
             ParameterExpression modelCollationParameter = Expression.Parameter(typeof(string), "modelCollation");
@@ -43,10 +82,6 @@ namespace Dibix.Sdk.Sql
             ParameterExpression sqlReferencePathParameter = Expression.Parameter(typeof(ITaskItem[]), "sqlReferencePath");
             ParameterExpression taskParameter = Expression.Parameter(typeof(ITask), "task");
             ParameterExpression loggerParameter = Expression.Parameter(typeof(ILogger), "logger");
-
-            Type hostLoaderType = TasksAssembly.GetType("Microsoft.Data.Tools.Schema.Tasks.Sql.TaskHostLoader", true);
-            MethodInfo loadMethod = hostLoaderType.GetMethod("Load");
-            Guard.IsNotNull(loadMethod, nameof(loadMethod), "Could find method 'Load' on 'TaskHostLoader'");
 
             // Improve logging
             // SqlExceptionUtils._disableFiltering = true;
@@ -57,14 +92,15 @@ namespace Dibix.Sdk.Sql
             Expression disableFilteringAssign = Expression.Assign(Expression.Field(null, disableFilteringField), Expression.Constant(true));
             Expression initializedAssign = Expression.Assign(Expression.Field(null, initializedField), Expression.Constant(true));
 
-            // TaskLoggingHelper logger = new TaskLoggingHelper(task);
-            Type loggerType = typeof(TaskLoggingHelper);
-            ParameterExpression loggerVariable = Expression.Variable(loggerType, "logger");
-            ConstructorInfo loggerCtor = loggerType.GetConstructor(new[] { typeof(ITask) });
-            Expression loggerValue = Expression.New(loggerCtor, taskParameter);
-            Expression loggerAssign = Expression.Assign(loggerVariable, loggerValue);
+            // TaskLoggingHelper loggingHelper = new TaskLoggingHelper(task);
+            Type loggingHelperType = typeof(TaskLoggingHelper);
+            ParameterExpression loggingHelperVariable = Expression.Variable(loggingHelperType, "loggingHelper");
+            ConstructorInfo loggingHelperCtor = loggingHelperType.GetConstructor(new[] { typeof(ITask) });
+            Expression loggingHelperValue = Expression.New(loggingHelperCtor, taskParameter);
+            Expression loggingHelperAssign = Expression.Assign(loggingHelperVariable, loggingHelperValue);
 
             // TaskHostLoader hostLoader = new TaskHostLoader();
+            Type hostLoaderType = TasksAssembly.GetType("Microsoft.Data.Tools.Schema.Tasks.Sql.TaskHostLoader", true);
             ParameterExpression hostLoaderVariable = Expression.Variable(hostLoaderType, "hostLoader");
             Expression hostLoaderValue = Expression.New(hostLoaderType);
             Expression hostLoaderAssign = Expression.Assign(hostLoaderVariable, hostLoaderValue);
@@ -85,63 +121,31 @@ namespace Dibix.Sdk.Sql
             Expression sqlReferencePathProperty = Expression.Property(hostLoaderVariable, "SqlReferencePath");
             Expression sqlReferencePathAssign = Expression.Assign(sqlReferencePathProperty, sqlReferencePathParameter);
 
-            // hostLoader.Load(null, logger);
-            Expression loadCall = Expression.Call(hostLoaderVariable, loadMethod, Expression.Constant(null, typeof(ITaskHost)), loggerVariable);
+            // hostLoader.Load(null, loggingHelper);
+            Expression loadCall = Expression.Call(hostLoaderVariable, "Load", new Type[0], Expression.Constant(null, typeof(ITaskHost)), loggingHelperVariable);
 
-            //IEnumerator<DataSchemaError> errorEnumerator;
-            //try
-            //{
-            //    errorEnumerator = hostLoader.LoadedErrorManager.GetAllErrors().GetEnumerator();
-            //    while (errorEnumerator.MoveNext())
-            //    {
-            //        DataSchemaError error = errorEnumerator.Current;
-            //        logger.LogError(error.ErrorCode, error.ErrorText, error.Document, error.Line, error.Column);
-            //    }
-            //}
-            //finally
-            //{
-            //    errorEnumerator.Dispose();
-            //}
-            Type dataSchemaErrorType = SchemaSqlAssembly.GetType("Microsoft.Data.Tools.Schema.DataSchemaError", true);
-            ParameterExpression errorEnumeratorVariable = Expression.Variable(typeof(IEnumerator<>).MakeGenericType(dataSchemaErrorType), "errorEnumerator");
-
+            // while (errorEnumerator.MoveNext())
+            // {
+            //     DataSchemaError errorElement = errorEnumerator.Current;
+            //     logger.LogError(error.ErrorCode.ToString(), error.Message, error.Document, error.Line, error.Column);
+            // }
             Expression errorManagerProperty = Expression.Property(hostLoaderVariable, "LoadedErrorManager");
             Expression errorsCall = Expression.Call(errorManagerProperty, "GetAllErrors", new Type[0]);
-            Expression errorEnumeratorValue = Expression.Call(errorsCall, typeof(IEnumerable<>).MakeGenericType(dataSchemaErrorType).GetMethod(nameof(IEnumerable<object>.GetEnumerator)));
-            Expression errorEnumeratorAssign = Expression.Assign(errorEnumeratorVariable, errorEnumeratorValue);
-
-            ParameterExpression errorVariable = Expression.Variable(dataSchemaErrorType, "error");
-            Expression errorValue = Expression.Property(errorEnumeratorVariable, nameof(IEnumerator<object>.Current));
-            Expression errorAssign = Expression.Assign(errorVariable, errorValue);
-
-            Expression logErrorCall = Expression.Call
+            Type dataSchemaErrorType = DacReflectionUtility.SchemaSqlAssembly.GetType("Microsoft.Data.Tools.Schema.DataSchemaError", true);
+            ExpressionUtility.Foreach
             (
-                loggerParameter
-              , nameof(ILogger.LogError)
-              , new Type[0]
-              , Expression.Call(Expression.Property(errorValue, "ErrorCode"), "ToString", new Type[0])
-              , Expression.Property(errorValue, "Message")
-              , Expression.Property(errorValue, "Document")
-              , Expression.Property(errorValue, "Line")
-              , Expression.Property(errorValue, "Column")
+                name: "error"
+              , enumerable: errorsCall
+              , elementType: dataSchemaErrorType
+              , bodyBuilder: builder => CompileErrorIterator(builder, loggerParameter)
+              , enumeratorVariable: out ParameterExpression enumeratorVariable
+              , enumeratorStatement: out Expression enumeratorStatement
             );
-            Expression itemBlock = Expression.Block(new[] { errorVariable }, errorAssign, logErrorCall);
-
-            Expression propertyEnumeratorMoveNextCall = Expression.Call(errorEnumeratorVariable, typeof(IEnumerator).GetMethod(nameof(IEnumerator.MoveNext)));
-            Expression loopCondition = Expression.Equal(propertyEnumeratorMoveNextCall, Expression.Constant(true));
-            LabelTarget loopBreakLabel = Expression.Label("LoopBreak");
-            Expression loopConditionBlock = Expression.IfThenElse(loopCondition, itemBlock, Expression.Break(loopBreakLabel));
-            Expression loop = Expression.Loop(loopConditionBlock, loopBreakLabel);
-
-            Expression tryBlock = Expression.Block(errorEnumeratorAssign, loop);
-            Expression @finally = Expression.Call(errorEnumeratorVariable, typeof(IDisposable).GetMethod(nameof(IDisposable.Dispose)));
-
-            Expression tryFinally = Expression.TryFinally(tryBlock, @finally);
 
             // new TSqlModel(hostLoader.LoadedTaskHost.Model);
             Expression loadedTaskHostProperty = Expression.Property(hostLoaderVariable, "LoadedTaskHost");
             MemberExpression modelProperty = Expression.Property(loadedTaskHostProperty, "Model");
-            Type dataSchemaModelType = SchemaSqlAssembly.GetType("Microsoft.Data.Tools.Schema.SchemaModel.DataSchemaModel", true);
+            Type dataSchemaModelType = DacReflectionUtility.SchemaSqlAssembly.GetType("Microsoft.Data.Tools.Schema.SchemaModel.DataSchemaModel", true);
             ConstructorInfo modelCtor = typeof(TSqlModel).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { dataSchemaModelType }, null);
             Expression modelValue = Expression.New(modelCtor, modelProperty);
 
@@ -150,20 +154,20 @@ namespace Dibix.Sdk.Sql
             (
                 new[]
                 {
-                    loggerVariable
+                    loggingHelperVariable
                   , hostLoaderVariable
-                  , errorEnumeratorVariable
+                  , enumeratorVariable
                 }
               , disableFilteringAssign
               , initializedAssign
-              , loggerAssign
+              , loggingHelperAssign
               , hostLoaderAssign
               , databaseSchemaProviderNameAssign
               , modelCollationAssign
               , sourceAssign
               , sqlReferencePathAssign
               , loadCall
-              , tryFinally
+              , enumeratorStatement
               , modelValue
             );
             Expression<LoadPublicDataSchemaModel> lambda = Expression.Lambda<LoadPublicDataSchemaModel>
@@ -178,6 +182,23 @@ namespace Dibix.Sdk.Sql
             );
             LoadPublicDataSchemaModel compiled = lambda.Compile();
             return compiled;
+        }
+
+        private static void CompileErrorIterator(IForeachBodyBuilder builder, Expression loggerParameter)
+        {
+            // logger.LogError(error.ErrorCode.ToString(), error.Message, error.Document, error.Line, error.Column);
+            Expression logErrorCall = Expression.Call
+            (
+                loggerParameter
+              , nameof(ILogger.LogError)
+              , new Type[0]
+              , Expression.Call(Expression.Property(builder.Element, "ErrorCode"), "ToString", new Type[0])
+              , Expression.Property(builder.Element, "Message")
+              , Expression.Property(builder.Element, "Document")
+              , Expression.Property(builder.Element, "Line")
+              , Expression.Property(builder.Element, "Column")
+            );
+            builder.AddStatement(logErrorCall);
         }
 
         private static FieldInfo TryGetStaticField(Type type, string fieldName)
