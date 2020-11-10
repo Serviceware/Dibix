@@ -148,8 +148,8 @@ $(_SqlReferencePath)" />
       <Endpoint Include="@(None)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(RelativeDir)', '^Endpoints\\')) and %(Extension) == '.json'" />
     </ItemGroup>
   </Target>
-  <Target Name="CompileArtifacts" 
-          AfterTargets="PostBuildEvent" 
+  <Target Name="CompileArtifacts"
+          AfterTargets="SqlBuild"
           DependsOnTargets="SetupSqlBuildInputs"
           Inputs="@(CompileArtifactsInput)"
           Outputs="@(CompileArtifactsOutput)">
@@ -225,6 +225,8 @@ $(_Contract)" />
 $(_Endpoint)" />
       <_CodeGenerationInputItem Include="References
 $(_ServerCompilationReference)" />
+      <_CodeGenerationInputItem Include="DacFilePath
+  $(SqlTargetPath)" />
       <_CodeGenerationInputItem Include="DatabaseSchemaProviderName
   $(DSP)" />
       <_CodeGenerationInputItem Include="ModelCollation

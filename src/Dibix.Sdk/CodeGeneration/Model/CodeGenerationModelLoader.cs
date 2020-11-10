@@ -93,7 +93,7 @@ namespace Dibix.Sdk.CodeGeneration
             // DDL statements however, need explicit markup, i.E. @Name at least
             bool requireExplicitMarkup = !isEmbedded;
             ISqlStatementParser parser = new SqlStoredProcedureParser(requireExplicitMarkup);
-            SqlStatementCollector statementCollector = new PhysicalFileSqlStatementCollector(projectName, isEmbedded, productName, areaName, parser, formatter, typeResolver, schemaRegistry, logger, sources, modelAccessor);
+            SqlStatementCollector statementCollector = new PhysicalFileSqlStatementCollector(projectName, isEmbedded, analyzeAlways: true, productName, areaName, parser, formatter, typeResolver, schemaRegistry, logger, sources, modelAccessor);
             return statementCollector.CollectStatements();
         }
 

@@ -14,7 +14,7 @@ namespace Dibix.Sdk.Sql
         internal SqlModel(string source, TSqlFragment scriptFragment, bool isScriptArtifact, string projectName, bool isEmbedded, TSqlModel model, ILogger logger)
         {
             this._model = model;
-            this._fragmentAnalyzer = new TSqlFragmentAnalyzer(source, scriptFragment, isScriptArtifact, projectName, isEmbedded, new Lazy<TSqlModel>(() => model), logger);
+            this._fragmentAnalyzer = new TSqlFragmentAnalyzer(source, scriptFragment, isScriptArtifact, projectName, isEmbedded, analyzeAlways: true, new Lazy<TSqlModel>(() => model), logger);
         }
 
         public IEnumerable<Constraint> GetTableConstraints(SchemaObjectName tableName, bool throwOnError = true) => this.GetConstraints(TableModel.Table, tableName, throwOnError);

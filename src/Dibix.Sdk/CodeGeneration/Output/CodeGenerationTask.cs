@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Dibix.Sdk.Sql;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -22,6 +23,8 @@ namespace Dibix.Sdk.CodeGeneration
           , IEnumerable<TaskItem> endpoints
           , IEnumerable<TaskItem> references
           , bool isEmbedded
+          , bool persistIsEmbedded
+          , string dacFilePath
           , string databaseSchemaProviderName
           , string modelCollation
           , ICollection<TaskItem> sqlReferencePath
@@ -29,6 +32,9 @@ namespace Dibix.Sdk.CodeGeneration
           , out string[] additionalAssemblyReferences
         )
         {
+            if (isEmbedded && persistIsEmbedded)
+                DacMetadataManager.SetIsEmbedded(dacFilePath);
+
             ISchemaRegistry schemaRegistry = new SchemaRegistry(logger);
             CodeArtifactsGenerationModel model = CodeGenerationModelLoader.Create
             (

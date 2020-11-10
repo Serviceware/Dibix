@@ -70,6 +70,7 @@ namespace Dibix.Sdk.CodeGeneration
               , target: statement
               , projectName: this._projectName
               , isEmbedded: false
+              , analyzeAlways: false
               , productName: this._productName
               , areaName: this._areaName
               , formatter: this._formatter

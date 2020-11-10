@@ -17,7 +17,7 @@ namespace Dibix.Sdk.Sql
         private readonly ILogger _logger;
         private SchemaAnalyzerResult _result;
 
-        public TSqlFragmentAnalyzer(string source, TSqlFragment sqlFragment, bool isScriptArtifact, string projectName, bool isEmbedded, Lazy<TSqlModel> modelAccessor, ILogger logger)
+        public TSqlFragmentAnalyzer(string source, TSqlFragment sqlFragment, bool isScriptArtifact, string projectName, bool isEmbedded, bool analyzeAlways, Lazy<TSqlModel> modelAccessor, ILogger logger)
         {
             this._source = source;
             this._sqlFragment = sqlFragment;
@@ -30,7 +30,8 @@ namespace Dibix.Sdk.Sql
             // Currently we always analyze. This ensures validating DML projects properly.
             // It is however prepared to be loaded in a lazy manner.
             // So if performance issues arise, optimizations can be evaluated and applied.
-            this._result = AnalyzeSchema(source, sqlFragment, isScriptArtifact, projectName, isEmbedded, this._modelAccessor.Value, logger);
+            if (analyzeAlways)
+                this._result = AnalyzeSchema(source, sqlFragment, isScriptArtifact, projectName, isEmbedded, this._modelAccessor.Value, logger);
         }
 
         public bool TryGetElementLocation(TSqlFragment fragment, out ElementLocation location) => this.GetResult().Locations.TryGetValue(fragment.StartOffset, out location);

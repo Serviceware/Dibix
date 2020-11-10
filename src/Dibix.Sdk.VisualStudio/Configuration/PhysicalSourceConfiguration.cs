@@ -43,6 +43,7 @@ namespace Dibix.Sdk.VisualStudio
             (
                 projectName: this._projectName
               , isEmbedded: true
+              , analyzeAlways: false
               , productName: null
               , areaName: null
               , parser: parser

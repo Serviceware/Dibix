@@ -12,6 +12,7 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly string _productName;
         private readonly string _areaName;
         private readonly bool _isEmbedded;
+        private readonly bool _analyzeAlways;
         private readonly ISqlStatementParser _parser;
         private readonly ISqlStatementFormatter _formatter;
         private readonly ITypeResolverFacade _typeResolver;
@@ -24,6 +25,7 @@ namespace Dibix.Sdk.CodeGeneration
         (
             string projectName
           , bool isEmbedded
+          , bool analyzeAlways
           , string productName
           , string areaName
           , ISqlStatementParser parser
@@ -37,6 +39,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             this._projectName = projectName;
             this._isEmbedded = isEmbedded;
+            this._analyzeAlways = analyzeAlways;
             this._productName = productName;
             this._areaName = areaName;
             this._parser = parser;
@@ -69,6 +72,7 @@ namespace Dibix.Sdk.CodeGeneration
               , target: statement
               , projectName: this._projectName
               , isEmbedded: this._isEmbedded
+              , analyzeAlways: this._analyzeAlways
               , productName: this._productName
               , areaName: this._areaName
               , formatter: this._formatter

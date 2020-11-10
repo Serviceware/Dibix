@@ -273,10 +273,10 @@ namespace Dibix.Sdk.Tests
         public static class TestAccessor
         {
             // EmptyWithParams
-            private const string EmptyWithParamsCommandText = "";
+            private const string EmptyWithParamsCommandText = "[dbo].[dbx_tests_syntax_empty_params]";
 
             // SingleConrecteResultWithParams
-            private const string SingleConrecteResultWithParamsCommandText = "SELECT [id] = 1";
+            private const string SingleConrecteResultWithParamsCommandText = "[dbo].[dbx_tests_syntax_singleconcreteresult_params]";
 
             public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, System.Guid? x, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, bool y = true, int? z = null)
             {
@@ -292,7 +292,7 @@ namespace Dibix.Sdk.Tests
                                                          })
                                                          .SetString(nameof(password), password, true)
                                                          .Build();
-                    accessor.Execute(EmptyWithParamsCommandText, @params);
+                    accessor.Execute(EmptyWithParamsCommandText, System.Data.CommandType.StoredProcedure, @params);
                 }
             }
 
@@ -306,7 +306,7 @@ namespace Dibix.Sdk.Tests
                                                              ids
                                                          })
                                                          .Build();
-                    return accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(SingleConrecteResultWithParamsCommandText, @params);
+                    return accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(SingleConrecteResultWithParamsCommandText, System.Data.CommandType.StoredProcedure, @params);
                 }
             }
         }
