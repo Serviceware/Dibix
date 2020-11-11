@@ -46,8 +46,6 @@
     <!-- This is probably not included, because we skip copying it to output -->
     <Clean Include="$(TargetPath)" />
     <Clean Include="$(ClientTargetPath)" />
-
-    <SqlCmdVariable Include="IsEmbedded" Value="True" Condition="'$(IsEmbedded)' == 'True'" />
   </ItemGroup>
 
 </Project>
