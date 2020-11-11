@@ -7,7 +7,7 @@ namespace Dibix.Sdk.CodeGeneration
     {
         public override ICollection<ErrorResponse> ErrorResponses { get; }
 
-        public NeighborActionTarget(string accessorFullName, TypeReference resultType, string methodName) : base(accessorFullName, resultType, methodName)
+        public NeighborActionTarget(string accessorFullName, TypeReference resultType, string operationName, bool isAsync) : base(accessorFullName, resultType, operationName, isAsync)
         {
             this.ErrorResponses = new Collection<ErrorResponse>();
         }

@@ -7,13 +7,15 @@ namespace Dibix.Sdk.CodeGeneration
     {
         public string AccessorFullName { get; }
         public TypeReference ResultType { get; }
+        public bool IsAsync { get; }
         public IDictionary<string, ActionParameter> Parameters { get; }
         public abstract ICollection<ErrorResponse> ErrorResponses { get; }
 
-        protected GeneratedAccessorMethodTarget(string accessorFullName, TypeReference resultType, string methodName) : base(methodName)
+        protected GeneratedAccessorMethodTarget(string accessorFullName, TypeReference resultType, string operationName, bool isAsync) : base(operationName)
         {
             this.AccessorFullName = accessorFullName;
             this.ResultType = resultType;
+            this.IsAsync = isAsync;
             this.Parameters = new Dictionary<string, ActionParameter>(StringComparer.OrdinalIgnoreCase);
         }
     }

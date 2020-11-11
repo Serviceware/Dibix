@@ -1,6 +1,7 @@
 using System;
 using System.Data;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Dibix
@@ -19,10 +20,10 @@ namespace Dibix
             return accessor.QuerySingleOrDefault<T>(sql, commandType, EmptyParameters.Instance);
         }
         // Configurator (GetKnowledgeBaseServiceConfiguration)
-        public static Task<T> QuerySingleAsync<T>(this IDatabaseAccessor accessor, string sql)
+        public static Task<T> QuerySingleAsync<T>(this IDatabaseAccessor accessor, string sql, CancellationToken cancellationToken)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.QuerySingleAsync<T>(sql, CommandType.Text, EmptyParameters.Instance);
+            return accessor.QuerySingleAsync<T>(sql, CommandType.Text, EmptyParameters.Instance, cancellationToken);
         }
         public static T QuerySingleOrDefault<T>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters)
         {

@@ -195,7 +195,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             WriteExecutor(writer, statement, context);
 
-            WriteOutputParameterAssignment(writer, statement, context);
+            WriteOutputParameterAssignment(writer, statement);
 
             writer.PopIndent()
                   .Write("}");
@@ -385,6 +385,9 @@ namespace Dibix.Sdk.CodeGeneration
                       .WriteRaw('"');
             }
 
+            if (query.Async)
+                writer.WriteRaw(", cancellationToken");
+
             writer.WriteRaw(')');
 
             if (query.Async)
@@ -415,6 +418,9 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (query.Parameters.Any())
                 writer.WriteRaw(", @params");
+
+            if (query.Async)
+                writer.WriteRaw(", cancellationToken");
 
             writer.WriteRaw(")");
 
@@ -520,7 +526,7 @@ namespace Dibix.Sdk.CodeGeneration
                   .WriteLine();
         }
 
-        private static void WriteOutputParameterAssignment(StringWriter writer, SqlStatementInfo statement, DaoCodeGenerationContext context)
+        private static void WriteOutputParameterAssignment(StringWriter writer, SqlStatementInfo statement)
         {
             if (!statement.Parameters.Any(x => x.IsOutput))
                 return;

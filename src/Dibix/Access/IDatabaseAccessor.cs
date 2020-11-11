@@ -22,7 +22,7 @@ namespace Dibix
         IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TReturn>(string sql, CommandType commandType, IParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TReturn> map, string splitOn);
         IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TEleventh, TReturn>(string sql, CommandType commandType, IParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TEleventh, TReturn> map, string splitOn);
         T QuerySingle<T>(string sql, CommandType commandType, IParametersVisitor parameters);
-        Task<T> QuerySingleAsync<T>(string sql, CommandType commandType, IParametersVisitor parameters);
+        Task<T> QuerySingleAsync<T>(string sql, CommandType commandType, IParametersVisitor parameters, CancellationToken cancellationToken);
         TReturn QuerySingle<TReturn, TSecond>(string sql, CommandType commandType, IParametersVisitor parameters, string splitOn) where TReturn : new();
         TReturn QuerySingle<TReturn, TSecond, TThird>(string sql, CommandType commandType, IParametersVisitor parameters, string splitOn) where TReturn : new();
         TReturn QuerySingle<TReturn, TSecond, TThird, TFourth>(string sql, CommandType commandType, IParametersVisitor parameters, string splitOn) where TReturn : new();

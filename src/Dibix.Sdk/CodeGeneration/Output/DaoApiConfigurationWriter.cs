@@ -55,8 +55,12 @@ namespace Dibix.Sdk.CodeGeneration
                     if (action.Target is GeneratedAccessorMethodTarget referencedActionTarget)
                     {
                         writer.WriteRaw($"typeof({referencedActionTarget.AccessorFullName}), nameof({referencedActionTarget.AccessorFullName}.")
-                              .WriteRaw(referencedActionTarget.Name)
-                              .WriteRaw(')');
+                              .WriteRaw(referencedActionTarget.Name);
+                        
+                        if (referencedActionTarget.IsAsync)
+                            writer.WriteRaw("Async");
+
+                        writer.WriteRaw(')');
                     }
                     else if (action.Target is ReflectionActionTarget reflectionActionTarget)
                     {

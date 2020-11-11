@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -67,7 +68,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, lineInfo.LineNumber, lineI
             // 3. Target 'could' be a compiled method in a neighbour project
             if (!this.TryGetNeighborActionTarget(methodName, filePath, lineInfo, out NeighborActionTarget neighborAction))
             {
-                this._logger.LogError(null, $"Could not find a method name '{methodName}' on database accessor type '{typeName}'", filePath, lineInfo.LineNumber, lineInfo.LinePosition);
+                this._logger.LogError(null, $"Could not find a method named '{methodName}' on database accessor type '{typeName}'", filePath, lineInfo.LineNumber, lineInfo.LinePosition);
                 return null;
             }
 
@@ -87,6 +88,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, lineInfo.LineNumber, lineI
                             where type.IsDatabaseAccessor()
                             from method in type.GetMethods()
                             where method.Name == methodName
+                               || method.Name == $"{methodName}Async"
                             select this.CreateNeighborActionTarget(method, filePath, lineInfo);
 
                 return query.FirstOrDefault();
@@ -104,15 +106,26 @@ Tried: {normalizedNamespace}.{methodName}", filePath, lineInfo.LineNumber, lineI
 
         private NeighborActionTarget CreateNeighborActionTarget(MethodInfo method, string filePath, IJsonLineInfo lineInfo)
         {
-            IEnumerable<ParameterInfo> parameters = method.GetExternalParameters();
+            string operationName = method.Name;
+            Type returnType = method.ReturnType;
+            bool isAsync = returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(Task<>);
+
+            if (isAsync)
+            {
+                returnType = returnType.GenericTypeArguments[0];
+                const string asyncSuffix = "Async";
+                if (operationName.EndsWith(asyncSuffix, StringComparison.Ordinal))
+                    operationName = operationName.Remove(operationName.Length - asyncSuffix.Length);
+            }
 
             TypeReference resultType = null;
-            if (method.ReturnType != typeof(void))
-                resultType = ReflectionTypeResolver.ResolveType(method.ReturnType, filePath, lineInfo.LineNumber, lineInfo.LinePosition, this._schemaRegistry);
+            if (returnType != typeof(void))
+                resultType = ReflectionTypeResolver.ResolveType(returnType, filePath, lineInfo.LineNumber, lineInfo.LinePosition, this._schemaRegistry);
 
-            NeighborActionTarget target = new NeighborActionTarget(method.DeclaringType.FullName, resultType, method.Name);
+            NeighborActionTarget target = new NeighborActionTarget(method.DeclaringType.FullName, resultType, operationName, isAsync);
             method.CollectErrorResponses((statusCode, errorCode, errorDescription, isClientError) => target.ErrorResponses.Add(new ErrorResponse(statusCode, errorCode, errorDescription, isClientError)));
 
+            IEnumerable<ParameterInfo> parameters = method.GetExternalParameters(isAsync);
             foreach (ParameterInfo parameter in parameters)
             {
                 TypeReference parameterType = ReflectionTypeResolver.ResolveType(parameter.ParameterType, filePath, lineInfo.LineNumber, lineInfo.LinePosition, this._schemaRegistry);

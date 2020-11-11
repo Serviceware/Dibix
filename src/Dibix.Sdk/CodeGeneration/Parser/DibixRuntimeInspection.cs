@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -50,11 +51,15 @@ namespace Dibix.Sdk.CodeGeneration
                        .FirstOrDefault();
         }
 
-        public static IEnumerable<ParameterInfo> GetExternalParameters(this MethodInfo method)
+        public static IEnumerable<ParameterInfo> GetExternalParameters(this MethodInfo method, bool isAsync)
         {
             IList<ParameterInfo> parameters = method.GetParameters().ToList();
             if (parameters[0].ParameterType.FullName == "Dibix.IDatabaseAccessorFactory")
                 parameters.RemoveAt(0);
+
+            int lastIndex = parameters.Count - 1;
+            if (isAsync && parameters[lastIndex].ParameterType == typeof(CancellationToken))
+                parameters.RemoveAt(lastIndex);
 
             return parameters;
         }

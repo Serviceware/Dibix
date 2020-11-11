@@ -93,10 +93,11 @@ namespace Dibix.Dapper
             return base.Connection.QuerySingle<T>(sql, PrepareParameters(parameters), this._transaction, commandType: commandType);
         }
 
-        protected override Task<T> QuerySingleAsync<T>(string sql, CommandType commandType, IParametersVisitor parameters)
+        protected override Task<T> QuerySingleAsync<T>(string sql, CommandType commandType, IParametersVisitor parameters, CancellationToken cancellationToken)
         {
             DecoratedTypeMap.Adapt<T>();
-            return base.Connection.QuerySingleAsync<T>(sql, PrepareParameters(parameters), this._transaction, commandType: commandType);
+            CommandDefinition command = new CommandDefinition(sql, PrepareParameters(parameters), this._transaction, commandType: commandType, cancellationToken: cancellationToken);
+            return base.Connection.QuerySingleAsync<T>(command);
         }
 
         protected override T QuerySingleOrDefault<T>(string sql, CommandType commandType, IParametersVisitor parameters)

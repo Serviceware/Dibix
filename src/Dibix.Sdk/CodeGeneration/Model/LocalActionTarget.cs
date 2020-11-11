@@ -7,7 +7,7 @@ namespace Dibix.Sdk.CodeGeneration
         public SqlStatementInfo Statement { get; }
         public override ICollection<ErrorResponse> ErrorResponses => this.Statement.ErrorResponses;
 
-        public LocalActionTarget(SqlStatementInfo statement, string outputName) : base($"{statement.Namespace}.{outputName}", statement.ResultType, statement.Name)
+        public LocalActionTarget(SqlStatementInfo statement, string outputName) : base($"{statement.Namespace}.{outputName}", statement.ResultType, statement.Name, statement.Async)
         {
             this.Statement = statement;
             foreach (SqlQueryParameter parameter in statement.Parameters)

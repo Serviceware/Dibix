@@ -72,7 +72,7 @@ namespace Dibix
 
         T IDatabaseAccessor.QuerySingle<T>(string sql, CommandType commandType, IParametersVisitor parameters) => Execute(sql, commandType, parameters, () => this.QuerySingle<T>(sql, commandType, parameters).PostProcess());
 
-        Task<T> IDatabaseAccessor.QuerySingleAsync<T>(string sql, CommandType commandType, IParametersVisitor parameters) => Execute(sql, commandType, parameters, () => this.QuerySingleAsync<T>(sql, commandType, parameters).PostProcess());
+        Task<T> IDatabaseAccessor.QuerySingleAsync<T>(string sql, CommandType commandType, IParametersVisitor parameters, CancellationToken cancellationToken) => Execute(sql, commandType, parameters, () => this.QuerySingleAsync<T>(sql, commandType, parameters, cancellationToken).PostProcess());
 
         public TReturn QuerySingle<TReturn, TSecond>(string sql, CommandType commandType, IParametersVisitor parameters, string splitOn) where TReturn : new() => Execute(sql, commandType, parameters, () =>
         {
@@ -111,7 +111,7 @@ namespace Dibix
         protected abstract IEnumerable<T> QueryMany<T>(string sql, CommandType commandType, IParametersVisitor parameters);
 
         protected abstract IEnumerable<TReturn> QueryMany<TFirst, TSecond, TReturn>(string sql, CommandType commandType, IParametersVisitor parameters, Func<TFirst, TSecond, TReturn> map, string splitOn);
-
+        
         protected abstract IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TReturn>(string sql, CommandType commandType, IParametersVisitor parameters, Func<TFirst, TSecond, TThird, TReturn> map, string splitOn);
         
         protected abstract IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TReturn>(string sql, CommandType commandType, IParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TReturn> map, string splitOn);
@@ -126,7 +126,7 @@ namespace Dibix
 
         protected abstract T QuerySingle<T>(string sql, CommandType commandType, IParametersVisitor parameters);
 
-        protected abstract Task<T> QuerySingleAsync<T>(string sql, CommandType commandType, IParametersVisitor parameters);
+        protected abstract Task<T> QuerySingleAsync<T>(string sql, CommandType commandType, IParametersVisitor parameters, CancellationToken cancellationToken);
 
         protected abstract T QuerySingleOrDefault<T>(string sql, CommandType commandType, IParametersVisitor parameters);
 
