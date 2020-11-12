@@ -1811,7 +1811,7 @@ namespace Dibix.Sdk.Tests
                 {
                     using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                     {
-                        return await accessor.QuerySingleAsync&lt;bool&gt;(GetSinglePrimitiveResultCommandText).ConfigureAwait(false);
+                        return await accessor.QuerySingleAsync&lt;bool&gt;(GetSinglePrimitiveResultCommandText, cancellationToken).ConfigureAwait(false);
                     }
                 }
             }

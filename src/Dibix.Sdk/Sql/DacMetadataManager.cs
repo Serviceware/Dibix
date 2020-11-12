@@ -4,30 +4,49 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Threading;
 using System.Xml.Linq;
 
 namespace Dibix.Sdk.Sql
 {
     public static class DacMetadataManager
     {
-        private static readonly Func<string, bool> IsEmbeddedMethod = CompileIsEmbeddedMethod();
-        private static readonly Action<FileInfo> WriteIsEmbeddedMethod = CompileWriteIsEmbeddedMethod();
+        private static readonly Func<string, bool?> IsEmbeddedMethod = CompileIsEmbeddedMethod();
+        private static readonly Action<FileInfo, bool> WriteIsEmbeddedMethod = CompileWriteIsEmbeddedMethod();
 
-        public static bool IsEmbedded(string packagePath)
+        public static bool? IsEmbedded(string packagePath)
         {
-            bool isEmbedded = IsEmbeddedMethod(packagePath);
+            bool? isEmbedded = IsEmbeddedMethod(packagePath);
             return isEmbedded;
         }
 
-        public static void SetIsEmbedded(string packagePath)
+        public static void SetIsEmbedded(string packagePath, bool value)
         {
             if (!File.Exists(packagePath))
                 throw new FileNotFoundException(null, packagePath);
 
-            WriteIsEmbeddedMethod(new FileInfo(packagePath));
+            int tries = 0;
+            while(true)
+            {
+                try
+                {
+                    WriteIsEmbeddedMethod(new FileInfo(packagePath), value);
+                    break;
+                }
+                catch (Exception exception) when (exception.InnerException is IOException)
+                {
+                    // When trying to open the dac file for writing we sometimes get:
+                    // System.IO.IOException: The process cannot access the file '' because it is being used by another process.
+                    // Since the dac file is opened for writing immediately after the SqlBuild target is completed, it might be that it is not fully closed yet. (Asynchronicity)
+                    if (++tries == 10)
+                        throw;
+                    
+                    Thread.Sleep(1000);
+                }
+            }
         }
 
-        private static Func<string, bool> CompileIsEmbeddedMethod()
+        private static Func<string, bool?> CompileIsEmbeddedMethod()
         {
             // SqlPackage package;
             // Stream stream;
@@ -36,7 +55,7 @@ namespace Dibix.Sdk.Sql
             //     package = SqlPackage.Open(path);
             //     SqlPackageContent content = package.GetContent(SqlPackageContentType.Model);
             //     stream = content.GetStream();
-            //     bool isEmbedded = DacMetadataManager.IsEmbedded(stream));
+            //     bool? isEmbedded = DacMetadataManager.IsEmbedded(stream));
             //     return isEmbedded;
             // }
             // finally
@@ -51,30 +70,30 @@ namespace Dibix.Sdk.Sql
             // (string file) => 
             ParameterExpression fileParameter = Expression.Parameter(typeof(string), "file");
 
-            Func<string, bool> compiled = CompileMethod<Func<string, bool>>
+            Func<string, bool?> compiled = CompileMethod<Func<string, bool?>>
             (
-                parameter: fileParameter
-              , packageOpener: (sqlPackageType, parameter) => Expression.Call(sqlPackageType, "Open", new Type[0], parameter, Expression.Constant(FileAccess.Read))
+                packageOpener: sqlPackageType => Expression.Call(sqlPackageType, "Open", new Type[0], fileParameter, Expression.Constant(FileAccess.Read))
               , body: (streamVariable, parameters, statements) =>
-              {
-                  ParameterExpression isEmbeddedVariable = Expression.Parameter(typeof(bool), "isEmbedded");
-                  Expression isEmbeddedValue = Expression.Call(typeof(DacMetadataManager), nameof(IsEmbedded), new Type[0], streamVariable);
-                  Expression isEmbeddedAssign = Expression.Assign(isEmbeddedVariable, isEmbeddedValue);
-                  parameters.Add(isEmbeddedVariable);
-                  statements.Add(isEmbeddedAssign);
-              }
+                {
+                    ParameterExpression isEmbeddedVariable = Expression.Parameter(typeof(bool?), "isEmbedded");
+                    Expression isEmbeddedValue = Expression.Call(typeof(DacMetadataManager), nameof(IsEmbedded), new Type[0], streamVariable);
+                    Expression isEmbeddedAssign = Expression.Assign(isEmbeddedVariable, isEmbeddedValue);
+                    parameters.Add(isEmbeddedVariable);
+                    statements.Add(isEmbeddedAssign);
+                }
+              , fileParameter
             );
             return compiled;
         }
 
-        private static bool IsEmbedded(Stream stream)
+        private static bool? IsEmbedded(Stream stream)
         {
             (XDocument _, XElement element, XName _) = GetIsEmbeddedElement(stream);
-            bool isEmbedded = String.Equals(element?.Value, Boolean.TrueString, StringComparison.OrdinalIgnoreCase);
+            bool? isEmbedded = Boolean.TryParse(element?.Value, out bool isEmbeddedValue) ? isEmbeddedValue : (bool?)null;
             return isEmbedded;
         }
 
-        private static Action<FileInfo> CompileWriteIsEmbeddedMethod()
+        private static Action<FileInfo, bool> CompileWriteIsEmbeddedMethod()
         {
             // SqlPackage package;
             // Stream stream;
@@ -82,7 +101,7 @@ namespace Dibix.Sdk.Sql
             // {
             //     package = SqlPackage.OpenForUpdate(fileInfo);
             //     stream = content.GetStream();
-            //     DacMetadataManager.WriteIsEmbedded(stream);
+            //     DacMetadataManager.WriteIsEmbedded(stream, value);
             // }
             // finally
             // {
@@ -93,23 +112,25 @@ namespace Dibix.Sdk.Sql
             //         package.Dispose();
             // }
 
-            // (FileInfo fileInfo) => 
+            // (FileInfo fileInfo, bool value) => 
             ParameterExpression fileInfoParameter = Expression.Parameter(typeof(FileInfo), "fileInfo");
+            ParameterExpression valueParameter = Expression.Parameter(typeof(bool), "value");
 
-            Action<FileInfo> compiled = CompileMethod<Action<FileInfo>>
+            Action<FileInfo, bool> compiled = CompileMethod<Action<FileInfo, bool>>
             (
-                parameter: fileInfoParameter
-              , packageOpener: (sqlPackageType, parameter) => Expression.Call(sqlPackageType, "OpenForUpdate", new Type[0], parameter)
+                packageOpener: sqlPackageType => Expression.Call(sqlPackageType, "OpenForUpdate", new Type[0], fileInfoParameter)
               , body: (streamVariable, parameters, statements) =>
-              {
-                  Expression writeIsEmbeddedCall = Expression.Call(typeof(DacMetadataManager), nameof(WriteIsEmbedded), new Type[0], streamVariable);
-                  statements.Add(writeIsEmbeddedCall);
-              }
+                {
+                    Expression writeIsEmbeddedCall = Expression.Call(typeof(DacMetadataManager), nameof(WriteIsEmbedded), new Type[0], streamVariable, valueParameter);
+                    statements.Add(writeIsEmbeddedCall);
+                }
+              , fileInfoParameter
+              , valueParameter
             );
             return compiled;
         }
 
-        private static void WriteIsEmbedded(Stream stream)
+        private static void WriteIsEmbedded(Stream stream, bool value)
         {
             (XDocument document, XElement element, XName elementName) = GetIsEmbeddedElement(stream);
             if (element == null)
@@ -117,22 +138,22 @@ namespace Dibix.Sdk.Sql
                 element = new XElement(elementName);
                 document.Root.Add(element);
             }
-            element.Value = Boolean.TrueString;
+            element.Value = value.ToString();
             stream.Position = 0;
             document.Save(stream);
         }
 
         private static TDelegate CompileMethod<TDelegate>
         (
-            ParameterExpression parameter
-          , Func<Type, Expression, Expression> packageOpener
+            Func<Type, Expression> packageOpener
           , Action<Expression, ICollection<ParameterExpression>, ICollection<Expression>> body
+          , params ParameterExpression[] parameters
         )
         {
             // package = <packageOpener>(parameter);
             Type sqlPackageType = DacReflectionUtility.SchemaSqlAssembly.GetType("Microsoft.Data.Tools.Schema.Sql.Build.SqlPackage", true);
             ParameterExpression packageVariable = Expression.Variable(sqlPackageType, "package");
-            Expression packageValue = packageOpener(sqlPackageType, parameter);
+            Expression packageValue = packageOpener(sqlPackageType);
             Expression packageAssign = Expression.Assign(packageVariable, packageValue);
 
             // SqlPackageContent content = package.GetContent(SqlPackageContentType.DacOrigin);
@@ -150,13 +171,13 @@ namespace Dibix.Sdk.Sql
             Expression streamAssign = Expression.Assign(streamVariable, streamValue);
 
             // <body>
-            IList<ParameterExpression> parameters = new Collection<ParameterExpression>();
-            IList<Expression> statements = new Collection<Expression>();
-            body(streamVariable, parameters, statements);
-            parameters.Insert(0, contentVariable);
-            statements.Insert(0, packageAssign);
-            statements.Insert(1, contentAssign);
-            statements.Insert(2, streamAssign);
+            IList<ParameterExpression> bodyParameters = new Collection<ParameterExpression>();
+            IList<Expression> bodyStatements = new Collection<Expression>();
+            body(streamVariable, bodyParameters, bodyStatements);
+            bodyParameters.Insert(0, contentVariable);
+            bodyStatements.Insert(0, packageAssign);
+            bodyStatements.Insert(1, contentAssign);
+            bodyStatements.Insert(2, streamAssign);
 
             // if (stream != null)
             //     stream.Dispose();
@@ -178,7 +199,7 @@ namespace Dibix.Sdk.Sql
             // {
             //     ..
             // }
-            Expression tryBlock = Expression.Block(parameters, statements);
+            Expression tryBlock = Expression.Block(bodyParameters, bodyStatements);
             Expression @finally = Expression.Block(disposeStreamIf, disposePackageIf);
             Expression tryFinally = Expression.TryFinally(tryBlock, @finally);
 
@@ -195,7 +216,7 @@ namespace Dibix.Sdk.Sql
             Expression<TDelegate> lambda = Expression.Lambda<TDelegate>
             (
                 block
-              , parameter
+              , parameters
             );
             TDelegate compiled = lambda.Compile();
             return compiled;

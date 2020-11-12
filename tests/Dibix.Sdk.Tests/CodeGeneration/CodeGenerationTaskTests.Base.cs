@@ -47,8 +47,6 @@ namespace Dibix.Sdk.Tests.CodeGeneration
               , endpoints: endpoints.Select(ToTaskItem)
               , references: Enumerable.Empty<TaskItem>()
               , isEmbedded: isEmbedded
-              , persistIsEmbedded: false
-              , dacFilePath: null
               , databaseSchemaProviderName: DatabaseTestUtility.DatabaseSchemaProviderName
               , modelCollation: DatabaseTestUtility.ModelCollation
               , sqlReferencePath: new TaskItem[0]

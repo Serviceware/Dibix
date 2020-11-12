@@ -1,36 +1,6 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <!-- 
-      Skip compilation of default SQL CLR .NET assembly.
-      The empty line in between by default contains:
-      
-      CoreCompile;
-    -->
-    <BuildDependsOn>
-      BuildOnlySettings;
-      BeforeBuild;
-      PrepareForBuild;
-      PreBuildEvent;
-      ResolveReferences;
-      ResolveArtifactReferences;
-      GenerateSqlTargetFrameworkMoniker;
-      ResolveKeySource;
-
-      GenerateSerializationAssemblies;
-      SqlBuild;
-      GetTargetPath;
-      PrepareForRun;
-      SqlPrepareForRun;
-      IncrementalClean;
-      PostBuildEvent;
-      AfterBuild;
-    </BuildDependsOn>
-
-    <!-- Skip copying the default SQL CLR .NET assembly to output -->
-    <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
-    <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
-
     <DibixToolsDirectory>$(MSBuildThisFileDirectory)..\tools\net472\</DibixToolsDirectory>
     <DibixCliPath Condition="'$(DibixCliPath)' == ''">$(DibixToolsDirectory)Dibix.exe</DibixCliPath>
     <DibixSdkPath>$(DibixToolsDirectory)Dibix.Sdk.dll</DibixSdkPath>
@@ -38,14 +8,13 @@
     <DibixRuntimeXplatPath>$(DibixToolsDirectory)..\netstandard2.0\Dibix.dll</DibixRuntimeXplatPath>
 
     <IsEmbedded Condition="'$(IsEmbedded)' == ''">$(MSBuildProjectName.EndsWith('.DML'))</IsEmbedded>
-    <ClientTargetPath Condition="'$(ClientOutputName)' != ''">$(TargetDir)$(ClientOutputName).dll</ClientTargetPath>
+    <ClientAssemblyTargetPath Condition="'$(ClientOutputName)' != ''">$(TargetDir)$(ClientOutputName).dll</ClientAssemblyTargetPath>
+    <ClientSymbolsTargetPath Condition="'$(ClientOutputName)' != ''">$(TargetDir)$(ClientOutputName).pdb</ClientSymbolsTargetPath>
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Clean target assembly, which is required to force rebuild of CompileArtifacts target -->
-    <!-- This is probably not included, because we skip copying it to output -->
-    <Clean Include="$(TargetPath)" />
     <Clean Include="$(ClientTargetPath)" />
+    <Clean Include="$(ClientSymbolsTargetPath)" />
   </ItemGroup>
 
 </Project>

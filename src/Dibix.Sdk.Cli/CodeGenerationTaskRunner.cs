@@ -26,8 +26,6 @@ namespace Dibix.Sdk.Cli
               , endpoints: configuration.GetItems("Endpoints")
               , references: configuration.GetItems("References")
               , isEmbedded: configuration.GetSingleValue<bool>("IsEmbedded")
-              , persistIsEmbedded: true
-              , dacFilePath: configuration.GetSingleValue<string>("DacFilePath")
               , databaseSchemaProviderName: configuration.GetSingleValue<string>("DatabaseSchemaProviderName")
               , modelCollation: configuration.GetSingleValue<string>("ModelCollation")
               , sqlReferencePath: configuration.GetItems("SqlReferencePath")

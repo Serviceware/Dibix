@@ -46,7 +46,18 @@ namespace Dibix.Sdk.Sql
                 if (Path.GetExtension(path) != ".dacpac")
                     continue;
 
-                if (DacMetadataManager.IsEmbedded(path))
+                string fileName = Path.GetFileNameWithoutExtension(path);
+                switch (fileName)
+                {
+                    case "master":
+                    case "msdb":
+                        continue;
+                }
+
+                bool? isEmbedded = DacMetadataManager.IsEmbedded(path);
+                if (!isEmbedded.HasValue)
+                    logger.LogError(null, $"Unsupported package reference: {path}", null, default, default);
+                else if (isEmbedded.Value)
                     logger.LogError(null, $"Unsupported reference to DML package: {path}", null, default, default);
             }
         }

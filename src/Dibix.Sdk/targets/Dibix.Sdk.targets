@@ -36,55 +36,56 @@
   </UsingTask>
 
   <!-- Define inputs and outputs so the targets know when they need to be rebuilt -->
-  <Target Name="SetupSqlBuildInputs" AfterTargets="_SetupSqlBuildInputs" DependsOnTargets="ResolveArtifactReferences">
+  <Target Name="SetupSqlBuildInputs" DependsOnTargets="_SetupSqlBuildInputs">
     <ItemGroup>
-      <!-- 
-        The intermediate assembly/pdb is used as an input,
-        therefore each time we run the CompileArtifacts target,
-        both these inputs are newer than the dacpac, and all targets
-        are forced to rebuild.
-      -->
-      <SqlBuildInputItem Remove="$(IntermediateTargetFullFileName)" />
-      <SqlBuildInputItem Remove="$(IntermediateSymbolsFullFileName)" />
+      <!-- Changed inputs that are relevant for all build targets -->
 
+      <!-- Some SSDT entries have to be added manually, since they are incorrect -->
+      <!-- For example: -->
+      <!--<__SqlBuildInputItem Include="@(MSBuildAllProjects)"/>-->
+      <SqlBuildInputItem Include="$(MSBuildAllProjects)"/>
+      <SqlBuildInputItem Include="$(MSBuildProjectFullPath)"/>
+
+      <!-- Import some inputs from SSDT -->
+      <_SqlTargetInput Include="@(SqlBuildInputItem)" />
+
+      <!-- SDK changes -->
       <_SqlTargetInput Include="$(DibixCliPath)" />
       <_SqlTargetInput Include="$(DibixSdkPath)" />
       <_SqlTargetInput Include="$(DibixRuntimePath)" />
       <_SqlTargetInput Include="$(DibixRuntimeXplatPath)" />
-      <_SqlTargetInput Include="$(MSBuildProjectFullPath)" />
-      <_SqlTargetInput Include="$(MSBuildAllProjects)" />
 
-      <!--
-        Since the SqlCodeAnalysis target does not produce any output, 
-        we use the dacpac to detect if it needs to be rebuilt.
-        To make this work we need to force rebuilding the dacpac aswell,
-        by specifying the same inputs.
-      -->
-      <SqlBuildInputItem Include="@(_SqlTargetInput)" />
-
+      
+      <!-- Target specific inputs -->
       <!-- SqlCodeAnalysis -->
       <SqlCodeAnalysisInput Include="@(_SqlTargetInput)" />
-      <SqlCodeAnalysisInput Include="@(Build)" />
-      <SqlCodeAnalysisInput Include="@(PreDeploy)" />
-      <SqlCodeAnalysisInput Include="@(PostDeploy)" />
-      <SqlCodeAnalysisInput Include="@(SqlReferencePath)" />
-      <SqlCodeAnalysisOutput Include="@(SqlTarget)" /> <!-- dacpac -->
 
       <!-- CompileArtifacts -->
       <CompileArtifactsInput Include="@(_SqlTargetInput)" />
-      <CompileArtifactsInput Include="@(Build)" />
       <CompileArtifactsInput Include="@(Contract)" />
       <CompileArtifactsInput Include="@(Endpoint)" />
-      <CompileArtifactsInput Include="@(SqlReferencePath)" />
-      <CompileArtifactsOutput Include="$(TargetPath)" />
-      <CompileArtifactsOutput Include="$(ClientTargetPath)" />
+    </ItemGroup>
+  </Target>
+  <Target Name="SetupSqlBuildOutputs" BeforeTargets="_SetupSqlBuildOutputs">
+    <ItemGroup>
+      <!--
+        Since the SqlCodeAnalysis target does not produce any output, 
+        we use the DLL produced in CompileArtifacts target to detect if it needs to be rebuilt.
+        TODO: Remove the dependency to an output produced by another target
+              by writing a separate marker file to determine whether analysis was already executed.
+      -->
+      <SqlCodeAnalysisOutput Include="$(TargetPath)" /> <!-- .dll -->
+
+      <!-- CompileArtifacts -->
+      <CompileArtifactsOutput Include="$(TargetPath)" /> <!-- .dll -->
     </ItemGroup>
   </Target>
 
+
   <!-- Run our own sql code analysis rules -->
   <Target Name="SqlCodeAnalysis" 
-          BeforeTargets="SqlBuild"
-          DependsOnTargets="SetupSqlBuildInputs"
+          BeforeTargets="CompileArtifacts"
+          DependsOnTargets="SetupSqlBuildInputs;SetupSqlBuildOutputs;ResolveArtifactReferences"
           Inputs="@(SqlCodeAnalysisInput)"
           Outputs="@(SqlCodeAnalysisOutput)">
     <!-- Configuration -->
@@ -149,8 +150,8 @@ $(_SqlReferencePath)" />
     </ItemGroup>
   </Target>
   <Target Name="CompileArtifacts"
-          AfterTargets="SqlBuild"
-          DependsOnTargets="SetupSqlBuildInputs;CopyFilesToOutputDirectory"
+          BeforeTargets="CoreCompile"
+          DependsOnTargets="SetupSqlBuildInputs;SetupSqlBuildOutputs;ResolveArtifactReferences"
           Inputs="@(CompileArtifactsInput)"
           Outputs="@(CompileArtifactsOutput)">
     <!-- Configuration -->
@@ -163,7 +164,7 @@ $(_SqlReferencePath)" />
       <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
       <CopyOutputSymbolsToOutputDirectory>true</CopyOutputSymbolsToOutputDirectory>
 
-      <_ServerOutputName>@(IntermediateAssembly->'%(Filename)')</_ServerOutputName>
+      <_ServerOutputName>$(AssemblyName)</_ServerOutputName>
       <_ServerIntermediateFilePathNoExt>$(IntermediateOutputPath)$(_ServerOutputName)</_ServerIntermediateFilePathNoExt>
       <_ServerIntermediateFilePath>$(_ServerIntermediateFilePathNoExt).cs</_ServerIntermediateFilePath>
       <_ClientIntermediateFilePathNoExt Condition="'$(ClientOutputName)' != ''">$(IntermediateOutputPath)$(ClientOutputName)</_ClientIntermediateFilePathNoExt>
@@ -171,7 +172,7 @@ $(_SqlReferencePath)" />
     </PropertyGroup>
 
     <ItemGroup>
-      <ServerCompilationReference Include="@(ArtifactReference->'%(RelativeDir)%(Filename).dll')" 
+      <ServerCompilationReference Include="@(ArtifactReference->'%(RelativeDir)%(Filename).dll')"
                                   Condition="Exists('%(RelativeDir)%(Filename).dll') AND !$([System.Text.RegularExpressions.Regex]::IsMatch('%(Filename)%(Extension)', '^master|msdb(\.dacpac)$'))" />
     </ItemGroup>
 
@@ -225,8 +226,6 @@ $(_Contract)" />
 $(_Endpoint)" />
       <_CodeGenerationInputItem Include="References
 $(_ServerCompilationReference)" />
-      <_CodeGenerationInputItem Include="DacFilePath
-  $(SqlTargetPath)" />
       <_CodeGenerationInputItem Include="DatabaseSchemaProviderName
   $(DSP)" />
       <_CodeGenerationInputItem Include="ModelCollation
@@ -293,7 +292,7 @@ $(_SqlReferencePath)" />
          EmitDebugInformation="$(DebugSymbols)"
          KeyFile="$(AssemblyOriginatorKeyFile)"
          LangVersion="$(LangVersion)"
-         OutputAssembly="@(IntermediateAssembly)"
+         OutputAssembly="$(IntermediateTargetFullFileName)"
          References="@(ServerCompilationReference)"
          Sources="@(ServerCompilationSource)"
          TargetType="$(OutputType)" />
@@ -343,48 +342,13 @@ $(_SqlReferencePath)" />
 
     <Exec Condition="'$(CompileArtifactsNetStandard)' == 'true'" Command="dotnet build $(_ServerIntermediateProjectFilePath) -c $(Configuration)" />
 
-    <Copy SourceFiles="@(IntermediateAssembly)"
-          DestinationFolder="$(OutDir)"
-          SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
-          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
-          Retries="$(CopyRetryCount)"
-          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
-          UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
-          UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
-          Condition="'$(CopyBuildOutputToOutputDirectory)' == 'true' and '$(SkipCopyBuildProduct)' != 'true'">
-      <Output TaskParameter="DestinationFiles" ItemName="MainAssembly"/>
-      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
-    </Copy>
-    <Copy SourceFiles="@(_DebugSymbolsIntermediatePath)"
-          DestinationFiles="@(_DebugSymbolsOutputPath)"
-          SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
-          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
-          Retries="$(CopyRetryCount)"
-          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
-          UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
-          UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
-          Condition="'$(_DebugSymbolsProduced)'=='true' and '$(SkipCopyingSymbolsToOutputDirectory)' != 'true' and '$(CopyOutputSymbolsToOutputDirectory)'=='true'">
-      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
-    </Copy>
+    <CallTarget Targets="CopyFilesToOutputDirectory" />
 
-    <!-- Publish docs -->
-    <ItemGroup>
-      <_DocsFiles Include="$(AreaName).yml" />
-      <_DocsFiles Include="$(AreaName).json" />
-
-      <_DocsFiles>
-        <SourcePath>$(IntermediateOutputPath)%(Filename)%(Extension)</SourcePath>
-        <TargetPath Condition="$(DocsDir) != ''">$(DocsDir)$([System.String]::Copy('%(Extension)').TrimStart('.'))\%(Filename)%(Extension)</TargetPath>
-      </_DocsFiles>
-
-      <_DocsSources Include="@(_DocsFiles->'%(SourcePath)')" Condition="$(DocsDir) != '' AND Exists('%(SourcePath)')" />
-      <_DocsTargets Include="@(_DocsSources->'%(TargetPath)')" />
-    </ItemGroup>
-    <Copy SourceFiles="@(_DocsSources)"
-          DestinationFiles="@(_DocsTargets)" />
 
     <!-- Client assembly info & DLL generation -->
     <PropertyGroup Condition="'$(ClientOutputName)' != ''">
+      <_ClientIntermediateAssemblyPath>$(IntermediateOutputPath)$(ClientOutputName).dll</_ClientIntermediateAssemblyPath>
+      <_ClientIntermediateSymbolsPath>$(IntermediateOutputPath)$(ClientOutputName).pdb</_ClientIntermediateSymbolsPath>
       <_ClientAssemblyInfoFile>$(_ClientIntermediateFilePathNoExt)_AssemblyInfo.cs</_ClientAssemblyInfoFile>
       <_ClientFileVersion Condition="'$(ClientFileVersion)' != ''">$(ClientFileVersion)</_ClientFileVersion>
       <_ClientFileVersion Condition="'$(ClientFileVersion)' == ''" >$(FileVersion)</_ClientFileVersion>
@@ -393,7 +357,6 @@ $(_SqlReferencePath)" />
     <ItemGroup Condition="'$(ClientOutputName)' != ''">
       <ClientCompilationSource Include="$(_ClientIntermediateFilePath)" />
       <ClientCompilationSource Include="$(_ClientAssemblyInfoFile)" />
-      <ClientAssembly Include="$(IntermediateOutputPath)$(ClientOutputName).dll" />
 
       <ClientAssemblyAttribute Include="@(AssemblyAttribute)" />
       <ClientAssemblyAttribute Include="AssemblyTitle">
@@ -411,11 +374,11 @@ $(_SqlReferencePath)" />
          EmitDebugInformation="$(DebugSymbols)"
          KeyFile="$(AssemblyOriginatorKeyFile)"
          LangVersion="$(LangVersion)"
-         OutputAssembly="@(ClientAssembly)"
+         OutputAssembly="$(_ClientIntermediateAssemblyPath)"
          Sources="@(ClientCompilationSource)"
          TargetType="$(OutputType)" />
 
-    <Copy SourceFiles="@(ClientAssembly)"
+    <Copy SourceFiles="$(_ClientIntermediateAssemblyPath)"
           DestinationFolder="$(OutDir)"
           SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
           OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
@@ -427,7 +390,7 @@ $(_SqlReferencePath)" />
       <Output TaskParameter="DestinationFiles" ItemName="MainAssembly"/>
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
     </Copy>
-    <Copy SourceFiles="@(_DebugSymbolsIntermediatePath->'%(RelativeDir)$(ClientOutputName)%(Extension)')"
+    <Copy SourceFiles="$(_ClientIntermediateSymbolsPath)"
           DestinationFolder="$(OutDir)"
           SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
           OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
@@ -438,6 +401,45 @@ $(_SqlReferencePath)" />
           Condition="'$(ClientOutputName)' != '' and '$(_DebugSymbolsProduced)'=='true' and '$(SkipCopyingSymbolsToOutputDirectory)' != 'true' and '$(CopyOutputSymbolsToOutputDirectory)'=='true'">
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
     </Copy>
+
+
+    <!-- Publish docs -->
+    <ItemGroup>
+      <_DocsFiles Include="$(AreaName).yml" />
+      <_DocsFiles Include="$(AreaName).json" />
+
+      <_DocsFiles>
+        <SourcePath>$(IntermediateOutputPath)%(Filename)%(Extension)</SourcePath>
+        <TargetPath Condition="$(DocsDir) != ''">$(DocsDir)$([System.String]::Copy('%(Extension)').TrimStart('.'))\%(Filename)%(Extension)</TargetPath>
+      </_DocsFiles>
+
+      <_DocsSources Include="@(_DocsFiles->'%(SourcePath)')" Condition="$(DocsDir) != '' AND Exists('%(SourcePath)')" />
+      <_DocsTargets Include="@(_DocsSources->'%(TargetPath)')" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_DocsSources)"
+          DestinationFiles="@(_DocsTargets)" />
+  </Target>
+
+  <!-- Append our own metadata to the produced dacpac file -->
+  <Target Name="SignDacFile"
+          AfterTargets="SqlBuild"
+          DependsOnTargets="SetupSqlBuildInputs;SetupSqlBuildOutputs">
+    
+    <!-- Prepare & write input file then exec CLI -->
+    <PropertyGroup>
+      <_SignDacInputFile>$(IntermediateOutputPath)sign.input</_SignDacInputFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_SignDacFileInputItem Include="DacFilePath
+  $(SqlTargetPath)" />
+      <_SignDacFileInputItem Include="IsEmbedded
+  $(IsEmbedded)" />
+    </ItemGroup>
+
+    <WriteLinesToFile File="$(_SignDacInputFile)" Lines="@(_SignDacFileInputItem)" Overwrite="True" />
+
+    <Exec Command="$(DibixCliPath) sign &quot;$(_SignDacInputFile)&quot;" />
   </Target>
 
 </Project>
