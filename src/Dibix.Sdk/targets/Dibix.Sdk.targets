@@ -288,6 +288,7 @@ $(_SqlReferencePath)" />
                        OutputFile="$(_ServerAssemblyInfoFile)" />
 
     <Csc Condition="'$(CompileArtifactsNetStandard)' == ''"
+         DebugType="$(DebugType)"
          DefineConstants="$(DefineConstants)"
          EmitDebugInformation="$(DebugSymbols)"
          KeyFile="$(AssemblyOriginatorKeyFile)"
@@ -370,6 +371,7 @@ $(_SqlReferencePath)" />
     <WriteCodeFragment AssemblyAttributes="@(ClientAssemblyAttribute)" Language="C#" OutputFile="$(_ClientAssemblyInfoFile)" Condition="'$(ClientOutputName)' != ''" />
 
     <Csc Condition="'$(ClientOutputName)' != ''"
+         DebugType="$(DebugType)"
          DefineConstants="$(DefineConstants)"
          EmitDebugInformation="$(DebugSymbols)"
          KeyFile="$(AssemblyOriginatorKeyFile)"
