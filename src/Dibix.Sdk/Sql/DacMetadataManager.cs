@@ -138,7 +138,12 @@ namespace Dibix.Sdk.Sql
                 element = new XElement(elementName);
                 document.Root.Add(element);
             }
-            element.Value = value.ToString();
+
+            string elementValue = value.ToString();
+            if (element.Value == elementValue) 
+                return;
+
+            element.Value = elementValue;
             stream.Position = 0;
             document.Save(stream);
         }
