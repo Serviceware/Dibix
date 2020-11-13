@@ -878,7 +878,7 @@ namespace Dibix.Sdk.Tests
             {
                 using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                 {
-                    return accessor.QueryFile(dbx_tests_syntax_fileapiCommandText, @params);
+                    return accessor.QueryFile(dbx_tests_syntax_fileapiCommandText);
                 }
             }
         }

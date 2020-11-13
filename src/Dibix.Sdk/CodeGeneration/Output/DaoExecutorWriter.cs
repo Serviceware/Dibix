@@ -1,6 +1,7 @@
 ﻿using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data;
 using System.Linq;
 using System.Text;
@@ -282,116 +283,33 @@ namespace Dibix.Sdk.CodeGeneration
         {
             if (query.IsFileApi)
             {
-                WriteFileApiResult(writer, query);
-            }
-            else if (query.ResultType == null) // Execute
-            {
-                WriteNoResult(writer, query);
+                WriteFileApiResult(writer, query, context);
             }
             else if (query.Results.Any(x => x.Name != null)) // GridReader
             {
                 WriteComplexResult(writer, query, context);
             }
-            else if (query.Results.Count == 1) // Query<T>/QuerySingle/etc.
+            else if (query.Results.Count <= 1) // Execute or Query<T>/QuerySingle<T>/etc.
             {
-                WriteSingleResult(writer, query, context);
+                WriteSimpleResult(writer, query, context);
+            }
+            else
+            {
+                throw new InvalidOperationException("Unable to determine executor");
             }
         }
 
-        private static void WriteNoResult(StringWriter writer, SqlStatementInfo query)
+        private static void WriteSimpleResult(StringWriter writer, SqlStatementInfo query, DaoCodeGenerationContext context)
         {
+            SqlQueryResult singleResult = query.Results.SingleOrDefault();
+
             writer.WriteIndent();
-            
-            if (query.ResultType != null)
+
+            if (singleResult != null)
                 writer.WriteRaw("return ");
 
-            if (query.Async)
-                writer.WriteRaw("await ");
-
-            writer.WriteRaw("accessor.Execute");
-
-            if (query.Async)
-                writer.WriteRaw("Async");
-
-            writer.WriteRaw('(')
-                  .WriteRaw(query.Name)
-                  .WriteRaw(ConstantSuffix);
-
-            if (query.CommandType.HasValue)
-                writer.WriteRaw(", System.Data.CommandType.")
-                      .WriteRaw(query.CommandType.Value);
-
-            if (query.Parameters.Any())
-                writer.WriteRaw(", @params");
-
-            if (query.Async)
-                writer.WriteRaw(", cancellationToken");
-
-            writer.WriteRaw(')');
-
-            if (query.Async)
-                writer.WriteRaw(".ConfigureAwait(false)");
-
-            writer.WriteLineRaw(";");
-        }
-
-        private static void WriteSingleResult(StringWriter writer, SqlStatementInfo query, DaoCodeGenerationContext context)
-        {
-            SqlQueryResult singleResult = query.Results.Single();
-            writer.Write("return ");
-
-            if (query.Async)
-                writer.WriteRaw("await ");
-
-            writer.WriteRaw("accessor.")
-                  .WriteRaw(GetExecutorMethodName(query.Results[0].ResultMode));
-
-            if (query.Async)
-                writer.WriteRaw("Async");
-
-            writer.WriteRaw('<');
-
-            for (int i = 0; i < singleResult.Types.Count; i++)
-            {
-                string returnType = context.ResolveTypeName(singleResult.Types[i]);
-                writer.WriteRaw(returnType);
-                if (i + 1 < singleResult.Types.Count)
-                    writer.WriteRaw(", ");
-            }
-
-            if (singleResult.ProjectToType != null)
-                writer.WriteRaw(", ")
-                      .WriteRaw(context.ResolveTypeName(singleResult.ProjectToType));
-
-            writer.WriteRaw(">(")
-                  .WriteRaw(query.Name)
-                  .WriteRaw(ConstantSuffix);
-
-            if (query.CommandType.HasValue)
-                writer.WriteRaw($", {typeof(CommandType).FullName}.")
-                      .WriteRaw(query.CommandType.Value);
-
-            if (query.Parameters.Any())
-                writer.WriteRaw(", @params");
-
-            if (query.Results[0].Types.Count > 1)
-            {
-                if (!String.IsNullOrEmpty(query.Results[0].Converter))
-                    writer.WriteRaw(", ")
-                          .WriteRaw(query.Results[0].Converter);
-
-                writer.WriteRaw(", \"")
-                      .WriteRaw(query.Results[0].SplitOn)
-                      .WriteRaw('"');
-            }
-
-            if (query.Async)
-                writer.WriteRaw(", cancellationToken");
-
-            writer.WriteRaw(')');
-
-            if (query.Async)
-                writer.WriteRaw(".ConfigureAwait(false)");
+            string methodName = singleResult != null ? GetExecutorMethodName(singleResult.ResultMode) : "Execute";
+            WriteMethodCall(writer, query, methodName, singleResult, context);
 
             writer.WriteLineRaw(";");
         }
@@ -400,32 +318,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             writer.Write("using (IMultipleResultReader reader = ");
 
-            if (query.Async)
-                writer.WriteRaw("await ");
-
-            writer.WriteRaw("accessor.QueryMultiple");
-
-            if (query.Async)
-                writer.WriteRaw("Async");
-
-            writer.WriteRaw('(')
-                  .WriteRaw(query.Name)
-                  .WriteRaw(ConstantSuffix);
-
-            if (query.CommandType.HasValue)
-                writer.WriteRaw($", {typeof(CommandType).FullName}.")
-                      .WriteRaw(query.CommandType.Value);
-
-            if (query.Parameters.Any())
-                writer.WriteRaw(", @params");
-
-            if (query.Async)
-                writer.WriteRaw(", cancellationToken");
-
-            writer.WriteRaw(")");
-
-            if (query.Async)
-                writer.WriteRaw(".ConfigureAwait(false)");
+            WriteMethodCall(writer, query, "QueryMultiple", null, context);
 
             writer.WriteLineRaw(")")
                   .WriteLine("{")
@@ -468,38 +361,18 @@ namespace Dibix.Sdk.CodeGeneration
                 }
 
                 writer.WriteRaw("reader.")
-                      .WriteRaw(GetMultipleResultReaderMethodName(result.ResultMode))
-                      .WriteRaw('<');
+                      .WriteRaw(GetMultipleResultReaderMethodName(result.ResultMode));
 
-                for (int j = 0; j < result.Types.Count; j++)
-                {
-                    string returnType = context.ResolveTypeName(result.Types[j]);
-                    writer.WriteRaw(returnType);
-                    if (j + 1 < result.Types.Count)
-                        writer.WriteRaw(", ");
-                }
+                WriteGenericTypeArguments(writer, result, context);
 
-                if (result.ProjectToType != null)
-                    writer.WriteRaw(", ")
-                          .WriteRaw(context.ResolveTypeName(result.ProjectToType));
+                ICollection<string> parameters = new Collection<string>();
 
-                writer.WriteRaw(">(");
+                AppendMultiMapParameters(result, parameters);
 
-                if (result.Types.Count > 1)
-                {
-                    if (!String.IsNullOrEmpty(result.Converter))
-                        writer.WriteRaw(result.Converter)
-                              .WriteRaw(", ");
-
-                    writer.WriteRaw('"')
-                          .WriteRaw(result.SplitOn)
-                          .WriteRaw('"');
-                }
-
-                writer.WriteRaw(')');
+                WriteMethodParameters(writer, parameters);
 
                 if (isEnumerable && (i > 0 || !query.MergeGridResult))
-                    writer.WriteRaw(')');
+                    writer.WriteRaw(')'); // ReplaceWith
 
                 writer.WriteLineRaw(";");
 
@@ -517,13 +390,86 @@ namespace Dibix.Sdk.CodeGeneration
             writer.WriteLine("return result;");
         }
 
-        private static void WriteFileApiResult(StringWriter writer, SqlStatementInfo query)
+        private static void WriteFileApiResult(StringWriter writer, SqlStatementInfo query, DaoCodeGenerationContext context)
         {
-            writer.Write("return accessor.QueryFile(")
-                  .WriteRaw(query.Name)
-                  .WriteRaw(ConstantSuffix)
-                  .WriteRaw(", @params);")
-                  .WriteLine();
+            writer.Write("return ");
+
+            WriteMethodCall(writer, query, "QueryFile", null, context);
+
+            writer.WriteLineRaw(";");
+        }
+
+        private static void WriteMethodCall(StringWriter writer, SqlStatementInfo query, string methodName, SqlQueryResult singleResult, DaoCodeGenerationContext context)
+        {
+            if (query.Async)
+                writer.WriteRaw("await ");
+
+            writer.WriteRaw("accessor.")
+                  .WriteRaw(methodName);
+
+            if (query.Async)
+                writer.WriteRaw("Async");
+
+            if (singleResult != null)
+                WriteGenericTypeArguments(writer, singleResult, context);
+
+            ICollection<string> parameters = new Collection<string>();
+
+            parameters.Add($"{query.Name}{ConstantSuffix}");
+
+            if (query.CommandType.HasValue)
+                parameters.Add($"{typeof(CommandType).FullName}.{query.CommandType.Value}");
+
+            if (query.Parameters.Any())
+                parameters.Add("@params");
+
+            if (singleResult != null)
+                AppendMultiMapParameters(singleResult, parameters);
+
+            if (query.Async)
+                parameters.Add("cancellationToken");
+
+            WriteMethodParameters(writer, parameters);
+
+            if (query.Async)
+                writer.WriteRaw(".ConfigureAwait(false)");
+        }
+
+        private static void WriteGenericTypeArguments(StringWriter writer, SqlQueryResult result, DaoCodeGenerationContext context)
+        {
+            writer.WriteRaw('<');
+
+            for (int i = 0; i < result.Types.Count; i++)
+            {
+                string returnType = context.ResolveTypeName(result.Types[i]);
+                writer.WriteRaw(returnType);
+                if (i + 1 < result.Types.Count)
+                    writer.WriteRaw(", ");
+            }
+
+            if (result.ProjectToType != null)
+                writer.WriteRaw(", ")
+                      .WriteRaw(context.ResolveTypeName(result.ProjectToType));
+
+            writer.WriteRaw('>');
+        }
+
+        private static void AppendMultiMapParameters(SqlQueryResult result, ICollection<string> parameters)
+        {
+            if (result.Types.Count > 1)
+            {
+                if (!String.IsNullOrEmpty(result.Converter))
+                    parameters.Add(result.Converter);
+
+                parameters.Add($"\"{result.SplitOn}\"");
+            }
+        }
+
+        private static void WriteMethodParameters(StringWriter writer, IEnumerable<string> parameters)
+        {
+            writer.WriteRaw('(')
+                  .WriteRaw(String.Join(", ", parameters))
+                  .WriteRaw(')');
         }
 
         private static void WriteOutputParameterAssignment(StringWriter writer, SqlStatementInfo statement)
