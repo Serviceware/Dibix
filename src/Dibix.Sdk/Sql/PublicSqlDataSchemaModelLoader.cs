@@ -43,10 +43,19 @@ namespace Dibix.Sdk.Sql
             foreach (TaskItem reference in sqlReferencePath)
             {
                 string path = reference.GetFullPath();
+                string fileName = Path.GetFileNameWithoutExtension(path);
+
+                if (reference.TryGetValue("SuppressMissingDependenciesErrors", out string suppressionValue)
+                 && Boolean.Parse(suppressionValue)
+                 && fileName != "History.Database") // TODO: Suppression
+                {
+                    logger.LogError(null, $"SuppressMissingDependenciesErrors is not supported: {path}", null, default, default);
+                    continue;
+                }
+
                 if (Path.GetExtension(path) != ".dacpac")
                     continue;
 
-                string fileName = Path.GetFileNameWithoutExtension(path);
                 switch (fileName)
                 {
                     case "master":
