@@ -2599,12 +2599,9 @@ namespace Dibix.Sdk.Tests
                 {
                     using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                     {
-                        using (IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText))
-                        {
-                            Dibix.Sdk.Tests.DomainModel.Grid.GridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GridResult();
-                            result.Item = reader.ReadSingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;("id");
-                            return result;
-                        }
+                        Dibix.Sdk.Tests.DomainModel.Grid.GridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GridResult();
+                        result.Item = accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(GetGridCommandText, "id");
+                        return result;
                     }
                 }
             }
@@ -2705,12 +2702,9 @@ namespace Dibix.Sdk.Tests
                 {
                     using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                     {
-                        using (IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText))
-                        {
-                            Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult();
-                            result.Item = reader.ReadSingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;("id");
-                            return result;
-                        }
+                        Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult();
+                        result.Item = accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(GetGridCommandText, "id");
+                        return result;
                     }
                 }
             }

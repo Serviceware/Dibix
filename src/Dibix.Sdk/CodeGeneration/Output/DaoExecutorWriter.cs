@@ -285,7 +285,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 WriteFileApiResult(writer, query, context);
             }
-            else if (query.Results.Any(x => x.Name != null)) // GridReader
+            else if (query.Results.Count > 1) // GridReader
             {
                 WriteComplexResult(writer, query, context);
             }
@@ -302,16 +302,31 @@ namespace Dibix.Sdk.CodeGeneration
         private static void WriteSimpleResult(StringWriter writer, SqlStatementInfo query, DaoCodeGenerationContext context)
         {
             SqlQueryResult singleResult = query.Results.SingleOrDefault();
+            bool isGridResult = singleResult?.Name != null;
+
+            if (isGridResult)
+            {
+                WriteComplexResultInitializer(writer, query, context);
+                WriteComplexResultAssignment(writer, query, singleResult, context, isFirstResult: true, WriteSimpleMethodCall);
+            }
 
             writer.WriteIndent();
 
             if (singleResult != null)
                 writer.WriteRaw("return ");
 
-            string methodName = singleResult != null ? GetExecutorMethodName(singleResult.ResultMode) : "Execute";
-            WriteMethodCall(writer, query, methodName, singleResult, context);
+            if (!isGridResult)
+                WriteSimpleMethodCall(writer, query, singleResult, context);
+            else
+                writer.WriteRaw("result");
 
             writer.WriteLineRaw(";");
+        }
+
+        private static void WriteSimpleMethodCall(StringWriter writer, SqlStatementInfo query, SqlQueryResult singleResult, DaoCodeGenerationContext context)
+        {
+            string methodName = singleResult != null ? GetExecutorMethodName(singleResult.ResultMode) : "Execute";
+            WriteMethodCall(writer, query, methodName, singleResult, context);
         }
 
         private static void WriteComplexResult(StringWriter writer, SqlStatementInfo query, DaoCodeGenerationContext context)
@@ -332,6 +347,31 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static void WriteComplexResultBody(StringWriter writer, SqlStatementInfo query, DaoCodeGenerationContext context)
         {
+            WriteComplexResultInitializer(writer, query, context);
+
+            for (int i = 0; i < query.Results.Count; i++)
+            {
+                SqlQueryResult result = query.Results[i];
+                bool isFirstResult = i == 0;
+
+                // Make sure subsequent results are not merged, when the root result returned null
+                if (query.MergeGridResult && isFirstResult && result.ResultMode == SqlQueryResultMode.SingleOrDefault)
+                {
+                    writer.WriteLine("if (result == null)")
+                          .PushIndent()
+                          .WriteLine("return null;")
+                          .PopIndent()
+                          .WriteLine();
+                }
+
+                WriteComplexResultAssignment(writer, query, result, context, isFirstResult, WriteGridReaderMethodCall);
+            }
+
+            writer.WriteLine("return result;");
+        }
+
+        private static void WriteComplexResultInitializer(StringWriter writer, SqlStatementInfo query, DaoCodeGenerationContext context)
+        {
             string resultTypeName = GetComplexTypeName(query, context);
 
             writer.Write(resultTypeName)
@@ -343,51 +383,42 @@ namespace Dibix.Sdk.CodeGeneration
                       .WriteRaw(resultTypeName)
                       .WriteLineRaw("();");
             }
+        }
 
-            for (int i = 0; i < query.Results.Count; i++)
+        private static void WriteComplexResultAssignment(StringWriter writer, SqlStatementInfo query, SqlQueryResult result, DaoCodeGenerationContext context, bool isFirstResult, Action<StringWriter, SqlStatementInfo, SqlQueryResult, DaoCodeGenerationContext> valueWriter)
+        {
+            bool isEnumerable = result.ResultMode == SqlQueryResultMode.Many;
+            if (!isFirstResult || !query.MergeGridResult)
             {
-                SqlQueryResult result = query.Results[i];
+                writer.Write("result")
+                      .WriteRaw($".{result.Name}");
 
-                bool isEnumerable = result.ResultMode == SqlQueryResultMode.Many;
-                if (i > 0 || !query.MergeGridResult)
-                {
-                    writer.Write("result")
-                          .WriteRaw($".{result.Name}");
-
-                    if (isEnumerable)
-                        writer.WriteRaw(".ReplaceWith(");
-                    else
-                        writer.WriteRaw(" = ");
-                }
-
-                writer.WriteRaw("reader.")
-                      .WriteRaw(GetMultipleResultReaderMethodName(result.ResultMode));
-
-                WriteGenericTypeArguments(writer, result, context);
-
-                ICollection<string> parameters = new Collection<string>();
-
-                AppendMultiMapParameters(result, parameters);
-
-                WriteMethodParameters(writer, parameters);
-
-                if (isEnumerable && (i > 0 || !query.MergeGridResult))
-                    writer.WriteRaw(')'); // ReplaceWith
-
-                writer.WriteLineRaw(";");
-
-                // Make sure subsequent results are not merged, when the root result returned null
-                if (query.MergeGridResult && i == 0 && result.ResultMode == SqlQueryResultMode.SingleOrDefault)
-                {
-                    writer.WriteLine("if (result == null)")
-                          .PushIndent()
-                          .WriteLine("return null;")
-                          .PopIndent()
-                          .WriteLine();
-                }
+                if (isEnumerable)
+                    writer.WriteRaw(".ReplaceWith(");
+                else
+                    writer.WriteRaw(" = ");
             }
 
-            writer.WriteLine("return result;");
+            valueWriter(writer, query, result, context);
+
+            if (isEnumerable && (!isFirstResult || !query.MergeGridResult))
+                writer.WriteRaw(')'); // ReplaceWith
+
+            writer.WriteLineRaw(";");
+        }
+
+        private static void WriteGridReaderMethodCall(StringWriter writer, SqlStatementInfo query, SqlQueryResult result, DaoCodeGenerationContext context)
+        {
+            writer.WriteRaw("reader.")
+                  .WriteRaw(GetMultipleResultReaderMethodName(result.ResultMode));
+
+            WriteGenericTypeArguments(writer, result, context);
+
+            ICollection<string> parameters = new Collection<string>();
+
+            AppendMultiMapParameters(result, parameters);
+
+            WriteMethodParameters(writer, parameters);
         }
 
         private static void WriteFileApiResult(StringWriter writer, SqlStatementInfo query, DaoCodeGenerationContext context)
