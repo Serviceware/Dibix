@@ -152,11 +152,51 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(5,2) 
         }
 
         [Fact]
+        public void Inline_GridResult_AndSingleResult()
+        {
+            this.ExecuteTest
+            (
+                source: @"Tests\Syntax\dbx_tests_syntax_gridresult_single.sql"
+              , contracts: new [] 
+                {
+                    @"Contracts\Direction.json"
+                  , @"Contracts\GenericContract.json"
+                  , @"Contracts\Extension\MultiMapContract.json"
+                }
+              , expectedAdditionalAssemblyReferences: new[]
+                {
+                    "System.ComponentModel.DataAnnotations.dll"
+                  , "Newtonsoft.Json.dll"
+                }
+            );
+        }
+
+        [Fact]
         public void Inline_GridResult_WithCustomResultContractName()
         {
             this.ExecuteTest
             (
                 source: @"Tests\Syntax\dbx_tests_syntax_gridresult_customname.sql"
+              , contracts: new [] 
+                {
+                    @"Contracts\Direction.json"
+                  , @"Contracts\GenericContract.json"
+                  , @"Contracts\Extension\MultiMapContract.json"
+                }
+              , expectedAdditionalAssemblyReferences: new[]
+                {
+                    "System.ComponentModel.DataAnnotations.dll"
+                  , "Newtonsoft.Json.dll"
+                }
+            );
+        }
+
+        [Fact]
+        public void Inline_GridResult_WithCustomResultContractName_AndSingleResult()
+        {
+            this.ExecuteTest
+            (
+                source: @"Tests\Syntax\dbx_tests_syntax_gridresult_customname_single.sql"
               , contracts: new [] 
                 {
                     @"Contracts\Direction.json"

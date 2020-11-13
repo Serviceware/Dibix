@@ -169,7 +169,7 @@ Either remove the @GenerateInputClass hint on the statement or the @Obfuscate hi
                 return base.Target.Results[0].Types[0];
 
             // Generate grid result type
-            if (base.Target.Results.Count > 1)
+            if (base.Target.Results.Any(x => x.Name != null))
             {
                 generateResultClass = true;
                 return this.GenerateGridResultType(relativeNamespace);
