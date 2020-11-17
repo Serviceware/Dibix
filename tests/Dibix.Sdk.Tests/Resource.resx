@@ -1039,7 +1039,10 @@ namespace Dibix.Sdk.Tests
                     {
                         using (IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText))
                         {
-                            Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract result = reader.ReadSingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;("id");
+                            Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract result = reader.ReadSingleOrDefault&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;("id");
+                            if (result == null)
+                                return null;
+
                             result.Directions.ReplaceWith(reader.ReadMany&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;());
                             return result;
                         }

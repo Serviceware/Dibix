@@ -354,6 +354,8 @@ namespace Dibix.Sdk.CodeGeneration
                 SqlQueryResult result = query.Results[i];
                 bool isFirstResult = i == 0;
 
+                WriteComplexResultAssignment(writer, query, result, context, isFirstResult, WriteGridReaderMethodCall);
+
                 // Make sure subsequent results are not merged, when the root result returned null
                 if (query.MergeGridResult && isFirstResult && result.ResultMode == SqlQueryResultMode.SingleOrDefault)
                 {
@@ -363,8 +365,6 @@ namespace Dibix.Sdk.CodeGeneration
                           .PopIndent()
                           .WriteLine();
                 }
-
-                WriteComplexResultAssignment(writer, query, result, context, isFirstResult, WriteGridReaderMethodCall);
             }
 
             writer.WriteLine("return result;");
