@@ -49,11 +49,11 @@ namespace Dibix.Tests
             }
         }
 
-        private sealed class LocaleParameterHttpSourceProvider : IHttpParameterSourceProvider
+        private sealed class LocaleParameterHttpSourceProvider : HttpParameterPropertySourceProvider, IHttpParameterSourceProvider
         {
-            public Type GetInstanceType(HttpActionDefinition action) => typeof(LocaleHttpParameterSource);
+            protected override Type GetInstanceType(HttpActionDefinition action) => typeof(LocaleHttpParameterSource);
 
-            public Expression GetInstanceValue(Type instanceType, ParameterExpression requestParameter, ParameterExpression argumentsParameter, ParameterExpression dependencyProviderParameter) => Expression.New(typeof(LocaleHttpParameterSource));
+            protected override Expression GetInstanceValue(Type instanceType, Expression argumentsParameter, Expression dependencyResolverParameter) => Expression.New(typeof(LocaleHttpParameterSource));
         }
 
         private sealed class LocaleHttpParameterSource
@@ -61,11 +61,11 @@ namespace Dibix.Tests
             public int LocaleId => 1033;
         }
 
-        private sealed class ApplicationHttpParameterSourceProvider : IHttpParameterSourceProvider
+        private sealed class ApplicationHttpParameterSourceProvider : HttpParameterPropertySourceProvider, IHttpParameterSourceProvider
         {
-            public Type GetInstanceType(HttpActionDefinition action) => typeof(ApplicationHttpParameterSource);
+            protected override Type GetInstanceType(HttpActionDefinition action) => typeof(ApplicationHttpParameterSource);
 
-            public Expression GetInstanceValue(Type instanceType, ParameterExpression requestParameter, ParameterExpression argumentsParameter, ParameterExpression dependencyProviderParameter) => Expression.New(typeof(ApplicationHttpParameterSource));
+            protected override Expression GetInstanceValue(Type instanceType, Expression argumentsParameter, Expression dependencyResolverParameter) => Expression.New(typeof(ApplicationHttpParameterSource));
         }
 
         private sealed class ApplicationHttpParameterSource
@@ -103,9 +103,15 @@ namespace Dibix.Tests
             }
         }
 
-        private sealed class ExplicitHttpParameterInput
+        private sealed class ExplicitHttpBodyParameterInput
         {
             public int targetid { get; set; }
+        }
+
+        private sealed class ExplicitHttpUriParameterInput
+        {
+            public int targetid { get; set; }
+            public string targetname { get; set; }
         }
 
         private sealed class HttpBodyDetail
@@ -144,6 +150,8 @@ namespace Dibix.Tests
 
         private sealed class EncryptionHttpParameterConverter : IHttpParameterConverter
         {
+            public Type ExpectedInputType => typeof(string);
+
             public Expression ConvertValue(Expression value) => Expression.Call(typeof(EncryptionHttpParameterConverter), nameof(Convert), new Type[0], value);
 
             private static string Convert(string input) => $"ENCRYPTED({input})";
@@ -206,15 +214,22 @@ namespace Dibix.Tests
 
             public void Add(short type, string name) => base.AddValues(type, name);
         }
+        
+        private sealed class UriItemSet : StructuredType<UriItemSet, string>
+        {
+            public UriItemSet() : base("x") => base.ImportSqlMetadata(() => this.Add(default));
+
+            public void Add(string name) => base.AddValues(name);
+        }
 
         private sealed class JsonToXmlConverter : IFormattedInputConverter<JObject, XElement>
         {
             public XElement Convert(JObject source) => JsonConvert.DeserializeXNode(source.ToString()).Root;
         }
 
-        private sealed class FormattedInputBinder : IFormattedInputBinder<ExplicitHttpBody, ExplicitHttpParameterInput>
+        private sealed class FormattedInputBinder : IFormattedInputBinder<ExplicitHttpBody, ExplicitHttpBodyParameterInput>
         {
-            public void Bind(ExplicitHttpBody source, ExplicitHttpParameterInput target) => target.targetid = source.SourceId;
+            public void Bind(ExplicitHttpBody source, ExplicitHttpBodyParameterInput target) => target.targetid = source.SourceId;
         }
     }
 }

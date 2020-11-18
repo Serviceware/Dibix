@@ -9,24 +9,26 @@ namespace Dibix.Http
     {
         public const string SourceName = "ENV";
 
-        public Type GetInstanceType(HttpActionDefinition action) => typeof(EnvironmentParameterSource);
-
-        public Expression GetInstanceValue(Type instanceType, ParameterExpression requestParameter, ParameterExpression argumentsParameter, ParameterExpression dependencyProviderParameter) => Expression.New(typeof(EnvironmentParameterSource));
-    }
-
-    public sealed class EnvironmentParameterSource
-    {
-        public string MachineName { get; }
-        public int CurrentProcessId { get; }
-
-        public EnvironmentParameterSource()
+        public void Resolve(IHttpParameterResolutionContext context)
         {
-            this.MachineName = GetMachineName();
-            this.CurrentProcessId = GetProcessId();
+            Expression value = BuildExpression(context.PropertyPath);
+            context.ResolveUsingValue(value);
         }
 
-        public static string GetMachineName() => Dns.GetHostEntry(String.Empty).HostName;
+        private static Expression BuildExpression(string propertyName)
+        {
+            switch (propertyName)
+            {
+                case "MachineName": return BuildMethodCallExpression(nameof(GetMachineName));
+                case "CurrentProcessId": return BuildMethodCallExpression(nameof(GetCurrentProcessId));
+                default: throw new ArgumentOutOfRangeException(nameof(propertyName), propertyName, null);
+            }
+        }
 
-        public static int GetProcessId() => Process.GetCurrentProcess().Id;
-    }
+        private static Expression BuildMethodCallExpression(string methodName) => Expression.Call(typeof(EnvironmentParameterSourceProvider), methodName, new Type[0]);
+
+        private static string GetMachineName() => Dns.GetHostEntry(String.Empty).HostName;
+
+        private static int GetCurrentProcessId() => Process.GetCurrentProcess().Id;
+}
 }

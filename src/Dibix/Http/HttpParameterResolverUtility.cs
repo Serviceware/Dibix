@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 
 namespace Dibix.Http
 {
@@ -13,12 +14,21 @@ namespace Dibix.Http
             return action.BodyContract;
         }
 
-        public static TBody ReadBody<TBody>(IDictionary<string, object> arguments)
+        public static TResult ReadArgument<TResult>(IDictionary<string, object> arguments, string key)
         {
-            if (!arguments.TryGetValue(HttpParameterName.Body, out object body))
-                throw new InvalidOperationException("Body is missing from arguments list");
+            if (!arguments.TryGetValue(key, out object value))
+                throw new InvalidOperationException($"Argument '{key}' is not available");
 
-            return (TBody)body;
+            return (TResult)value;
+        }
+
+        public static TBody ReadBody<TBody>(IDictionary<string, object> arguments) => ReadArgument<TBody>(arguments, HttpParameterName.Body);
+
+        public static Expression BuildArgumentAccessorExpression(Expression argumentsParameter, string key)
+        {
+            Expression argumentsKey = Expression.Constant(key);
+            Expression property = Expression.Property(argumentsParameter, "Item", argumentsKey);
+            return property;
         }
     }
 }

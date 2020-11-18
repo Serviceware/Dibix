@@ -24,9 +24,7 @@ namespace Dibix.Tests
     Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
     .Block(Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
-        .Call $arguments.Add(
-            ""databaseAccessorFactory"",
-            (System.Object)$databaseaccessorfactorySource)
+        $arguments.Item[""databaseAccessorFactory""] = (System.Object)$databaseaccessorfactorySource
     }
 }", result.Source);
             Assert.False(result.Parameters.Any());
@@ -60,12 +58,8 @@ namespace Dibix.Tests
         Dibix.Tests.HttpParameterResolverTest+LocaleHttpParameterSource $localeSource) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
         $localeSource = .New Dibix.Tests.HttpParameterResolverTest+LocaleHttpParameterSource();
-        .Call $arguments.Add(
-            ""databaseAccessorFactory"",
-            (System.Object)$databaseaccessorfactorySource);
-        .Call $arguments.Add(
-            ""lcid"",
-            (System.Object)$localeSource.LocaleId)
+        $arguments.Item[""databaseAccessorFactory""] = (System.Object)$databaseaccessorfactorySource;
+        $arguments.Item[""lcid""] = (System.Object)$localeSource.LocaleId
     }
 }", result.Source);
             Assert.False(result.Parameters.Any());
@@ -100,14 +94,10 @@ namespace Dibix.Tests
         Dibix.Tests.HttpParameterResolverTest+ApplicationHttpParameterSource $applicationSource) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
         $applicationSource = .New Dibix.Tests.HttpParameterResolverTest+ApplicationHttpParameterSource();
-        .Call $arguments.Add(
-            ""databaseAccessorFactory"",
-            (System.Object)$databaseaccessorfactorySource);
-        .Call $arguments.Add(
+        $arguments.Item[""databaseAccessorFactory""] = (System.Object)$databaseaccessorfactorySource;
+        $arguments.Item[""applicationid""] = (System.Object).Call Dibix.Http.HttpParameterResolver.ConvertValue(
             ""applicationid"",
-            (System.Object).Call Dibix.Http.HttpParameterResolver.ConvertValue(
-                ""applicationid"",
-                $applicationSource.ApplicationId))
+            $applicationSource.ApplicationId)
     }
 }", result.Source);
             Assert.False(result.Parameters.Any());
@@ -163,31 +153,21 @@ Parameter: lcid", exception.Message);
     .Block(
         Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
         Dibix.Tests.HttpParameterResolverTest+ExplicitHttpBody $bodySource,
-        Dibix.Tests.HttpParameterResolverTest+ExplicitHttpParameterInput $input) {
+        Dibix.Tests.HttpParameterResolverTest+ExplicitHttpBodyParameterInput $input) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
         $bodySource = .Call Dibix.Http.HttpParameterResolverUtility.ReadBody($arguments);
-        .Call $arguments.Add(
-            ""databaseAccessorFactory"",
-            (System.Object)$databaseaccessorfactorySource);
-        .Call $arguments.Add(
-            ""lcid"",
-            (System.Object)$bodySource.LocaleId);
-        .Call $arguments.Add(
-            ""agentid"",
-            (System.Object)($bodySource.Detail).AgentId);
-        .Call $arguments.Add(
-            ""itemsa_"",
-            (System.Object).Call Dibix.StructuredType`1[Dibix.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemSet].From(
-                $bodySource.ItemsA,
-                .Lambda #Lambda2<System.Action`3[Dibix.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemSet,Dibix.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,System.Int32]>)
-        );
-        $input = .New Dibix.Tests.HttpParameterResolverTest+ExplicitHttpParameterInput();
+        $arguments.Item[""databaseAccessorFactory""] = (System.Object)$databaseaccessorfactorySource;
+        $arguments.Item[""lcid""] = (System.Object)$bodySource.LocaleId;
+        $arguments.Item[""agentid""] = (System.Object)($bodySource.Detail).AgentId;
+        $arguments.Item[""itemsa_""] = (System.Object).Call Dibix.StructuredType`1[Dibix.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemSet].From(
+            $bodySource.ItemsA,
+            .Lambda #Lambda2<System.Action`3[Dibix.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemSet,Dibix.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,System.Int32]>)
+        ;
+        $input = .New Dibix.Tests.HttpParameterResolverTest+ExplicitHttpBodyParameterInput();
         $input.targetid = .Call Dibix.Http.HttpParameterResolver.ConvertValue(
             ""targetid"",
             $bodySource.SourceId);
-        .Call $arguments.Add(
-            ""input"",
-            (System.Object)$input)
+        $arguments.Item[""input""] = (System.Object)$input
     }
 }
 
@@ -229,7 +209,7 @@ Parameter: lcid", exception.Message);
             Assert.Equal(6, arguments.Count);
             Assert.Equal(body, arguments["$body"]);
             Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
-            ExplicitHttpParameterInput input = Assert.IsType<ExplicitHttpParameterInput>(arguments["input"]);
+            ExplicitHttpBodyParameterInput input = Assert.IsType<ExplicitHttpBodyParameterInput>(arguments["input"]);
             Assert.Equal(7, input.targetid);
             Assert.Equal(1033, arguments["lcid"]);
             Assert.Equal(710, arguments["agentid"]);
@@ -240,7 +220,7 @@ Parameter: lcid", exception.Message);
 1033        2           5            Y                  ", itemsa_.Dump());
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
-        private static void Compile_ExplicitBodySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpParameterInput input, int lcid, int agentid, ExplicitHttpBodyItemSet itemsa_) { }
+        private static void Compile_ExplicitBodySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpBodyParameterInput input, int lcid, int agentid, ExplicitHttpBodyItemSet itemsa_) { }
 
         [Fact]
         public void Compile_ImplicitBodySource()
@@ -256,18 +236,12 @@ Parameter: lcid", exception.Message);
         Dibix.Tests.HttpParameterResolverTest+ImplicitBodyHttpParameterInput $input) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
         $bodySource = .Call Dibix.Http.HttpParameterResolverUtility.ReadBody($arguments);
-        .Call $arguments.Add(
-            ""databaseAccessorFactory"",
-            (System.Object)$databaseaccessorfactorySource);
-        .Call $arguments.Add(
-            ""userid"",
-            (System.Object)$bodySource.UserId);
-        .Call $arguments.Add(
-            ""itemsa"",
-            (System.Object).Call Dibix.StructuredType`1[Dibix.Tests.HttpParameterResolverTest+ImplicitHttpBodyItemSet].From(
-                $bodySource.ItemsA,
-                .Lambda #Lambda2<System.Action`3[Dibix.Tests.HttpParameterResolverTest+ImplicitHttpBodyItemSet,Dibix.Tests.HttpParameterResolverTest+ImplicitHttpBodyItem,System.Int32]>)
-        );
+        $arguments.Item[""databaseAccessorFactory""] = (System.Object)$databaseaccessorfactorySource;
+        $arguments.Item[""userid""] = (System.Object)$bodySource.UserId;
+        $arguments.Item[""itemsa""] = (System.Object).Call Dibix.StructuredType`1[Dibix.Tests.HttpParameterResolverTest+ImplicitHttpBodyItemSet].From(
+            $bodySource.ItemsA,
+            .Lambda #Lambda2<System.Action`3[Dibix.Tests.HttpParameterResolverTest+ImplicitHttpBodyItemSet,Dibix.Tests.HttpParameterResolverTest+ImplicitHttpBodyItem,System.Int32]>)
+        ;
         $input = .New Dibix.Tests.HttpParameterResolverTest+ImplicitBodyHttpParameterInput();
         $input.sourceid = .Call Dibix.Http.HttpParameterResolver.ConvertValue(
             ""sourceid"",
@@ -276,9 +250,7 @@ Parameter: lcid", exception.Message);
         $input.fromuri = .Call Dibix.Http.HttpParameterResolver.ConvertValue(
             ""fromuri"",
             $arguments.Item[""fromuri""]);
-        .Call $arguments.Add(
-            ""input"",
-            (System.Object)$input)
+        $arguments.Item[""input""] = (System.Object)$input
     }
 }
 
@@ -349,15 +321,15 @@ Parameter: lcid", exception.Message);
         [Fact]
         public void Compile_BodySource_WithConverter()
         {
-            HttpParameterConverterRegistry.Register<EncryptionHttpParameterConverter>("CRYPT");
+            HttpParameterConverterRegistry.Register<EncryptionHttpParameterConverter>("CRYPT1");
             IHttpParameterResolutionMethod result = Compile(x =>
             {
                 x.BodyContract = typeof(HttpBody);
-                x.ResolveParameterFromSource("encryptedpassword", "BODY", "Password", "CRYPT");
-                x.ResolveParameterFromSource("anotherencryptedpassword", "BODY", "Detail.Password", "CRYPT");
+                x.ResolveParameterFromSource("encryptedpassword", "BODY", "Password", "CRYPT1");
+                x.ResolveParameterFromSource("anotherencryptedpassword", "BODY", "Detail.Password", "CRYPT1");
                 x.ResolveParameterFromSource("items", "BODY", "Items", y =>
                 {
-                    y.ResolveParameterFromSource("encryptedpassword", "ITEM", "Password", "CRYPT");
+                    y.ResolveParameterFromSource("encryptedpassword", "ITEM", "Password", "CRYPT1");
                 });
             });
             TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
@@ -369,23 +341,14 @@ Parameter: lcid", exception.Message);
         Dibix.Tests.HttpParameterResolverTest+HttpBody $bodySource) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
         $bodySource = .Call Dibix.Http.HttpParameterResolverUtility.ReadBody($arguments);
-        .Call $arguments.Add(
-            ""databaseAccessorFactory"",
-            (System.Object)$databaseaccessorfactorySource);
-        .Call $arguments.Add(
-            ""encryptedpassword"",
-            (System.Object).Call Dibix.Tests.HttpParameterResolverTest+EncryptionHttpParameterConverter.Convert($bodySource.Password)
-        );
-        .Call $arguments.Add(
-            ""anotherencryptedpassword"",
-            (System.Object).Call Dibix.Tests.HttpParameterResolverTest+EncryptionHttpParameterConverter.Convert(($bodySource.Detail).Password)
-        );
-        .Call $arguments.Add(
-            ""items"",
-            (System.Object).Call Dibix.StructuredType`1[Dibix.Tests.HttpParameterResolverTest+HttpBodyItemSet].From(
-                $bodySource.Items,
-                .Lambda #Lambda2<System.Action`3[Dibix.Tests.HttpParameterResolverTest+HttpBodyItemSet,Dibix.Tests.HttpParameterResolverTest+HttpBodyItem,System.Int32]>)
-        )
+        $arguments.Item[""databaseAccessorFactory""] = (System.Object)$databaseaccessorfactorySource;
+        $arguments.Item[""encryptedpassword""] = (System.Object).Call Dibix.Tests.HttpParameterResolverTest+EncryptionHttpParameterConverter.Convert($bodySource.Password)
+        ;
+        $arguments.Item[""anotherencryptedpassword""] = (System.Object).Call Dibix.Tests.HttpParameterResolverTest+EncryptionHttpParameterConverter.Convert(($bodySource.Detail).Password)
+        ;
+        $arguments.Item[""items""] = (System.Object).Call Dibix.StructuredType`1[Dibix.Tests.HttpParameterResolverTest+HttpBodyItemSet].From(
+            $bodySource.Items,
+            .Lambda #Lambda2<System.Action`3[Dibix.Tests.HttpParameterResolverTest+HttpBodyItemSet,Dibix.Tests.HttpParameterResolverTest+HttpBodyItem,System.Int32]>)
     }
 }
 
@@ -450,17 +413,13 @@ ENCRYPTED(Item2)               ", items.Dump());
         Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
         Dibix.Tests.HttpParameterResolverTest+XmlHttpParameterInput $input) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
-        .Call $arguments.Add(
-            ""databaseAccessorFactory"",
-            (System.Object)$databaseaccessorfactorySource);
+        $arguments.Item[""databaseAccessorFactory""] = (System.Object)$databaseaccessorfactorySource;
         .Call Dibix.Http.HttpParameterResolver.AddParameterFromBody(
             $arguments,
             ""value"");
         $input = .New Dibix.Tests.HttpParameterResolverTest+XmlHttpParameterInput();
         $input.data = .Call Dibix.Http.HttpParameterResolver.ConvertParameterFromBody($arguments);
-        .Call $arguments.Add(
-            ""input"",
-            (System.Object)$input)
+        $arguments.Item[""input""] = (System.Object)$input
     }
 }", result.Source);
             Assert.Equal(1, result.Parameters.Count);
@@ -502,18 +461,14 @@ ENCRYPTED(Item2)               ", items.Dump());
     Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
     .Block(
         Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
-        Dibix.Tests.HttpParameterResolverTest+ExplicitHttpParameterInput $input) {
+        Dibix.Tests.HttpParameterResolverTest+ExplicitHttpBodyParameterInput $input) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
-        .Call $arguments.Add(
-            ""databaseAccessorFactory"",
-            (System.Object)$databaseaccessorfactorySource);
-        $input = .New Dibix.Tests.HttpParameterResolverTest+ExplicitHttpParameterInput();
+        $arguments.Item[""databaseAccessorFactory""] = (System.Object)$databaseaccessorfactorySource;
+        $input = .New Dibix.Tests.HttpParameterResolverTest+ExplicitHttpBodyParameterInput();
         .Call Dibix.Http.HttpParameterResolver.BindParametersFromBody(
             $arguments,
             $input);
-        .Call $arguments.Add(
-            ""input"",
-            (System.Object)$input)
+        $arguments.Item[""input""] = (System.Object)$input
     }
 }", result.Source);
             Assert.Equal(1, result.Parameters.Count);
@@ -534,11 +489,11 @@ ENCRYPTED(Item2)               ", items.Dump());
             Assert.Equal(3, arguments.Count);
             Assert.Equal(body, arguments["$body"]);
             Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
-            ExplicitHttpParameterInput input = Assert.IsType<ExplicitHttpParameterInput>(arguments["input"]);
+            ExplicitHttpBodyParameterInput input = Assert.IsType<ExplicitHttpBodyParameterInput>(arguments["input"]);
             Assert.Equal(7, input.targetid);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
-        private static void Compile_BodyBinder_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpParameterInput input) { }
+        private static void Compile_BodyBinder_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpBodyParameterInput input) { }
 
         [Fact]
         public void Compile_BodyBinder_WithoutInputClass_Throws()
@@ -554,7 +509,7 @@ Parameter: input", exception.Message);
             Assert.NotNull(exception.InnerException);
             Assert.Equal("Using a binder for the body is only supported if the target parameter is a class and is marked with the Dibix.InputClassAttribute", exception.InnerException.Message);
         }
-        private static void Compile_BodyBinder_WithoutInputClass_Throws_Target(IDatabaseAccessorFactory databaseAccessorFactory, ExplicitHttpParameterInput input) { }
+        private static void Compile_BodyBinder_WithoutInputClass_Throws_Target(IDatabaseAccessorFactory databaseAccessorFactory, ExplicitHttpBodyParameterInput input) { }
 
         [Fact]
         public void Compile_ConstantSource()
@@ -571,18 +526,10 @@ Parameter: input", exception.Message);
     Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
     .Block(Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
-        .Call $arguments.Add(
-            ""databaseAccessorFactory"",
-            (System.Object)$databaseaccessorfactorySource);
-        .Call $arguments.Add(
-            ""boolValue"",
-            (System.Object)True);
-        .Call $arguments.Add(
-            ""intValue"",
-            (System.Object)2);
-        .Call $arguments.Add(
-            ""nullValue"",
-            (System.Object)null)
+        $arguments.Item[""databaseAccessorFactory""] = (System.Object)$databaseaccessorfactorySource;
+        $arguments.Item[""boolValue""] = (System.Object)True;
+        $arguments.Item[""intValue""] = (System.Object)2;
+        $arguments.Item[""nullValue""] = (System.Object)null
     }
 }", result.Source);
             Assert.False(result.Parameters.Any());
@@ -608,7 +555,13 @@ Parameter: input", exception.Message);
         [Fact]
         public void Compile_UriSource()
         {
-            IHttpParameterResolutionMethod result = Compile();
+            HttpParameterConverterRegistry.Register<EncryptionHttpParameterConverter>("CRYPT2");
+            IHttpParameterResolutionMethod result = Compile(x =>
+            {
+                x.ResolveParameterFromSource("true", "QUERY", "true_");
+                x.ResolveParameterFromSource("name", "QUERY", "name_", "CRYPT2");
+                x.ResolveParameterFromSource("targetname", "QUERY", "targetname_", "CRYPT2");
+            });
             TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
@@ -616,12 +569,11 @@ Parameter: input", exception.Message);
     .Block(
         Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
         System.Object $idDefaultValue,
+        System.Object $nameDefaultValue,
         System.Object $trueDefaultValue,
-        Dibix.Tests.HttpParameterResolverTest+ExplicitHttpParameterInput $input) {
+        Dibix.Tests.HttpParameterResolverTest+ExplicitHttpUriParameterInput $input) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
-        .Call $arguments.Add(
-            ""databaseAccessorFactory"",
-            (System.Object)$databaseaccessorfactorySource);
+        $arguments.Item[""databaseAccessorFactory""] = (System.Object)$databaseaccessorfactorySource;
         .If (
             .Call $arguments.TryGetValue(
                 ""id"",
@@ -631,6 +583,20 @@ Parameter: input", exception.Message);
         } .Else {
             .Default(System.Void)
         };
+        $arguments.Item[""name""] = (System.Object)$arguments.Item[""name_""];
+        .If (
+            .Call $arguments.TryGetValue(
+                ""name"",
+                $nameDefaultValue) & $nameDefaultValue == null
+        ) {
+            $arguments.Item[""name""] = (System.Object)""Cake""
+        } .Else {
+            .Default(System.Void)
+        };
+        $arguments.Item[""name""] = (System.Object).Call Dibix.Tests.HttpParameterResolverTest+EncryptionHttpParameterConverter.Convert(.Call Dibix.Http.HttpParameterResolver.ConvertValue(
+                ""name"",
+                $arguments.Item[""name""]));
+        $arguments.Item[""true""] = (System.Object)$arguments.Item[""true_""];
         .If (
             .Call $arguments.TryGetValue(
                 ""true"",
@@ -640,25 +606,38 @@ Parameter: input", exception.Message);
         } .Else {
             .Default(System.Void)
         };
-        $input = .New Dibix.Tests.HttpParameterResolverTest+ExplicitHttpParameterInput();
+        $input = .New Dibix.Tests.HttpParameterResolverTest+ExplicitHttpUriParameterInput();
         $input.targetid = .Call Dibix.Http.HttpParameterResolver.ConvertValue(
             ""targetid"",
             $arguments.Item[""targetid""]);
-        .Call $arguments.Add(
-            ""input"",
-            (System.Object)$input)
+        $input.targetname = .Call Dibix.Tests.HttpParameterResolverTest+EncryptionHttpParameterConverter.Convert(.Call Dibix.Http.HttpParameterResolver.ConvertValue(
+                ""targetname"",
+                $arguments.Item[""targetname_""]));
+        $arguments.Item[""input""] = (System.Object)$input
     }
 }", result.Source);
-            Assert.Equal(4, result.Parameters.Count);
+            Assert.Equal(8, result.Parameters.Count);
             Assert.Equal("targetid", result.Parameters["targetid"].Name);
             Assert.Equal(typeof(int), result.Parameters["targetid"].Type);
             Assert.False(result.Parameters["targetid"].IsOptional);
+            Assert.Equal("items", result.Parameters["items"].Name);
+            Assert.Equal(typeof(UriItemSet), result.Parameters["items"].Type);
+            Assert.False(result.Parameters["items"].IsOptional);
+            Assert.Equal("targetname_", result.Parameters["targetname_"].Name);
+            Assert.Equal(typeof(string), result.Parameters["targetname_"].Type);
+            Assert.False(result.Parameters["targetname_"].IsOptional);
             Assert.Equal("id", result.Parameters["id"].Name);
             Assert.Equal(typeof(int), result.Parameters["id"].Type);
             Assert.True(result.Parameters["id"].IsOptional);
-            Assert.Equal("true", result.Parameters["true"].Name);
-            Assert.Equal(typeof(bool?), result.Parameters["true"].Type);
-            Assert.True(result.Parameters["true"].IsOptional);
+            Assert.Equal("anotherid", result.Parameters["anotherid"].Name);
+            Assert.Equal(typeof(int), result.Parameters["anotherid"].Type);
+            Assert.False(result.Parameters["anotherid"].IsOptional);
+            Assert.Equal("name_", result.Parameters["name_"].Name);
+            Assert.Equal(typeof(string), result.Parameters["name_"].Type);
+            Assert.True(result.Parameters["name_"].IsOptional);
+            Assert.Equal("true_", result.Parameters["true_"].Name);
+            Assert.Equal(typeof(bool?), result.Parameters["true_"].Type);
+            Assert.True(result.Parameters["true_"].IsOptional);
             Assert.Equal("empty", result.Parameters["empty"].Name);
             Assert.Equal(typeof(bool?), result.Parameters["empty"].Type);
             Assert.True(result.Parameters["empty"].IsOptional);
@@ -667,8 +646,11 @@ Parameter: input", exception.Message);
             IDictionary<string, object> arguments = new Dictionary<string, object>
             {
                 { "targetid", 9 }
+              , { "targetname_", "Muffin" }
               , { "id", 10 }
-              , { "true", null }  // Optional => Use default value
+              , { "anotherid", 5 }
+              , { "name_", null } // Optional => Use default value
+              , { "true_", null } // Optional => Use default value
               , { "empty", null } // Optional => Use default value
             };
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
@@ -678,17 +660,23 @@ Parameter: input", exception.Message);
 
             result.PrepareParameters(request, arguments, dependencyResolver.Object);
 
-            Assert.Equal(6, arguments.Count);
+            Assert.Equal(11, arguments.Count);
             Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             Assert.Equal(9, arguments["targetid"]);
+            Assert.Equal("Muffin", arguments["targetname_"]);
             Assert.Equal(10, arguments["id"]);
+            Assert.Equal(5, arguments["anotherid"]);
+            Assert.Equal(null, arguments["name_"]);
+            Assert.Equal("ENCRYPTED(Cake)", arguments["name"]);
+            Assert.Equal(null, arguments["true_"]);
             Assert.Equal(true, arguments["true"]);
             Assert.Equal(null, arguments["empty"]);
-            ExplicitHttpParameterInput input = Assert.IsType<ExplicitHttpParameterInput>(arguments["input"]);
+            ExplicitHttpUriParameterInput input = Assert.IsType<ExplicitHttpUriParameterInput>(arguments["input"]);
             Assert.Equal(9, input.targetid);
+            Assert.Equal("ENCRYPTED(Muffin)", input.targetname);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
-        private static void Compile_UriSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpParameterInput input, int id = 0, bool? @true = true, bool? empty = null) { }
+        private static void Compile_UriSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpUriParameterInput input, UriItemSet items, int anotherid, int id = 0, string name = "Cake", bool? @true = true, bool? empty = null) { }
 
         [Fact]
         public void Compile_RequestSource()
@@ -701,17 +689,10 @@ Parameter: input", exception.Message);
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
     Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
-    .Block(
-        Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
-        Dibix.Http.RequestParameterSource $requestSource) {
+    .Block(Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
-        $requestSource = .New Dibix.Http.RequestParameterSource($request);
-        .Call $arguments.Add(
-            ""databaseAccessorFactory"",
-            (System.Object)$databaseaccessorfactorySource);
-        .Call $arguments.Add(
-            ""regionlanguage"",
-            (System.Object)$requestSource.Language)
+        $arguments.Item[""databaseAccessorFactory""] = (System.Object)$databaseaccessorfactorySource;
+        $arguments.Item[""regionlanguage""] = (System.Object).Call Dibix.Http.RequestParameterSourceProvider.GetRequestLanguage($request)
     }
 }", result.Source);
             Assert.False(result.Parameters.Any());
@@ -745,20 +726,11 @@ Parameter: input", exception.Message);
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
     Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
-    .Block(
-        Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
-        Dibix.Http.EnvironmentParameterSource $envSource) {
+    .Block(Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
-        $envSource = .New Dibix.Http.EnvironmentParameterSource();
-        .Call $arguments.Add(
-            ""databaseAccessorFactory"",
-            (System.Object)$databaseaccessorfactorySource);
-        .Call $arguments.Add(
-            ""machinename"",
-            (System.Object)$envSource.MachineName);
-        .Call $arguments.Add(
-            ""pid"",
-            (System.Object)$envSource.CurrentProcessId)
+        $arguments.Item[""databaseAccessorFactory""] = (System.Object)$databaseaccessorfactorySource;
+        $arguments.Item[""machinename""] = (System.Object).Call Dibix.Http.EnvironmentParameterSourceProvider.GetMachineName();
+        $arguments.Item[""pid""] = (System.Object).Call Dibix.Http.EnvironmentParameterSourceProvider.GetCurrentProcessId()
     }
 }", result.Source);
             Assert.False(result.Parameters.Any());

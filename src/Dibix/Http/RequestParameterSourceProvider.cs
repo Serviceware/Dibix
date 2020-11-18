@@ -3,7 +3,6 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net.Http;
-using System.Reflection;
 
 namespace Dibix.Http
 {
@@ -11,22 +10,27 @@ namespace Dibix.Http
     {
         public const string SourceName = "REQUEST";
 
-        public Type GetInstanceType(HttpActionDefinition action) => typeof(RequestParameterSource);
-
-        public Expression GetInstanceValue(Type instanceType, ParameterExpression requestParameter, ParameterExpression argumentsParameter, ParameterExpression dependencyProviderParameter)
+        public void Resolve(IHttpParameterResolutionContext context)
         {
-            ConstructorInfo constructor = typeof(RequestParameterSource).GetConstructor(new[] { typeof(HttpRequestMessage) });
-            return Expression.New(constructor, requestParameter);
+            Expression value = BuildExpression(context.PropertyPath, context.RequestParameter);
+            context.ResolveUsingValue(value);
         }
-    }
 
-    public sealed class RequestParameterSource
-    {
-        public string Language { get; }
-
-        public RequestParameterSource(HttpRequestMessage request)
+        private static Expression BuildExpression(string propertyName, Expression requestParameter)
         {
-            this.Language = request.Headers.AcceptLanguage.Select(x => x.Value).FirstOrDefault() ?? new CultureInfo("en").Name;
+            switch (propertyName)
+            {
+                case "Language": return BuildLanguageExpression(requestParameter);
+                default: throw new ArgumentOutOfRangeException(nameof(propertyName), propertyName, null);
+            }
         }
+
+        private static Expression BuildLanguageExpression(Expression requestParameter)
+        {
+            Expression getRequestLanguageCall = Expression.Call(typeof(RequestParameterSourceProvider), nameof(GetRequestLanguage), new Type[0], requestParameter);
+            return getRequestLanguageCall;
+        }
+
+        private static string GetRequestLanguage(HttpRequestMessage request) => request.Headers.AcceptLanguage.Select(x => x.Value).FirstOrDefault() ?? new CultureInfo("en").Name;
     }
 }

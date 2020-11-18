@@ -3,12 +3,12 @@ using System.Linq.Expressions;
 
 namespace Dibix.Http
 {
-    internal sealed class BodyParameterSourceProvider : IHttpParameterSourceProvider
+    internal sealed class BodyParameterSourceProvider : HttpParameterPropertySourceProvider, IHttpParameterSourceProvider
     {
         public const string SourceName = "BODY";
 
-        public Type GetInstanceType(HttpActionDefinition action) => action.SafeGetBodyContract();
+        protected override Type GetInstanceType(HttpActionDefinition action) => action.SafeGetBodyContract();
 
-        public Expression GetInstanceValue(Type instanceType, ParameterExpression requestParameter, ParameterExpression argumentsParameter, ParameterExpression dependencyProviderParameter) => Expression.Call(typeof(HttpParameterResolverUtility), nameof(HttpParameterResolverUtility.ReadBody), new [] { instanceType }, argumentsParameter);
+        protected override Expression GetInstanceValue(Type instanceType, Expression argumentsParameter, Expression dependencyResolverParameter) => Expression.Call(typeof(HttpParameterResolverUtility), nameof(HttpParameterResolverUtility.ReadBody), new [] { instanceType }, argumentsParameter);
     }
 }
