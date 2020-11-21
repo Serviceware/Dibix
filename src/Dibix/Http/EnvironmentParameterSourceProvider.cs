@@ -5,11 +5,11 @@ using System.Net;
 
 namespace Dibix.Http
 {
-    internal sealed class EnvironmentParameterSourceProvider : IHttpParameterSourceProvider
+    public sealed class EnvironmentParameterSourceProvider : IHttpParameterSourceProvider
     {
         public const string SourceName = "ENV";
 
-        public void Resolve(IHttpParameterResolutionContext context)
+        void IHttpParameterSourceProvider.Resolve(IHttpParameterResolutionContext context)
         {
             Expression value = BuildExpression(context.PropertyPath);
             context.ResolveUsingValue(value);
@@ -25,10 +25,10 @@ namespace Dibix.Http
             }
         }
 
+        public static string GetMachineName() => Dns.GetHostEntry(String.Empty).HostName;
+
+        public static int GetCurrentProcessId() => Process.GetCurrentProcess().Id;
+
         private static Expression BuildMethodCallExpression(string methodName) => Expression.Call(typeof(EnvironmentParameterSourceProvider), methodName, new Type[0]);
-
-        private static string GetMachineName() => Dns.GetHostEntry(String.Empty).HostName;
-
-        private static int GetCurrentProcessId() => Process.GetCurrentProcess().Id;
-}
+    }
 }
