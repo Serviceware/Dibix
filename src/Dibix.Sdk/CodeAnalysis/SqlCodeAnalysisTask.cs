@@ -37,7 +37,32 @@ namespace Dibix.Sdk.CodeAnalysis
         )
         {
             TSqlModel model = PublicSqlDataSchemaModelLoader.Load(projectName, databaseSchemaProviderName, modelCollation, source, sqlReferencePath, logger);
-
+            return Execute
+            (
+                projectName
+              , namingConventionPrefix
+              , isEmbedded
+              , staticCodeAnalysisSucceededFile
+              , resultsFile
+              , source
+              , scriptSource
+              , logger
+              , model
+            );
+        }
+        internal static bool Execute
+        (
+            string projectName
+          , string namingConventionPrefix
+          , bool isEmbedded
+          , string staticCodeAnalysisSucceededFile
+          , string resultsFile
+          , ICollection<TaskItem> source
+          , IEnumerable<TaskItem> scriptSource
+          , ILogger logger
+          , TSqlModel model
+        )
+        {
             ExecuteNativeCodeAnalysis(model, logger, staticCodeAnalysisSucceededFile, resultsFile);
 
             SqlCodeAnalysisRuleEngine codeAnalysisEngine = SqlCodeAnalysisRuleEngine.Create(model, projectName, namingConventionPrefix, isEmbedded, logger);

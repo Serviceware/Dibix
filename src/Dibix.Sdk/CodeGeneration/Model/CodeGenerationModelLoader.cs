@@ -31,6 +31,7 @@ namespace Dibix.Sdk.CodeGeneration
           , ICollection<TaskItem> sqlReferencePath
           , ISchemaRegistry schemaRegistry
           , ILogger logger
+          , TSqlModel sqlModel
         )
         {
             string rootNamespace = NamespaceUtility.BuildRootNamespace(productName, areaName);
@@ -55,7 +56,7 @@ namespace Dibix.Sdk.CodeGeneration
                 ClientOutputFilePath = clientOutputFilePath
             };
 
-            Lazy<TSqlModel> modelAccessor = new Lazy<TSqlModel>(() => PublicSqlDataSchemaModelLoader.Load(projectName, databaseSchemaProviderName, modelCollation, source, sqlReferencePath, logger));
+            Lazy<TSqlModel> modelAccessor = sqlModel != null ? new Lazy<TSqlModel>(() => sqlModel) : new Lazy<TSqlModel>(() => PublicSqlDataSchemaModelLoader.Load(projectName, databaseSchemaProviderName, modelCollation, source, sqlReferencePath, logger));
             IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(projectDirectory);
             ISqlStatementFormatter formatter = isEmbedded ? (ISqlStatementFormatter)new TakeSourceSqlStatementFormatter() : new ExecStoredProcedureSqlStatementFormatter();
             formatter.StripWhiteSpace = model.CommandTextFormatting == CommandTextFormatting.StripWhiteSpace;

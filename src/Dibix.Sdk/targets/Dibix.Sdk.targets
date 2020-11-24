@@ -64,6 +64,11 @@
       <CompileArtifactsInput Include="@(_SqlTargetInput)" />
       <CompileArtifactsInput Include="@(Contract)" />
       <CompileArtifactsInput Include="@(Endpoint)" />
+
+      <!-- SqlCore -->
+      <SqlCoreInput Include="@(_SqlTargetInput)" />
+      <SqlCoreInput Include="@(Contract)" />
+      <SqlCoreInput Include="@(Endpoint)" />
     </ItemGroup>
   </Target>
   <Target Name="SetupSqlBuildOutputs" BeforeTargets="_SetupSqlBuildOutputs">
@@ -78,6 +83,9 @@
 
       <!-- CompileArtifacts -->
       <CompileArtifactsOutput Include="$(TargetPath)" /> <!-- .dll -->
+
+      <!-- SqlCore -->
+      <SqlCoreOutput Include="$(TargetPath)" /> <!-- .dll -->
     </ItemGroup>
   </Target>
 
@@ -156,10 +164,9 @@ $(_SqlReferencePath)" />
     </ItemGroup>
   </Target>
   <Target Name="CompileArtifacts"
-          BeforeTargets="CoreCompile"
           DependsOnTargets="SetupSqlBuildInputs;SetupSqlBuildOutputs;ResolveArtifactReferences"
           Inputs="@(CompileArtifactsInput)"
-          Outputs="@(CompileArtifactsOutput)">
+          Outputs="@(CompileArtifactsOutput)"> <!-- BeforeTargets="CoreCompile" -->
     <!-- Configuration -->
     <PropertyGroup>
       <ProductName Condition="'$(ProductName)' == ''">$(RootNamespace.Split('.')[0])</ProductName>
@@ -292,6 +299,303 @@ $(_SqlReferencePath)" />
 
     <WriteCodeFragment Condition="'$(CompileArtifactsNetStandard)' == ''"
                        AssemblyAttributes="@(ServerAssemblyAttribute)" 
+                       Language="C#"
+                       OutputFile="$(_ServerAssemblyInfoFile)" />
+
+    <Csc Condition="'$(CompileArtifactsNetStandard)' == ''"
+         DebugType="$(DebugType)"
+         DefineConstants="$(DefineConstants)"
+         EmitDebugInformation="$(DebugSymbols)"
+         KeyFile="$(AssemblyOriginatorKeyFile)"
+         LangVersion="$(LangVersion)"
+         OutputAssembly="$(IntermediateTargetFullFileName)"
+         References="@(ServerCompilationReference)"
+         Sources="@(ServerCompilationSource)"
+         TargetType="$(OutputType)" />
+
+    <PropertyGroup Condition="'$(CompileArtifactsNetStandard)' == 'true'">
+      <_ServerIntermediateProjectFilePath>$(_ServerIntermediateFilePathNoExt).csproj</_ServerIntermediateProjectFilePath>
+      <_ServerIntermediateProjectFileContent>
+        <![CDATA[
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    
+    <OutDir>.</OutDir>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <AssemblyOriginatorKeyFile>$(AssemblyOriginatorKeyFile)</AssemblyOriginatorKeyFile>
+    <SignAssembly>$(SignAssembly)</SignAssembly>
+    
+    <Product>$(Product)</Product>
+    <Company>$(Company)</Company>
+    <Copyright>$(Copyright)</Copyright>
+    <FileVersion>$(_ServerFileVersion)</FileVersion>
+    <InformationalVersion>$(InformationalVersion)</InformationalVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="$(_ServerOutputName).cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Reflection" Version="4.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Dibix" HintPath="$(DibixRuntimeXplatPath)" Private="false" />
+  </ItemGroup>
+
+</Project>
+]]>
+      </_ServerIntermediateProjectFileContent>
+    </PropertyGroup>
+
+    <WriteLinesToFile Condition="'$(CompileArtifactsNetStandard)' == 'true'"
+                      File="$(_ServerIntermediateProjectFilePath)"
+                      Lines="$(_ServerIntermediateProjectFileContent)"
+                      Overwrite="True" />
+
+    <Exec Condition="'$(CompileArtifactsNetStandard)' == 'true'" Command="dotnet build $(_ServerIntermediateProjectFilePath) -c $(Configuration)" />
+
+    <CallTarget Targets="CopyFilesToOutputDirectory" />
+
+
+    <!-- Client assembly info & DLL generation -->
+    <PropertyGroup Condition="'$(ClientOutputName)' != ''">
+      <_ClientIntermediateAssemblyPath>$(IntermediateOutputPath)$(ClientOutputName).dll</_ClientIntermediateAssemblyPath>
+      <_ClientIntermediateSymbolsPath>$(IntermediateOutputPath)$(ClientOutputName).pdb</_ClientIntermediateSymbolsPath>
+      <_ClientAssemblyInfoFile>$(_ClientIntermediateFilePathNoExt)_AssemblyInfo.cs</_ClientAssemblyInfoFile>
+      <_ClientFileVersion Condition="'$(ClientFileVersion)' != ''">$(ClientFileVersion)</_ClientFileVersion>
+      <_ClientFileVersion Condition="'$(ClientFileVersion)' == ''" >$(FileVersion)</_ClientFileVersion>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(ClientOutputName)' != ''">
+      <ClientCompilationSource Include="$(_ClientIntermediateFilePath)" />
+      <ClientCompilationSource Include="$(_ClientAssemblyInfoFile)" />
+
+      <ClientAssemblyAttribute Include="@(AssemblyAttribute)" />
+      <ClientAssemblyAttribute Include="AssemblyTitle">
+        <_Parameter1>$(ClientOutputName)</_Parameter1>
+      </ClientAssemblyAttribute>
+      <ClientAssemblyAttribute Include="AssemblyFileVersion" Condition="'$(_ClientFileVersion)' != ''">
+        <_Parameter1>$(_ClientFileVersion)</_Parameter1>
+      </ClientAssemblyAttribute>
+    </ItemGroup>
+
+    <WriteCodeFragment AssemblyAttributes="@(ClientAssemblyAttribute)" Language="C#" OutputFile="$(_ClientAssemblyInfoFile)" Condition="'$(ClientOutputName)' != ''" />
+
+    <Csc Condition="'$(ClientOutputName)' != ''"
+         DebugType="$(DebugType)"
+         DefineConstants="$(DefineConstants)"
+         EmitDebugInformation="$(DebugSymbols)"
+         KeyFile="$(AssemblyOriginatorKeyFile)"
+         LangVersion="$(LangVersion)"
+         OutputAssembly="$(_ClientIntermediateAssemblyPath)"
+         Sources="@(ClientCompilationSource)"
+         TargetType="$(OutputType)" />
+
+    <Copy SourceFiles="$(_ClientIntermediateAssemblyPath)"
+          DestinationFolder="$(OutDir)"
+          SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
+          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+          Retries="$(CopyRetryCount)"
+          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+          UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
+          UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
+          Condition="'$(ClientOutputName)' != '' and '$(CopyBuildOutputToOutputDirectory)' == 'true' and '$(SkipCopyBuildProduct)' != 'true'">
+      <Output TaskParameter="DestinationFiles" ItemName="MainAssembly"/>
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+    </Copy>
+    <Copy SourceFiles="$(_ClientIntermediateSymbolsPath)"
+          DestinationFolder="$(OutDir)"
+          SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
+          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+          Retries="$(CopyRetryCount)"
+          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+          UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
+          UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
+          Condition="'$(ClientOutputName)' != '' and '$(_DebugSymbolsProduced)'=='true' and '$(SkipCopyingSymbolsToOutputDirectory)' != 'true' and '$(CopyOutputSymbolsToOutputDirectory)'=='true'">
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+    </Copy>
+
+
+    <!-- Publish docs -->
+    <ItemGroup>
+      <_DocsFiles Include="$(AreaName).yml" />
+      <_DocsFiles Include="$(AreaName).json" />
+
+      <_DocsFiles>
+        <SourcePath>$(IntermediateOutputPath)%(Filename)%(Extension)</SourcePath>
+        <TargetPath Condition="$(DocsDir) != ''">$(DocsDir)$([System.String]::Copy('%(Extension)').TrimStart('.'))\%(Filename)%(Extension)</TargetPath>
+      </_DocsFiles>
+
+      <_DocsSources Include="@(_DocsFiles->'%(SourcePath)')" Condition="$(DocsDir) != '' AND Exists('%(SourcePath)')" />
+      <_DocsTargets Include="@(_DocsSources->'%(TargetPath)')" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_DocsSources)"
+          DestinationFiles="@(_DocsTargets)" />
+  </Target>
+
+  <!-- Run SQL code analysis and compile database access artifacts -->
+  <Target Name="SqlCore"
+          BeforeTargets="CoreCompile"
+          DependsOnTargets="SetupSqlBuildInputs;SetupSqlBuildOutputs;ResolveArtifactReferences"
+          Inputs="@(SqlCoreInput)"
+          Outputs="@(SqlCoreOutput)">
+    <!-- Configuration -->
+    <PropertyGroup>
+      <SqlNamingConventionPrefix Condition="'$(SqlNamingConventionPrefix)' == ''">dbx</SqlNamingConventionPrefix>
+
+      <ProductName Condition="'$(ProductName)' == ''">$(RootNamespace.Split('.')[0])</ProductName>
+      <AreaName Condition="$(AreaName) == '' and $(RootNamespace.Split('.').Length) > 1">$(RootNamespace.Split('.')[1])</AreaName>
+      <Title Condition="$(Title) == ''">$(AreaName)</Title>
+      <Description Condition="$(Description) == '' and $(Build_Repository_Uri) != '' and $(Build_SourceVersion) != '' and $(Build_SourceBranch) != ''">__Build version:__ $([System.DateTime]::Now.ToString(G))\r\n\r\n__Source version:__ [$(Build_SourceVersion)]($(Build_Repository_Uri)/commit/$(Build_SourceVersion)?refName=$(Build_SourceBranch))</Description>
+      <LangVersion>latest</LangVersion>
+      <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
+      <CopyOutputSymbolsToOutputDirectory>true</CopyOutputSymbolsToOutputDirectory>
+
+      <_ServerOutputName>$(AssemblyName)</_ServerOutputName>
+      <_ServerIntermediateFilePathNoExt>$(IntermediateOutputPath)$(_ServerOutputName)</_ServerIntermediateFilePathNoExt>
+      <_ServerIntermediateFilePath>$(_ServerIntermediateFilePathNoExt).cs</_ServerIntermediateFilePath>
+      <_ClientIntermediateFilePathNoExt Condition="'$(ClientOutputName)' != ''">$(IntermediateOutputPath)$(ClientOutputName)</_ClientIntermediateFilePathNoExt>
+      <_ClientIntermediateFilePath Condition="'$(ClientOutputName)' != ''">$(_ClientIntermediateFilePathNoExt).cs</_ClientIntermediateFilePath>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <SqlCodeAnalysisScriptItem Include="@(PreDeploy)" />
+      <SqlCodeAnalysisScriptItem Include="@(PostDeploy)" />
+
+      <ServerCompilationReference Include="@(ArtifactReference->'%(RelativeDir)%(Filename).dll')"
+                                  Condition="Exists('%(RelativeDir)%(Filename).dll') AND !$([System.Text.RegularExpressions.Regex]::IsMatch('%(Filename)%(Extension)', '^master|msdb(\.dacpac)$'))" />
+    </ItemGroup>
+
+    <!-- Prepare & write input file then exec CLI -->
+    <PropertyGroup>
+      <_SqlCoreInputFile>$(IntermediateOutputPath)core.input</_SqlCoreInputFile>
+    </PropertyGroup>
+
+    <DumpItem Source="@(SqlCodeAnalysisScriptItem)">
+      <Output TaskParameter="Result" PropertyName="_SqlCodeAnalysisScriptItem"/>
+    </DumpItem>
+    <DumpItem Source="@(Build)">
+      <Output TaskParameter="Result" PropertyName="_Build"/>
+    </DumpItem>
+    <DumpItem Source="@(Contract)">
+      <Output TaskParameter="Result" PropertyName="_Contract"/>
+    </DumpItem>
+    <DumpItem Source="@(Endpoint)">
+      <Output TaskParameter="Result" PropertyName="_Endpoint"/>
+    </DumpItem>
+    <DumpItem Source="@(ServerCompilationReference)">
+      <Output TaskParameter="Result" PropertyName="_ServerCompilationReference"/>
+    </DumpItem>
+    <DumpItem Source="@(SqlReferencePath)">
+      <Output TaskParameter="Result" PropertyName="_SqlReferencePath"/>
+    </DumpItem>
+
+    <ItemGroup>
+      <_SqlCoreInputItem Include="ProjectName
+  $(MSBuildProjectName)" />
+      <_SqlCoreInputItem Include="ProjectDirectory
+  $(MSBuildProjectDirectory)" />
+      <_SqlCoreInputItem Include="NamingConventionPrefix
+  $(SqlNamingConventionPrefix)" />
+      <_SqlCoreInputItem Include="StaticCodeAnalysisSucceededFile
+  $(StaticCodeAnalysisSucceededFile)" />
+      <_SqlCoreInputItem Include="ResultsFile
+  $(ResultsFile)" />
+      <_SqlCoreInputItem Include="ProductName
+  $(ProductName)" />
+      <_SqlCoreInputItem Include="AreaName
+  $(AreaName)" />
+      <_SqlCoreInputItem Include="Title
+  $(Title)" />
+      <_SqlCoreInputItem Include="Version
+  $(FileVersion)" />
+      <_SqlCoreInputItem Include="Description
+  $(Description)" />
+      <_SqlCoreInputItem Include="BaseUrl
+  $(BaseUrl)" />
+      <_SqlCoreInputItem Include="DefaultOutputFilePath
+  $(_ServerIntermediateFilePath)" />
+      <_SqlCoreInputItem Include="ClientOutputFilePath
+  $(_ClientIntermediateFilePath)" />
+      <_SqlCoreInputItem Include="BuildingInsideVisualStudio
+  $(BuildingInsideVisualStudio)" />
+      <_SqlCoreInputItem Include="Source
+$(_Build)" />
+      <_SqlCoreInputItem Include="ScriptSource
+$(_SqlCodeAnalysisScriptItem)" />
+      <_SqlCoreInputItem Include="Contracts
+$(_Contract)" />
+      <_SqlCoreInputItem Include="Endpoints
+$(_Endpoint)" />
+      <_SqlCoreInputItem Include="References
+$(_ServerCompilationReference)" />
+      <_SqlCoreInputItem Include="DatabaseSchemaProviderName
+  $(DSP)" />
+      <_SqlCoreInputItem Include="ModelCollation
+  $(ModelCollation)" />
+      <_SqlCoreInputItem Include="IsEmbedded
+  $(IsEmbedded)" />
+      <_SqlCoreInputItem Include="SqlReferencePath
+$(_SqlReferencePath)" />
+    </ItemGroup>
+
+    <WriteLinesToFile File="$(_SqlCoreInputFile)" Lines="@(_SqlCoreInputItem)" Overwrite="True" />
+
+    <PropertyGroup>
+      <_SqlCoreCommand>$(DibixCliPath) core "$(_SqlCoreInputFile)"</_SqlCoreCommand>
+      <_SqlCoreCommand Condition="'$(ResetSuppressions)' != ''">$(_SqlCoreCommand) -s $(ResetSuppressions)</_SqlCoreCommand>
+    </PropertyGroup>
+
+    <Exec Command="$(_SqlCoreCommand)" />
+
+    <!-- Shared assembly info -->
+    <PropertyGroup>
+      <Product Condition="'$(Product)' == ''">$(ProductName)</Product>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <AssemblyAttribute Include="AssemblyCompany" Condition="'$(Company)' != ''">
+        <_Parameter1>$(Company)</_Parameter1>
+      </AssemblyAttribute>
+      <AssemblyAttribute Include="AssemblyProduct" Condition="'$(Product)' != ''">
+        <_Parameter1>$(Product)</_Parameter1>
+      </AssemblyAttribute>
+      <AssemblyAttribute Include="AssemblyCopyright" Condition="'$(Copyright)' != ''">
+        <_Parameter1>$(Copyright)</_Parameter1>
+      </AssemblyAttribute>
+      <AssemblyAttribute Include="AssemblyInformationalVersion" Condition="'$(InformationalVersion)' != ''">
+        <_Parameter1>$(InformationalVersion)</_Parameter1>
+      </AssemblyAttribute>
+    </ItemGroup>
+
+    <!-- Server assembly info & DLL generation -->
+    <PropertyGroup>
+      <_ServerAssemblyInfoFile>$(_ServerIntermediateFilePathNoExt)_AssemblyInfo.cs</_ServerAssemblyInfoFile>
+      <_ServerFileVersion>$(FileVersion)</_ServerFileVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ServerCompilationSource Include="$(_ServerIntermediateFilePath)" />
+      <ServerCompilationSource Include="$(_ServerAssemblyInfoFile)" />
+      <ServerCompilationReference Include="$(DibixRuntimePath)" />
+      <ServerCompilationReference Include="System.ComponentModel.DataAnnotations.dll" />
+      <ServerCompilationReference Include="$(DibixToolsDirectory)Newtonsoft.Json.dll" />
+
+      <ServerAssemblyAttribute Include="@(AssemblyAttribute)" />
+      <ServerAssemblyAttribute Include="AssemblyTitle">
+        <_Parameter1>$(_ServerOutputName)</_Parameter1>
+      </ServerAssemblyAttribute>
+      <ServerAssemblyAttribute Include="AssemblyFileVersion" Condition="'$(_ServerFileVersion)' != ''">
+        <_Parameter1>$(_ServerFileVersion)</_Parameter1>
+      </ServerAssemblyAttribute>
+    </ItemGroup>
+
+    <WriteCodeFragment Condition="'$(CompileArtifactsNetStandard)' == ''"
+                       AssemblyAttributes="@(ServerAssemblyAttribute)"
                        Language="C#"
                        OutputFile="$(_ServerAssemblyInfoFile)" />
 
