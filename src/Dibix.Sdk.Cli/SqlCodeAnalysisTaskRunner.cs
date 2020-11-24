@@ -16,6 +16,8 @@ namespace Dibix.Sdk.Cli
               , modelCollation: configuration.GetSingleValue<string>("ModelCollation")
               , namingConventionPrefix: configuration.GetSingleValue<string>("NamingConventionPrefix")
               , isEmbedded: configuration.GetSingleValue<bool>("IsEmbedded")
+              , staticCodeAnalysisSucceededFile: configuration.GetSingleValue<string>("StaticCodeAnalysisSucceededFile")
+              , resultsFile: configuration.GetSingleValue<string>("ResultsFile")
               , source: configuration.GetItems("Source")
               , scriptSource: configuration.GetItems("ScriptSource")
               , sqlReferencePath: configuration.GetItems("SqlReferencePath")

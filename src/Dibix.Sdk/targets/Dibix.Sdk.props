@@ -7,6 +7,9 @@
     <DibixRuntimePath>$(DibixToolsDirectory)Dibix.dll</DibixRuntimePath>
     <DibixRuntimeXplatPath>$(DibixToolsDirectory)..\netstandard2.0\Dibix.dll</DibixRuntimeXplatPath>
 
+    <!-- We have our own CA target, which also executes the native SqlStaticCodeAnalysis -->
+    <RunSqlCodeAnalysis>false</RunSqlCodeAnalysis>
+
     <IsEmbedded Condition="'$(IsEmbedded)' == ''">$(MSBuildProjectName.EndsWith('.DML'))</IsEmbedded>
     <ClientAssemblyTargetPath Condition="'$(ClientOutputName)' != ''">$(TargetDir)$(ClientOutputName).dll</ClientAssemblyTargetPath>
     <ClientSymbolsTargetPath Condition="'$(ClientOutputName)' != ''">$(TargetDir)$(ClientOutputName).pdb</ClientSymbolsTargetPath>

@@ -38,12 +38,13 @@ namespace Dibix.Sdk.VisualStudio
         #region ILogger Members
         public void LogMessage(string text) => throw new NotSupportedException();
 
-        public void LogError(string code, string text, string source, int line, int column)
+        public void LogError(string code, string text, string source, int? line, int? column) => this.LogError(subCategory: null, code: code, text: text, source: source, line: line, column: column);
+        public void LogError(string subCategory, string code, string text, string source, int? line, int? column)
         {
             // Apparently errors are reported with distinct description, even though a different position is supplied
             // To make it work we append the position to the message
             string normalizedText = String.Concat(text, ZeroWidthUtility.MaskText($" ({line},{column})"));
-            this._errors.Add(new CompilerError(source, line, column, code, normalizedText));
+            this._errors.Add(new CompilerError(source, line ?? default, column ?? default, code, normalizedText));
         }
         #endregion
 

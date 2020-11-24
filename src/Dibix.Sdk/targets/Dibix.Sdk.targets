@@ -124,6 +124,12 @@
   $(SqlNamingConventionPrefix)" />
       <_SqlCodeAnalysisInputItem Include="IsEmbedded
   $(IsEmbedded)" />
+      <_SqlCodeAnalysisInputItem Include="StaticCodeAnalysisSucceededFile
+  $(StaticCodeAnalysisSucceededFile)" />
+      <_SqlCodeAnalysisInputItem Include="BuildingInsideVisualStudio
+  $(BuildingInsideVisualStudio)" />
+      <_SqlCodeAnalysisInputItem Include="ResultsFile
+  $(ResultsFile)" />
       <_SqlCodeAnalysisInputItem Include="Source
 $(_Build)" />
       <_SqlCodeAnalysisInputItem Include="ScriptSource
@@ -218,6 +224,8 @@ $(_SqlReferencePath)" />
   $(_ServerIntermediateFilePath)" />
       <_CodeGenerationInputItem Include="ClientOutputFilePath
   $(_ClientIntermediateFilePath)" />
+      <_CodeGenerationInputItem Include="BuildingInsideVisualStudio
+  $(BuildingInsideVisualStudio)" />
       <_CodeGenerationInputItem Include="Source
 $(_Build)" />
       <_CodeGenerationInputItem Include="Contracts

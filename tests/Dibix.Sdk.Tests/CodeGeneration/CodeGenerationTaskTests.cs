@@ -58,7 +58,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         public void Inline_SinglePrimitiveResult_WithoutDeclaration_Error()
         {
             this.ExecuteTestAndExpectError(@"Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql", @"One or more errors occured during code generation:
-Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(5,2) : Error : Missing return declaration for output. Please decorate the statement with the following hint to describe the output: -- @Return <ContractName>");
+Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(5,2,5,2):error:Missing return declaration for output. Please decorate the statement with the following hint to describe the output: -- @Return <ContractName>");
         }
 
         [Fact]
@@ -277,15 +277,15 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(5,2) 
         public void Inline_SingleConcreteResult_WithUnknownResultContract_Error()
         {
             this.ExecuteTestAndExpectError(@"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontract.sql", @"One or more errors occured during code generation:
-Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontract.sql(1,21) : Error : Could not resolve type 'X'");
+Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontract.sql(1,21,1,21):error:Could not resolve type 'X'");
         }
 
         [Fact]
         public void Inline_SingleConcreteResult_WithUnknownResultContractAssembly_Error()
         {
             this.ExecuteTestAndExpectError(@"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly.sql", @"One or more errors occured during code generation:
-Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly.sql(1,23) : Error : Could not locate assembly: A
-Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly.sql(1,21) : Error : Could not resolve type 'X,A'");
+Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly.sql(1,23,1,23):error:Could not locate assembly: A
+Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly.sql(1,21,1,21):error:Could not resolve type 'X,A'");
         }
 
         [Fact]
@@ -339,15 +339,15 @@ Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly
         public void InvalidContractSchema_Error()
         {
             this.ExecuteTestAndExpectError(Enumerable.Empty<string>(), Enumerable.Repeat(@"Contracts\Invalid.json", 1), @"One or more errors occured during code generation:
-Contracts\Invalid.json(3,12) : Error : String 'x' does not match regex pattern '^(binary|boolean|byte|datetime|datetimeoffset|decimal|double|float|int16|int32|int64|string|uuid)\??\*?$'. (Invalid.A)
-Contracts\Invalid.json(3,12) : Error : String 'x' does not match regex pattern '^#([\w]+)(.([\w]+))*\??\*?$'. (Invalid.A)
-Contracts\Invalid.json(3,12) : Error : JSON does not match any schemas from 'anyOf'. (Invalid.A)
-Contracts\Invalid.json(3,12) : Error : Invalid type. Expected Object but got String. (Invalid.A)
-Contracts\Invalid.json(3,12) : Error : Invalid type. Expected Object but got String. (Invalid.A)
-Contracts\Invalid.json(3,12) : Error : Invalid type. Expected Object but got String. (Invalid.A)
-Contracts\Invalid.json(3,12) : Error : JSON does not match any schemas from 'anyOf'. (Invalid.A)
-Contracts\Invalid.json(2,14) : Error : Invalid type. Expected Array but got Object. (Invalid)
-Contracts\Invalid.json(2,14) : Error : JSON does not match any schemas from 'anyOf'. (Invalid)");
+Contracts\Invalid.json(3,12,3,12):error:String 'x' does not match regex pattern '^(binary|boolean|byte|datetime|datetimeoffset|decimal|double|float|int16|int32|int64|string|uuid)\??\*?$'. (Invalid.A)
+Contracts\Invalid.json(3,12,3,12):error:String 'x' does not match regex pattern '^#([\w]+)(.([\w]+))*\??\*?$'. (Invalid.A)
+Contracts\Invalid.json(3,12,3,12):error:JSON does not match any schemas from 'anyOf'. (Invalid.A)
+Contracts\Invalid.json(3,12,3,12):error:Invalid type. Expected Object but got String. (Invalid.A)
+Contracts\Invalid.json(3,12,3,12):error:Invalid type. Expected Object but got String. (Invalid.A)
+Contracts\Invalid.json(3,12,3,12):error:Invalid type. Expected Object but got String. (Invalid.A)
+Contracts\Invalid.json(3,12,3,12):error:JSON does not match any schemas from 'anyOf'. (Invalid.A)
+Contracts\Invalid.json(2,14,2,14):error:Invalid type. Expected Array but got Object. (Invalid)
+Contracts\Invalid.json(2,14,2,14):error:JSON does not match any schemas from 'anyOf'. (Invalid)");
         }
     }
 }

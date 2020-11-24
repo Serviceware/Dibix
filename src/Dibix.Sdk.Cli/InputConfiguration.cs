@@ -19,9 +19,12 @@ namespace Dibix.Sdk.Cli
             return new InputConfiguration(arguments);
         }
 
-        public T GetSingleValue<T>(string key)
+        public T GetSingleValue<T>(string key, bool throwOnInvalidKey = true)
         {
-            InputProperty property = this.GetProperty(key);
+            InputProperty property = this.GetProperty(key, throwOnInvalidKey);
+            if (!throwOnInvalidKey && property == null)
+                return default;
+
             TaskItem item = property.Values.SingleOrDefault();
             if (item == null)
                 return default;
@@ -31,14 +34,19 @@ namespace Dibix.Sdk.Cli
 
         public ICollection<TaskItem> GetItems(string key)
         {
-            InputProperty property = this.GetProperty(key);
+            InputProperty property = this.GetProperty(key, throwOnInvalidKey: true);
             return property.Values;
         }
 
-        private InputProperty GetProperty(string key)
+        private InputProperty GetProperty(string key, bool throwOnInvalidKey)
         {
             if (!this._arguments.TryGetValue(key, out InputProperty property))
+            {
+                if (!throwOnInvalidKey)
+                    return null;
+
                 throw new KeyNotFoundException($"Property not found: {key}");
+            }
 
             return property;
         }

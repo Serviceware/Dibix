@@ -15,7 +15,7 @@ using Assembly = System.Reflection.Assembly;
 
 namespace Dibix.Sdk.Sql
 {
-    internal static class PublicSqlDataSchemaModelLoader
+    public static class PublicSqlDataSchemaModelLoader
     {
         #region Fields
         private static readonly Assembly TasksAssembly = typeof(SqlBuildTask).Assembly;
@@ -219,8 +219,8 @@ namespace Dibix.Sdk.Sql
               , Expression.Call(Expression.Property(builder.Element, "ErrorCode"), "ToString", new Type[0])
               , Expression.Property(builder.Element, "Message")
               , Expression.Property(builder.Element, "Document")
-              , Expression.Property(builder.Element, "Line")
-              , Expression.Property(builder.Element, "Column")
+              , Expression.Convert(Expression.Property(builder.Element, "Line"), typeof(int?))
+              , Expression.Convert(Expression.Property(builder.Element, "Column"), typeof(int?))
             );
             builder.AddStatement(logErrorCall);
         }

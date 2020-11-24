@@ -9,7 +9,9 @@ using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using Dibix.Sdk.CodeAnalysis;
+using Dibix.Sdk.Sql;
 using Dibix.Tests;
+using Microsoft.SqlServer.Dac.Model;
 using Xunit.Abstractions;
 
 namespace Dibix.Sdk.Tests.CodeAnalysis
@@ -37,7 +39,8 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
 
             TestLogger logger = new TestLogger(this._output);
 
-            ISqlCodeAnalysisRuleEngine engine = SqlCodeAnalysisRuleEngine.Create(DatabaseTestUtility.ProjectName, DatabaseTestUtility.DatabaseSchemaProviderName, DatabaseTestUtility.ModelCollation, "dbx", false, sources, new TaskItem[0], logger);
+            TSqlModel model = PublicSqlDataSchemaModelLoader.Load(DatabaseTestUtility.ProjectName, DatabaseTestUtility.DatabaseSchemaProviderName, DatabaseTestUtility.ModelCollation, sources, new TaskItem[0], logger);
+            ISqlCodeAnalysisRuleEngine engine = SqlCodeAnalysisRuleEngine.Create(model, DatabaseTestUtility.ProjectName, "dbx", false, logger);
             IEnumerable<SqlCodeAnalysisError> errors = engine.Analyze(violationScriptPath, ruleInstance);
 
             string actual = GenerateXmlFromResults(errors);

@@ -42,9 +42,8 @@ namespace Dibix.Sdk.CodeAnalysis
         #endregion
 
         #region Factory Methods
-        public static SqlCodeAnalysisRuleEngine Create(string projectName, string databaseSchemaProviderName, string modelCollation, string namingConventionPrefix, bool isEmbedded, IEnumerable<TaskItem> source, ICollection<TaskItem> sqlReferencePath, ILogger logger)
+        public static SqlCodeAnalysisRuleEngine Create(TSqlModel model, string projectName, string namingConventionPrefix, bool isEmbedded, ILogger logger)
         {
-            TSqlModel model = PublicSqlDataSchemaModelLoader.Load(projectName, databaseSchemaProviderName, modelCollation, source, sqlReferencePath, logger);
             return new SqlCodeAnalysisRuleEngine(model, projectName, namingConventionPrefix, isEmbedded, logger);
         }
         #endregion

@@ -19,10 +19,11 @@ namespace Dibix.Sdk.Tests
 
         public void LogMessage(string text) => this._messageOutput.WriteLine(text);
 
-        public void LogError(string code, string text, string source, int line, int column)
+        public void LogError(string code, string text, string source, int? line, int? column) => this.LogError(subCategory: null, code: code, text: text, source: source, line: line, column: column);
+        public void LogError(string subCategory, string code, string text, string source, int? line, int? column)
         {
             string relativeSource = source.Substring(DatabaseTestUtility.DatabaseProjectDirectory.Length + 1);
-            this._errorOutput.AppendLine(CanonicalLogFormat.ToErrorString(code, text, relativeSource, line, column));
+            this._errorOutput.AppendLine(CanonicalLogFormat.ToErrorString(subCategory, code, text, relativeSource, line, column));
         }
 
         public void Verify()
