@@ -146,7 +146,7 @@ CommandText: <Dynamic>
                 Assert.Equal(@"Oops
 CommandType: StoredProcedure
 CommandText: x
-Parameter a(BINARY): System.Byte[]
+Parameter a(Binary): System.Byte[]
 Parameter b([dbo].[x]):
 intValue INT(4)  stringValue NVARCHAR(MAX)
 ---------------  -------------------------
@@ -193,7 +193,7 @@ intValue INT(4)  stringValue NVARCHAR(MAX)
                 Assert.Equal(@"Oops
 CommandType: Text
 CommandText: <Dynamic>
-Parameter a(BINARY): System.Byte[]
+Parameter a(Binary): System.Byte[]
 Parameter b([dbo].[x]):
 intValue INT(4)  stringValue NVARCHAR(MAX)
 ---------------  -------------------------

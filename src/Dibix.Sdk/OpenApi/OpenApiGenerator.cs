@@ -81,11 +81,12 @@ namespace Dibix.Sdk.OpenApi
                     foreach (ActionDefinition action in path)
                     {
                         OperationType operationType = (OperationType)Enum.Parse(typeof(OperationType), action.Method.ToString());
+                        string operationId = operationIds[action];
 
                         OpenApiOperation operation = new OpenApiOperation();
                         operation.Tags.Add(new OpenApiTag { Name = controller.Name });
-                        operation.Summary = action.Description ?? "Undocumented action";
-                        operation.OperationId = operationIds[action];
+                        operation.Summary = action.Description ?? operationId;
+                        operation.OperationId = operationId;
 
                         AppendParameters(document, operation, action, rootNamespace, schemaRegistry);
                         AppendBody(document, operation, action, rootNamespace, schemaRegistry);

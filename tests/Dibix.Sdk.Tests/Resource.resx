@@ -429,7 +429,7 @@ paths:
     get:
       tags:
         - GenericEndpoint
-      summary: Undocumented action
+      summary: EmptyWithParams1
       operationId: EmptyWithParams1
       parameters:
         - name: password
@@ -453,7 +453,7 @@ paths:
     get:
       tags:
         - GenericEndpoint
-      summary: Undocumented action
+      summary: EmptyWithParams2
       operationId: EmptyWithParams2
       parameters:
         - name: password
@@ -495,7 +495,7 @@ paths:
     get:
       tags:
         - GenericEndpoint
-      summary: Undocumented action
+      summary: SingleConrecteResultWithParams
       operationId: SingleConrecteResultWithParams
       parameters:
         - name: ids
@@ -518,7 +518,7 @@ paths:
     post:
       tags:
         - GenericEndpoint
-      summary: Undocumented action
+      summary: EmptyWithParams3
       operationId: EmptyWithParams3
       requestBody:
         content:
