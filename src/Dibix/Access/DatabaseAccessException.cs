@@ -38,7 +38,7 @@ namespace Dibix
                     parameterDescription = structuredType.Dump();
                 }
                 else
-                    parameterType = type.ToString().ToUpperInvariant();
+                    parameterType = type.ToString();
 
                 if (parameterType != null)
                 {
