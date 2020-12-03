@@ -29,9 +29,9 @@ namespace Dibix.Dapper
             return base.Connection.Execute(sql, PrepareParameters(parameters), this._transaction, commandType: commandType);
         }
 
-        protected override Task<int> ExecuteAsync(string sql, CommandType commandType, IParametersVisitor parameters, CancellationToken cancellationToken)
+        protected override Task<int> ExecuteAsync(string sql, CommandType commandType, int? commandTimeout, IParametersVisitor parameters, CancellationToken cancellationToken)
         {
-            CommandDefinition command = new CommandDefinition(sql, PrepareParameters(parameters), this._transaction, commandType: commandType, cancellationToken: cancellationToken);
+            CommandDefinition command = new CommandDefinition(sql, PrepareParameters(parameters), this._transaction, commandTimeout, commandType, cancellationToken: cancellationToken);
             return base.Connection.ExecuteAsync(command);
         }
 

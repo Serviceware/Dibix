@@ -33,13 +33,18 @@ namespace Dibix
         public static Task<int> ExecuteAsync(this IDatabaseAccessor accessor, string sql, CancellationToken cancellationToken)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.ExecuteAsync(sql, CommandType.Text, EmptyParameters.Instance, cancellationToken);
+            return accessor.ExecuteAsync(sql, CommandType.Text, commandTimeout: null, EmptyParameters.Instance, cancellationToken);
         }
         // Configurator (UpdateKnowledgeBaseServiceConfiguration)
         public static Task<int> ExecuteAsync(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, CancellationToken cancellationToken)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.ExecuteAsync(sql, CommandType.Text, parameters, cancellationToken);
+            return accessor.ExecuteAsync(sql, CommandType.Text, commandTimeout: null, parameters, cancellationToken);
+        }
+        public static Task<int> ExecuteAsync(this IDatabaseAccessor accessor, string sql, CommandType commandType, IParametersVisitor parameters, CancellationToken cancellationToken)
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
+            return accessor.ExecuteAsync(sql, commandType, commandTimeout: null, parameters, cancellationToken);
         }
     }
 }
