@@ -236,7 +236,7 @@ namespace Dibix.Sdk.OpenApi
                 default:
                 {
                     //throw new ArgumentOutOfRangeException(nameof(actionTarget), actionTarget, "Unsupported action target for Open API response");
-                    hasParameterInformation = true;
+                    hasParameterInformation = false;
                     return new Dictionary<string, ActionParameter>();
                 }
             }
