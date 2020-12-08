@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -31,7 +30,7 @@ namespace Dibix.Sdk.CodeGeneration
             this._neighborStatementMap = new ConcurrentDictionary<string, NeighborActionTarget>();
         }
 
-        public ActionDefinitionTarget Select(string target, string filePath, IJsonLineInfo lineInfo)
+        public ActionDefinitionTarget Select(string target, string filePath, int line, int column)
         {
             // 1. Target is a reflection target within a foreign assembly
             bool isExternal = target.Contains(",");
@@ -61,21 +60,21 @@ namespace Dibix.Sdk.CodeGeneration
             if (!isAbsolute)
             {
                 this._logger.LogError(null, $@"Could not find action target: {target}
-Tried: {normalizedNamespace}.{methodName}", filePath, lineInfo.LineNumber, lineInfo.LinePosition);
+Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
                 return null;
             }
 
             // 3. Target 'could' be a compiled method in a neighbour project
-            if (!this.TryGetNeighborActionTarget(methodName, filePath, lineInfo, out NeighborActionTarget neighborAction))
+            if (!this.TryGetNeighborActionTarget(methodName, filePath, line, column, out NeighborActionTarget neighborAction))
             {
-                this._logger.LogError(null, $"Could not find a method named '{methodName}' on database accessor type '{typeName}'", filePath, lineInfo.LineNumber, lineInfo.LinePosition);
+                this._logger.LogError(null, $"Could not find a method named '{methodName}' on database accessor type '{typeName}'", filePath, line, column);
                 return null;
             }
 
             return neighborAction;
         }
 
-        private bool TryGetNeighborActionTarget(string methodName, string filePath, IJsonLineInfo lineInfo, out NeighborActionTarget target)
+        private bool TryGetNeighborActionTarget(string methodName, string filePath, int line, int column, out NeighborActionTarget target)
         {
             if (this._neighborStatementMap.TryGetValue(methodName, out target))
                 return true;
@@ -89,7 +88,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, lineInfo.LineNumber, lineI
                             from method in type.GetMethods()
                             where method.Name == methodName
                                || method.Name == $"{methodName}Async"
-                            select this.CreateNeighborActionTarget(method, filePath, lineInfo);
+                            select this.CreateNeighborActionTarget(method, filePath, line, column);
 
                 return query.FirstOrDefault();
             });
@@ -104,7 +103,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, lineInfo.LineNumber, lineI
             return false;
         }
 
-        private NeighborActionTarget CreateNeighborActionTarget(MethodInfo method, string filePath, IJsonLineInfo lineInfo)
+        private NeighborActionTarget CreateNeighborActionTarget(MethodInfo method, string filePath, int line, int column)
         {
             string operationName = method.Name;
             Type returnType = method.ReturnType;
@@ -120,7 +119,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, lineInfo.LineNumber, lineI
 
             TypeReference resultType = null;
             if (returnType != typeof(void))
-                resultType = ReflectionTypeResolver.ResolveType(returnType, filePath, lineInfo.LineNumber, lineInfo.LinePosition, this._schemaRegistry);
+                resultType = ReflectionTypeResolver.ResolveType(returnType, filePath, line, column, this._schemaRegistry);
 
             NeighborActionTarget target = new NeighborActionTarget(method.DeclaringType.FullName, resultType, operationName, isAsync);
             method.CollectErrorResponses((statusCode, errorCode, errorDescription, isClientError) => target.ErrorResponses.Add(new ErrorResponse(statusCode, errorCode, errorDescription, isClientError)));
@@ -128,7 +127,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, lineInfo.LineNumber, lineI
             IEnumerable<ParameterInfo> parameters = method.GetExternalParameters(isAsync);
             foreach (ParameterInfo parameter in parameters)
             {
-                TypeReference parameterType = ReflectionTypeResolver.ResolveType(parameter.ParameterType, filePath, lineInfo.LineNumber, lineInfo.LinePosition, this._schemaRegistry);
+                TypeReference parameterType = ReflectionTypeResolver.ResolveType(parameter.ParameterType, filePath, line, column, this._schemaRegistry);
                 
                 // ParameterInfo.HasDefaultValue/DefaultValue => It is illegal to reflect on the custom attributes of a Type loaded via ReflectionOnlyGetType (see Assembly.ReflectionOnly) -- use CustomAttributeData instead
                 bool hasDefaultValue = parameter.RawDefaultValue != DBNull.Value;

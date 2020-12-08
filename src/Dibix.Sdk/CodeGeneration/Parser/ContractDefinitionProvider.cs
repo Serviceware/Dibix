@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using Dibix.Sdk.Json;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -103,6 +104,7 @@ If this is not a project that has multiple areas, please make sure to define the
                     contract.WcfNamespace = (string)property.Value;
                 else
                 {
+                    JValue typeNameValue;
                     string typeName;
                     bool isPartOfKey = default;
                     bool isDiscriminator = default;
@@ -113,7 +115,8 @@ If this is not a project that has multiple areas, please make sure to define the
                     {
                         case JTokenType.Object:
                             JObject propertyInfo = (JObject)property.Value;
-                            typeName = (string)propertyInfo.Property("type").Value;
+                            typeNameValue = (JValue)propertyInfo.Property("type").Value;
+                            typeName = (string)typeNameValue;
                             isPartOfKey = (bool?)propertyInfo.Property("isPartOfKey")?.Value ?? default;
                             isDiscriminator = (bool?)propertyInfo.Property("isDiscriminator")?.Value ?? default;
                             Enum.TryParse((string)propertyInfo.Property("serialize")?.Value, true, out serializationBehavior);
@@ -124,14 +127,15 @@ If this is not a project that has multiple areas, please make sure to define the
                             break;
 
                         case JTokenType.String:
-                            typeName = (string)property.Value;
+                            typeNameValue = (JValue)property.Value;
+                            typeName = (string)typeNameValue;
                             break;
 
                         default:
                             throw new ArgumentOutOfRangeException(nameof(property.Type), property.Type, null);
                     }
 
-                    TypeReference type = ParseType(typeName, rootNamespace, filePath, property.Value);
+                    TypeReference type = ParseType(typeName, rootNamespace, filePath, typeNameValue);
                     contract.Properties.Add(new ObjectSchemaProperty(property.Name, type, isPartOfKey, isDiscriminator, serializationBehavior, dateTimeKind, obfuscated));
                 }
             }
@@ -190,7 +194,7 @@ If this is not a project that has multiple areas, please make sure to define the
             }
         }
 
-        private static TypeReference ParseType(string typeName, string rootNamespace, string filePath, IJsonLineInfo location)
+        private static TypeReference ParseType(string typeName, string rootNamespace, string filePath, JValue value)
         {
             bool isEnumerable = typeName.EndsWith("*", StringComparison.Ordinal);
             typeName = typeName.TrimEnd('*');
@@ -202,7 +206,11 @@ If this is not a project that has multiple areas, please make sure to define the
             typeName = typeName.TrimStart('#');
 
             if (isTypeReference)
-                return new SchemaTypeReference($"{rootNamespace}.{typeName}", filePath, location.LineNumber, location.LinePosition, isNullable, isEnumerable);
+            {
+                IJsonLineInfo location = value;
+                int column = value.GetCorrectLinePosition() + 1;
+                return new SchemaTypeReference($"{rootNamespace}.{typeName}", filePath, location.LineNumber, column, isNullable, isEnumerable);
+            }
 
             PrimitiveDataType dataType = (PrimitiveDataType)Enum.Parse(typeof(PrimitiveDataType), typeName, true);
             return new PrimitiveTypeReference(dataType, isNullable, isEnumerable);

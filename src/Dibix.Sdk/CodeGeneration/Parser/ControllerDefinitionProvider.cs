@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
+using Dibix.Sdk.Json;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -73,17 +76,40 @@ namespace Dibix.Sdk.CodeGeneration
         private void ReadControllerAction(string filePath, ControllerDefinition controller, JObject action)
         {
             ActionDefinitionTarget actionTarget = this.ReadActionTarget(action, filePath);
+
+            JProperty childRouteProperty = action.Property("childRoute");
+            string childRoute = (string)childRouteProperty?.Value;
+
+            if (childRouteProperty != null && actionTarget is GeneratedAccessorMethodTarget generatedAccessorMethodTarget)
+            {
+                IEnumerable<Group> pathSegments = Regex.Matches(childRoute, @"\{(?<parameter>[^}]+)\}")
+                                                       .Cast<Match>()
+                                                       .Select(x => x.Groups["parameter"]);
+
+                foreach (Group pathSegment in pathSegments)
+                {
+                    if (generatedAccessorMethodTarget.Parameters.ContainsKey(pathSegment.Value)) 
+                        continue;
+
+                    JValue childRouteValue = (JValue)childRouteProperty.Value;
+                    IJsonLineInfo childRouteValueLocation = childRouteProperty.Value;
+                    int matchIndex = pathSegment.Index - 1;
+                    base.Logger.LogError(null, $"Undefined path parameter: {pathSegment.Value}", filePath, childRouteValueLocation.LineNumber, childRouteValue.GetCorrectLinePosition() + matchIndex);
+                }
+            }
+
             Enum.TryParse((string)action.Property("method")?.Value, true, out ActionMethod method);
 
             ActionDefinition actionDefinition = new ActionDefinition(actionTarget)
             {
                 Method = method,
                 Description = (string)action.Property("description")?.Value,
-                ChildRoute = (string)action.Property("childRoute")?.Value,
+                ChildRoute = childRoute,
                 BodyContract = this.ReadBodyContract(action, filePath),
                 BodyBinder = (string)action.Property("bindFromBody")?.Value,
                 IsAnonymous = (bool?)action.Property("isAnonymous")?.Value ?? default
             };
+
             this.ReadControllerActionParameters(actionDefinition, (JObject)action.Property("params")?.Value, filePath);
             if (controller.Actions.Add(actionDefinition))
                 return;
@@ -102,14 +128,15 @@ namespace Dibix.Sdk.CodeGeneration
 
         private ActionDefinitionTarget ReadActionTarget(JObject action, string filePath)
         {
-            JToken targetValue = action.Property("target").Value;
-            ActionDefinitionTarget actionTarget = this._controllerActionTargetSelector.Select((string)targetValue, filePath, targetValue);
+            JValue targetValue = (JValue)action.Property("target").Value;
+            IJsonLineInfo lineInfo = targetValue;
+            ActionDefinitionTarget actionTarget = this._controllerActionTargetSelector.Select((string)targetValue, filePath, lineInfo.LineNumber, targetValue.GetCorrectLinePosition());
             return actionTarget;
         }
 
         private TypeReference ReadBodyContract(JObject action, string filePath)
         {
-            JToken bodyContractValue = action.Property("body")?.Value;
+            JValue bodyContractValue = (JValue)action.Property("body")?.Value;
             if (bodyContractValue == null) 
                 return null;
 
@@ -117,7 +144,7 @@ namespace Dibix.Sdk.CodeGeneration
             IJsonLineInfo bodyContractLocation = bodyContractValue;
             bool isEnumerable = bodyContractTypeName.EndsWith("*", StringComparison.Ordinal);
             bodyContractTypeName = bodyContractTypeName.TrimEnd('*');
-            TypeReference bodyContract = this._typeResolver.ResolveType(bodyContractTypeName, null, filePath, bodyContractLocation.LineNumber, bodyContractLocation.LinePosition, isEnumerable);
+            TypeReference bodyContract = this._typeResolver.ResolveType(bodyContractTypeName, null, filePath, bodyContractLocation.LineNumber, bodyContractValue.GetCorrectLinePosition(), isEnumerable);
             return bodyContract;
         }
 
@@ -137,8 +164,8 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 if (generatedAccessorMethodTarget?.Parameters.ContainsKey(property.Name) == false)
                 {
-                    IJsonLineInfo propertyLocation = property;
-                    base.Logger.LogError(null, $"Parameter '{property.Name}' not found on action: {action.Target.Name}", filePath, propertyLocation.LineNumber, propertyLocation.LinePosition);
+                    IJsonLineInfo propertyLocation = property.Parent;
+                    base.Logger.LogError(null, $"Parameter '{property.Name}' not found on action: {action.Target.Name}", filePath, propertyLocation.LineNumber, property.GetCorrectLinePosition());
                 }
 
                 if (TryReadSource(property, action.ParameterSources))

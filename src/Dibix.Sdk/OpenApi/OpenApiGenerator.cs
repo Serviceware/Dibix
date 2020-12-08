@@ -117,7 +117,7 @@ namespace Dibix.Sdk.OpenApi
                 foreach (string pathParameter in pathParameters)
                 {
                     if (!actionParameters.TryGetValue(pathParameter, out ActionParameter actionParameter)) 
-                        continue;
+                        throw new InvalidOperationException($"Undefined parameter in path segment: {pathParameter}");
 
                     AppendPathParameter(document, operation, actionParameter, pathParameter, rootNamespace, schemaRegistry);
                     visitedActionParameters.Add(actionParameter.Name);
