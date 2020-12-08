@@ -106,7 +106,7 @@ namespace Dibix.Sdk.OpenApi
         private static void AppendParameters(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
             ICollection<string> bodyProperties = GetBodyProperties(action.BodyContract, schemaRegistry);
-            IDictionary<string, ActionParameter> actionParameters = GetActionParameters(action.Target);
+            IDictionary<string, ActionParameter> actionParameters = GetActionParameters(action.Target, out bool hasParameterInformation);
             HashSet<string> visitedActionParameters = new HashSet<string>();
             if (!String.IsNullOrEmpty(action.ChildRoute))
             {
@@ -116,8 +116,13 @@ namespace Dibix.Sdk.OpenApi
 
                 foreach (string pathParameter in pathParameters)
                 {
-                    if (!actionParameters.TryGetValue(pathParameter, out ActionParameter actionParameter)) 
-                        throw new InvalidOperationException($"Undefined parameter in path segment: {pathParameter}");
+                    if (!actionParameters.TryGetValue(pathParameter, out ActionParameter actionParameter))
+                    {
+                        if (hasParameterInformation)
+                            throw new InvalidOperationException($"Undefined parameter in path segment: {pathParameter}");
+
+                        continue;
+                    }
 
                     AppendPathParameter(document, operation, actionParameter, pathParameter, rootNamespace, schemaRegistry);
                     visitedActionParameters.Add(actionParameter.Name);
@@ -216,15 +221,24 @@ namespace Dibix.Sdk.OpenApi
             return apiParameter;
         }
 
-        private static IDictionary<string, ActionParameter> GetActionParameters(ActionDefinitionTarget actionTarget)
+        private static IDictionary<string, ActionParameter> GetActionParameters(ActionDefinitionTarget actionTarget, out bool hasParameterInformation)
         {
             switch (actionTarget)
             {
-                case GeneratedAccessorMethodTarget generatedAccessorActionTarget: return generatedAccessorActionTarget.Parameters;
+                case GeneratedAccessorMethodTarget generatedAccessorActionTarget:
+                {
+                    hasParameterInformation = true;
+                    return generatedAccessorActionTarget.Parameters;
+                }
 
                 //case ReflectionActionTarget reflectionActionTarget:
-                
-                default: return new Dictionary<string, ActionParameter>(); //throw new ArgumentOutOfRangeException(nameof(actionTarget), actionTarget, "Unsupported action target for Open API response");
+
+                default:
+                {
+                    //throw new ArgumentOutOfRangeException(nameof(actionTarget), actionTarget, "Unsupported action target for Open API response");
+                    hasParameterInformation = true;
+                    return new Dictionary<string, ActionParameter>();
+                }
             }
         }
 
