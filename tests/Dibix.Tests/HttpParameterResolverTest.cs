@@ -560,7 +560,7 @@ Parameter: input", exception.Message);
         private static void Compile_ConstantSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, bool boolValue, int intValue, Guid? nullValue) { }
 
         [Fact]
-        public void Compile_UriSource()
+        public void Compile_QuerySource()
         {
             HttpParameterConverterRegistry.Register<EncryptionHttpParameterConverter>("CRYPT2");
             IHttpParameterResolutionMethod result = Compile(x =>
@@ -692,7 +692,7 @@ Parameter: input", exception.Message);
             Assert.Equal("ENCRYPTED(Muffin)", input.targetname);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
-        private static void Compile_UriSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpUriParameterInput input, UriItemSet items, int anotherid, int id = 0, string name = "Cake", bool? @true = true, bool? empty = null) { }
+        private static void Compile_QuerySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpUriParameterInput input, UriItemSet items, int anotherid, int id = 0, string name = "Cake", bool? @true = true, bool? empty = null) { }
 
         [Fact]
         public void Compile_PathSource()

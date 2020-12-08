@@ -173,7 +173,7 @@ namespace Dibix.Sdk.OpenApi
         private static void AppendQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter actionParameter, string rootNamespace, ISchemaRegistry schemaRegistry) => AppendQueryParameter(document, operation, actionParameter, actionParameter.Type, actionParameter.Type.IsEnumerable, rootNamespace, schemaRegistry);
         private static OpenApiParameter AppendQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter actionParameter, TypeReference parameterType, bool isEnumerable, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
-            bool isRequired = !actionParameter.HasDefaultValue && !actionParameter.Type.IsNullable;
+            bool isRequired = !actionParameter.HasDefaultValue;
             return AppendParameter(document, operation, actionParameter, actionParameter.Name, parameterType, isEnumerable, ParameterLocation.Query, isRequired, rootNamespace, schemaRegistry);
         }
 
@@ -432,6 +432,9 @@ namespace Dibix.Sdk.OpenApi
 
                 OpenApiSchema propertySchema = CreateSchema(document, property.Type, rootNamespace, schemaRegistry);
                 schema.Properties.Add(property.Name, propertySchema);
+
+                if (property.SerializationBehavior == SerializationBehavior.Always)
+                    schema.Required.Add(property.Name);
             }
         }
 
