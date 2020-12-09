@@ -10,10 +10,6 @@ namespace Dibix.Sdk.CodeGeneration
         public LocalActionTarget(SqlStatementInfo statement, string outputName) : base($"{statement.Namespace}.{outputName}", statement.ResultType, statement.Name, statement.Async)
         {
             this.Statement = statement;
-            foreach (SqlQueryParameter parameter in statement.Parameters)
-            {
-                base.Parameters.Add(parameter.Name, new ActionParameter(parameter.Name, parameter.Type, parameter.HasDefaultValue, parameter.DefaultValue));
-            }
         }
     }
 }

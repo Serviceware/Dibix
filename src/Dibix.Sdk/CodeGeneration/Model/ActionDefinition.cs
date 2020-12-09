@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -11,12 +12,12 @@ namespace Dibix.Sdk.CodeGeneration
         public TypeReference BodyContract { get; set; }
         public string BodyBinder { get; set; }
         public bool IsAnonymous { get; set; }
-        public IDictionary<string, ActionParameterSource> ParameterSources { get; }
+        public IList<ActionParameter> Parameters { get; }
 
         public ActionDefinition(ActionDefinitionTarget target)
         {
             this.Target = target;
-            this.ParameterSources = new Dictionary<string, ActionParameterSource>();
+            this.Parameters = new Collection<ActionParameter>();
         }
     }
 }

@@ -697,7 +697,12 @@ Parameter: input", exception.Message);
         [Fact]
         public void Compile_PathSource()
         {
-            IHttpParameterResolutionMethod result = Compile(x => x.ChildRoute = "{targetid}/{targetname}/{anotherid}");
+            HttpParameterConverterRegistry.Register<EncryptionHttpParameterConverter>("CRYPT3");
+            IHttpParameterResolutionMethod result = Compile(x =>
+            {
+                x.ChildRoute = "{targetid}/{targetname_}/{anotherid}";
+                x.ResolveParameterFromSource("targetname", "PATH", "targetname_", "CRYPT3");
+            });
             TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
@@ -707,16 +712,13 @@ Parameter: input", exception.Message);
         Dibix.Tests.HttpParameterResolverTest+ExplicitHttpUriParameterInput $input) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
         $arguments.Item[""databaseAccessorFactory""] = (System.Object)$databaseaccessorfactorySource;
-        $arguments.Item[""anotherid""] = (System.Object).Call Dibix.Http.HttpParameterResolver.ConvertValue(
-            ""anotherid"",
-            $arguments.Item[""anotherid""]);
         $input = .New Dibix.Tests.HttpParameterResolverTest+ExplicitHttpUriParameterInput();
         $input.targetid = .Call Dibix.Http.HttpParameterResolver.ConvertValue(
             ""targetid"",
             $arguments.Item[""targetid""]);
-        $input.targetname = .Call Dibix.Http.HttpParameterResolver.ConvertValue(
-            ""targetname"",
-            $arguments.Item[""targetname""]);
+        $input.targetname = .Call Dibix.Tests.HttpParameterResolverTest+EncryptionHttpParameterConverter.Convert(.Call Dibix.Http.HttpParameterResolver.ConvertValue(
+                ""targetname"",
+                $arguments.Item[""targetname_""]));
         $arguments.Item[""input""] = (System.Object)$input
     }
 }", result.Source);
@@ -725,10 +727,10 @@ Parameter: input", exception.Message);
             Assert.Equal(typeof(int), result.Parameters["targetid"].Type);
             Assert.Equal(HttpParameterLocation.Path, result.Parameters["targetid"].Location);
             Assert.False(result.Parameters["targetid"].IsOptional);
-            Assert.Equal("targetname", result.Parameters["targetname"].Name);
-            Assert.Equal(typeof(string), result.Parameters["targetname"].Type);
-            Assert.Equal(HttpParameterLocation.Path, result.Parameters["targetname"].Location);
-            Assert.False(result.Parameters["targetname"].IsOptional);
+            Assert.Equal("targetname_", result.Parameters["targetname_"].Name);
+            Assert.Equal(typeof(string), result.Parameters["targetname_"].Type);
+            Assert.Equal(HttpParameterLocation.Path, result.Parameters["targetname_"].Location);
+            Assert.False(result.Parameters["targetname_"].IsOptional);
             Assert.Equal("anotherid", result.Parameters["anotherid"].Name);
             Assert.Equal(typeof(int), result.Parameters["anotherid"].Type);
             Assert.Equal(HttpParameterLocation.Path, result.Parameters["anotherid"].Location);
@@ -738,7 +740,7 @@ Parameter: input", exception.Message);
             IDictionary<string, object> arguments = new Dictionary<string, object>
             {
                 { "targetid", 9 }
-              , { "targetname", "Muffin" }
+              , { "targetname_", "Muffin" }
               , { "anotherid", 5 }
             };
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
@@ -751,11 +753,10 @@ Parameter: input", exception.Message);
             Assert.Equal(5, arguments.Count);
             Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             Assert.Equal(9, arguments["targetid"]);
-            Assert.Equal("Muffin", arguments["targetname"]);
-            Assert.Equal(5, arguments["anotherid"]);
+            Assert.Equal("Muffin", arguments["targetname_"]);
             ExplicitHttpUriParameterInput input = Assert.IsType<ExplicitHttpUriParameterInput>(arguments["input"]);
             Assert.Equal(9, input.targetid);
-            Assert.Equal("Muffin", input.targetname);
+            Assert.Equal("ENCRYPTED(Muffin)", input.targetname);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
         private static void Compile_PathSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpUriParameterInput input, int anotherid) { }

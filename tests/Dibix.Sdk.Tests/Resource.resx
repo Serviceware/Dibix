@@ -387,8 +387,8 @@ namespace Dibix.Sdk.Tests
                     {
                         y.Method = HttpApiMethod.Get;
                         y.ChildRoute = "{password}/Fixed";
-                        y.ResolveParameterFromSource("x", "DBX", "X");
                         y.ResolveParameterFromNull("password");
+                        y.ResolveParameterFromSource("x", "DBX", "X");
                         y.ResolveParameterFromConstant("y", true);
                         y.ResolveParameterFromConstant("z", 5);
                     });
@@ -463,6 +463,7 @@ paths:
             type: string
         - name: x
           in: query
+          required: true
           schema:
             type: string
             format: uuid
@@ -532,6 +533,9 @@ paths:
 components:
   schemas:
     GenericParameterSet:
+      required:
+        - id
+        - name
       type: object
       properties:
         id:
@@ -542,6 +546,8 @@ components:
           nullable: true
       additionalProperties: false
     GenericContract:
+      required:
+        - CreationTime
       type: object
       properties:
         Name:
@@ -551,6 +557,11 @@ components:
           format: date-time
       additionalProperties: false
     InputContract:
+      required:
+        - X
+        - Password
+        - Y
+        - Z
       type: object
       properties:
         X:

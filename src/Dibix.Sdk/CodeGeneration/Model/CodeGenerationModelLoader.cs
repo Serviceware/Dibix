@@ -112,8 +112,8 @@ namespace Dibix.Sdk.CodeGeneration
           , ILogger logger
         )
         {
-            IControllerActionTargetSelector controllerActionTargetSelector = new ControllerActionTargetSelector(productName, areaName, defaultOutputName, statements, referencedAssemblyInspector, schemaRegistry, logger);
-            return new ControllerDefinitionProvider(fileSystemProvider, controllerActionTargetSelector, typeResolver, logger, endpoints).Controllers;
+            ControllerDefinitionProvider controllerDefinitionProvider = new ControllerDefinitionProvider(productName, areaName, defaultOutputName, statements, endpoints, typeResolver, referencedAssemblyInspector, schemaRegistry, fileSystemProvider, logger);
+            return controllerDefinitionProvider.Controllers;
         }
     }
 }

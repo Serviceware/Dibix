@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Text.RegularExpressions;
 using Dibix.Http;
 using Dibix.Sdk.CodeGeneration;
 using Microsoft.OpenApi.Any;
@@ -105,64 +104,43 @@ namespace Dibix.Sdk.OpenApi
 
         private static void AppendParameters(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
-            ICollection<string> bodyProperties = GetBodyProperties(action.BodyContract, schemaRegistry);
-            IDictionary<string, ActionParameter> actionParameters = GetActionParameters(action.Target, out bool hasParameterInformation);
-            HashSet<string> visitedActionParameters = new HashSet<string>();
-            if (!String.IsNullOrEmpty(action.ChildRoute))
+            foreach (ActionParameter parameter in action.Parameters)
             {
-                IEnumerable<string> pathParameters = Regex.Matches(action.ChildRoute, @"\{(?<parameter>[^}]+)\}")
-                                                          .Cast<Match>()
-                                                          .Select(x => x.Groups["parameter"].Value);
-
-                foreach (string pathParameter in pathParameters)
-                {
-                    if (!actionParameters.TryGetValue(pathParameter, out ActionParameter actionParameter))
-                    {
-                        if (hasParameterInformation)
-                            throw new InvalidOperationException($"Undefined parameter in path segment: {pathParameter}");
-
-                        continue;
-                    }
-
-                    AppendPathParameter(document, operation, actionParameter, pathParameter, rootNamespace, schemaRegistry);
-                    visitedActionParameters.Add(actionParameter.Name);
-                }
-            }
-
-            foreach (ActionParameter actionParameter in actionParameters.Values)
-            {
-                if (visitedActionParameters.Contains(actionParameter.Name)     // Path segment
-                 || action.ParameterSources.ContainsKey(actionParameter.Name)  // Constant/Internal value
-                 || bodyProperties.Contains(actionParameter.Name))             // Body property
+                if (parameter.Location != ActionParameterLocation.Query && parameter.Location != ActionParameterLocation.Path) 
                     continue;
 
-                AppendParameter(document, operation, actionParameter, actionParameter.Type, rootNamespace, schemaRegistry);
+                AppendUserParameter(document, operation, parameter, parameter.Location, rootNamespace, schemaRegistry);
             }
         }
 
-        private static ICollection<string> GetBodyProperties(TypeReference bodyContract, ISchemaRegistry schemaRegistry)
+        private static void AppendUserParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, ActionParameterLocation location, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
-            HashSet<string> properties = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            if (bodyContract is SchemaTypeReference schemaTypeReference)
+            switch (location)
             {
-                SchemaDefinition schema = schemaRegistry.GetSchema(schemaTypeReference);
-                if (schema is ObjectSchema objectSchema)
-                    properties.AddRange(objectSchema.Properties.Select(x => x.Name));
+                case ActionParameterLocation.Query: 
+                    AppendQueryParameter(document, operation, parameter, parameter.Type, rootNamespace, schemaRegistry);
+                    break;
+                
+                case ActionParameterLocation.Path: 
+                    AppendPathParameter(document, operation, parameter, rootNamespace, schemaRegistry);
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(location), location, null);
             }
-            return properties;
         }
 
-        private static void AppendParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter actionParameter, TypeReference parameterType, string rootNamespace, ISchemaRegistry schemaRegistry)
+        private static void AppendQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, TypeReference parameterType, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
             switch (parameterType)
             {
                 case PrimitiveTypeReference _:
-                    AppendQueryParameter(document, operation, actionParameter, rootNamespace, schemaRegistry);
+                    AppendQueryParameter(document, operation, parameter, rootNamespace, schemaRegistry);
                     break;
 
                 case SchemaTypeReference schemaTypeReference:
                     SchemaDefinition schema = schemaRegistry.GetSchema(schemaTypeReference);
-                    AppendComplexParameter(document, operation, actionParameter, schema, rootNamespace, schemaRegistry);
+                    AppendComplexQueryParameter(document, operation, parameter, schema, rootNamespace, schemaRegistry);
                     break;
 
                 default:
@@ -170,28 +148,28 @@ namespace Dibix.Sdk.OpenApi
             }
         }
 
-        private static void AppendPathParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter actionParameter, string parameterName, string rootNamespace, ISchemaRegistry schemaRegistry)
+        private static void AppendPathParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
-            AppendParameter(document, operation, actionParameter, parameterName, ParameterLocation.Path, true, rootNamespace, schemaRegistry);
+            AppendParameter(document, operation, parameter, ParameterLocation.Path, true, rootNamespace, schemaRegistry);
         }
 
-        private static void AppendQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter actionParameter, string rootNamespace, ISchemaRegistry schemaRegistry) => AppendQueryParameter(document, operation, actionParameter, actionParameter.Type, actionParameter.Type.IsEnumerable, rootNamespace, schemaRegistry);
-        private static OpenApiParameter AppendQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter actionParameter, TypeReference parameterType, bool isEnumerable, string rootNamespace, ISchemaRegistry schemaRegistry)
+        private static void AppendQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, string rootNamespace, ISchemaRegistry schemaRegistry) => AppendQueryParameter(document, operation, parameter, parameter.Type, parameter.Type.IsEnumerable, rootNamespace, schemaRegistry);
+        private static OpenApiParameter AppendQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, TypeReference parameterType, bool isEnumerable, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
-            bool isRequired = !actionParameter.HasDefaultValue;
-            return AppendParameter(document, operation, actionParameter, actionParameter.Name, parameterType, isEnumerable, ParameterLocation.Query, isRequired, rootNamespace, schemaRegistry);
+            bool isRequired = !parameter.HasDefaultValue;
+            return AppendParameter(document, operation, parameter, parameterType, isEnumerable, ParameterLocation.Query, isRequired, rootNamespace, schemaRegistry);
         }
 
-        private static void AppendComplexParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter actionParameter, SchemaDefinition parameterSchema, string rootNamespace, ISchemaRegistry schemaRegistry)
+        private static void AppendComplexQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, SchemaDefinition parameterSchema, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
             switch (parameterSchema)
             {
                 case EnumSchema _:
-                    AppendQueryParameter(document, operation, actionParameter, rootNamespace, schemaRegistry);
+                    AppendQueryParameter(document, operation, parameter, rootNamespace, schemaRegistry);
                     break;
 
                 case UserDefinedTypeSchema userDefinedTypeSchema:
-                    AppendQueryArrayParameter(document, operation, actionParameter, userDefinedTypeSchema, rootNamespace, schemaRegistry);
+                    AppendQueryArrayParameter(document, operation, parameter, userDefinedTypeSchema, rootNamespace, schemaRegistry);
                     break;
 
                 default:
@@ -199,47 +177,26 @@ namespace Dibix.Sdk.OpenApi
             }
         }
 
-        private static void AppendQueryArrayParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter actionParameter, UserDefinedTypeSchema parameterSchema, string rootNamespace, ISchemaRegistry schemaRegistry)
+        private static void AppendQueryArrayParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, ObjectSchema parameterSchema, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
-            TypeReference parameterType = parameterSchema.Properties.Count > 1 ? actionParameter.Type : parameterSchema.Properties[0].Type;
-            OpenApiParameter result = AppendQueryParameter(document, operation, actionParameter, parameterType, true, rootNamespace, schemaRegistry);
+            TypeReference parameterType = parameterSchema.Properties.Count > 1 ? parameter.Type : parameterSchema.Properties[0].Type;
+            OpenApiParameter result = AppendQueryParameter(document, operation, parameter, parameterType, true, rootNamespace, schemaRegistry);
             result.Explode = true;
             result.Style = parameterSchema.Properties.Count > 1 ? ParameterStyle.DeepObject : ParameterStyle.Form;
         }
 
-        private static void AppendParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter actionParameter, string parameterName, ParameterLocation parameterLocation, bool isRequired, string rootNamespace, ISchemaRegistry schemaRegistry) => AppendParameter(document, operation, actionParameter, parameterName, actionParameter.Type, actionParameter.Type.IsEnumerable, parameterLocation, isRequired, rootNamespace, schemaRegistry);
-        private static OpenApiParameter AppendParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter actionParameter, string parameterName, TypeReference parameterType, bool isEnumerable, ParameterLocation parameterLocation, bool isRequired, string rootNamespace, ISchemaRegistry schemaRegistry)
+        private static void AppendParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, ParameterLocation parameterLocation, bool isRequired, string rootNamespace, ISchemaRegistry schemaRegistry) => AppendParameter(document, operation, parameter, parameter.Type, parameter.Type.IsEnumerable, parameterLocation, isRequired, rootNamespace, schemaRegistry);
+        private static OpenApiParameter AppendParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter actionParameter, TypeReference parameterType, bool isEnumerable, ParameterLocation parameterLocation, bool isRequired, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
             OpenApiParameter apiParameter = new OpenApiParameter
             {
                 In = parameterLocation,
                 Required = isRequired,
-                Name = parameterName,
+                Name = actionParameter.Name,
                 Schema = CreateSchema(document, parameterType, isEnumerable, actionParameter.HasDefaultValue, actionParameter.DefaultValue, rootNamespace, schemaRegistry)
             };
             operation.Parameters.Add(apiParameter);
             return apiParameter;
-        }
-
-        private static IDictionary<string, ActionParameter> GetActionParameters(ActionDefinitionTarget actionTarget, out bool hasParameterInformation)
-        {
-            switch (actionTarget)
-            {
-                case GeneratedAccessorMethodTarget generatedAccessorActionTarget:
-                {
-                    hasParameterInformation = true;
-                    return generatedAccessorActionTarget.Parameters;
-                }
-
-                //case ReflectionActionTarget reflectionActionTarget:
-
-                default:
-                {
-                    //throw new ArgumentOutOfRangeException(nameof(actionTarget), actionTarget, "Unsupported action target for Open API response");
-                    hasParameterInformation = false;
-                    return new Dictionary<string, ActionParameter>();
-                }
-            }
         }
 
         private static void AppendBody(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, string rootNamespace, ISchemaRegistry schemaRegistry)

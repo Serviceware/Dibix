@@ -81,9 +81,7 @@ namespace Dibix.Http
         {
             HashSet<string> pathParameters = new HashSet<string>();
             if (!String.IsNullOrEmpty(action.ChildRoute))
-                pathParameters.AddRange(Regex.Matches(action.ChildRoute, @"\{(?<parameter>[^}]+)\}")
-                                             .Cast<Match>()
-                                             .Select(x => x.Groups["parameter"].Value));
+                pathParameters.AddRange(HttpParameterUtility.ExtractPathParameters(action.ChildRoute).Select(x => x.Value));
 
             foreach (ParameterInfo parameter in parameters)
             {
@@ -261,12 +259,7 @@ namespace Dibix.Http
                             // HttpParameterResolver.AddParameterFromBody<SomeValueFromBody, SomeUdt1, SomeUdt1InputConverter>(arguments, "someUdt1");
                             CollectBodyParameterAssignment(compilationContext, action.SafeGetBodyContract(), parameter, argumentsParameter);
                         }
-                        else if (parameter.Location != HttpParameterLocation.Query)
-                        {
-                            // arguments[lcid"] = actionAuthorizationContext.LocaleId;
-                            CollectNonUserParameterAssignment(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, parameter);
-                        }
-                        else
+                        else if (IsUri(parameter.Location))
                         {
                             // arguments["lcid] = arguments["localeid"];
                             // if (arguments.TryGetvalue("lcid", out object value) && value == null)
@@ -274,7 +267,12 @@ namespace Dibix.Http
                             //     arguments["lcid"] = 5; // Default value
                             // }
                             // arguments["lcid"] = CONVERT(arguments["lcid"])
-                            CollectQueryParameterAssignment(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, parameter);
+                            CollectUriParameterAssignment(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, parameter);
+                        }
+                        else
+                        {
+                            // arguments[lcid"] = actionAuthorizationContext.LocaleId;
+                            CollectNonUserParameterAssignment(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, parameter);
                         }
                     }
                     else
@@ -287,15 +285,15 @@ namespace Dibix.Http
                                 CollectBodyPropertyAssignment(compilationContext, action.SafeGetBodyContract(), parameter, contractParameterVariable, argumentsParameter);
                             }
                         }
-                        else if (parameter.Location != HttpParameterLocation.Query)
+                        else if (IsUri(parameter.Location))
                         {
-                            // input.lcid = actionAuthorizationContext.LocaleId;
-                            CollectNonUserPropertyAssignment(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, parameter, contractParameterVariable);
+                            // input.id = HttpParameterResolver.ConvertValue<object, int>("id", arguments["id"]);
+                            CollectUriPropertyAssignment(action, requestParameter, dependencyResolverParameter, argumentsParameter, compilationContext, sourceMap, parameter, contractParameterVariable);
                         }
                         else
                         {
-                            // input.id = HttpParameterResolver.ConvertValue<object, int>("id", arguments["id"]);
-                            CollectUserPropertyAssignment(action, requestParameter, dependencyResolverParameter, argumentsParameter, compilationContext, sourceMap, parameter, contractParameterVariable);
+                            // input.lcid = actionAuthorizationContext.LocaleId;
+                            CollectNonUserPropertyAssignment(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, parameter, contractParameterVariable);
                         }
                     }
                 }
@@ -344,11 +342,11 @@ namespace Dibix.Http
             compilationContext.Statements.Add(assign);
         }
 
-        private static void CollectQueryParameterAssignment(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter)
+        private static void CollectUriParameterAssignment(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter)
         {
             bool hasDefaultValue = parameter.DefaultValue != DBNull.Value && parameter.DefaultValue != null;
 
-            if (parameter.SourceKind != HttpParameterSourceKind.Query)
+            if (parameter.SourceKind == HttpParameterSourceKind.SourceProperty) // QUERY or PATH source
             {
                 // arguments["lcid] = arguments["localeid"];
                 Expression value = CollectParameterValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, parameter, generateConverterStatement: !hasDefaultValue, ensureCorrectType: !hasDefaultValue);
@@ -362,7 +360,10 @@ namespace Dibix.Http
             // {
             //     arguments["lcid"] = 5; // Default value
             // }
-            CollectQueryParameterDefaultValueAssignment(compilationContext, parameter, argumentsParameter);
+            if (parameter.SourceKind == HttpParameterSourceKind.Query
+             || parameter.SourceKind == HttpParameterSourceKind.SourceProperty
+             && parameter.Source.SourceName == QueryParameterSourceProvider.SourceName)
+                CollectQueryParameterDefaultValueAssignment(compilationContext, parameter, argumentsParameter);
 
             // arguments["lcid"] = CONVERT(arguments["lcid"])
             if (parameter.Converter != null)
@@ -392,7 +393,7 @@ namespace Dibix.Http
             compilationContext.Statements.Add(@if);
         }
 
-        private static void CollectUserPropertyAssignment(HttpActionDefinition action, Expression requestParameter, Expression dependencyResolverParameter, Expression argumentsParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter, Expression contractParameterVariable)
+        private static void CollectUriPropertyAssignment(HttpActionDefinition action, Expression requestParameter, Expression dependencyResolverParameter, Expression argumentsParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter, Expression contractParameterVariable)
         {
             // input.id = CONVERT(HttpParameterResolver.ConvertValue<object, int>("id", arguments["id"]));
             Expression property = Expression.Property(contractParameterVariable, parameter.ParameterName);
@@ -624,6 +625,8 @@ Either create a mapping or make sure a property of the same name exists in the s
             }
         }
 
+        private static bool IsUri(HttpParameterLocation location) => location == HttpParameterLocation.Query || location == HttpParameterLocation.Path;
+
         private static Exception CreateException(string message, Exception innerException, HttpActionDefinition action, string parameterName)
         {
             StringBuilder sb = new StringBuilder(message);
@@ -755,7 +758,7 @@ Either create a mapping or make sure a property of the same name exists in the s
                     Source = source
                 };
                 
-                if (location == HttpParameterLocation.Query)
+                if (IsUri(location))
                     parameter.ExpectedParameterName = source.PropertyPath;
                 
                 source.Parent = parameter;
@@ -772,7 +775,7 @@ Either create a mapping or make sure a property of the same name exists in the s
                     Items = new HttpItemsParameterInfo(udtName, addItemMethod, itemSources)
                 };
 
-                if (location == HttpParameterLocation.Query)
+                if (IsUri(location))
                     parameter.ExpectedParameterName = source.PropertyPath;
 
                 source.Parent = parameter;
@@ -801,7 +804,12 @@ Either create a mapping or make sure a property of the same name exists in the s
 
             private static HttpParameterLocation DetermineParameterLocation(HttpParameterSourceInfo source)
             {
-                return source.SourceName == QueryParameterSourceProvider.SourceName ? HttpParameterLocation.Query : HttpParameterLocation.NonUser;
+                switch (source.SourceName)
+                {
+                    case QueryParameterSourceProvider.SourceName: return HttpParameterLocation.Query;
+                    case PathParameterSourceProvider.SourceName: return HttpParameterLocation.Path;
+                    default: return HttpParameterLocation.NonUser;
+                }
             }
         }
 

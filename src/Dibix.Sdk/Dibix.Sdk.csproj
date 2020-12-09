@@ -14,6 +14,7 @@
     <Compile Include="..\Dibix\Environment\SchemaName.cs" Link="Environment\SchemaName.cs" />
     <Compile Include="..\Dibix\Extensions\EnumerableExtensions.cs" Link="Extensions\EnumerableExtensions.cs" />
     <Compile Include="..\Dibix\Http\HttpErrorResponseParser.cs" Link="CodeGeneration\Parser\HttpErrorResponseParser.cs" />
+    <Compile Include="..\Dibix\Http\HttpParameterUtility.cs" Link="CodeGeneration\Parser\HttpParameterUtility.cs" />
     <Compile Include="..\Dibix\Http\HttpParameterName.cs" Link="OpenApi\HttpParameterName.cs" />
     <Compile Include="..\Dibix\Http\RouteBuilder.cs" Link="OpenApi\RouteBuilder.cs" />
     <None Remove="lib\**" />

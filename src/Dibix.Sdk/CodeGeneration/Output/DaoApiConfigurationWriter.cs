@@ -97,9 +97,9 @@ namespace Dibix.Sdk.CodeGeneration
                         writer.WriteLine($"y.BodyBinder = Type.GetType(\"{action.BodyBinder}\", true);");
                     }
 
-                    foreach (KeyValuePair<string, ActionParameterSource> parameter in action.ParameterSources)
+                    foreach (ActionParameter parameter in action.Parameters.Where(x => x.Source != null))
                     {
-                        WriteParameter(writer, parameter.Key, parameter.Value);
+                        WriteParameter(writer, parameter.Name, parameter.Source);
                     }
 
                     if (action.IsAnonymous)
