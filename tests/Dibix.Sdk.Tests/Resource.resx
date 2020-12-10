@@ -314,13 +314,13 @@ namespace Dibix.Sdk.Tests
 
         #region Structured types
         [StructuredType("[dbo].[dbx_codeanalysis_udt_generic]")]
-        public sealed class GenericParameterSet : StructuredType&lt;GenericParameterSet, int, string&gt;
+        public sealed class GenericParameterSet : StructuredType&lt;GenericParameterSet, int, string?&gt;
         {
             public GenericParameterSet() : base("[dbo].[dbx_codeanalysis_udt_generic]")
             {
                 base.ImportSqlMetadata(() =&gt; this.Add(default, default));
             }
-            public void Add(int id, string name)
+            public void Add(int id, string? name)
             {
                 base.AddValues(id, name);
             }
@@ -687,13 +687,13 @@ namespace Dibix.Sdk.Tests
 
         #region Structured types
         [StructuredType("[dbo].[dbx_codeanalysis_udt_generic]")]
-        public sealed class GenericParameterSet : StructuredType&lt;GenericParameterSet, int, string&gt;
+        public sealed class GenericParameterSet : StructuredType&lt;GenericParameterSet, int, string?&gt;
         {
             public GenericParameterSet() : base("[dbo].[dbx_codeanalysis_udt_generic]")
             {
                 base.ImportSqlMetadata(() =&gt; this.Add(default, default));
             }
-            public void Add(int id, string name)
+            public void Add(int id, string? name)
             {
                 base.AddValues(id, name);
             }
@@ -753,13 +753,13 @@ namespace Dibix.Sdk.Tests
 
         #region Structured types
         [StructuredType("[dbo].[dbx_codeanalysis_udt_generic]")]
-        public sealed class GenericParameterSet : StructuredType&lt;GenericParameterSet, int, string&gt;
+        public sealed class GenericParameterSet : StructuredType&lt;GenericParameterSet, int, string?&gt;
         {
             public GenericParameterSet() : base("[dbo].[dbx_codeanalysis_udt_generic]")
             {
                 base.ImportSqlMetadata(() =&gt; this.Add(default, default));
             }
-            public void Add(int id, string name)
+            public void Add(int id, string? name)
             {
                 base.AddValues(id, name);
             }

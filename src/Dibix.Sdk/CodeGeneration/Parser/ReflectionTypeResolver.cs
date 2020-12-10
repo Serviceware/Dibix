@@ -97,7 +97,7 @@ namespace Dibix.Sdk.CodeGeneration
                 if (this._assemblyResolver.TryGetAssembly(assemblyName, out Assembly assembly))
                 {
                     Type type = assembly.GetType(typeName.Name, true);
-                    return this.ResolveType(type, source, line, column, typeName.IsNullable, isEnumerable);
+                    return ReflectionOnlyTypeInspector.Inspect(() => this.ResolveType(type, source, line, column, typeName.IsNullable, isEnumerable));
                 }
 
                 this._logger.LogError(null, $"Could not locate assembly: {assemblyName}", source, line, column + parts[0].Length + 1);
@@ -142,10 +142,52 @@ namespace Dibix.Sdk.CodeGeneration
                 ObjectSchema objectSchema = new ObjectSchema(type.Namespace, type.Name);
                 schemaRegistry.Populate(objectSchema); // Register schema before traversing properties to avoid endless recursions for self referencing properties
                 objectSchema.Properties.AddRange(type.GetProperties()
-                                                     .Select(x => new ObjectSchemaProperty(x.Name, ResolveType(x.PropertyType, source, line, column, schemaRegistry))));
+                                                     .Select(x => CreateProperty(x, source, line, column, schemaRegistry)));
             }
 
             return schemaTypeReference;
+        }
+
+        private static ObjectSchemaProperty CreateProperty(PropertyInfo property, string source, int line, int column, ISchemaRegistry schemaRegistry)
+        {
+            TypeReference typeReference = ResolveType(property.PropertyType, source, line, column, schemaRegistry);
+            if (IsNullableReferenceType(property))
+                typeReference.IsNullable = true;
+
+            return new ObjectSchemaProperty(property.Name, typeReference);
+        }
+
+        private static bool IsNullableReferenceType(PropertyInfo property)
+        {
+            if (property.PropertyType.IsValueType)
+                return false;
+
+            byte nullableFlag = ResolveNullableFlag(property);
+            return nullableFlag == 2;
+        }
+
+        private static byte ResolveNullableFlag(MemberInfo member)
+        {
+            byte nullableFlag = ResolveNullableFlag(member,               "System.Runtime.CompilerServices.NullableAttribute")
+                             ?? ResolveNullableFlag(member.DeclaringType, "System.Runtime.CompilerServices.NullableContextAttribute") 
+                             ?? 0;
+            return nullableFlag;
+        }
+        private static byte? ResolveNullableFlag(MemberInfo member, string attributeFullName)
+        {
+            foreach (CustomAttributeData attribute in member.GetCustomAttributesData())
+            {
+                if (attribute.AttributeType.FullName != attributeFullName) 
+                    continue;
+
+                byte nullableFlag = attribute.ConstructorArguments
+                                             .Select(y => y.Value)
+                                             .OfType<byte>()
+                                             .SingleOrDefault();
+                return nullableFlag;
+            }
+
+            return null;
         }
 
         private static Type GetUnderlyingEnumerableType(Type type)

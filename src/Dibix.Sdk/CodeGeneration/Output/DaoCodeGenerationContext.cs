@@ -79,7 +79,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             StringBuilder sb = new StringBuilder(typeName);
-            if (reference.IsNullable && requiresNullabilityMarker)
+            if (reference.IsNullable/* && requiresNullabilityMarker*/)
                 sb.Append('?');
 
             return sb.ToString();
