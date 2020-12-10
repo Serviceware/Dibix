@@ -11,8 +11,29 @@
     <RunSqlCodeAnalysis>false</RunSqlCodeAnalysis>
 
     <IsEmbedded Condition="'$(IsEmbedded)' == ''">$(MSBuildProjectName.EndsWith('.DML'))</IsEmbedded>
+    <ProducePackage Condition="'$(ProducePackage)' == '' and '$(IsEmbedded)' == 'false'">True</ProducePackage>
+    <ProducePackage Condition="'$(ProducePackage)' == '' and '$(IsEmbedded)' == 'true'">False</ProducePackage>
     <ClientAssemblyTargetPath Condition="'$(ClientOutputName)' != ''">$(TargetDir)$(ClientOutputName).dll</ClientAssemblyTargetPath>
     <ClientSymbolsTargetPath Condition="'$(ClientOutputName)' != ''">$(TargetDir)$(ClientOutputName).pdb</ClientSymbolsTargetPath>
+
+    <BuildDependsOn Condition="'$(ProducePackage)' == 'false'">
+      BuildOnlySettings;
+      BeforeBuild;
+      PrepareForBuild;
+      PreBuildEvent;
+      ResolveReferences;
+      ResolveArtifactReferences;
+      GenerateSqlTargetFrameworkMoniker;
+      ResolveKeySource;
+      CoreCompile;
+      GenerateSerializationAssemblies;
+      GetTargetPath;
+      PrepareForRun;
+      SqlPrepareForRun;
+      IncrementalClean;
+      PostBuildEvent;
+      AfterBuild;
+    </BuildDependsOn>
   </PropertyGroup>
 
   <ItemGroup>
