@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using Dibix.Sdk.Sql;
+using Microsoft.SqlServer.Dac.Model;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -86,24 +87,28 @@ namespace Dibix.Sdk.CodeGeneration
             if (!(selectElement is SelectScalarExpression scalar))
                 return null;
 
+            this.FragmentAnalyzer.TryGetModelElement(selectElement, out TSqlObject modelElement);
+            SqlDataType dataType = selectElement.GetDataType(modelElement);
+            bool? isNullable = selectElement.IsNullable(modelElement);
+
             if (scalar.ColumnName == null)
             {
                 if (scalar.Expression is ColumnReferenceExpression columnReference)
                 {
-                    if (columnReference.ColumnType != ColumnType.Regular)
+                    if (columnReference.ColumnType != Microsoft.SqlServer.TransactSql.ScriptDom.ColumnType.Regular)
                     {
                         this.Logger.LogError(null, $"Cannot determine name for unaliased column: {columnReference.Dump()}", this._sourcePath, selectElement.StartLine, selectElement.StartColumn);
                         return null;
                     }
 
                     Identifier identifier = columnReference.GetName();
-                    return new OutputColumnResult(identifier.Value, selectElement, scalar.Expression, this.FragmentAnalyzer);
+                    return new OutputColumnResult(identifier.Value, selectElement, scalar.Expression, dataType, isNullable);
                 }
 
-                return new OutputColumnResult(null, scalar, null, this.FragmentAnalyzer);
+                return new OutputColumnResult(null, scalar, null, dataType, isNullable);
             }
 
-            return new OutputColumnResult(scalar.ColumnName.Value, selectElement, scalar.ColumnName, this.FragmentAnalyzer);
+            return new OutputColumnResult(scalar.ColumnName.Value, selectElement, scalar.ColumnName, dataType, isNullable);
         }
         #endregion
     }

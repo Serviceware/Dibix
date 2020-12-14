@@ -74,13 +74,13 @@ namespace Dibix.Sdk.CodeGeneration
             if (column.ColumnName.ToLowerInvariant() != expectedColumnName)
                 return false;
 
-            if (!expectedColumnTypes.Contains(column.DataTypeAccessor.Value))
+            if (!expectedColumnTypes.Contains(column.DataType))
                 return false;
 
             return true;
         }
 
-        private static void ValidateMergeGridResult(SqlStatementInfo target, TSqlFragment node, IList<ISqlElement> returnElements, ILogger logger)
+        private static void ValidateMergeGridResult(SqlStatementInfo target, TSqlFragment node, ICollection<ISqlElement> returnElements, ILogger logger)
         {
             if (!target.MergeGridResult || returnElements.Count > 1) 
                 return;
@@ -262,9 +262,19 @@ namespace Dibix.Sdk.CodeGeneration
                         continue;
                     }
 
+                    ObjectSchemaProperty property = objectSchema.Properties.SingleOrDefault(x => String.Equals(x.Name, columnResult.ColumnName, StringComparison.OrdinalIgnoreCase));
+
                     // Validate if entity property exists
-                    if (objectSchema.Properties.All(x => !String.Equals(x.Name, columnResult.ColumnName, StringComparison.OrdinalIgnoreCase)))
+                    if (property == null)
+                    {
                         logger.LogError(null, $"Property '{columnResult.ColumnName}' not found on return type '{schema.FullName}'", target.Source, columnResult.ColumnNameSource.StartLine, columnResult.ColumnNameSource.StartColumn);
+                        continue;
+                    }
+
+                    // Experimental
+                    // Validate nullability
+                    //if (columnResult.IsNullable.HasValue && columnResult.IsNullable.Value != property.Type.IsNullable)
+                    //    logger.LogError(null, $"Nullability of column '{columnResult.ColumnName}' should match the target property", target.Source, columnResult.ColumnNameSource.StartLine, columnResult.ColumnNameSource.StartColumn);
                 }
             }
         }

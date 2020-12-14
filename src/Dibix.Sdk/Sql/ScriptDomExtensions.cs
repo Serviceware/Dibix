@@ -122,13 +122,34 @@ namespace Dibix.Sdk.Sql
             return child;
         }
 
-        public static SqlDataType GetDataType(this TSqlFragment sqlFragment, TSqlFragmentAnalyzer fragmentAnalyzer)
+        public static bool? IsNullable(this TSqlFragment sqlFragment, TSqlObject modelElement)
         {
-            if (!fragmentAnalyzer.TryGetModelElement(sqlFragment, out TSqlObject element))
+            if (modelElement == null)
             {
                 TSqlFragment target = sqlFragment;
                 if (target is SelectScalarExpression scalarExpression)
                     target = scalarExpression.Expression;
+
+                if (target is CastCall)
+                    return true;
+
+                return null;
+            }
+
+            ModelPropertyClass nullableProperty = GetNullableProperty(modelElement.ObjectType);
+            return modelElement.GetProperty<bool>(nullableProperty);
+        }
+
+        public static SqlDataType GetDataType(this TSqlFragment sqlFragment, TSqlObject modelElement)
+        {
+            if (modelElement == null)
+            {
+                TSqlFragment target = sqlFragment;
+                if (target is SelectScalarExpression scalarExpression)
+                    target = scalarExpression.Expression;
+
+                if (target is CastCall cast && cast.DataType is SqlDataTypeReference sqlDataTypeReference)
+                    return (SqlDataType)sqlDataTypeReference.SqlDataTypeOption;
 
                 if (target is Literal literal)
                     return ToDataType(literal);
@@ -136,8 +157,15 @@ namespace Dibix.Sdk.Sql
                 return SqlDataType.Unknown;
             }
 
-            TSqlObject columnType = element.GetReferenced(Microsoft.SqlServer.Dac.Model.Column.DataType, DacQueryScopes.All).Single();
-            return columnType.GetProperty<SqlDataType>(DataType.SqlDataType);
+            // DataType property not available
+            TSqlObject parent = modelElement.GetParent(DacQueryScopes.All);
+            if (parent?.ObjectType == ModelSchema.TableValuedFunction
+             || parent?.ObjectType == ModelSchema.View)
+                return SqlDataType.Unknown;
+
+            ModelRelationshipClass dataTypeRelationship = GetDataTypeRelationship(modelElement.ObjectType);
+            TSqlObject dataType = modelElement.GetReferenced(dataTypeRelationship, DacQueryScopes.All).Single();
+            return dataType.GetProperty<SqlDataType>(DataType.SqlDataType);
         }
 
         private static SqlDataType ToDataType(Literal literal)
@@ -169,6 +197,34 @@ namespace Dibix.Sdk.Sql
                 default:
                     throw new ArgumentOutOfRangeException(nameof(literalType), literalType, null);
             }
+        }
+
+        private static ModelRelationshipClass GetDataTypeRelationship(ModelTypeClass type)
+        {
+            ModelRelationshipClass relationship;
+
+            if (type == ModelSchema.Column)
+                relationship = Microsoft.SqlServer.Dac.Model.Column.DataType;
+            else if (type == ModelSchema.Parameter)
+                relationship = Parameter.DataType;
+            else
+                throw new ArgumentOutOfRangeException(nameof(type), type, null);
+
+            return relationship;
+        }
+
+        private static ModelPropertyClass GetNullableProperty(ModelTypeClass type)
+        {
+            ModelPropertyClass property;
+
+            if (type == ModelSchema.Column)
+                property = Microsoft.SqlServer.Dac.Model.Column.Nullable;
+            else if (type == ModelSchema.Parameter)
+                property = Parameter.IsNullable;
+            else
+                throw new ArgumentOutOfRangeException(nameof(type), type, null);
+
+            return property;
         }
 
 
