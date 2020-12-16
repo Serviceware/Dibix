@@ -192,7 +192,7 @@ namespace Dibix.Sdk.OpenApi
             {
                 In = parameterLocation,
                 Required = isRequired,
-                Name = actionParameter.Name,
+                Name = actionParameter.ApiParameterName,
                 Schema = CreateSchema(document, parameterType, isEnumerable, actionParameter.HasDefaultValue, actionParameter.DefaultValue, rootNamespace, schemaRegistry)
             };
             operation.Parameters.Add(apiParameter);

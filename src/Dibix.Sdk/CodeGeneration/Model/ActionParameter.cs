@@ -2,16 +2,18 @@
 {
     public sealed class ActionParameter
     {
-        public string Name { get; }
+        public string ApiParameterName { get; }
+        public string InternalParameterName { get; }
         public TypeReference Type { get; }
         public ActionParameterLocation Location { get; }
         public bool HasDefaultValue { get; }
         public object DefaultValue { get; }
         public ActionParameterSource Source { get; }
 
-        public ActionParameter(string name, TypeReference type, ActionParameterLocation location, bool hasDefaultValue, object defaultValue, ActionParameterSource source)
+        public ActionParameter(string apiParameterName, string internalParameterName, TypeReference type, ActionParameterLocation location, bool hasDefaultValue, object defaultValue, ActionParameterSource source)
         {
-            this.Name = name;
+            this.ApiParameterName = apiParameterName;
+            this.InternalParameterName = internalParameterName;
             this.Type = type;
             this.Location = location;
             this.HasDefaultValue = hasDefaultValue;

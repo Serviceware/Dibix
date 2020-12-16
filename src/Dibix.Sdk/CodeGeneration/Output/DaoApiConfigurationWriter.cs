@@ -99,7 +99,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                     foreach (ActionParameter parameter in action.Parameters.Where(x => x.Source != null))
                     {
-                        WriteParameter(writer, parameter.Name, parameter.Source);
+                        WriteParameter(writer, parameter.InternalParameterName, parameter.Source);
                     }
 
                     if (action.IsAnonymous)

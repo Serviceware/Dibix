@@ -412,6 +412,8 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
         private static ActionParameter CreateActionParameter(string name, TypeReference type, bool hasDefaultValue, object defaultValue, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, Group> pathParameters, ICollection<string> bodyParameters)
         {
             ActionParameterLocation location = ActionParameterLocation.NonUser;
+            string apiParameterName = name;
+            string internalParameterName = name;
 
             if (explicitParameters.TryGetValue(name, out ExplicitParameter explicitParameter))
             {
@@ -420,7 +422,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
                 if (explicitParameter.Source is ActionParameterPropertySource propertySource
                  && TryGetLocation(propertySource.SourceName, ref location))
                 {
-                    name = propertySource.PropertyName;
+                    apiParameterName = propertySource.PropertyName;
 
                     if (location == ActionParameterLocation.Path)
                         pathParameters.Remove(propertySource.PropertyName);
@@ -439,7 +441,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
             }
             else if (pathParameters.TryGetValue(name, out Group pathSegment))
             {
-                name = pathSegment.Value;
+                apiParameterName = pathSegment.Value;
                 location = ActionParameterLocation.Path;
                 pathParameters.Remove(name);
             }
@@ -452,7 +454,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
                 location = ActionParameterLocation.Query;
             }
 
-            return new ActionParameter(name, type, location, hasDefaultValue, defaultValue, explicitParameter?.Source);
+            return new ActionParameter(apiParameterName, internalParameterName, type, location, hasDefaultValue, defaultValue, explicitParameter?.Source);
         }
 
         private static bool TryGetLocation(string sourceName, ref ActionParameterLocation location)
@@ -511,7 +513,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
                 if (actionParameter.Location == ActionParameterLocation.Path)
                 {
                     // Restore original path parameter order from route template
-                    int currentPathSegmentIndex = this._pathSegmentIndexMap[actionParameter.Name];
+                    int currentPathSegmentIndex = this._pathSegmentIndexMap[actionParameter.ApiParameterName];
                     bool insertBefore = this._previousPathSegmentIndex > currentPathSegmentIndex;
                     this._previousPathSegmentIndex = currentPathSegmentIndex;
                     if (insertBefore)

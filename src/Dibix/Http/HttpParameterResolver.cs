@@ -7,7 +7,6 @@ using System.Linq.Expressions;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace Dibix.Http
 {
@@ -66,7 +65,7 @@ namespace Dibix.Http
 
                 ResolveParameters compiled = Compile(compilationContext, out string source);
                 HttpParameterResolutionMethod method = new HttpParameterResolutionMethod(source, compiled);
-                CollectExpectedParameters(method, @params, action.BodyContract);
+                CollectApiParameters(method, @params, action.BodyContract);
                 return method;
             }
             catch (Exception exception)
@@ -250,7 +249,7 @@ namespace Dibix.Http
 
                 foreach (HttpParameterInfo parameter in parameterGroup)
                 {
-                    compilationContext.LastVisitedParameter = parameter.ParameterName;
+                    compilationContext.LastVisitedParameter = parameter.InternalParameterName;
 
                     if (contractParameterVariable == null)
                     {
@@ -330,13 +329,13 @@ namespace Dibix.Http
         {
             // arguments["lcid"] = actionAuthorizationContext.LocaleId;
             Expression value = CollectParameterValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, parameter);
-            CollectParameterAssignment(compilationContext, parameter.ParameterName, argumentsParameter, value);
+            CollectParameterAssignment(compilationContext, parameter.InternalParameterName, argumentsParameter, value);
         }
 
         private static void CollectNonUserPropertyAssignment(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter, Expression contractParameterVariable)
         {
             // input.lcid = actionAuthorizationContext.LocaleId;
-            Expression property = Expression.Property(contractParameterVariable, parameter.ParameterName);
+            Expression property = Expression.Property(contractParameterVariable, parameter.InternalParameterName);
             Expression value = CollectParameterValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, parameter);
             Expression assign = Expression.Assign(property, value); 
             compilationContext.Statements.Add(assign);
@@ -350,7 +349,7 @@ namespace Dibix.Http
             {
                 // arguments["lcid] = arguments["localeid"];
                 Expression value = CollectParameterValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, parameter, generateConverterStatement: !hasDefaultValue, ensureCorrectType: !hasDefaultValue);
-                CollectParameterAssignment(compilationContext, parameter.ParameterName, argumentsParameter, value);
+                CollectParameterAssignment(compilationContext, parameter.InternalParameterName, argumentsParameter, value);
             }
 
             if (!hasDefaultValue) 
@@ -368,9 +367,9 @@ namespace Dibix.Http
             // arguments["lcid"] = CONVERT(arguments["lcid"])
             if (parameter.Converter != null)
             {
-                Expression value = HttpParameterResolverUtility.BuildArgumentAccessorExpression(argumentsParameter, parameter.ParameterName);
+                Expression value = HttpParameterResolverUtility.BuildArgumentAccessorExpression(argumentsParameter, parameter.InternalParameterName);
                 value = CollectConverterStatement(parameter, value);
-                CollectParameterAssignment(compilationContext, parameter.ParameterName, argumentsParameter, value);
+                CollectParameterAssignment(compilationContext, parameter.InternalParameterName, argumentsParameter, value);
             }
         }
 
@@ -380,8 +379,8 @@ namespace Dibix.Http
             // {
             //     arguments["lcid"] = 5; // Default value
             // }
-            Expression argumentsKey = Expression.Constant(parameter.ParameterName);
-            ParameterExpression defaultValue = Expression.Parameter(typeof(object), $"{parameter.ParameterName}DefaultValue");
+            Expression argumentsKey = Expression.Constant(parameter.InternalParameterName);
+            ParameterExpression defaultValue = Expression.Parameter(typeof(object), $"{parameter.InternalParameterName}DefaultValue");
             Expression tryGetValue = Expression.Call(argumentsParameter, nameof(IDictionary<object, object>.TryGetValue), new Type[0], argumentsKey, defaultValue);
             Expression emptyParameterValue = Expression.Equal(defaultValue, Expression.Constant(null));
             Expression condition = Expression.And(tryGetValue, emptyParameterValue);
@@ -396,7 +395,7 @@ namespace Dibix.Http
         private static void CollectUriPropertyAssignment(HttpActionDefinition action, Expression requestParameter, Expression dependencyResolverParameter, Expression argumentsParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter, Expression contractParameterVariable)
         {
             // input.id = CONVERT(HttpParameterResolver.ConvertValue<object, int>("id", arguments["id"]));
-            Expression property = Expression.Property(contractParameterVariable, parameter.ParameterName);
+            Expression property = Expression.Property(contractParameterVariable, parameter.InternalParameterName);
             Expression value = CollectParameterValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, parameter);
             Expression assign = Expression.Assign(property, value);
             compilationContext.Statements.Add(assign);
@@ -405,7 +404,7 @@ namespace Dibix.Http
         private static void CollectBodyParameterAssignment(CompilationContext compilationContext, Type bodyContract, HttpParameterInfo parameter, Expression argumentsParameter)
         {
             // HttpParameterResolver.AddParameterFromBody<SomeValueFromBody, SomeUdt1, SomeUdt1InputConverter>(arguments, "someUdt1");
-            Expression parameterName = Expression.Constant(parameter.ParameterName);
+            Expression parameterName = Expression.Constant(parameter.InternalParameterName);
             Type[] typeArguments = { bodyContract, parameter.ParameterType, parameter.InputConverter };
             Expression addParameterFromBodyCall = Expression.Call(typeof(HttpParameterResolver), nameof(AddParameterFromBody), typeArguments, argumentsParameter, parameterName);
             compilationContext.Statements.Add(addParameterFromBodyCall);
@@ -414,7 +413,7 @@ namespace Dibix.Http
         private static void CollectBodyPropertyAssignment(CompilationContext compilationContext, Type bodyContract, HttpParameterInfo parameter, Expression contractParameterVariable, Expression argumentsParameter)
         {
             // input.someUdt1 = HttpParameterResolver.ConvertParameterFromBody<SomeValueFromBody, SomeUdt1, SomeUdt1InputConverter>(arguments);
-            Expression property = Expression.Property(contractParameterVariable, parameter.ParameterName);
+            Expression property = Expression.Property(contractParameterVariable, parameter.InternalParameterName);
             Type[] typeArguments = { bodyContract, parameter.ParameterType, parameter.InputConverter };
             Expression convertParameterFromBodyCall = Expression.Call(typeof(HttpParameterResolver), nameof(ConvertParameterFromBody), typeArguments, argumentsParameter);
             Expression assign = Expression.Assign(property, convertParameterFromBodyCall);
@@ -449,7 +448,7 @@ namespace Dibix.Http
 
                 case HttpParameterSourceKind.Query:
                 case HttpParameterSourceKind.Path:
-                    value = HttpParameterResolverUtility.BuildArgumentAccessorExpression(argumentsParameter, parameter.ParameterName);
+                    value = HttpParameterResolverUtility.BuildArgumentAccessorExpression(argumentsParameter, parameter.InternalParameterName);
                     break;
 
                 case HttpParameterSourceKind.SourceInstance:
@@ -473,7 +472,7 @@ namespace Dibix.Http
                     break;
 
                 default:
-                    throw new InvalidOperationException($"Value of parameter '{parameter.ParameterName}' could not be resolved");
+                    throw new InvalidOperationException($"Value of parameter '{parameter.InternalParameterName}' could not be resolved");
             }
 
             if (generateConverterStatement) 
@@ -484,7 +483,7 @@ namespace Dibix.Http
                 return value;
 
             if (ensureCorrectType)
-                value = EnsureCorrectType(parameter.ParameterName, value, parameter.ParameterType);
+                value = EnsureCorrectType(parameter.InternalParameterName, value, parameter.ParameterType);
 
             return value;
         }
@@ -507,7 +506,7 @@ namespace Dibix.Http
                 if (itemSource.SourceKind == HttpParameterSourceKind.SourceProperty && itemSource.Source.PropertyPath == ItemIndexPropertyName) // ITEM.$INDEX => i
                 {
                     HttpParameterSourceInfo source = new HttpParameterSourceInfo(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, ItemSourceName, sourceProvider: null, propertyPath: null);
-                    itemParameter = HttpParameterInfo.SourceInstance(itemSource.ParameterType, itemSource.ParameterName, source);
+                    itemParameter = HttpParameterInfo.SourceInstance(itemSource.ParameterType, itemSource.InternalParameterName, source);
                     itemSourceVariable = addItemFuncIndexParameter;
                 }
                 else
@@ -517,7 +516,7 @@ namespace Dibix.Http
                 }
 
                 sourceMap[ItemSourceName] = itemSourceVariable;
-                addMethodParameterValues[itemSource.ParameterName] = CollectParameterValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, itemParameter);
+                addMethodParameterValues[itemSource.InternalParameterName] = CollectParameterValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, itemParameter);
             }
 
             foreach (KeyValuePair<string, Expression> addMethodParameter in addMethodParameterValues.Where(x => x.Value == null).ToArray())
@@ -544,7 +543,7 @@ Either create a mapping or make sure a property of the same name exists in the s
             if (parameter.Converter == null)
                 return value;
 
-            value = EnsureCorrectType(parameter.ParameterName, value, parameter.Converter.ExpectedInputType);
+            value = EnsureCorrectType(parameter.InternalParameterName, value, parameter.Converter.ExpectedInputType);
             value = parameter.Converter.ConvertValue(value);
             return value;
         }
@@ -577,13 +576,13 @@ Either create a mapping or make sure a property of the same name exists in the s
             return compiled;
         }
 
-        private static void CollectExpectedParameters(HttpParameterResolutionMethod method, IEnumerable<HttpParameterInfo> parameters, Type bodyContract)
+        private static void CollectApiParameters(HttpParameterResolutionMethod method, IEnumerable<HttpParameterInfo> parameters, Type bodyContract)
         {
             if (bodyContract != null)
                 method.AddParameter(HttpParameterName.Body, bodyContract, HttpParameterLocation.NonUser, isOptional: false);
 
             foreach (HttpParameterInfo parameter in parameters.Where(x => x.Location != HttpParameterLocation.NonUser)) 
-                method.AddParameter(parameter.ExpectedParameterName, parameter.ParameterType, parameter.Location, parameter.IsOptional);
+                method.AddParameter(parameter.ApiParameterName, parameter.ParameterType, parameter.Location, parameter.IsOptional);
         }
 
         private static void AddParameterFromBody<TSource, TTarget, TConverter>(IDictionary<string, object> arguments, string parameterName) where TConverter : IFormattedInputConverter<TSource, TTarget>, new()
@@ -700,8 +699,8 @@ Either create a mapping or make sure a property of the same name exists in the s
             public HttpParameterSourceKind SourceKind { get; } 
             public ParameterInfo ContractParameter { get; private set; }    // InputParameterClass
             public Type ParameterType { get; }
-            public string ParameterName { get; }
-            public string ExpectedParameterName { get; private set; }
+            public string InternalParameterName { get; }
+            public string ApiParameterName { get; private set; }
             public object Value { get; private set; }
             public bool IsOptional { get; }
             public object DefaultValue { get; private set; }
@@ -710,13 +709,13 @@ Either create a mapping or make sure a property of the same name exists in the s
             public HttpParameterSourceInfo Source { get; private set; }     // HLSESSION.LocaleId / databaseAccessorFactory
             public HttpItemsParameterInfo Items { get; private set; }       // udt_columnname = ITEM.SomePropertyName
 
-            private HttpParameterInfo(HttpParameterLocation location, HttpParameterSourceKind sourceKind, Type parameterType, string parameterName, bool isOptional)
+            private HttpParameterInfo(HttpParameterLocation location, HttpParameterSourceKind sourceKind, Type parameterType, string internalParameterName, bool isOptional)
             {
                 this.Location = location;
                 this.SourceKind = sourceKind;
                 this.ParameterType = parameterType;
-                this.ParameterName = parameterName;
-                this.ExpectedParameterName = parameterName;
+                this.InternalParameterName = internalParameterName;
+                this.ApiParameterName = internalParameterName;
                 this.IsOptional = isOptional;
             }
 
@@ -759,7 +758,7 @@ Either create a mapping or make sure a property of the same name exists in the s
                 };
                 
                 if (IsUri(location))
-                    parameter.ExpectedParameterName = source.PropertyPath;
+                    parameter.ApiParameterName = source.PropertyPath;
                 
                 source.Parent = parameter;
 
@@ -776,7 +775,7 @@ Either create a mapping or make sure a property of the same name exists in the s
                 };
 
                 if (IsUri(location))
-                    parameter.ExpectedParameterName = source.PropertyPath;
+                    parameter.ApiParameterName = source.PropertyPath;
 
                 source.Parent = parameter;
 
