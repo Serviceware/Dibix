@@ -74,7 +74,9 @@ namespace Dibix.Sdk.Cli
                 if (!this.BuildingInsideVisualStudio) 
                     return;
 
-                text = $"{code}: {text}";
+                if (!String.IsNullOrEmpty(code))
+                    text = $"{code}: {text}";
+
                 code = null;
             }
         }
