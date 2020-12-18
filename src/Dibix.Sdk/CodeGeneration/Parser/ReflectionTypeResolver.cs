@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Newtonsoft.Json;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -154,7 +155,12 @@ namespace Dibix.Sdk.CodeGeneration
             if (IsNullableReferenceType(property))
                 typeReference.IsNullable = true;
 
-            return new ObjectSchemaProperty(property.Name, typeReference);
+            bool isPartOfKey = ResolveIsPartOfKey(property);
+            bool isDiscriminator = ResolveIsDiscriminator(property);
+            SerializationBehavior serializationBehavior = ResolveSerializationBehavior(property);
+            DateTimeKind dateTimeKind = ResolveDateTimeKind(property);
+            bool obfuscated = ResolveObfuscated(property);
+            return new ObjectSchemaProperty(property.Name, typeReference, isPartOfKey, isDiscriminator, serializationBehavior, dateTimeKind, obfuscated);
         }
 
         private static bool IsNullableReferenceType(PropertyInfo property)
@@ -173,6 +179,7 @@ namespace Dibix.Sdk.CodeGeneration
                              ?? 0;
             return nullableFlag;
         }
+
         private static byte? ResolveNullableFlag(MemberInfo member, string attributeFullName)
         {
             foreach (CustomAttributeData attribute in member.GetCustomAttributesData())
@@ -189,6 +196,45 @@ namespace Dibix.Sdk.CodeGeneration
 
             return null;
         }
+
+        private static bool ResolveIsPartOfKey(MemberInfo member) => IsDefined(member, "System.ComponentModel.DataAnnotations.KeyAttribute");
+        
+        private static bool ResolveIsDiscriminator(MemberInfo member) => IsDefined(member, "Dibix.DiscriminatorAttribute");
+
+        private static SerializationBehavior ResolveSerializationBehavior(MemberInfo member)
+        {
+            foreach (CustomAttributeData attribute in member.GetCustomAttributesData())
+            {
+                if (attribute.AttributeType.FullName == typeof(JsonIgnoreAttribute).FullName)
+                    return SerializationBehavior.Never;
+
+                if (attribute.AttributeType.FullName != typeof(JsonPropertyAttribute).FullName)
+                    continue;
+
+                bool ignoreWhenNull = attribute.NamedArguments
+                                               .Where(x => x.MemberName == nameof(JsonPropertyAttribute.NullValueHandling))
+                                               .Select(x => (NullValueHandling)x.TypedValue.Value)
+                                               .Any(x => x == NullValueHandling.Ignore);
+                
+                if (ignoreWhenNull)
+                    return SerializationBehavior.IfNotEmpty;
+            }
+
+            return SerializationBehavior.Always;
+        }
+
+        private static DateTimeKind ResolveDateTimeKind(MemberInfo member)
+        {
+            DateTimeKind dateTimeKind = member.GetCustomAttributesData()
+                                              .Where(x => x.AttributeType.FullName == "Dibix.DateTimeKindAttribute")
+                                              .Select(x => (DateTimeKind)x.ConstructorArguments.Single().Value)
+                                              .SingleOrDefault();
+            return dateTimeKind;
+        }
+
+        private static bool ResolveObfuscated(MemberInfo member) => IsDefined(member, "Dibix.ObfuscatedAttribute");
+
+        private static bool IsDefined(MemberInfo member, string attributeName) => member.GetCustomAttributesData().Any(x => x.AttributeType.FullName == attributeName);
 
         private static Type GetUnderlyingEnumerableType(Type type)
         {
