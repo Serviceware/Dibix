@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Dibix.Sdk.Tests.CodeGeneration;
 using Dibix.Tests;
 using EnvDTE;
@@ -53,7 +54,7 @@ namespace Dibix.Sdk.VisualStudio.Tests
                                     .Callback((CompilerErrorCollection errors) =>
                                     {
                                         if (errors.HasErrors)
-                                            throw new CodeGenerationException(String.Join(Environment.NewLine, errors));
+                                            throw new CodeGenerationException(String.Join(Environment.NewLine, errors.Cast<CompilerError>()));
                                     });
             serviceProvider.Setup(x => x.GetService(typeof(DTE))).Returns(dte.Object);
             dte.SetupGet(x => x.Solution).Returns(solution.Object);
@@ -196,7 +197,7 @@ namespace Dibix.Sdk.VisualStudio.Tests
                 Mock<CodeElements> properties = new Mock<CodeElements>(MockBehavior.Strict);
 
                 codeClass.SetupGet(x => x.Members).Returns(properties.Object);
-                properties.As<IEnumerable>().Setup(x => x.GetEnumerator()).Returns(currentType.GetProperties().Select(x =>
+                properties.As<IEnumerable>().Setup(x => x.GetEnumerator()).Returns(currentType.GetProperties(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly).Select(x =>
                 {
                     Mock<CodeElement> property = new Mock<CodeElement>(MockBehavior.Strict);
 

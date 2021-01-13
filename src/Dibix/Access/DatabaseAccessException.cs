@@ -10,7 +10,7 @@ namespace Dibix
         public string CommandText { get; }
         public IParametersVisitor Parameters { get; }
 
-        private DatabaseAccessException(string message, CommandType commandType, string commandText, IParametersVisitor parameters, Exception innerException) : base($"{innerException.Message}{Environment.NewLine}{message}{Environment.NewLine}", innerException)
+        private DatabaseAccessException(string message, CommandType commandType, string commandText, IParametersVisitor parameters, Exception innerException) : base($"{innerException.Message}{Environment.NewLine}{message}", innerException)
         {
             this.CommandType = commandType;
             this.CommandText = commandText;

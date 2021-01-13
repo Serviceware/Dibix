@@ -137,6 +137,9 @@ namespace Dibix.Sdk.Sql
             }
 
             ModelPropertyClass nullableProperty = GetNullableProperty(modelElement.ObjectType);
+            if (nullableProperty == null)
+                return null; // Not supported
+
             return modelElement.GetProperty<bool>(nullableProperty);
         }
 
@@ -207,8 +210,10 @@ namespace Dibix.Sdk.Sql
                 relationship = Microsoft.SqlServer.Dac.Model.Column.DataType;
             else if (type == ModelSchema.Parameter)
                 relationship = Parameter.DataType;
+            else if (type == ModelSchema.ScalarFunction)
+                relationship = ScalarFunction.ReturnType;
             else
-                throw new ArgumentOutOfRangeException(nameof(type), type, null);
+                throw new ArgumentOutOfRangeException(nameof(type), $"{type}.{type.Name}", null);
 
             return relationship;
         }
@@ -221,6 +226,8 @@ namespace Dibix.Sdk.Sql
                 property = Microsoft.SqlServer.Dac.Model.Column.Nullable;
             else if (type == ModelSchema.Parameter)
                 property = Parameter.IsNullable;
+            else if (type == ModelSchema.ScalarFunction)
+                return null;
             else
                 throw new ArgumentOutOfRangeException(nameof(type), type, null);
 

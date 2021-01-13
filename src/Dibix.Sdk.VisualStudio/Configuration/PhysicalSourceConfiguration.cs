@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Dibix.Sdk.CodeGeneration;
+using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.Dac.Model;
 
 namespace Dibix.Sdk.VisualStudio
@@ -52,7 +53,7 @@ namespace Dibix.Sdk.VisualStudio
               , schemaRegistry: schemaRegistry
               , logger: logger
               , files: files
-              , modelAccessor: new Lazy<TSqlModel>(() => throw new NotSupportedException())
+              , modelAccessor: new Lazy<TSqlModel>(() => PublicSqlDataSchemaModelLoader.Load(this._projectName, "Microsoft.Data.Tools.Schema.Sql.Sql120DatabaseSchemaProvider", "1033, CI", Enumerable.Empty<TaskItem>(), new TaskItem[0], logger))
             );
             return statementCollector.CollectStatements();
         }

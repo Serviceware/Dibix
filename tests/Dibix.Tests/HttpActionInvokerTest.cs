@@ -65,8 +65,7 @@ namespace Dibix.Tests
             {
                 Assert.Equal(@"504 GatewayTimeout: Too late
 CommandType: 0
-CommandText: <Dynamic>
-", requestException.Message);
+CommandText: <Dynamic>", requestException.Message);
                 Assert.IsType<DatabaseAccessException>(requestException.InnerException);
                 Assert.False(requestException.IsClientError);
                 Assert.Equal(HttpStatusCode.GatewayTimeout, requestException.ErrorResponse.StatusCode);
@@ -98,8 +97,7 @@ CommandText: <Dynamic>
             {
                 Assert.Equal(@"403 Forbidden: Sorry
 CommandType: 0
-CommandText: <Dynamic>
-", requestException.Message);
+CommandText: <Dynamic>", requestException.Message);
                 Assert.IsType<DatabaseAccessException>(requestException.InnerException);
                 Assert.True(requestException.IsClientError);
                 Assert.Equal(HttpStatusCode.Forbidden, requestException.ErrorResponse.StatusCode);
@@ -151,8 +149,7 @@ Parameter b([dbo].[x]):
 intValue INT(4)  stringValue NVARCHAR(MAX)
 ---------------  -------------------------
 1                I                        
-2                II                       
-", ex.Message);
+2                II                       ", ex.Message);
             }
         }
 
@@ -198,8 +195,7 @@ Parameter b([dbo].[x]):
 intValue INT(4)  stringValue NVARCHAR(MAX)
 ---------------  -------------------------
 1                I                        
-2                II                       
-", ex.Message);
+2                II                       ", ex.Message);
             }
         }
 

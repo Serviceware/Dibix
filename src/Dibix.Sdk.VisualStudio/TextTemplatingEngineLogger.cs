@@ -36,7 +36,7 @@ namespace Dibix.Sdk.VisualStudio
         #endregion
 
         #region ILogger Members
-        public void LogMessage(string text) => throw new NotSupportedException();
+        public void LogMessage(string text) => Console.WriteLine(text);
 
         public void LogError(string code, string text, string source, int? line, int? column) => this.LogError(subCategory: null, code: code, text: text, source: source, line: line, column: column);
         public void LogError(string subCategory, string code, string text, string source, int? line, int? column)
