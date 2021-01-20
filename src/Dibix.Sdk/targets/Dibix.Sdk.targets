@@ -83,6 +83,7 @@
 
       <!-- CompileArtifacts -->
       <CompileArtifactsOutput Include="$(TargetPath)" /> <!-- .dll -->
+      <FileWrites Include="$(ClientAssemblyTargetPath);$(ClientSymbolsTargetPath)" /> <!-- This is important so these files don't get removed in IncrementalClean -->
 
       <!-- SqlCore -->
       <SqlCoreOutput Include="$(TargetPath)" /> <!-- .dll -->

@@ -42,6 +42,14 @@ namespace Dibix
 
         IEnumerable<TReturn> IMultipleResultReader.ReadMany<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> map, string splitOn) => this.ReadMany(map, splitOn).PostProcess();
 
+        // OrderManagement (GetProductDesign)
+        public IEnumerable<TReturn> ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth>(string splitOn) where TReturn : new()
+        {
+            MultiMapper multiMapper = new MultiMapper();
+            return this.ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>((a, b, c, d, e, f) => multiMapper.MapRow<TReturn>(false, a, b, c, d, e, f), splitOn)
+                       .PostProcess(multiMapper);
+        }
+        
         IEnumerable<TReturn> IMultipleResultReader.ReadMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> map, string splitOn) => this.ReadMany(map, splitOn).PostProcess();
 
         T IMultipleResultReader.ReadSingle<T>() => this.ReadSingle<T>().PostProcess();
@@ -59,6 +67,15 @@ namespace Dibix
         {
             MultiMapper multiMapper = new MultiMapper();
             return this.ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TReturn>((a, b, c, d, e) => multiMapper.MapRow<TReturn>(false, a, b, c, d, e), splitOn)
+                       .PostProcess(multiMapper)
+                       .Single();
+        }
+
+        // OrderManagement (GetProductDesign)
+        public TReturn ReadSingle<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth>(string splitOn) where TReturn : new()
+        {
+            MultiMapper multiMapper = new MultiMapper();
+            return this.ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TReturn>((a, b, c, d, e, f, g, h, i, j) => multiMapper.MapRow<TReturn>(false, a, b, c, d, e, f, g, h, i, j), splitOn)
                        .PostProcess(multiMapper)
                        .Single();
         }
@@ -87,6 +104,8 @@ namespace Dibix
         protected abstract IEnumerable<TReturn> ReadMany<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> map, string splitOn);
 
         protected abstract IEnumerable<TReturn> ReadMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> map, string splitOn);
+        
+        protected abstract IEnumerable<TReturn> ReadMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TReturn> map, string splitOn);
 
         protected abstract T ReadSingle<T>();
 

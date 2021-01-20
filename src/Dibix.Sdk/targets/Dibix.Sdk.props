@@ -37,7 +37,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Clean Include="$(ClientTargetPath)" />
+    <Clean Include="$(ClientAssemblyTargetPath)" />
     <Clean Include="$(ClientSymbolsTargetPath)" />
   </ItemGroup>
 

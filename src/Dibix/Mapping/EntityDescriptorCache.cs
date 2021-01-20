@@ -1,4 +1,5 @@
-﻿﻿using System;
+﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -11,19 +12,20 @@ namespace Dibix
 {
     internal static class EntityDescriptorCache
     {
-        private static readonly ConcurrentDictionary<Type, EntityDescriptor> Cache = new ConcurrentDictionary<Type, EntityDescriptor>();
+        private static readonly ConcurrentDictionary<Type, EntityDescriptor> DescriptorCache = new ConcurrentDictionary<Type, EntityDescriptor>();
+        private static readonly ConcurrentDictionary<Type, IEqualityComparer> ComparerCache = new ConcurrentDictionary<Type, IEqualityComparer>();
         private static readonly IEntityPropertyFormatter[] PropertyFormatters =
         {
             new DateTimeKindEntityPropertyFormatter()
           , new TextObfuscationEntityPropertyFormatter()
         };
 
-        public static EntityDescriptor GetDescriptor(Type type) => Cache.GetOrAdd(type, BuildDescriptor);
+        public static EntityDescriptor GetDescriptor(Type type) => DescriptorCache.GetOrAdd(type, BuildDescriptor);
 
         private static EntityDescriptor BuildDescriptor(Type type)
         {
             EntityDescriptor descriptor = new EntityDescriptor();
-            if (type.IsPrimitive())
+            if (type.IsPrimitive() || type == typeof(byte[]))
                 return descriptor;
 
             IDictionary<PropertyInfo, ICollection<IEntityPropertyFormatter>> formattableProperties = new Dictionary<PropertyInfo, ICollection<IEntityPropertyFormatter>>();
@@ -115,25 +117,21 @@ namespace Dibix
             ParameterExpression instanceParameter = Expression.Parameter(typeof(object), "instance");
             ParameterExpression valueParameter = Expression.Parameter(typeof(object), "value");
             Expression instanceCast = Expression.Convert(instanceParameter, property.DeclaringType);
-            Expression valueCast = Expression.Convert(valueParameter, entityType);
             MemberExpression propertyAccessor = Expression.Property(instanceCast, property);
-            
-            Func<object, object> compiledValueGetter = null;
-            if (!isCollection)
-            {
-                Expression propertyValueCast = Expression.Convert(propertyAccessor, typeof(object));
-                Expression<Func<object, object>> getValueLambda = Expression.Lambda<Func<object, object>>(propertyValueCast, instanceParameter);
-                compiledValueGetter = getValueLambda.Compile();
-            }
+
+            Expression propertyValueCast = Expression.Convert(propertyAccessor, typeof(object));
+            Expression<Func<object, object>> valueGetterLambda = Expression.Lambda<Func<object, object>>(propertyValueCast, instanceParameter);
+            Func<object, object> compiledValueGetter = valueGetterLambda.Compile();
 
             Action<object, object> compiledValueSetter = null;
             if (valueSetter != null)
             {
+                Expression valueCast = Expression.Convert(valueParameter, entityType);
                 Expression setValue = valueSetter(propertyAccessor, valueCast);
-                Expression<Action<object, object>> setValueLambda = Expression.Lambda<Action<object, object>>(setValue, instanceParameter, valueParameter);
-                compiledValueSetter = setValueLambda.Compile();
+                Expression<Action<object, object>> valueSetterLambda = Expression.Lambda<Action<object, object>>(setValue, instanceParameter, valueParameter);
+                compiledValueSetter = valueSetterLambda.Compile();
             }
-            
+
             return new EntityProperty(property.Name, entityType, isCollection, compiledValueGetter, compiledValueSetter);
         }
 
