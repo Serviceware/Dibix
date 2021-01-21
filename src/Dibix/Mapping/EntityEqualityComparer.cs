@@ -5,7 +5,14 @@ namespace Dibix
 {
     internal sealed class EntityEqualityComparer<T> : EntityEqualityComparer, IEqualityComparer<T>
     {
-        public static IEqualityComparer<T> Create() => new EntityEqualityComparer<T>();
+        public static IEqualityComparer<T> Create()
+        {
+            EntityDescriptor entityDescriptor = EntityDescriptorCache.GetDescriptor(typeof(T));
+            if (!entityDescriptor.Keys.Any())
+                return EqualityComparer<T>.Default;
+
+            return new EntityEqualityComparer<T>();
+        }
 
         bool IEqualityComparer<T>.Equals(T x, T y) => base.EqualsCore(x, y);
 
