@@ -97,7 +97,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                 CSharpMethod method = @class.AddMethod(name: methodName
                                                      , type: resultTypeName
-                                                     , body: GenerateMethodBody(statement, context)
+                                                     , body: GenerateMethodBody(statement, resultTypeName, context)
                                                      , annotations: annotations
                                                      , isExtension: true
                                                      , modifiers: CSharpModifiers.Public | CSharpModifiers.Static);
@@ -173,7 +173,7 @@ namespace Dibix.Sdk.CodeGeneration
             return query.Results[0].ResultMode == SqlQueryResultMode.Many ? MakeEnumerableType(typeName) : typeName;
         }
 
-        private static string GenerateMethodBody(SqlStatementInfo statement, DaoCodeGenerationContext context)
+        private static string GenerateMethodBody(SqlStatementInfo statement, string resultTypeName, DaoCodeGenerationContext context)
         {
             StringWriter writer = new StringWriter();
 
@@ -194,9 +194,13 @@ namespace Dibix.Sdk.CodeGeneration
             if (statement.Parameters.Any())
                 WriteParameters(writer, statement, context);
 
-            WriteExecutor(writer, statement, context);
+            bool hasOutputParameters = statement.Parameters.Any(x => x.IsOutput);
+            WriteExecutor(writer, statement, resultTypeName, hasOutputParameters, context);
 
             WriteOutputParameterAssignment(writer, statement);
+
+            if (hasOutputParameters && (statement.ResultType != null || statement.IsFileApi))
+                writer.WriteLine("return result;");
 
             writer.PopIndent()
                   .Write("}");
@@ -228,70 +232,77 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static void WriteParameters(StringWriter writer, SqlStatementInfo query, DaoCodeGenerationContext context)
         {
-            writer.Write("IParametersVisitor @params = accessor.Parameters()")
+            writer.WriteLine("IParametersVisitor @params = accessor.Parameters()")
                   .SetTemporaryIndent(37);
 
-            writer.WriteLine()
-                  .Write(".SetFromTemplate(");
+            bool hasImplicitParameters = query.GenerateInputClass || query.Parameters.Any(x => !x.IsOutput && !x.Obfuscate);
 
-            if (query.GenerateInputClass)
-                writer.WriteRaw("input");
-            else
+            if (hasImplicitParameters)
             {
-                writer.WriteLineRaw("new")
-                      .WriteLine("{")
-                      .PushIndent();
+                writer.Write(".SetFromTemplate(");
 
-                for (int i = 0; i < query.Parameters.Count; i++)
+                if (query.GenerateInputClass)
+                    writer.WriteRaw("input");
+                else
                 {
-                    SqlQueryParameter parameter = query.Parameters[i];
-                    if (parameter.Obfuscate || parameter.IsOutput)
-                        continue;
+                    writer.WriteLineRaw("new")
+                          .WriteLine("{")
+                          .PushIndent();
 
-                    writer.Write(parameter.Name);
+                    for (int i = 0; i < query.Parameters.Count; i++)
+                    {
+                        SqlQueryParameter parameter = query.Parameters[i];
+                        if (parameter.Obfuscate || parameter.IsOutput)
+                            continue;
 
-                    if (i + 1 < query.Parameters.Count)
-                        writer.WriteRaw(",");
+                        writer.Write(parameter.Name);
 
-                    writer.WriteLine();
+                        if (i + 1 < query.Parameters.Count)
+                            writer.WriteRaw(",");
+
+                        writer.WriteLine();
+                    }
+
+                    writer.PopIndent()
+                          .Write("}");
                 }
 
-                writer.PopIndent()
-                      .Write("}");
+                writer.WriteLineRaw(")");
             }
 
-            writer.WriteLineRaw(")");
-
-            foreach (SqlQueryParameter parameter in query.Parameters)
+            if (!query.GenerateInputClass)
             {
-                if (parameter.IsOutput)
+                foreach (SqlQueryParameter parameter in query.Parameters)
                 {
-                    string methodName = GetSetParameterMethodName(parameter.Type);
-                    string clrTypeName = context.ResolveTypeName(parameter.Type);
-                    writer.WriteLine($".{methodName}(nameof({parameter.Name}), out IOutParameter<{clrTypeName}> {parameter.Name}Output)");
-                }
+                    if (parameter.IsOutput)
+                    {
+                        string methodName = GetSetParameterMethodName(parameter.Type);
+                        string clrTypeName = context.ResolveTypeName(parameter.Type);
+                        writer.WriteLine($".{methodName}(nameof({parameter.Name}), out IOutParameter<{clrTypeName}> {parameter.Name}Output)");
+                    }
 
-                if (parameter.Obfuscate)
-                    writer.WriteLine($".SetString(nameof({parameter.Name}), {parameter.Name}, true)");
+                    if (parameter.Obfuscate)
+                        writer.WriteLine($".SetString(nameof({parameter.Name}), {parameter.Name}, true)");
+                }
             }
 
             writer.WriteLine(".Build();")
                   .ResetTemporaryIndent();
         }
 
-        private static void WriteExecutor(StringWriter writer, SqlStatementInfo query, DaoCodeGenerationContext context)
+        private static void WriteExecutor(StringWriter writer, SqlStatementInfo query, string resultTypeName, bool hasOutputParameters, DaoCodeGenerationContext context)
         {
             if (query.IsFileApi)
             {
-                WriteFileApiResult(writer, query, context);
+                WriteFileApiResult(writer, query, resultTypeName, hasOutputParameters, context);
             }
             else if (query.Results.Count > 1) // GridReader
             {
-                WriteComplexResult(writer, query, context);
+                WriteComplexResult(writer, query, resultTypeName, hasOutputParameters, context);
             }
             else if (query.Results.Count <= 1) // Execute or Query<T>/QuerySingle<T>/etc.
             {
-                WriteSimpleResult(writer, query, context);
+                WriteSimpleResult(writer, query, resultTypeName, hasOutputParameters, context);
             }
             else
             {
@@ -299,25 +310,25 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static void WriteSimpleResult(StringWriter writer, SqlStatementInfo query, DaoCodeGenerationContext context)
+        private static void WriteSimpleResult(StringWriter writer, SqlStatementInfo query, string resultTypeName, bool hasOutputParameters, DaoCodeGenerationContext context)
         {
             SqlQueryResult singleResult = query.Results.SingleOrDefault();
             bool isGridResult = singleResult?.Name != null;
 
             if (isGridResult)
             {
-                WriteComplexResultInitializer(writer, query, context);
+                WriteComplexResultInitializer(writer, query, resultTypeName, hasOutputParameters);
                 WriteComplexResultAssignment(writer, query, singleResult, context, isFirstResult: true, WriteSimpleMethodCall);
             }
 
             writer.WriteIndent();
 
-            if (singleResult != null)
-                writer.WriteRaw("return ");
+            if (singleResult != null) 
+                WriteResultInitialization(writer, resultTypeName, hasOutputParameters);
 
             if (!isGridResult)
                 WriteSimpleMethodCall(writer, query, singleResult, context);
-            else
+            else if (!hasOutputParameters)
                 writer.WriteRaw("result");
 
             writer.WriteLineRaw(";");
@@ -329,8 +340,14 @@ namespace Dibix.Sdk.CodeGeneration
             WriteMethodCall(writer, query, methodName, singleResult, context);
         }
 
-        private static void WriteComplexResult(StringWriter writer, SqlStatementInfo query, DaoCodeGenerationContext context)
+        private static void WriteComplexResult(StringWriter writer, SqlStatementInfo query, string resultTypeName, bool hasOutputParameters, DaoCodeGenerationContext context)
         {
+            if (hasOutputParameters)
+            {
+                writer.Write(resultTypeName)
+                      .WriteLineRaw(" result;");
+            }
+
             writer.Write("using (IMultipleResultReader reader = ");
 
             WriteMethodCall(writer, query, "QueryMultiple", null, context);
@@ -339,43 +356,74 @@ namespace Dibix.Sdk.CodeGeneration
                   .WriteLine("{")
                   .PushIndent();
 
-            WriteComplexResultBody(writer, query, context);
+            WriteComplexResultBody(writer, query, resultTypeName, hasOutputParameters, context);
 
             writer.PopIndent()
                   .WriteLine("}");
         }
 
-        private static void WriteComplexResultBody(StringWriter writer, SqlStatementInfo query, DaoCodeGenerationContext context)
+        private static void WriteComplexResultBody(StringWriter writer, SqlStatementInfo query, string resultTypeName, bool hasOutputParameters, DaoCodeGenerationContext context)
         {
-            WriteComplexResultInitializer(writer, query, context);
+            WriteComplexResultInitializer(writer, query, resultTypeName, hasOutputParameters);
 
+            bool performNullCheck = false;
             for (int i = 0; i < query.Results.Count; i++)
             {
                 SqlQueryResult result = query.Results[i];
                 bool isFirstResult = i == 0;
+                bool isLastResult = i + 1 == query.Results.Count;
 
                 WriteComplexResultAssignment(writer, query, result, context, isFirstResult, WriteGridReaderMethodCall);
 
                 // Make sure subsequent results are not merged, when the root result returned null
-                if (query.MergeGridResult && isFirstResult && result.ResultMode == SqlQueryResultMode.SingleOrDefault)
+                if (isFirstResult) 
+                    performNullCheck = query.MergeGridResult && result.ResultMode == SqlQueryResultMode.SingleOrDefault;
+
+                if (!performNullCheck) 
+                    continue;
+
+                if (!hasOutputParameters)
                 {
-                    writer.WriteLine("if (result == null)")
-                          .PushIndent()
-                          .WriteLine("return null;")
-                          .PopIndent()
-                          .WriteLine();
+                    if (isFirstResult)
+                    {
+                        writer.WriteLine("if (result == null)")
+                              .PushIndent()
+                              .WriteLine("return null;")
+                              .PopIndent()
+                              .WriteLine();
+                    }
+                    continue;
+                }
+
+                if (isFirstResult)
+                {
+                    writer.WriteLine("if (result != null)")
+                          .WriteLine("{")
+                          .PushIndent();
+                }
+
+                if (isLastResult)
+                {
+                    writer.PopIndent()
+                          .WriteLine("}");
                 }
             }
 
-            writer.WriteLine("return result;");
+            if (!hasOutputParameters)
+                writer.WriteLine("return result;");
         }
 
-        private static void WriteComplexResultInitializer(StringWriter writer, SqlStatementInfo query, DaoCodeGenerationContext context)
+        private static void WriteComplexResultInitializer(StringWriter writer, SqlStatementInfo query, string resultTypeName, bool hasOutputParameter)
         {
-            string resultTypeName = GetComplexTypeName(query, context);
+            writer.WriteIndent();
 
-            writer.Write(resultTypeName)
-                  .WriteRaw(" result = ");
+            if (!hasOutputParameter)
+            {
+                writer.WriteRaw(resultTypeName)
+                      .WriteRaw(" ");
+            }
+
+            writer.WriteRaw("result = ");
 
             if (!query.MergeGridResult)
             {
@@ -421,9 +469,11 @@ namespace Dibix.Sdk.CodeGeneration
             WriteMethodParameters(writer, parameters);
         }
 
-        private static void WriteFileApiResult(StringWriter writer, SqlStatementInfo query, DaoCodeGenerationContext context)
+        private static void WriteFileApiResult(StringWriter writer, SqlStatementInfo query, string resultTypeName, bool hasOutputParameters, DaoCodeGenerationContext context)
         {
-            writer.Write("return ");
+            writer.WriteIndent();
+
+            WriteResultInitialization(writer, resultTypeName, hasOutputParameters);
 
             WriteMethodCall(writer, query, "QueryFile", null, context);
 
@@ -503,12 +553,24 @@ namespace Dibix.Sdk.CodeGeneration
                   .WriteRaw(')');
         }
 
+        private static void WriteResultInitialization(StringWriter writer, string resultTypeName, bool hasOutputParameters)
+        {
+            if (hasOutputParameters)
+            {
+                writer.WriteRaw(resultTypeName)
+                      .WriteRaw(" result =");
+            }
+            else
+            {
+                writer.WriteRaw("return");
+            }
+            writer.WriteRaw(' ');
+        }
+
         private static void WriteOutputParameterAssignment(StringWriter writer, SqlStatementInfo statement)
         {
-            if (!statement.Parameters.Any(x => x.IsOutput))
+            if (!statement.Parameters.Any(x => x.IsOutput) || statement.GenerateInputClass)
                 return;
-
-            writer.WriteLine();
 
             foreach (SqlQueryParameter parameter in statement.Parameters.Where(parameter => parameter.IsOutput))
             {

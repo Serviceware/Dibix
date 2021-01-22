@@ -323,7 +323,22 @@ namespace Dibix.Sdk.CodeGeneration
                 ActionParameterRegistry parameterRegistry = new ActionParameterRegistry(actionDefinition, pathParameters);
                 foreach (SqlQueryParameter parameter in statement.Parameters)
                 {
-                    CollectActionParameter(parameter.Name, parameter.Type, parameter.HasDefaultValue, parameter.DefaultValue, parameterRegistry, explicitParameters, pathParameters, bodyParameters);
+                    this.CollectActionParameter
+                    (
+                        parameter.Name
+                      , parameter.Type
+                      , parameter.HasDefaultValue
+                      , parameter.DefaultValue
+                      , parameter.IsOutput
+                      , target
+                      , filePath
+                      , line
+                      , column
+                      , parameterRegistry
+                      , explicitParameters
+                      , pathParameters
+                      , bodyParameters
+                    );
                 }
                 return actionDefinition;
             }
@@ -337,7 +352,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
             }
 
             // 3. Target 'could' be a compiled method in a neighbour project
-            if (!this.TryGetNeighborActionTarget(methodName, filePath, line, column, explicitParameters, pathParameters, bodyParameters, out actionDefinition))
+            if (!this.TryGetNeighborActionTarget(target, methodName, filePath, line, column, explicitParameters, pathParameters, bodyParameters, out actionDefinition))
             {
                 base.Logger.LogError(null, $"Could not find a method named '{methodName}' on database accessor type '{typeName}'", filePath, line, column);
                 return null;
@@ -345,7 +360,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
             return actionDefinition;
         }
 
-        private bool TryGetNeighborActionTarget(string methodName, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, Group> pathParameters, ICollection<string> bodyParameters, out ActionDefinition actionDefinition)
+        private bool TryGetNeighborActionTarget(string targetName, string methodName, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, Group> pathParameters, ICollection<string> bodyParameters, out ActionDefinition actionDefinition)
         {
             actionDefinition = this._referencedAssemblyInspector.Inspect(referencedAssemblies =>
             {
@@ -356,7 +371,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
                             from method in type.GetMethods()
                             where method.Name == methodName
                                || method.Name == $"{methodName}Async"
-                            select this.CreateActionDefinition(method, filePath, line, column, explicitParameters, pathParameters, bodyParameters);
+                            select this.CreateActionDefinition(targetName, method, filePath, line, column, explicitParameters, pathParameters, bodyParameters);
 
                 return query.FirstOrDefault();
             });
@@ -364,7 +379,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
             return actionDefinition != null;
         }
 
-        private ActionDefinition CreateActionDefinition(MethodInfo method, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, Group> pathParameters, ICollection<string> bodyParameters)
+        private ActionDefinition CreateActionDefinition(string targetName, MethodInfo method, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, Group> pathParameters, ICollection<string> bodyParameters)
         {
             string operationName = method.Name;
             Type returnType = method.ReturnType;
@@ -396,16 +411,50 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
                 // ParameterInfo.HasDefaultValue/DefaultValue => It is illegal to reflect on the custom attributes of a Type loaded via ReflectionOnlyGetType (see Assembly.ReflectionOnly) -- use CustomAttributeData instead
                 bool hasDefaultValue = parameter.RawDefaultValue != DBNull.Value;
                 object defaultValue = parameter.RawDefaultValue;
+                bool isOutParameter = parameter.IsOut;
 
-                CollectActionParameter(parameterName, parameterType, hasDefaultValue, defaultValue, parameterRegistry, explicitParameters, pathParameters, bodyParameters);
+                this.CollectActionParameter
+                (
+                    parameterName
+                  , parameterType
+                  , hasDefaultValue
+                  , defaultValue
+                  , isOutParameter
+                  , targetName
+                  , filePath
+                  , line
+                  , column
+                  , parameterRegistry
+                  , explicitParameters
+                  , pathParameters
+                  , bodyParameters
+                );
             }
 
             return actionDefinition;
         }
 
-        private static void CollectActionParameter(string name, TypeReference type, bool hasDefaultValue, object defaultValue, ActionParameterRegistry parameterRegistry, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, Group> pathParameters, ICollection<string> bodyParameters)
+        private void CollectActionParameter
+        (
+            string parameterName
+          , TypeReference parameterType
+          , bool hasDefaultValue
+          , object defaultValue
+          , bool isOutParameter
+          , string actionName
+          , string filePath
+          , int line
+          , int column
+          , ActionParameterRegistry parameterRegistry
+          , IDictionary<string, ExplicitParameter> explicitParameters
+          , IDictionary<string, Group> pathParameters
+          , ICollection<string> bodyParameters
+        )
         {
-            ActionParameter actionParameter = CreateActionParameter(name, type, hasDefaultValue, defaultValue, explicitParameters, pathParameters, bodyParameters);
+            if (isOutParameter)
+                base.Logger.LogError(null, $"Output parameters are not supported in endpoints: {actionName}", filePath, line, column);
+
+            ActionParameter actionParameter = CreateActionParameter(parameterName, parameterType, hasDefaultValue, defaultValue, explicitParameters, pathParameters, bodyParameters);
             parameterRegistry.Add(actionParameter);
         }
 

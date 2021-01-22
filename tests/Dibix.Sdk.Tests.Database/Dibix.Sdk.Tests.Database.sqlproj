@@ -145,6 +145,7 @@
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_040.sql" />
     <Build Include="Tests\Syntax\dbx_tests_syntax_gridresult_customname_single.sql" />
     <Build Include="Tests\Syntax\dbx_tests_syntax_gridresult_single.sql" />
+    <Build Include="Tests\Syntax\dbx_tests_syntax_empty_params_out.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CodeAnalysis" />
@@ -172,6 +173,7 @@
     <None Include="Contracts\JointContract.json" />
     <None Include="Endpoints\GenericEndpoint.json" />
     <None Include="Contracts\InputContract.json" />
+    <None Include="Endpoints\GenericEndpointWithOutputParam.json" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\master.dacpac">

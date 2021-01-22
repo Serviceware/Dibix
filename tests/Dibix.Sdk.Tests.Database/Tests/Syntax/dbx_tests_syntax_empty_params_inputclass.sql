@@ -1,13 +1,10 @@
-﻿/*
-DROP PROCEDURE [dbo].[dbx_tests_syntax_empty_params_inputclass]
-*/
--- @Name EmptyWithParams
+﻿-- @Name EmptyWithParams
 -- @GenerateInputClass
 CREATE PROCEDURE [dbo].[dbx_tests_syntax_empty_params_inputclass]
 	@x UNIQUEIDENTIFIER NULL
-  , @y BIT
-  , @z INT
---, /* @Obfuscate */ @password NVARCHAR(128)
+  , /* @Obfuscate */ @password NVARCHAR(128)
   , @ids [dbo].[dbx_codeanalysis_udt_generic] READONLY
+  , @y BIT OUTPUT
+  , @z INT
 AS
 	;

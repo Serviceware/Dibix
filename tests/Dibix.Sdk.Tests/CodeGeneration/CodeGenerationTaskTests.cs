@@ -43,6 +43,16 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         }
 
         [Fact]
+        public void External_Empty_WithOutputParam()
+        {
+            this.ExecuteTest
+            (
+                isEmbedded: false
+              , @"Tests\Syntax\dbx_tests_syntax_empty_params_out.sql"
+            );
+        }
+
+        [Fact]
         public void Inline_SinglePrimitiveResult()
         {
             this.ExecuteTest(@"Tests\Syntax\dbx_tests_syntax_singleprimitiveresult.sql");
@@ -336,9 +346,16 @@ Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly
         }
 
         [Fact]
+        public void Endpoint_WithOutputParam_Error()
+        {
+            this.ExecuteTestAndExpectError(@"Tests\Syntax\dbx_tests_syntax_empty_params_out.sql", @"Endpoints\GenericEndpointWithOutputParam.json", @"One or more errors occured during code generation:
+Endpoints\GenericEndpointWithOutputParam.json(6,18,6,18):error:Output parameters are not supported in endpoints: EmptyWithOutputParam");
+        }
+
+        [Fact]
         public void InvalidContractSchema_Error()
         {
-            this.ExecuteTestAndExpectError(Enumerable.Empty<string>(), Enumerable.Repeat(@"Contracts\Invalid.json", 1), @"One or more errors occured during code generation:
+            this.ExecuteTestAndExpectError(Enumerable.Repeat(@"Contracts\Invalid.json", 1), @"One or more errors occured during code generation:
 Contracts\Invalid.json(3,12,3,12):error:String 'x' does not match regex pattern '^(binary|boolean|byte|datetime|datetimeoffset|decimal|double|float|int16|int32|int64|string|uuid|xml)\??\*?$'. (Invalid.A)
 Contracts\Invalid.json(3,12,3,12):error:String 'x' does not match regex pattern '^#([\w]+)(.([\w]+))*\??\*?$'. (Invalid.A)
 Contracts\Invalid.json(3,12,3,12):error:JSON does not match any schemas from 'anyOf'. (Invalid.A)

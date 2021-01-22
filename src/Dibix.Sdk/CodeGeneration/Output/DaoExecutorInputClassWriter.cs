@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Dibix.Sdk.CodeGeneration.CSharp;
 
@@ -40,7 +41,11 @@ namespace Dibix.Sdk.CodeGeneration
 
                     foreach (SqlQueryParameter parameter in statement.Parameters)
                     {
-                        inputType.AddProperty(parameter.Name, context.ResolveTypeName(parameter.Type))
+                        ICollection<string> propertyAnnotations = new Collection<string>();
+                        if (parameter.Obfuscate)
+                            propertyAnnotations.Add("Obfuscated");
+
+                        inputType.AddProperty(parameter.Name, ResolvePropertyTypeName(parameter, context), propertyAnnotations)
                                  .Getter(null)
                                  .Setter(null);
                     }
@@ -59,6 +64,15 @@ namespace Dibix.Sdk.CodeGeneration
         private static bool RequiresInput(SqlStatementInfo statement) => statement.GenerateInputClass;
 
         private static string GetInputTypeName(SqlStatementInfo statement) => String.Concat(statement.Name, InputTypeSuffix);
+
+        private static string ResolvePropertyTypeName(SqlQueryParameter parameter, DaoCodeGenerationContext context)
+        {
+            string typeName = context.ResolveTypeName(parameter.Type);
+            if (!parameter.IsOutput)
+                return typeName;
+
+            return $"IOutParameter<{typeName}>";
+        }
         #endregion
     }
 }

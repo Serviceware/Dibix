@@ -106,9 +106,23 @@ namespace Dibix
             Guard.IsNotNull(template, nameof(template));
             foreach (PropertyAccessor property in TypeAccessor.GetProperties(template.GetType()))
             {
-                DbType type = ResolveDbType(property.Type);
+                Type outParameterType = null;
+                DbType type = ResolveDbType(property.Type, ref outParameterType);
                 object value = property.GetValue(template);
-                this.Set(property.Name, type, value);
+                bool isObfuscated = property.IsDefined<ObfuscatedAttribute>();
+                if (isObfuscated)
+                {
+                    this.SetStringCore(property.Name, (string)value, true);
+                }
+                else if (outParameterType == null)
+                {
+                    this.Set(property.Name, type, value);
+                }
+                else
+                {
+                    this.Set(property.Name, type, outParameterType, out OutParameter outParameter);
+                    property.SetValue(template, outParameter);
+                }
             }
             return this;
         }
@@ -123,18 +137,30 @@ namespace Dibix
             parameterValue = outParameter;
             return this.Set(name, type, null, outParameter);
         }
+        private IParameterBuilder Set(string name, DbType dbType, Type clrType, out OutParameter parameterValue)
+        {
+            OutParameter outParameter = (OutParameter)Activator.CreateInstance(typeof(OutParameter<>).MakeGenericType(clrType));
+            parameterValue = outParameter;
+            return this.Set(name, dbType, null, outParameter);
+        }
         private IParameterBuilder Set(string name, DbType type, object value, OutParameter outParameter = null)
         {
             this._parameters[name] = new Parameter(name, type, value, outParameter);
             return this;
         }
 
-        private static DbType ResolveDbType(Type clrType)
+        private static DbType ResolveDbType(Type clrType, ref Type outParameterType)
         {
             Type nullUnderlyingType = Nullable.GetUnderlyingType(clrType);
             if (nullUnderlyingType != null) 
                 clrType = nullUnderlyingType;
-            
+
+            if (clrType.IsGenericType && clrType.GetGenericTypeDefinition() == typeof(IOutParameter<>))
+            {
+                outParameterType = clrType.GenericTypeArguments[0];
+                clrType = outParameterType;
+            }
+
             if (clrType.IsEnum && !TypeMap.ContainsKey(clrType)) 
                 clrType = Enum.GetUnderlyingType(clrType);
 

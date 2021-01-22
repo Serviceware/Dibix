@@ -45,7 +45,7 @@ namespace Dibix.Sdk.CodeGeneration
                 IsOutput = node.Modifier == ParameterModifier.Output
             };
             
-            this.ParseParameterObfuscate(node, parameter, markup);
+            this.ParseParameterObfuscate(parameter, markup);
             this.ParseDefaultValue(node, parameter);
 
             base.Target.Parameters.Add(parameter);
@@ -57,16 +57,9 @@ namespace Dibix.Sdk.CodeGeneration
             return parameter.DataType.ToTypeReference(isNullable, parameterName, base.Target.Namespace, base.Target.Source, markup, base.TypeResolver, base.Logger, out _);
         }
 
-        private void ParseParameterObfuscate(TSqlFragment parameter, SqlQueryParameter target, ISqlMarkupDeclaration markup)
+        private void ParseParameterObfuscate(SqlQueryParameter target, ISqlMarkupDeclaration markup)
         {
-            target.Obfuscate = markup.TryGetSingleElement(SqlMarkupKey.Obfuscate, base.Target.Source, base.Logger, out ISqlElement obfuscate);
-
-            // NOTE: Uncomment line dbx_tests_syntax_empty_params_inputclass line 5, whenever base is implemented
-            if (target.Obfuscate && base.Target.GenerateInputClass)
-            {
-                base.Logger.LogError(null, $@"Parameter obfuscation is currently not supported with input classes: {target.Name}
-Either remove the @GenerateInputClass hint on the statement or the @Obfuscate hint on the parameter", base.Target.Source, obfuscate.Line, obfuscate.Column);
-            }
+            target.Obfuscate = markup.TryGetSingleElement(SqlMarkupKey.Obfuscate, base.Target.Source, base.Logger, out ISqlElement _);
         }
 
         private void ParseDefaultValue(DeclareVariableElement parameter, SqlQueryParameter target)

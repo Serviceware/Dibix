@@ -1,0 +1,9 @@
+﻿{
+  "$schema": "../../../src/Dibix.Sdk/CodeGeneration/Schema/dibix.endpoints.schema.json",
+  "GenericEndpoint": [
+    {
+      "method": "GET",
+      "target": "EmptyWithOutputParam"
+    }
+  ]
+}

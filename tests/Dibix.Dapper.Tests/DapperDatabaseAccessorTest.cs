@@ -28,12 +28,19 @@ CommandText: <Dynamic>", exception.Message);
             using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
             {
                 const string commandText = "[dbo].[_dibix_tests_sp1]";
+                InputClass input = new InputClass();
                 IParametersVisitor parameters = accessor.Parameters()
-                                                        .SetInt32("out", out IOutParameter<int> @out)
+                                                        .SetInt32("out1", out IOutParameter<int> out1)
+                                                        .SetFromTemplate(input)
                                                         .Build();
                 accessor.Execute(commandText, CommandType.StoredProcedure, parameters);
-                Assert.Equal(5, @out.Result);
+                Assert.Equal(5, out1.Result);
+                Assert.True(input.out2.Result);
             }
+        }
+        private sealed class InputClass
+        {
+            public IOutParameter<bool> out2 { get; set; }
         }
 
         [Fact]
