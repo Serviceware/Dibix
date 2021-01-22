@@ -550,8 +550,19 @@ namespace Dibix.Sdk.CodeGeneration
         {
             switch (dataType)
             {
+                case PrimitiveDataType.Boolean: return "SetBoolean";
+                case PrimitiveDataType.Byte: return "SetByte";
+                case PrimitiveDataType.Int16: return "SetInt16";
                 case PrimitiveDataType.Int32: return "SetInt32";
+                case PrimitiveDataType.Int64: return "SetInt64";
+                case PrimitiveDataType.Float: return "SetSingle";
+                case PrimitiveDataType.Double: return "SetDouble";
+                case PrimitiveDataType.Decimal: return "SetDecimal";
+                case PrimitiveDataType.Binary: return "SetBytes";
+                case PrimitiveDataType.DateTime: return "SetDateTime";
+                case PrimitiveDataType.String: return "SetString";
                 case PrimitiveDataType.UUID: return "SetGuid";
+                case PrimitiveDataType.Xml: return "SetXml";
                 default: throw new ArgumentOutOfRangeException(nameof(dataType), dataType, null);
             }
         }
