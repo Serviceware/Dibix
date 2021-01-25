@@ -581,7 +581,7 @@ Either create a mapping or make sure a property of the same name exists in the s
             if (bodyContract != null)
                 method.AddParameter(HttpParameterName.Body, bodyContract, HttpParameterLocation.NonUser, isOptional: false);
 
-            foreach (HttpParameterInfo parameter in parameters.Where(x => x.Location != HttpParameterLocation.NonUser)) 
+            foreach (HttpParameterInfo parameter in parameters.Where(x => x.Location != HttpParameterLocation.NonUser).DistinctBy(x => x.ApiParameterName)) 
                 method.AddParameter(parameter.ApiParameterName, parameter.ParameterType, parameter.Location, parameter.IsOptional);
         }
 

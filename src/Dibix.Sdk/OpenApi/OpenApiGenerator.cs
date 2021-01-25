@@ -104,7 +104,7 @@ namespace Dibix.Sdk.OpenApi
 
         private static void AppendParameters(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
-            foreach (ActionParameter parameter in action.Parameters)
+            foreach (ActionParameter parameter in action.Parameters.DistinctBy(x => x.ApiParameterName))
             {
                 if (parameter.Location != ActionParameterLocation.Query && parameter.Location != ActionParameterLocation.Path) 
                     continue;
