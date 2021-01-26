@@ -16,6 +16,7 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly string _productName;
         private readonly string _areaName;
         private readonly IDictionary<string, SchemaDefinition> _schemas;
+        private readonly IDictionary<string, SchemaDefinitionLocation> _schemaLocations;
         #endregion
 
         #region Properties
@@ -30,6 +31,7 @@ namespace Dibix.Sdk.CodeGeneration
             this._productName = productName;
             this._areaName = areaName;
             this._schemas = new Dictionary<string, SchemaDefinition>();
+            this._schemaLocations = new Dictionary<string, SchemaDefinitionLocation>();
             base.Collect(contracts);
         }
         #endregion
@@ -74,20 +76,22 @@ If this is not a project that has multiple areas, please make sure to define the
         {
             foreach (JProperty definitionProperty in contracts.Properties())
             {
-                this.ReadContract(rootNamespace, currentNamespace, definitionProperty.Name, definitionProperty.Value, filePath);
+                IJsonLineInfo location = definitionProperty;
+                int column = definitionProperty.GetCorrectLinePosition();
+                this.ReadContract(rootNamespace, currentNamespace, definitionProperty.Name, definitionProperty.Value, filePath, location.LineNumber, column);
             }
         }
 
-        private void ReadContract(string rootNamespace, string currentNamespace, string definitionName, JToken value, string filePath)
+        private void ReadContract(string rootNamespace, string currentNamespace, string definitionName, JToken value, string filePath, int line, int column)
         {
             switch (value.Type)
             {
                 case JTokenType.Object:
-                    this.ReadObjectContract(rootNamespace, currentNamespace, definitionName, value, filePath);
+                    this.ReadObjectContract(rootNamespace, currentNamespace, definitionName, value, filePath, line, column);
                     break;
 
                 case JTokenType.Array:
-                    this.ReadEnumContract(currentNamespace, definitionName, value);
+                    this.ReadEnumContract(currentNamespace, definitionName, value, filePath, line, column);
                     break;
 
                 default:
@@ -95,7 +99,7 @@ If this is not a project that has multiple areas, please make sure to define the
             }
         }
 
-        private void ReadObjectContract(string rootNamespace, string currentNamespace, string definitionName, JToken value, string filePath)
+        private void ReadObjectContract(string rootNamespace, string currentNamespace, string definitionName, JToken value, string filePath, int line, int column)
         {
             ObjectSchema contract = new ObjectSchema(currentNamespace, definitionName);
             foreach (JProperty property in ((JObject)value).Properties())
@@ -140,10 +144,10 @@ If this is not a project that has multiple areas, please make sure to define the
                 }
             }
 
-            this._schemas.Add(contract.FullName, contract);
+            this.CollectContract(contract.FullName, contract, filePath, line, column);
         }
 
-        private void ReadEnumContract(string currentNamespace, string definitionName, JToken definitionValue)
+        private void ReadEnumContract(string currentNamespace, string definitionName, JToken definitionValue, string filePath, int line, int column)
         {
             EnumSchema contract = new EnumSchema(currentNamespace, definitionName, false);
 
@@ -156,7 +160,7 @@ If this is not a project that has multiple areas, please make sure to define the
                 contract.Members.Add(new EnumSchemaMember(value.Name, actualValue, value.StringValue));
             }
 
-            this._schemas.Add(contract.FullName, contract);
+            this.CollectContract(contract.FullName, contract, filePath, line, column);
         }
 
         private static IEnumerable<EnumValue> ReadEnumValues(JToken members)
@@ -194,6 +198,18 @@ If this is not a project that has multiple areas, please make sure to define the
             }
         }
 
+        private void CollectContract(string name, SchemaDefinition definition, string filePath, int line, int column)
+        {
+            if (this._schemaLocations.TryGetValue(name, out SchemaDefinitionLocation otherLocation))
+            {
+                this.Logger.LogError(null, $"Ambiguous contract definition: {definition.FullName}", otherLocation.FilePath, otherLocation.Line, otherLocation.Column);
+                this.Logger.LogError(null, $"Ambiguous contract definition: {definition.FullName}", filePath, line, column);
+                return;
+            }
+            this._schemas.Add(name, definition);
+            this._schemaLocations.Add(name, new SchemaDefinitionLocation(filePath, line, column));
+        }
+
         private static TypeReference ParseType(string typeName, string rootNamespace, string filePath, JValue value)
         {
             bool isEnumerable = typeName.EndsWith("*", StringComparison.Ordinal);
@@ -218,6 +234,20 @@ If this is not a project that has multiple areas, please make sure to define the
         #endregion
 
         #region Nested types
+        private readonly struct SchemaDefinitionLocation
+        {
+            public string FilePath { get; }
+            public int Line { get; }
+            public int Column { get; }
+
+            public SchemaDefinitionLocation(string filePath, int line, int column)
+            {
+                this.FilePath = filePath;
+                this.Line = line;
+                this.Column = column;
+            }
+        }
+
         private sealed class EnumValue
         {
             public string Name { get; }

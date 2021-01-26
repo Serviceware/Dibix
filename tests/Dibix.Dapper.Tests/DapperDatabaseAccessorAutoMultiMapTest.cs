@@ -68,7 +68,7 @@ INNER JOIN (VALUES (N'black', N'feature1')
         }
 
         [Fact]
-        public void QuerySingle_WithAutoMultiMap_AmbigousKey_IdentifiedUsingParent()
+        public void QuerySingle_WithAutoMultiMap_AmbiguousKey_IdentifiedUsingParent()
         {
             using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
             {

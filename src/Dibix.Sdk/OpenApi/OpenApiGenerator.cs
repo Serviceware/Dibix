@@ -69,9 +69,9 @@ namespace Dibix.Sdk.OpenApi
                                                                                    Position = i + 1,
                                                                                    Name = x.Key,
                                                                                    Action = y,
-                                                                                   IsAmbigous = x.Count() > 1
+                                                                                   IsAmbiguous = x.Count() > 1
                                                                                }))
-                                                                               .ToDictionary(x => x.Action, x => x.IsAmbigous ? $"{x.Name}{x.Position}" : x.Name);
+                                                                               .ToDictionary(x => x.Action, x => x.IsAmbiguous ? $"{x.Name}{x.Position}" : x.Name);
 
                 foreach (IGrouping<string, ActionDefinition> path in controller.Actions.GroupBy(x => $"/{RouteBuilder.BuildRoute(areaName, controller.Name, x.ChildRoute)}"))
                 {
