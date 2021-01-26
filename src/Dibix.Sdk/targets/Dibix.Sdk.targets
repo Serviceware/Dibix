@@ -232,6 +232,8 @@ $(_SqlReferencePath)" />
   $(_ServerIntermediateFilePath)" />
       <_CodeGenerationInputItem Include="ClientOutputFilePath
   $(_ClientIntermediateFilePath)" />
+      <_CodeGenerationInputItem Include="ExternalAssemblyReferenceDir
+  $(ExternalAssemblyReferenceDir)" />
       <_CodeGenerationInputItem Include="BuildingInsideVisualStudio
   $(BuildingInsideVisualStudio)" />
       <_CodeGenerationInputItem Include="Source
@@ -522,6 +524,8 @@ $(_SqlReferencePath)" />
   $(_ServerIntermediateFilePath)" />
       <_SqlCoreInputItem Include="ClientOutputFilePath
   $(_ClientIntermediateFilePath)" />
+      <_SqlCoreInputItem Include="ExternalAssemblyReferenceDir
+  $(ExternalAssemblyReferenceDir)" />
       <_SqlCoreInputItem Include="BuildingInsideVisualStudio
   $(BuildingInsideVisualStudio)" />
       <_SqlCoreInputItem Include="Source

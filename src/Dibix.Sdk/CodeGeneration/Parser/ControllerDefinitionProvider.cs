@@ -1,21 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Dibix.Http;
 using Dibix.Sdk.Json;
+using Microsoft.SqlServer.TransactSql.ScriptDom;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using AssemblyName = System.Reflection.AssemblyName;
 
 namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class ControllerDefinitionProvider : JsonSchemaDefinitionReader, IControllerDefinitionProvider
     {
         #region Fields
+        private readonly string _projectName;
         private readonly string _productName;
         private readonly string _areaName;
         private readonly string _outputName;
@@ -23,6 +28,7 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly ITypeResolverFacade _typeResolver;
         private readonly ReferencedAssemblyInspector _referencedAssemblyInspector;
         private readonly ISchemaRegistry _schemaRegistry;
+        private readonly AssemblyResolver _assemblyResolver;
         #endregion
 
         #region Properties
@@ -31,8 +37,9 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public ControllerDefinitionProvider(string productName, string areaName, string outputName, ICollection<SqlStatementInfo> statements, IEnumerable<string> endpoints, ITypeResolverFacade typeResolver, ReferencedAssemblyInspector referencedAssemblyInspector, ISchemaRegistry schemaRegistry, IFileSystemProvider fileSystemProvider, ILogger logger) : base(fileSystemProvider, logger)
+        public ControllerDefinitionProvider(string projectName, string productName, string areaName, string outputName, ICollection<SqlStatementInfo> statements, IEnumerable<string> endpoints, ITypeResolverFacade typeResolver, ReferencedAssemblyInspector referencedAssemblyInspector, ISchemaRegistry schemaRegistry, IFileSystemProvider fileSystemProvider, ILogger logger) : base(fileSystemProvider, logger)
         {
+            this._projectName = projectName;
             this._productName = productName;
             this._areaName = areaName;
             this._outputName = outputName;
@@ -40,6 +47,7 @@ namespace Dibix.Sdk.CodeGeneration
             this._typeResolver = typeResolver;
             this._referencedAssemblyInspector = referencedAssemblyInspector;
             this._schemaRegistry = schemaRegistry;
+            this._assemblyResolver = referencedAssemblyInspector;
             this.Controllers = new Collection<ControllerDefinition>();
             base.Collect(endpoints);
         }
@@ -106,6 +114,8 @@ namespace Dibix.Sdk.CodeGeneration
 
             // Resolve action target, parameters and create action definition
             ActionDefinition actionDefinition = this.CreateActionDefinition(action, filePath, explicitParameters, pathParameters, bodyParameters);
+            if (actionDefinition == null)
+                return;
 
             // Unfortunately we do not have any metadata on reflection targets
             if (!(actionDefinition.Target is ReflectionActionTarget))
@@ -114,7 +124,7 @@ namespace Dibix.Sdk.CodeGeneration
                 foreach (ExplicitParameter explicitParameter in explicitParameters.Values)
                 {
                     IJsonLineInfo propertyLocation = explicitParameter.Property;
-                    base.Logger.LogError(null, $"Parameter '{explicitParameter.Property.Name}' not found on action: {actionDefinition.Target.Name}", filePath, propertyLocation.LineNumber, explicitParameter.Property.GetCorrectLinePosition());
+                    base.Logger.LogError(null, $"Parameter '{explicitParameter.Property.Name}' not found on action: {actionDefinition.Target.OperationName}", filePath, propertyLocation.LineNumber, explicitParameter.Property.GetCorrectLinePosition());
                 }
 
                 // Validate path parameters
@@ -295,9 +305,8 @@ namespace Dibix.Sdk.CodeGeneration
         private ActionDefinition CreateActionDefinition(string target, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, Group> pathParameters, ICollection<string> bodyParameters)
         {
             // 1. Target is a reflection target within a foreign assembly
-            bool isExternal = target.Contains(",");
-            if (isExternal)
-                return new ActionDefinition(new ReflectionActionTarget(target));
+            if (this.TryGetExternalActionTarget(target, filePath, line, column, explicitParameters, pathParameters, bodyParameters, out ActionDefinition actionDefinition))
+                return actionDefinition;
 
             // Use explicit namespace if it can be extracted
             int statementNameIndex = target.LastIndexOf('.');
@@ -312,7 +321,6 @@ namespace Dibix.Sdk.CodeGeneration
 
             string typeName = $"{normalizedNamespace}.{this._outputName}";
             string methodName = target.Substring(statementNameIndex + 1);
-            ActionDefinition actionDefinition;
 
             // 2. Target is a SQL statement within the current project
             SqlStatementInfo statement = this._statements.FirstOrDefault(x => x.Namespace == normalizedNamespace && x.Name == methodName);
@@ -360,6 +368,52 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
             return actionDefinition;
         }
 
+        private bool TryGetExternalActionTarget(string targetName, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, Group> pathParameters, ICollection<string> bodyParameters, out ActionDefinition actionDefinition)
+        {
+            string[] parts = targetName.Split(',');
+            if (parts.Length != 2)
+            {
+                actionDefinition = null;
+                return false;
+            }
+            
+            string assemblyName = parts[1];
+            int methodNameIndex = parts[0].LastIndexOf('.');
+            string typeName = parts[0].Substring(0, methodNameIndex);
+            string methodName = parts[0].Substring(methodNameIndex + 1, parts[0].Length - methodNameIndex - 1);
+
+            /*
+            if (!this._assemblyResolver.TryGetAssembly(assemblyName, out Assembly assembly))
+            {
+                base.Logger.LogError(null, $"Could not locate assembly: {assemblyName}", filePath, line, column + parts[0].Length + 1);
+                actionDefinition = null;
+                return true;
+            }
+
+            Type type = assembly.GetType(typeName, true);
+            MethodInfo method = type.GetMethod(methodName);
+            if (method == null)
+            {
+                base.Logger.LogError(null, $"Could not find method: {methodName} on {typeName}", filePath, line, column + methodNameIndex + 1);
+                actionDefinition = null;
+                return true;
+            }
+
+            actionDefinition = ReflectionOnlyTypeInspector.Inspect(() => this.CreateActionDefinition(targetName, assemblyName, method, filePath, line, column, explicitParameters, pathParameters, bodyParameters));
+            */
+            
+            // Workaround to ensure generation of a valid OpenAPI schema
+            actionDefinition = new ActionDefinition(new ReflectionActionTarget(assemblyName, typeName, methodName, null, false));
+            foreach (string pathParameter in pathParameters.Keys)
+            {
+                TypeReference type = new PrimitiveTypeReference(PrimitiveDataType.String, isNullable: false, isEnumerable: false);
+                ActionParameter parameter = new ActionParameter(pathParameter, pathParameter, type, ActionParameterLocation.Path, hasDefaultValue: false, defaultValue: null, source: null);
+                actionDefinition.Parameters.Add(parameter);
+            }
+
+            return true;
+        }
+
         private bool TryGetNeighborActionTarget(string targetName, string methodName, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, Group> pathParameters, ICollection<string> bodyParameters, out ActionDefinition actionDefinition)
         {
             actionDefinition = this._referencedAssemblyInspector.Inspect(referencedAssemblies =>
@@ -371,7 +425,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
                             from method in type.GetMethods()
                             where method.Name == methodName
                                || method.Name == $"{methodName}Async"
-                            select this.CreateActionDefinition(targetName, method, filePath, line, column, explicitParameters, pathParameters, bodyParameters);
+                            select this.CreateActionDefinition(targetName, assemblyName: null, method, filePath, line, column, explicitParameters, pathParameters, bodyParameters);
 
                 return query.FirstOrDefault();
             });
@@ -379,10 +433,11 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
             return actionDefinition != null;
         }
 
-        private ActionDefinition CreateActionDefinition(string targetName, MethodInfo method, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, Group> pathParameters, ICollection<string> bodyParameters)
+        private ActionDefinition CreateActionDefinition(string targetName, string assemblyName, MethodInfo method, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, Group> pathParameters, ICollection<string> bodyParameters)
         {
             string operationName = method.Name;
-            Type returnType = method.ReturnType;
+            bool isReflectionTarget = assemblyName != null;
+            Type returnType = this.CollectReturnType(method, isReflectionTarget);
             bool isAsync = returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(Task<>);
 
             if (isAsync)
@@ -397,12 +452,17 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
             if (returnType != typeof(void))
                 resultType = ReflectionTypeResolver.ResolveType(returnType, filePath, line, column, this._schemaRegistry);
 
-            NeighborActionTarget target = new NeighborActionTarget(method.DeclaringType.FullName, resultType, operationName, isAsync);
+            NeighborActionTarget target;
+            if (isReflectionTarget)
+                target = new ReflectionActionTarget(assemblyName, method.DeclaringType.FullName, operationName, resultType, isAsync);
+            else
+                target = new NeighborActionTarget(method.DeclaringType.FullName, operationName, resultType, isAsync);
+
             ActionDefinition actionDefinition = new ActionDefinition(target);
             ActionParameterRegistry parameterRegistry = new ActionParameterRegistry(actionDefinition, pathParameters);
             method.CollectErrorResponses((statusCode, errorCode, errorDescription, isClientError) => target.ErrorResponses.Add(new ErrorResponse(statusCode, errorCode, errorDescription, isClientError)));
 
-            IEnumerable<ParameterInfo> parameters = method.GetExternalParameters(isAsync);
+            IEnumerable<ParameterInfo> parameters = this.CollectReflectionInfo(() => method.GetExternalParameters(isAsync), isReflectionTarget, Enumerable.Empty<ParameterInfo>);
             foreach (ParameterInfo parameter in parameters)
             {
                 string parameterName = parameter.Name;
@@ -432,6 +492,34 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
             }
 
             return actionDefinition;
+        }
+
+        private Type CollectReturnType(MethodInfo method, bool isReflectionTarget)
+        {
+            Type returnType = this.CollectReflectionInfo(() => method.ReturnType, isReflectionTarget, () => typeof(void));
+            if (isReflectionTarget && returnType.FullName == typeof(HttpResponseMessage).FullName)
+                return typeof(void);
+
+            return returnType;
+        }
+
+        private T CollectReflectionInfo<T>(Func<T> valueResolver, bool isReflectionTarget, Func<T> fallbackValueResolver)
+        {
+            if (!isReflectionTarget)
+                return valueResolver();
+
+            try
+            {
+                return valueResolver();
+            }
+            catch (FileNotFoundException exception)
+            {
+                AssemblyName assemblyName = new AssemblyName(exception.FileName);
+                if (assemblyName.Name == this._projectName)
+                    return fallbackValueResolver();
+
+                throw;
+            }
         }
 
         private void CollectActionParameter

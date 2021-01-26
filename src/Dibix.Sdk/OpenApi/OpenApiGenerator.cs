@@ -63,7 +63,7 @@ namespace Dibix.Sdk.OpenApi
             foreach (ControllerDefinition controller in controllers)
             {
                 IDictionary<ActionDefinition, string> operationIds = controller.Actions
-                                                                               .GroupBy(x => x.Target.Name)
+                                                                               .GroupBy(x => x.Target.OperationName)
                                                                                .SelectMany(x => x.Select((y, i) => new
                                                                                {
                                                                                    Position = i + 1,
@@ -211,23 +211,20 @@ namespace Dibix.Sdk.OpenApi
 
         private static void AppendResponses(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
-            TypeReference resultType = GetResultType(action.Target);
-            AppendDefaultResponse(document, operation, resultType, rootNamespace, schemaRegistry);
-            AppendErrorResponses(document, operation, action, rootNamespace, schemaRegistry);
+            AppendDefaultResponse(document, operation, action.Target, rootNamespace, schemaRegistry);
+            AppendErrorResponses(document, operation, action.Target, rootNamespace, schemaRegistry);
         }
 
-        private static void AppendDefaultResponse(OpenApiDocument document, OpenApiOperation operation, TypeReference typeReference, string rootNamespace, ISchemaRegistry schemaRegistry)
+        private static void AppendDefaultResponse(OpenApiDocument document, OpenApiOperation operation, ActionDefinitionTarget actionTarget, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
+            TypeReference typeReference = actionTarget.ResultType;
             HttpStatusCode statusCode = typeReference != null ? HttpStatusCode.OK : HttpStatusCode.NoContent;
             operation.Responses.Add(((int)statusCode).ToString(), CreateResponse(document, statusCode, typeReference, rootNamespace, schemaRegistry));
         }
 
-        private static void AppendErrorResponses(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, string rootNamespace, ISchemaRegistry schemaRegistry)
+        private static void AppendErrorResponses(OpenApiDocument document, OpenApiOperation operation, ActionDefinitionTarget actionTarget, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
-            if (!(action.Target is GeneratedAccessorMethodTarget generatedAccessorActionTarget))
-                return;
-            
-            foreach (var errorResponseGroup in generatedAccessorActionTarget.ErrorResponses.GroupBy(x => new { x.StatusCode, x.IsClientError }))
+            foreach (var errorResponseGroup in actionTarget.ErrorResponses.GroupBy(x => new { x.StatusCode, x.IsClientError }))
             {
                 AppendErrorResponse(document, operation, errorResponseGroup.Key.StatusCode, errorResponseGroup.Key.IsClientError, errorResponseGroup.ToArray(), rootNamespace, schemaRegistry);
             }
@@ -280,18 +277,6 @@ namespace Dibix.Sdk.OpenApi
         {
             const string mediaType = "application/json";
             target.Add(mediaType, new OpenApiMediaType { Schema = CreateSchema(document, typeReference, rootNamespace, schemaRegistry) });
-        }
-
-        private static TypeReference GetResultType(ActionDefinitionTarget actionTarget)
-        {
-            switch (actionTarget)
-            {
-                case GeneratedAccessorMethodTarget generatedAccessorActionTarget: return generatedAccessorActionTarget.ResultType;
-
-                //case ReflectionActionTarget reflectionActionTarget:
-
-                default: return null; //throw new ArgumentOutOfRangeException(nameof(actionTarget), actionTarget, "Unsupported action target for Open API response");
-            }
         }
 
         private static OpenApiSchema CreateSchema(OpenApiDocument document, TypeReference typeReference, string rootNamespace, ISchemaRegistry schemaRegistry) => CreateSchema(document, typeReference, typeReference.IsEnumerable, false, null, rootNamespace, schemaRegistry);

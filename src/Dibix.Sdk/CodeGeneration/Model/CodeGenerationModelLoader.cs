@@ -21,6 +21,7 @@ namespace Dibix.Sdk.CodeGeneration
           , string baseUrl
           , string defaultOutputFilePath
           , string clientOutputFilePath
+          , string externalAssemblyReferenceDirectory
           , ICollection<TaskItem> source
           , IEnumerable<TaskItem> contracts
           , IEnumerable<TaskItem> endpoints
@@ -60,7 +61,7 @@ namespace Dibix.Sdk.CodeGeneration
             IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(projectDirectory);
             ISqlStatementFormatter formatter = isEmbedded ? (ISqlStatementFormatter)new TakeSourceSqlStatementFormatter() : new ExecStoredProcedureSqlStatementFormatter();
             formatter.StripWhiteSpace = model.CommandTextFormatting == CommandTextFormatting.StripWhiteSpace;
-            DefaultAssemblyResolver assemblyResolver = new DefaultAssemblyResolver(projectDirectory, normalizedReferences);
+            DefaultAssemblyResolver assemblyResolver = new DefaultAssemblyResolver(projectDirectory, externalAssemblyReferenceDirectory, normalizedReferences);
             ITypeResolverFacade typeResolver = new TypeResolverFacade(assemblyResolver, schemaRegistry, logger);
             IContractDefinitionProvider contractDefinitionProvider = new ContractDefinitionProvider(fileSystemProvider, logger, normalizedContracts, productName, areaName);
             IUserDefinedTypeProvider userDefinedTypeProvider = new UserDefinedTypeProvider(productName, areaName, normalizedSources, typeResolver, logger);
@@ -72,7 +73,7 @@ namespace Dibix.Sdk.CodeGeneration
             model.Statements.AddRange(CollectStatements(normalizedSources, projectName, productName, areaName, isEmbedded, formatter, typeResolver, schemaRegistry, logger, modelAccessor));
             model.UserDefinedTypes.AddRange(userDefinedTypeProvider.Types);
             model.Contracts.AddRange(contractDefinitionProvider.Contracts);
-            model.Controllers.AddRange(CollectControllers(normalizedEndpoints, productName, areaName, defaultOutputName, model.Statements, assemblyResolver, fileSystemProvider, typeResolver, schemaRegistry, logger));
+            model.Controllers.AddRange(CollectControllers(normalizedEndpoints, projectName, productName, areaName, defaultOutputName, model.Statements, assemblyResolver, fileSystemProvider, typeResolver, schemaRegistry, logger));
 
             return model;
         }
@@ -101,6 +102,7 @@ namespace Dibix.Sdk.CodeGeneration
         private static IEnumerable<ControllerDefinition> CollectControllers
         (
             IEnumerable<string> endpoints
+          , string projectName
           , string productName
           , string areaName
           , string defaultOutputName
@@ -112,7 +114,7 @@ namespace Dibix.Sdk.CodeGeneration
           , ILogger logger
         )
         {
-            ControllerDefinitionProvider controllerDefinitionProvider = new ControllerDefinitionProvider(productName, areaName, defaultOutputName, statements, endpoints, typeResolver, referencedAssemblyInspector, schemaRegistry, fileSystemProvider, logger);
+            ControllerDefinitionProvider controllerDefinitionProvider = new ControllerDefinitionProvider(projectName, productName, areaName, defaultOutputName, statements, endpoints, typeResolver, referencedAssemblyInspector, schemaRegistry, fileSystemProvider, logger);
             return controllerDefinitionProvider.Controllers;
         }
     }

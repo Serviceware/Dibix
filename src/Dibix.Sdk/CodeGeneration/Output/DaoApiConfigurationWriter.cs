@@ -52,23 +52,19 @@ namespace Dibix.Sdk.CodeGeneration
                 {
                     writer.Write("x.AddAction(ReflectionHttpActionTarget.Create(");
 
-                    if (action.Target is GeneratedAccessorMethodTarget referencedActionTarget)
+                    if (action.Target is ReflectionActionTarget reflectionActionTarget)
                     {
-                        writer.WriteRaw($"typeof({referencedActionTarget.AccessorFullName}), nameof({referencedActionTarget.AccessorFullName}.")
-                              .WriteRaw(referencedActionTarget.Name);
-                        
-                        if (referencedActionTarget.IsAsync)
-                            writer.WriteRaw("Async");
-
-                        writer.WriteRaw(')');
-                    }
-                    else if (action.Target is ReflectionActionTarget reflectionActionTarget)
-                    {
-                        writer.WriteRaw($"\"{reflectionActionTarget.AssemblyAndTypeQualifiedMethodName}\"");
+                        writer.WriteRaw($"\"{reflectionActionTarget.AccessorFullName}.{reflectionActionTarget.OperationName},{reflectionActionTarget.AssemblyName}\"");
                     }
                     else
                     {
-                        throw new InvalidOperationException($"Unexpected action target: {action.Target?.GetType()}");
+                        writer.WriteRaw($"typeof({action.Target.AccessorFullName}), nameof({action.Target.AccessorFullName}.")
+                              .WriteRaw(action.Target.OperationName);
+                        
+                        if (action.Target.IsAsync)
+                            writer.WriteRaw("Async");
+
+                        writer.WriteRaw(')');
                     }
 
                     writer.WriteLineRaw("), y =>")

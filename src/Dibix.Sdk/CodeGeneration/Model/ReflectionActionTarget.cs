@@ -1,14 +1,12 @@
-﻿using System.Linq;
-
-namespace Dibix.Sdk.CodeGeneration
+﻿namespace Dibix.Sdk.CodeGeneration
 {
-    public class ReflectionActionTarget : ActionDefinitionTarget
+    public class ReflectionActionTarget : NeighborActionTarget
     {
-        public string AssemblyAndTypeQualifiedMethodName { get; }
+        public string AssemblyName { get; }
 
-        public ReflectionActionTarget(string assemblyAndTypeQualifiedMethodName) : base(assemblyAndTypeQualifiedMethodName.Split(',').First().Split('.').Last())
+        public ReflectionActionTarget(string assemblyName, string accessorFullName, string operationName, TypeReference resultType, bool isAsync) : base(accessorFullName, operationName, resultType, isAsync)
         {
-            this.AssemblyAndTypeQualifiedMethodName = assemblyAndTypeQualifiedMethodName;
+            this.AssemblyName = assemblyName;
         }
     }
 }

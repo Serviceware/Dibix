@@ -15,6 +15,7 @@
     <ProducePackage Condition="'$(ProducePackage)' == '' and '$(IsEmbedded)' == 'true'">False</ProducePackage>
     <ClientAssemblyTargetPath Condition="'$(ClientOutputName)' != ''">$(TargetDir)$(ClientOutputName).dll</ClientAssemblyTargetPath>
     <ClientSymbolsTargetPath Condition="'$(ClientOutputName)' != ''">$(TargetDir)$(ClientOutputName).pdb</ClientSymbolsTargetPath>
+    <ExternalAssemblyReferenceDir Condition="'$(ExternalAssemblyReferenceDir)' == ''">$(TargetDir)</ExternalAssemblyReferenceDir>
 
     <BuildDependsOn Condition="'$(ProducePackage)' == 'false'">
       BuildOnlySettings;

@@ -21,6 +21,7 @@ namespace Dibix.Sdk.Cli
               , baseUrl: configuration.GetSingleValue<string>("BaseUrl")
               , defaultOutputFilePath: configuration.GetSingleValue<string>("DefaultOutputFilePath")
               , clientOutputFilePath: configuration.GetSingleValue<string>("ClientOutputFilePath")
+              , externalAssemblyReferenceDirectory: configuration.GetSingleValue<string>("ExternalAssemblyReferenceDir")
               , source: configuration.GetItems("Source")
               , contracts: configuration.GetItems("Contracts")
               , endpoints: configuration.GetItems("Endpoints")

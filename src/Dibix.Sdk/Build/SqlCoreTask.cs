@@ -23,6 +23,7 @@ namespace Dibix.Sdk
           , string baseUrl
           , string defaultOutputFilePath
           , string clientOutputFilePath
+          , string externalAssemblyReferenceDirectory
           , ICollection<TaskItem> source
           , IEnumerable<TaskItem> scriptSource
           , IEnumerable<TaskItem> contracts
@@ -69,6 +70,7 @@ namespace Dibix.Sdk
               , baseUrl
               , defaultOutputFilePath
               , clientOutputFilePath
+              , externalAssemblyReferenceDirectory
               , source
               , contracts
               , endpoints

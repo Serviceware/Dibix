@@ -18,6 +18,7 @@ namespace Dibix.Sdk.CodeGeneration
           , string baseUrl
           , string defaultOutputFilePath
           , string clientOutputFilePath
+          , string externalAssemblyReferenceDirectory
           , ICollection<TaskItem> source
           , IEnumerable<TaskItem> contracts
           , IEnumerable<TaskItem> endpoints
@@ -42,6 +43,7 @@ namespace Dibix.Sdk.CodeGeneration
               , baseUrl
               , defaultOutputFilePath
               , clientOutputFilePath
+              , externalAssemblyReferenceDirectory
               , source
               , contracts
               , endpoints
@@ -67,6 +69,7 @@ namespace Dibix.Sdk.CodeGeneration
           , string baseUrl
           , string defaultOutputFilePath
           , string clientOutputFilePath
+          , string externalAssemblyReferenceDirectory
           , ICollection<TaskItem> source
           , IEnumerable<TaskItem> contracts
           , IEnumerable<TaskItem> endpoints
@@ -93,6 +96,7 @@ namespace Dibix.Sdk.CodeGeneration
               , baseUrl
               , defaultOutputFilePath
               , clientOutputFilePath
+              , externalAssemblyReferenceDirectory
               , source
               , contracts
               , endpoints

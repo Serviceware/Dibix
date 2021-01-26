@@ -42,6 +42,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
               , baseUrl: "https://localhost/api"
               , defaultOutputFilePath: !generateClient ? outputFilePath : null
               , clientOutputFilePath: generateClient ? outputFilePath : null
+              , externalAssemblyReferenceDirectory: null
               , source: sources.Select(ToTaskItem).ToArray()
               , contracts: contracts.Select(ToTaskItem)
               , endpoints: endpoints.Select(ToTaskItem)
