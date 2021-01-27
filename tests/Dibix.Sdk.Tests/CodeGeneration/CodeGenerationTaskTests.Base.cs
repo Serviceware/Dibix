@@ -2,8 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Dibix.Sdk.CodeGeneration;
 using Dibix.Tests;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Emit;
+using Microsoft.CodeAnalysis.Text;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -59,12 +64,12 @@ namespace Dibix.Sdk.Tests.CodeGeneration
 
             Assert.True(result, "MSBuild task result was false");
             Assert.Equal(expectedAdditionalAssemblyReferences, additionalAssemblyReferences);
-            EvaluateFile(outputFilePath);
+            AssertFile(outputFilePath);
 
             if (assertOpenApi)
             {
                 string openApiDocumentFilePath = Path.Combine(tempDirectory, "Tests.yml");
-                EvaluateFile($"{TestUtility.TestName}_OpenApi", openApiDocumentFilePath);
+                AssertFileContent($"{TestUtility.TestName}_OpenApi", openApiDocumentFilePath);
             }
         }
 
@@ -84,12 +89,51 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             }
         }
 
-        private static void EvaluateFile(string generatedFilePath) => EvaluateFile(TestUtility.TestName, generatedFilePath);
-        private static void EvaluateFile(string expectedTextKey, string generatedFilePath)
+        private static void AssertFile(string generatedFilePath)
+        {
+            AssertFileContent(TestUtility.TestName, generatedFilePath);
+            AssertFileCompilation(generatedFilePath);
+        }
+
+        private static void AssertFileContent(string expectedTextKey, string generatedFilePath)
         {
             string expectedText = TestUtility.GetExpectedText(expectedTextKey);
             TestUtility.AssertFileEqualWithDiffTool(expectedText, generatedFilePath);
         }
+
+        private static void AssertFileCompilation(string generatedFilePath)
+        {
+            using (Stream inputStream = File.OpenRead(generatedFilePath))
+            {
+                SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(SourceText.From(inputStream), path: generatedFilePath);
+                CSharpCompilation compilation = CSharpCompilation.Create(null)
+                                                                 .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
+                                                                 .AddReferences(ResolveReference<Object>())
+                                                                 .AddReferences(ResolveReference<System.CodeDom.Compiler.GeneratedCodeAttribute>())
+                                                                 .AddReferences(ResolveReference<System.Runtime.Serialization.DataContractAttribute>())
+                                                                 .AddReferences(ResolveReference<System.ComponentModel.DataAnnotations.KeyAttribute>())
+                                                                 .AddReferences(ResolveReference<System.Data.CommandType>())
+                                                                 .AddReferences(ResolveReference<System.Linq.Expressions.Expression>())
+                                                                 .AddReferences(MetadataReference.CreateFromFile("Dibix.dll"))
+                                                                 .AddReferences(MetadataReference.CreateFromFile("Newtonsoft.Json.dll"))
+                                                                 .AddSyntaxTrees(syntaxTree);
+
+                using (Stream outputStream = new MemoryStream())
+                {
+                    EmitResult emitResult = compilation.Emit(outputStream);
+                    if (emitResult.Success) 
+                        return;
+
+                    StringBuilder sb = new StringBuilder();
+                    foreach (Diagnostic error in emitResult.Diagnostics)
+                        sb.AppendLine(error.ToString());
+
+                    throw new CodeCompilationException(sb.ToString());
+                }
+            }
+        }
+
+        private static MetadataReference ResolveReference<T>() => MetadataReference.CreateFromFile(typeof(T).Assembly.Location);
 
         private static TaskItem ToTaskItem(string relativePath) => new TaskItem(relativePath) { ["FullPath"] = Path.Combine(DatabaseTestUtility.DatabaseProjectDirectory, relativePath) };
     }

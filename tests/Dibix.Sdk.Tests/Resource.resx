@@ -885,13 +885,19 @@ namespace Dibix.Sdk.Tests
         public static class TestAccessor
         {
             // dbx_tests_syntax_fileapi
-            private const string dbx_tests_syntax_fileapiCommandText = "SELECT [type] = N'png'\r\n     , [data] = 0x0";
+            private const string dbx_tests_syntax_fileapiCommandText = "SELECT [type] = N'png'\r\n     , [data] = 0x0\r\nWHERE @id = 1";
 
-            public static HttpFileResponse dbx_tests_syntax_fileapi(this IDatabaseAccessorFactory databaseAccessorFactory)
+            public static HttpFileResponse dbx_tests_syntax_fileapi(this IDatabaseAccessorFactory databaseAccessorFactory, int id)
             {
                 using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                 {
-                    return accessor.QueryFile(dbx_tests_syntax_fileapiCommandText);
+                    IParametersVisitor @params = accessor.Parameters()
+                                                         .SetFromTemplate(new
+                                                         {
+                                                             id
+                                                         })
+                                                         .Build();
+                    return accessor.QueryFile(dbx_tests_syntax_fileapiCommandText, @params);
                 }
             }
         }
@@ -1326,7 +1332,7 @@ namespace Dibix.Sdk.Tests
         {
             public sealed class GridResult
             {
-                public Dibix.Sdk.Tests.DomainModel.GenericContract Item { get; set; }
+                public Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract Item { get; set; }
                 public ICollection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
 
                 public GridResult()
@@ -1371,7 +1377,7 @@ namespace Dibix.Sdk.Tests
             public static class TestAccessor
             {
                 // GetGrid
-                private const string GetGridCommandText = "SELECT [id] = 1\r\nUNION ALL\r\nSELECT [id] = 2\r\n\r\nSELECT [accessrights] = 1";
+                private const string GetGridCommandText = "SELECT [id] = 1, [direction] = 0\r\nUNION ALL\r\nSELECT [id] = 2, [direction] = 1\r\n\r\nSELECT [accessrights] = 1";
 
                 public static Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult GetGrid(this IDatabaseAccessorFactory databaseAccessorFactory)
                 {
@@ -1380,7 +1386,7 @@ namespace Dibix.Sdk.Tests
                         using (IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText))
                         {
                             Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult();
-                            result.Items.ReplaceWith(reader.ReadMany&lt;Dibix.Sdk.Tests.DomainModel.GenericContract, Dibix.Sdk.Tests.DomainModel.JointContract&gt;());
+                            result.Items.ReplaceWith(reader.ReadMany&lt;Dibix.Sdk.Tests.DomainModel.GenericContract, Dibix.Sdk.Tests.DomainModel.Direction, Dibix.Sdk.Tests.DomainModel.JointContract&gt;("direction"));
                             result.AccessRights = reader.ReadSingle&lt;Dibix.Sdk.Tests.DomainModel.AccessRights&gt;();
                             return result;
                         }
@@ -1614,13 +1620,19 @@ namespace Dibix.Sdk.Tests
         public static class TestAccessor
         {
             // dbx_tests_syntax_singlemultimapresult
-            private const string dbx_tests_syntax_singlemultimapresultCommandText = "SELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 1\r\nUNION ALL\r\nSELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 2";
+            private const string dbx_tests_syntax_singlemultimapresultCommandText = "SELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 1\r\nUNION ALL\r\nSELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 2\r\nWHERE @id = 1";
 
-            public static Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract dbx_tests_syntax_singlemultimapresult(this IDatabaseAccessorFactory databaseAccessorFactory)
+            public static Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract dbx_tests_syntax_singlemultimapresult(this IDatabaseAccessorFactory databaseAccessorFactory, int id)
             {
                 using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                 {
-                    return accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(dbx_tests_syntax_singlemultimapresultCommandText, "id");
+                    IParametersVisitor @params = accessor.Parameters()
+                                                         .SetFromTemplate(new
+                                                         {
+                                                             id
+                                                         })
+                                                         .Build();
+                    return accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(dbx_tests_syntax_singlemultimapresultCommandText, @params, "id");
                 }
             }
         }
@@ -2609,14 +2621,20 @@ namespace Dibix.Sdk.Tests
             public static class TestAccessor
             {
                 // GetGrid
-                private const string GetGridCommandText = "SELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 1\r\nUNION ALL\r\nSELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 2";
+                private const string GetGridCommandText = "SELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 1\r\nUNION ALL\r\nSELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 2\r\nWHERE @id = 1";
 
-                public static Dibix.Sdk.Tests.DomainModel.Grid.GridResult GetGrid(this IDatabaseAccessorFactory databaseAccessorFactory)
+                public static Dibix.Sdk.Tests.DomainModel.Grid.GridResult GetGrid(this IDatabaseAccessorFactory databaseAccessorFactory, int id)
                 {
                     using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                     {
+                        IParametersVisitor @params = accessor.Parameters()
+                                                             .SetFromTemplate(new
+                                                             {
+                                                                 id
+                                                             })
+                                                             .Build();
                         Dibix.Sdk.Tests.DomainModel.Grid.GridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GridResult();
-                        result.Item = accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(GetGridCommandText, "id");
+                        result.Item = accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(GetGridCommandText, @params, "id");
                         return result;
                     }
                 }
@@ -2712,14 +2730,20 @@ namespace Dibix.Sdk.Tests
             public static class TestAccessor
             {
                 // GetGrid
-                private const string GetGridCommandText = "SELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 1\r\nUNION ALL\r\nSELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 2";
+                private const string GetGridCommandText = "SELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 1\r\nUNION ALL\r\nSELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 2\r\nWHERE @id = 1";
 
-                public static Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult GetGrid(this IDatabaseAccessorFactory databaseAccessorFactory)
+                public static Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult GetGrid(this IDatabaseAccessorFactory databaseAccessorFactory, int id)
                 {
                     using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                     {
+                        IParametersVisitor @params = accessor.Parameters()
+                                                             .SetFromTemplate(new
+                                                             {
+                                                                 id
+                                                             })
+                                                             .Build();
                         Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult();
-                        result.Item = accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(GetGridCommandText, "id");
+                        result.Item = accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(GetGridCommandText, @params, "id");
                         return result;
                     }
                 }
