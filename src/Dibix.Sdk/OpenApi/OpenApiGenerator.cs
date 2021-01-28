@@ -28,6 +28,7 @@ namespace Dibix.Sdk.OpenApi
           , [PrimitiveDataType.String]         = () => new OpenApiSchema { Type = "string"                        }
           , [PrimitiveDataType.UUID]           = () => new OpenApiSchema { Type = "string",  Format = "uuid"      }
         };
+        private static readonly OpenApiSchema NullSchema = new OpenApiSchema { Type = "null" };
 
         public static OpenApiDocument Generate
         (
@@ -282,11 +283,7 @@ namespace Dibix.Sdk.OpenApi
         private static OpenApiSchema CreateSchema(OpenApiDocument document, TypeReference typeReference, string rootNamespace, ISchemaRegistry schemaRegistry) => CreateSchema(document, typeReference, typeReference.IsEnumerable, false, null, rootNamespace, schemaRegistry);
         private static OpenApiSchema CreateSchema(OpenApiDocument document, TypeReference typeReference, bool isEnumerable, bool hasDefaultValue, object defaultValue, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
-            OpenApiSchema schema = CreateSchemaCore(document, typeReference, rootNamespace, schemaRegistry);
-            schema.Nullable = typeReference.IsNullable;
-
-            if (hasDefaultValue)
-                schema.Default = CreateDefaultValue(defaultValue);
+            OpenApiSchema schema = CreateSchemaCore(document, typeReference, hasDefaultValue, defaultValue, rootNamespace, schemaRegistry);
 
             if (isEnumerable)
             {
@@ -300,42 +297,48 @@ namespace Dibix.Sdk.OpenApi
             return schema;
         }
 
-        private static OpenApiSchema CreateSchemaCore(OpenApiDocument document, TypeReference typeReference, string rootNamespace, ISchemaRegistry schemaRegistry)
+        private static OpenApiSchema CreateSchemaCore(OpenApiDocument document, TypeReference typeReference, bool hasDefaultValue, object defaultValue, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
             switch (typeReference)
             {
-                case PrimitiveTypeReference primitiveContractPropertyType: return CreatePrimitiveTypeSchema(primitiveContractPropertyType);
+                case PrimitiveTypeReference primitiveContractPropertyType: return CreatePrimitiveTypeSchema(primitiveContractPropertyType, hasDefaultValue, defaultValue);
                 case SchemaTypeReference contractPropertyTypeReference: return CreateReferenceSchema(document, contractPropertyTypeReference, rootNamespace, schemaRegistry);
                 default: throw new ArgumentOutOfRangeException(nameof(typeReference), typeReference, $"Unexpected property type: {typeReference}");
             }
         }
 
-        private static OpenApiSchema CreatePrimitiveTypeSchema(PrimitiveTypeReference typeReference)
+        private static OpenApiSchema CreatePrimitiveTypeSchema(PrimitiveTypeReference typeReference, bool hasDefaultValue, object defaultValue)
         {
             if (!PrimitiveTypeMap.TryGetValue(typeReference.Type, out Func<OpenApiSchema> schemaFactory))
                 throw new InvalidOperationException($"Unexpected primitive type: {typeReference.Type}");
 
-            return schemaFactory();
+            OpenApiSchema schema = schemaFactory();
+            schema.Nullable = typeReference.IsNullable;
+
+            if (hasDefaultValue)
+                schema.Default = CreateDefaultValue(defaultValue);
+
+            return schema;
         }
 
         private static OpenApiSchema CreateReferenceSchema(OpenApiDocument document, SchemaTypeReference typeReference, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
-            SchemaDefinition schema = schemaRegistry.GetSchema(typeReference);
+            SchemaDefinition schemaDefinition = schemaRegistry.GetSchema(typeReference);
             string typeName;
 
             if (_useRelativeNamespaces)
             {
-                typeName = schema.DefinitionName;
-                string relativeNamespace = NamespaceUtility.BuildRelativeNamespace(rootNamespace, LayerName.DomainModel, schema.Namespace);
+                typeName = schemaDefinition.DefinitionName;
+                string relativeNamespace = NamespaceUtility.BuildRelativeNamespace(rootNamespace, LayerName.DomainModel, schemaDefinition.Namespace);
                 if (!String.IsNullOrEmpty(relativeNamespace))
                     typeName = $"{relativeNamespace}.{typeName}";
             }
             else
-                typeName = schema.FullName;
+                typeName = schemaDefinition.FullName;
 
-            EnsureSchema(document, typeName, schema, rootNamespace, schemaRegistry);
+            EnsureSchema(document, typeName, schemaDefinition, rootNamespace, schemaRegistry);
 
-            return new OpenApiSchema
+            OpenApiSchema openApiSchema = new OpenApiSchema
             {
                 Reference = new OpenApiReference
                 {
@@ -343,6 +346,24 @@ namespace Dibix.Sdk.OpenApi
                     Id = typeName
                 }
             };
+
+            // OpenAPI 3.1
+            /*
+            if (typeReference.IsNullable)
+            {
+                openApiSchema = new OpenApiSchema
+                {
+                    OneOf =
+                    {
+                        NullSchema,
+                        openApiSchema
+                    }
+                };
+
+            }
+            */
+
+            return openApiSchema;
         }
 
         private static void EnsureSchema(OpenApiDocument document, string schemaName, SchemaDefinition contract, string rootNamespace, ISchemaRegistry schemaRegistry)
