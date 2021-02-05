@@ -19,7 +19,7 @@ namespace Dibix.Tests
         private static IHttpParameterResolutionMethod Compile(Action<HttpActionDefinition> actionConfiguration)
         {
             HttpApiRegistration registration = new HttpApiRegistration(actionConfiguration);
-            registration.Configure();
+            registration.Configure(null);
             HttpActionDefinition action = registration.Controllers.Single().Actions.Single();
             MethodInfo method = action.Target.Build();
             IHttpParameterResolutionMethod result = HttpParameterResolver.Compile(action, method.GetParameters());
@@ -33,7 +33,7 @@ namespace Dibix.Tests
 
             public HttpApiRegistration(Action<HttpActionDefinition> actionConfiguration) => this._actionConfiguration = actionConfiguration;
 
-            public override void Configure() => base.RegisterController("Test", x => x.AddAction(ReflectionHttpActionTarget.Create(typeof(HttpParameterResolverTest), this._methodName), this._actionConfiguration));
+            public override void Configure(IHttpApiDiscoveryContext context) => base.RegisterController("Test", x => x.AddAction(ReflectionHttpActionTarget.Create(typeof(HttpParameterResolverTest), this._methodName), this._actionConfiguration));
 
             private static string DetermineTestName()
             {

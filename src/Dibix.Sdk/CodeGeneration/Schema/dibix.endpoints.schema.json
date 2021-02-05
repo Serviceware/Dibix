@@ -93,6 +93,18 @@
         }
       ]
     },
+    "Response": {
+      "properties": {
+        "type": {
+          "$ref": "#/definitions/NameIdentifier"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "minProperties": 1,
+      "additionalProperties": false
+    },
     "Api": {
       "type": "object",
       "properties": {
@@ -173,6 +185,26 @@
         },
         "isAnonymous": {
           "type": "boolean"
+        },
+        "responses": {
+          "type": "object",
+          "patternProperties": {
+            "^\\d{3}$": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/definitions/NameIdentifier"
+                },
+                {
+                  "$ref": "#/definitions/Response"
+                }
+              ]
+            }
+          },
+          "minProperties": 1,
+          "additionalProperties": false
         }
       },
       "required": [

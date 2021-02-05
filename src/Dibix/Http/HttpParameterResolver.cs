@@ -65,7 +65,7 @@ namespace Dibix.Http
 
                 ResolveParameters compiled = Compile(compilationContext, out string source);
                 HttpParameterResolutionMethod method = new HttpParameterResolutionMethod(source, compiled);
-                CollectApiParameters(method, @params, action.BodyContract);
+                CollectApiParameters(action, method, @params, action.BodyContract);
                 return method;
             }
             catch (Exception exception)
@@ -85,6 +85,11 @@ namespace Dibix.Http
             foreach (ParameterInfo parameter in parameters)
             {
                 compilationContext.LastVisitedParameter = parameter.Name;
+
+                // We don't support out parameters in REST APIs, so we assume that this method is used as both backend accessor and REST API.
+                // Therefore we just skip it
+                if (parameter.IsOut)
+                    continue;
 
                 if (KnownDependencies.Contains(parameter.ParameterType))
                 {
@@ -576,10 +581,16 @@ Either create a mapping or make sure a property of the same name exists in the s
             return compiled;
         }
 
-        private static void CollectApiParameters(HttpParameterResolutionMethod method, IEnumerable<HttpParameterInfo> parameters, Type bodyContract)
+        private static void CollectApiParameters(HttpActionDefinition action, HttpParameterResolutionMethod method, ICollection<HttpParameterInfo> parameters, Type bodyContract)
         {
             if (bodyContract != null)
-                method.AddParameter(HttpParameterName.Body, bodyContract, HttpParameterLocation.NonUser, isOptional: false);
+            {
+                // For custom reflection targets we still support handling the body themselves
+                // Since the body can only be bound to one target parameter, we skip our $body argument, if necessary
+                bool isCustomReflectionTarget = action.Target is ReflectionHttpActionTarget reflectionTarget && reflectionTarget.IsExternal;
+                if (parameters.All(x => x.ParameterType != bodyContract) || !isCustomReflectionTarget)
+                    method.AddParameter(HttpParameterName.Body, bodyContract, HttpParameterLocation.NonUser, isOptional: false);
+            }
 
             foreach (HttpParameterInfo parameter in parameters.Where(x => x.Location != HttpParameterLocation.NonUser).DistinctBy(x => x.ApiParameterName)) 
                 method.AddParameter(parameter.ApiParameterName, parameter.ParameterType, parameter.Location, parameter.IsOptional);

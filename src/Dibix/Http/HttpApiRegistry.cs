@@ -17,8 +17,7 @@ namespace Dibix.Http
         #region Constructor
         public HttpApiRegistry(IEnumerable<Assembly> assemblies)
         {
-            this._apis = new Collection<HttpApiDescriptor>();
-            this._apis.ReplaceWith(CollectHttpApiDescriptors(assemblies));
+            this._apis = CollectHttpApiDescriptors(assemblies);
             this._areaNameCache = this._apis.GroupBy(x => new { Assembly = GetAssembly(x), x.AreaName }).ToDictionary(x => x.Key.Assembly, x => x.Key.AreaName);
             this._declarativeApis = this._apis.Where(IsDeclarative).ToArray();
         }
@@ -42,8 +41,10 @@ namespace Dibix.Http
         #endregion
 
         #region Private Methods
-        private static IEnumerable<HttpApiDescriptor> CollectHttpApiDescriptors(IEnumerable<Assembly> assemblies)
+        private static ICollection<HttpApiDescriptor> CollectHttpApiDescriptors(IEnumerable<Assembly> assemblies)
         {
+            HttpApiDiscoveryContext context = new HttpApiDiscoveryContext();
+            ICollection<HttpApiDescriptor> descriptors = new Collection<HttpApiDescriptor>();
             foreach (Assembly assembly in assemblies)
             {
                 ApiRegistrationAttribute attribute = assembly.GetCustomAttribute<ApiRegistrationAttribute>();
@@ -57,9 +58,13 @@ namespace Dibix.Http
 
                 Type apiDescriptorType = types.FirstOrDefault(typeof(HttpApiDescriptor).IsAssignableFrom);
                 HttpApiDescriptor descriptor = apiDescriptorType != null ? (HttpApiDescriptor)Activator.CreateInstance(apiDescriptorType) : new HttpApiRegistration(assembly);
-                descriptor.Configure();
-                yield return descriptor;
+                descriptor.Configure(context);
+                descriptors.Add(descriptor);
             }
+
+            context.FinishProxyAssembly();
+
+            return descriptors;
         }
 
         private static Assembly GetAssembly(HttpApiDescriptor descriptor) => descriptor is HttpApiRegistration registration ? registration.Assembly : descriptor.GetType().Assembly;
@@ -87,9 +92,72 @@ namespace Dibix.Http
 
             public HttpApiRegistration(Assembly assembly) => this.Assembly = assembly;
 
-            public override void Configure() { }
+            public override void Configure(IHttpApiDiscoveryContext context) { }
 
             protected override string ResolveAreaName(Assembly assembly) => base.ResolveAreaName(this.Assembly);
+        }
+
+        private sealed class HttpApiDiscoveryContext : IHttpApiDiscoveryContext
+        {
+#if !NETSTANDARD
+            private readonly Lazy<ReflectionHttpActionTargetProxyBuilder> _proxyBuilderAccessor;
+            private readonly ICollection<ProxyMethodEntry> _proxyTargetHandlerMap;
+
+            public HttpApiDiscoveryContext()
+            {
+                this._proxyBuilderAccessor = new Lazy<ReflectionHttpActionTargetProxyBuilder>(ReflectionHttpActionTargetProxyBuilder.Create);
+                this._proxyTargetHandlerMap = new Collection<ProxyMethodEntry>();
+            }
+            
+#endif
+            public void RegisterProxyHandler(MethodInfo method, Action<MethodInfo> targetHandler)
+            {
+                if (!NeedsProxy(method))
+                    return;
+
+#if NETSTANDARD
+                throw new PlatformNotSupportedException("Dynamic proxy method generation is not supported on .NET standard (yet)");
+#else
+                this._proxyBuilderAccessor.Value.AddMethod(method);
+                this._proxyTargetHandlerMap.Add(new ProxyMethodEntry(method, targetHandler));
+#endif
+            }
+
+            public void FinishProxyAssembly()
+            {
+#if !NETSTANDARD
+                foreach (ProxyMethodEntry registration in this._proxyTargetHandlerMap)
+                {
+                    ProxyMethodEntry entry = registration;
+                    MethodInfo proxyMethod = this._proxyBuilderAccessor.Value.GetProxyMethod(entry.Method);
+                    entry.Method = proxyMethod;
+                }
+#endif
+            }
+
+            private static bool NeedsProxy(MethodBase method) => method.GetParameters().Any(x => x.ParameterType.IsByRef);
+        }
+
+        private struct ProxyMethodEntry
+        {
+            private MethodInfo _method;
+            private readonly Action<MethodInfo> _methodUpdater;
+
+            public MethodInfo Method
+            {
+                get => this._method;
+                set
+                {
+                    this._method = value;
+                    this._methodUpdater(value);
+                }
+            }
+
+            public ProxyMethodEntry(MethodInfo method, Action<MethodInfo> methodUpdater)
+            {
+                this._method = method;
+                this._methodUpdater = methodUpdater;
+            }
         }
         #endregion
     }

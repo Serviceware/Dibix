@@ -379,7 +379,7 @@ namespace Dibix.Sdk.Tests
         #region Endpoints
         public sealed class ApiConfiguration : HttpApiDescriptor
         {
-            public override void Configure()
+            public override void Configure(IHttpApiDiscoveryContext context)
             {
                 base.RegisterController("GenericEndpoint", x =&gt; 
                 {

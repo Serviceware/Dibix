@@ -25,7 +25,7 @@ namespace Dibix.Http
         #endregion
 
         #region Abstract Methods
-        public abstract void Configure();
+        public abstract void Configure(IHttpApiDiscoveryContext context);
         #endregion
 
         #region Protected Methods

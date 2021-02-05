@@ -42,7 +42,8 @@ namespace Dibix.Tests
             Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
-        private static void Compile_Default_Target(IDatabaseAccessorFactory databaseAccessorFactory) { }
+
+        private static void Compile_Default_Target(IDatabaseAccessorFactory databaseAccessorFactory, out int x) => x = default;
 
         [Fact]
         public void Compile_PropertySource()
@@ -775,7 +776,7 @@ Parameter: input", exception.Message);
     .Block(Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
         $arguments.Item[""databaseAccessorFactory""] = (System.Object)$databaseaccessorfactorySource;
-        $arguments.Item[""regionlanguage""] = (System.Object).Call Dibix.Http.RequestParameterSourceProvider.GetRequestLanguage($request)
+        $arguments.Item[""regionlanguage""] = (System.Object).Call Dibix.Http.RequestParameterSourceProvider.GetLanguage($request)
     }
 }", result.Source);
             Assert.False(result.Parameters.Any());

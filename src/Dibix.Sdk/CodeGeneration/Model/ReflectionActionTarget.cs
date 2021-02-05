@@ -4,7 +4,7 @@
     {
         public string AssemblyName { get; }
 
-        public ReflectionActionTarget(string assemblyName, string accessorFullName, string operationName, TypeReference resultType, bool isAsync) : base(accessorFullName, operationName, resultType, isAsync)
+        public ReflectionActionTarget(string assemblyName, string accessorFullName, string operationName, bool isAsync, bool hasRefParameters) : base(accessorFullName, operationName, isAsync, hasRefParameters)
         {
             this.AssemblyName = assemblyName;
         }

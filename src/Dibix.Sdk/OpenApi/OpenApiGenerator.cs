@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
+using System.Text;
 using Dibix.Http;
 using Dibix.Sdk.CodeGeneration;
 using Microsoft.OpenApi.Any;
@@ -212,66 +212,47 @@ namespace Dibix.Sdk.OpenApi
 
         private static void AppendResponses(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
-            AppendDefaultResponse(document, operation, action.Target, rootNamespace, schemaRegistry);
-            AppendErrorResponses(document, operation, action.Target, rootNamespace, schemaRegistry);
-        }
-
-        private static void AppendDefaultResponse(OpenApiDocument document, OpenApiOperation operation, ActionDefinitionTarget actionTarget, string rootNamespace, ISchemaRegistry schemaRegistry)
-        {
-            TypeReference typeReference = actionTarget.ResultType;
-            HttpStatusCode statusCode = typeReference != null ? HttpStatusCode.OK : HttpStatusCode.NoContent;
-            operation.Responses.Add(((int)statusCode).ToString(), CreateResponse(document, statusCode, typeReference, rootNamespace, schemaRegistry));
-        }
-
-        private static void AppendErrorResponses(OpenApiDocument document, OpenApiOperation operation, ActionDefinitionTarget actionTarget, string rootNamespace, ISchemaRegistry schemaRegistry)
-        {
-            foreach (var errorResponseGroup in actionTarget.ErrorResponses.GroupBy(x => new { x.StatusCode, x.IsClientError }))
+            foreach (ActionResponse actionResponse in action.Responses.Values.OrderBy(x => x.StatusCode))
             {
-                AppendErrorResponse(document, operation, errorResponseGroup.Key.StatusCode, errorResponseGroup.Key.IsClientError, errorResponseGroup.ToArray(), rootNamespace, schemaRegistry);
-            }
-        }
+                OpenApiResponse apiResponse = new OpenApiResponse();
 
-        private static void AppendErrorResponse(OpenApiDocument document, OpenApiOperation operation, int statusCode, bool isClientError, ICollection<ErrorResponse> errorResponses, string rootNamespace, ISchemaRegistry schemaRegistry)
-        {
-            OpenApiResponse response = CreateResponse(document, (HttpStatusCode)statusCode, null, rootNamespace, schemaRegistry);
+                if (actionResponse.ResultType != null)
+                    AppendContent(document, apiResponse.Content, actionResponse.ResultType, rootNamespace, schemaRegistry);
 
-            if (isClientError)
-            {
-                response.Description = $@"{HttpErrorResponseParser.ClientErrorCodeHeaderName}|{HttpErrorResponseParser.ClientErrorDescriptionHeaderName}
+                StringBuilder sb = new StringBuilder(actionResponse.Description);
+                if (actionResponse.Errors.Any())
+                {
+                    if (sb.Length > 0)
+                        sb.AppendLine();
+
+                    sb.Append($@"{HttpErrorResponseParser.ClientErrorCodeHeaderName}|{HttpErrorResponseParser.ClientErrorDescriptionHeaderName}
 -|-
-{String.Join(Environment.NewLine, errorResponses.Select(x => $"{(x.ErrorCode != 0 ? x.ErrorCode.ToString() : "n/a")}|{x.ErrorDescription}"))}";
+{String.Join(Environment.NewLine, actionResponse.Errors.Select(x => $"{(x.ErrorCode != 0 ? x.ErrorCode.ToString() : "n/a")}|{x.Description}"))}");
 
-                if (errorResponses.Any(x => x.ErrorCode != 0))
-                {
-                    response.Headers.Add(HttpErrorResponseParser.ClientErrorCodeHeaderName, new OpenApiHeader
+                    if (actionResponse.Errors.Any(x => x.ErrorCode != 0))
                     {
-                        Description = "Additional error code to handle the error on the client",
-                        Schema = PrimitiveTypeMap[PrimitiveDataType.Int16]()
-                    });
+                        apiResponse.Headers.Add(HttpErrorResponseParser.ClientErrorCodeHeaderName, new OpenApiHeader
+                        {
+                            Description = "Additional error code to handle the error on the client",
+                            Schema = PrimitiveTypeMap[PrimitiveDataType.Int16]()
+                        });
+                    }
+
+                    if (actionResponse.Errors.Any(x => !String.IsNullOrEmpty(x.Description)))
+                    {
+                        apiResponse.Headers.Add(HttpErrorResponseParser.ClientErrorDescriptionHeaderName, new OpenApiHeader
+                        {
+                            Description = "A mesage describing the cause of the error",
+                            Schema = PrimitiveTypeMap[PrimitiveDataType.String]()
+                        });
+                        const string mimeType = "text/plain";
+                        apiResponse.Content.Add(mimeType, new OpenApiMediaType { Schema = PrimitiveTypeMap[PrimitiveDataType.String]() });
+                    }
                 }
 
-                if (errorResponses.Any(x => !String.IsNullOrEmpty(x.ErrorDescription)))
-                {
-                    response.Headers.Add(HttpErrorResponseParser.ClientErrorDescriptionHeaderName, new OpenApiHeader
-                    {
-                        Description = "A mesage describing the cause of the error",
-                        Schema = PrimitiveTypeMap[PrimitiveDataType.String]()
-                    });
-                    const string mimeType = "text/plain";
-                    response.Content.Add(mimeType, new OpenApiMediaType { Schema = PrimitiveTypeMap[PrimitiveDataType.String]() });
-                }
+                apiResponse.Description = sb.Length > 0 ? sb.ToString() : actionResponse.StatusCode.ToString();
+                operation.Responses.Add(((int)actionResponse.StatusCode).ToString(), apiResponse);
             }
-
-            operation.Responses.Add(statusCode.ToString(), response);
-        }
-
-        private static OpenApiResponse CreateResponse(OpenApiDocument document, HttpStatusCode statusCode, TypeReference typeReference, string rootNamespace, ISchemaRegistry schemaRegistry)
-        {
-            OpenApiResponse response = new OpenApiResponse { Description = statusCode.ToString() };
-            if (typeReference != null)
-                AppendContent(document, response.Content, typeReference, rootNamespace, schemaRegistry);
-
-            return response;
         }
 
         private static void AppendContent(OpenApiDocument document, IDictionary<string, OpenApiMediaType> target, TypeReference typeReference, string rootNamespace, ISchemaRegistry schemaRegistry)

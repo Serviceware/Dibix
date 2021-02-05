@@ -345,7 +345,7 @@ Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly
             );
         }
 
-        [Fact]
+        //[Fact]
         public void Endpoint_WithOutputParam_Error()
         {
             this.ExecuteTestAndExpectError(@"Tests\Syntax\dbx_tests_syntax_empty_params_out.sql", @"Endpoints\GenericEndpointWithOutputParam.json", @"One or more errors occured during code generation:

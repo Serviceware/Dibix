@@ -8,14 +8,12 @@ namespace Dibix.Http
         public int StatusCode { get; }
         public int ErrorCode { get; }
         public string ErrorDescription { get; }
-        public bool IsClientError { get; }
 
-        public ErrorResponseAttribute(int statusCode, int errorCode, string errorDescription, bool isClientError)
+        public ErrorResponseAttribute(int statusCode, int errorCode, string errorDescription)
         {
             this.StatusCode = statusCode;
             this.ErrorCode = errorCode;
             this.ErrorDescription = errorDescription;
-            this.IsClientError = isClientError;
         }
     }
 }

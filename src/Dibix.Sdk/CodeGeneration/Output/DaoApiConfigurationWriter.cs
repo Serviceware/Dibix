@@ -33,7 +33,8 @@ namespace Dibix.Sdk.CodeGeneration
             context.Output
                    .AddClass("ApiConfiguration", CSharpModifiers.Public | CSharpModifiers.Sealed)
                    .Inherits("HttpApiDescriptor")
-                   .AddMethod("Configure", "void", body, modifiers: CSharpModifiers.Public | CSharpModifiers.Override);
+                   .AddMethod("Configure", "void", body, modifiers: CSharpModifiers.Public | CSharpModifiers.Override)
+                   .AddParameter("context", "IHttpApiDiscoveryContext");
         }
         #endregion
 
@@ -51,6 +52,9 @@ namespace Dibix.Sdk.CodeGeneration
                 foreach (ActionDefinition action in controller.Actions)
                 {
                     writer.Write("x.AddAction(ReflectionHttpActionTarget.Create(");
+
+                    if (action.Target.HasRefParameters) 
+                        writer.WriteRaw("context, ");
 
                     if (action.Target is ReflectionActionTarget reflectionActionTarget)
                     {

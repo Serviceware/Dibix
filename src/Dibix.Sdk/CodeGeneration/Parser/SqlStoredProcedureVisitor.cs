@@ -242,9 +242,10 @@ namespace Dibix.Sdk.CodeGeneration
 
                 if (node.ErrorNumber is Literal errorNumberLiteral
                  && Int32.TryParse(errorNumberLiteral.Value, out int errorNumber)
-                 && HttpErrorResponseParser.TryParseErrorResponse(errorNumber, out int statusCode, out int errorCode, out bool isClientError))
+                 && HttpErrorResponseParser.TryParseErrorResponse(errorNumber, out int statusCode, out int errorCode, out bool isClientError)
+                 && isClientError)
                 {
-                    this.ErrorResponses.Add(new ErrorResponse(statusCode, errorCode, errorMessage, isClientError));
+                    this.ErrorResponses.Add(new ErrorResponse(statusCode, errorCode, errorMessage));
                 }
             }
         }
