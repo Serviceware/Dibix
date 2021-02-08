@@ -111,6 +111,7 @@ If this is not a project that has multiple areas, please make sure to define the
                     JValue typeNameValue;
                     string typeName;
                     bool isPartOfKey = default;
+                    bool isOptional = default;
                     bool isDiscriminator = default;
                     SerializationBehavior serializationBehavior = default;
                     DateTimeKind dateTimeKind = default;
@@ -122,6 +123,7 @@ If this is not a project that has multiple areas, please make sure to define the
                             typeNameValue = (JValue)propertyInfo.Property("type").Value;
                             typeName = (string)typeNameValue;
                             isPartOfKey = (bool?)propertyInfo.Property("isPartOfKey")?.Value ?? default;
+                            isOptional = (bool?)propertyInfo.Property("isOptional")?.Value ?? default;
                             isDiscriminator = (bool?)propertyInfo.Property("isDiscriminator")?.Value ?? default;
                             Enum.TryParse((string)propertyInfo.Property("serialize")?.Value, true, out serializationBehavior);
                             if (String.Equals(typeName, nameof(PrimitiveDataType.DateTime), StringComparison.OrdinalIgnoreCase))
@@ -140,7 +142,7 @@ If this is not a project that has multiple areas, please make sure to define the
                     }
 
                     TypeReference type = ParseType(typeName, rootNamespace, filePath, typeNameValue);
-                    contract.Properties.Add(new ObjectSchemaProperty(property.Name, type, isPartOfKey, isDiscriminator, serializationBehavior, dateTimeKind, obfuscated));
+                    contract.Properties.Add(new ObjectSchemaProperty(property.Name, type, isPartOfKey, isOptional, isDiscriminator, serializationBehavior, dateTimeKind, obfuscated));
                 }
             }
 

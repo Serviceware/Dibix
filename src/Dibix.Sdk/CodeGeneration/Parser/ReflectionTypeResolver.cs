@@ -156,11 +156,12 @@ namespace Dibix.Sdk.CodeGeneration
                 typeReference.IsNullable = true;
 
             bool isPartOfKey = ResolveIsPartOfKey(property);
+            bool isOptional = ResolveIsOptional(property);
             bool isDiscriminator = ResolveIsDiscriminator(property);
             SerializationBehavior serializationBehavior = ResolveSerializationBehavior(property);
             DateTimeKind dateTimeKind = ResolveDateTimeKind(property);
             bool obfuscated = ResolveObfuscated(property);
-            return new ObjectSchemaProperty(property.Name, typeReference, isPartOfKey, isDiscriminator, serializationBehavior, dateTimeKind, obfuscated);
+            return new ObjectSchemaProperty(property.Name, typeReference, isPartOfKey, isOptional, isDiscriminator, serializationBehavior, dateTimeKind, obfuscated);
         }
 
         private static bool IsNullableReferenceType(PropertyInfo property)
@@ -198,6 +199,8 @@ namespace Dibix.Sdk.CodeGeneration
         }
 
         private static bool ResolveIsPartOfKey(MemberInfo member) => IsDefined(member, "System.ComponentModel.DataAnnotations.KeyAttribute");
+        
+        private static bool ResolveIsOptional(MemberInfo member) => IsDefined(member, "Dibix.OptionalAttribute");
         
         private static bool ResolveIsDiscriminator(MemberInfo member) => IsDefined(member, "Dibix.DiscriminatorAttribute");
 

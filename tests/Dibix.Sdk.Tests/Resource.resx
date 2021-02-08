@@ -369,6 +369,7 @@ namespace Dibix.Sdk.Tests
         public sealed class InputContract
         {
             public string V { get; set; }
+            [Optional]
             public string W { get; set; }
             public System.Guid X { get; set; }
             public string Password { get; set; }
@@ -580,7 +581,6 @@ components:
     InputContract:
       required:
         - V
-        - W
         - X
         - Password
         - Y

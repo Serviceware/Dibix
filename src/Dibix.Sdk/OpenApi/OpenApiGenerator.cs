@@ -403,7 +403,7 @@ namespace Dibix.Sdk.OpenApi
                 OpenApiSchema propertySchema = CreateSchema(document, property.Type, rootNamespace, schemaRegistry);
                 schema.Properties.Add(property.Name, propertySchema);
 
-                if (property.SerializationBehavior == SerializationBehavior.Always)
+                if (property.SerializationBehavior == SerializationBehavior.Always && !property.IsOptional)
                     schema.Required.Add(property.Name);
             }
         }

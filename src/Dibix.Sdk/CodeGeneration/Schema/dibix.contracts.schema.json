@@ -45,6 +45,9 @@
                 "isPartOfKey": {
                   "type": "boolean"
                 },
+                "isOptional": {
+                  "type": "boolean"
+                },
                 "serialize": {
                   "$ref": "#/definitions/SerializationBehavior"
                 },

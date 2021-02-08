@@ -3,5 +3,5 @@
 namespace Dibix
 {
     [AttributeUsage(AttributeTargets.Property)]
-    public sealed class DiscriminatorAttribute : Attribute { }
+    public sealed class OptionalAttribute : Attribute { }
 }

@@ -1,7 +1,10 @@
 ﻿{
   "InputContract": {
     "V": "string",
-    "W": "string",
+    "W": {
+      "type": "string",
+      "isOptional": true
+    },
     "X": "uuid",
     "Password": "string",
     "Y": "boolean",
