@@ -21,7 +21,6 @@ namespace Dibix.Http
             switch (propertyName)
             {
                 case "Language": return BuildLanguageExpression(requestParameter);
-                case "AuthorizationParameter": return BuildAuthorizationParameterExpression(requestParameter);
                 default: throw new ArgumentOutOfRangeException(nameof(propertyName), propertyName, null);
             }
         }
@@ -32,14 +31,6 @@ namespace Dibix.Http
             return getLanguageCall;
         }
 
-        private static Expression BuildAuthorizationParameterExpression(Expression requestParameter)
-        {
-            Expression getAuthorizationParameterCall = Expression.Call(typeof(RequestParameterSourceProvider), nameof(GetAuthorizationParameter), new Type[0], requestParameter);
-            return getAuthorizationParameterCall;
-        }
-
         private static string GetLanguage(HttpRequestMessage request) => request.Headers.AcceptLanguage.Select(x => x.Value).FirstOrDefault() ?? new CultureInfo("en").Name;
-        
-        private static string GetAuthorizationParameter(HttpRequestMessage request) => request.Headers.Authorization?.Parameter;
     }
 }

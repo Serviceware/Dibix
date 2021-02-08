@@ -5,6 +5,7 @@
         NonUser,
         Query,
         Path,
-        Body
+        Body,
+        Header
     }
 }

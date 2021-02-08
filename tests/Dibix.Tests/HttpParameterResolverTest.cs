@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Xml.Linq;
 using Dibix.Http;
 using Moq;
@@ -761,6 +762,58 @@ Parameter: input", exception.Message);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
         private static void Compile_PathSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpUriParameterInput input, int anotherid) { }
+
+        [Fact]
+        public void Compile_HeaderSource()
+        {
+            IHttpParameterResolutionMethod result = Compile(x =>
+            {
+                x.ResolveParameterFromSource("authorization", "HEADER", "Authorization");
+                x.ResolveParameterFromSource("authorizationscheme", "HEADER", "Authorization.Scheme");
+            });
+            TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
+    System.Net.Http.HttpRequestMessage $request,
+    System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
+    Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
+    .Block(
+        Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
+        System.Net.Http.Headers.HttpRequestHeaders $headerSource) {
+        $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
+        $headerSource = $request.Headers;
+        $arguments.Item[""databaseAccessorFactory""] = (System.Object)$databaseaccessorfactorySource;
+        $arguments.Item[""authorization""] = (System.Object)$headerSource.Authorization;
+        $arguments.Item[""authorizationscheme""] = (System.Object)($headerSource.Authorization).Scheme
+    }
+}", result.Source);
+            Assert.Equal(2, result.Parameters.Count);
+            Assert.Equal("authorization", result.Parameters["authorization"].Name);
+            Assert.Equal(typeof(AuthenticationHeaderValue), result.Parameters["authorization"].Type);
+            Assert.Equal(HttpParameterLocation.Header, result.Parameters["authorization"].Location);
+            Assert.True(result.Parameters["authorization"].IsOptional);
+            Assert.Equal("authorizationscheme", result.Parameters["authorizationscheme"].Name);
+            Assert.Equal(typeof(string), result.Parameters["authorizationscheme"].Type);
+            Assert.Equal(HttpParameterLocation.Header, result.Parameters["authorizationscheme"].Location);
+            Assert.True(result.Parameters["authorizationscheme"].IsOptional);
+
+            HttpRequestMessage request = new HttpRequestMessage();
+            request.Headers.Add("Authorization", "Bearer token");
+            IDictionary<string, object> arguments = new Dictionary<string, object>();
+            Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
+            Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
+
+            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
+
+            result.PrepareParameters(request, arguments, dependencyResolver.Object);
+
+            Assert.Equal(3, arguments.Count);
+            Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
+            AuthenticationHeaderValue authorization = Assert.IsType<AuthenticationHeaderValue>(arguments["authorization"]);
+            Assert.Equal("Bearer", authorization.Scheme);
+            Assert.Equal("token", authorization.Parameter);
+            Assert.Equal("Bearer", arguments["authorizationscheme"]);
+            dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
+        }
+        private static void Compile_HeaderSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, AuthenticationHeaderValue authorization, string authorizationscheme) { }
 
         [Fact]
         public void Compile_RequestSource()

@@ -7,6 +7,8 @@
       "target": "EmptyWithParams",
       "childRoute": "{password}/Fixed",
       "params": {
+        "v": "HEADER.Authorization.Scheme",
+        "w": "HEADER.Authorization.Parameter",
         "x": "DBX.X",
         "password": null, 
         "y": true,

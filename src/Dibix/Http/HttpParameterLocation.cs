@@ -4,6 +4,7 @@
     {
         NonUser,
         Query,
-        Path
+        Path,
+        Header
     }
 }

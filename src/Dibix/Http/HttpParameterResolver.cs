@@ -585,10 +585,9 @@ Either create a mapping or make sure a property of the same name exists in the s
         {
             if (bodyContract != null)
             {
-                // For custom reflection targets we still support handling the body themselves
-                // Since the body can only be bound to one target parameter, we skip our $body argument, if necessary
-                bool isCustomReflectionTarget = action.Target is ReflectionHttpActionTarget reflectionTarget && reflectionTarget.IsExternal;
-                if (parameters.All(x => x.ParameterType != bodyContract) || !isCustomReflectionTarget)
+                // If the target method does not expect a parameter of the body type, we have to add a pseudo parameter
+                // That way ASP.NET will use a formatter binding and read the body for us, which we can later read from the arguments dictionary.
+                if (parameters.All(x => x.ParameterType != bodyContract))
                     method.AddParameter(HttpParameterName.Body, bodyContract, HttpParameterLocation.NonUser, isOptional: false);
             }
 
@@ -713,7 +712,7 @@ Either create a mapping or make sure a property of the same name exists in the s
             public string InternalParameterName { get; }
             public string ApiParameterName { get; private set; }
             public object Value { get; private set; }
-            public bool IsOptional { get; }
+            public bool IsOptional { get; set; }
             public object DefaultValue { get; private set; }
             public Type InputConverter { get; private set; }                // IFormattedInputConverter<TSource, TTarget>
             public IHttpParameterConverter Converter { get; private set; }  // CONVERT(value)
@@ -770,6 +769,9 @@ Either create a mapping or make sure a property of the same name exists in the s
                 
                 if (IsUri(location))
                     parameter.ApiParameterName = source.PropertyPath;
+
+                if (location == HttpParameterLocation.Header)
+                    parameter.IsOptional = true;
                 
                 source.Parent = parameter;
 
@@ -818,6 +820,7 @@ Either create a mapping or make sure a property of the same name exists in the s
                 {
                     case QueryParameterSourceProvider.SourceName: return HttpParameterLocation.Query;
                     case PathParameterSourceProvider.SourceName: return HttpParameterLocation.Path;
+                    case HeaderParameterSourceProvider.SourceName: return HttpParameterLocation.Header;
                     default: return HttpParameterLocation.NonUser;
                 }
             }

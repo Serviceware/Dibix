@@ -11,6 +11,6 @@ namespace Dibix.Http
 
         protected override Type GetInstanceType(HttpActionDefinition action) => this._type;
 
-        protected override Expression GetInstanceValue(Type instanceType, Expression argumentsParameter, Expression dependencyResolverParameter) => Expression.Call(dependencyResolverParameter, nameof(IParameterDependencyResolver.Resolve), new[] { instanceType });
+        protected override Expression GetInstanceValue(Type instanceType, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter) => Expression.Call(dependencyResolverParameter, nameof(IParameterDependencyResolver.Resolve), new[] { instanceType });
     }
 }

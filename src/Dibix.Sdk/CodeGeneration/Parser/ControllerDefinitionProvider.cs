@@ -415,7 +415,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
             {
                 string apiParameterName = parameter.Property.Name;
                 string internalParameterName = apiParameterName;
-                ActionParameterLocation location = ResolveParameterLocationFromSource(parameter.Source);
+                ActionParameterLocation location = ResolveParameterLocationFromSource(parameter.Source, ref apiParameterName);
                 if (location == ActionParameterLocation.Path)
                     pathParameters.Remove(apiParameterName);
 
@@ -652,7 +652,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
                 if (explicitParameter.Source is ActionParameterPropertySource propertySource
                  && TryGetLocation(propertySource.SourceName, ref location))
                 {
-                    apiParameterName = propertySource.PropertyName;
+                    apiParameterName = propertySource.PropertyName.Split('.')[0];
 
                     if (location == ActionParameterLocation.Path)
                         pathParameters.Remove(propertySource.PropertyName);
@@ -687,7 +687,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
             return new ActionParameter(apiParameterName, internalParameterName, type, location, hasDefaultValue, defaultValue, explicitParameter?.Source);
         }
 
-        private static ActionParameterLocation ResolveParameterLocationFromSource(ActionParameterSource parameterSource)
+        private static ActionParameterLocation ResolveParameterLocationFromSource(ActionParameterSource parameterSource, ref string apiParameterName)
         {
             switch (parameterSource)
             {
@@ -698,6 +698,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
                 case ActionParameterPropertySource actionParameterPropertySource:
                     ActionParameterLocation location = ActionParameterLocation.NonUser;
                     TryGetLocation(actionParameterPropertySource.SourceName, ref location);
+                    apiParameterName = actionParameterPropertySource.PropertyName.Split('.')[0];
                     return location;
 
                 default: throw new ArgumentOutOfRangeException(nameof(parameterSource), parameterSource, null);
@@ -714,6 +715,14 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
 
                 case "PATH":
                     location = ActionParameterLocation.Path;
+                    return true;
+
+                case "BODY":
+                    location = ActionParameterLocation.Body;
+                    return true;
+
+                case "HEADER":
+                    location = ActionParameterLocation.Header;
                     return true;
 
                 default:

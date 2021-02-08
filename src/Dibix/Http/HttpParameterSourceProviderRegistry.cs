@@ -12,6 +12,7 @@ namespace Dibix.Http
             Register<QueryParameterSourceProvider>(QueryParameterSourceProvider.SourceName);
             Register<PathParameterSourceProvider>(PathParameterSourceProvider.SourceName);
             Register<BodyParameterSourceProvider>(BodyParameterSourceProvider.SourceName);
+            Register<HeaderParameterSourceProvider>(HeaderParameterSourceProvider.SourceName);
             Register<RequestParameterSourceProvider>(RequestParameterSourceProvider.SourceName);
             Register<EnvironmentParameterSourceProvider>(EnvironmentParameterSourceProvider.SourceName);
         }

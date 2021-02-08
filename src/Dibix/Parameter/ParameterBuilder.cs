@@ -236,7 +236,9 @@ namespace Dibix
 
             public override void ResolveValue(object value)
             {
-                this._result = (T)value;
+                if (value != null)
+                    this._result = (T)value;
+
                 this._isResolved = true;
             }
         }

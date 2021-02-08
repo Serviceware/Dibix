@@ -107,7 +107,9 @@ namespace Dibix.Sdk.OpenApi
         {
             foreach (ActionParameter parameter in action.Parameters.DistinctBy(x => x.ApiParameterName))
             {
-                if (parameter.Location != ActionParameterLocation.Query && parameter.Location != ActionParameterLocation.Path) 
+                if (parameter.Location != ActionParameterLocation.Query
+                 && parameter.Location != ActionParameterLocation.Path
+                 && parameter.Location != ActionParameterLocation.Header) 
                     continue;
 
                 AppendUserParameter(document, operation, parameter, parameter.Location, rootNamespace, schemaRegistry);
@@ -118,12 +120,16 @@ namespace Dibix.Sdk.OpenApi
         {
             switch (location)
             {
-                case ActionParameterLocation.Query: 
+                case ActionParameterLocation.Query:
                     AppendQueryParameter(document, operation, parameter, parameter.Type, rootNamespace, schemaRegistry);
                     break;
                 
-                case ActionParameterLocation.Path: 
+                case ActionParameterLocation.Path:
                     AppendPathParameter(document, operation, parameter, rootNamespace, schemaRegistry);
+                    break;
+                
+                case ActionParameterLocation.Header:
+                    AppendHeaderParameter(document, operation, parameter, rootNamespace, schemaRegistry);
                     break;
 
                 default:
@@ -151,7 +157,13 @@ namespace Dibix.Sdk.OpenApi
 
         private static void AppendPathParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
-            AppendParameter(document, operation, parameter, ParameterLocation.Path, true, rootNamespace, schemaRegistry);
+            AppendParameter(document, operation, parameter, ParameterLocation.Path, isRequired: true, rootNamespace, schemaRegistry);
+        }
+
+        private static void AppendHeaderParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, string rootNamespace, ISchemaRegistry schemaRegistry)
+        {
+            TypeReference parameterType = new PrimitiveTypeReference(PrimitiveDataType.String, isNullable: true, isEnumerable: false);
+            AppendParameter(document, operation, parameter, parameterType: parameterType, isEnumerable: false, ParameterLocation.Header, isRequired: false, rootNamespace, schemaRegistry);
         }
 
         private static void AppendQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, string rootNamespace, ISchemaRegistry schemaRegistry) => AppendQueryParameter(document, operation, parameter, parameter.Type, parameter.Type.IsEnumerable, rootNamespace, schemaRegistry);

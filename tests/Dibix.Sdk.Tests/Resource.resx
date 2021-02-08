@@ -278,13 +278,15 @@ namespace Dibix.Sdk.Tests
             // SingleConrecteResultWithParams
             private const string SingleConrecteResultWithParamsCommandText = "[dbo].[dbx_tests_syntax_singleconcreteresult_params]";
 
-            public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, System.Guid? x, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, bool y = true, int? z = null)
+            public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string v, string w, System.Guid? x, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, bool y = true, int? z = null)
             {
                 using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                 {
                     IParametersVisitor @params = accessor.Parameters()
                                                          .SetFromTemplate(new
                                                          {
+                                                             v,
+                                                             w,
                                                              x,
                                                              ids,
                                                              y,
@@ -366,6 +368,8 @@ namespace Dibix.Sdk.Tests
 
         public sealed class InputContract
         {
+            public string V { get; set; }
+            public string W { get; set; }
             public System.Guid X { get; set; }
             public string Password { get; set; }
             public bool Y { get; set; }
@@ -388,6 +392,8 @@ namespace Dibix.Sdk.Tests
                         y.Method = HttpApiMethod.Get;
                         y.ChildRoute = "{password}/Fixed";
                         y.ResolveParameterFromNull("password");
+                        y.ResolveParameterFromSource("v", "HEADER", "Authorization.Scheme");
+                        y.ResolveParameterFromSource("w", "HEADER", "Authorization.Parameter");
                         y.ResolveParameterFromSource("x", "DBX", "X");
                         y.ResolveParameterFromConstant("y", true);
                         y.ResolveParameterFromConstant("z", 5);
@@ -437,6 +443,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+            nullable: true
         - name: ids
           in: query
           required: true
@@ -458,6 +469,16 @@ paths:
       parameters:
         - name: password
           in: path
+          required: true
+          schema:
+            type: string
+        - name: v
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: w
+          in: query
           required: true
           schema:
             type: string
@@ -558,12 +579,18 @@ components:
       additionalProperties: false
     InputContract:
       required:
+        - V
+        - W
         - X
         - Password
         - Y
         - Z
       type: object
       properties:
+        V:
+          type: string
+        W:
+          type: string
         X:
           type: string
           format: uuid
@@ -665,13 +692,15 @@ namespace Dibix.Sdk.Tests
             // EmptyWithParams
             private const string EmptyWithParamsCommandText = "[dbo].[dbx_tests_syntax_empty_params]";
 
-            public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, System.Guid? x, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, bool y = true, int? z = null)
+            public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string v, string w, System.Guid? x, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, bool y = true, int? z = null)
             {
                 using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                 {
                     IParametersVisitor @params = accessor.Parameters()
                                                          .SetFromTemplate(new
                                                          {
+                                                             v,
+                                                             w,
                                                              x,
                                                              ids,
                                                              y,
