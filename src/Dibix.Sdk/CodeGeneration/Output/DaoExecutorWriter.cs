@@ -72,8 +72,6 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static void AddExecutionMethods(CSharpClass @class, DaoCodeGenerationContext context, IList<SqlStatementInfo> statements)
         {
-            IDictionary<SqlStatementInfo, string> methodReturnTypeMap = statements.ToDictionary(x => x, x => ResolveTypeName(x, context));
-
             for (int i = 0; i < statements.Count; i++)
             {
                 SqlStatementInfo statement = statements[i];
@@ -89,18 +87,23 @@ namespace Dibix.Sdk.CodeGeneration
                 if (statement.Async)
                     methodName = $"{methodName}Async";
 
-                string resultTypeName = methodReturnTypeMap[statement];
+                string resultTypeName = ResolveTypeName(statement, context);
+                string returnTypeName = DetermineReturnTypeName(statement, resultTypeName, context);
 
                 IEnumerable<string> annotations = statement.ErrorResponses.Select(x => $"ErrorResponse(statusCode: {x.StatusCode}, errorCode: {x.ErrorCode}, errorDescription: \"{x.ErrorDescription}\")");
                 if (statement.ErrorResponses.Any())
                     context.AddUsing("Dibix.Http");
 
+                CSharpModifiers modifiers = CSharpModifiers.Public | CSharpModifiers.Static;
+                if (statement.Async)
+                    modifiers |= CSharpModifiers.Async;
+
                 CSharpMethod method = @class.AddMethod(name: methodName
-                                                     , type: resultTypeName
+                                                     , type: returnTypeName
                                                      , body: GenerateMethodBody(statement, resultTypeName, context)
                                                      , annotations: annotations
                                                      , isExtension: true
-                                                     , modifiers: CSharpModifiers.Public | CSharpModifiers.Static);
+                                                     , modifiers: modifiers);
                 method.AddParameter("databaseAccessorFactory", "IDatabaseAccessorFactory");
 
                 if (statement.GenerateInputClass)
@@ -142,23 +145,23 @@ namespace Dibix.Sdk.CodeGeneration
             return new CSharpValue(defailtValueStr);
         }
 
-        private static string ResolveTypeName(SqlStatementInfo query, DaoCodeGenerationContext context)
+        private static string DetermineReturnTypeName(SqlStatementInfo query, string resultTypeName, DaoCodeGenerationContext context)
         {
-            string resultTypeName = ResolveTypeNameCore(query, context);
-            if (query.Async)
-            {
-                context.AddUsing(typeof(Task).Namespace);
-                StringBuilder sb = new StringBuilder("async Task");
-                if (query.ResultType != null)
-                    sb.Append('<')
-                      .Append(resultTypeName)
-                      .Append('>');
+            if (!query.Async) 
+                return resultTypeName;
 
-                resultTypeName = sb.ToString();
-            }
-            return resultTypeName;
+            context.AddUsing(typeof(Task).Namespace);
+            StringBuilder sb = new StringBuilder(nameof(Task));
+            if (query.ResultType != null)
+                sb.Append('<')
+                  .Append(resultTypeName)
+                  .Append('>');
+
+            string returnTypeName = sb.ToString();
+            return returnTypeName;
         }
-        private static string ResolveTypeNameCore(SqlStatementInfo query, DaoCodeGenerationContext context)
+
+        private static string ResolveTypeName(SqlStatementInfo query, DaoCodeGenerationContext context)
         {
             if (query.IsFileApi)
                 return "HttpFileResponse";
@@ -457,8 +460,14 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static void WriteGridReaderMethodCall(StringWriter writer, SqlStatementInfo query, SqlQueryResult result, DaoCodeGenerationContext context)
         {
+            if (query.Async)
+                writer.WriteRaw("await ");
+
             writer.WriteRaw("reader.")
                   .WriteRaw(GetMultipleResultReaderMethodName(result.ResultMode));
+
+            if (query.Async)
+                writer.WriteRaw("Async");
 
             WriteGenericTypeArguments(writer, result, context);
 
@@ -467,6 +476,9 @@ namespace Dibix.Sdk.CodeGeneration
             AppendMultiMapParameters(result, parameters);
 
             WriteMethodParameters(writer, parameters);
+
+            if (query.Async)
+                writer.WriteRaw(".ConfigureAwait(false)");
         }
 
         private static void WriteFileApiResult(StringWriter writer, SqlStatementInfo query, string resultTypeName, bool hasOutputParameters, DaoCodeGenerationContext context)

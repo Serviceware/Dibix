@@ -162,6 +162,25 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(5,2,5
         }
 
         [Fact]
+        public void Inline_GridResultAsync()
+        {
+            this.ExecuteTest
+            (
+                source: @"Tests\Syntax\dbx_tests_syntax_gridresult_async.sql"
+              , contracts: new [] 
+                {
+                    @"Contracts\Direction.json"
+                  , @"Contracts\GenericContract.json"
+                }
+              , expectedAdditionalAssemblyReferences: new[]
+                {
+                    "System.ComponentModel.DataAnnotations.dll"
+                  , "Newtonsoft.Json.dll"
+                }
+            );
+        }
+
+        [Fact]
         public void Inline_GridResult_AndSingleResult()
         {
             this.ExecuteTest

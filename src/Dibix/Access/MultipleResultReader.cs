@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Dibix
 {
@@ -10,6 +11,9 @@ namespace Dibix
         public abstract bool IsConsumed { get; }
 
         IEnumerable<T> IMultipleResultReader.ReadMany<T>() => this.ReadMany<T>().PostProcess();
+
+        // TaskReminder
+        Task<IEnumerable<T>> IMultipleResultReader.ReadManyAsync<T>() => this.ReadManyAsync<T>().PostProcess();
 
         // ObjectManagement (GetDetailConfigurationExportById, GetDetailConfigurationExportByObjectDef)
         public IEnumerable<TReturn> ReadMany<TReturn, TSecond>(string splitOn) where TReturn : new()
@@ -94,6 +98,8 @@ namespace Dibix
 
         #region Abstract Methods
         protected abstract IEnumerable<T> ReadMany<T>();
+        
+        protected abstract Task<IEnumerable<T>> ReadManyAsync<T>();
 
         protected abstract IEnumerable<TReturn> ReadMany<TFirst, TSecond, TReturn>(Func<TFirst, TSecond, TReturn> map, string splitOn);
 

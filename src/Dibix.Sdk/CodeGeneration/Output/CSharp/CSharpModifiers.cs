@@ -14,6 +14,7 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
         Sealed = 32,
         Const = 64,
         ReadOnly = 128,
-        Override = 256
+        Override = 256,
+        Async = 512
     }
 }

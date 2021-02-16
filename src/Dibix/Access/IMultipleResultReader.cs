@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Dibix
 {
@@ -8,6 +9,7 @@ namespace Dibix
         bool IsConsumed { get; }
 
         IEnumerable<T> ReadMany<T>();
+        Task<IEnumerable<T>> ReadManyAsync<T>();
         IEnumerable<TReturn> ReadMany<TReturn, TSecond>(string splitOn) where TReturn : new();
         IEnumerable<TReturn> ReadMany<TFirst, TSecond, TReturn>(Func<TFirst, TSecond, TReturn> map, string splitOn);
         IEnumerable<TReturn> ReadMany<TFirst, TSecond, TReturn>(string splitOn) where TReturn : new();

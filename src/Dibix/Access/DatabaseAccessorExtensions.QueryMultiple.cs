@@ -1,4 +1,6 @@
 using System.Data;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Dibix
 {
@@ -13,6 +15,13 @@ namespace Dibix
         {
             Guard.IsNotNull(accessor, nameof(accessor));
             return accessor.QueryMultiple(sql, CommandType.Text, parameters);
+        }
+
+        // TaskReminder
+        public static Task<IMultipleResultReader> QueryMultipleAsync(this IDatabaseAccessor accessor, string sql, CancellationToken cancellationToken)
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
+            return accessor.QueryMultipleAsync(sql, CommandType.Text, EmptyParameters.Instance, cancellationToken);
         }
     }
 }

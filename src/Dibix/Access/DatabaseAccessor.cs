@@ -101,6 +101,8 @@ namespace Dibix
         T IDatabaseAccessor.QuerySingleOrDefault<T>(string sql, CommandType commandType, IParametersVisitor parameters) => Execute(sql, commandType, parameters, () => this.QuerySingleOrDefault<T>(sql, commandType, parameters).PostProcess());
 
         IMultipleResultReader IDatabaseAccessor.QueryMultiple(string sql, CommandType commandType, IParametersVisitor parameters) => Execute(sql, commandType, parameters, () => this.QueryMultiple(sql, commandType, parameters));
+        
+        Task<IMultipleResultReader> IDatabaseAccessor.QueryMultipleAsync(string sql, CommandType commandType, IParametersVisitor parameters, CancellationToken cancellationToken) => Execute(sql, commandType, parameters, () => this.QueryMultipleAsync(sql, commandType, parameters, cancellationToken));
         #endregion
 
         #region Abstract Methods
@@ -131,6 +133,8 @@ namespace Dibix
         protected abstract T QuerySingleOrDefault<T>(string sql, CommandType commandType, IParametersVisitor parameters);
 
         protected abstract IMultipleResultReader QueryMultiple(string sql, CommandType commandType, IParametersVisitor parameters);
+        
+        protected abstract Task<IMultipleResultReader> QueryMultipleAsync(string sql, CommandType commandType, IParametersVisitor parameters, CancellationToken cancellationToken);
         #endregion
 
         #region Private Methods

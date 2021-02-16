@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Dapper;
 
 namespace Dibix.Dapper
@@ -26,6 +27,12 @@ namespace Dibix.Dapper
         {
             DecoratedTypeMap.Adapt<T>();
             return this._reader.Read<T>();
+        }
+
+        protected override Task<IEnumerable<T>> ReadManyAsync<T>()
+        {
+            DecoratedTypeMap.Adapt<T>();
+            return this._reader.ReadAsync<T>();
         }
 
         protected override IEnumerable<TReturn> ReadMany<TFirst, TSecond, TReturn>(Func<TFirst, TSecond, TReturn> map, string splitOn)

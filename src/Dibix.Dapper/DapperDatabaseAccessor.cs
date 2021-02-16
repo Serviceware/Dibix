@@ -111,6 +111,12 @@ namespace Dibix.Dapper
             SqlMapper.GridReader reader = base.Connection.QueryMultiple(sql, PrepareParameters(parameters), this._transaction, commandType: commandType);
             return new DapperGridResultReader(reader);
         }
+
+        protected override async Task<IMultipleResultReader> QueryMultipleAsync(string sql, CommandType commandType, IParametersVisitor parameters, CancellationToken cancellationToken)
+        {
+            SqlMapper.GridReader reader = await base.Connection.QueryMultipleAsync(new CommandDefinition(sql, PrepareParameters(parameters), this._transaction, commandTimeout: null, commandType, cancellationToken: cancellationToken));
+            return new DapperGridResultReader(reader);
+        }
         #endregion
 
         #region Private Methods

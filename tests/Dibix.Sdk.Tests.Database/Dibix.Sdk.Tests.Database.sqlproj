@@ -146,6 +146,7 @@
     <Build Include="Tests\Syntax\dbx_tests_syntax_gridresult_customname_single.sql" />
     <Build Include="Tests\Syntax\dbx_tests_syntax_gridresult_single.sql" />
     <Build Include="Tests\Syntax\dbx_tests_syntax_empty_params_out.sql" />
+    <Build Include="Tests\Syntax\dbx_tests_syntax_gridresult_async.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CodeAnalysis" />
