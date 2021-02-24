@@ -9,7 +9,7 @@ namespace Dibix
     public interface IDatabaseAccessor : IDisposable
     {
         IParameterBuilder Parameters();
-        int Execute(string sql, CommandType commandType, IParametersVisitor parameters);
+        int Execute(string sql, CommandType commandType, int? commandTimeout, IParametersVisitor parameters);
         Task<int> ExecuteAsync(string sql, CommandType commandType, int? commandTimeout, IParametersVisitor parameters, CancellationToken cancellationToken);
         IEnumerable<T> QueryMany<T>(string sql, CommandType commandType, IParametersVisitor parameters);
         IEnumerable<TReturn> QueryMany<TReturn, TSecond>(string sql, CommandType commandType, IParametersVisitor parameters, string splitOn) where TReturn : new();

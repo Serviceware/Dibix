@@ -36,7 +36,7 @@ namespace Dibix
         #region IDatabaseAccessor Members
         public IParameterBuilder Parameters() => new ParameterBuilder();
 
-        int IDatabaseAccessor.Execute(string sql, CommandType commandType, IParametersVisitor parameters) => Execute(sql, commandType, parameters, () => this.Execute(sql, commandType, parameters));
+        int IDatabaseAccessor.Execute(string sql, CommandType commandType, int? commandTimeout, IParametersVisitor parameters) => Execute(sql, commandType, parameters, () => this.Execute(sql, commandType, commandTimeout, parameters));
 
         Task<int> IDatabaseAccessor.ExecuteAsync(string sql, CommandType commandType, int? commandTimeout, IParametersVisitor parameters, CancellationToken cancellationToken) => Execute(sql, commandType, parameters, () => this.ExecuteAsync(sql, commandType, commandTimeout, parameters, cancellationToken));
 
@@ -106,7 +106,7 @@ namespace Dibix
         #endregion
 
         #region Abstract Methods
-        protected abstract int Execute(string sql, CommandType commandType, IParametersVisitor parameters);
+        protected abstract int Execute(string sql, CommandType commandType, int? commandTimeout, IParametersVisitor parameters);
 
         protected abstract Task<int> ExecuteAsync(string sql, CommandType commandType, int? commandTimeout, IParametersVisitor parameters, CancellationToken cancellationToken);
 

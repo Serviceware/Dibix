@@ -24,9 +24,9 @@ namespace Dibix.Dapper
         #endregion
 
         #region Overrides
-        protected override int Execute(string sql, CommandType commandType, IParametersVisitor parameters)
+        protected override int Execute(string sql, CommandType commandType, int? commandTImeout, IParametersVisitor parameters)
         {
-            return base.Connection.Execute(sql, PrepareParameters(parameters), this._transaction, commandType: commandType);
+            return base.Connection.Execute(sql, PrepareParameters(parameters), this._transaction, commandTImeout, commandType);
         }
 
         protected override Task<int> ExecuteAsync(string sql, CommandType commandType, int? commandTimeout, IParametersVisitor parameters, CancellationToken cancellationToken)

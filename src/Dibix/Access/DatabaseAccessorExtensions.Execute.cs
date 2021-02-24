@@ -11,12 +11,17 @@ namespace Dibix
         public static int Execute(this IDatabaseAccessor accessor, string sql)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.Execute(sql, CommandType.Text, EmptyParameters.Instance);
+            return accessor.Execute(sql, CommandType.Text, commandTimeout: null, EmptyParameters.Instance);
         }
         public static int Execute(this IDatabaseAccessor accessor, string sql, CommandType commandType)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.Execute(sql, commandType, EmptyParameters.Instance);
+            return accessor.Execute(sql, commandType, commandTimeout: null, EmptyParameters.Instance);
+        }
+        public static int Execute(this IDatabaseAccessor accessor, string sql, CommandType commandType, IParametersVisitor parameters)
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
+            return accessor.Execute(sql, commandType, commandTimeout: null, parameters);
         }
         // DataImport
         public static int Execute(this IDatabaseAccessor accessor, string sql, CommandType commandType, Action<IParameterBuilder> configureParameters)
