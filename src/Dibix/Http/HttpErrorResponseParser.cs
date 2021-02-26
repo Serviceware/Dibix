@@ -12,6 +12,7 @@ namespace Dibix.Http
         private static readonly int[] ClientErrorHttpStatuses =
         {
             (int)HttpStatusCode.BadRequest                 // Client syntax error (malformed request)
+          , (int)HttpStatusCode.Unauthorized               // Either the request is missing credentials or the credentials were not accepted
           , (int)HttpStatusCode.Forbidden                  // The authorized user is not allowed to access the current resource
           , (int)HttpStatusCode.NotFound                   // Resource with given ID not found, Feature not available/configured
           , (int)HttpStatusCode.Conflict                   // The resource is currently locked by another request (might resolve by retry)
