@@ -12,6 +12,7 @@ namespace Dibix
         int Execute(string sql, CommandType commandType, int? commandTimeout, IParametersVisitor parameters);
         Task<int> ExecuteAsync(string sql, CommandType commandType, int? commandTimeout, IParametersVisitor parameters, CancellationToken cancellationToken);
         IEnumerable<T> QueryMany<T>(string sql, CommandType commandType, IParametersVisitor parameters);
+        Task<IEnumerable<T>> QueryManyAsync<T>(string sql, CommandType commandType, IParametersVisitor parameters, bool buffered, CancellationToken cancellationToken);
         IEnumerable<TReturn> QueryMany<TReturn, TSecond>(string sql, CommandType commandType, IParametersVisitor parameters, string splitOn) where TReturn : new();
         IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird>(string sql, CommandType commandType, IParametersVisitor parameters, string splitOn) where TReturn : new();
         IEnumerable<TReturn> QueryMany<TFirst, TSecond, TReturn>(string sql, CommandType commandType, IParametersVisitor parameters, Func<TFirst, TSecond, TReturn> map, string splitOn);

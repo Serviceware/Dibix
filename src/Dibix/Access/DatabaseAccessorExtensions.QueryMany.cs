@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Dibix
 {
@@ -20,6 +22,12 @@ namespace Dibix
         {
             Guard.IsNotNull(accessor, nameof(accessor));
             return accessor.QueryMany<T>(sql, CommandType.Text, parameters);
+        }
+
+        public static Task<IEnumerable<T>> QueryManyAsync<T>(this IDatabaseAccessor accessor, string sql, CancellationToken cancellationToken)
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
+            return accessor.QueryManyAsync<T>(sql, CommandType.Text, EmptyParameters.Instance, buffered: true, cancellationToken);
         }
 
         public static IEnumerable<TReturn> QueryMany<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, Action<TReturn, TSecond> map, string splitOn)

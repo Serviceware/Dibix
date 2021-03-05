@@ -41,6 +41,8 @@ namespace Dibix
         Task<int> IDatabaseAccessor.ExecuteAsync(string sql, CommandType commandType, int? commandTimeout, IParametersVisitor parameters, CancellationToken cancellationToken) => Execute(sql, commandType, parameters, () => this.ExecuteAsync(sql, commandType, commandTimeout, parameters, cancellationToken));
 
         IEnumerable<T> IDatabaseAccessor.QueryMany<T>(string sql, CommandType commandType, IParametersVisitor parameters) => Execute(sql, commandType, parameters, () => this.QueryMany<T>(sql, commandType, parameters).PostProcess());
+        
+        Task<IEnumerable<T>> IDatabaseAccessor.QueryManyAsync<T>(string sql, CommandType commandType, IParametersVisitor parameters, bool buffered, CancellationToken cancellationToken) => Execute(sql, commandType, parameters, () => this.QueryManyAsync<T>(sql, commandType, parameters, buffered, cancellationToken).PostProcess());
 
         public IEnumerable<TReturn> QueryMany<TReturn, TSecond>(string sql, CommandType commandType, IParametersVisitor parameters, string splitOn) where TReturn : new() => Execute(sql, commandType, parameters, () =>
         {
@@ -111,6 +113,8 @@ namespace Dibix
         protected abstract Task<int> ExecuteAsync(string sql, CommandType commandType, int? commandTimeout, IParametersVisitor parameters, CancellationToken cancellationToken);
 
         protected abstract IEnumerable<T> QueryMany<T>(string sql, CommandType commandType, IParametersVisitor parameters);
+        
+        protected abstract Task<IEnumerable<T>> QueryManyAsync<T>(string sql, CommandType commandType, IParametersVisitor parameters, bool buffered, CancellationToken cancellationToken);
 
         protected abstract IEnumerable<TReturn> QueryMany<TFirst, TSecond, TReturn>(string sql, CommandType commandType, IParametersVisitor parameters, Func<TFirst, TSecond, TReturn> map, string splitOn);
         

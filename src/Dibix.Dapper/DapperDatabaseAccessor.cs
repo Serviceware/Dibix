@@ -41,6 +41,14 @@ namespace Dibix.Dapper
             return base.Connection.Query<T>(sql, PrepareParameters(parameters), this._transaction, commandType: commandType);
         }
 
+        protected override Task<IEnumerable<T>> QueryManyAsync<T>(string sql, CommandType commandType, IParametersVisitor parameters, bool buffered, CancellationToken cancellationToken)
+        {
+            DecoratedTypeMap.Adapt<T>();
+            CommandFlags flags = buffered ? CommandFlags.Buffered : CommandFlags.None;
+            CommandDefinition command = new CommandDefinition(sql, PrepareParameters(parameters), this._transaction, commandType: commandType, flags: flags, cancellationToken: cancellationToken);
+            return base.Connection.QueryAsync<T>(command);
+        }
+
         protected override IEnumerable<TReturn> QueryMany<TFirst, TSecond, TReturn>(string sql, CommandType commandType, IParametersVisitor parameters, Func<TFirst, TSecond, TReturn> map, string splitOn)
         {
             DecoratedTypeMap.Adapt<TFirst, TSecond>();
