@@ -1,0 +1,65 @@
+pool:
+  name: Processes
+
+#trigger:
+#- master
+#- rel/*
+
+parameters:
+- name: PublishPackages
+  displayName: "\U0001FA82 Publish packages"
+  type: boolean
+  default: "false"
+
+variables:
+  # Unfortunately 'Build.SourceVersionMessage' is not available at this stage yet - See setvariable step
+  PublishPackages: "$[or(eq('${{ parameters.PublishPackages }}', true), contains(variables['Build.SourceVersionMessage'], '[package]'))]"
+
+steps:
+- script: "echo ##vso[task.setvariable variable=PublishPackages]true"
+  displayName: "\U0001F50D Resolve 'PublishPackages' property from commmit message"
+  condition: contains(variables['Build.SourceVersionMessage'], '[package]')
+
+- task: DotNetCoreCLI@2  
+  displayName: "\U0001F913 Install NBGV"
+  inputs:
+    command: custom
+    custom: tool
+    arguments: install --tool-path . nbgv
+
+- script: nbgv cloud
+  displayName: "\U0001F58D Update pipeline instance name"
+
+- task: DotNetCoreCLI@2
+  displayName: "\U0001F52C Build debug"
+  inputs:
+    command: 'build'
+
+- task: DotNetCoreCLI@2
+  displayName: "\U0001F6A2 Build release"
+  inputs:
+    command: 'build'
+    arguments: '-c Release'
+
+- task: DotNetCoreCLI@2
+  displayName: "\U0001F4E6 Create packages"
+  inputs:
+    command: 'pack'
+    packagesToPack: 'src\Dibix;src\Dibix.Dapper;src\Dibix.Sdk;src\Dibix.Sdk.VisualStudio'
+    configuration: 'Release'
+    verbosityPack: 'Normal'
+
+- task: DotNetCoreCLI@2
+  displayName: "\U0001F9EA Run unit tests"
+  continueOnError: true
+  inputs:
+    command: 'test'
+
+- task: DotNetCoreCLI@2
+  displayName: "\U0001FA82 Publish packages"
+  condition: and(succeeded(), eq(variables['PublishPackages'], true), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  inputs:
+    command: 'push'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+    nuGetFeedType: 'internal'
+    publishVstsFeed: '3faf84d3-2d7c-4a03-b5d2-4d12a0b38b6c' # Dibix

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -98,6 +99,9 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         private static void AssertFileContent(string expectedTextKey, string generatedFilePath)
         {
             string expectedText = TestUtility.GetExpectedText(expectedTextKey);
+            string fileVersion = FileVersionInfo.GetVersionInfo(typeof(DaoCodeGenerator).Assembly.Location).FileVersion;
+            expectedText = expectedText.Replace("[GeneratedCodeAttribute(\"Dibix.Sdk\", \"1.0.0.0\")]"
+                                             , $"[GeneratedCodeAttribute(\"Dibix.Sdk\", \"{fileVersion}\")]");
             TestUtility.AssertFileEqualWithDiffTool(expectedText, generatedFilePath);
         }
 

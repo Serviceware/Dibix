@@ -121,7 +121,7 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(5,2,5
             );
         }
 
-        //[Fact]
+        [Fact(Skip = "Projection using the 'ResultType' property is currently only supported in a part of a grid result")]
         public void Inline_SingleMultiMapResult_WithProjection()
         {
             this.ExecuteTest
@@ -364,7 +364,7 @@ Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly
             );
         }
 
-        //[Fact]
+        [Fact(Skip = "Output parameters are now supported")]
         public void Endpoint_WithOutputParam_Error()
         {
             this.ExecuteTestAndExpectError(@"Tests\Syntax\dbx_tests_syntax_empty_params_out.sql", @"Endpoints\GenericEndpointWithOutputParam.json", @"One or more errors occured during code generation:

@@ -556,7 +556,7 @@ Parameter: input", exception.Message);
             Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             Assert.Equal(true, arguments["boolValue"]);
             Assert.Equal(2, arguments["intValue"]);
-            Assert.Equal(null, arguments["nullValue"]);
+            Assert.Null(arguments["nullValue"]);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
         private static void Compile_ConstantSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, bool boolValue, int intValue, Guid? nullValue) { }
@@ -684,11 +684,11 @@ Parameter: input", exception.Message);
             Assert.Equal("Muffin", arguments["targetname_"]);
             Assert.Equal(10, arguments["id"]);
             Assert.Equal(5, arguments["anotherid"]);
-            Assert.Equal(null, arguments["name_"]);
+            Assert.Null(arguments["name_"]);
             Assert.Equal("ENCRYPTED(Cake)", arguments["name"]);
-            Assert.Equal(null, arguments["true_"]);
+            Assert.Null(arguments["true_"]);
             Assert.Equal(true, arguments["true"]);
-            Assert.Equal(null, arguments["empty"]);
+            Assert.Null(arguments["empty"]);
             ExplicitHttpUriParameterInput input = Assert.IsType<ExplicitHttpUriParameterInput>(arguments["input"]);
             Assert.Equal(9, input.targetid);
             Assert.Equal("ENCRYPTED(Muffin)", input.targetname);

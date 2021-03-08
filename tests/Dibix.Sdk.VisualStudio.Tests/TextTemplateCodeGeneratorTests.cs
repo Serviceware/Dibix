@@ -1,4 +1,5 @@
-﻿using Dibix.Sdk.CodeGeneration;
+﻿using System.Diagnostics;
+using Dibix.Sdk.CodeGeneration;
 using Dibix.Tests;
 using Xunit;
 
@@ -19,7 +20,7 @@ namespace Dibix.Sdk.VisualStudio.Tests
                                                      })
                                                      .SelectOutputWriter<DaoWriter>(x => { x.Formatting(CommandTextFormatting.MultiLine); }));
 
-            TestUtility.Evaluate(generated);
+            Assert(generated);
         }
 
         [Fact]
@@ -47,7 +48,18 @@ namespace Dibix.Sdk.VisualStudio.Tests
                                                           .Formatting(CommandTextFormatting.MultiLine);
                                                      }));
 
-            TestUtility.Evaluate("SourcesTest", generated);
+            Assert("SourcesTest", generated);
+        }
+
+        private static void Assert(string generated) => Assert(TestUtility.TestName, generated);
+        private static void Assert(string expectedTextKey, string generated)
+        {
+            string expectedText = TestUtility.GetExpectedText(expectedTextKey);
+            string fileVersion = FileVersionInfo.GetVersionInfo(typeof(DaoCodeGenerator).Assembly.Location).FileVersion;
+            expectedText = expectedText.Replace("[GeneratedCodeAttribute(\"Dibix.Sdk\", \"1.0.0.0\")]"
+                                             , $"[GeneratedCodeAttribute(\"Dibix.Sdk\", \"{fileVersion}\")]");
+            string actualText = generated;
+            TestUtility.AssertEqualWithDiffTool(expectedText, actualText, "cs");
         }
     }
 }

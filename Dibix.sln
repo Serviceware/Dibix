@@ -20,11 +20,11 @@ Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Dibix.Sdk.Tests.Database", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{62C58971-8516-42E1-8D2A-70A0CE779FFE}"
 	ProjectSection(SolutionItems) = preProject
-		build\common.props = build\common.props
+		build\azure-pipelines.yml = build\azure-pipelines.yml
 		build\dependencies.props = build\dependencies.props
 		Directory.Build.props = Directory.Build.props
-		build\NuGet.config = build\NuGet.config
-		build\version.props = build\version.props
+		NuGet.config = NuGet.config
+		version.json = version.json
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Dapper", "src\Dibix.Dapper\Dibix.Dapper.csproj", "{A6D595E0-EA46-4A3C-A82A-61E8B3D61804}"
