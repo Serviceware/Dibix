@@ -8,7 +8,7 @@
     <DibixRuntimeXplatPath>$(DibixToolsDirectory)..\netstandard2.0\Dibix.dll</DibixRuntimeXplatPath>
 
     <!-- We have our own CA target, which also executes the native SqlStaticCodeAnalysis -->
-    <RunSqlCodeAnalysis>false</RunSqlCodeAnalysis>
+    <RunSqlCodeAnalysisOnce>false</RunSqlCodeAnalysisOnce>
 
     <IsEmbedded Condition="'$(IsEmbedded)' == ''">$(MSBuildProjectName.EndsWith('.DML'))</IsEmbedded>
     <ProducePackage Condition="'$(ProducePackage)' == '' and '$(IsEmbedded)' == 'false'">True</ProducePackage>
