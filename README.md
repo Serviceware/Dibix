@@ -412,7 +412,6 @@ Code|Name|Sample use cases
 [409](https://httpstatuses.com/409)|Conflict|The resource is currently locked by another request (might resolve by retry)
 [422](https://httpstatuses.com/422)|UnprocessableEntity|The client content was not accepted because of a semantic error (i.E. schema validation)
 
-
 ##### SQL
 ```sql
 THROW 404017, N'Service not available', 1
