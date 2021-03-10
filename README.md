@@ -442,6 +442,13 @@ HTTP/1.1 504 Gateway Timeout
 
 ### Builtin parameter source providers
 This section describes known parameter sources that are already registered and can help to dynamically map a stored procedure parameter from. They are used in the [endpoint definition json](#http-endpoints) and are accessible within the parameter configuration.
+
+#### QUERY
+This source provides access to the query string arguments.
+
+#### PATH
+This source provides access to the path segment arguments. For example use `PATH.userId` to access the `userId` parameter in the URL `User/{userId}`.
+
 #### BODY
 This source provides access to the properties on a JSON object supplied in the body. It requires the body property to be set on the action definition to specify the expected contract of the body.
 
@@ -460,6 +467,9 @@ Sample:
   ]
 }
 ```
+
+#### HEADER
+This source provides access to the request headers. For example `HEADER.Authorization`.
 
 #### REQUEST
 This source provides access to the HTTP request. It supports the following properties:
