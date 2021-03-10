@@ -406,10 +406,12 @@ Supported:
 Code|Name|Sample use cases
 -|-|-
 [400](https://httpstatuses.com/400)|BadRequest|Client syntax error (malformed request)
+[401](https://httpstatuses.com/401)|Unauthorized|Either the request is missing credentials or the credentials were not accepted
 [403](https://httpstatuses.com/403)|Forbidden|The authorized user is not allowed to access the current resource
 [404](https://httpstatuses.com/404)|NotFound|Resource with given ID not found, Feature not available/configured
 [409](https://httpstatuses.com/409)|Conflict|The resource is currently locked by another request (might resolve by retry)
 [422](https://httpstatuses.com/422)|UnprocessableEntity|The client content was not accepted because of a semantic error (i.E. schema validation)
+
 
 ##### SQL
 ```sql
