@@ -5,6 +5,10 @@
       "type": "string",
       "pattern": "^[A-Z]([A-Za-z.]+)?(,[A-Z]([A-Za-z.]+)?)?$"
     },
+    "MediaType": {
+      "type": "string",
+      "pattern": "^\\w+\\/[-+.\\w*]+$"
+    },
     "ConstantSource": {
       "anyOf": [
         {
@@ -92,6 +96,20 @@
           "$ref": "#/definitions/PropertySource"
         }
       ]
+    },
+    "FileResponse": {
+      "properties": {
+        "mediaType": {
+          "$ref": "#/definitions/MediaType"
+        },
+        "cache": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "mediaType"
+      ],
+      "additionalProperties": false
     },
     "Response": {
       "properties": {
@@ -185,6 +203,9 @@
         },
         "isAnonymous": {
           "type": "boolean"
+        },
+        "fileResponse": {
+          "$ref": "#/definitions/FileResponse"
         },
         "responses": {
           "type": "object",

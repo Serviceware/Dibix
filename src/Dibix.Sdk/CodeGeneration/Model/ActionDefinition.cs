@@ -13,6 +13,7 @@ namespace Dibix.Sdk.CodeGeneration
         public TypeReference BodyContract { get; set; }
         public string BodyBinder { get; set; }
         public bool IsAnonymous { get; set; }
+        public ActionFileResponse FileResponse { get; set; }
         public IList<ActionParameter> Parameters { get; }
         public IDictionary<HttpStatusCode, ActionResponse> Responses { get; }
 

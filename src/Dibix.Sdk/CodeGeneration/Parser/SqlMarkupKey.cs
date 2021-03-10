@@ -6,7 +6,7 @@
         public const string Name = "Name";
         public const string NoCompile = "NoCompile";
         public const string MergeGridResult = "MergeGridResult";
-        public const string FileApi = "FileApi";
+        public const string FileResult = "FileResult";
         public const string Async = "Async";
         public const string Return = "Return";
         public const string ResultTypeName = "ResultTypeName";

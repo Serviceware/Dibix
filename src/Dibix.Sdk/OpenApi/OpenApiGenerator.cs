@@ -11,7 +11,7 @@ namespace Dibix.Sdk.OpenApi
 {
     internal static class OpenApiGenerator
     {
-        private static bool _useRelativeNamespaces = true;
+        private static readonly bool UseRelativeNamespaces = true;
         private static readonly IDictionary<PrimitiveDataType, Func<OpenApiSchema>> PrimitiveTypeMap = new Dictionary<PrimitiveDataType, Func<OpenApiSchema>>
         {
             [PrimitiveDataType.Boolean]        = () => new OpenApiSchema { Type = "boolean"                       }
@@ -228,8 +228,7 @@ namespace Dibix.Sdk.OpenApi
             {
                 OpenApiResponse apiResponse = new OpenApiResponse();
 
-                if (actionResponse.ResultType != null)
-                    AppendContent(document, apiResponse.Content, actionResponse.ResultType, rootNamespace, schemaRegistry);
+                AppendContent(document, apiResponse.Content, actionResponse.MediaType, actionResponse.IsBinary, actionResponse.ResultType, rootNamespace, schemaRegistry);
 
                 StringBuilder sb = new StringBuilder(actionResponse.Description);
                 if (actionResponse.Errors.Any())
@@ -269,9 +268,22 @@ namespace Dibix.Sdk.OpenApi
 
         private static void AppendContent(OpenApiDocument document, IDictionary<string, OpenApiMediaType> target, TypeReference typeReference, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
-            const string mediaType = "application/json";
-            target.Add(mediaType, new OpenApiMediaType { Schema = CreateSchema(document, typeReference, rootNamespace, schemaRegistry) });
+            AppendContent(document, target, HttpMediaType.Default, isBinary: false, typeReference, rootNamespace, schemaRegistry);
         }
+        private static void AppendContent(OpenApiDocument document, IDictionary<string, OpenApiMediaType> target, string mediaType, bool isBinary, TypeReference typeReference, string rootNamespace, ISchemaRegistry schemaRegistry)
+        {
+            if (!isBinary && typeReference == null)
+                return;
+
+            OpenApiSchema schema = isBinary ? CreateFileSchema() : CreateSchema(document, typeReference, rootNamespace, schemaRegistry);
+            target.Add(mediaType, new OpenApiMediaType { Schema = schema });
+        }
+
+        private static OpenApiSchema CreateFileSchema() => new OpenApiSchema
+        {
+            Type = "string",
+            Format = "binary"
+        };
 
         private static OpenApiSchema CreateSchema(OpenApiDocument document, TypeReference typeReference, string rootNamespace, ISchemaRegistry schemaRegistry) => CreateSchema(document, typeReference, typeReference.IsEnumerable, false, null, rootNamespace, schemaRegistry);
         private static OpenApiSchema CreateSchema(OpenApiDocument document, TypeReference typeReference, bool isEnumerable, bool hasDefaultValue, object defaultValue, string rootNamespace, ISchemaRegistry schemaRegistry)
@@ -319,7 +331,7 @@ namespace Dibix.Sdk.OpenApi
             SchemaDefinition schemaDefinition = schemaRegistry.GetSchema(typeReference);
             string typeName;
 
-            if (_useRelativeNamespaces)
+            if (UseRelativeNamespaces)
             {
                 typeName = schemaDefinition.DefinitionName;
                 string relativeNamespace = NamespaceUtility.BuildRelativeNamespace(rootNamespace, LayerName.DomainModel, schemaDefinition.Namespace);

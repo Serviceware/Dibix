@@ -125,7 +125,6 @@ namespace Dibix.Sdk.CodeGeneration
             base.Target.Namespace = this.ParseNamespace(relativeNamespace);
             base.Target.Name = this.ParseName();
             base.Target.MergeGridResult = base.Markup.HasSingleElement(SqlMarkupKey.MergeGridResult, base.Target.Source, base.Logger);
-            base.Target.IsFileApi = base.Markup.HasSingleElement(SqlMarkupKey.FileApi, base.Target.Source, base.Logger);
             base.Target.GenerateInputClass = base.Markup.HasSingleElement(SqlMarkupKey.GenerateInputClass, base.Target.Source, base.Logger);
             base.Target.Async = base.Markup.HasSingleElement(SqlMarkupKey.Async, base.Target.Source, base.Logger);
 
@@ -150,9 +149,6 @@ namespace Dibix.Sdk.CodeGeneration
                 TypeReference type = base.TypeResolver.ResolveType(value.Value, base.Target.Namespace, base.Target.Source, value.Line, value.Column, false);
                 return type;
             }
-
-            if (base.Target.IsFileApi)
-                return null;
 
             if (base.Target.Results.Count == 0)
                 return null;

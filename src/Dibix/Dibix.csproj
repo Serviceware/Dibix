@@ -26,10 +26,12 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <Compile Remove="Http\DatabaseAccessorExtensions.Http.cs" />
     <Compile Remove="Http\Http*Response.cs" />
     <Compile Remove="Http\HttpActionInvoker.cs" />
+    <Compile Remove="Http\HttpFileResponseFormatter.cs" />
+    <Compile Remove="Http\HttpResponseFormatter.cs" />
     <Compile Remove="Http\ReflectionHttpActionTargetProxyBuilder.cs" />
+    <Compile Remove="Http\WrappedHttpResponseFormatter.cs" />
 
     <PackageReference Include="System.ComponentModel.Annotations" Version="$(DataAnnotationsVersion)" />
     <PackageReference Include="System.Data.SqlClient" Version="$(SqlClientVersion)" />

@@ -80,9 +80,6 @@ namespace Dibix.Sdk.CodeGeneration
                 if (isSingleResult && statement.Results[0].ResultMode == SqlQueryResultMode.Many)
                     context.AddUsing(typeof(IEnumerable<>).Namespace);
 
-                if (statement.IsFileApi)
-                    context.AddUsing("Dibix.Http");
-
                 string methodName = String.Concat(MethodPrefix, statement.Name);
                 if (statement.Async)
                     methodName = $"{methodName}Async";
@@ -163,9 +160,6 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static string ResolveTypeName(SqlStatementInfo query, DaoCodeGenerationContext context)
         {
-            if (query.IsFileApi)
-                return "HttpFileResponse";
-
             if (query.ResultType == null) // Execute
                 return "void";
             
@@ -202,7 +196,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             WriteOutputParameterAssignment(writer, statement);
 
-            if (hasOutputParameters && (statement.ResultType != null || statement.IsFileApi))
+            if (hasOutputParameters && statement.ResultType != null)
                 writer.WriteLine("return result;");
 
             writer.PopIndent()
@@ -295,11 +289,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static void WriteExecutor(StringWriter writer, SqlStatementInfo query, string resultTypeName, bool hasOutputParameters, DaoCodeGenerationContext context)
         {
-            if (query.IsFileApi)
-            {
-                WriteFileApiResult(writer, query, resultTypeName, hasOutputParameters, context);
-            }
-            else if (query.Results.Count > 1) // GridReader
+            if (query.Results.Count > 1) // GridReader
             {
                 WriteComplexResult(writer, query, resultTypeName, hasOutputParameters, context);
             }
@@ -479,17 +469,6 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (query.Async)
                 writer.WriteRaw(".ConfigureAwait(false)");
-        }
-
-        private static void WriteFileApiResult(StringWriter writer, SqlStatementInfo query, string resultTypeName, bool hasOutputParameters, DaoCodeGenerationContext context)
-        {
-            writer.WriteIndent();
-
-            WriteResultInitialization(writer, resultTypeName, hasOutputParameters);
-
-            WriteMethodCall(writer, query, "QueryFile", null, context);
-
-            writer.WriteLineRaw(";");
         }
 
         private static void WriteMethodCall(StringWriter writer, SqlStatementInfo query, string methodName, SqlQueryResult singleResult, DaoCodeGenerationContext context)

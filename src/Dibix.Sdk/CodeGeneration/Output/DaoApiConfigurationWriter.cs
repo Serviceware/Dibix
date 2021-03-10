@@ -105,6 +105,9 @@ namespace Dibix.Sdk.CodeGeneration
                     if (action.IsAnonymous)
                         writer.WriteLine("y.IsAnonymous = true;");
 
+                    if (action.FileResponse != null)
+                        writer.WriteLine($"y.FileResponse = new HttpFileResponseDefinition(cache: {ComputeConstantLiteral(action.FileResponse.Cache)});");
+
                     writer.PopIndent()
                           .WriteLine("});");
                 }
@@ -128,7 +131,7 @@ namespace Dibix.Sdk.CodeGeneration
             switch (value)
             {
                 case ActionParameterConstantSource constant when constant.Value != null:
-                    string constantLiteral = ComputeConstantLiteral(constant);
+                    string constantLiteral = ComputeConstantLiteral(constant.Value);
                     writer.WriteLine($"{sourceSelectorVariable}.ResolveParameterFromConstant(\"{parameterName}\", {constantLiteral});");
                     break;
 
@@ -176,12 +179,12 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static string ComputeConstantLiteral(ActionParameterConstantSource constant)
+        private static string ComputeConstantLiteral(object value)
         {
-            switch (constant.Value)
+            switch (value)
             {
                 case bool boolValue: return boolValue.ToString().ToLowerInvariant();
-                default: return constant.Value.ToString();
+                default: return value.ToString();
             }
         }
         #endregion

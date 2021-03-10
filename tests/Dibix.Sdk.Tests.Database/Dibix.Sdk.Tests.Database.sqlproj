@@ -127,7 +127,7 @@
     <None Include="Contracts\GenericContract.json" />
     <Build Include="Tests\Syntax\dbx_tests_syntax_multiconcreteresult.sql" />
     <Build Include="Tests\Syntax\dbx_tests_syntax_singlemultimapresult.sql" />
-    <Build Include="Tests\Syntax\dbx_tests_syntax_fileapi.sql" />
+    <Build Include="Tests\Syntax\dbx_tests_syntax_fileresult.sql" />
     <Build Include="Tests\Syntax\dbx_tests_syntax_gridresult.sql" />
     <Build Include="Tests\Syntax\dbx_tests_syntax_gridresult_customname.sql" />
     <Build Include="Tests\Syntax\dbx_tests_syntax_empty_nocompile.sql" />

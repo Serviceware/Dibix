@@ -23,7 +23,8 @@ namespace Dibix.Tests
 
             Func<Task<object>> executor = () => Task.FromResult<object>(1);
 
-            object result = await HttpActionInvoker.Invoke(null, null, null, parameterResolver.Object, executor, null).ConfigureAwait(false);
+            HttpActionDefinition action = HttpActionDefinitionFactory.Create();
+            object result = await HttpActionInvoker.Invoke(action, null, null, parameterResolver.Object, executor, null).ConfigureAwait(false);
             Assert.Equal(1, result);
         }
 
@@ -37,7 +38,8 @@ namespace Dibix.Tests
 
             Func<Task<object>> executor = () => Task.FromResult<object>(new HttpResponse(HttpStatusCode.Forbidden));
 
-            object result = await HttpActionInvoker.Invoke(null, request, null, parameterResolver.Object, executor, null).ConfigureAwait(false);
+            HttpActionDefinition action = HttpActionDefinitionFactory.Create();
+            object result = await HttpActionInvoker.Invoke(action, request, null, parameterResolver.Object, executor, null).ConfigureAwait(false);
             HttpResponseMessage response = Assert.IsType<HttpResponseMessage>(result);
             Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
             Assert.Equal(request, response.RequestMessage);
@@ -204,6 +206,25 @@ intValue INT(4)  stringValue NVARCHAR(MAX)
             public X() : base("x") => base.ImportSqlMetadata(() => this.Add(default, default));
 
             public void Add(int intValue, string stringValue) => base.AddValues(intValue, stringValue);
+        }
+
+        private class HttpActionDefinitionFactory : HttpApiDescriptor
+        {
+            private HttpActionDefinition _action;
+
+            private HttpActionDefinitionFactory() { }
+
+            public static HttpActionDefinition Create()
+            {
+                HttpActionDefinitionFactory apiDescriptor = new HttpActionDefinitionFactory();
+                apiDescriptor.Configure(null);
+                return apiDescriptor._action;
+            }
+
+            public override void Configure(IHttpApiDiscoveryContext context)
+            {
+                base.RegisterController("X", x => x.AddAction(null, y => this._action = y));
+            }
         }
     }
 

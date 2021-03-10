@@ -10,7 +10,7 @@
         "v": "HEADER.Authorization.Scheme",
         "w": "HEADER.Authorization.Parameter",
         "x": "DBX.X",
-        "password": null, 
+        "password": null,
         "y": true,
         "z": 5
       }
@@ -24,6 +24,15 @@
       "method": "GET",
       "target": "SingleConrecteResultWithParams",
       "childRoute": "Array"
+    },
+    {
+      "method": "GET",
+      "target": "FileResult",
+      "childRoute": "{id}",
+      "fileResponse": {
+        "mediaType": "image/*",
+        "cache": false 
+      }
     },
     {
       "method": "POST",

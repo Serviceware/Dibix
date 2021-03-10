@@ -23,10 +23,8 @@ namespace Dibix.Http
             {
                 parameterResolver.PrepareParameters(request, arguments, parameterDependencyResolver);
                 object result = await executor().ConfigureAwait(false);
-                if (result is HttpResponse httpResponse)
-                    return httpResponse.CreateResponse(request);
-
-                return result;
+                object formattedResult = HttpResponseFormatter.Format(action, result, request);
+                return formattedResult;
             }
             catch (DatabaseAccessException exception) when (exception.InnerException is SqlException sqlException)
             {

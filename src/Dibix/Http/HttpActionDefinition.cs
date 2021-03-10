@@ -13,6 +13,7 @@ namespace Dibix.Http
         public Type BodyContract { get; set; }
         public Type BodyBinder { get; set; }
         public bool IsAnonymous { get; set; }
+        public HttpFileResponseDefinition FileResponse { get; set; }
         public string Description { get; set; }
         public Uri ComputedUri => this._computedUri ?? (this._computedUri = this.BuildUri());
 

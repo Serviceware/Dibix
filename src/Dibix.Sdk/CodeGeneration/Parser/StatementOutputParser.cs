@@ -23,50 +23,84 @@ namespace Dibix.Sdk.CodeGeneration
             node.Accept(visitor);
 
             IList<ISqlElement> returnElements = markup.GetElements(SqlMarkupKey.Return).ToArray();
+            SqlQueryResult builtInResult = GetBuiltInResult(markup, target, node, returnElements, visitor.Results, logger, typeResolver);
 
-            ValidateFileApi(target, node, returnElements, visitor.Results, logger);
+            if (builtInResult != null)
+            {
+                yield return builtInResult;
+                yield break;
+            }
+
             ValidateMergeGridResult(target, node, returnElements, logger);
 
             // Incorrect number of return elements/results will make further execution fail
-            if (!ValidateReturnElements(target, returnElements, visitor.Results, logger)) 
+            if (!ValidateReturnElements(target, returnElements, visitor.Results, logger))
                 yield break;
 
             foreach (SqlQueryResult result in CollectResults(target, node, typeResolver, schemaRegistry, logger, returnElements, visitor)) 
                 yield return result;
         }
 
-        private static void ValidateFileApi(SqlStatementInfo target, TSqlFragment node, IEnumerable<ISqlElement> returnElements, IList<OutputSelectResult> results, ILogger logger)
+        private static SqlQueryResult GetBuiltInResult(ISqlMarkupDeclaration markup, SqlStatementInfo target, TSqlFragment node, IEnumerable<ISqlElement> returnElements, IList<OutputSelectResult> results, ILogger logger, ITypeResolverFacade typeResolver)
         {
-            if (!target.IsFileApi) 
-                return;
-            
+            SqlQueryResult fileResult = GetFileResult(markup, target, node, returnElements, results, logger, typeResolver);
+            return fileResult;
+        }
+
+        private static SqlQueryResult GetFileResult(ISqlMarkupDeclaration markup, SqlStatementInfo target, TSqlFragment node, IEnumerable<ISqlElement> returnElements, IList<OutputSelectResult> results, ILogger logger, ITypeResolverFacade typeResolver)
+        {
+            bool isFileResult = markup.TryGetSingleElement(SqlMarkupKey.FileResult, target.Source, logger, out ISqlElement fileResultElement);
+            if (!isFileResult)
+                return null;
+
+            ValidateFileResult(target, node, returnElements, results, logger);
+            return CreateBuiltInResult("Dibix.FileEntity,Dibix", target, fileResultElement, typeResolver);
+        }
+
+        private static SqlQueryResult CreateBuiltInResult(string typeName, SqlStatementInfo target, ISqlElement source, ITypeResolverFacade typeResolver)
+        {
+            TypeReference typeReference = typeResolver.ResolveType(typeName, @namespace: null, target.Source, source.Line, source.Column, isEnumerable: false);
+            return new SqlQueryResult
+            {
+                ResultMode = SqlQueryResultMode.SingleOrDefault,
+                Types = { typeReference }
+            };
+        }
+
+        private static void ValidateFileResult(SqlStatementInfo target, TSqlFragment node, IEnumerable<ISqlElement> returnElements, IList<OutputSelectResult> results, ILogger logger)
+        {
             if (returnElements.Any())
             {
-                logger.LogError(null, "When using the @FileApi option, no return declarations should be defined", target.Source, node.StartLine, node.StartColumn);
+                logger.LogError(null, "When using the @FileResult option, no return declarations should be defined", target.Source, node.StartLine, node.StartColumn);
             }
             
-            if (!IsValidFileApiResult(results))
+            if (!IsValidFileResult(results))
             {
-                logger.LogError(null, "When using the @FileApi option, the query should return only one output statement with the following schema: ([type] NVARCHAR, [data] VARBINARY)", target.Source, node.StartLine, node.StartColumn);
+                logger.LogError(null, "When using the @FileResult option, the query should return only one output statement with the following schema: ([type] NVARCHAR, [data] VARBINARY, [filename] NVARCHAR NULL)", target.Source, node.StartLine, node.StartColumn);
             }
 
             if (target.MergeGridResult)
             {
-                logger.LogError(null, "When using the @FileApi option, the @MergeGridResult option is invalid", target.Source, node.StartLine, node.StartColumn);
+                logger.LogError(null, "When using the @FileResult option, the @MergeGridResult option is invalid", target.Source, node.StartLine, node.StartColumn);
             }
         }
 
-        private static bool IsValidFileApiResult(IList<OutputSelectResult> results)
+        private static bool IsValidFileResult(IList<OutputSelectResult> results)
         {
             if (results.Count != 1) 
                 return false;
 
-            if (results[0].Columns.Count != 2) 
+            int columnCount = results[0].Columns.Count;
+            if (columnCount < 2 || columnCount > 3) 
                 return false;
 
-            IList<OutputColumnResult> columns = results[0].Columns.OrderByDescending(x => x.ColumnName).ToArray();
-            return ValidateColumn(columns[0], "type", SqlDataType.Char, SqlDataType.NChar, SqlDataType.VarChar, SqlDataType.NVarChar)
-                && ValidateColumn(columns[1], "data", SqlDataType.Binary, SqlDataType.VarBinary);
+            ICollection<OutputColumnResult> columns = results[0].Columns;
+            bool hasRequiredColumns = columns.Any(x => ValidateColumn(x, "data", SqlDataType.Binary, SqlDataType.VarBinary))
+                                   && columns.Any(x => ValidateColumn(x, "type", SqlDataType.Char, SqlDataType.NChar, SqlDataType.VarChar, SqlDataType.NVarChar));
+
+            bool isFileNameColumnValid = columnCount < 3 || columns.Any(x => ValidateColumn(x, "filename", SqlDataType.Char, SqlDataType.NChar, SqlDataType.VarChar, SqlDataType.NVarChar));
+
+            return hasRequiredColumns && isFileNameColumnValid;
         }
 
         private static bool ValidateColumn(OutputColumnResult column, string expectedColumnName, params SqlDataType[] expectedColumnTypes)
@@ -90,9 +124,6 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static bool ValidateReturnElements(SqlStatementInfo target, IList<ISqlElement> returnElements, IList<OutputSelectResult> results, ILogger logger)
         {
-            if (target.IsFileApi)
-                return true;
-
             bool result = true;
             for (int i = results.Count; i < returnElements.Count; i++)
             {

@@ -318,9 +318,9 @@ Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly
         }
 
         [Fact]
-        public void Inline_FileApi()
+        public void Inline_FileResult()
         {
-            this.ExecuteTest(@"Tests\Syntax\dbx_tests_syntax_fileapi.sql");
+            this.ExecuteTest(@"Tests\Syntax\dbx_tests_syntax_fileresult.sql");
         }
 
         [Fact]
@@ -346,6 +346,7 @@ Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly
                 sources: new [] 
                 { 
                     @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_fileresult.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_params.sql"
                   , @"Types\dbx_codeanalysis_udt_generic.sql"
                   , @"Types\dbx_codeanalysis_udt_int.sql"

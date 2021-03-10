@@ -145,6 +145,13 @@ namespace Dibix.Sdk.CodeGeneration
             actionDefinition.BodyContract = bodyContract;
             actionDefinition.BodyBinder = (string)action.Property("bindFromBody")?.Value;
             actionDefinition.IsAnonymous = (bool?)action.Property("isAnonymous")?.Value ?? default;
+            actionDefinition.FileResponse = ReadFileResponse(action);
+
+            if (actionDefinition.FileResponse != null)
+            {
+                actionDefinition.Responses[HttpStatusCode.OK] = new ActionResponse(HttpStatusCode.OK, actionDefinition.FileResponse.MediaType, isBinary: true);
+                actionDefinition.Responses[HttpStatusCode.NotFound] = new ActionResponse(HttpStatusCode.NotFound);
+            }
 
             this.CollectActionResponses((JObject)action.Property("responses")?.Value, actionDefinition, filePath);
 
@@ -294,6 +301,27 @@ namespace Dibix.Sdk.CodeGeneration
         {
             string bodyConverterTypeName = (string)((JValue)bodyConverterProperty.Value).Value;
             return new ActionParameterBodySource(bodyConverterTypeName);
+        }
+
+        private static ActionFileResponse ReadFileResponse(JObject action)
+        {
+            JObject fileResponseValue = (JObject)action.Property("fileResponse")?.Value;
+            if (fileResponseValue == null)
+                return null;
+
+            JProperty mediaTypeProperty = fileResponseValue.Property("mediaType");
+            if (mediaTypeProperty == null)
+                throw new InvalidOperationException("Missing required property fileResponse.mediaType");
+
+            JProperty cacheProperty = fileResponseValue.Property("cache");
+
+            string mediaType = (string)mediaTypeProperty.Value;
+            ActionFileResponse fileResponse = new ActionFileResponse(mediaType);
+
+            if (cacheProperty != null)
+                fileResponse.Cache = (bool)cacheProperty.Value;
+
+            return fileResponse;
         }
 
         private ActionDefinition CreateActionDefinition(JObject action, string filePath, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, Group> pathParameters, ICollection<string> bodyParameters)
