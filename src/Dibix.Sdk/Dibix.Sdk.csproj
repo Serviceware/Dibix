@@ -7,8 +7,8 @@
 
   <ItemGroup>
     <EmbeddedResource Include="CodeAnalysis\Suppressions.json" />
-    <EmbeddedResource Include="CodeGeneration\Schema\dibix.contracts.schema.json" PackagePath="content/dibix.contracts.schema.json" />
-    <EmbeddedResource Include="CodeGeneration\Schema\dibix.endpoints.schema.json" PackagePath="content/dibix.endpoints.schema.json" />
+    <EmbeddedResource Include="CodeGeneration\Schema\dibix.contracts.schema.json" Pack="true" PackagePath="content/dibix.contracts.schema.json" />
+    <EmbeddedResource Include="CodeGeneration\Schema\dibix.endpoints.schema.json" Pack="true" PackagePath="content/dibix.endpoints.schema.json" />
     <Compile Include="..\Dibix\Collections\FuncEqualityComparer.cs" Link="Collections\FuncEqualityComparer.cs" />
     <Compile Include="..\Dibix\Diagnostics\Guard.cs" Link="Diagnostics\Guard.cs" />
     <Compile Include="..\Dibix\Environment\SchemaName.cs" Link="Environment\SchemaName.cs" />
