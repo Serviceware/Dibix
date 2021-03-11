@@ -521,7 +521,7 @@ $(_SqlReferencePath)" />
 
   <!-- Run SQL code analysis and compile database access artifacts -->
   <Target Name="SqlCore"
-          BeforeTargets="SqlBuild;Build"
+          BeforeTargets="GenerateSqlTargetFrameworkMoniker"
           DependsOnTargets="SetupSqlBuildInputs;SetupSqlBuildOutputs;ResolveArtifactReferences"
           Inputs="@(SqlCoreInput)"
           Outputs="@(SqlCoreOutput)">
