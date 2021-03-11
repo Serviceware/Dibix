@@ -6,8 +6,10 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     [SqlCodeAnalysisRule(id: 16)]
     public sealed class UnsupportedDataTypeSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
+        // See: https://docs.microsoft.com/en-us/sql/t-sql/data-types/ntext-text-and-image-transact-sql
         private static readonly ICollection<SqlDataTypeOption> ObsoleteDataTypes = new HashSet<SqlDataTypeOption>
         {
+            SqlDataTypeOption.Text,
             SqlDataTypeOption.NText,
             SqlDataTypeOption.Image
         };
