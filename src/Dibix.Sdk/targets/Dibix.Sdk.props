@@ -7,34 +7,8 @@
     <DibixRuntimePath>$(DibixToolsDirectory)Dibix.dll</DibixRuntimePath>
     <DibixRuntimeXplatPath>$(DibixToolsDirectory)..\netstandard2.0\Dibix.dll</DibixRuntimeXplatPath>
 
-    <!-- We have our own CA target, which also executes the native SqlStaticCodeAnalysis -->
-    <RunSqlCodeAnalysisOnce>false</RunSqlCodeAnalysisOnce>
-
-    <IsEmbedded Condition="'$(IsEmbedded)' == ''">$(MSBuildProjectName.EndsWith('.DML'))</IsEmbedded>
-    <ProducePackage Condition="'$(ProducePackage)' == '' and '$(IsEmbedded)' == 'false'">True</ProducePackage>
-    <ProducePackage Condition="'$(ProducePackage)' == '' and '$(IsEmbedded)' == 'true'">False</ProducePackage>
-    <ClientAssemblyTargetPath Condition="'$(ClientOutputName)' != ''">$(TargetDir)$(ClientOutputName).dll</ClientAssemblyTargetPath>
-    <ClientSymbolsTargetPath Condition="'$(ClientOutputName)' != ''">$(TargetDir)$(ClientOutputName).pdb</ClientSymbolsTargetPath>
-    <ExternalAssemblyReferenceDir Condition="'$(ExternalAssemblyReferenceDir)' == ''">$(TargetDir)</ExternalAssemblyReferenceDir>
-
-    <BuildDependsOn Condition="'$(ProducePackage)' == 'false'">
-      BuildOnlySettings;
-      BeforeBuild;
-      PrepareForBuild;
-      PreBuildEvent;
-      ResolveReferences;
-      ResolveArtifactReferences;
-      GenerateSqlTargetFrameworkMoniker;
-      ResolveKeySource;
-      CoreCompile;
-      GenerateSerializationAssemblies;
-      GetTargetPath;
-      PrepareForRun;
-      SqlPrepareForRun;
-      IncrementalClean;
-      PostBuildEvent;
-      AfterBuild;
-    </BuildDependsOn>
+    <IsEmbedded>$(MSBuildProjectName.EndsWith('.DML'))</IsEmbedded>
+    <ExternalAssemblyReferenceDir>$(TargetDir)</ExternalAssemblyReferenceDir>
   </PropertyGroup>
 
   <ItemGroup>

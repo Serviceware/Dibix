@@ -1,5 +1,80 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+  <!-- 
+    To make sure some global properties are overriden, we have to put them here instead of the .props file.
+    This is because NuGet imports the .props file at the beginning of the project and the .targets file at the end.
+  -->
+  <PropertyGroup>
+    <!-- We have our own CA target, which also executes the native SqlStaticCodeAnalysis -->
+    <RunSqlCodeAnalysis>false</RunSqlCodeAnalysis>
+    <RunSqlCodeAnalysisOnce>false</RunSqlCodeAnalysisOnce>
+
+    <ProducePackage Condition="'$(ProducePackage)' == '' and '$(IsEmbedded)' == 'false'">True</ProducePackage>
+    <ProducePackage Condition="'$(ProducePackage)' == '' and '$(IsEmbedded)' == 'true'">False</ProducePackage>
+    <!--
+    <BuildDependsOn>
+      BuildOnlySettings;
+      BeforeBuild;
+      PrepareForBuild;
+      PreBuildEvent;
+      ResolveReferences;
+      ResolveArtifactReferences;
+      GenerateSqlTargetFrameworkMoniker;
+      ResolveKeySource;
+      CoreCompile;
+      GenerateSerializationAssemblies;
+      SqlBuild;
+      GetTargetPath;
+      PrepareForRun;
+      SqlPrepareForRun;
+      IncrementalClean;
+      PostBuildEvent;
+      AfterBuild;
+    </BuildDependsOn>
+    -->
+    <!-- Exclude CoreCompile, because we generate our own assembly -->
+    <BuildDependsOn>
+      BuildOnlySettings;
+      BeforeBuild;
+      PrepareForBuild;
+      PreBuildEvent;
+      ResolveReferences;
+      ResolveArtifactReferences;
+      GenerateSqlTargetFrameworkMoniker;
+      ResolveKeySource;
+      GenerateSerializationAssemblies;
+    </BuildDependsOn>
+
+    <!-- Exclude SqlBuild to increase build performance, if no dacpac should be produced -->
+    <BuildDependsOn Condition="'$(ProducePackage)' == 'true'">$(BuildDependsOn);SqlBuild;</BuildDependsOn>
+
+    <BuildDependsOn>
+      $(BuildDependsOn);
+      GetTargetPath;
+      PrepareForRun;
+      SqlPrepareForRun;
+      IncrementalClean;
+      PostBuildEvent;
+      AfterBuild;
+    </BuildDependsOn>
+  </PropertyGroup>
+
+  <!-- 
+    Unfortunately the BuildDependsOn property cannot be overriden in the NuGet .targets file, because of the order how these imports happen.
+    Currently the order is as follows:
+    - Import SSDT targets
+      - Import C# targets
+        - Import NuGet targets
+          - Import Dibix NuGet targets (we can't override properties here)
+    - SSDT sets properties we want to override
+
+    Therefore these need to be overriden by adding a custom import after the SSDT targets.
+    This can only be done by the caller, not by this NuGet package.
+  -->
+  <PropertyGroup>
+    <DibixBuildDependsOn>$(BuildDependsOn)</DibixBuildDependsOn>
+  </PropertyGroup>
+
   <!-- Utility to dump item including metadata -->
   <UsingTask TaskName="DumpItem" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
     <ParameterGroup>
@@ -55,7 +130,7 @@
       <_SqlTargetInput Include="$(DibixRuntimePath)" />
       <_SqlTargetInput Include="$(DibixRuntimeXplatPath)" />
 
-      
+
       <!-- Target specific inputs -->
       <!-- SqlCodeAnalysis -->
       <SqlCodeAnalysisInput Include="@(_SqlTargetInput)" />
@@ -72,6 +147,10 @@
     </ItemGroup>
   </Target>
   <Target Name="SetupSqlBuildOutputs" BeforeTargets="_SetupSqlBuildOutputs">
+    <PropertyGroup>
+      <_ClientAssemblyTargetPath Condition="'$(ClientOutputName)' != ''">$(TargetDir)$(ClientOutputName).dll</_ClientAssemblyTargetPath>
+      <_ClientSymbolsTargetPath Condition="'$(ClientOutputName)' != ''">$(TargetDir)$(ClientOutputName).pdb</_ClientSymbolsTargetPath>
+    </PropertyGroup>
     <ItemGroup>
       <!--
         Since the SqlCodeAnalysis target does not produce any output, 
@@ -83,7 +162,7 @@
 
       <!-- CompileArtifacts -->
       <CompileArtifactsOutput Include="$(TargetPath)" /> <!-- .dll -->
-      <FileWrites Include="$(ClientAssemblyTargetPath);$(ClientSymbolsTargetPath)" /> <!-- This is important so these files don't get removed in IncrementalClean -->
+      <FileWrites Include="$(_ClientAssemblyTargetPath);$(_ClientSymbolsTargetPath)" /> <!-- This is important so these files don't get removed in IncrementalClean -->
 
       <!-- SqlCore -->
       <SqlCoreOutput Include="$(TargetPath)" /> <!-- .dll -->
@@ -92,7 +171,7 @@
 
 
   <!-- Run our own sql code analysis rules -->
-  <Target Name="SqlCodeAnalysis" 
+  <Target Name="SqlCodeAnalysis"
           BeforeTargets="CompileArtifacts"
           DependsOnTargets="SetupSqlBuildInputs;SetupSqlBuildOutputs;ResolveArtifactReferences"
           Inputs="@(SqlCodeAnalysisInput)"
@@ -301,7 +380,7 @@ $(_SqlReferencePath)" />
     </ItemGroup>
 
     <WriteCodeFragment Condition="'$(CompileArtifactsNetStandard)' == ''"
-                       AssemblyAttributes="@(ServerAssemblyAttribute)" 
+                       AssemblyAttributes="@(ServerAssemblyAttribute)"
                        Language="C#"
                        OutputFile="$(_ServerAssemblyInfoFile)" />
 
@@ -442,7 +521,7 @@ $(_SqlReferencePath)" />
 
   <!-- Run SQL code analysis and compile database access artifacts -->
   <Target Name="SqlCore"
-          BeforeTargets="CoreCompile"
+          BeforeTargets="SqlBuild;Build"
           DependsOnTargets="SetupSqlBuildInputs;SetupSqlBuildOutputs;ResolveArtifactReferences"
           Inputs="@(SqlCoreInput)"
           Outputs="@(SqlCoreOutput)">
@@ -745,7 +824,7 @@ $(_SqlReferencePath)" />
   <Target Name="SignDacFile"
           AfterTargets="SqlBuild"
           DependsOnTargets="SetupSqlBuildInputs;SetupSqlBuildOutputs">
-    
+
     <!-- Prepare & write input file then exec CLI -->
     <PropertyGroup>
       <_SignDacInputFile>$(IntermediateOutputPath)sign.input</_SignDacInputFile>
