@@ -9,6 +9,22 @@
       "type": "string",
       "pattern": "^\\w+\\/[-+.\\w*]+$"
     },
+    "Body": {
+      "type": "object",
+      "properties": {
+        "contract": {
+          "$ref": "#/definitions/NameIdentifier"
+        },
+        "mediaType": {
+          "$ref": "#/definitions/MediaType"
+        },
+        "binder": {
+          "$ref": "#/definitions/NameIdentifier"
+        }
+      },
+      "minProperties": 1,
+      "additionalProperties": false
+    },
     "ConstantSource": {
       "anyOf": [
         {
@@ -176,7 +192,14 @@
           "type": "string"
         },
         "body": {
-          "$ref": "#/definitions/NameIdentifier"
+          "anyOf": [
+            {
+              "$ref": "#/definitions/NameIdentifier"
+            },
+            {
+              "$ref": "#/definitions/Body"
+            }
+          ]
         },
         "params": {
           "type": "object",
@@ -197,9 +220,6 @@
           },
           "minProperties": 1,
           "additionalProperties": false
-        },
-        "bindFromBody": {
-          "$ref": "#/definitions/NameIdentifier"
         },
         "isAnonymous": {
           "type": "boolean"

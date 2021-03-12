@@ -1,6 +1,6 @@
 ﻿namespace Dibix.Sdk.CodeGeneration
 {
-    public enum PrimitiveDataType
+    public enum PrimitiveType
     {
         None,
         Boolean,
@@ -12,6 +12,7 @@
         Double,
         Decimal,
         Binary,
+        Stream,
         DateTime,
         DateTimeOffset,
         String,

@@ -65,7 +65,7 @@ namespace Dibix.Http
 
                 ResolveParameters compiled = Compile(compilationContext, out string source);
                 HttpParameterResolutionMethod method = new HttpParameterResolutionMethod(source, compiled);
-                CollectApiParameters(action, method, @params, action.BodyContract);
+                CollectApiParameters(method, @params, action.BodyContract);
                 return method;
             }
             catch (Exception exception)
@@ -581,7 +581,7 @@ Either create a mapping or make sure a property of the same name exists in the s
             return compiled;
         }
 
-        private static void CollectApiParameters(HttpActionDefinition action, HttpParameterResolutionMethod method, ICollection<HttpParameterInfo> parameters, Type bodyContract)
+        private static void CollectApiParameters(HttpParameterResolutionMethod method, ICollection<HttpParameterInfo> parameters, Type bodyContract)
         {
             if (bodyContract != null)
             {

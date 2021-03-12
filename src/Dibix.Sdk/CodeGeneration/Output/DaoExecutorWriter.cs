@@ -599,23 +599,23 @@ namespace Dibix.Sdk.CodeGeneration
                 default: throw new ArgumentOutOfRangeException(nameof(typeReference), typeReference, null);
             }
         }
-        private static string GetSetParameterMethodName(PrimitiveDataType dataType)
+        private static string GetSetParameterMethodName(PrimitiveType dataType)
         {
             switch (dataType)
             {
-                case PrimitiveDataType.Boolean: return "SetBoolean";
-                case PrimitiveDataType.Byte: return "SetByte";
-                case PrimitiveDataType.Int16: return "SetInt16";
-                case PrimitiveDataType.Int32: return "SetInt32";
-                case PrimitiveDataType.Int64: return "SetInt64";
-                case PrimitiveDataType.Float: return "SetSingle";
-                case PrimitiveDataType.Double: return "SetDouble";
-                case PrimitiveDataType.Decimal: return "SetDecimal";
-                case PrimitiveDataType.Binary: return "SetBytes";
-                case PrimitiveDataType.DateTime: return "SetDateTime";
-                case PrimitiveDataType.String: return "SetString";
-                case PrimitiveDataType.UUID: return "SetGuid";
-                case PrimitiveDataType.Xml: return "SetXml";
+                case PrimitiveType.Boolean: return "SetBoolean";
+                case PrimitiveType.Byte: return "SetByte";
+                case PrimitiveType.Int16: return "SetInt16";
+                case PrimitiveType.Int32: return "SetInt32";
+                case PrimitiveType.Int64: return "SetInt64";
+                case PrimitiveType.Float: return "SetSingle";
+                case PrimitiveType.Double: return "SetDouble";
+                case PrimitiveType.Decimal: return "SetDecimal";
+                case PrimitiveType.Binary: return "SetBytes";
+                case PrimitiveType.DateTime: return "SetDateTime";
+                case PrimitiveType.String: return "SetString";
+                case PrimitiveType.UUID: return "SetGuid";
+                case PrimitiveType.Xml: return "SetXml";
                 default: throw new ArgumentOutOfRangeException(nameof(dataType), dataType, null);
             }
         }

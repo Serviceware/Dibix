@@ -10,8 +10,7 @@ namespace Dibix.Sdk.CodeGeneration
         public ActionMethod Method { get; set; }
         public string Description { get; set; }
         public string ChildRoute { get; set; }
-        public TypeReference BodyContract { get; set; }
-        public string BodyBinder { get; set; }
+        public ActionRequestBody RequestBody { get; set; }
         public bool IsAnonymous { get; set; }
         public ActionFileResponse FileResponse { get; set; }
         public IList<ActionParameter> Parameters { get; }

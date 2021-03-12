@@ -16,7 +16,11 @@ namespace Dibix.Sdk.CodeGeneration
         public TypeResolverFacade(AssemblyResolver assemblyResolver, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             this._logger = logger;
-            this._typeResolvers = new Collection<TypeResolver> { new ReflectionTypeResolver(assemblyResolver, schemaRegistry, logger) };
+            this._typeResolvers = new Collection<TypeResolver>
+            {
+                new PrimitiveTypeResolver()
+              , new ReflectionTypeResolver(assemblyResolver, schemaRegistry, logger)
+            };
         }
         #endregion
 

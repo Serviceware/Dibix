@@ -2,9 +2,9 @@
 {
     public sealed class PrimitiveTypeReference : TypeReference
     {
-        public PrimitiveDataType Type { get; }
+        public PrimitiveType Type { get; }
 
-        public PrimitiveTypeReference(PrimitiveDataType type, bool isNullable, bool isEnumerable) : base(isNullable, isEnumerable)
+        public PrimitiveTypeReference(PrimitiveType type, bool isNullable, bool isEnumerable) : base(isNullable, isEnumerable)
         {
             this.Type = type;
         }

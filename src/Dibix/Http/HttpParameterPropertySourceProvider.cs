@@ -7,12 +7,12 @@ namespace Dibix.Http
     {
         public void Resolve(IHttpParameterResolutionContext context)
         {
-            Type instanceType = this.GetInstanceType(context.Action);
+            Type instanceType = this.GetInstanceType(context);
             Expression instanceValue = this.GetInstanceValue(instanceType, context.RequestParameter, context.ArgumentsParameter, context.DependencyResolverParameter);
             context.ResolveUsingInstanceProperty(instanceType, instanceValue);
         }
 
-        protected abstract Type GetInstanceType(HttpActionDefinition action);
+        protected abstract Type GetInstanceType(IHttpParameterResolutionContext context);
 
         protected abstract Expression GetInstanceValue(Type instanceType, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter);
     }

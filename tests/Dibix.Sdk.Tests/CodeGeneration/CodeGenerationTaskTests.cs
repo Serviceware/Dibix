@@ -347,6 +347,7 @@ Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly
                 { 
                     @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_fileresult.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_fileupload.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_params.sql"
                   , @"Types\dbx_codeanalysis_udt_generic.sql"
                   , @"Types\dbx_codeanalysis_udt_int.sql"

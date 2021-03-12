@@ -83,18 +83,21 @@ namespace Dibix.Sdk.CodeGeneration
                     if (!String.IsNullOrEmpty(action.ChildRoute))
                         writer.WriteLine($"y.ChildRoute = \"{action.ChildRoute}\";");
 
-                    if (action.BodyContract != null)
-                    {
-                        if (!(action.BodyContract is SchemaTypeReference bodySchemaReference))
-                            throw new InvalidOperationException($"Unexpected body type: {action.BodyContract?.GetType()}");
+                    // TODO: Involves a breaking change
+                    //if (action.RequestBody != null)
+                    //{
+                    //    string @null = ComputeConstantLiteral(null);
+                    //    string binder = action.RequestBody.Binder != null ? $"Type.GetType(\"{action.RequestBody.Binder}\", true);" : @null;
+                    //    writer.WriteLine($"y.Body = new HttpRequestBody(contract: typeof({context.ResolveTypeName(action.RequestBody.Contract)}), binder: {binder});");
+                    //}
 
-                        writer.WriteLine($"y.BodyContract = typeof({bodySchemaReference.Key});");
-                    }
+                    if (action.RequestBody?.Contract != null) 
+                        writer.WriteLine($"y.BodyContract = typeof({context.ResolveTypeName(action.RequestBody.Contract)});");
 
-                    if (!String.IsNullOrEmpty(action.BodyBinder))
+                    if (!String.IsNullOrEmpty(action.RequestBody?.Binder))
                     {
                         context.AddUsing(typeof(Type).Namespace);
-                        writer.WriteLine($"y.BodyBinder = Type.GetType(\"{action.BodyBinder}\", true);");
+                        writer.WriteLine($"y.BodyBinder = Type.GetType(\"{action.RequestBody.Binder}\", true);");
                     }
 
                     foreach (ActionParameter parameter in action.Parameters.Where(x => x.Source != null))
@@ -184,6 +187,7 @@ namespace Dibix.Sdk.CodeGeneration
             switch (value)
             {
                 case bool boolValue: return boolValue.ToString().ToLowerInvariant();
+                case null: return "null";
                 default: return value.ToString();
             }
         }

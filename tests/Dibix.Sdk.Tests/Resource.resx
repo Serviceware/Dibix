@@ -278,6 +278,9 @@ namespace Dibix.Sdk.Tests
             // FileResult
             private const string FileResultCommandText = "[dbo].[dbx_tests_syntax_fileresult]";
 
+            // FileUpload
+            private const string FileUploadCommandText = "[dbo].[dbx_tests_syntax_fileupload]";
+
             // SingleConrecteResultWithParams
             private const string SingleConrecteResultWithParamsCommandText = "[dbo].[dbx_tests_syntax_singleconcreteresult_params]";
 
@@ -312,6 +315,20 @@ namespace Dibix.Sdk.Tests
                                                          })
                                                          .Build();
                     return accessor.QuerySingleOrDefault&lt;Dibix.FileEntity&gt;(FileResultCommandText, System.Data.CommandType.StoredProcedure, @params);
+                }
+            }
+
+            public static void FileUpload(this IDatabaseAccessorFactory databaseAccessorFactory, System.IO.Stream data)
+            {
+                using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
+                {
+                    IParametersVisitor @params = accessor.Parameters()
+                                                         .SetFromTemplate(new
+                                                         {
+                                                             data
+                                                         })
+                                                         .Build();
+                    accessor.Execute(FileUploadCommandText, System.Data.CommandType.StoredProcedure, @params);
                 }
             }
 
@@ -431,6 +448,12 @@ namespace Dibix.Sdk.Tests
                         y.Method = HttpApiMethod.Get;
                         y.ChildRoute = "{id}";
                         y.FileResponse = new HttpFileResponseDefinition(cache: false);
+                    });
+                    x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.FileUpload)), y =&gt;
+                    {
+                        y.Method = HttpApiMethod.Put;
+                        y.BodyContract = typeof(System.IO.Stream);
+                        y.ResolveParameterFromSource("data", "BODY", "$RAW");
                     });
                     x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), y =&gt;
                     {
@@ -584,6 +607,21 @@ paths:
         '404':
           description: NotFound
   /Tests/GenericEndpoint:
+    put:
+      tags:
+        - GenericEndpoint
+      summary: FileUpload
+      operationId: FileUpload
+      requestBody:
+        content:
+          image/png:
+            schema:
+              type: string
+              format: binary
+        required: true
+      responses:
+        '204':
+          description: NoContent
     post:
       tags:
         - GenericEndpoint

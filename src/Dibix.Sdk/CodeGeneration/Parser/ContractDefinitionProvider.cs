@@ -126,7 +126,7 @@ If this is not a project that has multiple areas, please make sure to define the
                             isOptional = (bool?)propertyInfo.Property("isOptional")?.Value ?? default;
                             isDiscriminator = (bool?)propertyInfo.Property("isDiscriminator")?.Value ?? default;
                             Enum.TryParse((string)propertyInfo.Property("serialize")?.Value, true, out serializationBehavior);
-                            if (String.Equals(typeName, nameof(PrimitiveDataType.DateTime), StringComparison.OrdinalIgnoreCase))
+                            if (String.Equals(typeName, nameof(PrimitiveType.DateTime), StringComparison.OrdinalIgnoreCase))
                                 Enum.TryParse((string)propertyInfo.Property("kind")?.Value, true, out dateTimeKind);
 
                             obfuscated = (bool?)propertyInfo.Property("obfuscated")?.Value ?? default;
@@ -230,7 +230,7 @@ If this is not a project that has multiple areas, please make sure to define the
                 return new SchemaTypeReference($"{rootNamespace}.{typeName}", filePath, location.LineNumber, column, isNullable, isEnumerable);
             }
 
-            PrimitiveDataType dataType = (PrimitiveDataType)Enum.Parse(typeof(PrimitiveDataType), typeName, true);
+            PrimitiveType dataType = (PrimitiveType)Enum.Parse(typeof(PrimitiveType), typeName, ignoreCase: true /* JSON is camelCase while C# is PascalCase */);
             return new PrimitiveTypeReference(dataType, isNullable, isEnumerable);
         }
         #endregion

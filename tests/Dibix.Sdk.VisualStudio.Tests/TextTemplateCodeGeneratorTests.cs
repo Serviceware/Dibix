@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+﻿using System.Text.RegularExpressions;
 using Dibix.Sdk.CodeGeneration;
 using Dibix.Tests;
 using Xunit;
@@ -54,10 +54,10 @@ namespace Dibix.Sdk.VisualStudio.Tests
         private static void Assert(string generated) => Assert(TestUtility.TestName, generated);
         private static void Assert(string expectedTextKey, string generated)
         {
+            generated = Regex.Replace(generated
+                                    , @"\[GeneratedCodeAttribute\(""Dibix\.Sdk"", ""[\d]+\.[\d]+\.[\d]+\.[\d]+""\)\]"
+                                    , "[GeneratedCodeAttribute(\"Dibix.Sdk\", \"1.0.0.0\")]");
             string expectedText = TestUtility.GetExpectedText(expectedTextKey);
-            string fileVersion = FileVersionInfo.GetVersionInfo(typeof(DaoCodeGenerator).Assembly.Location).FileVersion;
-            expectedText = expectedText.Replace("[GeneratedCodeAttribute(\"Dibix.Sdk\", \"1.0.0.0\")]"
-                                             , $"[GeneratedCodeAttribute(\"Dibix.Sdk\", \"{fileVersion}\")]");
             string actualText = generated;
             TestUtility.AssertEqualWithDiffTool(expectedText, actualText, "cs");
         }

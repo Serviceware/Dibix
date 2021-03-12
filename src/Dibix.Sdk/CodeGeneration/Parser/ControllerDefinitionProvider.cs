@@ -81,7 +81,7 @@ namespace Dibix.Sdk.CodeGeneration
                         break;
 
                     case JTokenType.String:
-                        ReadControllerImport(controller, (string)((JValue)action).Value);
+                        ReadControllerImport(controller, (string)action);
                         break;
 
                     default:
@@ -109,8 +109,8 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             // Collect body parameters
-            TypeReference bodyContract = this.ReadBodyContract(action, filePath);
-            ICollection<string> bodyParameters = GetBodyProperties(bodyContract, this._schemaRegistry);
+            ActionRequestBody requestBody = this.ReadBody(action, filePath);
+            ICollection<string> bodyParameters = GetBodyProperties(requestBody?.Contract, this._schemaRegistry);
 
             // Resolve action target, parameters and create action definition
             ActionDefinition actionDefinition = this.CreateActionDefinition(action, filePath, explicitParameters, pathParameters, bodyParameters);
@@ -142,14 +142,13 @@ namespace Dibix.Sdk.CodeGeneration
             actionDefinition.Method = method;
             actionDefinition.Description = (string)action.Property("description")?.Value;
             actionDefinition.ChildRoute = childRoute;
-            actionDefinition.BodyContract = bodyContract;
-            actionDefinition.BodyBinder = (string)action.Property("bindFromBody")?.Value;
+            actionDefinition.RequestBody = requestBody;
             actionDefinition.IsAnonymous = (bool?)action.Property("isAnonymous")?.Value ?? default;
             actionDefinition.FileResponse = ReadFileResponse(action);
 
             if (actionDefinition.FileResponse != null)
             {
-                actionDefinition.Responses[HttpStatusCode.OK] = new ActionResponse(HttpStatusCode.OK, actionDefinition.FileResponse.MediaType, isBinary: true);
+                actionDefinition.Responses[HttpStatusCode.OK] = new ActionResponse(HttpStatusCode.OK, actionDefinition.FileResponse.MediaType, CreateStreamTypeReference());
                 actionDefinition.Responses[HttpStatusCode.NotFound] = new ActionResponse(HttpStatusCode.NotFound);
             }
 
@@ -173,14 +172,48 @@ namespace Dibix.Sdk.CodeGeneration
             base.Logger.LogError(null, $"Duplicate action registration: {sb}", filePath, lineInfo.LineNumber, lineInfo.LinePosition);
         }
 
-        private TypeReference ReadBodyContract(JObject action, string filePath)
+        private ActionRequestBody ReadBody(JObject action, string filePath)
         {
-            JValue bodyContractValue = (JValue)action.Property("body")?.Value;
-            if (bodyContractValue == null) 
+            JToken bodyValue = action.Property("body")?.Value;
+            if (bodyValue == null) 
                 return null;
 
-            TypeReference bodyContract = this.ResolveType(bodyContractValue, filePath);
-            return bodyContract;
+            switch (bodyValue.Type)
+            {
+                case JTokenType.Object:
+                    return this.ReadBodyValue((JObject)bodyValue, filePath);
+
+                case JTokenType.String:
+                    return this.ReadBodyValue((JValue)bodyValue, filePath);
+
+                default:
+                    throw new ArgumentOutOfRangeException(bodyValue.Path, bodyValue.Type, null);
+            }
+        }
+
+        private ActionRequestBody ReadBodyValue(JObject value, string filePath)
+        {
+            JValue contractName = (JValue)value.Property("contract")?.Value;
+            string mediaType = (string)value.Property("mediaType")?.Value;
+            string binder = (string)value.Property("binder")?.Value;
+
+            if (mediaType != null && mediaType != HttpMediaType.Default)
+                return new ActionRequestBody(mediaType, CreateStreamTypeReference());
+
+            if (contractName == null)
+            {
+                IJsonLineInfo valueLocation = value;
+                base.Logger.LogError(null, "Body is missing 'contract' property", filePath, valueLocation.LineNumber, valueLocation.LinePosition);
+                return null;
+            }
+
+            TypeReference contract = this.ResolveType(contractName, filePath);
+            return new ActionRequestBody(mediaType, contract, binder);
+        }
+        private ActionRequestBody ReadBodyValue(JValue value, string filePath)
+        {
+            TypeReference contract = this.ResolveType(value, filePath);
+            return new ActionRequestBody(contract);
         }
 
         private static ICollection<string> GetBodyProperties(TypeReference bodyContract, ISchemaRegistry schemaRegistry)
@@ -452,7 +485,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
 
             foreach (string pathParameter in pathParameters.Keys)
             {
-                TypeReference typeReference = new PrimitiveTypeReference(PrimitiveDataType.String, isNullable: false, isEnumerable: false);
+                TypeReference typeReference = new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: false);
                 ActionParameter parameter = new ActionParameter(pathParameter, pathParameter, typeReference, ActionParameterLocation.Path, hasDefaultValue: false, defaultValue: null, source: null);
                 actionDefinition.Parameters.Add(parameter);
             }
@@ -757,6 +790,8 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
                     return false;
             }
         }
+
+        private static TypeReference CreateStreamTypeReference() => new PrimitiveTypeReference(PrimitiveType.Stream, isNullable: false, isEnumerable: false);
         #endregion
 
         #region Nested Types

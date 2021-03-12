@@ -91,11 +91,11 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private bool TryParseParameterDefaultValue(Literal literal, PrimitiveDataType primitiveType, out object defaultValue)
+        private bool TryParseParameterDefaultValue(Literal literal, PrimitiveType primitiveType, out object defaultValue)
         {
             switch (literal.LiteralType)
             {
-                case LiteralType.Integer when primitiveType == PrimitiveDataType.Boolean:
+                case LiteralType.Integer when primitiveType == PrimitiveType.Boolean:
                     defaultValue = literal.Value == "1";
                     return true;
 

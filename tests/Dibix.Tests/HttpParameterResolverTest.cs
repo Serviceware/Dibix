@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -402,6 +403,44 @@ ENCRYPTED(Item2)               ", items.Dump());
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
         private static void Compile_BodySource_WithConverter_Target(IDatabaseAccessorFactory databaseAccessorFactory, string encryptedpassword, string anotherencryptedpassword, HttpBodyItemSet items) { }
+
+        [Fact]
+        public void Compile_BodySource_Raw()
+        {
+            IHttpParameterResolutionMethod result = Compile(x =>
+            {
+                x.BodyContract = typeof(Stream);
+                x.ResolveParameterFromSource("data", "BODY", "$RAW");
+            });
+            TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.HttpParameterResolver+ResolveParameters>(
+    System.Net.Http.HttpRequestMessage $request,
+    System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
+    Dibix.Http.IParameterDependencyResolver $dependencyResolver) {
+    .Block(Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource) {
+        $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
+        $arguments.Item[""databaseAccessorFactory""] = (System.Object)$databaseaccessorfactorySource;
+        $arguments.Item[""data""] = (System.Object).Call (.Call (.Call ($request.Content).ReadAsStreamAsync()).GetAwaiter()).GetResult()
+    }
+}", result.Source);
+            Assert.False(result.Parameters.Any());
+
+            byte[] data = { 1, 2 };
+            HttpRequestMessage request = new HttpRequestMessage();
+            request.Content = new ByteArrayContent(data);
+            IDictionary<string, object> arguments = new Dictionary<string, object>();
+            Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
+            Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
+
+            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
+
+            result.PrepareParameters(request, arguments, dependencyResolver.Object);
+
+            Assert.Equal(2, arguments.Count);
+            Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
+            MemoryStream stream = Assert.IsType<MemoryStream>(arguments["data"]);
+            Assert.Equal(data.AsEnumerable(), stream.ToArray().AsEnumerable());
+        }
+        private static void Compile_BodySource_Raw_Target(IDatabaseAccessorFactory databaseAccessorFactory, Stream data) { }
         
         [Fact]
         public void Compile_BodyConverter()

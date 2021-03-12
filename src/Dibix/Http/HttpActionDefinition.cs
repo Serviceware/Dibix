@@ -12,6 +12,7 @@ namespace Dibix.Http
         public string ChildRoute { get; set; }
         public Type BodyContract { get; set; }
         public Type BodyBinder { get; set; }
+        public HttpRequestBody Body { get; set; }
         public bool IsAnonymous { get; set; }
         public HttpFileResponseDefinition FileResponse { get; set; }
         public string Description { get; set; }

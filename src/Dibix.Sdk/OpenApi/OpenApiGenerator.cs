@@ -6,27 +6,29 @@ using Dibix.Http;
 using Dibix.Sdk.CodeGeneration;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
+using PrimitiveType = Dibix.Sdk.CodeGeneration.PrimitiveType;
 
 namespace Dibix.Sdk.OpenApi
 {
     internal static class OpenApiGenerator
     {
         private static readonly bool UseRelativeNamespaces = true;
-        private static readonly IDictionary<PrimitiveDataType, Func<OpenApiSchema>> PrimitiveTypeMap = new Dictionary<PrimitiveDataType, Func<OpenApiSchema>>
+        private static readonly IDictionary<PrimitiveType, Func<OpenApiSchema>> PrimitiveTypeMap = new Dictionary<PrimitiveType, Func<OpenApiSchema>>
         {
-            [PrimitiveDataType.Boolean]        = () => new OpenApiSchema { Type = "boolean"                       }
-          , [PrimitiveDataType.Byte]           = () => new OpenApiSchema { Type = "integer", Format = "int32"     }
-          , [PrimitiveDataType.Int16]          = () => new OpenApiSchema { Type = "integer", Format = "int32"     }
-          , [PrimitiveDataType.Int32]          = () => new OpenApiSchema { Type = "integer", Format = "int32"     }
-          , [PrimitiveDataType.Int64]          = () => new OpenApiSchema { Type = "integer", Format = "int64"     }
-          , [PrimitiveDataType.Float]          = () => new OpenApiSchema { Type = "number",  Format = "float"     }
-          , [PrimitiveDataType.Double]         = () => new OpenApiSchema { Type = "number",  Format = "double"    }
-          , [PrimitiveDataType.Decimal]        = () => new OpenApiSchema { Type = "number",  Format = "double"    }
-          , [PrimitiveDataType.Binary]         = () => new OpenApiSchema { Type = "string",  Format = "byte"      }
-          , [PrimitiveDataType.DateTime]       = () => new OpenApiSchema { Type = "string",  Format = "date-time" }
-          , [PrimitiveDataType.DateTimeOffset] = () => new OpenApiSchema { Type = "string",  Format = "date-time" }
-          , [PrimitiveDataType.String]         = () => new OpenApiSchema { Type = "string"                        }
-          , [PrimitiveDataType.UUID]           = () => new OpenApiSchema { Type = "string",  Format = "uuid"      }
+            [PrimitiveType.Boolean]        = () => new OpenApiSchema { Type = "boolean"                       }
+          , [PrimitiveType.Byte]           = () => new OpenApiSchema { Type = "integer", Format = "int32"     }
+          , [PrimitiveType.Int16]          = () => new OpenApiSchema { Type = "integer", Format = "int32"     }
+          , [PrimitiveType.Int32]          = () => new OpenApiSchema { Type = "integer", Format = "int32"     }
+          , [PrimitiveType.Int64]          = () => new OpenApiSchema { Type = "integer", Format = "int64"     }
+          , [PrimitiveType.Float]          = () => new OpenApiSchema { Type = "number",  Format = "float"     }
+          , [PrimitiveType.Double]         = () => new OpenApiSchema { Type = "number",  Format = "double"    }
+          , [PrimitiveType.Decimal]        = () => new OpenApiSchema { Type = "number",  Format = "double"    }
+          , [PrimitiveType.Binary]         = () => new OpenApiSchema { Type = "string",  Format = "byte"      }
+          , [PrimitiveType.Stream]         = () => new OpenApiSchema { Type = "string",  Format = "binary"    }
+          , [PrimitiveType.DateTime]       = () => new OpenApiSchema { Type = "string",  Format = "date-time" }
+          , [PrimitiveType.DateTimeOffset] = () => new OpenApiSchema { Type = "string",  Format = "date-time" }
+          , [PrimitiveType.String]         = () => new OpenApiSchema { Type = "string"                        }
+          , [PrimitiveType.UUID]           = () => new OpenApiSchema { Type = "string",  Format = "uuid"      }
         };
         private static readonly OpenApiSchema NullSchema = new OpenApiSchema { Type = "null" };
 
@@ -162,7 +164,7 @@ namespace Dibix.Sdk.OpenApi
 
         private static void AppendHeaderParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
-            TypeReference parameterType = new PrimitiveTypeReference(PrimitiveDataType.String, isNullable: true, isEnumerable: false);
+            TypeReference parameterType = new PrimitiveTypeReference(PrimitiveType.String, isNullable: true, isEnumerable: false);
             AppendParameter(document, operation, parameter, parameterType: parameterType, isEnumerable: false, ParameterLocation.Header, isRequired: false, rootNamespace, schemaRegistry);
         }
 
@@ -214,11 +216,11 @@ namespace Dibix.Sdk.OpenApi
 
         private static void AppendBody(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
-            if (action.BodyContract == null)
+            if (action.RequestBody == null)
                 return;
 
             OpenApiRequestBody body = new OpenApiRequestBody { Required = true };
-            AppendContent(document, body.Content, action.BodyContract, rootNamespace, schemaRegistry);
+            AppendContent(document, body.Content, action.RequestBody.MediaType, action.RequestBody.Contract, rootNamespace, schemaRegistry);
             operation.RequestBody = body;
         }
 
@@ -228,7 +230,8 @@ namespace Dibix.Sdk.OpenApi
             {
                 OpenApiResponse apiResponse = new OpenApiResponse();
 
-                AppendContent(document, apiResponse.Content, actionResponse.MediaType, actionResponse.IsBinary, actionResponse.ResultType, rootNamespace, schemaRegistry);
+                if (actionResponse.ResultType != null)
+                    AppendContent(document, apiResponse.Content, actionResponse.MediaType, actionResponse.ResultType, rootNamespace, schemaRegistry);
 
                 StringBuilder sb = new StringBuilder(actionResponse.Description);
                 if (actionResponse.Errors.Any())
@@ -245,7 +248,7 @@ namespace Dibix.Sdk.OpenApi
                         apiResponse.Headers.Add(HttpErrorResponseParser.ClientErrorCodeHeaderName, new OpenApiHeader
                         {
                             Description = "Additional error code to handle the error on the client",
-                            Schema = PrimitiveTypeMap[PrimitiveDataType.Int16]()
+                            Schema = PrimitiveTypeMap[PrimitiveType.Int16]()
                         });
                     }
 
@@ -254,10 +257,10 @@ namespace Dibix.Sdk.OpenApi
                         apiResponse.Headers.Add(HttpErrorResponseParser.ClientErrorDescriptionHeaderName, new OpenApiHeader
                         {
                             Description = "A mesage describing the cause of the error",
-                            Schema = PrimitiveTypeMap[PrimitiveDataType.String]()
+                            Schema = PrimitiveTypeMap[PrimitiveType.String]()
                         });
                         const string mimeType = "text/plain";
-                        apiResponse.Content.Add(mimeType, new OpenApiMediaType { Schema = PrimitiveTypeMap[PrimitiveDataType.String]() });
+                        apiResponse.Content.Add(mimeType, new OpenApiMediaType { Schema = PrimitiveTypeMap[PrimitiveType.String]() });
                     }
                 }
 
@@ -266,24 +269,11 @@ namespace Dibix.Sdk.OpenApi
             }
         }
 
-        private static void AppendContent(OpenApiDocument document, IDictionary<string, OpenApiMediaType> target, TypeReference typeReference, string rootNamespace, ISchemaRegistry schemaRegistry)
+        private static void AppendContent(OpenApiDocument document, IDictionary<string, OpenApiMediaType> target, string mediaType, TypeReference typeReference, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
-            AppendContent(document, target, HttpMediaType.Default, isBinary: false, typeReference, rootNamespace, schemaRegistry);
+            OpenApiMediaType content = new OpenApiMediaType { Schema = CreateSchema(document, typeReference, rootNamespace, schemaRegistry) };
+            target.Add(mediaType, content);
         }
-        private static void AppendContent(OpenApiDocument document, IDictionary<string, OpenApiMediaType> target, string mediaType, bool isBinary, TypeReference typeReference, string rootNamespace, ISchemaRegistry schemaRegistry)
-        {
-            if (!isBinary && typeReference == null)
-                return;
-
-            OpenApiSchema schema = isBinary ? CreateFileSchema() : CreateSchema(document, typeReference, rootNamespace, schemaRegistry);
-            target.Add(mediaType, new OpenApiMediaType { Schema = schema });
-        }
-
-        private static OpenApiSchema CreateFileSchema() => new OpenApiSchema
-        {
-            Type = "string",
-            Format = "binary"
-        };
 
         private static OpenApiSchema CreateSchema(OpenApiDocument document, TypeReference typeReference, string rootNamespace, ISchemaRegistry schemaRegistry) => CreateSchema(document, typeReference, typeReference.IsEnumerable, false, null, rootNamespace, schemaRegistry);
         private static OpenApiSchema CreateSchema(OpenApiDocument document, TypeReference typeReference, bool isEnumerable, bool hasDefaultValue, object defaultValue, string rootNamespace, ISchemaRegistry schemaRegistry)
@@ -422,7 +412,7 @@ namespace Dibix.Sdk.OpenApi
 
         private static void AppendEnumSchema(OpenApiDocument document, string schemaName, EnumSchema enumContract)
         {
-            OpenApiSchema schema = PrimitiveTypeMap[PrimitiveDataType.Int32]();
+            OpenApiSchema schema = PrimitiveTypeMap[PrimitiveType.Int32]();
             OpenApiArray enumNames = new OpenApiArray();
 
             schema.Description = String.Join("<br/>", enumContract.Members.Select(x => $"{x.ActualValue} = {x.Name}"));

@@ -35,6 +35,16 @@
       }
     },
     {
+      "method": "PUT",
+      "target": "FileUpload",
+      "body": {
+        "mediaType": "image/png"
+      },
+      "params": {
+        "data": "BODY.$RAW"
+      } 
+    },
+    {
       "method": "POST",
       "target": "EmptyWithParams",
       "body": "InputContract",

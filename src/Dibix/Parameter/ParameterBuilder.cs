@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -26,6 +27,7 @@ namespace Dibix
           , [typeof(string)]          = DbType.String
           , [typeof(char)]            = DbType.StringFixedLength
           , [typeof(byte[])]          = DbType.Binary
+          , [typeof(Stream)]          = DbType.Binary
           , [typeof(Guid)]            = DbType.Guid
           , [typeof(DateTime)]        = DbType.DateTime
           , [typeof(DateTimeOffset)]  = DbType.DateTimeOffset
@@ -166,6 +168,9 @@ namespace Dibix
 
             if (typeof(StructuredType).IsAssignableFrom(clrType))
                 return DbType.Object;
+
+            if (typeof(Stream).IsAssignableFrom(clrType))
+                clrType = typeof(Stream);
 
             if (TypeMap.TryGetValue(clrType, out DbType dbType))
                 return dbType;

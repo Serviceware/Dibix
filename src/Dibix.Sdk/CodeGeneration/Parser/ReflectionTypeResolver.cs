@@ -9,21 +9,21 @@ namespace Dibix.Sdk.CodeGeneration
     internal sealed class ReflectionTypeResolver : TypeResolver
     {
         #region Fields
-        private static readonly IDictionary<Type, PrimitiveDataType> PrimitiveTypeMap = new Dictionary<Type, PrimitiveDataType>
+        private static readonly IDictionary<Type, PrimitiveType> PrimitiveTypeMap = new Dictionary<Type, PrimitiveType>
         {
-            [typeof(bool)]           = PrimitiveDataType.Boolean
-          , [typeof(byte)]           = PrimitiveDataType.Byte
-          , [typeof(short)]          = PrimitiveDataType.Int16
-          , [typeof(int)]            = PrimitiveDataType.Int32
-          , [typeof(long)]           = PrimitiveDataType.Int64
-          , [typeof(float)]          = PrimitiveDataType.Float
-          , [typeof(double)]         = PrimitiveDataType.Double
-          , [typeof(decimal)]        = PrimitiveDataType.Decimal
-          , [typeof(byte[])]         = PrimitiveDataType.Binary
-          , [typeof(DateTime)]       = PrimitiveDataType.DateTime
-          , [typeof(DateTimeOffset)] = PrimitiveDataType.DateTimeOffset
-          , [typeof(string)]         = PrimitiveDataType.String
-          , [typeof(Guid)]           = PrimitiveDataType.UUID
+            [typeof(bool)]           = PrimitiveType.Boolean
+          , [typeof(byte)]           = PrimitiveType.Byte
+          , [typeof(short)]          = PrimitiveType.Int16
+          , [typeof(int)]            = PrimitiveType.Int32
+          , [typeof(long)]           = PrimitiveType.Int64
+          , [typeof(float)]          = PrimitiveType.Float
+          , [typeof(double)]         = PrimitiveType.Double
+          , [typeof(decimal)]        = PrimitiveType.Decimal
+          , [typeof(byte[])]         = PrimitiveType.Binary
+          , [typeof(DateTime)]       = PrimitiveType.DateTime
+          , [typeof(DateTimeOffset)] = PrimitiveType.DateTimeOffset
+          , [typeof(string)]         = PrimitiveType.String
+          , [typeof(Guid)]           = PrimitiveType.UUID
         };
         private readonly AssemblyResolver _assemblyResolver;
         private readonly ISchemaRegistry _schemaRegistry;
@@ -114,7 +114,7 @@ namespace Dibix.Sdk.CodeGeneration
         private TypeReference ResolveType(Type type, string source, int line, int column, bool isNullable, bool isEnumerable) => ResolveType(type, source, line, column, isNullable, isEnumerable, null, this._schemaRegistry);
         private static TypeReference ResolveType(Type type, string source, int line, int column, bool isNullable, bool isEnumerable, string udtName, ISchemaRegistry schemaRegistry)
         {
-            if (PrimitiveTypeMap.TryGetValue(type, out PrimitiveDataType dataType))
+            if (PrimitiveTypeMap.TryGetValue(type, out PrimitiveType dataType))
                 return new PrimitiveTypeReference(dataType, isNullable, isEnumerable);
 
             SchemaTypeReference schemaTypeReference = SchemaTypeReference.WithNamespace(type.Namespace, type.Name, source, line, column, isNullable, isEnumerable);

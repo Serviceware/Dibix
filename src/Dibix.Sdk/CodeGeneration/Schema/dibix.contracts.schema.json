@@ -1,15 +1,21 @@
 {
   "$schema": "http://json-schema.org/draft-05/schema#",
   "definitions": {
+    "PrimitiveTypeReference": {
+      "type": "string",
+      "pattern": "^(binary|boolean|byte|datetime|datetimeoffset|decimal|double|float|int16|int32|int64|string|uuid|xml)\\??\\*?$"
+    },
+    "SchemaTypeReference": {
+      "type": "string",
+      "pattern": "^#([\\w]+)(.([\\w]+))*\\??\\*?$"
+    },
     "PropertyType": {
       "anyOf": [
         {
-          "type": "string",
-          "pattern": "^(binary|boolean|byte|datetime|datetimeoffset|decimal|double|float|int16|int32|int64|string|uuid|xml)\\??\\*?$"
+          "$ref": "#/definitions/PrimitiveTypeReference"
         },
         {
-          "type": "string",
-          "pattern": "^#([\\w]+)(.([\\w]+))*\\??\\*?$"
+          "$ref": "#/definitions/SchemaTypeReference"
         }
       ]
     },

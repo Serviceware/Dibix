@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
@@ -19,6 +20,21 @@ namespace Dibix.Dapper.Tests
                 Assert.Equal(@"Sequence contains more than one element
 CommandType: Text
 CommandText: <Dynamic>", exception.Message);
+            }
+        }
+
+        [Fact]
+        public void QueryFile_WithStreamParameter_IsAcceptedAsBinary()
+        {
+            byte[] data = { 1, 2 };
+            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            {
+                const string commandText = "SELECT @data";
+                byte[] result = accessor.QuerySingle<byte[]>(commandText, CommandType.Text, accessor.Parameters().SetFromTemplate(new
+                {
+                    data = new MemoryStream(data)
+                }).Build());
+                Assert.Equal(data.AsEnumerable(), result.AsEnumerable());
             }
         }
 

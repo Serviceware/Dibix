@@ -8,28 +8,29 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public sealed class DaoCodeGenerationContext
     {
-        private static readonly IDictionary<PrimitiveDataType, string> PrimitiveTypeMap = new Dictionary<PrimitiveDataType, string>
+        private static readonly IDictionary<PrimitiveType, string> PrimitiveTypeMap = new Dictionary<PrimitiveType, string>
         {
-            [PrimitiveDataType.Boolean]        = "bool"
-          , [PrimitiveDataType.Byte]           = "byte"
-          , [PrimitiveDataType.Int16]          = "short"
-          , [PrimitiveDataType.Int32]          = "int"
-          , [PrimitiveDataType.Int64]          = "long"
-          , [PrimitiveDataType.Float]          = "float"
-          , [PrimitiveDataType.Double]         = "double"
-          , [PrimitiveDataType.Decimal]        = "decimal"
-          , [PrimitiveDataType.Binary]         = "byte[]"
-          , [PrimitiveDataType.DateTime]       = "System.DateTime"
-          , [PrimitiveDataType.DateTimeOffset] = "System.DateTimeOffset"
-          , [PrimitiveDataType.String]         = "string"
-          , [PrimitiveDataType.UUID]           = "System.Guid"
-          , [PrimitiveDataType.Xml]            = "System.Xml.Linq.XElement"
+            [PrimitiveType.Boolean]        = "bool"
+          , [PrimitiveType.Byte]           = "byte"
+          , [PrimitiveType.Int16]          = "short"
+          , [PrimitiveType.Int32]          = "int"
+          , [PrimitiveType.Int64]          = "long"
+          , [PrimitiveType.Float]          = "float"
+          , [PrimitiveType.Double]         = "double"
+          , [PrimitiveType.Decimal]        = "decimal"
+          , [PrimitiveType.Binary]         = "byte[]"
+          , [PrimitiveType.Stream]         = "System.IO.Stream"
+          , [PrimitiveType.DateTime]       = "System.DateTime"
+          , [PrimitiveType.DateTimeOffset] = "System.DateTimeOffset"
+          , [PrimitiveType.String]         = "string"
+          , [PrimitiveType.UUID]           = "System.Guid"
+          , [PrimitiveType.Xml]            = "System.Xml.Linq.XElement"
         };
-        private static readonly PrimitiveDataType[] ReferenceTypes =
+        private static readonly PrimitiveType[] ReferenceTypes =
         {
-            PrimitiveDataType.Binary
-          , PrimitiveDataType.String
-          , PrimitiveDataType.Xml
+            PrimitiveType.Binary
+          , PrimitiveType.String
+          , PrimitiveType.Xml
         };
         private readonly CSharpRoot _root;
         private readonly ISchemaRegistry _schemaRegistry;

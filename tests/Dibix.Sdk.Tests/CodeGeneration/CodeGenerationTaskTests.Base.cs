@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Dibix.Sdk.CodeGeneration;
 using Dibix.Tests;
 using Microsoft.CodeAnalysis;
@@ -98,10 +98,10 @@ namespace Dibix.Sdk.Tests.CodeGeneration
 
         private static void AssertFileContent(string expectedTextKey, string generatedFilePath)
         {
+            File.WriteAllText(generatedFilePath, Regex.Replace(File.ReadAllText(generatedFilePath)
+                                                             , @"\[GeneratedCodeAttribute\(""Dibix\.Sdk"", ""[\d]+\.[\d]+\.[\d]+\.[\d]+""\)\]"
+                                                             , "[GeneratedCodeAttribute(\"Dibix.Sdk\", \"1.0.0.0\")]"));
             string expectedText = TestUtility.GetExpectedText(expectedTextKey);
-            string fileVersion = FileVersionInfo.GetVersionInfo(typeof(DaoCodeGenerator).Assembly.Location).FileVersion;
-            expectedText = expectedText.Replace("[GeneratedCodeAttribute(\"Dibix.Sdk\", \"1.0.0.0\")]"
-                                             , $"[GeneratedCodeAttribute(\"Dibix.Sdk\", \"{fileVersion}\")]");
             TestUtility.AssertFileEqualWithDiffTool(expectedText, generatedFilePath);
         }
 

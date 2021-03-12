@@ -7,33 +7,33 @@ namespace Dibix.Sdk.Sql
 {
     internal static class SqlDataTypeExtensions
     {
-        private static readonly IDictionary<SqlDataTypeOption, PrimitiveDataType> PrimitiveTypeMap = new Dictionary<SqlDataTypeOption, PrimitiveDataType>
+        private static readonly IDictionary<SqlDataTypeOption, PrimitiveType> PrimitiveTypeMap = new Dictionary<SqlDataTypeOption, PrimitiveType>
         {
-            [SqlDataTypeOption.Bit]              = PrimitiveDataType.Boolean
-          , [SqlDataTypeOption.TinyInt]          = PrimitiveDataType.Byte
-          , [SqlDataTypeOption.SmallInt]         = PrimitiveDataType.Int16
-          , [SqlDataTypeOption.Int]              = PrimitiveDataType.Int32
-          , [SqlDataTypeOption.BigInt]           = PrimitiveDataType.Int64
-          , [SqlDataTypeOption.Real]             = PrimitiveDataType.Float
-          , [SqlDataTypeOption.Float]            = PrimitiveDataType.Double
-          , [SqlDataTypeOption.Decimal]          = PrimitiveDataType.Decimal
-          , [SqlDataTypeOption.SmallMoney]       = PrimitiveDataType.Decimal
-          , [SqlDataTypeOption.Money]            = PrimitiveDataType.Decimal
-          , [SqlDataTypeOption.Numeric]          = PrimitiveDataType.Decimal
-          , [SqlDataTypeOption.Binary]           = PrimitiveDataType.Binary
-          , [SqlDataTypeOption.VarBinary]        = PrimitiveDataType.Binary
-          , [SqlDataTypeOption.Date]             = PrimitiveDataType.DateTime
-          , [SqlDataTypeOption.DateTime]         = PrimitiveDataType.DateTime
-          , [SqlDataTypeOption.DateTime2]        = PrimitiveDataType.DateTime
-          , [SqlDataTypeOption.DateTimeOffset]   = PrimitiveDataType.DateTimeOffset
-          , [SqlDataTypeOption.SmallDateTime]    = PrimitiveDataType.DateTime
-          , [SqlDataTypeOption.Char]             = PrimitiveDataType.String
-          , [SqlDataTypeOption.NChar]            = PrimitiveDataType.String
-          , [SqlDataTypeOption.VarChar]          = PrimitiveDataType.String
-          , [SqlDataTypeOption.NVarChar]         = PrimitiveDataType.String
-          , [SqlDataTypeOption.Text]             = PrimitiveDataType.String
-          , [SqlDataTypeOption.NText]            = PrimitiveDataType.String
-          , [SqlDataTypeOption.UniqueIdentifier] = PrimitiveDataType.UUID
+            [SqlDataTypeOption.Bit]              = PrimitiveType.Boolean
+          , [SqlDataTypeOption.TinyInt]          = PrimitiveType.Byte
+          , [SqlDataTypeOption.SmallInt]         = PrimitiveType.Int16
+          , [SqlDataTypeOption.Int]              = PrimitiveType.Int32
+          , [SqlDataTypeOption.BigInt]           = PrimitiveType.Int64
+          , [SqlDataTypeOption.Real]             = PrimitiveType.Float
+          , [SqlDataTypeOption.Float]            = PrimitiveType.Double
+          , [SqlDataTypeOption.Decimal]          = PrimitiveType.Decimal
+          , [SqlDataTypeOption.SmallMoney]       = PrimitiveType.Decimal
+          , [SqlDataTypeOption.Money]            = PrimitiveType.Decimal
+          , [SqlDataTypeOption.Numeric]          = PrimitiveType.Decimal
+          , [SqlDataTypeOption.Binary]           = PrimitiveType.Binary
+          , [SqlDataTypeOption.VarBinary]        = PrimitiveType.Binary
+          , [SqlDataTypeOption.Date]             = PrimitiveType.DateTime
+          , [SqlDataTypeOption.DateTime]         = PrimitiveType.DateTime
+          , [SqlDataTypeOption.DateTime2]        = PrimitiveType.DateTime
+          , [SqlDataTypeOption.DateTimeOffset]   = PrimitiveType.DateTimeOffset
+          , [SqlDataTypeOption.SmallDateTime]    = PrimitiveType.DateTime
+          , [SqlDataTypeOption.Char]             = PrimitiveType.String
+          , [SqlDataTypeOption.NChar]            = PrimitiveType.String
+          , [SqlDataTypeOption.VarChar]          = PrimitiveType.String
+          , [SqlDataTypeOption.NVarChar]         = PrimitiveType.String
+          , [SqlDataTypeOption.Text]             = PrimitiveType.String
+          , [SqlDataTypeOption.NText]            = PrimitiveType.String
+          , [SqlDataTypeOption.UniqueIdentifier] = PrimitiveType.UUID
         };
 
         public static TypeReference ToTypeReference
@@ -52,7 +52,7 @@ namespace Dibix.Sdk.Sql
             if (markup.TryGetSingleElementValue(SqlMarkupKey.ClrType, source, logger, out ISqlElementValue typeImplementationName) && !(dataTypeReference is SqlDataTypeReference))
             {
                 udtName = null;
-                logger.LogError(null, $@"The @ClrType hint is only supported for primitive types and is used to specify an enum type implementation
+                logger.LogError(null, $@"The @ClrType hint is only supported for primitive types
 Name: {name}
 DataType: {dataTypeReference.GetType()}", source, dataTypeReference.StartLine, dataTypeReference.StartColumn);
                 return null;
@@ -64,7 +64,10 @@ DataType: {dataTypeReference.GetType()}", source, dataTypeReference.StartLine, d
                 {
                     udtName = null;
 
-                    // Most likely a primitive parameter that should be generated using a known enum, therefore specific type implementation hint
+                    // Explicit override of generated type name
+                    // Examples:
+                    // /* @ClrType stream */ [data] VARBINARY(MAX) -> System.IO.Stream data
+                    // /* @ClrType RequestTypeEnum */ [requesttype] TINYINT -> RequestTypeEnum requesttype
                     if (typeImplementationName != null)
                     {
                         TypeReference typeReference = typeResolver.ResolveType(typeImplementationName.Value, @namespace, source, typeImplementationName.Line, typeImplementationName.Column, false);
@@ -74,7 +77,7 @@ DataType: {dataTypeReference.GetType()}", source, dataTypeReference.StartLine, d
                         return typeReference;
                     }
 
-                    if (PrimitiveTypeMap.TryGetValue(sqlDataTypeReference.SqlDataTypeOption, out PrimitiveDataType dataType))
+                    if (PrimitiveTypeMap.TryGetValue(sqlDataTypeReference.SqlDataTypeOption, out PrimitiveType dataType))
                         return new PrimitiveTypeReference(dataType, isNullable, false);
 
                     logger.LogError(null, $@"Unsupported sql data type
@@ -88,7 +91,7 @@ DataType: {sqlDataTypeReference.SqlDataTypeOption}", source, dataTypeReference.S
                     if (String.Equals(userDataTypeReference.Name.BaseIdentifier.Value, "SYSNAME", StringComparison.OrdinalIgnoreCase))
                     {
                         udtName = null;
-                        return new PrimitiveTypeReference(PrimitiveDataType.String, isNullable, false);
+                        return new PrimitiveTypeReference(PrimitiveType.String, isNullable, false);
                     }
 
                     udtName = userDataTypeReference.Name.ToFullName();
@@ -98,7 +101,7 @@ DataType: {sqlDataTypeReference.SqlDataTypeOption}", source, dataTypeReference.S
 
                 case XmlDataTypeReference _:
                     udtName = null;
-                    return new PrimitiveTypeReference(PrimitiveDataType.Xml, false, false);
+                    return new PrimitiveTypeReference(PrimitiveType.Xml, false, false);
 
                 default:
                     throw new InvalidOperationException($@"Unexpected data type reference
