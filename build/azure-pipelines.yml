@@ -16,6 +16,8 @@ variables:
   PublishPackages: "$[or(eq('${{ parameters.PublishPackages }}', true), contains(variables['Build.SourceVersionMessage'], '[package]'))]"
 
 steps:
+#- powershell: (gci  env:* | sort-object name) # Print env variables
+
 - script: "echo ##vso[task.setvariable variable=PublishPackages]true"
   displayName: "\U0001F50D Resolve 'PublishPackages' property from commmit message"
   condition: contains(variables['Build.SourceVersionMessage'], '[package]')

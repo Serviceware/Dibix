@@ -63,8 +63,10 @@ namespace Dibix.Sdk.CodeAnalysis
           , TSqlModel model
         )
         {
-            if (!logger.HasLoggedErrors)
-                ExecuteNativeCodeAnalysis(model, logger, staticCodeAnalysisSucceededFile, resultsFile);
+            if (logger.HasLoggedErrors)
+                return false;
+
+            ExecuteNativeCodeAnalysis(model, logger, staticCodeAnalysisSucceededFile, resultsFile);
 
             SqlCodeAnalysisRuleEngine codeAnalysisEngine = SqlCodeAnalysisRuleEngine.Create(model, projectName, namingConventionPrefix, isEmbedded, logger);
 

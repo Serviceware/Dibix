@@ -38,7 +38,6 @@ namespace Dibix.Sdk
         )
         {
             TSqlModel sqlModel = PublicSqlDataSchemaModelLoader.Load(projectName, databaseSchemaProviderName, modelCollation, source, sqlReferencePath, logger);
-            
             bool analysisResult = SqlCodeAnalysisTask.Execute
             (
                 projectName
