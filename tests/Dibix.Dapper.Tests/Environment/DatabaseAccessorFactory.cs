@@ -9,6 +9,7 @@ namespace Dibix.Dapper.Tests
         public static IDatabaseAccessor Create()
         {
             ConnectionStringOptions connectionSections = new ConfigurationBuilder().AddUserSecrets("dibix")
+                                                                                   .AddEnvironmentVariables()
                                                                                    .Build()
                                                                                    .Get<ConnectionStringOptions>();
             Guard.IsNotNull(connectionSections, nameof(connectionSections), "No connection string configured. Please call setup-env script.");

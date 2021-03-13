@@ -56,6 +56,10 @@ steps:
   continueOnError: true
   inputs:
     command: 'test'
+  env:
+    # Required for Dibix.Dapper.Tests
+    DefaultConnection:ConnectionString: $(TestConnection:ConnectionString)
+    DefaultConnection:ProviderName: System.Data.SqlClient
 
 - task: DotNetCoreCLI@2
   displayName: "\U0001FA82 Publish packages"

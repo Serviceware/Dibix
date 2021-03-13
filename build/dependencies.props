@@ -24,11 +24,12 @@
 
     <!-- Testing -->
     <ConfigurationBinderVersion>2.1.1</ConfigurationBinderVersion>
+    <ConfigurationEnvironmentVersion>2.1.1</ConfigurationEnvironmentVersion>
+    <ConfigurationUserSecretsVersion>2.1.1</ConfigurationUserSecretsVersion>
     <CoverletVersion>2.3.1</CoverletVersion>
     <MicrosoftTestSdkVersion>15.9.0</MicrosoftTestSdkVersion>
     <MoqVersion>4.10.1</MoqVersion>
     <RoslynVersion>3.8.0</RoslynVersion>
-    <UserSecretsVersion>2.1.1</UserSecretsVersion>
     <XUnitVersion>2.4.1</XUnitVersion>
     <XUnitCliVersion>2.3.1</XUnitCliVersion>
 
