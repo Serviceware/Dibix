@@ -7,7 +7,7 @@ using System.Xml.Linq;
 
 namespace Dibix
 {
-    public sealed class ParameterBuilder : IParameterBuilder
+    internal sealed class ParameterBuilder : IParameterBuilder
     {
         #region Fields
         private static readonly IDictionary<Type, DbType> TypeMap = new Dictionary<Type, DbType>
