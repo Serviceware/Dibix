@@ -12,7 +12,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftTestSdkVersion)" />
     <PackageReference Include="xunit" Version="$(XUnitVersion)" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="$(XUnitVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(XUnitVSVersion)" />
     <PackageReference Include="coverlet.msbuild" Version="$(CoverletVersion)" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="$(ConfigurationBinderVersion)" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="$(ConfigurationEnvironmentVersion)" />

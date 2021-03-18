@@ -36,12 +36,13 @@ steps:
   displayName: "\U0001F52C Build debug"
   inputs:
     command: 'build'
+    arguments: '/p:SonarQubeExclude=True'
 
 - task: DotNetCoreCLI@2
   displayName: "\U0001F6A2 Build release"
   inputs:
     command: 'build'
-    arguments: '-c Release'
+    arguments: '-c Release /p:SonarQubeExclude=True'
 
 - task: DotNetCoreCLI@2
   displayName: "\U0001F4E6 Create packages"

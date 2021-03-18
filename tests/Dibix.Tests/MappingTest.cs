@@ -1,12 +1,12 @@
-﻿using Moq;
-using Moq.Protected;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
+using Moq;
+using Moq.Protected;
 using Xunit;
 
 namespace Dibix.Tests
@@ -28,7 +28,6 @@ namespace Dibix.Tests
             Mock<DatabaseAccessor> accessor = new Mock<DatabaseAccessor>(MockBehavior.Strict, connection.Object);
             Mock<IParametersVisitor> parametersVisitor = new Mock<IParametersVisitor>(MockBehavior.Strict);
 
-            connection.Protected().Setup("Dispose", false);
             accessor.Protected()
                     .As<IDatabaseAccessor>()
                     .Setup(x => x.QueryMany("sql", CommandType.Text, parametersVisitor.Object, It.IsAny<Func<Character, Name, string, Name, Character>>(), "splitOn"))
@@ -69,7 +68,6 @@ namespace Dibix.Tests
             Mock<DatabaseAccessor> accessor = new Mock<DatabaseAccessor>(connection.Object);
             Mock<IParametersVisitor> parametersVisitor = new Mock<IParametersVisitor>(MockBehavior.Strict);
 
-            connection.Protected().Setup("Dispose", false);
             accessor.Protected()
                     .As<IDatabaseAccessor>()
                     .Setup(x => x.QueryMany("sql", CommandType.Text, parametersVisitor.Object, It.IsAny<Func<Category, CategoryBlacklistEntry, Category>>(), "splitOn"))
@@ -140,7 +138,6 @@ namespace Dibix.Tests
             Mock<DatabaseAccessor> accessor = new Mock<DatabaseAccessor>(MockBehavior.Strict, connection.Object);
             Mock<MultipleResultReader> multipleResultReader = new Mock<MultipleResultReader>(MockBehavior.Strict);
 
-            connection.Protected().Setup("Dispose", false);
             accessor.As<IDatabaseAccessor>()
                     .Setup(x => x.QueryMultiple("sql", CommandType.Text, It.IsAny<IParametersVisitor>()))
                     .Returns(multipleResultReader.Object);

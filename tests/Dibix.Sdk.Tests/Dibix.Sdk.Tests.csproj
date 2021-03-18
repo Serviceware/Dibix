@@ -22,7 +22,7 @@
     <PackageReference Include="Moq" Version="$(MoqVersion)" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="$(DataAnnotationsVersion)" />
     <PackageReference Include="xunit" Version="$(XUnitVersion)" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="$(XUnitVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(XUnitVSVersion)" />
   </ItemGroup>
 
   <ItemGroup>

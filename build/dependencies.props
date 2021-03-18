@@ -1,36 +1,37 @@
 <Project>
   <PropertyGroup>
     <!-- Runtime -->
-    <AspNetWebApiVersion>5.2.3</AspNetWebApiVersion>
-    <DapperVersion>1.50.5</DapperVersion>
-    <DataAnnotationsVersion>4.7.0</DataAnnotationsVersion>
-    <SqlClientVersion>4.5.1</SqlClientVersion>
+    <AspNetWebApiVersion>5.2.7</AspNetWebApiVersion>
+    <DapperVersion>2.0.78</DapperVersion>
+    <DataAnnotationsVersion>5.0.0</DataAnnotationsVersion>
+    <SqlClientVersion>4.8.2</SqlClientVersion>
 
     <!-- Sdk -->
-    <DacFxVersion>150.4573.2</DacFxVersion>
-    <NewtonsoftJsonSchemaVersion>3.0.10</NewtonsoftJsonSchemaVersion>
-    <OpenApiVersion>1.1.4</OpenApiVersion>
+    <DacFxVersion>150.5084.2</DacFxVersion>
+    <NewtonsoftJsonSchemaVersion>3.0.14</NewtonsoftJsonSchemaVersion>
+    <OpenApiVersion>1.2.3</OpenApiVersion>
 
     <!-- VS integration -->
-    <EnvDTEVersion>8.0.2</EnvDTEVersion>
-    <VSLangProjVersion>7.0.3301</VSLangProjVersion>
+    <EnvDTEVersion>16.9.31023.347</EnvDTEVersion>
+    <VSLangProjVersion>16.9.31023.347</VSLangProjVersion>
     <VSTextTemplatingInterfacesVersion>10.0.30320</VSTextTemplatingInterfacesVersion>
 
     <!-- MSBuild -->
     <ILRepackVersion>2.0.18</ILRepackVersion>
 
     <!-- MSBuild.Tasks -->
-    <MSBuildUtilitiesVersion>15.9.20</MSBuildUtilitiesVersion>
+    <MSBuildUtilitiesVersion>16.9.0</MSBuildUtilitiesVersion>
 
     <!-- Testing -->
-    <ConfigurationBinderVersion>2.1.1</ConfigurationBinderVersion>
-    <ConfigurationEnvironmentVersion>2.1.1</ConfigurationEnvironmentVersion>
-    <ConfigurationUserSecretsVersion>2.1.1</ConfigurationUserSecretsVersion>
-    <CoverletVersion>2.3.1</CoverletVersion>
-    <MicrosoftTestSdkVersion>15.9.0</MicrosoftTestSdkVersion>
-    <MoqVersion>4.10.1</MoqVersion>
-    <RoslynVersion>3.8.0</RoslynVersion>
+    <ConfigurationBinderVersion>5.0.0</ConfigurationBinderVersion>
+    <ConfigurationEnvironmentVersion>5.0.0</ConfigurationEnvironmentVersion>
+    <ConfigurationUserSecretsVersion>5.0.0</ConfigurationUserSecretsVersion>
+    <CoverletVersion>3.0.3</CoverletVersion>
+    <MicrosoftTestSdkVersion>16.9.1</MicrosoftTestSdkVersion>
+    <MoqVersion>4.16.1</MoqVersion>
+    <RoslynVersion>3.9.0</RoslynVersion>
     <XUnitVersion>2.4.1</XUnitVersion>
+    <XUnitVSVersion>2.4.3</XUnitVSVersion>
     <XUnitCliVersion>2.3.1</XUnitCliVersion>
 
   </PropertyGroup>

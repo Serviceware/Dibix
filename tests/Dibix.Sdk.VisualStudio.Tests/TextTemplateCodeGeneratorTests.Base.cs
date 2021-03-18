@@ -66,7 +66,7 @@ namespace Dibix.Sdk.VisualStudio.Tests
             project.SetupGet(x => x.ProjectItems).Returns(projectItems.Object);
             project.SetupGet(x => x.ConfigurationManager).Returns(configurationManager.Object);
             project.SetupGet(x => x.Object).Returns(projectObject.Object);
-            projectItems.As<IEnumerable>().Setup(x => x.GetEnumerator()).Returns(new[]
+            projectItems.Setup(x => x.GetEnumerator()).Returns(new[]
             {
                 CollectType<SpecialEntity>(),
                 CollectType<Direction>()
@@ -116,7 +116,7 @@ namespace Dibix.Sdk.VisualStudio.Tests
         private static void CollectProjectItems(string path, Mock<ProjectItems> items)
         {
             ICollection<ProjectItem> itemsSource = new Collection<ProjectItem>();
-            items.As<IEnumerable>().Setup(x => x.GetEnumerator()).Returns(itemsSource.GetEnumerator);
+            items.Setup(x => x.GetEnumerator()).Returns(itemsSource.GetEnumerator);
 
             if (!Directory.Exists(path))
                 return;
@@ -160,7 +160,7 @@ namespace Dibix.Sdk.VisualStudio.Tests
             projectItem.SetupGet(x => x.FileCodeModel).Returns(codeModel.Object);
             projectItem.SetupGet(x => x.ProjectItems).Returns(projectItems.Object);
             codeModel.SetupGet(x => x.CodeElements).Returns(codeElements.Object);
-            projectItems.As<IEnumerable>().Setup(x => x.GetEnumerator()).Returns(Enumerable.Empty<object>().GetEnumerator);
+            projectItems.Setup(x => x.GetEnumerator()).Returns(Enumerable.Empty<object>().GetEnumerator);
             codeElement.SetupGet(x => x.Name).Returns(type.Name);
             codeElement.SetupGet(x => x.FullName).Returns(type.FullName);
             codeNamespace.SetupGet(x => x.FullName).Returns(type.Namespace);
@@ -176,7 +176,7 @@ namespace Dibix.Sdk.VisualStudio.Tests
                 CollectConcreteType(type, codeElement, codeNamespace.Object);
             }
 
-            codeElements.As<IEnumerable>().Setup(x => x.GetEnumerator()).Returns(Enumerable.Repeat(codeElement.Object, 1).GetEnumerator);
+            codeElements.Setup(x => x.GetEnumerator()).Returns(Enumerable.Repeat(codeElement.Object, 1).GetEnumerator);
 
             return projectItem.Object;
         }
