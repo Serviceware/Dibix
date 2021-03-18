@@ -32,7 +32,7 @@ namespace Dibix.Sdk.CodeGeneration
             //if (!writers.Any())
             //    return;
 
-            string generatedCodeAnnotation = $"{typeof(GeneratedCodeAttribute).Name}(\"{GeneratorName}\", \"{Version}\")";
+            string generatedCodeAnnotation = $"{nameof(GeneratedCodeAttribute)}(\"{GeneratorName}\", \"{Version}\")";
 
             // Prepare writer
             bool isArtifactAssembly = model.CompatibilityLevel == CodeGeneratorCompatibilityLevel.Full;

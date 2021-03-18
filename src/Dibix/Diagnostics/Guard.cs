@@ -4,7 +4,7 @@ using System.Diagnostics;
 namespace Dibix
 {
     [DebuggerNonUserCode]
-    public static class Guard
+    internal static class Guard
     {
         public static void IsNotNull<T>(T value, string paramName, string message = null) where T : class
         {

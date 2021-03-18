@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\Dibix\Diagnostics\Guard.cs" Link="Diagnostics\Guard.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="EnvDTE" Version="$(EnvDTEVersion)" />
     <PackageReference Include="Microsoft.VisualStudio.TextTemplating.Interfaces.10.0" Version="$(VSTextTemplatingInterfacesVersion)" />
     <PackageReference Include="VSLangProj" Version="$(VSLangProjVersion)" />

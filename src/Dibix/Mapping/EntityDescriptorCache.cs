@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -13,7 +12,6 @@ namespace Dibix
     internal static class EntityDescriptorCache
     {
         private static readonly ConcurrentDictionary<Type, EntityDescriptor> DescriptorCache = new ConcurrentDictionary<Type, EntityDescriptor>();
-        private static readonly ConcurrentDictionary<Type, IEqualityComparer> ComparerCache = new ConcurrentDictionary<Type, IEqualityComparer>();
         private static readonly IEntityPropertyFormatter[] PropertyFormatters =
         {
             new DateTimeKindEntityPropertyFormatter()
