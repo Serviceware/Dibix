@@ -51,12 +51,14 @@ steps:
     packagesToPack: 'src\Dibix;src\Dibix.Dapper;src\Dibix.Sdk'
     configuration: 'Release'
     verbosityPack: 'Normal'
+    arguments: '/p:SonarQubeExclude=True'
 
 - task: DotNetCoreCLI@2
   displayName: "\U0001F9EA Run unit tests"
   continueOnError: true
   inputs:
     command: 'test'
+    arguments: '/p:SonarQubeExclude=True'
   env:
     # Required for Dibix.Dapper.Tests
     DefaultConnection:ConnectionString: $(TestConnection:ConnectionString)
