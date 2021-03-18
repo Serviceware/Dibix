@@ -1,8 +1,8 @@
 <Project>
   <PropertyGroup>
     <!-- Runtime -->
-    <AspNetWebApiVersion>5.2.7</AspNetWebApiVersion>
-    <DapperVersion>2.0.78</DapperVersion>
+    <AspNetWebApiVersion>5.2.3</AspNetWebApiVersion>
+    <DapperVersion>1.50.5</DapperVersion>
     <DataAnnotationsVersion>5.0.0</DataAnnotationsVersion>
     <SqlClientVersion>4.8.2</SqlClientVersion>
 
