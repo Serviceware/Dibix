@@ -1,46 +1,24 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
+    <TargetFrameworks>net5.0;net451</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Update="Access\DatabaseAccessorExtensions.Execute.cs">
-      <DependentUpon>Access\DatabaseAccessorExtensions.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Access\DatabaseAccessorExtensions.GridReader.cs">
-      <DependentUpon>Access\DatabaseAccessorExtensions.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Access\DatabaseAccessorExtensions.QueryMany.cs">
-      <DependentUpon>Access\DatabaseAccessorExtensions.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Access\DatabaseAccessorExtensions.QueryMultiple.cs">
-      <DependentUpon>Access\DatabaseAccessorExtensions.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Access\DatabaseAccessorExtensions.QuerySingle.cs">
-      <DependentUpon>Access\DatabaseAccessorExtensions.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Access\DatabaseAccessorExtensions.QuerySingleOrDefault.cs">
-      <DependentUpon>Access\DatabaseAccessorExtensions.cs</DependentUpon>
-    </Compile>
+    <Compile Update="Access\DatabaseAccessorExtensions.Execute.cs" DependentUpon="Access\DatabaseAccessorExtensions.cs" />
+    <Compile Update="Access\DatabaseAccessorExtensions.GridReader.cs" DependentUpon="Access\DatabaseAccessorExtensions.cs" />
+    <Compile Update="Access\DatabaseAccessorExtensions.QueryMany.cs" DependentUpon="Access\DatabaseAccessorExtensions.cs" />
+    <Compile Update="Access\DatabaseAccessorExtensions.QueryMultiple.cs" DependentUpon="Access\DatabaseAccessorExtensions.cs" />
+    <Compile Update="Access\DatabaseAccessorExtensions.QuerySingle.cs" DependentUpon="Access\DatabaseAccessorExtensions.cs" />
+    <Compile Update="Access\DatabaseAccessorExtensions.QuerySingleOrDefault.cs" DependentUpon="Access\DatabaseAccessorExtensions.cs" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <Compile Remove="Http\Http*Response.cs" />
-    <Compile Remove="Http\HttpActionInvoker.cs" />
-    <Compile Remove="Http\HttpFileResponseFormatter.cs" />
-    <Compile Remove="Http\HttpResponseFormatter.cs" />
-    <Compile Remove="Http\ReflectionHttpActionTargetProxyBuilder.cs" />
-    <Compile Remove="Http\WrappedHttpResponseFormatter.cs" />
-
-    <PackageReference Include="System.ComponentModel.Annotations" Version="$(DataAnnotationsVersion)" />
+  <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
     <PackageReference Include="System.Data.SqlClient" Version="$(SqlClientVersion)" />
   </ItemGroup>
   
-  <ItemGroup Condition="'$(TargetFramework)' == 'net452'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net451'">
     <Reference Include="System.ComponentModel.DataAnnotations" Version="4.0" />
-    <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="$(AspNetWebApiVersion)" />
-    <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="$(AspNetWebApiVersion)" />
   </ItemGroup>
   
 </Project>

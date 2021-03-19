@@ -47,7 +47,7 @@ namespace Dibix.Http
                 if (!this._typeBuilderMap.TryGetValue(declaringType, out TypeBuilder typeBuilder))
                     throw new InvalidOperationException($"No proxy for type '{declaringType}' is registered. Did you call '{nameof(AddMethod)}' on this instance?");
 
-                proxyType = typeBuilder.CreateType();
+                proxyType = typeBuilder.CreateTypeInfo();
                 this._proxyTypeMap.Add(declaringType, proxyType);
             }
 
@@ -80,7 +80,11 @@ namespace Dibix.Http
             BlockExpression block = Expression.Block(variables, call);
             LambdaExpression lambda = Expression.Lambda(block, parameters);
             MethodBuilder methodBuilder = typeBuilder.DefineMethod(method.Name, MethodAttributes.Public | MethodAttributes.Static);
+#if NET5_0
+            throw new PlatformNotSupportedException("LambdaExpression.CompileToMethod is not supported on .NET standard");
+#else
             lambda.CompileToMethod(methodBuilder);
+#endif
         }
 
         private TypeBuilder AddType(Type type) => this._moduleBuilder.DefineType(type.FullName, TypeAttributes.Public);

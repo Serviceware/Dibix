@@ -23,7 +23,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public override void Write(DaoCodeGenerationContext context)
         {
-            context.AddUsing("Dibix.Http");
+            context.AddDibixHttpReference();
 
             if (context.Model.Controllers.Any(x => x.ControllerImports.Any()))
                 context.AddUsing(typeof(Type).Namespace);

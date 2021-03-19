@@ -3,7 +3,7 @@ using System.Data.SqlClient;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Dibix.Tests
+namespace Dibix.Http.Tests
 {
     internal static class SqlExceptionFactory
     {
@@ -28,6 +28,7 @@ namespace Dibix.Tests
             ParameterExpression errorMessageParameter = Expression.Parameter(typeof(string), "errorMessage");
             ParameterExpression procedureParameter = Expression.Parameter(typeof(string), "procedure");
             ParameterExpression lineNumberParameter = Expression.Parameter(typeof(int), "lineNumber");
+            Expression exceptionParameter = Expression.Constant(null, typeof(Exception));
 
             ConstructorInfo sqlErrorConstrutor = sqlErrorType.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new[]
             {
@@ -38,6 +39,7 @@ namespace Dibix.Tests
               , errorMessageParameter.Type
               , procedureParameter.Type
               , lineNumberParameter.Type
+              , exceptionParameter.Type
             }, null);
 
             if (sqlErrorConstrutor == null)
@@ -54,6 +56,7 @@ namespace Dibix.Tests
               , errorMessageParameter
               , procedureParameter
               , lineNumberParameter
+              , exceptionParameter
             );
             Expression errorAssign = Expression.Assign(errorVariable, errorValue);
 

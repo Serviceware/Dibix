@@ -13,10 +13,10 @@
     <Compile Include="..\Dibix\Diagnostics\Guard.cs" Link="Diagnostics\Guard.cs" />
     <Compile Include="..\Dibix\Environment\SchemaName.cs" Link="Environment\SchemaName.cs" />
     <Compile Include="..\Dibix\Extensions\EnumerableExtensions.cs" Link="Extensions\EnumerableExtensions.cs" />
-    <Compile Include="..\Dibix\Http\HttpErrorResponseParser.cs" Link="CodeGeneration\Parser\HttpErrorResponseParser.cs" />
-    <Compile Include="..\Dibix\Http\HttpParameterUtility.cs" Link="CodeGeneration\Parser\HttpParameterUtility.cs" />
-    <Compile Include="..\Dibix\Http\HttpParameterName.cs" Link="OpenApi\HttpParameterName.cs" />
-    <Compile Include="..\Dibix\Http\RouteBuilder.cs" Link="OpenApi\RouteBuilder.cs" />
+    <Compile Include="..\Dibix.Http\Runtime\HttpErrorResponseParser.cs" Link="CodeGeneration\Parser\HttpErrorResponseParser.cs" />
+    <Compile Include="..\Dibix.Http\Runtime\HttpParameterUtility.cs" Link="CodeGeneration\Parser\HttpParameterUtility.cs" />
+    <Compile Include="..\Dibix.Http\Runtime\HttpParameterName.cs" Link="OpenApi\HttpParameterName.cs" />
+    <Compile Include="..\Dibix.Http\Utilities\RouteBuilder.cs" Link="OpenApi\RouteBuilder.cs" />
     <None Remove="lib\**" />
     <Content Include="targets\**" PackagePath="build" />
   </ItemGroup>
@@ -50,7 +50,7 @@
       <_DibixCliTargetFramework>net472</_DibixCliTargetFramework>
     </PropertyGroup>
 
-    <MSBuild Projects="$(_DibixCliProjectDir)$(_DibixCliProjectName).csproj"
+    <MSBuild Projects="$(_DibixCliProjectDir)$(_DibixCliProjectName).csproj" 
              Targets="Restore;Build"
              Properties="Configuration=$(Configuration)" />
 
@@ -92,8 +92,8 @@
     <PropertyGroup>
       <_DibixRuntimeProjectName>Dibix</_DibixRuntimeProjectName>
       <_DibixRuntimeProjectDir>..\$(_DibixRuntimeProjectName)\</_DibixRuntimeProjectDir>
-      <_DibixRuntimeTargetFramework>net452</_DibixRuntimeTargetFramework>
-      <_DibixRuntimeXplatTargetFramework>netstandard2.0</_DibixRuntimeXplatTargetFramework>
+      <_DibixRuntimeTargetFramework>net451</_DibixRuntimeTargetFramework>
+      <_DibixRuntimeXplatTargetFramework>net5.0</_DibixRuntimeXplatTargetFramework>
       <_DibixRuntimePath>$(_DibixRuntimeProjectDir)bin\$(Configuration)\$(_DibixRuntimeTargetFramework)\$(_DibixRuntimeProjectName).dll</_DibixRuntimePath>
       <_DibixRuntimeXplatPath>$(_DibixRuntimeProjectDir)bin\$(Configuration)\$(_DibixRuntimeXplatTargetFramework)\$(_DibixRuntimeProjectName).dll</_DibixRuntimeXplatPath>
     </PropertyGroup>
@@ -110,6 +110,28 @@
              Targets="Restore;Build"
              Properties="Configuration=$(Configuration);TargetFramework=$(_DibixRuntimeTargetFramework)" />
 
+    <!-- Build Dibix.Http -->
+    <PropertyGroup>
+      <_DibixHttpProjectName>Dibix.Http</_DibixHttpProjectName>
+      <_DibixHttpProjectDir>..\$(_DibixHttpProjectName)\</_DibixHttpProjectDir>
+      <_DibixHttpTargetFramework>net451</_DibixHttpTargetFramework>
+      <_DibixHttpXplatTargetFramework>net5.0</_DibixHttpXplatTargetFramework>
+      <_DibixHttpPath>$(_DibixHttpProjectDir)bin\$(Configuration)\$(_DibixHttpTargetFramework)\$(_DibixHttpProjectName).dll</_DibixHttpPath>
+      <_DibixHttpXplatPath>$(_DibixHttpProjectDir)bin\$(Configuration)\$(_DibixHttpXplatTargetFramework)\$(_DibixHttpProjectName).dll</_DibixHttpXplatPath>
+    </PropertyGroup>
+
+    <MSBuild Projects="$(_DibixHttpProjectDir)$(_DibixHttpProjectName).csproj"
+             Targets="Restore"
+             Properties="IsRestoring=true;Configuration=$(Configuration);TargetFramework=$(_DibixHttpXplatTargetFramework)" />
+
+    <MSBuild Projects="$(_DibixHttpProjectDir)$(_DibixHttpProjectName).csproj"
+             Targets="Build"
+             Properties="Configuration=$(Configuration);TargetFramework=$(_DibixHttpXplatTargetFramework)" />
+
+    <MSBuild Projects="$(_DibixHttpProjectDir)$(_DibixHttpProjectName).csproj"
+             Targets="Restore;Build"
+             Properties="Configuration=$(Configuration);TargetFramework=$(_DibixHttpTargetFramework)" />
+
     <!-- Register tools\ folder in package -->
     <PropertyGroup>
       <_PackageToolsDirectory>tools\</_PackageToolsDirectory>
@@ -118,6 +140,8 @@
       <_PackageFiles Include="$(_DibixExePath)" PackagePath="$(_PackageToolsDirectory)$(_DibixCliTargetFramework)" />
       <_PackageFiles Include="$(_DibixRuntimePath)" PackagePath="$(_PackageToolsDirectory)$(_DibixCliTargetFramework)" />
       <_PackageFiles Include="$(_DibixRuntimeXplatPath)" PackagePath="$(_PackageToolsDirectory)$(_DibixRuntimeXplatTargetFramework)" />
+      <_PackageFiles Include="$(_DibixHttpPath)" PackagePath="$(_PackageToolsDirectory)$(_DibixCliTargetFramework)" />
+      <_PackageFiles Include="$(_DibixHttpXplatPath)" PackagePath="$(_PackageToolsDirectory)$(_DibixHttpXplatTargetFramework)" />
       <_PackageFiles Include="$(_DibixCliExePath).config" PackagePath="$(_PackageToolsDirectory)$(_DibixCliTargetFramework)\$(_DibixExeName).config" />
 
       <!-- Remove this, once ILMerge works properly -->

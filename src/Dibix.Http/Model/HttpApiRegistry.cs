@@ -99,7 +99,7 @@ namespace Dibix.Http
 
         private sealed class HttpApiDiscoveryContext : IHttpApiDiscoveryContext
         {
-#if !NETSTANDARD
+#if !NET5_0
             private readonly Lazy<ReflectionHttpActionTargetProxyBuilder> _proxyBuilderAccessor;
             private readonly ICollection<ProxyMethodEntry> _proxyTargetHandlerMap;
 
@@ -115,7 +115,7 @@ namespace Dibix.Http
                 if (!NeedsProxy(method))
                     return;
 
-#if NETSTANDARD
+#if NET5_0
                 throw new PlatformNotSupportedException("Dynamic proxy method generation is not supported on .NET standard (yet)");
 #else
                 this._proxyBuilderAccessor.Value.AddMethod(method);
@@ -125,7 +125,7 @@ namespace Dibix.Http
 
             public void FinishProxyAssembly()
             {
-#if !NETSTANDARD
+#if !NET5_0
                 foreach (ProxyMethodEntry registration in this._proxyTargetHandlerMap)
                 {
                     ProxyMethodEntry entry = registration;

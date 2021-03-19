@@ -6,12 +6,11 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Xml.Linq;
-using Dibix.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
-namespace Dibix.Tests
+namespace Dibix.Http.Tests
 {
     public partial class HttpParameterResolverTest
     {

@@ -119,6 +119,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                                                                  .AddReferences(ResolveReference<System.Data.CommandType>())
                                                                  .AddReferences(ResolveReference<System.Linq.Expressions.Expression>())
                                                                  .AddReferences(MetadataReference.CreateFromFile("Dibix.dll"))
+                                                                 .AddReferences(MetadataReference.CreateFromFile("Dibix.Http.dll"))
                                                                  .AddReferences(MetadataReference.CreateFromFile("Newtonsoft.Json.dll"))
                                                                  .AddSyntaxTrees(syntaxTree);
 

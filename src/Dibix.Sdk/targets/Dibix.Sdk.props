@@ -4,8 +4,8 @@
     <DibixToolsDirectory>$(MSBuildThisFileDirectory)..\tools\net472\</DibixToolsDirectory>
     <DibixCliPath Condition="'$(DibixCliPath)' == ''">$(DibixToolsDirectory)Dibix.exe</DibixCliPath>
     <DibixSdkPath>$(DibixToolsDirectory)Dibix.Sdk.dll</DibixSdkPath>
-    <DibixRuntimePath>$(DibixToolsDirectory)Dibix.dll</DibixRuntimePath>
-    <DibixRuntimeXplatPath>$(DibixToolsDirectory)..\netstandard2.0\Dibix.dll</DibixRuntimeXplatPath>
+    <DibixRuntimeDirectory>$(DibixToolsDirectory)</DibixRuntimeDirectory>
+    <DibixRuntimeXplatDirectory>$(DibixToolsDirectory)..\net5.0\</DibixRuntimeXplatDirectory>
 
     <IsEmbedded>$(MSBuildProjectName.EndsWith('.DML'))</IsEmbedded>
     <ExternalAssemblyReferenceDir>$(TargetDir)</ExternalAssemblyReferenceDir>

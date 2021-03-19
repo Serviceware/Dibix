@@ -22,6 +22,9 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <DebugType>embedded</DebugType>
   </PropertyGroup>
+  <ItemGroup Condition="'$(Configuration)' == 'Release' and '$(SourceRoot)'==''">
+    <SourceRoot Include="$(MSBuildThisFileDirectory)/" />
+  </ItemGroup>
 
   <ItemGroup>
     <SourceLinkAzureDevOpsServerGitHost Include="azdops.serviceware.net" VirtualDirectory="sw" />

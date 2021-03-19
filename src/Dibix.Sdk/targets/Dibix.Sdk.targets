@@ -5,6 +5,11 @@
     This is because NuGet imports the .props file at the beginning of the project and the .targets file at the end.
   -->
   <PropertyGroup>
+    <_DibixRuntimeDirectory Condition="'$(CompileArtifactsNetStandard)' != 'true'">$(DibixRuntimeDirectory)</_DibixRuntimeDirectory>
+    <_DibixRuntimeDirectory Condition="'$(CompileArtifactsNetStandard)' == 'true'">$(DibixRuntimeXplatDirectory)</_DibixRuntimeDirectory>
+    <DibixAssemblyPath>$(_DibixRuntimeDirectory)Dibix.dll</DibixAssemblyPath>
+    <DibixHttpAssemblyPath>$(_DibixRuntimeDirectory)Dibix.Http.dll</DibixHttpAssemblyPath>
+
     <!-- We have our own CA target, which also executes the native SqlStaticCodeAnalysis -->
     <RunSqlCodeAnalysis>false</RunSqlCodeAnalysis>
     <RunSqlCodeAnalysisOnce>false</RunSqlCodeAnalysisOnce>
@@ -127,8 +132,8 @@
       <!-- SDK changes -->
       <_SqlTargetInput Include="$(DibixCliPath)" />
       <_SqlTargetInput Include="$(DibixSdkPath)" />
-      <_SqlTargetInput Include="$(DibixRuntimePath)" />
-      <_SqlTargetInput Include="$(DibixRuntimeXplatPath)" />
+      <_SqlTargetInput Include="$(DibixAssemblyPath)" />
+      <_SqlTargetInput Include="$(DibixHttpAssemblyPath)" />
 
 
       <!-- Target specific inputs -->
@@ -322,11 +327,11 @@ $(_SqlReferencePath)" />
     <ItemGroup>
       <ServerCompilationSource Include="$(_ServerIntermediateFilePath)" />
       <ServerCompilationSource Include="$(_ServerAssemblyInfoFile)" />
-      <ServerCompilationLocalReference Include="@(ServerCompilationArtifactReference)" />
-      <ServerCompilationLocalReference Include="$(DibixRuntimePath)" />
-      <ServerCompilationReference Include="@(ServerCompilationLocalReference)" />
-      <ServerCompilationReference Include="System.ComponentModel.DataAnnotations.dll" />
-      <ServerCompilationReference Include="$(DibixToolsDirectory)Newtonsoft.Json.dll" />
+      <ServerCompilationReference Include="@(ServerCompilationArtifactReference)" />
+      <ServerCompilationReference Include="$(DibixAssemblyPath)" />
+      <ServerCompilationReference Include="$(DibixHttpAssemblyPath)" />
+      <ServerCompilationReference Condition="'$(CompileArtifactsNetStandard)' != 'true'" Include="System.ComponentModel.DataAnnotations.dll" />
+      <ServerCompilationReference Condition="'$(CompileArtifactsNetStandard)' != 'true'" Include="$(DibixToolsDirectory)Newtonsoft.Json.dll" />
 
       <ServerAssemblyAttribute Include="@(AssemblyAttribute)" />
       <ServerAssemblyAttribute Include="AssemblyTitle">
@@ -337,12 +342,12 @@ $(_SqlReferencePath)" />
       </ServerAssemblyAttribute>
     </ItemGroup>
 
-    <WriteCodeFragment Condition="'$(CompileArtifactsNetStandard)' == ''"
+    <WriteCodeFragment Condition="'$(CompileArtifactsNetStandard)' != 'true'"
                        AssemblyAttributes="@(ServerAssemblyAttribute)"
                        Language="C#"
                        OutputFile="$(_ServerAssemblyInfoFile)" />
 
-    <Csc Condition="'$(CompileArtifactsNetStandard)' == ''"
+    <Csc Condition="'$(CompileArtifactsNetStandard)' != 'true'"
          DebugType="$(DebugType)"
          DefineConstants="$(DefineConstants)"
          DisabledWarnings="nullable"
@@ -355,7 +360,7 @@ $(_SqlReferencePath)" />
          TargetType="$(OutputType)" />
 
     <ItemGroup Condition="'$(CompileArtifactsNetStandard)' == 'true'">
-      <_ServerCompilationReferenceItem Include="@(ServerCompilationLocalReference->'&lt;Reference Include=&quot;%(Filename)&quot; HintPath=&quot;%(FullPath)&quot; Private=&quot;False&quot; /&gt;')" />
+      <_ServerCompilationReferenceItem Include="@(ServerCompilationReference->'&lt;Reference Include=&quot;%(Filename)&quot; HintPath=&quot;%(FullPath)&quot; Private=&quot;False&quot; /&gt;')" />
     </ItemGroup>
 
     <PropertyGroup Condition="'$(CompileArtifactsNetStandard)' == 'true'">
@@ -365,7 +370,7 @@ $(_SqlReferencePath)" />
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net5.0</TargetFrameworks>
     
     <OutDir>.</OutDir>
     <EnableDefaultItems>false</EnableDefaultItems>

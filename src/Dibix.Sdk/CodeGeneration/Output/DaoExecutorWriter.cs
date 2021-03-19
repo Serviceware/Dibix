@@ -89,7 +89,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                 IEnumerable<string> annotations = statement.ErrorResponses.Select(x => $"ErrorResponse(statusCode: {x.StatusCode}, errorCode: {x.ErrorCode}, errorDescription: \"{x.ErrorDescription}\")");
                 if (statement.ErrorResponses.Any())
-                    context.AddUsing("Dibix.Http");
+                    context.AddDibixHttpReference();
 
                 CSharpModifiers modifiers = CSharpModifiers.Public | CSharpModifiers.Static;
                 if (statement.Async)
