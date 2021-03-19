@@ -25,6 +25,7 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly string _areaName;
         private readonly string _outputName;
         private readonly ICollection<SqlStatementInfo> _statements;
+        private readonly IEnumerable<SecurityScheme> _securitySchemes;
         private readonly ITypeResolverFacade _typeResolver;
         private readonly ReferencedAssemblyInspector _referencedAssemblyInspector;
         private readonly ISchemaRegistry _schemaRegistry;
@@ -37,13 +38,28 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public ControllerDefinitionProvider(string projectName, string productName, string areaName, string outputName, ICollection<SqlStatementInfo> statements, IEnumerable<string> endpoints, ITypeResolverFacade typeResolver, ReferencedAssemblyInspector referencedAssemblyInspector, ISchemaRegistry schemaRegistry, IFileSystemProvider fileSystemProvider, ILogger logger) : base(fileSystemProvider, logger)
+        public ControllerDefinitionProvider
+        (
+            string projectName
+          , string productName
+          , string areaName
+          , string outputName
+          , ICollection<SqlStatementInfo> statements
+          , IEnumerable<string> endpoints
+          , IEnumerable<SecurityScheme> securitySchemes
+          , ITypeResolverFacade typeResolver
+          , ReferencedAssemblyInspector referencedAssemblyInspector
+          , ISchemaRegistry schemaRegistry
+          , IFileSystemProvider fileSystemProvider
+          , ILogger logger
+        ) : base(fileSystemProvider, logger)
         {
             this._projectName = projectName;
             this._productName = productName;
             this._areaName = areaName;
             this._outputName = outputName;
             this._statements = statements;
+            this._securitySchemes = securitySchemes;
             this._typeResolver = typeResolver;
             this._referencedAssemblyInspector = referencedAssemblyInspector;
             this._schemaRegistry = schemaRegistry;
@@ -156,6 +172,9 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (!actionDefinition.Responses.Any())
                 actionDefinition.SetDefaultResultType(null);
+
+            if (!actionDefinition.IsAnonymous)
+                actionDefinition.SecuritySchemes.AddRange(this._securitySchemes);
 
             if (controller.Actions.Add(actionDefinition))
                 return;

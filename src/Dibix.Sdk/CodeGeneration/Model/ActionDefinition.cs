@@ -15,12 +15,14 @@ namespace Dibix.Sdk.CodeGeneration
         public ActionFileResponse FileResponse { get; set; }
         public IList<ActionParameter> Parameters { get; }
         public IDictionary<HttpStatusCode, ActionResponse> Responses { get; }
+        public ICollection<SecurityScheme> SecuritySchemes { get; }
 
         public ActionDefinition(ActionDefinitionTarget target)
         {
             this.Target = target;
             this.Parameters = new Collection<ActionParameter>();
             this.Responses = new Dictionary<HttpStatusCode, ActionResponse>();
+            this.SecuritySchemes = new Collection<SecurityScheme>();
         }
 
         public void SetDefaultResultType(TypeReference resultType)

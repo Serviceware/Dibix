@@ -23,6 +23,7 @@ namespace Dibix.Sdk.CodeGeneration
           , IEnumerable<TaskItem> contracts
           , IEnumerable<TaskItem> endpoints
           , IEnumerable<TaskItem> references
+          , IEnumerable<TaskItem> securitySchemes
           , bool isEmbedded
           , string databaseSchemaProviderName
           , string modelCollation
@@ -48,6 +49,7 @@ namespace Dibix.Sdk.CodeGeneration
               , contracts
               , endpoints
               , references
+              , securitySchemes
               , isEmbedded
               , databaseSchemaProviderName
               , modelCollation
@@ -74,6 +76,7 @@ namespace Dibix.Sdk.CodeGeneration
           , IEnumerable<TaskItem> contracts
           , IEnumerable<TaskItem> endpoints
           , IEnumerable<TaskItem> references
+          , IEnumerable<TaskItem> securitySchemes
           , bool isEmbedded
           , string databaseSchemaProviderName
           , string modelCollation
@@ -101,6 +104,7 @@ namespace Dibix.Sdk.CodeGeneration
               , contracts
               , endpoints
               , references
+              , securitySchemes
               , isEmbedded
               , databaseSchemaProviderName
               , modelCollation

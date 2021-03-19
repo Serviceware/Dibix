@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using Dibix.Http;
@@ -93,6 +94,7 @@ namespace Dibix.Sdk.OpenApi
                         AppendParameters(document, operation, action, rootNamespace, schemaRegistry);
                         AppendBody(document, operation, action, rootNamespace, schemaRegistry);
                         AppendResponses(document, operation, action, rootNamespace, schemaRegistry);
+                        AppendSecuritySchemes(document, action, operation);
 
                         value.AddOperation(operationType, operation);
                     }
@@ -273,6 +275,28 @@ namespace Dibix.Sdk.OpenApi
         {
             OpenApiMediaType content = new OpenApiMediaType { Schema = CreateSchema(document, typeReference, rootNamespace, schemaRegistry) };
             target.Add(mediaType, content);
+        }
+
+        private static void AppendSecuritySchemes(OpenApiDocument document, ActionDefinition action, OpenApiOperation operation)
+        {
+            foreach (SecurityScheme securityScheme in action.SecuritySchemes)
+            {
+                OpenApiSecurityScheme scheme = new OpenApiSecurityScheme
+                {
+                    Name = securityScheme.Name,
+                    In = ParameterLocation.Header,
+                    Reference = new OpenApiReference
+                    {
+                        Id = securityScheme.Name,
+                        Type = ReferenceType.SecurityScheme
+                    }
+                };
+                OpenApiSecurityRequirement requirement = new OpenApiSecurityRequirement { { scheme, new Collection<string>() } };
+                operation.Security.Add(requirement);
+
+                if (!document.Components.SecuritySchemes.ContainsKey(securityScheme.Name))
+                    document.Components.SecuritySchemes.Add(securityScheme.Name, scheme);
+            }
         }
 
         private static OpenApiSchema CreateSchema(OpenApiDocument document, TypeReference typeReference, string rootNamespace, ISchemaRegistry schemaRegistry) => CreateSchema(document, typeReference, typeReference.IsEnumerable, false, null, rootNamespace, schemaRegistry);

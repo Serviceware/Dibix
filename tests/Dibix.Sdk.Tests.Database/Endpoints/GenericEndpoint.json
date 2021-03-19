@@ -18,7 +18,8 @@
     {
       "method": "GET",
       "target": "EmptyWithParams",
-      "childRoute": "{password}/User"
+      "childRoute": "{password}/User",
+      "isAnonymous": true
     },
     {
       "method": "GET",

@@ -437,6 +437,7 @@ namespace Dibix.Sdk.Tests
                     {
                         y.Method = HttpApiMethod.Get;
                         y.ChildRoute = "{password}/User";
+                        y.IsAnonymous = true;
                     });
                     x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.SingleConrecteResultWithParams)), y =&gt;
                     {
@@ -507,6 +508,9 @@ paths:
       responses:
         '204':
           description: NoContent
+      security:
+        - HLNS-SIT: [ ]
+        - HLNS-ClientId: [ ]
   '/Tests/GenericEndpoint/{password}/User':
     get:
       tags:
@@ -583,6 +587,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericContract'
+      security:
+        - HLNS-SIT: [ ]
+        - HLNS-ClientId: [ ]
   '/Tests/GenericEndpoint/{id}':
     get:
       tags:
@@ -606,6 +613,9 @@ paths:
                 format: binary
         '404':
           description: NotFound
+      security:
+        - HLNS-SIT: [ ]
+        - HLNS-ClientId: [ ]
   /Tests/GenericEndpoint:
     put:
       tags:
@@ -622,6 +632,9 @@ paths:
       responses:
         '204':
           description: NoContent
+      security:
+        - HLNS-SIT: [ ]
+        - HLNS-ClientId: [ ]
     post:
       tags:
         - GenericEndpoint
@@ -636,6 +649,9 @@ paths:
       responses:
         '204':
           description: NoContent
+      security:
+        - HLNS-SIT: [ ]
+        - HLNS-ClientId: [ ]
 components:
   schemas:
     GenericParameterSet:
@@ -685,7 +701,16 @@ components:
         Z:
           type: integer
           format: int32
-      additionalProperties: false</value>
+      additionalProperties: false
+  securitySchemes:
+    HLNS-SIT:
+      type: apiKey
+      name: HLNS-SIT
+      in: header
+    HLNS-ClientId:
+      type: apiKey
+      name: HLNS-ClientId
+      in: header</value>
   </data>
   <data name="ExplicitProcedureArgumentSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;

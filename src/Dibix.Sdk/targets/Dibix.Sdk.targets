@@ -237,6 +237,9 @@
     <DumpItem Source="@(SqlReferencePath)">
       <Output TaskParameter="Result" PropertyName="_SqlReferencePath"/>
     </DumpItem>
+    <DumpItem Source="@(SecurityScheme)">
+      <Output TaskParameter="Result" PropertyName="_SecurityScheme"/>
+    </DumpItem>
 
     <ItemGroup>
       <_SqlCoreInputItem Include="ProjectName
@@ -279,6 +282,8 @@ $(_Contract)" />
 $(_Endpoint)" />
       <_SqlCoreInputItem Include="References
 $(_ServerCompilationArtifactReference)" />
+      <_SqlCoreInputItem Include="SecuritySchemes
+$(_SecurityScheme)" />
       <_SqlCoreInputItem Include="DatabaseSchemaProviderName
   $(DSP)" />
       <_SqlCoreInputItem Include="ModelCollation
