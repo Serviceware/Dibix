@@ -294,7 +294,7 @@ namespace Dibix.Sdk.OpenApi
                 OpenApiSecurityRequirement requirement = new OpenApiSecurityRequirement { { scheme, new Collection<string>() } };
                 operation.Security.Add(requirement);
 
-                if (!document.Components.SecuritySchemes.ContainsKey(securityScheme.Name))
+                if (!EnsureComponents(document).SecuritySchemes.ContainsKey(securityScheme.Name))
                     document.Components.SecuritySchemes.Add(securityScheme.Name, scheme);
             }
         }
@@ -387,10 +387,7 @@ namespace Dibix.Sdk.OpenApi
 
         private static void EnsureSchema(OpenApiDocument document, string schemaName, SchemaDefinition contract, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
-            if (document.Components == null)
-                document.Components = new OpenApiComponents();
-
-            if (!document.Components.Schemas.ContainsKey(schemaName))
+            if (!EnsureComponents(document).Schemas.ContainsKey(schemaName))
                 AppendContractSchema(document, schemaName, contract, rootNamespace, schemaRegistry);
         }
 
@@ -450,6 +447,8 @@ namespace Dibix.Sdk.OpenApi
 
             document.Components.Schemas.Add(schemaName, schema);
         }
+
+        private static OpenApiComponents EnsureComponents(OpenApiDocument document) => document.Components ?? (document.Components = new OpenApiComponents());
 
         private static IOpenApiAny CreateDefaultValue(object defaultValue)
         {

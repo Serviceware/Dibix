@@ -8,7 +8,7 @@ using Dapper;
 
 namespace Dibix.Dapper
 {
-    public sealed class DapperDatabaseAccessor : DatabaseAccessor, IDatabaseAccessor, IDisposable
+    public class DapperDatabaseAccessor : DatabaseAccessor, IDatabaseAccessor, IDisposable
     {
         #region Fields
         private readonly IDbTransaction _transaction;
