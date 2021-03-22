@@ -262,7 +262,7 @@ using Dibix.Http;
 using Newtonsoft.Json;
 
 [assembly: ArtifactAssembly]
-[assembly: ApiRegistration("Tests")]
+[assembly: AreaRegistration("Tests")]
 namespace Dibix.Sdk.Tests
 {
     namespace Data

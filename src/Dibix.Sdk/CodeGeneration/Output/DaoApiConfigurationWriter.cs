@@ -18,7 +18,7 @@ namespace Dibix.Sdk.CodeGeneration
         public override IEnumerable<string> GetGlobalAnnotations(CodeGenerationModel model)
         {
             string areaName = NamespaceUtility.EnsureAreaName(model.AreaName);
-            yield return $"ApiRegistration(\"{areaName}\")";
+            yield return $"AreaRegistration(\"{areaName}\")";
         }
 
         public override void Write(DaoCodeGenerationContext context)

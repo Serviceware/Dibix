@@ -47,7 +47,7 @@ namespace Dibix.Http
             ICollection<HttpApiDescriptor> descriptors = new Collection<HttpApiDescriptor>();
             foreach (Assembly assembly in assemblies)
             {
-                ApiRegistrationAttribute attribute = assembly.GetCustomAttribute<ApiRegistrationAttribute>();
+                AreaRegistrationAttribute attribute = assembly.GetCustomAttribute<AreaRegistrationAttribute>();
                 if (attribute == null)
                     continue;
 

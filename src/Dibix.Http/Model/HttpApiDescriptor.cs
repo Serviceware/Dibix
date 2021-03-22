@@ -31,9 +31,9 @@ namespace Dibix.Http
         #region Protected Methods
         protected virtual string ResolveAreaName(Assembly assembly)
         {
-            ApiRegistrationAttribute attribute = assembly.GetCustomAttribute<ApiRegistrationAttribute>();
+            AreaRegistrationAttribute attribute = assembly.GetCustomAttribute<AreaRegistrationAttribute>();
             if (attribute == null)
-                throw new InvalidOperationException($"Assembly {assembly.GetName().Name} is not marked with {typeof(ApiRegistrationAttribute)}");
+                throw new InvalidOperationException($"Assembly {assembly.GetName().Name} is not marked with {typeof(AreaRegistrationAttribute)}");
 
             if (String.IsNullOrEmpty(attribute.AreaName))
                 throw new InvalidOperationException($@"Area name cannot be empty

@@ -1,13 +1,13 @@
 ﻿using System;
 
-namespace Dibix.Http
+namespace Dibix
 {
     [AttributeUsage(AttributeTargets.Assembly)]
-    public sealed class ApiRegistrationAttribute : Attribute
+    public sealed class AreaRegistrationAttribute : Attribute
     {
         public string AreaName { get; }
 
-        public ApiRegistrationAttribute(string areaName)
+        public AreaRegistrationAttribute(string areaName)
         {
             this.AreaName = areaName;
         }

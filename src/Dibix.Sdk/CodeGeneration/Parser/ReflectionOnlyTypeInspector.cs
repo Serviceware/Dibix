@@ -23,13 +23,17 @@ namespace Dibix.Sdk.CodeGeneration
         // When using the ReflectionOnly APIs, dependent assemblies must be pre-loaded or loaded on demand through the ReflectionOnlyAssemblyResolve event.
         private static Assembly OnReflectionOnlyAssemblyResolve(object sender, ResolveEventArgs args)
         {
-            Assembly assembly = AppDomain.CurrentDomain.ReflectionOnlyGetAssemblies().FirstOrDefault(x => x.FullName == args.Name);
-            if (assembly != null)
-                return assembly;
+            AssemblyName assemblyName = new AssemblyName(args.Name);
 
-            assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.FullName == args.Name);
-            if (assembly != null)
-                return Assembly.ReflectionOnlyLoadFrom(assembly.Location);
+            bool IsMatchingAssembly(Assembly assembly) => assembly.GetName().Name == assemblyName.Name;
+
+            Assembly matchingAssembly = AppDomain.CurrentDomain.ReflectionOnlyGetAssemblies().FirstOrDefault(IsMatchingAssembly);
+            if (matchingAssembly != null)
+                return matchingAssembly;
+
+            matchingAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(IsMatchingAssembly);
+            if (matchingAssembly != null)
+                return Assembly.ReflectionOnlyLoadFrom(matchingAssembly.Location);
 
             return Assembly.ReflectionOnlyLoad(args.Name);
         }
