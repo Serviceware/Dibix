@@ -321,6 +321,9 @@ $(_SqlReferencePath)" />
       <AssemblyAttribute Include="AssemblyInformationalVersion" Condition="'$(InformationalVersion)' != ''">
         <_Parameter1>$(InformationalVersion)</_Parameter1>
       </AssemblyAttribute>
+      <AssemblyAttribute Include="AssemblyConfiguration">
+        <_Parameter1>$(Configuration)</_Parameter1>
+      </AssemblyAttribute>
     </ItemGroup>
 
     <!-- Server assembly info & DLL generation -->
