@@ -3,7 +3,7 @@ using System.Data.SqlClient;
 
 namespace Dibix.Dapper
 {
-    public sealed class DapperDatabaseAccessorFactory : IDatabaseAccessorFactory
+    public class DapperDatabaseAccessorFactory : IDatabaseAccessorFactory
     {
         private readonly DbProviderFactory _dbProviderFactory;
         private readonly string _connectionString;
