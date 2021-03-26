@@ -229,8 +229,8 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static void WriteParameters(StringWriter writer, SqlStatementInfo query, DaoCodeGenerationContext context)
         {
-            writer.WriteLine("IParametersVisitor @params = accessor.Parameters()")
-                  .SetTemporaryIndent(37);
+            writer.WriteLine("ParametersVisitor @params = accessor.Parameters()")
+                  .SetTemporaryIndent(36);
 
             bool hasImplicitParameters = query.GenerateInputClass || query.Parameters.Any(x => !x.IsOutput && !x.Obfuscate);
 

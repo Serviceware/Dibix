@@ -53,6 +53,6 @@ namespace Dibix
         IParameterBuilder SetXml(string parameterName, XElement parameterValue);
         IParameterBuilder SetStructured(string name, StructuredType parameterValue);
         IParameterBuilder SetFromTemplate(object template);
-        IParametersVisitor Build();
+        ParametersVisitor Build();
     }
 }

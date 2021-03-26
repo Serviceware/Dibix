@@ -9,9 +9,9 @@ namespace Dibix
         public static IMultipleResultReader QueryMultiple(this IDatabaseAccessor accessor, string sql)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.QueryMultiple(sql, CommandType.Text, EmptyParameters.Instance);
+            return accessor.QueryMultiple(sql, CommandType.Text, ParametersVisitor.Empty);
         }
-        public static IMultipleResultReader QueryMultiple(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters)
+        public static IMultipleResultReader QueryMultiple(this IDatabaseAccessor accessor, string sql, ParametersVisitor parameters)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
             return accessor.QueryMultiple(sql, CommandType.Text, parameters);
@@ -21,7 +21,7 @@ namespace Dibix
         public static Task<IMultipleResultReader> QueryMultipleAsync(this IDatabaseAccessor accessor, string sql, CancellationToken cancellationToken)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.QueryMultipleAsync(sql, CommandType.Text, EmptyParameters.Instance, cancellationToken);
+            return accessor.QueryMultipleAsync(sql, CommandType.Text, ParametersVisitor.Empty, cancellationToken);
         }
     }
 }

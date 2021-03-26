@@ -45,10 +45,10 @@ CommandText: <Dynamic>", exception.Message);
             {
                 const string commandText = "[dbo].[_dibix_tests_sp1]";
                 InputClass input = new InputClass();
-                IParametersVisitor parameters = accessor.Parameters()
-                                                        .SetInt32("out1", out IOutParameter<int> out1)
-                                                        .SetFromTemplate(input)
-                                                        .Build();
+                ParametersVisitor parameters = accessor.Parameters()
+                                                       .SetInt32("out1", out IOutParameter<int> out1)
+                                                       .SetFromTemplate(input)
+                                                       .Build();
                 accessor.Execute(commandText, CommandType.StoredProcedure, parameters);
                 Assert.Equal(5, out1.Result);
                 Assert.True(input.out2.Result);
@@ -66,7 +66,7 @@ CommandText: <Dynamic>", exception.Message);
             {
                 const string commandText = "SELECT CAST(@binary AS NVARCHAR(MAX))";
                 byte[] binary = Encoding.Unicode.GetBytes("Test");
-                IParametersVisitor parameters = accessor.Parameters().SetFromTemplate(new { binary }).Build();
+                ParametersVisitor parameters = accessor.Parameters().SetFromTemplate(new { binary }).Build();
                 string result = accessor.QuerySingle<string>(commandText, parameters);
                 Assert.Equal("Test", result);
             }
@@ -79,7 +79,7 @@ CommandText: <Dynamic>", exception.Message);
             {
                 const string commandText = "SELECT [x].[v].value('@value', 'INT') FROM @xml.nodes(N'root/item') AS [x]([v])";
                 XElement xml = XElement.Parse("<root><item value=\"1\" /><item value=\"2\" /></root>");
-                IParametersVisitor parameters = accessor.Parameters().SetFromTemplate(new { xml }).Build();
+                ParametersVisitor parameters = accessor.Parameters().SetFromTemplate(new { xml }).Build();
                 IList<byte> results = accessor.QueryMany<byte>(commandText, parameters).ToArray();
                 Assert.Equal(2, results.Count);
                 Assert.Equal((byte)1, results[0]);
@@ -94,7 +94,7 @@ CommandText: <Dynamic>", exception.Message);
             {
                 const string commandText = "SELECT [x].[v].value('@value', 'INT') FROM @xml.nodes(N'root/item') AS [x]([v])";
                 XElement xml = XElement.Parse("<root><item value=\"1\" /><item value=\"2\" /></root>");
-                IParametersVisitor parameters = accessor.Parameters().SetXml(nameof(xml), xml).Build();
+                ParametersVisitor parameters = accessor.Parameters().SetXml(nameof(xml), xml).Build();
                 IList<byte> results = accessor.QueryMany<byte>(commandText, parameters).ToArray();
                 Assert.Equal(2, results.Count);
                 Assert.Equal((byte)1, results[0]);
@@ -146,7 +146,7 @@ CommandText: <Dynamic>", exception.Message);
             using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
             {
                 const string commandText = @"SELECT @agentid AS [id], N'beef' AS [name]";
-                IParametersVisitor parameters = accessor.Parameters().SetInt32("agentid", 6).Build();
+                ParametersVisitor parameters = accessor.Parameters().SetInt32("agentid", 6).Build();
                 Entity result = accessor.QuerySingle<Entity>(commandText, parameters);
                 Assert.Equal(6, result.Id);
                 Assert.Equal("beef", result.Name);
@@ -160,7 +160,7 @@ CommandText: <Dynamic>", exception.Message);
             using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
             {
                 const string commandText = @"SELECT @agentid AS [id], N'beef' AS [name]";
-                IParametersVisitor parameters = accessor.Parameters().SetFromTemplate(new { agentid = 6 }).Build();
+                ParametersVisitor parameters = accessor.Parameters().SetFromTemplate(new { agentid = 6 }).Build();
                 Entity result = accessor.QuerySingle<Entity>(commandText, parameters);
                 Assert.Equal(6, result.Id);
                 Assert.Equal("beef", result.Name);
@@ -174,9 +174,9 @@ CommandText: <Dynamic>", exception.Message);
             using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
             {
                 const string commandText = @"SELECT @agentid AS [id], N'beef' AS [name]";
-                IParametersVisitor @params = accessor.Parameters()
-                                                     .SetInt32("agentid", 6)
-                                                     .Build();
+                ParametersVisitor @params = accessor.Parameters()
+                                                    .SetInt32("agentid", 6)
+                                                    .Build();
                 Entity result = accessor.QuerySingle<Entity>(commandText, @params);
                 Assert.Equal(6, result.Id);
                 Assert.Equal("beef", result.Name);
@@ -190,13 +190,13 @@ CommandText: <Dynamic>", exception.Message);
             using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
             {
                 const string commandText = "SELECT @agentid AS [id], N'beef' AS [name], @direction AS [direction]";
-                IParametersVisitor @params = accessor.Parameters()
-                                                     .SetFromTemplate(new
-                                                     {
-                                                         agentid = 6
-                                                       , direction = (Direction?)Direction.Descending
-                                                     })
-                                                     .Build();
+                ParametersVisitor @params = accessor.Parameters()
+                                                    .SetFromTemplate(new
+                                                    {
+                                                        agentid = 6
+                                                      , direction = (Direction?)Direction.Descending
+                                                    })
+                                                    .Build();
                 Entity result = accessor.QuerySingle<Entity>(commandText, @params);
                 Assert.Equal(6, result.Id);
                 Assert.Equal("beef", result.Name);
@@ -218,7 +218,7 @@ FROM @translations";
                     { 9, "en" }
                 };
 
-                IParametersVisitor parameters = accessor.Parameters().SetStructured("translations", translationsParam).Build();
+                ParametersVisitor parameters = accessor.Parameters().SetStructured("translations", translationsParam).Build();
                 IList<Entity> result = accessor.QueryMany<Entity>(commandText, parameters).ToArray();
                 Assert.Equal(2, result.Count);
                 Assert.Equal(7, result[0].Id);
@@ -243,14 +243,14 @@ FROM @ids";
                 StructuredType_IntStringDecimal valuesParam = new StructuredType_IntStringDecimal { { 5, "cake", 3.975M } };
                 StructuredType_Int idsParam = StructuredType_Int.From(new[] { 1, 2 }, (x, y) => x.Add(y));
 
-                IParametersVisitor parameters = accessor.Parameters()
-                                                        .SetFromTemplate(new
-                                                        {
-                                                            agentid = 6,
-                                                            values = valuesParam,
-                                                            ids = idsParam
-                                                        })
-                                                        .Build();
+                ParametersVisitor parameters = accessor.Parameters()
+                                                       .SetFromTemplate(new
+                                                       {
+                                                           agentid = 6,
+                                                           values = valuesParam,
+                                                           ids = idsParam
+                                                       })
+                                                       .Build();
                 using (IMultipleResultReader reader = accessor.QueryMultiple(commandText, parameters))
                 {
                     Entity entity = reader.ReadSingle<Entity>();
@@ -277,11 +277,11 @@ FROM @ids";
                 StructuredType_IntStringDecimal valuesParam = new StructuredType_IntStringDecimal { { 5, "cake", 3.975M } };
                 StructuredType_Int idsParam = StructuredType_Int.From(new[] { 1, 2 }, (x, y) => x.Add(y));
 
-                IParametersVisitor parameters = accessor.Parameters()
-                                                        .SetInt32("agentid", 6)
-                                                        .SetStructured("values", valuesParam)
-                                                        .SetStructured("ids", idsParam)
-                                                        .Build();
+                ParametersVisitor parameters = accessor.Parameters()
+                                                       .SetInt32("agentid", 6)
+                                                       .SetStructured("values", valuesParam)
+                                                       .SetStructured("ids", idsParam)
+                                                       .Build();
                 using (IMultipleResultReader reader = accessor.QueryMultiple(commandText, parameters))
                 {
                     Entity entity = reader.ReadSingle<Entity>();
@@ -304,9 +304,9 @@ FROM @ids";
 FROM @values";
 
                 StructuredType_IntStringDecimal valuesParam = new StructuredType_IntStringDecimal { { 5, "cake", 3.975M } };
-                IParametersVisitor @params = accessor.Parameters()
-                                                     .SetStructured("values", valuesParam)
-                                                     .Build();
+                ParametersVisitor @params = accessor.Parameters()
+                                                    .SetStructured("values", valuesParam)
+                                                    .Build();
                 void MapEntity(Entity a, NameEntity b, PriceEntity c)
                 {
                     Assert.Equal(5, a.Id);
@@ -337,9 +337,9 @@ FROM @values";
 FROM @values";
 
                 StructuredType_IntStringDecimal valuesParam = new StructuredType_IntStringDecimal { { 5, "cake", 3.975M } };
-                IParametersVisitor @params = accessor.Parameters()
-                                                     .SetStructured("values", valuesParam)
-                                                     .Build();
+                ParametersVisitor @params = accessor.Parameters()
+                                                    .SetStructured("values", valuesParam)
+                                                    .Build();
                 void MapEntity(Entity a, NameEntity b, PriceEntity c)
                 {
                     Assert.Equal(5, a.Id);
@@ -372,7 +372,7 @@ FROM @values";
                 const string commandText = @"SELECT [stringvalue]
 FROM @values";
 
-                IParametersVisitor parameters = accessor.Parameters().SetStructured("values", new StructuredType_String_Custom { "abc" }).Build();
+                ParametersVisitor parameters = accessor.Parameters().SetStructured("values", new StructuredType_String_Custom { "abc" }).Build();
                 string result = accessor.QuerySingle<string>(commandText, parameters);
                 Assert.Equal("a", result);
             }
@@ -386,7 +386,7 @@ FROM @values";
                 const string commandText = @"SELECT [decimalvalue]
 FROM @values";
 
-                IParametersVisitor parameters = accessor.Parameters().SetStructured("values", new StructuredType_Decimal_Custom { 3.975M }).Build();
+                ParametersVisitor parameters = accessor.Parameters().SetStructured("values", new StructuredType_Decimal_Custom { 3.975M }).Build();
                 decimal result = accessor.QuerySingle<decimal>(commandText, parameters);
                 Assert.Equal(4M, result);
             }

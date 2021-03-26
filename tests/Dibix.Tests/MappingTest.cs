@@ -26,12 +26,12 @@ namespace Dibix.Tests
 
             Mock<DbConnection> connection = new Mock<DbConnection>(MockBehavior.Strict);
             Mock<DatabaseAccessor> accessor = new Mock<DatabaseAccessor>(MockBehavior.Strict, connection.Object);
-            Mock<IParametersVisitor> parametersVisitor = new Mock<IParametersVisitor>(MockBehavior.Strict);
+            Mock<ParametersVisitor> parametersVisitor = new Mock<ParametersVisitor>(MockBehavior.Strict);
 
             accessor.Protected()
                     .As<IDatabaseAccessor>()
                     .Setup(x => x.QueryMany("sql", CommandType.Text, parametersVisitor.Object, It.IsAny<Func<Character, Name, string, Name, Character>>(), "splitOn"))
-                    .Returns<string, CommandType, IParametersVisitor, Func<Character, Name, string, Name, Character>, string>((sql, commandType, parameters, map, splitOn) => rows.Select(x => map((Character)x[0], (Name)x[1], (string)x[2], (Name)x[3])));
+                    .Returns<string, CommandType, ParametersVisitor, Func<Character, Name, string, Name, Character>, string>((sql, commandType, parameters, map, splitOn) => rows.Select(x => map((Character)x[0], (Name)x[1], (string)x[2], (Name)x[3])));
 
             Character result = accessor.Object.QuerySingle<Character, Name, string, Name>("sql", parametersVisitor.Object, "splitOn");
             Assert.NotNull(result.Name);
@@ -66,12 +66,12 @@ namespace Dibix.Tests
 
             Mock<DbConnection> connection = new Mock<DbConnection>(MockBehavior.Strict);
             Mock<DatabaseAccessor> accessor = new Mock<DatabaseAccessor>(connection.Object);
-            Mock<IParametersVisitor> parametersVisitor = new Mock<IParametersVisitor>(MockBehavior.Strict);
+            Mock<ParametersVisitor> parametersVisitor = new Mock<ParametersVisitor>(MockBehavior.Strict);
 
             accessor.Protected()
                     .As<IDatabaseAccessor>()
                     .Setup(x => x.QueryMany("sql", CommandType.Text, parametersVisitor.Object, It.IsAny<Func<Category, CategoryBlacklistEntry, Category>>(), "splitOn"))
-                    .Returns<string, CommandType, IParametersVisitor, Func<Category, CategoryBlacklistEntry, Category>, string>((sql, commandType, parameters, map, splitOn) => rows.Select(x => map((Category)x[0], (CategoryBlacklistEntry)x[1])));
+                    .Returns<string, CommandType, ParametersVisitor, Func<Category, CategoryBlacklistEntry, Category>, string>((sql, commandType, parameters, map, splitOn) => rows.Select(x => map((Category)x[0], (CategoryBlacklistEntry)x[1])));
 
             IList<Category> categories = accessor.Object.QueryMany<Category, CategoryBlacklistEntry>("sql", CommandType.Text, parametersVisitor.Object, "splitOn").ToArray();
             Assert.NotNull(categories);
@@ -139,7 +139,7 @@ namespace Dibix.Tests
             Mock<MultipleResultReader> multipleResultReader = new Mock<MultipleResultReader>(MockBehavior.Strict);
 
             accessor.As<IDatabaseAccessor>()
-                    .Setup(x => x.QueryMultiple("sql", CommandType.Text, It.IsAny<IParametersVisitor>()))
+                    .Setup(x => x.QueryMultiple("sql", CommandType.Text, It.IsAny<ParametersVisitor>()))
                     .Returns(multipleResultReader.Object);
             multipleResultReader.Setup(x => x.Dispose());
             multipleResultReader.Protected()

@@ -11,14 +11,14 @@ namespace Dibix
         public static IEnumerable<T> QueryMany<T>(this IDatabaseAccessor accessor, string sql)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.QueryMany<T>(sql, CommandType.Text, EmptyParameters.Instance);
+            return accessor.QueryMany<T>(sql, CommandType.Text, ParametersVisitor.Empty);
         }
         public static IEnumerable<T> QueryMany<T>(this IDatabaseAccessor accessor, string sql, CommandType commandType)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.QueryMany<T>(sql, commandType, EmptyParameters.Instance);
+            return accessor.QueryMany<T>(sql, commandType, ParametersVisitor.Empty);
         }
-        public static IEnumerable<T> QueryMany<T>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters)
+        public static IEnumerable<T> QueryMany<T>(this IDatabaseAccessor accessor, string sql, ParametersVisitor parameters)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
             return accessor.QueryMany<T>(sql, CommandType.Text, parameters);
@@ -27,36 +27,36 @@ namespace Dibix
         public static Task<IEnumerable<T>> QueryManyAsync<T>(this IDatabaseAccessor accessor, string sql, CancellationToken cancellationToken)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.QueryManyAsync<T>(sql, CommandType.Text, EmptyParameters.Instance, buffered: true, cancellationToken);
+            return accessor.QueryManyAsync<T>(sql, CommandType.Text, ParametersVisitor.Empty, buffered: true, cancellationToken);
         }
 
         public static IEnumerable<TReturn> QueryMany<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, Action<TReturn, TSecond> map, string splitOn)
         {
-            return QueryMany(accessor, sql, CommandType.Text, EmptyParameters.Instance, map, splitOn);
+            return QueryMany(accessor, sql, CommandType.Text, ParametersVisitor.Empty, map, splitOn);
         }
         // Workflow (GetPendingWorkflowActionRequests)
         public static IEnumerable<TReturn> QueryMany<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, string splitOn) where TReturn : new()
         {
             Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.QueryMany<TReturn, TSecond>(sql, CommandType.Text, EmptyParameters.Instance, splitOn);
+            return accessor.QueryMany<TReturn, TSecond>(sql, CommandType.Text, ParametersVisitor.Empty, splitOn);
         }
         // SubProcess (GetAttributesOfCmdbFlows)
         public static IEnumerable<TReturn> QueryMany<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, CommandType commandType, string splitOn) where TReturn : new()
         {
             Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.QueryMany<TReturn, TSecond>(sql, commandType, EmptyParameters.Instance, splitOn);
+            return accessor.QueryMany<TReturn, TSecond>(sql, commandType, ParametersVisitor.Empty, splitOn);
         }
         // TaskMgmt (GetUserTaskAggregates)
-        public static IEnumerable<TReturn> QueryMany<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, string splitOn) where TReturn : new()
+        public static IEnumerable<TReturn> QueryMany<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, ParametersVisitor parameters, string splitOn) where TReturn : new()
         {
             Guard.IsNotNull(accessor, nameof(accessor));
             return accessor.QueryMany<TReturn, TSecond>(sql, CommandType.Text, parameters, splitOn);
         }
-        public static IEnumerable<TReturn> QueryMany<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, Action<TReturn, TSecond> map, string splitOn)
+        public static IEnumerable<TReturn> QueryMany<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, ParametersVisitor parameters, Action<TReturn, TSecond> map, string splitOn)
         {
             return QueryMany(accessor, sql, CommandType.Text, parameters, map, splitOn);
         }
-        public static IEnumerable<TReturn> QueryMany<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, CommandType commandType, IParametersVisitor parameters, Action<TReturn, TSecond> map, string splitOn)
+        public static IEnumerable<TReturn> QueryMany<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, CommandType commandType, ParametersVisitor parameters, Action<TReturn, TSecond> map, string splitOn)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
 
@@ -78,24 +78,24 @@ namespace Dibix
         public static IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird>(this IDatabaseAccessor accessor, string sql, string splitOn) where TReturn : new()
         {
             Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.QueryMany<TReturn, TSecond, TThird>(sql, CommandType.Text, EmptyParameters.Instance, splitOn);
+            return accessor.QueryMany<TReturn, TSecond, TThird>(sql, CommandType.Text, ParametersVisitor.Empty, splitOn);
         }
         // SubProcess (GetCmdbFlows)
         public static IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird>(this IDatabaseAccessor accessor, string sql, CommandType commandType, string splitOn) where TReturn : new()
         {
             Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.QueryMany<TReturn, TSecond, TThird>(sql, commandType, EmptyParameters.Instance, splitOn);
+            return accessor.QueryMany<TReturn, TSecond, TThird>(sql, commandType, ParametersVisitor.Empty, splitOn);
         }
         // BPMNModeler
         public static IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird>(this IDatabaseAccessor accessor, string sql, Action<TReturn, TSecond, TThird> map, string splitOn)
         {
-            return QueryMany(accessor, sql, CommandType.Text, EmptyParameters.Instance, map, splitOn);
+            return QueryMany(accessor, sql, CommandType.Text, ParametersVisitor.Empty, map, splitOn);
         }
-        public static IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, Action<TReturn, TSecond, TThird> map, string splitOn)
+        public static IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird>(this IDatabaseAccessor accessor, string sql, ParametersVisitor parameters, Action<TReturn, TSecond, TThird> map, string splitOn)
         {
             return QueryMany(accessor, sql, CommandType.Text, parameters, map, splitOn);
         }
-        public static IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird>(this IDatabaseAccessor accessor, string sql, CommandType commandType, IParametersVisitor parameters, Action<TReturn, TSecond, TThird> map, string splitOn)
+        public static IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird>(this IDatabaseAccessor accessor, string sql, CommandType commandType, ParametersVisitor parameters, Action<TReturn, TSecond, TThird> map, string splitOn)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
 
@@ -113,7 +113,7 @@ namespace Dibix
             return cache;
         }
 
-        public static IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird, TFourth>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, Action<TReturn, TSecond, TThird, TFourth> map, string splitOn)
+        public static IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird, TFourth>(this IDatabaseAccessor accessor, string sql, ParametersVisitor parameters, Action<TReturn, TSecond, TThird, TFourth> map, string splitOn)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
 
@@ -131,7 +131,7 @@ namespace Dibix
             return cache;
         }
 
-        public static IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird, TFourth, TFifth>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, Action<TReturn, TSecond, TThird, TFourth, TFifth> map, string splitOn)
+        public static IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird, TFourth, TFifth>(this IDatabaseAccessor accessor, string sql, ParametersVisitor parameters, Action<TReturn, TSecond, TThird, TFourth, TFifth> map, string splitOn)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
 
@@ -149,7 +149,7 @@ namespace Dibix
             return cache;
         }
 
-        public static IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, Action<TReturn, TSecond, TThird, TFourth, TFifth, TSixth> map, string splitOn)
+        public static IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth>(this IDatabaseAccessor accessor, string sql, ParametersVisitor parameters, Action<TReturn, TSecond, TThird, TFourth, TFifth, TSixth> map, string splitOn)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
 
@@ -167,7 +167,7 @@ namespace Dibix
             return cache;
         }
 
-        public static IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, Action<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> map, string splitOn)
+        public static IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>(this IDatabaseAccessor accessor, string sql, ParametersVisitor parameters, Action<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> map, string splitOn)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
 
@@ -190,7 +190,7 @@ namespace Dibix
             Guard.IsNotNull(accessor, nameof(accessor));
 
             HashCollection<TReturn> cache = new HashCollection<TReturn>(EntityEqualityComparer<TReturn>.Create());
-            accessor.QueryMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TEleventh, TReturn>(sql, CommandType.Text, EmptyParameters.Instance, (a, b, c, d, e, f, g, h, i, j, k) =>
+            accessor.QueryMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TEleventh, TReturn>(sql, CommandType.Text, ParametersVisitor.Empty, (a, b, c, d, e, f, g, h, i, j, k) =>
             {
                 if (!cache.TryGetValue(a, out TReturn instance))
                 {

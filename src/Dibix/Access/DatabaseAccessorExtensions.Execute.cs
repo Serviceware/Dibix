@@ -11,14 +11,14 @@ namespace Dibix
         public static int Execute(this IDatabaseAccessor accessor, string sql)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.Execute(sql, CommandType.Text, commandTimeout: null, EmptyParameters.Instance);
+            return accessor.Execute(sql, CommandType.Text, commandTimeout: null, ParametersVisitor.Empty);
         }
         public static int Execute(this IDatabaseAccessor accessor, string sql, CommandType commandType)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.Execute(sql, commandType, commandTimeout: null, EmptyParameters.Instance);
+            return accessor.Execute(sql, commandType, commandTimeout: null, ParametersVisitor.Empty);
         }
-        public static int Execute(this IDatabaseAccessor accessor, string sql, CommandType commandType, IParametersVisitor parameters)
+        public static int Execute(this IDatabaseAccessor accessor, string sql, CommandType commandType, ParametersVisitor parameters)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
             return accessor.Execute(sql, commandType, commandTimeout: null, parameters);
@@ -29,7 +29,7 @@ namespace Dibix
             Guard.IsNotNull(accessor, nameof(accessor));
             return accessor.Execute(sql, commandType, configureParameters.Build());
         }
-        public static int Execute(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters)
+        public static int Execute(this IDatabaseAccessor accessor, string sql, ParametersVisitor parameters)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
             return accessor.Execute(sql, CommandType.Text, parameters);
@@ -38,15 +38,15 @@ namespace Dibix
         public static Task<int> ExecuteAsync(this IDatabaseAccessor accessor, string sql, CancellationToken cancellationToken)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.ExecuteAsync(sql, CommandType.Text, commandTimeout: null, EmptyParameters.Instance, cancellationToken);
+            return accessor.ExecuteAsync(sql, CommandType.Text, commandTimeout: null, ParametersVisitor.Empty, cancellationToken);
         }
         // Configurator (UpdateKnowledgeBaseServiceConfiguration)
-        public static Task<int> ExecuteAsync(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, CancellationToken cancellationToken)
+        public static Task<int> ExecuteAsync(this IDatabaseAccessor accessor, string sql, ParametersVisitor parameters, CancellationToken cancellationToken)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
             return accessor.ExecuteAsync(sql, CommandType.Text, commandTimeout: null, parameters, cancellationToken);
         }
-        public static Task<int> ExecuteAsync(this IDatabaseAccessor accessor, string sql, CommandType commandType, IParametersVisitor parameters, CancellationToken cancellationToken)
+        public static Task<int> ExecuteAsync(this IDatabaseAccessor accessor, string sql, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
             return accessor.ExecuteAsync(sql, commandType, commandTimeout: null, parameters, cancellationToken);

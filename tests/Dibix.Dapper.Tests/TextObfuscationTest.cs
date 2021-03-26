@@ -14,10 +14,10 @@ namespace Dibix.Dapper.Tests
             {
                 const string commandText = "SELECT [id] = 1, [password] = @password1, [id] = 1, [password] = @password2";
                 InputClass input = new InputClass { password2 = "test2" };
-                IParametersVisitor parameters = accessor.Parameters()
-                                                        .SetString("password1", "test1", true)
-                                                        .SetFromTemplate(input)
-                                                        .Build();
+                ParametersVisitor parameters = accessor.Parameters()
+                                                       .SetString("password1", "test1", true)
+                                                       .SetFromTemplate(input)
+                                                       .Build();
                 Entity entity = accessor.QuerySingle<Entity, Entity>(commandText, parameters, "id");
                 Assert.Equal("test1", entity.Password);
                 Assert.Equal("test2", entity.RelatedEntities.Single().Password);

@@ -129,7 +129,7 @@ namespace Dibix
             return this;
         }
 
-        IParametersVisitor IParameterBuilder.Build() => new ParametersAccessor(this._parameters.Values);
+        ParametersVisitor IParameterBuilder.Build() => new ParametersAccessor(this._parameters.Values);
         #endregion
 
         #region Private Methods
@@ -180,21 +180,18 @@ namespace Dibix
         #endregion
 
         #region Nested Types
-        private sealed class ParametersAccessor : IParametersVisitor
+        private sealed class ParametersAccessor : ParametersVisitor
         {
             private readonly ICollection<Parameter> _parameters;
 
-            public ParametersAccessor(ICollection<Parameter> parameters)
-            {
-                this._parameters = parameters;
-            }
+            public ParametersAccessor(ICollection<Parameter> parameters) => this._parameters = parameters;
 
-            void IParametersVisitor.VisitInputParameters(InputParameterVisitor visitParameter)
+            public override void VisitInputParameters(InputParameterVisitor visitParameter)
             {
                 this._parameters.Each(x => visitParameter(x.Name, x.Type, x.Value, x.OutputParameter != null));
             }
 
-            public void VisitOutputParameters(OutputParameterVisitor visitParameter)
+            public override void VisitOutputParameters(OutputParameterVisitor visitParameter)
             {
                 this._parameters
                     .Where(x => x.OutputParameter != null)

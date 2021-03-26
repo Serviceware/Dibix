@@ -150,12 +150,12 @@ UNION ALL
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
-                IParametersVisitor @params = accessor.Parameters()
-                                                     .SetFromTemplate(new
-                                                     {
-                                                         param1
-                                                     })
-                                                     .Build();
+                ParametersVisitor @params = accessor.Parameters()
+                                                    .SetFromTemplate(new
+                                                    {
+                                                        param1
+                                                    })
+                                                    .Build();
                 using (IMultipleResultReader reader = accessor.QueryMultiple(dbx_tests_parser_nobeginendCommandText, @params))
                 {
                     dbx_tests_parser_nobeginendResult result = new dbx_tests_parser_nobeginendResult();
@@ -199,12 +199,12 @@ UNION ALL
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
-                IParametersVisitor @params = accessor.Parameters()
-                                                     .SetFromTemplate(new
-                                                     {
-                                                         x
-                                                     })
-                                                     .Build();
+                ParametersVisitor @params = accessor.Parameters()
+                                                    .SetFromTemplate(new
+                                                    {
+                                                        x
+                                                    })
+                                                    .Build();
                 accessor.Execute(dbx_tests_parser_xmlparamCommandText, @params);
             }
         }

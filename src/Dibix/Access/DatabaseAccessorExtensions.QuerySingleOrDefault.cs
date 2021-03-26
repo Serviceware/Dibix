@@ -11,27 +11,27 @@ namespace Dibix
         public static T QuerySingleOrDefault<T>(this IDatabaseAccessor accessor, string sql)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.QuerySingleOrDefault<T>(sql, CommandType.Text, EmptyParameters.Instance);
+            return accessor.QuerySingleOrDefault<T>(sql, CommandType.Text, ParametersVisitor.Empty);
         }
         // DataImport (LoadDeployAlias)
         public static T QuerySingleOrDefault<T>(this IDatabaseAccessor accessor, string sql, CommandType commandType)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.QuerySingleOrDefault<T>(sql, commandType, EmptyParameters.Instance);
+            return accessor.QuerySingleOrDefault<T>(sql, commandType, ParametersVisitor.Empty);
         }
         // Configurator (GetKnowledgeBaseServiceConfiguration)
         public static Task<T> QuerySingleAsync<T>(this IDatabaseAccessor accessor, string sql, CancellationToken cancellationToken)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.QuerySingleAsync<T>(sql, CommandType.Text, EmptyParameters.Instance, cancellationToken);
+            return accessor.QuerySingleAsync<T>(sql, CommandType.Text, ParametersVisitor.Empty, cancellationToken);
         }
-        public static T QuerySingleOrDefault<T>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters)
+        public static T QuerySingleOrDefault<T>(this IDatabaseAccessor accessor, string sql, ParametersVisitor parameters)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
             return accessor.QuerySingleOrDefault<T>(sql, CommandType.Text, parameters);
         }
 
-        public static TReturn QuerySingleOrDefault<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, Action<TReturn, TSecond> map, string splitOn)
+        public static TReturn QuerySingleOrDefault<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, ParametersVisitor parameters, Action<TReturn, TSecond> map, string splitOn)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
 
@@ -50,7 +50,7 @@ namespace Dibix
         }
 
         // BPMNModeler
-        public static TReturn QuerySingleOrDefault<TReturn, TSecond, TThird>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, Action<TReturn, TSecond, TThird> map, string splitOn)
+        public static TReturn QuerySingleOrDefault<TReturn, TSecond, TThird>(this IDatabaseAccessor accessor, string sql, ParametersVisitor parameters, Action<TReturn, TSecond, TThird> map, string splitOn)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
 
@@ -68,7 +68,7 @@ namespace Dibix
             return cache.SingleOrDefault();
         }
 
-        public static TReturn QuerySingleOrDefault<TReturn, TSecond, TThird, TFourth, TFifth, TSixth>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, Action<TReturn, TSecond, TThird, TFourth, TFifth, TSixth> map, string splitOn)
+        public static TReturn QuerySingleOrDefault<TReturn, TSecond, TThird, TFourth, TFifth, TSixth>(this IDatabaseAccessor accessor, string sql, ParametersVisitor parameters, Action<TReturn, TSecond, TThird, TFourth, TFifth, TSixth> map, string splitOn)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
 

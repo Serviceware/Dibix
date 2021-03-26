@@ -24,24 +24,24 @@ namespace Dibix.Dapper
         #endregion
 
         #region Overrides
-        protected override int Execute(string sql, CommandType commandType, int? commandTImeout, IParametersVisitor parameters)
+        protected override int Execute(string sql, CommandType commandType, int? commandTImeout, ParametersVisitor parameters)
         {
             return base.Connection.Execute(sql, PrepareParameters(parameters), this._transaction, commandTImeout, commandType);
         }
 
-        protected override Task<int> ExecuteAsync(string sql, CommandType commandType, int? commandTimeout, IParametersVisitor parameters, CancellationToken cancellationToken)
+        protected override Task<int> ExecuteAsync(string sql, CommandType commandType, int? commandTimeout, ParametersVisitor parameters, CancellationToken cancellationToken)
         {
             CommandDefinition command = new CommandDefinition(sql, PrepareParameters(parameters), this._transaction, commandTimeout, commandType, cancellationToken: cancellationToken);
             return base.Connection.ExecuteAsync(command);
         }
 
-        protected override IEnumerable<T> QueryMany<T>(string sql, CommandType commandType, IParametersVisitor parameters)
+        protected override IEnumerable<T> QueryMany<T>(string sql, CommandType commandType, ParametersVisitor parameters)
         {
             DecoratedTypeMap.Adapt<T>();
             return base.Connection.Query<T>(sql, PrepareParameters(parameters), this._transaction, commandType: commandType);
         }
 
-        protected override Task<IEnumerable<T>> QueryManyAsync<T>(string sql, CommandType commandType, IParametersVisitor parameters, bool buffered, CancellationToken cancellationToken)
+        protected override Task<IEnumerable<T>> QueryManyAsync<T>(string sql, CommandType commandType, ParametersVisitor parameters, bool buffered, CancellationToken cancellationToken)
         {
             DecoratedTypeMap.Adapt<T>();
             CommandFlags flags = buffered ? CommandFlags.Buffered : CommandFlags.None;
@@ -49,37 +49,37 @@ namespace Dibix.Dapper
             return base.Connection.QueryAsync<T>(command);
         }
 
-        protected override IEnumerable<TReturn> QueryMany<TFirst, TSecond, TReturn>(string sql, CommandType commandType, IParametersVisitor parameters, Func<TFirst, TSecond, TReturn> map, string splitOn)
+        protected override IEnumerable<TReturn> QueryMany<TFirst, TSecond, TReturn>(string sql, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TReturn> map, string splitOn)
         {
             DecoratedTypeMap.Adapt<TFirst, TSecond>();
             return base.Connection.Query(sql, map, PrepareParameters(parameters), this._transaction, commandType: commandType, splitOn: splitOn);
         }
 
-        protected override IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TReturn>(string sql, CommandType commandType, IParametersVisitor parameters, Func<TFirst, TSecond, TThird, TReturn> map, string splitOn)
+        protected override IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TReturn>(string sql, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TReturn> map, string splitOn)
         {
             DecoratedTypeMap.Adapt<TFirst, TSecond, TThird>();
             return base.Connection.Query(sql, map, PrepareParameters(parameters), this._transaction, commandType: commandType, splitOn: splitOn);
         }
 
-        protected override IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TReturn>(string sql, CommandType commandType, IParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TReturn> map, string splitOn)
+        protected override IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TReturn>(string sql, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TReturn> map, string splitOn)
         {
             DecoratedTypeMap.Adapt<TFirst, TSecond, TThird, TFourth>();
             return base.Connection.Query(sql, map, PrepareParameters(parameters), this._transaction, commandType: commandType, splitOn: splitOn);
         }
 
-        protected override IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(string sql, CommandType commandType, IParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> map, string splitOn)
+        protected override IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(string sql, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> map, string splitOn)
         {
             DecoratedTypeMap.Adapt<TFirst, TSecond, TThird, TFourth, TFifth>();
             return base.Connection.Query(sql, map, PrepareParameters(parameters), this._transaction, commandType: commandType, splitOn: splitOn);
         }
 
-        protected override IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(string sql, CommandType commandType, IParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> map, string splitOn)
+        protected override IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(string sql, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> map, string splitOn)
         {
             DecoratedTypeMap.Adapt<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>();
             return base.Connection.Query(sql, map, PrepareParameters(parameters), this._transaction, commandType: commandType, splitOn: splitOn);
         }
 
-        protected override IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TReturn>(string sql, CommandType commandType, IParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TReturn> map, string splitOn)
+        protected override IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TReturn>(string sql, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TReturn> map, string splitOn)
         {
             DecoratedTypeMap.Adapt<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>();
             Type[] types = { typeof(TFirst), typeof(TSecond), typeof(TThird), typeof(TFourth), typeof(TFifth), typeof(TSixth), typeof(TSeventh), typeof(TEighth), typeof(TNinth) };
@@ -87,7 +87,7 @@ namespace Dibix.Dapper
             return base.Connection.Query(sql, types, mapWrapper, PrepareParameters(parameters), this._transaction, commandType: commandType, splitOn: splitOn);
         }
 
-        protected override IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TEleventh, TReturn>(string sql, CommandType commandType, IParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TEleventh, TReturn> map, string splitOn)
+        protected override IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TEleventh, TReturn>(string sql, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TEleventh, TReturn> map, string splitOn)
         {
             DecoratedTypeMap.Adapt<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TEleventh>();
             Type[] types = { typeof(TFirst), typeof(TSecond), typeof(TThird), typeof(TFourth), typeof(TFifth), typeof(TSixth), typeof(TSeventh), typeof(TEighth), typeof(TNinth), typeof(TTenth), typeof(TEleventh) };
@@ -95,32 +95,32 @@ namespace Dibix.Dapper
             return base.Connection.Query(sql, types, mapWrapper, PrepareParameters(parameters), this._transaction, commandType: commandType, splitOn: splitOn);
         }
 
-        protected override T QuerySingle<T>(string sql, CommandType commandType, IParametersVisitor parameters)
+        protected override T QuerySingle<T>(string sql, CommandType commandType, ParametersVisitor parameters)
         {
             DecoratedTypeMap.Adapt<T>();
             return base.Connection.QuerySingle<T>(sql, PrepareParameters(parameters), this._transaction, commandType: commandType);
         }
 
-        protected override Task<T> QuerySingleAsync<T>(string sql, CommandType commandType, IParametersVisitor parameters, CancellationToken cancellationToken)
+        protected override Task<T> QuerySingleAsync<T>(string sql, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken)
         {
             DecoratedTypeMap.Adapt<T>();
             CommandDefinition command = new CommandDefinition(sql, PrepareParameters(parameters), this._transaction, commandType: commandType, cancellationToken: cancellationToken);
             return base.Connection.QuerySingleAsync<T>(command);
         }
 
-        protected override T QuerySingleOrDefault<T>(string sql, CommandType commandType, IParametersVisitor parameters)
+        protected override T QuerySingleOrDefault<T>(string sql, CommandType commandType, ParametersVisitor parameters)
         {
             DecoratedTypeMap.Adapt<T>();
             return base.Connection.QuerySingleOrDefault<T>(sql, PrepareParameters(parameters), this._transaction, commandType: commandType);
         }
 
-        protected override IMultipleResultReader QueryMultiple(string sql, CommandType commandType, IParametersVisitor parameters)
+        protected override IMultipleResultReader QueryMultiple(string sql, CommandType commandType, ParametersVisitor parameters)
         {
             SqlMapper.GridReader reader = base.Connection.QueryMultiple(sql, PrepareParameters(parameters), this._transaction, commandType: commandType);
             return new DapperGridResultReader(reader);
         }
 
-        protected override async Task<IMultipleResultReader> QueryMultipleAsync(string sql, CommandType commandType, IParametersVisitor parameters, CancellationToken cancellationToken)
+        protected override async Task<IMultipleResultReader> QueryMultipleAsync(string sql, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken)
         {
             SqlMapper.GridReader reader = await base.Connection.QueryMultipleAsync(new CommandDefinition(sql, PrepareParameters(parameters), this._transaction, commandTimeout: null, commandType, cancellationToken: cancellationToken));
             return new DapperGridResultReader(reader);
@@ -128,7 +128,7 @@ namespace Dibix.Dapper
         #endregion
 
         #region Private Methods
-        private static object PrepareParameters(IParametersVisitor parametersVisitor)
+        private static object PrepareParameters(ParametersVisitor parametersVisitor)
         {
             Guard.IsNotNull(parametersVisitor, nameof(parametersVisitor));
             DynamicParameters @params = new DynamicParameters();
@@ -160,11 +160,11 @@ namespace Dibix.Dapper
             private readonly SqlMapper.IDynamicParameters _dynamicParameters;
             private readonly SqlMapper.IParameterLookup _parameterLookup;
             private readonly SqlMapper.IParameterCallbacks _parameterCallbacks;
-            private readonly IParametersVisitor _parametersVisitor;
+            private readonly ParametersVisitor _parametersVisitor;
 
             object SqlMapper.IParameterLookup.this[string name] => this._parameterLookup[name];
 
-            public DynamicParametersWrapper(DynamicParameters impl, IParametersVisitor parametersVisitor)
+            public DynamicParametersWrapper(DynamicParameters impl, ParametersVisitor parametersVisitor)
             {
                 this._impl = impl;
                 this._dynamicParameters = impl;

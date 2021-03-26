@@ -49,7 +49,7 @@ namespace Dibix.Http.Tests
         {
             SqlException sqlException = SqlExceptionFactory.Create(default, 504000, default, default, default, "Too late", default, default);
 
-            Mock<IParametersVisitor> parametersVisitor = new Mock<IParametersVisitor>(MockBehavior.Strict);
+            Mock<ParametersVisitor> parametersVisitor = new Mock<ParametersVisitor>(MockBehavior.Strict);
             Mock<IHttpParameterResolutionMethod> parameterResolver = new Mock<IHttpParameterResolutionMethod>(MockBehavior.Strict);
 
             parametersVisitor.Setup(x => x.VisitInputParameters(It.IsAny<InputParameterVisitor>()));
@@ -81,7 +81,7 @@ CommandText: <Dynamic>", requestException.Message);
         {
             SqlException sqlException = SqlExceptionFactory.Create(default, 403001, default, default, default, "Sorry", default, default);
 
-            Mock<IParametersVisitor> parametersVisitor = new Mock<IParametersVisitor>(MockBehavior.Strict);
+            Mock<ParametersVisitor> parametersVisitor = new Mock<ParametersVisitor>(MockBehavior.Strict);
             Mock<IHttpParameterResolutionMethod> parameterResolver = new Mock<IHttpParameterResolutionMethod>(MockBehavior.Strict);
 
             parametersVisitor.Setup(x => x.VisitInputParameters(It.IsAny<InputParameterVisitor>()));
@@ -115,7 +115,7 @@ CommandText: <Dynamic>", requestException.Message);
             string commandText = "x";
             SqlException sqlException = SqlExceptionFactory.Create(default, 50000, default, default, default, "Oops", default, default);
 
-            Mock<IParametersVisitor> parametersVisitor = new Mock<IParametersVisitor>(MockBehavior.Strict);
+            Mock<ParametersVisitor> parametersVisitor = new Mock<ParametersVisitor>(MockBehavior.Strict);
             Mock<IHttpParameterResolutionMethod> parameterResolver = new Mock<IHttpParameterResolutionMethod>(MockBehavior.Strict);
 
             parametersVisitor.Setup(x => x.VisitInputParameters(It.IsAny<InputParameterVisitor>()))
@@ -161,7 +161,7 @@ intValue INT(4)  stringValue NVARCHAR(MAX)
             string commandText = "x";
             SqlException sqlException = SqlExceptionFactory.Create(default, default, default, default, default, "Oops", default, default);
 
-            Mock<IParametersVisitor> parametersVisitor = new Mock<IParametersVisitor>(MockBehavior.Strict);
+            Mock<ParametersVisitor> parametersVisitor = new Mock<ParametersVisitor>(MockBehavior.Strict);
             Mock<IHttpParameterResolutionMethod> parameterResolver = new Mock<IHttpParameterResolutionMethod>(MockBehavior.Strict);
 
             parametersVisitor.Setup(x => x.VisitInputParameters(It.IsAny<InputParameterVisitor>()))

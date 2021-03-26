@@ -9,9 +9,9 @@ namespace Dibix
         public static T QuerySingle<T>(this IDatabaseAccessor accessor, string sql)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.QuerySingle<T>(sql, CommandType.Text, EmptyParameters.Instance);
+            return accessor.QuerySingle<T>(sql, CommandType.Text, ParametersVisitor.Empty);
         }
-        public static T QuerySingle<T>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters)
+        public static T QuerySingle<T>(this IDatabaseAccessor accessor, string sql, ParametersVisitor parameters)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
             return accessor.QuerySingle<T>(sql, CommandType.Text, parameters);
@@ -20,16 +20,16 @@ namespace Dibix
         public static T QuerySingle<T>(this IDatabaseAccessor accessor, string sql, CommandType commandType)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.QuerySingle<T>(sql, commandType, EmptyParameters.Instance);
+            return accessor.QuerySingle<T>(sql, commandType, ParametersVisitor.Empty);
         }
 
         // SubProcessOverview
-        public static TReturn QuerySingle<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, string splitOn) where TReturn : new()
+        public static TReturn QuerySingle<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, ParametersVisitor parameters, string splitOn) where TReturn : new()
         {
             Guard.IsNotNull(accessor, nameof(accessor));
             return accessor.QuerySingle<TReturn, TSecond>(sql, CommandType.Text, parameters, splitOn);
         }
-        public static TReturn QuerySingle<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, Action<TReturn, TSecond> map, string splitOn)
+        public static TReturn QuerySingle<TReturn, TSecond>(this IDatabaseAccessor accessor, string sql, ParametersVisitor parameters, Action<TReturn, TSecond> map, string splitOn)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
 
@@ -47,12 +47,12 @@ namespace Dibix
             return cache.Single();
         }
 
-        public static TReturn QuerySingle<TReturn, TSecond, TThird>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, string splitOn) where TReturn : new()
+        public static TReturn QuerySingle<TReturn, TSecond, TThird>(this IDatabaseAccessor accessor, string sql, ParametersVisitor parameters, string splitOn) where TReturn : new()
         {
             Guard.IsNotNull(accessor, nameof(accessor));
             return accessor.QuerySingle<TReturn, TSecond, TThird>(sql, CommandType.Text, parameters, splitOn);
         }
-        public static TReturn QuerySingle<TReturn, TSecond, TThird>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, Action<TReturn, TSecond, TThird> map, string splitOn)
+        public static TReturn QuerySingle<TReturn, TSecond, TThird>(this IDatabaseAccessor accessor, string sql, ParametersVisitor parameters, Action<TReturn, TSecond, TThird> map, string splitOn)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
 
@@ -71,12 +71,12 @@ namespace Dibix
         }
 
         // OrderManagement (GetCategoryDetail)
-        public static TReturn QuerySingle<TReturn, TSecond, TThird, TFourth>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, string splitOn) where TReturn : new()
+        public static TReturn QuerySingle<TReturn, TSecond, TThird, TFourth>(this IDatabaseAccessor accessor, string sql, ParametersVisitor parameters, string splitOn) where TReturn : new()
         {
             Guard.IsNotNull(accessor, nameof(accessor));
             return accessor.QuerySingle<TReturn, TSecond, TThird, TFourth>(sql, CommandType.Text, parameters, splitOn);
         }
-        public static TReturn QuerySingle<TReturn, TSecond, TThird, TFourth>(this IDatabaseAccessor accessor, string sql, IParametersVisitor parameters, Action<TReturn, TSecond, TThird, TFourth> map, string splitOn)
+        public static TReturn QuerySingle<TReturn, TSecond, TThird, TFourth>(this IDatabaseAccessor accessor, string sql, ParametersVisitor parameters, Action<TReturn, TSecond, TThird, TFourth> map, string splitOn)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
 

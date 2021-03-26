@@ -8,16 +8,16 @@ namespace Dibix
     {
         public CommandType CommandType { get; }
         public string CommandText { get; }
-        public IParametersVisitor Parameters { get; }
+        public ParametersVisitor Parameters { get; }
 
-        private DatabaseAccessException(string message, CommandType commandType, string commandText, IParametersVisitor parameters, Exception innerException) : base($"{innerException.Message}{Environment.NewLine}{message}", innerException)
+        private DatabaseAccessException(string message, CommandType commandType, string commandText, ParametersVisitor parameters, Exception innerException) : base($"{innerException.Message}{Environment.NewLine}{message}", innerException)
         {
             this.CommandType = commandType;
             this.CommandText = commandText;
             this.Parameters = parameters;
         }
 
-        internal static DatabaseAccessException Create(CommandType commandType, string commandText, IParametersVisitor parameters, Exception innerException)
+        internal static DatabaseAccessException Create(CommandType commandType, string commandText, ParametersVisitor parameters, Exception innerException)
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("CommandType: ").Append(commandType).AppendLine()

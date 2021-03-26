@@ -21,24 +21,11 @@ namespace Dibix
         internal static IEnumerable<TReturn> PostProcess<TReturn>(this IEnumerable<TReturn> source) => PostProcessor.PostProcess(source);
         internal static IEnumerable<TReturn> PostProcess<TReturn>(this IEnumerable<TReturn> source, MultiMapper multiMapper) => PostProcessor.PostProcess(source, multiMapper);
 
-        private static IParametersVisitor Build(this Action<IParameterBuilder> configureParameters)
+        private static ParametersVisitor Build(this Action<IParameterBuilder> configureParameters)
         {
             IParameterBuilder builder = new ParameterBuilder();
             configureParameters(builder);
             return builder.Build();
-        }
-
-        private sealed class EmptyParameters : IParametersVisitor
-        {
-            private static readonly EmptyParameters CachedInstance = new EmptyParameters();
-
-            private EmptyParameters() { }
-
-            public static IParametersVisitor Instance => CachedInstance;
-
-            void IParametersVisitor.VisitInputParameters(InputParameterVisitor visitParameter) { }
-
-            void IParametersVisitor.VisitOutputParameters(OutputParameterVisitor visitParameter) { }
         }
     }
 }

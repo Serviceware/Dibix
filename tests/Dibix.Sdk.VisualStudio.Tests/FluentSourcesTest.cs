@@ -49,12 +49,12 @@ namespace This.Is.A.Custom.Namespace
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
-                IParametersVisitor @params = accessor.Parameters()
-                                                     .SetFromTemplate(new
-                                                     {
-                                                         x
-                                                     })
-                                                     .Build();
+                ParametersVisitor @params = accessor.Parameters()
+                                                    .SetFromTemplate(new
+                                                    {
+                                                        x
+                                                    })
+                                                    .Build();
                 accessor.Execute(dbx_tests_sources_externalspCommandText, System.Data.CommandType.StoredProcedure, @params);
             }
         }
@@ -63,13 +63,13 @@ namespace This.Is.A.Custom.Namespace
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
-                IParametersVisitor @params = accessor.Parameters()
-                                                     .SetFromTemplate(new
-                                                     {
-                                                         folder_name,
-                                                         project_name
-                                                     })
-                                                     .Build();
+                ParametersVisitor @params = accessor.Parameters()
+                                                    .SetFromTemplate(new
+                                                    {
+                                                        folder_name,
+                                                        project_name
+                                                    })
+                                                    .Build();
                 accessor.Execute(DeleteProjectCommandText, System.Data.CommandType.StoredProcedure, @params);
             }
         }

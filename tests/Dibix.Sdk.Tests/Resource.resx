@@ -288,18 +288,18 @@ namespace Dibix.Sdk.Tests
             {
                 using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                 {
-                    IParametersVisitor @params = accessor.Parameters()
-                                                         .SetFromTemplate(new
-                                                         {
-                                                             v,
-                                                             w,
-                                                             x,
-                                                             ids,
-                                                             y,
-                                                             z
-                                                         })
-                                                         .SetString(nameof(password), password, true)
-                                                         .Build();
+                    ParametersVisitor @params = accessor.Parameters()
+                                                        .SetFromTemplate(new
+                                                        {
+                                                            v,
+                                                            w,
+                                                            x,
+                                                            ids,
+                                                            y,
+                                                            z
+                                                        })
+                                                        .SetString(nameof(password), password, true)
+                                                        .Build();
                     accessor.Execute(EmptyWithParamsCommandText, System.Data.CommandType.StoredProcedure, @params);
                 }
             }
@@ -308,12 +308,12 @@ namespace Dibix.Sdk.Tests
             {
                 using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                 {
-                    IParametersVisitor @params = accessor.Parameters()
-                                                         .SetFromTemplate(new
-                                                         {
-                                                             id
-                                                         })
-                                                         .Build();
+                    ParametersVisitor @params = accessor.Parameters()
+                                                        .SetFromTemplate(new
+                                                        {
+                                                            id
+                                                        })
+                                                        .Build();
                     return accessor.QuerySingleOrDefault&lt;Dibix.FileEntity&gt;(FileResultCommandText, System.Data.CommandType.StoredProcedure, @params);
                 }
             }
@@ -322,12 +322,12 @@ namespace Dibix.Sdk.Tests
             {
                 using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                 {
-                    IParametersVisitor @params = accessor.Parameters()
-                                                         .SetFromTemplate(new
-                                                         {
-                                                             data
-                                                         })
-                                                         .Build();
+                    ParametersVisitor @params = accessor.Parameters()
+                                                        .SetFromTemplate(new
+                                                        {
+                                                            data
+                                                        })
+                                                        .Build();
                     accessor.Execute(FileUploadCommandText, System.Data.CommandType.StoredProcedure, @params);
                 }
             }
@@ -336,12 +336,12 @@ namespace Dibix.Sdk.Tests
             {
                 using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                 {
-                    IParametersVisitor @params = accessor.Parameters()
-                                                         .SetFromTemplate(new
-                                                         {
-                                                             ids
-                                                         })
-                                                         .Build();
+                    ParametersVisitor @params = accessor.Parameters()
+                                                        .SetFromTemplate(new
+                                                        {
+                                                            ids
+                                                        })
+                                                        .Build();
                     return accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(SingleConrecteResultWithParamsCommandText, System.Data.CommandType.StoredProcedure, @params);
                 }
             }
@@ -805,18 +805,18 @@ namespace Dibix.Sdk.Tests
             {
                 using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                 {
-                    IParametersVisitor @params = accessor.Parameters()
-                                                         .SetFromTemplate(new
-                                                         {
-                                                             v,
-                                                             w,
-                                                             x,
-                                                             ids,
-                                                             y,
-                                                             z
-                                                         })
-                                                         .SetString(nameof(password), password, true)
-                                                         .Build();
+                    ParametersVisitor @params = accessor.Parameters()
+                                                        .SetFromTemplate(new
+                                                        {
+                                                            v,
+                                                            w,
+                                                            x,
+                                                            ids,
+                                                            y,
+                                                            z
+                                                        })
+                                                        .SetString(nameof(password), password, true)
+                                                        .Build();
                     accessor.Execute(EmptyWithParamsCommandText, System.Data.CommandType.StoredProcedure, @params);
                 }
             }
@@ -870,9 +870,9 @@ namespace Dibix.Sdk.Tests
             {
                 using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                 {
-                    IParametersVisitor @params = accessor.Parameters()
-                                                         .SetFromTemplate(input)
-                                                         .Build();
+                    ParametersVisitor @params = accessor.Parameters()
+                                                        .SetFromTemplate(input)
+                                                        .Build();
                     accessor.Execute(EmptyWithParamsCommandText, System.Data.CommandType.StoredProcedure, @params);
                 }
             }
@@ -1028,12 +1028,12 @@ namespace Dibix.Sdk.Tests
             {
                 using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                 {
-                    IParametersVisitor @params = accessor.Parameters()
-                                                         .SetFromTemplate(new
-                                                         {
-                                                             id
-                                                         })
-                                                         .Build();
+                    ParametersVisitor @params = accessor.Parameters()
+                                                        .SetFromTemplate(new
+                                                        {
+                                                            id
+                                                        })
+                                                        .Build();
                     return accessor.QuerySingleOrDefault&lt;Dibix.FileEntity&gt;(FileResultCommandText, @params);
                 }
             }
@@ -1763,12 +1763,12 @@ namespace Dibix.Sdk.Tests
             {
                 using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                 {
-                    IParametersVisitor @params = accessor.Parameters()
-                                                         .SetFromTemplate(new
-                                                         {
-                                                             id
-                                                         })
-                                                         .Build();
+                    ParametersVisitor @params = accessor.Parameters()
+                                                        .SetFromTemplate(new
+                                                        {
+                                                            id
+                                                        })
+                                                        .Build();
                     return accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(dbx_tests_syntax_singlemultimapresultCommandText, @params, "id");
                 }
             }
@@ -2769,12 +2769,12 @@ namespace Dibix.Sdk.Tests
                 {
                     using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                     {
-                        IParametersVisitor @params = accessor.Parameters()
-                                                             .SetFromTemplate(new
-                                                             {
-                                                                 id
-                                                             })
-                                                             .Build();
+                        ParametersVisitor @params = accessor.Parameters()
+                                                            .SetFromTemplate(new
+                                                            {
+                                                                id
+                                                            })
+                                                            .Build();
                         Dibix.Sdk.Tests.DomainModel.Grid.GridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GridResult();
                         result.Item = accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(GetGridCommandText, @params, "id");
                         return result;
@@ -2878,12 +2878,12 @@ namespace Dibix.Sdk.Tests
                 {
                     using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                     {
-                        IParametersVisitor @params = accessor.Parameters()
-                                                             .SetFromTemplate(new
-                                                             {
-                                                                 id
-                                                             })
-                                                             .Build();
+                        ParametersVisitor @params = accessor.Parameters()
+                                                            .SetFromTemplate(new
+                                                            {
+                                                                id
+                                                            })
+                                                            .Build();
                         Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult();
                         result.Item = accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(GetGridCommandText, @params, "id");
                         return result;
@@ -2979,9 +2979,9 @@ namespace Dibix.Sdk.Tests
             {
                 using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                 {
-                    IParametersVisitor @params = accessor.Parameters()
-                                                         .SetInt16(nameof(a), out IOutParameter&lt;short&gt; aOutput)
-                                                         .Build();
+                    ParametersVisitor @params = accessor.Parameters()
+                                                        .SetInt16(nameof(a), out IOutParameter&lt;short&gt; aOutput)
+                                                        .Build();
                     short result = accessor.QuerySingle&lt;short&gt;(EmptyWithOutputParamCommandText, System.Data.CommandType.StoredProcedure, @params);
                     a = aOutput.Result;
                     return result;
