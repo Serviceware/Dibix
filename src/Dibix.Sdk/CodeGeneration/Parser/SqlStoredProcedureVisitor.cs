@@ -228,7 +228,9 @@ namespace Dibix.Sdk.CodeGeneration
         #region Nested Types
         private sealed class ThrowVisitor : TSqlFragmentVisitor
         {
-            public ICollection<ErrorResponse> ErrorResponses { get; } = new Collection<ErrorResponse>();
+            private readonly IDictionary<ErrorResponseKey, ErrorResponse> _errorResponses = new Dictionary<ErrorResponseKey, ErrorResponse>();
+
+            public ICollection<ErrorResponse> ErrorResponses => this._errorResponses.Values;
 
             public override void Visit(ThrowStatement node)
             {
@@ -241,8 +243,24 @@ namespace Dibix.Sdk.CodeGeneration
                  && HttpErrorResponseParser.TryParseErrorResponse(errorNumber, out int statusCode, out int errorCode, out bool isClientError)
                  && isClientError)
                 {
-                    this.ErrorResponses.Add(new ErrorResponse(statusCode, errorCode, errorMessage));
+                    ErrorResponseKey errorResponseKey = new ErrorResponseKey(statusCode, errorCode);
+                    if (this._errorResponses.ContainsKey(errorResponseKey))
+                        return;
+
+                    this._errorResponses.Add(errorResponseKey, new ErrorResponse(statusCode, errorCode, errorMessage));
                 }
+            }
+        }
+
+        private readonly struct ErrorResponseKey
+        {
+            public int StatusCode { get; }
+            public int ErrorCode { get; }
+
+            public ErrorResponseKey(int statusCode, int errorCode)
+            {
+                this.StatusCode = statusCode;
+                this.ErrorCode = errorCode;
             }
         }
         #endregion
