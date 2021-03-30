@@ -41,7 +41,7 @@ namespace Dibix.Sdk.OpenApi
           , string baseUrl
           , string areaName
           , string rootNamespace
-          , IEnumerable<ControllerDefinition> controllers
+          , ICollection<ControllerDefinition> controllers
           , ISchemaRegistry schemaRegistry
         )
         {
@@ -62,21 +62,21 @@ namespace Dibix.Sdk.OpenApi
             return document;
         }
 
-        private static void AppendPaths(OpenApiDocument document, string areaName, IEnumerable<ControllerDefinition> controllers, string rootNamespace, ISchemaRegistry schemaRegistry)
+        private static void AppendPaths(OpenApiDocument document, string areaName, ICollection<ControllerDefinition> controllers, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
+            IDictionary<ActionDefinition, string> operationIds = controllers.SelectMany(x => x.Actions)
+                                                                            .GroupBy(x => x.Target.OperationName)
+                                                                            .SelectMany(x => x.Select((y, i) => new
+                                                                            {
+                                                                                Position = i + 1,
+                                                                                Name = x.Key,
+                                                                                Action = y,
+                                                                                IsAmbiguous = x.Count() > 1
+                                                                            }))
+                                                                            .ToDictionary(x => x.Action, x => x.IsAmbiguous ? $"{x.Name}{x.Position}" : x.Name);
+
             foreach (ControllerDefinition controller in controllers)
             {
-                IDictionary<ActionDefinition, string> operationIds = controller.Actions
-                                                                               .GroupBy(x => x.Target.OperationName)
-                                                                               .SelectMany(x => x.Select((y, i) => new
-                                                                               {
-                                                                                   Position = i + 1,
-                                                                                   Name = x.Key,
-                                                                                   Action = y,
-                                                                                   IsAmbiguous = x.Count() > 1
-                                                                               }))
-                                                                               .ToDictionary(x => x.Action, x => x.IsAmbiguous ? $"{x.Name}{x.Position}" : x.Name);
-
                 foreach (IGrouping<string, ActionDefinition> path in controller.Actions.GroupBy(x => $"/{RouteBuilder.BuildRoute(areaName, controller.Name, x.ChildRoute)}"))
                 {
                     OpenApiPathItem value = new OpenApiPathItem();
