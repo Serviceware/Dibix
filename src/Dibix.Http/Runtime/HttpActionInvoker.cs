@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Dibix.Http
@@ -57,7 +58,7 @@ namespace Dibix.Http
                     errorResponse.Headers.Add(HttpErrorResponseParser.ClientErrorCodeHeaderName, errorCode.ToString());
 
                 errorResponse.Headers.Add(HttpErrorResponseParser.ClientErrorDescriptionHeaderName, sqlException.Message);
-                errorResponse.Content = new StringContent(sqlException.Message);
+                errorResponse.Content = new StringContent($"\"{sqlException.Message}\"", Encoding.UTF8, "application/json");
             }
 
             exception = new HttpRequestExecutionException(errorResponse, isClientError, innerException);

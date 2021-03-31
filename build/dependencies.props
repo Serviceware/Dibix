@@ -5,6 +5,7 @@
     <DapperVersion>1.50.5</DapperVersion>
     <DataAnnotationsVersion>5.0.0</DataAnnotationsVersion>
     <SqlClientVersion>4.8.2</SqlClientVersion>
+    <ReflectionEmitVersion>4.7.0</ReflectionEmitVersion>
 
     <!-- Sdk -->
     <DacFxVersion>150.5084.2</DacFxVersion>

@@ -1,22 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   
   <PropertyGroup>
-    <TargetFrameworks>net5.0;net451</TargetFrameworks>
+    <TargetFrameworks>net5.0;netstandard2.0;net451</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Update="Access\DatabaseAccessorExtensions.Execute.cs" DependentUpon="Access\DatabaseAccessorExtensions.cs" />
-    <Compile Update="Access\DatabaseAccessorExtensions.GridReader.cs" DependentUpon="Access\DatabaseAccessorExtensions.cs" />
-    <Compile Update="Access\DatabaseAccessorExtensions.QueryMany.cs" DependentUpon="Access\DatabaseAccessorExtensions.cs" />
-    <Compile Update="Access\DatabaseAccessorExtensions.QueryMultiple.cs" DependentUpon="Access\DatabaseAccessorExtensions.cs" />
-    <Compile Update="Access\DatabaseAccessorExtensions.QuerySingle.cs" DependentUpon="Access\DatabaseAccessorExtensions.cs" />
+    <Compile Update="Access\DatabaseAccessorExtensions.Execute.cs"              DependentUpon="Access\DatabaseAccessorExtensions.cs" />
+    <Compile Update="Access\DatabaseAccessorExtensions.GridReader.cs"           DependentUpon="Access\DatabaseAccessorExtensions.cs" />
+    <Compile Update="Access\DatabaseAccessorExtensions.QueryMany.cs"            DependentUpon="Access\DatabaseAccessorExtensions.cs" />
+    <Compile Update="Access\DatabaseAccessorExtensions.QueryMultiple.cs"        DependentUpon="Access\DatabaseAccessorExtensions.cs" />
+    <Compile Update="Access\DatabaseAccessorExtensions.QuerySingle.cs"          DependentUpon="Access\DatabaseAccessorExtensions.cs" />
     <Compile Update="Access\DatabaseAccessorExtensions.QuerySingleOrDefault.cs" DependentUpon="Access\DatabaseAccessorExtensions.cs" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
+  <ItemGroup Condition="'$(TargetFramework)' != 'net451'">
     <PackageReference Include="System.Data.SqlClient" Version="$(SqlClientVersion)" />
   </ItemGroup>
-  
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="System.ComponentModel.Annotations" Version="$(DataAnnotationsVersion)" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFramework)' == 'net451'">
     <Reference Include="System.ComponentModel.DataAnnotations" Version="4.0" />
   </ItemGroup>

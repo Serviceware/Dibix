@@ -80,8 +80,8 @@ namespace Dibix.Http
             BlockExpression block = Expression.Block(variables, call);
             LambdaExpression lambda = Expression.Lambda(block, parameters);
             MethodBuilder methodBuilder = typeBuilder.DefineMethod(method.Name, MethodAttributes.Public | MethodAttributes.Static);
-#if NET5_0
-            throw new PlatformNotSupportedException("LambdaExpression.CompileToMethod is not supported on .NET standard");
+#if NET5_0 || NETSTANDARD
+            throw new PlatformNotSupportedException("LambdaExpression.CompileToMethod is not supported on this platform");
 #else
             lambda.CompileToMethod(methodBuilder);
 #endif
