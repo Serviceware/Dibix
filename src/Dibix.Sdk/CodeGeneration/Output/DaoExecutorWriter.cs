@@ -110,7 +110,7 @@ namespace Dibix.Sdk.CodeGeneration
                     foreach (SqlQueryParameter parameter in statement.Parameters)
                     {
                         ParameterKind parameterKind = parameter.IsOutput ? ParameterKind.Out : ParameterKind.Value;
-                        CSharpValue defaultValue = parameter.HasDefaultValue ? ParseDefaultValue(parameter.DefaultValue) : null;
+                        CSharpValue defaultValue = parameter.HasDefaultValue ? ParseDefaultValue(parameter.DefaultValue, parameter.Type, context) : null;
                         method.AddParameter(parameter.Name, context.ResolveTypeName(parameter.Type), parameterKind, defaultValue);
                     }
                 }
@@ -118,7 +118,7 @@ namespace Dibix.Sdk.CodeGeneration
                 if (statement.Async)
                 {
                     context.AddUsing(typeof(CancellationToken).Namespace);
-                    method.AddParameter("cancellationToken", "CancellationToken", default, new CSharpValue("default"));
+                    method.AddParameter("cancellationToken", nameof(CancellationToken), default, new CSharpValue("default"));
                 }
 
                 if (i + 1 < statements.Count)
@@ -126,20 +126,26 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static CSharpValue ParseDefaultValue(object defaultValue)
+        private static CSharpValue ParseDefaultValue(object defaultValue, TypeReference parameterType, DaoCodeGenerationContext context)
         {
             if (defaultValue == null)
                 return new CSharpValue("null");
 
-            string defailtValueStr = defaultValue.ToString();
+            string defaultValueStr = defaultValue.ToString();
 
             if (defaultValue is bool)
-                return new CSharpValue(defailtValueStr.ToLowerInvariant());
+                return new CSharpValue(defaultValueStr.ToLowerInvariant());
 
             if (defaultValue is string)
-                return new CSharpStringValue(defailtValueStr, false);
+                return new CSharpStringValue(defaultValueStr, false);
 
-            return new CSharpValue(defailtValueStr);
+            if (parameterType is SchemaTypeReference schemaTypeReference && context.GetSchema(schemaTypeReference) is EnumSchema enumSchema)
+            {
+                EnumSchemaMember member = enumSchema.Members.Single(x => Equals(x.ActualValue, defaultValue));
+                defaultValueStr = $"{enumSchema.FullName}.{member.Name}";
+            }
+
+            return new CSharpValue(defaultValueStr);
         }
 
         private static string DetermineReturnTypeName(SqlStatementInfo query, string resultTypeName, DaoCodeGenerationContext context)

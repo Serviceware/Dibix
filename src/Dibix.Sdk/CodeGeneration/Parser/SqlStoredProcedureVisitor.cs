@@ -46,7 +46,7 @@ namespace Dibix.Sdk.CodeGeneration
             };
             
             this.ParseParameterObfuscate(parameter, markup);
-            this.ParseDefaultValue(node, parameter);
+                this.ParseDefaultValue(node, parameter);
 
             base.Target.Parameters.Add(parameter);
         }
@@ -79,15 +79,34 @@ namespace Dibix.Sdk.CodeGeneration
                     defaultValue = null;
                     return true;
 
-                case Literal literal when targetType is PrimitiveTypeReference primitiveTypeReference:
-                    return this.TryParseParameterDefaultValue(literal, primitiveTypeReference.Type, out defaultValue);
+                case Literal literal:
+                    return this.TryParseParameterDefaultValue(literal, targetType, out defaultValue);
 
                 case VariableReference variableReference:
                     defaultValue = variableReference.Name;
                     return true;
 
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(value), value, "Only literals and parameter references are supported for parameter defaults");
+                    throw new ArgumentOutOfRangeException(nameof(value), value, $@"Unsupported parameter default
+targetType: {targetType}");
+            }
+        }
+
+        private bool TryParseParameterDefaultValue(Literal literal, TypeReference typeReference, out object defaultValue)
+        {
+            switch (typeReference)
+            {
+                case PrimitiveTypeReference primitiveTypeReference:
+                    return this.TryParseParameterDefaultValue(literal, primitiveTypeReference.Type, out defaultValue);
+                
+                case SchemaTypeReference schemaTypeReference:
+                    defaultValue = Int32.Parse(literal.Value);
+                    return true;
+
+                default:
+                    // Error should have been reported
+                    defaultValue = null;
+                    return false;
             }
         }
 
