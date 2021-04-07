@@ -10,13 +10,13 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
     public class CSharpStatementScope : CSharpStatement
     {
         private readonly string _namespace;
-        private readonly IList<CSharpStatement> _statements;
+        private readonly IList<CSharpExpression> _statements;
 
-        protected CSharpStatementScope(string @namespace) : this(@namespace, Enumerable.Empty<string>()) { }
-        protected CSharpStatementScope(string @namespace, IEnumerable<string> globalAnnotations) : base(globalAnnotations.Select(x => $"assembly: {x}"))
+        protected CSharpStatementScope(string @namespace) : this(@namespace, Enumerable.Empty<CSharpAnnotation>()) { }
+        protected CSharpStatementScope(string @namespace, IEnumerable<CSharpAnnotation> globalAnnotations) : base(MarkAnnotationsAsGlobal(globalAnnotations))
         {
             this._namespace = @namespace;
-            this._statements = new Collection<CSharpStatement>();
+            this._statements = new Collection<CSharpExpression>();
         }
 
         public CSharpStatementScope BeginScope(string @namespace)
@@ -32,15 +32,15 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             return this;
         }
 
-        public CSharpClass AddClass(string name, CSharpModifiers modifiers, params string[] annotations) => this.AddClass(name, modifiers, annotations.AsEnumerable());
-        public CSharpClass AddClass(string name, CSharpModifiers modifiers, IEnumerable<string> annotations)
+        public CSharpClass AddClass(string name, CSharpModifiers modifiers, params CSharpAnnotation[] annotations) => this.AddClass(name, modifiers, annotations.AsEnumerable());
+        public CSharpClass AddClass(string name, CSharpModifiers modifiers, IEnumerable<CSharpAnnotation> annotations)
         {
             CSharpClass @class = new CSharpClass(name, modifiers, annotations);
             this._statements.Add(@class);
             return @class;
         }
 
-        public CSharpEnum AddEnum(string name, CSharpModifiers modifiers, IEnumerable<string> annotations)
+        public CSharpEnum AddEnum(string name, CSharpModifiers modifiers, IEnumerable<CSharpAnnotation> annotations)
         {
             CSharpEnum @enum = new CSharpEnum(name, modifiers, annotations);
             this._statements.Add(@enum);
@@ -53,23 +53,27 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             return Disposable.Create(() => this._statements.Add(new CSharpRegionEnd()));
         }
 
-        public override void Write(StringWriter writer)
+        protected override void WriteBody(StringWriter writer)
         {
-            base.Write(writer);
             writer.WriteLine(String.Concat("namespace ", this._namespace))
                 .WriteLine("{")
                 .PushIndent();
 
-            for (int i = 0; i < this._statements.Count; i++)
+            foreach (CSharpExpression expression in this._statements)
             {
-                CSharpStatement type = this._statements[i];
-                type.Write(writer);
-                //if (i + 1 < this._types.Count)
+                expression.Write(writer);
                 writer.WriteLine();
             }
 
             writer.PopIndent()
                 .Write("}");
+        }
+
+        private static IEnumerable<CSharpAnnotation> MarkAnnotationsAsGlobal(IEnumerable<CSharpAnnotation> globalAnnotations)
+        {
+            IEnumerable<CSharpAnnotation> globalAnnotationsEnumerated = globalAnnotations as ICollection<CSharpAnnotation> ?? globalAnnotations.ToArray();
+            globalAnnotationsEnumerated.Each(x => x.IsGlobal = true);
+            return globalAnnotationsEnumerated;
         }
 
         private class Disposable : IDisposable

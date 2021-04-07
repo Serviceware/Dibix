@@ -11,7 +11,7 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
         private readonly CSharpModifiers _modifiers;
         private string _baseTypeName;
 
-        public CSharpEnum(string name, CSharpModifiers modifiers, IEnumerable<string> annotations) : base(annotations)
+        public CSharpEnum(string name, CSharpModifiers modifiers, IEnumerable<CSharpAnnotation> annotations) : base(annotations)
         {
             this._name = name;
             this._modifiers = modifiers;
@@ -31,9 +31,8 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             return this;
         }
 
-        public override void Write(StringWriter writer)
+        protected override void WriteBody(StringWriter writer)
         {
-            base.Write(writer);
             WriteModifiers(writer, this._modifiers);
 
             writer.WriteRaw("enum ")
@@ -51,7 +50,7 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
 
             for (int i = 0; i < this._members.Count; i++)
             {
-                CSharpStatement member = this._members[i];
+                CSharpExpression member = this._members[i];
                 member.Write(writer);
                 if (i + 1 < this._members.Count)
                     writer.WriteRaw(',')

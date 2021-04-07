@@ -15,9 +15,8 @@
             this._modifiers = modifiers;
         }
 
-        public override void Write(StringWriter writer)
+        protected override void WriteBody(StringWriter writer)
         {
-            base.Write(writer);
             WriteModifiers(writer, this._modifiers);
 
             writer.WriteRaw(this._type)

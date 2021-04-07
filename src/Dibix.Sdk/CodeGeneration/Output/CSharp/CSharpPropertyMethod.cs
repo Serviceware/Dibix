@@ -1,6 +1,6 @@
 ﻿namespace Dibix.Sdk.CodeGeneration.CSharp
 {
-    internal abstract class CSharpPropertyMethod : CSharpStatement
+    internal abstract class CSharpPropertyMethod : CSharpExpression
     {
         private readonly string _name;
         private readonly string _body;
@@ -20,7 +20,6 @@
 
         public override void Write(StringWriter writer)
         {
-            base.Write(writer);
             WriteModifiers(writer, this._modifiers, false);
             writer.WriteRaw(this._name);
 

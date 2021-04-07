@@ -15,10 +15,10 @@ namespace Dibix.Sdk.CodeGeneration
         #region Overrides
         public override bool HasContent(CodeGenerationModel model) => model.Controllers.Any();
 
-        public override IEnumerable<string> GetGlobalAnnotations(CodeGenerationModel model)
+        public override IEnumerable<CSharpAnnotation> GetGlobalAnnotations(CodeGenerationModel model)
         {
             string areaName = NamespaceUtility.EnsureAreaName(model.AreaName);
-            yield return $"AreaRegistration(\"{areaName}\")";
+            yield return new CSharpAnnotation("AreaRegistration", new CSharpStringValue(areaName));
         }
 
         public override void Write(DaoCodeGenerationContext context)

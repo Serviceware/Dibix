@@ -38,7 +38,10 @@ namespace Dibix.Sdk.CodeGeneration
 
                 // Class
                 CSharpModifiers classVisibility = context.GeneratePublicArtifacts ? CSharpModifiers.Public : CSharpModifiers.Internal;
-                IEnumerable<string> annotations = new[] { context.GeneratedCodeAnnotation, "DatabaseAccessor" }.Where(x => x != null);
+                ICollection<CSharpAnnotation> annotations = new Collection<CSharpAnnotation> { new CSharpAnnotation("DatabaseAccessor") };
+                if (context.GeneratedCodeAnnotation != null)
+                    annotations.Add(context.GeneratedCodeAnnotation);
+
                 CSharpClass @class = scope.AddClass(context.Model.DefaultClassName, classVisibility | CSharpModifiers.Static, annotations);
 
                 // Command text constants
@@ -87,7 +90,10 @@ namespace Dibix.Sdk.CodeGeneration
                 string resultTypeName = ResolveTypeName(statement, context);
                 string returnTypeName = DetermineReturnTypeName(statement, resultTypeName, context);
 
-                IEnumerable<string> annotations = statement.ErrorResponses.Select(x => $"ErrorResponse(statusCode: {x.StatusCode}, errorCode: {x.ErrorCode}, errorDescription: \"{x.ErrorDescription}\")");
+                IEnumerable<CSharpAnnotation> annotations = statement.ErrorResponses
+                                                                     .Select(x => new CSharpAnnotation("ErrorResponse").AddParameter("statusCode", new CSharpValue(x.StatusCode.ToString()))
+                                                                                                                       .AddParameter("errorCode", new CSharpValue(x.ErrorCode.ToString()))
+                                                                                                                       .AddParameter("errorDescription", new CSharpStringValue(x.ErrorDescription)));
                 if (statement.ErrorResponses.Any())
                     context.AddDibixHttpReference();
 
@@ -104,13 +110,13 @@ namespace Dibix.Sdk.CodeGeneration
                 method.AddParameter("databaseAccessorFactory", "IDatabaseAccessorFactory");
 
                 if (statement.GenerateInputClass)
-                    method.AddParameter("input", $"{statement.Name}{DaoExecutorInputClassWriter.InputTypeSuffix}", "InputClass");
+                    method.AddParameter("input", $"{statement.Name}{DaoExecutorInputClassWriter.InputTypeSuffix}", new CSharpAnnotation("InputClass"));
                 else
                 {
                     foreach (SqlQueryParameter parameter in statement.Parameters)
                     {
                         ParameterKind parameterKind = parameter.IsOutput ? ParameterKind.Out : ParameterKind.Value;
-                        CSharpValue defaultValue = parameter.HasDefaultValue ? ParseDefaultValue(parameter.DefaultValue, parameter.Type, context) : null;
+                        CSharpValue defaultValue = parameter.DefaultValue != null ? context.BuildDefaultValueLiteral(parameter.DefaultValue) : null;
                         method.AddParameter(parameter.Name, context.ResolveTypeName(parameter.Type), parameterKind, defaultValue);
                     }
                 }
@@ -124,28 +130,6 @@ namespace Dibix.Sdk.CodeGeneration
                 if (i + 1 < statements.Count)
                     @class.AddSeparator();
             }
-        }
-
-        private static CSharpValue ParseDefaultValue(object defaultValue, TypeReference parameterType, DaoCodeGenerationContext context)
-        {
-            if (defaultValue == null)
-                return new CSharpValue("null");
-
-            string defaultValueStr = defaultValue.ToString();
-
-            if (defaultValue is bool)
-                return new CSharpValue(defaultValueStr.ToLowerInvariant());
-
-            if (defaultValue is string)
-                return new CSharpStringValue(defaultValueStr, false);
-
-            if (parameterType is SchemaTypeReference schemaTypeReference && context.GetSchema(schemaTypeReference) is EnumSchema enumSchema)
-            {
-                EnumSchemaMember member = enumSchema.Members.Single(x => Equals(x.ActualValue, defaultValue));
-                defaultValueStr = $"{enumSchema.FullName}.{member.Name}";
-            }
-
-            return new CSharpValue(defaultValueStr);
         }
 
         private static string DetermineReturnTypeName(SqlStatementInfo query, string resultTypeName, DaoCodeGenerationContext context)

@@ -19,6 +19,19 @@
         }
       ]
     },
+    "DefaultValue": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
     "SerializationBehavior": {
       "type": "string",
       "enum": [
@@ -53,6 +66,9 @@
                 },
                 "isOptional": {
                   "type": "boolean"
+                },
+                "default": {
+                  "$ref": "#/definitions/DefaultValue"
                 },
                 "serialize": {
                   "$ref": "#/definitions/SerializationBehavior"

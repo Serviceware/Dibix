@@ -41,9 +41,9 @@ namespace Dibix.Sdk.CodeGeneration
 
                     foreach (SqlQueryParameter parameter in statement.Parameters)
                     {
-                        ICollection<string> propertyAnnotations = new Collection<string>();
+                        ICollection<CSharpAnnotation> propertyAnnotations = new Collection<CSharpAnnotation>();
                         if (parameter.Obfuscate)
-                            propertyAnnotations.Add("Obfuscated");
+                            propertyAnnotations.Add(new CSharpAnnotation("Obfuscated"));
 
                         inputType.AddProperty(parameter.Name, ResolvePropertyTypeName(parameter, context), propertyAnnotations)
                                  .Getter(null)

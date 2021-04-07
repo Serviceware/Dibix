@@ -1,6 +1,6 @@
 ﻿namespace Dibix.Sdk.CodeGeneration.CSharp
 {
-    public class CSharpValue : CSharpStatement
+    public class CSharpValue : CSharpExpression
     {
         private readonly string _value;
 

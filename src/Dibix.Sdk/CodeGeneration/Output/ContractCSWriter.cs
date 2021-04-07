@@ -12,7 +12,7 @@ namespace Dibix.Sdk.CodeGeneration
     internal static class ContractCSWriter
     {
         #region Public Methods
-        public static void Write(DaoCodeGenerationContext context, bool withAnnotations)
+        public static void Write(DaoCodeGenerationContext context, bool generateRuntimeSpecifics)
         {
             var namespaceGroups = CollectContracts(context).GroupBy(x => context.GetRelativeNamespace(LayerName.DomainModel, x.Namespace)).ToArray();
 
@@ -27,7 +27,7 @@ namespace Dibix.Sdk.CodeGeneration
                     switch (schema)
                     {
                         case ObjectSchema objectSchema:
-                            ProcessObjectSchema(context, scope, objectSchema, withAnnotations);
+                            ProcessObjectSchema(context, scope, objectSchema, generateRuntimeSpecifics);
                             break;
 
                         case EnumSchema enumSchema:
@@ -59,13 +59,13 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static void ProcessObjectSchema(DaoCodeGenerationContext context, CSharpStatementScope scope, ObjectSchema schema, bool withAnnotations)
+        private static void ProcessObjectSchema(DaoCodeGenerationContext context, CSharpStatementScope scope, ObjectSchema schema, bool generateRuntimeSpecifics)
         {
-            ICollection<string> classAnnotations = new Collection<string>();
-            if (withAnnotations && !String.IsNullOrEmpty(schema.WcfNamespace))
+            ICollection<CSharpAnnotation> classAnnotations = new Collection<CSharpAnnotation>();
+            if (generateRuntimeSpecifics && !String.IsNullOrEmpty(schema.WcfNamespace)) // Serialization/Compatibility
             {
                 context.AddUsing(typeof(DataMemberAttribute).Namespace);
-                classAnnotations.Add($"DataContract(Namespace = \"{schema.WcfNamespace}\")");
+                classAnnotations.Add(new CSharpAnnotation("DataContract").AddProperty("Namespace", new CSharpStringValue(schema.WcfNamespace)));
             }
 
             CSharpModifiers classVisibility = context.GeneratePublicArtifacts ? CSharpModifiers.Public : CSharpModifiers.Internal;
@@ -74,37 +74,45 @@ namespace Dibix.Sdk.CodeGeneration
             ICollection<string> shouldSerializeMethods = new Collection<string>();
             foreach (ObjectSchemaProperty property in schema.Properties)
             {
-                ICollection<string> propertyAnnotations = new Collection<string>();
-                if (withAnnotations)
+                ICollection<CSharpAnnotation> propertyAnnotations = new Collection<CSharpAnnotation>();
+                CSharpValue defaultValue = null;
+                if (generateRuntimeSpecifics)
                 {
                     if (!String.IsNullOrEmpty(schema.WcfNamespace))
-                        propertyAnnotations.Add("DataMember");
+                        propertyAnnotations.Add(new CSharpAnnotation("DataMember")); // Serialization/Compatibility
 
                     if (property.IsPartOfKey)
                     {
                         context.AddUsing("System.ComponentModel.DataAnnotations");
                         context.Model.AdditionalAssemblyReferences.Add("System.ComponentModel.DataAnnotations.dll");
-                        propertyAnnotations.Add("Key");
+                        propertyAnnotations.Add(new CSharpAnnotation("Key")); // Dibix runtime
                     }
                     
                     if (property.IsOptional)
                     {
                         context.AddUsing("Dibix");
-                        propertyAnnotations.Add("Optional");
+                        propertyAnnotations.Add(new CSharpAnnotation("Optional")); // OpenAPI description
                     }
                     
                     if (property.IsDiscriminator)
                     {
                         context.AddUsing("Dibix");
-                        propertyAnnotations.Add("Discriminator");
+                        propertyAnnotations.Add(new CSharpAnnotation("Discriminator")); // Dibix runtime
                     }
 
                     if (property.DateTimeKind != default)
                     {
                         context.AddUsing("Dibix");
                         context.AddUsing(typeof(DateTimeKind).Namespace);
-                        propertyAnnotations.Add($"DateTimeKind(DateTimeKind.{property.DateTimeKind})");
+                        propertyAnnotations.Add(new CSharpAnnotation("DateTimeKind", new CSharpValue($"DateTimeKind.{property.DateTimeKind}"))); // Dibix runtime
                     }
+                }
+
+                if (property.DefaultValue != null)
+                {
+                    defaultValue = context.BuildDefaultValueLiteral(property.DefaultValue);
+                    context.AddUsing("System.ComponentModel");
+                    propertyAnnotations.Add(new CSharpAnnotation("DefaultValue", defaultValue));
                 }
 
                 switch (property.SerializationBehavior)
@@ -113,12 +121,12 @@ namespace Dibix.Sdk.CodeGeneration
                         break;
 
                     case SerializationBehavior.IfNotEmpty:
-                        if (withAnnotations)
+                        if (generateRuntimeSpecifics)
                         {
                             if (!property.Type.IsEnumerable)
                             {
                                 AddJsonReference(context);
-                                propertyAnnotations.Add("JsonProperty(NullValueHandling = NullValueHandling.Ignore)");
+                                propertyAnnotations.Add(new CSharpAnnotation("JsonProperty").AddProperty("NullValueHandling", new CSharpValue("NullValueHandling.Ignore"))); // Serialization
                             }
                             else
                             {
@@ -129,10 +137,10 @@ namespace Dibix.Sdk.CodeGeneration
                         break;
 
                     case SerializationBehavior.Never:
-                        if (withAnnotations)
+                        if (generateRuntimeSpecifics)
                         {
                             AddJsonReference(context);
-                            propertyAnnotations.Add("JsonIgnore");
+                            propertyAnnotations.Add(new CSharpAnnotation("JsonIgnore")); // Serialization
                         }
                         else
                             continue;
@@ -144,12 +152,13 @@ namespace Dibix.Sdk.CodeGeneration
                 }
 
                 if (property.Obfuscated) 
-                    propertyAnnotations.Add("Obfuscated");
+                    propertyAnnotations.Add(new CSharpAnnotation("Obfuscated"));
 
                 string clrTypeName = context.ResolveTypeName(property.Type);
                 @class.AddProperty(property.Name, !property.Type.IsEnumerable ? clrTypeName : $"ICollection<{clrTypeName}>", propertyAnnotations)
                       .Getter(null)
-                      .Setter(null, property.Type.IsEnumerable ? CSharpModifiers.Private : default);
+                      .Setter(null, property.Type.IsEnumerable ? CSharpModifiers.Private : default)
+                      .Initializer(defaultValue);
 
                 if (property.Type.IsEnumerable)
                     ctorAssignments.Add($"this.{property.Name} = new Collection<{clrTypeName}>();");
@@ -164,7 +173,7 @@ namespace Dibix.Sdk.CodeGeneration
                       .AddConstructor(String.Join(Environment.NewLine, ctorAssignments));
             }
 
-            if (withAnnotations && shouldSerializeMethods.Any())
+            if (generateRuntimeSpecifics && shouldSerializeMethods.Any())
             {
                 context.AddUsing(typeof(Enumerable).Namespace);
 
@@ -172,16 +181,16 @@ namespace Dibix.Sdk.CodeGeneration
 
                 foreach (string shouldSerializeMethod in shouldSerializeMethods)
                 {
-                    @class.AddMethod($"ShouldSerialize{shouldSerializeMethod}", "bool", $"return {shouldSerializeMethod}.Any();");
+                    @class.AddMethod($"ShouldSerialize{shouldSerializeMethod}", "bool", $"return {shouldSerializeMethod}.Any();"); // Serialization
                 }
             }
         }
 
         private static void ProcessEnumSchema(CSharpStatementScope scope, EnumSchema schema)
         {
-            ICollection<string> annotations = new Collection<string>();
+            ICollection<CSharpAnnotation> annotations = new Collection<CSharpAnnotation>();
             if (schema.IsFlaggable)
-                annotations.Add("Flags");
+                annotations.Add(new CSharpAnnotation("Flags"));
 
             CSharpEnum @enum = scope.AddEnum(schema.DefinitionName, CSharpModifiers.Public, annotations);
             foreach (EnumSchemaMember member in schema.Members)

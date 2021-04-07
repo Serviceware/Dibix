@@ -12,7 +12,7 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
         private readonly bool _isExtension;
         private readonly CSharpModifiers _modifiers;
 
-        public CSharpMethod(string name, string returnType, string body, bool isExtension, CSharpModifiers modifiers, IEnumerable<string> annotations) : base(annotations)
+        public CSharpMethod(string name, string returnType, string body, bool isExtension, CSharpModifiers modifiers, IEnumerable<CSharpAnnotation> annotations) : base(annotations)
         {
             this._name = name;
             this._returnType = returnType;
@@ -22,17 +22,16 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             this._parameters = new Collection<CSharpParameter>();
         }
 
-        public CSharpMethod AddParameter(string name, string type, params string[] annotations) => this.AddParameter(name, type, default, null, annotations);
-        public CSharpMethod AddParameter(string name, string type, ParameterKind parameterKind, CSharpValue defaultValue, params string[] annotations)
+        public CSharpMethod AddParameter(string name, string type, params CSharpAnnotation[] annotations) => this.AddParameter(name, type, default, null, annotations);
+        public CSharpMethod AddParameter(string name, string type, ParameterKind parameterKind, CSharpValue defaultValue, params CSharpAnnotation[] annotations)
         {
             CSharpParameter parameter = new CSharpParameter(name, type, parameterKind, defaultValue, annotations);
             this._parameters.Add(parameter);
             return this;
         }
 
-        public override void Write(StringWriter writer)
+        protected override void WriteBody(StringWriter writer)
         {
-            base.Write(writer);
             WriteModifiers(writer, this._modifiers);
 
             writer.WriteRaw(this._returnType)

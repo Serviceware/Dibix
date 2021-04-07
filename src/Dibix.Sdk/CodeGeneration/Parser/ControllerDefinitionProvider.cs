@@ -65,7 +65,7 @@ namespace Dibix.Sdk.CodeGeneration
             this._schemaRegistry = schemaRegistry;
             this._assemblyResolver = referencedAssemblyInspector;
             this.Controllers = new Collection<ControllerDefinition>();
-            base.Collect(endpoints);
+            this.Collect(endpoints);
         }
         #endregion
 
@@ -416,7 +416,6 @@ namespace Dibix.Sdk.CodeGeneration
                     (
                         parameter.Name
                       , parameter.Type
-                      , parameter.HasDefaultValue
                       , parameter.DefaultValue
                       , parameter.IsOutput
                       , target
@@ -499,13 +498,13 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
                 if (location == ActionParameterLocation.Path)
                     pathParameters.Remove(apiParameterName);
 
-                parameterRegistry.Add(new ActionParameter(apiParameterName, internalParameterName, type: null, location, hasDefaultValue: false, defaultValue: null, parameter.Source));
+                parameterRegistry.Add(new ActionParameter(apiParameterName, internalParameterName, type: null, location, defaultValue: null, parameter.Source));
             }
 
             foreach (string pathParameter in pathParameters.Keys)
             {
                 TypeReference typeReference = new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: false);
-                ActionParameter parameter = new ActionParameter(pathParameter, pathParameter, typeReference, ActionParameterLocation.Path, hasDefaultValue: false, defaultValue: null, source: null);
+                ActionParameter parameter = new ActionParameter(pathParameter, pathParameter, typeReference, ActionParameterLocation.Path, defaultValue: null, source: null);
                 actionDefinition.Parameters.Add(parameter);
             }
 
@@ -549,7 +548,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
 
             TypeReference resultType = null;
             if (returnType != typeof(void))
-                resultType = ReflectionTypeResolver.ResolveType(returnType, filePath, line, column, this._schemaRegistry);
+                resultType = ReflectionTypeResolver.ResolveType(returnType, filePath, line, column, this._schemaRegistry, base.Logger);
 
             NeighborActionTarget target;
             if (isReflectionTarget)
@@ -566,18 +565,16 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
             foreach (ParameterInfo parameter in parameters)
             {
                 string parameterName = parameter.Name;
-                TypeReference parameterType = ReflectionTypeResolver.ResolveType(parameter.ParameterType, filePath, line, column, this._schemaRegistry);
+                TypeReference parameterType = ReflectionTypeResolver.ResolveType(parameter.ParameterType, filePath, line, column, this._schemaRegistry, base.Logger);
 
                 // ParameterInfo.HasDefaultValue/DefaultValue => It is illegal to reflect on the custom attributes of a Type loaded via ReflectionOnlyGetType (see Assembly.ReflectionOnly) -- use CustomAttributeData instead
-                bool hasDefaultValue = parameter.RawDefaultValue != DBNull.Value;
-                object defaultValue = parameter.RawDefaultValue;
+                DefaultValue defaultValue = parameter.RawDefaultValue != DBNull.Value ? new DefaultValue(parameter.RawDefaultValue, filePath, line, column) : null;
                 bool isOutParameter = parameter.IsOut;
 
                 this.CollectActionParameter
                 (
                     parameterName
                   , parameterType
-                  , hasDefaultValue
                   , defaultValue
                   , isOutParameter
                   , targetName
@@ -626,8 +623,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
         (
             string parameterName
           , TypeReference parameterType
-          , bool hasDefaultValue
-          , object defaultValue
+          , DefaultValue defaultValue
           , bool isOutParameter
           , string actionName
           , string filePath
@@ -648,7 +644,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
                 return;
             }
 
-            ActionParameter actionParameter = CreateActionParameter(parameterName, parameterType, hasDefaultValue, defaultValue, explicitParameters, pathParameters, bodyParameters);
+            ActionParameter actionParameter = CreateActionParameter(parameterName, parameterType, defaultValue, explicitParameters, pathParameters, bodyParameters);
             parameterRegistry.Add(actionParameter);
         }
 
@@ -719,7 +715,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
             response.Errors.Add(new ErrorDescription(errorCode, errorDescription));
         }
 
-        private static ActionParameter CreateActionParameter(string name, TypeReference type, bool hasDefaultValue, object defaultValue, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, Group> pathParameters, ICollection<string> bodyParameters)
+        private static ActionParameter CreateActionParameter(string name, TypeReference type, DefaultValue defaultValue, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, Group> pathParameters, ICollection<string> bodyParameters)
         {
             ActionParameterLocation location = ActionParameterLocation.NonUser;
             string apiParameterName = name;
@@ -764,7 +760,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
                 location = ActionParameterLocation.Query;
             }
 
-            return new ActionParameter(apiParameterName, internalParameterName, type, location, hasDefaultValue, defaultValue, explicitParameter?.Source);
+            return new ActionParameter(apiParameterName, internalParameterName, type, location, defaultValue, explicitParameter?.Source);
         }
 
         private static ActionParameterLocation ResolveParameterLocationFromSource(ActionParameterSource parameterSource, ref string apiParameterName)

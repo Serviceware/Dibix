@@ -2,7 +2,7 @@
 
 namespace Dibix.Sdk.CodeGeneration.CSharp
 {
-    internal class CSharpComment : CSharpStatement
+    internal class CSharpComment : CSharpExpression
     {
         private readonly string _comment;
         private readonly bool _isMultiline;

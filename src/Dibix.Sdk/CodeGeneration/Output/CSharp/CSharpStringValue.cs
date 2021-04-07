@@ -4,7 +4,7 @@
     {
         private readonly bool _verbatim;
 
-        public CSharpStringValue(string value, bool verbatim) : base(value)
+        public CSharpStringValue(string value, bool verbatim = false) : base(value)
         {
             this._verbatim = verbatim;
         }

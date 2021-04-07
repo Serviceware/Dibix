@@ -173,7 +173,7 @@ namespace Dibix.Sdk.OpenApi
         private static void AppendQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, string rootNamespace, ISchemaRegistry schemaRegistry) => AppendQueryParameter(document, operation, parameter, parameter.Type, parameter.Type.IsEnumerable, rootNamespace, schemaRegistry);
         private static OpenApiParameter AppendQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, TypeReference parameterType, bool isEnumerable, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
-            bool isRequired = !parameter.HasDefaultValue;
+            bool isRequired = parameter.DefaultValue == null;
             return AppendParameter(document, operation, parameter, parameterType, isEnumerable, ParameterLocation.Query, isRequired, rootNamespace, schemaRegistry);
         }
 
@@ -210,7 +210,7 @@ namespace Dibix.Sdk.OpenApi
                 In = parameterLocation,
                 Required = isRequired,
                 Name = actionParameter.ApiParameterName,
-                Schema = CreateSchema(document, parameterType, isEnumerable, actionParameter.HasDefaultValue, actionParameter.DefaultValue, rootNamespace, schemaRegistry)
+                Schema = CreateSchema(document, parameterType, isEnumerable, actionParameter.DefaultValue, rootNamespace, schemaRegistry)
             };
             operation.Parameters.Add(apiParameter);
             return apiParameter;
@@ -299,10 +299,10 @@ namespace Dibix.Sdk.OpenApi
             }
         }
 
-        private static OpenApiSchema CreateSchema(OpenApiDocument document, TypeReference typeReference, string rootNamespace, ISchemaRegistry schemaRegistry) => CreateSchema(document, typeReference, typeReference.IsEnumerable, false, null, rootNamespace, schemaRegistry);
-        private static OpenApiSchema CreateSchema(OpenApiDocument document, TypeReference typeReference, bool isEnumerable, bool hasDefaultValue, object defaultValue, string rootNamespace, ISchemaRegistry schemaRegistry)
+        private static OpenApiSchema CreateSchema(OpenApiDocument document, TypeReference typeReference, string rootNamespace, ISchemaRegistry schemaRegistry) => CreateSchema(document, typeReference, typeReference.IsEnumerable, defaultValue: null, rootNamespace, schemaRegistry);
+        private static OpenApiSchema CreateSchema(OpenApiDocument document, TypeReference typeReference, bool isEnumerable, DefaultValue defaultValue, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
-            OpenApiSchema schema = CreateSchemaCore(document, typeReference, hasDefaultValue, defaultValue, rootNamespace, schemaRegistry);
+            OpenApiSchema schema = CreateSchemaCore(document, typeReference, defaultValue, rootNamespace, schemaRegistry);
 
             if (isEnumerable)
             {
@@ -316,17 +316,17 @@ namespace Dibix.Sdk.OpenApi
             return schema;
         }
 
-        private static OpenApiSchema CreateSchemaCore(OpenApiDocument document, TypeReference typeReference, bool hasDefaultValue, object defaultValue, string rootNamespace, ISchemaRegistry schemaRegistry)
+        private static OpenApiSchema CreateSchemaCore(OpenApiDocument document, TypeReference typeReference, DefaultValue defaultValue, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
             switch (typeReference)
             {
-                case PrimitiveTypeReference primitiveContractPropertyType: return CreatePrimitiveTypeSchema(primitiveContractPropertyType, hasDefaultValue, defaultValue);
+                case PrimitiveTypeReference primitiveContractPropertyType: return CreatePrimitiveTypeSchema(primitiveContractPropertyType, defaultValue);
                 case SchemaTypeReference contractPropertyTypeReference: return CreateReferenceSchema(document, contractPropertyTypeReference, rootNamespace, schemaRegistry);
                 default: throw new ArgumentOutOfRangeException(nameof(typeReference), typeReference, $"Unexpected property type: {typeReference}");
             }
         }
 
-        private static OpenApiSchema CreatePrimitiveTypeSchema(PrimitiveTypeReference typeReference, bool hasDefaultValue, object defaultValue)
+        private static OpenApiSchema CreatePrimitiveTypeSchema(PrimitiveTypeReference typeReference, DefaultValue defaultValue)
         {
             if (!PrimitiveTypeMap.TryGetValue(typeReference.Type, out Func<OpenApiSchema> schemaFactory))
                 throw new InvalidOperationException($"Unexpected primitive type: {typeReference.Type}");
@@ -334,8 +334,8 @@ namespace Dibix.Sdk.OpenApi
             OpenApiSchema schema = schemaFactory();
             schema.Nullable = typeReference.IsNullable;
 
-            if (hasDefaultValue)
-                schema.Default = CreateDefaultValue(defaultValue);
+            if (defaultValue != null)
+                schema.Default = CreateDefaultValue(defaultValue.Value);
 
             return schema;
         }
@@ -428,6 +428,15 @@ namespace Dibix.Sdk.OpenApi
 
                 if (property.SerializationBehavior == SerializationBehavior.Always && !property.IsOptional)
                     schema.Required.Add(property.Name);
+
+                if (property.DefaultValue != null)
+                {
+                    object defaultValue = property.DefaultValue.Value;
+                    if (property.DefaultValue.EnumMember != null)
+                        defaultValue = property.DefaultValue.EnumMember.ActualValue;
+
+                    propertySchema.Default = CreateDefaultValue(defaultValue);
+                }
             }
         }
 

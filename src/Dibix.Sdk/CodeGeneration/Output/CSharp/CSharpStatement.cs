@@ -4,52 +4,39 @@ using System.Linq;
 
 namespace Dibix.Sdk.CodeGeneration.CSharp
 {
-    public abstract class CSharpStatement
+    public abstract class CSharpStatement : CSharpExpression
     {
-        private readonly IEnumerable<string> _annotations;
+        private readonly IEnumerable<CSharpAnnotation> _annotations;
         
-        protected CSharpStatement() : this(Enumerable.Empty<string>()) { }
-        protected CSharpStatement(IEnumerable<string> annotations)
+        protected CSharpStatement() : this(Enumerable.Empty<CSharpAnnotation>()) { }
+        protected CSharpStatement(IEnumerable<CSharpAnnotation> annotations)
         {
             this._annotations = annotations;
         }
 
-        public virtual void Write(StringWriter writer)
+        public override void Write(StringWriter writer)
         {
-            foreach (string annotation in this._annotations.OrderBy(x => x.Length))
+            IEnumerable<string> annotations = this.CollectAnnotations();
+            foreach (string annotation in annotations.OrderBy(x => x.Length))
             {
                 this.WriteAnnotation(writer, annotation);
             }
+
+            this.WriteBody(writer);
         }
 
-        protected virtual void WriteAnnotation(StringWriter writer, string annotation)
-        {
-            writer.WriteLine($"[{annotation}]");
-        }
+        protected abstract void WriteBody(StringWriter writer);
 
-        protected static void WriteMultiline(StringWriter writer, string content)
+        protected virtual void WriteAnnotation(StringWriter writer, string annotation) => writer.WriteLine(annotation);
+
+        private IEnumerable<string> CollectAnnotations()
         {
-            foreach (string line in content.Split('\n').Select(x => x.TrimEnd('\r')))
+            foreach (CSharpAnnotation annotation in this._annotations)
             {
-                if (!String.IsNullOrEmpty(line)) // Don't indent empty lines
-                    writer.WriteLine(line);
-                else
-                    writer.WriteLine();
+                StringWriter writer = new StringWriter();
+                annotation.Write(writer);
+                yield return writer.ToString();
             }
-        }
-
-        protected static void WriteModifiers(StringWriter writer, CSharpModifiers modifiers, bool indent = true)
-        {
-            IEnumerable<CSharpModifiers> flags = Enum.GetValues(typeof(CSharpModifiers))
-                                                     .Cast<CSharpModifiers>()
-                                                     .Where(x => x != default && modifiers.HasFlag(x));
-
-            if (indent)
-                writer.WriteIndent();
-
-            foreach (CSharpModifiers flag in flags)
-                writer.WriteRaw(flag.ToString().ToLowerInvariant())
-                      .WriteRaw(' ');
         }
     }
 }

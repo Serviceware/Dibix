@@ -36,13 +36,13 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly ISchemaRegistry _schemaRegistry;
 
         public CSharpStatementScope Output { get; internal set; }
-        public string GeneratedCodeAnnotation { get; }
+        public CSharpAnnotation GeneratedCodeAnnotation { get; }
         public CodeGenerationModel Model { get; }
         public bool WriteGuardChecks { get; set; }
         public bool GeneratePublicArtifacts => this.Model.CompatibilityLevel == CodeGeneratorCompatibilityLevel.Full;
         public bool WriteNamespaces => this.Model.CompatibilityLevel == CodeGeneratorCompatibilityLevel.Full;
 
-        internal DaoCodeGenerationContext(CSharpRoot root, string generatedCodeAnnotation, CodeGenerationModel model, ISchemaRegistry schemaRegistry)
+        internal DaoCodeGenerationContext(CSharpRoot root, CSharpAnnotation generatedCodeAnnotation, CodeGenerationModel model, ISchemaRegistry schemaRegistry)
         {
             this._root = root;
             this._schemaRegistry = schemaRegistry;
@@ -84,6 +84,26 @@ namespace Dibix.Sdk.CodeGeneration
                 sb.Append('?');
 
             return sb.ToString();
+        }
+
+        public CSharpValue BuildDefaultValueLiteral(DefaultValue defaultValue)
+        {
+            object value = defaultValue.Value;
+            if (value == null)
+                return new CSharpValue("null");
+
+            string defaultValueStr = value.ToString();
+
+            if (defaultValue.EnumMember != null)
+                return new CSharpValue($"{defaultValue.EnumMember.Enum.FullName}.{defaultValue.EnumMember.Name}");
+
+            switch (value)
+            {
+                case bool _: return new CSharpValue(defaultValueStr.ToLowerInvariant());
+                case char defaultValueChar: return new CSharpCharacterValue(defaultValueChar);
+                case string _: return new CSharpStringValue(defaultValueStr);
+                default: return new CSharpValue(defaultValueStr);
+            }
         }
 
         public string GetRelativeNamespace(string layerName, string relativeNamespace)

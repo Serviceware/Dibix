@@ -189,6 +189,7 @@
 //----------------------------------------------------------------------------*/
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 
 namespace Dibix.Sdk.Tests
 {
@@ -209,9 +210,19 @@ namespace Dibix.Sdk.Tests
             Descending
         }
 
+        public enum Role : int
+        {
+            None,
+            User,
+            Admin
+        }
+
         public sealed class GenericContract
         {
-            public string Name { get; set; }
+            [DefaultValue("DefaultValue")]
+            public string Name { get; set; } = "DefaultValue";
+            [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
+            public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
             public System.DateTime CreationTime { get; set; }
         }
 
@@ -255,6 +266,7 @@ namespace Dibix.Sdk.Tests
 //----------------------------------------------------------------------------*/
 using System;
 using System.CodeDom.Compiler;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using Dibix;
@@ -381,6 +393,13 @@ namespace Dibix.Sdk.Tests
     namespace DomainModel
     {
         #region Contracts
+        public enum Role : int
+        {
+            None,
+            User,
+            Admin
+        }
+
         [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
@@ -389,12 +408,16 @@ namespace Dibix.Sdk.Tests
             [JsonIgnore]
             public int Id { get; set; }
             [DataMember]
+            [DefaultValue("DefaultValue")]
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; }
+            public string Name { get; set; } = "DefaultValue";
             [DataMember]
             [JsonIgnore]
             [Discriminator]
             public int? ParentId { get; set; }
+            [DataMember]
+            [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
+            public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime CreationTime { get; set; }
@@ -669,15 +692,31 @@ components:
       additionalProperties: false
     GenericContract:
       required:
+        - Role
         - CreationTime
       type: object
       properties:
         Name:
           type: string
+          default: DefaultValue
+        Role:
+          $ref: '#/components/schemas/Role'
         CreationTime:
           type: string
           format: date-time
       additionalProperties: false
+    Role:
+      enum:
+        - 0
+        - 1
+        - 2
+      type: integer
+      description: 0 = None&lt;br/&gt;1 = User&lt;br/&gt;2 = Admin
+      format: int32
+      x-enum-varnames:
+        - None
+        - User
+        - Admin
     InputContract:
       required:
         - V
@@ -1056,6 +1095,7 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using Dibix;
@@ -1103,6 +1143,13 @@ namespace Dibix.Sdk.Tests
             Descending
         }
 
+        public enum Role : int
+        {
+            None,
+            User,
+            Admin
+        }
+
         [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
@@ -1111,12 +1158,16 @@ namespace Dibix.Sdk.Tests
             [JsonIgnore]
             public int Id { get; set; }
             [DataMember]
+            [DefaultValue("DefaultValue")]
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; }
+            public string Name { get; set; } = "DefaultValue";
             [DataMember]
             [JsonIgnore]
             [Discriminator]
             public int? ParentId { get; set; }
+            [DataMember]
+            [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
+            public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime CreationTime { get; set; }
@@ -1169,6 +1220,7 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using Dibix;
@@ -1218,6 +1270,13 @@ namespace Dibix.Sdk.Tests
             Descending
         }
 
+        public enum Role : int
+        {
+            None,
+            User,
+            Admin
+        }
+
         [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
@@ -1226,12 +1285,16 @@ namespace Dibix.Sdk.Tests
             [JsonIgnore]
             public int Id { get; set; }
             [DataMember]
+            [DefaultValue("DefaultValue")]
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; }
+            public string Name { get; set; } = "DefaultValue";
             [DataMember]
             [JsonIgnore]
             [Discriminator]
             public int? ParentId { get; set; }
+            [DataMember]
+            [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
+            public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime CreationTime { get; set; }
@@ -1270,6 +1333,7 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using Dibix;
@@ -1317,6 +1381,13 @@ namespace Dibix.Sdk.Tests
             Descending
         }
 
+        public enum Role : int
+        {
+            None,
+            User,
+            Admin
+        }
+
         [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
@@ -1325,12 +1396,16 @@ namespace Dibix.Sdk.Tests
             [JsonIgnore]
             public int Id { get; set; }
             [DataMember]
+            [DefaultValue("DefaultValue")]
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; }
+            public string Name { get; set; } = "DefaultValue";
             [DataMember]
             [JsonIgnore]
             [Discriminator]
             public int? ParentId { get; set; }
+            [DataMember]
+            [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
+            public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime CreationTime { get; set; }
@@ -1383,6 +1458,7 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using Dibix;
@@ -1430,6 +1506,13 @@ namespace Dibix.Sdk.Tests
             Descending
         }
 
+        public enum Role : int
+        {
+            None,
+            User,
+            Admin
+        }
+
         [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
@@ -1438,12 +1521,16 @@ namespace Dibix.Sdk.Tests
             [JsonIgnore]
             public int Id { get; set; }
             [DataMember]
+            [DefaultValue("DefaultValue")]
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; }
+            public string Name { get; set; } = "DefaultValue";
             [DataMember]
             [JsonIgnore]
             [Discriminator]
             public int? ParentId { get; set; }
+            [DataMember]
+            [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
+            public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime CreationTime { get; set; }
@@ -1496,6 +1583,7 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using Dibix;
@@ -1552,6 +1640,13 @@ namespace Dibix.Sdk.Tests
             Descending
         }
 
+        public enum Role : int
+        {
+            None,
+            User,
+            Admin
+        }
+
         [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
@@ -1560,12 +1655,16 @@ namespace Dibix.Sdk.Tests
             [JsonIgnore]
             public int Id { get; set; }
             [DataMember]
+            [DefaultValue("DefaultValue")]
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; }
+            public string Name { get; set; } = "DefaultValue";
             [DataMember]
             [JsonIgnore]
             [Discriminator]
             public int? ParentId { get; set; }
+            [DataMember]
+            [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
+            public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime CreationTime { get; set; }
@@ -1607,6 +1706,7 @@ namespace Dibix.Sdk.Tests
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using Dibix;
@@ -1639,6 +1739,13 @@ namespace Dibix.Sdk.Tests
     namespace DomainModel
     {
         #region Contracts
+        public enum Role : int
+        {
+            None,
+            User,
+            Admin
+        }
+
         [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
@@ -1647,12 +1754,16 @@ namespace Dibix.Sdk.Tests
             [JsonIgnore]
             public int Id { get; set; }
             [DataMember]
+            [DefaultValue("DefaultValue")]
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; }
+            public string Name { get; set; } = "DefaultValue";
             [DataMember]
             [JsonIgnore]
             [Discriminator]
             public int? ParentId { get; set; }
+            [DataMember]
+            [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
+            public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime CreationTime { get; set; }
@@ -1673,6 +1784,7 @@ namespace Dibix.Sdk.Tests
 //----------------------------------------------------------------------------*/
 using System;
 using System.CodeDom.Compiler;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using Dibix;
@@ -1705,6 +1817,13 @@ namespace Dibix.Sdk.Tests
     namespace DomainModel
     {
         #region Contracts
+        public enum Role : int
+        {
+            None,
+            User,
+            Admin
+        }
+
         [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
@@ -1713,12 +1832,16 @@ namespace Dibix.Sdk.Tests
             [JsonIgnore]
             public int Id { get; set; }
             [DataMember]
+            [DefaultValue("DefaultValue")]
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; }
+            public string Name { get; set; } = "DefaultValue";
             [DataMember]
             [JsonIgnore]
             [Discriminator]
             public int? ParentId { get; set; }
+            [DataMember]
+            [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
+            public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime CreationTime { get; set; }
@@ -1741,6 +1864,7 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using Dibix;
@@ -1785,6 +1909,13 @@ namespace Dibix.Sdk.Tests
             Descending
         }
 
+        public enum Role : int
+        {
+            None,
+            User,
+            Admin
+        }
+
         [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
@@ -1793,12 +1924,16 @@ namespace Dibix.Sdk.Tests
             [JsonIgnore]
             public int Id { get; set; }
             [DataMember]
+            [DefaultValue("DefaultValue")]
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; }
+            public string Name { get; set; } = "DefaultValue";
             [DataMember]
             [JsonIgnore]
             [Discriminator]
             public int? ParentId { get; set; }
+            [DataMember]
+            [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
+            public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime CreationTime { get; set; }
@@ -1873,6 +2008,13 @@ namespace Dibix.Sdk.Tests
             Descending
         }
 
+        public enum Role : int
+        {
+            None,
+            User,
+            Admin
+        }
+
         [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
@@ -1881,12 +2023,16 @@ namespace Dibix.Sdk.Tests
             [JsonIgnore]
             public int Id { get; set; }
             [DataMember]
+            [DefaultValue("DefaultValue")]
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; }
+            public string Name { get; set; } = "DefaultValue";
             [DataMember]
             [JsonIgnore]
             [Discriminator]
             public int? ParentId { get; set; }
+            [DataMember]
+            [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
+            public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime CreationTime { get; set; }
@@ -2745,6 +2891,7 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using Dibix;
@@ -2794,6 +2941,13 @@ namespace Dibix.Sdk.Tests
             Descending
         }
 
+        public enum Role : int
+        {
+            None,
+            User,
+            Admin
+        }
+
         [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
@@ -2802,12 +2956,16 @@ namespace Dibix.Sdk.Tests
             [JsonIgnore]
             public int Id { get; set; }
             [DataMember]
+            [DefaultValue("DefaultValue")]
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; }
+            public string Name { get; set; } = "DefaultValue";
             [DataMember]
             [JsonIgnore]
             [Discriminator]
             public int? ParentId { get; set; }
+            [DataMember]
+            [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
+            public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime CreationTime { get; set; }
@@ -2854,6 +3012,7 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using Dibix;
@@ -2903,6 +3062,13 @@ namespace Dibix.Sdk.Tests
             Descending
         }
 
+        public enum Role : int
+        {
+            None,
+            User,
+            Admin
+        }
+
         [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
@@ -2911,12 +3077,16 @@ namespace Dibix.Sdk.Tests
             [JsonIgnore]
             public int Id { get; set; }
             [DataMember]
+            [DefaultValue("DefaultValue")]
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; }
+            public string Name { get; set; } = "DefaultValue";
             [DataMember]
             [JsonIgnore]
             [Discriminator]
             public int? ParentId { get; set; }
+            [DataMember]
+            [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
+            public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime CreationTime { get; set; }
@@ -3006,6 +3176,7 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using System.Threading;
@@ -3055,6 +3226,13 @@ namespace Dibix.Sdk.Tests
             Descending
         }
 
+        public enum Role : int
+        {
+            None,
+            User,
+            Admin
+        }
+
         [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
@@ -3063,12 +3241,16 @@ namespace Dibix.Sdk.Tests
             [JsonIgnore]
             public int Id { get; set; }
             [DataMember]
+            [DefaultValue("DefaultValue")]
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; }
+            public string Name { get; set; } = "DefaultValue";
             [DataMember]
             [JsonIgnore]
             [Discriminator]
             public int? ParentId { get; set; }
+            [DataMember]
+            [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
+            public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime CreationTime { get; set; }

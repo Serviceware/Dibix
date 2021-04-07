@@ -1,6 +1,6 @@
 ﻿namespace Dibix.Sdk.CodeGeneration.CSharp
 {
-    internal class CSharpRegionStart : CSharpStatement
+    internal class CSharpRegionStart : CSharpExpression
     {
         private readonly string _regionName;
 

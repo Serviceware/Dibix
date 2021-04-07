@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using Dibix.Http;
 using Dibix.Sdk.Sql;
@@ -46,7 +45,7 @@ namespace Dibix.Sdk.CodeGeneration
             };
             
             this.ParseParameterObfuscate(parameter, markup);
-                this.ParseDefaultValue(node, parameter);
+            this.CollectParameterDefault(node, parameter);
 
             base.Target.Parameters.Add(parameter);
         }
@@ -62,51 +61,40 @@ namespace Dibix.Sdk.CodeGeneration
             target.Obfuscate = markup.TryGetSingleElement(SqlMarkupKey.Obfuscate, base.Target.Source, base.Logger, out ISqlElement _);
         }
 
-        private void ParseDefaultValue(DeclareVariableElement parameter, SqlQueryParameter target)
+        private void CollectParameterDefault(DeclareVariableElement parameter, SqlQueryParameter target)
         {
             if (parameter.Value == null)
                 return;
-
-            target.HasDefaultValue = this.TryParseParameterDefaultValue(parameter.Value, target.Type, out object defaultValue);
-            target.DefaultValue = defaultValue;
+            
+            target.DefaultValue = this.CollectParameterDefault(parameter.Value, target.Type);
         }
-
-        private bool TryParseParameterDefaultValue(ScalarExpression value, TypeReference targetType, out object defaultValue)
+        private DefaultValue CollectParameterDefault(ScalarExpression value, TypeReference targetType)
         {
             switch (value)
             {
-                case NullLiteral _:
-                    defaultValue = null;
-                    return true;
-
-                case Literal literal:
-                    return this.TryParseParameterDefaultValue(literal, targetType, out defaultValue);
-
-                case VariableReference variableReference:
-                    defaultValue = variableReference.Name;
-                    return true;
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(value), value, $@"Unsupported parameter default
+                case NullLiteral _: return this.BuildDefaultValue(value, null);
+                case Literal literal: return this.CollectParameterDefault(literal, targetType);
+                case VariableReference variableReference: return this.BuildDefaultValue(value, variableReference);
+                default: throw new ArgumentOutOfRangeException(nameof(value), value, $@"Unsupported parameter default
 targetType: {targetType}");
             }
         }
-
-        private bool TryParseParameterDefaultValue(Literal literal, TypeReference typeReference, out object defaultValue)
+        private DefaultValue CollectParameterDefault(Literal literal, TypeReference typeReference)
         {
             switch (typeReference)
             {
-                case PrimitiveTypeReference primitiveTypeReference:
-                    return this.TryParseParameterDefaultValue(literal, primitiveTypeReference.Type, out defaultValue);
+                case PrimitiveTypeReference primitiveTypeReference when this.TryParseParameterDefaultValue(literal, primitiveTypeReference.Type, out object defaultRawValue):
+                    return this.BuildDefaultValue(literal, defaultRawValue);
                 
                 case SchemaTypeReference schemaTypeReference:
-                    defaultValue = Int32.Parse(literal.Value);
-                    return true;
+                    int numericValue = Int32.Parse(literal.Value);
+                    DefaultValue defaultValue = this.BuildDefaultValue(literal, numericValue);
+                    defaultValue.EnumMember = this.CollectEnumDefault(schemaTypeReference, literal, numericValue);
+                    return defaultValue;
 
                 default:
                     // Error should have been reported
-                    defaultValue = null;
-                    return false;
+                    return null;
             }
         }
 
@@ -135,6 +123,22 @@ targetType: {targetType}");
                     defaultValue = null;
                     return false;
             }
+        }
+
+        private DefaultValue BuildDefaultValue(TSqlFragment value, object defaultValue) => new DefaultValue(defaultValue, base.Target.Source, value.StartLine, value.StartColumn);
+
+        private EnumSchemaMember CollectEnumDefault(SchemaTypeReference schemaTypeReference, TSqlFragment value, int numericValue)
+        {
+            if (!(base.SchemaRegistry.GetSchema(schemaTypeReference) is EnumSchema enumSchema))
+                return null;
+
+            EnumSchemaMember enumMember = enumSchema.Members.FirstOrDefault(x => Equals(x.ActualValue, numericValue));
+
+            if (enumMember != null)
+                return enumMember;
+
+            base.Logger.LogError(code: null, $"Enum '{enumSchema.FullName}' does not define a member with value '{numericValue}'", base.Target.Source, value.StartLine, value.StartColumn);
+            return null;
         }
 
         private void ParseContent(TSqlFragment content, StatementList statements)

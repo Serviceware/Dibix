@@ -10,7 +10,7 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
         private readonly ParameterKind _parameterKind;
         private readonly CSharpValue _defaultValue;
 
-        public CSharpParameter(string name, string type, ParameterKind parameterKind, CSharpValue defaultValue, IEnumerable<string> annotations) : base(annotations)
+        public CSharpParameter(string name, string type, ParameterKind parameterKind, CSharpValue defaultValue, IEnumerable<CSharpAnnotation> annotations) : base(annotations)
         {
             this._name = name;
             this._type = type;
@@ -18,10 +18,8 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             this._defaultValue = defaultValue;
         }
 
-        public override void Write(StringWriter writer)
+        protected override void WriteBody(StringWriter writer)
         {
-            base.Write(writer);
-
             WriteParameterKind(writer, this._parameterKind);
 
             writer.WriteRaw(this._type)
@@ -60,9 +58,6 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             defaultValue.Write(writer);
         }
 
-        protected override void WriteAnnotation(StringWriter writer, string annotation)
-        {
-            writer.WriteRaw($"[{annotation}] ");
-        }
+        protected override void WriteAnnotation(StringWriter writer, string annotation) => writer.WriteRaw($"{annotation} ");
     }
 }

@@ -32,12 +32,11 @@ namespace Dibix.Sdk.CodeGeneration
             //if (!writers.Any())
             //    return;
 
-            string generatedCodeAnnotation = $"{nameof(GeneratedCodeAttribute)}(\"{GeneratorName}\", \"{Version}\")";
+            CSharpAnnotation generatedCodeAnnotation = new CSharpAnnotation(nameof(GeneratedCodeAttribute), new CSharpStringValue(GeneratorName), new CSharpStringValue(Version));
 
             // Prepare writer
             bool isArtifactAssembly = model.CompatibilityLevel == CodeGeneratorCompatibilityLevel.Full;
-            IEnumerable<string> globalAnnotations = isArtifactAssembly ? Enumerable.Repeat("ArtifactAssembly", 1) : Enumerable.Empty<string>();
-            globalAnnotations = globalAnnotations.Concat(writers.SelectMany(x => x.GetGlobalAnnotations(model)).Distinct().OrderBy(x => x.Length));
+            IEnumerable<CSharpAnnotation> globalAnnotations = CollectGlobalAnnotations(isArtifactAssembly).Concat(writers.SelectMany(x => x.GetGlobalAnnotations(model)));
             CSharpWriter output = new CSharpWriter(writer, model.RootNamespace, globalAnnotations);
 
             DaoCodeGenerationContext context = new DaoCodeGenerationContext(output.Root, generatedCodeAnnotation, model, this._schemaRegistry);
@@ -75,6 +74,12 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
+        private static IEnumerable<CSharpAnnotation> CollectGlobalAnnotations(bool isArtifactAssembly)
+        {
+            if (isArtifactAssembly)
+                yield return new CSharpAnnotation("ArtifactAssembly");
+        }
+
         private static IEnumerable<DaoWriter> SelectWriters()
         {
             yield return new DaoExecutorWriter();

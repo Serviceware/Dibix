@@ -21,7 +21,7 @@ namespace Dibix.Sdk.CodeGeneration
             this.Logger = logger;
         }
 
-        protected void Collect(IEnumerable<string> inputs)
+        protected virtual void Collect(IEnumerable<string> inputs)
         {
             foreach (string filePath in this.FileSystemProvider.GetFiles(null, inputs.Select(x => (VirtualPath)x), new VirtualPath[0]))
             {

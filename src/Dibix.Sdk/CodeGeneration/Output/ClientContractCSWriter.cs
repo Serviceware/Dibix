@@ -19,12 +19,12 @@ namespace Dibix.Sdk.CodeGeneration
         #region Overrides
         protected override void Write(StringWriter writer, CodeGenerationModel model)
         {
-            CSharpWriter output = new CSharpWriter(writer, model.RootNamespace, Enumerable.Empty<string>());
+            CSharpWriter output = new CSharpWriter(writer, model.RootNamespace, Enumerable.Empty<CSharpAnnotation>());
 
             DaoCodeGenerationContext context = new DaoCodeGenerationContext(output.Root, null, model, this._schemaRegistry) { Output = output.Root.BeginScope(LayerName.DomainModel) };
 
             if (model.Contracts.Any())
-                ContractCSWriter.Write(context, false);
+                ContractCSWriter.Write(context, generateRuntimeSpecifics: false);
 
             output.Generate();
         }

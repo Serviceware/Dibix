@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
@@ -48,8 +49,8 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Public Methods
-        public static TypeReference ResolveType(Type type, string source, int line, int column, string udtName, ISchemaRegistry schemaRegistry) => ResolveType(type, source, line, column, false, false, udtName, schemaRegistry);
-        public static TypeReference ResolveType(Type type, string source, int line, int column, ISchemaRegistry schemaRegistry)
+        public static TypeReference ResolveType(Type type, string source, int line, int column, string udtName, ISchemaRegistry schemaRegistry, ILogger logger) => ResolveType(type, source, line, column, false, false, udtName, schemaRegistry, logger);
+        public static TypeReference ResolveType(Type type, string source, int line, int column, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             string udtName = type.GetUdtName();
             Type underlyingEnumerableType = null;
@@ -63,7 +64,7 @@ namespace Dibix.Sdk.CodeGeneration
             Type normalizedType = underlyingNullableType ?? underlyingEnumerableType ?? type;
             bool isEnumerable = underlyingEnumerableType != null;
             bool isNullable = underlyingNullableType != null;
-            return ResolveType(normalizedType, source, line, column, isNullable, isEnumerable, udtName, schemaRegistry);
+            return ResolveType(normalizedType, source, line, column, isNullable, isEnumerable, udtName, schemaRegistry, logger);
         }
         #endregion
 
@@ -111,8 +112,8 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private TypeReference ResolveType(Type type, string source, int line, int column, bool isNullable, bool isEnumerable) => ResolveType(type, source, line, column, isNullable, isEnumerable, null, this._schemaRegistry);
-        private static TypeReference ResolveType(Type type, string source, int line, int column, bool isNullable, bool isEnumerable, string udtName, ISchemaRegistry schemaRegistry)
+        private TypeReference ResolveType(Type type, string source, int line, int column, bool isNullable, bool isEnumerable) => ResolveType(type, source, line, column, isNullable, isEnumerable, null, this._schemaRegistry, this._logger);
+        private static TypeReference ResolveType(Type type, string source, int line, int column, bool isNullable, bool isEnumerable, string udtName, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             if (PrimitiveTypeMap.TryGetValue(type, out PrimitiveType dataType))
                 return new PrimitiveTypeReference(dataType, isNullable, isEnumerable);
@@ -125,7 +126,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 UserDefinedTypeSchema udtSchema = new UserDefinedTypeSchema(type.Namespace, type.Name, udtName);
                 udtSchema.Properties.AddRange(type.GetProperties()
-                                                  .Select(x => new ObjectSchemaProperty(x.Name, ResolveType(x.PropertyType, source, line, column, schemaRegistry))));
+                                                  .Select(x => new ObjectSchemaProperty(x.Name, ResolveType(x.PropertyType, source, line, column, schemaRegistry, logger))));
                 schemaRegistry.Populate(udtSchema);
             }
             else if (type.IsEnum)
@@ -134,7 +135,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                 // Enum.GetValues() => "The requested operation is invalid in the ReflectionOnly context"
                 foreach (FieldInfo member in type.GetFields(BindingFlags.Public | BindingFlags.Static))
-                    enumSchema.Members.Add(new EnumSchemaMember(member.Name, (int)member.GetRawConstantValue(), null));
+                    enumSchema.Members.Add(new EnumSchemaMember(member.Name, (int)member.GetRawConstantValue(), stringValue: null, enumSchema));
 
                 schemaRegistry.Populate(enumSchema);
             }
@@ -143,25 +144,26 @@ namespace Dibix.Sdk.CodeGeneration
                 ObjectSchema objectSchema = new ObjectSchema(type.Namespace, type.Name);
                 schemaRegistry.Populate(objectSchema); // Register schema before traversing properties to avoid endless recursions for self referencing properties
                 objectSchema.Properties.AddRange(type.GetProperties()
-                                                     .Select(x => CreateProperty(x, source, line, column, schemaRegistry)));
+                                                     .Select(x => CreateProperty(x, source, line, column, schemaRegistry, logger)));
             }
 
             return schemaTypeReference;
         }
 
-        private static ObjectSchemaProperty CreateProperty(PropertyInfo property, string source, int line, int column, ISchemaRegistry schemaRegistry)
+        private static ObjectSchemaProperty CreateProperty(PropertyInfo property, string source, int line, int column, ISchemaRegistry schemaRegistry, ILogger logger)
         {
-            TypeReference typeReference = ResolveType(property.PropertyType, source, line, column, schemaRegistry);
+            TypeReference typeReference = ResolveType(property.PropertyType, source, line, column, schemaRegistry, logger);
             if (IsNullableReferenceType(property))
                 typeReference.IsNullable = true;
 
             bool isPartOfKey = ResolveIsPartOfKey(property);
             bool isOptional = ResolveIsOptional(property);
             bool isDiscriminator = ResolveIsDiscriminator(property);
+            DefaultValue defaultValue = ResolveDefaultValue(property, source, line, column, schemaRegistry, logger);
             SerializationBehavior serializationBehavior = ResolveSerializationBehavior(property);
             DateTimeKind dateTimeKind = ResolveDateTimeKind(property);
             bool obfuscated = ResolveObfuscated(property);
-            return new ObjectSchemaProperty(property.Name, typeReference, isPartOfKey, isOptional, isDiscriminator, serializationBehavior, dateTimeKind, obfuscated);
+            return new ObjectSchemaProperty(property.Name, typeReference, isPartOfKey, isOptional, isDiscriminator, defaultValue, serializationBehavior, dateTimeKind, obfuscated);
         }
 
         private static bool IsNullableReferenceType(PropertyInfo property)
@@ -203,6 +205,40 @@ namespace Dibix.Sdk.CodeGeneration
         private static bool ResolveIsOptional(MemberInfo member) => IsDefined(member, "Dibix.OptionalAttribute");
         
         private static bool ResolveIsDiscriminator(MemberInfo member) => IsDefined(member, "Dibix.DiscriminatorAttribute");
+
+        private static DefaultValue ResolveDefaultValue(MemberInfo member, string source, int line, int column, ISchemaRegistry schemaRegistry, ILogger logger)
+        {
+            foreach (CustomAttributeData customAttributeData in member.GetCustomAttributesData())
+            {
+                if (customAttributeData.AttributeType.FullName != typeof(DefaultValueAttribute).FullName) 
+                    continue;
+
+                CustomAttributeTypedArgument argument = customAttributeData.ConstructorArguments.Single();
+                DefaultValue defaultValue = new DefaultValue(argument.Value, source, line, column);
+                defaultValue.EnumMember = CollectEnumDefault(argument.ArgumentType, argument.Value, source, line, column, schemaRegistry, logger);
+                return defaultValue;
+            }
+
+            return null;
+        }
+
+        private static EnumSchemaMember CollectEnumDefault(Type argumentType, object value, string source, int line, int column, ISchemaRegistry schemaRegistry, ILogger logger)
+        {
+            if (!(value is int)) 
+                return null;
+
+            TypeReference typeReference = ResolveType(argumentType, source, line, column, isNullable: false, isEnumerable: false, udtName: null, schemaRegistry, logger);
+            if (!(typeReference is SchemaTypeReference schemaTypeReference)
+             || !(schemaRegistry.GetSchema(schemaTypeReference) is EnumSchema enumSchema)) 
+                return null;
+
+            EnumSchemaMember enumMember = enumSchema.Members.FirstOrDefault(x => Equals(x.ActualValue, value));
+            if (enumMember != null)
+                return enumMember;
+
+            logger.LogError(code: null, $"Enum '{enumSchema.FullName}' does not define a member with value '{value}'", source, line, column);
+            return null;
+        }
 
         private static SerializationBehavior ResolveSerializationBehavior(MemberInfo member)
         {

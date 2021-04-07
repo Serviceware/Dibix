@@ -8,15 +8,15 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
     public sealed class CSharpClass : CSharpStatement
     {
         private readonly string _name;
-        private readonly IList<CSharpStatement> _members;
+        private readonly IList<CSharpExpression> _members;
         private readonly CSharpModifiers _modifiers;
         private string _baseClassName;
 
-        public CSharpClass(string name, CSharpModifiers modifiers, IEnumerable<string> annotations) : base(annotations)
+        public CSharpClass(string name, CSharpModifiers modifiers, IEnumerable<CSharpAnnotation> annotations) : base(annotations)
         {
             this._name = name;
             this._modifiers = modifiers;
-            this._members = new Collection<CSharpStatement>();
+            this._members = new Collection<CSharpExpression>();
         }
 
         public CSharpClass AddField(string name, string type, CSharpValue value = null, CSharpModifiers modifiers = CSharpModifiers.Public)
@@ -26,8 +26,8 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             return this;
         }
 
-        public CSharpProperty AddProperty(string name, string returnType, CSharpModifiers modifiers = CSharpModifiers.Public) => this.AddProperty(name, returnType, Enumerable.Empty<string>(), modifiers);
-        public CSharpProperty AddProperty(string name, string returnType, IEnumerable<string> annotations, CSharpModifiers modifiers = CSharpModifiers.Public)
+        public CSharpProperty AddProperty(string name, string returnType, CSharpModifiers modifiers = CSharpModifiers.Public) => this.AddProperty(name, returnType, Enumerable.Empty<CSharpAnnotation>(), modifiers);
+        public CSharpProperty AddProperty(string name, string returnType, IEnumerable<CSharpAnnotation> annotations, CSharpModifiers modifiers = CSharpModifiers.Public)
         {
             CSharpProperty property = new CSharpProperty(name, returnType, modifiers, annotations);
             this._members.Add(property);
@@ -41,8 +41,8 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             return ctor;
         }
 
-        public CSharpMethod AddMethod(string name, string type, string body, bool isExtension = false, CSharpModifiers modifiers = CSharpModifiers.Public) => this.AddMethod(name, type, body, Enumerable.Empty<string>(), isExtension, modifiers);
-        public CSharpMethod AddMethod(string name, string type, string body, IEnumerable<string> annotations, bool isExtension = false, CSharpModifiers modifiers = CSharpModifiers.Public)
+        public CSharpMethod AddMethod(string name, string type, string body, bool isExtension = false, CSharpModifiers modifiers = CSharpModifiers.Public) => this.AddMethod(name, type, body, Enumerable.Empty<CSharpAnnotation>(), isExtension, modifiers);
+        public CSharpMethod AddMethod(string name, string type, string body, IEnumerable<CSharpAnnotation> annotations, bool isExtension = false, CSharpModifiers modifiers = CSharpModifiers.Public)
         {
             CSharpMethod method = new CSharpMethod(name, type, body, isExtension, modifiers, annotations);
             this._members.Add(method);
@@ -51,7 +51,7 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
 
         public CSharpClass AddClass(string name, CSharpModifiers modifiers = CSharpModifiers.Public)
         {
-            CSharpClass @class = new CSharpClass(name, modifiers, Enumerable.Empty<string>());
+            CSharpClass @class = new CSharpClass(name, modifiers, Enumerable.Empty<CSharpAnnotation>());
             this._members.Add(@class);
             return @class;
         }
@@ -74,9 +74,8 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             return this;
         }
 
-        public override void Write(StringWriter writer)
+        protected override void WriteBody(StringWriter writer)
         {
-            base.Write(writer);
             WriteModifiers(writer, this._modifiers);
 
             writer.WriteRaw("class ")
@@ -94,7 +93,7 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
 
             for (int i = 0; i < this._members.Count; i++)
             {
-                CSharpStatement member = this._members[i];
+                CSharpExpression member = this._members[i];
                 member.Write(writer);
                 if (i + 1 < this._members.Count)
                     writer.WriteLine();

@@ -22,7 +22,7 @@ namespace Dibix.Sdk.VisualStudio
             ProjectReferenceAssemblyResolver assemblyResolver = new ProjectReferenceAssemblyResolver(serviceProvider, textTemplatingEngineHost.TemplateFile);
             ITypeResolverFacade typeResolverFacade = new TypeResolverFacade(assemblyResolver, schemaRegistry, logger);
             typeResolverFacade.Register(typeResolver, 0);
-            typeResolverFacade.Register(new UserDefinedTypeSchemaTypeResolver(schemaRegistry, new UnsupportedUserDefinedTypeProvider(), assemblyResolver), 1);
+            typeResolverFacade.Register(new UserDefinedTypeSchemaTypeResolver(schemaRegistry, new UnsupportedUserDefinedTypeProvider(), assemblyResolver, logger), 1);
 
             CodeGenerationModel model = new CodeGenerationModel(CodeGeneratorCompatibilityLevel.Legacy);
 

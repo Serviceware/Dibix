@@ -32,7 +32,7 @@ namespace Dibix.Sdk.CodeGeneration
             this._areaName = areaName;
             this._schemas = new Dictionary<string, SchemaDefinition>();
             this._schemaLocations = new Dictionary<string, SchemaDefinitionLocation>();
-            base.Collect(contracts);
+            this.Collect(contracts);
         }
         #endregion
 
@@ -49,6 +49,12 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Overrides
+        protected override void Collect(IEnumerable<string> inputs)
+        {
+            base.Collect(inputs);
+            this.Validate();
+        }
+
         protected override void Read(string filePath, JObject json)
         {
             string relativePath = Path.GetDirectoryName(filePath).Substring(base.FileSystemProvider.CurrentDirectory.Length + 1);
@@ -113,6 +119,7 @@ If this is not a project that has multiple areas, please make sure to define the
                     bool isPartOfKey = default;
                     bool isOptional = default;
                     bool isDiscriminator = default;
+                    DefaultValue defaultValue = default;
                     SerializationBehavior serializationBehavior = default;
                     DateTimeKind dateTimeKind = default;
                     bool obfuscated = default;
@@ -125,6 +132,16 @@ If this is not a project that has multiple areas, please make sure to define the
                             isPartOfKey = (bool?)propertyInfo.Property("isPartOfKey")?.Value ?? default;
                             isOptional = (bool?)propertyInfo.Property("isOptional")?.Value ?? default;
                             isDiscriminator = (bool?)propertyInfo.Property("isDiscriminator")?.Value ?? default;
+                            
+                            JProperty defaultProperty = propertyInfo.Property("default");
+                            if (defaultProperty != null)
+                            {
+                                JValue defaultValueValue = ((JValue)defaultProperty.Value);
+                                IJsonLineInfo defaultValueLocation = defaultValueValue;
+                                int defaultValueColumn = defaultValueValue.GetCorrectLinePosition();
+                                defaultValue = new DefaultValue(defaultValueValue.Value, filePath, defaultValueLocation.LineNumber, defaultValueColumn);
+                            }
+
                             Enum.TryParse((string)propertyInfo.Property("serialize")?.Value, true, out serializationBehavior);
                             if (String.Equals(typeName, nameof(PrimitiveType.DateTime), StringComparison.OrdinalIgnoreCase))
                                 Enum.TryParse((string)propertyInfo.Property("kind")?.Value, true, out dateTimeKind);
@@ -142,7 +159,7 @@ If this is not a project that has multiple areas, please make sure to define the
                     }
 
                     TypeReference type = ParseType(typeName, rootNamespace, filePath, typeNameValue);
-                    contract.Properties.Add(new ObjectSchemaProperty(property.Name, type, isPartOfKey, isOptional, isDiscriminator, serializationBehavior, dateTimeKind, obfuscated));
+                    contract.Properties.Add(new ObjectSchemaProperty(property.Name, type, isPartOfKey, isOptional, isDiscriminator, defaultValue, serializationBehavior, dateTimeKind, obfuscated));
                 }
             }
 
@@ -159,10 +176,79 @@ If this is not a project that has multiple areas, please make sure to define the
             foreach (EnumValue value in values)
             {
                 int actualValue = value.ActualValue ?? EnumValueParser.ParseDynamicValue(actualValues, value.StringValue);
-                contract.Members.Add(new EnumSchemaMember(value.Name, actualValue, value.StringValue));
+                contract.Members.Add(new EnumSchemaMember(value.Name, actualValue, value.StringValue, contract));
             }
 
             this.CollectContract(contract.FullName, contract, filePath, line, column);
+        }
+
+        private void CollectContract(string name, SchemaDefinition definition, string filePath, int line, int column)
+        {
+            if (this._schemaLocations.TryGetValue(name, out SchemaDefinitionLocation otherLocation))
+            {
+                this.Logger.LogError(null, $"Ambiguous contract definition: {definition.FullName}", otherLocation.FilePath, otherLocation.Line, otherLocation.Column);
+                this.Logger.LogError(null, $"Ambiguous contract definition: {definition.FullName}", filePath, line, column);
+                return;
+            }
+            this._schemas.Add(name, definition);
+            this._schemaLocations.Add(name, new SchemaDefinitionLocation(filePath, line, column));
+        }
+
+        private void Validate()
+        {
+            foreach (SchemaDefinition schemaDefinition in this._schemas.Values)
+            {
+                if (!(schemaDefinition is ObjectSchema objectSchema)) 
+                    continue;
+
+                foreach (ObjectSchemaProperty property in objectSchema.Properties)
+                {
+                    DefaultValue defaultValue = property.DefaultValue;
+                    if (!this.IsEnumDefaultValue(defaultValue, property, out EnumSchema enumSchema)) 
+                        continue;
+
+                    defaultValue.EnumMember = this.CollectEnumDefault(defaultValue, enumSchema);
+                }
+            }
+        }
+
+        private EnumSchemaMember CollectEnumDefault(DefaultValue defaultValue, EnumSchema enumSchema)
+        {
+            if (defaultValue.Value is string enumMemberName)
+            {
+                EnumSchemaMember enumMember = enumSchema.Members.FirstOrDefault(x => x.Name == enumMemberName);
+                if (enumMember != null) 
+                    return enumMember;
+
+                base.Logger.LogError(code: null, $"Enum '{enumSchema.FullName}' does not define a member named '{enumMemberName}'", defaultValue.Source, defaultValue.Line, defaultValue.Column);
+                return null;
+            }
+            else
+            {
+                EnumSchemaMember enumMember = null;
+                if (defaultValue.Value is byte || defaultValue.Value is short || defaultValue.Value is int || defaultValue.Value is long)
+                    enumMember = enumSchema.Members.FirstOrDefault(x => Equals(x.ActualValue, Convert.ToInt32(defaultValue.Value)));
+
+                if (enumMember != null) 
+                    return enumMember;
+
+                base.Logger.LogError(code: null, $"Enum '{enumSchema.FullName}' does not define a member with value '{defaultValue.Value}'", defaultValue.Source, defaultValue.Line, defaultValue.Column);
+                return null;
+            }
+        }
+
+        private bool IsEnumDefaultValue(DefaultValue defaultValue, ObjectSchemaProperty property, out EnumSchema enumSchema)
+        {
+            if (defaultValue != null
+             && property.Type is SchemaTypeReference schemaTypeReference
+             && this._schemas[schemaTypeReference.Key] is EnumSchema enumSchemaReference)
+            {
+                enumSchema = enumSchemaReference;
+                return true;
+            }
+
+            enumSchema = null;
+            return false;
         }
 
         private static IEnumerable<EnumValue> ReadEnumValues(JToken members)
@@ -198,18 +284,6 @@ If this is not a project that has multiple areas, please make sure to define the
                 case JTokenType.String: return EnumValue.DynamicValue(name, (string)value.Value);
                 default: throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
-        }
-
-        private void CollectContract(string name, SchemaDefinition definition, string filePath, int line, int column)
-        {
-            if (this._schemaLocations.TryGetValue(name, out SchemaDefinitionLocation otherLocation))
-            {
-                this.Logger.LogError(null, $"Ambiguous contract definition: {definition.FullName}", otherLocation.FilePath, otherLocation.Line, otherLocation.Column);
-                this.Logger.LogError(null, $"Ambiguous contract definition: {definition.FullName}", filePath, line, column);
-                return;
-            }
-            this._schemas.Add(name, definition);
-            this._schemaLocations.Add(name, new SchemaDefinitionLocation(filePath, line, column));
         }
 
         private static TypeReference ParseType(string typeName, string rootNamespace, string filePath, JValue value)

@@ -15,7 +15,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Overrides
         public override bool HasContent(CodeGenerationModel model) => model.UserDefinedTypes.Any();
 
-        public override IEnumerable<string> GetGlobalAnnotations(CodeGenerationModel model) { yield break; }
+        public override IEnumerable<CSharpAnnotation> GetGlobalAnnotations(CodeGenerationModel model) { yield break; }
 
         public override void Write(DaoCodeGenerationContext context)
         {
@@ -34,7 +34,7 @@ namespace Dibix.Sdk.CodeGeneration
                 for (int j = 0; j < userDefinedTypes.Count; j++)
                 {
                     UserDefinedTypeSchema userDefinedType = userDefinedTypes[j];
-                    CSharpClass @class = scope.AddClass(userDefinedType.DefinitionName, CSharpModifiers.Public | CSharpModifiers.Sealed, $"StructuredType(\"{userDefinedType.UdtName}\")")
+                    CSharpClass @class = scope.AddClass(userDefinedType.DefinitionName, CSharpModifiers.Public | CSharpModifiers.Sealed, new CSharpAnnotation("StructuredType", new CSharpStringValue(userDefinedType.UdtName)))
                                               .Inherits($"StructuredType<{userDefinedType.DefinitionName}, {String.Join(", ", userDefinedType.Properties.Select(x => context.ResolveTypeName(x.Type)))}>");
 
                     @class.AddConstructor(body: $"base.ImportSqlMetadata(() => this.Add({String.Join(", ", userDefinedType.Properties.Select(x => "default"))}));"

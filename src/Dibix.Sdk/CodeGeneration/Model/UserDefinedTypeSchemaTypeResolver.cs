@@ -8,15 +8,17 @@ namespace Dibix.Sdk.CodeGeneration
     {
         private readonly ISchemaRegistry _schemaRegistry;
         private readonly ReferencedAssemblyInspector _referencedAssemblyInspector;
+        private readonly ILogger _logger;
         private readonly IDictionary<string, string> _localUserDefinedTypes;
         private readonly IDictionary<string, Type> _externalUserDefinedTypes;
 
         public override TypeResolutionScope Scope => TypeResolutionScope.UserDefinedType;
 
-        public UserDefinedTypeSchemaTypeResolver(ISchemaRegistry schemaRegistry, IUserDefinedTypeProvider userDefinedTypeProvider, ReferencedAssemblyInspector referencedAssemblyInspector) : base(schemaRegistry, userDefinedTypeProvider)
+        public UserDefinedTypeSchemaTypeResolver(ISchemaRegistry schemaRegistry, IUserDefinedTypeProvider userDefinedTypeProvider, ReferencedAssemblyInspector referencedAssemblyInspector, ILogger logger) : base(schemaRegistry, userDefinedTypeProvider)
         {
             this._schemaRegistry = schemaRegistry;
             this._referencedAssemblyInspector = referencedAssemblyInspector;
+            this._logger = logger;
             this._localUserDefinedTypes = ScanLocalTypes(userDefinedTypeProvider).ToDictionary(x => x.Key, x => x.Value);
             this._externalUserDefinedTypes = new Dictionary<string, Type>();
         }
@@ -27,7 +29,7 @@ namespace Dibix.Sdk.CodeGeneration
                 return new SchemaTypeReference(key, source, line, column, false, false);
 
             if (this.TryGetExternalType(input, out Type type))
-                return ReflectionTypeResolver.ResolveType(type, source, line, column, input, this._schemaRegistry);
+                return ReflectionTypeResolver.ResolveType(type, source, line, column, input, this._schemaRegistry, this._logger);
 
             return base.ResolveType(input, @namespace, source, line, column, isEnumerable);
         }

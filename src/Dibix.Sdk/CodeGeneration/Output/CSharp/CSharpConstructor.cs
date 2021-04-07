@@ -24,14 +24,13 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
 
         public CSharpConstructor AddParameter(string name, string type)
         {
-            CSharpParameter parameter = new CSharpParameter(name, type, default, null, Enumerable.Empty<string>());
+            CSharpParameter parameter = new CSharpParameter(name, type, default, null, Enumerable.Empty<CSharpAnnotation>());
             this._parameters.Add(parameter);
             return this;
         }
 
-        public override void Write(StringWriter writer)
+        protected override void WriteBody(StringWriter writer)
         {
-            base.Write(writer);
             WriteModifiers(writer, this._modifiers);
 
             writer.WriteRaw(this._declaringTypeName)

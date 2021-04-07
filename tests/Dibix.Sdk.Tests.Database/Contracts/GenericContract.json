@@ -1,4 +1,9 @@
 ﻿{
+  "Role": [
+    "None",
+    "User",
+    "Admin"
+  ],
   "GenericContract": {
     "$wcfNs": "https://schemas.dibix.com/GenericContract",
     "Id": {
@@ -8,11 +13,16 @@
     },
     "Name": {
       "type": "string",
-      "serialize": "IfNotEmpty"
+      "serialize": "IfNotEmpty",
+      "default": "DefaultValue"
     },
     "ParentId": {
       "type": "int32?",
       "isDiscriminator": true
+    },
+    "Role": {
+      "type": "#Role",
+      "default": "User"
     },
     "CreationTime": {
       "type": "datetime",

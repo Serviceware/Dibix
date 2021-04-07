@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Dibix.Sdk.CodeGeneration.CSharp
 {
@@ -9,8 +10,9 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
         private readonly CSharpModifiers _modifiers;
         private CSharpPropertyGetter _getter;
         private CSharpPropertySetter _setter;
+        private CSharpValue _initializer;
 
-        public CSharpProperty(string name, string returnType, CSharpModifiers modifiers, IEnumerable<string> annotations) : base(annotations)
+        public CSharpProperty(string name, string returnType, CSharpModifiers modifiers, IEnumerable<CSharpAnnotation> annotations) : base(annotations)
         {
             this._name = name;
             this._returnType = returnType;
@@ -29,9 +31,14 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             return this;
         }
 
-        public override void Write(StringWriter writer)
+        public CSharpProperty Initializer(CSharpValue value)
         {
-            base.Write(writer);
+            this._initializer = value;
+            return this;
+        }
+
+        protected override void WriteBody(StringWriter writer)
+        {
             WriteModifiers(writer, this._modifiers);
 
             writer.WriteRaw(this._returnType)
@@ -83,7 +90,22 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
                       .Write("}");
             }
             else
+            {
                 writer.WriteRaw(" }");
+            }
+
+            if (this._initializer != null)
+            {
+                bool isAutoProperty = !Equals(this._getter?.HasBody, true) && !Equals(this._setter?.HasBody, true);
+                if (!isAutoProperty)
+                    throw new InvalidOperationException("Property initializers are only supported for auto properties");
+
+                writer.WriteRaw(" = ");
+
+                this._initializer.Write(writer);
+
+                writer.WriteRaw(';');
+            }
         }
     }
 }

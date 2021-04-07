@@ -1,6 +1,6 @@
 ﻿namespace Dibix.Sdk.CodeGeneration.CSharp
 {
-    public sealed class CSharpEnumMember : CSharpStatement
+    public sealed class CSharpEnumMember : CSharpExpression
     {
         private readonly string _name;
         private readonly string _value;
@@ -13,8 +13,6 @@
 
         public override void Write(StringWriter writer)
         {
-            base.Write(writer);
-
             writer.Write(this._name);
             if (this._value != null)
             {

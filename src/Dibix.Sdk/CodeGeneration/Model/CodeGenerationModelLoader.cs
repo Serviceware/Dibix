@@ -70,7 +70,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             schemaRegistry.ImportSchemas(contractDefinitionProvider, userDefinedTypeProvider);
             typeResolver.Register(new ContractDefinitionSchemaTypeResolver(schemaRegistry, contractDefinitionProvider), 0);
-            typeResolver.Register(new UserDefinedTypeSchemaTypeResolver(schemaRegistry, userDefinedTypeProvider, assemblyResolver), 1);
+            typeResolver.Register(new UserDefinedTypeSchemaTypeResolver(schemaRegistry, userDefinedTypeProvider, assemblyResolver, logger), 1);
 
             model.Statements.AddRange(CollectStatements(normalizedSources, projectName, productName, areaName, isEmbedded, formatter, typeResolver, schemaRegistry, logger, modelAccessor));
             model.UserDefinedTypes.AddRange(userDefinedTypeProvider.Types);
