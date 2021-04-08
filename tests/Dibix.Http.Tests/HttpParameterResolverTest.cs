@@ -141,9 +141,10 @@ Parameter: lcid", exception.Message);
                 x.ResolveParameterFromSource("targetid", "BODY", "SourceId");
                 x.ResolveParameterFromSource("lcid", "BODY", "LocaleId");
                 x.ResolveParameterFromSource("agentid", "BODY", "Detail.AgentId");
+                x.ResolveParameterFromSource("skip", "BODY", "OptionalDetail.Nested.Skip");
                 x.ResolveParameterFromSource("itemsa_", "BODY", "ItemsA", y =>
                 {
-                    y.ResolveParameterFromSource("id_", "BODY", "LocaleId");
+                    y.ResolveParameterFromSource("id_", "BODY", "Detail.AgentId");
                     y.ResolveParameterFromSource("idx", "ITEM", "$INDEX");
                     y.ResolveParameterFromConstant("age_", 5);
                     y.ResolveParameterFromSource("name_", "ITEM", "Name");
@@ -161,11 +162,22 @@ Parameter: lcid", exception.Message);
         $bodySource = .Call Dibix.Http.HttpParameterResolverUtility.ReadBody($arguments);
         $arguments.Item[""databaseAccessorFactory""] = (System.Object)$databaseaccessorfactorySource;
         $arguments.Item[""lcid""] = (System.Object)$bodySource.LocaleId;
-        $arguments.Item[""agentid""] = (System.Object)($bodySource.Detail).AgentId;
+        $arguments.Item[""agentid""] = (System.Object).If ($bodySource.Detail != null) {
+            ($bodySource.Detail).AgentId
+        } .Else {
+            .Default(System.Int32)
+        };
         $arguments.Item[""itemsa_""] = (System.Object).Call Dibix.StructuredType`1[Dibix.Http.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemSet].From(
             $bodySource.ItemsA,
             .Lambda #Lambda2<System.Action`3[Dibix.Http.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemSet,Dibix.Http.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,System.Int32]>)
         ;
+        $arguments.Item[""skip""] = (System.Object).If (
+            $bodySource.OptionalDetail != null && ($bodySource.OptionalDetail).Nested != null
+        ) {
+            (($bodySource.OptionalDetail).Nested).Skip
+        } .Else {
+            5
+        };
         $input = .New Dibix.Http.Tests.HttpParameterResolverTest+ExplicitHttpBodyParameterInput();
         $input.targetid = .Call Dibix.Http.HttpParameterResolver.ConvertValue(
             ""targetid"",
@@ -179,7 +191,11 @@ Parameter: lcid", exception.Message);
     Dibix.Http.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem $y,
     System.Int32 $i) {
     .Call $x.Add(
-        $bodySource.LocaleId,
+        .If ($bodySource.Detail != null) {
+            ($bodySource.Detail).AgentId
+        } .Else {
+            .Default(System.Int32)
+        },
         $i,
         5,
         $y.Name)
@@ -210,7 +226,7 @@ Parameter: lcid", exception.Message);
 
             result.PrepareParameters(request, arguments, dependencyResolver.Object);
 
-            Assert.Equal(6, arguments.Count);
+            Assert.Equal(7, arguments.Count);
             Assert.Equal(body, arguments["$body"]);
             Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             ExplicitHttpBodyParameterInput input = Assert.IsType<ExplicitHttpBodyParameterInput>(arguments["input"]);
@@ -220,11 +236,12 @@ Parameter: lcid", exception.Message);
             ExplicitHttpBodyItemSet itemsa_ = Assert.IsType<ExplicitHttpBodyItemSet>(arguments["itemsa_"]);
             Assert.Equal(@"id_ INT(4)  idx INT(4)  age_ INT(4)  name_ NVARCHAR(MAX)
 ----------  ----------  -----------  -------------------
-1033        1           5            X                  
-1033        2           5            Y                  ", itemsa_.Dump());
+710         1           5            X                  
+710         2           5            Y                  ", itemsa_.Dump());
+            Assert.Equal(5, arguments["skip"]);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
-        private static void Compile_ExplicitBodySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpBodyParameterInput input, int lcid, int agentid, ExplicitHttpBodyItemSet itemsa_) { }
+        private static void Compile_ExplicitBodySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpBodyParameterInput input, int lcid, int agentid, ExplicitHttpBodyItemSet itemsa_, int skip = 5) { }
 
         [Fact]
         public void Compile_ImplicitBodySource()
@@ -351,8 +368,12 @@ Parameter: lcid", exception.Message);
         $arguments.Item[""databaseAccessorFactory""] = (System.Object)$databaseaccessorfactorySource;
         $arguments.Item[""encryptedpassword""] = (System.Object).Call Dibix.Http.Tests.HttpParameterResolverTest+EncryptionHttpParameterConverter.Convert($bodySource.Password)
         ;
-        $arguments.Item[""anotherencryptedpassword""] = (System.Object).Call Dibix.Http.Tests.HttpParameterResolverTest+EncryptionHttpParameterConverter.Convert(($bodySource.Detail).Password)
-        ;
+        $arguments.Item[""anotherencryptedpassword""] = (System.Object).Call Dibix.Http.Tests.HttpParameterResolverTest+EncryptionHttpParameterConverter.Convert(.If ($bodySource.Detail !=
+            null) {
+                ($bodySource.Detail).Password
+            } .Else {
+                .Default(System.String)
+            });
         $arguments.Item[""items""] = (System.Object).Call Dibix.StructuredType`1[Dibix.Http.Tests.HttpParameterResolverTest+HttpBodyItemSet].From(
             $bodySource.Items,
             .Lambda #Lambda2<System.Action`3[Dibix.Http.Tests.HttpParameterResolverTest+HttpBodyItemSet,Dibix.Http.Tests.HttpParameterResolverTest+HttpBodyItem,System.Int32]>)

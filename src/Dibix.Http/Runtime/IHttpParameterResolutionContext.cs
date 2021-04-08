@@ -11,7 +11,7 @@ namespace Dibix.Http
         Expression DependencyResolverParameter { get; }
         string PropertyPath { get; }
 
-        void ResolveUsingInstanceProperty(Type instanceType, Expression instanceValue);
+        void ResolveUsingInstanceProperty(Type instanceType, Expression instanceValue, bool ensureNullPropagation);
         void ResolveUsingValue(Expression value);
     }
 }

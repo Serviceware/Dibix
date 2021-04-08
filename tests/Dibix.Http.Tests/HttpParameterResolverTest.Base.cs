@@ -77,6 +77,7 @@ namespace Dibix.Http.Tests
             public short SourceId { get; set; }
             public int LocaleId { get; set; }
             public ExplicitHttpBodyDetail Detail { get; set; }
+            public ExplicitHttpBodyOptionalDetail OptionalDetail { get; set; }
             public ICollection<ExplicitHttpBodyItem> ItemsA { get; }
 
             public ExplicitHttpBody()
@@ -88,6 +89,16 @@ namespace Dibix.Http.Tests
         private sealed class ExplicitHttpBodyDetail
         {
             public int AgentId { get; set; }
+        }
+
+        private sealed class ExplicitHttpBodyOptionalDetail
+        {
+            public ExplicitHttpBodyOptionalDetailNested Nested { get; set; }
+        }
+
+        private sealed class ExplicitHttpBodyOptionalDetailNested
+        {
+            public int Skip { get; set; }
         }
 
         private sealed class ExplicitHttpBodyItem

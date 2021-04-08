@@ -441,7 +441,7 @@ namespace Dibix.Http
             compilationContext.Statements.Add(assign);
         }
 
-        private static Expression CollectParameterValue(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter, bool generateConverterStatement = true, bool ensureCorrectType = true)
+        private static Expression CollectParameterValue(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter, bool generateConverterStatement = true, bool ensureCorrectType = true, bool ensureNullPropagation = false)
         {
             Expression value;
 
@@ -458,21 +458,21 @@ namespace Dibix.Http
 
                 case HttpParameterSourceKind.SourceInstance:
                 case HttpParameterSourceKind.SourceProperty:
-                    if (sourceMap.TryGetValue(parameter.Source.SourceName, out value))
+                    if (parameter.Source.Value != null)
+                    {
+                        // Use resolved static value from source provider
+                        value = parameter.Source.Value;
+                    }
+                    else if (sourceMap.TryGetValue(parameter.Source.SourceName, out value))
                     {
                         // Expand property path on an existing source instance variable
                         if (parameter.SourceKind == HttpParameterSourceKind.SourceProperty)
                         {
-                            foreach (string propertyName in parameter.Source.PropertyPath.Split('.'))
-                            {
-                                MemberExpression sourcePropertyExpression = Expression.Property(value, propertyName);
-                                value = parameter.Items != null ? CollectItemsParameterValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, parameter, sourcePropertyExpression, sourceMap) : sourcePropertyExpression;
-                            }
+                            value = CollectSourcePropertyValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, parameter, value, ensureNullPropagation);
                         }
                     }
                     else
-                        // Use resolved static value from source provider
-                        value = parameter.Source.Value;
+                        throw new InvalidOperationException($"Value of parameter '{parameter.InternalParameterName}' could not be resolved from source '{parameter.Source.SourceName}'");
 
                     break;
 
@@ -493,7 +493,32 @@ namespace Dibix.Http
             return value;
         }
 
-        private static Expression CollectItemsParameterValue(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, CompilationContext compilationContext, HttpParameterInfo parameter, MemberExpression sourcePropertyExpression, IDictionary<string, Expression> sourceMap)
+        private static Expression CollectSourcePropertyValue(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter, Expression value, bool ensureNullPropagation)
+        {
+            string[] parts = parameter.Source.PropertyPath.Split('.');
+            ICollection<Expression> nullCheckTargets = new Collection<Expression>();
+            for (int i = 0; i < parts.Length; i++)
+            {
+                string propertyName = parts[i];
+                MemberExpression sourcePropertyExpression = Expression.Property(value, propertyName);
+                value = parameter.Items != null ? CollectItemsParameterValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, parameter, sourcePropertyExpression, sourceMap, ensureNullPropagation) : sourcePropertyExpression;
+
+                if (ensureNullPropagation && i + 1 < parts.Length)
+                    nullCheckTargets.Add(sourcePropertyExpression);
+            }
+
+            if (nullCheckTargets.Any())
+            {
+                Expression test = nullCheckTargets.Select(x => Expression.NotEqual(x, Expression.Constant(null))).Aggregate(Expression.AndAlso /* Short-circuit behavior like && in C# */);
+                bool hasDefaultValue = parameter.DefaultValue != DBNull.Value && parameter.DefaultValue != null;
+                Expression fallbackValue = hasDefaultValue ? (Expression)Expression.Constant(parameter.DefaultValue) : Expression.Default(value.Type);
+                value = Expression.Condition(test, value, fallbackValue);
+            }
+
+            return value;
+        }
+
+        private static Expression CollectItemsParameterValue(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, CompilationContext compilationContext, HttpParameterInfo parameter, MemberExpression sourcePropertyExpression, IDictionary<string, Expression> sourceMap, bool ensureNullPropagation)
         {
             Type itemType = GetItemType(sourcePropertyExpression.Type);
             MethodInfo structuredTypeFactoryMethod = GetStructuredTypeFactoryMethod(parameter.ParameterType, itemType);
@@ -521,7 +546,7 @@ namespace Dibix.Http
                 }
 
                 sourceMap[ItemSourceName] = itemSourceVariable;
-                addMethodParameterValues[itemSource.InternalParameterName] = CollectParameterValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, itemParameter);
+                addMethodParameterValues[itemSource.InternalParameterName] = CollectParameterValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, itemParameter, ensureNullPropagation: ensureNullPropagation);
             }
 
             foreach (KeyValuePair<string, Expression> addMethodParameter in addMethodParameterValues.Where(x => x.Value == null).ToArray())
@@ -865,7 +890,7 @@ Either create a mapping or make sure a property of the same name exists in the s
                 this.PropertyPath = propertyPath;
             }
 
-            public void ResolveUsingInstanceProperty(Type instanceType, Expression instanceValue)
+            public void ResolveUsingInstanceProperty(Type instanceType, Expression instanceValue, bool ensureNullPropagation)
             {
                 if (!this._sourceMap.TryGetValue(this.SourceName, out Expression sourceVariableInstance))
                 {
@@ -883,11 +908,7 @@ Either create a mapping or make sure a property of the same name exists in the s
                 if (this.PropertyPath == null)
                     return;
 
-                foreach (string propertyName in this.PropertyPath.Split('.'))
-                {
-                    MemberExpression sourcePropertyExpression = Expression.Property(this.Value, propertyName);
-                    this.Value = this.Parent.Items != null ? CollectItemsParameterValue(this.Action, this.RequestParameter, this.ArgumentsParameter, this.DependencyResolverParameter, this._compilationContext, this.Parent, sourcePropertyExpression, this._sourceMap) : sourcePropertyExpression;
-                }
+                this.Value = CollectSourcePropertyValue(this.Action, this.RequestParameter, this.ArgumentsParameter, this.DependencyResolverParameter, this._compilationContext, this._sourceMap, this.Parent, this.Value, ensureNullPropagation);
             }
 
             public void ResolveUsingValue(Expression value) => this.Value = value;

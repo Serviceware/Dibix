@@ -18,7 +18,7 @@ namespace Dibix.Http
             {
                 Type instanceType = context.Action.SafeGetBodyContract();
                 Expression instanceValue = Expression.Call(typeof(HttpParameterResolverUtility), nameof(HttpParameterResolverUtility.ReadBody), new[] { instanceType }, context.ArgumentsParameter);
-                context.ResolveUsingInstanceProperty(instanceType, instanceValue);
+                context.ResolveUsingInstanceProperty(instanceType, instanceValue, ensureNullPropagation: true);
             }
             else
             {
