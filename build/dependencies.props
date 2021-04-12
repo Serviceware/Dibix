@@ -2,15 +2,15 @@
   <PropertyGroup>
 
     <!-- Runtime -->
-    <AspNetWebApiVersion>5.2.3</AspNetWebApiVersion>
-    <DapperVersion>1.50.5</DapperVersion>
+    <AspNetWebApiVersion>5.2.3</AspNetWebApiVersion><!-- Update blocked by Processes -->
+    <DapperVersion>1.50.5</DapperVersion><!-- Update blocked by Processes -->
     <DataAnnotationsVersion>5.0.0</DataAnnotationsVersion>
     <SqlClientVersion>4.8.2</SqlClientVersion>
     <ReflectionEmitVersion>4.7.0</ReflectionEmitVersion>
 
     <!-- Sdk -->
     <DacFxVersion>150.5084.2</DacFxVersion>
-    <NewtonsoftJsonVersion>12.0.3</NewtonsoftJsonVersion>
+    <NewtonsoftJsonVersion>12.0.3</NewtonsoftJsonVersion><!-- Update blocked by Processes -->
     <NewtonsoftJsonSchemaVersion>3.0.14</NewtonsoftJsonSchemaVersion>
     <OpenApiVersion>1.2.3</OpenApiVersion>
 
@@ -28,10 +28,12 @@
     <!-- Testing -->
     <ConfigurationBinderVersion>5.0.0</ConfigurationBinderVersion>
     <ConfigurationEnvironmentVersion>5.0.0</ConfigurationEnvironmentVersion>
+    <ConfigurationJsonVersion>5.0.0</ConfigurationJsonVersion>
     <ConfigurationUserSecretsVersion>5.0.0</ConfigurationUserSecretsVersion>
     <CoverletVersion>3.0.3</CoverletVersion>
-    <MicrosoftTestSdkVersion>16.9.1</MicrosoftTestSdkVersion>
+    <MicrosoftTestSdkVersion>16.9.4</MicrosoftTestSdkVersion>
     <MoqVersion>4.16.1</MoqVersion>
+    <MSTestFrameworkVersion>2.1.2</MSTestFrameworkVersion>
     <RoslynVersion>3.9.0</RoslynVersion>
     <XUnitVersion>2.4.1</XUnitVersion>
     <XUnitVSVersion>2.4.3</XUnitVSVersion>

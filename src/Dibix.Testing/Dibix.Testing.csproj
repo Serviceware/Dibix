@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  
+  <PropertyGroup>
+    <TargetFrameworks>net5.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Dibix.Dapper\Dibix.Dapper.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="$(ConfigurationBinderVersion)" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="$(ConfigurationJsonVersion)" />
+    <PackageReference Include="MSTest.TestFramework" Version="$(MSTestFrameworkVersion)" />
+  </ItemGroup>
+  
+</Project>

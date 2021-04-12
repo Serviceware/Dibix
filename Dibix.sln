@@ -43,6 +43,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Http", "src\Dibix.Htt
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Http.Tests", "tests\Dibix.Http.Tests\Dibix.Http.Tests.csproj", "{C86A8EE9-DE7A-4656-9688-7A903799838E}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Testing", "src\Dibix.Testing\Dibix.Testing.csproj", "{C9882C3B-89DE-41CE-BD2B-29203381006C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -96,6 +98,10 @@ Global
 		{C86A8EE9-DE7A-4656-9688-7A903799838E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C86A8EE9-DE7A-4656-9688-7A903799838E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C86A8EE9-DE7A-4656-9688-7A903799838E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9882C3B-89DE-41CE-BD2B-29203381006C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9882C3B-89DE-41CE-BD2B-29203381006C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9882C3B-89DE-41CE-BD2B-29203381006C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9882C3B-89DE-41CE-BD2B-29203381006C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -113,6 +119,7 @@ Global
 		{8CB88EDF-5855-4D08-89F8-865890AF5F1C} = {118B0BCE-C81F-4DA0-814C-2F8AC4867710}
 		{03B51AFD-53C0-4B05-8ACE-E6656D1B2D29} = {118B0BCE-C81F-4DA0-814C-2F8AC4867710}
 		{C86A8EE9-DE7A-4656-9688-7A903799838E} = {B1D5F4EA-842C-494E-9B2F-1FF271591E29}
+		{C9882C3B-89DE-41CE-BD2B-29203381006C} = {118B0BCE-C81F-4DA0-814C-2F8AC4867710}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F25BA702-70BE-4E04-8583-C71369C6D3D0}
