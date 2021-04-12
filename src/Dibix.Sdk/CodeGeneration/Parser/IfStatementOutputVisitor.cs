@@ -1,85 +1,40 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
+﻿using System.Linq;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal class IfOutputResolutionContext
-    {
-        public bool IsResolved { get; private set; }
-        public IList<OutputSelectResult> Outputs { get; }
-
-        public IfOutputResolutionContext()
-        {
-            this.Outputs = new Collection<OutputSelectResult>();
-        }
-
-        public void Resolve(IEnumerable<OutputSelectResult> outputs)
-        {
-            this.IsResolved = true;
-            this.Outputs.AddRange(outputs);
-        }
-    }
-
     internal sealed class IfStatementOutputVisitor : StatementOutputVisitorBase
     {
-        #region Fields
-        private readonly IfOutputResolutionContext _context;
-        private readonly string _sourcePath;
-        private bool _containsIf;
-        #endregion
-
-        #region Properties
-        public IList<OutputSelectResult> Results => this._context.Outputs;
-        #endregion
-
-        #region Constructor
-        public IfStatementOutputVisitor(string sourcePath, TSqlFragmentAnalyzer fragmentAnalyzer, ILogger logger) : this(sourcePath, fragmentAnalyzer, logger, new IfOutputResolutionContext()) { }
-        public IfStatementOutputVisitor(string sourcePath, TSqlFragmentAnalyzer fragmentAnalyzer, ILogger logger, IfOutputResolutionContext context) : base(sourcePath, fragmentAnalyzer, logger)
-        {
-            this._sourcePath = sourcePath;
-            this._context = context;
-        }
-        #endregion
-
-        #region Overrides
-        public override void Accept(TSqlFragment fragment)
-        {
-            this._containsIf = fragment.ContainsIf();
-            base.Accept(fragment);
-        }
+        public IfStatementOutputVisitor(string sourcePath, TSqlFragmentAnalyzer fragmentAnalyzer, ILogger logger) : base(sourcePath, fragmentAnalyzer, logger) { }
 
         public override void ExplicitVisit(IfStatement node)
         {
-            IfStatementOutputVisitor left = new IfStatementOutputVisitor(this._sourcePath, base.FragmentAnalyzer, base.Logger, this._context);
+            IfStatementOutputVisitor left = new IfStatementOutputVisitor(base.SourcePath, base.FragmentAnalyzer, base.Logger);
             left.Accept(node.ThenStatement);
 
             // This might be an IF block without ELSE
             // This is only allowed, if the IF block is not producing any outputs (i.E. RAISERROR)
             if (node.ElseStatement != null)
             {
-                IfStatementOutputVisitor right = new IfStatementOutputVisitor(this._sourcePath, base.FragmentAnalyzer, base.Logger, this._context);
+                IfStatementOutputVisitor right = new IfStatementOutputVisitor(base.SourcePath, base.FragmentAnalyzer, base.Logger);
                 right.Accept(node.ElseStatement);
 
                 // Compare output statements between IF..THEN and ELSE
-                IList<OutputSelectResult> leftResults = left._containsIf ? left.Results : left.Outputs;
-                IList<OutputSelectResult> rightResults = right._containsIf ? right.Results : right.Outputs;
-                if (leftResults.Count != rightResults.Count)
+                if (left.Outputs.Count != right.Outputs.Count)
                 {
-                    base.Logger.LogError(null, "The number of output statements in IF THEN block does not match the number in ELSE block", this._sourcePath, node.StartLine, node.StartColumn);
+                    base.Logger.LogError(null, "The number of output statements in IF THEN block does not match the number in ELSE block", base.SourcePath, node.StartLine, node.StartColumn);
                     return;
                 }
 
-                for (int i = 0; i < leftResults.Count; i++)
+                for (int i = 0; i < left.Outputs.Count; i++)
                 {
-                    OutputSelectResult leftResult = leftResults[i];
-                    OutputSelectResult rightResult = rightResults[i];
+                    OutputSelectResult leftResult = left.Outputs[i];
+                    OutputSelectResult rightResult = right.Outputs[i];
 
                     if (leftResult.Columns.Count != rightResult.Columns.Count)
                     {
-                        base.Logger.LogError(null, "The number of columns in output statement in IF THEN block does not match the number in ELSE block", this._sourcePath, leftResult.Line, leftResult.Column);
+                        base.Logger.LogError(null, "The number of columns in output statement in IF THEN block does not match the number in ELSE block", base.SourcePath, leftResult.Line, leftResult.Column);
                         break;
                     }
 
@@ -92,21 +47,17 @@ namespace Dibix.Sdk.CodeGeneration
                         {
                             base.Logger.LogError(null, $@"The column names in output statement in IF THEN block do not match those in ELSE block
 Column in THEN: {leftColumn.ColumnName}
-Column in ELSE: {rightColumn.ColumnName}", this._sourcePath, leftColumn.ColumnNameSource.StartLine, leftColumn.ColumnNameSource.StartColumn);
+Column in ELSE: {rightColumn.ColumnName}", base.SourcePath, leftColumn.ColumnNameSource.StartLine, leftColumn.ColumnNameSource.StartColumn);
                             break;
                         }
                     }
                 }
 
                 // Use output statements of IF..THEN now that they should be validated as equal
-                if (!this._context.IsResolved)
-                    this._context.Resolve(left.Outputs);
-
-                //this._visitedStatements.AddRange(right.Results.Select(x => x.Index));
+                this.Outputs.AddRange(left.Outputs);
             }
             else if (left.Outputs.Any())
-                base.Logger.LogError(null, "IF statements that produce outputs but do not have an ELSE block are not supported, because the number of output results isn't guaranteed", this._sourcePath, node.StartLine, node.StartColumn);
+                base.Logger.LogError(null, "IF statements that produce outputs but do not have an ELSE block are not supported, because the number of output results isn't guaranteed", base.SourcePath, node.StartLine, node.StartColumn);
         }
-        #endregion
     }
 }

@@ -9,21 +9,18 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal abstract class StatementOutputVisitorBase : TSqlFragmentVisitor
     {
-        #region Fields
-        private readonly string _sourcePath;
-        #endregion
-
         #region Properties
         public string Statement { get; private set; }
+        public IList<OutputSelectResult> Outputs { get; }
+        protected string SourcePath { get; }
         protected TSqlFragmentAnalyzer FragmentAnalyzer { get; }
-        protected IList<OutputSelectResult> Outputs { get; }
         protected ILogger Logger { get; }
         #endregion
 
         #region Constructor
         protected StatementOutputVisitorBase(string sourcePath, TSqlFragmentAnalyzer fragmentAnalyzer, ILogger logger)
         {
-            this._sourcePath = sourcePath;
+            this.SourcePath = sourcePath;
             this.FragmentAnalyzer = fragmentAnalyzer;
             this.Logger = logger;
             this.Outputs = new Collection<OutputSelectResult>();
@@ -58,10 +55,6 @@ namespace Dibix.Sdk.CodeGeneration
         }
         #endregion
 
-        #region Protected Methods
-        protected virtual void OnOutputFound(OutputSelectResult result) { }
-        #endregion
-
         #region Private Methods
         private void Visit(int index, int line, int column, IEnumerable<SelectElement> selectElements)
         {
@@ -73,14 +66,13 @@ namespace Dibix.Sdk.CodeGeneration
             result.Columns.AddRange(columns);
 
             this.Outputs.Add(result);
-            this.OnOutputFound(result);
         }
 
         private OutputColumnResult VisitSelectElement(SelectElement selectElement)
         {
             if (selectElement is SelectStarExpression)
             {
-                this.Logger.LogError(null, "Star expressions are not supported", this._sourcePath, selectElement.StartLine, selectElement.StartColumn);
+                this.Logger.LogError(null, "Star expressions are not supported", this.SourcePath, selectElement.StartLine, selectElement.StartColumn);
                 return null;
             }
 
@@ -97,7 +89,7 @@ namespace Dibix.Sdk.CodeGeneration
                 {
                     if (columnReference.ColumnType != Microsoft.SqlServer.TransactSql.ScriptDom.ColumnType.Regular)
                     {
-                        this.Logger.LogError(null, $"Cannot determine name for unaliased column: {columnReference.Dump()}", this._sourcePath, selectElement.StartLine, selectElement.StartColumn);
+                        this.Logger.LogError(null, $"Cannot determine name for unaliased column: {columnReference.Dump()}", this.SourcePath, selectElement.StartLine, selectElement.StartColumn);
                         return null;
                     }
 

@@ -179,17 +179,16 @@ IF @true = 1
             SELECT 1.0 AS [action];
         ELSE
             SELECT 1.1 AS [action];
+        SELECT 2 AS [action];
     END
 ELSE
-    IF @true = 1
-        BEGIN
-            DECLARE @x AS INT = 1;
-            SELECT 2 AS [action];
-        END
-    ELSE
-        BEGIN
-            SELECT 3 AS [action];
-        END
+    BEGIN
+        SELECT 3 AS [action];
+        IF @true = 0
+            SELECT 4.0 AS [action];
+        ELSE
+            SELECT 4.1 AS [action];
+    END
 
 IF @true = 1
     SELECT 1;
@@ -261,6 +260,7 @@ UNION ALL
                     dbx_tests_parser_nestedifsResult result = new dbx_tests_parser_nestedifsResult();
                     result.A.ReplaceWith(reader.ReadMany&lt;int&gt;());
                     result.B.ReplaceWith(reader.ReadMany&lt;int&gt;());
+                    result.C.ReplaceWith(reader.ReadMany&lt;int&gt;());
                     return result;
                 }
             }
@@ -354,11 +354,13 @@ UNION ALL
     {
         public ICollection&lt;int&gt; A { get; private set; }
         public ICollection&lt;int&gt; B { get; private set; }
+        public ICollection&lt;int&gt; C { get; private set; }
 
         public dbx_tests_parser_nestedifsResult()
         {
             this.A = new Collection&lt;int&gt;();
             this.B = new Collection&lt;int&gt;();
+            this.C = new Collection&lt;int&gt;();
         }
     }
 

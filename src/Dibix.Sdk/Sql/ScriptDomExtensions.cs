@@ -84,13 +84,6 @@ namespace Dibix.Sdk.Sql
             return visitor.FirstQueryExpression;
         }
 
-        public static bool ContainsIf(this TSqlFragment fragment)
-        {
-            IfStatementVisitor visitor = new IfStatementVisitor();
-            fragment.Accept(visitor);
-            return visitor.Found;
-        }
-
         public static IEnumerable<TableReference> Recursive(this IEnumerable<TableReference> references)
         {
             foreach (TableReference tableReference in references)
@@ -266,13 +259,6 @@ namespace Dibix.Sdk.Sql
                 if (node.QuoteType == QuoteType.NotQuoted)
                     node.QuoteType = QuoteType.SquareBracket;
             }
-        }
-
-        private sealed class IfStatementVisitor : TSqlFragmentVisitor
-        {
-            public bool Found { get; private set; }
-
-            public override void ExplicitVisit(IfStatement node) => this.Found = true;
         }
 
         private sealed class UnionStatementVisitor : TSqlFragmentVisitor

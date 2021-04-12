@@ -23,7 +23,7 @@ namespace Dibix.Sdk.CodeGeneration
             node.Accept(visitor);
 
             IList<ISqlElement> returnElements = markup.GetElements(SqlMarkupKey.Return).ToArray();
-            SqlQueryResult builtInResult = GetBuiltInResult(markup, target, node, returnElements, visitor.Results, logger, typeResolver);
+            SqlQueryResult builtInResult = GetBuiltInResult(markup, target, node, returnElements, visitor.Outputs, logger, typeResolver);
 
             if (builtInResult != null)
             {
@@ -34,7 +34,7 @@ namespace Dibix.Sdk.CodeGeneration
             ValidateMergeGridResult(target, node, returnElements, logger);
 
             // Incorrect number of return elements/results will make further execution fail
-            if (!ValidateReturnElements(target, returnElements, visitor.Results, logger))
+            if (!ValidateReturnElements(target, returnElements, visitor.Outputs, logger))
                 yield break;
 
             foreach (SqlQueryResult result in CollectResults(target, node, typeResolver, schemaRegistry, logger, returnElements, visitor)) 
@@ -167,7 +167,7 @@ namespace Dibix.Sdk.CodeGeneration
                 if (!resultTypes.Any())
                     continue;
 
-                OutputSelectResult output = visitor.Results[i];
+                OutputSelectResult output = visitor.Outputs[i];
                 ValidateResult
                 (
                     isFirstResult: i == 0
