@@ -16,9 +16,7 @@ namespace Dibix.Testing
         private readonly bool _isAzureDevops;
         private readonly bool _supportsFile;
         private bool _collectingLine;
-#if DEBUG
         private readonly Process _tail;
-#endif
 
         public override Encoding Encoding => Encoding.UTF8;
 
@@ -34,7 +32,6 @@ namespace Dibix.Testing
 
             this._outputPath = Path.Combine(privateResultsDirectory, logFileName);
             this._output = new StreamWriter(this._outputPath);
-#if DEBUG
 
             if (!tailOutput) 
                 return;
@@ -44,7 +41,6 @@ namespace Dibix.Testing
                 throw new InvalidOperationException("Could not tail output");
 
             Process.GetCurrentProcess().Exited += (_, _) => this.EndOutputTail();
-#endif
         }
 
         public TraceListener CreateTraceListener() => new TestOutputHelperTraceListener(this);
@@ -77,19 +73,14 @@ namespace Dibix.Testing
             }
 
             this._output.Dispose();
-#if DEBUG
-
             this.EndOutputTail();
-#endif
         }
-#if DEBUG
 
         private void EndOutputTail()
         {
             if (!this._tail.HasExited) 
                 this._tail.Kill();
         }
-#endif
 
         private void Write(string message, bool appendLine)
         {
