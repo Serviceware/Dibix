@@ -45,11 +45,11 @@ namespace Dibix.Testing
                 await accessor.ExecuteAsync(storedProcedureName, CommandType.StoredProcedure, commandTimeout, parameterBuilder.Build(), CancellationToken.None).ConfigureAwait(false);
             }
         }
+
+        protected static IDatabaseAccessorFactory CreateDatabaseAccessorFactory(TConfiguration configuration) => new DapperDatabaseAccessorFactory(configuration.Database.ConnectionString);
         #endregion
 
         #region Private Methods
-        private static IDatabaseAccessorFactory CreateDatabaseAccessorFactory(TConfiguration configuration) => new DapperDatabaseAccessorFactory(configuration.Database.ConnectionString);
-
         private static TraceSource GetDibixTraceSource()
         {
             const string fieldName = "TraceSource";

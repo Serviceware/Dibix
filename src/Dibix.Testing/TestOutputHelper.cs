@@ -78,7 +78,7 @@ namespace Dibix.Testing
 
         private void EndOutputTail()
         {
-            if (!this._tail.HasExited) 
+            if (this._tail != null && !this._tail.HasExited)
                 this._tail.Kill();
         }
 
