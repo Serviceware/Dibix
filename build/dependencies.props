@@ -31,6 +31,7 @@
     <ConfigurationJsonVersion>5.0.0</ConfigurationJsonVersion>
     <ConfigurationUserSecretsVersion>5.0.0</ConfigurationUserSecretsVersion>
     <CoverletVersion>3.0.3</CoverletVersion>
+    <EventLogVersion>5.0.1</EventLogVersion>
     <MicrosoftTestSdkVersion>16.9.4</MicrosoftTestSdkVersion>
     <MoqVersion>4.16.1</MoqVersion>
     <MSTestFrameworkVersion>2.1.2</MSTestFrameworkVersion>

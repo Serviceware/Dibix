@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dibix.Testing
 {
-    internal sealed class TestOutputHelper : TextWriter, ITestOutputHelper, IDisposable
+    internal sealed class TestOutputWriter : TextWriter, IDisposable
     {
         private readonly string _outputPath;
         private readonly StreamWriter _output;
@@ -20,15 +20,18 @@ namespace Dibix.Testing
 
         public override Encoding Encoding => Encoding.UTF8;
 
-        public TestOutputHelper(TestContext testContext, string logFileName, bool tailOutput)
+        public TestOutputWriter(TestContext testContext, string logFileName, bool tailOutput)
         {
             this._testContext = testContext;
-            string privateResultsDirectory = GetPrivateResultsDirectory(testContext, out bool isSpecified);
+            string privateResultsDirectory = testContext.GetPrivateResultsDirectory(out bool isSpecified);
             this._isAzureDevops = isSpecified;
             this._supportsFile = !String.IsNullOrEmpty(logFileName);
 
             if (!this._supportsFile) 
                 return;
+
+            if (!Path.HasExtension(logFileName))
+                logFileName = $"{logFileName}.log";
 
             this._outputPath = Path.Combine(privateResultsDirectory, logFileName);
             this._output = new StreamWriter(this._outputPath);
@@ -90,6 +93,9 @@ namespace Dibix.Testing
 
             for (int i = 0; i < lines.Length; i++)
             {
+                if (i > 0) 
+                    this.AppendLine();
+
                 string line = lines[i];
 
                 if (!this._collectingLine || i > 0)
@@ -102,12 +108,7 @@ namespace Dibix.Testing
             }
 
             if (appendLine)
-            {
-                Console.WriteLine();
-
-                if (this._supportsFile)
-                    this._output.WriteLine();
-            }
+                this.AppendLine();
 
             this._collectingLine = !appendLine;
 
@@ -115,22 +116,19 @@ namespace Dibix.Testing
                 this._output.Flush();
         }
 
-        private static string GetPrivateResultsDirectory(TestContext testContext, out bool isSpecified)
+        private void AppendLine()
         {
-            string privateResultsDirectory = (string)testContext.Properties["PrivateTestResultsDirectory"];
-            isSpecified = !String.IsNullOrEmpty(privateResultsDirectory);
-            if (!isSpecified)
-                privateResultsDirectory = testContext.TestRunResultsDirectory;
+            Console.WriteLine();
 
-            Directory.CreateDirectory(privateResultsDirectory);
-            return privateResultsDirectory;
+            if (this._supportsFile)
+                this._output.WriteLine();
         }
 
         private sealed class TestOutputHelperTraceListener : TraceListener
         {
-            private readonly TestOutputHelper _testOutputHelper;
+            private readonly TestOutputWriter _testOutputHelper;
 
-            public TestOutputHelperTraceListener(TestOutputHelper testOutputHelper) => this._testOutputHelper = testOutputHelper;
+            public TestOutputHelperTraceListener(TestOutputWriter testOutputHelper) => this._testOutputHelper = testOutputHelper;
 
             public override void Write(string message) { } // Ignore trace category prefix stuff
 

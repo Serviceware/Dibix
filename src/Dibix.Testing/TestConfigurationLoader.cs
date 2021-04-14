@@ -3,9 +3,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dibix.Testing
 {
-    public static class TestConfigurationLoader
+    internal static class TestConfigurationLoader
     {
-
         public static T Load<T>(TestContext testContext) where T : LazyConfiguration, new()
         {
             T instance = new T();

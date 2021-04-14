@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -18,16 +19,23 @@ namespace Dibix.Testing
             set
             {
                 this._testContext = value;
-                TestOutputHelper testOutputHelper = new TestOutputHelper(value, this.LogFileName, this.AttachOutputObserver);
+                TestOutputWriter testOutputHelper = new TestOutputWriter(value, this.LogFileName, this.AttachOutputObserver);
                 this.TestOutputHelper = testOutputHelper;
 
                 this.OnTestContextInitialized();
             }
         }
-        internal TestOutputHelper TestOutputHelper { get; private set; }
+        internal TestOutputWriter TestOutputHelper { get; private set; }
         protected virtual bool AttachOutputObserver => false;
         protected virtual string LogFileName => this.TestContext?.TestName;
         protected virtual TextWriter Out => this.TestOutputHelper;
+        #endregion
+
+        #region Constructor
+        protected TestBase()
+        {
+            AppDomain.CurrentDomain.FirstChanceException += this.OnFirstChanceException;
+        }
         #endregion
 
         #region Protected Methods
@@ -37,10 +45,38 @@ namespace Dibix.Testing
 
         protected void WriteLine(string message) => this.TestOutputHelper.WriteLine(message);
 
+        protected void AssertEqualDiffTool(string expected, string actual, string message = null)
+        {
+            if (!Equals(expected, actual))
+                this.TestContext.AddDiffToolInvoker(expected, actual);
+
+            Assert.AreEqual(expected, actual, message);
+        }
+
         protected static Task Retry(Func<Task<bool>> retryMethod) => Retry(retryMethod, x => x);
         protected static Task Retry(Func<Task<bool>> retryMethod, TimeSpan timeout) => Retry(retryMethod, x => x, timeout);
         protected static Task<TResult> Retry<TResult>(Func<Task<TResult>> retryMethod, Func<TResult, bool> condition) => Retry(retryMethod, condition, TimeSpan.FromMinutes(30));
         protected static Task<TResult> Retry<TResult>(Func<Task<TResult>> retryMethod, Func<TResult, bool> condition, TimeSpan timeout) => retryMethod.Retry(condition, (int)TimeSpan.FromSeconds(1).TotalMilliseconds, (int)timeout.TotalMilliseconds);
+        #endregion
+
+        #region Private Methods
+        private void OnFirstChanceException(object sender, FirstChanceExceptionEventArgs e)
+        {
+            if (e.Exception is UnitTestAssertException)
+                return;
+
+            AppDomain.CurrentDomain.FirstChanceException -= this.OnFirstChanceException;
+
+            try
+            {
+                if (OperatingSystem.IsWindows())
+                    this.TestContext.AddLastEventLogErrors();
+            }
+            catch (Exception exception)
+            {
+                this.TestContext.AddResultFile("AdditionalErrors.txt", exception.ToString());
+            }
+        }
         #endregion
 
         #region IDisposable Members
