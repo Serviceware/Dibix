@@ -9,15 +9,13 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' != 'net451'">
-    <PackageReference Include="Dapper.StrongName" Version="$(DapperVersion)" />
+    <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="$(AspNetWebApiVersion)" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net451'">
-    <PackageReference Include="Dapper.StrongName" Version="$(DapperNetFxVersion)" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Dibix\Dibix.csproj" />
+    <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="$(AspNetWebApiNetFxVersion)" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonNetFxVersion)" />
   </ItemGroup>
   
 </Project>

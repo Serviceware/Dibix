@@ -2,15 +2,18 @@
   <PropertyGroup>
 
     <!-- Runtime -->
-    <AspNetWebApiVersion>5.2.3</AspNetWebApiVersion><!-- Update blocked by Processes -->
-    <DapperVersion>1.50.5</DapperVersion><!-- Update blocked by Processes -->
+    <AspNetWebApiVersion>5.2.7</AspNetWebApiVersion>
+    <AspNetWebApiNetFxVersion>5.2.3</AspNetWebApiNetFxVersion><!-- Update blocked by Processes -->
+    <DapperVersion>2.0.78</DapperVersion>
+    <DapperNetFxVersion>1.50.5</DapperNetFxVersion><!-- Update blocked by Processes -->
     <DataAnnotationsVersion>5.0.0</DataAnnotationsVersion>
     <SqlClientVersion>4.8.2</SqlClientVersion>
     <ReflectionEmitVersion>4.7.0</ReflectionEmitVersion>
 
     <!-- Sdk -->
     <DacFxVersion>150.5084.2</DacFxVersion>
-    <NewtonsoftJsonVersion>12.0.3</NewtonsoftJsonVersion><!-- Update blocked by Processes -->
+    <NewtonsoftJsonVersion>13.0.1</NewtonsoftJsonVersion>
+    <NewtonsoftJsonNetFxVersion>12.0.3</NewtonsoftJsonNetFxVersion><!-- Update blocked by Processes -->
     <NewtonsoftJsonSchemaVersion>3.0.14</NewtonsoftJsonSchemaVersion>
     <OpenApiVersion>1.2.3</OpenApiVersion>
 

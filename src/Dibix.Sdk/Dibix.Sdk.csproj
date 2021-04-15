@@ -25,7 +25,7 @@
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MSBuildUtilitiesVersion)" />
     <PackageReference Include="Microsoft.OpenApi" Version="$(OpenApiVersion)" />
     <PackageReference Include="Microsoft.SqlServer.DacFx" Version="$(DacFxVersion)" />
-    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonNetFxVersion)" />
     <PackageReference Include="Newtonsoft.Json.Schema" Version="$(NewtonsoftJsonSchemaVersion)" />
     
     <PackageReference Include="ILRepack" Version="$(ILRepackVersion)" PrivateAssets="All" />
