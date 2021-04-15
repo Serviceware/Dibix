@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  
+  <PropertyGroup>    
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="Dibix.AreaRegistrationAttribute">
+      <_Parameter1>Dibix</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="HttpParameterResolverTest.Base.cs" DependentUpon="HttpParameterResolverTest.cs" />
+    <Compile Include="..\Dibix.Tests\TestUtility.cs" Link="TestUtility.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftTestSdkVersion)" />
+    <PackageReference Include="Moq" Version="$(MoqVersion)" />
+    <PackageReference Include="xunit" Version="$(XUnitVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(XUnitVSVersion)" />
+    <PackageReference Include="coverlet.msbuild" Version="$(CoverletVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Dibix.Http.Server\Dibix.Http.Server.csproj" />
+  </ItemGroup>
+
+</Project>

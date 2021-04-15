@@ -9,7 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Dibix.Http;
+using Dibix.Http.Server;
 using Dibix.Sdk.Json;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;

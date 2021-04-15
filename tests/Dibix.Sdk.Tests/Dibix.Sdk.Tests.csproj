@@ -23,7 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Dibix\Dibix.csproj" />
-    <ProjectReference Include="..\..\src\Dibix.Http\Dibix.Http.csproj" />
+    <ProjectReference Include="..\..\src\Dibix.Http.Server\Dibix.Http.Server.csproj" />
     <ProjectReference Include="..\..\src\Dibix.Sdk\Dibix.Sdk.csproj" />
   </ItemGroup>
 

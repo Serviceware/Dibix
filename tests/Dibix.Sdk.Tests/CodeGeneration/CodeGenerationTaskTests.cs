@@ -362,7 +362,7 @@ Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly
                 {
                     "System.ComponentModel.DataAnnotations.dll"
                   , "Newtonsoft.Json.dll"
-                  , "Dibix.Http.dll"
+                  , "Dibix.Http.Server.dll"
                 }
             );
         }

@@ -39,9 +39,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Sdk.VisualStudio.Test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Sdk.Cli", "src\Dibix.Sdk.Cli\Dibix.Sdk.Cli.csproj", "{8CB88EDF-5855-4D08-89F8-865890AF5F1C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Http", "src\Dibix.Http\Dibix.Http.csproj", "{03B51AFD-53C0-4B05-8ACE-E6656D1B2D29}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Http.Server", "src\Dibix.Http.Server\Dibix.Http.Server.csproj", "{03B51AFD-53C0-4B05-8ACE-E6656D1B2D29}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Http.Tests", "tests\Dibix.Http.Tests\Dibix.Http.Tests.csproj", "{C86A8EE9-DE7A-4656-9688-7A903799838E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Http.Server.Tests", "tests\Dibix.Http.Server.Tests\Dibix.Http.Server.Tests.csproj", "{C86A8EE9-DE7A-4656-9688-7A903799838E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Testing", "src\Dibix.Testing\Dibix.Testing.csproj", "{C9882C3B-89DE-41CE-BD2B-29203381006C}"
 EndProject

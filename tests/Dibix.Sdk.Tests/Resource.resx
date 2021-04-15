@@ -270,7 +270,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using Dibix;
-using Dibix.Http;
+using Dibix.Http.Server;
 using Newtonsoft.Json;
 
 [assembly: ArtifactAssembly]

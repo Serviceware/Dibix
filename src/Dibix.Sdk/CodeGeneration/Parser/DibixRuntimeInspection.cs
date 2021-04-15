@@ -32,7 +32,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             foreach (CustomAttributeData attribute in method.GetCustomAttributesData())
             {
-                if (attribute.AttributeType.FullName != "Dibix.Http.ErrorResponseAttribute")
+                if (attribute.AttributeType.FullName != "Dibix.Http.Server.ErrorResponseAttribute")
                     continue;
 
                 int statusCode = (int)attribute.ConstructorArguments[0].Value;

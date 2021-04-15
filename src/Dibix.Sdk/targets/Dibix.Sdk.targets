@@ -8,7 +8,7 @@
     <_DibixRuntimeDirectory Condition="'$(CompileArtifactsNetStandard)' != 'true'">$(DibixRuntimeDirectory)</_DibixRuntimeDirectory>
     <_DibixRuntimeDirectory Condition="'$(CompileArtifactsNetStandard)' == 'true'">$(DibixRuntimeXplatDirectory)</_DibixRuntimeDirectory>
     <DibixAssemblyPath>$(_DibixRuntimeDirectory)Dibix.dll</DibixAssemblyPath>
-    <DibixHttpAssemblyPath>$(_DibixRuntimeDirectory)Dibix.Http.dll</DibixHttpAssemblyPath>
+    <DibixHttpServerAssemblyPath>$(_DibixRuntimeDirectory)Dibix.Http.Server.dll</DibixHttpServerAssemblyPath>
 
     <!-- We have our own CA target, which also executes the native SqlStaticCodeAnalysis -->
     <RunSqlCodeAnalysis>false</RunSqlCodeAnalysis>
@@ -133,7 +133,7 @@
       <_SqlTargetInput Include="$(DibixCliPath)" />
       <_SqlTargetInput Include="$(DibixSdkPath)" />
       <_SqlTargetInput Include="$(DibixAssemblyPath)" />
-      <_SqlTargetInput Include="$(DibixHttpAssemblyPath)" />
+      <_SqlTargetInput Include="$(DibixHttpServerAssemblyPath)" />
 
 
       <!-- Target specific inputs -->
@@ -337,7 +337,7 @@ $(_SqlReferencePath)" />
       <ServerCompilationSource Include="$(_ServerAssemblyInfoFile)" />
       <ServerCompilationReference Include="@(ServerCompilationArtifactReference)" />
       <ServerCompilationReference Include="$(DibixAssemblyPath)" />
-      <ServerCompilationReference Include="$(DibixHttpAssemblyPath)" />
+      <ServerCompilationReference Include="$(DibixHttpServerAssemblyPath)" />
       <ServerCompilationReference Condition="'$(CompileArtifactsNetStandard)' != 'true'" Include="System.ComponentModel.DataAnnotations.dll" />
       <ServerCompilationReference Condition="'$(CompileArtifactsNetStandard)' != 'true'" Include="$(DibixToolsDirectory)Newtonsoft.Json.dll" />
 

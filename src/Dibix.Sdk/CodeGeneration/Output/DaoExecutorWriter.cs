@@ -95,7 +95,7 @@ namespace Dibix.Sdk.CodeGeneration
                                                                                                                        .AddParameter("errorCode", new CSharpValue(x.ErrorCode.ToString()))
                                                                                                                        .AddParameter("errorDescription", new CSharpStringValue(x.ErrorDescription)));
                 if (statement.ErrorResponses.Any())
-                    context.AddDibixHttpReference();
+                    context.AddDibixHttpServerReference();
 
                 CSharpModifiers modifiers = CSharpModifiers.Public | CSharpModifiers.Static;
                 if (statement.Async)

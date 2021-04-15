@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
-using Dibix.Http;
+using Dibix.Http.Server;
 using Dibix.Sdk.CodeGeneration;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
