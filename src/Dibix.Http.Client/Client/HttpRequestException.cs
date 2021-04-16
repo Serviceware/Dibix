@@ -1,39 +1,36 @@
 ﻿using System;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace Dibix.Http.Client
 {
-    public sealed class HttpRequestException : Exception
+    public sealed class HttpException : Exception
     {
         public HttpStatusCode StatusCode => this.Response.StatusCode;
-        public HttpRequestMessage Request => this.Response.RequestMessage;
+        public HttpRequestMessage Request { get; }
+        public string RequestContentText { get; }
         public HttpResponseMessage Response { get; }
-        public HttpContentHeaders ResponseContentHeaders { get; }
         public string ResponseContentText { get; }
 
-        private HttpRequestException(HttpResponseMessage response, HttpContentHeaders responseContentHeaders, string responseContentText) : base(CreateMessage(response))
+        private HttpException(HttpRequestMessage request, string requestContentText, HttpResponseMessage response, string responseContentText) : base(CreateMessage(response))
         {
+            this.Request = request;
+            this.RequestContentText = requestContentText;
             this.Response = response;
-            this.ResponseContentHeaders = responseContentHeaders;
             this.ResponseContentText = responseContentText;
         }
 
-        internal static async Task<HttpRequestException> Create(HttpResponseMessage response)
+        internal static async Task<HttpException> Create(HttpRequestMessage request, HttpResponseMessage response)
         {
-            HttpContentHeaders contentHeaders = null;
-            string contentText = null;
- 
-            if (response.Content != null)
-            {
-                contentHeaders = response.Content.Headers;
-                contentText = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                response.Content.Dispose();
-            }
+            string requestContentText = null;
+            if (request.Content != null) 
+                requestContentText = await request.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-            return new HttpRequestException(response, contentHeaders, contentText);
+            string responseContentText = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            response.Content.Dispose();
+
+            return new HttpException(request, requestContentText, response, responseContentText);
         }
 
         private static string CreateMessage(HttpResponseMessage response)

@@ -1,9 +1,11 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 
 namespace Dibix.Http.Client
 {
     public interface IHttpClientFactory
     {
-        HttpClient Create();
+        HttpClient CreateClient();
+        HttpClient CreateClient(Uri baseAddress);
     }
 }

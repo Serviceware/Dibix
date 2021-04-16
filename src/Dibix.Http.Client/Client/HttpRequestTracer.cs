@@ -3,23 +3,23 @@ using System.Net.Http;
 
 namespace Dibix.Http.Client
 {
-    public class HttpRequestTracer : IHttpRequestTracer
+    public class HttpRequestTracer
     {
-        public bool CollectRequestContent { get; set; } = true;
+        public bool MaskSensitiveData { get; set; } = true;
         public HttpRequestTrace LastRequest { get; private set; }
 
-        public virtual void TraceRequest(HttpRequestMessage requestMessage, string dump)
+        public virtual void TraceRequest(HttpRequestMessage requestMessage, string formattedRequestText)
         {
-            this.LastRequest = new HttpRequestTrace(requestMessage, dump);
+            this.LastRequest = new HttpRequestTrace(requestMessage, formattedRequestText);
         }
 
-        public virtual void TraceResponse(HttpResponseMessage responseMessage, string dump, TimeSpan duration)
+        public virtual void TraceResponse(HttpResponseMessage responseMessage, string formattedResponseText, TimeSpan duration)
         {
             if (this.LastRequest == null)
                 throw new InvalidOperationException("Request not initialized");
 
             this.LastRequest.ResponseMessage = responseMessage;
-            this.LastRequest.ResponseDump = dump;
+            this.LastRequest.FormattedResponseText = formattedResponseText;
             this.LastRequest.Duration = duration;
         }
     }
