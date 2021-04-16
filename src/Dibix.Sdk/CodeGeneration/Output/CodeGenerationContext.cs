@@ -6,7 +6,7 @@ using Dibix.Sdk.CodeGeneration.CSharp;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    public sealed class DaoCodeGenerationContext
+    public sealed class CodeGenerationContext
     {
         private static readonly IDictionary<PrimitiveType, string> PrimitiveTypeMap = new Dictionary<PrimitiveType, string>
         {
@@ -42,7 +42,7 @@ namespace Dibix.Sdk.CodeGeneration
         public bool GeneratePublicArtifacts => this.Model.CompatibilityLevel == CodeGeneratorCompatibilityLevel.Full;
         public bool WriteNamespaces => this.Model.CompatibilityLevel == CodeGeneratorCompatibilityLevel.Full;
 
-        internal DaoCodeGenerationContext(CSharpRoot root, CSharpAnnotation generatedCodeAnnotation, CodeGenerationModel model, ISchemaRegistry schemaRegistry)
+        internal CodeGenerationContext(CSharpRoot root, CSharpAnnotation generatedCodeAnnotation, CodeGenerationModel model, ISchemaRegistry schemaRegistry)
         {
             this._root = root;
             this._schemaRegistry = schemaRegistry;
@@ -51,7 +51,7 @@ namespace Dibix.Sdk.CodeGeneration
             this.Model = model;
         }
 
-        public DaoCodeGenerationContext AddUsing(string @using)
+        public CodeGenerationContext AddUsing(string @using)
         {
             this._root.AddUsing(@using);
             return this;

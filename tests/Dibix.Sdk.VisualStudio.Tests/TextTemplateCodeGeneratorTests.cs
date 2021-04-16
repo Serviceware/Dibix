@@ -18,7 +18,7 @@ namespace Dibix.Sdk.VisualStudio.Tests
                                                               y.Formatter<GenerateScriptSqlStatementFormatter>(); // Uses sql dom script generator
                                                           });
                                                      })
-                                                     .SelectOutputWriter<DaoWriter>(x => { x.Formatting(CommandTextFormatting.MultiLine); }));
+                                                     .SelectOutputWriter<ArtifactWriterBase>(x => { x.Formatting(CommandTextFormatting.MultiLine); }));
 
             Assert(generated);
         }
@@ -41,7 +41,7 @@ namespace Dibix.Sdk.VisualStudio.Tests
                                                          x.SelectProcedure("[catalog].[delete_project]", "DeleteProject")
                                                           .SelectParser<SqlStoredProcedureParser>(y => { y.Formatter<ExecStoredProcedureSqlStatementFormatter>(); });
                                                      })
-                                                     .SelectOutputWriter<DaoWriter>(x =>
+                                                     .SelectOutputWriter<ArtifactWriterBase>(x =>
                                                      {
                                                          x.Namespace("This.Is.A.Custom.Namespace")
                                                           .ClassName("Accessor")

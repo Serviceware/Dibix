@@ -5,7 +5,7 @@ using Dibix.Sdk.CodeGeneration.CSharp;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class DaoStructuredTypeWriter : DaoWriter
+    internal sealed class DaoStructuredTypeWriter : ArtifactWriterBase
     {
         #region Properties
         public override string LayerName => CodeGeneration.LayerName.Data;
@@ -17,7 +17,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public override IEnumerable<CSharpAnnotation> GetGlobalAnnotations(CodeGenerationModel model) { yield break; }
 
-        public override void Write(DaoCodeGenerationContext context)
+        public override void Write(CodeGenerationContext context)
         {
             context.AddUsing("Dibix");
 

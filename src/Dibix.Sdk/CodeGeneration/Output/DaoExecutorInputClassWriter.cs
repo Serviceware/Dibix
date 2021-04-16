@@ -6,7 +6,7 @@ using Dibix.Sdk.CodeGeneration.CSharp;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class DaoExecutorInputClassWriter : DaoWriter
+    internal sealed class DaoExecutorInputClassWriter : ArtifactWriterBase
     {
         #region Fields
         internal const string InputTypeSuffix = "Input";
@@ -20,7 +20,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Overrides
         public override bool HasContent(CodeGenerationModel model) => model.Statements.Any(RequiresInput);
 
-        public override void Write(DaoCodeGenerationContext context)
+        public override void Write(CodeGenerationContext context)
         {
             var namespaceGroups = context.Model
                                          .Statements
@@ -65,7 +65,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static string GetInputTypeName(SqlStatementInfo statement) => String.Concat(statement.Name, InputTypeSuffix);
 
-        private static string ResolvePropertyTypeName(SqlQueryParameter parameter, DaoCodeGenerationContext context)
+        private static string ResolvePropertyTypeName(SqlQueryParameter parameter, CodeGenerationContext context)
         {
             string typeName = context.ResolveTypeName(parameter.Type);
             if (!parameter.IsOutput)

@@ -1,22 +1,18 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Dibix.Sdk.CodeGeneration.CSharp;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    public sealed class ServerCodeGenerator : CodeGenerator
+    internal sealed class ClientCodeGenerator : CodeGenerator
     {
         #region Constructor
-        public ServerCodeGenerator(ILogger logger, ISchemaRegistry schemaRegistry) : base(logger, schemaRegistry) { }
+        public ClientCodeGenerator(ILogger logger, ISchemaRegistry schemaRegistry) : base(logger, schemaRegistry) { }
         #endregion
 
         #region Overrides
         protected override IEnumerable<ArtifactWriterBase> SelectWriters()
         {
-            yield return new DaoExecutorWriter();
-            yield return new DaoExecutorInputClassWriter();
-            yield return new DaoContractClassWriter();
-            yield return new DaoStructuredTypeWriter();
-            yield return new ApiDescriptionWriter();
+            yield return new ClientContractClassWriter();
         }
 
         protected override IEnumerable<CSharpAnnotation> CollectGlobalAnnotations(bool isArtifactAssembly)
@@ -28,7 +24,7 @@ namespace Dibix.Sdk.CodeGeneration
         protected override void OnContextCreated(CodeGenerationContext context, bool isArtifactAssembly)
         {
             if (isArtifactAssembly)
-                context.AddUsing("Dibix");
+                context.AddUsing("Dibix.Http.Client");
         }
         #endregion
     }

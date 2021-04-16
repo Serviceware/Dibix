@@ -5,7 +5,7 @@ using Dibix.Sdk.CodeGeneration.CSharp;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class DaoApiConfigurationWriter : DaoWriter
+    internal sealed class ApiDescriptionWriter : ArtifactWriterBase
     {
         #region Properties
         public override string LayerName => CodeGeneration.LayerName.Business;
@@ -21,7 +21,7 @@ namespace Dibix.Sdk.CodeGeneration
             yield return new CSharpAnnotation("AreaRegistration", new CSharpStringValue(areaName));
         }
 
-        public override void Write(DaoCodeGenerationContext context)
+        public override void Write(CodeGenerationContext context)
         {
             context.AddDibixHttpServerReference();
 
@@ -39,7 +39,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private static string WriteBody(DaoCodeGenerationContext context, IList<ControllerDefinition> controllers)
+        private static string WriteBody(CodeGenerationContext context, IList<ControllerDefinition> controllers)
         {
             StringWriter writer = new StringWriter();
             for (int i = 0; i < controllers.Count; i++)

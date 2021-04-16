@@ -9,6 +9,7 @@
     <_DibixRuntimeDirectory Condition="'$(CompileArtifactsNetStandard)' == 'true'">$(DibixRuntimeXplatDirectory)</_DibixRuntimeDirectory>
     <DibixAssemblyPath>$(_DibixRuntimeDirectory)Dibix.dll</DibixAssemblyPath>
     <DibixHttpServerAssemblyPath>$(_DibixRuntimeDirectory)Dibix.Http.Server.dll</DibixHttpServerAssemblyPath>
+    <DibixHttpClientAssemblyPath>$(_DibixRuntimeDirectory)Dibix.Http.Client.dll</DibixHttpClientAssemblyPath>
 
     <!-- We have our own CA target, which also executes the native SqlStaticCodeAnalysis -->
     <RunSqlCodeAnalysis>false</RunSqlCodeAnalysis>
@@ -436,6 +437,7 @@ $(_SqlReferencePath)" />
     <ItemGroup Condition="'$(ClientOutputName)' != ''">
       <ClientCompilationSource Include="$(_ClientIntermediateFilePath)" />
       <ClientCompilationSource Include="$(_ClientAssemblyInfoFile)" />
+      <ClientCompilationReference Include="$(DibixHttpClientAssemblyPath)" />
 
       <ClientAssemblyAttribute Include="@(AssemblyAttribute)" />
       <ClientAssemblyAttribute Include="AssemblyTitle">
@@ -456,6 +458,7 @@ $(_SqlReferencePath)" />
          KeyFile="$(AssemblyOriginatorKeyFile)"
          LangVersion="$(LangVersion)"
          OutputAssembly="$(_ClientIntermediateAssemblyPath)"
+         References="@(ClientCompilationReference)"
          Sources="@(ClientCompilationSource)"
          TargetType="$(OutputType)" />
 

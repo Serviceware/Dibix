@@ -15,7 +15,7 @@ namespace Dibix.Sdk.VisualStudio
             ILogger logger = new TextTemplatingEngineLogger(textTemplatingEngineHost);
             ISchemaRegistry schemaRegistry = new SchemaRegistry(logger);
             CodeGenerationModel model = TextTemplateCodeGenerationModelLoader.Create(textTemplatingEngineHost, serviceProvider, schemaRegistry, logger, configure);
-            CodeGenerator generator = new DaoCodeGenerator(logger, schemaRegistry);
+            CodeGenerator generator = new ServerCodeGenerator(logger, schemaRegistry);
             return generator.Generate(model);
         }
     }

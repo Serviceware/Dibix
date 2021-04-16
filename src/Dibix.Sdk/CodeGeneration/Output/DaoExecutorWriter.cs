@@ -11,7 +11,7 @@ using Dibix.Sdk.CodeGeneration.CSharp;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class DaoExecutorWriter : DaoWriter
+    internal sealed class DaoExecutorWriter : ArtifactWriterBase
     {
         #region Fields
         private const string ConstantSuffix = "CommandText";
@@ -26,7 +26,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Overrides
         public override bool HasContent(CodeGenerationModel model) => model.Statements.Any();
 
-        public override void Write(DaoCodeGenerationContext context)
+        public override void Write(CodeGenerationContext context)
         {
             context.AddUsing(typeof(GeneratedCodeAttribute).Namespace)
                    .AddUsing("Dibix");
@@ -55,7 +55,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private static void AddCommandTextConstants(CSharpClass @class, DaoCodeGenerationContext context, IList<SqlStatementInfo> statements)
+        private static void AddCommandTextConstants(CSharpClass @class, CodeGenerationContext context, IList<SqlStatementInfo> statements)
         {
             for (int i = 0; i < statements.Count; i++)
             {
@@ -73,7 +73,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static void AddExecutionMethods(CSharpClass @class, DaoCodeGenerationContext context, IList<SqlStatementInfo> statements)
+        private static void AddExecutionMethods(CSharpClass @class, CodeGenerationContext context, IList<SqlStatementInfo> statements)
         {
             for (int i = 0; i < statements.Count; i++)
             {
@@ -132,7 +132,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static string DetermineReturnTypeName(SqlStatementInfo query, string resultTypeName, DaoCodeGenerationContext context)
+        private static string DetermineReturnTypeName(SqlStatementInfo query, string resultTypeName, CodeGenerationContext context)
         {
             if (!query.Async) 
                 return resultTypeName;
@@ -148,7 +148,7 @@ namespace Dibix.Sdk.CodeGeneration
             return returnTypeName;
         }
 
-        private static string ResolveTypeName(SqlStatementInfo query, DaoCodeGenerationContext context)
+        private static string ResolveTypeName(SqlStatementInfo query, CodeGenerationContext context)
         {
             if (query.ResultType == null) // Execute
                 return "void";
@@ -160,7 +160,7 @@ namespace Dibix.Sdk.CodeGeneration
             return query.Results[0].ResultMode == SqlQueryResultMode.Many ? MakeEnumerableType(typeName) : typeName;
         }
 
-        private static string GenerateMethodBody(SqlStatementInfo statement, string resultTypeName, DaoCodeGenerationContext context)
+        private static string GenerateMethodBody(SqlStatementInfo statement, string resultTypeName, CodeGenerationContext context)
         {
             StringWriter writer = new StringWriter();
 
@@ -217,7 +217,7 @@ namespace Dibix.Sdk.CodeGeneration
                   .WriteLine();
         }
 
-        private static void WriteParameters(StringWriter writer, SqlStatementInfo query, DaoCodeGenerationContext context)
+        private static void WriteParameters(StringWriter writer, SqlStatementInfo query, CodeGenerationContext context)
         {
             writer.WriteLine("ParametersVisitor @params = accessor.Parameters()")
                   .SetTemporaryIndent(36);
@@ -277,7 +277,7 @@ namespace Dibix.Sdk.CodeGeneration
                   .ResetTemporaryIndent();
         }
 
-        private static void WriteExecutor(StringWriter writer, SqlStatementInfo query, string resultTypeName, bool hasOutputParameters, DaoCodeGenerationContext context)
+        private static void WriteExecutor(StringWriter writer, SqlStatementInfo query, string resultTypeName, bool hasOutputParameters, CodeGenerationContext context)
         {
             if (query.Results.Count > 1) // GridReader
             {
@@ -293,7 +293,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static void WriteSimpleResult(StringWriter writer, SqlStatementInfo query, string resultTypeName, bool hasOutputParameters, DaoCodeGenerationContext context)
+        private static void WriteSimpleResult(StringWriter writer, SqlStatementInfo query, string resultTypeName, bool hasOutputParameters, CodeGenerationContext context)
         {
             SqlQueryResult singleResult = query.Results.SingleOrDefault();
             bool isGridResult = singleResult?.Name != null;
@@ -317,13 +317,13 @@ namespace Dibix.Sdk.CodeGeneration
             writer.WriteLineRaw(";");
         }
 
-        private static void WriteSimpleMethodCall(StringWriter writer, SqlStatementInfo query, SqlQueryResult singleResult, DaoCodeGenerationContext context)
+        private static void WriteSimpleMethodCall(StringWriter writer, SqlStatementInfo query, SqlQueryResult singleResult, CodeGenerationContext context)
         {
             string methodName = singleResult != null ? GetExecutorMethodName(singleResult.ResultMode) : "Execute";
             WriteMethodCall(writer, query, methodName, singleResult, context);
         }
 
-        private static void WriteComplexResult(StringWriter writer, SqlStatementInfo query, string resultTypeName, bool hasOutputParameters, DaoCodeGenerationContext context)
+        private static void WriteComplexResult(StringWriter writer, SqlStatementInfo query, string resultTypeName, bool hasOutputParameters, CodeGenerationContext context)
         {
             if (hasOutputParameters)
             {
@@ -345,7 +345,7 @@ namespace Dibix.Sdk.CodeGeneration
                   .WriteLine("}");
         }
 
-        private static void WriteComplexResultBody(StringWriter writer, SqlStatementInfo query, string resultTypeName, bool hasOutputParameters, DaoCodeGenerationContext context)
+        private static void WriteComplexResultBody(StringWriter writer, SqlStatementInfo query, string resultTypeName, bool hasOutputParameters, CodeGenerationContext context)
         {
             WriteComplexResultInitializer(writer, query, resultTypeName, hasOutputParameters);
 
@@ -416,7 +416,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static void WriteComplexResultAssignment(StringWriter writer, SqlStatementInfo query, SqlQueryResult result, DaoCodeGenerationContext context, bool isFirstResult, Action<StringWriter, SqlStatementInfo, SqlQueryResult, DaoCodeGenerationContext> valueWriter)
+        private static void WriteComplexResultAssignment(StringWriter writer, SqlStatementInfo query, SqlQueryResult result, CodeGenerationContext context, bool isFirstResult, Action<StringWriter, SqlStatementInfo, SqlQueryResult, CodeGenerationContext> valueWriter)
         {
             bool isEnumerable = result.ResultMode == SqlQueryResultMode.Many;
             if (!isFirstResult || !query.MergeGridResult)
@@ -438,7 +438,7 @@ namespace Dibix.Sdk.CodeGeneration
             writer.WriteLineRaw(";");
         }
 
-        private static void WriteGridReaderMethodCall(StringWriter writer, SqlStatementInfo query, SqlQueryResult result, DaoCodeGenerationContext context)
+        private static void WriteGridReaderMethodCall(StringWriter writer, SqlStatementInfo query, SqlQueryResult result, CodeGenerationContext context)
         {
             if (query.Async)
                 writer.WriteRaw("await ");
@@ -461,7 +461,7 @@ namespace Dibix.Sdk.CodeGeneration
                 writer.WriteRaw(".ConfigureAwait(false)");
         }
 
-        private static void WriteMethodCall(StringWriter writer, SqlStatementInfo query, string methodName, SqlQueryResult singleResult, DaoCodeGenerationContext context)
+        private static void WriteMethodCall(StringWriter writer, SqlStatementInfo query, string methodName, SqlQueryResult singleResult, CodeGenerationContext context)
         {
             if (query.Async)
                 writer.WriteRaw("await ");
@@ -497,7 +497,7 @@ namespace Dibix.Sdk.CodeGeneration
                 writer.WriteRaw(".ConfigureAwait(false)");
         }
 
-        private static void WriteGenericTypeArguments(StringWriter writer, SqlQueryResult result, DaoCodeGenerationContext context)
+        private static void WriteGenericTypeArguments(StringWriter writer, SqlQueryResult result, CodeGenerationContext context)
         {
             writer.WriteRaw('<');
 
@@ -612,7 +612,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static string MakeEnumerableType(string typeName) => $"IEnumerable<{typeName}>";
 
-        private static string GetComplexTypeName(SqlStatementInfo statement, DaoCodeGenerationContext context)
+        private static string GetComplexTypeName(SqlStatementInfo statement, CodeGenerationContext context)
         {
             if (!(statement.ResultType is SchemaTypeReference schemaTypeReference))
                 throw new InvalidOperationException($"Unexpected result type for grid result: {statement.ResultType}");
