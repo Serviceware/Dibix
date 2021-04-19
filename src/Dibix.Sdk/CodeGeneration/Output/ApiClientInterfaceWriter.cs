@@ -17,7 +17,7 @@ namespace Dibix.Sdk.CodeGeneration
             foreach (ActionDefinition action in controller.Actions)
             {
                 // TODO: Remove this shit!
-                if (context.Model.AreaName != "Tests" && controller.Name != "UserConfiguration")
+                if (context.Model.AreaName != "Tests" && action.Target.OperationName != "GetUserConfiguration")
                     continue;
 
                 base.AddMethod(action, context, (methodName, returnType) => @interface.AddMethod(methodName, returnType));

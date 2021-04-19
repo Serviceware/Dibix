@@ -43,7 +43,7 @@ this._authorizationProvider = authorizationProvider;")
             foreach (ActionDefinition action in controller.Actions)
             {
                 // TODO: Remove this shit!
-                if (context.Model.AreaName != "Tests" && controller.Name != "UserConfiguration")
+                if (context.Model.AreaName != "Tests" && action.Target.OperationName != "GetUserConfiguration")
                     continue;
 
                 string body = GeneratedMethodBody(controller, action, context);
