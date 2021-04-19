@@ -102,7 +102,7 @@ namespace Dibix.Sdk.CodeGeneration
                     modifiers |= CSharpModifiers.Async;
 
                 CSharpMethod method = @class.AddMethod(name: methodName
-                                                     , type: returnTypeName
+                                                     , returnType: returnTypeName
                                                      , body: GenerateMethodBody(statement, resultTypeName, context)
                                                      , annotations: annotations
                                                      , isExtension: true

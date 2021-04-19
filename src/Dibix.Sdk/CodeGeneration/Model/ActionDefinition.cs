@@ -14,6 +14,11 @@ namespace Dibix.Sdk.CodeGeneration
         public bool IsAnonymous { get; set; }
         public ActionFileResponse FileResponse { get; set; }
         public IList<ActionParameter> Parameters { get; }
+        public TypeReference DefaultResponseType
+        {
+            get => this.GetDefaultResponseType();
+            set => this.SetDefaultResponseType(value);
+        }
         public IDictionary<HttpStatusCode, ActionResponse> Responses { get; }
         public ICollection<SecurityScheme> SecuritySchemes { get; }
 
@@ -25,16 +30,18 @@ namespace Dibix.Sdk.CodeGeneration
             this.SecuritySchemes = new Collection<SecurityScheme>();
         }
 
-        public void SetDefaultResultType(TypeReference resultType)
+        private TypeReference GetDefaultResponseType() => this.Responses.TryGetValue(HttpStatusCode.OK, out ActionResponse response) ? response.ResultType : null;
+
+        private void SetDefaultResponseType(TypeReference typeReference)
         {
-            HttpStatusCode statusCode = resultType != null ? HttpStatusCode.OK : HttpStatusCode.NoContent;
+            HttpStatusCode statusCode = typeReference != null ? HttpStatusCode.OK : HttpStatusCode.NoContent;
             if (!this.Responses.TryGetValue(statusCode, out ActionResponse response))
             {
-                response = new ActionResponse(statusCode, resultType);
+                response = new ActionResponse(statusCode, typeReference);
                 this.Responses.Add(statusCode, response);
             }
             else
-                response.ResultType = resultType;
+                response.ResultType = typeReference;
         }
     }
 }

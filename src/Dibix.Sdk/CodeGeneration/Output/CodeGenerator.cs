@@ -89,7 +89,7 @@ namespace Dibix.Sdk.CodeGeneration
                 }
 
                 if (i + 1 < childWriterGroups.Count)
-                    context.Output.AddSeparator();
+                    output.Root.AddSeparator();
             }
 
             output.Generate();

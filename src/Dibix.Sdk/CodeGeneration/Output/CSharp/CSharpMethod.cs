@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace Dibix.Sdk.CodeGeneration.CSharp
@@ -50,15 +51,24 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
                     writer.WriteRaw(", ");
             }
 
-            writer.WriteRaw(')')
-                  .WriteLine()
-                  .WriteLine("{")
-                  .PushIndent();
+            writer.WriteRaw(')');
 
-            WriteMultiline(writer, this._body);
+            // Abstract/interface methods do not have a body
+            if (String.IsNullOrEmpty(this._body))
+            {
+                writer.WriteRaw(';');
+            }
+            else
+            {
+                writer.WriteLine()
+                      .WriteLine("{")
+                      .PushIndent();
 
-            writer.PopIndent()
-                  .Write("}");
+                WriteMultiline(writer, this._body);
+
+                writer.PopIndent()
+                      .Write("}");
+            }
         }
     }
 }

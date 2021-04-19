@@ -10,6 +10,7 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
         private readonly string _name;
         private readonly IList<CSharpExpression> _members;
         private readonly CSharpModifiers _modifiers;
+        private readonly ICollection<string> _implementedInterfaces;
         private string _baseClassName;
 
         public CSharpClass(string name, CSharpModifiers modifiers, IEnumerable<CSharpAnnotation> annotations) : base(annotations)
@@ -17,6 +18,7 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             this._name = name;
             this._modifiers = modifiers;
             this._members = new Collection<CSharpExpression>();
+            this._implementedInterfaces = new Collection<string>();
         }
 
         public CSharpClass AddField(string name, string type, CSharpValue value = null, CSharpModifiers modifiers = CSharpModifiers.Public)
@@ -34,17 +36,17 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             return property;
         }
 
-        public CSharpConstructor AddConstructor(string body, CSharpModifiers modifiers = CSharpModifiers.Public, string baseConstructorParameters = null)
+        public CSharpConstructor AddConstructor(string body = null, CSharpModifiers modifiers = CSharpModifiers.Public)
         {
-            CSharpConstructor ctor = new CSharpConstructor(this._name, body, baseConstructorParameters, modifiers);
+            CSharpConstructor ctor = new CSharpConstructor(this._name, body, modifiers);
             this._members.Add(ctor);
             return ctor;
         }
 
-        public CSharpMethod AddMethod(string name, string type, string body, bool isExtension = false, CSharpModifiers modifiers = CSharpModifiers.Public) => this.AddMethod(name, type, body, Enumerable.Empty<CSharpAnnotation>(), isExtension, modifiers);
-        public CSharpMethod AddMethod(string name, string type, string body, IEnumerable<CSharpAnnotation> annotations, bool isExtension = false, CSharpModifiers modifiers = CSharpModifiers.Public)
+        public CSharpMethod AddMethod(string name, string returnType, string body, bool isExtension = false, CSharpModifiers modifiers = CSharpModifiers.Public) => this.AddMethod(name, returnType, body, Enumerable.Empty<CSharpAnnotation>(), isExtension, modifiers);
+        public CSharpMethod AddMethod(string name, string returnType, string body, IEnumerable<CSharpAnnotation> annotations, bool isExtension = false, CSharpModifiers modifiers = CSharpModifiers.Public)
         {
-            CSharpMethod method = new CSharpMethod(name, type, body, isExtension, modifiers, annotations);
+            CSharpMethod method = new CSharpMethod(name, returnType, body, isExtension, modifiers, annotations);
             this._members.Add(method);
             return method;
         }
@@ -74,6 +76,12 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             return this;
         }
 
+        public CSharpClass Implements(string interfaceName)
+        {
+            this._implementedInterfaces.Add(interfaceName);
+            return this;
+        }
+
         protected override void WriteBody(StringWriter writer)
         {
             WriteModifiers(writer, this._modifiers);
@@ -81,10 +89,20 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             writer.WriteRaw("class ")
                   .WriteRaw(this._name);
 
+            IList<string> bases = this._implementedInterfaces.ToList();
             if (!String.IsNullOrEmpty(this._baseClassName))
+                bases.Insert(0, this._baseClassName);
+
+            if (bases.Any())
+                writer.WriteRaw(" : ");
+
+            for (int i = 0; i < bases.Count; i++)
             {
-                writer.WriteRaw(" : ")
-                      .WriteRaw(this._baseClassName);
+                string @base = bases[i];
+                writer.WriteRaw(@base);
+
+                if (i + 1 < bases.Count)
+                    writer.WriteRaw(", ");
             }
 
             writer.WriteLine()

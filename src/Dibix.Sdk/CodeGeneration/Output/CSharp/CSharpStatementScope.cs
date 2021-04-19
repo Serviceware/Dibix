@@ -40,6 +40,13 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             return @class;
         }
 
+        public CSharpInterface AddInterface(string name, CSharpModifiers modifiers)
+        {
+            CSharpInterface @interface = new CSharpInterface(name, modifiers);
+            this._statements.Add(@interface);
+            return @interface;
+        }
+
         public CSharpEnum AddEnum(string name, CSharpModifiers modifiers, IEnumerable<CSharpAnnotation> annotations)
         {
             CSharpEnum @enum = new CSharpEnum(name, modifiers, annotations);

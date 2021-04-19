@@ -171,7 +171,7 @@ namespace Dibix.Sdk.CodeGeneration
             this.CollectActionResponses((JObject)action.Property("responses")?.Value, actionDefinition, filePath);
 
             if (!actionDefinition.Responses.Any())
-                actionDefinition.SetDefaultResultType(null);
+                actionDefinition.DefaultResponseType = null;
 
             if (!actionDefinition.IsAnonymous)
                 actionDefinition.SecuritySchemes.AddRange(this._securitySchemes);
@@ -432,7 +432,7 @@ namespace Dibix.Sdk.CodeGeneration
                 foreach (ErrorResponse errorResponse in statement.ErrorResponses)
                     RegisterErrorResponse(actionDefinition, errorResponse.StatusCode, errorResponse.ErrorCode, errorResponse.ErrorDescription);
 
-                actionDefinition.SetDefaultResultType(statement.ResultType);
+                actionDefinition.DefaultResponseType = statement.ResultType;
 
                 return actionDefinition;
             }
@@ -559,7 +559,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
             ActionDefinition actionDefinition = new ActionDefinition(target);
             ActionParameterRegistry parameterRegistry = new ActionParameterRegistry(actionDefinition, pathParameters);
             method.CollectErrorResponses((statusCode, errorCode, errorDescription) => RegisterErrorResponse(actionDefinition, statusCode, errorCode, errorDescription));
-            actionDefinition.SetDefaultResultType(resultType);
+            actionDefinition.DefaultResponseType = resultType;
 
             IEnumerable<ParameterInfo> parameters = this.CollectReflectionInfo(() => method.GetExternalParameters(isAsync), isReflectionTarget, Enumerable.Empty<ParameterInfo>);
             foreach (ParameterInfo parameter in parameters)

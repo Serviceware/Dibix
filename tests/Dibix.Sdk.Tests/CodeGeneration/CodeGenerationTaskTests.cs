@@ -323,17 +323,38 @@ Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly
             this.ExecuteTest(@"Tests\Syntax\dbx_tests_syntax_fileresult.sql");
         }
 
-        [Fact]
-        public void DomainModel()
+        [Fact(Skip = "HTTP client service generation WIP")]
+        public void Client()
         {
             this.ExecuteTest
             (
-                new []
+                generateClient: true
+              , sources: new[]
+                {
+                    @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_fileresult.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_fileupload.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_params.sql"
+                  , @"Types\dbx_codeanalysis_udt_generic.sql"
+                  , @"Types\dbx_codeanalysis_udt_int.sql"
+                }
+              , contracts: new []
                 {
                     @"Contracts\AccessRights.json"
                   , @"Contracts\Direction.json"
                   , @"Contracts\GenericContract.json"
+                  , @"Contracts\InputContract.json"
                   , @"Contracts\Extension\MultiMapContract.json"
+                }
+              , endpoints: new[] { @"Endpoints\GenericEndpoint.json" }
+              , expectedAdditionalAssemblyReferences: new[]
+                {
+                    "System.ComponentModel.DataAnnotations.dll"
+                  , "Newtonsoft.Json.dll"
+                  , "Dibix.Http.Server.dll"
+                  , "Dibix.Http.Client.dll"
+                  , "System.Net.Http.dll"
+                  , "System.Net.Http.Formatting.dll"
                 }
             );
         }

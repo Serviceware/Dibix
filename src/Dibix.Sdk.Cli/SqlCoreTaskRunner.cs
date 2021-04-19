@@ -34,6 +34,8 @@
               , modelCollation: configuration.GetSingleValue<string>("ModelCollation")
               , sqlReferencePath: configuration.GetItems("SqlReferencePath")
               , logger: base.Logger
+                // This property is ignored, since we currently don't have a way to output properties from the CLI to MSbuild
+                // Therefore all additional assembly references are registered statically within the target
               , additionalAssemblyReferences: out string[] _
             );
         }

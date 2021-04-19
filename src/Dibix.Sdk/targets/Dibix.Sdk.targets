@@ -11,6 +11,10 @@
     <DibixHttpServerAssemblyPath>$(_DibixRuntimeDirectory)Dibix.Http.Server.dll</DibixHttpServerAssemblyPath>
     <DibixHttpClientAssemblyPath>$(_DibixRuntimeDirectory)Dibix.Http.Client.dll</DibixHttpClientAssemblyPath>
 
+    <_ClientFilePathNoExt Condition="'$(ClientOutputName)' != ''">$(TargetDir)$(ClientOutputName)</_ClientFilePathNoExt>
+    <ClientOutputSymbolsPath Condition="'$(_ClientFilePathNoExt)' != ''">$(_ClientFilePathNoExt).pdb</ClientOutputSymbolsPath>
+    <ClientTargetPath Condition="'$(_ClientFilePathNoExt)' != ''">$(_ClientFilePathNoExt).dll</ClientTargetPath>
+
     <!-- We have our own CA target, which also executes the native SqlStaticCodeAnalysis -->
     <RunSqlCodeAnalysis>false</RunSqlCodeAnalysis>
     <RunSqlCodeAnalysisOnce>false</RunSqlCodeAnalysisOnce>
@@ -153,10 +157,6 @@
     </ItemGroup>
   </Target>
   <Target Name="SetupSqlBuildOutputs" BeforeTargets="_SetupSqlBuildOutputs">
-    <PropertyGroup>
-      <_ClientAssemblyTargetPath Condition="'$(ClientOutputName)' != ''">$(TargetDir)$(ClientOutputName).dll</_ClientAssemblyTargetPath>
-      <_ClientSymbolsTargetPath Condition="'$(ClientOutputName)' != ''">$(TargetDir)$(ClientOutputName).pdb</_ClientSymbolsTargetPath>
-    </PropertyGroup>
     <ItemGroup>
       <!--
         Since the SqlCodeAnalysis target does not produce any output, 
@@ -168,7 +168,7 @@
 
       <!-- CompileArtifacts -->
       <CompileArtifactsOutput Include="$(TargetPath)" /> <!-- .dll -->
-      <FileWrites Include="$(_ClientAssemblyTargetPath);$(_ClientSymbolsTargetPath)" /> <!-- This is important so these files don't get removed in IncrementalClean -->
+      <FileWrites Include="$(ClientTargetPath);$(ClientOutputSymbolsPath)" /> <!-- This is important so these files don't get removed in IncrementalClean -->
 
       <!-- SqlCore -->
       <SqlCoreOutput Include="$(TargetPath)" /> <!-- .dll -->
@@ -438,6 +438,8 @@ $(_SqlReferencePath)" />
       <ClientCompilationSource Include="$(_ClientIntermediateFilePath)" />
       <ClientCompilationSource Include="$(_ClientAssemblyInfoFile)" />
       <ClientCompilationReference Include="$(DibixHttpClientAssemblyPath)" />
+      <ClientCompilationReference Include="System.Net.Http.dll" />
+      <ClientCompilationReference Include="$(DibixToolsDirectory)System.Net.Http.Formatting.dll" />
 
       <ClientAssemblyAttribute Include="@(AssemblyAttribute)" />
       <ClientAssemblyAttribute Include="AssemblyTitle">

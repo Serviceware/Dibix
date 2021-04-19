@@ -37,8 +37,9 @@ namespace Dibix.Sdk.CodeGeneration
                     CSharpClass @class = scope.AddClass(userDefinedType.DefinitionName, CSharpModifiers.Public | CSharpModifiers.Sealed, new CSharpAnnotation("StructuredType", new CSharpStringValue(userDefinedType.UdtName)))
                                               .Inherits($"StructuredType<{userDefinedType.DefinitionName}, {String.Join(", ", userDefinedType.Properties.Select(x => context.ResolveTypeName(x.Type)))}>");
 
-                    @class.AddConstructor(body: $"base.ImportSqlMetadata(() => this.Add({String.Join(", ", userDefinedType.Properties.Select(x => "default"))}));"
-                                        , baseConstructorParameters: $"\"{userDefinedType.UdtName}\"");
+                    @class.AddConstructor(body: $"base.ImportSqlMetadata(() => this.Add({String.Join(", ", userDefinedType.Properties.Select(x => "default"))}));")
+                          .CallBase()
+                          .AddParameter(new CSharpStringValue(userDefinedType.UdtName));
 
                     CSharpMethod method = @class.AddMethod("Add", "void", $"base.AddValues({String.Join(", ", userDefinedType.Properties.Select(x => x.Name))});");
                     foreach (ObjectSchemaProperty column in userDefinedType.Properties)
@@ -48,8 +49,8 @@ namespace Dibix.Sdk.CodeGeneration
                         scope.AddSeparator();
                 }
 
-                if (i + 1 < context.Model.UserDefinedTypes.Count)
-                    scope.AddSeparator();
+                if (i + 1 < namespaceGroups.Length)
+                    context.Output.AddSeparator();
             }
         }
         #endregion

@@ -13,6 +13,8 @@ namespace Dibix.Sdk.CodeGeneration
         protected override IEnumerable<ArtifactWriterBase> SelectWriters()
         {
             yield return new ClientContractClassWriter();
+            yield return new ApiClientInterfaceWriter();
+            yield return new ApiClientImplementationWriter();
         }
 
         protected override IEnumerable<CSharpAnnotation> CollectGlobalAnnotations(bool isArtifactAssembly)
