@@ -1,4 +1,5 @@
-﻿using Dibix.Sdk.CodeGeneration.CSharp;
+﻿using System.Collections.Generic;
+using Dibix.Sdk.CodeGeneration.CSharp;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -9,18 +10,14 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Overrides
-        protected override void WriteController(CodeGenerationContext context, ControllerDefinition controller, string serviceName)
+        protected override void WriteController(CodeGenerationContext context, ControllerDefinition controller, string serviceName, IDictionary<ActionDefinition, string> operationIdMap)
         {
             string interfaceName = $"I{serviceName}";
             CSharpInterface @interface = context.Output.AddInterface(interfaceName, CSharpModifiers.Public);
 
             foreach (ActionDefinition action in controller.Actions)
             {
-                // TODO: Remove this shit!
-                if (context.Model.AreaName != "Tests" && action.Target.OperationName != "GetUserConfiguration")
-                    continue;
-
-                base.AddMethod(action, context, (methodName, returnType) => @interface.AddMethod(methodName, returnType));
+                base.AddMethod(action, context, operationIdMap, (methodName, returnType) => @interface.AddMethod(methodName, returnType));
             }
         }
         #endregion

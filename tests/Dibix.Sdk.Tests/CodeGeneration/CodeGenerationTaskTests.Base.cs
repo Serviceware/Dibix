@@ -27,7 +27,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         private void ExecuteTest(string source, IEnumerable<string> contracts, IEnumerable<string> expectedAdditionalAssemblyReferences) => this.ExecuteTest(Enumerable.Repeat(source, 1), contracts, Enumerable.Empty<string>(), true, expectedAdditionalAssemblyReferences);
         private void ExecuteTest(IEnumerable<string> sources, IEnumerable<string> contracts, IEnumerable<string> endpoints, bool isEmbedded, IEnumerable<string> expectedAdditionalAssemblyReferences) => this.ExecuteTest(sources, contracts, endpoints, isEmbedded, false, false, expectedAdditionalAssemblyReferences);
         private void ExecuteTest(IEnumerable<string> sources, IEnumerable<string> contracts, IEnumerable<string> endpoints, IEnumerable<string> expectedAdditionalAssemblyReferences) => this.ExecuteTest(false, sources, contracts, endpoints, expectedAdditionalAssemblyReferences);
-        private void ExecuteTest(bool generateClient, IEnumerable<string> sources, IEnumerable<string> contracts, IEnumerable<string> endpoints, IEnumerable<string> expectedAdditionalAssemblyReferences) => this.ExecuteTest(sources, contracts, endpoints, false, generateClient, true, expectedAdditionalAssemblyReferences);
+        private void ExecuteTest(bool generateClient, IEnumerable<string> sources, IEnumerable<string> contracts, IEnumerable<string> endpoints, IEnumerable<string> expectedAdditionalAssemblyReferences) => this.ExecuteTest(sources, contracts, endpoints, false, generateClient, !generateClient, expectedAdditionalAssemblyReferences);
         private void ExecuteTest(IEnumerable<string> sources, IEnumerable<string> contracts, IEnumerable<string> endpoints, bool isEmbedded, bool generateClient, bool assertOpenApi, IEnumerable<string> expectedAdditionalAssemblyReferences)
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), $"dibix-sdk-tests-{Guid.NewGuid()}");
@@ -120,10 +120,12 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                                                                  .AddReferences(ResolveReference<System.ComponentModel.DataAnnotations.KeyAttribute>())
                                                                  .AddReferences(ResolveReference<System.Data.CommandType>())
                                                                  .AddReferences(ResolveReference<System.Linq.Expressions.Expression>())
+                                                                 .AddReferences(ResolveReference<System.Net.Http.HttpClient>())
                                                                  .AddReferences(MetadataReference.CreateFromFile("Dibix.dll"))
                                                                  .AddReferences(MetadataReference.CreateFromFile("Dibix.Http.Client.dll"))
                                                                  .AddReferences(MetadataReference.CreateFromFile("Dibix.Http.Server.dll"))
                                                                  .AddReferences(MetadataReference.CreateFromFile("Newtonsoft.Json.dll"))
+                                                                 .AddReferences(MetadataReference.CreateFromFile("System.Net.Http.Formatting.dll"))
                                                                  .AddSyntaxTrees(syntaxTree);
 
                 using (Stream outputStream = new MemoryStream())

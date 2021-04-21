@@ -323,7 +323,7 @@ Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly
             this.ExecuteTest(@"Tests\Syntax\dbx_tests_syntax_fileresult.sql");
         }
 
-        [Fact(Skip = "HTTP client service generation WIP")]
+        [Fact]
         public void Client()
         {
             this.ExecuteTest

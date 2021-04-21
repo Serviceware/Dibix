@@ -176,7 +176,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (!actionDefinition.IsAnonymous)
                 actionDefinition.SecuritySchemes.AddRange(this._securitySchemes);
 
-            if (controller.Actions.Add(actionDefinition))
+            if (controller.Actions.TryAdd(actionDefinition))
                 return;
 
             StringBuilder sb = new StringBuilder();

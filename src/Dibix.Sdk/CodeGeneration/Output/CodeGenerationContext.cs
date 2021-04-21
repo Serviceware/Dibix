@@ -76,7 +76,7 @@ namespace Dibix.Sdk.CodeGeneration
                     break;
 
                 default:
-                    throw new InvalidOperationException($"Unsupported result type: {reference.GetType()}");
+                    throw new InvalidOperationException($"Unsupported result type: {reference?.GetType()}");
             }
 
             StringBuilder sb = new StringBuilder(typeName);

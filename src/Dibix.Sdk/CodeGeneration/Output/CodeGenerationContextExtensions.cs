@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net.Http;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -17,16 +16,9 @@ namespace Dibix.Sdk.CodeGeneration
             context.Model.AdditionalAssemblyReferences.Add("Dibix.Http.Client.dll");
         }
 
-        public static void AddHttpClientReference(this CodeGenerationContext context)
+        public static void AddReference<TType>(this CodeGenerationContext context)
         {
-            Type type = typeof(HttpClient);
-            context.AddUsing(type.Namespace);
-            context.Model.AdditionalAssemblyReferences.Add($"{type.Assembly.GetName().Name}.dll");
-        }
-
-        public static void AddHttpFormattingReference(this CodeGenerationContext context)
-        {
-            Type type = typeof(HttpContentExtensions);
+            Type type = typeof(TType);
             context.AddUsing(type.Namespace);
             context.Model.AdditionalAssemblyReferences.Add($"{type.Assembly.GetName().Name}.dll");
         }

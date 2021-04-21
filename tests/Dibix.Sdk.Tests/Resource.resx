@@ -187,10 +187,16 @@
 //     the code is regenerated.
 // &lt;/auto-generated&gt;
 //----------------------------------------------------------------------------*/
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Net.Http;
+using System.Net.Http.Formatting;
+using System.Threading;
+using System.Threading.Tasks;
 using Dibix.Http.Client;
+using UriBuilder = Dibix.Http.Client.UriBuilder;
 
 [assembly: ArtifactAssembly]
 namespace Dibix.Sdk.Tests
@@ -251,6 +257,128 @@ namespace Dibix.Sdk.Tests
                 {
                     this.Y = new Collection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;();
                     this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
+                }
+            }
+        }
+        #endregion
+    }
+
+    namespace Client
+    {
+        #region Interfaces
+        public interface IGenericEndpointService
+        {
+            Task&lt;HttpResponseMessage&gt; EmptyWithParams1Async(string password, string Authorization, IEnumerable&lt;object&gt; ids, CancellationToken cancellationToken = default);
+            Task&lt;HttpResponseMessage&gt; EmptyWithParams2Async(string password, string v, string w, System.Guid? x, IEnumerable&lt;object&gt; ids, bool y, int? z, CancellationToken cancellationToken = default);
+            Task&lt;HttpResponse&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;&gt; SingleConrecteResultWithParamsAsync(IEnumerable&lt;int&gt; ids, CancellationToken cancellationToken = default);
+            Task&lt;HttpResponse&lt;System.IO.Stream&gt;&gt; FileResultAsync(int id, CancellationToken cancellationToken = default);
+            Task&lt;HttpResponseMessage&gt; FileUploadAsync(System.IO.Stream body, CancellationToken cancellationToken = default);
+            Task&lt;HttpResponseMessage&gt; EmptyWithParams3Async(Dibix.Sdk.Tests.DomainModel.InputContract body, CancellationToken cancellationToken = default);
+        }
+        #endregion
+
+        #region Implementation
+        [HttpService(typeof(IGenericEndpointService))]
+        public sealed class GenericEndpointService : IGenericEndpointService
+        {
+            private static readonly Uri BaseAddress = new Uri("https://localhost/api/");
+            private static readonly MediaTypeFormatter Formatter = new JsonMediaTypeFormatter();
+            private readonly IHttpClientFactory _httpClientFactory;
+            private readonly IHttpAuthorizationProvider _authorizationProvider;
+
+            public GenericEndpointService(IHttpAuthorizationProvider authorizationProvider) : this(new DefaultHttpClientFactory(), authorizationProvider) { }
+            public GenericEndpointService(IHttpClientFactory httpClientFactory, IHttpAuthorizationProvider authorizationProvider)
+            {
+                this._httpClientFactory = httpClientFactory;
+                this._authorizationProvider = authorizationProvider;
+            }
+
+            public async Task&lt;HttpResponseMessage&gt; EmptyWithParams1Async(string password, string Authorization, IEnumerable&lt;object&gt; ids, CancellationToken cancellationToken = default)
+            {
+                using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
+                {
+                    Uri uri = UriBuilder.Create($"Tests/GenericEndpoint/{password}/Fixed", UriKind.Relative)
+                                        .AddQueryParam(nameof(ids), ids)
+                                        .Build();
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("GET"), uri);
+                    requestMessage.Headers.Add("HLNS-SIT", this._authorizationProvider.GetValue("HLNS-SIT"));
+                    requestMessage.Headers.Add("HLNS-ClientId", this._authorizationProvider.GetValue("HLNS-ClientId"));
+                    requestMessage.Headers.Add("Authorization", Authorization);
+                    HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
+                    return responseMessage;
+                }
+            }
+
+            public async Task&lt;HttpResponseMessage&gt; EmptyWithParams2Async(string password, string v, string w, System.Guid? x, IEnumerable&lt;object&gt; ids, bool y, int? z, CancellationToken cancellationToken = default)
+            {
+                using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
+                {
+                    Uri uri = UriBuilder.Create($"Tests/GenericEndpoint/{password}/User", UriKind.Relative)
+                                        .AddQueryParam(nameof(v), v)
+                                        .AddQueryParam(nameof(w), w)
+                                        .AddQueryParam(nameof(x), x)
+                                        .AddQueryParam(nameof(ids), ids)
+                                        .AddQueryParam(nameof(y), y)
+                                        .AddQueryParam(nameof(z), z)
+                                        .Build();
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("GET"), uri);
+                    HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
+                    return responseMessage;
+                }
+            }
+
+            public async Task&lt;HttpResponse&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;&gt; SingleConrecteResultWithParamsAsync(IEnumerable&lt;int&gt; ids, CancellationToken cancellationToken = default)
+            {
+                using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
+                {
+                    Uri uri = UriBuilder.Create("Tests/GenericEndpoint/Array", UriKind.Relative)
+                                        .AddQueryParam(nameof(ids), ids)
+                                        .Build();
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("GET"), uri);
+                    requestMessage.Headers.Add("HLNS-SIT", this._authorizationProvider.GetValue("HLNS-SIT"));
+                    requestMessage.Headers.Add("HLNS-ClientId", this._authorizationProvider.GetValue("HLNS-ClientId"));
+                    HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
+                    Dibix.Sdk.Tests.DomainModel.GenericContract responseContent = await responseMessage.Content.ReadAsAsync&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(cancellationToken).ConfigureAwait(false);
+                    return new HttpResponse&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(responseMessage, responseContent);
+                }
+            }
+
+            public async Task&lt;HttpResponse&lt;System.IO.Stream&gt;&gt; FileResultAsync(int id, CancellationToken cancellationToken = default)
+            {
+                using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
+                {
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("GET"), $"Tests/GenericEndpoint/{id}");
+                    requestMessage.Headers.Add("HLNS-SIT", this._authorizationProvider.GetValue("HLNS-SIT"));
+                    requestMessage.Headers.Add("HLNS-ClientId", this._authorizationProvider.GetValue("HLNS-ClientId"));
+                    HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
+                    System.IO.Stream responseContent = await responseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false);
+                    return new HttpResponse&lt;System.IO.Stream&gt;(responseMessage, responseContent);
+                }
+            }
+
+            public async Task&lt;HttpResponseMessage&gt; FileUploadAsync(System.IO.Stream body, CancellationToken cancellationToken = default)
+            {
+                using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
+                {
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("PUT"), "Tests/GenericEndpoint");
+                    requestMessage.Headers.Add("HLNS-SIT", this._authorizationProvider.GetValue("HLNS-SIT"));
+                    requestMessage.Headers.Add("HLNS-ClientId", this._authorizationProvider.GetValue("HLNS-ClientId"));
+                    requestMessage.Content = new StreamContent(body);
+                    HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
+                    return responseMessage;
+                }
+            }
+
+            public async Task&lt;HttpResponseMessage&gt; EmptyWithParams3Async(Dibix.Sdk.Tests.DomainModel.InputContract body, CancellationToken cancellationToken = default)
+            {
+                using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
+                {
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("POST"), "Tests/GenericEndpoint");
+                    requestMessage.Headers.Add("HLNS-SIT", this._authorizationProvider.GetValue("HLNS-SIT"));
+                    requestMessage.Headers.Add("HLNS-ClientId", this._authorizationProvider.GetValue("HLNS-ClientId"));
+                    requestMessage.Content = new ObjectContent&lt;Dibix.Sdk.Tests.DomainModel.InputContract&gt;(body, Formatter);
+                    HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
+                    return responseMessage;
                 }
             }
         }

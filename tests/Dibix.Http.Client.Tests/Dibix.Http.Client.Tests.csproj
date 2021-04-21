@@ -1,12 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   
   <PropertyGroup>    
-    <TargetFramework>net452</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Update="HttpParameterResolverTest.Base.cs" DependentUpon="HttpParameterResolverTest.cs" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftTestSdkVersion)" />
@@ -17,11 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="System.ComponentModel.DataAnnotations" Version="4.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Dibix\Dibix.csproj" />
+    <ProjectReference Include="..\..\src\Dibix.Http.Client\Dibix.Http.Client.csproj" />
   </ItemGroup>
 
 </Project>
