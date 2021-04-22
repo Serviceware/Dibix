@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 
-namespace Dibix.Testing
+namespace Dibix.Testing.Data
 {
     public sealed class DatabaseConfiguration : LazyConfiguration
     {

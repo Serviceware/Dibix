@@ -40,7 +40,9 @@ namespace Dibix.Testing
             }
         }
 
+#if NET5_0
         [SupportedOSPlatform("windows")]
+#endif
         public static void AddLastEventLogErrors(this TestContext context, int count = 5)
         {
             string privateResultsDirectory = context.GetPrivateResultsDirectory(out _);

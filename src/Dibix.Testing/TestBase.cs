@@ -53,6 +53,8 @@ namespace Dibix.Testing
             Assert.AreEqual(expected, actual, message);
         }
 
+        protected void LogException(Exception exception) => this.TestContext.AddResultFile("AdditionalErrors.txt", exception.ToString());
+
         protected static Task Retry(Func<Task<bool>> retryMethod) => Retry(retryMethod, x => x);
         protected static Task Retry(Func<Task<bool>> retryMethod, TimeSpan timeout) => Retry(retryMethod, x => x, timeout);
         protected static Task<TResult> Retry<TResult>(Func<Task<TResult>> retryMethod, Func<TResult, bool> condition) => Retry(retryMethod, condition, TimeSpan.FromMinutes(30));
@@ -69,12 +71,14 @@ namespace Dibix.Testing
 
             try
             {
+#if NET5_0
                 if (OperatingSystem.IsWindows())
+#endif
                     this.TestContext.AddLastEventLogErrors();
             }
             catch (Exception exception)
             {
-                this.TestContext.AddResultFile("AdditionalErrors.txt", exception.ToString());
+                this.LogException(exception);
             }
         }
         #endregion

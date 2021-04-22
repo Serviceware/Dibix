@@ -1,4 +1,4 @@
-﻿namespace Dibix.Testing
+﻿namespace Dibix.Testing.Data
 {
     public abstract class DatabaseConfigurationBase : LazyConfiguration
     {

@@ -1,11 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   
   <PropertyGroup>
-    <TargetFrameworks>net5.0</TargetFrameworks>
+    <TargetFrameworks>net5.0;net461</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Dibix.Dapper\Dibix.Dapper.csproj" />
+    <ProjectReference Include="..\Dibix.Http.Client\Dibix.Http.Client.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dibix.Dapper;
 
-namespace Dibix.Testing
+namespace Dibix.Testing.Data
 {
     public abstract class DatabaseTestBase<TConfiguration> : TestBase<TConfiguration>, IDisposable where TConfiguration : DatabaseConfigurationBase, new()
     {

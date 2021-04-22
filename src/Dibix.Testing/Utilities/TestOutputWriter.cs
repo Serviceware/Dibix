@@ -43,7 +43,7 @@ namespace Dibix.Testing
             if (this._tail == null || this._tail.HasExited)
                 throw new InvalidOperationException("Could not tail output");
 
-            Process.GetCurrentProcess().Exited += (_, _) => this.EndOutputTail();
+            Process.GetCurrentProcess().Exited += (sender, e) => this.EndOutputTail();
         }
 
         public TraceListener CreateTraceListener() => new TestOutputHelperTraceListener(this);
