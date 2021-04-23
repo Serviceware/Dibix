@@ -303,7 +303,8 @@ namespace Dibix.Sdk.Tests
                     HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("GET"), uri);
                     requestMessage.Headers.Add("HLNS-SIT", this._authorizationProvider.GetValue("HLNS-SIT"));
                     requestMessage.Headers.Add("HLNS-ClientId", this._authorizationProvider.GetValue("HLNS-ClientId"));
-                    requestMessage.Headers.Add("Authorization", Authorization);
+                    if (Authorization != null)
+                        requestMessage.Headers.Add("Authorization", Authorization);
                     HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
                     return responseMessage;
                 }
