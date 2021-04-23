@@ -17,12 +17,19 @@ namespace Dibix.Sdk.CodeGeneration
                 yield break;
 
             SchemaDefinition schema = context.GetSchema(schemaTypeReference);
+            if (schema is UserDefinedTypeSchema)
+                yield break;
+
             yield return schema;
 
             if (!(schema is ObjectSchema objectSchema)) 
                 yield break;
 
-            foreach (SchemaDefinition propertySchema in objectSchema.Properties.SelectMany(x => CollectEndpointSchemas(x.Type, context)))
+            IEnumerable<SchemaDefinition> propertySchemas = objectSchema.Properties
+                                                                        .Where(x => x.Type != typeReference /* Recursion */)
+                                                                        .SelectMany(x => CollectEndpointSchemas(x.Type, context));
+
+            foreach (SchemaDefinition propertySchema in propertySchemas)
                 yield return propertySchema;
         }
         private static IEnumerable<TypeReference> CollectEndpointTypeReferences(CodeGenerationContext context)
