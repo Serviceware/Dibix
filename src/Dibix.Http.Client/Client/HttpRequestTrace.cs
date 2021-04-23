@@ -6,7 +6,7 @@ namespace Dibix.Http.Client
     public sealed class HttpRequestTrace
     {
         public HttpRequestMessage RequestMessage { get; }
-        public string FormattedRequestText { get; }
+        public string FormattedRequestText { get; set; }
         public HttpResponseMessage ResponseMessage { get; set; }
         public string FormattedResponseText { get; set; }
         public TimeSpan Duration { get; set; }

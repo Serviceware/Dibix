@@ -10,18 +10,11 @@ namespace Dibix.Http.Client
             return JsonConvert.DeserializeObject<T>(exception.ResponseContentText);
         }
 
-        public static string GetFormattedRequestText(this HttpException exception)
+        public static string Format(this HttpException exception)
         {
-            // At this point the HttpContent is already disposed
-            // Therefore we have to use the overload that accepts the previously captured response content text
-            return HttpMessageFormatter.Format(exception.Request, exception.RequestContentText, maskSensitiveData: true);
-        }
-
-        public static string GetFormattedResponseText(this HttpException exception)
-        {
-            // At this point the HttpContent is already disposed
-            // Therefore we have to use the overload that accepts the previously captured response content text
-            return HttpMessageFormatter.Format(exception.Response, exception.ResponseContentText);
+            string formattedRequest = HttpMessageFormatter.Format(exception.Request, exception.RequestContentText, maskSensitiveData: true);
+            string formattedResponse = HttpMessageFormatter.Format(exception.Response, exception.ResponseContentText);
+            return HttpMessageFormatter.Format(formattedRequest, formattedResponse);
         }
     }
 }

@@ -128,7 +128,7 @@
     <PropertyGroup>
       <_DibixHttpClientProjectName>Dibix.Http.Client</_DibixHttpClientProjectName>
       <_DibixHttpClientProjectDir>..\$(_DibixHttpClientProjectName)\</_DibixHttpClientProjectDir>
-      <_DibixHttpClientTargetFramework>net451</_DibixHttpClientTargetFramework>
+      <_DibixHttpClientTargetFramework>net46</_DibixHttpClientTargetFramework>
       <_DibixHttpClientPath>$(_DibixHttpClientProjectDir)bin\$(Configuration)\$(_DibixHttpClientTargetFramework)\$(_DibixHttpClientProjectName).dll</_DibixHttpClientPath>
     </PropertyGroup>
 

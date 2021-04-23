@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 namespace Dibix.Http.Client
 {
     /// <summary>
-    /// - Get request message diagnostics (usually it's disposed after the request; required opt-in to avoid large in memory allocations)
-    /// - Get response message diagnostics
+    /// - Capture request/response message including formatted content text
     /// - Measure request duration
     /// </summary>
     public sealed class TracingHttpMessageHandler : DelegatingHandler
@@ -48,17 +47,9 @@ namespace Dibix.Http.Client
         #endregion
 
         #region Private Methods
-        private async Task TraceRequest(HttpRequestMessage request)
-        {
-            string formattedRequest = await HttpMessageFormatter.Format(request, this._tracer.MaskSensitiveData).ConfigureAwait(false);
-            this._tracer.TraceRequest(request, formattedRequest);
-        }
+        private Task TraceRequest(HttpRequestMessage request) => this._tracer.TraceRequestAsync(request);
 
-        private async Task TraceResponse(HttpResponseMessage response)
-        {
-            string formattedResponse = await HttpMessageFormatter.Format(response).ConfigureAwait(false);
-            this._tracer.TraceResponse(response, formattedResponse, this._requestDurationTracker.Elapsed);
-        }
+        private Task TraceResponse(HttpResponseMessage response) => this._tracer.TraceResponseAsync(response, this._requestDurationTracker.Elapsed);
 
         private void StartTracking() => this._requestDurationTracker.Restart();
 

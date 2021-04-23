@@ -11,37 +11,59 @@ using System.Threading.Tasks;
 
 namespace Dibix.Http.Client
 {
-    internal static class HttpMessageFormatter
+    public static class HttpMessageFormatter
     {
         #region Fields
         private static readonly Func<HttpHeaders, IEnumerable<KeyValuePair<string, string>>> GetHeaderStringsAccessor = CompileGetHeaderStrings();
         #endregion
 
         #region Public Methods
-        public static async Task<string> Format(HttpRequestMessage request, bool maskSensitiveData)
+        public static string Format(string formattedRequestText, string formattedResponseText, int? maxLength = null)
         {
-            string requestMessageContent = null;
-            if (request.Content != null)
-                requestMessageContent = await request.Content.ReadAsStringAsync().ConfigureAwait(false);
+            string formattedRequestTextTrimmed = formattedRequestText;
+            string formattedResponseTextTrimmed = formattedResponseText;
 
-            return Format(request, requestMessageContent, maskSensitiveData);
-        }
-        public static string Format(HttpRequestMessage request, string requestContentText, bool maskSensitiveData)
-        {
-            Guard.IsNotNull(request, nameof(request));
-
-            StringBuilder sb = new StringBuilder($"{request.Method} {request.RequestUri} HTTP/{request.Version}");
-
-            if (request.Headers.Any())
+            if (maxLength.HasValue)
             {
-                sb.AppendLine()
-                  .Append(Format(request.Headers));
+                formattedRequestTextTrimmed = formattedRequestTextTrimmed.TrimIfNecessary(maxLength.Value);
+                formattedResponseTextTrimmed = formattedResponseTextTrimmed.TrimIfNecessary(maxLength.Value);
             }
 
-            if (Equals(request.Content?.Headers.Any(), true))
+            return $@"Request
+-------
+{formattedRequestTextTrimmed}
+
+Response
+--------
+{formattedResponseTextTrimmed}";
+        }
+        #endregion
+
+        #region Internal Methods
+        internal static async Task<string> Format(HttpRequestMessage requestMessage, bool maskSensitiveData)
+        {
+            string requestMessageContent = null;
+            if (requestMessage.Content != null)
+                requestMessageContent = await requestMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+            return Format(requestMessage, requestMessageContent, maskSensitiveData);
+        }
+        internal static string Format(HttpRequestMessage requestMessage, string requestContentText, bool maskSensitiveData)
+        {
+            Guard.IsNotNull(requestMessage, nameof(requestMessage));
+
+            StringBuilder sb = new StringBuilder($"{requestMessage.Method} {requestMessage.RequestUri} HTTP/{requestMessage.Version}");
+
+            if (requestMessage.Headers.Any())
             {
                 sb.AppendLine()
-                  .Append(Format(request.Content.Headers));
+                  .Append(Format(requestMessage.Headers));
+            }
+
+            if (Equals(requestMessage.Content?.Headers.Any(), true))
+            {
+                sb.AppendLine()
+                  .Append(Format(requestMessage.Content.Headers));
             }
 
             if (requestContentText != null)
@@ -59,27 +81,27 @@ namespace Dibix.Http.Client
             return formattedRequest;
         }
 
-        public static async Task<string> Format(HttpResponseMessage response)
+        internal static async Task<string> Format(HttpResponseMessage responseMessage)
         {
-            string responseContentText = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-            return Format(response, responseContentText);
+            string responseContentText = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+            return Format(responseMessage, responseContentText);
         }
-        public static string Format(HttpResponseMessage response, string responseContentText)
+        internal static string Format(HttpResponseMessage responseMessage, string responseContentText)
         {
-            Guard.IsNotNull(response, nameof(response));
+            Guard.IsNotNull(responseMessage, nameof(responseMessage));
 
-            StringBuilder sb = new StringBuilder($"HTTP/{response.Version} {(int)response.StatusCode} {response.ReasonPhrase}");
+            StringBuilder sb = new StringBuilder($"HTTP/{responseMessage.Version} {(int)responseMessage.StatusCode} {responseMessage.ReasonPhrase}");
 
-            if (response.Headers.Any())
+            if (responseMessage.Headers.Any())
             {
                 sb.AppendLine()
-                  .Append(Format(response.Headers));
+                  .Append(Format(responseMessage.Headers));
             }
 
-            if (response.Content.Headers.Any())
+            if (responseMessage.Content.Headers.Any())
             {
                 sb.AppendLine()
-                  .Append(Format(response.Content.Headers));
+                  .Append(Format(responseMessage.Content.Headers));
             }
 
             if (responseContentText.Length > 0)
@@ -111,6 +133,8 @@ namespace Dibix.Http.Client
         }
 
         private static string TrimAuthorizationValue(string value) => value.Length < 5 ? value : $"{value.Substring(0, 5)}...";
+
+        private static string TrimIfNecessary(this string text, int maxLength) => text?.Length > maxLength ? $"{text.Substring(0, maxLength)}..." : text;
 
         private static Func<HttpHeaders, IEnumerable<KeyValuePair<string, string>>> CompileGetHeaderStrings()
         {
