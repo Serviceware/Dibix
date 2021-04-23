@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
+using System.Text;
 using System.Threading.Tasks;
 using Dibix.Http.Server;
 using Dibix.Sdk.CodeGeneration.CSharp;
@@ -41,16 +42,33 @@ namespace Dibix.Sdk.CodeGeneration
 
             @class.AddSeparator();
 
-            @class.AddConstructor()
-                  .AddParameter("authorizationProvider", "IHttpAuthorizationProvider")
-                  .CallThis()
-                  .AddParameter(new CSharpValue("new DefaultHttpClientFactory()"))
-                  .AddParameter(new CSharpValue("authorizationProvider"));
+            bool requiresAuthorization = controller.Actions.Any(x => x.SecuritySchemes.Any());
 
-            @class.AddConstructor(@"this._httpClientFactory = httpClientFactory;
-this._authorizationProvider = authorizationProvider;")
-                  .AddParameter("httpClientFactory", "IHttpClientFactory")
-                  .AddParameter("authorizationProvider", "IHttpAuthorizationProvider");
+            CSharpConstructor ctor1 = @class.AddConstructor();
+
+            if (requiresAuthorization)
+                ctor1.AddParameter("authorizationProvider", "IHttpAuthorizationProvider");
+
+            ICSharpConstructorInvocationExpression constructorBaseCall = ctor1.CallThis()
+                                                                              .AddParameter(new CSharpValue("new DefaultHttpClientFactory()"));
+
+            if (requiresAuthorization)
+                constructorBaseCall.AddParameter(new CSharpValue("authorizationProvider"));
+
+            StringBuilder ctorBodySb = new StringBuilder("this._httpClientFactory = httpClientFactory;");
+
+            if (requiresAuthorization)
+            {
+                ctorBodySb.AppendLine()
+                          .Append("this._authorizationProvider = authorizationProvider;");
+            }
+
+            string ctorBody = ctorBodySb.ToString();
+            CSharpConstructor ctor2 = @class.AddConstructor(ctorBody)
+                                            .AddParameter("httpClientFactory", "IHttpClientFactory");
+
+            if (requiresAuthorization)
+                ctor2.AddParameter("authorizationProvider", "IHttpAuthorizationProvider");
 
             @class.AddSeparator();
 
@@ -110,7 +128,12 @@ this._authorizationProvider = authorizationProvider;")
                 writer.WriteLine($"requestMessage.{nameof(HttpRequestMessage.Headers)}.{nameof(HttpRequestMessage.Headers.Add)}(\"{securityScheme.Name}\", this._authorizationProvider.GetValue(\"{securityScheme.Name}\"));");
 
             foreach (ActionParameter parameter in distinctParameters.Where(x => x.Location == ActionParameterLocation.Header))
-                writer.WriteLine($"requestMessage.{nameof(HttpRequestMessage.Headers)}.{nameof(HttpRequestMessage.Headers.Add)}(\"{parameter.ApiParameterName}\", {parameter.ApiParameterName});");
+            {
+                writer.WriteLine($"if ({parameter.ApiParameterName} != null)")
+                      .SetTemporaryIndent(4)
+                      .WriteLine($"requestMessage.{nameof(HttpRequestMessage.Headers)}.{nameof(HttpRequestMessage.Headers.Add)}(\"{parameter.ApiParameterName}\", {parameter.ApiParameterName});")
+                      .ResetTemporaryIndent();
+            }
 
             if (action.RequestBody != null)
             {
