@@ -139,6 +139,7 @@
       <_SqlTargetInput Include="$(DibixSdkPath)" />
       <_SqlTargetInput Include="$(DibixAssemblyPath)" />
       <_SqlTargetInput Include="$(DibixHttpServerAssemblyPath)" />
+      <_SqlTargetInput Include="$(DibixHttpClientAssemblyPath)" />
 
 
       <!-- Target specific inputs -->
