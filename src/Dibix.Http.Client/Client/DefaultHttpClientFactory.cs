@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 
 namespace Dibix.Http.Client
 {
@@ -29,13 +30,17 @@ namespace Dibix.Http.Client
         public HttpClient CreateClient(Uri baseAddress)
         {
             HttpClientBuilder builder = new HttpClientBuilder();
-            this.CreateClientCore(builder);
+            ICollection<Action<HttpClient>> postActions = new Collection<Action<HttpClient>>();
+            this.CreateClientCore(builder, postActions);
             this.CreateClient(builder);
 
             HttpMessageHandler handler = CreateHandlerPipeline(builder);
             HttpClient client = new HttpClient(handler);
             client.BaseAddress = baseAddress;
             builder.ConfigureClient(client);
+
+            foreach (Action<HttpClient> postAction in postActions)
+                postAction(client);
 
             return client;
         }
@@ -71,7 +76,7 @@ Handler: '{handler}'";
         #endregion
 
         #region Private Methods
-        private void CreateClientCore(IHttpClientBuilder builder)
+        private void CreateClientCore(IHttpClientBuilder builder, ICollection<Action<HttpClient>> postActions)
         {
             builder.AddHttpMessageHandler<EnsureSuccessStatusCodeHttpMessageHandler>();
             
@@ -82,6 +87,14 @@ Handler: '{handler}'";
 
             if (this._httpRequestTracer != null)
                 builder.AddHttpMessageHandler(new TracingHttpMessageHandler(this._httpRequestTracer));
+
+            TimeoutHttpMessageHandler timeoutHandler = new TimeoutHttpMessageHandler();
+            builder.AddHttpMessageHandler(timeoutHandler);
+            postActions.Add(x =>
+            {
+                timeoutHandler.Timeout = x.Timeout;
+                x.Timeout = Timeout.InfiniteTimeSpan;
+            });
         }
         #endregion
 
