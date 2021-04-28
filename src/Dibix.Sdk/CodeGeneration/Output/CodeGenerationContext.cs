@@ -59,7 +59,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public SchemaDefinition GetSchema(SchemaTypeReference reference) => this._schemaRegistry.GetSchema(reference);
 
-        public string ResolveTypeName(TypeReference reference)
+        public string ResolveTypeName(TypeReference reference, CodeGenerationContext context, bool includeEnumerable = true)
         {
             string typeName;
             bool requiresNullabilityMarker;
@@ -75,15 +75,26 @@ namespace Dibix.Sdk.CodeGeneration
                     requiresNullabilityMarker = this.GetSchema(schemaTypeReference) is EnumSchema;
                     break;
 
+                case null:
+                    return "void";
+
                 default:
-                    throw new InvalidOperationException($"Unsupported result type: {reference?.GetType()}");
+                    throw new InvalidOperationException($"Unsupported result type: {reference.GetType()}");
             }
 
-            StringBuilder sb = new StringBuilder(typeName);
             if (reference.IsNullable/* && requiresNullabilityMarker*/)
-                sb.Append('?');
+                typeName = $"{typeName}?";
 
-            return sb.ToString();
+            if (reference.IsEnumerable && includeEnumerable) 
+                typeName = this.WrapInEnumerable(typeName, context);
+
+            return typeName;
+        }
+
+        public string WrapInEnumerable(string typeName, CodeGenerationContext context)
+        {
+            context.AddUsing<IEnumerable<object>>();
+            return $"{nameof(IEnumerable<object>)}<{typeName}>";
         }
 
         public CSharpValue BuildDefaultValueLiteral(DefaultValue defaultValue)

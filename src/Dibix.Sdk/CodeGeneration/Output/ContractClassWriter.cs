@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -73,7 +74,7 @@ namespace Dibix.Sdk.CodeGeneration
             ICollection<CSharpAnnotation> classAnnotations = new Collection<CSharpAnnotation>();
             if (generateRuntimeSpecifics && !String.IsNullOrEmpty(schema.WcfNamespace)) // Serialization/Compatibility
             {
-                context.AddUsing(typeof(DataMemberAttribute).Namespace);
+                context.AddUsing<DataMemberAttribute>();
                 classAnnotations.Add(new CSharpAnnotation("DataContract").AddProperty("Namespace", new CSharpStringValue(schema.WcfNamespace)));
             }
 
@@ -112,7 +113,7 @@ namespace Dibix.Sdk.CodeGeneration
                     if (property.DateTimeKind != default)
                     {
                         context.AddUsing("Dibix");
-                        context.AddUsing(typeof(DateTimeKind).Namespace);
+                        context.AddUsing<DateTimeKind>();
                         propertyAnnotations.Add(new CSharpAnnotation("DateTimeKind", new CSharpValue($"DateTimeKind.{property.DateTimeKind}"))); // Dibix runtime
                     }
                 }
@@ -120,7 +121,7 @@ namespace Dibix.Sdk.CodeGeneration
                 if (property.DefaultValue != null)
                 {
                     defaultValue = context.BuildDefaultValueLiteral(property.DefaultValue);
-                    context.AddUsing("System.ComponentModel");
+                    context.AddUsing<DefaultValueAttribute>();
                     propertyAnnotations.Add(new CSharpAnnotation("DefaultValue", defaultValue));
                 }
 
@@ -163,7 +164,7 @@ namespace Dibix.Sdk.CodeGeneration
                 if (property.Obfuscated) 
                     propertyAnnotations.Add(new CSharpAnnotation("Obfuscated"));
 
-                string clrTypeName = context.ResolveTypeName(property.Type);
+                string clrTypeName = context.ResolveTypeName(property.Type, context, includeEnumerable: false);
                 @class.AddProperty(property.Name, !property.Type.IsEnumerable ? clrTypeName : $"ICollection<{clrTypeName}>", propertyAnnotations)
                       .Getter(null)
                       .Setter(null, property.Type.IsEnumerable ? CSharpModifiers.Private : default)
@@ -175,8 +176,8 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (ctorAssignments.Any())
             {
-                context.AddUsing(typeof(ICollection<>).Namespace)
-                       .AddUsing(typeof(Collection<>).Namespace);
+                context.AddUsing<ICollection<object>>()
+                       .AddUsing<Collection<object>>();
 
                 @class.AddSeparator()
                       .AddConstructor(String.Join(Environment.NewLine, ctorAssignments));
@@ -184,7 +185,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (generateRuntimeSpecifics && shouldSerializeMethods.Any())
             {
-                context.AddUsing(typeof(Enumerable).Namespace);
+                context.AddUsing(typeof(Enumerable).Namespace); // Enumerable.Any();
 
                 @class.AddSeparator();
 
@@ -211,7 +212,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static void AddJsonReference(CodeGenerationContext context)
         {
-            context.AddUsing(typeof(JsonPropertyAttribute).Namespace);
+            context.AddUsing<JsonPropertyAttribute>();
             context.Model.AdditionalAssemblyReferences.Add(Path.GetFileName(typeof(JsonPropertyAttribute).Assembly.Location));
         }
         #endregion

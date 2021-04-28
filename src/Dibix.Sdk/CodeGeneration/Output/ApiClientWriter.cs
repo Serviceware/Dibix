@@ -19,28 +19,31 @@ namespace Dibix.Sdk.CodeGeneration
         public override void Write(CodeGenerationContext context)
         {
             context.AddDibixHttpClientReference();
-            context.AddUsing(typeof(Uri).Namespace);
+            context.AddUsing<Uri>();
 
-            IDictionary<ActionDefinition, string> operationIdMap = context.Model
-                                                                          .Controllers
-                                                                          .SelectMany(x => x.Actions)
-                                                                          .GroupBy(x => x.Target.OperationName)
-                                                                          .SelectMany(x => x.Select((y, i) => new
-                                                                          {
-                                                                              Position = i + 1,
-                                                                              Name = x.Key,
-                                                                              Action = y,
-                                                                              IsAmbiguous = x.Count() > 1
-                                                                          }))
-                                                                          .ToDictionary(x => x.Action, x => x.IsAmbiguous ? $"{x.Name}{x.Position}" : x.Name);
+            IList<ControllerDefinition> controllers = context.Model
+                                                             .Controllers
+                                                             .Where(x => x.Actions.Any())
+                                                             .ToArray();
 
-            for (int i = 0; i < context.Model.Controllers.Count; i++)
+            IDictionary<ActionDefinition, string> operationIdMap = controllers.SelectMany(x => x.Actions)
+                                                                              .GroupBy(x => x.Target.OperationName)
+                                                                              .SelectMany(x => x.Select((y, i) => new
+                                                                              {
+                                                                                  Position = i + 1,
+                                                                                  Name = x.Key,
+                                                                                  Action = y,
+                                                                                  IsAmbiguous = x.Count() > 1
+                                                                              }))
+                                                                              .ToDictionary(x => x.Action, x => x.IsAmbiguous ? $"{x.Name}{x.Position}" : x.Name);
+
+            for (int i = 0; i < controllers.Count; i++)
             {
-                ControllerDefinition controller = context.Model.Controllers[i];
+                ControllerDefinition controller = controllers[i];
                 string serviceName = $"{controller.Name}Service";
                 this.WriteController(context, controller, serviceName, operationIdMap);
 
-                if (i + 1 < context.Model.Controllers.Count)
+                if (i + 1 < controllers.Count)
                     context.Output.AddSeparator();
             }
         }
@@ -51,7 +54,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         protected void AddMethod(ActionDefinition action, CodeGenerationContext context, IDictionary<ActionDefinition, string> operationIdMap, Func<string, string, CSharpMethod> methodTarget)
         {
-            context.AddUsing(typeof(Task<>).Namespace);
+            context.AddUsing<Task<object>>();
 
             string methodName = $"{operationIdMap[action]}Async";
             string returnType = ResolveReturnTypeName(action.DefaultResponseType, context);
@@ -68,9 +71,9 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             if (action.RequestBody != null)
-                method.AddParameter("body", context.ResolveTypeName(action.RequestBody.Contract));
+                method.AddParameter("body", context.ResolveTypeName(action.RequestBody.Contract, context));
 
-            context.AddUsing(typeof(CancellationToken).Namespace);
+            context.AddUsing<CancellationToken>();
             method.AddParameter("cancellationToken", nameof(CancellationToken), default, new CSharpValue("default"));
         }
 
@@ -80,7 +83,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Private Methods
         private static string ResolveReturnTypeName(TypeReference resultType, CodeGenerationContext context)
         {
-            string typeName = $"Task<HttpResponse{(resultType != null ? $"<{context.ResolveTypeName(resultType)}>" : "Message")}>";
+            string typeName = $"Task<HttpResponse{(resultType != null ? $"<{context.ResolveTypeName(resultType, context)}>" : "Message")}>";
             return typeName;
         }
 
@@ -93,12 +96,11 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 // Note: Deep object query parameters require a separate input class, which is not yet supported
                 // Therefore in this case we currently return object, which obviously will not work at runtime
-                string enumerableTypeName = userDefinedTypeSchema.Properties.Count == 1 ? context.ResolveTypeName(userDefinedTypeSchema.Properties[0].Type) : "object";
-                context.AddUsing(typeof(IEnumerable<>).Namespace);
-                return $"{nameof(IEnumerable<object>)}<{enumerableTypeName}>";
+                string enumerableTypeName = userDefinedTypeSchema.Properties.Count == 1 ? context.ResolveTypeName(userDefinedTypeSchema.Properties[0].Type, context, includeEnumerable: false) : "object";
+                return context.WrapInEnumerable(enumerableTypeName, context);
             }
 
-            return context.ResolveTypeName(parameter.Type);
+            return context.ResolveTypeName(parameter.Type, context);
         }
         #endregion
     }

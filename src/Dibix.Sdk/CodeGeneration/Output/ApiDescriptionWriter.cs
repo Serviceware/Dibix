@@ -26,7 +26,7 @@ namespace Dibix.Sdk.CodeGeneration
             context.AddDibixHttpServerReference();
 
             if (context.Model.Controllers.Any(x => x.ControllerImports.Any()))
-                context.AddUsing(typeof(Type).Namespace);
+                context.AddUsing<Type>();
 
             string body = WriteBody(context, context.Model.Controllers);
 
@@ -92,11 +92,11 @@ namespace Dibix.Sdk.CodeGeneration
                     //}
 
                     if (action.RequestBody?.Contract != null) 
-                        writer.WriteLine($"y.BodyContract = typeof({context.ResolveTypeName(action.RequestBody.Contract)});");
+                        writer.WriteLine($"y.BodyContract = typeof({context.ResolveTypeName(action.RequestBody.Contract, context)});");
 
                     if (!String.IsNullOrEmpty(action.RequestBody?.Binder))
                     {
-                        context.AddUsing(typeof(Type).Namespace);
+                        context.AddUsing<Type>();
                         writer.WriteLine($"y.BodyBinder = Type.GetType(\"{action.RequestBody.Binder}\", true);");
                     }
 

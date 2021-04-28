@@ -67,7 +67,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static string ResolvePropertyTypeName(SqlQueryParameter parameter, CodeGenerationContext context)
         {
-            string typeName = context.ResolveTypeName(parameter.Type);
+            string typeName = context.ResolveTypeName(parameter.Type, context);
             if (!parameter.IsOutput)
                 return typeName;
 

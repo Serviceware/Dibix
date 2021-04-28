@@ -145,7 +145,7 @@ namespace Dibix.Sdk.CodeGeneration
                 else
                 {
                     context.AddReference<ObjectContent<object>>();
-                    writer.WriteRaw($"{nameof(ObjectContent<object>)}<{context.ResolveTypeName(requestBodyType)}>(body, Formatter");
+                    writer.WriteRaw($"{nameof(ObjectContent<object>)}<{context.ResolveTypeName(requestBodyType, context)}>(body, Formatter");
                 }
 
                 writer.WriteLineRaw(");");
@@ -155,7 +155,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             string responseContentType = null;
             if (action.DefaultResponseType != null)
-                responseContentType = context.ResolveTypeName(action.DefaultResponseType);
+                responseContentType = context.ResolveTypeName(action.DefaultResponseType, context);
 
             if (responseContentType != null)
             {
