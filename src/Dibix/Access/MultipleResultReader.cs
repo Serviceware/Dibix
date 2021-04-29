@@ -94,6 +94,15 @@ namespace Dibix
                        .PostProcess(multiMapper)
                        .SingleOrDefault();
         }
+
+        // Search (GlobalSearchGroups)
+        public TReturn ReadSingleOrDefault<TReturn, TSecond, TThird>(string splitOn) where TReturn : new()
+        {
+            MultiMapper multiMapper = new MultiMapper();
+            return this.ReadMany<TReturn, TSecond, TThird, TReturn>((a, b, c) => multiMapper.MapRow<TReturn>(false, a, b, c), splitOn)
+                       .PostProcess(multiMapper)
+                       .SingleOrDefault();
+        }
         #endregion
 
         #region Abstract Methods
