@@ -161,7 +161,7 @@ namespace Dibix.Sdk.CodeGeneration
                         throw new ArgumentOutOfRangeException(nameof(property.SerializationBehavior), property.SerializationBehavior, null);
                 }
 
-                if (property.Obfuscated) 
+                if (property.Obfuscated && generateRuntimeSpecifics)
                     propertyAnnotations.Add(new CSharpAnnotation("Obfuscated"));
 
                 string clrTypeName = context.ResolveTypeName(property.Type, context, includeEnumerable: false);
