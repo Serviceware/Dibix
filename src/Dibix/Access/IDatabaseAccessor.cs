@@ -14,9 +14,10 @@ namespace Dibix
         IEnumerable<T> QueryMany<T>(string sql, CommandType commandType, ParametersVisitor parameters);
         Task<IEnumerable<T>> QueryManyAsync<T>(string sql, CommandType commandType, ParametersVisitor parameters, bool buffered, CancellationToken cancellationToken);
         IEnumerable<TReturn> QueryMany<TReturn, TSecond>(string sql, CommandType commandType, ParametersVisitor parameters, string splitOn) where TReturn : new();
-        IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird>(string sql, CommandType commandType, ParametersVisitor parameters, string splitOn) where TReturn : new();
         IEnumerable<TReturn> QueryMany<TFirst, TSecond, TReturn>(string sql, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TReturn> map, string splitOn);
+        IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird>(string sql, CommandType commandType, ParametersVisitor parameters, string splitOn) where TReturn : new();
         IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TReturn>(string sql, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TReturn> map, string splitOn);
+        IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird, TFourth>(string sql, CommandType commandType, ParametersVisitor parameters, string splitOn) where TReturn : new();
         IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TReturn>(string sql, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TReturn> map, string splitOn);
         IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(string sql, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> map, string splitOn);
         IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(string sql, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> map, string splitOn);

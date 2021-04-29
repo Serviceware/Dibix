@@ -51,6 +51,8 @@ namespace Dibix
                        .PostProcess(multiMapper);
         });
 
+        IEnumerable<TReturn> IDatabaseAccessor.QueryMany<TFirst, TSecond, TReturn>(string sql, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TReturn> map, string splitOn) => Execute(sql, commandType, parameters, () => this.QueryMany(sql, commandType, parameters, map, splitOn).PostProcess());
+
         public IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird>(string sql, CommandType commandType, ParametersVisitor parameters, string splitOn) where TReturn : new() => Execute(sql, commandType, parameters, () =>
         {
             MultiMapper multiMapper = new MultiMapper();
@@ -58,9 +60,14 @@ namespace Dibix
                        .PostProcess(multiMapper);
         });
 
-        IEnumerable<TReturn> IDatabaseAccessor.QueryMany<TFirst, TSecond, TReturn>(string sql, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TReturn> map, string splitOn) => Execute(sql, commandType, parameters, () => this.QueryMany(sql, commandType, parameters, map, splitOn).PostProcess());
-
         IEnumerable<TReturn> IDatabaseAccessor.QueryMany<TFirst, TSecond, TThird, TReturn>(string sql, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TReturn> map, string splitOn) => Execute(sql, commandType, parameters, () => this.QueryMany(sql, commandType, parameters, map, splitOn).PostProcess());
+
+        public IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird, TFourth>(string sql, CommandType commandType, ParametersVisitor parameters, string splitOn) where TReturn : new() => Execute(sql, commandType, parameters, () =>
+        {
+            MultiMapper multiMapper = new MultiMapper();
+            return this.QueryMany<TReturn, TSecond, TThird, TFourth, TReturn>(sql, commandType, parameters, (a, b, c,d ) => multiMapper.MapRow<TReturn>(false, a, b, c, d), splitOn)
+                       .PostProcess(multiMapper);
+        });
 
         IEnumerable<TReturn> IDatabaseAccessor.QueryMany<TFirst, TSecond, TThird, TFourth, TReturn>(string sql, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TReturn> map, string splitOn) => Execute(sql, commandType, parameters, () => this.QueryMany(sql, commandType, parameters, map, splitOn).PostProcess());
 
