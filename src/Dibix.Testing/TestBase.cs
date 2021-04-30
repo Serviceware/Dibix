@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Resources;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -51,6 +55,40 @@ namespace Dibix.Testing
                 this.TestContext.AddDiffToolInvoker(expected, actual);
 
             Assert.AreEqual(expected, actual, message);
+        }
+
+        protected static string ResolveExpectedTextFromEmbeddedResource(Assembly assembly, string resourceName)
+        {
+            string key = $"{resourceName}.json";
+            using (Stream stream = assembly.GetManifestResourceStream(key))
+            {
+                if (stream == null)
+                    throw new MissingManifestResourceException($"Could not find resource '{key}' in assembly '{assembly}'");
+
+                using (TextReader reader = new StreamReader(stream))
+                {
+                    string content = reader.ReadToEnd();
+                    return content;
+                }
+            }
+        }
+
+        protected static string ResolveExpectedTextFromResourceManager(Type caller, string resourceName)
+        {
+            ResourceManager resourceManager = new ResourceManager($"{caller.Namespace}.Resource", caller.Assembly);
+            return resourceManager.GetString(resourceName);
+        }
+
+        protected static MethodBase ResolveTestMethod()
+        {
+            MethodBase method = new StackTrace().GetFrames()
+                                                .Select(x => x.GetMethod())
+                                                .FirstOrDefault(x => x.IsDefined(typeof(TestMethodAttribute)));
+
+            if (method == null)
+                throw new InvalidOperationException("Could not detect test name");
+
+            return method;
         }
 
         protected void LogException(Exception exception) => this.TestContext.AddResultFile("AdditionalErrors.txt", exception.ToString());
