@@ -27,7 +27,7 @@ namespace Dibix.Testing.Http
         #endregion
 
         #region Protected Methods
-        private protected Task ExecuteTest(Func<IHttpTestContext<TConfiguration>, Task> testFlow) => this.ExecuteTest(testFlow, CreateTestContext);
+        protected virtual Task ExecuteTest(Func<IHttpTestContext<TConfiguration>, Task> testFlow) => this.ExecuteTest(testFlow, CreateTestContext);
 
         protected virtual async Task ExecuteTest<TTestContext>(Func<TTestContext, Task> testFlow, Func<TConfiguration, IHttpClientFactory, IHttpAuthorizationProvider, TTestContext> contextCreator) where TTestContext : IHttpTestContext<TConfiguration>
         {

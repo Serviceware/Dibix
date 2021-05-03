@@ -6,7 +6,7 @@ using Dibix.Testing.Data;
 
 namespace Dibix.Testing.Http
 {
-    public abstract class WebApiServiceTestBase<TService, TConfiguration> : WebApiTestBase<TConfiguration> where TConfiguration : DatabaseConfigurationBase, new()
+    public abstract class WebApiTestBase<TService, TConfiguration> : WebApiTestBase<TConfiguration> where TConfiguration : DatabaseConfigurationBase, new()
     {
         #region Protected Methods
         protected virtual Task ExecuteTest(Func<IHttpTestContext<TService, TConfiguration>, Task> testFlow) => base.ExecuteTest(testFlow, CreateTestContext);
