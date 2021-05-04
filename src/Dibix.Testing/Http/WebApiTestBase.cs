@@ -46,10 +46,12 @@ namespace Dibix.Testing.Http
             this.Assert(response, expectedText);
             return response.ResponseContent;
         }
-        private protected Task<TContent> ExecuteTestUnit<TService, TContent>(IHttpTestContext<TConfiguration> context, Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector, string expectedText)
+        protected Task ExecuteTestUnit<TService>(IHttpTestContext<TConfiguration> context, Expression<Func<TService, Task<HttpResponseMessage>>> methodSelector) => ExecuteTestUnit<TService, HttpResponseMessage>(context, methodSelector);
+        protected async Task<TContent> ExecuteTestUnit<TService, TContent>(IHttpTestContext<TConfiguration> context, Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector, string expectedText)
         {
-            TService service = CreateServiceInstance<TService>(context.HttpClientFactory, context.HttpAuthorizationProvider);
-            return this.ExecuteTestUnit(service, methodSelector, expectedText);
+            HttpResponse<TContent> response = await ExecuteTestUnit(context, methodSelector).ConfigureAwait(false);
+            this.Assert(response, expectedText);
+            return response.ResponseContent;
         }
 
         private protected static TService CreateServiceInstance<TService>(IHttpClientFactory httpClientFactory, IHttpAuthorizationProvider authorizationProvider)
@@ -67,6 +69,11 @@ namespace Dibix.Testing.Http
         #endregion
 
         #region Private Methods
+        private static Task<TResponse> ExecuteTestUnit<TService, TResponse>(IHttpTestContext<TConfiguration> context, Expression<Func<TService, Task<TResponse>>> methodSelector)
+        {
+            TService service = CreateServiceInstance<TService>(context.HttpClientFactory, context.HttpAuthorizationProvider);
+            return ExecuteTestUnit(service, methodSelector);
+        }
         private static async Task<TResponse> ExecuteTestUnit<TService, TResponse>(TService service, Expression<Func<TService, Task<TResponse>>> methodSelector)
         {
             Func<TService, Task<TResponse>> compiled = methodSelector.Compile();

@@ -10,10 +10,10 @@ namespace Dibix.Testing
         public static string GenerateReferencingBatchFile(TestContext context, string expected, string actual, out bool privateResultsDirectorySpecified)
         {
             string privateResultsDirectory = context.GetPrivateResultsDirectory(out privateResultsDirectorySpecified);
-            string publicResultsDirectory = context.GetPublicResultsDirectory(privateResultsDirectory);
+            string publicResultsDirectory = context.GetPublicResultsDirectory();
 
-            string expectedFileName = $"{context.TestName}_expected.txt";
-            string actualFileName = $"{context.TestName}_actual.txt";
+            string expectedFileName = "expected.txt";
+            string actualFileName = "actual.txt";
 
             string expectedPrivatePath = Path.Combine(privateResultsDirectory, expectedFileName);
             string actualPrivatePath = Path.Combine(privateResultsDirectory, actualFileName);
@@ -23,7 +23,7 @@ namespace Dibix.Testing
             File.WriteAllText(expectedPrivatePath, expected);
             File.WriteAllText(actualPrivatePath, actual);
 
-            string batchPath = Path.Combine(privateResultsDirectory, $"{context.TestName}.bat");
+            string batchPath = Path.Combine(privateResultsDirectory, "winmerge.bat");
             string content = $@"@echo off
 start winmerge ""{expectedPublicPath}"" ""{actualPublicPath}""";
             File.WriteAllText(batchPath, content);

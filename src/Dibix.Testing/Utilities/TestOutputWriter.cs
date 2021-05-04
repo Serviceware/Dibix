@@ -10,30 +10,29 @@ namespace Dibix.Testing
 {
     internal sealed class TestOutputWriter : TextWriter, IDisposable
     {
+        private const string OutputFileName = "output.log";
         private readonly string _outputPath;
         private readonly StreamWriter _output;
         private readonly TestContext _testContext;
         private readonly bool _isAzureDevops;
-        private readonly bool _supportsFile;
+        private readonly bool _outputToFile;
         private bool _collectingLine;
         private readonly Process _tail;
 
         public override Encoding Encoding => Encoding.UTF8;
 
-        public TestOutputWriter(TestContext testContext, string logFileName, bool tailOutput)
+        public TestOutputWriter(TestContext testContext, bool outputToFile, bool tailOutput)
         {
             this._testContext = testContext;
+            this._outputToFile = outputToFile;
+
             string privateResultsDirectory = testContext.GetPrivateResultsDirectory(out bool isSpecified);
             this._isAzureDevops = isSpecified;
-            this._supportsFile = !String.IsNullOrEmpty(logFileName);
 
-            if (!this._supportsFile) 
+            if (!this._outputToFile) 
                 return;
 
-            if (!Path.HasExtension(logFileName))
-                logFileName = $"{logFileName}.log";
-
-            this._outputPath = Path.Combine(privateResultsDirectory, logFileName);
+            this._outputPath = Path.Combine(privateResultsDirectory, OutputFileName);
             this._output = new StreamWriter(this._outputPath);
 
             if (!tailOutput) 
@@ -65,7 +64,7 @@ namespace Dibix.Testing
             if (!disposing)
                 return;
 
-            if (!this._supportsFile)
+            if (!this._outputToFile)
                 return;
 
             // Unfortunately azure devops does not add the output to the test result, if it has passed.
@@ -103,7 +102,7 @@ namespace Dibix.Testing
                 
                 Console.Write(line);
 
-                if (this._supportsFile)
+                if (this._outputToFile)
                     this._output.Write(line);
             }
 
@@ -112,7 +111,7 @@ namespace Dibix.Testing
 
             this._collectingLine = !appendLine;
 
-            if (this._supportsFile)
+            if (this._outputToFile)
                 this._output.Flush();
         }
 
@@ -120,7 +119,7 @@ namespace Dibix.Testing
         {
             Console.WriteLine();
 
-            if (this._supportsFile)
+            if (this._outputToFile)
                 this._output.WriteLine();
         }
 

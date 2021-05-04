@@ -23,7 +23,7 @@ namespace Dibix.Testing
             set
             {
                 this._testContext = value;
-                TestOutputWriter testOutputHelper = new TestOutputWriter(value, this.LogFileName, this.AttachOutputObserver);
+                TestOutputWriter testOutputHelper = new TestOutputWriter(testContext: value, outputToFile: true, tailOutput: this.AttachOutputObserver);
                 this.TestOutputHelper = testOutputHelper;
 
                 this.OnTestContextInitialized();
@@ -31,7 +31,6 @@ namespace Dibix.Testing
         }
         internal TestOutputWriter TestOutputHelper { get; private set; }
         protected virtual bool AttachOutputObserver => false;
-        protected virtual string LogFileName => this.TestContext?.TestName;
         protected virtual TextWriter Out => this.TestOutputHelper;
         #endregion
 
@@ -56,6 +55,10 @@ namespace Dibix.Testing
 
             Assert.AreEqual(expected, actual, message);
         }
+
+        protected void LogException(Exception exception) => this.TestContext.AddResultFile("AdditionalErrors.txt", exception.ToString());
+
+        protected void AddResultFile(string fileName, string content) => this.TestContext.AddResultFile(fileName, content);
 
         protected static string ResolveExpectedTextFromEmbeddedResource(Assembly assembly, string resourceName)
         {
@@ -90,8 +93,6 @@ namespace Dibix.Testing
 
             return method;
         }
-
-        protected void LogException(Exception exception) => this.TestContext.AddResultFile("AdditionalErrors.txt", exception.ToString());
 
         protected static Task Retry(Func<Task<bool>> retryMethod) => Retry(retryMethod, x => x);
         protected static Task Retry(Func<Task<bool>> retryMethod, TimeSpan timeout) => Retry(retryMethod, x => x, timeout);
