@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Dibix.Http.Server;
@@ -17,8 +18,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Overrides
-
-        protected override void WriteController(CodeGenerationContext context, ControllerDefinition controller, string serviceName, IDictionary<ActionDefinition, string> operationIdMap)
+        protected override void WriteController(CodeGenerationContext context, ControllerDefinition controller, string serviceName, IDictionary<ActionDefinition, string> operationIdMap, IDictionary<string, SecurityScheme> securitySchemeMap)
         {
             context.AddReference<HttpClient>();
 
@@ -42,7 +42,10 @@ namespace Dibix.Sdk.CodeGeneration
 
             @class.AddSeparator();
 
-            bool requiresAuthorization = controller.Actions.Any(x => x.SecuritySchemes.Any());
+            bool requiresAuthorization = controller.Actions
+                                                   .SelectMany(x => x.SecuritySchemes)
+                                                   .SelectMany(x => x)
+                                                   .Any(x => x != SecuritySchemes.Anonymous.Name);
 
             CSharpConstructor ctor1 = @class.AddConstructor();
 
@@ -75,7 +78,7 @@ namespace Dibix.Sdk.CodeGeneration
             for (int i = 0; i < controller.Actions.Count; i++)
             {
                 ActionDefinition action = controller.Actions[i];
-                string body = this.GeneratedMethodBody(controller, action, context);
+                string body = this.GeneratedMethodBody(controller, action, context, securitySchemeMap);
                 base.AddMethod(action, context, operationIdMap, (methodName, returnType) => @class.AddMethod(methodName, returnType, body, modifiers: CSharpModifiers.Public | CSharpModifiers.Async));
 
                 if (i + 1 < controller.Actions.Count)
@@ -85,7 +88,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private string GeneratedMethodBody(ControllerDefinition controller, ActionDefinition action, CodeGenerationContext context)
+        private string GeneratedMethodBody(ControllerDefinition controller, ActionDefinition action, CodeGenerationContext context, IDictionary<string, SecurityScheme> securitySchemeMap)
         {
             ICollection<ActionParameter> distinctParameters = action.Parameters
                                                                     .DistinctBy(x => x.ApiParameterName)
@@ -124,14 +127,34 @@ namespace Dibix.Sdk.CodeGeneration
 
             writer.WriteLine($"{nameof(HttpRequestMessage)} requestMessage = new {nameof(HttpRequestMessage)}(new {nameof(HttpMethod)}(\"{action.Method.ToString().ToUpperInvariant()}\"), {uriConstant});");
 
-            foreach (SecurityScheme securityScheme in action.SecuritySchemes) 
-                writer.WriteLine($"requestMessage.{nameof(HttpRequestMessage.Headers)}.{nameof(HttpRequestMessage.Headers.Add)}(\"{securityScheme.Name}\", this._authorizationProvider.GetValue(\"{securityScheme.Name}\"));");
+            bool oneOf = action.SecuritySchemes.Count > 1;
+            foreach (string securitySchemeName in action.SecuritySchemes.SelectMany(x => x).Where(x => x != SecuritySchemes.Anonymous.Name))
+            {
+                string getAuthorizationValueCall = $"this._authorizationProvider.GetValue(\"{securitySchemeName}\")";
+                if (oneOf)
+                {
+                    writer.WriteLine($"if ({getAuthorizationValueCall} != null)")
+                          .PushIndent();
+                }
+
+                SecurityScheme securityScheme = securitySchemeMap[securitySchemeName];
+                (string authorizationHeaderName, string authorizationHeaderValue) = ResolveSecuritySchemeHeaderValues(securitySchemeName, getAuthorizationValueCall, securityScheme.Kind);
+                writer.WriteLine($"requestMessage.{nameof(HttpRequestMessage.Headers)}.{nameof(HttpRequestMessage.Headers.Add)}(\"{authorizationHeaderName}\", {authorizationHeaderValue});");
+
+                if (oneOf)
+                    writer.PopIndent();
+            }
 
             foreach (ActionParameter parameter in distinctParameters.Where(x => x.Location == ActionParameterLocation.Header))
             {
-                writer.WriteLine($"if ({parameter.ApiParameterName} != null)")
+                // Will be handled by SecurityScheme/IHttpAuthorizationProvider
+                if (parameter.ApiParameterName == "Authorization")
+                    continue;
+
+                string normalizedApiParameterName = NormalizeApiParameterName(parameter.ApiParameterName);
+                writer.WriteLine($"if ({normalizedApiParameterName} != null)")
                       .SetTemporaryIndent(4)
-                      .WriteLine($"requestMessage.{nameof(HttpRequestMessage.Headers)}.{nameof(HttpRequestMessage.Headers.Add)}(\"{parameter.ApiParameterName}\", {parameter.ApiParameterName});")
+                      .WriteLine($"requestMessage.{nameof(HttpRequestMessage.Headers)}.{nameof(HttpRequestMessage.Headers.Add)}(\"{parameter.ApiParameterName}\", {normalizedApiParameterName});")
                       .ResetTemporaryIndent();
             }
 
@@ -187,6 +210,16 @@ namespace Dibix.Sdk.CodeGeneration
 
             string body = writer.ToString();
             return body;
+        }
+
+        private static (string name, string value) ResolveSecuritySchemeHeaderValues(string name, string value, SecuritySchemeKind kind)
+        {
+            switch (kind)
+            {
+                case SecuritySchemeKind.Bearer: return (name: nameof(HttpRequestHeaders.Authorization), value: $"$\"Bearer {{{value}}}\"");
+                case SecuritySchemeKind.ApiKey: return (name: name, value: value);
+                default: throw new ArgumentOutOfRangeException(nameof(kind), kind, null);
+            }
         }
         #endregion
     }

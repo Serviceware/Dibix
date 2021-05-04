@@ -26,7 +26,7 @@ namespace Dibix.Sdk.CodeGeneration
           , IEnumerable<TaskItem> contracts
           , IEnumerable<TaskItem> endpoints
           , IEnumerable<TaskItem> references
-          , IEnumerable<TaskItem> securitySchemes
+          , IEnumerable<TaskItem> defaultSecuritySchemes
           , bool isEmbedded
           , string databaseSchemaProviderName
           , string modelCollation
@@ -43,7 +43,7 @@ namespace Dibix.Sdk.CodeGeneration
             IEnumerable<string> normalizedContracts = contracts.Select(x => x.GetFullPath());
             IEnumerable<string> normalizedEndpoints = endpoints.Select(x => x.GetFullPath());
             ICollection<string> normalizedReferences = references.Select(x => x.GetFullPath()).ToArray();
-            IEnumerable<SecurityScheme> normalizedSecuritySchemes = securitySchemes.Select(x => new SecurityScheme(x.ItemSpec));
+            ICollection<string> normalizedDefaultSecuritySchemes = defaultSecuritySchemes.Select(x => x.ItemSpec).ToArray();
 
             CodeArtifactsGenerationModel model = new CodeArtifactsGenerationModel(CodeGeneratorCompatibilityLevel.Full)
             {
@@ -72,12 +72,21 @@ namespace Dibix.Sdk.CodeGeneration
             typeResolver.Register(new ContractDefinitionSchemaTypeResolver(schemaRegistry, contractDefinitionProvider), 0);
             typeResolver.Register(new UserDefinedTypeSchemaTypeResolver(schemaRegistry, userDefinedTypeProvider, assemblyResolver, logger), 1);
 
+            IDictionary<string, SecurityScheme> securitySchemeMap = new Dictionary<string, SecurityScheme>();
+
             model.Statements.AddRange(CollectStatements(normalizedSources, projectName, productName, areaName, isEmbedded, formatter, typeResolver, schemaRegistry, logger, modelAccessor));
             model.UserDefinedTypes.AddRange(userDefinedTypeProvider.Types);
             model.Contracts.AddRange(contractDefinitionProvider.Contracts);
-            model.Controllers.AddRange(CollectControllers(normalizedEndpoints, projectName, productName, areaName, defaultOutputName, model.Statements, normalizedSecuritySchemes, assemblyResolver, fileSystemProvider, typeResolver, schemaRegistry, logger));
+            model.Controllers.AddRange(CollectControllers(normalizedEndpoints, projectName, productName, areaName, defaultOutputName, model.Statements, normalizedDefaultSecuritySchemes, securitySchemeMap, assemblyResolver, fileSystemProvider, typeResolver, schemaRegistry, logger));
+            model.SecuritySchemes.AddRange(securitySchemeMap.Values);
 
             return model;
+        }
+
+        private static IEnumerable<SecurityScheme> CollectSecuritySchemes(IEnumerable<string> defaultSecuritySchemes)
+        {
+            foreach (string name in defaultSecuritySchemes)
+                yield return new SecurityScheme(name, SecuritySchemeKind.ApiKey);
         }
 
         private static IEnumerable<SqlStatementInfo> CollectStatements
@@ -109,7 +118,8 @@ namespace Dibix.Sdk.CodeGeneration
           , string areaName
           , string defaultOutputName
           , ICollection<SqlStatementInfo> statements
-          , IEnumerable<SecurityScheme> securitySchemes
+          , ICollection<string> defaultSecuritySchemes
+          , IDictionary<string, SecurityScheme> securitySchemeMap
           , ReferencedAssemblyInspector referencedAssemblyInspector
           , IFileSystemProvider fileSystemProvider
           , ITypeResolverFacade typeResolver
@@ -117,7 +127,7 @@ namespace Dibix.Sdk.CodeGeneration
           , ILogger logger
         )
         {
-            ControllerDefinitionProvider controllerDefinitionProvider = new ControllerDefinitionProvider(projectName, productName, areaName, defaultOutputName, statements, endpoints, securitySchemes, typeResolver, referencedAssemblyInspector, schemaRegistry, fileSystemProvider, logger);
+            ControllerDefinitionProvider controllerDefinitionProvider = new ControllerDefinitionProvider(projectName, productName, areaName, defaultOutputName, statements, endpoints, defaultSecuritySchemes, securitySchemeMap, typeResolver, referencedAssemblyInspector, schemaRegistry, fileSystemProvider, logger);
             return controllerDefinitionProvider.Controllers;
         }
     }

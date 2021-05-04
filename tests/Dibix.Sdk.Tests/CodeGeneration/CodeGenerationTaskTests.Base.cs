@@ -54,7 +54,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
               , contracts: contracts.Select(ToTaskItem)
               , endpoints: endpoints.Select(ToTaskItem)
               , references: Enumerable.Empty<TaskItem>()
-              , securitySchemes: new[] { "HLNS-SIT", "HLNS-ClientId" }.Select(ToTaskItem)
+              , defaultSecuritySchemes: new[] { "HLNS-SIT", "HLNS-ClientId" }.Select(ToTaskItem)
               , isEmbedded: isEmbedded
               , databaseSchemaProviderName: DatabaseTestUtility.DatabaseSchemaProviderName
               , modelCollation: DatabaseTestUtility.ModelCollation

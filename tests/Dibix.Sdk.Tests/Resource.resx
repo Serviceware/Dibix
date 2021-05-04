@@ -268,7 +268,7 @@ namespace Dibix.Sdk.Tests
         #region Interfaces
         public interface IGenericEndpointService
         {
-            Task&lt;HttpResponseMessage&gt; EmptyWithParams1Async(string password, string Authorization, IEnumerable&lt;object&gt; ids, CancellationToken cancellationToken = default);
+            Task&lt;HttpResponseMessage&gt; EmptyWithParams1Async(string password, string acceptLanguage, IEnumerable&lt;object&gt; ids, CancellationToken cancellationToken = default);
             Task&lt;HttpResponseMessage&gt; EmptyWithParams2Async(string password, string v, string w, System.Guid? x, IEnumerable&lt;object&gt; ids, bool y, int? z, CancellationToken cancellationToken = default);
             Task&lt;HttpResponse&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;&gt; SingleConrecteResultWithParamsAsync(IEnumerable&lt;int&gt; ids, CancellationToken cancellationToken = default);
             Task&lt;HttpResponse&lt;System.IO.Stream&gt;&gt; FileResultAsync(int id, CancellationToken cancellationToken = default);
@@ -293,7 +293,7 @@ namespace Dibix.Sdk.Tests
                 this._authorizationProvider = authorizationProvider;
             }
 
-            public async Task&lt;HttpResponseMessage&gt; EmptyWithParams1Async(string password, string Authorization, IEnumerable&lt;object&gt; ids, CancellationToken cancellationToken = default)
+            public async Task&lt;HttpResponseMessage&gt; EmptyWithParams1Async(string password, string acceptLanguage, IEnumerable&lt;object&gt; ids, CancellationToken cancellationToken = default)
             {
                 using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
                 {
@@ -303,8 +303,8 @@ namespace Dibix.Sdk.Tests
                     HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("GET"), uri);
                     requestMessage.Headers.Add("HLNS-SIT", this._authorizationProvider.GetValue("HLNS-SIT"));
                     requestMessage.Headers.Add("HLNS-ClientId", this._authorizationProvider.GetValue("HLNS-ClientId"));
-                    if (Authorization != null)
-                        requestMessage.Headers.Add("Authorization", Authorization);
+                    if (acceptLanguage != null)
+                        requestMessage.Headers.Add("Accept-Language", acceptLanguage);
                     HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
                     return responseMessage;
                 }
@@ -349,8 +349,8 @@ namespace Dibix.Sdk.Tests
                 using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
                 {
                     HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("GET"), $"Tests/GenericEndpoint/{id}");
-                    requestMessage.Headers.Add("HLNS-SIT", this._authorizationProvider.GetValue("HLNS-SIT"));
-                    requestMessage.Headers.Add("HLNS-ClientId", this._authorizationProvider.GetValue("HLNS-ClientId"));
+                    if (this._authorizationProvider.GetValue("Bearer") != null)
+                        requestMessage.Headers.Add("Authorization", $"Bearer {this._authorizationProvider.GetValue("Bearer")}");
                     HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
                     System.IO.Stream responseContent = await responseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false);
                     return new HttpResponse&lt;System.IO.Stream&gt;(responseMessage, responseContent);
@@ -592,7 +592,7 @@ namespace Dibix.Sdk.Tests
                         y.Method = HttpApiMethod.Get;
                         y.ChildRoute = "{password}/Fixed";
                         y.ResolveParameterFromNull("password");
-                        y.ResolveParameterFromSource("v", "HEADER", "Authorization.Scheme");
+                        y.ResolveParameterFromSource("v", "HEADER", "Accept-Language");
                         y.ResolveParameterFromSource("w", "HEADER", "Authorization.Parameter");
                         y.ResolveParameterFromSource("x", "DBX", "X");
                         y.ResolveParameterFromConstant("y", true);
@@ -613,6 +613,7 @@ namespace Dibix.Sdk.Tests
                     {
                         y.Method = HttpApiMethod.Get;
                         y.ChildRoute = "{id}";
+                        y.IsAnonymous = true;
                         y.FileResponse = new HttpFileResponseDefinition(cache: false);
                     });
                     x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.FileUpload)), y =&gt;
@@ -656,11 +657,10 @@ paths:
           required: true
           schema:
             type: string
-        - name: Authorization
+        - name: Accept-Language
           in: header
           schema:
             type: string
-            nullable: true
         - name: ids
           in: query
           required: true
@@ -675,7 +675,7 @@ paths:
           description: NoContent
       security:
         - HLNS-SIT: [ ]
-        - HLNS-ClientId: [ ]
+          HLNS-ClientId: [ ]
   '/Tests/GenericEndpoint/{password}/User':
     get:
       tags:
@@ -754,7 +754,7 @@ paths:
                 $ref: '#/components/schemas/GenericContract'
       security:
         - HLNS-SIT: [ ]
-        - HLNS-ClientId: [ ]
+          HLNS-ClientId: [ ]
   '/Tests/GenericEndpoint/{id}':
     get:
       tags:
@@ -779,8 +779,8 @@ paths:
         '404':
           description: NotFound
       security:
-        - HLNS-SIT: [ ]
-        - HLNS-ClientId: [ ]
+        - { }
+        - Bearer: [ ]
   /Tests/GenericEndpoint:
     put:
       tags:
@@ -799,7 +799,7 @@ paths:
           description: NoContent
       security:
         - HLNS-SIT: [ ]
-        - HLNS-ClientId: [ ]
+          HLNS-ClientId: [ ]
     post:
       tags:
         - GenericEndpoint
@@ -816,7 +816,7 @@ paths:
           description: NoContent
       security:
         - HLNS-SIT: [ ]
-        - HLNS-ClientId: [ ]
+          HLNS-ClientId: [ ]
 components:
   schemas:
     GenericParameterSet:
@@ -891,7 +891,11 @@ components:
     HLNS-ClientId:
       type: apiKey
       name: HLNS-ClientId
-      in: header</value>
+      in: header
+    Bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT</value>
   </data>
   <data name="ExplicitProcedureArgumentSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;

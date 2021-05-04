@@ -25,7 +25,8 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly string _areaName;
         private readonly string _outputName;
         private readonly ICollection<SqlStatementInfo> _statements;
-        private readonly IEnumerable<SecurityScheme> _securitySchemes;
+        private readonly IDictionary<string, SecurityScheme> _securitySchemeMap;
+        private readonly ICollection<string> _defaultSecuritySchemes;
         private readonly ITypeResolverFacade _typeResolver;
         private readonly ReferencedAssemblyInspector _referencedAssemblyInspector;
         private readonly ISchemaRegistry _schemaRegistry;
@@ -34,6 +35,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         #region Properties
         public ICollection<ControllerDefinition> Controllers { get; }
+        public ICollection<SecurityScheme> SecuritySchemes { get; }
         protected override string SchemaName => "dibix.endpoints.schema";
         #endregion
 
@@ -46,7 +48,8 @@ namespace Dibix.Sdk.CodeGeneration
           , string outputName
           , ICollection<SqlStatementInfo> statements
           , IEnumerable<string> endpoints
-          , IEnumerable<SecurityScheme> securitySchemes
+          , ICollection<string> defaultSecuritySchemes
+          , IDictionary<string, SecurityScheme> securitySchemeMap
           , ITypeResolverFacade typeResolver
           , ReferencedAssemblyInspector referencedAssemblyInspector
           , ISchemaRegistry schemaRegistry
@@ -59,12 +62,14 @@ namespace Dibix.Sdk.CodeGeneration
             this._areaName = areaName;
             this._outputName = outputName;
             this._statements = statements;
-            this._securitySchemes = securitySchemes;
+            this._securitySchemeMap = securitySchemeMap;
+            this._defaultSecuritySchemes = defaultSecuritySchemes;
             this._typeResolver = typeResolver;
             this._referencedAssemblyInspector = referencedAssemblyInspector;
             this._schemaRegistry = schemaRegistry;
             this._assemblyResolver = referencedAssemblyInspector;
             this.Controllers = new Collection<ControllerDefinition>();
+            this.SecuritySchemes = new Collection<SecurityScheme>();
             this.Collect(endpoints);
         }
         #endregion
@@ -111,7 +116,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             // Collect explicit parameters
             IDictionary<string, ExplicitParameter> explicitParameters = new Dictionary<string, ExplicitParameter>();
-            CollectActionParameters((JObject)action.Property("params")?.Value, explicitParameters);
+            CollectActionParameters(action, explicitParameters);
 
             // Collect path parameters
             IDictionary<string, Group> pathParameters = new Dictionary<string, Group>(StringComparer.OrdinalIgnoreCase);
@@ -159,7 +164,6 @@ namespace Dibix.Sdk.CodeGeneration
             actionDefinition.Description = (string)action.Property("description")?.Value;
             actionDefinition.ChildRoute = childRoute;
             actionDefinition.RequestBody = requestBody;
-            actionDefinition.IsAnonymous = (bool?)action.Property("isAnonymous")?.Value ?? default;
             actionDefinition.FileResponse = ReadFileResponse(action);
 
             if (actionDefinition.FileResponse != null)
@@ -168,13 +172,14 @@ namespace Dibix.Sdk.CodeGeneration
                 actionDefinition.Responses[HttpStatusCode.NotFound] = new ActionResponse(HttpStatusCode.NotFound);
             }
 
-            this.CollectActionResponses((JObject)action.Property("responses")?.Value, actionDefinition, filePath);
+            this.CollectActionResponses(action, actionDefinition, filePath);
+            this.CollectSecuritySchemes(action, actionDefinition, filePath);
 
             if (!actionDefinition.Responses.Any())
                 actionDefinition.DefaultResponseType = null;
 
-            if (!actionDefinition.IsAnonymous)
-                actionDefinition.SecuritySchemes.AddRange(this._securitySchemes);
+            if (!actionDefinition.SecuritySchemes.Any()) 
+                actionDefinition.SecuritySchemes.Add(this.EnsureDefaultSecuritySchemes().ToArray());
 
             if (controller.Actions.TryAdd(actionDefinition))
                 return;
@@ -252,8 +257,9 @@ namespace Dibix.Sdk.CodeGeneration
             controller.ControllerImports.Add(typeName);
         }
 
-        private static void CollectActionParameters(JObject mappings, IDictionary<string, ExplicitParameter> target)
+        private static void CollectActionParameters(JObject action, IDictionary<string, ExplicitParameter> target)
         {
+            JObject mappings = (JObject)action.Property("params")?.Value;
             if (mappings == null)
                 return;
 
@@ -648,8 +654,9 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
             parameterRegistry.Add(actionParameter);
         }
 
-        private void CollectActionResponses(JObject responses, ActionDefinition actionDefinition, string filePath)
+        private void CollectActionResponses(JObject actionJson, ActionDefinition actionDefinition, string filePath)
         {
+            JObject responses = (JObject)actionJson.Property("responses")?.Value;
             if (responses == null)
                 return;
 
@@ -672,7 +679,6 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
                         break;
 
                     case JTokenType.Object:
-
                         JObject responseObject = (JObject)property.Value;
                         string description = (string)responseObject.Property("description")?.Value;
 
@@ -693,6 +699,82 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
                 }
             }
         }
+
+        private void CollectSecuritySchemes(JObject actionJson, ActionDefinition actionDefinition, string filePath)
+        {
+            JProperty property = actionJson.Property("authorization");
+            if (property == null)
+                return;
+
+            switch (property.Value.Type)
+            {
+                case JTokenType.String:
+                    this.CollectSecurityScheme(actionDefinition, property.Value, filePath);
+                    break;
+
+                case JTokenType.Array:
+                    JArray array = (JArray)property.Value;
+                    foreach (JToken value in array)
+                        this.CollectSecurityScheme(actionDefinition, value, filePath);
+
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(property.Value.Path, property.Value.Type, null);
+            }
+        }
+
+        private void CollectSecurityScheme(ActionDefinition actionDefinition, JToken value, string filePath)
+        {
+            if (value.Type != JTokenType.String)
+                throw new ArgumentOutOfRangeException(value.Path, value.Type, null);
+
+            string name = (string)value;
+            if (!this._securitySchemeMap.ContainsKey(name))
+            {
+                if (!CodeGeneration.SecuritySchemes.TryFindSecurityScheme(name, out SecurityScheme scheme)
+                 && !this.TryGetDefaultSecurityScheme(name, out scheme))
+                {
+                    IJsonLineInfo lineInfo = value;
+                    string possibleValues = String.Join(", ", CodeGeneration.SecuritySchemes
+                                                                            .Schemes
+                                                                            .Select(x => x.Name)
+                                                                            .Concat(this._defaultSecuritySchemes));
+                    base.Logger.LogError(null, $"Unknown authorization scheme '{name}'. Possible values are: {possibleValues}", filePath, lineInfo.LineNumber, lineInfo.LinePosition);
+                    return;
+                }
+                this._securitySchemeMap.Add(name, scheme);
+            }
+
+            actionDefinition.SecuritySchemes.Add(new[] { name });
+        }
+
+        private bool TryGetDefaultSecurityScheme(string name, out SecurityScheme scheme)
+        {
+            if (this._defaultSecuritySchemes.Contains(name))
+            {
+                scheme = CreateDefaultSecurityScheme(name);
+                return true;
+            }
+
+            scheme = null;
+            return false;
+        }
+
+        private IEnumerable<string> EnsureDefaultSecuritySchemes()
+        {
+            foreach (string name in this._defaultSecuritySchemes)
+            {
+                if (!this._securitySchemeMap.ContainsKey(name))
+                {
+                    SecurityScheme scheme = CreateDefaultSecurityScheme(name);
+                    this._securitySchemeMap.Add(name, scheme);
+                }
+                yield return name;
+            }
+        }
+
+        private static SecurityScheme CreateDefaultSecurityScheme(string name) => new SecurityScheme(name, SecuritySchemeKind.ApiKey);
 
         private TypeReference ResolveType(JValue typeNameValue, string filePath)
         {

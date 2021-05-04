@@ -29,7 +29,7 @@ namespace Dibix.Sdk
           , IEnumerable<TaskItem> contracts
           , IEnumerable<TaskItem> endpoints
           , IEnumerable<TaskItem> references
-          , IEnumerable<TaskItem> securitySchemes
+          , IEnumerable<TaskItem> defaultSecuritySchemes
           , bool isEmbedded
           , string databaseSchemaProviderName
           , string modelCollation
@@ -75,7 +75,7 @@ namespace Dibix.Sdk
               , contracts
               , endpoints
               , references
-              , securitySchemes
+              , defaultSecuritySchemes
               , isEmbedded
               , databaseSchemaProviderName
               , modelCollation

@@ -7,7 +7,7 @@
       "target": "EmptyWithParams",
       "childRoute": "{password}/Fixed",
       "params": {
-        "v": "HEADER.Authorization.Scheme",
+        "v": "HEADER.Accept-Language",
         "w": "HEADER.Authorization.Parameter",
         "x": "DBX.X",
         "password": null,
@@ -19,7 +19,7 @@
       "method": "GET",
       "target": "EmptyWithParams",
       "childRoute": "{password}/User",
-      "isAnonymous": true
+      "authorization": "Anonymous"
     },
     {
       "method": "GET",
@@ -30,9 +30,13 @@
       "method": "GET",
       "target": "FileResult",
       "childRoute": "{id}",
+      "authorization": [
+        "Anonymous",
+        "Bearer"
+      ],
       "fileResponse": {
         "mediaType": "image/*",
-        "cache": false 
+        "cache": false
       }
     },
     {

@@ -31,34 +31,26 @@ namespace Dibix.Sdk.OpenApi
           , [PrimitiveType.String]         = () => new OpenApiSchema { Type = "string"                        }
           , [PrimitiveType.UUID]           = () => new OpenApiSchema { Type = "string",  Format = "uuid"      }
         };
+        private static readonly string[] ReservedOpenApiHeaders = { "Accept", "Authorization", "Content-Type" };
         private static readonly OpenApiSchema NullSchema = new OpenApiSchema { Type = "null" };
 
-        public static OpenApiDocument Generate
-        (
-            string title
-          , string version
-          , string description
-          , string baseUrl
-          , string areaName
-          , string rootNamespace
-          , ICollection<ControllerDefinition> controllers
-          , ISchemaRegistry schemaRegistry
-        )
+        public static OpenApiDocument Generate(CodeArtifactsGenerationModel model, ISchemaRegistry schemaRegistry)
         {
             OpenApiDocument document = new OpenApiDocument
             {
                 Info = new OpenApiInfo
                 {
-                    Title = title,
-                    Version = !String.IsNullOrEmpty(version) ? version : "1.0.0",
-                    Description = description
+                    Title = model.Title,
+                    Version = !String.IsNullOrEmpty(model.Version) ? model.Version : "1.0.0",
+                    Description = model.Description
                 }
             };
             
-            if (!String.IsNullOrEmpty(baseUrl))
-                document.Servers.Add(new OpenApiServer { Url = baseUrl });
+            if (!String.IsNullOrEmpty(model.BaseUrl))
+                document.Servers.Add(new OpenApiServer { Url = model.BaseUrl });
 
-            AppendPaths(document, areaName, controllers, rootNamespace, schemaRegistry);
+            AppendSecuritySchemes(document, model.SecuritySchemes);
+            AppendPaths(document, model.AreaName, model.Controllers, model.RootNamespace, schemaRegistry);
             return document;
         }
 
@@ -166,7 +158,12 @@ namespace Dibix.Sdk.OpenApi
 
         private static void AppendHeaderParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
-            TypeReference parameterType = new PrimitiveTypeReference(PrimitiveType.String, isNullable: true, isEnumerable: false);
+            // Header parameters named Accept, Content-Type and Authorization are not allowed. To describe these headers, use the corresponding OpenAPI keywords
+            // See: https://swagger.io/docs/specification/describing-parameters/#header-parameters
+            if (ReservedOpenApiHeaders.Contains(parameter.ApiParameterName))
+                return;
+
+            TypeReference parameterType = new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: false);
             AppendParameter(document, operation, parameter, parameterType: parameterType, isEnumerable: false, ParameterLocation.Header, isRequired: false, rootNamespace, schemaRegistry);
         }
 
@@ -279,23 +276,78 @@ namespace Dibix.Sdk.OpenApi
 
         private static void AppendSecuritySchemes(OpenApiDocument document, ActionDefinition action, OpenApiOperation operation)
         {
-            foreach (SecurityScheme securityScheme in action.SecuritySchemes)
-            {
-                OpenApiSecurityScheme scheme = new OpenApiSecurityScheme
-                {
-                    Name = securityScheme.Name,
-                    In = ParameterLocation.Header,
-                    Reference = new OpenApiReference
-                    {
-                        Id = securityScheme.Name,
-                        Type = ReferenceType.SecurityScheme
-                    }
-                };
-                OpenApiSecurityRequirement requirement = new OpenApiSecurityRequirement { { scheme, new Collection<string>() } };
-                operation.Security.Add(requirement);
+            if (action.SecuritySchemes.SelectMany(x => x).All(x => x == SecuritySchemes.Anonymous.Name))
+                return;
 
-                if (!EnsureComponents(document).SecuritySchemes.ContainsKey(securityScheme.Name))
-                    document.Components.SecuritySchemes.Add(securityScheme.Name, scheme);
+            foreach (ICollection<string> securitySchemeGroup in action.SecuritySchemes)
+            {
+                OpenApiSecurityRequirement requirement = new OpenApiSecurityRequirement();
+                foreach (string securitySchemeName in securitySchemeGroup)
+                {
+                    if (securitySchemeName == SecuritySchemes.Anonymous.Name)
+                        continue;
+
+                    OpenApiSecurityScheme scheme = document.Components.SecuritySchemes[securitySchemeName];
+                    requirement.Add(scheme, new Collection<string>());
+                }
+                operation.Security.Add(requirement);
+            }
+        }
+
+        private static void AppendSecuritySchemes(OpenApiDocument document, IEnumerable<SecurityScheme> securitySchemes)
+        {
+            foreach (SecurityScheme modelSecurityScheme in securitySchemes)
+            {
+                string name = modelSecurityScheme.Name;
+                OpenApiSecurityScheme openApiSecurityScheme = CreateSecurityScheme(name, modelSecurityScheme.Kind, document);
+
+                if (openApiSecurityScheme == null)
+                    continue;
+
+                if (EnsureComponents(document).SecuritySchemes.ContainsKey(name)) 
+                    continue;
+
+                document.Components.SecuritySchemes.Add(name, openApiSecurityScheme);
+            }
+        }
+
+        private static OpenApiSecurityScheme CreateSecurityScheme(string name, SecuritySchemeKind kind, OpenApiDocument document)
+        {
+            switch (kind)
+            {
+                case SecuritySchemeKind.None: 
+                    return null;
+
+                case SecuritySchemeKind.Bearer:
+                    return new OpenApiSecurityScheme
+                    {
+                        Name = name,
+                        Type = SecuritySchemeType.Http,
+                        In = ParameterLocation.Header,
+                        Reference = new OpenApiReference
+                        {
+                            Id = name,
+                            Type = ReferenceType.SecurityScheme
+                        },
+                        Scheme = "bearer",
+                        BearerFormat = "JWT"
+                    };
+
+                case SecuritySchemeKind.ApiKey:
+                    return new OpenApiSecurityScheme
+                    {
+                        Name = name,
+                        Type = SecuritySchemeType.ApiKey,
+                        In = ParameterLocation.Header,
+                        Reference = new OpenApiReference
+                        {
+                            Id = name,
+                            Type = ReferenceType.SecurityScheme
+                        }
+                    };
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(kind), kind, null);
             }
         }
 

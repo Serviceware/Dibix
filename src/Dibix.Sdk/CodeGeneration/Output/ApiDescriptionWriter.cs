@@ -105,7 +105,7 @@ namespace Dibix.Sdk.CodeGeneration
                         WriteParameter(writer, parameter.InternalParameterName, parameter.Source);
                     }
 
-                    if (action.IsAnonymous)
+                    if (action.SecuritySchemes.Any(x => x.Contains(SecuritySchemes.Anonymous.Name)))
                         writer.WriteLine("y.IsAnonymous = true;");
 
                     if (action.FileResponse != null)

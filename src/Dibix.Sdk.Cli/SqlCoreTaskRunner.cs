@@ -28,7 +28,7 @@
               , contracts: configuration.GetItems("Contracts")
               , endpoints: configuration.GetItems("Endpoints")
               , references: configuration.GetItems("References")
-              , securitySchemes: configuration.GetItems("SecuritySchemes")
+              , defaultSecuritySchemes: configuration.GetItems("DefaultSecuritySchemes")
               , isEmbedded: configuration.GetSingleValue<bool>("IsEmbedded")
               , databaseSchemaProviderName: configuration.GetSingleValue<string>("DatabaseSchemaProviderName")
               , modelCollation: configuration.GetSingleValue<string>("ModelCollation")

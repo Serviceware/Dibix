@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Dibix.Sdk.CodeGeneration.CSharp;
@@ -37,11 +39,13 @@ namespace Dibix.Sdk.CodeGeneration
                                                                               }))
                                                                               .ToDictionary(x => x.Action, x => x.IsAmbiguous ? $"{x.Name}{x.Position}" : x.Name);
 
+            IDictionary<string, SecurityScheme> securitySchemeMap = context.Model.SecuritySchemes.ToDictionary(x => x.Name);
+
             for (int i = 0; i < controllers.Count; i++)
             {
                 ControllerDefinition controller = controllers[i];
                 string serviceName = $"{controller.Name}Service";
-                this.WriteController(context, controller, serviceName, operationIdMap);
+                this.WriteController(context, controller, serviceName, operationIdMap, securitySchemeMap);
 
                 if (i + 1 < controllers.Count)
                     context.Output.AddSeparator();
@@ -50,7 +54,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Protected Methods
-        protected abstract void WriteController(CodeGenerationContext context, ControllerDefinition controller, string serviceName, IDictionary<ActionDefinition, string> operationIdMap);
+        protected abstract void WriteController(CodeGenerationContext context, ControllerDefinition controller, string serviceName, IDictionary<ActionDefinition, string> operationIdMap, IDictionary<string, SecurityScheme> securitySchemeMap);
 
         protected void AddMethod(ActionDefinition action, CodeGenerationContext context, IDictionary<ActionDefinition, string> operationIdMap, Func<string, string, CSharpMethod> methodTarget)
         {
@@ -67,7 +71,12 @@ namespace Dibix.Sdk.CodeGeneration
                  && parameter.Location != ActionParameterLocation.Header)
                     continue;
 
-                method.AddParameter(parameter.ApiParameterName, ResolveParameterTypeName(parameter, context));
+                // Will be handled by SecurityScheme/IHttpAuthorizationProvider
+                if (parameter.Location == ActionParameterLocation.Header && parameter.ApiParameterName == "Authorization")
+                    continue;
+
+                string normalizedApiParameterName = NormalizeApiParameterName(parameter.ApiParameterName);
+                method.AddParameter(normalizedApiParameterName, ResolveParameterTypeName(parameter, context));
             }
 
             if (action.RequestBody != null)
@@ -78,6 +87,20 @@ namespace Dibix.Sdk.CodeGeneration
         }
 
         protected bool IsStream(TypeReference typeReference) => typeReference is PrimitiveTypeReference primitiveTypeReference && primitiveTypeReference.Type == PrimitiveType.Stream;
+
+        protected static string NormalizeApiParameterName(string name)
+        {
+            string normalized = Regex.Replace(name, "[-]", String.Empty);
+            StringBuilder sb = new StringBuilder();
+            if (normalized.Length > 0)
+                sb.Append(normalized[0].ToString().ToLowerInvariant());
+
+            if (normalized.Length > 1)
+                sb.Append(normalized.Substring(1));
+
+            string result = sb.ToString();
+            return result;
+        }
         #endregion
 
         #region Private Methods
