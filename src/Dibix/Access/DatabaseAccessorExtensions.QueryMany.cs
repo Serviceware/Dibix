@@ -80,6 +80,12 @@ namespace Dibix
             Guard.IsNotNull(accessor, nameof(accessor));
             return accessor.QueryMany<TReturn, TSecond, TThird>(sql, CommandType.Text, ParametersVisitor.Empty, splitOn);
         }
+        // Notifications (GetNotificationWebRequest)
+        public static IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird>(this IDatabaseAccessor accessor, string sql, ParametersVisitor parameters, string splitOn) where TReturn : new()
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
+            return accessor.QueryMany<TReturn, TSecond, TThird>(sql, CommandType.Text, parameters, splitOn);
+        }
         // SubProcess (GetCmdbFlows)
         public static IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird>(this IDatabaseAccessor accessor, string sql, CommandType commandType, string splitOn) where TReturn : new()
         {
