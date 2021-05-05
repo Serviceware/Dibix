@@ -831,6 +831,7 @@ Parameter: input", exception.Message);
             {
                 x.ResolveParameterFromSource("authorization", "HEADER", "Authorization");
                 x.ResolveParameterFromSource("authorizationscheme", "HEADER", "Authorization.Scheme");
+                x.ResolveParameterFromSource("acceptLanguage", "HEADER", "Accept-Language");
             });
             TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
@@ -843,10 +844,13 @@ Parameter: input", exception.Message);
         $headerSource = $request.Headers;
         $arguments.Item[""databaseAccessorFactory""] = (System.Object)$databaseaccessorfactorySource;
         $arguments.Item[""authorization""] = (System.Object)$headerSource.Authorization;
-        $arguments.Item[""authorizationscheme""] = (System.Object)($headerSource.Authorization).Scheme
+        $arguments.Item[""authorizationscheme""] = (System.Object)($headerSource.Authorization).Scheme;
+        $arguments.Item[""acceptlanguage""] = (System.Object).Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
+            ""acceptlanguage"",
+            $headerSource.AcceptLanguage)
     }
 }", result.Source);
-            Assert.Equal(2, result.Parameters.Count);
+            Assert.Equal(3, result.Parameters.Count);
             Assert.Equal("authorization", result.Parameters["authorization"].Name);
             Assert.Equal(typeof(AuthenticationHeaderValue), result.Parameters["authorization"].Type);
             Assert.Equal(HttpParameterLocation.Header, result.Parameters["authorization"].Location);
@@ -855,9 +859,14 @@ Parameter: input", exception.Message);
             Assert.Equal(typeof(string), result.Parameters["authorizationscheme"].Type);
             Assert.Equal(HttpParameterLocation.Header, result.Parameters["authorizationscheme"].Location);
             Assert.True(result.Parameters["authorizationscheme"].IsOptional);
+            Assert.Equal("acceptlanguage", result.Parameters["acceptlanguage"].Name);
+            Assert.Equal(typeof(string), result.Parameters["acceptlanguage"].Type);
+            Assert.Equal(HttpParameterLocation.Header, result.Parameters["acceptlanguage"].Location);
+            Assert.True(result.Parameters["acceptlanguage"].IsOptional);
 
             HttpRequestMessage request = new HttpRequestMessage();
             request.Headers.Add("Authorization", "Bearer token");
+            request.Headers.Add("Accept-Language", "en-US,en;q=0.5");
             IDictionary<string, object> arguments = new Dictionary<string, object>();
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
@@ -866,15 +875,16 @@ Parameter: input", exception.Message);
 
             result.PrepareParameters(request, arguments, dependencyResolver.Object);
 
-            Assert.Equal(3, arguments.Count);
+            Assert.Equal(4, arguments.Count);
             Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             AuthenticationHeaderValue authorization = Assert.IsType<AuthenticationHeaderValue>(arguments["authorization"]);
             Assert.Equal("Bearer", authorization.Scheme);
             Assert.Equal("token", authorization.Parameter);
             Assert.Equal("Bearer", arguments["authorizationscheme"]);
+            Assert.Equal("en-US, en; q=0.5", arguments["acceptlanguage"]);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
-        private static void Compile_HeaderSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, AuthenticationHeaderValue authorization, string authorizationscheme) { }
+        private static void Compile_HeaderSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, AuthenticationHeaderValue authorization, string authorizationscheme, string acceptlanguage) { }
 
         [Fact]
         public void Compile_RequestSource()

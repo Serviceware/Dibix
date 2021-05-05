@@ -495,7 +495,11 @@ namespace Dibix.Http.Server
 
         private static Expression CollectSourcePropertyValue(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter, Expression value, bool ensureNullPropagation)
         {
-            string[] parts = parameter.Source.PropertyPath.Split('.');
+            return CollectSourcePropertyValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, parameter, value, ensureNullPropagation, parameter.Source.PropertyPath);
+        }
+        private static Expression CollectSourcePropertyValue(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter, Expression value, bool ensureNullPropagation, string propertyPath)
+        {
+            string[] parts = propertyPath.Split('.');
             ICollection<Expression> nullCheckTargets = new Collection<Expression>();
             for (int i = 0; i < parts.Length; i++)
             {
@@ -649,7 +653,14 @@ Either create a mapping or make sure a property of the same name exists in the s
                 //if (!Equals(value, null))
                 {
                     TypeConverter typeConverter = TypeDescriptor.GetConverter(typeof(TTarget));
-                    result = typeConverter.CanConvertFrom(typeof(TSource)) ? typeConverter.ConvertFrom(value) : Convert.ChangeType(value, typeof(TTarget));
+                    if (typeConverter.CanConvertFrom(typeof(TSource)))
+                        result = typeConverter.ConvertFrom(value);
+                    else if (typeof(IComparable).IsAssignableFrom(typeof(TSource)))
+                        result = Convert.ChangeType(value, typeof(TTarget));
+                    else if (!Equals(value, null))
+                        result = value.ToString();
+                    else 
+                        result = default(TTarget);
                 }
                 return (TTarget)result;
             }
@@ -890,7 +901,8 @@ Either create a mapping or make sure a property of the same name exists in the s
                 this.PropertyPath = propertyPath;
             }
 
-            public void ResolveUsingInstanceProperty(Type instanceType, Expression instanceValue, bool ensureNullPropagation)
+            public void ResolveUsingInstanceProperty(Type instanceType, Expression instanceValue, bool ensureNullPropagation) => this.ResolveUsingInstanceProperty(instanceType, instanceValue, ensureNullPropagation, this.PropertyPath);
+            public void ResolveUsingInstanceProperty(Type instanceType, Expression instanceValue, bool ensureNullPropagation, string propertyPath)
             {
                 if (!this._sourceMap.TryGetValue(this.SourceName, out Expression sourceVariableInstance))
                 {
@@ -908,7 +920,7 @@ Either create a mapping or make sure a property of the same name exists in the s
                 if (this.PropertyPath == null)
                     return;
 
-                this.Value = CollectSourcePropertyValue(this.Action, this.RequestParameter, this.ArgumentsParameter, this.DependencyResolverParameter, this._compilationContext, this._sourceMap, this.Parent, this.Value, ensureNullPropagation);
+                this.Value = CollectSourcePropertyValue(this.Action, this.RequestParameter, this.ArgumentsParameter, this.DependencyResolverParameter, this._compilationContext, this._sourceMap, this.Parent, this.Value, ensureNullPropagation, propertyPath);
             }
 
             public void ResolveUsingValue(Expression value) => this.Value = value;

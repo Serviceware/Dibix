@@ -12,6 +12,7 @@ namespace Dibix.Http.Server
         string PropertyPath { get; }
 
         void ResolveUsingInstanceProperty(Type instanceType, Expression instanceValue, bool ensureNullPropagation);
+        void ResolveUsingInstanceProperty(Type instanceType, Expression instanceValue, bool ensureNullPropagation, string propertyPath);
         void ResolveUsingValue(Expression value);
     }
 }
