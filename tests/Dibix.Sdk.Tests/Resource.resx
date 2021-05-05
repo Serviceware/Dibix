@@ -237,6 +237,7 @@ namespace Dibix.Sdk.Tests
 
         public sealed class InputContract
         {
+            public string U { get; set; }
             public string V { get; set; }
             public string W { get; set; }
             public System.Guid X { get; set; }
@@ -268,8 +269,8 @@ namespace Dibix.Sdk.Tests
         #region Interfaces
         public interface IGenericEndpointService
         {
-            Task&lt;HttpResponseMessage&gt; EmptyWithParams1Async(string password, string acceptLanguage, IEnumerable&lt;object&gt; ids, CancellationToken cancellationToken = default);
-            Task&lt;HttpResponseMessage&gt; EmptyWithParams2Async(string password, string v, string w, System.Guid? x, IEnumerable&lt;object&gt; ids, bool y, int? z, CancellationToken cancellationToken = default);
+            Task&lt;HttpResponseMessage&gt; EmptyWithParams1Async(string password, string userAgent, IEnumerable&lt;object&gt; ids, string acceptLanguage = null, CancellationToken cancellationToken = default);
+            Task&lt;HttpResponseMessage&gt; EmptyWithParams2Async(string password, string u, string v, System.Guid? w, IEnumerable&lt;object&gt; ids, string x = null, bool y = true, int? z = null, CancellationToken cancellationToken = default);
             Task&lt;HttpResponse&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;&gt; SingleConrecteResultWithParamsAsync(IEnumerable&lt;int&gt; ids, CancellationToken cancellationToken = default);
             Task&lt;HttpResponse&lt;System.IO.Stream&gt;&gt; FileResultAsync(int id, CancellationToken cancellationToken = default);
             Task&lt;HttpResponseMessage&gt; FileUploadAsync(System.IO.Stream body, CancellationToken cancellationToken = default);
@@ -293,7 +294,7 @@ namespace Dibix.Sdk.Tests
                 this._authorizationProvider = authorizationProvider;
             }
 
-            public async Task&lt;HttpResponseMessage&gt; EmptyWithParams1Async(string password, string acceptLanguage, IEnumerable&lt;object&gt; ids, CancellationToken cancellationToken = default)
+            public async Task&lt;HttpResponseMessage&gt; EmptyWithParams1Async(string password, string userAgent, IEnumerable&lt;object&gt; ids, string acceptLanguage = null, CancellationToken cancellationToken = default)
             {
                 using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
                 {
@@ -303,6 +304,7 @@ namespace Dibix.Sdk.Tests
                     HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("GET"), uri);
                     requestMessage.Headers.Add("HLNS-SIT", this._authorizationProvider.GetValue("HLNS-SIT"));
                     requestMessage.Headers.Add("HLNS-ClientId", this._authorizationProvider.GetValue("HLNS-ClientId"));
+                    requestMessage.Headers.Add("User-Agent", userAgent);
                     if (acceptLanguage != null)
                         requestMessage.Headers.Add("Accept-Language", acceptLanguage);
                     HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
@@ -310,15 +312,16 @@ namespace Dibix.Sdk.Tests
                 }
             }
 
-            public async Task&lt;HttpResponseMessage&gt; EmptyWithParams2Async(string password, string v, string w, System.Guid? x, IEnumerable&lt;object&gt; ids, bool y, int? z, CancellationToken cancellationToken = default)
+            public async Task&lt;HttpResponseMessage&gt; EmptyWithParams2Async(string password, string u, string v, System.Guid? w, IEnumerable&lt;object&gt; ids, string x = null, bool y = true, int? z = null, CancellationToken cancellationToken = default)
             {
                 using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
                 {
                     Uri uri = UriBuilder.Create($"Tests/GenericEndpoint/{password}/User", UriKind.Relative)
+                                        .AddQueryParam(nameof(u), u)
                                         .AddQueryParam(nameof(v), v)
                                         .AddQueryParam(nameof(w), w)
-                                        .AddQueryParam(nameof(x), x)
                                         .AddQueryParam(nameof(ids), ids)
+                                        .AddQueryParam(nameof(x), x)
                                         .AddQueryParam(nameof(y), y)
                                         .AddQueryParam(nameof(z), z)
                                         .Build();
@@ -439,17 +442,18 @@ namespace Dibix.Sdk.Tests
             // SingleConrecteResultWithParams
             private const string SingleConrecteResultWithParamsCommandText = "[dbo].[dbx_tests_syntax_singleconcreteresult_params]";
 
-            public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string v, string w, System.Guid? x, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, bool y = true, int? z = null)
+            public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string u, string v, System.Guid? w, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string x = null, bool y = true, int? z = null)
             {
                 using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                 {
                     ParametersVisitor @params = accessor.Parameters()
                                                         .SetFromTemplate(new
                                                         {
+                                                            u,
                                                             v,
                                                             w,
-                                                            x,
                                                             ids,
+                                                            x,
                                                             y,
                                                             z
                                                         })
@@ -567,6 +571,7 @@ namespace Dibix.Sdk.Tests
 
         public sealed class InputContract
         {
+            public string U { get; set; }
             public string V { get; set; }
             [Optional]
             public string W { get; set; }
@@ -592,9 +597,10 @@ namespace Dibix.Sdk.Tests
                         y.Method = HttpApiMethod.Get;
                         y.ChildRoute = "{password}/Fixed";
                         y.ResolveParameterFromNull("password");
-                        y.ResolveParameterFromSource("v", "HEADER", "Accept-Language");
-                        y.ResolveParameterFromSource("w", "HEADER", "Authorization.Parameter");
-                        y.ResolveParameterFromSource("x", "DBX", "X");
+                        y.ResolveParameterFromSource("u", "HEADER", "User-Agent");
+                        y.ResolveParameterFromSource("v", "HEADER", "Authorization.Parameter");
+                        y.ResolveParameterFromSource("w", "DBX", "X");
+                        y.ResolveParameterFromSource("x", "REQUEST", "Language");
                         y.ResolveParameterFromConstant("y", true);
                         y.ResolveParameterFromConstant("z", 5);
                     });
@@ -657,8 +663,9 @@ paths:
           required: true
           schema:
             type: string
-        - name: Accept-Language
+        - name: User-Agent
           in: header
+          required: true
           schema:
             type: string
         - name: ids
@@ -670,6 +677,11 @@ paths:
             type: array
             items:
               $ref: '#/components/schemas/GenericParameterSet'
+        - name: Accept-Language
+          in: header
+          schema:
+            type: string
+            default: 
       responses:
         '204':
           description: NoContent
@@ -688,17 +700,17 @@ paths:
           required: true
           schema:
             type: string
+        - name: u
+          in: query
+          required: true
+          schema:
+            type: string
         - name: v
           in: query
           required: true
           schema:
             type: string
         - name: w
-          in: query
-          required: true
-          schema:
-            type: string
-        - name: x
           in: query
           required: true
           schema:
@@ -714,6 +726,11 @@ paths:
             type: array
             items:
               $ref: '#/components/schemas/GenericParameterSet'
+        - name: x
+          in: query
+          schema:
+            type: string
+            default: 
         - name: y
           in: query
           schema:
@@ -861,6 +878,7 @@ components:
         - Admin
     InputContract:
       required:
+        - U
         - V
         - X
         - Password
@@ -868,6 +886,8 @@ components:
         - Z
       type: object
       properties:
+        U:
+          type: string
         V:
           type: string
         W:
@@ -986,17 +1006,18 @@ namespace Dibix.Sdk.Tests
             // EmptyWithParams
             private const string EmptyWithParamsCommandText = "[dbo].[dbx_tests_syntax_empty_params]";
 
-            public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string v, string w, System.Guid? x, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, bool y = true, int? z = null)
+            public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string u, string v, System.Guid? w, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string x = null, bool y = true, int? z = null)
             {
                 using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                 {
                     ParametersVisitor @params = accessor.Parameters()
                                                         .SetFromTemplate(new
                                                         {
+                                                            u,
                                                             v,
                                                             w,
-                                                            x,
                                                             ids,
+                                                            x,
                                                             y,
                                                             z
                                                         })

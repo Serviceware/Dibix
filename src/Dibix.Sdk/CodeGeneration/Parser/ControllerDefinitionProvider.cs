@@ -807,13 +807,14 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
             {
                 explicitParameters.Remove(name);
 
-                if (explicitParameter.Source is ActionParameterPropertySource propertySource
-                 && TryGetLocation(propertySource.SourceName, ref location))
+                if (explicitParameter.Source is ActionParameterPropertySource propertySource)
                 {
                     apiParameterName = propertySource.PropertyName.Split('.')[0];
-
-                    if (location == ActionParameterLocation.Path)
-                        pathParameters.Remove(propertySource.PropertyName);
+                    if (IsUserParameter(propertySource.SourceName, propertySource.PropertyName, ref location, ref apiParameterName))
+                    {
+                        if (location == ActionParameterLocation.Path)
+                            pathParameters.Remove(propertySource.PropertyName);
+                    }
                 }
 
                 // See CodeGenerationTaskTests.Endpoints
@@ -855,15 +856,15 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
 
                 case ActionParameterPropertySource actionParameterPropertySource:
                     ActionParameterLocation location = ActionParameterLocation.NonUser;
-                    TryGetLocation(actionParameterPropertySource.SourceName, ref location);
                     apiParameterName = actionParameterPropertySource.PropertyName.Split('.')[0];
+                    IsUserParameter(actionParameterPropertySource.SourceName, actionParameterPropertySource.PropertyName, ref location, ref apiParameterName);
                     return location;
 
                 default: throw new ArgumentOutOfRangeException(nameof(parameterSource), parameterSource, null);
             }
         }
 
-        private static bool TryGetLocation(string sourceName, ref ActionParameterLocation location)
+        private static bool IsUserParameter(string sourceName, string propertyName, ref ActionParameterLocation location, ref string apiParameterName)
         {
             switch (sourceName)
             {
@@ -881,6 +882,11 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
 
                 case "HEADER":
                     location = ActionParameterLocation.Header;
+                    return true;
+
+                case "REQUEST" when propertyName == "Language":
+                    location = ActionParameterLocation.Header;
+                    apiParameterName = "Accept-Language";
                     return true;
 
                 default:

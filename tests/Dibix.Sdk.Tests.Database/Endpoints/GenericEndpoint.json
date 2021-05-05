@@ -7,10 +7,11 @@
       "target": "EmptyWithParams",
       "childRoute": "{password}/Fixed",
       "params": {
-        "v": "HEADER.Accept-Language",
-        "w": "HEADER.Authorization.Parameter",
-        "x": "DBX.X",
+        "u": "HEADER.User-Agent",
+        "v": "HEADER.Authorization.Parameter",
+        "w": "DBX.X",
         "password": null,
+        "x": "REQUEST.Language",
         "y": true,
         "z": 5
       }

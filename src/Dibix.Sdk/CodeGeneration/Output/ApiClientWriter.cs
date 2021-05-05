@@ -66,8 +66,18 @@ namespace Dibix.Sdk.CodeGeneration
 
             foreach (ActionParameter parameter in action.Parameters.DistinctBy(x => x.ApiParameterName))
             {
+                if (parameter.Location != ActionParameterLocation.Path)
+                    continue;
+
+                AppendParameter(context, parameter, method);
+            }
+
+            if (action.RequestBody != null)
+                method.AddParameter("body", context.ResolveTypeName(action.RequestBody.Contract, context));
+
+            foreach (ActionParameter parameter in action.Parameters.DistinctBy(x => x.ApiParameterName).OrderBy(x => x.DefaultValue != null))
+            {
                 if (parameter.Location != ActionParameterLocation.Query
-                 && parameter.Location != ActionParameterLocation.Path
                  && parameter.Location != ActionParameterLocation.Header)
                     continue;
 
@@ -75,15 +85,11 @@ namespace Dibix.Sdk.CodeGeneration
                 if (parameter.Location == ActionParameterLocation.Header && parameter.ApiParameterName == "Authorization")
                     continue;
 
-                string normalizedApiParameterName = NormalizeApiParameterName(parameter.ApiParameterName);
-                method.AddParameter(normalizedApiParameterName, ResolveParameterTypeName(parameter, context));
+                AppendParameter(context, parameter, method);
             }
 
-            if (action.RequestBody != null)
-                method.AddParameter("body", context.ResolveTypeName(action.RequestBody.Contract, context));
-
             context.AddUsing<CancellationToken>();
-            method.AddParameter("cancellationToken", nameof(CancellationToken), default, new CSharpValue("default"));
+            method.AddParameter("cancellationToken", nameof(CancellationToken), new CSharpValue("default"), default);
         }
 
         protected bool IsStream(TypeReference typeReference) => typeReference is PrimitiveTypeReference primitiveTypeReference && primitiveTypeReference.Type == PrimitiveType.Stream;
@@ -110,11 +116,15 @@ namespace Dibix.Sdk.CodeGeneration
             return typeName;
         }
 
+        private static void AppendParameter(CodeGenerationContext context, ActionParameter parameter, CSharpMethod method)
+        {
+            string normalizedApiParameterName = NormalizeApiParameterName(parameter.ApiParameterName);
+            CSharpValue defaultValue = parameter.DefaultValue != null ? context.BuildDefaultValueLiteral(parameter.DefaultValue) : null;
+            method.AddParameter(normalizedApiParameterName, ResolveParameterTypeName(parameter, context), defaultValue);
+        }
+
         private static string ResolveParameterTypeName(ActionParameter parameter, CodeGenerationContext context)
         {
-            if (parameter.Location == ActionParameterLocation.Header)
-                return "string";
-
             if (parameter.Type is SchemaTypeReference schemaTypeReference && context.GetSchema(schemaTypeReference) is UserDefinedTypeSchema userDefinedTypeSchema)
             {
                 // Note: Deep object query parameters require a separate input class, which is not yet supported
@@ -122,7 +132,6 @@ namespace Dibix.Sdk.CodeGeneration
                 string enumerableTypeName = userDefinedTypeSchema.Properties.Count == 1 ? context.ResolveTypeName(userDefinedTypeSchema.Properties[0].Type, context, includeEnumerable: false) : "object";
                 return context.WrapInEnumerable(enumerableTypeName, context);
             }
-
             return context.ResolveTypeName(parameter.Type, context);
         }
         #endregion

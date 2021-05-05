@@ -114,14 +114,14 @@ namespace Dibix.Sdk.CodeGeneration
                     {
                         ParameterKind parameterKind = parameter.IsOutput ? ParameterKind.Out : ParameterKind.Value;
                         CSharpValue defaultValue = parameter.DefaultValue != null ? context.BuildDefaultValueLiteral(parameter.DefaultValue) : null;
-                        method.AddParameter(parameter.Name, context.ResolveTypeName(parameter.Type, context), parameterKind, defaultValue);
+                        method.AddParameter(parameter.Name, context.ResolveTypeName(parameter.Type, context), defaultValue, parameterKind);
                     }
                 }
 
                 if (statement.Async)
                 {
                     context.AddUsing<CancellationToken>();
-                    method.AddParameter("cancellationToken", nameof(CancellationToken), default, new CSharpValue("default"));
+                    method.AddParameter("cancellationToken", nameof(CancellationToken), new CSharpValue("default"), default);
                 }
 
                 if (i + 1 < statements.Count)

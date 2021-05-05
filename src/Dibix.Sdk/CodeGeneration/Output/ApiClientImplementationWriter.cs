@@ -152,10 +152,16 @@ namespace Dibix.Sdk.CodeGeneration
                     continue;
 
                 string normalizedApiParameterName = NormalizeApiParameterName(parameter.ApiParameterName);
-                writer.WriteLine($"if ({normalizedApiParameterName} != null)")
-                      .SetTemporaryIndent(4)
-                      .WriteLine($"requestMessage.{nameof(HttpRequestMessage.Headers)}.{nameof(HttpRequestMessage.Headers.Add)}(\"{parameter.ApiParameterName}\", {normalizedApiParameterName});")
-                      .ResetTemporaryIndent();
+                if (!parameter.IsRequired)
+                {
+                    writer.WriteLine($"if ({normalizedApiParameterName} != null)")
+                          .SetTemporaryIndent(4);
+                }
+
+                writer.WriteLine($"requestMessage.{nameof(HttpRequestMessage.Headers)}.{nameof(HttpRequestMessage.Headers.Add)}(\"{parameter.ApiParameterName}\", {normalizedApiParameterName});");
+                
+                if (!parameter.IsRequired)
+                    writer.ResetTemporaryIndent();
             }
 
             if (action.RequestBody != null)

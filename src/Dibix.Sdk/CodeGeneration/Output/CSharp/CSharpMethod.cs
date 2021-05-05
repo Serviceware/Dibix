@@ -23,8 +23,8 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             this._parameters = new Collection<CSharpParameter>();
         }
 
-        public CSharpMethod AddParameter(string name, string type, params CSharpAnnotation[] annotations) => this.AddParameter(name, type, default, null, annotations);
-        public CSharpMethod AddParameter(string name, string type, ParameterKind parameterKind, CSharpValue defaultValue, params CSharpAnnotation[] annotations)
+        public CSharpMethod AddParameter(string name, string type, params CSharpAnnotation[] annotations) => this.AddParameter(name, type, null, default, annotations);
+        public CSharpMethod AddParameter(string name, string type, CSharpValue defaultValue, ParameterKind parameterKind = default, params CSharpAnnotation[] annotations)
         {
             CSharpParameter parameter = new CSharpParameter(name, type, parameterKind, defaultValue, annotations);
             this._parameters.Add(parameter);
