@@ -39,17 +39,22 @@ namespace Dibix.Testing.Http
             await testFlow(testContext).ConfigureAwait(false);
         }
 
-        protected Task ExecuteTestUnit<TService>(TService service, Expression<Func<TService, Task<HttpResponseMessage>>> methodSelector) => ExecuteTestUnit<TService, HttpResponseMessage>(service, methodSelector);
-        protected async Task<TContent> ExecuteTestUnit<TService, TContent>(TService service, Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector, string expectedText)
+        protected Task InvokeApi<TService>(TService service, Expression<Func<TService, Task<HttpResponseMessage>>> methodSelector) => InvokeApi<TService, HttpResponseMessage>(service, methodSelector);
+        protected async Task<TContent> InvokeApi<TService, TContent>(TService service, Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector, string expectedText)
         {
-            HttpResponse<TContent> response = await ExecuteTestUnit(service, methodSelector).ConfigureAwait(false);
+            HttpResponse<TContent> response = await InvokeApi(service, methodSelector).ConfigureAwait(false);
             this.Assert(response, expectedText);
             return response.ResponseContent;
         }
-        protected Task ExecuteTestUnit<TService>(IHttpTestContext<TConfiguration> context, Expression<Func<TService, Task<HttpResponseMessage>>> methodSelector) => ExecuteTestUnit<TService, HttpResponseMessage>(context, methodSelector);
-        protected async Task<TContent> ExecuteTestUnit<TService, TContent>(IHttpTestContext<TConfiguration> context, Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector, string expectedText)
+        protected Task InvokeApi<TService>(IHttpTestContext<TConfiguration> context, Expression<Func<TService, Task<HttpResponseMessage>>> methodSelector) => InvokeApiCore<TService, HttpResponseMessage>(context, methodSelector);
+        protected async Task<TContent> InvokeApi<TService, TContent>(IHttpTestContext<TConfiguration> context, Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector)
         {
-            HttpResponse<TContent> response = await ExecuteTestUnit(context, methodSelector).ConfigureAwait(false);
+            HttpResponse<TContent> response = await InvokeApiCore(context, methodSelector).ConfigureAwait(false);
+            return response.ResponseContent;
+        }
+        protected async Task<TContent> InvokeApi<TService, TContent>(IHttpTestContext<TConfiguration> context, Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector, string expectedText)
+        {
+            HttpResponse<TContent> response = await InvokeApiCore(context, methodSelector).ConfigureAwait(false);
             this.Assert(response, expectedText);
             return response.ResponseContent;
         }
@@ -69,12 +74,12 @@ namespace Dibix.Testing.Http
         #endregion
 
         #region Private Methods
-        private static Task<TResponse> ExecuteTestUnit<TService, TResponse>(IHttpTestContext<TConfiguration> context, Expression<Func<TService, Task<TResponse>>> methodSelector)
+        private static Task<TResponse> InvokeApiCore<TService, TResponse>(IHttpTestContext<TConfiguration> context, Expression<Func<TService, Task<TResponse>>> methodSelector)
         {
             TService service = CreateServiceInstance<TService>(context.HttpClientFactory, context.HttpAuthorizationProvider);
-            return ExecuteTestUnit(service, methodSelector);
+            return InvokeApi(service, methodSelector);
         }
-        private static async Task<TResponse> ExecuteTestUnit<TService, TResponse>(TService service, Expression<Func<TService, Task<TResponse>>> methodSelector)
+        private static async Task<TResponse> InvokeApi<TService, TResponse>(TService service, Expression<Func<TService, Task<TResponse>>> methodSelector)
         {
             Func<TService, Task<TResponse>> compiled = methodSelector.Compile();
             Task<TResponse> task = compiled(service);
