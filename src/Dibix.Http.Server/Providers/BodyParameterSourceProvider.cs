@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace Dibix.Http.Server
 {
-    internal sealed class BodyParameterSourceProvider : IHttpParameterSourceProvider
+    internal sealed class BodyParameterSourceProvider : NonUserParameterSourceProvider, IHttpParameterSourceProvider
     {
         public const string SourceName = "BODY";
         public const string RawPropertyName = "$RAW";
 
-        public void Resolve(IHttpParameterResolutionContext context)
+        public override void Resolve(IHttpParameterResolutionContext context)
         {
             if (context.PropertyPath != RawPropertyName)
             {

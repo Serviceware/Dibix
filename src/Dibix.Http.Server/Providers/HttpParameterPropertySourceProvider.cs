@@ -3,9 +3,9 @@ using System.Linq.Expressions;
 
 namespace Dibix.Http.Server
 {
-    public abstract class HttpParameterPropertySourceProvider : IHttpParameterSourceProvider
+    public abstract class HttpParameterPropertySourceProvider : NonUserParameterSourceProvider, IHttpParameterSourceProvider
     {
-        public void Resolve(IHttpParameterResolutionContext context)
+        public override void Resolve(IHttpParameterResolutionContext context)
         {
             Type instanceType = this.GetInstanceType(context);
             Expression instanceValue = this.GetInstanceValue(instanceType, context.RequestParameter, context.ArgumentsParameter, context.DependencyResolverParameter);

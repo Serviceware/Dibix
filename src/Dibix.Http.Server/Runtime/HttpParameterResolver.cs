@@ -655,12 +655,10 @@ Either create a mapping or make sure a property of the same name exists in the s
                     TypeConverter typeConverter = TypeDescriptor.GetConverter(typeof(TTarget));
                     if (typeConverter.CanConvertFrom(typeof(TSource)))
                         result = typeConverter.ConvertFrom(value);
-                    else if (typeof(IComparable).IsAssignableFrom(typeof(TSource)))
+                    else if (Equals(value, null) || value is IConvertible)
                         result = Convert.ChangeType(value, typeof(TTarget));
-                    else if (!Equals(value, null))
+                    else
                         result = value.ToString();
-                    else 
-                        result = default(TTarget);
                 }
                 return (TTarget)result;
             }
@@ -794,7 +792,7 @@ Either create a mapping or make sure a property of the same name exists in the s
             }
             public static HttpParameterInfo SourceProperty(ParameterInfo contractParameter, Type parameterType, string parameterName, bool isOptional, object defaultValue, HttpParameterSourceInfo source, IHttpParameterConverter converter)
             {
-                HttpParameterLocation location = DetermineParameterLocation(source);
+                HttpParameterLocation location = source.Location;
                 HttpParameterInfo parameter = new HttpParameterInfo(location, HttpParameterSourceKind.SourceProperty, parameterType, parameterName, isOptional)
                 {
                     ContractParameter = contractParameter,
@@ -815,7 +813,7 @@ Either create a mapping or make sure a property of the same name exists in the s
             }
             public static HttpParameterInfo SourcePropertyItemsSource(ParameterInfo contractParameter, Type parameterType, string parameterName, HttpParameterSourceInfo source, string udtName, MethodInfo addItemMethod, IEnumerable<HttpParameterInfo> itemSources)
             {
-                HttpParameterLocation location = DetermineParameterLocation(source);
+                HttpParameterLocation location = source.Location;
                 HttpParameterInfo parameter = new HttpParameterInfo(location, HttpParameterSourceKind.SourceProperty, parameterType, parameterName, isOptional: false)
                 {
                     ContractParameter = contractParameter,
@@ -849,17 +847,6 @@ Either create a mapping or make sure a property of the same name exists in the s
                 };
                 return parameter;
             }
-
-            private static HttpParameterLocation DetermineParameterLocation(HttpParameterSourceInfo source)
-            {
-                switch (source.SourceName)
-                {
-                    case QueryParameterSourceProvider.SourceName: return HttpParameterLocation.Query;
-                    case PathParameterSourceProvider.SourceName: return HttpParameterLocation.Path;
-                    case HeaderParameterSourceProvider.SourceName: return HttpParameterLocation.Header;
-                    default: return HttpParameterLocation.NonUser;
-                }
-            }
         }
 
         private enum HttpParameterSourceKind
@@ -887,6 +874,7 @@ Either create a mapping or make sure a property of the same name exists in the s
             public string PropertyPath { get; }
             public HttpParameterInfo Parent { get; set; }
             public Expression Value { get; private set; }
+            public HttpParameterLocation Location => this._sourceProvider?.Location ?? HttpParameterLocation.NonUser;
 
             public HttpParameterSourceInfo(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, string sourceName, IHttpParameterSourceProvider sourceProvider, string propertyPath)
             {

@@ -5,11 +5,11 @@ using System.Net;
 
 namespace Dibix.Http.Server
 {
-    public sealed class EnvironmentParameterSourceProvider : IHttpParameterSourceProvider
+    public sealed class EnvironmentParameterSourceProvider : NonUserParameterSourceProvider, IHttpParameterSourceProvider
     {
         public const string SourceName = "ENV";
 
-        void IHttpParameterSourceProvider.Resolve(IHttpParameterResolutionContext context)
+        public override void Resolve(IHttpParameterResolutionContext context)
         {
             Expression value = BuildExpression(context.PropertyPath);
             context.ResolveUsingValue(value);

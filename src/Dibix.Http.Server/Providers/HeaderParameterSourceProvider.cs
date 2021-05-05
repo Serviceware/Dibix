@@ -10,6 +10,8 @@ namespace Dibix.Http.Server
     {
         public const string SourceName = "HEADER";
 
+        public override HttpParameterLocation Location => HttpParameterLocation.Header;
+
         protected override Type GetInstanceType(IHttpParameterResolutionContext context) => typeof(HttpRequestHeaders);
 
         protected override Expression GetInstanceValue(Type instanceType, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter) => Expression.Property(requestParameter, nameof(HttpRequestMessage.Headers));

@@ -6,11 +6,11 @@ using System.Net.Http;
 
 namespace Dibix.Http.Server
 {
-    internal sealed class RequestParameterSourceProvider : IHttpParameterSourceProvider
+    internal sealed class RequestParameterSourceProvider : NonUserParameterSourceProvider, IHttpParameterSourceProvider
     {
         public const string SourceName = "REQUEST";
 
-        public void Resolve(IHttpParameterResolutionContext context)
+        public override void Resolve(IHttpParameterResolutionContext context)
         {
             Expression value = BuildExpression(context.PropertyPath, context.RequestParameter);
             context.ResolveUsingValue(value);

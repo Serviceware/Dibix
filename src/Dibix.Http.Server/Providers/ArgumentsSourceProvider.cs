@@ -2,9 +2,9 @@
 
 namespace Dibix.Http.Server
 {
-    internal abstract class ArgumentsSourceProvider : IHttpParameterSourceProvider
+    internal abstract class ArgumentsSourceProvider : NonUserParameterSourceProvider, IHttpParameterSourceProvider
     {
-        public void Resolve(IHttpParameterResolutionContext context)
+        public override void Resolve(IHttpParameterResolutionContext context)
         {
             Expression value = HttpParameterResolverUtility.BuildArgumentAccessorExpression(context.ArgumentsParameter, context.PropertyPath);
             context.ResolveUsingValue(value);
