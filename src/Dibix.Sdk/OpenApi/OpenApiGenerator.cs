@@ -161,7 +161,18 @@ namespace Dibix.Sdk.OpenApi
             // Header parameters named Accept, Content-Type and Authorization are not allowed. To describe these headers, use the corresponding OpenAPI keywords
             // See: https://swagger.io/docs/specification/describing-parameters/#header-parameters
             if (ReservedOpenApiHeaders.Contains(parameter.ApiParameterName))
-                return;
+            {
+                // TODO: REMOVE THIS SHIT ONCE SESSIONMANAGEMENT IMPLEMENTS BEARER AUTHENTICATOR
+                if (parameter.ApiParameterName == "Authorization" && rootNamespace == "Helpline.SessionManagement" && (operation.OperationId == "Authenticate" || operation.OperationId == "AuthenticatePortal"))
+                {
+                    typeof(ActionParameter).GetField("<Type>k__BackingField", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                                           .SetValue(parameter, new PrimitiveTypeReference(PrimitiveType.String, isNullable: true, isEnumerable: false));
+                }
+                else
+                {
+                    return;
+                }
+            }
 
             AppendParameter(document, operation, parameter, ParameterLocation.Header, rootNamespace, schemaRegistry);
         }
