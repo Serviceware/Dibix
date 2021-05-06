@@ -125,8 +125,12 @@ namespace Dibix.Sdk.CodeGeneration
             if (!String.IsNullOrEmpty(udtName))
             {
                 UserDefinedTypeSchema udtSchema = new UserDefinedTypeSchema(type.Namespace, type.Name, udtName);
-                udtSchema.Properties.AddRange(type.GetProperties()
-                                                  .Select(x => new ObjectSchemaProperty(x.Name, ResolveType(x.PropertyType, source, line, column, schemaRegistry, logger))));
+                MethodInfo addMethod = type.GetMethod("Add");
+                if (addMethod == null)
+                    throw new InvalidOperationException($"Could not find 'Add' method on type: {type}");
+
+                udtSchema.Properties.AddRange(addMethod.GetParameters()
+                                                       .Select(x => new ObjectSchemaProperty(x.Name, ResolveType(x.ParameterType, source, line, column, schemaRegistry, logger))));
                 schemaRegistry.Populate(udtSchema);
             }
             else if (type.IsEnum)
