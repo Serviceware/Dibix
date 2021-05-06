@@ -167,6 +167,8 @@ namespace Dibix.Sdk.OpenApi
                 {
                     typeof(ActionParameter).GetField("<Type>k__BackingField", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                                            .SetValue(parameter, new PrimitiveTypeReference(PrimitiveType.String, isNullable: true, isEnumerable: false));
+                    typeof(ActionParameter).GetField("<DefaultValue>k__BackingField", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                                           .SetValue(parameter, new DefaultValue(default, default, default, default));
                 }
                 else
                 {
