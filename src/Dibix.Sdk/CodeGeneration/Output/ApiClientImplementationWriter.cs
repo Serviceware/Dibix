@@ -31,21 +31,23 @@ namespace Dibix.Sdk.CodeGeneration
                                         .AddField("BaseAddress", nameof(Uri), new CSharpValue($"new {nameof(Uri)}(\"{context.Model.BaseUrl.TrimEnd('/')}/\")"), CSharpModifiers.Private | CSharpModifiers.Static | CSharpModifiers.ReadOnly);
 
             bool hasBodyParameter = controller.Actions.Any(x => x.RequestBody != null);
+            bool requiresAuthorization = controller.Actions
+                                                   .SelectMany(x => x.SecuritySchemes)
+                                                   .SelectMany(x => x)
+                                                   .Any(x => x != SecuritySchemes.Anonymous.Name);
+
             if (hasBodyParameter)
             {
                 context.AddReference<MediaTypeFormatter>();
                 @class.AddField("Formatter", nameof(MediaTypeFormatter), new CSharpValue($"new {nameof(JsonMediaTypeFormatter)}()"), CSharpModifiers.Private | CSharpModifiers.Static | CSharpModifiers.ReadOnly);
             }
 
-            @class.AddField("_httpClientFactory", "IHttpClientFactory", modifiers: CSharpModifiers.Private | CSharpModifiers.ReadOnly)
-                  .AddField("_authorizationProvider", "IHttpAuthorizationProvider", modifiers: CSharpModifiers.Private | CSharpModifiers.ReadOnly);
+            @class.AddField("_httpClientFactory", "IHttpClientFactory", modifiers: CSharpModifiers.Private | CSharpModifiers.ReadOnly);
+
+            if (requiresAuthorization)
+                @class.AddField("_authorizationProvider", "IHttpAuthorizationProvider", modifiers: CSharpModifiers.Private | CSharpModifiers.ReadOnly);
 
             @class.AddSeparator();
-
-            bool requiresAuthorization = controller.Actions
-                                                   .SelectMany(x => x.SecuritySchemes)
-                                                   .SelectMany(x => x)
-                                                   .Any(x => x != SecuritySchemes.Anonymous.Name);
 
             CSharpConstructor ctor1 = @class.AddConstructor();
 
