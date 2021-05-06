@@ -280,6 +280,9 @@ namespace Dibix.Sdk.CodeGeneration
             if (type == typeof(string))
                 return null; // string = IEnumerable<char>
 
+            if (type == typeof(byte[]))
+                return null; // byte[] => Binary
+
             return type.GetInterfaces()
                        .Prepend(type)
                        .Select(GetUnderlyingEnumerableTypeCore)
