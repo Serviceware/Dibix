@@ -110,7 +110,7 @@ namespace Dibix.Sdk.CodeGeneration
                     method.AddParameter("input", $"{statement.Name}{DaoExecutorInputClassWriter.InputTypeSuffix}", new CSharpAnnotation("InputClass"));
                 else
                 {
-                    foreach (SqlQueryParameter parameter in statement.Parameters)
+                    foreach (SqlQueryParameter parameter in statement.Parameters.OrderBy(x => x.DefaultValue != null))
                     {
                         ParameterKind parameterKind = parameter.IsOutput ? ParameterKind.Out : ParameterKind.Value;
                         CSharpValue defaultValue = parameter.DefaultValue != null ? context.BuildDefaultValueLiteral(parameter.DefaultValue) : null;
