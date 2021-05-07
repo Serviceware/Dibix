@@ -165,13 +165,13 @@ namespace Dibix.Sdk.CodeGeneration
                     propertyAnnotations.Add(new CSharpAnnotation("Obfuscated"));
 
                 string clrTypeName = context.ResolveTypeName(property.Type, context, includeEnumerable: false);
-                @class.AddProperty(property.Name, !property.Type.IsEnumerable ? clrTypeName : $"ICollection<{clrTypeName}>", propertyAnnotations)
+                @class.AddProperty(property.Name, !property.Type.IsEnumerable ? clrTypeName : $"{nameof(IList<object>)}<{clrTypeName}>", propertyAnnotations)
                       .Getter(null)
                       .Setter(null, property.Type.IsEnumerable ? CSharpModifiers.Private : default)
                       .Initializer(defaultValue);
 
                 if (property.Type.IsEnumerable)
-                    ctorAssignments.Add($"this.{property.Name} = new Collection<{clrTypeName}>();");
+                    ctorAssignments.Add($"this.{property.Name} = new {nameof(Collection<object>)}<{clrTypeName}>();");
             }
 
             if (ctorAssignments.Any())
