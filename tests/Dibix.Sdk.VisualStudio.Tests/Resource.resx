@@ -334,11 +334,11 @@ UNION ALL
     #region Contracts
     internal sealed class dbx_tests_parser_invalidcolumnsforentityResult
     {
-        public ICollection&lt;int?&gt; A { get; private set; }
-        public ICollection&lt;int&gt; B { get; private set; }
-        public ICollection&lt;string&gt; C { get; private set; }
-        public ICollection&lt;Dibix.Sdk.VisualStudio.Tests.Direction?&gt; D { get; private set; }
-        public ICollection&lt;Dibix.Sdk.VisualStudio.Tests.SpecialEntity&gt; E { get; private set; }
+        public IList&lt;int?&gt; A { get; private set; }
+        public IList&lt;int&gt; B { get; private set; }
+        public IList&lt;string&gt; C { get; private set; }
+        public IList&lt;Dibix.Sdk.VisualStudio.Tests.Direction?&gt; D { get; private set; }
+        public IList&lt;Dibix.Sdk.VisualStudio.Tests.SpecialEntity&gt; E { get; private set; }
 
         public dbx_tests_parser_invalidcolumnsforentityResult()
         {
@@ -352,9 +352,9 @@ UNION ALL
 
     internal sealed class dbx_tests_parser_nestedifsResult
     {
-        public ICollection&lt;int&gt; A { get; private set; }
-        public ICollection&lt;int&gt; B { get; private set; }
-        public ICollection&lt;int&gt; C { get; private set; }
+        public IList&lt;int&gt; A { get; private set; }
+        public IList&lt;int&gt; B { get; private set; }
+        public IList&lt;int&gt; C { get; private set; }
 
         public dbx_tests_parser_nestedifsResult()
         {
@@ -366,9 +366,9 @@ UNION ALL
 
     internal sealed class dbx_tests_parser_nobeginendResult
     {
-        public ICollection&lt;int&gt; A { get; private set; }
+        public IList&lt;int&gt; A { get; private set; }
         public int B { get; set; }
-        public ICollection&lt;int&gt; C { get; private set; }
+        public IList&lt;int&gt; C { get; private set; }
 
         public dbx_tests_parser_nobeginendResult()
         {
@@ -379,14 +379,14 @@ UNION ALL
 
     internal sealed class dbx_tests_parser_typenamesResult
     {
-        public ICollection&lt;string&gt; A { get; private set; }
-        public ICollection&lt;int?&gt; B { get; private set; }
-        public ICollection&lt;Dibix.Sdk.VisualStudio.Tests.Direction&gt; C { get; private set; }
-        public ICollection&lt;Dibix.Sdk.VisualStudio.Tests.Direction?&gt; D { get; private set; }
-        public ICollection&lt;Dibix.Sdk.VisualStudio.Tests.Direction&gt; E { get; private set; }
-        public ICollection&lt;Dibix.Sdk.VisualStudio.Tests.Direction?&gt; F { get; private set; }
-        public ICollection&lt;string&gt; G { get; private set; }
-        public ICollection&lt;Dibix.Sdk.VisualStudio.Tests.Direction?&gt; H { get; private set; }
+        public IList&lt;string&gt; A { get; private set; }
+        public IList&lt;int?&gt; B { get; private set; }
+        public IList&lt;Dibix.Sdk.VisualStudio.Tests.Direction&gt; C { get; private set; }
+        public IList&lt;Dibix.Sdk.VisualStudio.Tests.Direction?&gt; D { get; private set; }
+        public IList&lt;Dibix.Sdk.VisualStudio.Tests.Direction&gt; E { get; private set; }
+        public IList&lt;Dibix.Sdk.VisualStudio.Tests.Direction?&gt; F { get; private set; }
+        public IList&lt;string&gt; G { get; private set; }
+        public IList&lt;Dibix.Sdk.VisualStudio.Tests.Direction?&gt; H { get; private set; }
 
         public dbx_tests_parser_typenamesResult()
         {
