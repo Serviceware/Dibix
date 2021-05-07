@@ -33,11 +33,11 @@ namespace Dibix.Sdk.CodeGeneration
           , PrimitiveType.Xml
         };
         private readonly CSharpRoot _root;
-        private readonly ISchemaRegistry _schemaRegistry;
 
         public CSharpStatementScope Output { get; internal set; }
         public CSharpAnnotation GeneratedCodeAnnotation { get; }
         public CodeGenerationModel Model { get; }
+        public ISchemaRegistry SchemaRegistry { get; }
         public bool WriteGuardChecks { get; set; }
         public bool GeneratePublicArtifacts => this.Model.CompatibilityLevel == CodeGeneratorCompatibilityLevel.Full;
         public bool WriteNamespaces => this.Model.CompatibilityLevel == CodeGeneratorCompatibilityLevel.Full;
@@ -45,10 +45,10 @@ namespace Dibix.Sdk.CodeGeneration
         internal CodeGenerationContext(CSharpRoot root, CSharpAnnotation generatedCodeAnnotation, CodeGenerationModel model, ISchemaRegistry schemaRegistry)
         {
             this._root = root;
-            this._schemaRegistry = schemaRegistry;
             this.Output = root;
             this.GeneratedCodeAnnotation = generatedCodeAnnotation;
             this.Model = model;
+            this.SchemaRegistry = schemaRegistry;
         }
 
         public CodeGenerationContext AddUsing(string @using)
@@ -57,7 +57,7 @@ namespace Dibix.Sdk.CodeGeneration
             return this;
         }
 
-        public SchemaDefinition GetSchema(SchemaTypeReference reference) => this._schemaRegistry.GetSchema(reference);
+        public SchemaDefinition GetSchema(SchemaTypeReference reference) => this.SchemaRegistry.GetSchema(reference);
 
         public string ResolveTypeName(TypeReference reference, CodeGenerationContext context, bool includeEnumerable = true)
         {

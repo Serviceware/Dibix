@@ -504,13 +504,16 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
                 if (location == ActionParameterLocation.Path)
                     pathParameters.Remove(apiParameterName);
 
-                parameterRegistry.Add(new ActionParameter(apiParameterName, internalParameterName, type: null, location, defaultValue: null, parameter.Source));
+                bool isRequired = IsParameterRequired(type: null, location, defaultValue: null, this._schemaRegistry);
+                parameterRegistry.Add(new ActionParameter(apiParameterName, internalParameterName, type: null, location, isRequired, defaultValue: null, parameter.Source));
             }
 
             foreach (string pathParameter in pathParameters.Keys)
             {
                 TypeReference typeReference = new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: false);
-                ActionParameter parameter = new ActionParameter(pathParameter, pathParameter, typeReference, ActionParameterLocation.Path, defaultValue: null, source: null);
+                ActionParameterLocation location = ActionParameterLocation.Path;
+                bool isRequired = IsParameterRequired(type: null, location, defaultValue: null, this._schemaRegistry);
+                ActionParameter parameter = new ActionParameter(pathParameter, pathParameter, typeReference, location, isRequired, defaultValue: null, source: null);
                 actionDefinition.Parameters.Add(parameter);
             }
 
@@ -650,7 +653,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
                 return;
             }
 
-            ActionParameter actionParameter = CreateActionParameter(parameterName, parameterType, defaultValue, explicitParameters, pathParameters, bodyParameters);
+            ActionParameter actionParameter = this.CreateActionParameter(parameterName, parameterType, defaultValue, explicitParameters, pathParameters, bodyParameters);
             parameterRegistry.Add(actionParameter);
         }
 
@@ -797,7 +800,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
             response.Errors.Add(new ErrorDescription(errorCode, errorDescription));
         }
 
-        private static ActionParameter CreateActionParameter(string name, TypeReference type, DefaultValue defaultValue, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, Group> pathParameters, ICollection<string> bodyParameters)
+        private ActionParameter CreateActionParameter(string name, TypeReference type, DefaultValue defaultValue, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, Group> pathParameters, ICollection<string> bodyParameters)
         {
             ActionParameterLocation location = ActionParameterLocation.NonUser;
             string apiParameterName = name;
@@ -843,7 +846,8 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
                 location = ActionParameterLocation.Query;
             }
 
-            return new ActionParameter(apiParameterName, internalParameterName, type, location, defaultValue, explicitParameter?.Source);
+            bool isRequired = IsParameterRequired(type, location, defaultValue, this._schemaRegistry);
+            return new ActionParameter(apiParameterName, internalParameterName, type, location, isRequired, defaultValue, explicitParameter?.Source);
         }
 
         private static ActionParameterLocation ResolveParameterLocationFromSource(ActionParameterSource parameterSource, ref string apiParameterName)
@@ -891,6 +895,21 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
 
                 default:
                     return false;
+            }
+        }
+
+        private static bool IsParameterRequired(TypeReference type, ActionParameterLocation location, DefaultValue defaultValue, ISchemaRegistry schemaRegistry)
+        {
+            switch (location)
+            {
+                case ActionParameterLocation.Query:
+                    return defaultValue == null && Equals(type?.IsUserDefinedType(schemaRegistry), false);
+
+                case ActionParameterLocation.Header:
+                    return defaultValue == null;
+
+                default:
+                    return true;
             }
         }
 

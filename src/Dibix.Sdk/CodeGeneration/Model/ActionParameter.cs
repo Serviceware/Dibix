@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Dibix.Sdk.CodeGeneration
+﻿namespace Dibix.Sdk.CodeGeneration
 {
     public sealed class ActionParameter
     {
@@ -10,29 +8,17 @@ namespace Dibix.Sdk.CodeGeneration
         public ActionParameterLocation Location { get; }
         public DefaultValue DefaultValue { get; }
         public ActionParameterSource Source { get; }
-        public bool IsRequired => this.CalculateIsRequired();
+        public bool IsRequired { get; }
 
-        public ActionParameter(string apiParameterName, string internalParameterName, TypeReference type, ActionParameterLocation location, DefaultValue defaultValue, ActionParameterSource source)
+        public ActionParameter(string apiParameterName, string internalParameterName, TypeReference type, ActionParameterLocation location, bool isRequired, DefaultValue defaultValue, ActionParameterSource source)
         {
             this.ApiParameterName = apiParameterName;
             this.InternalParameterName = internalParameterName;
             this.Type = type;
             this.Location = location;
+            this.IsRequired = isRequired;
             this.DefaultValue = defaultValue;
             this.Source = source;
-        }
-
-        private bool CalculateIsRequired()
-        {
-            switch (this.Location)
-            {
-                case ActionParameterLocation.Query:
-                case ActionParameterLocation.Header:
-                    return this.DefaultValue == null;
-
-                default: 
-                    return true;
-            }
         }
     }
 }

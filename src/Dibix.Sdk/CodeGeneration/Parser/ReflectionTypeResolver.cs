@@ -232,8 +232,7 @@ namespace Dibix.Sdk.CodeGeneration
                 return null;
 
             TypeReference typeReference = ResolveType(argumentType, source, line, column, isNullable: false, isEnumerable: false, udtName: null, schemaRegistry, logger);
-            if (!(typeReference is SchemaTypeReference schemaTypeReference)
-             || !(schemaRegistry.GetSchema(schemaTypeReference) is EnumSchema enumSchema)) 
+            if (!typeReference.IsEnum(schemaRegistry, out EnumSchema enumSchema)) 
                 return null;
 
             EnumSchemaMember enumMember = enumSchema.Members.FirstOrDefault(x => Equals(x.ActualValue, value));

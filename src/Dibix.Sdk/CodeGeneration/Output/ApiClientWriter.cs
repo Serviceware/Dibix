@@ -125,7 +125,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static string ResolveParameterTypeName(ActionParameter parameter, CodeGenerationContext context)
         {
-            if (parameter.Type is SchemaTypeReference schemaTypeReference && context.GetSchema(schemaTypeReference) is UserDefinedTypeSchema userDefinedTypeSchema)
+            if (parameter.Type.IsUserDefinedType(context.SchemaRegistry, out UserDefinedTypeSchema userDefinedTypeSchema))
             {
                 // Note: Deep object query parameters require a separate input class, which is not yet supported
                 // Therefore in this case we currently return object, which obviously will not work at runtime
