@@ -653,12 +653,14 @@ Either create a mapping or make sure a property of the same name exists in the s
                 //if (!Equals(value, null))
                 {
                     TypeConverter typeConverter = TypeDescriptor.GetConverter(typeof(TTarget));
-                    if (typeConverter.CanConvertFrom(typeof(TSource)))
+                    if (value is TTarget)
+                        result = value;
+                    else if (typeConverter.CanConvertFrom(typeof(TSource)))
                         result = typeConverter.ConvertFrom(value);
-                    else if (Equals(value, null) || value is IConvertible)
-                        result = Convert.ChangeType(value, typeof(TTarget));
-                    else
+                    else if (typeof(TTarget) == typeof(string) && !Equals(value, null))
                         result = value.ToString();
+                    else
+                        result = Convert.ChangeType(value, typeof(TTarget));
                 }
                 return (TTarget)result;
             }
