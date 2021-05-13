@@ -162,18 +162,7 @@ namespace Dibix.Sdk.OpenApi
             // See: https://swagger.io/docs/specification/describing-parameters/#header-parameters
             if (ReservedOpenApiHeaders.Contains(parameter.ApiParameterName))
             {
-                // TODO: REMOVE THIS SHIT ONCE SESSIONMANAGEMENT IMPLEMENTS BEARER AUTHENTICATOR
-                if (parameter.ApiParameterName == "Authorization" && rootNamespace == "Helpline.SessionManagement" && (operation.OperationId == "Authenticate" || operation.OperationId == "AuthenticatePortal"))
-                {
-                    typeof(ActionParameter).GetField("<Type>k__BackingField", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                                           .SetValue(parameter, new PrimitiveTypeReference(PrimitiveType.String, isNullable: true, isEnumerable: false));
-                    typeof(ActionParameter).GetField("<IsRequired>k__BackingField", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                                           .SetValue(parameter, false);
-                }
-                else
-                {
-                    return;
-                }
+                return;
             }
 
             AppendParameter(document, operation, parameter, ParameterLocation.Header, rootNamespace, schemaRegistry);
@@ -282,12 +271,6 @@ namespace Dibix.Sdk.OpenApi
 
         private static void AppendSecuritySchemes(OpenApiDocument document, ActionDefinition action, OpenApiOperation operation)
         {
-            // TODO: REMOVE THIS SHIT ONCE SESSIONMANAGEMENT IMPLEMENTS BEARER AUTHENTICATOR
-            if (document.Info.Title == "SessionManagement" && (operation.OperationId == "Authenticate" || operation.OperationId == "AuthenticatePortal"))
-            {
-                return;
-            }
-
             if (action.SecuritySchemes.SelectMany(x => x).All(x => x == SecuritySchemes.Anonymous.Name))
                 return;
 
