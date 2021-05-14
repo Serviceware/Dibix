@@ -20,7 +20,8 @@
       "method": "GET",
       "target": "EmptyWithParams",
       "childRoute": "{password}/User",
-      "authorization": "Anonymous"
+      "authorization": "Anonymous",
+      "operationId": "EmptyWithParamsAnonymous"
     },
     {
       "method": "GET",

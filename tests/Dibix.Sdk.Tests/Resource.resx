@@ -269,11 +269,11 @@ namespace Dibix.Sdk.Tests
         public interface IGenericEndpointService
         {
             Task&lt;HttpResponseMessage&gt; EmptyWithParams1Async(string password, string userAgent, IEnumerable&lt;object&gt; ids, string acceptLanguage = null, CancellationToken cancellationToken = default);
-            Task&lt;HttpResponseMessage&gt; EmptyWithParams2Async(string password, string u, string v, System.Guid? w, IEnumerable&lt;object&gt; ids, string x = null, bool y = true, int? z = null, CancellationToken cancellationToken = default);
+            Task&lt;HttpResponseMessage&gt; EmptyWithParamsAnonymousAsync(string password, string u, string v, System.Guid? w, IEnumerable&lt;object&gt; ids, string x = null, bool y = true, int? z = null, CancellationToken cancellationToken = default);
             Task&lt;HttpResponse&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;&gt; SingleConrecteResultWithParamsAsync(IEnumerable&lt;int&gt; ids, CancellationToken cancellationToken = default);
             Task&lt;HttpResponse&lt;System.IO.Stream&gt;&gt; FileResultAsync(int id, CancellationToken cancellationToken = default);
             Task&lt;HttpResponseMessage&gt; FileUploadAsync(System.IO.Stream body, CancellationToken cancellationToken = default);
-            Task&lt;HttpResponseMessage&gt; EmptyWithParams3Async(Dibix.Sdk.Tests.DomainModel.InputContract body, CancellationToken cancellationToken = default);
+            Task&lt;HttpResponseMessage&gt; EmptyWithParams2Async(Dibix.Sdk.Tests.DomainModel.InputContract body, CancellationToken cancellationToken = default);
         }
         #endregion
 
@@ -311,7 +311,7 @@ namespace Dibix.Sdk.Tests
                 }
             }
 
-            public async Task&lt;HttpResponseMessage&gt; EmptyWithParams2Async(string password, string u, string v, System.Guid? w, IEnumerable&lt;object&gt; ids, string x = null, bool y = true, int? z = null, CancellationToken cancellationToken = default)
+            public async Task&lt;HttpResponseMessage&gt; EmptyWithParamsAnonymousAsync(string password, string u, string v, System.Guid? w, IEnumerable&lt;object&gt; ids, string x = null, bool y = true, int? z = null, CancellationToken cancellationToken = default)
             {
                 using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
                 {
@@ -372,7 +372,7 @@ namespace Dibix.Sdk.Tests
                 }
             }
 
-            public async Task&lt;HttpResponseMessage&gt; EmptyWithParams3Async(Dibix.Sdk.Tests.DomainModel.InputContract body, CancellationToken cancellationToken = default)
+            public async Task&lt;HttpResponseMessage&gt; EmptyWithParams2Async(Dibix.Sdk.Tests.DomainModel.InputContract body, CancellationToken cancellationToken = default)
             {
                 using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
                 {
@@ -685,8 +685,8 @@ paths:
     get:
       tags:
         - GenericEndpoint
-      summary: EmptyWithParams2
-      operationId: EmptyWithParams2
+      summary: EmptyWithParamsAnonymous
+      operationId: EmptyWithParamsAnonymous
       parameters:
         - name: password
           in: path
@@ -808,8 +808,8 @@ paths:
     post:
       tags:
         - GenericEndpoint
-      summary: EmptyWithParams3
-      operationId: EmptyWithParams3
+      summary: EmptyWithParams2
+      operationId: EmptyWithParams2
       requestBody:
         content:
           application/json:

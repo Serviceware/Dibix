@@ -29,7 +29,7 @@ namespace Dibix.Sdk.CodeGeneration
                                                              .ToArray();
 
             IDictionary<ActionDefinition, string> operationIdMap = controllers.SelectMany(x => x.Actions)
-                                                                              .GroupBy(x => x.Target.OperationName)
+                                                                              .GroupBy(x => x.OperationId)
                                                                               .SelectMany(x => x.Select((y, i) => new
                                                                               {
                                                                                   Position = i + 1,

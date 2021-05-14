@@ -8,6 +8,7 @@ namespace Dibix.Sdk.CodeGeneration
     {
         public ActionDefinitionTarget Target { get; }
         public ActionMethod Method { get; set; }
+        public string OperationId { get; set; }
         public string Description { get; set; }
         public string ChildRoute { get; set; }
         public ActionRequestBody RequestBody { get; set; }

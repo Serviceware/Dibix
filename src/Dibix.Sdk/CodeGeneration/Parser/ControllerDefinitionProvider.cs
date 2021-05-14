@@ -161,6 +161,7 @@ namespace Dibix.Sdk.CodeGeneration
             Enum.TryParse((string)action.Property("method")?.Value, true, out ActionMethod method);
 
             actionDefinition.Method = method;
+            actionDefinition.OperationId = (string)action.Property("operationId")?.Value ?? actionDefinition.Target.OperationName;
             actionDefinition.Description = (string)action.Property("description")?.Value;
             actionDefinition.ChildRoute = childRoute;
             actionDefinition.RequestBody = requestBody;
