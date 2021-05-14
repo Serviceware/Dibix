@@ -1,5 +1,4 @@
 ﻿using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
@@ -28,8 +27,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public override void Write(CodeGenerationContext context)
         {
-            context.AddUsing<GeneratedCodeAttribute>()
-                   .AddUsing("Dibix");
+            context.AddUsing("Dibix");
 
             foreach (IGrouping<string, SqlStatementInfo> namespaceGroup in context.Model.Statements.GroupBy(x => context.GetRelativeNamespace(this.LayerName, x.Namespace)))
             {
@@ -39,9 +37,6 @@ namespace Dibix.Sdk.CodeGeneration
                 // Class
                 CSharpModifiers classVisibility = context.GeneratePublicArtifacts ? CSharpModifiers.Public : CSharpModifiers.Internal;
                 ICollection<CSharpAnnotation> annotations = new Collection<CSharpAnnotation> { new CSharpAnnotation("DatabaseAccessor") };
-                if (context.GeneratedCodeAnnotation != null)
-                    annotations.Add(context.GeneratedCodeAnnotation);
-
                 CSharpClass @class = scope.AddClass(context.Model.DefaultClassName, classVisibility | CSharpModifiers.Static, annotations);
 
                 // Command text constants
