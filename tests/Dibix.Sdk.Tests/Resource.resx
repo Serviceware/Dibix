@@ -231,7 +231,7 @@ namespace Dibix.Sdk.Tests
             public string Name { get; set; } = "DefaultValue";
             [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
             public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
-            public System.DateTime CreationTime { get; set; }
+            public System.DateTime? CreationTime { get; set; }
         }
 
         public sealed class InputContract
@@ -562,7 +562,7 @@ namespace Dibix.Sdk.Tests
             public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
-            public System.DateTime CreationTime { get; set; }
+            public System.DateTime? CreationTime { get; set; }
         }
 
         public sealed class InputContract
@@ -851,6 +851,7 @@ components:
         CreationTime:
           type: string
           format: date-time
+          nullable: true
       additionalProperties: false
     Role:
       enum:
@@ -1310,7 +1311,7 @@ namespace Dibix.Sdk.Tests
             public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
-            public System.DateTime CreationTime { get; set; }
+            public System.DateTime? CreationTime { get; set; }
         }
 
         namespace Extension
@@ -1434,7 +1435,7 @@ namespace Dibix.Sdk.Tests
             public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
-            public System.DateTime CreationTime { get; set; }
+            public System.DateTime? CreationTime { get; set; }
         }
 
         namespace Extension
@@ -1542,7 +1543,7 @@ namespace Dibix.Sdk.Tests
             public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
-            public System.DateTime CreationTime { get; set; }
+            public System.DateTime? CreationTime { get; set; }
         }
 
         namespace Extension
@@ -1664,7 +1665,7 @@ namespace Dibix.Sdk.Tests
             public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
-            public System.DateTime CreationTime { get; set; }
+            public System.DateTime? CreationTime { get; set; }
         }
 
         namespace Extension
@@ -1795,7 +1796,7 @@ namespace Dibix.Sdk.Tests
             public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
-            public System.DateTime CreationTime { get; set; }
+            public System.DateTime? CreationTime { get; set; }
         }
 
         public sealed class JointContract
@@ -1891,7 +1892,7 @@ namespace Dibix.Sdk.Tests
             public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
-            public System.DateTime CreationTime { get; set; }
+            public System.DateTime? CreationTime { get; set; }
         }
         #endregion
     }
@@ -1966,7 +1967,7 @@ namespace Dibix.Sdk.Tests
             public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
-            public System.DateTime CreationTime { get; set; }
+            public System.DateTime? CreationTime { get; set; }
         }
         #endregion
     }
@@ -2055,7 +2056,7 @@ namespace Dibix.Sdk.Tests
             public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
-            public System.DateTime CreationTime { get; set; }
+            public System.DateTime? CreationTime { get; set; }
         }
 
         namespace Extension
@@ -2151,7 +2152,7 @@ namespace Dibix.Sdk.Tests
             public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
-            public System.DateTime CreationTime { get; set; }
+            public System.DateTime? CreationTime { get; set; }
         }
 
         public sealed class JointContract
@@ -3074,7 +3075,7 @@ namespace Dibix.Sdk.Tests
             public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
-            public System.DateTime CreationTime { get; set; }
+            public System.DateTime? CreationTime { get; set; }
         }
 
         namespace Extension
@@ -3192,7 +3193,7 @@ namespace Dibix.Sdk.Tests
             public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
-            public System.DateTime CreationTime { get; set; }
+            public System.DateTime? CreationTime { get; set; }
         }
 
         namespace Extension
@@ -3350,7 +3351,7 @@ namespace Dibix.Sdk.Tests
             public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
-            public System.DateTime CreationTime { get; set; }
+            public System.DateTime? CreationTime { get; set; }
         }
 
         namespace Grid

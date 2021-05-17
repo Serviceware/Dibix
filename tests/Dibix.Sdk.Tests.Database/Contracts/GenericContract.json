@@ -25,7 +25,7 @@
       "default": "User"
     },
     "CreationTime": {
-      "type": "datetime",
+      "type": "datetime?",
       "kind": "utc"
     }
   }

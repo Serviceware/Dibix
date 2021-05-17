@@ -143,8 +143,7 @@ If this is not a project that has multiple areas, please make sure to define the
                             }
 
                             Enum.TryParse((string)propertyInfo.Property("serialize")?.Value, true, out serializationBehavior);
-                            if (String.Equals(typeName, nameof(PrimitiveType.DateTime), StringComparison.OrdinalIgnoreCase))
-                                Enum.TryParse((string)propertyInfo.Property("kind")?.Value, true, out dateTimeKind);
+                            Enum.TryParse((string)propertyInfo.Property("kind")?.Value, true, out dateTimeKind);
 
                             obfuscated = (bool?)propertyInfo.Property("obfuscated")?.Value ?? default;
                             break;
