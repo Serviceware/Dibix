@@ -7,6 +7,8 @@ namespace Dibix.Testing
 {
     internal static class DiffToolUtility
     {
+        private const string WinMergeProcessName = @"winmergeU";
+
         public static string GenerateReferencingBatchFile(TestContext context, string expected, string actual, out bool privateResultsDirectorySpecified)
         {
             string privateResultsDirectory = context.GetPrivateResultsDirectory(out privateResultsDirectorySpecified);
@@ -25,7 +27,7 @@ namespace Dibix.Testing
 
             string batchPath = Path.Combine(privateResultsDirectory, "winmerge.bat");
             string content = $@"@echo off
-start winmerge ""{expectedPublicPath}"" ""{actualPublicPath}""";
+start {WinMergeProcessName} ""{expectedPublicPath}"" ""{actualPublicPath}""";
             File.WriteAllText(batchPath, content);
 
             return batchPath;
@@ -40,7 +42,7 @@ start winmerge ""{expectedPublicPath}"" ""{actualPublicPath}""";
 if not exist ""{context.TestRunResultsDirectory}"" mkdir ""{context.TestRunResultsDirectory}""
 {GenerateEchoStatements(expected, expectedPath)}
 {GenerateEchoStatements(actual, actualPath)}
-start winmerge ""{expectedPath}"" ""{actualPath}""";
+start {WinMergeProcessName} ""{expectedPath}"" ""{actualPath}""";
             File.WriteAllText(batchPath, content);
 
             return batchPath;
