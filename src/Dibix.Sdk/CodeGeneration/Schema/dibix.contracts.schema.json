@@ -104,7 +104,14 @@
               "minProperties": 2,
               "properties": {
                 "type": {
-                  "const": "datetime"
+                  "anyOf": [
+                    {
+                      "const": "datetime"
+                    },
+                    {
+                      "const": "datetime?"
+                    }
+                  ]
                 },
                 "kind": {
                   "type": "string",
