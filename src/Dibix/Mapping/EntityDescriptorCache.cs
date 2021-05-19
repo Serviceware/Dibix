@@ -172,7 +172,7 @@ namespace Dibix
                                                  let propertyInfo = formattableProperty.Key
                                                  from formatter in formattableProperty.Value
                                                  let propertyExpression = Expression.Property(instanceParameter, propertyInfo)
-                                                 select Expression.Assign(propertyExpression, formatter.BuildFormattingExpression(propertyInfo, propertyExpression));
+                                                 select Expression.Assign(propertyExpression, formatter.BuildExpression(propertyInfo, propertyExpression));
 
             Expression block = Expression.Block(statements);
             LambdaExpression lambda = Expression.Lambda(block, instanceParameter);

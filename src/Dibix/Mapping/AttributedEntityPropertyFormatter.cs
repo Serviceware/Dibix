@@ -9,21 +9,20 @@ namespace Dibix
     {
         public bool RequiresFormatting(PropertyInfo property) => property.IsDefined(typeof(TAttribute));
 
-        public Expression BuildFormattingExpression(PropertyInfo propertyInfo, Expression propertyExpression)
+        public Expression BuildExpression(PropertyInfo propertyInfo, Expression propertyExpression)
         {
             TAttribute attribute = propertyInfo.GetCustomAttribute<TAttribute>();
             Guard.IsNotNull(attribute, nameof(attribute));
 
-            MethodInfo formatValueMethod = this.GetValueFormatterMethod();
-            Expression formatValueCall = Expression.Call(formatValueMethod, this.GetValueFormatterParameters(propertyExpression, attribute));
-            return formatValueCall;
+            Expression formattedValueExpression = this.BuildExpression(this.GetValueFormatterParameters(propertyExpression, attribute));
+            return formattedValueExpression;
         }
-
-        protected abstract MethodInfo GetValueFormatterMethod();
 
         protected virtual IEnumerable<Expression> GetValueFormatterParameters(Expression valueParameter, TAttribute attribute)
         {
             yield return valueParameter;
         }
+
+        protected abstract Expression BuildExpression(IEnumerable<Expression> arguments);
     }
 }

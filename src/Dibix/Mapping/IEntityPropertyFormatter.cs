@@ -6,6 +6,6 @@ namespace Dibix
     public interface IEntityPropertyFormatter
     {
         bool RequiresFormatting(PropertyInfo property);
-        Expression BuildFormattingExpression(PropertyInfo propertyInfo, Expression propertyExpression);
+        Expression BuildExpression(PropertyInfo propertyInfo, Expression propertyExpression);
     }
 }

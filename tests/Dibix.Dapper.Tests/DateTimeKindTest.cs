@@ -14,7 +14,9 @@ namespace Dibix.Dapper.Tests
                 const string commandText = "SELECT [creationtime] = CAST(43861.1666666667 AS DATETIME), [modifiedat] = CAST(43861.1666666667 AS DATETIME)";
                 Entity entity = await accessor.QuerySingleAsync<Entity>(commandText, cancellationToken: default).ConfigureAwait(false);
                 Assert.Equal(DateTimeKind.Unspecified, entity.CreationTime.Kind);
-                Assert.Equal(DateTimeKind.Utc, entity.ModifiedAt.Kind);
+                Assert.NotNull(entity.ModifiedAt);
+                Assert.Equal(DateTimeKind.Utc, entity.ModifiedAt.Value.Kind);
+                Assert.Null(entity.DeletedAt);
             }
         }
 
@@ -24,7 +26,10 @@ namespace Dibix.Dapper.Tests
             public DateTime CreationTime { get; set; }
             
             [DateTimeKind(DateTimeKind.Utc)]
-            public DateTime ModifiedAt { get; set; }
+            public DateTime? ModifiedAt { get; set; }
+            
+            [DateTimeKind(DateTimeKind.Utc)]
+            public DateTime? DeletedAt { get; set; }
         }
     }
 }
