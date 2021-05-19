@@ -14,7 +14,7 @@ namespace Dibix
             TAttribute attribute = propertyInfo.GetCustomAttribute<TAttribute>();
             Guard.IsNotNull(attribute, nameof(attribute));
 
-            Expression formattedValueExpression = this.BuildExpression(this.GetValueFormatterParameters(propertyExpression, attribute));
+            Expression formattedValueExpression = this.BuildExpression(propertyInfo, this.GetValueFormatterParameters(propertyExpression, attribute));
             return formattedValueExpression;
         }
 
@@ -23,6 +23,6 @@ namespace Dibix
             yield return valueParameter;
         }
 
-        protected abstract Expression BuildExpression(IEnumerable<Expression> arguments);
+        protected abstract Expression BuildExpression(PropertyInfo property, IEnumerable<Expression> arguments);
     }
 }

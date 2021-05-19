@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Dibix
 {
@@ -12,10 +13,12 @@ namespace Dibix
             yield return valueParameter;
             yield return Expression.Constant(attribute.Kind);
         }
-        protected override Expression BuildExpression(IEnumerable<Expression> arguments)
+
+        protected override Expression BuildExpression(PropertyInfo property, IEnumerable<Expression> arguments)
         {
             Expression[] expressionsArray = arguments as Expression[] ?? arguments.ToArray();
-            Expression call = Expression.Call(typeof(DateTimeKindEntityPropertyFormatter), nameof(SpecifyKind), new Type[0], expressionsArray);
+            Type targetType = property.PropertyType == typeof(DateTime?) ? typeof(DateTimeKindEntityPropertyFormatter) : typeof(DateTime);
+            Expression call = Expression.Call(targetType, nameof(SpecifyKind), new Type[0], expressionsArray);
             return call;
         }
 
