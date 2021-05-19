@@ -5,7 +5,11 @@
     "^refs/heads/master$",
     "^refs/heads/rel/v\\d+(?:\\.\\d+)?$"
   ],
+  "nugetPackageVersion": {
+    "semVer": 2
+  },
   "release": {
-    "branchName": "rel/v{version}"
+    "branchName": "rel/v{version}",
+    "firstUnstableTag": ""
   }
 }
