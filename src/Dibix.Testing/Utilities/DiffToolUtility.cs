@@ -7,7 +7,7 @@ namespace Dibix.Testing
 {
     internal static class DiffToolUtility
     {
-        private const string WinMergeProcessName = @"winmergeU";
+        private const string WinMergeProcessName = "winmergeU";
 
         public static string GenerateReferencingBatchFile(TestContext context, string expected, string actual, out bool privateResultsDirectorySpecified)
         {

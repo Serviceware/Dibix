@@ -10,6 +10,7 @@ namespace Dibix.Http.Client
     public class DefaultHttpClientFactory : IHttpClientFactory
     {
         #region Fields
+        private readonly Uri _baseAddress;
         private readonly HttpRequestTracer _httpRequestTracer;
         #endregion
 
@@ -19,14 +20,17 @@ namespace Dibix.Http.Client
 
         #region Constructor
         public DefaultHttpClientFactory() { }
-        public DefaultHttpClientFactory(HttpRequestTracer httpRequestTracer)
+        public DefaultHttpClientFactory(Uri baseAddress) => this._baseAddress = baseAddress;
+        public DefaultHttpClientFactory(HttpRequestTracer httpRequestTracer) => this._httpRequestTracer = httpRequestTracer;
+        public DefaultHttpClientFactory(Uri baseAddress, HttpRequestTracer httpRequestTracer)
         {
+            this._baseAddress = baseAddress;
             this._httpRequestTracer = httpRequestTracer;
         }
         #endregion
 
         #region IHttpClientFactory Members
-        public HttpClient CreateClient() => this.CreateClient(baseAddress: null);
+        public HttpClient CreateClient() => this.CreateClient(this._baseAddress);
         public HttpClient CreateClient(Uri baseAddress)
         {
             HttpClientBuilder builder = new HttpClientBuilder();
@@ -49,6 +53,19 @@ namespace Dibix.Http.Client
         #region Private Methods
         private static HttpMessageHandler CreateHandlerPipeline(HttpClientBuilder clientBuilder)
         {
+            // Subsequent handlers, that make their own requests with the same tracer, might overwrite the last request trace
+            // Therefore we move the tracing handler before user handlers
+            for (int i = 0; i < clientBuilder.AddtionalHandlers.Count; i++)
+            {
+                DelegatingHandler handler = clientBuilder.AddtionalHandlers[i];
+                if (!(handler is TracingHttpMessageHandler))
+                    continue;
+
+                clientBuilder.AddtionalHandlers.RemoveAt(i);
+                clientBuilder.AddtionalHandlers.Add(handler);
+                break;
+            }
+
             HttpMessageHandler next = clientBuilder.PrimaryHttpMessageHandler;
             for (int i = clientBuilder.AddtionalHandlers.Count - 1; i >= 0; i--)
             {
@@ -112,55 +129,71 @@ Handler: '{handler}'";
                 this.AddtionalHandlers = new Collection<DelegatingHandler>();
             }
 
-            public void ConfigureClient(Action<HttpClient> configure)
+            public IHttpClientBuilder ConfigureClient(Action<HttpClient> configure)
             {
                 Guard.IsNotNull(configure, nameof(configure));
                 this._clientActions.Add(configure);
+                return this;
             }
 
-            public void ConfigureClient(HttpClient client)
+            public IHttpClientBuilder ConfigureClient(HttpClient client)
             {
                 foreach (Action<HttpClient> configure in this._clientActions) 
                     configure(client);
+
+                return this;
             }
 
-            public void ConfigurePrimaryHttpMessageHandler<THandler>() where THandler : HttpMessageHandler, new()
+            public IHttpClientBuilder ConfigurePrimaryHttpMessageHandler<THandler>() where THandler : HttpMessageHandler, new()
             {
                 this.ConfigurePrimaryHttpMessageHandler(new THandler());
+                return this;
             }
-            public void ConfigurePrimaryHttpMessageHandler<THandler>(THandler handler) where THandler : HttpMessageHandler
+            public IHttpClientBuilder ConfigurePrimaryHttpMessageHandler<THandler>(THandler handler) where THandler : HttpMessageHandler
             {
                 this.PrimaryHttpMessageHandler = handler;
+                return this;
             }
 
-            public void AddHttpMessageHandler<THandler>() where THandler : DelegatingHandler, new() => this.AddHttpMessageHandler(new THandler());
-            public void AddHttpMessageHandler(DelegatingHandler handler)
+            public IHttpClientBuilder AddHttpMessageHandler<THandler>() where THandler : DelegatingHandler, new() => this.AddHttpMessageHandler(new THandler());
+            public IHttpClientBuilder AddHttpMessageHandler(DelegatingHandler handler)
             {
                 Guard.IsNotNull(handler, nameof(handler));
                 this.AddtionalHandlers.Add(handler);
+                return this;
             }
 
-            public void RemoveHttpMessageHandler<THandler>() where THandler : DelegatingHandler, new()
+            public IHttpClientBuilder RemoveHttpMessageHandler<THandler>() where THandler : DelegatingHandler
             {
                 foreach (THandler handler in this.AddtionalHandlers.OfType<THandler>().ToArray()) 
                     this.AddtionalHandlers.Remove(handler);
-            }
-            public void RemoveHttpMessageHandler(DelegatingHandler handler) => this.AddtionalHandlers.Remove(handler);
 
-            public void ClearHttpMessageHandlers() => this.AddtionalHandlers.Clear();
+                return this;
+            }
+            public IHttpClientBuilder RemoveHttpMessageHandler(DelegatingHandler handler)
+            {
+                this.AddtionalHandlers.Remove(handler);
+                return this;
+            }
+
+            public IHttpClientBuilder ClearHttpMessageHandlers()
+            {
+                this.AddtionalHandlers.Clear();
+                return this;
+            }
         }
         #endregion
     }
 
     public interface IHttpClientBuilder
     {
-        void ConfigureClient(Action<HttpClient> configure);
-        void ConfigurePrimaryHttpMessageHandler<THandler>() where THandler : HttpMessageHandler, new();
-        void ConfigurePrimaryHttpMessageHandler<THandler>(THandler handler) where THandler : HttpMessageHandler;
-        void AddHttpMessageHandler<THandler>() where THandler : DelegatingHandler, new();
-        void AddHttpMessageHandler(DelegatingHandler handler);
-        void RemoveHttpMessageHandler<THandler>() where THandler : DelegatingHandler, new();
-        void RemoveHttpMessageHandler(DelegatingHandler handler);
-        void ClearHttpMessageHandlers();
+        IHttpClientBuilder ConfigureClient(Action<HttpClient> configure);
+        IHttpClientBuilder ConfigurePrimaryHttpMessageHandler<THandler>() where THandler : HttpMessageHandler, new();
+        IHttpClientBuilder ConfigurePrimaryHttpMessageHandler<THandler>(THandler handler) where THandler : HttpMessageHandler;
+        IHttpClientBuilder AddHttpMessageHandler<THandler>() where THandler : DelegatingHandler, new();
+        IHttpClientBuilder AddHttpMessageHandler(DelegatingHandler handler);
+        IHttpClientBuilder RemoveHttpMessageHandler<THandler>() where THandler : DelegatingHandler;
+        IHttpClientBuilder RemoveHttpMessageHandler(DelegatingHandler handler);
+        IHttpClientBuilder ClearHttpMessageHandlers();
     }
 }
