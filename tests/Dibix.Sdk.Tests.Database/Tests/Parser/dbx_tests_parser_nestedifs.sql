@@ -1,6 +1,7 @@
 ﻿-- @Return int Name:A
 -- @Return int Name:B
 -- @Return int Name:C
+-- @Return int Name:D
 CREATE PROCEDURE [dbo].[dbx_tests_parser_nestedifs]
 AS
     DECLARE @true BIT = 1
@@ -30,3 +31,13 @@ AS
 		SELECT 2
 	ELSE
 		SELECT 3
+
+	
+	IF @true = 1
+		SELECT 1
+	ELSE IF @true = 2
+	BEGIN
+		;THROW 50000, N'Error', 1
+	END
+	ELSE
+		SELECT 2

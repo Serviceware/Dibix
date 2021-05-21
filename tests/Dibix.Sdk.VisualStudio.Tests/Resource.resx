@@ -193,7 +193,17 @@ ELSE
     IF @true = 2
         SELECT 2;
     ELSE
-        SELECT 3;";
+        SELECT 3;
+
+IF @true = 1
+    SELECT 1;
+ELSE
+    IF @true = 2
+        BEGIN
+            THROW 50000, N'Error', 1;
+        END
+    ELSE
+        SELECT 2;";
 
         // dbx_tests_parser_nobeginend
         public const string dbx_tests_parser_nobeginendCommandText = @"SELECT 1;
@@ -258,6 +268,7 @@ UNION ALL
                     result.A.ReplaceWith(reader.ReadMany&lt;int&gt;());
                     result.B.ReplaceWith(reader.ReadMany&lt;int&gt;());
                     result.C.ReplaceWith(reader.ReadMany&lt;int&gt;());
+                    result.D.ReplaceWith(reader.ReadMany&lt;int&gt;());
                     return result;
                 }
             }
@@ -352,12 +363,14 @@ UNION ALL
         public IList&lt;int&gt; A { get; private set; }
         public IList&lt;int&gt; B { get; private set; }
         public IList&lt;int&gt; C { get; private set; }
+        public IList&lt;int&gt; D { get; private set; }
 
         public dbx_tests_parser_nestedifsResult()
         {
             this.A = new Collection&lt;int&gt;();
             this.B = new Collection&lt;int&gt;();
             this.C = new Collection&lt;int&gt;();
+            this.D = new Collection&lt;int&gt;();
         }
     }
 

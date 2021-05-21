@@ -73,7 +73,6 @@ namespace Dibix.Sdk.CodeGeneration
             for (int i = 0; i < statements.Count; i++)
             {
                 SqlStatementInfo statement = statements[i];
-                bool isSingleResult = statement.Results.Count == 1;
 
                 string methodName = String.Concat(MethodPrefix, statement.Name);
                 if (statement.Async)

@@ -64,24 +64,32 @@ namespace Dibix.Sdk.CodeGeneration
                 Name = Path.GetFileNameWithoutExtension(file)
             };
 
-            bool result = this._parser.Read
-            (
-                sourceKind: SqlParserSourceKind.Stream
-              , source: File.OpenRead(file)
-              , modelAccessor: this._modelAccessor
-              , target: statement
-              , projectName: this._projectName
-              , isEmbedded: this._isEmbedded
-              , analyzeAlways: this._analyzeAlways
-              , productName: this._productName
-              , areaName: this._areaName
-              , formatter: this._formatter
-              , typeResolver: this._typeResolver
-              , schemaRegistry: this._schemaRegistry
-              , logger: this._logger
-            );
-
-            return result ? statement : null;
+            try
+            {
+                bool result = this._parser.Read
+                (
+                    sourceKind: SqlParserSourceKind.Stream
+                  , source: File.OpenRead(file)
+                  , modelAccessor: this._modelAccessor
+                  , target: statement
+                  , projectName: this._projectName
+                  , isEmbedded: this._isEmbedded
+                  , analyzeAlways: this._analyzeAlways
+                  , productName: this._productName
+                  , areaName: this._areaName
+                  , formatter: this._formatter
+                  , typeResolver: this._typeResolver
+                  , schemaRegistry: this._schemaRegistry
+                  , logger: this._logger
+                );
+                return result ? statement : null;
+            }
+            catch (Exception exception)
+            {
+                throw new Exception($@"{exception.Message}
+   at {file}
+", exception);
+            }
         }
     }
 }
