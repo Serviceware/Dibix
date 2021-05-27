@@ -9,6 +9,7 @@ namespace Dibix.Sdk.CodeGeneration
             typeof(ServerCodeArtifactGenerationUnit)
           , typeof(ClientCodeArtifactGenerationUnit)
           , typeof(OpenApiArtifactsGenerationUnit)
+          , typeof(DumpModelUnit)
         };
 
         public bool Generate(CodeArtifactsGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger)
