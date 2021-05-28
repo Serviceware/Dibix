@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net.Http;
@@ -31,6 +30,6 @@ namespace Dibix.Http.Server
             return getLanguageCall;
         }
 
-        private static string GetLanguage(HttpRequestMessage request) => request.Headers.AcceptLanguage.Select(x => x.Value).FirstOrDefault() ?? new CultureInfo("en").Name;
+        private static string GetLanguage(HttpRequestMessage request) => request.Headers.AcceptLanguage.Select(x => x.Value).FirstOrDefault();
     }
 }
