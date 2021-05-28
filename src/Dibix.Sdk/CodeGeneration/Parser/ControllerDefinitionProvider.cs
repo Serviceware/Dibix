@@ -505,8 +505,12 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
                 if (location == ActionParameterLocation.Path)
                     pathParameters.Remove(apiParameterName);
 
-                bool isRequired = IsParameterRequired(type: null, location, defaultValue: null, this._schemaRegistry);
-                parameterRegistry.Add(new ActionParameter(apiParameterName, internalParameterName, type: null, location, isRequired, defaultValue: null, parameter.Source));
+                TypeReference type = null;
+                if (location == ActionParameterLocation.Header)
+                    type = new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: false);
+
+                bool isRequired = IsParameterRequired(type, location, defaultValue: null, this._schemaRegistry);
+                parameterRegistry.Add(new ActionParameter(apiParameterName, internalParameterName, type, location, isRequired, defaultValue: null, parameter.Source));
             }
 
             foreach (string pathParameter in pathParameters.Keys)
