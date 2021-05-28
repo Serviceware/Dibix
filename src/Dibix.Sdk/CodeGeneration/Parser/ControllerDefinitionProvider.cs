@@ -506,11 +506,15 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
                     pathParameters.Remove(apiParameterName);
 
                 TypeReference type = null;
+                DefaultValue defaultValue = null;
                 if (location == ActionParameterLocation.Header)
+                {
                     type = new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: false);
+                    defaultValue = new DefaultValue(null, filePath, parameter.Property.GetCorrectLinePosition(), ((IJsonLineInfo)parameter.Property).LinePosition);
+                }
 
-                bool isRequired = IsParameterRequired(type, location, defaultValue: null, this._schemaRegistry);
-                parameterRegistry.Add(new ActionParameter(apiParameterName, internalParameterName, type, location, isRequired, defaultValue: null, parameter.Source));
+                bool isRequired = IsParameterRequired(type, location, defaultValue, this._schemaRegistry);
+                parameterRegistry.Add(new ActionParameter(apiParameterName, internalParameterName, type, location, isRequired, defaultValue, parameter.Source));
             }
 
             foreach (string pathParameter in pathParameters.Keys)
