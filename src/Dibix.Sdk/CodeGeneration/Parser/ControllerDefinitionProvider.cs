@@ -509,7 +509,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
                 DefaultValue defaultValue = null;
                 if (location == ActionParameterLocation.Header)
                 {
-                    type = new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: false);
+                    type = new PrimitiveTypeReference(PrimitiveType.String, isNullable: true, isEnumerable: false);
                     defaultValue = new DefaultValue(null, filePath, parameter.Property.GetCorrectLinePosition(), ((IJsonLineInfo)parameter.Property).LinePosition);
                 }
 
