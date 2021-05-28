@@ -591,8 +591,78 @@ Either create a mapping or make sure a property of the same name exists in the s
             if (targetType == typeof(object))
                 return valueExpression;
 
+            if (TryStructuredTypeConversion(parameterName, valueExpression, targetType, out Expression newValueExpression))
+                return newValueExpression;
+
             Expression convertCall = Expression.Call(typeof(HttpParameterResolver), nameof(ConvertValue), new[] { valueExpression.Type, targetType }, Expression.Constant(parameterName), valueExpression);
             return convertCall;
+        }
+
+        private static bool TryStructuredTypeConversion(string parameterName, Expression valueExpression, Type targetType, out Expression newValueExpression)
+        {
+            Type sourceType = valueExpression.Type;
+            bool isSourceEnumerable = Enumerable.Repeat(sourceType, 1)
+                                                .Union(sourceType.GetInterfaces())
+                                                .Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+
+            if (!isSourceEnumerable || !typeof(StructuredType).IsAssignableFrom(targetType))
+            {
+                newValueExpression = null;
+                return false;
+            }
+
+            MethodInfo addMethod = GetStructuredTypeAddMethod(targetType);
+            ParameterInfo[] parameters = addMethod.GetParameters();
+            if (parameters.Length != 1)
+                throw new NotSupportedException($"{nameof(StructuredType)} implementations with {parameters.Length} parameters are not supported");
+
+            newValueExpression = BuildSingleValueStructuredTypeConversion(parameterName, targetType, addMethod, valueExpression);
+            return true;
+        }
+
+        private static Expression BuildSingleValueStructuredTypeConversion(string parameterName, Type type, MethodInfo addMethod, Expression valueExpression)
+        {
+            // IdSet structuredType = new IdSet();
+            ParameterExpression structureTypeVariable = Expression.Variable(type, parameterName);
+            Expression structuredTypeValue = Expression.New(type);
+            Expression structuredTypeAssign = Expression.Assign(structureTypeVariable, structuredTypeValue);
+
+            // IEnumerator<int> valuesEnumerator;
+            // try
+            // {
+            //     valuesEnumerator = values.GetEnumerator();
+            //     while (valuesEnumerator.MoveNext())
+            //     {
+            //         structuredType.Add(structuredTypeEnumerator.Current);
+            //     }
+            // }
+            // finally
+            // {
+            //     if (valuesEnumerator != null)
+            //         valuesEnumerator.Dispose();
+            // }
+            Type parameterType = addMethod.GetParameters().Select(x => x.ParameterType).Single();
+            ExpressionUtility.Foreach
+            (
+                parameterName
+              , valueExpression
+              , parameterType
+              , builder => builder.AddStatement(Expression.Call(structureTypeVariable, addMethod, builder.Element))
+              , out ParameterExpression enumeratorVariable
+              , out Expression enumeratorStatement
+            );
+
+            Expression block = Expression.Block(new[] { structureTypeVariable, enumeratorVariable }, structuredTypeAssign, enumeratorStatement, structureTypeVariable);
+            return block;
+        }
+
+        private static MethodInfo GetStructuredTypeAddMethod(IReflect type)
+        {
+            MethodInfo addMethod = type.GetMethod("Add", BindingFlags.Public | BindingFlags.Instance);
+            if (addMethod == null)
+                throw new InvalidOperationException($"Structured type '{type}' does not have a public Add method");
+
+            return addMethod;
         }
 
         private static PropertyAccessor BuildDebugViewAccessor()

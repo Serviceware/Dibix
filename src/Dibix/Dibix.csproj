@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\..\shared\EnumerableExtensions.cs" Link="Extensions\EnumerableExtensions.cs" />
+    <Compile Include="..\..\shared\FuncEqualityComparer.cs" Link="Collections\FuncEqualityComparer.cs" />
+    <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\Guard.cs" />
+    <Compile Include="..\..\shared\SchemaName.cs" Link="Environment\SchemaName.cs" />
     <Compile Update="Access\DatabaseAccessorExtensions.Execute.cs"              DependentUpon="Access\DatabaseAccessorExtensions.cs" />
     <Compile Update="Access\DatabaseAccessorExtensions.GridReader.cs"           DependentUpon="Access\DatabaseAccessorExtensions.cs" />
     <Compile Update="Access\DatabaseAccessorExtensions.QueryMany.cs"            DependentUpon="Access\DatabaseAccessorExtensions.cs" />

@@ -225,9 +225,9 @@ namespace Dibix.Http.Server.Tests
             public void Add(short type, string name) => base.AddValues(type, name);
         }
         
-        private sealed class UriItemSet : StructuredType<UriItemSet, string>
+        private sealed class StringSet : StructuredType<StringSet, string>
         {
-            public UriItemSet() : base("x") => base.ImportSqlMetadata(() => this.Add(default));
+            public StringSet() : base("x") => base.ImportSqlMetadata(() => this.Add(default));
 
             public void Add(string name) => base.AddValues(name);
         }

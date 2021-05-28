@@ -233,7 +233,7 @@ Parameter: lcid", exception.Message);
             Assert.Equal(7, input.targetid);
             Assert.Equal(1033, arguments["lcid"]);
             Assert.Equal(710, arguments["agentid"]);
-            ExplicitHttpBodyItemSet itemsa_ = Assert.IsType<ExplicitHttpBodyItemSet>(arguments["itemsa_"]);
+            StructuredType itemsa_ = Assert.IsType<ExplicitHttpBodyItemSet>(arguments["itemsa_"]);
             Assert.Equal(@"id_ INT(4)  idx INT(4)  age_ INT(4)  name_ NVARCHAR(MAX)
 ----------  ----------  -----------  -------------------
 710         1           5            X                  
@@ -334,7 +334,7 @@ Parameter: lcid", exception.Message);
             Assert.Equal(7, input.sourceid);
             Assert.Equal(1033, input.localeid);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
-            ImplicitHttpBodyItemSet itemsa = Assert.IsType<ImplicitHttpBodyItemSet>(arguments["itemsa"]);
+            StructuredType itemsa = Assert.IsType<ImplicitHttpBodyItemSet>(arguments["itemsa"]);
             Assert.Equal(@"type SMALLINT(2)  name NVARCHAR(MAX)
 ----------------  ------------------
 1                 X                 
@@ -417,7 +417,7 @@ Parameter: lcid", exception.Message);
             Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             Assert.Equal("ENCRYPTED(Cake)", arguments["encryptedpassword"]);
             Assert.Equal("ENCRYPTED(Cookie)", arguments["anotherencryptedpassword"]);
-            HttpBodyItemSet items = Assert.IsType<HttpBodyItemSet>(arguments["items"]);
+            StructuredType items = Assert.IsType<HttpBodyItemSet>(arguments["items"]);
             Assert.Equal(@"encryptedpassword NVARCHAR(MAX)
 -------------------------------
 ENCRYPTED(Item1)               
@@ -693,7 +693,7 @@ Parameter: input", exception.Message);
             Assert.Equal(HttpParameterLocation.Query, result.Parameters["targetid"].Location);
             Assert.False(result.Parameters["targetid"].IsOptional);
             Assert.Equal("items", result.Parameters["items"].Name);
-            Assert.Equal(typeof(UriItemSet), result.Parameters["items"].Type);
+            Assert.Equal(typeof(StringSet), result.Parameters["items"].Type);
             Assert.Equal(HttpParameterLocation.Query, result.Parameters["items"].Location);
             Assert.False(result.Parameters["items"].IsOptional);
             Assert.Equal("targetname_", result.Parameters["targetname_"].Name);
@@ -755,7 +755,7 @@ Parameter: input", exception.Message);
             Assert.Equal("ENCRYPTED(Muffin)", input.targetname);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
-        private static void Compile_QuerySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpUriParameterInput input, UriItemSet items, int anotherid, int id = 0, string name = "Cake", bool? @true = true, bool? empty = null) { }
+        private static void Compile_QuerySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpUriParameterInput input, StringSet items, int anotherid, int id = 0, string name = "Cake", bool? @true = true, bool? empty = null) { }
 
         [Fact]
         public void Compile_PathSource()
@@ -891,7 +891,8 @@ Parameter: input", exception.Message);
         {
             IHttpParameterResolutionMethod result = Compile(x =>
             {
-                x.ResolveParameterFromSource("regionlanguage", "REQUEST", "Language");
+                x.ResolveParameterFromSource("primaryclientlanguage", "REQUEST", "Language");
+                x.ResolveParameterFromSource("clientlanguages", "REQUEST", "Languages");
             });
             TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
@@ -900,7 +901,39 @@ Parameter: input", exception.Message);
     .Block(Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
         $arguments.Item[""databaseAccessorFactory""] = (System.Object)$databaseaccessorfactorySource;
-        $arguments.Item[""regionlanguage""] = (System.Object).Call Dibix.Http.Server.RequestParameterSourceProvider.GetLanguage($request)
+        $arguments.Item[""primaryclientlanguage""] = (System.Object).Call Dibix.Http.Server.RequestParameterSourceProvider.GetFirstLanguage($request)
+        ;
+        $arguments.Item[""clientlanguages""] = (System.Object).Block(
+            Dibix.Http.Server.Tests.HttpParameterResolverTest+StringSet $clientlanguages,
+            System.Collections.Generic.IEnumerator`1[System.String] $clientlanguagesEnumerator) {
+            $clientlanguages = .New Dibix.Http.Server.Tests.HttpParameterResolverTest+StringSet();
+            .Try {
+                .Block() {
+                    $clientlanguagesEnumerator = .Call (.Call Dibix.Http.Server.RequestParameterSourceProvider.GetLanguages($request)).GetEnumerator()
+                    ;
+                    .Loop  {
+                        .If (
+                            .IsTrue(.Call $clientlanguagesEnumerator.MoveNext())
+                        ) {
+                            .Block(System.String $clientlanguagesElement) {
+                                $clientlanguagesElement = $clientlanguagesEnumerator.Current;
+                                .Call $clientlanguages.Add($clientlanguagesElement)
+                            }
+                        } .Else {
+                            .Break BreakClientlanguagesEnumerator { }
+                        }
+                    }
+                    .LabelTarget BreakClientlanguagesEnumerator:
+                }
+            } .Finally {
+                .If ($clientlanguagesEnumerator != null) {
+                    .Call $clientlanguagesEnumerator.Dispose()
+                } .Else {
+                    .Default(System.Void)
+                }
+            };
+            $clientlanguages
+        }
     }
 }", result.Source);
             Assert.False(result.Parameters.Any());
@@ -915,12 +948,17 @@ Parameter: input", exception.Message);
 
             result.PrepareParameters(request, arguments, dependencyResolver.Object);
 
-            Assert.Equal(2, arguments.Count);
+            Assert.Equal(3, arguments.Count);
             Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
-            Assert.Equal("en-US", arguments["regionlanguage"]);
+            Assert.Equal("en-US", arguments["primaryclientlanguage"]);
+            StructuredType clientLanguages = Assert.IsType<StringSet>(arguments["clientlanguages"]);
+            Assert.Equal(@"name NVARCHAR(MAX)
+------------------
+en-US             
+en                ", clientLanguages.Dump());
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
-        private static void Compile_RequestSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, string regionlanguage) { }
+        private static void Compile_RequestSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, string primaryclientlanguage, StringSet clientlanguages) { }
 
         [Fact]
         public void Compile_EnvironmentSource()
