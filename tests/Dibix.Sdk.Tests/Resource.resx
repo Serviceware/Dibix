@@ -1803,6 +1803,7 @@ namespace Dibix.Sdk.Tests
         {
             public Dibix.Sdk.Tests.DomainModel.GenericContract A { get; set; }
             public Dibix.Sdk.Tests.DomainModel.Direction B { get; set; }
+            public Dibix.Sdk.Tests.DomainModel.AccessRights C { get; set; }
         }
 
         namespace Grid
@@ -2088,6 +2089,7 @@ namespace Dibix.Sdk.Tests
 // &lt;/auto-generated&gt;
 //----------------------------------------------------------------------------*/
 using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using Dibix;
@@ -2103,13 +2105,13 @@ namespace Dibix.Sdk.Tests
         public static class TestAccessor
         {
             // dbx_tests_syntax_singlemultimapresult_projection
-            private const string dbx_tests_syntax_singlemultimapresult_projectionCommandText = "SELECT [id] = 1, [direction] = 0\r\nUNION ALL\r\nSELECT [id] = 1, [direction] = 1";
+            private const string dbx_tests_syntax_singlemultimapresult_projectionCommandText = "SELECT [id] = 1, [direction] = 0, [accessrights] = 1\r\nUNION ALL\r\nSELECT [id] = 1, [direction] = 1, [accessrights] = 1";
 
             public static Dibix.Sdk.Tests.DomainModel.JointContract dbx_tests_syntax_singlemultimapresult_projection(this IDatabaseAccessorFactory databaseAccessorFactory)
             {
                 using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                 {
-                    return accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.GenericContract, Dibix.Sdk.Tests.DomainModel.Direction, Dibix.Sdk.Tests.DomainModel.JointContract&gt;(dbx_tests_syntax_singlemultimapresult_projectionCommandText, "direction");
+                    return accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.GenericContract, Dibix.Sdk.Tests.DomainModel.Direction, Dibix.Sdk.Tests.DomainModel.AccessRights, Dibix.Sdk.Tests.DomainModel.JointContract&gt;(dbx_tests_syntax_singlemultimapresult_projectionCommandText, "direction,accessrights");
                 }
             }
         }
@@ -2119,6 +2121,15 @@ namespace Dibix.Sdk.Tests
     namespace DomainModel
     {
         #region Contracts
+        public enum AccessRights : int
+        {
+            None = 0,
+            Read = 1,
+            Write = 2,
+            Execute = 4,
+            All = Read | Write | Execute
+        }
+
         public enum Direction : int
         {
             Ascending,
@@ -2157,8 +2168,9 @@ namespace Dibix.Sdk.Tests
 
         public sealed class JointContract
         {
-            public GenericContract A { get; set; }
-            public Direction B { get; set; }
+            public Dibix.Sdk.Tests.DomainModel.GenericContract A { get; set; }
+            public Dibix.Sdk.Tests.DomainModel.Direction B { get; set; }
+            public Dibix.Sdk.Tests.DomainModel.AccessRights C { get; set; }
         }
         #endregion
     }

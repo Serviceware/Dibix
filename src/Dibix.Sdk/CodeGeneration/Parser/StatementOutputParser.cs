@@ -182,7 +182,7 @@ namespace Dibix.Sdk.CodeGeneration
                   , schemaRegistry: schemaRegistry
                   , logger: logger
                 );
-
+                
                 SqlQueryResult result = new SqlQueryResult
                 {
                     Name = resultName?.Value,
@@ -399,6 +399,12 @@ namespace Dibix.Sdk.CodeGeneration
             if (singleResult)
             {
                 // NOTE: Uncomment the Inline_SingleMultiMapResult_WithProjection test, whenever this is implemented
+                // Full projection implementation attempts resulted in ambiguous runtime overloads. For example:
+                // No projection: QuerySingle<TReturn, TSecond, TThird>() => Second and third are mapped to first result
+                //    Projection: QuerySingle<TFirst, TSecond, TReturn>() => First and second are mapped to projected type
+                // To implement this they can only be distinguished by a different method name.
+                // Currently the invest is bigger than the benefit
+                // The current workaround is to always have a root result (the first one) that contains at least one property (for example: the key)
                 logger.LogError(null, "Projection using the 'ResultType' property is currently only supported in a part of a grid result", target.Source, node.StartLine, node.StartColumn);
             }
 

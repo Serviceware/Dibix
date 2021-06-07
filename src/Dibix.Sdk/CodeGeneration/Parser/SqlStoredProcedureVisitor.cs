@@ -178,7 +178,7 @@ targetType: {targetType}");
 
             // Grid result is merged to first result type
             if (base.Target.MergeGridResult)
-                return base.Target.Results[0].Types[0];
+                return base.Target.Results[0].ResultType;
 
             // Generate grid result type
             if (base.Target.Results.Any(x => x.Name != null))
@@ -187,7 +187,7 @@ targetType: {targetType}");
                 return this.GenerateGridResultType(relativeNamespace);
             }
 
-            return base.Target.Results[0].Types[0];
+            return base.Target.Results[0].ResultType;
         }
 
         private TypeReference GenerateGridResultType(string relativeNamespace)

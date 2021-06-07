@@ -129,7 +129,8 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(5,2,5
                 source: @"Tests\Syntax\dbx_tests_syntax_singlemultimapresult_projection.sql"
               , contracts: new [] 
                 {
-                    @"Contracts\Direction.json"
+                    @"Contracts\AccessRights.json"
+                  , @"Contracts\Direction.json"
                   , @"Contracts\GenericContract.json"
                   , @"Contracts\JointContract.json"
                 }
