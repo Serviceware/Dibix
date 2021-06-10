@@ -10,7 +10,15 @@ namespace Dibix.Testing.Http
 {
     public static class HttpClientExtensions
     {
-        public static HttpClient AddUserAgentFromTestAssembly(this HttpClient client) => client.AddUserAgentFromAssembly(ResolveTestAssembly());
+        public static HttpClient AddUserAgentFromTestAssembly(this HttpClient client, Func<string, string> productNameFormatter = null) => client.AddUserAgentFromAssembly(ResolveTestAssembly(), productName =>
+        {
+            string normalizedProductName = productName.Replace(".", null);
+
+            if (productNameFormatter != null)
+                normalizedProductName = productNameFormatter(normalizedProductName);
+
+            return normalizedProductName;
+        });
 
         private static Assembly ResolveTestAssembly()
         {

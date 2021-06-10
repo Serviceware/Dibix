@@ -25,13 +25,15 @@ namespace Dibix.Http.Client
         private static ProductInfoHeaderValue ResolveUserAgentFromAssembly(Assembly assembly, Func<string, string> productNameFormatter)
         {
             FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
-            string productName = Path.GetFileNameWithoutExtension(assembly.Location);
+            string productName = fileVersionInfo.ProductName;
+            string assemblyName = Path.GetFileNameWithoutExtension(assembly.Location);
             string productVersion = fileVersionInfo.ProductVersion;
 
+            string userAgentProductName = $"{productName}{assemblyName}";
             if (productNameFormatter != null)
-                productName = productNameFormatter(productName);
+                userAgentProductName = productNameFormatter(userAgentProductName);
 
-            return new ProductInfoHeaderValue(productName, productVersion);
+            return new ProductInfoHeaderValue(userAgentProductName, productVersion);
         }
 
         private static Assembly ResolveEntryAssembly()
