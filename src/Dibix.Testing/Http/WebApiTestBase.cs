@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dibix.Http.Client;
 using Dibix.Testing.Data;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
@@ -33,7 +34,7 @@ namespace Dibix.Testing.Http
         {
             TConfiguration configuration = base.LoadConfiguration();
 
-            IHttpClientFactory httpClientFactory = new HttpClientFactory(base.Out, x => this.ConfigureClient(configuration, x));
+            IHttpClientFactory httpClientFactory = new HttpClientFactory(base.TestContext, base.Out, x => this.ConfigureClient(configuration, x));
             IHttpAuthorizationProvider authorizationProvider = await this.Authorize(httpClientFactory, configuration).ConfigureAwait(false);
             TTestContext testContext = contextCreator(configuration, httpClientFactory, authorizationProvider);
             await testFlow(testContext).ConfigureAwait(false);
@@ -155,7 +156,7 @@ namespace Dibix.Testing.Http
             private readonly TextWriter _logger;
             private readonly Action<IHttpClientBuilder> _additionalClientConfiguration;
 
-            public HttpClientFactory(TextWriter logger, Action<IHttpClientBuilder> additionalClientConfiguration)
+            public HttpClientFactory(TestContext testContext, TextWriter logger, Action<IHttpClientBuilder> additionalClientConfiguration) : base(x => ConfigureFactory(x, testContext))
             {
                 this._logger = logger;
                 this._additionalClientConfiguration = additionalClientConfiguration;
@@ -165,6 +166,15 @@ namespace Dibix.Testing.Http
             {
                 this._additionalClientConfiguration(builder);
                 builder.AddHttpMessageHandler(new LoggingHttpMessageHandler(this._logger));
+            }
+
+            private static void ConfigureFactory(IHttpClientFactoryConfigurationBuilder configure, TestContext testContext)
+            {
+                configure.AddUserAgent(x => x.FromAssembly(TestAssemblyResolver.ResolveTestAssembly(testContext), productName =>
+                {
+                    string normalizedProductName = productName.Replace(".", null);
+                    return normalizedProductName;
+                }));
             }
         }
 
