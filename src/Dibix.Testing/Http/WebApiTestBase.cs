@@ -153,11 +153,13 @@ namespace Dibix.Testing.Http
 
         private sealed class HttpClientFactory : DefaultHttpClientFactory, IHttpClientFactory
         {
+            private readonly TestContext _testContext;
             private readonly TextWriter _logger;
             private readonly Action<IHttpClientBuilder> _additionalClientConfiguration;
 
-            public HttpClientFactory(TestContext testContext, TextWriter logger, Action<IHttpClientBuilder> additionalClientConfiguration) : base(x => ConfigureFactory(x, testContext))
+            public HttpClientFactory(TestContext testContext, TextWriter logger, Action<IHttpClientBuilder> additionalClientConfiguration)
             {
+                this._testContext = testContext;
                 this._logger = logger;
                 this._additionalClientConfiguration = additionalClientConfiguration;
             }
@@ -165,12 +167,14 @@ namespace Dibix.Testing.Http
             protected override void CreateClient(IHttpClientBuilder builder)
             {
                 this._additionalClientConfiguration(builder);
+                builder.ConfigureClient(this.ConfigureClient);
                 builder.AddHttpMessageHandler(new LoggingHttpMessageHandler(this._logger));
             }
 
-            private static void ConfigureFactory(IHttpClientFactoryConfigurationBuilder configure, TestContext testContext)
+            private void ConfigureClient(HttpClient client)
             {
-                configure.AddUserAgent(x => x.FromAssembly(TestAssemblyResolver.ResolveTestAssembly(testContext), productName =>
+                Assembly testAssembly = TestAssemblyResolver.ResolveTestAssembly(this._testContext);
+                client.AddUserAgent(y => y.FromAssembly(testAssembly, productName =>
                 {
                     string normalizedProductName = productName.Replace(".", null);
                     return normalizedProductName;

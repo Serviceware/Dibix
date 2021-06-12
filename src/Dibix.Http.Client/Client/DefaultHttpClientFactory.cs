@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Reflection;
 using System.Threading;
 
 namespace Dibix.Http.Client
@@ -14,20 +10,27 @@ namespace Dibix.Http.Client
     public class DefaultHttpClientFactory : IHttpClientFactory
     {
         #region Fields
-        private readonly HttpClientFactoryConfiguration _configuration;
+        private readonly Uri _baseAddress;
+        private readonly HttpRequestTracer _httpRequestTracer;
+        #endregion
+
+        #region Properties
+        public bool FollowRedirectsForGetRequests { get; set; } = true;
         #endregion
 
         #region Constructor
-        public DefaultHttpClientFactory(Action<IHttpClientFactoryConfigurationBuilder> configure = null)
+        public DefaultHttpClientFactory() { }
+        public DefaultHttpClientFactory(Uri baseAddress) => this._baseAddress = baseAddress;
+        public DefaultHttpClientFactory(HttpRequestTracer httpRequestTracer) => this._httpRequestTracer = httpRequestTracer;
+        public DefaultHttpClientFactory(Uri baseAddress, HttpRequestTracer httpRequestTracer)
         {
-            HttpClientFactoryConfiguration configuration = new HttpClientFactoryConfiguration();
-            configure?.Invoke(configuration);
-            this._configuration = configuration;
+            this._baseAddress = baseAddress;
+            this._httpRequestTracer = httpRequestTracer;
         }
         #endregion
 
         #region IHttpClientFactory Members
-        public HttpClient CreateClient() => this.CreateClient(this._configuration.BaseAddress);
+        public HttpClient CreateClient() => this.CreateClient(this._baseAddress);
         public HttpClient CreateClient(Uri baseAddress)
         {
             HttpClientBuilder builder = new HttpClientBuilder();
@@ -37,12 +40,7 @@ namespace Dibix.Http.Client
 
             HttpMessageHandler handler = CreateHandlerPipeline(builder);
             HttpClient client = new HttpClient(handler);
-            
             client.BaseAddress = baseAddress;
-
-            foreach (ProductInfoHeaderValue userAgent in this._configuration.UserAgent) 
-                client.DefaultRequestHeaders.UserAgent.Add(userAgent);
-
             builder.ConfigureClient(client);
 
             foreach (Action<HttpClient> postAction in postActions)
@@ -99,13 +97,13 @@ Handler: '{handler}'";
         {
             builder.AddHttpMessageHandler<EnsureSuccessStatusCodeHttpMessageHandler>();
             
-            if (this._configuration.FollowRedirectsForGetRequests)
+            if (this.FollowRedirectsForGetRequests)
                 builder.AddHttpMessageHandler<FollowRedirectHttpMessageHandler>();
             
             builder.AddHttpMessageHandler<TraceProxyHttpMessageHandler>();
 
-            if (this._configuration.HttpRequestTracer != null)
-                builder.AddHttpMessageHandler(new TracingHttpMessageHandler(this._configuration.HttpRequestTracer));
+            if (this._httpRequestTracer != null)
+                builder.AddHttpMessageHandler(new TracingHttpMessageHandler(this._httpRequestTracer));
 
             TimeoutHttpMessageHandler timeoutHandler = new TimeoutHttpMessageHandler();
             builder.AddHttpMessageHandler(timeoutHandler);
@@ -118,54 +116,6 @@ Handler: '{handler}'";
         #endregion
 
         #region Nested Types
-        private sealed class HttpClientFactoryConfiguration : IHttpClientFactoryConfigurationBuilder
-        {
-            public Uri BaseAddress { get; set; }
-            public HttpRequestTracer HttpRequestTracer { get; set; }
-            public bool FollowRedirectsForGetRequests { get; set; } = true;
-            public ICollection<ProductInfoHeaderValue> UserAgent { get; } = new Collection<ProductInfoHeaderValue>();
-
-            public void AddUserAgent(Action<IHttpUserAgentSelectorExpression> selector)
-            {
-                HttpUserAgentSelectorExpression expression = new HttpUserAgentSelectorExpression();
-                selector(expression);
-                this.UserAgent.Add(expression.UserAgent);
-            }
-        }
-
-        private sealed class HttpUserAgentSelectorExpression : IHttpUserAgentSelectorExpression
-        {
-            public ProductInfoHeaderValue UserAgent { get; private set; }
-
-            public void FromAssembly(Assembly assembly, Func<string, string> productNameFormatter = null) => this.ResolveUserAgentFromAssembly(assembly, productNameFormatter);
-
-            public void FromEntryAssembly(Func<string, string> productNameFormatter = null) => this.ResolveUserAgentFromAssembly(ResolveEntryAssembly(), productNameFormatter);
-
-            private void ResolveUserAgentFromAssembly(Assembly assembly, Func<string, string> productNameFormatter)
-            {
-                FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
-                string productName = fileVersionInfo.ProductName;
-                string assemblyName = Path.GetFileNameWithoutExtension(assembly.Location);
-                string productVersion = fileVersionInfo.ProductVersion;
-
-                string userAgentProductName = $"{productName}{assemblyName}";
-                if (productNameFormatter != null)
-                    userAgentProductName = productNameFormatter(userAgentProductName);
-
-                this.UserAgent = new ProductInfoHeaderValue(userAgentProductName, productVersion);
-            }
-
-            private static Assembly ResolveEntryAssembly()
-            {
-                Assembly assembly = Assembly.GetEntryAssembly();
-
-                if (assembly == null)
-                    throw new InvalidOperationException("Could not determine entry assembly");
-
-                return assembly;
-            }
-        }
-
         private sealed class HttpClientBuilder : IHttpClientBuilder
         {
             private readonly ICollection<Action<HttpClient>> _clientActions;
