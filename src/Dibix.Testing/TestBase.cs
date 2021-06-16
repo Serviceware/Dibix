@@ -25,8 +25,6 @@ namespace Dibix.Testing
                 this._testContext = value;
                 TestOutputWriter testOutputHelper = new TestOutputWriter(testContext: value, outputToFile: true, tailOutput: this.AttachOutputObserver);
                 this.TestOutputHelper = testOutputHelper;
-
-                this.OnTestContextInitialized();
             }
         }
         internal TestOutputWriter TestOutputHelper { get; private set; }
@@ -41,8 +39,13 @@ namespace Dibix.Testing
         }
         #endregion
 
+        #region Public Methods
+        [TestInitialize]
+        public Task OnTestInitialize() => this.OnTestInitialized();
+        #endregion
+
         #region Protected Methods
-        protected virtual void OnTestContextInitialized() { }
+        protected virtual Task OnTestInitialized() => Task.CompletedTask;
 
         protected TConfiguration LoadConfiguration() => TestConfigurationLoader.Load<TConfiguration>(this.TestContext);
 

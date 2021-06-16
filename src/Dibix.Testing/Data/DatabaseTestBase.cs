@@ -18,12 +18,13 @@ namespace Dibix.Testing.Data
         #endregion
 
         #region Protected Methods
-        protected override void OnTestContextInitialized()
+        protected override Task OnTestInitialized()
         {
             TraceSource dibixTraceSource = GetDibixTraceSource();
             TraceListener traceListener = base.TestOutputHelper.CreateTraceListener();
             dibixTraceSource.Listeners.Add(traceListener);
             this._removeTraceListener = () => dibixTraceSource.Listeners.Remove(traceListener);
+            return Task.CompletedTask;
         }
 
         protected static async Task<TResult> ExecuteDatabaseAction<TResult>(TConfiguration configuration, Func<IDatabaseAccessor, Task<TResult>> action)
