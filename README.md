@@ -1,11 +1,9 @@
 # Dibix
----
 Seamlessly create use case oriented REST APIs based on T-SQL stored procedures.
 
 [![Build Status](https://img.shields.io/azure-devops/build/serviceware/dibix/2/master)](https://dev.azure.com/serviceware/Dibix/_build/latest?definitionId=2&branchName=master)
 
 ## Packages
----
 | Package | NuGet |
 | - | - |
 | [Dibix](https://azdops.serviceware.net/sw/platform/Common/_packaging?_a=package&feed=3faf84d3-2d7c-4a03-b5d2-4d12a0b38b6c&package=494b3d58-8bc0-4cc8-a992-7b68795991c7&preferRelease=true) | [![Dibix package in Dibix feed in Azure Artifacts](https://azdops.serviceware.net/sw/platform/_apis/public/Packaging/Feeds/3faf84d3-2d7c-4a03-b5d2-4d12a0b38b6c/Packages/494b3d58-8bc0-4cc8-a992-7b68795991c7/Badge)](https://azdops.serviceware.net/sw/platform/Common/_packaging?_a=package&feed=3faf84d3-2d7c-4a03-b5d2-4d12a0b38b6c&package=494b3d58-8bc0-4cc8-a992-7b68795991c7&preferRelease=true) |
@@ -16,11 +14,9 @@ Seamlessly create use case oriented REST APIs based on T-SQL stored procedures.
 | [Dibix.Testing](https://azdops.serviceware.net/sw/platform/Common/_packaging?_a=package&feed=3faf84d3-2d7c-4a03-b5d2-4d12a0b38b6c&package=396326b6-92a7-4cc3-b076-6982bcaf6a9f&preferRelease=true) | [![Dibix.Testing package in Dibix feed in Azure Artifacts](https://azdops.serviceware.net/sw/platform/_apis/public/Packaging/Feeds/3faf84d3-2d7c-4a03-b5d2-4d12a0b38b6c/Packages/396326b6-92a7-4cc3-b076-6982bcaf6a9f/Badge)](https://azdops.serviceware.net/sw/platform/Common/_packaging?_a=package&feed=3faf84d3-2d7c-4a03-b5d2-4d12a0b38b6c&package=396326b6-92a7-4cc3-b076-6982bcaf6a9f&preferRelease=true) |
 
 ## Background
----
 The aim of Dibix is to rapidly create use case oriented REST APIs without writing any boilerplate code, unlike the general approach of designing ASP<span>.</span>NET APIs by writing controllers and actions. It strictly focuses on a hand-written T-SQL stored procedure, which is described with a bit of metadata markup. The APIs and contracts involved are specified in a declarative JSON format. Basically, each URL defined in an API endpoint results in invoking the SQL stored procedure, materializing the relational result into a hierarchical result and then return that to the client.
 
 ## Getting started
----
 
 ### Creating a project
 Dibix follows a database first approach therefore most of the work is done in a [SQL server database project](https://visualstudio.microsoft.com/vs/features/ssdt/). 
@@ -41,7 +37,6 @@ Unfortunately NuGet is [not supported](https://github.com/NuGet/Home/issues/545)
 
 
 ## Creating a REST API
----
 In this walkthrough, we try to create the following endpoints, that make up a RESTful API:<br />
 Number|Method|URL|Description
 -|-|-|-
@@ -396,7 +391,6 @@ Once you have created all the necessary artifacts, you can build the database pr
 As of right now Dibix itself does not contain a runtime implementation for the web server. So again, please check if there is any existing documentation in the product you are working on or ask [me](mailto:tommy.lohse@helpline.de) for assistance.
 
 ## Syntax reference
----
 ### HTTP status code
 By default Dibix endpoints return [200 OK](https://httpstatuses.com/200) for operations that have a result and [204 NoContent](https://httpstatuses.com/204) for those that do not return a result.<br />
 However sometimes you need to return a different HTTP status code, for example to indicate that the request is invalid. 
@@ -488,7 +482,6 @@ PropertyName|Type|Value
 MachineName|string|The value of [`System.Environment.MachineName`](https://docs.microsoft.com/en-us/dotnet/api/system.environment.machinename)
 CurrentProcessId|int|The value of [`System.Diagnostics.Process.GetCurrentProcess()`](https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.process.getcurrentprocess)[`.Id`](https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.process.id)
 
----
 
 If you read until here, you are entering a dead end, meaning a totally incomplete section. Sorry.
 
@@ -536,7 +529,6 @@ In this section the schema for defining contracts is described. The documentatio
 In this section the schema for defining endpoints is described. The documentation is still in progress. For now you can use [the JSON schema](/src/Dibix.Sdk/CodeGeneration/Schema/dibix.endpoints.schema.json) as a reference.
 
 ## Roadmap
----
 - [ ] Continue writing this documentation 🤓
 - [ ] Dibix.Server<br />
 This is the overall goal, which drives the whole project, since the idea at the end is to have an independent lightweight server application, that consumes only declarative API registrations rather than DLLs.
