@@ -2,7 +2,7 @@
 ---
 Seamlessly create use case oriented REST APIs based on T-SQL stored procedures.
 
-[![Build Status](https://azdops.serviceware.net/sw/Platform/Common/_apis/build/status/Dibix?branchName=master)](https://azdops.serviceware.net/sw/Platform/Common/_build/latest?definitionId=1246&branchName=master)
+[![Build Status](https://img.shields.io/azure-devops/build/serviceware/dibix/2/master)](https://dev.azure.com/serviceware/Dibix/_build/latest?definitionId=2&branchName=master)
 
 ## Packages
 ---
