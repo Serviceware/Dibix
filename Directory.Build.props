@@ -10,9 +10,9 @@
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
 
-    <PackageProjectUrl>https://azdops.serviceware.net/sw/platform/Common/_git/Dibix</PackageProjectUrl>
-    <RepositoryUrl>https://azdops.serviceware.net/sw/platform/Common/_git/Dibix</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/Serviceware/Dibix</PackageProjectUrl>
     <RepositoryType>Git</RepositoryType>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <PackageTags>Dibix</PackageTags>
     <Description>Seamlessly create use case oriented REST APIs based on T-SQL stored procedures.</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
