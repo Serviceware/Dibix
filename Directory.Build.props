@@ -15,6 +15,7 @@
     <RepositoryType>Git</RepositoryType>
     <PackageTags>Dibix</PackageTags>
     <Description>Seamlessly create use case oriented REST APIs based on T-SQL stored procedures.</Description>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
@@ -22,6 +23,7 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <DebugType>embedded</DebugType>
   </PropertyGroup>
+
   <ItemGroup Condition="'$(Configuration)' == 'Release' and '$(SourceRoot)'==''">
     <SourceRoot Include="$(MSBuildThisFileDirectory)/" />
   </ItemGroup>
