@@ -4,12 +4,16 @@ using Xunit;
 
 namespace Dibix.Dapper.Tests
 {
-    public class DateTimeKindTest
+    public class DateTimeKindTest : IClassFixture<DatabaseTestFixture>
     {
+        private readonly DatabaseTestFixture _fixture;
+
+        public DateTimeKindTest(DatabaseTestFixture fixture) => this._fixture = fixture;
+
         [Fact]
         public async Task KindIsSpecified_AccordingToPropertySetting()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = this._fixture.CreateDatabaseAccessor())
             {
                 const string commandText = "SELECT [creationtime] = CAST(43861.1666666667 AS DATETIME), [registrationtime] = CAST(43861.1666666667 AS DATETIME), [modifiedat] = CAST(43861.1666666667 AS DATETIME)";
                 Entity entity = await accessor.QuerySingleAsync<Entity>(commandText, cancellationToken: default).ConfigureAwait(false);

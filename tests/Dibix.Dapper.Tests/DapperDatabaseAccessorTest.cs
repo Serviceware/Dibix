@@ -8,12 +8,16 @@ using Xunit;
 
 namespace Dibix.Dapper.Tests
 {
-    public class DapperDatabaseAccessorTest
+    public sealed class DapperDatabaseAccessorTest : IClassFixture<DatabaseTestFixture>
     {
+        private readonly DatabaseTestFixture _fixture;
+
+        public DapperDatabaseAccessorTest(DatabaseTestFixture fixture) => this._fixture = fixture;
+
         [Fact]
         public void QuerySingle_WithMultipleRows_ThrowsException()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = this._fixture.CreateDatabaseAccessor())
             {
                 const string commandText = "SELECT 1 UNION ALL SELECT 2";
                 DatabaseAccessException exception = Assert.Throws<DatabaseAccessException>(() => accessor.QuerySingle<byte>(commandText));
@@ -27,7 +31,7 @@ CommandText: <Dynamic>", exception.Message);
         public void QueryFile_WithStreamParameter_IsAcceptedAsBinary()
         {
             byte[] data = { 1, 2 };
-            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = this._fixture.CreateDatabaseAccessor())
             {
                 const string commandText = "SELECT @data";
                 byte[] result = accessor.QuerySingle<byte[]>(commandText, CommandType.Text, accessor.Parameters().SetFromTemplate(new
@@ -41,7 +45,7 @@ CommandText: <Dynamic>", exception.Message);
         [Fact]
         public void Execute_WithOutputParameter_OutputParameterValueIsReturned()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = this._fixture.CreateDatabaseAccessor())
             {
                 const string commandText = "[dbo].[_dibix_tests_sp1]";
                 InputClass input = new InputClass();
@@ -62,7 +66,7 @@ CommandText: <Dynamic>", exception.Message);
         [Fact]
         public void QueryMany_WithBinaryParameter_UsingTemplate_Success()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = this._fixture.CreateDatabaseAccessor())
             {
                 const string commandText = "SELECT CAST(@binary AS NVARCHAR(MAX))";
                 byte[] binary = Encoding.Unicode.GetBytes("Test");
@@ -75,7 +79,7 @@ CommandText: <Dynamic>", exception.Message);
         [Fact]
         public void QueryMany_WithXElementParameter_UsingTemplate_Success()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = this._fixture.CreateDatabaseAccessor())
             {
                 const string commandText = "SELECT [x].[v].value('@value', 'INT') FROM @xml.nodes(N'root/item') AS [x]([v])";
                 XElement xml = XElement.Parse("<root><item value=\"1\" /><item value=\"2\" /></root>");
@@ -90,7 +94,7 @@ CommandText: <Dynamic>", exception.Message);
         [Fact]
         public void QueryMany_WithXElementParameter_UsingTypedMethod_Success()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = this._fixture.CreateDatabaseAccessor())
             {
                 const string commandText = "SELECT [x].[v].value('@value', 'INT') FROM @xml.nodes(N'root/item') AS [x]([v])";
                 XElement xml = XElement.Parse("<root><item value=\"1\" /><item value=\"2\" /></root>");
@@ -105,7 +109,7 @@ CommandText: <Dynamic>", exception.Message);
         [Fact]
         public void QuerySingle_MissingColumnName_ThrowsException()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = this._fixture.CreateDatabaseAccessor())
             {
                 const string commandText = @"SELECT 1";
                 DatabaseAccessException exception = Assert.Throws<DatabaseAccessException>(() => accessor.QuerySingle<Entity>(commandText));
@@ -118,7 +122,7 @@ CommandText: <Dynamic>", exception.Message);
         [Fact]
         public void QuerySingle_InvalidColumnName_ThrowsException()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = this._fixture.CreateDatabaseAccessor())
             {
                 const string commandText = @"SELECT 1 AS [idx]";
                 DatabaseAccessException exception = Assert.Throws<DatabaseAccessException>(() => accessor.QuerySingle<Entity>(commandText));
@@ -131,7 +135,7 @@ CommandText: <Dynamic>", exception.Message);
         [Fact]
         public void QuerySingle_Success()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = this._fixture.CreateDatabaseAccessor())
             {
                 const string commandText = @"SELECT 1 AS [id]";
                 Entity result = accessor.QuerySingle<Entity>(commandText);
@@ -143,7 +147,7 @@ CommandText: <Dynamic>", exception.Message);
         [Fact]
         public void QuerySingle_WithPrimitiveParameter_UsingLambdaSyntax_Success()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = this._fixture.CreateDatabaseAccessor())
             {
                 const string commandText = @"SELECT @agentid AS [id], N'beef' AS [name]";
                 ParametersVisitor parameters = accessor.Parameters().SetInt32("agentid", 6).Build();
@@ -157,7 +161,7 @@ CommandText: <Dynamic>", exception.Message);
         [Fact]
         public void QuerySingle_WithPrimitiveParameter_UsingLambdaAndTemplateSyntax_Success()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = this._fixture.CreateDatabaseAccessor())
             {
                 const string commandText = @"SELECT @agentid AS [id], N'beef' AS [name]";
                 ParametersVisitor parameters = accessor.Parameters().SetFromTemplate(new { agentid = 6 }).Build();
@@ -171,7 +175,7 @@ CommandText: <Dynamic>", exception.Message);
         [Fact]
         public void QuerySingle_WithPrimitiveParameter_UsingVariableSyntax_Success()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = this._fixture.CreateDatabaseAccessor())
             {
                 const string commandText = @"SELECT @agentid AS [id], N'beef' AS [name]";
                 ParametersVisitor @params = accessor.Parameters()
@@ -187,7 +191,7 @@ CommandText: <Dynamic>", exception.Message);
         [Fact]
         public void QuerySingle_WithPrimitiveParameter_UsingVariableAndTemplateSyntax_Success()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = this._fixture.CreateDatabaseAccessor())
             {
                 const string commandText = "SELECT @agentid AS [id], N'beef' AS [name], @direction AS [direction]";
                 ParametersVisitor @params = accessor.Parameters()
@@ -208,7 +212,7 @@ CommandText: <Dynamic>", exception.Message);
         [Fact]
         public void QueryMany_WithTableValueParameter_Success()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = this._fixture.CreateDatabaseAccessor())
             {
                 const string commandText = @"SELECT [intvalue] AS [id], [stringvalue] AS [name]
 FROM @translations";
@@ -233,7 +237,7 @@ FROM @translations";
         [Fact]
         public void QueryMultiple_UsingTemplate_Success()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = this._fixture.CreateDatabaseAccessor())
             {
                 const string commandText = @"SELECT @agentid AS [id], N'beef' AS [name], [decimalvalue] AS [price]
 FROM @values
@@ -267,7 +271,7 @@ FROM @ids";
         [Fact]
         public void QueryMultiple_UsingTypedMethod_Success()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = this._fixture.CreateDatabaseAccessor())
             {
                 const string commandText = @"SELECT @agentid AS [id], N'beef' AS [name], [decimalvalue] AS [price]
 FROM @values
@@ -298,7 +302,7 @@ FROM @ids";
         [Fact]
         public void QuerySingle_WithMultiMap_Success()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = this._fixture.CreateDatabaseAccessor())
             {
                 const string commandText = @"SELECT [intvalue] AS [id], 0 AS [id], [stringvalue] AS [name], 0 AS [id], [decimalvalue] AS [price]
 FROM @values";
@@ -331,7 +335,7 @@ FROM @values";
         [Fact]
         public void QueryMultiple_WithMultiMap_Success()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = this._fixture.CreateDatabaseAccessor())
             {
                 const string commandText = @"SELECT [intvalue] AS [id], 0 AS [id], [stringvalue] AS [name], 0 AS [id], [decimalvalue] AS [price]
 FROM @values";
@@ -367,7 +371,7 @@ FROM @values";
         [Fact]
         public void CustomSqlMetadata_MaxLength_TextIsTrimmed()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = this._fixture.CreateDatabaseAccessor())
             {
                 const string commandText = @"SELECT [stringvalue]
 FROM @values";
@@ -381,7 +385,7 @@ FROM @values";
         [Fact]
         public void CustomSqlMetadata_Scale_DecimalValueIsRounded()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = this._fixture.CreateDatabaseAccessor())
             {
                 const string commandText = @"SELECT [decimalvalue]
 FROM @values";

@@ -60,30 +60,34 @@ jobs:
       projects: |
         **/Dibix.Http.Client.Tests.csproj
         **/Dibix.Http.Server.Tests.csproj
-      # Dibix.Dapper.Tests are currently disabled, because they required a public database server instance
-      #projects: |
-      #  **/Dibix.Dapper.Tests.csproj
-      #  **/Dibix.Http.Client.Tests.csproj
-      #  **/Dibix.Http.Server.Tests.csproj
-      #arguments: '/p:SonarQubeExclude=True'
-    env:
-      # Required for Dibix.Dapper.Tests
-      DefaultConnection:ConnectionString: $(TestConnection:ConnectionString)
-      DefaultConnection:ProviderName: System.Data.SqlClient
 
 - job: TestWin
   dependsOn: BuildAndTest
   pool:
     vmImage: 'windows-latest'
   steps:
+  - script: 'sqllocaldb start mssqllocaldb'
+    displayName: "\U000023EB Start MSSQLLocalDB instance for Dibix.Dapper.Tests"
+
+  - script: 'sqlcmd -S (localdb)\MSSQLLocalDB -Q "CREATE DATABASE [Dibix]"'
+    displayName: "\U0001F5C4 Create database for Dibix.Dapper.Tests"
+
+  - script: 'sqlcmd -S (localdb)\MSSQLLocalDB -i tests/Dibix.Dapper.Tests/Environment/Initialize.sql -d Dibix'
+    displayName: "\U0001F527 Initialize database for Dibix.Dapper.Tests"
+
   - task: DotNetCoreCLI@2
     displayName: "\U0001F9EA Run unit tests"
     inputs:
       command: 'test'
       projects:  |
+        **/Dibix.Dapper.Tests.csproj
         **/Dibix.Sdk.Tests.csproj
         **/Dibix.Sdk.VisualStudio.Tests.csproj
         **/Dibix.Tests.csproj
+    env:
+      # Required for Dibix.Dapper.Tests
+      DefaultConnection:ConnectionString: 'Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Dibix;Integrated Security=True;'
+      DefaultConnection:ProviderName: System.Data.SqlClient
 
 - job: Packaging
   dependsOn: TestWin

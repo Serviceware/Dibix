@@ -6,12 +6,16 @@ using Xunit;
 
 namespace Dibix.Dapper.Tests
 {
-    public class DapperDatabaseAccessorAutoMultiMapTest
+    public class DapperDatabaseAccessorAutoMultiMapTest : IClassFixture<DatabaseTestFixture>
     {
+        private readonly DatabaseTestFixture _fixture;
+
+        public DapperDatabaseAccessorAutoMultiMapTest(DatabaseTestFixture fixture) => this._fixture = fixture;
+
         [Fact]
         public void QuerySingle_WithAutoMultiMap_RecursiveTreeModel()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = this._fixture.CreateDatabaseAccessor())
             {
                 const string commandText = @"SELECT [x].[identifier], [y].[identifier]
 FROM (VALUES (N'desks')) AS [x]([identifier])
@@ -28,7 +32,7 @@ INNER JOIN (VALUES (N'agentdesk', N'desks')
         [Fact]
         public void QuerySingle_WithAutoMultiMap_MultipleNestedPaths()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = this._fixture.CreateDatabaseAccessor())
             {
                 const string commandText = @"SELECT [x].[name], [y].[name], [z].[name]
 FROM (VALUES (N'feature1')) AS [x]([name])
@@ -50,7 +54,7 @@ INNER JOIN (VALUES (N'dependentfeaturex', N'feature1')
         [Fact]
         public void QuerySingle_WithAutoMultiMap_SingleDuplicateProperty_SetOnlyOnce()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = this._fixture.CreateDatabaseAccessor())
             {
                 const string commandText = @"SELECT [x].[name], [y].[name], [z].[name]
 FROM (VALUES (N'feature1')) AS [x]([name])
@@ -70,7 +74,7 @@ INNER JOIN (VALUES (N'black', N'feature1')
         [Fact]
         public void QuerySingle_WithAutoMultiMap_AmbiguousKey_IdentifiedUsingParent()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = this._fixture.CreateDatabaseAccessor())
             {
                 const string commandText = @"SELECT [x].[name], [xt].[lcid], [xt].[value], [y].[name], [yt].[lcid], [yt].[value]
 FROM (VALUES (N'feature1')) AS [x]([name])
@@ -108,7 +112,7 @@ INNER JOIN (VALUES (7, N'black_de', N'black')
         [Fact]
         public void QuerySingle_WithAutoMultiMap_NonEntity_Collection_ReferenceEqualityIsPerformed()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = this._fixture.CreateDatabaseAccessor())
             {
                 const string commandText = @"SELECT [x].[name], [y].[name], [z].[data]
 FROM (VALUES (N'feature1')) AS [x]([name])
@@ -130,7 +134,7 @@ INNER JOIN (VALUES (0x1, N'feature1')
         [Fact]
         public void QuerySingle_WithAutoMultiMap_NonEntity_SingleProperty_ReferenceEqualityIsPerformed()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = this._fixture.CreateDatabaseAccessor())
             {
                 const string commandText = @"SELECT [x].[name], [y].[data], [z].[name]
 FROM (VALUES (N'product1')) AS [x]([name])

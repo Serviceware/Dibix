@@ -5,12 +5,16 @@ using Xunit;
 
 namespace Dibix.Dapper.Tests
 {
-    public class TextObfuscationTest
+    public class TextObfuscationTest : IClassFixture<DatabaseTestFixture>
     {
+        private readonly DatabaseTestFixture _fixture;
+
+        public TextObfuscationTest(DatabaseTestFixture fixture) => this._fixture = fixture;
+
         [Fact]
         public void ObfuscateAndDeobfuscate_OriginalValueIsRestored()
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = this._fixture.CreateDatabaseAccessor())
             {
                 const string commandText = "SELECT [id] = 1, [password] = @password1, [id] = 1, [password] = @password2";
                 InputClass input = new InputClass { password2 = "test2" };

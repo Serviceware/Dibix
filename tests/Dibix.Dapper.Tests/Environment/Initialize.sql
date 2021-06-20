@@ -1,0 +1,15 @@
+﻿IF TYPE_ID('[dbo].[_dibix_tests_structuredtype]') IS NULL
+BEGIN
+	CREATE TYPE [dbo].[_dibix_tests_structuredtype] AS TABLE
+	(
+		[intvalue]     INT			     NOT NULL
+	  , [stringvalue]  NVARCHAR(MAX) NOT NULL
+	  , [decimalvalue] DECIMAL(14,2) NOT NULL
+	  , PRIMARY KEY ([intvalue])
+	)
+END
+GO
+CREATE OR ALTER PROCEDURE [dbo].[_dibix_tests_sp1] @out1 INT OUTPUT, @out2 BIT OUTPUT
+AS
+    SET @out1 = 5
+    SET @out2 = 1
