@@ -119,6 +119,13 @@ namespace Dibix
             return cache;
         }
 
+        // News (GetEditorialGraph)
+        public static IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird, TFourth>(this IDatabaseAccessor accessor, string sql, ParametersVisitor parameters, string splitOn) where TReturn : new()
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
+            return accessor.QueryMany<TReturn, TSecond, TThird, TFourth>(sql, CommandType.Text, parameters, splitOn);
+        }
+
         public static IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird, TFourth>(this IDatabaseAccessor accessor, string sql, ParametersVisitor parameters, Action<TReturn, TSecond, TThird, TFourth> map, string splitOn)
         {
             Guard.IsNotNull(accessor, nameof(accessor));
