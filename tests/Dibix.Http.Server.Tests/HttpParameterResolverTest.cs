@@ -51,7 +51,11 @@ namespace Dibix.Http.Server.Tests
         public void Compile_PropertySource()
         {
             HttpParameterSourceProviderRegistry.Register<LocaleParameterHttpSourceProvider>("LOCALE");
-            IHttpParameterResolutionMethod result = Compile(x => x.ResolveParameterFromSource("lcid", "LOCALE", "LocaleId"));
+            IHttpParameterResolutionMethod result = Compile(x =>
+            {
+                x.ResolveParameterFromSource("lcid", "LOCALE", "LocaleId");
+                x.ResolveParameterFromSource("locale", "LOCALE", "$SELF");
+            });
             TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
@@ -62,7 +66,8 @@ namespace Dibix.Http.Server.Tests
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
         $localeSource = .New Dibix.Http.Server.Tests.HttpParameterResolverTest+LocaleHttpParameterSource();
         $arguments.Item[""databaseAccessorFactory""] = (System.Object)$databaseaccessorfactorySource;
-        $arguments.Item[""lcid""] = (System.Object)$localeSource.LocaleId
+        $arguments.Item[""lcid""] = (System.Object)$localeSource.LocaleId;
+        $arguments.Item[""locale""] = (System.Object)$localeSource
     }
 }", result.Source);
             Assert.False(result.Parameters.Any());
@@ -76,12 +81,14 @@ namespace Dibix.Http.Server.Tests
 
             result.PrepareParameters(request, arguments, dependencyResolver.Object);
 
-            Assert.Equal(2, arguments.Count);
+            Assert.Equal(3, arguments.Count);
             Assert.Equal(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             Assert.Equal(1033, arguments["lcid"]);
+            LocaleHttpParameterSource locale = Assert.IsType<LocaleHttpParameterSource>(arguments["locale"]);
+            Assert.Equal(1033, locale.LocaleId);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
-        private static void Compile_PropertySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, int lcid) { }
+        private static void Compile_PropertySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, int lcid, LocaleHttpParameterSource locale) { }
 
         [Fact]
         public void Compile_PropertySource_WithInvalidCast_Throws()

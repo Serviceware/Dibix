@@ -15,6 +15,7 @@ namespace Dibix.Http.Server
         #region Fields
         private static readonly ICollection<Type> KnownDependencies = new[] { typeof(IDatabaseAccessorFactory) };
         private static readonly Lazy<PropertyAccessor> DebugViewAccessor = new Lazy<PropertyAccessor>(BuildDebugViewAccessor);
+        private const string SelfPropertyName = "$SELF";
         private const string ItemSourceName = "ITEM";
         private const string ItemIndexPropertyName = "$INDEX";
         #endregion
@@ -504,6 +505,9 @@ namespace Dibix.Http.Server
             for (int i = 0; i < parts.Length; i++)
             {
                 string propertyName = parts[i];
+                if (propertyName == SelfPropertyName)
+                    continue;
+
                 MemberExpression sourcePropertyExpression = Expression.Property(value, propertyName);
                 value = parameter.Items != null ? CollectItemsParameterValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, parameter, sourcePropertyExpression, sourceMap, ensureNullPropagation) : sourcePropertyExpression;
 
