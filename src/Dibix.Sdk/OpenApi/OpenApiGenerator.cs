@@ -108,11 +108,11 @@ namespace Dibix.Sdk.OpenApi
                  && parameter.Location != ActionParameterLocation.Header) 
                     continue;
 
-                AppendUserParameter(document, operation, parameter, parameter.Location, rootNamespace, schemaRegistry);
+                AppendUserParameter(document, operation, action, parameter, parameter.Location, rootNamespace, schemaRegistry);
             }
         }
 
-        private static void AppendUserParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, ActionParameterLocation location, string rootNamespace, ISchemaRegistry schemaRegistry)
+        private static void AppendUserParameter(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, ActionParameter parameter, ActionParameterLocation location, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
             switch (location)
             {
@@ -125,7 +125,7 @@ namespace Dibix.Sdk.OpenApi
                     break;
                 
                 case ActionParameterLocation.Header:
-                    AppendHeaderParameter(document, operation, parameter, rootNamespace, schemaRegistry);
+                    AppendHeaderParameter(document, operation, action, parameter, rootNamespace, schemaRegistry);
                     break;
 
                 default:
@@ -156,11 +156,11 @@ namespace Dibix.Sdk.OpenApi
             AppendParameter(document, operation, parameter, ParameterLocation.Path, rootNamespace, schemaRegistry);
         }
 
-        private static void AppendHeaderParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, string rootNamespace, ISchemaRegistry schemaRegistry)
+        private static void AppendHeaderParameter(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, ActionParameter parameter, string rootNamespace, ISchemaRegistry schemaRegistry)
         {
             // Header parameters named Accept, Content-Type and Authorization are not allowed. To describe these headers, use the corresponding OpenAPI keywords
             // See: https://swagger.io/docs/specification/describing-parameters/#header-parameters
-            if (ReservedOpenApiHeaders.Contains(parameter.ApiParameterName))
+            if (ReservedOpenApiHeaders.Contains(parameter.ApiParameterName) || action.SecuritySchemes.SelectMany(x => x).Any(x => x == parameter.ApiParameterName))
             {
                 return;
             }

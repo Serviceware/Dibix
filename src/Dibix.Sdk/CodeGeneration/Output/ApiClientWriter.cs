@@ -82,7 +82,7 @@ namespace Dibix.Sdk.CodeGeneration
                     continue;
 
                 // Will be handled by SecurityScheme/IHttpAuthorizationProvider
-                if (parameter.Location == ActionParameterLocation.Header && parameter.ApiParameterName == "Authorization")
+                if (parameter.Location == ActionParameterLocation.Header && (parameter.ApiParameterName == "Authorization" || action.SecuritySchemes.SelectMany(x => x).Any(x => x == parameter.ApiParameterName)))
                     continue;
 
                 AppendParameter(context, parameter, method);

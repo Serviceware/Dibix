@@ -150,7 +150,7 @@ namespace Dibix.Sdk.CodeGeneration
             foreach (ActionParameter parameter in distinctParameters.Where(x => x.Location == ActionParameterLocation.Header))
             {
                 // Will be handled by SecurityScheme/IHttpAuthorizationProvider
-                if (parameter.ApiParameterName == "Authorization")
+                if (parameter.ApiParameterName == "Authorization" || action.SecuritySchemes.SelectMany(x => x).Any(x => x == parameter.ApiParameterName))
                     continue;
 
                 string normalizedApiParameterName = NormalizeApiParameterName(parameter.ApiParameterName);
