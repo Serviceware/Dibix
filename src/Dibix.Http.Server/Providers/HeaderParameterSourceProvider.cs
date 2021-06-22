@@ -1,25 +1,24 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text.RegularExpressions;
 
 namespace Dibix.Http.Server
 {
-    internal sealed class HeaderParameterSourceProvider : HttpParameterPropertySourceProvider, IHttpParameterSourceProvider
+    internal sealed class HeaderParameterSourceProvider : NonUserParameterSourceProvider, IHttpParameterSourceProvider
     {
         public const string SourceName = "HEADER";
 
         public override HttpParameterLocation Location => HttpParameterLocation.Header;
-
-        protected override Type GetInstanceType(IHttpParameterResolutionContext context) => typeof(HttpRequestHeaders);
-
-        protected override Expression GetInstanceValue(Type instanceType, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter) => Expression.Property(requestParameter, nameof(HttpRequestMessage.Headers));
-
-        protected override string NormalizePropertyPath(string propertyPath)
+        
+        public override void Resolve(IHttpParameterResolutionContext context)
         {
-            string normalizedPropertyPath = Regex.Replace(propertyPath, "[-]", String.Empty);
-            return normalizedPropertyPath;
+            Expression keyParameter = Expression.Constant(context.PropertyPath);
+            Expression getHeaderCall = Expression.Call(typeof(HeaderParameterSourceProvider), nameof(GetHeader), new Type[0], context.RequestParameter, keyParameter);
+            context.ResolveUsingValue(getHeaderCall);
         }
+
+        private static string GetHeader(HttpRequestMessage request, string key) => request.Headers.TryGetValues(key, out IEnumerable<string> values) ? values.First() : null;
     }
 }
