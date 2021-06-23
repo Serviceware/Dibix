@@ -8,7 +8,6 @@
     <DibixRuntimeXplatDirectory>$(DibixToolsDirectory)..\net5.0\</DibixRuntimeXplatDirectory>
 
     <IsEmbedded>$(MSBuildProjectName.EndsWith('.DML'))</IsEmbedded>
-    <ExternalAssemblyReferenceDir>$(TargetDir)</ExternalAssemblyReferenceDir>
   </PropertyGroup>
 
   <ItemGroup>

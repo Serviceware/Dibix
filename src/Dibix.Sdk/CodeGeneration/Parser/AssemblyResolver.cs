@@ -19,6 +19,28 @@ namespace Dibix.Sdk.CodeGeneration
             return true;
         }
 
+        public static bool TryGetLoadedAssembly(string assemblyName, out Assembly assembly)
+        {
+            bool IsMatchingAssembly(Assembly candidate) => candidate.GetName().Name == assemblyName;
+
+            Assembly matchingAssembly = AppDomain.CurrentDomain.ReflectionOnlyGetAssemblies().FirstOrDefault(IsMatchingAssembly);
+            if (matchingAssembly != null)
+            {
+                assembly = matchingAssembly;
+                return true;
+            }
+
+            matchingAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(IsMatchingAssembly);
+            if (matchingAssembly != null)
+            {
+                assembly = Assembly.ReflectionOnlyLoadFrom(matchingAssembly.Location);
+                return true;
+            }
+
+            assembly = null;
+            return false;
+        }
+
         protected Assembly LoadAssembly(string assemblyLocation)
         {
             if (TryGetLoadedAssembly(Path.GetFileNameWithoutExtension(assemblyLocation), out Assembly assembly))
@@ -27,6 +49,8 @@ namespace Dibix.Sdk.CodeGeneration
             return LoadAssemblyCore(assemblyLocation);
         }
 
+        protected abstract bool TryGetAssemblyLocation(string assemblyName, out string path);
+
         private static Assembly LoadAssemblyCore(string assemblyLocation)
         {
             // Both these approaches keep the file locked in visual studio..
@@ -34,17 +58,6 @@ namespace Dibix.Sdk.CodeGeneration
             // 2. Assembly.ReflectionOnlyLoadFrom(assemblyPath);
             // see: https://www.codeproject.com/Tips/836907/Loading-Assembly-to-Leave-Assembly-File-Unlocked
             return Assembly.ReflectionOnlyLoad(File.ReadAllBytes(assemblyLocation));
-        }
-
-        protected abstract bool TryGetAssemblyLocation(string assemblyName, out string path);
-
-        private static bool TryGetLoadedAssembly(string assemblyName, out Assembly assembly)
-        {
-            assembly = AppDomain.CurrentDomain
-                                .ReflectionOnlyGetAssemblies()
-                                .FirstOrDefault(x => x.GetName().Name == assemblyName);
-            
-            return assembly != null;
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Reflection;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -25,15 +24,8 @@ namespace Dibix.Sdk.CodeGeneration
         {
             AssemblyName assemblyName = new AssemblyName(args.Name);
 
-            bool IsMatchingAssembly(Assembly assembly) => assembly.GetName().Name == assemblyName.Name;
-
-            Assembly matchingAssembly = AppDomain.CurrentDomain.ReflectionOnlyGetAssemblies().FirstOrDefault(IsMatchingAssembly);
-            if (matchingAssembly != null)
+            if (AssemblyResolver.TryGetLoadedAssembly(assemblyName.Name, out Assembly matchingAssembly))
                 return matchingAssembly;
-
-            matchingAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(IsMatchingAssembly);
-            if (matchingAssembly != null)
-                return Assembly.ReflectionOnlyLoadFrom(matchingAssembly.Location);
 
             return Assembly.ReflectionOnlyLoad(args.Name);
         }
