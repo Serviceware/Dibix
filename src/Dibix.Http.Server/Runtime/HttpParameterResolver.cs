@@ -519,7 +519,8 @@ namespace Dibix.Http.Server
             {
                 Expression test = nullCheckTargets.Select(x => Expression.NotEqual(x, Expression.Constant(null))).Aggregate(Expression.AndAlso /* Short-circuit behavior like && in C# */);
                 bool hasDefaultValue = parameter.DefaultValue != DBNull.Value && parameter.DefaultValue != null;
-                Expression fallbackValue = hasDefaultValue ? (Expression)Expression.Constant(parameter.DefaultValue) : Expression.Default(value.Type);
+                Expression fallbackValue = hasDefaultValue ? (Expression)Expression.Constant(parameter.DefaultValue) : Expression.Default(parameter.ParameterType);
+                value = EnsureCorrectType(parameter.InternalParameterName, value, parameter.ParameterType);
                 value = Expression.Condition(test, value, fallbackValue);
             }
 
