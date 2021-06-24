@@ -529,13 +529,12 @@ namespace Dibix.Http.Server
         private static Expression CollectItemsParameterValue(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, CompilationContext compilationContext, HttpParameterInfo parameter, MemberExpression sourcePropertyExpression, IDictionary<string, Expression> sourceMap, bool ensureNullPropagation)
         {
             Type itemType = GetItemType(sourcePropertyExpression.Type);
-            MethodInfo structuredTypeFactoryMethod = GetStructuredTypeFactoryMethod(parameter.ParameterType, itemType);
             IDictionary<string, Expression> addMethodParameterValues = parameter.Items.AddItemMethod.GetParameters().ToDictionary(x => x.Name, x => (Expression)null);
             IDictionary<string, Type> addMethodParameterTypes = parameter.Items.AddItemMethod.GetParameters().ToDictionary(x => x.Name, x => x.ParameterType);
 
             ParameterExpression addItemFuncSetParameter = Expression.Parameter(parameter.ParameterType, "x");
             ParameterExpression addItemFuncItemParameter = Expression.Parameter(itemType, "y");
-            ParameterExpression addItemFuncIndexParameter = Expression.Parameter(typeof(int), "i");
+            ParameterExpression addItemFuncIndexParameter = null;
 
             foreach (HttpParameterInfo itemSource in parameter.Items.ParameterSources)
             {
@@ -545,6 +544,9 @@ namespace Dibix.Http.Server
                 {
                     HttpParameterSourceInfo source = new HttpParameterSourceInfo(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, ItemSourceName, sourceProvider: null, propertyPath: null);
                     itemParameter = HttpParameterInfo.SourceInstance(itemSource.ParameterType, itemSource.InternalParameterName, source);
+                    if (addItemFuncIndexParameter == null)
+                        addItemFuncIndexParameter = Expression.Parameter(typeof(int), "i"); // Lazy
+
                     itemSourceVariable = addItemFuncIndexParameter;
                 }
                 else
@@ -559,19 +561,35 @@ namespace Dibix.Http.Server
 
             foreach (KeyValuePair<string, Expression> addMethodParameter in addMethodParameterValues.Where(x => x.Value == null).ToArray())
             {
+                Type targetType = addMethodParameterTypes[addMethodParameter.Key];
+                Expression source;
+
                 PropertyInfo property = itemType.GetProperty(addMethodParameter.Key, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
-                if (property == null)
+                if (addMethodParameterValues.Count == 1 && targetType == itemType)
+                {
+                    // IEnumerable<string> => UDT(nvarchar)
+                    source = addItemFuncItemParameter;
+                }
+                else if (property != null)
+                {
+                    // IEnumerable<Model> => Model.Property1 => UDT(property1, ...)
+                    source = Expression.Property(addItemFuncItemParameter, property);
+                }
+                else
                     throw new InvalidOperationException($@"Can not map UDT column: {parameter.Items.UdtName ?? parameter.ParameterType.ToString()}.{addMethodParameter.Key}
 Either create a mapping or make sure a property of the same name exists in the source: {parameter.Source.SourceName}.{parameter.Source.PropertyPath}");
 
-                Expression source = Expression.Property(addItemFuncItemParameter, property);
-                Type targetType = addMethodParameterTypes[addMethodParameter.Key];
                 source = EnsureCorrectType(addMethodParameter.Key, source, targetType);
                 addMethodParameterValues[addMethodParameter.Key] = source;
             }
 
             MethodCallExpression addItemCall = Expression.Call(addItemFuncSetParameter, parameter.Items.AddItemMethod, addMethodParameterValues.Values);
-            Expression addItemLambda = Expression.Lambda(addItemCall, addItemFuncSetParameter, addItemFuncItemParameter, addItemFuncIndexParameter);
+            ICollection<ParameterExpression> parameters = new Collection<ParameterExpression> { addItemFuncSetParameter, addItemFuncItemParameter };
+            if (addItemFuncIndexParameter != null)
+                parameters.Add(addItemFuncIndexParameter);
+
+            Expression addItemLambda = Expression.Lambda(addItemCall, parameters);
+            MethodInfo structuredTypeFactoryMethod = GetStructuredTypeFactoryMethod(parameter.ParameterType, itemType, withIndex: addItemFuncIndexParameter != null);
             Expression value = Expression.Call(null, structuredTypeFactoryMethod, sourcePropertyExpression, addItemLambda);
             return value;
         }
@@ -768,7 +786,7 @@ Either create a mapping or make sure a property of the same name exists in the s
             return new InvalidOperationException(sb.ToString(), innerException);
         }
 
-        private static MethodInfo GetStructuredTypeFactoryMethod(Type implementationType, Type itemType)
+        private static MethodInfo GetStructuredTypeFactoryMethod(Type implementationType, Type itemType, bool withIndex)
         {
             foreach (MethodInfo method in typeof(StructuredType<>).MakeGenericType(implementationType).GetRuntimeMethods())
             {
@@ -780,7 +798,7 @@ Either create a mapping or make sure a property of the same name exists in the s
                     continue;
 
                 if (parameters[0].ParameterType.GetGenericTypeDefinition() == typeof(IEnumerable<>)
-                 && parameters[1].ParameterType.GetGenericTypeDefinition() == typeof(Action<,,>))
+                 && parameters[1].ParameterType.GetGenericTypeDefinition() == (withIndex ? typeof(Action<,,>) : typeof(Action<,>)))
                 {
                     return method.MakeGenericMethod(itemType);
                 }

@@ -268,8 +268,11 @@ Parameter: lcid", exception.Message);
         $arguments.Item[""userid""] = (System.Object)$bodySource.UserId;
         $arguments.Item[""itemsa""] = (System.Object).Call Dibix.StructuredType`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+ImplicitHttpBodyItemSet].From(
             $bodySource.ItemsA,
-            .Lambda #Lambda2<System.Action`3[Dibix.Http.Server.Tests.HttpParameterResolverTest+ImplicitHttpBodyItemSet,Dibix.Http.Server.Tests.HttpParameterResolverTest+ImplicitHttpBodyItem,System.Int32]>)
+            .Lambda #Lambda2<System.Action`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ImplicitHttpBodyItemSet,Dibix.Http.Server.Tests.HttpParameterResolverTest+ImplicitHttpBodyItem]>)
         ;
+        $arguments.Item[""itemsb""] = (System.Object).Call Dibix.StructuredType`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+StringSet].From(
+            $bodySource.ItemsB,
+            .Lambda #Lambda3<System.Action`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+StringSet,System.String]>);
         $input = .New Dibix.Http.Server.Tests.HttpParameterResolverTest+ImplicitBodyHttpParameterInput();
         $input.sourceid = .Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
             ""sourceid"",
@@ -282,15 +285,20 @@ Parameter: lcid", exception.Message);
     }
 }
 
-.Lambda #Lambda2<System.Action`3[Dibix.Http.Server.Tests.HttpParameterResolverTest+ImplicitHttpBodyItemSet,Dibix.Http.Server.Tests.HttpParameterResolverTest+ImplicitHttpBodyItem,System.Int32]>(
+.Lambda #Lambda2<System.Action`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ImplicitHttpBodyItemSet,Dibix.Http.Server.Tests.HttpParameterResolverTest+ImplicitHttpBodyItem]>(
     Dibix.Http.Server.Tests.HttpParameterResolverTest+ImplicitHttpBodyItemSet $x,
-    Dibix.Http.Server.Tests.HttpParameterResolverTest+ImplicitHttpBodyItem $y,
-    System.Int32 $i) {
+    Dibix.Http.Server.Tests.HttpParameterResolverTest+ImplicitHttpBodyItem $y) {
     .Call $x.Add(
         .Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
             ""type"",
             $y.Type),
         $y.Name)
+}
+
+.Lambda #Lambda3<System.Action`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+StringSet,System.String]>(
+    Dibix.Http.Server.Tests.HttpParameterResolverTest+StringSet $x,
+    System.String $y) {
+    .Call $x.Add($y)
 }", result.Source);
             Assert.Equal(3, result.Parameters.Count);
             Assert.Equal("$body", result.Parameters["$body"].Name);
@@ -315,7 +323,8 @@ Parameter: lcid", exception.Message);
                 {
                     new ImplicitHttpBodyItem(ImplicitHttpBodyItemType.A, "X"),
                     new ImplicitHttpBodyItem(ImplicitHttpBodyItemType.B, "Y")
-                }
+                },
+                ItemsB = { "TextValue" }
             };
             HttpRequestMessage request = new HttpRequestMessage();
             IDictionary<string, object> arguments = new Dictionary<string, object>
@@ -331,7 +340,7 @@ Parameter: lcid", exception.Message);
 
             result.PrepareParameters(request, arguments, dependencyResolver.Object);
 
-            Assert.Equal(7, arguments.Count);
+            Assert.Equal(8, arguments.Count);
             Assert.Equal(2, arguments["id"]);
             Assert.Equal(5, arguments["userid"]);
             Assert.Equal(3, arguments["fromuri"]);
@@ -346,8 +355,12 @@ Parameter: lcid", exception.Message);
 ----------------  ------------------
 1                 X                 
 2                 Y                 ", itemsa.Dump());
+            StructuredType itemsb = Assert.IsType<StringSet>(arguments["itemsb"]);
+            Assert.Equal(@"name NVARCHAR(MAX)
+------------------
+TextValue         ", itemsb.Dump());
         }
-        private static void Compile_ImplicitBodySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, int id, [InputClass] ImplicitBodyHttpParameterInput input, int userid, ImplicitHttpBodyItemSet itemsa) { }
+        private static void Compile_ImplicitBodySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, int id, [InputClass] ImplicitBodyHttpParameterInput input, int userid, ImplicitHttpBodyItemSet itemsa, StringSet itemsb) { }
 
         [Fact]
         public void Compile_BodySource_WithConverter()
@@ -383,14 +396,13 @@ Parameter: lcid", exception.Message);
             });
         $arguments.Item[""items""] = (System.Object).Call Dibix.StructuredType`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+HttpBodyItemSet].From(
             $bodySource.Items,
-            .Lambda #Lambda2<System.Action`3[Dibix.Http.Server.Tests.HttpParameterResolverTest+HttpBodyItemSet,Dibix.Http.Server.Tests.HttpParameterResolverTest+HttpBodyItem,System.Int32]>)
+            .Lambda #Lambda2<System.Action`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+HttpBodyItemSet,Dibix.Http.Server.Tests.HttpParameterResolverTest+HttpBodyItem]>)
     }
 }
 
-.Lambda #Lambda2<System.Action`3[Dibix.Http.Server.Tests.HttpParameterResolverTest+HttpBodyItemSet,Dibix.Http.Server.Tests.HttpParameterResolverTest+HttpBodyItem,System.Int32]>(
+.Lambda #Lambda2<System.Action`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+HttpBodyItemSet,Dibix.Http.Server.Tests.HttpParameterResolverTest+HttpBodyItem]>(
     Dibix.Http.Server.Tests.HttpParameterResolverTest+HttpBodyItemSet $x,
-    Dibix.Http.Server.Tests.HttpParameterResolverTest+HttpBodyItem $y,
-    System.Int32 $i) {
+    Dibix.Http.Server.Tests.HttpParameterResolverTest+HttpBodyItem $y) {
     .Call $x.Add(.Call Dibix.Http.Server.Tests.HttpParameterResolverTest+EncryptionHttpParameterConverter.Convert($y.Password)
     )
 }", result.Source);

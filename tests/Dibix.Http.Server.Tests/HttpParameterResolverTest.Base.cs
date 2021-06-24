@@ -174,10 +174,12 @@ namespace Dibix.Http.Server.Tests
             public int UserId { get; set; }
             public int CannotBeMapped { get; set; }
             public ICollection<ImplicitHttpBodyItem> ItemsA { get; }
+            public ICollection<string> ItemsB { get; }
 
             public ImplicitHttpBody()
             {
                 this.ItemsA = new Collection<ImplicitHttpBodyItem>();
+                this.ItemsB = new Collection<string>();
             }
         }
 
