@@ -203,7 +203,7 @@ namespace Dibix.Http.Server.Tests
 
         private sealed class ImplicitBodyHttpParameterInput
         {
-            public int sourceid { get; set; }
+            public int? sourceid { get; set; }
             public int localeid { get; set; }
             public int fromuri { get; set; }
         }

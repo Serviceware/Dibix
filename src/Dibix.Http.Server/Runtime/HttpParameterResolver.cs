@@ -746,13 +746,26 @@ Either create a mapping or make sure a property of the same name exists in the s
                 {
                     TypeConverter typeConverter = TypeDescriptor.GetConverter(typeof(TTarget));
                     if (value is TTarget)
+                    {
                         result = value;
+                    }
                     else if (typeConverter.CanConvertFrom(typeof(TSource)))
+                    {
                         result = typeConverter.ConvertFrom(value);
+                    }
                     else if (typeof(TTarget) == typeof(string) && !Equals(value, null))
+                    {
                         result = value.ToString();
+                    }
                     else
-                        result = Convert.ChangeType(value, typeof(TTarget));
+                    {
+                        Type targetType = typeof(TTarget);
+                        Type nullableType = Nullable.GetUnderlyingType(targetType);
+                        if (nullableType != null && !Equals(value, null))
+                            targetType = nullableType;
+
+                        result = Convert.ChangeType(value, targetType);
+                    }
                 }
                 return (TTarget)result;
             }
