@@ -194,8 +194,8 @@ namespace Dibix.Sdk.Sql
             // ElementDescriptor elementDescriptor = columnOffsetDescriptorElement.Value;
             ParameterExpression elementDescriptorVariable = Expression.Variable(ElementDescriptorType, "elementDescriptor");
             Expression elementDescriptorValue = Expression.Property(bodyBuilder.Element, nameof(KeyValuePair<object, object>.Value));
-            Expression elementDescriptorAsssign = Expression.Assign(elementDescriptorVariable, elementDescriptorValue);
-            bodyBuilder.AddAssignStatement(elementDescriptorVariable, elementDescriptorAsssign);
+            Expression elementDescriptorAssign = Expression.Assign(elementDescriptorVariable, elementDescriptorValue);
+            bodyBuilder.AddAssignStatement(elementDescriptorVariable, elementDescriptorAssign);
 
             // Func<TSqlModel, TSqlObject> elementAccessor = elementDescriptor.GetModelElement;
             MethodInfo getModelElementMethod = ElementDescriptorType.GetMethod("GetModelElement");

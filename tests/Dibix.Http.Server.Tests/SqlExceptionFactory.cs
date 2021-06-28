@@ -30,7 +30,7 @@ namespace Dibix.Http.Server.Tests
             ParameterExpression lineNumberParameter = Expression.Parameter(typeof(int), "lineNumber");
             Expression exceptionParameter = Expression.Constant(null, typeof(Exception));
 
-            ConstructorInfo sqlErrorConstrutor = sqlErrorType.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new[]
+            ConstructorInfo sqlErrorConstructor = sqlErrorType.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new[]
             {
                 infoNumberParameter.Type
               , errorStateParameter.Type
@@ -42,13 +42,13 @@ namespace Dibix.Http.Server.Tests
               , exceptionParameter.Type
             }, null);
 
-            if (sqlErrorConstrutor == null)
+            if (sqlErrorConstructor == null)
                 throw new InvalidOperationException($"Could not find ctor on type '{sqlErrorType}'");
 
             ParameterExpression errorVariable = Expression.Variable(sqlErrorType, "error");
             Expression errorValue = Expression.New
             (
-                sqlErrorConstrutor
+                sqlErrorConstructor
               , infoNumberParameter
               , errorStateParameter
               , errorClassParameter

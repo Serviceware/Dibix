@@ -113,7 +113,7 @@ namespace Dibix.Sdk.Sql
                 return true;
 
             // We support NOCHECK/CHECK for CHECK constraints
-            if (fragment is AlterTableConstraintModificationStatement constrationModificationStatement && constrationModificationStatement.ConstraintEnforcement != ConstraintEnforcement.NotSpecified)
+            if (fragment is AlterTableConstraintModificationStatement constraintModificationStatement && constraintModificationStatement.ConstraintEnforcement != ConstraintEnforcement.NotSpecified)
                 return true;
             
             // TODO: Dirty suppression..

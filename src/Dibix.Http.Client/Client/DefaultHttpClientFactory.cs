@@ -55,21 +55,21 @@ namespace Dibix.Http.Client
         {
             // Subsequent handlers, that make their own requests with the same tracer, might overwrite the last request trace
             // Therefore we move the tracing handler before user handlers
-            for (int i = 0; i < clientBuilder.AddtionalHandlers.Count; i++)
+            for (int i = 0; i < clientBuilder.AdditionalHandlers.Count; i++)
             {
-                DelegatingHandler handler = clientBuilder.AddtionalHandlers[i];
+                DelegatingHandler handler = clientBuilder.AdditionalHandlers[i];
                 if (!(handler is TracingHttpMessageHandler))
                     continue;
 
-                clientBuilder.AddtionalHandlers.RemoveAt(i);
-                clientBuilder.AddtionalHandlers.Add(handler);
+                clientBuilder.AdditionalHandlers.RemoveAt(i);
+                clientBuilder.AdditionalHandlers.Add(handler);
                 break;
             }
 
             HttpMessageHandler next = clientBuilder.PrimaryHttpMessageHandler;
-            for (int i = clientBuilder.AddtionalHandlers.Count - 1; i >= 0; i--)
+            for (int i = clientBuilder.AdditionalHandlers.Count - 1; i >= 0; i--)
             {
-                DelegatingHandler handler = clientBuilder.AddtionalHandlers[i];
+                DelegatingHandler handler = clientBuilder.AdditionalHandlers[i];
 
                 // Checking for this allows us to catch cases where someone has tried to re-use a handler. That really won't
                 // work the way you want and it can be tricky for callers to figure out.
@@ -121,12 +121,12 @@ Handler: '{handler}'";
             private readonly ICollection<Action<HttpClient>> _clientActions;
 
             public HttpMessageHandler PrimaryHttpMessageHandler { get; set; } = new HttpClientHandler();
-            public IList<DelegatingHandler> AddtionalHandlers { get; }
+            public IList<DelegatingHandler> AdditionalHandlers { get; }
 
             public HttpClientBuilder()
             {
                 this._clientActions = new Collection<Action<HttpClient>>();
-                this.AddtionalHandlers = new Collection<DelegatingHandler>();
+                this.AdditionalHandlers = new Collection<DelegatingHandler>();
             }
 
             public IHttpClientBuilder ConfigureClient(Action<HttpClient> configure)
@@ -159,26 +159,26 @@ Handler: '{handler}'";
             public IHttpClientBuilder AddHttpMessageHandler(DelegatingHandler handler)
             {
                 Guard.IsNotNull(handler, nameof(handler));
-                this.AddtionalHandlers.Add(handler);
+                this.AdditionalHandlers.Add(handler);
                 return this;
             }
 
             public IHttpClientBuilder RemoveHttpMessageHandler<THandler>() where THandler : DelegatingHandler
             {
-                foreach (THandler handler in this.AddtionalHandlers.OfType<THandler>().ToArray()) 
-                    this.AddtionalHandlers.Remove(handler);
+                foreach (THandler handler in this.AdditionalHandlers.OfType<THandler>().ToArray()) 
+                    this.AdditionalHandlers.Remove(handler);
 
                 return this;
             }
             public IHttpClientBuilder RemoveHttpMessageHandler(DelegatingHandler handler)
             {
-                this.AddtionalHandlers.Remove(handler);
+                this.AdditionalHandlers.Remove(handler);
                 return this;
             }
 
             public IHttpClientBuilder ClearHttpMessageHandlers()
             {
-                this.AddtionalHandlers.Clear();
+                this.AdditionalHandlers.Clear();
                 return this;
             }
         }

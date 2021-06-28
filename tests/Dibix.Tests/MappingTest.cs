@@ -30,10 +30,10 @@ namespace Dibix.Tests
 
             accessor.Protected()
                     .As<IDatabaseAccessor>()
-                    .Setup(x => x.QueryMany("sql", CommandType.Text, parametersVisitor.Object, It.IsAny<Func<Character, Name, string, Name, Character>>(), "splitOn"))
-                    .Returns<string, CommandType, ParametersVisitor, Func<Character, Name, string, Name, Character>, string>((sql, commandType, parameters, map, splitOn) => rows.Select(x => map((Character)x[0], (Name)x[1], (string)x[2], (Name)x[3])));
+                    .Setup(x => x.QueryMany("commandText", CommandType.Text, parametersVisitor.Object, It.IsAny<Func<Character, Name, string, Name, Character>>(), "splitOn"))
+                    .Returns<string, CommandType, ParametersVisitor, Func<Character, Name, string, Name, Character>, string>((commandText, commandType, parameters, map, splitOn) => rows.Select(x => map((Character)x[0], (Name)x[1], (string)x[2], (Name)x[3])));
 
-            Character result = accessor.Object.QuerySingle<Character, Name, string, Name>("sql", parametersVisitor.Object, "splitOn");
+            Character result = accessor.Object.QuerySingle<Character, Name, string, Name>("commandText", parametersVisitor.Object, "splitOn");
             Assert.NotNull(result.Name);
             Assert.Equal("Luke", result.Name.FirstName);
             Assert.Equal("Skywalker", result.Name.LastName);
@@ -70,10 +70,10 @@ namespace Dibix.Tests
 
             accessor.Protected()
                     .As<IDatabaseAccessor>()
-                    .Setup(x => x.QueryMany("sql", CommandType.Text, parametersVisitor.Object, It.IsAny<Func<Category, CategoryBlacklistEntry, Category>>(), "splitOn"))
-                    .Returns<string, CommandType, ParametersVisitor, Func<Category, CategoryBlacklistEntry, Category>, string>((sql, commandType, parameters, map, splitOn) => rows.Select(x => map((Category)x[0], (CategoryBlacklistEntry)x[1])));
+                    .Setup(x => x.QueryMany("commandText", CommandType.Text, parametersVisitor.Object, It.IsAny<Func<Category, CategoryBlacklistEntry, Category>>(), "splitOn"))
+                    .Returns<string, CommandType, ParametersVisitor, Func<Category, CategoryBlacklistEntry, Category>, string>((commandText, commandType, parameters, map, splitOn) => rows.Select(x => map((Category)x[0], (CategoryBlacklistEntry)x[1])));
 
-            IList<Category> categories = accessor.Object.QueryMany<Category, CategoryBlacklistEntry>("sql", CommandType.Text, parametersVisitor.Object, "splitOn").ToArray();
+            IList<Category> categories = accessor.Object.QueryMany<Category, CategoryBlacklistEntry>("commandText", CommandType.Text, parametersVisitor.Object, "splitOn").ToArray();
             Assert.NotNull(categories);
             Assert.Equal(3, categories.Count);
 
@@ -136,10 +136,10 @@ namespace Dibix.Tests
 
             Mock<DbConnection> connection = new Mock<DbConnection>(MockBehavior.Strict);
             Mock<DatabaseAccessor> accessor = new Mock<DatabaseAccessor>(MockBehavior.Strict, connection.Object);
-            Mock<MultipleResultReader> multipleResultReader = new Mock<MultipleResultReader>(MockBehavior.Strict);
+            Mock<MultipleResultReader> multipleResultReader = new Mock<MultipleResultReader>(MockBehavior.Strict, null, null, null);
 
             accessor.As<IDatabaseAccessor>()
-                    .Setup(x => x.QueryMultiple("sql", CommandType.Text, It.IsAny<ParametersVisitor>()))
+                    .Setup(x => x.QueryMultiple("commandText", CommandType.Text, It.IsAny<ParametersVisitor>()))
                     .Returns(multipleResultReader.Object);
             multipleResultReader.Setup(x => x.Dispose());
             multipleResultReader.Protected()
@@ -147,7 +147,7 @@ namespace Dibix.Tests
                                 .Setup(x => x.ReadMany(It.IsAny<Func<Name, Name, CharacterInfo>>(), "splitOn"))
                                 .Returns<Func<Name, Name, CharacterInfo>, string>((map, splitOn) => rows.Select(x => map((Name)x[0], (Name)x[1])));
 
-            using (IMultipleResultReader reader = accessor.Object.QueryMultiple("sql"))
+            using (IMultipleResultReader reader = accessor.Object.QueryMultiple("commandText"))
             {
                 CharacterInfo result = reader.ReadMany<Name, Name, CharacterInfo>("splitOn").Single();
                 Assert.NotNull(result.Name);
