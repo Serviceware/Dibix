@@ -236,7 +236,7 @@ targetType: {targetType}");
             if (beginEndBlock != null)
                 statementList = beginEndBlock.StatementList;
 
-            base.Target.Content = base.Formatter.Format(base.Target, statementList);
+            base.Target.Statement = base.Formatter.Format(base.Target, statementList);
         }
 
         private void ParseErrorResponses(TSqlFragment body)

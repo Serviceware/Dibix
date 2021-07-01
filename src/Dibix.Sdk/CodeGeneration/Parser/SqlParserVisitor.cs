@@ -12,7 +12,7 @@ namespace Dibix.Sdk.CodeGeneration
         internal ITypeResolverFacade TypeResolver { get; set; }
         internal ISchemaRegistry SchemaRegistry { get; set; }
         internal ILogger Logger { get; set; }
-        internal SqlStatementInfo Target { get; set; }
+        internal SqlStatementDescriptor Target { get; set; }
         internal ISqlMarkupDeclaration Markup { get; set; }
     }
 }

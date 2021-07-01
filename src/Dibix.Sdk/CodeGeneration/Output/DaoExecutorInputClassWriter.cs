@@ -30,12 +30,12 @@ namespace Dibix.Sdk.CodeGeneration
 
             for (int i = 0; i < namespaceGroups.Length; i++)
             {
-                IGrouping<string, SqlStatementInfo> namespaceGroup = namespaceGroups[i];
+                IGrouping<string, SqlStatementDescriptor> namespaceGroup = namespaceGroups[i];
                 CSharpStatementScope scope = namespaceGroup.Key != null ? context.Output.BeginScope(namespaceGroup.Key) : context.Output;
-                IList<SqlStatementInfo> statements = namespaceGroup.ToArray();
+                IList<SqlStatementDescriptor> statements = namespaceGroup.ToArray();
                 for (int j = 0; j < statements.Count; j++)
                 {
-                    SqlStatementInfo statement = statements[j];
+                    SqlStatementDescriptor statement = statements[j];
                     CSharpModifiers classVisibility = context.GeneratePublicArtifacts ? CSharpModifiers.Public : CSharpModifiers.Internal;
                     CSharpClass inputType = scope.AddClass(GetInputTypeName(statement), classVisibility | CSharpModifiers.Sealed);
 
@@ -61,9 +61,9 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private static bool RequiresInput(SqlStatementInfo statement) => statement.GenerateInputClass;
+        private static bool RequiresInput(SqlStatementDescriptor statement) => statement.GenerateInputClass;
 
-        private static string GetInputTypeName(SqlStatementInfo statement) => String.Concat(statement.Name, InputTypeSuffix);
+        private static string GetInputTypeName(SqlStatementDescriptor statement) => String.Concat(statement.Name, InputTypeSuffix);
 
         private static string ResolvePropertyTypeName(SqlQueryParameter parameter, CodeGenerationContext context)
         {

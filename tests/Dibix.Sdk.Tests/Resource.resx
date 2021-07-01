@@ -411,6 +411,7 @@ namespace Dibix.Sdk.Tests
 using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.Runtime.Serialization;
 using Dibix;
 using Dibix.Http.Server;
@@ -455,7 +456,7 @@ namespace Dibix.Sdk.Tests
                                                         })
                                                         .SetString(nameof(password), password, true)
                                                         .Build();
-                    accessor.Execute(EmptyWithParamsCommandText, System.Data.CommandType.StoredProcedure, @params);
+                    accessor.Execute(EmptyWithParamsCommandText, CommandType.StoredProcedure, @params);
                 }
             }
 
@@ -469,7 +470,7 @@ namespace Dibix.Sdk.Tests
                                                             id
                                                         })
                                                         .Build();
-                    return accessor.QuerySingleOrDefault&lt;Dibix.FileEntity&gt;(FileResultCommandText, System.Data.CommandType.StoredProcedure, @params);
+                    return accessor.QuerySingleOrDefault&lt;Dibix.FileEntity&gt;(FileResultCommandText, CommandType.StoredProcedure, @params);
                 }
             }
 
@@ -483,7 +484,7 @@ namespace Dibix.Sdk.Tests
                                                             data
                                                         })
                                                         .Build();
-                    accessor.Execute(FileUploadCommandText, System.Data.CommandType.StoredProcedure, @params);
+                    accessor.Execute(FileUploadCommandText, CommandType.StoredProcedure, @params);
                 }
             }
 
@@ -497,7 +498,7 @@ namespace Dibix.Sdk.Tests
                                                             ids
                                                         })
                                                         .Build();
-                    return accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(SingleConrecteResultWithParamsCommandText, System.Data.CommandType.StoredProcedure, @params);
+                    return accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(SingleConrecteResultWithParamsCommandText, CommandType.StoredProcedure, @params);
                 }
             }
         }
@@ -940,6 +941,7 @@ components:
 //     the code is regenerated.
 // &lt;/auto-generated&gt;
 //----------------------------------------------------------------------------*/
+using System.Data;
 using Dibix;
 
 [assembly: ArtifactAssembly]
@@ -958,7 +960,7 @@ namespace Dibix.Sdk.Tests
             {
                 using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                 {
-                    accessor.Execute(EmptyCommandText, System.Data.CommandType.StoredProcedure);
+                    accessor.Execute(EmptyCommandText, CommandType.StoredProcedure, ParametersVisitor.Empty);
                 }
             }
         }
@@ -975,6 +977,7 @@ namespace Dibix.Sdk.Tests
 //     the code is regenerated.
 // &lt;/auto-generated&gt;
 //----------------------------------------------------------------------------*/
+using System.Data;
 using Dibix;
 
 [assembly: ArtifactAssembly]
@@ -1006,7 +1009,7 @@ namespace Dibix.Sdk.Tests
                                                         })
                                                         .SetString(nameof(password), password, true)
                                                         .Build();
-                    accessor.Execute(EmptyWithParamsCommandText, System.Data.CommandType.StoredProcedure, @params);
+                    accessor.Execute(EmptyWithParamsCommandText, CommandType.StoredProcedure, @params);
                 }
             }
         }
@@ -1038,6 +1041,7 @@ namespace Dibix.Sdk.Tests
 //     the code is regenerated.
 // &lt;/auto-generated&gt;
 //----------------------------------------------------------------------------*/
+using System.Data;
 using Dibix;
 
 [assembly: ArtifactAssembly]
@@ -1059,7 +1063,7 @@ namespace Dibix.Sdk.Tests
                     ParametersVisitor @params = accessor.Parameters()
                                                         .SetFromTemplate(input)
                                                         .Build();
-                    accessor.Execute(EmptyWithParamsCommandText, System.Data.CommandType.StoredProcedure, @params);
+                    accessor.Execute(EmptyWithParamsCommandText, CommandType.StoredProcedure, @params);
                 }
             }
         }
@@ -1193,6 +1197,7 @@ namespace Dibix.Sdk.Tests
 //     the code is regenerated.
 // &lt;/auto-generated&gt;
 //----------------------------------------------------------------------------*/
+using System.Data;
 using Dibix;
 
 [assembly: ArtifactAssembly]
@@ -1217,7 +1222,7 @@ namespace Dibix.Sdk.Tests
                                                             id
                                                         })
                                                         .Build();
-                    return accessor.QuerySingleOrDefault&lt;Dibix.FileEntity&gt;(FileResultCommandText, @params);
+                    return accessor.QuerySingleOrDefault&lt;Dibix.FileEntity&gt;(FileResultCommandText, CommandType.Text, @params);
                 }
             }
         }
@@ -1239,6 +1244,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.Runtime.Serialization;
 using Dibix;
 using Newtonsoft.Json;
@@ -1261,7 +1267,7 @@ namespace Dibix.Sdk.Tests
                 {
                     using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                     {
-                        using (IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText))
+                        using (IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText, CommandType.Text, ParametersVisitor.Empty))
                         {
                             Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult();
                             result.Item = reader.ReadSingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;("id");
@@ -1361,6 +1367,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.Runtime.Serialization;
 using Dibix;
 using Newtonsoft.Json;
@@ -1383,7 +1390,7 @@ namespace Dibix.Sdk.Tests
                 {
                     using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                     {
-                        using (IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText))
+                        using (IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText, CommandType.Text, ParametersVisitor.Empty))
                         {
                             Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract result = reader.ReadSingleOrDefault&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;("id");
                             if (result == null)
@@ -1471,6 +1478,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.Runtime.Serialization;
 using Dibix;
 using Newtonsoft.Json;
@@ -1493,7 +1501,7 @@ namespace Dibix.Sdk.Tests
                 {
                     using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                     {
-                        using (IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText))
+                        using (IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText, CommandType.Text, ParametersVisitor.Empty))
                         {
                             Dibix.Sdk.Tests.DomainModel.Grid.GridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GridResult();
                             result.Item = reader.ReadSingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;("id");
@@ -1593,6 +1601,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.Runtime.Serialization;
 using Dibix;
 using Newtonsoft.Json;
@@ -1615,7 +1624,7 @@ namespace Dibix.Sdk.Tests
                 {
                     using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                     {
-                        using (IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText))
+                        using (IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText, CommandType.Text, ParametersVisitor.Empty))
                         {
                             Dibix.Sdk.Tests.DomainModel.Grid.GridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GridResult();
                             result.Item = reader.ReadSingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;("id");
@@ -1715,6 +1724,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.Runtime.Serialization;
 using Dibix;
 using Newtonsoft.Json;
@@ -1737,7 +1747,7 @@ namespace Dibix.Sdk.Tests
                 {
                     using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                     {
-                        using (IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText))
+                        using (IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText, CommandType.Text, ParametersVisitor.Empty))
                         {
                             Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult();
                             result.Items.ReplaceWith(reader.ReadMany&lt;Dibix.Sdk.Tests.DomainModel.GenericContract, Dibix.Sdk.Tests.DomainModel.Direction, Dibix.Sdk.Tests.DomainModel.JointContract&gt;("direction"));
@@ -1836,6 +1846,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.Runtime.Serialization;
 using Dibix;
 using Newtonsoft.Json;
@@ -1856,7 +1867,7 @@ namespace Dibix.Sdk.Tests
             {
                 using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                 {
-                    return accessor.QueryMany&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(dbx_tests_syntax_multiconcreteresultCommandText);
+                    return accessor.QueryMany&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(dbx_tests_syntax_multiconcreteresultCommandText, CommandType.Text, ParametersVisitor.Empty);
                 }
             }
         }
@@ -1911,6 +1922,7 @@ namespace Dibix.Sdk.Tests
 using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.Runtime.Serialization;
 using Dibix;
 using Newtonsoft.Json;
@@ -1931,7 +1943,7 @@ namespace Dibix.Sdk.Tests
             {
                 using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                 {
-                    return accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(dbx_tests_syntax_singleconcreteresultCommandText);
+                    return accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(dbx_tests_syntax_singleconcreteresultCommandText, CommandType.Text, ParametersVisitor.Empty);
                 }
             }
         }
@@ -1988,6 +2000,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.Runtime.Serialization;
 using Dibix;
 using Newtonsoft.Json;
@@ -2014,7 +2027,7 @@ namespace Dibix.Sdk.Tests
                                                             id
                                                         })
                                                         .Build();
-                    return accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(dbx_tests_syntax_singlemultimapresultCommandText, @params, "id");
+                    return accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(dbx_tests_syntax_singlemultimapresultCommandText, CommandType.Text, @params, "id");
                 }
             }
         }
@@ -2185,6 +2198,7 @@ namespace Dibix.Sdk.Tests
 //     the code is regenerated.
 // &lt;/auto-generated&gt;
 //----------------------------------------------------------------------------*/
+using System.Data;
 using Dibix;
 
 [assembly: ArtifactAssembly]
@@ -2205,7 +2219,7 @@ namespace Dibix.Sdk.Tests
                 {
                     using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                     {
-                        return accessor.QuerySingle&lt;bool&gt;(GetSinglePrimitiveResultCommandText);
+                        return accessor.QuerySingle&lt;bool&gt;(GetSinglePrimitiveResultCommandText, CommandType.Text, ParametersVisitor.Empty);
                     }
                 }
             }
@@ -2223,6 +2237,7 @@ namespace Dibix.Sdk.Tests
 //     the code is regenerated.
 // &lt;/auto-generated&gt;
 //----------------------------------------------------------------------------*/
+using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 using Dibix;
@@ -2245,7 +2260,7 @@ namespace Dibix.Sdk.Tests
                 {
                     using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                     {
-                        return await accessor.QuerySingleAsync&lt;bool&gt;(GetSinglePrimitiveResultCommandText, cancellationToken).ConfigureAwait(false);
+                        return await accessor.QuerySingleAsync&lt;bool&gt;(GetSinglePrimitiveResultCommandText, CommandType.Text, ParametersVisitor.Empty, cancellationToken).ConfigureAwait(false);
                     }
                 }
             }
@@ -3013,6 +3028,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.Runtime.Serialization;
 using Dibix;
 using Newtonsoft.Json;
@@ -3042,7 +3058,7 @@ namespace Dibix.Sdk.Tests
                                                             })
                                                             .Build();
                         Dibix.Sdk.Tests.DomainModel.Grid.GridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GridResult();
-                        result.Item = accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(GetGridCommandText, @params, "id");
+                        result.Item = accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(GetGridCommandText, CommandType.Text, @params, "id");
                         return result;
                     }
                 }
@@ -3131,6 +3147,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.Runtime.Serialization;
 using Dibix;
 using Newtonsoft.Json;
@@ -3160,7 +3177,7 @@ namespace Dibix.Sdk.Tests
                                                             })
                                                             .Build();
                         Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult();
-                        result.Item = accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(GetGridCommandText, @params, "id");
+                        result.Item = accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(GetGridCommandText, CommandType.Text, @params, "id");
                         return result;
                     }
                 }
@@ -3244,6 +3261,7 @@ namespace Dibix.Sdk.Tests
 //     the code is regenerated.
 // &lt;/auto-generated&gt;
 //----------------------------------------------------------------------------*/
+using System.Data;
 using Dibix;
 
 [assembly: ArtifactAssembly]
@@ -3265,7 +3283,7 @@ namespace Dibix.Sdk.Tests
                     ParametersVisitor @params = accessor.Parameters()
                                                         .SetInt16(nameof(a), out IOutParameter&lt;short&gt; aOutput)
                                                         .Build();
-                    short result = accessor.QuerySingle&lt;short&gt;(EmptyWithOutputParamCommandText, System.Data.CommandType.StoredProcedure, @params);
+                    short result = accessor.QuerySingle&lt;short&gt;(EmptyWithOutputParamCommandText, CommandType.StoredProcedure, @params);
                     a = aOutput.Result;
                     return result;
                 }
@@ -3289,6 +3307,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
@@ -3313,7 +3332,7 @@ namespace Dibix.Sdk.Tests
                 {
                     using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                     {
-                        using (IMultipleResultReader reader = await accessor.QueryMultipleAsync(GetGridCommandText, cancellationToken).ConfigureAwait(false))
+                        using (IMultipleResultReader reader = await accessor.QueryMultipleAsync(GetGridCommandText, CommandType.Text, ParametersVisitor.Empty, cancellationToken).ConfigureAwait(false))
                         {
                             Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult();
                             result.Items.ReplaceWith(await reader.ReadManyAsync&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;().ConfigureAwait(false));

@@ -1,11 +1,12 @@
-﻿using Dibix.Sdk.Sql;
+﻿using System.Data;
+using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeGeneration
 {
     public sealed class GenerateScriptSqlStatementFormatter : SqlStatementFormatter, ISqlStatementFormatter
     {
-        protected override string Format(SqlStatementInfo info, StatementList statementList)
+        protected override FormattedSqlStatement Format(SqlStatementDescriptor statementDescriptor, StatementList statementList)
         {
             TSqlBatch batch = new TSqlBatch();
 
@@ -14,7 +15,7 @@ namespace Dibix.Sdk.CodeGeneration
             base.CollectStatements(statementList, StatementHandler);
 
             string generated = ScriptDomFacade.Generate(batch, x => x.Options.AlignClauseBodies = false);
-            return generated;
+            return new FormattedSqlStatement(generated, CommandType.Text);
         }
     }
 }

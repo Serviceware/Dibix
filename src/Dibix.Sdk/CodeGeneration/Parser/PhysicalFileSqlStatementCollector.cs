@@ -51,14 +51,14 @@ namespace Dibix.Sdk.CodeGeneration
             this._logger = logger;
         }
 
-        public override IEnumerable<SqlStatementInfo> CollectStatements()
+        public override IEnumerable<SqlStatementDescriptor> CollectStatements()
         {
             return this._files.Select(this.CollectStatement).Where(x => x != null);
         }
 
-        private SqlStatementInfo CollectStatement(string file)
+        private SqlStatementDescriptor CollectStatement(string file)
         {
-            SqlStatementInfo statement = new SqlStatementInfo
+            SqlStatementDescriptor statement = new SqlStatementDescriptor
             {
                 Source = file,
                 Name = Path.GetFileNameWithoutExtension(file)

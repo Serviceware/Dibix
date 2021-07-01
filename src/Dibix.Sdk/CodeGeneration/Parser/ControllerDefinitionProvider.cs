@@ -24,7 +24,7 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly string _productName;
         private readonly string _areaName;
         private readonly string _outputName;
-        private readonly ICollection<SqlStatementInfo> _statements;
+        private readonly ICollection<SqlStatementDescriptor> _statements;
         private readonly IDictionary<string, SecurityScheme> _securitySchemeMap;
         private readonly ICollection<string> _defaultSecuritySchemes;
         private readonly ITypeResolverFacade _typeResolver;
@@ -46,7 +46,7 @@ namespace Dibix.Sdk.CodeGeneration
           , string productName
           , string areaName
           , string outputName
-          , ICollection<SqlStatementInfo> statements
+          , ICollection<SqlStatementDescriptor> statements
           , IEnumerable<string> endpoints
           , ICollection<string> defaultSecuritySchemes
           , IDictionary<string, SecurityScheme> securitySchemeMap
@@ -411,7 +411,7 @@ namespace Dibix.Sdk.CodeGeneration
             string methodName = target.Substring(statementNameIndex + 1);
 
             // 2. Target is a SQL statement within the current project
-            SqlStatementInfo statement = this._statements.FirstOrDefault(x => x.Namespace == normalizedNamespace && x.Name == methodName);
+            SqlStatementDescriptor statement = this._statements.FirstOrDefault(x => x.Namespace == normalizedNamespace && x.Name == methodName);
             if (statement != null)
             {
                 ActionDefinitionTarget actionTarget = new LocalActionTarget(statement, this._outputName);

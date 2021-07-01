@@ -43,20 +43,20 @@ namespace Dibix.Sdk.CodeGeneration
             this._procedureNames = procedureNames;
         }
 
-        public override IEnumerable<SqlStatementInfo> CollectStatements()
+        public override IEnumerable<SqlStatementDescriptor> CollectStatements()
         {
             TSqlModel model = TSqlModel.LoadFromDacpac(this._packagePath, new ModelLoadOptions());
             return this._procedureNames.Select(x => this.CollectStatement(x.Value, x.Key, model)).Where(x => x != null);
         }
 
-        private SqlStatementInfo CollectStatement(string procedureName, string displayName, TSqlModel model)
+        private SqlStatementDescriptor CollectStatement(string procedureName, string displayName, TSqlModel model)
         {
             ICollection<string> parts = procedureName.Split('.').Select(x => x.Trim('[', ']')).ToArray();
             TSqlObject element = model.GetObject(ModelSchema.Procedure, new ObjectIdentifier(parts), DacQueryScopes.All);
             Guard.IsNotNull(element, nameof(element), $"The element {procedureName} could not be found in dacpac");
 
             string script = element.GetScript();
-            SqlStatementInfo statement = new SqlStatementInfo
+            SqlStatementDescriptor statement = new SqlStatementDescriptor
             {
                 Name = displayName,
                 Source = this._packagePath

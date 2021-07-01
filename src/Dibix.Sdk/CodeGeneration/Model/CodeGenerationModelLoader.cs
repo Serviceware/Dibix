@@ -89,7 +89,7 @@ namespace Dibix.Sdk.CodeGeneration
                 yield return new SecurityScheme(name, SecuritySchemeKind.ApiKey);
         }
 
-        private static IEnumerable<SqlStatementInfo> CollectStatements
+        private static IEnumerable<SqlStatementDescriptor> CollectStatements
         (
             IEnumerable<string> sources
           , string projectName
@@ -117,7 +117,7 @@ namespace Dibix.Sdk.CodeGeneration
           , string productName
           , string areaName
           , string defaultOutputName
-          , ICollection<SqlStatementInfo> statements
+          , ICollection<SqlStatementDescriptor> statements
           , ICollection<string> defaultSecuritySchemes
           , IDictionary<string, SecurityScheme> securitySchemeMap
           , ReferencedAssemblyInspector referencedAssemblyInspector

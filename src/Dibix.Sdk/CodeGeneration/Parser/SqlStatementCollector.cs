@@ -4,6 +4,6 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public abstract class SqlStatementCollector
     {
-        public abstract IEnumerable<SqlStatementInfo> CollectStatements();
+        public abstract IEnumerable<SqlStatementDescriptor> CollectStatements();
     }
 }

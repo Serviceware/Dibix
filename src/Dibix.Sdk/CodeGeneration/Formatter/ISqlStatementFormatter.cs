@@ -6,6 +6,6 @@ namespace Dibix.Sdk.CodeGeneration
     {
         bool StripWhiteSpace { get; set; }
 
-        string Format(SqlStatementInfo info, StatementList statementList);
+        FormattedSqlStatement Format(SqlStatementDescriptor statementDescriptor, StatementList statementList);
     }
 }

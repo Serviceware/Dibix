@@ -17,7 +17,7 @@ namespace Dibix.Sdk.CodeGeneration
         private const string ReturnPropertyConverter = "Converter";
         private const string ReturnPropertyResultType = "ResultType";
 
-        public static IEnumerable<SqlQueryResult> Parse(SqlStatementInfo target, TSqlFragment node, TSqlFragmentAnalyzer fragmentAnalyzer, ISqlMarkupDeclaration markup, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger)
+        public static IEnumerable<SqlQueryResult> Parse(SqlStatementDescriptor target, TSqlFragment node, TSqlFragmentAnalyzer fragmentAnalyzer, ISqlMarkupDeclaration markup, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             StatementOutputVisitor visitor = new StatementOutputVisitor(target.Source, fragmentAnalyzer, logger);
             node.Accept(visitor);
@@ -41,13 +41,13 @@ namespace Dibix.Sdk.CodeGeneration
                 yield return result;
         }
 
-        private static SqlQueryResult GetBuiltInResult(ISqlMarkupDeclaration markup, SqlStatementInfo target, TSqlFragment node, IEnumerable<ISqlElement> returnElements, IList<OutputSelectResult> results, ILogger logger, ITypeResolverFacade typeResolver)
+        private static SqlQueryResult GetBuiltInResult(ISqlMarkupDeclaration markup, SqlStatementDescriptor target, TSqlFragment node, IEnumerable<ISqlElement> returnElements, IList<OutputSelectResult> results, ILogger logger, ITypeResolverFacade typeResolver)
         {
             SqlQueryResult fileResult = GetFileResult(markup, target, node, returnElements, results, logger, typeResolver);
             return fileResult;
         }
 
-        private static SqlQueryResult GetFileResult(ISqlMarkupDeclaration markup, SqlStatementInfo target, TSqlFragment node, IEnumerable<ISqlElement> returnElements, IList<OutputSelectResult> results, ILogger logger, ITypeResolverFacade typeResolver)
+        private static SqlQueryResult GetFileResult(ISqlMarkupDeclaration markup, SqlStatementDescriptor target, TSqlFragment node, IEnumerable<ISqlElement> returnElements, IList<OutputSelectResult> results, ILogger logger, ITypeResolverFacade typeResolver)
         {
             bool isFileResult = markup.TryGetSingleElement(SqlMarkupKey.FileResult, target.Source, logger, out ISqlElement fileResultElement);
             if (!isFileResult)
@@ -57,7 +57,7 @@ namespace Dibix.Sdk.CodeGeneration
             return CreateBuiltInResult("Dibix.FileEntity,Dibix", target, fileResultElement, typeResolver);
         }
 
-        private static SqlQueryResult CreateBuiltInResult(string typeName, SqlStatementInfo target, ISqlElement source, ITypeResolverFacade typeResolver)
+        private static SqlQueryResult CreateBuiltInResult(string typeName, SqlStatementDescriptor target, ISqlElement source, ITypeResolverFacade typeResolver)
         {
             TypeReference typeReference = typeResolver.ResolveType(typeName, @namespace: null, target.Source, source.Line, source.Column, isEnumerable: false);
             return new SqlQueryResult
@@ -67,7 +67,7 @@ namespace Dibix.Sdk.CodeGeneration
             };
         }
 
-        private static void ValidateFileResult(SqlStatementInfo target, TSqlFragment node, IEnumerable<ISqlElement> returnElements, IList<OutputSelectResult> results, ILogger logger)
+        private static void ValidateFileResult(SqlStatementDescriptor target, TSqlFragment node, IEnumerable<ISqlElement> returnElements, IList<OutputSelectResult> results, ILogger logger)
         {
             if (returnElements.Any())
             {
@@ -114,7 +114,7 @@ namespace Dibix.Sdk.CodeGeneration
             return true;
         }
 
-        private static void ValidateMergeGridResult(SqlStatementInfo target, TSqlFragment node, ICollection<ISqlElement> returnElements, ILogger logger)
+        private static void ValidateMergeGridResult(SqlStatementDescriptor target, TSqlFragment node, ICollection<ISqlElement> returnElements, ILogger logger)
         {
             if (!target.MergeGridResult || returnElements.Count > 1) 
                 return;
@@ -122,7 +122,7 @@ namespace Dibix.Sdk.CodeGeneration
             logger.LogError(null, "The @MergeGridResult option only works with a grid result so at least two results should be specified with the @Return hint", target.Source, node.StartLine, node.StartColumn);
         }
 
-        private static bool ValidateReturnElements(SqlStatementInfo target, IList<ISqlElement> returnElements, IList<OutputSelectResult> results, ILogger logger)
+        private static bool ValidateReturnElements(SqlStatementDescriptor target, IList<ISqlElement> returnElements, IList<OutputSelectResult> results, ILogger logger)
         {
             bool result = true;
             for (int i = results.Count; i < returnElements.Count; i++)
@@ -142,7 +142,7 @@ namespace Dibix.Sdk.CodeGeneration
             return result;
         }
 
-        private static IEnumerable<SqlQueryResult> CollectResults(SqlStatementInfo target, TSqlFragment node, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger, IList<ISqlElement> returnElements, StatementOutputVisitor visitor)
+        private static IEnumerable<SqlQueryResult> CollectResults(SqlStatementDescriptor target, TSqlFragment node, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger, IList<ISqlElement> returnElements, StatementOutputVisitor visitor)
         {
             ICollection<string> usedOutputNames = new HashSet<string>();
             for (int i = 0; i < returnElements.Count; i++)
@@ -198,7 +198,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static bool TryParseResultMode(SqlStatementInfo target, ISqlElement returnElement, ILogger logger, out SqlQueryResultMode resultMode)
+        private static bool TryParseResultMode(SqlStatementDescriptor target, ISqlElement returnElement, ILogger logger, out SqlQueryResultMode resultMode)
         {
             resultMode = SqlQueryResultMode.Many;
             if (!returnElement.TryGetPropertyValue(ReturnPropertyMode, isDefault: false, out ISqlElementValue resultModeHint) || Enum.TryParse(resultModeHint.Value, out resultMode)) 
@@ -208,7 +208,7 @@ namespace Dibix.Sdk.CodeGeneration
             return false;
         }
 
-        private static void ValidateMergeGridResult(SqlStatementInfo target, TSqlFragment node, bool isFirstResult, SqlQueryResultMode resultMode, string resultName, ILogger logger)
+        private static void ValidateMergeGridResult(SqlStatementDescriptor target, TSqlFragment node, bool isFirstResult, SqlQueryResultMode resultMode, string resultName, ILogger logger)
         {
             SqlQueryResultMode[] supportedMergeGridResultModes = { SqlQueryResultMode.Single, SqlQueryResultMode.SingleOrDefault };
             if (!target.MergeGridResult || !isFirstResult) 
@@ -225,7 +225,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static IEnumerable<TypeReference> ParseResultTypes(SqlStatementInfo target, SqlQueryResultMode resultMode, ISqlElementValue typesHint, ITypeResolverFacade typeResolver)
+        private static IEnumerable<TypeReference> ParseResultTypes(SqlStatementDescriptor target, SqlQueryResultMode resultMode, ISqlElementValue typesHint, ITypeResolverFacade typeResolver)
         {
             string[] typeNames = typesHint.Value.Split(';');
             int column = typesHint.Column;
@@ -250,7 +250,7 @@ namespace Dibix.Sdk.CodeGeneration
           , IList<TypeReference> resultTypes
           , IList<OutputColumnResult> columns
           , ICollection<string> usedOutputNames
-          , SqlStatementInfo target
+          , SqlStatementDescriptor target
           , ISchemaRegistry schemaRegistry
           , ILogger logger
         )
@@ -310,7 +310,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static void ValidateName(bool isFirstResult, int numberOfReturnElements, ISqlElement returnElement, ISqlElementValue name, ICollection<string> usedOutputNames, SqlStatementInfo target, ILogger logger)
+        private static void ValidateName(bool isFirstResult, int numberOfReturnElements, ISqlElement returnElement, ISqlElementValue name, ICollection<string> usedOutputNames, SqlStatementDescriptor target, ILogger logger)
         {
             if (name != null)
             {
@@ -387,7 +387,7 @@ namespace Dibix.Sdk.CodeGeneration
             return true;
         }
 
-        private static TypeReference ParseProjectionContract(SqlStatementInfo target, TSqlFragment node, ICollection<ISqlElement> returnElements, SqlQueryResultMode resultMode, ISqlElement returnElement, ITypeResolverFacade typeResolver, ILogger logger)
+        private static TypeReference ParseProjectionContract(SqlStatementDescriptor target, TSqlFragment node, ICollection<ISqlElement> returnElements, SqlQueryResultMode resultMode, ISqlElement returnElement, ITypeResolverFacade typeResolver, ILogger logger)
         {
             SqlQueryResultMode[] supportedResultTypeResultModes = { SqlQueryResultMode.Many };
             if (!returnElement.TryGetPropertyValue(ReturnPropertyResultType, isDefault: false, out ISqlElementValue resultType))

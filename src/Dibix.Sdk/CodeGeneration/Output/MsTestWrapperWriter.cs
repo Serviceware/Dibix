@@ -29,7 +29,7 @@ namespace %namespace%
     }
 }";
 
-            string methods = String.Join(String.Format("{0}{0}", Environment.NewLine), model.Statements.Select(x => BuildTestMethod(x.Name, x.Content, model.CommandTextFormatting)));
+            string methods = String.Join(String.Format("{0}{0}", Environment.NewLine), model.Statements.Select(x => BuildTestMethod(x.Name, x.Statement.Content, model.CommandTextFormatting)));
 
             return template.Replace("%namespace%", model.RootNamespace)
                            .Replace("%className%", model.DefaultClassName)

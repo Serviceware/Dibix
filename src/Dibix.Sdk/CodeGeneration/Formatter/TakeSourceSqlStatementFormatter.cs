@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Linq;
 using System.Text;
 using Dibix.Sdk.Sql;
@@ -8,7 +9,7 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public sealed class TakeSourceSqlStatementFormatter : SqlStatementFormatter, ISqlStatementFormatter
     {
-        protected override string Format(SqlStatementInfo info, StatementList statementList)
+        protected override FormattedSqlStatement Format(SqlStatementDescriptor statementDescriptor, StatementList statementList)
         {
             StringBuilder sb = new StringBuilder();
 
@@ -34,7 +35,8 @@ namespace Dibix.Sdk.CodeGeneration
 
             base.CollectStatements(statementList, StatementHandler, TokenHandler);
 
-            return DecreaseIndentation(sb.ToString());
+            string content = DecreaseIndentation(sb.ToString());
+            return new FormattedSqlStatement(content, CommandType.Text);
         }
 
         private static string DecreaseIndentation(string text) => String.Join("\n", text.Split('\n').Select((line, lineIndex) =>

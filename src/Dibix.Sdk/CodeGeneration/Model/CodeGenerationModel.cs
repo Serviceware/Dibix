@@ -11,7 +11,7 @@ namespace Dibix.Sdk.CodeGeneration
         public string BaseUrl { get; set; }
         public CodeGeneratorCompatibilityLevel CompatibilityLevel { get; }
         public CommandTextFormatting CommandTextFormatting { get; set; }
-        public IList<SqlStatementInfo> Statements { get; }
+        public IList<SqlStatementDescriptor> Statements { get; }
         public IList<UserDefinedTypeSchema> UserDefinedTypes { get; }
         public ICollection<SchemaDefinition> Contracts { get; }
         public IList<ControllerDefinition> Controllers { get; }
@@ -21,7 +21,7 @@ namespace Dibix.Sdk.CodeGeneration
         public CodeGenerationModel(CodeGeneratorCompatibilityLevel compatibilityLevel)
         {
             this.CompatibilityLevel = compatibilityLevel;
-            this.Statements = new Collection<SqlStatementInfo>();
+            this.Statements = new Collection<SqlStatementDescriptor>();
             this.UserDefinedTypes = new Collection<UserDefinedTypeSchema>();
             this.Contracts = new Collection<SchemaDefinition>();
             this.Controllers = new Collection<ControllerDefinition>();
