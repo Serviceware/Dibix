@@ -35,6 +35,12 @@ namespace Dibix
             Guard.IsNotNull(accessor, nameof(accessor));
             return accessor.QueryManyAsync<T>(commandText, CommandType.Text, parameters, buffered: true, cancellationToken);
         }
+        // Notification (GetRetryRequests)
+        public static Task<IEnumerable<T>> QueryManyAsync<T>(this IDatabaseAccessor accessor, string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken)
+        {
+            Guard.IsNotNull(accessor, nameof(accessor));
+            return accessor.QueryManyAsync<T>(commandText, commandType, parameters, buffered: true, cancellationToken);
+        }
 
         public static IEnumerable<TReturn> QueryMany<TReturn, TSecond>(this IDatabaseAccessor accessor, string commandText, Action<TReturn, TSecond> map, string splitOn)
         {
