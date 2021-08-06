@@ -11,9 +11,7 @@
     <DibixHttpServerAssemblyPath>$(_DibixRuntimeDirectory)Dibix.Http.Server.dll</DibixHttpServerAssemblyPath>
     <DibixHttpClientAssemblyPath>$(_DibixRuntimeDirectory)Dibix.Http.Client.dll</DibixHttpClientAssemblyPath>
 
-    <_ClientFilePathNoExt Condition="'$(ClientOutputName)' != ''">$(TargetDir)$(ClientOutputName)</_ClientFilePathNoExt>
-    <ClientOutputSymbolsPath Condition="'$(_ClientFilePathNoExt)' != ''">$(_ClientFilePathNoExt).pdb</ClientOutputSymbolsPath>
-    <ClientTargetPath Condition="'$(_ClientFilePathNoExt)' != ''">$(_ClientFilePathNoExt).dll</ClientTargetPath>
+    <AreaName Condition="$(AreaName) == '' and $(RootNamespace.Split('.').Length) > 1">$(RootNamespace.Split('.')[1])</AreaName>
 
     <!-- We have our own CA target, which also executes the native SqlStaticCodeAnalysis -->
     <RunSqlCodeAnalysis>false</RunSqlCodeAnalysis>
@@ -181,6 +179,14 @@
       <Contract Include="@(None)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(RelativeDir)', '^Contracts\\')) and %(Extension) == '.json'" />
       <Endpoint Include="@(None)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(RelativeDir)', '^Endpoints\\')) and %(Extension) == '.json'" />
     </ItemGroup>
+
+    <PropertyGroup>
+      <_HasEndpoints Condition="@(Endpoint->Count()) > 0">True</_HasEndpoints>
+      <ClientOutputName Condition="'$(ClientOutputName)' == '' and '$(AreaName)' != '' and '$(_HasEndpoints)' == 'true'">$(AreaName).Client</ClientOutputName>
+      <_ClientFilePathNoExt Condition="'$(ClientOutputName)' != ''">$(TargetDir)$(ClientOutputName)</_ClientFilePathNoExt>
+      <ClientOutputSymbolsPath Condition="'$(_ClientFilePathNoExt)' != ''">$(_ClientFilePathNoExt).pdb</ClientOutputSymbolsPath>
+      <ClientTargetPath Condition="'$(_ClientFilePathNoExt)' != ''">$(_ClientFilePathNoExt).dll</ClientTargetPath>
+    </PropertyGroup>
   </Target>
 
   <!-- Run SQL code analysis and compile database access artifacts -->
@@ -194,7 +200,6 @@
       <SqlNamingConventionPrefix Condition="'$(SqlNamingConventionPrefix)' == ''">dbx</SqlNamingConventionPrefix>
 
       <ProductName Condition="'$(ProductName)' == ''">$(RootNamespace.Split('.')[0])</ProductName>
-      <AreaName Condition="$(AreaName) == '' and $(RootNamespace.Split('.').Length) > 1">$(RootNamespace.Split('.')[1])</AreaName>
       <Title Condition="$(Title) == ''">$(AreaName)</Title>
       <Description Condition="$(Description) == '' and $(Build_Repository_Uri) != '' and $(Build_SourceVersion) != '' and $(Build_SourceBranch) != ''">__Build version:__ $([System.DateTime]::Now.ToString(G))\r\n\r\n__Source version:__ [$(Build_SourceVersion)]($(Build_Repository_Uri)/commit/$(Build_SourceVersion)?refName=$(Build_SourceBranch))</Description>
       <LangVersion>latest</LangVersion>
