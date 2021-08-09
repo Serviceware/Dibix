@@ -167,7 +167,9 @@
 
       <!-- CompileArtifacts -->
       <CompileArtifactsOutput Include="$(TargetPath)" /> <!-- .dll -->
-      <FileWrites Include="$(ClientTargetPath);$(ClientOutputSymbolsPath)" /> <!-- This is important so these files don't get removed in IncrementalClean -->
+      
+      <!-- This is important so these files don't get removed in IncrementalClean -->
+      <FileWrites Include="$(ClientTargetPath);$(ClientOutputSymbolsPath);@(Docs)" />
 
       <!-- SqlCore -->
       <SqlCoreOutput Include="$(TargetPath)" /> <!-- .dll -->
@@ -187,6 +189,12 @@
       <ClientOutputSymbolsPath Condition="'$(_ClientFilePathNoExt)' != ''">$(_ClientFilePathNoExt).pdb</ClientOutputSymbolsPath>
       <ClientTargetPath Condition="'$(_ClientFilePathNoExt)' != ''">$(_ClientFilePathNoExt).dll</ClientTargetPath>
     </PropertyGroup>
+
+    <ItemGroup Condition="'$(AreaName)' != '' and '$(_HasEndpoints)' == 'true'">
+      <_DocsFiles Include="$(AreaName).yml" />
+      <_DocsFiles Include="$(AreaName).json" />
+      <Docs Include="@(_DocsFiles->'$(OutDir)\%(Identity)')" />
+    </ItemGroup>
   </Target>
 
   <!-- Run SQL code analysis and compile database access artifacts -->
@@ -497,21 +505,18 @@ $(_SqlReferencePath)" />
 
 
     <!-- Publish docs -->
-    <ItemGroup>
-      <_DocsFiles Include="$(AreaName).yml" />
-      <_DocsFiles Include="$(AreaName).json" />
-
-      <_DocsFiles>
-        <SourcePath>$(IntermediateOutputPath)%(Filename)%(Extension)</SourcePath>
-        <TargetPath Condition="$(DocsDir) != ''">$(DocsDir)$([System.String]::Copy('%(Extension)').TrimStart('.'))\%(Filename)%(Extension)</TargetPath>
-      </_DocsFiles>
-
-      <_DocsSources Include="@(_DocsFiles->'%(SourcePath)')" Condition="$(DocsDir) != '' AND Exists('%(SourcePath)')" />
-      <_DocsTargets Include="@(_DocsSources->'%(TargetPath)')" />
-    </ItemGroup>
-    <Copy SourceFiles="@(_DocsSources)"
-          DestinationFiles="@(_DocsTargets)" />
+    <Copy SourceFiles="@(_DocsFiles->'$(IntermediateOutputPath)\%(Identity)')"
+          DestinationFolder="$(OutDir)"
+          SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
+          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+          Retries="$(CopyRetryCount)"
+          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+          UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
+          UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)">
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+    </Copy>
   </Target>
+
 
   <!-- Append our own metadata to the produced dacpac file -->
   <Target Name="SignDacFile"
