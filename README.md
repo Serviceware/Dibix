@@ -390,6 +390,16 @@ DELETE /api/Person?personIds[]=1&personIds[]=2
 Once you have created all the necessary artifacts, you can build the database project. With the Dibix MSBuild targets automatically integrated into the build pipeline, you end up with a .dll next to your .dacpac file in your output directory. The assembly contains everything required to feed a web server with the REST API definitions.<br />
 As of right now Dibix itself does not contain a runtime implementation for the web server. So again, please check if there is any existing documentation in the product you are working on or ask [me](mailto:tommy.lohse@helpline.de) for assistance.
 
+### Consuming endpoints
+If the project contains any HTTP endpoints, a client assembly and an [OpenAPI](https://github.com/OAI/OpenAPI-Specification) document are also created during compilation. The client assembly contains a service interface and implementation for each endpoint defined in the project along with their referenced contracts. A host project can consume these client assemblies and register the implementation in the DI container to make the interface available to consumers via IoC. <br />
+The implementation is based on the [Dibix.Http.Client](https://www.nuget.org/packages/Dibix.Http.Client) runtime and the generated services may require a few dependencies:
+|Type|Required|Implementation(s)|
+|-|-|-|
+|[`IHttpClientFactory`](https://github.com/Serviceware/Dibix/blob/master/src/Dibix.Http.Client/Client/IHttpClientFactory.cs)|Optional|[`DefaultHttpClientFactory`](https://github.com/Serviceware/Dibix/blob/master/src/Dibix.Http.Client/Client/DefaultHttpClientFactory.cs)
+|[`IHttpAuthorizationProvider`](https://github.com/Serviceware/Dibix/blob/master/src/Dibix.Http.Client/Client/IHttpAuthorizationProvider.cs)|Required (if endpoint requires authorization)|-
+
+The OpenAPI document will be generated in YAML and JSON format and can be used to generate other artifacts, for example clients in other languages like TypeScript.
+
 ## Syntax reference
 ### HTTP status code
 By default Dibix endpoints return [200 OK](https://httpstatuses.com/200) for operations that have a result and [204 NoContent](https://httpstatuses.com/204) for those that do not return a result.<br />
