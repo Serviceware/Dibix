@@ -259,26 +259,43 @@ namespace Dibix.Sdk.CodeGeneration
             ValidateName(isFirstResult, numberOfReturnElements, returnElement, name, usedOutputNames, target, logger);
             
             // SplitOn:X
-            if (!TrySplitColumns(columns, resultTypes.Count, returnElement, splitOn, target.Source, logger, out IList<ICollection<OutputColumnResult>> columnGroups))
+            if (!TrySplitColumns(columns, resultTypes.Count, returnElement, splitOn, target.Source, logger, out IList<IList<OutputColumnResult>> columnGroups))
                 return;
 
             // Validate result columns
             for (int i = 0; i < resultTypes.Count; i++)
             {
                 TypeReference returnType = resultTypes[i];
-                ICollection<OutputColumnResult> columnGroup = columnGroups[i];
+                IList<OutputColumnResult> columnGroup = columnGroups[i];
+
+                if (!columnGroup.Any())
+                    throw new InvalidOperationException("Result does not contain any columns");
+
                 SchemaDefinition schema = null;
                 if (returnType is SchemaTypeReference schemaTypeReference)
                     schema = schemaRegistry.GetSchema(schemaTypeReference);
+                
+                string primitiveTypeName;
+                
+                if (returnType is PrimitiveTypeReference primitiveTypeReference)
+                    primitiveTypeName = primitiveTypeReference.Type.ToString();
+                else if (schema is EnumSchema enumSchema)
+                    primitiveTypeName = enumSchema.FullName;
+                else
+                    primitiveTypeName = null;
 
-                // SELECT 1 => Query<int>/Single<int> => No entity property validation + No missing alias validation
-                bool singleColumn = columnGroup.Count == 1;
-                bool isPrimitive = returnType is PrimitiveTypeReference || schema is EnumSchema;
-                if (singleColumn && isPrimitive)
-                    continue;
+                if (primitiveTypeName != null)
+                {
+                    bool singleColumn = columnGroup.Count == 1;
+                    if (!singleColumn)
+                    {
+                        TSqlFragment firstColumn = columnGroup[0].ColumnNameSource;
+                        logger.LogError(null, $"Cannot map complex result to primitive type '{primitiveTypeName}'", target.Source, firstColumn.StartLine, firstColumn.StartColumn);
+                    }
 
-                if (schema == null)
+                    // SELECT 1 => Query<int>/Single<int> => No entity property validation + No missing alias validation
                     continue;
+                }
 
                 if (!(schema is ObjectSchema objectSchema))
                     throw new NotSupportedException($"Unsupported return type for result validation: {returnType.GetType()}");
@@ -325,9 +342,9 @@ namespace Dibix.Sdk.CodeGeneration
                 logger.LogError(null, "The 'Name' property must be specified when multiple outputs are returned. Mark it in the @Return hint: -- @Return ClrTypes:<ClrTypeName> Name:<ResultName>", target.Source, returnElement.Line, returnElement.Column);
         }
 
-        private static bool TrySplitColumns(IList<OutputColumnResult> columns, int resultTypeCount, ISqlElement returnElement, ISqlElementValue splitOn, string source, ILogger logger, out IList<ICollection<OutputColumnResult>> columnGroups)
+        private static bool TrySplitColumns(IList<OutputColumnResult> columns, int resultTypeCount, ISqlElement returnElement, ISqlElementValue splitOn, string source, ILogger logger, out IList<IList<OutputColumnResult>> columnGroups)
         {
-            columnGroups = new Collection<ICollection<OutputColumnResult>>();
+            columnGroups = new Collection<IList<OutputColumnResult>>();
             if (splitOn == null)
             {
                 if (resultTypeCount > 1)
@@ -350,7 +367,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             string splitColumn = null;
             int position = splitOn.Column;
-            ICollection<OutputColumnResult> page = new Collection<OutputColumnResult>();
+            IList<OutputColumnResult> page = new Collection<OutputColumnResult>();
             for (int i = 0; i < columns.Count; i++)
             {
                 OutputColumnResult column = columns[i];
