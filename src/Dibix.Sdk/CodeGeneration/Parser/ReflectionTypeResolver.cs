@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
@@ -138,8 +139,13 @@ namespace Dibix.Sdk.CodeGeneration
                 EnumSchema enumSchema = new EnumSchema(type.Namespace, type.Name, false);
 
                 // Enum.GetValues() => "The requested operation is invalid in the ReflectionOnly context"
-                foreach (FieldInfo member in type.GetFields(BindingFlags.Public | BindingFlags.Static))
-                    enumSchema.Members.Add(new EnumSchemaMember(member.Name, (int)member.GetRawConstantValue(), stringValue: null, enumSchema));
+                for (int i = 0; i < type.GetFields(BindingFlags.Public | BindingFlags.Static).Length; i++)
+                {
+                    FieldInfo member = type.GetFields(BindingFlags.Public | BindingFlags.Static)[i];
+                    int actualValue = (int)member.GetRawConstantValue();
+                    string stringValue = i != actualValue ? actualValue.ToString(CultureInfo.InvariantCulture) : null;
+                    enumSchema.Members.Add(new EnumSchemaMember(member.Name, actualValue, stringValue, enumSchema));
+                }
 
                 schemaRegistry.Populate(enumSchema);
             }

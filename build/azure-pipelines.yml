@@ -2,7 +2,7 @@
   #name: Processes
 
 #trigger:
-#- master
+#- main
 #- rel/*
 
 parameters:
@@ -115,7 +115,7 @@ jobs:
   
   - task: DotNetCoreCLI@2
     displayName: "\U0001FA82 Publish packages"
-    condition: and(succeeded(), eq(variables['PublishPackages'], true)) #, eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+    condition: and(succeeded(), eq(variables['PublishPackages'], true)) #, eq(variables['Build.SourceBranch'], 'refs/heads/main'))
     inputs:
       #command: 'push'
       #packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
@@ -141,7 +141,7 @@ jobs:
   
   - task: DotNetCoreCLI@2
     displayName: "\U0001FA82 Publish packages"
-    condition: and(succeeded(), eq(variables['PublishPackages'], true)) #, eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+    condition: and(succeeded(), eq(variables['PublishPackages'], true)) #, eq(variables['Build.SourceBranch'], 'refs/heads/main'))
     inputs:
       command: custom
       custom: nuget

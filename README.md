@@ -1,7 +1,7 @@
 # Dibix
 Seamlessly create use case oriented REST APIs based on T-SQL stored procedures.
 
-[![Build Status](https://img.shields.io/azure-devops/build/serviceware/dibix/2/master)](https://dev.azure.com/serviceware/Dibix/_build/latest?definitionId=2&branchName=master) [![Test Status](https://img.shields.io/azure-devops/tests/serviceware/dibix/2/master)](https://dev.azure.com/serviceware/Dibix/_build/latest?definitionId=2&branchName=master)
+[![Build Status](https://img.shields.io/azure-devops/build/serviceware/dibix/2/main)](https://dev.azure.com/serviceware/Dibix/_build/latest?definitionId=2&branchName=main) [![Test Status](https://img.shields.io/azure-devops/tests/serviceware/dibix/2/main)](https://dev.azure.com/serviceware/Dibix/_build/latest?definitionId=2&branchName=main)
 
 ## Packages
 | Package | NuGet |
@@ -395,8 +395,8 @@ If the project contains any HTTP endpoints, a client assembly and an [OpenAPI](h
 The implementation is based on the [Dibix.Http.Client](https://www.nuget.org/packages/Dibix.Http.Client) runtime and the generated services may require a few dependencies:
 |Type|Required|Implementation(s)|
 |-|-|-|
-|[`IHttpClientFactory`](https://github.com/Serviceware/Dibix/blob/master/src/Dibix.Http.Client/Client/IHttpClientFactory.cs)|Optional|[`DefaultHttpClientFactory`](https://github.com/Serviceware/Dibix/blob/master/src/Dibix.Http.Client/Client/DefaultHttpClientFactory.cs)
-|[`IHttpAuthorizationProvider`](https://github.com/Serviceware/Dibix/blob/master/src/Dibix.Http.Client/Client/IHttpAuthorizationProvider.cs)|Required (if endpoint requires authorization)|-
+|[`IHttpClientFactory`](https://github.com/Serviceware/Dibix/blob/main/src/Dibix.Http.Client/Client/IHttpClientFactory.cs)|Optional|[`DefaultHttpClientFactory`](https://github.com/Serviceware/Dibix/blob/main/src/Dibix.Http.Client/Client/DefaultHttpClientFactory.cs)
+|[`IHttpAuthorizationProvider`](https://github.com/Serviceware/Dibix/blob/main/src/Dibix.Http.Client/Client/IHttpAuthorizationProvider.cs)|Required (if endpoint requires authorization)|-
 
 The OpenAPI document will be generated in YAML and JSON format and can be used to generate other artifacts, for example clients in other languages like TypeScript.
 

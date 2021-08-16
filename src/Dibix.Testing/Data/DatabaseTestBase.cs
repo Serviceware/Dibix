@@ -41,7 +41,7 @@ namespace Dibix.Testing.Data
             IDatabaseAccessorFactory databaseAccessorFactory = CreateDatabaseAccessorFactory(configuration);
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
-                   IParameterBuilder parameterBuilder = accessor.Parameters();
+                IParameterBuilder parameterBuilder = accessor.Parameters();
                 parameters?.Invoke(parameterBuilder);
                 await accessor.ExecuteAsync(storedProcedureName, CommandType.StoredProcedure, commandTimeout, parameterBuilder.Build(), CancellationToken.None).ConfigureAwait(false);
             }
