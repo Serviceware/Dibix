@@ -12,19 +12,22 @@ parameters:
   default: "false"
 
 variables:
-  # Unfortunately 'Build.SourceVersionMessage' is not available at this stage yet - See setvariable step
+  # Publish packages automatically, when:
+  # - Build was triggered by individual CI and commit message contains '[package]'
+  # - Build was triggered manually and 'PublishPackages' was set to true
+  # Note: 'Build.SourceVersionMessage' is null for manually triggered builds
   PublishPackages: "$[or(eq('${{ parameters.PublishPackages }}', true), contains(variables['Build.SourceVersionMessage'], '[package]'))]"
 
 jobs:
-- job: BuildAndTest
+- job: Initialize
   pool:
     vmImage: 'ubuntu-latest'
   steps:
   #- powershell: (gci  env:* | sort-object name) # Print env variables
 
-  - script: "echo ##vso[task.setvariable variable=PublishPackages]true"
-    displayName: "\U0001F50D Resolve 'PublishPackages' property from commmit message"
-    condition: contains(variables['Build.SourceVersionMessage'], '[package]')
+  #- script: "echo ##vso[task.setvariable variable=PublishPackages]true"
+  #  displayName: "\U0001F50D Resolve 'PublishPackages' property from commmit message"
+  #  condition: contains(variables['Build.SourceVersionMessage'], '[package]')
 
   - task: DotNetCoreCLI@2  
     displayName: "\U0001F913 Install NBGV"
@@ -36,6 +39,11 @@ jobs:
   - script: ./nbgv cloud
     displayName: "\U0001F58D Update pipeline instance name"
 
+- job: BuildAndTest
+  dependsOn: Initialize
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
   - task: DotNetCoreCLI@2
     displayName: "\U0001F52C Build debug"
     inputs:
