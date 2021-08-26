@@ -144,17 +144,17 @@ namespace Dibix.Sdk.CodeGeneration
                 // Validate explicit parameters
                 foreach (ExplicitParameter explicitParameter in explicitParameters.Values)
                 {
-                    IJsonLineInfo propertyLocation = explicitParameter.Property;
-                    base.Logger.LogError(null, $"Parameter '{explicitParameter.Property.Name}' not found on action: {actionDefinition.Target.OperationName}", filePath, propertyLocation.LineNumber, explicitParameter.Property.GetCorrectLinePosition());
+                    IJsonLineInfo propertyLocation = explicitParameter.Property.GetLineInfo();
+                    base.Logger.LogError(null, $"Parameter '{explicitParameter.Property.Name}' not found on action: {actionDefinition.Target.OperationName}", filePath, propertyLocation.LineNumber, propertyLocation.LinePosition);
                 }
 
                 // Validate path parameters
                 foreach (Group pathSegment in pathParameters.Values)
                 {
                     JValue childRouteValue = (JValue)childRouteProperty.Value;
-                    IJsonLineInfo childRouteValueLocation = childRouteProperty.Value;
+                    IJsonLineInfo childRouteValueLocation = childRouteProperty.Value.GetLineInfo();
                     int matchIndex = pathSegment.Index - 1;
-                    base.Logger.LogError(null, $"Undefined path parameter: {pathSegment}", filePath, childRouteValueLocation.LineNumber, childRouteValue.GetCorrectLinePosition() + matchIndex);
+                    base.Logger.LogError(null, $"Undefined path parameter: {pathSegment}", filePath, childRouteValueLocation.LineNumber, childRouteValueLocation.LinePosition + matchIndex);
                 }
             }
 
@@ -386,8 +386,8 @@ namespace Dibix.Sdk.CodeGeneration
         private ActionDefinition CreateActionDefinition(JObject action, string filePath, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, Group> pathParameters, ICollection<string> bodyParameters)
         {
             JValue targetValue = (JValue)action.Property("target").Value;
-            IJsonLineInfo lineInfo = targetValue;
-            ActionDefinition actionDefinition = this.CreateActionDefinition((string)targetValue, filePath, lineInfo.LineNumber, targetValue.GetCorrectLinePosition(), explicitParameters, pathParameters, bodyParameters);
+            IJsonLineInfo lineInfo = targetValue.GetLineInfo();
+            ActionDefinition actionDefinition = this.CreateActionDefinition((string)targetValue, filePath, lineInfo.LineNumber, lineInfo.LinePosition, explicitParameters, pathParameters, bodyParameters);
             return actionDefinition;
         }
         private ActionDefinition CreateActionDefinition(string target, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, Group> pathParameters, ICollection<string> bodyParameters)
@@ -510,7 +510,8 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
                 if (location == ActionParameterLocation.Header)
                 {
                     type = new PrimitiveTypeReference(PrimitiveType.String, isNullable: true, isEnumerable: false);
-                    defaultValue = new DefaultValue(null, filePath, parameter.Property.GetCorrectLinePosition(), ((IJsonLineInfo)parameter.Property).LinePosition);
+                    IJsonLineInfo propertyLocation = parameter.Property.GetLineInfo();
+                    defaultValue = new DefaultValue(null, filePath, propertyLocation.LineNumber, propertyLocation.LinePosition);
                 }
 
                 bool isRequired = IsParameterRequired(type, location, defaultValue, this._schemaRegistry);
@@ -791,10 +792,10 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
         private TypeReference ResolveType(JValue typeNameValue, string filePath)
         {
             string typeName = (string)typeNameValue;
-            IJsonLineInfo typeNameLocation = typeNameValue;
+            IJsonLineInfo typeNameLocation = typeNameValue.GetLineInfo();
             bool isEnumerable = typeName.EndsWith("*", StringComparison.Ordinal);
             typeName = typeName.TrimEnd('*');
-            TypeReference type = this._typeResolver.ResolveType(typeName, null, filePath, typeNameLocation.LineNumber, typeNameValue.GetCorrectLinePosition(), isEnumerable);
+            TypeReference type = this._typeResolver.ResolveType(typeName, null, filePath, typeNameLocation.LineNumber, typeNameLocation.LinePosition, isEnumerable);
             return type;
         }
 

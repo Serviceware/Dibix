@@ -1,9 +1,13 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
+using Dibix.Sdk.Json;
 using Dibix.Sdk.OpenApi;
+using Dibix.Sdk.OpenApi.Validation;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Extensions;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json.Linq;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -18,31 +22,32 @@ namespace Dibix.Sdk.CodeGeneration
 
             OpenApiDocument document = OpenApiGenerator.Generate(model, schemaRegistry);
 
-            // Unfortunately the validation of the Microsoft SDK is not as thorough as the one on https://editor.swagger.io
-            // To catch all errors, like referencing missing schemas, we use swagger manually for now.
-            //foreach (OpenApiError error in document.Validate(ValidationRuleSet.GetDefaultRuleSet()))
-            //{
-            //    logger.LogError(null, $"{error.Message} ({error.Pointer})", null, 0, 0);
-            //}
-
-            if (logger.HasLoggedErrors)
-                return false;
-
             string targetDirectory = Path.GetDirectoryName(model.DefaultOutputFilePath);
 
-            string jsonFilePath = Path.Combine(targetDirectory, $"{model.AreaName}.json");
+            string jsonFilePath = BuildOutputPath(targetDirectory, model.AreaName, "json");
             using (Stream stream = File.Open(jsonFilePath, FileMode.Create))
             {
                 document.SerializeAsJson(stream, OpenApiSpecVersion.OpenApi3_0);
             }
 
-            string yamlFilePath = Path.Combine(targetDirectory, $"{model.AreaName}.yml");
+            string yamlFilePath = BuildOutputPath(targetDirectory, model.AreaName, "yml");
             using (Stream stream = File.Open(yamlFilePath, FileMode.Create))
             {
                 document.SerializeAsYaml(stream, OpenApiSpecVersion.OpenApi3_0);
             }
 
-            return true;
+            // Unfortunately the validation of the Microsoft SDK is not as thorough as the one on https://editor.swagger.io
+            // To catch all errors, like referencing missing schemas, we use swagger manually for now.
+            Lazy<JToken> jsonAccessor = new Lazy<JToken>(() => JsonExtensions.LoadJson(jsonFilePath));
+            foreach (OpenApiError error in OpenApiValidationAdapter.Validate(document, ValidationRules.All))
+            {
+                JToken json = jsonAccessor.Value;
+                OpenApiValidationUtility.LogError(error, jsonFilePath, json, logger);
+            }
+
+            return !logger.HasLoggedErrors;
         }
+
+        private static string BuildOutputPath(string targetDirectory, string areaName, string extension) => Path.GetFullPath(Path.Combine(targetDirectory, $"{areaName}.{extension}"));
     }
 }

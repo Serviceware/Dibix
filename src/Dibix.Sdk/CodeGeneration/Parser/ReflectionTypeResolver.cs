@@ -300,7 +300,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static Type GetUnderlyingEnumerableTypeCore(Type type)
         {
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>)) 
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>))
                 return type.GenericTypeArguments.Single();
             
             return null;

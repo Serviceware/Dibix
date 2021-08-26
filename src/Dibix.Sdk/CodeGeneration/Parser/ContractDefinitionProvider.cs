@@ -82,22 +82,20 @@ If this is not a project that has multiple areas, please make sure to define the
         {
             foreach (JProperty definitionProperty in contracts.Properties())
             {
-                IJsonLineInfo location = definitionProperty;
-                int column = definitionProperty.GetCorrectLinePosition();
-                this.ReadContract(rootNamespace, currentNamespace, definitionProperty.Name, definitionProperty.Value, filePath, location.LineNumber, column);
+                this.ReadContract(rootNamespace, currentNamespace, definitionProperty.Name, definitionProperty.Value, filePath, definitionProperty.GetLineInfo());
             }
         }
 
-        private void ReadContract(string rootNamespace, string currentNamespace, string definitionName, JToken value, string filePath, int line, int column)
+        private void ReadContract(string rootNamespace, string currentNamespace, string definitionName, JToken value, string filePath, IJsonLineInfo lineInfo)
         {
             switch (value.Type)
             {
                 case JTokenType.Object:
-                    this.ReadObjectContract(rootNamespace, currentNamespace, definitionName, value, filePath, line, column);
+                    this.ReadObjectContract(rootNamespace, currentNamespace, definitionName, value, filePath, lineInfo);
                     break;
 
                 case JTokenType.Array:
-                    this.ReadEnumContract(currentNamespace, definitionName, value, filePath, line, column);
+                    this.ReadEnumContract(currentNamespace, definitionName, value, filePath, lineInfo);
                     break;
 
                 default:
@@ -105,7 +103,7 @@ If this is not a project that has multiple areas, please make sure to define the
             }
         }
 
-        private void ReadObjectContract(string rootNamespace, string currentNamespace, string definitionName, JToken value, string filePath, int line, int column)
+        private void ReadObjectContract(string rootNamespace, string currentNamespace, string definitionName, JToken value, string filePath, IJsonLineInfo lineInfo)
         {
             ObjectSchema contract = new ObjectSchema(currentNamespace, definitionName);
             foreach (JProperty property in ((JObject)value).Properties())
@@ -136,10 +134,9 @@ If this is not a project that has multiple areas, please make sure to define the
                             JProperty defaultProperty = propertyInfo.Property("default");
                             if (defaultProperty != null)
                             {
-                                JValue defaultValueValue = ((JValue)defaultProperty.Value);
-                                IJsonLineInfo defaultValueLocation = defaultValueValue;
-                                int defaultValueColumn = defaultValueValue.GetCorrectLinePosition();
-                                defaultValue = new DefaultValue(defaultValueValue.Value, filePath, defaultValueLocation.LineNumber, defaultValueColumn);
+                                JValue defaultValueValue = (JValue)defaultProperty.Value;
+                                IJsonLineInfo defaultValueLocation = defaultValueValue.GetLineInfo();
+                                defaultValue = new DefaultValue(defaultValueValue.Value, filePath, defaultValueLocation.LineNumber, defaultValueLocation.LinePosition);
                             }
 
                             Enum.TryParse((string)propertyInfo.Property("serialize")?.Value, true, out serializationBehavior);
@@ -162,10 +159,10 @@ If this is not a project that has multiple areas, please make sure to define the
                 }
             }
 
-            this.CollectContract(contract.FullName, contract, filePath, line, column);
+            this.CollectContract(contract.FullName, contract, filePath, lineInfo);
         }
 
-        private void ReadEnumContract(string currentNamespace, string definitionName, JToken definitionValue, string filePath, int line, int column)
+        private void ReadEnumContract(string currentNamespace, string definitionName, JToken definitionValue, string filePath, IJsonLineInfo lineInfo)
         {
             EnumSchema contract = new EnumSchema(currentNamespace, definitionName, false);
 
@@ -178,19 +175,19 @@ If this is not a project that has multiple areas, please make sure to define the
                 contract.Members.Add(new EnumSchemaMember(value.Name, actualValue, value.StringValue, contract));
             }
 
-            this.CollectContract(contract.FullName, contract, filePath, line, column);
+            this.CollectContract(contract.FullName, contract, filePath, lineInfo);
         }
 
-        private void CollectContract(string name, SchemaDefinition definition, string filePath, int line, int column)
+        private void CollectContract(string name, SchemaDefinition definition, string filePath, IJsonLineInfo lineInfo)
         {
             if (this._schemaLocations.TryGetValue(name, out SchemaDefinitionLocation otherLocation))
             {
                 this.Logger.LogError(null, $"Ambiguous contract definition: {definition.FullName}", otherLocation.FilePath, otherLocation.Line, otherLocation.Column);
-                this.Logger.LogError(null, $"Ambiguous contract definition: {definition.FullName}", filePath, line, column);
+                this.Logger.LogError(null, $"Ambiguous contract definition: {definition.FullName}", filePath, lineInfo.LineNumber, lineInfo.LinePosition);
                 return;
             }
             this._schemas.Add(name, definition);
-            this._schemaLocations.Add(name, new SchemaDefinitionLocation(filePath, line, column));
+            this._schemaLocations.Add(name, new SchemaDefinitionLocation(filePath, lineInfo.LineNumber, lineInfo.LinePosition));
         }
 
         private void Validate()
@@ -298,8 +295,8 @@ If this is not a project that has multiple areas, please make sure to define the
 
             if (isTypeReference)
             {
-                IJsonLineInfo location = value;
-                int column = value.GetCorrectLinePosition() + 1;
+                IJsonLineInfo location = value.GetLineInfo();
+                int column = location.LinePosition + 1;
                 return new SchemaTypeReference($"{rootNamespace}.{typeName}", filePath, location.LineNumber, column, isNullable, isEnumerable);
             }
 

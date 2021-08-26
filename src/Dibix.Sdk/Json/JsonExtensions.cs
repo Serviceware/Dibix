@@ -7,9 +7,48 @@ namespace Dibix.Sdk.Json
 {
     internal static class JsonExtensions
     {
+        public static JToken LoadJson(string jsonFilePath)
+        {
+            using (Stream stream = File.OpenRead(jsonFilePath))
+            {
+                using (TextReader textReader = new StreamReader(stream))
+                {
+                    using (JsonReader jsonReader = new JsonTextReader(textReader))
+                    {
+                        return JToken.Load(jsonReader);
+                    }
+                }
+            }
+        }
+
+        public static IJsonLineInfo GetLineInfo(this JToken token)
+        {
+            IJsonLineInfo lineInfo = token;
+
+            int? linePosition = null;
+            if (lineInfo.HasLineInfo())
+            {
+                switch (token)
+                {
+                    case JValue value:
+                        linePosition = value.GetCorrectLinePosition();
+                        break;
+
+                    case JProperty property:
+                        linePosition = property.GetCorrectLinePosition();
+                        break;
+                }
+            }
+
+            if (!linePosition.HasValue)
+                return lineInfo;
+
+            return new JsonLineInfo(lineInfo.LineNumber, linePosition.Value);
+        }
+
         // The line positions are somewhat weird and unexpected
         // Not sure if this is a bug, but we have to adjust the position to get the actual start of the value
-        public static int GetCorrectLinePosition(this JValue value)
+        private static int GetCorrectLinePosition(this JValue value)
         {
             IJsonLineInfo lineInfo = value;
             StringBuilder sb = new StringBuilder();
@@ -29,11 +68,25 @@ namespace Dibix.Sdk.Json
                 }
             }
         }
-        public static int GetCorrectLinePosition(this JProperty property)
+        private static int GetCorrectLinePosition(this JProperty property)
         {
             IJsonLineInfo lineInfo = property;
             int result = lineInfo.LinePosition - 1 - property.Name.Length;
             return result;
+        }
+
+        private sealed class JsonLineInfo : IJsonLineInfo
+        {
+            public int LineNumber { get; }
+            public int LinePosition { get; }
+
+            public JsonLineInfo(int lineNumber, int linePosition)
+            {
+                this.LineNumber = lineNumber;
+                this.LinePosition = linePosition;
+            }
+
+            public bool HasLineInfo() => true;
         }
     }
 }

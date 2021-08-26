@@ -268,8 +268,8 @@ namespace Dibix.Sdk.Tests
         #region Interfaces
         public interface IGenericEndpointService
         {
-            Task&lt;HttpResponseMessage&gt; EmptyWithParams1Async(string password, string userAgent, IEnumerable&lt;object&gt; ids, string acceptLanguage = null, CancellationToken cancellationToken = default);
-            Task&lt;HttpResponseMessage&gt; EmptyWithParamsAnonymousAsync(string password, string u, string v, System.Guid? w, IEnumerable&lt;object&gt; ids, string x = null, bool y = true, int? z = null, CancellationToken cancellationToken = default);
+            Task&lt;HttpResponseMessage&gt; EmptyWithParams1Async(string password, string userAgent, IEnumerable&lt;object&gt; ids, string? acceptLanguage = null, CancellationToken cancellationToken = default);
+            Task&lt;HttpResponseMessage&gt; EmptyWithParamsAnonymousAsync(string password, string u, string v, System.Guid? w, IEnumerable&lt;object&gt; ids, string? x = null, bool y = true, int? z = null, CancellationToken cancellationToken = default);
             Task&lt;HttpResponse&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;&gt; SingleConrecteResultWithParamsAsync(IEnumerable&lt;int&gt; ids, CancellationToken cancellationToken = default);
             Task&lt;HttpResponse&lt;System.IO.Stream&gt;&gt; FileResultAsync(int id, CancellationToken cancellationToken = default);
             Task&lt;HttpResponseMessage&gt; FileUploadAsync(System.IO.Stream body, CancellationToken cancellationToken = default);
@@ -293,7 +293,7 @@ namespace Dibix.Sdk.Tests
                 this._authorizationProvider = authorizationProvider;
             }
 
-            public async Task&lt;HttpResponseMessage&gt; EmptyWithParams1Async(string password, string userAgent, IEnumerable&lt;object&gt; ids, string acceptLanguage = null, CancellationToken cancellationToken = default)
+            public async Task&lt;HttpResponseMessage&gt; EmptyWithParams1Async(string password, string userAgent, IEnumerable&lt;object&gt; ids, string? acceptLanguage = null, CancellationToken cancellationToken = default)
             {
                 using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
                 {
@@ -311,7 +311,7 @@ namespace Dibix.Sdk.Tests
                 }
             }
 
-            public async Task&lt;HttpResponseMessage&gt; EmptyWithParamsAnonymousAsync(string password, string u, string v, System.Guid? w, IEnumerable&lt;object&gt; ids, string x = null, bool y = true, int? z = null, CancellationToken cancellationToken = default)
+            public async Task&lt;HttpResponseMessage&gt; EmptyWithParamsAnonymousAsync(string password, string u, string v, System.Guid? w, IEnumerable&lt;object&gt; ids, string? x = null, bool y = true, int? z = null, CancellationToken cancellationToken = default)
             {
                 using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
                 {
@@ -439,7 +439,7 @@ namespace Dibix.Sdk.Tests
             // SingleConrecteResultWithParams
             private const string SingleConrecteResultWithParamsCommandText = "[dbo].[dbx_tests_syntax_singleconcreteresult_params]";
 
-            public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string u, string v, System.Guid? w, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string x = null, bool y = true, int? z = null)
+            public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string u, string v, System.Guid? w, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? x = null, bool y = true, int? z = null)
             {
                 using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                 {
@@ -676,6 +676,7 @@ paths:
           schema:
             type: string
             default: 
+            nullable: true
       responses:
         '204':
           description: NoContent
@@ -722,6 +723,7 @@ paths:
           schema:
             type: string
             default: 
+            nullable: true
         - name: y
           in: query
           schema:
@@ -992,7 +994,7 @@ namespace Dibix.Sdk.Tests
             // EmptyWithParams
             private const string EmptyWithParamsCommandText = "[dbo].[dbx_tests_syntax_empty_params]";
 
-            public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string u, string v, System.Guid? w, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string x = null, bool y = true, int? z = null)
+            public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string u, string v, System.Guid? w, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? x = null, bool y = true, int? z = null)
             {
                 using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                 {
