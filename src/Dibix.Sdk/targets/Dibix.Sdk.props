@@ -5,7 +5,6 @@
     <DibixCliPath Condition="'$(DibixCliPath)' == ''">$(DibixToolsDirectory)Dibix.exe</DibixCliPath>
     <DibixSdkPath>$(DibixToolsDirectory)Dibix.Sdk.dll</DibixSdkPath>
     <DibixRuntimeDirectory>$(DibixToolsDirectory)</DibixRuntimeDirectory>
-    <DibixRuntimeXplatDirectory>$(DibixToolsDirectory)..\net5.0\</DibixRuntimeXplatDirectory>
 
     <IsEmbedded>$(MSBuildProjectName.EndsWith('.DML'))</IsEmbedded>
   </PropertyGroup>

@@ -145,7 +145,7 @@ jobs:
   - template: dotnet-pack-template.yml
     parameters:
       packagesToPack:
-        - Dibix.Sdk
+        - Dibix.Sdk.Cli
   
   - task: DotNetCoreCLI@2
     displayName: "\U0001FA82 Publish packages"

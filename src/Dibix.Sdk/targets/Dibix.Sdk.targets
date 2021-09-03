@@ -5,11 +5,13 @@
     This is because NuGet imports the .props file at the beginning of the project and the .targets file at the end.
   -->
   <PropertyGroup>
-    <_DibixRuntimeDirectory Condition="'$(CompileArtifactsNetStandard)' != 'true'">$(DibixRuntimeDirectory)</_DibixRuntimeDirectory>
-    <_DibixRuntimeDirectory Condition="'$(CompileArtifactsNetStandard)' == 'true'">$(DibixRuntimeXplatDirectory)</_DibixRuntimeDirectory>
-    <DibixAssemblyPath>$(_DibixRuntimeDirectory)Dibix.dll</DibixAssemblyPath>
-    <DibixHttpServerAssemblyPath>$(_DibixRuntimeDirectory)Dibix.Http.Server.dll</DibixHttpServerAssemblyPath>
-    <DibixHttpClientAssemblyPath>$(_DibixRuntimeDirectory)Dibix.Http.Client.dll</DibixHttpClientAssemblyPath>
+    <_DibixName>Dibix</_DibixName>
+    <_DibixHttpClientName>Dibix.Http.Client</_DibixHttpClientName>
+    <_DibixHttpServerName>Dibix.Http.Server</_DibixHttpServerName>
+
+    <DibixAssemblyPath>$(DibixRuntimeDirectory)$(_DibixName).dll</DibixAssemblyPath>
+    <DibixHttpClientAssemblyPath>$(DibixRuntimeDirectory)$(_DibixHttpClientName).dll</DibixHttpClientAssemblyPath>
+    <DibixHttpServerAssemblyPath>$(DibixRuntimeDirectory)$(_DibixHttpServerName).dll</DibixHttpServerAssemblyPath>
 
     <AreaName Condition="$(AreaName) == '' and $(RootNamespace.Split('.').Length) > 1">$(RootNamespace.Split('.')[1])</AreaName>
 
@@ -352,8 +354,8 @@ $(_SqlReferencePath)" />
       <ServerCompilationSource Include="$(_ServerIntermediateFilePath)" />
       <ServerCompilationSource Include="$(_ServerAssemblyInfoFile)" />
       <ServerCompilationReference Include="@(ServerCompilationArtifactReference)" />
-      <ServerCompilationReference Include="$(DibixAssemblyPath)" />
-      <ServerCompilationReference Include="$(DibixHttpServerAssemblyPath)" />
+      <ServerCompilationReference Condition="'$(CompileArtifactsNetStandard)' != 'true'" Include="$(DibixAssemblyPath)" />
+      <ServerCompilationReference Condition="'$(CompileArtifactsNetStandard)' != 'true'" Include="$(DibixHttpServerAssemblyPath)" />
       <ServerCompilationReference Condition="'$(CompileArtifactsNetStandard)' != 'true'" Include="System.ComponentModel.DataAnnotations.dll" />
       <ServerCompilationReference Condition="'$(CompileArtifactsNetStandard)' != 'true'" Include="$(DibixToolsDirectory)Newtonsoft.Json.dll" />
 
@@ -420,6 +422,7 @@ $(_SqlReferencePath)" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="$(_DibixName)" Version="*" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
     <PackageReference Include="System.Reflection" Version="4.3.0" />

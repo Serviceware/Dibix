@@ -7,8 +7,8 @@
 
   <ItemGroup>
     <EmbeddedResource Include="CodeAnalysis\Suppressions.json" />
-    <EmbeddedResource Include="CodeGeneration\Schema\dibix.contracts.schema.json" Pack="true" PackagePath="content/dibix.contracts.schema.json" />
-    <EmbeddedResource Include="CodeGeneration\Schema\dibix.endpoints.schema.json" Pack="true" PackagePath="content/dibix.endpoints.schema.json" />
+    <EmbeddedResource Include="CodeGeneration\Schema\dibix.contracts.schema.json" />
+    <EmbeddedResource Include="CodeGeneration\Schema\dibix.endpoints.schema.json" />
     <Compile Include="..\..\shared\EnumerableExtensions.cs" Link="Extensions\EnumerableExtensions.cs" />
     <Compile Include="..\..\shared\ExpressionUtility.cs" Link="Utilities\ExpressionUtility.cs" />
     <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\Guard.cs" />
@@ -18,8 +18,6 @@
     <Compile Include="..\Dibix.Http.Server\Runtime\HttpParameterUtility.cs" Link="CodeGeneration\Parser\HttpParameterUtility.cs" />
     <Compile Include="..\Dibix.Http.Server\Runtime\HttpParameterName.cs" Link="OpenApi\HttpParameterName.cs" />
     <Compile Include="..\Dibix.Http.Server\Utilities\RouteBuilder.cs" Link="OpenApi\RouteBuilder.cs" />
-    <None Remove="lib\**" />
-    <Content Include="targets\**" PackagePath="build" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,8 +27,6 @@
     <PackageReference Include="Microsoft.SqlServer.DacFx" Version="$(DacFxVersion)" />
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonNetFxVersion)" />
     <PackageReference Include="Newtonsoft.Json.Schema" Version="$(NewtonsoftJsonSchemaVersion)" />
-    
-    <PackageReference Include="ILRepack" Version="$(ILRepackVersion)" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
@@ -40,140 +36,5 @@
     <Reference Include="Microsoft.Data.Tools.Schema.Utilities.Sql" HintPath="lib\Microsoft.Data.Tools.Schema.Utilities.Sql.dll" />
     <Reference Include="Microsoft.SqlServer.ConnectionInfo" HintPath="lib\Microsoft.SqlServer.ConnectionInfo.dll" />
   </ItemGroup>
-
-  <Target Name="PreparePackage" BeforeTargets="GenerateNuspec">
-    <!-- Build Dibix SDK CLI -->
-    <PropertyGroup>
-      <_DibixCliProjectName>Dibix.Sdk.Cli</_DibixCliProjectName>
-      <_DibixCliProjectDir>..\$(_DibixCliProjectName)\</_DibixCliProjectDir>
-      <_DibixCliExeName>$(_DibixCliProjectName).exe</_DibixCliExeName>
-      <_DibixCliExeDirectory>$(_DibixCliProjectDir)bin\$(Configuration)\net472\</_DibixCliExeDirectory>
-      <_DibixCliExePath>$(_DibixCliExeDirectory)$(_DibixCliExeName)</_DibixCliExePath>
-      <_DibixCliTargetFramework>net472</_DibixCliTargetFramework>
-    </PropertyGroup>
-
-    <MSBuild Projects="$(_DibixCliProjectDir)$(_DibixCliProjectName).csproj" 
-             Targets="Restore;Build"
-             Properties="Configuration=$(Configuration)" />
-
-    <!-- Merge Dibix SDK + CLI into a single EXE -->
-    <ItemGroup>
-      <_DibixExeDependency Include="$(_DibixCliExeName)" />
-      <_DibixExeDependency Include="$(TargetFileName)" />
-      <_DibixExeDependency Include="Microsoft.Build.Framework.dll" />
-      <_DibixExeDependency Include="Microsoft.Build.Utilities.Core.dll" />
-      <_DibixExeDependency Include="Microsoft.Data.Tools.Components.dll" />
-      <_DibixExeDependency Include="Microsoft.Data.Tools.Contracts.dll" />
-      <_DibixExeDependency Include="Microsoft.Data.Tools.Schema.Sql.dll" />
-      <_DibixExeDependency Include="Microsoft.Data.Tools.Schema.Tasks.Sql.dll" />
-      <_DibixExeDependency Include="Microsoft.Data.Tools.Schema.Utilities.Sql.dll" />
-      <_DibixExeDependency Include="Microsoft.Data.Tools.Utilities.dll" />
-      <_DibixExeDependency Include="Microsoft.OpenApi.dll" />
-      <_DibixExeDependency Include="Microsoft.SqlServer.ConnectionInfo.dll" />
-      <_DibixExeDependency Include="Microsoft.SqlServer.Dac.dll" />
-      <_DibixExeDependency Include="Microsoft.SqlServer.Dac.Extensions.dll" />
-      <_DibixExeDependency Include="Microsoft.SqlServer.TransactSql.ScriptDom.dll" />
-      <_DibixExeDependency Include="Newtonsoft.Json.dll" />
-      <_DibixExeDependency Include="Newtonsoft.Json.Schema.dll" />
-      <_DibixExeDependency Include="System.Net.Http.Formatting.dll" />
-    </ItemGroup>
-
-    <PropertyGroup>
-      <_DibixExeName>Dibix.exe</_DibixExeName>
-      <_DibixExePath>$(BaseIntermediateOutputPath)$(Configuration)\$(_DibixExeName)</_DibixExePath>
-      <_DibixExeDependencies>@(_DibixExeDependency->'$(_DibixCliExeDirectory)%(Identity)', ' ')</_DibixExeDependencies>
-    </PropertyGroup>
-
-    <!-- 
-      ILMerge/ILRepack introduces various issues including problems with dynamic loaded assemblies.
-      We'll keep this open as an option for the future but right now it's not stable enough yet.
-    -->
-    <!--<Exec Command="$(ILRepack) /out:$(_DibixExePath) /target:winexe $(_DibixExeDependencies)" />-->
-    <Copy SourceFiles="$(_DibixCliExePath)" DestinationFiles="$(_DibixExePath)" />
-
-    <!-- Build Dibix runtime -->
-    <PropertyGroup>
-      <_DibixRuntimeProjectName>Dibix</_DibixRuntimeProjectName>
-      <_DibixRuntimeProjectDir>..\$(_DibixRuntimeProjectName)\</_DibixRuntimeProjectDir>
-      <_DibixRuntimeTargetFramework>net451</_DibixRuntimeTargetFramework>
-      <_DibixRuntimeXplatTargetFramework>net5.0</_DibixRuntimeXplatTargetFramework>
-      <_DibixRuntimePath>$(_DibixRuntimeProjectDir)bin\$(Configuration)\$(_DibixRuntimeTargetFramework)\$(_DibixRuntimeProjectName).dll</_DibixRuntimePath>
-      <_DibixRuntimeXplatPath>$(_DibixRuntimeProjectDir)bin\$(Configuration)\$(_DibixRuntimeXplatTargetFramework)\$(_DibixRuntimeProjectName).dll</_DibixRuntimeXplatPath>
-    </PropertyGroup>
-
-    <MSBuild Projects="$(_DibixRuntimeProjectDir)$(_DibixRuntimeProjectName).csproj"
-             Targets="Restore"
-             Properties="IsRestoring=true;Configuration=$(Configuration);TargetFramework=$(_DibixRuntimeXplatTargetFramework)" />
-
-    <MSBuild Projects="$(_DibixRuntimeProjectDir)$(_DibixRuntimeProjectName).csproj"
-             Targets="Build"
-             Properties="Configuration=$(Configuration);TargetFramework=$(_DibixRuntimeXplatTargetFramework)" />
-
-    <MSBuild Projects="$(_DibixRuntimeProjectDir)$(_DibixRuntimeProjectName).csproj"
-             Targets="Restore;Build"
-             Properties="Configuration=$(Configuration);TargetFramework=$(_DibixRuntimeTargetFramework)" />
-
-    <!-- Build Dibix.Http.Server -->
-    <PropertyGroup>
-      <_DibixHttpServerProjectName>Dibix.Http.Server</_DibixHttpServerProjectName>
-      <_DibixHttpServerProjectDir>..\$(_DibixHttpServerProjectName)\</_DibixHttpServerProjectDir>
-      <_DibixHttpServerTargetFramework>net451</_DibixHttpServerTargetFramework>
-      <_DibixHttpServerXplatTargetFramework>net5.0</_DibixHttpServerXplatTargetFramework>
-      <_DibixHttpServerPath>$(_DibixHttpServerProjectDir)bin\$(Configuration)\$(_DibixHttpServerTargetFramework)\$(_DibixHttpServerProjectName).dll</_DibixHttpServerPath>
-      <_DibixHttpServerXplatPath>$(_DibixHttpServerProjectDir)bin\$(Configuration)\$(_DibixHttpServerTargetFramework)\$(_DibixHttpServerProjectName).dll</_DibixHttpServerXplatPath>
-    </PropertyGroup>
-
-    <MSBuild Projects="$(_DibixHttpServerProjectDir)$(_DibixHttpServerProjectName).csproj"
-             Targets="Restore"
-             Properties="IsRestoring=true;Configuration=$(Configuration);TargetFramework=$(_DibixRuntimeXplatTargetFramework)" />
-
-    <MSBuild Projects="$(_DibixHttpServerProjectDir)$(_DibixHttpServerProjectName).csproj"
-             Targets="Build"
-             Properties="Configuration=$(Configuration);TargetFramework=$(_DibixRuntimeXplatTargetFramework)" />
-
-    <MSBuild Projects="$(_DibixHttpServerProjectDir)$(_DibixHttpServerProjectName).csproj"
-             Targets="Restore;Build"
-             Properties="Configuration=$(Configuration);TargetFramework=$(_DibixHttpServerTargetFramework)" />
-
-    <!-- Build Dibix.Http.Client -->
-    <PropertyGroup>
-      <_DibixHttpClientProjectName>Dibix.Http.Client</_DibixHttpClientProjectName>
-      <_DibixHttpClientProjectDir>..\$(_DibixHttpClientProjectName)\</_DibixHttpClientProjectDir>
-      <_DibixHttpClientTargetFramework>net46</_DibixHttpClientTargetFramework>
-      <_DibixHttpClientXplatTargetFramework>net5.0</_DibixHttpClientXplatTargetFramework>
-      <_DibixHttpClientPath>$(_DibixHttpClientProjectDir)bin\$(Configuration)\$(_DibixHttpClientTargetFramework)\$(_DibixHttpClientProjectName).dll</_DibixHttpClientPath>
-      <_DibixHttpClientXplatPath>$(_DibixHttpClientProjectDir)bin\$(Configuration)\$(_DibixHttpClientTargetFramework)\$(_DibixHttpClientProjectName).dll</_DibixHttpClientXplatPath>
-    </PropertyGroup>
-
-    <MSBuild Projects="$(_DibixHttpClientProjectDir)$(_DibixHttpClientProjectName).csproj"
-             Targets="Restore"
-             Properties="IsRestoring=true;Configuration=$(Configuration);TargetFramework=$(_DibixRuntimeXplatTargetFramework)" />
-
-    <MSBuild Projects="$(_DibixHttpClientProjectDir)$(_DibixHttpClientProjectName).csproj"
-             Targets="Build"
-             Properties="Configuration=$(Configuration);TargetFramework=$(_DibixRuntimeXplatTargetFramework)" />
-
-    <MSBuild Projects="$(_DibixHttpClientProjectDir)$(_DibixHttpClientProjectName).csproj"
-             Targets="Restore;Build"
-             Properties="Configuration=$(Configuration);TargetFramework=$(_DibixHttpClientTargetFramework)" />
-
-    <!-- Register tools\ folder in package -->
-    <PropertyGroup>
-      <_PackageToolsDirectory>tools\</_PackageToolsDirectory>
-    </PropertyGroup>
-    <ItemGroup>
-      <_PackageFiles Include="$(_DibixExePath)" PackagePath="$(_PackageToolsDirectory)$(_DibixCliTargetFramework)" />
-      <_PackageFiles Include="$(_DibixRuntimePath)" PackagePath="$(_PackageToolsDirectory)$(_DibixCliTargetFramework)" />
-      <_PackageFiles Include="$(_DibixRuntimeXplatPath)" PackagePath="$(_PackageToolsDirectory)$(_DibixRuntimeXplatTargetFramework)" />
-      <_PackageFiles Include="$(_DibixHttpServerPath)" PackagePath="$(_PackageToolsDirectory)$(_DibixCliTargetFramework)" />
-      <_PackageFiles Include="$(_DibixHttpServerXplatPath)" PackagePath="$(_PackageToolsDirectory)$(_DibixHttpServerXplatTargetFramework)" />
-      <_PackageFiles Include="$(_DibixHttpClientPath)" PackagePath="$(_PackageToolsDirectory)$(_DibixCliTargetFramework)" />
-      <_PackageFiles Include="$(_DibixHttpClientXplatPath)" PackagePath="$(_PackageToolsDirectory)$(_DibixHttpClientXplatTargetFramework)" />
-      <_PackageFiles Include="$(_DibixCliExePath).config" PackagePath="$(_PackageToolsDirectory)$(_DibixCliTargetFramework)\$(_DibixExeName).config" />
-
-      <!-- Remove this, once ILMerge works properly -->
-      <_PackageFiles Include="@(_DibixExeDependency->'$(_DibixCliExeDirectory)%(Identity)')" Condition="%(Identity) != '$(_DibixCliExeName)'" PackagePath="$(_PackageToolsDirectory)$(_DibixCliTargetFramework)" />
-    </ItemGroup>
-  </Target>
   
 </Project>

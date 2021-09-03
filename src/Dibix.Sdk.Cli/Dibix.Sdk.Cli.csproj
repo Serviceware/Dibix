@@ -3,10 +3,93 @@
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <OutputType>Exe</OutputType>
+
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Dibix.Sdk\Dibix.Sdk.csproj" />
+    <None Include="..\Dibix.Sdk\targets\**" Pack="true" PackagePath="build" />
+    <None Include="..\Dibix.Sdk\CodeGeneration\Schema\*.json" Pack="true" PackagePath="content" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Dibix\Dibix.csproj" PrivateAssets="All" />
+    <ProjectReference Include="..\Dibix.Http.Client\Dibix.Http.Client.csproj" PrivateAssets="All" />
+    <ProjectReference Include="..\Dibix.Http.Server\Dibix.Http.Server.csproj" PrivateAssets="All" />
+    <ProjectReference Include="..\Dibix.Sdk\Dibix.Sdk.csproj" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ILRepack" Version="$(ILRepackVersion)" PrivateAssets="All" />
+  </ItemGroup>
+
+  <Target Name="PreparePackage" BeforeTargets="GenerateNuspec">
+
+    <PropertyGroup>
+      <_DibixSdkName>Dibix.Sdk</_DibixSdkName>
+      <_DibixSdkFileName>$(_DibixSdkName).dll</_DibixSdkFileName>
+
+      <PackageId>$(_DibixSdkName)</PackageId>
+    </PropertyGroup>
+
+
+    <ItemGroup>
+      <_ToolDependency Include="Dibix.dll" />
+      <_ToolDependency Include="Dibix.Http.Client.dll" />
+      <_ToolDependency Include="Dibix.Http.Server.dll" />
+      <_ToolDependency Include="$(_DibixSdkFileName)" />
+      <_ToolDependency Include="Microsoft.Build.Framework.dll" />
+      <_ToolDependency Include="Microsoft.Build.Utilities.Core.dll" />
+      <_ToolDependency Include="Microsoft.Data.Tools.Components.dll" />
+      <_ToolDependency Include="Microsoft.Data.Tools.Contracts.dll" />
+      <_ToolDependency Include="Microsoft.Data.Tools.Schema.Sql.dll" />
+      <_ToolDependency Include="Microsoft.Data.Tools.Schema.Tasks.Sql.dll" />
+      <_ToolDependency Include="Microsoft.Data.Tools.Schema.Utilities.Sql.dll" />
+      <_ToolDependency Include="Microsoft.Data.Tools.Utilities.dll" />
+      <_ToolDependency Include="Microsoft.OpenApi.dll" />
+      <_ToolDependency Include="Microsoft.SqlServer.ConnectionInfo.dll" />
+      <_ToolDependency Include="Microsoft.SqlServer.Dac.dll" />
+      <_ToolDependency Include="Microsoft.SqlServer.Dac.Extensions.dll" />
+      <_ToolDependency Include="Microsoft.SqlServer.TransactSql.ScriptDom.dll" />
+      <_ToolDependency Include="Newtonsoft.Json.dll" />
+      <_ToolDependency Include="Newtonsoft.Json.Schema.dll" />
+      <_ToolDependency Include="System.Net.Http.Formatting.dll" />
+    </ItemGroup>
+
+
+    <!-- Merge Dibix SDK + CLI into a single EXE -->
+    <ItemGroup>
+      <_DibixExeMergeInput Include="$(TargetName)" />
+      <_DibixExeMergeInput Include="@(_ToolDependency)" />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <_DibixExeFileName>Dibix.exe</_DibixExeFileName>
+      <_DibixExePath>$(OutDir)$(_DibixExeFileName)</_DibixExePath>
+
+      <_DibixExeMergeInputFlat>@(_DibixExeMergeInput->'$(OutDir)%(Identity)', ' ')</_DibixExeMergeInputFlat>
+    </PropertyGroup>
+
+    <!-- 
+      ILMerge/ILRepack introduces various issues including problems with dynamic loaded assemblies.
+      We'll keep this open as an option for the future but right now it's not stable enough yet.
+    -->
+    <!--<Exec Command="$(ILRepack) /out:$(_DibixExePath) /target:winexe $(_DibixExeMergeInputFlat)" />-->
+    <Copy SourceFiles="$(TargetPath)" DestinationFiles="$(_DibixExePath)" />
+    <Copy SourceFiles="$(TargetPath).config" DestinationFiles="$(_DibixExePath).config" />
+
+    
+    <!-- Collect package files -->
+    <ItemGroup>
+      <_ToolItem Include="$(_DibixExeFileName)" />
+      <_ToolItem Include="$(_DibixExeFileName).config" />
+      <_ToolItem Include="@(_ToolDependency)" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_PackageFiles Include="@(_ToolItem->'$(OutDir)%(Identity)')" PackagePath="tools\$(TargetFramework)" />
+    </ItemGroup>
+  </Target>
 
 </Project>
