@@ -4,14 +4,18 @@
     <TargetFramework>net472</TargetFramework>
     <OutputType>Exe</OutputType>
 
+    <!-- Since this is a tool package, disable some package generation defaults -->
+    <!-- Don't create a lib folder -->
     <IncludeBuildOutput>false</IncludeBuildOutput>
-    <NoWarn>$(NoWarn);NU5128</NoWarn>
+    <!-- There aren't any dependencies for the consumer -->
     <SuppressDependenciesWhenPacking>True</SuppressDependenciesWhenPacking>
+    <!-- This project has a target framework, however the NuGet package doesn't include this as a dependency. -->
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\Dibix.Sdk\targets\**" Pack="true" PackagePath="build" />
-    <None Include="..\Dibix.Sdk\CodeGeneration\Schema\*.json" Pack="true" PackagePath="content" />
+    <None Include="..\Dibix.Sdk\targets\**" Link="build\%(Filename)%(Extension)" Pack="true" PackagePath="build" />
+    <None Include="..\Dibix.Sdk\CodeGeneration\Schema\*.json" Link="content\%(Filename)%(Extension)" Pack="true" PackagePath="content" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,10 +35,15 @@
       <_DibixSdkName>Dibix.Sdk</_DibixSdkName>
       <_DibixSdkFileName>$(_DibixSdkName).dll</_DibixSdkFileName>
 
+      <!-- Publish Dibix.Sdk.Cli as Dibix.Sdk -->
       <PackageId>$(_DibixSdkName)</PackageId>
     </PropertyGroup>
 
 
+    <!-- 
+      All tool dependencies must be embedded within the package
+      https://github.com/dotnet/msbuild/issues/1755
+    -->
     <ItemGroup>
       <_ToolDependency Include="Dibix.dll" />
       <_ToolDependency Include="Dibix.Http.Client.dll" />
