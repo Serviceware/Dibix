@@ -15,6 +15,14 @@
 
     <AreaName Condition="$(AreaName) == '' and $(RootNamespace.Split('.').Length) > 1">$(RootNamespace.Split('.')[1])</AreaName>
 
+    <!--
+      We rather copy the outputs ourselves instead of relying on the CopyFilesToOutputDirectory target,
+      because it causes problems, when SqlCore target itself is skipped, and CopyFilesToOutputDirectory target is not,
+      which might result in older files being redeployed in some cases.
+    -->
+    <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
+    <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
+
     <!-- We have our own CA target, which also executes the native SqlStaticCodeAnalysis -->
     <RunSqlCodeAnalysis>false</RunSqlCodeAnalysis>
     <RunSqlCodeAnalysisOnce>false</RunSqlCodeAnalysisOnce>
@@ -213,8 +221,6 @@
       <Title Condition="$(Title) == ''">$(AreaName)</Title>
       <Description Condition="$(Description) == '' and $(Build_Repository_Uri) != '' and $(Build_SourceVersion) != '' and $(Build_SourceBranch) != ''">__Build version:__ $([System.DateTime]::Now.ToString(G))\r\n\r\n__Source version:__ [$(Build_SourceVersion)]($(Build_Repository_Uri)/commit/$(Build_SourceVersion)?refName=$(Build_SourceBranch))</Description>
       <LangVersion>latest</LangVersion>
-      <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
-      <CopyOutputSymbolsToOutputDirectory>true</CopyOutputSymbolsToOutputDirectory>
       <!--<ExternalAssemblyReferenceDir Condition="'$(ExternalAssemblyReferenceDir)' == ''">$(TargetDir)</ExternalAssemblyReferenceDir>-->
 
       <_ServerOutputName>$(AssemblyName)</_ServerOutputName>
@@ -440,7 +446,34 @@ $(_SqlReferencePath)" />
 
     <Exec Condition="'$(CompileArtifactsNetStandard)' == 'true'" Command="dotnet build $(_ServerIntermediateProjectFilePath) -c $(Configuration)" />
 
-    <CallTarget Targets="CopyFilesToOutputDirectory" />
+    <!-- Copy the build product (.dll or .exe). -->
+    <Copy SourceFiles="@(IntermediateAssembly)"
+          DestinationFolder="$(OutDir)"
+          SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
+          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+          Retries="$(CopyRetryCount)"
+          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+          UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
+          UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
+          ErrorIfLinkFails="$(ErrorIfLinkFailsForCopyFilesToOutputDirectory)"
+          Condition="'$(SkipCopyBuildProduct)' != 'true'">
+      <Output TaskParameter="DestinationFiles" ItemName="MainAssembly"/>
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+    </Copy>
+
+    <!-- Copy the debug information file (.pdb), if any -->
+    <Copy SourceFiles="@(_DebugSymbolsIntermediatePath)"
+          DestinationFiles="@(_DebugSymbolsOutputPath)"
+          SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
+          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+          Retries="$(CopyRetryCount)"
+          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+          UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
+          UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
+          ErrorIfLinkFails="$(ErrorIfLinkFailsForCopyFilesToOutputDirectory)"
+          Condition="'$(_DebugSymbolsProduced)'=='true' and '$(SkipCopyingSymbolsToOutputDirectory)' != 'true'">
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+    </Copy>
 
 
     <!-- Client assembly info & DLL generation -->
@@ -482,6 +515,7 @@ $(_SqlReferencePath)" />
          Sources="@(ClientCompilationSource)"
          TargetType="$(OutputType)" />
 
+    <!-- Copy the build product (.dll or .exe). -->
     <Copy SourceFiles="$(_ClientIntermediateAssemblyPath)"
           DestinationFolder="$(OutDir)"
           SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
@@ -494,6 +528,8 @@ $(_SqlReferencePath)" />
       <Output TaskParameter="DestinationFiles" ItemName="MainAssembly"/>
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
     </Copy>
+
+    <!-- Copy the debug information file (.pdb), if any -->
     <Copy SourceFiles="$(_ClientIntermediateSymbolsPath)"
           DestinationFolder="$(OutDir)"
           SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
