@@ -15,14 +15,6 @@
 
     <AreaName Condition="$(AreaName) == '' and $(RootNamespace.Split('.').Length) > 1">$(RootNamespace.Split('.')[1])</AreaName>
 
-    <!--
-      We rather copy the outputs ourselves instead of relying on the CopyFilesToOutputDirectory target,
-      because it causes problems, when SqlCore target itself is skipped, and CopyFilesToOutputDirectory target is not,
-      which might result in older files being redeployed in some cases.
-    -->
-    <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
-    <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
-
     <!-- We have our own CA target, which also executes the native SqlStaticCodeAnalysis -->
     <RunSqlCodeAnalysis>false</RunSqlCodeAnalysis>
     <RunSqlCodeAnalysisOnce>false</RunSqlCodeAnalysisOnce>
@@ -62,6 +54,9 @@
       ResolveKeySource;
       GenerateSerializationAssemblies;
     </BuildDependsOn>
+
+    <!-- Add our own compilation target here -->
+    <BuildDependsOn>$(BuildDependsOn);SqlCore</BuildDependsOn>
 
     <!-- Exclude SqlBuild to increase build performance, if no dacpac should be produced -->
     <BuildDependsOn Condition="'$(ProducePackage)' == 'true'">$(BuildDependsOn);SqlBuild;</BuildDependsOn>
@@ -177,9 +172,6 @@
 
       <!-- CompileArtifacts -->
       <CompileArtifactsOutput Include="$(TargetPath)" /> <!-- .dll -->
-      
-      <!-- This is important so these files don't get removed in IncrementalClean -->
-      <FileWrites Include="$(ClientTargetPath);$(ClientOutputSymbolsPath);@(Docs)" />
 
       <!-- SqlCore -->
       <SqlCoreOutput Include="$(TargetPath)" /> <!-- .dll -->
@@ -209,7 +201,6 @@
 
   <!-- Run SQL code analysis and compile database access artifacts -->
   <Target Name="SqlCore"
-          BeforeTargets="GenerateSqlTargetFrameworkMoniker"
           DependsOnTargets="SetupSqlBuildInputs;SetupSqlBuildOutputs;ResolveArtifactReferences"
           Inputs="@(SqlCoreInput)"
           Outputs="@(SqlCoreOutput)">
@@ -446,35 +437,6 @@ $(_SqlReferencePath)" />
 
     <Exec Condition="'$(CompileArtifactsNetStandard)' == 'true'" Command="dotnet build $(_ServerIntermediateProjectFilePath) -c $(Configuration)" />
 
-    <!-- Copy the build product (.dll or .exe). -->
-    <Copy SourceFiles="@(IntermediateAssembly)"
-          DestinationFolder="$(OutDir)"
-          SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
-          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
-          Retries="$(CopyRetryCount)"
-          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
-          UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
-          UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
-          ErrorIfLinkFails="$(ErrorIfLinkFailsForCopyFilesToOutputDirectory)"
-          Condition="'$(SkipCopyBuildProduct)' != 'true'">
-      <Output TaskParameter="DestinationFiles" ItemName="MainAssembly"/>
-      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
-    </Copy>
-
-    <!-- Copy the debug information file (.pdb), if any -->
-    <Copy SourceFiles="@(_DebugSymbolsIntermediatePath)"
-          DestinationFiles="@(_DebugSymbolsOutputPath)"
-          SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
-          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
-          Retries="$(CopyRetryCount)"
-          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
-          UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
-          UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
-          ErrorIfLinkFails="$(ErrorIfLinkFailsForCopyFilesToOutputDirectory)"
-          Condition="'$(_DebugSymbolsProduced)'=='true' and '$(SkipCopyingSymbolsToOutputDirectory)' != 'true'">
-      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
-    </Copy>
-
 
     <!-- Client assembly info & DLL generation -->
     <PropertyGroup Condition="'$(ClientOutputName)' != ''">
@@ -514,8 +476,20 @@ $(_SqlReferencePath)" />
          References="@(ClientCompilationReference)"
          Sources="@(ClientCompilationSource)"
          TargetType="$(OutputType)" />
+  </Target>
 
-    <!-- Copy the build product (.dll or .exe). -->
+
+  <!-- 
+    It is important to have this as a separate target that will always be executed.
+    Previously this was done within the SqlCore target, but if that is skipped,
+    the necessary FileWrites are not added, and the IncrementalClean target 
+    will delete the outputs after the first build.
+  -->
+  <Target Name="CopyArtifactsToOuputDirectory"
+          AfterTargets="CopyFilesToOutputDirectory"
+          DependsOnTargets="SqlCore">
+
+    <!-- Copy generated client assembly (.dll) -->
     <Copy SourceFiles="$(_ClientIntermediateAssemblyPath)"
           DestinationFolder="$(OutDir)"
           SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
@@ -525,11 +499,10 @@ $(_SqlReferencePath)" />
           UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
           UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
           Condition="'$(ClientOutputName)' != '' and '$(SkipCopyBuildProduct)' != 'true'">
-      <Output TaskParameter="DestinationFiles" ItemName="MainAssembly"/>
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
     </Copy>
 
-    <!-- Copy the debug information file (.pdb), if any -->
+    <!-- Copy the debug information file (.pdb) of the generated client assembly -->
     <Copy SourceFiles="$(_ClientIntermediateSymbolsPath)"
           DestinationFolder="$(OutDir)"
           SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
@@ -541,7 +514,6 @@ $(_SqlReferencePath)" />
           Condition="'$(ClientOutputName)' != '' and '$(_DebugSymbolsProduced)'=='true' and '$(SkipCopyingSymbolsToOutputDirectory)' != 'true'">
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
     </Copy>
-
 
     <!-- Publish docs -->
     <Copy SourceFiles="@(_DocsFiles->'$(IntermediateOutputPath)\%(Identity)')"
