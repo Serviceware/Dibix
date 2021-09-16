@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -19,11 +18,9 @@ namespace Dibix.Http.Server
             string mediaType = MimeTypes.GetMimeType(file.Type);
 
             HttpResponseMessage response = requestMessage.CreateResponse();
-            response.Content = new StreamContent(new MemoryStream(file.Data));
-            response.Content.Headers.ContentLength = file.Data.Length;
+            response.Content = new ByteArrayContent(file.Data);
             response.Content.Headers.ContentType = new MediaTypeHeaderValue(mediaType);
-            if (!String.IsNullOrEmpty(file.FileName))
-                response.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment") { FileName = file.FileName };
+            response.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("inline") { FileName = file.FileName };
 
             if (actionDefinition.FileResponse.Cache)
             {
