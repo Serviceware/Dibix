@@ -2,7 +2,7 @@
 {
     public sealed class ActionRequestBody
     {
-        public string MediaType { get; } = HttpMediaType.Default;
+        public string MediaType { get; } = HttpMediaType.Json;
         public TypeReference Contract { get; }
         public string Binder { get; }
 

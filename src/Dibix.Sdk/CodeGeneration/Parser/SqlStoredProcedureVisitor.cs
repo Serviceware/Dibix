@@ -150,6 +150,7 @@ targetType: {targetType}");
             base.Target.MergeGridResult = base.Markup.HasSingleElement(SqlMarkupKey.MergeGridResult, base.Target.Source, base.Logger);
             base.Target.GenerateInputClass = base.Markup.HasSingleElement(SqlMarkupKey.GenerateInputClass, base.Target.Source, base.Logger);
             base.Target.Async = base.Markup.HasSingleElement(SqlMarkupKey.Async, base.Target.Source, base.Logger);
+            base.Target.IsFileResult = base.Markup.HasSingleElement(SqlMarkupKey.FileResult, base.Target.Source, base.Logger);
 
             this.ParseResults(content, base.Markup);
 

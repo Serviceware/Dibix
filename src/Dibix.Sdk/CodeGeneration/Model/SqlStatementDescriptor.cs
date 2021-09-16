@@ -14,6 +14,7 @@ namespace Dibix.Sdk.CodeGeneration
         public bool GenerateResultClass { get; set; }
         public bool GenerateInputClass { get; set; }
         public bool Async { get; set; }
+        public bool IsFileResult { get; set; }
         public TypeReference ResultType { get; set; }
         public IList<SqlQueryParameter> Parameters { get; }
         public IList<SqlQueryResult> Results { get; }

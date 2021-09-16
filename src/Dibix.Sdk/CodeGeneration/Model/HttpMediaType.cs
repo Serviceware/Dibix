@@ -2,6 +2,7 @@
 {
     public static class HttpMediaType
     {
-        public static string Default = "application/json";
+        public const string Json = "application/json";
+        public const string Binary = "application/octet-stream";
     }
 }

@@ -7,7 +7,7 @@ namespace Dibix.Sdk.CodeGeneration
     public sealed class ActionResponse
     {
         public HttpStatusCode StatusCode { get; }
-        public string MediaType { get; } = HttpMediaType.Default;
+        public string MediaType { get; } = HttpMediaType.Json;
         public TypeReference ResultType { get; set; }
         public string Description { get; set; }
         public ICollection<ErrorDescription> Errors { get; }

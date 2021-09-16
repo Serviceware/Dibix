@@ -165,13 +165,10 @@ namespace Dibix.Sdk.CodeGeneration
             actionDefinition.Description = (string)action.Property("description")?.Value;
             actionDefinition.ChildRoute = childRoute;
             actionDefinition.RequestBody = requestBody;
-            actionDefinition.FileResponse = ReadFileResponse(action);
-
-            if (actionDefinition.FileResponse != null)
-            {
-                actionDefinition.Responses[HttpStatusCode.OK] = new ActionResponse(HttpStatusCode.OK, actionDefinition.FileResponse.MediaType, CreateStreamTypeReference());
-                actionDefinition.Responses[HttpStatusCode.NotFound] = new ActionResponse(HttpStatusCode.NotFound);
-            }
+            
+            ActionFileResponse fileResponse = ReadFileResponse(action);
+            if (fileResponse != null) 
+                CollectFileResponse(actionDefinition, fileResponse);
 
             this.CollectActionResponses(action, actionDefinition, filePath);
             this.CollectSecuritySchemes(action, actionDefinition, filePath);
@@ -222,7 +219,7 @@ namespace Dibix.Sdk.CodeGeneration
             string mediaType = (string)value.Property("mediaType")?.Value;
             string binder = (string)value.Property("binder")?.Value;
 
-            if (mediaType != null && mediaType != HttpMediaType.Default)
+            if (mediaType != null && mediaType != HttpMediaType.Json)
                 return new ActionRequestBody(mediaType, CreateStreamTypeReference());
 
             if (contractName == null)
@@ -439,7 +436,7 @@ namespace Dibix.Sdk.CodeGeneration
                 foreach (ErrorResponse errorResponse in statement.ErrorResponses)
                     RegisterErrorResponse(actionDefinition, errorResponse.StatusCode, errorResponse.ErrorCode, errorResponse.ErrorDescription);
 
-                actionDefinition.DefaultResponseType = statement.ResultType;
+                CollectResponse(actionDefinition, statement);
 
                 return actionDefinition;
             }
@@ -608,6 +605,14 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
             }
 
             return actionDefinition;
+        }
+
+        private static void CollectResponse(ActionDefinition actionDefinition, SqlStatementDescriptor statement)
+        {
+            if (statement.IsFileResult)
+                CollectFileResponse(actionDefinition, new ActionFileResponse(HttpMediaType.Binary));
+            else
+                actionDefinition.DefaultResponseType = statement.ResultType;
         }
 
         private Type CollectReturnType(MethodInfo method, bool isReflectionTarget)
@@ -921,6 +926,13 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
                 default:
                     return true;
             }
+        }
+
+        private static void CollectFileResponse(ActionDefinition actionDefinition, ActionFileResponse actionFileResponse)
+        {
+            actionDefinition.FileResponse = actionFileResponse;
+            actionDefinition.Responses[HttpStatusCode.OK] = new ActionResponse(HttpStatusCode.OK, actionFileResponse.MediaType, CreateStreamTypeReference());
+            actionDefinition.Responses[HttpStatusCode.NotFound] = new ActionResponse(HttpStatusCode.NotFound);
         }
 
         private static TypeReference CreateStreamTypeReference() => new PrimitiveTypeReference(PrimitiveType.Stream, isNullable: false, isEnumerable: false);
