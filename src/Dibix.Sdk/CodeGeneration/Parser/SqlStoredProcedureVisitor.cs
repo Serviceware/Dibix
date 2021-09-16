@@ -74,7 +74,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 case NullLiteral _: return this.BuildDefaultValue(value, null);
                 case Literal literal: return this.CollectParameterDefault(literal, targetType);
-                case VariableReference variableReference: return this.BuildDefaultValue(value, variableReference);
+              //case VariableReference variableReference: return this.BuildDefaultValue(value, variableReference);
                 default: throw new ArgumentOutOfRangeException(nameof(value), value, $@"Unsupported parameter default
 targetType: {targetType}");
             }
