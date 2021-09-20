@@ -7,7 +7,7 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal static class EnumValueParser
     {
-        public static int ParseDynamicValue(IDictionary<string, int> actualValues, string stringValue)
+        public static int ParseDynamicValue(IDictionary<string, int> actualValues, string stringValue, ref bool foundCombinationFlag)
         {
             int actualValue = 0;
 
@@ -38,6 +38,7 @@ namespace Dibix.Sdk.CodeGeneration
                     else if (bitwiseOperator.Value == '&')
                         actualValue &= currentMemberValue;
 
+                    foundCombinationFlag = true;
                     bitwiseOperator = null;
                 }
                 else

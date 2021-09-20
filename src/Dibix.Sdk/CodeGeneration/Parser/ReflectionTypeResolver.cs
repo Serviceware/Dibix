@@ -136,7 +136,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
             else if (type.IsEnum)
             {
-                EnumSchema enumSchema = new EnumSchema(type.Namespace, type.Name, false);
+                EnumSchema enumSchema = new EnumSchema(type.Namespace, type.Name, isFlaggable: false);
 
                 // Enum.GetValues() => "The requested operation is invalid in the ReflectionOnly context"
                 for (int i = 0; i < type.GetFields(BindingFlags.Public | BindingFlags.Static).Length; i++)

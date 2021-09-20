@@ -164,14 +164,23 @@ If this is not a project that has multiple areas, please make sure to define the
 
         private void ReadEnumContract(string currentNamespace, string definitionName, JToken definitionValue, string filePath, IJsonLineInfo lineInfo)
         {
-            EnumSchema contract = new EnumSchema(currentNamespace, definitionName, false);
+            EnumSchema contract = new EnumSchema(currentNamespace, definitionName, isFlaggable: false);
 
             ICollection<EnumValue> values = ReadEnumValues(definitionValue).ToArray();
             IDictionary<string, int> actualValues = values.Where(x => x.ActualValue.HasValue).ToDictionary(x => x.Name, x => x.ActualValue.Value);
 
             foreach (EnumValue value in values)
             {
-                int actualValue = value.ActualValue ?? EnumValueParser.ParseDynamicValue(actualValues, value.StringValue);
+                bool foundCombinationFlag = false;
+                int actualValue = value.ActualValue ?? EnumValueParser.ParseDynamicValue(actualValues, value.StringValue, ref foundCombinationFlag);
+
+                if (foundCombinationFlag)
+                {
+                    // Currently there is no explicit support to mark an enum as flaggable.
+                    // Therefore this is the only case where we implicitly detect it.
+                    contract.IsFlaggable = true;
+                }
+
                 contract.Members.Add(new EnumSchemaMember(value.Name, actualValue, value.StringValue, contract));
             }
 

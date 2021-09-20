@@ -75,7 +75,7 @@ namespace Dibix.Sdk.VisualStudio
             switch (element)
             {
                 case CodeEnum @enum:
-                    return this.ResolveType(@enum.Namespace, element.Name, source, line, column, typeName.IsNullable, isEnumerable, (x, y) => new EnumSchema(x, y, false));
+                    return this.ResolveType(@enum.Namespace, element.Name, source, line, column, typeName.IsNullable, isEnumerable, (x, y) => new EnumSchema(@namespace: x, definitionName: y, isFlaggable: false));
 
                 case CodeClass @class:
                     return this.ResolveType(@class.Namespace, element.Name, source, line, column, typeName.IsNullable, isEnumerable, (x, y) =>

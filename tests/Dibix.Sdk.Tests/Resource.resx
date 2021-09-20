@@ -203,6 +203,7 @@ namespace Dibix.Sdk.Tests
     namespace DomainModel
     {
         #region Contracts
+        [Flags]
         public enum AccessRights : int
         {
             None = 0,
@@ -1766,6 +1767,7 @@ namespace Dibix.Sdk.Tests
     namespace DomainModel
     {
         #region Contracts
+        [Flags]
         public enum AccessRights : int
         {
             None = 0,
@@ -2136,6 +2138,7 @@ namespace Dibix.Sdk.Tests
     namespace DomainModel
     {
         #region Contracts
+        [Flags]
         public enum AccessRights : int
         {
             None = 0,
