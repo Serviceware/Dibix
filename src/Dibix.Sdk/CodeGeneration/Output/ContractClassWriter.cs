@@ -39,7 +39,7 @@ namespace Dibix.Sdk.CodeGeneration
                             break;
 
                         case EnumSchema enumSchema:
-                            ProcessEnumSchema(scope, enumSchema);
+                            ProcessEnumSchema(context, scope, enumSchema);
                             break;
                     }
 
@@ -196,11 +196,14 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static void ProcessEnumSchema(CSharpStatementScope scope, EnumSchema schema)
+        private static void ProcessEnumSchema(CodeGenerationContext context, CSharpStatementScope scope, EnumSchema schema)
         {
             ICollection<CSharpAnnotation> annotations = new Collection<CSharpAnnotation>();
             if (schema.IsFlaggable)
+            {
+                context.AddUsing<FlagsAttribute>();
                 annotations.Add(new CSharpAnnotation("Flags"));
+            }
 
             CSharpEnum @enum = scope.AddEnum(schema.DefinitionName, CSharpModifiers.Public, annotations);
             foreach (EnumSchemaMember member in schema.Members)
