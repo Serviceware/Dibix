@@ -7,17 +7,24 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     public sealed class ImplicitAliasSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
         protected override string ErrorMessageTemplate => "Aliases must be marked with 'AS'";
-        
+
         public override void Visit(TableReferenceWithAlias node)
         {
             if (node.Alias == null)
                 return;
 
-            for (int i = node.Alias.FirstTokenIndex; i > node.FirstTokenIndex; i--)
+            for (int i = node.Alias.FirstTokenIndex - 1; i > node.FirstTokenIndex; i--)
             {
-                if (node.ScriptTokenStream[i].TokenType == SqlTokenType.As)
+                TSqlParserToken token = node.ScriptTokenStream[i];
+                if (token.TokenType == TSqlTokenType.WhiteSpace)
+                    continue;
+
+                if (token.TokenType == SqlTokenType.As)
                     return;
+                
+                break;
             }
+
             base.Fail(node.Alias);
         }
 

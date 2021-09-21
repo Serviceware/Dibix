@@ -1114,6 +1114,11 @@ namespace Dibix.Sdk.Tests
     message="Aliases must be marked with 'AS'"
     line="4"
     column="25" /&gt;
+  &lt;error
+    ruleid="8"
+    message="Aliases must be marked with 'AS'"
+    line="12"
+    column="4" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="ImplicitDefaultSqlCodeAnalysisRule" xml:space="preserve">
