@@ -173,7 +173,7 @@ namespace Dibix.Testing.Http
 
             private void ConfigureClient(HttpClient client)
             {
-                Assembly testAssembly = TestAssemblyResolver.ResolveTestAssembly(this._testContext);
+                Assembly testAssembly = TestImplementationResolver.ResolveTestAssembly(this._testContext);
                 client.AddUserAgent(y => y.FromAssembly(testAssembly, productName =>
                 {
                     string normalizedProductName = productName.Replace(".", null);

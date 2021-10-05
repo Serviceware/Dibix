@@ -6,7 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dibix.Testing
 {
-    public static class TestAssemblyResolver
+    internal static class TestImplementationResolver
     {
         public static Assembly ResolveTestAssembly(TestContext testContext)
         {
@@ -23,6 +23,8 @@ namespace Dibix.Testing
 
             return assembly;
         }
+
+        public static MethodInfo ResolveTestMethod(TestContext testContext) => ResolveTestMethodFromTestContext(testContext);
 
         // Not stable, because it uses reflection and expects a specific test host implementation
         private static Assembly TryResolveTestAssemblyFromTestContextImplementation(TestContext testContext)
@@ -67,6 +69,26 @@ namespace Dibix.Testing
                                          .Select(x => x.Assembly)
                                          .FirstOrDefault();
             return assembly;
+        }
+
+        private static MethodInfo ResolveTestMethodFromTestContext(TestContext testContext)
+        {
+            string testClassName = testContext.FullyQualifiedTestClassName;
+            Type testClass = AppDomain.CurrentDomain
+                                      .GetAssemblies()
+                                      .Select(x => x.GetType(testClassName))
+                                      .FirstOrDefault(x => x != null);
+
+            if (testClass == null)
+                throw new InvalidOperationException($"Could not resolve test class: {testClassName}");
+
+            string testMethodName = testContext.TestName;
+            MethodInfo testMethod = testClass.GetMethod(testMethodName);
+
+            if (testMethod == null)
+                throw new InvalidOperationException($"Could not resolve test class: {testMethodName}");
+
+            return testMethod;
         }
     }
 }
