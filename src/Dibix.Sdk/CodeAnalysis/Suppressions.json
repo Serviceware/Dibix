@@ -15,7 +15,6 @@
     "hlsysattachment_query_data_su": "a137b10bac21a9873f71e91e97c85420",
     "hlsysgetusercontext": "83638772ba6add448f0130e609531cf4",
     "hlsyssec_query_agentsystemacl": "40a02f1fc6a88990d13827c3567e5b15",
-    "hlsysum_getcentraladminorgunits": "31d880c73db362bc15cf338c33dee422",
     "hltm_getreceiversfortask": "85d0a2eb6f719bb4c987c1ecaf4d327b"
   },
   "MissingPrimaryKeySqlCodeAnalysisRule": {
@@ -193,13 +192,8 @@
     "hlsubprocess_getnotificationtasks@fake": "e3bccb70ea83839a48cecaae0d06725b",
     "hlsyscal_fn_calculate_difference_formatted@caseid_casedefid": "d7d5779c6a6fb6a4436d7b91d6febdff",
     "hlsyscal_fn_calculate_token_add@caseid_casedefid": "a1fadf36adcbf3757c82925354cdf854",
-    "hlsysdxi_generate_objecthistory@channelid": "1e0e6321bf7cf346cb4330c9bbfe510e",
-    "hlsysdxi_generate_objecthistory@starttime": "1e0e6321bf7cf346cb4330c9bbfe510e",
     "hlsyssec_inh_pub@defids": "fa4443a53337805e80e5853ae6870bc0",
-    "hlsysum_queryorgunitancestorsass@adminid": "a1936208f07861f89018c0689abca38c",
-    "hlsysum_querypersonancestorsass@adminid": "cdca6a415fe5cfa515481753eebd4860",
-    "hlsysum_queryuserlistagent@filter_agn_set": "f9406ea61efb4be208f2ba361649427c",
-    "hlsysum_queryuserlistperson@filter_per_set": "12688929ac1a33674ef21299a41ec164"
+    "hlsysum_queryorgunitancestorsass@adminid": "a1936208f07861f89018c0689abca38c"
   },
   "SurrogateKeySqlCodeAnalysisRule": {
     "PK_hlbitomattribute(attributeconfigid)": "c522f76399890736a641c901a670ff9e",

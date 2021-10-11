@@ -206,7 +206,7 @@
           Outputs="@(SqlCoreOutput)">
     <!-- Configuration -->
     <PropertyGroup>
-      <SqlNamingConventionPrefix Condition="'$(SqlNamingConventionPrefix)' == ''">dbx</SqlNamingConventionPrefix>
+      <!--<SqlNamingConventionPrefix Condition="'$(SqlNamingConventionPrefix)' == ''">dbx</SqlNamingConventionPrefix>-->
 
       <ProductName Condition="'$(ProductName)' == ''">$(RootNamespace.Split('.')[0])</ProductName>
       <Title Condition="$(Title) == ''">$(AreaName)</Title>
