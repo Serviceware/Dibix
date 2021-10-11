@@ -10,7 +10,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dibix.Testing
 {
-    public abstract class TestBase<TConfiguration> : IDisposable where TConfiguration : LazyConfiguration, new()
+    public abstract class TestBase<TConfiguration> : IDisposable where TConfiguration : new()
     {
         #region Fields
         private TestContext _testContext;

@@ -1,7 +1,7 @@
 ﻿namespace Dibix.Testing.Data
 {
-    public abstract class DatabaseConfigurationBase : LazyConfiguration
+    public abstract class DatabaseConfigurationBase
     {
-        public DatabaseConfiguration Database { get; } = new DatabaseConfiguration();
+        public virtual DatabaseConfiguration Database { get; } = new DatabaseConfiguration();
     }
 }

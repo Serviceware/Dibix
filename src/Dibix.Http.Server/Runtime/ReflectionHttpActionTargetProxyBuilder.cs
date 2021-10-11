@@ -22,9 +22,10 @@ namespace Dibix.Http.Server
 
         public static ReflectionHttpActionTargetProxyBuilder Create()
         {
-            const string name = "Dibix.Proxy.dll";
-            AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(name), AssemblyBuilderAccess.Run);
-            ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule(name);
+            AssemblyName assemblyName = new AssemblyName(typeof(ReflectionHttpActionTargetProxyBuilder).Assembly.FullName);
+            assemblyName.Name += ".Proxy";
+            AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
+            ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName.Name);
             return new ReflectionHttpActionTargetProxyBuilder(moduleBuilder);
         }
 

@@ -14,7 +14,7 @@ namespace Dibix.Http.Client
     /// </summary>
     public sealed class TimeoutHttpMessageHandler : DelegatingHandler
     {
-        #region Fields
+        #region Properties
         public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(100d); // HttpClient.defaultTimeout
         #endregion
 

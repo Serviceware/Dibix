@@ -8,15 +8,17 @@ namespace Dibix.Testing
 {
     internal static class TestConfigurationLoader
     {
-        public static T Load<T>(TestContext testContext) where T : LazyConfiguration, new()
+        public static T Load<T>(TestContext testContext) where T : new()
         {
-            T instance = new T();
             IConfigurationRoot root = new ConfigurationBuilder().AddJsonFile("appsettings.json", optional: true)
                                                                 .AddJsonFile($"appsettings.{System.Environment.MachineName}.json", optional: true)
                                                                 .AddRunSettings(testContext)
                                                                 .Build();
 
-            CollectConfigurationSections(root, testContext).Each(x => x.Bind(instance, y => y.BindNonPublicProperties = true));
+            ConfigurationInitializationToken initializationToken = new ConfigurationInitializationToken();
+            T instance = ConfigurationProxyBuilder.BuildProxyIfNeeded<T>(initializationToken);
+            CollectConfigurationSections(root, testContext).Each(x => Microsoft.Extensions.Configuration.Dibix.ConfigurationBinder.Bind(x, instance));
+            initializationToken.IsInitialized = true;
 
             return instance;
         }
@@ -28,7 +30,9 @@ namespace Dibix.Testing
             if (!TryGetProfileName(testContext, out string profileName))
                 profileName = "Default";
 
-            yield return root.GetSection($"Profiles:{profileName}");
+            IConfigurationSection profile = root.GetSection($"Profiles:{profileName}");
+            if (profile.Exists())
+                yield return profile;
         }
 
         private static bool TryGetProfileName(TestContext testContext, out string profileName)
