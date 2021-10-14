@@ -215,7 +215,7 @@
       <LangVersion>latest</LangVersion>
       <!--<ExternalAssemblyReferenceDir Condition="'$(ExternalAssemblyReferenceDir)' == ''">$(TargetDir)</ExternalAssemblyReferenceDir>-->
 
-      <_MSBuildBinPath>"$(MSBuildToolsPath)\msbuild.exe"</_MSBuildBinPath>
+      <_MSBuildBinPath>$(MSBuildToolsPath)\msbuild.exe</_MSBuildBinPath>
       <_SignAssembly>$(SignAssembly)</_SignAssembly>
       <_SignAssembly Condition="'$(_SignAssembly)' == '' and '$(AssemblyOriginatorKeyFile)' != ''">true</_SignAssembly>
       <_ServerOutputName>$(AssemblyName)</_ServerOutputName>
@@ -476,7 +476,7 @@ $(_SqlReferencePath)" />
 
     <!--<Exec Condition="'$(CompileArtifactsNetStandard)' == 'true'"-->
     <!--<Exec Command="dotnet build $(_ServerIntermediateProjectFilePath) -c $(Configuration)" />-->
-    <Exec Command="$(_MSBuildBinPath) $(_ServerIntermediateProjectFilePath) -restore -p:Configuration=$(Configuration) -verbosity:minimal" />
+    <Exec Command="&quot;$(_MSBuildBinPath)&quot; &quot;$(_ServerIntermediateProjectFilePath)&quot; -restore -p:Configuration=$(Configuration) -verbosity:minimal" />
     <!--
     <MSBuild Projects="$(_ServerIntermediateProjectFilePath)" Targets="Restore" Properties="Configuration=$(Configuration)"/>
     <MSBuild Projects="$(_ServerIntermediateProjectFilePath)" Targets="Build"   Properties="Configuration=$(Configuration)"/>
@@ -604,7 +604,7 @@ $(_SqlReferencePath)" />
           Command="dotnet build $(_ClientIntermediateProjectFilePath) -c $(Configuration)" />
     -->
     <Exec Condition="'$(ClientOutputName)' != ''"
-          Command="$(_MSBuildBinPath) $(_ClientIntermediateProjectFilePath) -restore -p:Configuration=$(Configuration) -verbosity:minimal" />
+          Command="&quot;$(_MSBuildBinPath)&quot; &quot;$(_ClientIntermediateProjectFilePath)&quot; -restore -p:Configuration=$(Configuration) -verbosity:minimal" />
     <!--
     <MSBuild Projects="$(_ClientIntermediateProjectFilePath)" Targets="Restore" Properties="Configuration=$(Configuration)"/>
     <MSBuild Projects="$(_ClientIntermediateProjectFilePath)" Targets="Build"   Properties="Configuration=$(Configuration)"/>
