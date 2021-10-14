@@ -449,13 +449,13 @@ $(_SqlReferencePath)" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
   </ItemGroup>
 
-  <Target Name="CollectPackageCacheDirectories" AfterTargets="ResolvePackageAssets">
+  <Target Name="DumpResolvedDibixReferencePaths" AfterTargets="ResolvePackageAssets">
     <ItemGroup>
-      <_PackageDirectories Include="%40(ResolvedCompileFileDefinitions->'%25(RelativeDir)')" Condition="'%25(NuGetPackageId)' == 'Dibix'" />
-      <_PackageDirectories Include="%40(ResolvedCompileFileDefinitions->'%25(RelativeDir)')" Condition="'%25(NuGetPackageId)' == 'Dibix.Http.Server'" />
+      <_DibixReferencePath Include="%40(ResolvedCompileFileDefinitions)" Condition="'%25(NuGetPackageId)' == 'Dibix'" />
+      <_DibixReferencePath Include="%40(ResolvedCompileFileDefinitions)" Condition="'%25(NuGetPackageId)' == 'Dibix.Http.Server'" />
     </ItemGroup>
 
-    <WriteLinesToFile File="%24(MSBuildThisFileDirectory)nuget.output" Lines="%40(_PackageDirectories)" Overwrite="True" />
+    <WriteLinesToFile File="%24(MSBuildThisFileDirectory)nuget.output" Lines="%40(_DibixReferencePath)" Overwrite="True" />
   </Target>
 
 </Project>
@@ -481,11 +481,6 @@ $(_SqlReferencePath)" />
     <MSBuild Projects="$(_ServerIntermediateProjectFilePath)" Targets="Restore" Properties="Configuration=$(Configuration)"/>
     <MSBuild Projects="$(_ServerIntermediateProjectFilePath)" Targets="Build"   Properties="Configuration=$(Configuration)"/>
     -->
-
-    <!-- Make NuGet cache directories for Dibix assemblies available for other targets -->
-    <ReadLinesFromFile File="$(IntermediateOutputPath)nuget.output">
-      <Output TaskParameter="Lines" PropertyName="DibixPackageDirectories" />
-    </ReadLinesFromFile>
 
 
     <!-- Client assembly info & DLL generation -->
@@ -682,6 +677,14 @@ $(_SqlReferencePath)" />
     <WriteLinesToFile File="$(_SignDacInputFile)" Lines="@(_SignDacFileInputItem)" Overwrite="True" />
 
     <Exec Command="$(DibixCliPath) sign &quot;$(_SignDacInputFile)&quot;" />
+  </Target>
+
+
+  <!-- Make resolved Dibix NuGet reference paths available for other targets -->
+  <Target Name="PublishDibixReferenceAssemblies">
+    <ReadLinesFromFile File="$(IntermediateOutputPath)nuget.output">
+      <Output TaskParameter="Lines" ItemName="DibixReferenceAssemblyPath" />
+    </ReadLinesFromFile>
   </Target>
 
 </Project>
