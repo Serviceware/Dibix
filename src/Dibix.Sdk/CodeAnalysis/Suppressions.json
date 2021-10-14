@@ -192,8 +192,7 @@
     "hlsubprocess_getnotificationtasks@fake": "e3bccb70ea83839a48cecaae0d06725b",
     "hlsyscal_fn_calculate_difference_formatted@caseid_casedefid": "d7d5779c6a6fb6a4436d7b91d6febdff",
     "hlsyscal_fn_calculate_token_add@caseid_casedefid": "a1fadf36adcbf3757c82925354cdf854",
-    "hlsyssec_inh_pub@defids": "fa4443a53337805e80e5853ae6870bc0",
-    "hlsysum_queryorgunitancestorsass@adminid": "a1936208f07861f89018c0689abca38c"
+    "hlsyssec_inh_pub@defids": "fa4443a53337805e80e5853ae6870bc0"
   },
   "SurrogateKeySqlCodeAnalysisRule": {
     "PK_hlbitomattribute(attributeconfigid)": "c522f76399890736a641c901a670ff9e",

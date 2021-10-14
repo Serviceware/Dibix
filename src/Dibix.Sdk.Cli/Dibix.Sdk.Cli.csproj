@@ -20,7 +20,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Dibix\Dibix.csproj" PrivateAssets="All" />
-    <ProjectReference Include="..\Dibix.Http.Client\Dibix.Http.Client.csproj" PrivateAssets="All" />
     <ProjectReference Include="..\Dibix.Http.Server\Dibix.Http.Server.csproj" PrivateAssets="All" />
     <ProjectReference Include="..\Dibix.Sdk\Dibix.Sdk.csproj" PrivateAssets="All" />
   </ItemGroup>
@@ -46,7 +45,6 @@
     -->
     <ItemGroup>
       <_ToolDependency Include="Dibix.dll" />
-      <_ToolDependency Include="Dibix.Http.Client.dll" />
       <_ToolDependency Include="Dibix.Http.Server.dll" />
       <_ToolDependency Include="$(_DibixSdkFileName)" />
       <_ToolDependency Include="Microsoft.Build.Framework.dll" />
@@ -64,7 +62,6 @@
       <_ToolDependency Include="Microsoft.SqlServer.TransactSql.ScriptDom.dll" />
       <_ToolDependency Include="Newtonsoft.Json.dll" />
       <_ToolDependency Include="Newtonsoft.Json.Schema.dll" />
-      <_ToolDependency Include="System.Net.Http.Formatting.dll" />
     </ItemGroup>
 
 

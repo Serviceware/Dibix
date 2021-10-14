@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
@@ -38,8 +37,9 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (hasBodyParameter)
             {
-                context.AddReference<MediaTypeFormatter>();
-                @class.AddField("Formatter", nameof(MediaTypeFormatter), new CSharpValue($"new {nameof(JsonMediaTypeFormatter)}()"), CSharpModifiers.Private | CSharpModifiers.Static | CSharpModifiers.ReadOnly);
+                //context.AddReference<MediaTypeFormatter>();
+                context.AddUsing("System.Net.Http.Formatting");
+                @class.AddField("Formatter", "MediaTypeFormatter", new CSharpValue("new JsonMediaTypeFormatter()"), CSharpModifiers.Private | CSharpModifiers.Static | CSharpModifiers.ReadOnly);
             }
 
             @class.AddField("_httpClientFactory", "IHttpClientFactory", modifiers: CSharpModifiers.Private | CSharpModifiers.ReadOnly);
@@ -175,8 +175,8 @@ namespace Dibix.Sdk.CodeGeneration
                     writer.WriteRaw($"{nameof(StreamContent)}(body");
                 else
                 {
-                    context.AddReference<ObjectContent<object>>();
-                    writer.WriteRaw($"{nameof(ObjectContent<object>)}<{context.ResolveTypeName(requestBodyType, context)}>(body, Formatter");
+                    //context.AddReference<ObjectContent<object>>();
+                    writer.WriteRaw($"ObjectContent<{context.ResolveTypeName(requestBodyType, context)}>(body, Formatter");
                 }
 
                 writer.WriteLineRaw(");");
@@ -196,8 +196,8 @@ namespace Dibix.Sdk.CodeGeneration
                     writer.WriteRaw($"{nameof(HttpContent.ReadAsStreamAsync)}()");
                 else
                 {
-                    context.AddReference<MediaTypeFormatter>();
-                    writer.WriteRaw($"{nameof(HttpContentExtensions.ReadAsAsync)}<{responseContentType}>(cancellationToken)");
+                    //context.AddReference<MediaTypeFormatter>();
+                    writer.WriteRaw($"ReadAsAsync<{responseContentType}>(cancellationToken)");
                 }
 
                 writer.WriteLineRaw($".{nameof(Task.ConfigureAwait)}(false);");

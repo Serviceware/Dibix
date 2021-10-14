@@ -1,6 +1,6 @@
 ﻿-- @Namespace Extension.Primitive
 -- @Name GetSinglePrimitiveResult
--- @Return ClrTypes:bool Mode:Single
+-- @Return ClrTypes:System.Guid Mode:Single
 CREATE PROCEDURE [dbo].[dbx_tests_syntax_singleprimitiveresult]
 AS
-	SELECT 1
+	SELECT NEWID()

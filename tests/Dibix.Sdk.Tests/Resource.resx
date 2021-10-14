@@ -2223,13 +2223,13 @@ namespace Dibix.Sdk.Tests
             public static class TestAccessor
             {
                 // GetSinglePrimitiveResult
-                private const string GetSinglePrimitiveResultCommandText = "SELECT 1";
+                private const string GetSinglePrimitiveResultCommandText = "SELECT NEWID()";
 
-                public static bool GetSinglePrimitiveResult(this IDatabaseAccessorFactory databaseAccessorFactory)
+                public static System.Guid GetSinglePrimitiveResult(this IDatabaseAccessorFactory databaseAccessorFactory)
                 {
                     using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                     {
-                        return accessor.QuerySingle&lt;bool&gt;(GetSinglePrimitiveResultCommandText, CommandType.Text, ParametersVisitor.Empty);
+                        return accessor.QuerySingle&lt;System.Guid&gt;(GetSinglePrimitiveResultCommandText, CommandType.Text, ParametersVisitor.Empty);
                     }
                 }
             }
@@ -2264,13 +2264,13 @@ namespace Dibix.Sdk.Tests
             public static class TestAccessor
             {
                 // GetSinglePrimitiveResult
-                private const string GetSinglePrimitiveResultCommandText = "SELECT 1";
+                private const string GetSinglePrimitiveResultCommandText = "SELECT NEWID()";
 
-                public static async Task&lt;bool&gt; GetSinglePrimitiveResultAsync(this IDatabaseAccessorFactory databaseAccessorFactory, CancellationToken cancellationToken = default)
+                public static async Task&lt;System.Guid&gt; GetSinglePrimitiveResultAsync(this IDatabaseAccessorFactory databaseAccessorFactory, CancellationToken cancellationToken = default)
                 {
                     using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
                     {
-                        return await accessor.QuerySingleAsync&lt;bool&gt;(GetSinglePrimitiveResultCommandText, CommandType.Text, ParametersVisitor.Empty, cancellationToken).ConfigureAwait(false);
+                        return await accessor.QuerySingleAsync&lt;System.Guid&gt;(GetSinglePrimitiveResultCommandText, CommandType.Text, ParametersVisitor.Empty, cancellationToken).ConfigureAwait(false);
                     }
                 }
             }

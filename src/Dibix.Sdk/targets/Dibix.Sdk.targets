@@ -140,10 +140,11 @@
       <!-- SDK changes -->
       <_SqlTargetInput Include="$(DibixCliPath)" />
       <_SqlTargetInput Include="$(DibixSdkPath)" />
+      <!--
       <_SqlTargetInput Include="$(DibixAssemblyPath)" />
       <_SqlTargetInput Include="$(DibixHttpServerAssemblyPath)" />
       <_SqlTargetInput Include="$(DibixHttpClientAssemblyPath)" />
-
+      -->
 
       <!-- Target specific inputs -->
       <!-- SqlCodeAnalysis -->
@@ -214,6 +215,9 @@
       <LangVersion>latest</LangVersion>
       <!--<ExternalAssemblyReferenceDir Condition="'$(ExternalAssemblyReferenceDir)' == ''">$(TargetDir)</ExternalAssemblyReferenceDir>-->
 
+      <_MSBuildBinPath>"$(MSBuildToolsPath)\msbuild.exe"</_MSBuildBinPath>
+      <_SignAssembly>$(SignAssembly)</_SignAssembly>
+      <_SignAssembly Condition="'$(_SignAssembly)' == '' and '$(AssemblyOriginatorKeyFile)' != ''">true</_SignAssembly>
       <_ServerOutputName>$(AssemblyName)</_ServerOutputName>
       <_ServerIntermediateFilePathNoExt>$(IntermediateOutputPath)$(_ServerOutputName)</_ServerIntermediateFilePathNoExt>
       <_ServerIntermediateFilePath>$(_ServerIntermediateFilePathNoExt).cs</_ServerIntermediateFilePath>
@@ -345,16 +349,22 @@ $(_SqlReferencePath)" />
     <PropertyGroup>
       <_ServerAssemblyInfoFile>$(_ServerIntermediateFilePathNoExt)_AssemblyInfo.cs</_ServerAssemblyInfoFile>
       <_ServerFileVersion>$(FileVersion)</_ServerFileVersion>
+      <_ServerTargetFrameworkNetFx>net451</_ServerTargetFrameworkNetFx>
+      <_ServerTargetFrameworkNetStandard>netstandard2.0</_ServerTargetFrameworkNetStandard>
+      <_ServerTargetFramework>$(_ServerTargetFrameworkNetFx)</_ServerTargetFramework>
+      <_ServerTargetFramework Condition="'$(CompileArtifactsNetStandard)' == 'true'">$(_ServerTargetFrameworkNetStandard)</_ServerTargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
       <ServerCompilationSource Include="$(_ServerIntermediateFilePath)" />
       <ServerCompilationSource Include="$(_ServerAssemblyInfoFile)" />
       <ServerCompilationReference Include="@(ServerCompilationArtifactReference)" />
+      <!--
       <ServerCompilationReference Condition="'$(CompileArtifactsNetStandard)' != 'true'" Include="$(DibixAssemblyPath)" />
       <ServerCompilationReference Condition="'$(CompileArtifactsNetStandard)' != 'true'" Include="$(DibixHttpServerAssemblyPath)" />
       <ServerCompilationReference Condition="'$(CompileArtifactsNetStandard)' != 'true'" Include="System.ComponentModel.DataAnnotations.dll" />
       <ServerCompilationReference Condition="'$(CompileArtifactsNetStandard)' != 'true'" Include="$(DibixToolsDirectory)Newtonsoft.Json.dll" />
+      -->
 
       <ServerAssemblyAttribute Include="@(AssemblyAttribute)" />
       <ServerAssemblyAttribute Include="AssemblyTitle">
@@ -365,6 +375,7 @@ $(_SqlReferencePath)" />
       </ServerAssemblyAttribute>
     </ItemGroup>
 
+    <!--
     <WriteCodeFragment Condition="'$(CompileArtifactsNetStandard)' != 'true'"
                        AssemblyAttributes="@(ServerAssemblyAttribute)"
                        Language="C#"
@@ -381,24 +392,27 @@ $(_SqlReferencePath)" />
          References="@(ServerCompilationReference)"
          Sources="@(ServerCompilationSource)"
          TargetType="$(OutputType)" />
+    -->
 
-    <ItemGroup Condition="'$(CompileArtifactsNetStandard)' == 'true'">
+    <!--<ItemGroup Condition="'$(CompileArtifactsNetStandard)' == 'true'">-->
+    <ItemGroup>
       <_ServerCompilationReferenceItem Include="@(ServerCompilationReference->'&lt;Reference Include=&quot;%(Filename)&quot; HintPath=&quot;%(FullPath)&quot; Private=&quot;False&quot; /&gt;')" />
     </ItemGroup>
 
-    <PropertyGroup Condition="'$(CompileArtifactsNetStandard)' == 'true'">
+    <!--<PropertyGroup Condition="'$(CompileArtifactsNetStandard)' == 'true'">-->
+    <PropertyGroup>
       <_ServerIntermediateProjectFilePath>$(_ServerIntermediateFilePathNoExt).csproj</_ServerIntermediateProjectFilePath>
       <_ServerIntermediateProjectFileContent>
         <![CDATA[
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFramework>$(_ServerTargetFramework)</TargetFramework>
     
     <OutDir>.</OutDir>
     <EnableDefaultItems>false</EnableDefaultItems>
     <AssemblyOriginatorKeyFile>$(AssemblyOriginatorKeyFile)</AssemblyOriginatorKeyFile>
-    <SignAssembly>$(SignAssembly)</SignAssembly>
+    <SignAssembly>$(_SignAssembly)</SignAssembly>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <NoWarn>nullable</NoWarn>
@@ -419,23 +433,59 @@ $(_SqlReferencePath)" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="$(_DibixName)" Version="*" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
-    <PackageReference Include="System.Reflection" Version="4.3.0" />
+    <PackageReference Include="$(_DibixName)" Version="$(DibixSdkVersion)" ExcludeAssets="runtime" />
+    <PackageReference Include="$(_DibixHttpServerName)" Version="$(DibixSdkVersion)" ExcludeAssets="runtime" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" ExcludeAssets="runtime" />
+    <!--
+    <PackageReference Include="System.Reflection" Version="4.3.0" ExcludeAssets="runtime" />
+    -->
   </ItemGroup>
+
+  <ItemGroup Condition="'%24(TargetFramework)' == '$(_ServerTargetFrameworkNetStandard)'">
+    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" ExcludeAssets="runtime" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'%24(TargetFramework)' == '$(_ServerTargetFrameworkNetFx)'">
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+  </ItemGroup>
+
+  <Target Name="CollectPackageCacheDirectories" AfterTargets="ResolvePackageAssets">
+    <ItemGroup>
+      <_PackageDirectories Include="%40(ResolvedCompileFileDefinitions->'%25(RelativeDir)')" Condition="'%25(NuGetPackageId)' == 'Dibix'" />
+      <_PackageDirectories Include="%40(ResolvedCompileFileDefinitions->'%25(RelativeDir)')" Condition="'%25(NuGetPackageId)' == 'Dibix.Http.Server'" />
+    </ItemGroup>
+
+    <WriteLinesToFile File="%24(MSBuildThisFileDirectory)nuget.output" Lines="%40(_PackageDirectories)" Overwrite="True" />
+  </Target>
 
 </Project>
 ]]>
       </_ServerIntermediateProjectFileContent>
     </PropertyGroup>
 
-    <WriteLinesToFile Condition="'$(CompileArtifactsNetStandard)' == 'true'"
-                      File="$(_ServerIntermediateProjectFilePath)"
+    <!--<WriteLinesToFile Condition="'$(CompileArtifactsNetStandard)' == 'true'"-->
+    <WriteLinesToFile File="$(_ServerIntermediateProjectFilePath)"
                       Lines="$(_ServerIntermediateProjectFileContent)"
                       Overwrite="True" />
 
-    <Exec Condition="'$(CompileArtifactsNetStandard)' == 'true'" Command="dotnet build $(_ServerIntermediateProjectFilePath) -c $(Configuration)" />
+    <!-- Override Directory.Build props/targets to ensure the project configuration is isolated -->
+    <!-- For example, a central package reference of Dibix runtime might interfere here -->
+    <!--<WriteLinesToFile Condition="'$(CompileArtifactsNetStandard)' == 'true'"-->
+    <WriteLinesToFile File="$(IntermediateOutputPath)Directory.Build.props" Lines="&lt;Project /&gt;" Overwrite="True" />
+    <WriteLinesToFile File="$(IntermediateOutputPath)Directory.Build.targets" Lines="&lt;Project /&gt;" Overwrite="True" />
+
+    <!--<Exec Condition="'$(CompileArtifactsNetStandard)' == 'true'"-->
+    <!--<Exec Command="dotnet build $(_ServerIntermediateProjectFilePath) -c $(Configuration)" />-->
+    <Exec Command="$(_MSBuildBinPath) $(_ServerIntermediateProjectFilePath) -restore -p:Configuration=$(Configuration) -verbosity:minimal" />
+    <!--
+    <MSBuild Projects="$(_ServerIntermediateProjectFilePath)" Targets="Restore" Properties="Configuration=$(Configuration)"/>
+    <MSBuild Projects="$(_ServerIntermediateProjectFilePath)" Targets="Build"   Properties="Configuration=$(Configuration)"/>
+    -->
+
+    <!-- Make NuGet cache directories for Dibix assemblies available for other targets -->
+    <ReadLinesFromFile File="$(IntermediateOutputPath)nuget.output">
+      <Output TaskParameter="Lines" PropertyName="DibixPackageDirectories" />
+    </ReadLinesFromFile>
 
 
     <!-- Client assembly info & DLL generation -->
@@ -445,15 +495,20 @@ $(_SqlReferencePath)" />
       <_ClientAssemblyInfoFile>$(_ClientIntermediateFilePathNoExt)_AssemblyInfo.cs</_ClientAssemblyInfoFile>
       <_ClientFileVersion Condition="'$(ClientFileVersion)' != ''">$(ClientFileVersion)</_ClientFileVersion>
       <_ClientFileVersion Condition="'$(ClientFileVersion)' == ''" >$(FileVersion)</_ClientFileVersion>
+      <_ClientTargetFrameworkNetFx>net46</_ClientTargetFrameworkNetFx>
+      <_ClientTargetFrameworkNetStandard>netstandard2.0</_ClientTargetFrameworkNetStandard>
+      <_ClientTargetFramework>$(_ClientTargetFrameworkNetFx)</_ClientTargetFramework>
+      <_ClientTargetFramework Condition="'$(CompileArtifactsNetStandard)' == 'true'">$(_ClientTargetFrameworkNetStandard)</_ClientTargetFramework>
     </PropertyGroup>
 
     <ItemGroup Condition="'$(ClientOutputName)' != ''">
       <ClientCompilationSource Include="$(_ClientIntermediateFilePath)" />
       <ClientCompilationSource Include="$(_ClientAssemblyInfoFile)" />
+      <!--
       <ClientCompilationReference Include="$(DibixHttpClientAssemblyPath)" />
       <ClientCompilationReference Include="System.Net.Http.dll" />
       <ClientCompilationReference Include="$(DibixToolsDirectory)System.Net.Http.Formatting.dll" />
-
+      -->
       <ClientAssemblyAttribute Include="@(AssemblyAttribute)" />
       <ClientAssemblyAttribute Include="AssemblyTitle">
         <_Parameter1>$(ClientOutputName)</_Parameter1>
@@ -463,6 +518,7 @@ $(_SqlReferencePath)" />
       </ClientAssemblyAttribute>
     </ItemGroup>
 
+    <!--
     <WriteCodeFragment AssemblyAttributes="@(ClientAssemblyAttribute)" Language="C#" OutputFile="$(_ClientAssemblyInfoFile)" Condition="'$(ClientOutputName)' != ''" />
 
     <Csc Condition="'$(ClientOutputName)' != ''"
@@ -476,6 +532,83 @@ $(_SqlReferencePath)" />
          References="@(ClientCompilationReference)"
          Sources="@(ClientCompilationSource)"
          TargetType="$(OutputType)" />
+    -->
+
+    <!--<ItemGroup Condition="'$(CompileArtifactsNetStandard)' == 'true'">-->
+    <ItemGroup Condition="'$(ClientOutputName)' != ''">
+      <_ClientCompilationReferenceItem Include="@(ClientCompilationReference->'&lt;Reference Include=&quot;%(Filename)&quot; HintPath=&quot;%(FullPath)&quot; Private=&quot;False&quot; /&gt;')" />
+    </ItemGroup>
+
+    <!--<PropertyGroup Condition="'$(CompileArtifactsNetStandard)' == 'true'">-->
+    <PropertyGroup Condition="'$(ClientOutputName)' != ''">
+      <_ClientIntermediateProjectFilePath>$(_ClientIntermediateFilePathNoExt).csproj</_ClientIntermediateProjectFilePath>
+      <_ClientIntermediateProjectFileContent>
+        <![CDATA[
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>$(_ClientTargetFramework)</TargetFramework>
+    
+    <OutDir>.</OutDir>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <AssemblyOriginatorKeyFile>$(AssemblyOriginatorKeyFile)</AssemblyOriginatorKeyFile>
+    <SignAssembly>$(_SignAssembly)</SignAssembly>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <NoWarn>nullable</NoWarn>
+    
+    <Product>$(Product)</Product>
+    <Company>$(Company)</Company>
+    <Copyright>$(Copyright)</Copyright>
+    <FileVersion>$(_ClientFileVersion)</FileVersion>
+    <InformationalVersion>$(InformationalVersion)</InformationalVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="$(ClientOutputName).cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+@(_ClientCompilationReferenceItem)
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="$(_DibixHttpClientName)" Version="$(DibixSdkVersion)" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.3" ExcludeAssets="runtime" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'%24(TargetFramework)' == '$(_ClientTargetFrameworkNetFx)'">
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
+</Project>
+]]>
+      </_ClientIntermediateProjectFileContent>
+    </PropertyGroup>
+
+    <!--<WriteLinesToFile Condition="'$(CompileArtifactsNetStandard)' == 'true'"-->
+    <WriteLinesToFile Condition="'$(ClientOutputName)' != ''"
+                      File="$(_ClientIntermediateProjectFilePath)"
+                      Lines="$(_ClientIntermediateProjectFileContent)"
+                      Overwrite="True" />
+
+    <!-- Override Directory.Build props/targets to ensure the project configuration is isolated -->
+    <!-- For example, a central package reference of Dibix runtime might interfere here -->
+    <!--<WriteLinesToFile Condition="'$(CompileArtifactsNetStandard)' == 'true'"-->
+    <WriteLinesToFile File="$(IntermediateOutputPath)Directory.Build.props" Lines="&lt;Project /&gt;" Overwrite="True" Condition="'$(ClientOutputName)' != ''" />
+    <WriteLinesToFile File="$(IntermediateOutputPath)Directory.Build.targets" Lines="&lt;Project /&gt;" Overwrite="True" Condition="'$(ClientOutputName)' != ''" />
+
+    <!--<Exec Condition="'$(CompileArtifactsNetStandard)' == 'true'"-->
+    <!--
+    <Exec Condition="'$(ClientOutputName)' != ''"
+          Command="dotnet build $(_ClientIntermediateProjectFilePath) -c $(Configuration)" />
+    -->
+    <Exec Condition="'$(ClientOutputName)' != ''"
+          Command="$(_MSBuildBinPath) $(_ClientIntermediateProjectFilePath) -restore -p:Configuration=$(Configuration) -verbosity:minimal" />
+    <!--
+    <MSBuild Projects="$(_ClientIntermediateProjectFilePath)" Targets="Restore" Properties="Configuration=$(Configuration)"/>
+    <MSBuild Projects="$(_ClientIntermediateProjectFilePath)" Targets="Build"   Properties="Configuration=$(Configuration)"/>
+    -->
   </Target>
 
 

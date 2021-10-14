@@ -355,7 +355,6 @@ Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly
                   , "Dibix.Http.Server.dll"
                   , "Dibix.Http.Client.dll"
                   , "System.Net.Http.dll"
-                  , "System.Net.Http.Formatting.dll"
                 }
             );
         }

@@ -21,7 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="$(AspNetWebApiVersion)" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MSBuildUtilitiesVersion)" />
     <PackageReference Include="Microsoft.OpenApi" Version="$(OpenApiVersion)" />
     <PackageReference Include="Microsoft.SqlServer.DacFx" Version="$(DacFxVersion)" />
