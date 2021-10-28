@@ -665,6 +665,7 @@ $(_SqlReferencePath)" />
     <!-- Prepare & write input file then exec CLI -->
     <PropertyGroup>
       <_SignDacInputFile>$(IntermediateOutputPath)sign.input</_SignDacInputFile>
+      <LockRetryCount Condition="'$(LockRetryCount)' == ''">10</LockRetryCount>
     </PropertyGroup>
 
     <ItemGroup>
@@ -672,6 +673,8 @@ $(_SqlReferencePath)" />
   $(SqlTargetPath)" />
       <_SignDacFileInputItem Include="IsEmbedded
   $(IsEmbedded)" />
+      <_SignDacFileInputItem Include="LockRetryCount
+  $(LockRetryCount)" />
     </ItemGroup>
 
     <WriteLinesToFile File="$(_SignDacInputFile)" Lines="@(_SignDacFileInputItem)" Overwrite="True" />

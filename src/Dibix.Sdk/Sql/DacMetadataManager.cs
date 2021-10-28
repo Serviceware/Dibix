@@ -20,12 +20,12 @@ namespace Dibix.Sdk.Sql
             return isEmbedded;
         }
 
-        public static void SetIsEmbedded(string packagePath, bool value)
+        public static void SetIsEmbedded(string packagePath, bool value, int lockRetryCount, Action<string> logger)
         {
             if (!File.Exists(packagePath))
                 throw new FileNotFoundException(null, packagePath);
 
-            int tries = 0;
+            int lockRetries = 0;
             while(true)
             {
                 try
@@ -38,10 +38,11 @@ namespace Dibix.Sdk.Sql
                     // When trying to open the dac file for writing we sometimes get:
                     // System.IO.IOException: The process cannot access the file '' because it is being used by another process.
                     // Since the dac file is opened for writing immediately after the SqlBuild target is completed, it might be that it is not fully closed yet. (Asynchronicity)
-                    if (++tries == 10)
+                    if (++lockRetries > lockRetryCount)
                         throw;
                     
                     Thread.Sleep(1000);
+                    logger($"[{lockRetries}/{lockRetryCount}] {exception.Message}");
                 }
             }
         }

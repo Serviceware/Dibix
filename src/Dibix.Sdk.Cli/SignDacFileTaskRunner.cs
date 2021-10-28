@@ -13,6 +13,8 @@ namespace Dibix.Sdk.Cli
             (
                 dacFilePath: configuration.GetSingleValue<string>("DacFilePath")
               , isEmbedded: configuration.GetSingleValue<bool>("IsEmbedded")
+              , lockRetryCount: configuration.GetSingleValue<int>("LockRetryCount")
+              , logger: base.Logger
             );
         }
     }
