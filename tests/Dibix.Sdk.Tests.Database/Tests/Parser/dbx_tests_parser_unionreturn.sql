@@ -1,4 +1,4 @@
-﻿-- @Return int
+﻿-- @Return int32
 CREATE PROCEDURE [dbo].[dbx_tests_parser_unionreturn]
 AS
 	(

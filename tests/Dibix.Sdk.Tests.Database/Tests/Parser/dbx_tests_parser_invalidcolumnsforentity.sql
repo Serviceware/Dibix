@@ -1,5 +1,5 @@
-﻿-- @Return ClrTypes:System.Int32? Name:A
--- @Return ClrTypes:System.Int32 Name:B
+﻿-- @Return ClrTypes:int32? Name:A
+-- @Return ClrTypes:int32 Name:B
 -- @Return ClrTypes:string Name:C
 -- @Return ClrTypes:Dibix.Sdk.VisualStudio.Tests.Direction? Name:D
 -- @Return ClrTypes:Dibix.Sdk.VisualStudio.Tests.SpecialEntity Name:E

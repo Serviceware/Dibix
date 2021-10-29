@@ -1,8 +1,8 @@
-﻿-- @Return int Name:A
--- @Return int Name:B
--- @Return int Name:C
--- @Return int Name:D
--- @Return int Name:E
+﻿-- @Return int32 Name:A
+-- @Return int32 Name:B
+-- @Return int32 Name:C
+-- @Return int32 Name:D
+-- @Return int32 Name:E
 CREATE PROCEDURE [dbo].[dbx_tests_parser_nestedifs]
 AS
     DECLARE @true BIT = 1

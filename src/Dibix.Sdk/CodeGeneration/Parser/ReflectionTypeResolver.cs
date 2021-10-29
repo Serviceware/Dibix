@@ -45,7 +45,7 @@ namespace Dibix.Sdk.CodeGeneration
         public override TypeReference ResolveType(string input, string @namespace, string source, int line, int column, bool isEnumerable)
         {
             bool isAssemblyQualified = input.IndexOf(',') >= 0;
-            return !isAssemblyQualified ? this.TryLocalType(input, source, line, column, isEnumerable) : this.TryForeignType(input, source, line, column, isEnumerable);
+            return !isAssemblyQualified ? null/*this.TryLocalType(input, source, line, column, isEnumerable)*/ : this.TryForeignType(input, source, line, column, isEnumerable);
         }
         #endregion
 
