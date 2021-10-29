@@ -67,6 +67,10 @@ Column in ELSE: {rightColumn.ColumnName}", base.SourcePath, leftColumn.ColumnNam
 
             // Resolve outputs using a branch that doesn't throw
             this.Outputs.AddRange(!left._containsThrow ? left.Outputs : right.Outputs);
+
+            // Both branches throw making the whole IF statement irrelevant
+            if (left._containsThrow && right._containsThrow)
+                this._containsThrow = true;
         }
 
         public override void ExplicitVisit(ThrowStatement node) => this._containsThrow = true;
