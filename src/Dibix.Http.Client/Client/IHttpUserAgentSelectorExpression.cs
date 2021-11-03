@@ -7,5 +7,7 @@ namespace Dibix.Http.Client
     {
         void FromAssembly(Assembly assembly, Func<string, string> productNameFormatter = null);
         void FromEntryAssembly(Func<string, string> productNameFormatter = null);
+        void FromCurrentProcess(Func<string, string> productNameFormatter = null);
+        void FromFile(string path, Func<string, string> productNameFormatter = null);
     }
 }

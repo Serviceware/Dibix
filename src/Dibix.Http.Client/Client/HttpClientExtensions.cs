@@ -31,14 +31,16 @@ namespace Dibix.Http.Client
             public ProductInfoHeaderValue UserAgent { get; private set; }
 
             public void FromAssembly(Assembly assembly, Func<string, string> productNameFormatter = null) => this.ResolveUserAgentFromAssembly(assembly, productNameFormatter);
-
+            
             public void FromEntryAssembly(Func<string, string> productNameFormatter = null) => this.ResolveUserAgentFromAssembly(ResolveEntryAssembly(), productNameFormatter);
+            
+            public void FromCurrentProcess(Func<string, string> productNameFormatter = null) => this.FromFile(ResolveCurrentProcessPath(), productNameFormatter);
 
-            private void ResolveUserAgentFromAssembly(Assembly assembly, Func<string, string> productNameFormatter)
+            public void FromFile(string path, Func<string, string> productNameFormatter)
             {
-                FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
+                FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(path);
                 string productName = fileVersionInfo.ProductName;
-                string assemblyName = Path.GetFileNameWithoutExtension(assembly.Location);
+                string assemblyName = Path.GetFileNameWithoutExtension(path);
                 string productVersion = fileVersionInfo.ProductVersion;
 
                 string userAgentProductName = $"{productName}{assemblyName}";
@@ -48,6 +50,8 @@ namespace Dibix.Http.Client
                 this.UserAgent = new ProductInfoHeaderValue(userAgentProductName, productVersion);
             }
 
+            private void ResolveUserAgentFromAssembly(Assembly assembly, Func<string, string> productNameFormatter) => this.FromFile(assembly.Location, productNameFormatter);
+
             private static Assembly ResolveEntryAssembly()
             {
                 Assembly assembly = Assembly.GetEntryAssembly();
@@ -56,6 +60,16 @@ namespace Dibix.Http.Client
                     throw new InvalidOperationException("Could not determine entry assembly");
 
                 return assembly;
+            }
+
+            private static string ResolveCurrentProcessPath()
+            {
+                ProcessModule processModule = Process.GetCurrentProcess().MainModule;
+                if (processModule == null)
+                    throw new InvalidOperationException("Could not determine main module from current process");
+                
+                string filePath = processModule.FileName;
+                return filePath;
             }
         }
     }
