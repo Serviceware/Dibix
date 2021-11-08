@@ -80,6 +80,12 @@ namespace Dibix.Dapper
             return this._reader.ReadSingle<T>();
         }
 
+        protected override Task<T> ReadSingleAsync<T>()
+        {
+            DecoratedTypeMap.Adapt<T>();
+            return this._reader.ReadSingleAsync<T>();
+        }
+
         protected override T ReadSingleOrDefault<T>()
         {
             DecoratedTypeMap.Adapt<T>();

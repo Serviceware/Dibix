@@ -73,6 +73,9 @@ namespace Dibix
 
         T IMultipleResultReader.ReadSingle<T>() => this.Execute(() => this.ReadSingle<T>().PostProcess());
 
+        // ObjectManagement (LoadGroupACLForSystemIdOrObjectId)
+        Task<T> IMultipleResultReader.ReadSingleAsync<T>() => this.Execute(() => this.ReadSingleAsync<T>().PostProcess());
+
         public TReturn ReadSingle<TReturn, TSecond>(string splitOn) where TReturn : new() => this.Execute(() =>
         {
             MultiMapper multiMapper = new MultiMapper();
@@ -138,6 +141,8 @@ namespace Dibix
         protected abstract IEnumerable<TReturn> ReadMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TReturn> map, string splitOn);
 
         protected abstract T ReadSingle<T>();
+
+        protected abstract Task<T> ReadSingleAsync<T>();
 
         protected abstract T ReadSingleOrDefault<T>();
         #endregion
