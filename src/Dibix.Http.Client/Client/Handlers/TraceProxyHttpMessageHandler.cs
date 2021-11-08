@@ -11,7 +11,7 @@ namespace Dibix.Http.Client
     public sealed class TraceProxyHttpMessageHandler : DelegatingHandler
     {
         #region Fields
-        private static readonly TraceSource ProxyTraceSource = new TraceSource("System.Net");
+        private static readonly TraceSource ProxyTraceSource = new NclTraceSource("System.Net");
         #endregion
 
         #region Overrides
@@ -30,6 +30,21 @@ namespace Dibix.Http.Client
 
             bool isBypassed = System.Net.WebRequest.DefaultWebProxy.IsBypassed(request.RequestUri);
             ProxyTraceSource.TraceInformation($"[Proxy] IsBypassed {request.RequestUri}: {isBypassed}");
+        }
+        #endregion
+
+        #region Nested Types
+        private class NclTraceSource : TraceSource
+        {
+            private static readonly string[] SupportedAttributes = 
+            {
+                "maxdatasize",
+                "tracemode"
+            };
+
+            internal NclTraceSource(string name) : base(name) { }
+
+            protected override string[] GetSupportedAttributes() => SupportedAttributes;
         }
         #endregion
     }
