@@ -401,6 +401,71 @@ The implementation is based on the [Dibix.Http.Client](https://www.nuget.org/pac
 The OpenAPI document will be generated in YAML and JSON format and can be used to generate other artifacts, for example clients in other languages like TypeScript.
 
 ## Syntax reference
+### Stored procedure
+In this section, the markup properties to declare input and output of the stored procedure is explained in more detail. The documentation is still in progress. You can also have a look at [these tests](/tests/Dibix.Sdk.Tests.Database/Tests/Syntax) for more examples.
+
+#### Name
+PascalCase naming is recommended for referencing actions in API definitions.
+If all lower case naming is used in T-SQL, this enables you to generate a PascalCase name for the action.
+```sql
+-- @Name GetPersons
+```
+```json
+{
+  "Person": [
+    {
+      "target": "GetPersons"
+    }
+  ]
+}
+```
+
+#### Namespace
+Allows to group actions into a separate (relative) namespace.
+```sql
+-- @Name GetPersons
+-- @Namespace Group
+```
+```json
+{
+  "Person": [
+    {
+      "target": "Group.GetPersons"
+    }
+  ]
+}
+```
+
+To be continued...
+
+### Contract
+In this section the schema for defining contracts is described. The documentation is still in progress. For now you can use [the JSON schema](/src/Dibix.Sdk/CodeGeneration/Schema/dibix.contracts.schema.json) as a reference or have a look at [these tests](/tests/Dibix.Sdk.Tests.Database/Contracts) as samples.
+
+### Endpoint
+In this section the schema for defining endpoints is described. The documentation is still in progress. For the sake of completeness, you can use [the JSON schema](/src/Dibix.Sdk/CodeGeneration/Schema/dibix.endpoints.schema.json) as a reference.
+
+An endpoint JSON starts with a root object. Each property inside the root object  maps to an endpoint. An endpoint is similar to a controller in ASP.NET. The property name defines the name of the endpoint. Along with the area name (based on the component name), it controls the URL of the API: `api/{areaName}/{endpointName}`.
+
+```json
+{
+  "EndpointName": [
+    {
+      "method": "GET",
+      "target": "GetEntity",
+      "childRoute": "{id}"
+    }
+  ]
+}
+```
+
+Each endpoint object consists of an array, in which the respective actions are defined. To ensure a RESTful API, each action is distinguished by its HTTP verb, which follows [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) operations, and a unique path.
+To extend the path to the API, the `childRoute` property can be used, which is appended to the path base, extending the route template as such: `api/{areaName}/{endpointName}/{childRoute}`.
+
+#### Target
+The target property should contain the name of the stored procedure that is invoked by this API action.
+
+To be continued...
+
 ### HTTP status code
 By default Dibix endpoints return [200 OK](https://httpstatuses.com/200) for operations that have a result and [204 NoContent](https://httpstatuses.com/204) for those that do not return a result.<br />
 However sometimes you need to return a different HTTP status code, for example to indicate that the request is invalid. 
@@ -491,52 +556,6 @@ PropertyName|Type|Value
 -|-|-
 MachineName|string|The value of [`System.Environment.MachineName`](https://docs.microsoft.com/en-us/dotnet/api/system.environment.machinename)
 CurrentProcessId|int|The value of [`System.Diagnostics.Process.GetCurrentProcess()`](https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.process.getcurrentprocess)[`.Id`](https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.process.id)
-
-
-If you read until here, you are entering a dead end, meaning a totally incomplete section. Sorry.
-
-### Stored procedure
-In this section, the markup properties to declare input and output of the stored procedure is explained in more detail. The documentation is still in progress. You can also have a look at [these tests](/tests/Dibix.Sdk.Tests.Database/Tests/Syntax) for more examples.
-
-#### Name
-PascalCase naming is recommended for referencing actions in API definitions.
-If all lower case naming is used in T-SQL, this enables you to generate a PascalCase name for the action.
-```sql
--- @Name GetPersons
-```
-```json
-{
-  "Person": [
-    {
-      "target": "GetPersons"
-    }
-  ]
-}
-```
-
-#### Namespace
-Allows to group actions into a separate (relative) namespace.
-```sql
--- @Name GetPersons
--- @Namespace Group
-```
-```json
-{
-  "Person": [
-    {
-      "target": "Group.GetPersons"
-    }
-  ]
-}
-```
-
-To be continued...
-
-### Contract
-In this section the schema for defining contracts is described. The documentation is still in progress. For now you can use [the JSON schema](/src/Dibix.Sdk/CodeGeneration/Schema/dibix.contracts.schema.json) as a reference or have a look at [these tests](/tests/Dibix.Sdk.Tests.Database/Contracts) as samples.
-
-### Endpoint
-In this section the schema for defining endpoints is described. The documentation is still in progress. For now you can use [the JSON schema](/src/Dibix.Sdk/CodeGeneration/Schema/dibix.endpoints.schema.json) as a reference.
 
 ## Roadmap
 - [ ] Continue writing this documentation 🤓
