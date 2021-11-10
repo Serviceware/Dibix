@@ -191,29 +191,34 @@ namespace Dibix.Sdk.CodeGeneration
                     continue;
 
                 CustomAttributeTypedArgument argument = customAttributeData.ConstructorArguments.Single();
-                DefaultValue defaultValue = new DefaultValue(argument.Value, source, line, column);
-                defaultValue.EnumMember = CollectEnumDefault(argument.ArgumentType, argument.Value, source, line, column, schemaRegistry, logger);
+                object defaultValueRaw = argument.Value;
+
+                if (TryCollectEnumDefault(argument.ArgumentType, argument.Value, source, line, column, schemaRegistry, logger, out EnumSchemaMember enumMemberValue))
+                    defaultValueRaw = enumMemberValue;
+                
+                DefaultValue defaultValue = new DefaultValue(defaultValueRaw, source, line, column);
                 return defaultValue;
             }
 
             return null;
         }
 
-        private static EnumSchemaMember CollectEnumDefault(Type argumentType, object value, string source, int line, int column, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static bool TryCollectEnumDefault(Type argumentType, object value, string source, int line, int column, ISchemaRegistry schemaRegistry, ILogger logger, out EnumSchemaMember enumMemberValue)
         {
-            if (!(value is int)) 
-                return null;
+            if (!(value is int))
+            {
+                enumMemberValue = null;
+                return false;
+            }
 
             TypeReference typeReference = ResolveType(argumentType, source, line, column, isNullable: false, isEnumerable: false, udtName: null, schemaRegistry, logger);
-            if (!typeReference.IsEnum(schemaRegistry, out EnumSchema enumSchema)) 
-                return null;
+            if (!typeReference.IsEnum(schemaRegistry, out EnumSchema enumSchema))
+            {
+                enumMemberValue = null;
+                return false;
+            }
 
-            EnumSchemaMember enumMember = enumSchema.Members.FirstOrDefault(x => Equals(x.ActualValue, value));
-            if (enumMember != null)
-                return enumMember;
-
-            logger.LogError(code: null, $"Enum '{enumSchema.FullName}' does not define a member with value '{value}'", source, line, column);
-            return null;
+            return enumSchema.TryGetEnumMember(value, source, line, column, logger, out enumMemberValue);
         }
 
         private static SerializationBehavior ResolveSerializationBehavior(MemberInfo member)

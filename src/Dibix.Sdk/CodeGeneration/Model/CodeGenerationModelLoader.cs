@@ -84,12 +84,6 @@ namespace Dibix.Sdk.CodeGeneration
             return model;
         }
 
-        private static IEnumerable<SecurityScheme> CollectSecuritySchemes(IEnumerable<string> defaultSecuritySchemes)
-        {
-            foreach (string name in defaultSecuritySchemes)
-                yield return new SecurityScheme(name, SecuritySchemeKind.ApiKey);
-        }
-
         private static IEnumerable<SqlStatementDescriptor> CollectStatements
         (
             IEnumerable<string> sources

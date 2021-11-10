@@ -476,14 +476,11 @@ namespace Dibix.Sdk.OpenApi
                 if (property.SerializationBehavior == SerializationBehavior.Always && !property.IsOptional)
                     schema.Required.Add(property.Name);
 
-                if (property.DefaultValue != null)
-                {
-                    object defaultValue = property.DefaultValue.Value;
-                    if (property.DefaultValue.EnumMember != null)
-                        defaultValue = property.DefaultValue.EnumMember.ActualValue;
+                if (property.DefaultValue == null) 
+                    continue;
 
-                    propertySchema.Default = CreateDefaultValue(defaultValue);
-                }
+                object defaultValue = property.DefaultValue.Value;
+                propertySchema.Default = CreateDefaultValue(defaultValue);
             }
         }
 
@@ -511,8 +508,17 @@ namespace Dibix.Sdk.OpenApi
             switch (defaultValue)
             {
                 case bool boolValue: return new OpenApiBoolean(boolValue);
-                case int intValue: return new OpenApiInteger(intValue);
+                case byte byteValue: return new OpenApiByte(byteValue);
+                case short int16Value: return new OpenApiInteger(int16Value);
+                case int int32Value: return new OpenApiInteger(int32Value);
+                case long int64Value: return new OpenApiLong(int64Value);
+                case float singleValue: return new OpenApiFloat(singleValue);
+                case double doubleValue: return new OpenApiDouble(doubleValue);
+                case DateTime dateTimeValue: return new OpenApiDateTime(dateTimeValue);
+                case DateTimeOffset dateTimeOffsetValue: return new OpenApiDateTime(dateTimeOffsetValue);
+                case Guid guidValue: return new OpenApiString(guidValue.ToString());
                 case string stringValue: return new OpenApiString(stringValue);
+                case EnumSchemaMember enumMember: return new OpenApiInteger(enumMember.ActualValue);
                 case null: return new OpenApiNull();
                 default: throw new ArgumentOutOfRangeException(nameof(defaultValue), defaultValue, null);
             }

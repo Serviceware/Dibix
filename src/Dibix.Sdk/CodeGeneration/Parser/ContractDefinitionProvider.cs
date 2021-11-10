@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -16,7 +17,7 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly string _productName;
         private readonly string _areaName;
         private readonly IDictionary<string, ContractDefinition> _contracts;
-        private readonly ICollection<string> _usedContracts;
+        private readonly ICollection<IDelayedContractCollectionAction> _delayedCollectionActions;
         #endregion
 
         #region Properties
@@ -31,8 +32,8 @@ namespace Dibix.Sdk.CodeGeneration
             this._productName = productName;
             this._areaName = areaName;
             this._contracts = new Dictionary<string, ContractDefinition>();
-            this._usedContracts = new HashSet<string>();
-            this.Collect(contracts);
+            this._delayedCollectionActions = new Collection<IDelayedContractCollectionAction>();
+            this.CollectCore(contracts);
         }
         #endregion
 
@@ -80,6 +81,14 @@ If this is not a project that has multiple areas, please make sure to define the
         #endregion
 
         #region Private Methods
+        private void CollectCore(IEnumerable<string> contracts)
+        {
+            base.Collect(contracts);
+
+            foreach (IDelayedContractCollectionAction action in this._delayedCollectionActions) 
+                action.Invoke();
+        }
+
         private void ReadContracts(string rootNamespace, string currentNamespace, JObject contracts, string filePath)
         {
             foreach (JProperty definitionProperty in contracts.Properties())
@@ -119,10 +128,10 @@ If this is not a project that has multiple areas, please make sure to define the
                     bool isPartOfKey = default;
                     bool isOptional = default;
                     bool isDiscriminator = default;
-                    DefaultValue defaultValue = default;
+                    JValue defaultValue = default;
+                    bool obfuscated = default;
                     SerializationBehavior serializationBehavior = default;
                     DateTimeKind dateTimeKind = default;
-                    bool obfuscated = default;
                     switch (property.Value.Type)
                     {
                         case JTokenType.Object:
@@ -132,19 +141,11 @@ If this is not a project that has multiple areas, please make sure to define the
                             isPartOfKey = (bool?)propertyInfo.Property("isPartOfKey")?.Value ?? default;
                             isOptional = (bool?)propertyInfo.Property("isOptional")?.Value ?? default;
                             isDiscriminator = (bool?)propertyInfo.Property("isDiscriminator")?.Value ?? default;
-                            
-                            JProperty defaultProperty = propertyInfo.Property("default");
-                            if (defaultProperty != null)
-                            {
-                                JValue defaultValueValue = (JValue)defaultProperty.Value;
-                                IJsonLineInfo defaultValueLocation = defaultValueValue.GetLineInfo();
-                                defaultValue = new DefaultValue(defaultValueValue.Value, filePath, defaultValueLocation.LineNumber, defaultValueLocation.LinePosition);
-                            }
+                            defaultValue = (JValue)propertyInfo.Property("default")?.Value;
+                            obfuscated = (bool?)propertyInfo.Property("obfuscated")?.Value ?? default;
 
                             Enum.TryParse((string)propertyInfo.Property("serialize")?.Value, true, out serializationBehavior);
                             Enum.TryParse((string)propertyInfo.Property("kind")?.Value, true, out dateTimeKind);
-
-                            obfuscated = (bool?)propertyInfo.Property("obfuscated")?.Value ?? default;
                             break;
 
                         case JTokenType.String:
@@ -156,8 +157,15 @@ If this is not a project that has multiple areas, please make sure to define the
                             throw new ArgumentOutOfRangeException(nameof(property.Type), property.Type, null);
                     }
 
-                    TypeReference type = this.ParseType(typeName, rootNamespace, filePath, typeNameValue);
-                    contract.Properties.Add(new ObjectSchemaProperty(property.Name, type, isPartOfKey, isOptional, isDiscriminator, defaultValue, serializationBehavior, dateTimeKind, obfuscated));
+                    TypeReference type = this.ParsePropertyType(typeName, rootNamespace, filePath, typeNameValue);
+                    ObjectSchemaProperty objectSchemaProperty = new ObjectSchemaProperty(property.Name, type, isPartOfKey, isOptional, isDiscriminator, serializationBehavior: serializationBehavior, dateTimeKind: dateTimeKind, obfuscated: obfuscated);
+                    if (defaultValue != null)
+                    {
+                        // Delay default value resolution, since property defaults might reference enum contracts, that have not been registered yet
+                        this._delayedCollectionActions.Add(new ContractDefaultValueCollectionAction(objectSchemaProperty, defaultValue, filePath, this._contracts, this.Logger));
+                    }
+                    
+                    contract.Properties.Add(objectSchemaProperty);
                 }
             }
 
@@ -200,9 +208,6 @@ If this is not a project that has multiple areas, please make sure to define the
             }
 
             ContractDefinition contractDefinition = new ContractDefinition(definition, filePath, lineInfo.LineNumber, lineInfo.LinePosition);
-            if (this._usedContracts.Contains(name))
-                contractDefinition.IsUsed = true;
-
             this._contracts.Add(name, contractDefinition);
         }
 
@@ -241,7 +246,7 @@ If this is not a project that has multiple areas, please make sure to define the
             }
         }
 
-        private TypeReference ParseType(string typeName, string rootNamespace, string filePath, JValue value)
+        private TypeReference ParsePropertyType(string typeName, string rootNamespace, string filePath, JToken value)
         {
             bool isEnumerable = typeName.EndsWith("*", StringComparison.Ordinal);
             typeName = typeName.TrimEnd('*');
@@ -258,16 +263,8 @@ If this is not a project that has multiple areas, please make sure to define the
                 int column = location.LinePosition + 1;
                 string key = $"{rootNamespace}.{typeName}";
 
-                if (this._contracts.TryGetValue(key, out ContractDefinition contract))
-                {
-                    // Mark contract as used, since it's part of a parent type
-                    contract.IsUsed = true;
-                }
-                else
-                {
-                    // Contract was not registered yet, mark for later
-                    this._usedContracts.Add(key);
-                }
+                // Delay property contract reference tracking, since it might not be registered yet
+                this._delayedCollectionActions.Add(new ContractReferenceCountCollectionAction(key, this._contracts));
 
                 return new SchemaTypeReference(key, filePath, location.LineNumber, column, isNullable, isEnumerable);
             }

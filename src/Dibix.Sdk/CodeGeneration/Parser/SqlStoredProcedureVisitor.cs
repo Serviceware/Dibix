@@ -81,21 +81,24 @@ targetType: {targetType}");
         }
         private DefaultValue CollectParameterDefault(Literal literal, TypeReference typeReference)
         {
-            switch (typeReference)
+            if (typeReference is PrimitiveTypeReference primitiveTypeReference
+             && this.TryParseParameterDefaultValue(literal, primitiveTypeReference.Type, out object defaultValueRaw))
             {
-                case PrimitiveTypeReference primitiveTypeReference when this.TryParseParameterDefaultValue(literal, primitiveTypeReference.Type, out object defaultRawValue):
-                    return this.BuildDefaultValue(literal, defaultRawValue);
-                
-                case SchemaTypeReference schemaTypeReference:
-                    int numericValue = Int32.Parse(literal.Value);
-                    DefaultValue defaultValue = this.BuildDefaultValue(literal, numericValue);
-                    defaultValue.EnumMember = this.CollectEnumDefault(schemaTypeReference, literal, numericValue);
-                    return defaultValue;
-
-                default:
-                    // Error should have been reported
-                    return null;
+                return this.BuildDefaultValue(literal, defaultValueRaw);
             }
+
+            if (typeReference.IsEnum(this.SchemaRegistry, out EnumSchema enumSchema))
+            {
+                int numericValue = Int32.Parse(literal.Value);
+                if (enumSchema.TryGetEnumMember(numericValue, Target.Source, literal.StartLine, literal.StartColumn, Logger, out EnumSchemaMember enumMember))
+                {
+                    DefaultValue defaultValue = this.BuildDefaultValue(literal, enumMember);
+                    return defaultValue;
+                }
+            }
+
+            // Error should have been reported
+            return null;
         }
 
         private bool TryParseParameterDefaultValue(Literal literal, PrimitiveType primitiveType, out object defaultValue)
@@ -126,20 +129,6 @@ targetType: {targetType}");
         }
 
         private DefaultValue BuildDefaultValue(TSqlFragment value, object defaultValue) => new DefaultValue(defaultValue, base.Target.Source, value.StartLine, value.StartColumn);
-
-        private EnumSchemaMember CollectEnumDefault(SchemaTypeReference schemaTypeReference, TSqlFragment value, int numericValue)
-        {
-            if (!(base.SchemaRegistry.GetSchema(schemaTypeReference) is EnumSchema enumSchema))
-                return null;
-
-            EnumSchemaMember enumMember = enumSchema.Members.FirstOrDefault(x => Equals(x.ActualValue, numericValue));
-
-            if (enumMember != null)
-                return enumMember;
-
-            base.Logger.LogError(code: null, $"Enum '{enumSchema.FullName}' does not define a member with value '{numericValue}'", base.Target.Source, value.StartLine, value.StartColumn);
-            return null;
-        }
 
         private void ParseContent(TSqlFragment content, StatementList statements)
         {

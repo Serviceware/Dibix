@@ -9,7 +9,7 @@ namespace Dibix.Sdk.CodeGeneration
         public bool IsPartOfKey { get; }
         public bool IsOptional { get; }
         public bool IsDiscriminator { get; }
-        public DefaultValue DefaultValue { get; }
+        public DefaultValue DefaultValue { get; internal set; }
         public DateTimeKind DateTimeKind { get; }
         public bool Obfuscated { get; }
         public SerializationBehavior SerializationBehavior { get; }

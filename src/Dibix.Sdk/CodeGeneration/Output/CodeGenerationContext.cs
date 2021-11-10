@@ -97,19 +97,14 @@ namespace Dibix.Sdk.CodeGeneration
         public CSharpValue BuildDefaultValueLiteral(DefaultValue defaultValue)
         {
             object value = defaultValue.Value;
-            if (value == null)
-                return new CSharpValue("null");
-
-            string defaultValueStr = value.ToString();
-
-            if (defaultValue.EnumMember != null)
-                return new CSharpValue($"{defaultValue.EnumMember.Enum.FullName}.{defaultValue.EnumMember.Name}");
-
+            string defaultValueStr = value?.ToString();
             switch (value)
             {
                 case bool _: return new CSharpValue(defaultValueStr.ToLowerInvariant());
                 case char defaultValueChar: return new CSharpCharacterValue(defaultValueChar);
                 case string _: return new CSharpStringValue(defaultValueStr);
+                case EnumSchemaMember enumMember: return new CSharpValue($"{enumMember.Enum.FullName}.{enumMember.Name}");
+                case null: return new CSharpValue("null");
                 default: return new CSharpValue(defaultValueStr);
             }
         }

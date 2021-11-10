@@ -26,7 +26,7 @@ namespace Dibix.Sdk.CodeGeneration
         public override TypeReference ResolveType(string input, string @namespace, string source, int line, int column, bool isEnumerable)
         {
             if (this._localUserDefinedTypes.TryGetValue(input, out string key))
-                return new SchemaTypeReference(key, source, line, column, false, false);
+                return new SchemaTypeReference(key, source, line, column, isNullable: false, isEnumerable: false);
 
             if (this.TryGetExternalType(input, out Type type))
                 return ReflectionTypeResolver.ResolveType(type, source, line, column, input, this._schemaRegistry, this._logger);
