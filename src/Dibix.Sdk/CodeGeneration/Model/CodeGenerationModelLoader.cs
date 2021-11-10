@@ -79,6 +79,7 @@ namespace Dibix.Sdk.CodeGeneration
             model.Contracts.AddRange(contractDefinitionProvider.Contracts);
             model.Controllers.AddRange(CollectControllers(normalizedEndpoints, projectName, productName, areaName, defaultOutputName, model.Statements, normalizedDefaultSecuritySchemes, securitySchemeMap, assemblyResolver, fileSystemProvider, typeResolver, schemaRegistry, logger));
             model.SecuritySchemes.AddRange(securitySchemeMap.Values);
+            model.Schemas.AddRange(schemaRegistry.Schemas);
 
             return model;
         }

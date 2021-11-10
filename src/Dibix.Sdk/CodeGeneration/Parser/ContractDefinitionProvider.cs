@@ -15,14 +15,14 @@ namespace Dibix.Sdk.CodeGeneration
         private const string RootFolderName = "Contracts";
         private readonly string _productName;
         private readonly string _areaName;
-        private readonly IDictionary<string, SchemaDefinition> _schemas;
-        private readonly IDictionary<string, SchemaDefinitionLocation> _schemaLocations;
+        private readonly IDictionary<string, ContractDefinition> _contracts;
+        private readonly ICollection<string> _usedContracts;
         #endregion
 
         #region Properties
-        public IEnumerable<SchemaDefinition> Contracts => this._schemas.Values;
+        public IEnumerable<ContractDefinition> Contracts => this._contracts.Values;
         protected override string SchemaName => "dibix.contracts.schema";
-        IEnumerable<SchemaDefinition> ISchemaProvider.Schemas => this.Contracts;
+        IEnumerable<SchemaDefinition> ISchemaProvider.Schemas => this.Contracts.Select(x => x.Schema);
         #endregion
 
         #region Constructor
@@ -30,8 +30,8 @@ namespace Dibix.Sdk.CodeGeneration
         {
             this._productName = productName;
             this._areaName = areaName;
-            this._schemas = new Dictionary<string, SchemaDefinition>();
-            this._schemaLocations = new Dictionary<string, SchemaDefinitionLocation>();
+            this._contracts = new Dictionary<string, ContractDefinition>();
+            this._usedContracts = new HashSet<string>();
             this.Collect(contracts);
         }
         #endregion
@@ -39,22 +39,24 @@ namespace Dibix.Sdk.CodeGeneration
         #region ISchemaProvider Members
         public bool TryGetSchema(string name, out SchemaDefinition schema)
         {
-            if (this._schemas.TryGetValue(name, out schema))
-                return true;
+            if (!this._contracts.TryGetValue(name, out ContractDefinition contract))
+            {
+                // Assume relative namespace
+                string absoluteNamespace = NamespaceUtility.BuildAbsoluteNamespace(this._productName, this._areaName, LayerName.DomainModel, name);
+                if (!this._contracts.TryGetValue(absoluteNamespace, out contract))
+                {
+                    schema = null;
+                    return false;
+                }
+            }
 
-            // Assume relative namespace
-            string absoluteNamespace = NamespaceUtility.BuildAbsoluteNamespace(this._productName, this._areaName, LayerName.DomainModel, name);
-            return this._schemas.TryGetValue(absoluteNamespace, out schema);
+            contract.IsUsed = true;
+            schema = contract.Schema;
+            return true;
         }
         #endregion
 
         #region Overrides
-        protected override void Collect(IEnumerable<string> inputs)
-        {
-            base.Collect(inputs);
-            this.Validate();
-        }
-
         protected override void Read(string filePath, JObject json)
         {
             string relativePath = Path.GetDirectoryName(filePath).Substring(base.FileSystemProvider.CurrentDirectory.Length + 1);
@@ -105,7 +107,7 @@ If this is not a project that has multiple areas, please make sure to define the
 
         private void ReadObjectContract(string rootNamespace, string currentNamespace, string definitionName, JToken value, string filePath, IJsonLineInfo lineInfo)
         {
-            ObjectSchema contract = new ObjectSchema(currentNamespace, definitionName);
+            ObjectSchema contract = new ObjectSchema(currentNamespace, definitionName, SchemaDefinitionSource.Local);
             foreach (JProperty property in ((JObject)value).Properties())
             {
                 if (property.Name == "$wcfNs")
@@ -154,17 +156,17 @@ If this is not a project that has multiple areas, please make sure to define the
                             throw new ArgumentOutOfRangeException(nameof(property.Type), property.Type, null);
                     }
 
-                    TypeReference type = ParseType(typeName, rootNamespace, filePath, typeNameValue);
+                    TypeReference type = this.ParseType(typeName, rootNamespace, filePath, typeNameValue);
                     contract.Properties.Add(new ObjectSchemaProperty(property.Name, type, isPartOfKey, isOptional, isDiscriminator, defaultValue, serializationBehavior, dateTimeKind, obfuscated));
                 }
             }
 
-            this.CollectContract(contract.FullName, contract, filePath, lineInfo);
+            this.CollectContract(contract, filePath, lineInfo);
         }
 
         private void ReadEnumContract(string currentNamespace, string definitionName, JToken definitionValue, string filePath, IJsonLineInfo lineInfo)
         {
-            EnumSchema contract = new EnumSchema(currentNamespace, definitionName, isFlaggable: false);
+            EnumSchema contract = new EnumSchema(currentNamespace, definitionName, SchemaDefinitionSource.Local, isFlaggable: false);
 
             ICollection<EnumValue> values = ReadEnumValues(definitionValue).ToArray();
             IDictionary<string, int> actualValues = values.Where(x => x.ActualValue.HasValue).ToDictionary(x => x.Name, x => x.ActualValue.Value);
@@ -184,76 +186,24 @@ If this is not a project that has multiple areas, please make sure to define the
                 contract.Members.Add(new EnumSchemaMember(value.Name, actualValue, value.StringValue, contract));
             }
 
-            this.CollectContract(contract.FullName, contract, filePath, lineInfo);
+            this.CollectContract(contract, filePath, lineInfo);
         }
 
-        private void CollectContract(string name, SchemaDefinition definition, string filePath, IJsonLineInfo lineInfo)
+        private void CollectContract(SchemaDefinition definition, string filePath, IJsonLineInfo lineInfo)
         {
-            if (this._schemaLocations.TryGetValue(name, out SchemaDefinitionLocation otherLocation))
+            string name = definition.FullName;
+            if (this._contracts.TryGetValue(name, out ContractDefinition otherContract))
             {
-                this.Logger.LogError(null, $"Ambiguous contract definition: {definition.FullName}", otherLocation.FilePath, otherLocation.Line, otherLocation.Column);
+                this.Logger.LogError(null, $"Ambiguous contract definition: {definition.FullName}", otherContract.FilePath, otherContract.Line, otherContract.Column);
                 this.Logger.LogError(null, $"Ambiguous contract definition: {definition.FullName}", filePath, lineInfo.LineNumber, lineInfo.LinePosition);
                 return;
             }
-            this._schemas.Add(name, definition);
-            this._schemaLocations.Add(name, new SchemaDefinitionLocation(filePath, lineInfo.LineNumber, lineInfo.LinePosition));
-        }
 
-        private void Validate()
-        {
-            foreach (SchemaDefinition schemaDefinition in this._schemas.Values)
-            {
-                if (!(schemaDefinition is ObjectSchema objectSchema)) 
-                    continue;
+            ContractDefinition contractDefinition = new ContractDefinition(definition, filePath, lineInfo.LineNumber, lineInfo.LinePosition);
+            if (this._usedContracts.Contains(name))
+                contractDefinition.IsUsed = true;
 
-                foreach (ObjectSchemaProperty property in objectSchema.Properties)
-                {
-                    DefaultValue defaultValue = property.DefaultValue;
-                    if (!this.IsEnumDefaultValue(defaultValue, property, out EnumSchema enumSchema)) 
-                        continue;
-
-                    defaultValue.EnumMember = this.CollectEnumDefault(defaultValue, enumSchema);
-                }
-            }
-        }
-
-        private EnumSchemaMember CollectEnumDefault(DefaultValue defaultValue, EnumSchema enumSchema)
-        {
-            if (defaultValue.Value is string enumMemberName)
-            {
-                EnumSchemaMember enumMember = enumSchema.Members.FirstOrDefault(x => x.Name == enumMemberName);
-                if (enumMember != null) 
-                    return enumMember;
-
-                base.Logger.LogError(code: null, $"Enum '{enumSchema.FullName}' does not define a member named '{enumMemberName}'", defaultValue.Source, defaultValue.Line, defaultValue.Column);
-                return null;
-            }
-            else
-            {
-                EnumSchemaMember enumMember = null;
-                if (defaultValue.Value is byte || defaultValue.Value is short || defaultValue.Value is int || defaultValue.Value is long)
-                    enumMember = enumSchema.Members.FirstOrDefault(x => Equals(x.ActualValue, Convert.ToInt32(defaultValue.Value)));
-
-                if (enumMember != null) 
-                    return enumMember;
-
-                base.Logger.LogError(code: null, $"Enum '{enumSchema.FullName}' does not define a member with value '{defaultValue.Value}'", defaultValue.Source, defaultValue.Line, defaultValue.Column);
-                return null;
-            }
-        }
-
-        private bool IsEnumDefaultValue(DefaultValue defaultValue, ObjectSchemaProperty property, out EnumSchema enumSchema)
-        {
-            if (defaultValue != null
-             && property.Type is SchemaTypeReference schemaTypeReference
-             && this._schemas[schemaTypeReference.Key] is EnumSchema enumSchemaReference)
-            {
-                enumSchema = enumSchemaReference;
-                return true;
-            }
-
-            enumSchema = null;
-            return false;
+            this._contracts.Add(name, contractDefinition);
         }
 
         private static IEnumerable<EnumValue> ReadEnumValues(JToken members)
@@ -291,7 +241,7 @@ If this is not a project that has multiple areas, please make sure to define the
             }
         }
 
-        private static TypeReference ParseType(string typeName, string rootNamespace, string filePath, JValue value)
+        private TypeReference ParseType(string typeName, string rootNamespace, string filePath, JValue value)
         {
             bool isEnumerable = typeName.EndsWith("*", StringComparison.Ordinal);
             typeName = typeName.TrimEnd('*');
@@ -306,7 +256,20 @@ If this is not a project that has multiple areas, please make sure to define the
             {
                 IJsonLineInfo location = value.GetLineInfo();
                 int column = location.LinePosition + 1;
-                return new SchemaTypeReference($"{rootNamespace}.{typeName}", filePath, location.LineNumber, column, isNullable, isEnumerable);
+                string key = $"{rootNamespace}.{typeName}";
+
+                if (this._contracts.TryGetValue(key, out ContractDefinition contract))
+                {
+                    // Mark contract as used, since it's part of a parent type
+                    contract.IsUsed = true;
+                }
+                else
+                {
+                    // Contract was not registered yet, mark for later
+                    this._usedContracts.Add(key);
+                }
+
+                return new SchemaTypeReference(key, filePath, location.LineNumber, column, isNullable, isEnumerable);
             }
 
             PrimitiveType dataType = (PrimitiveType)Enum.Parse(typeof(PrimitiveType), typeName, ignoreCase: true /* JSON is camelCase while C# is PascalCase */);
@@ -315,20 +278,6 @@ If this is not a project that has multiple areas, please make sure to define the
         #endregion
 
         #region Nested types
-        private readonly struct SchemaDefinitionLocation
-        {
-            public string FilePath { get; }
-            public int Line { get; }
-            public int Column { get; }
-
-            public SchemaDefinitionLocation(string filePath, int line, int column)
-            {
-                this.FilePath = filePath;
-                this.Line = line;
-                this.Column = column;
-            }
-        }
-
         private sealed class EnumValue
         {
             public string Name { get; }

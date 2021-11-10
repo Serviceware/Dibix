@@ -61,7 +61,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                 string @namespace = NamespaceUtility.BuildAbsoluteNamespace(this._productName, this._areaName, LayerName.Data, relativeNamespace);
                 ICollection<string> notNullableColumns = new HashSet<string>(GetNotNullableColumns(node.Definition));
-                this.Definition = new UserDefinedTypeSchema(@namespace, definitionName, typeName);
+                this.Definition = new UserDefinedTypeSchema(@namespace, definitionName, SchemaDefinitionSource.Local, typeName);
                 this.Definition.Properties.AddRange(node.Definition.ColumnDefinitions.Select(x => this.MapColumn(x, relativeNamespace, notNullableColumns)));
             }
 

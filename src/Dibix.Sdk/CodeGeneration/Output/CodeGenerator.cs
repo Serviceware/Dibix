@@ -23,12 +23,12 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        protected CodeGenerator(ILogger logger, ISchemaRegistry schemaRegistry)
+        protected CodeGenerator(CodeGenerationModel model, ILogger logger, ISchemaRegistry schemaRegistry)
         {
             this._logger = logger;
             this._schemaRegistry = schemaRegistry;
             this._writers = new Collection<ArtifactWriterBase>();
-            this._writers.AddRange(this.SelectWriters());
+            this._writers.AddRange(this.SelectWriters(model));
         }
         #endregion
 
@@ -90,7 +90,7 @@ namespace Dibix.Sdk.CodeGeneration
             output.Generate();
         }
 
-        protected virtual IEnumerable<ArtifactWriterBase> SelectWriters()
+        protected virtual IEnumerable<ArtifactWriterBase> SelectWriters(CodeGenerationModel model)
         {
             yield break;
         }

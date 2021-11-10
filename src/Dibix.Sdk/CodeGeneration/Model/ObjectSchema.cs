@@ -8,7 +8,7 @@ namespace Dibix.Sdk.CodeGeneration
         public string WcfNamespace { get; set; }
         public IList<ObjectSchemaProperty> Properties { get; }
 
-        public ObjectSchema(string @namespace, string definitionName) : base(@namespace, definitionName)
+        public ObjectSchema(string @namespace, string definitionName, SchemaDefinitionSource source) : base(@namespace, definitionName, source)
         {
             this.Properties = new Collection<ObjectSchemaProperty>();
         }

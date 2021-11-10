@@ -10,6 +10,10 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly IDictionary<string, SchemaDefinition> _schemas;
         #endregion
 
+        #region Properties
+        public IEnumerable<SchemaDefinition> Schemas => this._schemas.Values;
+        #endregion
+
         #region Constructor
         public SchemaRegistry(ILogger logger)
         {

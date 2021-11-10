@@ -58,7 +58,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
               , isEmbedded: isEmbedded
               , databaseSchemaProviderName: DatabaseTestUtility.DatabaseSchemaProviderName
               , modelCollation: DatabaseTestUtility.ModelCollation
-              , sqlReferencePath: new TaskItem[0]
+              , sqlReferencePath: Array.Empty<TaskItem>()
               , logger: logger
               , additionalAssemblyReferences: out string[] additionalAssemblyReferences
             );

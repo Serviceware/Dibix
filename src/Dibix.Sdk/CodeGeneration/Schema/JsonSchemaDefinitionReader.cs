@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Dibix.Sdk.Json;
@@ -21,9 +22,9 @@ namespace Dibix.Sdk.CodeGeneration
             this.Logger = logger;
         }
 
-        protected virtual void Collect(IEnumerable<string> inputs)
+        protected  void Collect(IEnumerable<string> inputs)
         {
-            foreach (string filePath in this.FileSystemProvider.GetFiles(null, inputs.Select(x => (VirtualPath)x), new VirtualPath[0]))
+            foreach (string filePath in this.FileSystemProvider.GetFiles(null, inputs.Select(x => (VirtualPath)x), Array.Empty<VirtualPath>()))
             {
                 using (Stream stream = File.OpenRead(filePath))
                 {

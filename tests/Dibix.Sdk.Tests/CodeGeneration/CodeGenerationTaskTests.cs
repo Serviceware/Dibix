@@ -341,11 +341,8 @@ Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly
                 }
               , contracts: new []
                 {
-                    @"Contracts\AccessRights.json"
-                  , @"Contracts\Direction.json"
-                  , @"Contracts\GenericContract.json"
+                    @"Contracts\GenericContract.json"
                   , @"Contracts\InputContract.json"
-                  , @"Contracts\Extension\MultiMapContract.json"
                 }
               , endpoints: new[] { @"Endpoints\GenericEndpoint.json" }
               , expectedAdditionalAssemblyReferences: new[]

@@ -6,6 +6,6 @@ namespace Dibix.Sdk.CodeGeneration
     {
         public override bool ShouldGenerate(CodeArtifactsGenerationModel model) => !String.IsNullOrEmpty(model.DefaultOutputFilePath);
         protected override string GetOutputFilePath(CodeArtifactsGenerationModel model) => model.DefaultOutputFilePath;
-        protected override ServerCodeGenerator CreateGenerator(ISchemaRegistry schemaRegistry, ILogger logger) => new ServerCodeGenerator(logger, schemaRegistry);
+        protected override ServerCodeGenerator CreateGenerator(CodeGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger) => new ServerCodeGenerator(model, logger, schemaRegistry);
     }
 }

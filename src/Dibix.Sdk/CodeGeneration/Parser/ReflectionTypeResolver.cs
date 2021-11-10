@@ -123,9 +123,10 @@ namespace Dibix.Sdk.CodeGeneration
             if (schemaRegistry.IsRegistered(schemaTypeReference.Key))
                 return schemaTypeReference;
 
+            SchemaDefinitionSource schemaDefinitionSource = DetermineSchemaDefinitionSource(type);
             if (!String.IsNullOrEmpty(udtName))
             {
-                UserDefinedTypeSchema udtSchema = new UserDefinedTypeSchema(type.Namespace, type.Name, udtName);
+                UserDefinedTypeSchema udtSchema = new UserDefinedTypeSchema(type.Namespace, type.Name, schemaDefinitionSource, udtName);
                 MethodInfo addMethod = type.GetMethod("Add");
                 if (addMethod == null)
                     throw new InvalidOperationException($"Could not find 'Add' method on type: {type}");
@@ -136,7 +137,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
             else if (type.IsEnum)
             {
-                EnumSchema enumSchema = new EnumSchema(type.Namespace, type.Name, isFlaggable: false);
+                EnumSchema enumSchema = new EnumSchema(type.Namespace, type.Name, schemaDefinitionSource, isFlaggable: false);
 
                 // Enum.GetValues() => "The requested operation is invalid in the ReflectionOnly context"
                 for (int i = 0; i < type.GetFields(BindingFlags.Public | BindingFlags.Static).Length; i++)
@@ -151,7 +152,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
             else
             {
-                ObjectSchema objectSchema = new ObjectSchema(type.Namespace, type.Name);
+                ObjectSchema objectSchema = new ObjectSchema(type.Namespace, type.Name, schemaDefinitionSource);
                 schemaRegistry.Populate(objectSchema); // Register schema before traversing properties to avoid endless recursions for self referencing properties
                 objectSchema.Properties.AddRange(type.GetProperties()
                                                      .Select(x => CreateProperty(x, source, line, column, schemaRegistry, logger)));
@@ -304,6 +305,12 @@ namespace Dibix.Sdk.CodeGeneration
                 return type.GenericTypeArguments.Single();
             
             return null;
+        }
+
+        private static SchemaDefinitionSource DetermineSchemaDefinitionSource(Type type)
+        {
+            bool isRuntimeType = type.Assembly.GetName().Name == "Dibix";
+            return isRuntimeType ? SchemaDefinitionSource.Internal : SchemaDefinitionSource.Foreign;
         }
         #endregion
     }

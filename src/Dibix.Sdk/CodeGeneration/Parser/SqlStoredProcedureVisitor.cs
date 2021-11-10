@@ -216,7 +216,7 @@ targetType: {targetType}");
             if (base.SchemaRegistry.IsRegistered(typeReference.Key)) 
                 return typeReference;
 
-            ObjectSchema schema = new ObjectSchema(@namespace, gridResultTypeName);
+            ObjectSchema schema = new ObjectSchema(@namespace, gridResultTypeName, SchemaDefinitionSource.Generated);
             schema.Properties.AddRange(base.Target
                                            .Results
                                            .Select(x => new ObjectSchemaProperty(x.Name, x.ResultType)));

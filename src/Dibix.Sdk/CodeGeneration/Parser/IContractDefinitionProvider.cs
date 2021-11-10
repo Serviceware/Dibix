@@ -4,7 +4,7 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public interface IContractDefinitionProvider : ISchemaProvider
     {
-        IEnumerable<SchemaDefinition> Contracts { get; }
+        IEnumerable<ContractDefinition> Contracts { get; }
         bool HasSchemaErrors { get; }
     }
 }

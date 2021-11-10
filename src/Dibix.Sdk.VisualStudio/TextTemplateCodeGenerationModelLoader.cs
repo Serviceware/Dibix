@@ -49,6 +49,7 @@ namespace Dibix.Sdk.VisualStudio
             if (model.DefaultClassName == null)
                 model.DefaultClassName = Path.GetFileNameWithoutExtension(textTemplatingEngineHost.TemplateFile);
 
+            model.Schemas.AddRange(schemaRegistry.Schemas);
             return model;
         }
         #endregion

@@ -188,7 +188,6 @@
 //----------------------------------------------------------------------------*/
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Net.Http;
 using System.Net.Http.Formatting;
@@ -203,22 +202,6 @@ namespace Dibix.Sdk.Tests
     namespace DomainModel
     {
         #region Contracts
-        [Flags]
-        public enum AccessRights : int
-        {
-            None = 0,
-            Read = 1,
-            Write = 2,
-            Execute = 4,
-            All = Read | Write | Execute
-        }
-
-        public enum Direction : int
-        {
-            Ascending,
-            Descending
-        }
-
         public enum Role : int
         {
             None,
@@ -244,22 +227,6 @@ namespace Dibix.Sdk.Tests
             public string Password { get; set; }
             public bool Y { get; set; }
             public int Z { get; set; }
-        }
-
-        namespace Extension
-        {
-            public sealed class MultiMapContract
-            {
-                public System.Guid? X { get; set; }
-                public IList&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; }
-                public IList&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
-
-                public MultiMapContract()
-                {
-                    this.Y = new Collection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;();
-                    this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
-                }
-            }
         }
         #endregion
     }

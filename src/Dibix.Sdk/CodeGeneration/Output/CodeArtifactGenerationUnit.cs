@@ -12,7 +12,7 @@ namespace Dibix.Sdk.CodeGeneration
     {
         public override bool Generate(CodeArtifactsGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger)
         {
-            TGenerator generator = this.CreateGenerator(schemaRegistry, logger);
+            TGenerator generator = this.CreateGenerator(model, schemaRegistry, logger);
 
             string generated = generator.Generate(model);
 
@@ -26,7 +26,7 @@ namespace Dibix.Sdk.CodeGeneration
             return false;
         }
 
-        protected abstract TGenerator CreateGenerator(ISchemaRegistry schemaRegistry, ILogger logger);
+        protected abstract TGenerator CreateGenerator(CodeGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger);
 
         protected abstract string GetOutputFilePath(CodeArtifactsGenerationModel model);
     }

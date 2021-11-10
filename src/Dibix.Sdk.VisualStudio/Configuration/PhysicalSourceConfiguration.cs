@@ -53,7 +53,7 @@ namespace Dibix.Sdk.VisualStudio
               , schemaRegistry: schemaRegistry
               , logger: logger
               , files: files
-              , modelAccessor: new Lazy<TSqlModel>(() => PublicSqlDataSchemaModelLoader.Load(this._projectName, "Microsoft.Data.Tools.Schema.Sql.Sql120DatabaseSchemaProvider", "1033, CI", Enumerable.Empty<TaskItem>(), new TaskItem[0], logger))
+              , modelAccessor: new Lazy<TSqlModel>(() => PublicSqlDataSchemaModelLoader.Load(this._projectName, "Microsoft.Data.Tools.Schema.Sql.Sql120DatabaseSchemaProvider", "1033, CI", Enumerable.Empty<TaskItem>(), Array.Empty<TaskItem>(), logger))
             );
             return statementCollector.CollectStatements();
         }

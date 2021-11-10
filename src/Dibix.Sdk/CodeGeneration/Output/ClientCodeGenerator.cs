@@ -6,13 +6,13 @@ namespace Dibix.Sdk.CodeGeneration
     internal sealed class ClientCodeGenerator : CodeGenerator
     {
         #region Constructor
-        public ClientCodeGenerator(ILogger logger, ISchemaRegistry schemaRegistry) : base(logger, schemaRegistry) { }
+        public ClientCodeGenerator(CodeGenerationModel model, ILogger logger, ISchemaRegistry schemaRegistry) : base(model, logger, schemaRegistry) { }
         #endregion
 
         #region Overrides
-        protected override IEnumerable<ArtifactWriterBase> SelectWriters()
+        protected override IEnumerable<ArtifactWriterBase> SelectWriters(CodeGenerationModel model)
         {
-            yield return new ClientContractClassWriter();
+            yield return new ClientContractClassWriter(model);
             yield return new ApiClientInterfaceWriter();
             yield return new ApiClientImplementationWriter();
         }

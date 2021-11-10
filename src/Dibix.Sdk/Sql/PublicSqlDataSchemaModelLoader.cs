@@ -292,7 +292,7 @@ namespace Dibix.Sdk.Sql
         {
             private readonly TaskItem _item;
 
-            ICollection ITaskItem.MetadataNames { get; } = new object[0];
+            ICollection ITaskItem.MetadataNames { get; } = Array.Empty<object>();
             int ITaskItem.MetadataCount => throw new NotSupportedException();
             string ITaskItem.ItemSpec
             {

@@ -7,7 +7,7 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public sealed class MsTestWrapperWriter : CodeGenerator
     {
-        public MsTestWrapperWriter(ILogger logger, ISchemaRegistry schemaRegistry) : base(logger, schemaRegistry) { }
+        public MsTestWrapperWriter(CodeGenerationModel model, ILogger logger, ISchemaRegistry schemaRegistry) : base(model, logger, schemaRegistry) { }
 
         protected override void Write(StringWriter writer, CodeGenerationModel model)
         {

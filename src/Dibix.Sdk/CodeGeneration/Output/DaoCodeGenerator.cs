@@ -6,15 +6,15 @@ namespace Dibix.Sdk.CodeGeneration
     public sealed class ServerCodeGenerator : CodeGenerator
     {
         #region Constructor
-        public ServerCodeGenerator(ILogger logger, ISchemaRegistry schemaRegistry) : base(logger, schemaRegistry) { }
+        public ServerCodeGenerator(CodeGenerationModel model, ILogger logger, ISchemaRegistry schemaRegistry) : base(model, logger, schemaRegistry) { }
         #endregion
 
         #region Overrides
-        protected override IEnumerable<ArtifactWriterBase> SelectWriters()
+        protected override IEnumerable<ArtifactWriterBase> SelectWriters(CodeGenerationModel model)
         {
             yield return new DaoExecutorWriter();
             yield return new DaoExecutorInputClassWriter();
-            yield return new DaoContractClassWriter();
+            yield return new DaoContractClassWriter(model);
             yield return new DaoStructuredTypeWriter();
             yield return new ApiDescriptionWriter();
         }

@@ -75,12 +75,12 @@ namespace Dibix.Sdk.VisualStudio
             switch (element)
             {
                 case CodeEnum @enum:
-                    return this.ResolveType(@enum.Namespace, element.Name, source, line, column, typeName.IsNullable, isEnumerable, (x, y) => new EnumSchema(@namespace: x, definitionName: y, isFlaggable: false));
+                    return this.ResolveType(@enum.Namespace, element.Name, source, line, column, typeName.IsNullable, isEnumerable, (x, y) => new EnumSchema(@namespace: x, definitionName: y, SchemaDefinitionSource.Internal, isFlaggable: false));
 
                 case CodeClass @class:
                     return this.ResolveType(@class.Namespace, element.Name, source, line, column, typeName.IsNullable, isEnumerable, (x, y) =>
                     {
-                        ObjectSchema schema = new ObjectSchema(x, y);
+                        ObjectSchema schema = new ObjectSchema(x, y, SchemaDefinitionSource.Internal);
                         foreach (ObjectSchemaProperty property in TraverseProperties(@class)) 
                             schema.Properties.Add(property);
 

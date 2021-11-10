@@ -13,9 +13,10 @@ namespace Dibix.Sdk.CodeGeneration
         public CommandTextFormatting CommandTextFormatting { get; set; }
         public IList<SqlStatementDescriptor> Statements { get; }
         public IList<UserDefinedTypeSchema> UserDefinedTypes { get; }
-        public ICollection<SchemaDefinition> Contracts { get; }
+        public ICollection<ContractDefinition> Contracts { get; }
         public IList<ControllerDefinition> Controllers { get; }
         public IList<SecurityScheme> SecuritySchemes { get; }
+        public ICollection<SchemaDefinition> Schemas { get; }
         public ICollection<string> AdditionalAssemblyReferences { get; }
 
         public CodeGenerationModel(CodeGeneratorCompatibilityLevel compatibilityLevel)
@@ -23,9 +24,10 @@ namespace Dibix.Sdk.CodeGeneration
             this.CompatibilityLevel = compatibilityLevel;
             this.Statements = new Collection<SqlStatementDescriptor>();
             this.UserDefinedTypes = new Collection<UserDefinedTypeSchema>();
-            this.Contracts = new Collection<SchemaDefinition>();
+            this.Contracts = new Collection<ContractDefinition>();
             this.Controllers = new Collection<ControllerDefinition>();
             this.SecuritySchemes = new Collection<SecurityScheme>();
+            this.Schemas = new Collection<SchemaDefinition>();
             this.AdditionalAssemblyReferences = new HashSet<string>();
         }
     }

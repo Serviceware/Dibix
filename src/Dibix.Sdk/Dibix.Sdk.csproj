@@ -9,6 +9,7 @@
     <EmbeddedResource Include="CodeAnalysis\Suppressions.json" />
     <EmbeddedResource Include="CodeGeneration\Schema\dibix.contracts.schema.json" />
     <EmbeddedResource Include="CodeGeneration\Schema\dibix.endpoints.schema.json" />
+    <Compile Include="..\..\shared\CollectionExtensions.cs" Link="Extensions\CollectionExtensions.cs" />
     <Compile Include="..\..\shared\EnumerableExtensions.cs" Link="Extensions\EnumerableExtensions.cs" />
     <Compile Include="..\..\shared\ExpressionUtility.cs" Link="Utilities\ExpressionUtility.cs" />
     <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\Guard.cs" />
