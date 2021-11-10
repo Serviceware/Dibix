@@ -582,6 +582,8 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
             {
                 string parameterName = parameter.Name;
                 TypeReference parameterType = ReflectionTypeResolver.ResolveType(parameter.ParameterType, filePath, line, column, this._schemaRegistry, base.Logger);
+                if (parameter.IsNullable())
+                    parameterType.IsNullable = true;
 
                 // ParameterInfo.HasDefaultValue/DefaultValue => It is illegal to reflect on the custom attributes of a Type loaded via ReflectionOnlyGetType (see Assembly.ReflectionOnly) -- use CustomAttributeData instead
                 DefaultValue defaultValue = parameter.RawDefaultValue != DBNull.Value ? new DefaultValue(parameter.RawDefaultValue, filePath, line, column) : null;

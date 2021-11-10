@@ -50,7 +50,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Public Methods
-        public static TypeReference ResolveType(Type type, string source, int line, int column, string udtName, ISchemaRegistry schemaRegistry, ILogger logger) => ResolveType(type, source, line, column, false, false, udtName, schemaRegistry, logger);
+        public static TypeReference ResolveType(Type type, string source, int line, int column, string udtName, ISchemaRegistry schemaRegistry, ILogger logger) => ResolveType(type, source, line, column, isNullable: false, isEnumerable: false, udtName, schemaRegistry, logger);
         public static TypeReference ResolveType(Type type, string source, int line, int column, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             string udtName = type.GetUdtName();
@@ -164,7 +164,7 @@ namespace Dibix.Sdk.CodeGeneration
         private static ObjectSchemaProperty CreateProperty(PropertyInfo property, string source, int line, int column, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             TypeReference typeReference = ResolveType(property.PropertyType, source, line, column, schemaRegistry, logger);
-            if (IsNullableReferenceType(property))
+            if (property.IsNullable())
                 typeReference.IsNullable = true;
 
             bool isPartOfKey = ResolveIsPartOfKey(property);
@@ -175,40 +175,6 @@ namespace Dibix.Sdk.CodeGeneration
             DateTimeKind dateTimeKind = ResolveDateTimeKind(property);
             bool obfuscated = ResolveObfuscated(property);
             return new ObjectSchemaProperty(property.Name, typeReference, isPartOfKey, isOptional, isDiscriminator, defaultValue, serializationBehavior, dateTimeKind, obfuscated);
-        }
-
-        private static bool IsNullableReferenceType(PropertyInfo property)
-        {
-            if (property.PropertyType.IsValueType)
-                return false;
-
-            byte nullableFlag = ResolveNullableFlag(property);
-            return nullableFlag == 2;
-        }
-
-        private static byte ResolveNullableFlag(MemberInfo member)
-        {
-            byte nullableFlag = ResolveNullableFlag(member,               "System.Runtime.CompilerServices.NullableAttribute")
-                             ?? ResolveNullableFlag(member.DeclaringType, "System.Runtime.CompilerServices.NullableContextAttribute") 
-                             ?? 0;
-            return nullableFlag;
-        }
-
-        private static byte? ResolveNullableFlag(MemberInfo member, string attributeFullName)
-        {
-            foreach (CustomAttributeData attribute in member.GetCustomAttributesData())
-            {
-                if (attribute.AttributeType.FullName != attributeFullName) 
-                    continue;
-
-                byte nullableFlag = attribute.ConstructorArguments
-                                             .Select(y => y.Value)
-                                             .OfType<byte>()
-                                             .SingleOrDefault();
-                return nullableFlag;
-            }
-
-            return null;
         }
 
         private static bool ResolveIsPartOfKey(MemberInfo member) => IsDefined(member, "System.ComponentModel.DataAnnotations.KeyAttribute");
