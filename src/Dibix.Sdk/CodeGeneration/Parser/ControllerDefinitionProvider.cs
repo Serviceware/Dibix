@@ -581,7 +581,11 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
             foreach (ParameterInfo parameter in parameters)
             {
                 string parameterName = parameter.Name;
-                TypeReference parameterType = ReflectionTypeResolver.ResolveType(parameter.ParameterType, filePath, line, column, this._schemaRegistry, base.Logger);
+                Type normalizedParameterType = parameter.ParameterType;
+                if (normalizedParameterType.HasElementType)
+                    normalizedParameterType = normalizedParameterType.GetElementType(); // By-ref types are not supported
+                
+                TypeReference parameterType = ReflectionTypeResolver.ResolveType(normalizedParameterType, filePath, line, column, this._schemaRegistry, base.Logger);
                 if (parameter.IsNullable())
                     parameterType.IsNullable = true;
 

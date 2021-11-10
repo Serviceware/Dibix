@@ -113,9 +113,12 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private TypeReference ResolveType(Type type, string source, int line, int column, bool isNullable, bool isEnumerable) => ResolveType(type, source, line, column, isNullable, isEnumerable, null, this._schemaRegistry, this._logger);
+        private TypeReference ResolveType(Type type, string source, int line, int column, bool isNullable, bool isEnumerable) => ResolveType(type, source, line, column, isNullable, isEnumerable, udtName: null, this._schemaRegistry, this._logger);
         private static TypeReference ResolveType(Type type, string source, int line, int column, bool isNullable, bool isEnumerable, string udtName, ISchemaRegistry schemaRegistry, ILogger logger)
         {
+            if (type.IsByRef)
+                throw new InvalidOperationException($"By ref types are not supported: {type}");
+
             if (PrimitiveTypeMap.TryGetValue(type, out PrimitiveType dataType))
                 return new PrimitiveTypeReference(dataType, isNullable, isEnumerable);
 
