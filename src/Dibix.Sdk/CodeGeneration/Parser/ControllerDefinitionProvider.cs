@@ -119,14 +119,14 @@ namespace Dibix.Sdk.CodeGeneration
             CollectActionParameters(action, explicitParameters);
 
             // Collect path parameters
-            IDictionary<string, Group> pathParameters = new Dictionary<string, Group>(StringComparer.OrdinalIgnoreCase);
+            IDictionary<string, PathParameter> pathParameters = new Dictionary<string, PathParameter>(StringComparer.OrdinalIgnoreCase);
             JProperty childRouteProperty = action.Property("childRoute");
             string childRoute = (string)childRouteProperty?.Value;
             if (childRouteProperty != null)
             {
                 IEnumerable<Group> pathSegments = HttpParameterUtility.ExtractPathParameters(childRoute);
                 foreach (Group pathSegment in pathSegments) 
-                    pathParameters.Add(pathSegment.Value, pathSegment);
+                    pathParameters.Add(pathSegment.Value, new PathParameter(childRouteProperty, pathSegment));
             }
 
             // Collect body parameters
@@ -144,17 +144,13 @@ namespace Dibix.Sdk.CodeGeneration
                 // Validate explicit parameters
                 foreach (ExplicitParameter explicitParameter in explicitParameters.Values)
                 {
-                    IJsonLineInfo propertyLocation = explicitParameter.Property.GetLineInfo();
-                    base.Logger.LogError(null, $"Parameter '{explicitParameter.Property.Name}' not found on action: {actionDefinition.Target.OperationName}", filePath, propertyLocation.LineNumber, propertyLocation.LinePosition);
+                    base.Logger.LogError(null, $"Parameter '{explicitParameter.Name}' not found on action: {actionDefinition.Target.OperationName}", filePath, explicitParameter.Line, explicitParameter.Column);
                 }
 
                 // Validate path parameters
-                foreach (Group pathSegment in pathParameters.Values)
+                foreach (PathParameter pathSegment in pathParameters.Values)
                 {
-                    JValue childRouteValue = (JValue)childRouteProperty.Value;
-                    IJsonLineInfo childRouteValueLocation = childRouteProperty.Value.GetLineInfo();
-                    int matchIndex = pathSegment.Index - 1;
-                    base.Logger.LogError(null, $"Undefined path parameter: {pathSegment}", filePath, childRouteValueLocation.LineNumber, childRouteValueLocation.LinePosition + matchIndex);
+                    base.Logger.LogError(null, $"Undefined path parameter: {pathSegment}", filePath, pathSegment.Line, pathSegment.Column);
                 }
             }
 
@@ -165,8 +161,8 @@ namespace Dibix.Sdk.CodeGeneration
             actionDefinition.Description = (string)action.Property("description")?.Value;
             actionDefinition.ChildRoute = childRoute;
             actionDefinition.RequestBody = requestBody;
-            
-            ActionFileResponse fileResponse = ReadFileResponse(action);
+
+            ActionFileResponseWithLocation fileResponse = ReadFileResponse(action, filePath);
             if (fileResponse != null) 
                 CollectFileResponse(actionDefinition, fileResponse);
 
@@ -216,11 +212,15 @@ namespace Dibix.Sdk.CodeGeneration
         private ActionRequestBody ReadBodyValue(JObject value, string filePath)
         {
             JValue contractName = (JValue)value.Property("contract")?.Value;
-            string mediaType = (string)value.Property("mediaType")?.Value;
+            JToken mediaTypeJson = value.Property("mediaType")?.Value;
+            string mediaType = (string)mediaTypeJson;
             string binder = (string)value.Property("binder")?.Value;
 
-            if (mediaType != null && mediaType != HttpMediaType.Json)
-                return new ActionRequestBody(mediaType, CreateStreamTypeReference());
+            if (mediaTypeJson != null && mediaType != HttpMediaType.Json)
+            {
+                IJsonLineInfo mediaTypeLocation = mediaTypeJson.GetLineInfo();
+                return new ActionRequestBody(mediaType, CreateStreamTypeReference(filePath, mediaTypeLocation.LineNumber, mediaTypeLocation.LinePosition));
+            }
 
             if (contractName == null)
             {
@@ -359,9 +359,10 @@ namespace Dibix.Sdk.CodeGeneration
             return new ActionParameterBodySource(bodyConverterTypeName);
         }
 
-        private static ActionFileResponse ReadFileResponse(JObject action)
+        private static ActionFileResponseWithLocation ReadFileResponse(JObject action, string filePath)
         {
-            JObject fileResponseValue = (JObject)action.Property("fileResponse")?.Value;
+            JProperty fileResponseProperty = action.Property("fileResponse");
+            JObject fileResponseValue = (JObject)fileResponseProperty?.Value;
             if (fileResponseValue == null)
                 return null;
 
@@ -377,17 +378,18 @@ namespace Dibix.Sdk.CodeGeneration
             if (cacheProperty != null)
                 fileResponse.Cache = (bool)cacheProperty.Value;
 
-            return fileResponse;
+            IJsonLineInfo fileResponsePropertyLocation = fileResponseProperty.GetLineInfo();
+            return new ActionFileResponseWithLocation(fileResponse, filePath, fileResponsePropertyLocation.LineNumber, fileResponsePropertyLocation.LinePosition);
         }
 
-        private ActionDefinition CreateActionDefinition(JObject action, string filePath, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, Group> pathParameters, ICollection<string> bodyParameters)
+        private ActionDefinition CreateActionDefinition(JObject action, string filePath, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters)
         {
             JValue targetValue = (JValue)action.Property("target").Value;
             IJsonLineInfo lineInfo = targetValue.GetLineInfo();
             ActionDefinition actionDefinition = this.CreateActionDefinition((string)targetValue, filePath, lineInfo.LineNumber, lineInfo.LinePosition, explicitParameters, pathParameters, bodyParameters);
             return actionDefinition;
         }
-        private ActionDefinition CreateActionDefinition(string target, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, Group> pathParameters, ICollection<string> bodyParameters)
+        private ActionDefinition CreateActionDefinition(string target, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters)
         {
             // 1. Target is a reflection target within a foreign assembly
             if (this.TryGetExternalActionTarget(target, filePath, line, column, explicitParameters, pathParameters, bodyParameters, out ActionDefinition actionDefinition))
@@ -458,7 +460,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
             return actionDefinition;
         }
 
-        private bool TryGetExternalActionTarget(string targetName, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, Group> pathParameters, ICollection<string> bodyParameters, out ActionDefinition actionDefinition)
+        private bool TryGetExternalActionTarget(string targetName, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, out ActionDefinition actionDefinition)
         {
             string[] parts = targetName.Split(',');
             if (parts.Length != 2)
@@ -496,38 +498,39 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
             ActionParameterRegistry parameterRegistry = new ActionParameterRegistry(actionDefinition, pathParameters);
             foreach (ExplicitParameter parameter in explicitParameters.Values)
             {
-                string apiParameterName = parameter.Property.Name;
+                string apiParameterName = parameter.Name;
                 string internalParameterName = apiParameterName;
                 ActionParameterLocation location = ResolveParameterLocationFromSource(parameter.Source, ref apiParameterName);
                 if (location == ActionParameterLocation.Path)
                     pathParameters.Remove(apiParameterName);
 
                 TypeReference type = null;
-                DefaultValue defaultValue = null;
+                ValueReference defaultValue = null;
                 if (location == ActionParameterLocation.Header)
                 {
-                    type = new PrimitiveTypeReference(PrimitiveType.String, isNullable: true, isEnumerable: false);
-                    IJsonLineInfo propertyLocation = parameter.Property.GetLineInfo();
-                    defaultValue = new DefaultValue(null, filePath, propertyLocation.LineNumber, propertyLocation.LinePosition);
+                    // Generate a null default value for header parameters
+                    PrimitiveTypeReference primitiveTypeReference = new PrimitiveTypeReference(PrimitiveType.String, isNullable: true, isEnumerable: false, filePath, parameter.Line, parameter.Column);
+                    type = primitiveTypeReference;
+                    defaultValue = new NullValueReference(primitiveTypeReference, filePath, parameter.Line, parameter.Column);
                 }
 
                 bool isRequired = IsParameterRequired(type, location, defaultValue, this._schemaRegistry);
                 parameterRegistry.Add(new ActionParameter(apiParameterName, internalParameterName, type, location, isRequired, defaultValue, parameter.Source));
             }
 
-            foreach (string pathParameter in pathParameters.Keys)
+            foreach (PathParameter pathParameter in pathParameters.Values)
             {
-                TypeReference typeReference = new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: false);
+                TypeReference typeReference = new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: false, filePath, pathParameter.Line, pathParameter.Column);
                 ActionParameterLocation location = ActionParameterLocation.Path;
                 bool isRequired = IsParameterRequired(type: null, location, defaultValue: null, this._schemaRegistry);
-                ActionParameter parameter = new ActionParameter(pathParameter, pathParameter, typeReference, location, isRequired, defaultValue: null, source: null);
+                ActionParameter parameter = new ActionParameter(pathParameter.Name, pathParameter.Name, typeReference, location, isRequired, defaultValue: null, source: null);
                 actionDefinition.Parameters.Add(parameter);
             }
 
             return true;
         }
 
-        private bool TryGetNeighborActionTarget(string targetName, string methodName, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, Group> pathParameters, ICollection<string> bodyParameters, out ActionDefinition actionDefinition)
+        private bool TryGetNeighborActionTarget(string targetName, string methodName, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, out ActionDefinition actionDefinition)
         {
             actionDefinition = this._referencedAssemblyInspector.Inspect(referencedAssemblies =>
             {
@@ -546,7 +549,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
             return actionDefinition != null;
         }
 
-        private ActionDefinition CreateActionDefinition(string targetName, string assemblyName, MethodInfo method, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, Group> pathParameters, ICollection<string> bodyParameters)
+        private ActionDefinition CreateActionDefinition(string targetName, string assemblyName, MethodInfo method, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters)
         {
             string operationName = method.Name;
             bool isReflectionTarget = assemblyName != null;
@@ -590,7 +593,10 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
                     parameterType.IsNullable = true;
 
                 // ParameterInfo.HasDefaultValue/DefaultValue => It is illegal to reflect on the custom attributes of a Type loaded via ReflectionOnlyGetType (see Assembly.ReflectionOnly) -- use CustomAttributeData instead
-                DefaultValue defaultValue = parameter.RawDefaultValue != DBNull.Value ? new DefaultValue(parameter.RawDefaultValue, filePath, line, column) : null;
+                ValueReference defaultValue = null;
+                if (parameter.RawDefaultValue != DBNull.Value) 
+                    defaultValue = RawValueReferenceParser.Parse(parameterType, parameter.RawDefaultValue, filePath, line, column, base.Logger);
+
                 bool isOutParameter = parameter.IsOut;
 
                 this.CollectActionParameter
@@ -615,8 +621,8 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
 
         private static void CollectResponse(ActionDefinition actionDefinition, SqlStatementDescriptor statement)
         {
-            if (statement.IsFileResult)
-                CollectFileResponse(actionDefinition, new ActionFileResponse(HttpMediaType.Binary));
+            if (statement.FileResult != null)
+                CollectFileResponse(actionDefinition, new ActionFileResponseWithLocation(new ActionFileResponse(HttpMediaType.Binary), statement.Source, statement.FileResult.Line, statement.FileResult.Column));
             else
                 actionDefinition.DefaultResponseType = statement.ResultType;
         }
@@ -653,7 +659,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
         (
             string parameterName
           , TypeReference parameterType
-          , DefaultValue defaultValue
+          , ValueReference defaultValue
           , bool isOutParameter
           , string actionName
           , string filePath
@@ -661,7 +667,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
           , int column
           , ActionParameterRegistry parameterRegistry
           , IDictionary<string, ExplicitParameter> explicitParameters
-          , IDictionary<string, Group> pathParameters
+          , IDictionary<string, PathParameter> pathParameters
           , ICollection<string> bodyParameters
         )
         {
@@ -821,7 +827,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
             response.Errors.Add(new ErrorDescription(errorCode, errorDescription));
         }
 
-        private ActionParameter CreateActionParameter(string name, TypeReference type, DefaultValue defaultValue, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, Group> pathParameters, ICollection<string> bodyParameters)
+        private ActionParameter CreateActionParameter(string name, TypeReference type, ValueReference defaultValue, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters)
         {
             ActionParameterLocation location = ActionParameterLocation.NonUser;
             string apiParameterName = name;
@@ -852,9 +858,9 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
                 if (pathParameters.Remove(name))
                     location = ActionParameterLocation.Path;
             }
-            else if (pathParameters.TryGetValue(name, out Group pathSegment))
+            else if (pathParameters.TryGetValue(name, out PathParameter pathParameter))
             {
-                apiParameterName = pathSegment.Value;
+                apiParameterName = pathParameter.Name;
                 location = ActionParameterLocation.Path;
                 pathParameters.Remove(name);
             }
@@ -919,7 +925,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
             }
         }
 
-        private static bool IsParameterRequired(TypeReference type, ActionParameterLocation location, DefaultValue defaultValue, ISchemaRegistry schemaRegistry)
+        private static bool IsParameterRequired(TypeReference type, ActionParameterLocation location, ValueReference defaultValue, ISchemaRegistry schemaRegistry)
         {
             switch (location)
             {
@@ -934,26 +940,65 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
             }
         }
 
-        private static void CollectFileResponse(ActionDefinition actionDefinition, ActionFileResponse actionFileResponse)
+        private static void CollectFileResponse(ActionDefinition actionDefinition, ActionFileResponseWithLocation actionFileResponse)
         {
-            actionDefinition.FileResponse = actionFileResponse;
-            actionDefinition.Responses[HttpStatusCode.OK] = new ActionResponse(HttpStatusCode.OK, actionFileResponse.MediaType, CreateStreamTypeReference());
+            actionDefinition.FileResponse = actionFileResponse.Response;
+            actionDefinition.Responses[HttpStatusCode.OK] = new ActionResponse(HttpStatusCode.OK, actionFileResponse.Response.MediaType, CreateStreamTypeReference(actionFileResponse.Source, actionFileResponse.Line, actionFileResponse.Column));
             actionDefinition.Responses[HttpStatusCode.NotFound] = new ActionResponse(HttpStatusCode.NotFound);
         }
 
-        private static TypeReference CreateStreamTypeReference() => new PrimitiveTypeReference(PrimitiveType.Stream, isNullable: false, isEnumerable: false);
+        private static TypeReference CreateStreamTypeReference(string source, int line, int column) => new PrimitiveTypeReference(PrimitiveType.Stream, isNullable: false, isEnumerable: false, source, line, column);
         #endregion
 
         #region Nested Types
         private sealed class ExplicitParameter
         {
-            public JProperty Property { get; }
+            public string Name { get; }
+            public int Line { get; }
+            public int Column { get; }
             public ActionParameterSource Source { get; }
 
             public ExplicitParameter(JProperty property, ActionParameterSource source)
             {
-                this.Property = property;
+                this.Name = property.Name;
+                IJsonLineInfo location = property.GetLineInfo();
+                this.Line = location.LineNumber;
+                this.Column = location.LinePosition;
                 this.Source = source;
+            }
+        }
+
+        private sealed class PathParameter
+        {
+            public string Name { get; }
+            public int Index { get; }
+            public int Line { get; }
+            public int Column { get; }
+
+            public PathParameter(JProperty childRouteProperty, Group segment)
+            {
+                this.Name = segment.Value;
+                this.Index = segment.Index;
+                IJsonLineInfo childRouteValueLocation = childRouteProperty.Value.GetLineInfo();
+                int matchIndex = segment.Index - 1;
+                this.Line = childRouteValueLocation.LineNumber;
+                this.Column = childRouteValueLocation.LinePosition + matchIndex;
+            }
+        }
+
+        private sealed class ActionFileResponseWithLocation
+        {
+            public ActionFileResponse Response { get; }
+            public string Source { get; }
+            public int Line { get; }
+            public int Column { get; }
+
+            public ActionFileResponseWithLocation(ActionFileResponse response, string source, int line, int column)
+            {
+                this.Response = response;
+                this.Source = source;
+                this.Line = line;
+                this.Column = column;
             }
         }
 
@@ -964,7 +1009,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
             private int _previousPathSegmentIndex;
             private int _previousPathParameterIndex = -1;
 
-            public ActionParameterRegistry(ActionDefinition actionDefinition, IDictionary<string, Group> pathParameters)
+            public ActionParameterRegistry(ActionDefinition actionDefinition, IDictionary<string, PathParameter> pathParameters)
             {
                 this._actionDefinition = actionDefinition;
                 this._pathSegmentIndexMap = pathParameters.OrderBy(x => x.Value.Index)

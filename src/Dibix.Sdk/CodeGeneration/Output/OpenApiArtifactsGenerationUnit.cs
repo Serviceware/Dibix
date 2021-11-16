@@ -20,7 +20,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (logger.HasLoggedErrors)
                 return false;
 
-            OpenApiDocument document = OpenApiGenerator.Generate(model, schemaRegistry);
+            OpenApiDocument document = OpenApiGenerator.Generate(model, schemaRegistry, logger);
 
             string targetDirectory = Path.GetDirectoryName(model.DefaultOutputFilePath);
 

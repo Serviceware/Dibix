@@ -78,7 +78,7 @@ DataType: {dataTypeReference.GetType()}", source, dataTypeReference.StartLine, d
                     }
 
                     if (PrimitiveTypeMap.TryGetValue(sqlDataTypeReference.SqlDataTypeOption, out PrimitiveType dataType))
-                        return new PrimitiveTypeReference(dataType, isNullable, false);
+                        return new PrimitiveTypeReference(dataType, isNullable, false, source, dataTypeReference.StartLine, dataTypeReference.StartColumn);
 
                     logger.LogError(null, $@"Unsupported sql data type
 Name: {name}
@@ -91,7 +91,7 @@ DataType: {sqlDataTypeReference.SqlDataTypeOption}", source, dataTypeReference.S
                     if (String.Equals(userDataTypeReference.Name.BaseIdentifier.Value, "SYSNAME", StringComparison.OrdinalIgnoreCase))
                     {
                         udtName = null;
-                        return new PrimitiveTypeReference(PrimitiveType.String, isNullable, false);
+                        return new PrimitiveTypeReference(PrimitiveType.String, isNullable, false, source, dataTypeReference.StartLine, dataTypeReference.StartColumn);
                     }
 
                     udtName = userDataTypeReference.Name.ToFullName();
@@ -101,7 +101,7 @@ DataType: {sqlDataTypeReference.SqlDataTypeOption}", source, dataTypeReference.S
 
                 case XmlDataTypeReference _:
                     udtName = null;
-                    return new PrimitiveTypeReference(PrimitiveType.Xml, false, false);
+                    return new PrimitiveTypeReference(PrimitiveType.Xml, false, false, source, dataTypeReference.StartLine, dataTypeReference.StartColumn);
 
                 default:
                     throw new InvalidOperationException($@"Unexpected data type reference

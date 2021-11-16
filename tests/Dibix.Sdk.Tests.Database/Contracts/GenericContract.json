@@ -1,9 +1,4 @@
 ﻿{
-  "Role": [
-    "None",
-    "User",
-    "Admin"
-  ],
   "GenericContract": {
     "$wcfNs": "https://schemas.dibix.com/GenericContract",
     "Id": {
@@ -28,5 +23,10 @@
       "type": "datetime?",
       "kind": "utc"
     }
-  }
+  },
+  "Role": [
+    "None",
+    "User",
+    "Admin"
+  ]
 }

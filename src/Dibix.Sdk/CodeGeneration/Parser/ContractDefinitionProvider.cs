@@ -128,7 +128,7 @@ If this is not a project that has multiple areas, please make sure to define the
                     bool isPartOfKey = default;
                     bool isOptional = default;
                     bool isDiscriminator = default;
-                    JValue defaultValue = default;
+                    JValue defaultValueJson = default;
                     bool obfuscated = default;
                     SerializationBehavior serializationBehavior = default;
                     DateTimeKind dateTimeKind = default;
@@ -141,7 +141,7 @@ If this is not a project that has multiple areas, please make sure to define the
                             isPartOfKey = (bool?)propertyInfo.Property("isPartOfKey")?.Value ?? default;
                             isOptional = (bool?)propertyInfo.Property("isOptional")?.Value ?? default;
                             isDiscriminator = (bool?)propertyInfo.Property("isDiscriminator")?.Value ?? default;
-                            defaultValue = (JValue)propertyInfo.Property("default")?.Value;
+                            defaultValueJson = (JValue)propertyInfo.Property("default")?.Value;
                             obfuscated = (bool?)propertyInfo.Property("obfuscated")?.Value ?? default;
 
                             Enum.TryParse((string)propertyInfo.Property("serialize")?.Value, true, out serializationBehavior);
@@ -158,13 +158,14 @@ If this is not a project that has multiple areas, please make sure to define the
                     }
 
                     TypeReference type = this.ParsePropertyType(typeName, rootNamespace, filePath, typeNameValue);
-                    ObjectSchemaProperty objectSchemaProperty = new ObjectSchemaProperty(property.Name, type, isPartOfKey, isOptional, isDiscriminator, serializationBehavior: serializationBehavior, dateTimeKind: dateTimeKind, obfuscated: obfuscated);
-                    if (defaultValue != null)
+                    ValueReference defaultValue = null;
+                    if (defaultValueJson != null)
                     {
-                        // Delay default value resolution, since property defaults might reference enum contracts, that have not been registered yet
-                        this._delayedCollectionActions.Add(new ContractDefaultValueCollectionAction(objectSchemaProperty, defaultValue, filePath, this._contracts, this.Logger));
+                        IJsonLineInfo defaultValueLocation = defaultValueJson.GetLineInfo();
+                        defaultValue = JsonValueReferenceParser.Parse(type, defaultValueJson, filePath, defaultValueLocation, Logger);
                     }
-                    
+
+                    ObjectSchemaProperty objectSchemaProperty = new ObjectSchemaProperty(property.Name, type, isPartOfKey, isOptional, isDiscriminator, defaultValue, serializationBehavior, dateTimeKind, obfuscated);
                     contract.Properties.Add(objectSchemaProperty);
                 }
             }
@@ -257,20 +258,19 @@ If this is not a project that has multiple areas, please make sure to define the
             bool isTypeReference = typeName.StartsWith("#", StringComparison.Ordinal);
             typeName = typeName.TrimStart('#');
 
+            IJsonLineInfo location = value.GetLineInfo();
             if (isTypeReference)
             {
-                IJsonLineInfo location = value.GetLineInfo();
-                int column = location.LinePosition + 1;
                 string key = $"{rootNamespace}.{typeName}";
 
                 // Delay property contract reference tracking, since it might not be registered yet
                 this._delayedCollectionActions.Add(new ContractReferenceCountCollectionAction(key, this._contracts));
 
-                return new SchemaTypeReference(key, filePath, location.LineNumber, column, isNullable, isEnumerable);
+                return new SchemaTypeReference(key, isNullable, isEnumerable, filePath, location.LineNumber, location.LinePosition);
             }
 
             PrimitiveType dataType = (PrimitiveType)Enum.Parse(typeof(PrimitiveType), typeName, ignoreCase: true /* JSON is camelCase while C# is PascalCase */);
-            return new PrimitiveTypeReference(dataType, isNullable, isEnumerable);
+            return new PrimitiveTypeReference(dataType, isNullable, isEnumerable, filePath, location.LineNumber, location.LinePosition);
         }
         #endregion
 

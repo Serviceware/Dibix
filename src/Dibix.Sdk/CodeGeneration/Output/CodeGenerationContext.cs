@@ -32,6 +32,7 @@ namespace Dibix.Sdk.CodeGeneration
           , PrimitiveType.Xml
         };
         private readonly CSharpRoot _root;
+        private readonly ILogger _logger;
 
         public CSharpStatementScope Output { get; internal set; }
         public CodeGenerationModel Model { get; }
@@ -40,12 +41,13 @@ namespace Dibix.Sdk.CodeGeneration
         public bool GeneratePublicArtifacts => this.Model.CompatibilityLevel == CodeGeneratorCompatibilityLevel.Full;
         public bool WriteNamespaces => this.Model.CompatibilityLevel == CodeGeneratorCompatibilityLevel.Full;
 
-        internal CodeGenerationContext(CSharpRoot root, CodeGenerationModel model, ISchemaRegistry schemaRegistry)
+        internal CodeGenerationContext(CSharpRoot root, CodeGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             this._root = root;
             this.Output = root;
             this.Model = model;
             this.SchemaRegistry = schemaRegistry;
+            this._logger = logger;
         }
 
         public CodeGenerationContext AddUsing(string @using)
@@ -94,18 +96,30 @@ namespace Dibix.Sdk.CodeGeneration
             return $"{nameof(IEnumerable<object>)}<{typeName}>";
         }
 
-        public CSharpValue BuildDefaultValueLiteral(DefaultValue defaultValue)
+        public CSharpValue BuildDefaultValueLiteral(ValueReference defaultValue)
         {
-            object value = defaultValue.Value;
-            string defaultValueStr = value?.ToString();
-            switch (value)
+            switch (defaultValue)
             {
-                case bool _: return new CSharpValue(defaultValueStr.ToLowerInvariant());
-                case char defaultValueChar: return new CSharpCharacterValue(defaultValueChar);
-                case string _: return new CSharpStringValue(defaultValueStr);
-                case EnumSchemaMember enumMember: return new CSharpValue($"{enumMember.Enum.FullName}.{enumMember.Name}");
-                case null: return new CSharpValue("null");
-                default: return new CSharpValue(defaultValueStr);
+                case NullValueReference _:
+                    return new CSharpValue("null");
+
+                case PrimitiveValueReference primitiveValueReference:
+                    return BuildDefaultValueLiteral(primitiveValueReference.Type.Type, primitiveValueReference.Value);
+
+                case EnumMemberNumericReference enumMemberNumericReference:
+                {
+                    EnumSchemaMember member = enumMemberNumericReference.GetEnumMember(this.SchemaRegistry, this._logger);
+                    return new CSharpValue($"{member.Enum.FullName}.{member.Name}");
+                }
+
+                case EnumMemberStringReference enumMemberStringReference:
+                {
+                    EnumSchemaMember member = enumMemberStringReference.GetEnumMember(this.SchemaRegistry, this._logger);
+                    return new CSharpValue($"{member.Enum.FullName}.{member.Name}");
+                }
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(defaultValue), defaultValue, $"Unexpected default value reference: {defaultValue?.GetType()}");
             }
         }
 
@@ -115,6 +129,31 @@ namespace Dibix.Sdk.CodeGeneration
                 return null;
                 
             return NamespaceUtility.BuildRelativeNamespace(this.Model.RootNamespace, layerName, relativeNamespace);
+        }
+
+        private static CSharpValue BuildDefaultValueLiteral(PrimitiveType type, object value)
+        {
+            string strValue = value.ToString();
+            switch (type)
+            {
+                case PrimitiveType.Boolean:
+                    return new CSharpValue(strValue.ToLowerInvariant());
+
+                case PrimitiveType.Byte:
+                case PrimitiveType.Int16:
+                case PrimitiveType.Int32:
+                case PrimitiveType.Int64:
+                case PrimitiveType.Float:
+                case PrimitiveType.Double:
+                case PrimitiveType.Decimal: 
+                    return new CSharpValue(strValue);
+
+                case PrimitiveType.String:
+                    return new CSharpStringValue(strValue);
+
+                default: 
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
+            }
         }
     }
 }

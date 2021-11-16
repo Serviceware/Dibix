@@ -3,21 +3,15 @@
     public sealed class SchemaTypeReference : TypeReference
     {
         public string Key { get; }
-        public string Source { get; }
-        public int Line { get; }
-        public int Column { get; }
 
-        public SchemaTypeReference(string key, string source, int line, int column, bool isNullable, bool isEnumerable) : base(isNullable, isEnumerable)
+        public SchemaTypeReference(string key, bool isNullable, bool isEnumerable, string source, int line, int column) : base(isNullable, isEnumerable, source, line, column)
         {
             this.Key = key;
-            this.Source = source;
-            this.Line = line;
-            this.Column = column;
         }
 
         public static SchemaTypeReference WithNamespace(string @namespace, string definitionName, string source, int line, int column, bool isNullable, bool isEnumerable)
         {
-            return new SchemaTypeReference($"{@namespace}.{definitionName}", source, line, column, isNullable, isEnumerable);
+            return new SchemaTypeReference($"{@namespace}.{definitionName}", isNullable, isEnumerable, source, line, column);
         }
     }
 }

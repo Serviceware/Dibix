@@ -66,69 +66,8 @@ namespace Dibix.Sdk.CodeGeneration
             if (parameter.Value == null)
                 return;
             
-            target.DefaultValue = this.CollectParameterDefault(parameter.Value, target.Type);
+            target.DefaultValue = SqlValueReferenceParser.Parse(parameter.VariableName.Value, parameter.Value, target.Type, base.Target.Source, base.Logger);
         }
-        private DefaultValue CollectParameterDefault(ScalarExpression value, TypeReference targetType)
-        {
-            switch (value)
-            {
-                case NullLiteral _: return this.BuildDefaultValue(value, null);
-                case Literal literal: return this.CollectParameterDefault(literal, targetType);
-              //case VariableReference variableReference: return this.BuildDefaultValue(value, variableReference);
-                default: throw new ArgumentOutOfRangeException(nameof(value), value, $@"Unsupported parameter default
-targetType: {targetType}");
-            }
-        }
-        private DefaultValue CollectParameterDefault(Literal literal, TypeReference typeReference)
-        {
-            if (typeReference is PrimitiveTypeReference primitiveTypeReference
-             && this.TryParseParameterDefaultValue(literal, primitiveTypeReference.Type, out object defaultValueRaw))
-            {
-                return this.BuildDefaultValue(literal, defaultValueRaw);
-            }
-
-            if (typeReference.IsEnum(this.SchemaRegistry, out EnumSchema enumSchema))
-            {
-                int numericValue = Int32.Parse(literal.Value);
-                if (enumSchema.TryGetEnumMember(numericValue, Target.Source, literal.StartLine, literal.StartColumn, Logger, out EnumSchemaMember enumMember))
-                {
-                    DefaultValue defaultValue = this.BuildDefaultValue(literal, enumMember);
-                    return defaultValue;
-                }
-            }
-
-            // Error should have been reported
-            return null;
-        }
-
-        private bool TryParseParameterDefaultValue(Literal literal, PrimitiveType primitiveType, out object defaultValue)
-        {
-            switch (literal.LiteralType)
-            {
-                case LiteralType.Integer when primitiveType == PrimitiveType.Boolean:
-                    defaultValue = literal.Value == "1";
-                    return true;
-
-                case LiteralType.Integer:
-                    defaultValue = Int32.Parse(literal.Value);
-                    return true;
-
-                case LiteralType.String:
-                    defaultValue = literal.Value;
-                    return true;
-
-                case LiteralType.Null:
-                    defaultValue = null;
-                    return true;
-
-                default:
-                    base.Logger.LogError(null, $"Literal type not supported for default value: {literal.LiteralType}", base.Target.Source, literal.StartLine, literal.StartColumn);
-                    defaultValue = null;
-                    return false;
-            }
-        }
-
-        private DefaultValue BuildDefaultValue(TSqlFragment value, object defaultValue) => new DefaultValue(defaultValue, base.Target.Source, value.StartLine, value.StartColumn);
 
         private void ParseContent(TSqlFragment content, StatementList statements)
         {
@@ -139,7 +78,9 @@ targetType: {targetType}");
             base.Target.MergeGridResult = base.Markup.HasSingleElement(SqlMarkupKey.MergeGridResult, base.Target.Source, base.Logger);
             base.Target.GenerateInputClass = base.Markup.HasSingleElement(SqlMarkupKey.GenerateInputClass, base.Target.Source, base.Logger);
             base.Target.Async = base.Markup.HasSingleElement(SqlMarkupKey.Async, base.Target.Source, base.Logger);
-            base.Target.IsFileResult = base.Markup.HasSingleElement(SqlMarkupKey.FileResult, base.Target.Source, base.Logger);
+
+            if (base.Markup.TryGetSingleElement(SqlMarkupKey.FileResult, base.Target.Source, base.Logger, out ISqlElement fileResultElement))
+                base.Target.FileResult = fileResultElement;
 
             this.ParseResults(content, base.Markup);
 

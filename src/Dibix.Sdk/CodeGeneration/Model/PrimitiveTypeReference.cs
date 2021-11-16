@@ -4,7 +4,7 @@
     {
         public PrimitiveType Type { get; }
 
-        public PrimitiveTypeReference(PrimitiveType type, bool isNullable, bool isEnumerable) : base(isNullable, isEnumerable)
+        public PrimitiveTypeReference(PrimitiveType type, bool isNullable, bool isEnumerable, string source, int line, int column) : base(isNullable, isEnumerable, source, line, column)
         {
             this.Type = type;
         }

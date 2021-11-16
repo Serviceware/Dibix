@@ -32,7 +32,7 @@ namespace Dibix.Sdk.CodeGeneration
                     return null;
             }
 
-            SchemaTypeReference type = new SchemaTypeReference(schema.FullName, source, line, column, typeName.IsNullable, isEnumerable);
+            SchemaTypeReference type = new SchemaTypeReference(schema.FullName, typeName.IsNullable, isEnumerable, source, line, column);
             if (!this._schemaRegistry.IsRegistered(type.Key))
                 this._schemaRegistry.Populate(schema);
 

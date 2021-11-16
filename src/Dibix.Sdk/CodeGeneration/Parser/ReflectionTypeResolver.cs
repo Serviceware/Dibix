@@ -120,7 +120,7 @@ namespace Dibix.Sdk.CodeGeneration
                 throw new InvalidOperationException($"By ref types are not supported: {type}");
 
             if (PrimitiveTypeMap.TryGetValue(type, out PrimitiveType dataType))
-                return new PrimitiveTypeReference(dataType, isNullable, isEnumerable);
+                return new PrimitiveTypeReference(dataType, isNullable, isEnumerable, source, line, column);
 
             SchemaTypeReference schemaTypeReference = SchemaTypeReference.WithNamespace(type.Namespace, type.Name, source, line, column, isNullable, isEnumerable);
             if (schemaRegistry.IsRegistered(schemaTypeReference.Key))
@@ -173,7 +173,7 @@ namespace Dibix.Sdk.CodeGeneration
             bool isPartOfKey = ResolveIsPartOfKey(property);
             bool isOptional = ResolveIsOptional(property);
             bool isDiscriminator = ResolveIsDiscriminator(property);
-            DefaultValue defaultValue = ResolveDefaultValue(property, source, line, column, schemaRegistry, logger);
+            ValueReference defaultValue = ResolveDefaultValue(property, typeReference, source, line, column, logger);
             SerializationBehavior serializationBehavior = ResolveSerializationBehavior(property);
             DateTimeKind dateTimeKind = ResolveDateTimeKind(property);
             bool obfuscated = ResolveObfuscated(property);
@@ -186,7 +186,7 @@ namespace Dibix.Sdk.CodeGeneration
         
         private static bool ResolveIsDiscriminator(MemberInfo member) => IsDefined(member, "Dibix.DiscriminatorAttribute");
 
-        private static DefaultValue ResolveDefaultValue(MemberInfo member, string source, int line, int column, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static ValueReference ResolveDefaultValue(MemberInfo member, TypeReference targetType, string source, int line, int column, ILogger logger)
         {
             foreach (CustomAttributeData customAttributeData in member.GetCustomAttributesData())
             {
@@ -194,34 +194,11 @@ namespace Dibix.Sdk.CodeGeneration
                     continue;
 
                 CustomAttributeTypedArgument argument = customAttributeData.ConstructorArguments.Single();
-                object defaultValueRaw = argument.Value;
-
-                if (TryCollectEnumDefault(argument.ArgumentType, argument.Value, source, line, column, schemaRegistry, logger, out EnumSchemaMember enumMemberValue))
-                    defaultValueRaw = enumMemberValue;
-                
-                DefaultValue defaultValue = new DefaultValue(defaultValueRaw, source, line, column);
+                ValueReference defaultValue = RawValueReferenceParser.Parse(targetType, argument.Value, source, line, column, logger);
                 return defaultValue;
             }
 
             return null;
-        }
-
-        private static bool TryCollectEnumDefault(Type argumentType, object value, string source, int line, int column, ISchemaRegistry schemaRegistry, ILogger logger, out EnumSchemaMember enumMemberValue)
-        {
-            if (!(value is int))
-            {
-                enumMemberValue = null;
-                return false;
-            }
-
-            TypeReference typeReference = ResolveType(argumentType, source, line, column, isNullable: false, isEnumerable: false, udtName: null, schemaRegistry, logger);
-            if (!typeReference.IsEnum(schemaRegistry, out EnumSchema enumSchema))
-            {
-                enumMemberValue = null;
-                return false;
-            }
-
-            return enumSchema.TryGetEnumMember(value, source, line, column, logger, out enumMemberValue);
         }
 
         private static SerializationBehavior ResolveSerializationBehavior(MemberInfo member)

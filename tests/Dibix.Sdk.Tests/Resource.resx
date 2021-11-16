@@ -202,13 +202,6 @@ namespace Dibix.Sdk.Tests
     namespace DomainModel
     {
         #region Contracts
-        public enum Role : int
-        {
-            None,
-            User,
-            Admin
-        }
-
         public sealed class GenericContract
         {
             [DefaultValue("DefaultValue")]
@@ -216,6 +209,13 @@ namespace Dibix.Sdk.Tests
             [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
             public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
             public System.DateTime? CreationTime { get; set; }
+        }
+
+        public enum Role : int
+        {
+            None,
+            User,
+            Admin
         }
 
         public sealed class InputContract
@@ -504,13 +504,6 @@ namespace Dibix.Sdk.Tests
     namespace DomainModel
     {
         #region Contracts
-        public enum Role : int
-        {
-            None,
-            User,
-            Admin
-        }
-
         [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
@@ -532,6 +525,13 @@ namespace Dibix.Sdk.Tests
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime? CreationTime { get; set; }
+        }
+
+        public enum Role : int
+        {
+            None,
+            User,
+            Admin
         }
 
         public sealed class InputContract
@@ -1265,13 +1265,6 @@ namespace Dibix.Sdk.Tests
             Descending
         }
 
-        public enum Role : int
-        {
-            None,
-            User,
-            Admin
-        }
-
         [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
@@ -1293,6 +1286,13 @@ namespace Dibix.Sdk.Tests
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime? CreationTime { get; set; }
+        }
+
+        public enum Role : int
+        {
+            None,
+            User,
+            Admin
         }
 
         namespace Extension
@@ -1390,13 +1390,6 @@ namespace Dibix.Sdk.Tests
             Descending
         }
 
-        public enum Role : int
-        {
-            None,
-            User,
-            Admin
-        }
-
         [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
@@ -1418,6 +1411,13 @@ namespace Dibix.Sdk.Tests
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime? CreationTime { get; set; }
+        }
+
+        public enum Role : int
+        {
+            None,
+            User,
+            Admin
         }
 
         namespace Extension
@@ -1499,13 +1499,6 @@ namespace Dibix.Sdk.Tests
             Descending
         }
 
-        public enum Role : int
-        {
-            None,
-            User,
-            Admin
-        }
-
         [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
@@ -1527,6 +1520,13 @@ namespace Dibix.Sdk.Tests
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime? CreationTime { get; set; }
+        }
+
+        public enum Role : int
+        {
+            None,
+            User,
+            Admin
         }
 
         namespace Extension
@@ -1622,13 +1622,6 @@ namespace Dibix.Sdk.Tests
             Descending
         }
 
-        public enum Role : int
-        {
-            None,
-            User,
-            Admin
-        }
-
         [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
@@ -1650,6 +1643,13 @@ namespace Dibix.Sdk.Tests
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime? CreationTime { get; set; }
+        }
+
+        public enum Role : int
+        {
+            None,
+            User,
+            Admin
         }
 
         namespace Extension
@@ -1755,13 +1755,6 @@ namespace Dibix.Sdk.Tests
             Descending
         }
 
-        public enum Role : int
-        {
-            None,
-            User,
-            Admin
-        }
-
         [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
@@ -1783,6 +1776,13 @@ namespace Dibix.Sdk.Tests
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime? CreationTime { get; set; }
+        }
+
+        public enum Role : int
+        {
+            None,
+            User,
+            Admin
         }
 
         public sealed class JointContract
@@ -1853,13 +1853,6 @@ namespace Dibix.Sdk.Tests
     namespace DomainModel
     {
         #region Contracts
-        public enum Role : int
-        {
-            None,
-            User,
-            Admin
-        }
-
         [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
@@ -1881,6 +1874,13 @@ namespace Dibix.Sdk.Tests
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime? CreationTime { get; set; }
+        }
+
+        public enum Role : int
+        {
+            None,
+            User,
+            Admin
         }
         #endregion
     }
@@ -1929,13 +1929,6 @@ namespace Dibix.Sdk.Tests
     namespace DomainModel
     {
         #region Contracts
-        public enum Role : int
-        {
-            None,
-            User,
-            Admin
-        }
-
         [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
@@ -1957,6 +1950,13 @@ namespace Dibix.Sdk.Tests
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime? CreationTime { get; set; }
+        }
+
+        public enum Role : int
+        {
+            None,
+            User,
+            Admin
         }
         #endregion
     }
@@ -2019,13 +2019,6 @@ namespace Dibix.Sdk.Tests
             Descending
         }
 
-        public enum Role : int
-        {
-            None,
-            User,
-            Admin
-        }
-
         [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
@@ -2047,6 +2040,13 @@ namespace Dibix.Sdk.Tests
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime? CreationTime { get; set; }
+        }
+
+        public enum Role : int
+        {
+            None,
+            User,
+            Admin
         }
 
         namespace Extension
@@ -2126,13 +2126,6 @@ namespace Dibix.Sdk.Tests
             Descending
         }
 
-        public enum Role : int
-        {
-            None,
-            User,
-            Admin
-        }
-
         [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
@@ -2154,6 +2147,13 @@ namespace Dibix.Sdk.Tests
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime? CreationTime { get; set; }
+        }
+
+        public enum Role : int
+        {
+            None,
+            User,
+            Admin
         }
 
         public sealed class JointContract
@@ -3053,13 +3053,6 @@ namespace Dibix.Sdk.Tests
             Descending
         }
 
-        public enum Role : int
-        {
-            None,
-            User,
-            Admin
-        }
-
         [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
@@ -3081,6 +3074,13 @@ namespace Dibix.Sdk.Tests
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime? CreationTime { get; set; }
+        }
+
+        public enum Role : int
+        {
+            None,
+            User,
+            Admin
         }
 
         namespace Extension
@@ -3172,13 +3172,6 @@ namespace Dibix.Sdk.Tests
             Descending
         }
 
-        public enum Role : int
-        {
-            None,
-            User,
-            Admin
-        }
-
         [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
@@ -3200,6 +3193,13 @@ namespace Dibix.Sdk.Tests
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime? CreationTime { get; set; }
+        }
+
+        public enum Role : int
+        {
+            None,
+            User,
+            Admin
         }
 
         namespace Extension
@@ -3332,13 +3332,6 @@ namespace Dibix.Sdk.Tests
             Descending
         }
 
-        public enum Role : int
-        {
-            None,
-            User,
-            Admin
-        }
-
         [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
@@ -3360,6 +3353,13 @@ namespace Dibix.Sdk.Tests
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime? CreationTime { get; set; }
+        }
+
+        public enum Role : int
+        {
+            None,
+            User,
+            Admin
         }
 
         namespace Grid

@@ -6,11 +6,11 @@
         public string InternalParameterName { get; }
         public TypeReference Type { get; }
         public ActionParameterLocation Location { get; }
-        public DefaultValue DefaultValue { get; }
+        public ValueReference DefaultValue { get; }
         public ActionParameterSource Source { get; }
         public bool IsRequired { get; }
 
-        public ActionParameter(string apiParameterName, string internalParameterName, TypeReference type, ActionParameterLocation location, bool isRequired, DefaultValue defaultValue, ActionParameterSource source)
+        public ActionParameter(string apiParameterName, string internalParameterName, TypeReference type, ActionParameterLocation location, bool isRequired, ValueReference defaultValue, ActionParameterSource source)
         {
             this.ApiParameterName = apiParameterName;
             this.InternalParameterName = internalParameterName;

@@ -13,16 +13,5 @@
             userDefinedTypeSchema = null;
             return false;
         }
-
-        public static bool IsEnum(this TypeReference typeReference, ISchemaRegistry schemaRegistry, out EnumSchema enumSchema)
-        {
-            if (typeReference is SchemaTypeReference schemaTypeReference)
-            {
-                enumSchema = schemaRegistry.GetSchema(schemaTypeReference) as EnumSchema;
-                return enumSchema != null;
-            }
-            enumSchema = null;
-            return false;
-        }
     }
 }

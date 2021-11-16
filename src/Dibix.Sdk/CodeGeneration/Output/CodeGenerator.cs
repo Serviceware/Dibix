@@ -58,7 +58,7 @@ namespace Dibix.Sdk.CodeGeneration
                                                                   .Concat(writers.SelectMany(x => x.GetGlobalAnnotations(model)));
             CSharpWriter output = new CSharpWriter(writer, model.RootNamespace, globalAnnotations);
 
-            CodeGenerationContext context = new CodeGenerationContext(output.Root, model, this._schemaRegistry);
+            CodeGenerationContext context = new CodeGenerationContext(output.Root, model, this._schemaRegistry, this._logger);
             this.OnContextCreated(context, isArtifactAssembly);
 
             IList<IGrouping<string, ArtifactWriterBase>> childWriterGroups = writers.GroupBy(x => x.LayerName).ToArray();
