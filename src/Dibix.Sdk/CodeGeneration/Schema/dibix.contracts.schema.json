@@ -3,7 +3,7 @@
   "definitions": {
     "PrimitiveTypeReference": {
       "type": "string",
-      "pattern": "^(binary|boolean|byte|datetime|datetimeoffset|decimal|double|float|int16|int32|int64|string|uuid|xml)\\??\\*?$"
+      "pattern": "^(binary|boolean|byte|datetime|datetimeoffset|decimal|double|float|int16|int32|int64|string|uri|uuid|xml)\\??\\*?$"
     },
     "SchemaTypeReference": {
       "type": "string",
@@ -123,6 +123,24 @@
               "required": [
                 "type",
                 "kind"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "minProperties": 2,
+              "properties": {
+                "type": {
+                  "const": "uri"
+                },
+                "isRelativeHttpsUrl": {
+                  "type": "boolean",
+                  "const": true
+                }
+              },
+              "required": [
+                "type",
+                "isRelativeHttpsUrl"
               ],
               "additionalProperties": false
             }

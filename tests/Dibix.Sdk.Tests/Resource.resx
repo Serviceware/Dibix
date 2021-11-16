@@ -209,6 +209,8 @@ namespace Dibix.Sdk.Tests
             [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
             public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
             public System.DateTime? CreationTime { get; set; }
+            [RelativeHttpsUrl]
+            public System.Uri ImageUrl { get; set; }
         }
 
         public enum Role : int
@@ -309,7 +311,7 @@ namespace Dibix.Sdk.Tests
                     requestMessage.Headers.Add("HLNS-SIT", this._authorizationProvider.GetValue("HLNS-SIT"));
                     requestMessage.Headers.Add("HLNS-ClientId", this._authorizationProvider.GetValue("HLNS-ClientId"));
                     HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
-                    Dibix.Sdk.Tests.DomainModel.GenericContract responseContent = await responseMessage.Content.ReadAsAsync&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(cancellationToken).ConfigureAwait(false);
+                    Dibix.Sdk.Tests.DomainModel.GenericContract responseContent = await responseMessage.Content.ReadAsAsync&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(MediaTypeFormattersFactory.Create(client), cancellationToken).ConfigureAwait(false);
                     return new HttpResponse&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(responseMessage, responseContent);
                 }
             }
@@ -525,6 +527,8 @@ namespace Dibix.Sdk.Tests
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime? CreationTime { get; set; }
+            [DataMember]
+            public System.Uri ImageUrl { get; set; }
         }
 
         public enum Role : int
@@ -812,6 +816,7 @@ components:
       required:
         - Role
         - CreationTime
+        - ImageUrl
       type: object
       properties:
         Name:
@@ -823,6 +828,9 @@ components:
           type: string
           format: date-time
           nullable: true
+        ImageUrl:
+          type: string
+          format: uri
       additionalProperties: false
     Role:
       enum:
@@ -1286,6 +1294,8 @@ namespace Dibix.Sdk.Tests
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime? CreationTime { get; set; }
+            [DataMember]
+            public System.Uri ImageUrl { get; set; }
         }
 
         public enum Role : int
@@ -1411,6 +1421,8 @@ namespace Dibix.Sdk.Tests
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime? CreationTime { get; set; }
+            [DataMember]
+            public System.Uri ImageUrl { get; set; }
         }
 
         public enum Role : int
@@ -1520,6 +1532,8 @@ namespace Dibix.Sdk.Tests
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime? CreationTime { get; set; }
+            [DataMember]
+            public System.Uri ImageUrl { get; set; }
         }
 
         public enum Role : int
@@ -1643,6 +1657,8 @@ namespace Dibix.Sdk.Tests
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime? CreationTime { get; set; }
+            [DataMember]
+            public System.Uri ImageUrl { get; set; }
         }
 
         public enum Role : int
@@ -1776,6 +1792,8 @@ namespace Dibix.Sdk.Tests
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime? CreationTime { get; set; }
+            [DataMember]
+            public System.Uri ImageUrl { get; set; }
         }
 
         public enum Role : int
@@ -1874,6 +1892,8 @@ namespace Dibix.Sdk.Tests
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime? CreationTime { get; set; }
+            [DataMember]
+            public System.Uri ImageUrl { get; set; }
         }
 
         public enum Role : int
@@ -1950,6 +1970,8 @@ namespace Dibix.Sdk.Tests
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime? CreationTime { get; set; }
+            [DataMember]
+            public System.Uri ImageUrl { get; set; }
         }
 
         public enum Role : int
@@ -2040,6 +2062,8 @@ namespace Dibix.Sdk.Tests
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime? CreationTime { get; set; }
+            [DataMember]
+            public System.Uri ImageUrl { get; set; }
         }
 
         public enum Role : int
@@ -2147,6 +2171,8 @@ namespace Dibix.Sdk.Tests
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime? CreationTime { get; set; }
+            [DataMember]
+            public System.Uri ImageUrl { get; set; }
         }
 
         public enum Role : int
@@ -3074,6 +3100,8 @@ namespace Dibix.Sdk.Tests
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime? CreationTime { get; set; }
+            [DataMember]
+            public System.Uri ImageUrl { get; set; }
         }
 
         public enum Role : int
@@ -3193,6 +3221,8 @@ namespace Dibix.Sdk.Tests
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime? CreationTime { get; set; }
+            [DataMember]
+            public System.Uri ImageUrl { get; set; }
         }
 
         public enum Role : int
@@ -3353,6 +3383,8 @@ namespace Dibix.Sdk.Tests
             [DataMember]
             [DateTimeKind(DateTimeKind.Utc)]
             public System.DateTime? CreationTime { get; set; }
+            [DataMember]
+            public System.Uri ImageUrl { get; set; }
         }
 
         public enum Role : int

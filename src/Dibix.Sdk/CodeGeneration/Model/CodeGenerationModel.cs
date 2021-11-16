@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -28,7 +29,7 @@ namespace Dibix.Sdk.CodeGeneration
             this.Controllers = new Collection<ControllerDefinition>();
             this.SecuritySchemes = new Collection<SecurityScheme>();
             this.Schemas = new Collection<SchemaDefinition>();
-            this.AdditionalAssemblyReferences = new HashSet<string>();
+            this.AdditionalAssemblyReferences = new SortedSet<string>();
         }
     }
 }

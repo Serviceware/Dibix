@@ -80,8 +80,8 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(5,2,5
               , contract: @"Contracts\GenericContract.json"
               , expectedAdditionalAssemblyReferences: new[]
                 {
-                    "System.ComponentModel.DataAnnotations.dll"
-                  , "Newtonsoft.Json.dll"
+                    "Newtonsoft.Json.dll"
+                  , "System.ComponentModel.DataAnnotations.dll"
                 }
             );
         }
@@ -95,8 +95,8 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(5,2,5
               , contract: @"Contracts\GenericContract.json"
               , expectedAdditionalAssemblyReferences: new[]
                 {
-                    "System.ComponentModel.DataAnnotations.dll"
-                  , "Newtonsoft.Json.dll"
+                    "Newtonsoft.Json.dll"
+                  , "System.ComponentModel.DataAnnotations.dll"
                 }
             );
         }
@@ -115,8 +115,8 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(5,2,5
                 }
               , expectedAdditionalAssemblyReferences: new[]
                 {
-                    "System.ComponentModel.DataAnnotations.dll"
-                  , "Newtonsoft.Json.dll"
+                    "Newtonsoft.Json.dll"
+                  , "System.ComponentModel.DataAnnotations.dll"
                 }
             );
         }
@@ -136,8 +136,8 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(5,2,5
                 }
               , expectedAdditionalAssemblyReferences: new[]
                 {
-                    "System.ComponentModel.DataAnnotations.dll"
-                  , "Newtonsoft.Json.dll"
+                    "Newtonsoft.Json.dll"
+                  , "System.ComponentModel.DataAnnotations.dll"
                 }
             );
         }
@@ -156,8 +156,8 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(5,2,5
                 }
               , expectedAdditionalAssemblyReferences: new[]
                 {
-                    "System.ComponentModel.DataAnnotations.dll"
-                  , "Newtonsoft.Json.dll"
+                    "Newtonsoft.Json.dll"
+                  , "System.ComponentModel.DataAnnotations.dll"
                 }
             );
         }
@@ -175,8 +175,8 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(5,2,5
                 }
               , expectedAdditionalAssemblyReferences: new[]
                 {
-                    "System.ComponentModel.DataAnnotations.dll"
-                  , "Newtonsoft.Json.dll"
+                    "Newtonsoft.Json.dll"
+                  , "System.ComponentModel.DataAnnotations.dll"
                 }
             );
         }
@@ -195,8 +195,8 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(5,2,5
                 }
               , expectedAdditionalAssemblyReferences: new[]
                 {
-                    "System.ComponentModel.DataAnnotations.dll"
-                  , "Newtonsoft.Json.dll"
+                    "Newtonsoft.Json.dll"
+                  , "System.ComponentModel.DataAnnotations.dll"
                 }
             );
         }
@@ -215,8 +215,8 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(5,2,5
                 }
               , expectedAdditionalAssemblyReferences: new[]
                 {
-                    "System.ComponentModel.DataAnnotations.dll"
-                  , "Newtonsoft.Json.dll"
+                    "Newtonsoft.Json.dll"
+                  , "System.ComponentModel.DataAnnotations.dll"
                 }
             );
         }
@@ -235,8 +235,8 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(5,2,5
                 }
               , expectedAdditionalAssemblyReferences: new[]
                 {
-                    "System.ComponentModel.DataAnnotations.dll"
-                  , "Newtonsoft.Json.dll"
+                    "Newtonsoft.Json.dll"
+                  , "System.ComponentModel.DataAnnotations.dll"
                 }
             );
         }
@@ -256,8 +256,8 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(5,2,5
                 }
               , expectedAdditionalAssemblyReferences: new[]
                 {
-                    "System.ComponentModel.DataAnnotations.dll"
-                  , "Newtonsoft.Json.dll"
+                    "Newtonsoft.Json.dll"
+                  , "System.ComponentModel.DataAnnotations.dll"
                 }
             );
         }
@@ -276,8 +276,8 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(5,2,5
                 }
               , expectedAdditionalAssemblyReferences: new[]
                 {
-                    "System.ComponentModel.DataAnnotations.dll"
-                  , "Newtonsoft.Json.dll"
+                    "Newtonsoft.Json.dll"
+                  , "System.ComponentModel.DataAnnotations.dll"
                 }
             );
         }
@@ -297,8 +297,8 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(5,2,5
                 }
               , expectedAdditionalAssemblyReferences: new[]
                 {
-                    "System.ComponentModel.DataAnnotations.dll"
-                  , "Newtonsoft.Json.dll"
+                    "Newtonsoft.Json.dll"
+                  , "System.ComponentModel.DataAnnotations.dll"
                 }
             );
         }
@@ -347,10 +347,10 @@ Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly
               , endpoints: new[] { @"Endpoints\GenericEndpoint.json" }
               , expectedAdditionalAssemblyReferences: new[]
                 {
-                    "System.ComponentModel.DataAnnotations.dll"
-                  , "Newtonsoft.Json.dll"
+                    "Dibix.Http.Client.dll"
                   , "Dibix.Http.Server.dll"
-                  , "Dibix.Http.Client.dll"
+                  , "Newtonsoft.Json.dll"
+                  , "System.ComponentModel.DataAnnotations.dll"
                   , "System.Net.Http.dll"
                 }
             );
@@ -378,9 +378,9 @@ Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly
               , endpoints: new [] { @"Endpoints\GenericEndpoint.json" }
               , expectedAdditionalAssemblyReferences: new[]
                 {
-                    "System.ComponentModel.DataAnnotations.dll"
+                    "Dibix.Http.Server.dll"
                   , "Newtonsoft.Json.dll"
-                  , "Dibix.Http.Server.dll"
+                  , "System.ComponentModel.DataAnnotations.dll"
                 }
             );
         }
@@ -396,7 +396,7 @@ Endpoints\GenericEndpointWithOutputParam.json(6,18,6,18):error:Output parameters
         public void InvalidContractSchema_Error()
         {
             this.ExecuteTestAndExpectError(Enumerable.Repeat(@"Contracts\Invalid.json", 1), @"One or more errors occured during code generation:
-Contracts\Invalid.json(3,12,3,12):error:String 'x' does not match regex pattern '^(binary|boolean|byte|datetime|datetimeoffset|decimal|double|float|int16|int32|int64|string|uuid|xml)\??\*?$'. (Invalid.A)
+Contracts\Invalid.json(3,12,3,12):error:String 'x' does not match regex pattern '^(binary|boolean|byte|datetime|datetimeoffset|decimal|double|float|int16|int32|int64|string|uri|uuid|xml)\??\*?$'. (Invalid.A)
 Contracts\Invalid.json(3,12,3,12):error:String 'x' does not match regex pattern '^#([\w]+)(.([\w]+))*\??\*?$'. (Invalid.A)
 Contracts\Invalid.json(3,12,3,12):error:JSON does not match any schemas from 'anyOf'. (Invalid.A)
 Contracts\Invalid.json(3,12,3,12):error:Invalid type. Expected Object but got String. (Invalid.A)

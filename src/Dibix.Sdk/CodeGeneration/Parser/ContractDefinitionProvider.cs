@@ -117,27 +117,28 @@ If this is not a project that has multiple areas, please make sure to define the
                 {
                     JValue typeNameValue;
                     string typeName;
+                    JValue defaultValueJson = default;
+                    SerializationBehavior serializationBehavior = default;
+                    DateTimeKind dateTimeKind = default;
                     bool isPartOfKey = default;
                     bool isOptional = default;
                     bool isDiscriminator = default;
-                    JValue defaultValueJson = default;
-                    bool obfuscated = default;
-                    SerializationBehavior serializationBehavior = default;
-                    DateTimeKind dateTimeKind = default;
+                    bool isObfuscated = default;
+                    bool isRelativeHttpsUrl = default;
                     switch (property.Value.Type)
                     {
                         case JTokenType.Object:
                             JObject propertyInfo = (JObject)property.Value;
                             typeNameValue = (JValue)propertyInfo.Property("type").Value;
                             typeName = (string)typeNameValue;
+                            defaultValueJson = (JValue)propertyInfo.Property("default")?.Value;
+                            Enum.TryParse((string)propertyInfo.Property("serialize")?.Value, true, out serializationBehavior);
+                            Enum.TryParse((string)propertyInfo.Property("kind")?.Value, true, out dateTimeKind);
                             isPartOfKey = (bool?)propertyInfo.Property("isPartOfKey")?.Value ?? default;
                             isOptional = (bool?)propertyInfo.Property("isOptional")?.Value ?? default;
                             isDiscriminator = (bool?)propertyInfo.Property("isDiscriminator")?.Value ?? default;
-                            defaultValueJson = (JValue)propertyInfo.Property("default")?.Value;
-                            obfuscated = (bool?)propertyInfo.Property("obfuscated")?.Value ?? default;
-
-                            Enum.TryParse((string)propertyInfo.Property("serialize")?.Value, true, out serializationBehavior);
-                            Enum.TryParse((string)propertyInfo.Property("kind")?.Value, true, out dateTimeKind);
+                            isObfuscated = (bool?)propertyInfo.Property("obfuscated")?.Value ?? default;
+                            isRelativeHttpsUrl = (bool?)propertyInfo.Property("isRelativeHttpsUrl")?.Value ?? default;
                             break;
 
                         case JTokenType.String:
@@ -157,7 +158,7 @@ If this is not a project that has multiple areas, please make sure to define the
                         defaultValue = JsonValueReferenceParser.Parse(type, defaultValueJson, filePath, defaultValueLocation, Logger);
                     }
 
-                    ObjectSchemaProperty objectSchemaProperty = new ObjectSchemaProperty(property.Name, type, isPartOfKey, isOptional, isDiscriminator, defaultValue, serializationBehavior, dateTimeKind, obfuscated);
+                    ObjectSchemaProperty objectSchemaProperty = new ObjectSchemaProperty(property.Name, type, defaultValue, serializationBehavior, dateTimeKind, isPartOfKey, isOptional, isDiscriminator, isObfuscated, isRelativeHttpsUrl);
                     contract.Properties.Add(objectSchemaProperty);
                 }
             }

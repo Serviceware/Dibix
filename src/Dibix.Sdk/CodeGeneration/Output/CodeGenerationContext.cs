@@ -22,6 +22,7 @@ namespace Dibix.Sdk.CodeGeneration
           , [PrimitiveType.DateTime]       = "System.DateTime"
           , [PrimitiveType.DateTimeOffset] = "System.DateTimeOffset"
           , [PrimitiveType.String]         = "string"
+          , [PrimitiveType.Uri]            = "System.Uri"
           , [PrimitiveType.UUID]           = "System.Guid"
           , [PrimitiveType.Xml]            = "System.Xml.Linq.XElement"
         };

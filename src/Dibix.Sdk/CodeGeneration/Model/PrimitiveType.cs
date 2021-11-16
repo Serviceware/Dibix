@@ -16,6 +16,7 @@
         DateTime,
         DateTimeOffset,
         String,
+        Uri,
         UUID,
         Xml
     }

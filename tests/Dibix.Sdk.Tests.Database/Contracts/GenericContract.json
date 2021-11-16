@@ -22,6 +22,10 @@
     "CreationTime": {
       "type": "datetime?",
       "kind": "utc"
+    },
+    "ImageUrl": {
+      "type": "uri",
+      "isRelativeHttpsUrl": true
     }
   },
   "Role": [

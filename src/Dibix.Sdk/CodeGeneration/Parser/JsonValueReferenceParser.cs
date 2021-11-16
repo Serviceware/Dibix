@@ -103,6 +103,10 @@ namespace Dibix.Sdk.CodeGeneration
                     rawValue = (string)jsonValue;
                     return true;
 
+                case PrimitiveType.Uri:
+                    rawValue = (Uri)jsonValue;
+                    return true;
+
                 case PrimitiveType.UUID:
                     rawValue = (Guid)jsonValue;
                     return true;

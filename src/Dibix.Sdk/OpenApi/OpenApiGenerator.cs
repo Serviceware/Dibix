@@ -29,6 +29,7 @@ namespace Dibix.Sdk.OpenApi
           , [PrimitiveType.DateTime]       = () => new OpenApiSchema { Type = "string",  Format = "date-time" }
           , [PrimitiveType.DateTimeOffset] = () => new OpenApiSchema { Type = "string",  Format = "date-time" }
           , [PrimitiveType.String]         = () => new OpenApiSchema { Type = "string"                        }
+          , [PrimitiveType.Uri]            = () => new OpenApiSchema { Type = "string",  Format = "uri"       }
           , [PrimitiveType.UUID]           = () => new OpenApiSchema { Type = "string",  Format = "uuid"      }
         };
         private static readonly string[] ReservedOpenApiHeaders = { "Accept", "Authorization", "Content-Type" };

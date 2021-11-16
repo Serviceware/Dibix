@@ -25,6 +25,7 @@ namespace Dibix.Sdk.CodeGeneration
           , [typeof(DateTime)]       = PrimitiveType.DateTime
           , [typeof(DateTimeOffset)] = PrimitiveType.DateTimeOffset
           , [typeof(string)]         = PrimitiveType.String
+          , [typeof(Uri)]            = PrimitiveType.Uri
           , [typeof(Guid)]           = PrimitiveType.UUID
         };
         private readonly AssemblyResolver _assemblyResolver;
@@ -171,14 +172,15 @@ namespace Dibix.Sdk.CodeGeneration
             if (property.IsNullable())
                 typeReference.IsNullable = true;
 
-            bool isPartOfKey = ResolveIsPartOfKey(property);
-            bool isOptional = ResolveIsOptional(property);
-            bool isDiscriminator = ResolveIsDiscriminator(property);
             ValueReference defaultValue = ResolveDefaultValue(property, typeReference, source, line, column, logger);
             SerializationBehavior serializationBehavior = ResolveSerializationBehavior(property);
             DateTimeKind dateTimeKind = ResolveDateTimeKind(property);
-            bool obfuscated = ResolveObfuscated(property);
-            return new ObjectSchemaProperty(property.Name, typeReference, isPartOfKey, isOptional, isDiscriminator, defaultValue, serializationBehavior, dateTimeKind, obfuscated);
+            bool isPartOfKey = ResolveIsPartOfKey(property);
+            bool isOptional = ResolveIsOptional(property);
+            bool isDiscriminator = ResolveIsDiscriminator(property);
+            bool isObfuscated = ResolveIsObfuscated(property);
+            bool isRelativeHttpsUrl = ResolveIsRelativeHttpsUrl(property);
+            return new ObjectSchemaProperty(property.Name, typeReference, defaultValue, serializationBehavior, dateTimeKind, isPartOfKey, isOptional, isDiscriminator, isObfuscated, isRelativeHttpsUrl);
         }
 
         private static bool ResolveIsPartOfKey(MemberInfo member) => IsDefined(member, "System.ComponentModel.DataAnnotations.KeyAttribute");
@@ -233,7 +235,9 @@ namespace Dibix.Sdk.CodeGeneration
             return dateTimeKind;
         }
 
-        private static bool ResolveObfuscated(MemberInfo member) => IsDefined(member, "Dibix.ObfuscatedAttribute");
+        private static bool ResolveIsObfuscated(MemberInfo member) => IsDefined(member, "Dibix.ObfuscatedAttribute");
+        
+        private static bool ResolveIsRelativeHttpsUrl(MemberInfo member) => IsDefined(member, "Dibix.RelativeHttpsUrlAttribute");
 
         private static bool IsDefined(MemberInfo member, string attributeName) => member.GetCustomAttributesData().Any(x => x.AttributeType.FullName == attributeName);
 

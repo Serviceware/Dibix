@@ -197,7 +197,7 @@ namespace Dibix.Sdk.CodeGeneration
                 else
                 {
                     //context.AddReference<MediaTypeFormatter>();
-                    writer.WriteRaw($"ReadAsAsync<{responseContentType}>(cancellationToken)");
+                    writer.WriteRaw($"ReadAsAsync<{responseContentType}>(MediaTypeFormattersFactory.Create(client), cancellationToken)");
                 }
 
                 writer.WriteLineRaw($".{nameof(Task.ConfigureAwait)}(false);");

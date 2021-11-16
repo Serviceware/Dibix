@@ -118,6 +118,10 @@ namespace Dibix.Sdk.CodeGeneration
                     rawValue = value;
                     return true;
 
+                case PrimitiveType.Uri when Uri.TryCreate(value, UriKind.RelativeOrAbsolute, out Uri uriValue):
+                    rawValue = uriValue;
+                    return true;
+
                 case PrimitiveType.UUID when Guid.TryParse(value, out Guid guidValue):
                     rawValue = guidValue;
                     return true;
