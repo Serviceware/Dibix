@@ -6,7 +6,7 @@
         public string FilePath { get; }
         public int Line { get; }
         public int Column { get; }
-        public bool IsUsed { get; internal set; }
+        public bool HasReferences { get; internal set; }
 
         public ContractDefinition(SchemaDefinition schema, string filePath, int line, int column)
         {

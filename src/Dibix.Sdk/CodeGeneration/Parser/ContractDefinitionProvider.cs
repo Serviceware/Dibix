@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -17,7 +16,7 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly string _productName;
         private readonly string _areaName;
         private readonly IDictionary<string, ContractDefinition> _contracts;
-        private readonly ICollection<IDelayedContractCollectionAction> _delayedCollectionActions;
+        private readonly ICollection<string> _referencedContracts;
         #endregion
 
         #region Properties
@@ -32,7 +31,7 @@ namespace Dibix.Sdk.CodeGeneration
             this._productName = productName;
             this._areaName = areaName;
             this._contracts = new Dictionary<string, ContractDefinition>();
-            this._delayedCollectionActions = new Collection<IDelayedContractCollectionAction>();
+            this._referencedContracts = new HashSet<string>();
             this.CollectCore(contracts);
         }
         #endregion
@@ -51,7 +50,7 @@ namespace Dibix.Sdk.CodeGeneration
                 }
             }
 
-            contract.IsUsed = true;
+            contract.HasReferences = true;
             schema = contract.Schema;
             return true;
         }
@@ -84,9 +83,7 @@ If this is not a project that has multiple areas, please make sure to define the
         private void CollectCore(IEnumerable<string> contracts)
         {
             base.Collect(contracts);
-
-            foreach (IDelayedContractCollectionAction action in this._delayedCollectionActions) 
-                action.Invoke();
+            this.CollectReferenceCounts();
         }
 
         private void ReadContracts(string rootNamespace, string currentNamespace, JObject contracts, string filePath)
@@ -262,15 +259,25 @@ If this is not a project that has multiple areas, please make sure to define the
             if (isTypeReference)
             {
                 string key = $"{rootNamespace}.{typeName}";
-
-                // Delay property contract reference tracking, since it might not be registered yet
-                this._delayedCollectionActions.Add(new ContractReferenceCountCollectionAction(key, this._contracts));
-
+                this._referencedContracts.Add(key);
                 return new SchemaTypeReference(key, isNullable, isEnumerable, filePath, location.LineNumber, location.LinePosition);
             }
 
             PrimitiveType dataType = (PrimitiveType)Enum.Parse(typeof(PrimitiveType), typeName, ignoreCase: true /* JSON is camelCase while C# is PascalCase */);
             return new PrimitiveTypeReference(dataType, isNullable, isEnumerable, filePath, location.LineNumber, location.LinePosition);
+        }
+
+        private void CollectReferenceCounts()
+        {
+            foreach (string name in this._referencedContracts)
+            {
+                if (!this._contracts.TryGetValue(name, out ContractDefinition contractDefinition))
+                {
+                    // The contract is quite possibly not defined in this project
+                    continue;
+                }
+                contractDefinition.HasReferences = true;
+            }
         }
         #endregion
 

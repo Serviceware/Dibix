@@ -69,7 +69,7 @@ namespace Dibix.Sdk.CodeGeneration
             IUserDefinedTypeProvider userDefinedTypeProvider = new UserDefinedTypeProvider(productName, areaName, normalizedSources, typeResolver, logger);
 
             schemaRegistry.ImportSchemas(contractDefinitionProvider, userDefinedTypeProvider);
-            typeResolver.Register(new ContractDefinitionSchemaTypeResolver(schemaRegistry, contractDefinitionProvider), 0);
+            typeResolver.Register(new ContractDefinitionSchemaTypeResolver(contractDefinitionProvider), 0);
             typeResolver.Register(new UserDefinedTypeSchemaTypeResolver(schemaRegistry, userDefinedTypeProvider, assemblyResolver, logger), 1);
 
             IDictionary<string, SecurityScheme> securitySchemeMap = new Dictionary<string, SecurityScheme>();

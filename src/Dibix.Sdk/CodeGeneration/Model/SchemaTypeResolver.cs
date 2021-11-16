@@ -5,14 +5,12 @@ namespace Dibix.Sdk.CodeGeneration
     public abstract class SchemaTypeResolver : TypeResolver
     {
         #region Fields
-        private readonly ISchemaRegistry _schemaRegistry;
         private readonly ISchemaProvider _schemaProvider;
         #endregion
 
         #region Constructor
-        protected SchemaTypeResolver(ISchemaRegistry schemaRegistry, ISchemaProvider schemaProvider)
+        protected SchemaTypeResolver(ISchemaProvider schemaProvider)
         {
-            this._schemaRegistry = schemaRegistry;
             this._schemaProvider = schemaProvider;
         }
         #endregion
@@ -33,8 +31,12 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             SchemaTypeReference type = new SchemaTypeReference(schema.FullName, typeName.IsNullable, isEnumerable, source, line, column);
-            if (!this._schemaRegistry.IsRegistered(type.Key))
-                this._schemaRegistry.Populate(schema);
+
+            // TODO: Investigate use case
+            //if (!this._schemaRegistry.IsRegistered(type.Key))
+            //{
+            //    //this._schemaRegistry.Populate(schema);
+            //}
 
             return type;
         }

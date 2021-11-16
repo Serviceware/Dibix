@@ -14,7 +14,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public override TypeResolutionScope Scope => TypeResolutionScope.UserDefinedType;
 
-        public UserDefinedTypeSchemaTypeResolver(ISchemaRegistry schemaRegistry, IUserDefinedTypeProvider userDefinedTypeProvider, ReferencedAssemblyInspector referencedAssemblyInspector, ILogger logger) : base(schemaRegistry, userDefinedTypeProvider)
+        public UserDefinedTypeSchemaTypeResolver(ISchemaRegistry schemaRegistry, IUserDefinedTypeProvider userDefinedTypeProvider, ReferencedAssemblyInspector referencedAssemblyInspector, ILogger logger) : base(userDefinedTypeProvider)
         {
             this._schemaRegistry = schemaRegistry;
             this._referencedAssemblyInspector = referencedAssemblyInspector;

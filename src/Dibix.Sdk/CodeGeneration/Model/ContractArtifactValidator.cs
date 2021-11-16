@@ -2,13 +2,11 @@
 {
     internal sealed class ContractArtifactValidator : ICodeArtifactsGenerationModelValidator
     {
-        private readonly ISchemaRegistry _schemaRegistry;
         private readonly ILogger _logger;
 
-        public ContractArtifactValidator(ISchemaRegistry schemaRegistry, ILogger logger)
+        public ContractArtifactValidator(ILogger logger)
         {
             this._logger = logger;
-            this._schemaRegistry = schemaRegistry;
         }
 
         public bool Validate(CodeGenerationModel model)
@@ -18,7 +16,7 @@
             {
                 // Validate unused contracts
                 string contractFullName = contractDefinition.Schema.FullName;
-                if (!contractDefinition.IsUsed)
+                if (!contractDefinition.HasReferences)
                 {
                     isValid = false;
                     this._logger.LogError(null, $"Unused contract definition: {contractFullName}", contractDefinition.FilePath, contractDefinition.Line, contractDefinition.Column);

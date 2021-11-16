@@ -114,7 +114,7 @@ namespace Dibix.Sdk.CodeGeneration
               , sqlModel
             );
 
-            ICodeArtifactsGenerationModelValidator modelValidator = new CompositeCodeArtifactsGenerationModelValidator(new ContractArtifactValidator(schemaRegistry, logger));
+            ICodeArtifactsGenerationModelValidator modelValidator = new CompositeCodeArtifactsGenerationModelValidator(new ContractArtifactValidator(logger));
             if (!modelValidator.Validate(codeGenerationModel))
             {
                 additionalAssemblyReferences = null;
