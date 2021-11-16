@@ -4,7 +4,7 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class PrimitiveTypeResolver : TypeResolver
     {
-        public override TypeReference ResolveType(string input, string @namespace, string source, int line, int column, bool isEnumerable)
+        public override TypeReference ResolveType(string input, string relativeNamespace, string source, int line, int column, bool isEnumerable)
         {
             NullableTypeName typeName = input;
 

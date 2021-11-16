@@ -41,7 +41,7 @@ namespace Dibix.Sdk.Sql
             this DataTypeReference dataTypeReference
           , bool isNullable
           , string name
-          , string @namespace
+          , string relativeNamespace
           , string source
           , ISqlMarkupDeclaration markup
           , ITypeResolverFacade typeResolver
@@ -70,7 +70,7 @@ DataType: {dataTypeReference.GetType()}", source, dataTypeReference.StartLine, d
                     // /* @ClrType RequestTypeEnum */ [requesttype] TINYINT -> RequestTypeEnum requesttype
                     if (typeImplementationName != null)
                     {
-                        TypeReference typeReference = typeResolver.ResolveType(typeImplementationName.Value, @namespace, source, typeImplementationName.Line, typeImplementationName.Column, false);
+                        TypeReference typeReference = typeResolver.ResolveType(typeImplementationName.Value, relativeNamespace, source, typeImplementationName.Line, typeImplementationName.Column, false);
                         if (typeReference != null)
                             typeReference.IsNullable = isNullable;
 
@@ -95,7 +95,7 @@ DataType: {sqlDataTypeReference.SqlDataTypeOption}", source, dataTypeReference.S
                     }
 
                     udtName = userDataTypeReference.Name.ToFullName();
-                    TypeReference typeReference = typeResolver.ResolveType(TypeResolutionScope.UserDefinedType, udtName, @namespace, source, dataTypeReference.StartLine, dataTypeReference.StartColumn, false);
+                    TypeReference typeReference = typeResolver.ResolveType(TypeResolutionScope.UserDefinedType, udtName, relativeNamespace, source, dataTypeReference.StartLine, dataTypeReference.StartColumn, false);
                     return typeReference;
                 }
 

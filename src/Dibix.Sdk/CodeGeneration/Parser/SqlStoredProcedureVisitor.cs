@@ -19,10 +19,10 @@ namespace Dibix.Sdk.CodeGeneration
             base.Target.ProcedureName = String.Join(".", node.ProcedureReference.Name.Identifiers.Select(x => Identifier.EncodeIdentifier(x.Value)));
 
             StatementList statements = node.StatementList ?? new StatementList();
-            this.ParseContent(node, statements);
+            this.ParseContent(node, statements, out string relativeNamespace);
 
             foreach (ProcedureParameter parameter in node.Parameters)
-                this.ParseParameter(parameter);
+                this.ParseParameter(parameter, relativeNamespace);
 
             this.ParseErrorResponses(statements);
 
@@ -31,7 +31,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private void ParseParameter(ProcedureParameter node)
+        private void ParseParameter(ProcedureParameter node, string relativeNamespace)
         {
             string parameterName = node.VariableName.Value.TrimStart('@');
 
@@ -40,7 +40,7 @@ namespace Dibix.Sdk.CodeGeneration
             SqlQueryParameter parameter = new SqlQueryParameter
             {
                 Name = parameterName,
-                Type = this.ParseParameterType(parameterName, node, markup),
+                Type = this.ParseParameterType(parameterName, node, markup, relativeNamespace),
                 IsOutput = node.Modifier == ParameterModifier.Output
             };
             
@@ -50,10 +50,10 @@ namespace Dibix.Sdk.CodeGeneration
             base.Target.Parameters.Add(parameter);
         }
 
-        private TypeReference ParseParameterType(string parameterName, DeclareVariableElement parameter, ISqlMarkupDeclaration markup)
+        private TypeReference ParseParameterType(string parameterName, DeclareVariableElement parameter, ISqlMarkupDeclaration markup, string relativeNamespace)
         {
             bool isNullable = parameter.Nullable?.Nullable ?? false;
-            return parameter.DataType.ToTypeReference(isNullable, parameterName, base.Target.Namespace, base.Target.Source, markup, base.TypeResolver, base.Logger, out _);
+            return parameter.DataType.ToTypeReference(isNullable, parameterName, relativeNamespace, base.Target.Source, markup, base.TypeResolver, base.Logger, out _);
         }
 
         private void ParseParameterObfuscate(SqlQueryParameter target, ISqlMarkupDeclaration markup)
@@ -69,9 +69,9 @@ namespace Dibix.Sdk.CodeGeneration
             target.DefaultValue = SqlValueReferenceParser.Parse(parameter.VariableName.Value, parameter.Value, target.Type, base.Target.Source, base.Logger);
         }
 
-        private void ParseContent(TSqlFragment content, StatementList statements)
+        private void ParseContent(TSqlFragment content, StatementList statements, out string relativeNamespace)
         {
-            _ = base.Markup.TryGetSingleElementValue(SqlMarkupKey.Namespace, base.Target.Source, base.Logger, out string relativeNamespace);
+            _ = base.Markup.TryGetSingleElementValue(SqlMarkupKey.Namespace, base.Target.Source, base.Logger, out relativeNamespace);
 
             base.Target.Namespace = this.ParseNamespace(relativeNamespace);
             base.Target.Name = this.ParseName();
@@ -82,7 +82,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (base.Markup.TryGetSingleElement(SqlMarkupKey.FileResult, base.Target.Source, base.Logger, out ISqlElement fileResultElement))
                 base.Target.FileResult = fileResultElement;
 
-            this.ParseResults(content, base.Markup);
+            this.ParseResults(content, base.Markup, relativeNamespace);
 
             bool generateResultClass = false;
             base.Target.ResultType = this.DetermineResultType(relativeNamespace, ref generateResultClass);
@@ -100,7 +100,7 @@ namespace Dibix.Sdk.CodeGeneration
             // Explicit result type
             if (base.Markup.TryGetSingleElementValue(SqlMarkupKey.ResultTypeName, base.Target.Source, base.Logger, out ISqlElementValue value))
             {
-                TypeReference type = base.TypeResolver.ResolveType(value.Value, base.Target.Namespace, base.Target.Source, value.Line, value.Column, false);
+                TypeReference type = base.TypeResolver.ResolveType(value.Value, relativeNamespace, base.Target.Source, value.Line, value.Column, false);
                 return type;
             }
 
@@ -155,9 +155,9 @@ namespace Dibix.Sdk.CodeGeneration
             return typeReference;
         }
 
-        private void ParseResults(TSqlFragment node, ISqlMarkupDeclaration markup)
+        private void ParseResults(TSqlFragment node, ISqlMarkupDeclaration markup, string relativeNamespace)
         {
-            IEnumerable<SqlQueryResult> results = StatementOutputParser.Parse(base.Target, node, base.FragmentAnalyzer, markup, base.TypeResolver, base.SchemaRegistry, base.Logger);
+            IEnumerable<SqlQueryResult> results = StatementOutputParser.Parse(base.Target, node, base.FragmentAnalyzer, markup, relativeNamespace, base.TypeResolver, base.SchemaRegistry, base.Logger);
             base.Target.Results.AddRange(results);
         }
 

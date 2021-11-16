@@ -41,13 +41,8 @@ namespace Dibix.Sdk.CodeGeneration
         {
             if (!this._contracts.TryGetValue(name, out ContractDefinition contract))
             {
-                // Assume relative namespace
-                string absoluteNamespace = NamespaceUtility.BuildAbsoluteNamespace(this._productName, this._areaName, LayerName.DomainModel, name);
-                if (!this._contracts.TryGetValue(absoluteNamespace, out contract))
-                {
-                    schema = null;
-                    return false;
-                }
+                schema = null;
+                return false;
             }
 
             contract.HasReferences = true;
@@ -258,6 +253,11 @@ If this is not a project that has multiple areas, please make sure to define the
             IJsonLineInfo location = value.GetLineInfo();
             if (isTypeReference)
             {
+                // TODO: Actually the contracts should have a namespace group, just like the procedures.
+                // The folder itself should not indicate a namespace (just like in C#).
+                // Therefore a namespace property should be added to the contract schema.
+                // This would however introduce a breaking change, since in C#, when you are within a namespace group,
+                // and you want to reference a type from outside of the namespace, an absolute namespace must be used.
                 string key = $"{rootNamespace}.{typeName}";
                 this._referencedContracts.Add(key);
                 return new SchemaTypeReference(key, isNullable, isEnumerable, filePath, location.LineNumber, location.LinePosition);

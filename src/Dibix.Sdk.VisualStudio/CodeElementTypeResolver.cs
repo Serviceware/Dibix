@@ -25,7 +25,7 @@ namespace Dibix.Sdk.VisualStudio
         #endregion
 
         #region Overrides
-        public override TypeReference ResolveType(string input, string @namespace, string source, int line, int column, bool isEnumerable)
+        public override TypeReference ResolveType(string input, string relativeNamespace, string source, int line, int column, bool isEnumerable)
         {
             NullableTypeName typeName = input;
 

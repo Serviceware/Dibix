@@ -17,7 +17,7 @@ namespace Dibix.Sdk.CodeGeneration
         private const string ReturnPropertyConverter = "Converter";
         private const string ReturnPropertyResultType = "ResultType";
 
-        public static IEnumerable<SqlQueryResult> Parse(SqlStatementDescriptor target, TSqlFragment node, TSqlFragmentAnalyzer fragmentAnalyzer, ISqlMarkupDeclaration markup, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger)
+        public static IEnumerable<SqlQueryResult> Parse(SqlStatementDescriptor target, TSqlFragment node, TSqlFragmentAnalyzer fragmentAnalyzer, ISqlMarkupDeclaration markup, string relativeNamespace, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             StatementOutputVisitor visitor = new StatementOutputVisitor(target.Source, fragmentAnalyzer, logger);
             node.Accept(visitor);
@@ -37,7 +37,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (!ValidateReturnElements(target, returnElements, visitor.Outputs, logger))
                 yield break;
 
-            foreach (SqlQueryResult result in CollectResults(target, node, typeResolver, schemaRegistry, logger, returnElements, visitor)) 
+            foreach (SqlQueryResult result in CollectResults(target, node, typeResolver, schemaRegistry, logger, returnElements, visitor, relativeNamespace)) 
                 yield return result;
         }
 
@@ -59,7 +59,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static SqlQueryResult CreateBuiltInResult(string typeName, SqlStatementDescriptor target, ISqlElement source, ITypeResolverFacade typeResolver)
         {
-            TypeReference typeReference = typeResolver.ResolveType(typeName, @namespace: null, target.Source, source.Line, source.Column, isEnumerable: false);
+            TypeReference typeReference = typeResolver.ResolveType(typeName, relativeNamespace: null, target.Source, source.Line, source.Column, isEnumerable: false);
             return new SqlQueryResult
             {
                 ResultMode = SqlQueryResultMode.SingleOrDefault,
@@ -142,7 +142,7 @@ namespace Dibix.Sdk.CodeGeneration
             return result;
         }
 
-        private static IEnumerable<SqlQueryResult> CollectResults(SqlStatementDescriptor target, TSqlFragment node, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger, IList<ISqlElement> returnElements, StatementOutputVisitor visitor)
+        private static IEnumerable<SqlQueryResult> CollectResults(SqlStatementDescriptor target, TSqlFragment node, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger, IList<ISqlElement> returnElements, StatementOutputVisitorBase visitor, string relativeNamespace)
         {
             ICollection<string> usedOutputNames = new HashSet<string>();
             for (int i = 0; i < returnElements.Count; i++)
@@ -163,7 +163,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                 ValidateMergeGridResult(target, node, i == 0, resultMode, resultName?.Value, logger);
 
-                IList<TypeReference> resultTypes = ParseResultTypes(target, resultMode, typesHint, typeResolver).ToArray();
+                IList<TypeReference> resultTypes = ParseResultTypes(target, resultMode, typesHint, typeResolver, relativeNamespace).ToArray();
                 if (!resultTypes.Any())
                     continue;
 
@@ -189,7 +189,7 @@ namespace Dibix.Sdk.CodeGeneration
                     ResultMode = resultMode,
                     Converter = converter?.Value,
                     SplitOn = splitOn?.Value,
-                    ProjectToType = ParseProjectionContract(target, node, returnElements, resultMode, returnElement, typeResolver, logger)
+                    ProjectToType = ParseProjectionContract(target, node, returnElements, resultMode, returnElement, relativeNamespace, typeResolver, logger)
                 };
                 result.Types.AddRange(resultTypes);
                 result.Columns.AddRange(output.Columns.Select(x => x.ColumnName));
@@ -225,14 +225,14 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static IEnumerable<TypeReference> ParseResultTypes(SqlStatementDescriptor target, SqlQueryResultMode resultMode, ISqlElementValue typesHint, ITypeResolverFacade typeResolver)
+        private static IEnumerable<TypeReference> ParseResultTypes(SqlStatementDescriptor target, SqlQueryResultMode resultMode, ISqlElementValue typesHint, ITypeResolverFacade typeResolver, string relativeNamespace)
         {
             string[] typeNames = typesHint.Value.Split(';');
             int column = typesHint.Column;
 
             foreach (string typeName in typeNames)
             {
-                TypeReference typeReference = typeResolver.ResolveType(typeName, target.Namespace, target.Source, typesHint.Line, column, resultMode == SqlQueryResultMode.Many);
+                TypeReference typeReference = typeResolver.ResolveType(typeName, relativeNamespace, target.Source, typesHint.Line, column, resultMode == SqlQueryResultMode.Many);
                 if (typeReference != null)
                     yield return typeReference;
 
@@ -404,7 +404,7 @@ namespace Dibix.Sdk.CodeGeneration
             return true;
         }
 
-        private static TypeReference ParseProjectionContract(SqlStatementDescriptor target, TSqlFragment node, ICollection<ISqlElement> returnElements, SqlQueryResultMode resultMode, ISqlElement returnElement, ITypeResolverFacade typeResolver, ILogger logger)
+        private static TypeReference ParseProjectionContract(SqlStatementDescriptor target, TSqlFragment node, ICollection<ISqlElement> returnElements, SqlQueryResultMode resultMode, ISqlElement returnElement, string relativeNamespace, ITypeResolverFacade typeResolver, ILogger logger)
         {
             SqlQueryResultMode[] supportedResultTypeResultModes = { SqlQueryResultMode.Many };
             if (!returnElement.TryGetPropertyValue(ReturnPropertyResultType, isDefault: false, out ISqlElementValue resultType))
@@ -433,7 +433,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (singleResult || isResultTypeSupported) 
                 return null;
 
-            return typeResolver.ResolveType(resultType.Value, target.Namespace, target.Source, resultType.Line, resultType.Column, resultMode == SqlQueryResultMode.Many);
+            return typeResolver.ResolveType(resultType.Value, relativeNamespace, target.Source, resultType.Line, resultType.Column, resultMode == SqlQueryResultMode.Many);
         }
     }
 }

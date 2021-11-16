@@ -36,18 +36,12 @@ namespace Dibix.Sdk.Sql
         #region Private Methods
         private static void RestrictEmbeddedReferences(string projectName, IEnumerable<TaskItem> sqlReferencePath, ILogger logger)
         {
-            // TODO: Dirty suppression..
-            if (projectName == "ObjectManagement.Database.Tests")
-                return;
-
             foreach (TaskItem reference in sqlReferencePath)
             {
                 string path = reference.GetFullPath();
                 string fileName = Path.GetFileNameWithoutExtension(path);
 
-                if (reference.TryGetValue("SuppressMissingDependenciesErrors", out string suppressionValue)
-                 && Boolean.Parse(suppressionValue)
-                 && fileName != "History.Database") // TODO: Suppression
+                if (reference.TryGetValue("SuppressMissingDependenciesErrors", out string suppressionValue) && Boolean.Parse(suppressionValue))
                 {
                     logger.LogError(null, $"SuppressMissingDependenciesErrors is not supported: {path}", null, default, default);
                     continue;

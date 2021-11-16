@@ -42,7 +42,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Overrides
-        public override TypeReference ResolveType(string input, string @namespace, string source, int line, int column, bool isEnumerable)
+        public override TypeReference ResolveType(string input, string relativeNamespace, string source, int line, int column, bool isEnumerable)
         {
             bool isAssemblyQualified = input.IndexOf(',') >= 0;
             return !isAssemblyQualified ? null/*this.TryLocalType(input, source, line, column, isEnumerable)*/ : this.TryForeignType(input, source, line, column, isEnumerable);
@@ -50,6 +50,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Public Methods
+        public static TypeReference ResolveType(Type type, string source, int line, int column, bool isNullable, bool isEnumerable, ISchemaRegistry schemaRegistry, ILogger logger) => ResolveType(type, source, line, column, isNullable, isEnumerable, udtName: null, schemaRegistry, logger);
         public static TypeReference ResolveType(Type type, string source, int line, int column, string udtName, ISchemaRegistry schemaRegistry, ILogger logger) => ResolveType(type, source, line, column, isNullable: false, isEnumerable: false, udtName, schemaRegistry, logger);
         public static TypeReference ResolveType(Type type, string source, int line, int column, ISchemaRegistry schemaRegistry, ILogger logger)
         {
