@@ -44,4 +44,11 @@
   </ItemGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)build\dependencies.props" />
+
+  <!-- Allow to override package version -->
+  <Target Name="SetPackageVersion" AfterTargets="GetBuildVersion">
+    <PropertyGroup>
+      <PackageVersion Condition="'$(PackageVersionOverride)' != ''">$(PackageVersionOverride)</PackageVersion>
+    </PropertyGroup>
+  </Target>
 </Project>

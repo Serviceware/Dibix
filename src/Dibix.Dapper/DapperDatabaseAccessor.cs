@@ -15,6 +15,7 @@ namespace Dibix.Dapper
         #endregion
 
         #region Constructor
+        static DapperDatabaseAccessor() => ConfigureDapper();
         public DapperDatabaseAccessor(DbConnection connection) : this(connection, null, null) { }
         public DapperDatabaseAccessor(DbConnection connection, Action onDispose) : this(connection, null, onDispose) { }
         public DapperDatabaseAccessor(DbConnection connection, IDbTransaction transaction, Action onDispose) : base(connection, onDispose)
@@ -132,7 +133,7 @@ namespace Dibix.Dapper
         {
             Guard.IsNotNull(parametersVisitor, nameof(parametersVisitor));
             DynamicParameters @params = new DynamicParameters();
-            parametersVisitor.VisitInputParameters((name, dataType, value, isOutput) => @params.Add(name: name, value: NormalizeParameterValue(value), dbType: NormalizeParameterDbType(dataType), direction: isOutput ? ParameterDirection.Output : (ParameterDirection?)null));
+            parametersVisitor.VisitInputParameters((name, dataType, value, isOutput, customInputType) => @params.Add(name: name, value: NormalizeParameterValue(value), dbType: NormalizeParameterDbType(dataType, customInputType), direction: isOutput ? ParameterDirection.Output : (ParameterDirection?)null));
             return new DynamicParametersWrapper(@params, parametersVisitor);
         }
 
@@ -144,12 +145,20 @@ namespace Dibix.Dapper
             return value;
         }
 
-        private static DbType? NormalizeParameterDbType(DbType dbType)
+        private static DbType? NormalizeParameterDbType(DbType dbType, CustomInputType customInputType)
         {
             if (dbType == DbType.Xml)
                 return null; // You would guess DbType.Xml, but since Dapper treats .NET XML types (i.E. XElement) as custom types, DbType = null is expected
 
+            if (customInputType != default)
+                return null; // Same weird logic like above. Dapper will only resolve the custom type handler, if the db type is null.
+
             return dbType;
+        }
+
+        private static void ConfigureDapper()
+        {
+            SqlMapper.AddTypeHandler(new DapperUriTypeHandler());
         }
         #endregion
 

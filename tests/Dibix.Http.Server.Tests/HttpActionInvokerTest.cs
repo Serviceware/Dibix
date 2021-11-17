@@ -121,12 +121,12 @@ CommandText: <Dynamic>", requestException.Message);
             parametersVisitor.Setup(x => x.VisitInputParameters(It.IsAny<InputParameterVisitor>()))
                              .Callback((InputParameterVisitor visitParameter) =>
                              {
-                                 visitParameter("a", DbType.Binary, new byte[] { 1 }, false);
+                                 visitParameter("a", DbType.Binary, new byte[] { 1 }, false, CustomInputType.None);
                                  visitParameter("b", DbType.Object, new X
                                  {
                                      { 1, "I" },
                                      { 2, "II" }
-                                 }, false);
+                                 }, false, CustomInputType.None);
                              });
 
             Exception exception = (Exception)typeof(DatabaseAccessException).GetMethod("Create", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { commandType, commandText, parametersVisitor.Object, sqlException });
@@ -167,12 +167,12 @@ intValue INT(4)  stringValue NVARCHAR(MAX)
             parametersVisitor.Setup(x => x.VisitInputParameters(It.IsAny<InputParameterVisitor>()))
                              .Callback((InputParameterVisitor visitParameter) =>
                              {
-                                 visitParameter("a", DbType.Binary, new byte[] { 1 }, false);
+                                 visitParameter("a", DbType.Binary, new byte[] { 1 }, false, CustomInputType.None);
                                  visitParameter("b", DbType.Object, new X
                                  {
                                      { 1, "I" },
                                      { 2, "II" }
-                                 }, false);
+                                 }, false, CustomInputType.None);
                              });
 
             Exception exception = (Exception)typeof(DatabaseAccessException).GetMethod("Create", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { commandType, commandText, parametersVisitor.Object, sqlException });

@@ -28,12 +28,17 @@ namespace Dibix
           , [typeof(char)]            = DbType.StringFixedLength
           , [typeof(byte[])]          = DbType.Binary
           , [typeof(Stream)]          = DbType.Binary
+          , [typeof(Uri)]             = DbType.String
           , [typeof(Guid)]            = DbType.Guid
           , [typeof(DateTime)]        = DbType.DateTime
           , [typeof(DateTimeOffset)]  = DbType.DateTimeOffset
           , [typeof(TimeSpan)]        = DbType.Time
           , [typeof(XElement)]        = DbType.Xml
           , [typeof(object)]          = DbType.Object
+        };
+        private static readonly IDictionary<Type, CustomInputType> CustomInputTypeMap = new Dictionary<Type, CustomInputType>
+        {
+            [typeof(Uri)] = Dibix.CustomInputType.Uri
         };
         private readonly IDictionary<string, Parameter> _parameters;
         #endregion
@@ -109,7 +114,8 @@ namespace Dibix
             foreach (PropertyAccessor property in TypeAccessor.GetProperties(template.GetType()))
             {
                 Type outParameterType = null;
-                DbType type = ResolveDbType(property.Type, ref outParameterType);
+                CustomInputType customInputType = CustomInputType.None;
+                DbType type = ResolveDbType(property.Type, ref outParameterType, ref customInputType);
                 object value = property.GetValue(template);
                 bool isObfuscated = property.IsDefined<ObfuscatedAttribute>();
                 if (isObfuscated)
@@ -118,7 +124,7 @@ namespace Dibix
                 }
                 else if (outParameterType == null)
                 {
-                    this.Set(property.Name, type, value);
+                    this.Set(property.Name, type, value, customInputType: customInputType);
                 }
                 else
                 {
@@ -145,13 +151,13 @@ namespace Dibix
             parameterValue = outParameter;
             return this.Set(name, dbType, null, outParameter);
         }
-        private IParameterBuilder Set(string name, DbType type, object value, OutParameter outParameter = null)
+        private IParameterBuilder Set(string name, DbType type, object value, OutParameter outParameter = null, CustomInputType customInputType = default)
         {
-            this._parameters[name] = new Parameter(name, type, value, outParameter);
+            this._parameters[name] = new Parameter(name, type, value, outParameter, customInputType);
             return this;
         }
 
-        private static DbType ResolveDbType(Type clrType, ref Type outParameterType)
+        private static DbType ResolveDbType(Type clrType, ref Type outParameterType, ref CustomInputType customInputType)
         {
             Type nullUnderlyingType = Nullable.GetUnderlyingType(clrType);
             if (nullUnderlyingType != null) 
@@ -172,6 +178,8 @@ namespace Dibix
             if (typeof(Stream).IsAssignableFrom(clrType))
                 clrType = typeof(Stream);
 
+            CustomInputTypeMap.TryGetValue(clrType, out customInputType);
+
             if (TypeMap.TryGetValue(clrType, out DbType dbType))
                 return dbType;
 
@@ -188,7 +196,7 @@ namespace Dibix
 
             public override void VisitInputParameters(InputParameterVisitor visitParameter)
             {
-                this._parameters.Each(x => visitParameter(x.Name, x.Type, x.Value, x.OutputParameter != null));
+                this._parameters.Each(x => visitParameter(x.Name, x.Type, x.Value, x.OutputParameter != null, x.CustomInputType));
             }
 
             public override void VisitOutputParameters(OutputParameterVisitor visitParameter)
@@ -205,13 +213,15 @@ namespace Dibix
             public DbType Type { get; }
             public object Value { get; }
             public OutParameter OutputParameter { get; }
+            public CustomInputType CustomInputType { get; }
 
-            public Parameter(string name, DbType type, object value, OutParameter outParameter)
+            public Parameter(string name, DbType type, object value, OutParameter outParameter, CustomInputType customInputType)
             {
                 this.Name = name;
                 this.Type = type;
                 this.Value = value;
                 this.OutputParameter = outParameter;
+                this.CustomInputType = customInputType;
             }
         }
 
