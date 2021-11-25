@@ -7,4 +7,4 @@ CREATE PROCEDURE [dbo].[dbx_tests_syntax_empty_params_inputclass]
   , @y BIT OUTPUT
   , @z INT
 AS
-	;
+	PRINT CONCAT(@x, @password, @ids, @y, @z)

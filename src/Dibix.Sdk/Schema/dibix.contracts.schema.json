@@ -161,6 +161,7 @@
             "type": "object",
             "minProperties": 1,
             "maxProperties": 1,
+            "uniqueItems": true,
             "patternProperties": {
               "^[A-Z]([\\w]+)?$": {
                 "anyOf": [

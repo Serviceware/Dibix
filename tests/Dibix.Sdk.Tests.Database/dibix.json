@@ -1,0 +1,8 @@
+{
+  "Endpoints": {
+    "BaseUrl": "https://localhost/api",
+    "ParameterSources": {
+      "DBX": null
+    }
+  }
+}

@@ -11,7 +11,7 @@ namespace Dibix.Testing
             if (backingField == null)
                 return false;
 
-            ConstructorInfo constructor = property.DeclaringType.GetConstructor(new Type[0]);
+            ConstructorInfo constructor = property.DeclaringType.GetConstructor(Type.EmptyTypes);
             if (constructor == null)
                 return false;
 

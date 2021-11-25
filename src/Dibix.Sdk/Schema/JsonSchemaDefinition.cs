@@ -4,7 +4,7 @@ using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Schema;
 
-namespace Dibix.Sdk.CodeGeneration
+namespace Dibix.Sdk
 {
     internal static class JsonSchemaDefinition
     {

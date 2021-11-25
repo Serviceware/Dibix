@@ -15,7 +15,7 @@ namespace Dibix.Http.Server
         public override void Resolve(IHttpParameterResolutionContext context)
         {
             Expression keyParameter = Expression.Constant(context.PropertyPath);
-            Expression getHeaderCall = Expression.Call(typeof(HeaderParameterSourceProvider), nameof(GetHeader), new Type[0], context.RequestParameter, keyParameter);
+            Expression getHeaderCall = Expression.Call(typeof(HeaderParameterSourceProvider), nameof(GetHeader), Type.EmptyTypes, context.RequestParameter, keyParameter);
             context.ResolveUsingValue(getHeaderCall);
         }
 

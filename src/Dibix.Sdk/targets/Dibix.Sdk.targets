@@ -159,6 +159,7 @@
       <SqlCoreInput Include="@(_SqlTargetInput)" />
       <SqlCoreInput Include="@(Contract)" />
       <SqlCoreInput Include="@(Endpoint)" />
+      <SqlCoreInput Include="$(_DibixConfigurationPath)" />
     </ItemGroup>
   </Target>
   <Target Name="SetupSqlBuildOutputs" BeforeTargets="_SetupSqlBuildOutputs">
@@ -186,6 +187,7 @@
     </ItemGroup>
 
     <PropertyGroup>
+      <_DibixConfigurationPath>$(DibixConfigurationDirectory)\dibix.json</_DibixConfigurationPath>
       <_HasEndpoints Condition="@(Endpoint->Count()) > 0">True</_HasEndpoints>
       <ClientOutputName Condition="'$(ClientOutputName)' == '' and '$(AreaName)' != '' and '$(_HasEndpoints)' == 'true'">$(AreaName).Client</ClientOutputName>
       <_ClientFilePathNoExt Condition="'$(ClientOutputName)' != ''">$(TargetDir)$(ClientOutputName)</_ClientFilePathNoExt>
@@ -207,8 +209,6 @@
           Outputs="@(SqlCoreOutput)">
     <!-- Configuration -->
     <PropertyGroup>
-      <!--<SqlNamingConventionPrefix Condition="'$(SqlNamingConventionPrefix)' == ''">dbx</SqlNamingConventionPrefix>-->
-
       <ProductName Condition="'$(ProductName)' == ''">$(RootNamespace.Split('.')[0])</ProductName>
       <Title Condition="$(Title) == ''">$(AreaName)</Title>
       <Description Condition="$(Description) == '' and $(Build_Repository_Uri) != '' and $(Build_SourceVersion) != '' and $(Build_SourceBranch) != ''">__Build version:__ $([System.DateTime]::Now.ToString(G))\r\n\r\n__Source version:__ [$(Build_SourceVersion)]($(Build_Repository_Uri)/commit/$(Build_SourceVersion)?refName=$(Build_SourceBranch))</Description>
@@ -265,8 +265,8 @@
   $(MSBuildProjectName)" />
       <_SqlCoreInputItem Include="ProjectDirectory
   $(MSBuildProjectDirectory)" />
-      <_SqlCoreInputItem Include="NamingConventionPrefix
-  $(SqlNamingConventionPrefix)" />
+      <_SqlCoreInputItem Include="ConfigurationFilePath
+  $(_DibixConfigurationPath)" />
       <_SqlCoreInputItem Include="StaticCodeAnalysisSucceededFile
   $(StaticCodeAnalysisSucceededFile)" />
       <_SqlCoreInputItem Include="ResultsFile
@@ -281,8 +281,6 @@
   $(FileVersion)" />
       <_SqlCoreInputItem Include="Description
   $(Description)" />
-      <_SqlCoreInputItem Include="BaseUrl
-  $(BaseUrl)" />
       <_SqlCoreInputItem Include="DefaultOutputFilePath
   $(_ServerIntermediateFilePath)" />
       <_SqlCoreInputItem Include="ClientOutputFilePath

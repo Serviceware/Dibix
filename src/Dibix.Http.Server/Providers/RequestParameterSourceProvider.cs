@@ -28,7 +28,7 @@ namespace Dibix.Http.Server
 
         private static Expression BuildExpression(Expression requestParameter, string methodName)
         {
-            Expression getLanguageCall = Expression.Call(typeof(RequestParameterSourceProvider), methodName, new Type[0], requestParameter);
+            Expression getLanguageCall = Expression.Call(typeof(RequestParameterSourceProvider), methodName, Type.EmptyTypes, requestParameter);
             return getLanguageCall;
         }
 

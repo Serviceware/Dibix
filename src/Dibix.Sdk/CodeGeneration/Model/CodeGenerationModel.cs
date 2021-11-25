@@ -9,7 +9,7 @@ namespace Dibix.Sdk.CodeGeneration
         public string AreaName { get; set; }
         public string RootNamespace { get; set; }
         public string DefaultClassName { get; set; }
-        public string BaseUrl { get; set; }
+        public EndpointConfiguration EndpointConfiguration { get; set; }
         public CodeGeneratorCompatibilityLevel CompatibilityLevel { get; }
         public CommandTextFormatting CommandTextFormatting { get; set; }
         public IList<SqlStatementDescriptor> Statements { get; }

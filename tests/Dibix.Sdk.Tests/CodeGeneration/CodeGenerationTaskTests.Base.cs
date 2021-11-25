@@ -37,20 +37,23 @@ namespace Dibix.Sdk.Tests.CodeGeneration
 
             TestLogger logger = new TestLogger(this._output);
 
-            bool result = CodeGenerationTask.Execute
+            bool result = SqlCoreTask.Execute
             (
                 projectName: DatabaseTestUtility.ProjectName
               , projectDirectory: DatabaseTestUtility.DatabaseProjectDirectory
+              , configurationFilePath: Path.Combine(DatabaseTestUtility.DatabaseProjectDirectory, "dibix.json")
+              , staticCodeAnalysisSucceededFile: null
+              , resultsFile: null
               , productName: "Dibix.Sdk"
               , areaName: "Tests"
               , title: "Dibix.Sdk.Tests API title"
               , version: "1.0.1"
               , description: "Dibix.Sdk.Tests API description"
-              , baseUrl: "https://localhost/api"
               , defaultOutputFilePath: defaultOutputFilePath
               , clientOutputFilePath: generateClient ? clientOutputFilePath : null
               , externalAssemblyReferenceDirectory: Environment.CurrentDirectory
               , source: sources.Select(ToTaskItem).ToArray()
+              , scriptSource: Enumerable.Empty<TaskItem>()
               , contracts: contracts.Select(ToTaskItem)
               , endpoints: endpoints.Select(ToTaskItem)
               , references: Enumerable.Empty<TaskItem>()

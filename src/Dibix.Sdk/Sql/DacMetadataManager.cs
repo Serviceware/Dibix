@@ -73,11 +73,11 @@ namespace Dibix.Sdk.Sql
 
             Func<string, bool?> compiled = CompileMethod<Func<string, bool?>>
             (
-                packageOpener: sqlPackageType => Expression.Call(sqlPackageType, "Open", new Type[0], fileParameter, Expression.Constant(FileAccess.Read))
+                packageOpener: sqlPackageType => Expression.Call(sqlPackageType, "Open", Type.EmptyTypes, fileParameter, Expression.Constant(FileAccess.Read))
               , body: (streamVariable, parameters, statements) =>
                 {
                     ParameterExpression isEmbeddedVariable = Expression.Parameter(typeof(bool?), "isEmbedded");
-                    Expression isEmbeddedValue = Expression.Call(typeof(DacMetadataManager), nameof(IsEmbedded), new Type[0], streamVariable);
+                    Expression isEmbeddedValue = Expression.Call(typeof(DacMetadataManager), nameof(IsEmbedded), Type.EmptyTypes, streamVariable);
                     Expression isEmbeddedAssign = Expression.Assign(isEmbeddedVariable, isEmbeddedValue);
                     parameters.Add(isEmbeddedVariable);
                     statements.Add(isEmbeddedAssign);
@@ -119,10 +119,10 @@ namespace Dibix.Sdk.Sql
 
             Action<FileInfo, bool> compiled = CompileMethod<Action<FileInfo, bool>>
             (
-                packageOpener: sqlPackageType => Expression.Call(sqlPackageType, "OpenForUpdate", new Type[0], fileInfoParameter)
+                packageOpener: sqlPackageType => Expression.Call(sqlPackageType, "OpenForUpdate", Type.EmptyTypes, fileInfoParameter)
               , body: (streamVariable, parameters, statements) =>
                 {
-                    Expression writeIsEmbeddedCall = Expression.Call(typeof(DacMetadataManager), nameof(WriteIsEmbedded), new Type[0], streamVariable, valueParameter);
+                    Expression writeIsEmbeddedCall = Expression.Call(typeof(DacMetadataManager), nameof(WriteIsEmbedded), Type.EmptyTypes, streamVariable, valueParameter);
                     statements.Add(writeIsEmbeddedCall);
                 }
               , fileInfoParameter
@@ -168,12 +168,12 @@ namespace Dibix.Sdk.Sql
             ParameterExpression contentVariable = Expression.Variable(sqlPackageContentType, "content");
             object sqlPackageContentTypeValue = Enum.Parse(sqlPackageContentTypeType, "DacOrigin");
             Expression sqlPackageContentTypeModelParameter = Expression.Constant(sqlPackageContentTypeValue, sqlPackageContentTypeType);
-            Expression contentValue = Expression.Call(packageVariable, "GetContent", new Type[0], sqlPackageContentTypeModelParameter);
+            Expression contentValue = Expression.Call(packageVariable, "GetContent", Type.EmptyTypes, sqlPackageContentTypeModelParameter);
             Expression contentAssign = Expression.Assign(contentVariable, contentValue);
 
             // stream = content.GetStream();
             ParameterExpression streamVariable = Expression.Variable(typeof(Stream), "stream");
-            Expression streamValue = Expression.Call(contentVariable, "GetStream", new Type[0]);
+            Expression streamValue = Expression.Call(contentVariable, "GetStream", Type.EmptyTypes);
             Expression streamAssign = Expression.Assign(streamVariable, streamValue);
 
             // <body>

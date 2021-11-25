@@ -18,7 +18,7 @@ namespace Dibix.Sdk.CodeAnalysis
         #region Fields
         private readonly TSqlModel _model;
         private readonly string _projectName;
-        private readonly string _namingConventionPrefix;
+        private readonly SqlCodeAnalysisConfiguration _configuration;
         private readonly bool _isEmbedded;
         private readonly ILogger _logger;
         private readonly ICollection<Func<SqlCodeAnalysisContext, IEnumerable<SqlCodeAnalysisError>>> _rules;
@@ -27,11 +27,11 @@ namespace Dibix.Sdk.CodeAnalysis
         #endregion
 
         #region Constructor
-        private SqlCodeAnalysisRuleEngine(TSqlModel model, string projectName, string namingConventionPrefix, bool isEmbedded, ILogger logger)
+        private SqlCodeAnalysisRuleEngine(TSqlModel model, string projectName, SqlCodeAnalysisConfiguration configuration, bool isEmbedded, ILogger logger)
         {
             this._model = model;
             this._projectName = projectName;
-            this._namingConventionPrefix = namingConventionPrefix;
+            this._configuration = configuration;
             this._isEmbedded = isEmbedded;
             this._logger = logger;
             this._rules = ScanRules().ToArray();
@@ -42,9 +42,9 @@ namespace Dibix.Sdk.CodeAnalysis
         #endregion
 
         #region Factory Methods
-        public static SqlCodeAnalysisRuleEngine Create(TSqlModel model, string projectName, string namingConventionPrefix, bool isEmbedded, ILogger logger)
+        public static SqlCodeAnalysisRuleEngine Create(TSqlModel model, string projectName, SqlCodeAnalysisConfiguration configuration, bool isEmbedded, ILogger logger)
         {
-            return new SqlCodeAnalysisRuleEngine(model, projectName, namingConventionPrefix, isEmbedded, logger);
+            return new SqlCodeAnalysisRuleEngine(model, projectName, configuration, isEmbedded, logger);
         }
         #endregion
 
@@ -137,7 +137,7 @@ namespace Dibix.Sdk.CodeAnalysis
 
         private SqlCodeAnalysisContext CreateContext(string source, TSqlFragment fragment, bool isScriptArtifact)
         {
-            return new SqlCodeAnalysisContext(this._model, source, fragment, isScriptArtifact, this._projectName, this._namingConventionPrefix, this._isEmbedded, this, this._logger);
+            return new SqlCodeAnalysisContext(this._model, source, fragment, isScriptArtifact, this._projectName, this._configuration, this._isEmbedded, this, this._logger);
         }
 
         private static IEnumerable<Func<SqlCodeAnalysisContext, IEnumerable<SqlCodeAnalysisError>>> ScanRules()

@@ -101,12 +101,12 @@ namespace Dibix.Sdk.Sql
             // SchemaAnalysisService schemaAnalysisService = SchemaAnalysisService.CreateAnalysisService(nullableColumnSchemaAnalyzer);
             Type schemaAnalysisServiceType = DacExtensionsAssembly.GetType("Microsoft.SqlServer.Dac.Model.SchemaAnalysisService", true);
             ParameterExpression schemaAnalysisServiceVariable = Expression.Variable(schemaAnalysisServiceType, "schemaAnalysisService");
-            Expression schemaAnalysisServiceValue = Expression.Call(schemaAnalysisServiceType, "CreateAnalysisService", new Type[0], nullableColumnSchemaAnalyzerVariable);
+            Expression schemaAnalysisServiceValue = Expression.Call(schemaAnalysisServiceType, "CreateAnalysisService", Type.EmptyTypes, nullableColumnSchemaAnalyzerVariable);
             Expression schemaAnalysisServiceAssign = Expression.Assign(schemaAnalysisServiceVariable, schemaAnalysisServiceValue);
 
             // IList<ExtensibilityError> interpretationErrors = schemaAnalysisService.AnalyzeScript(dataSchemaModel, sqlFragment);
             ParameterExpression interpretationErrorsVariable = Expression.Variable(typeof(IList<ExtensibilityError>), "interpretationErrors");
-            Expression interpretationErrorsValue = Expression.Call(schemaAnalysisServiceVariable, "AnalyzeScript", new Type[0], dataSchemaModelParameter, sqlFragmentParameter);
+            Expression interpretationErrorsValue = Expression.Call(schemaAnalysisServiceVariable, "AnalyzeScript", Type.EmptyTypes, dataSchemaModelParameter, sqlFragmentParameter);
             Expression interpretationErrorsAssign = Expression.Assign(interpretationErrorsVariable, interpretationErrorsValue);
 
             // result.Errors.AddRange(interpretationErrors);
@@ -115,7 +115,7 @@ namespace Dibix.Sdk.Sql
 
             // result.DDLStatements.AddRange(NullableColumnSchemaAnalyzerShim.GetDDLStatements(nullableColumnSchemaAnalyzer));
             Expression ddlStatementsProperty = Expression.Property(resultVariable, nameof(SchemaAnalyzerResult.DDLStatements));
-            Expression ddlStatementsValue = Expression.Call(typeof(NullableColumnSchemaAnalyzerShim), nameof(NullableColumnSchemaAnalyzerShim.GetDDLStatements), new Type[0], nullableColumnSchemaAnalyzerVariable);
+            Expression ddlStatementsValue = Expression.Call(typeof(NullableColumnSchemaAnalyzerShim), nameof(NullableColumnSchemaAnalyzerShim.GetDDLStatements), Type.EmptyTypes, nullableColumnSchemaAnalyzerVariable);
             Expression ddlStatementsAddRange = Expression.Call(typeof(CollectionExtensions), nameof(CollectionExtensions.AddRange), new[] { typeof(TSqlFragment) }, ddlStatementsProperty, ddlStatementsValue);
 
             // IEnumerator<KeyValuePair<int, ElementDescriptor>> columnOffsetDescriptorEnumerator;
@@ -202,7 +202,7 @@ namespace Dibix.Sdk.Sql
             Guard.IsNotNull(getModelElementMethod, nameof(getModelElementMethod), "Could not find method 'GetModelElement' on ElementDescriptor");
             Type elementAccessorType = typeof(Func<TSqlModel, TSqlObject>);
             ParameterExpression elementAccessorVariable = Expression.Variable(elementAccessorType, "elementAccessor");
-            Expression elementAccessorValue = Expression.Call(Expression.Constant(getModelElementMethod), "CreateDelegate", new Type[0], Expression.Constant(elementAccessorType), elementDescriptorVariable);
+            Expression elementAccessorValue = Expression.Call(Expression.Constant(getModelElementMethod), "CreateDelegate", Type.EmptyTypes, Expression.Constant(elementAccessorType), elementDescriptorVariable);
             Expression elementAccessorAssign = Expression.Assign(elementAccessorVariable, Expression.Convert(elementAccessorValue, elementAccessorType));
             bodyBuilder.AddAssignStatement(elementAccessorVariable, elementAccessorAssign);
 
@@ -219,7 +219,7 @@ namespace Dibix.Sdk.Sql
             // result.Locations.Add(location.Offset, location);
             Expression locationsProperty = Expression.Property(resultVariable, nameof(SchemaAnalyzerResult.Locations));
             Expression offsetProperty = Expression.Property(locationVariable, nameof(ElementLocation.Offset));
-            Expression locationsAddCall = Expression.Call(locationsProperty, nameof(IDictionary<object, object>.Add), new Type[0], offsetProperty, locationVariable);
+            Expression locationsAddCall = Expression.Call(locationsProperty, nameof(IDictionary<object, object>.Add), Type.EmptyTypes, offsetProperty, locationVariable);
             bodyBuilder.AddStatement(locationsAddCall);
         }
 

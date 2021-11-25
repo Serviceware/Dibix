@@ -11,7 +11,7 @@ namespace Dibix
         protected override Expression BuildExpression(PropertyInfo property, IEnumerable<Expression> arguments)
         {
             Expression[] expressionsArray = arguments as Expression[] ?? arguments.ToArray();
-            Expression call = Expression.Call(typeof(TextObfuscator), nameof(TextObfuscator.Deobfuscate), new Type[0], expressionsArray);
+            Expression call = Expression.Call(typeof(TextObfuscator), nameof(TextObfuscator.Deobfuscate), Type.EmptyTypes, expressionsArray);
             return call;
         }
     }

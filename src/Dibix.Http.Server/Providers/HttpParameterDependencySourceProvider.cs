@@ -7,7 +7,7 @@ namespace Dibix.Http.Server
     {
         private readonly Type _type;
 
-        public HttpParameterDependencySourceProvider(Type type) => this._type = type;
+        protected internal HttpParameterDependencySourceProvider(Type type) => this._type = type;
 
         protected override Type GetInstanceType(IHttpParameterResolutionContext context) => this._type;
 

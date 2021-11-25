@@ -44,11 +44,9 @@ namespace Dibix.Sdk.OpenApi
                     Title = model.Title,
                     Version = !String.IsNullOrEmpty(model.Version) ? model.Version : "1.0.0",
                     Description = model.Description
-                }
+                },
+                Servers = { new OpenApiServer { Url = model.EndpointConfiguration.BaseUrl } }
             };
-            
-            if (!String.IsNullOrEmpty(model.BaseUrl))
-                document.Servers.Add(new OpenApiServer { Url = model.BaseUrl });
 
             AppendSecuritySchemes(document, model.SecuritySchemes);
             AppendPaths(document, model.AreaName, model.Controllers, model.RootNamespace, schemaRegistry, logger);

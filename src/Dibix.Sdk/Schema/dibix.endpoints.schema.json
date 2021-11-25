@@ -121,6 +121,7 @@
         {
           "type": "array",
           "minItems": 1,
+          "uniqueItems": true,
           "items": {
             "type": "string"
           }
@@ -171,6 +172,7 @@
     "Controller": {
       "type": "array",
       "minItems": 1,
+      "uniqueItems": true,
       "items": {
         "anyOf": [
           {

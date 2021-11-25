@@ -40,7 +40,7 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
             TestLogger logger = new TestLogger(this._output);
 
             TSqlModel model = PublicSqlDataSchemaModelLoader.Load(DatabaseTestUtility.ProjectName, DatabaseTestUtility.DatabaseSchemaProviderName, DatabaseTestUtility.ModelCollation, sources, Array.Empty<TaskItem>(), logger);
-            ISqlCodeAnalysisRuleEngine engine = SqlCodeAnalysisRuleEngine.Create(model, DatabaseTestUtility.ProjectName, "dbx", false, logger);
+            ISqlCodeAnalysisRuleEngine engine = SqlCodeAnalysisRuleEngine.Create(model, DatabaseTestUtility.ProjectName, new SqlCodeAnalysisConfiguration("dbx"), false, logger);
             IEnumerable<SqlCodeAnalysisError> errors = engine.Analyze(violationScriptPath, ruleInstance);
 
             string actual = GenerateXmlFromResults(errors);

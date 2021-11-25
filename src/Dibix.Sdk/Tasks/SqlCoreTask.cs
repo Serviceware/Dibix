@@ -12,7 +12,7 @@ namespace Dibix.Sdk
         (
             string projectName
           , string projectDirectory
-          , string namingConventionPrefix
+          , string configurationFilePath
           , string staticCodeAnalysisSucceededFile
           , string resultsFile
           , string productName
@@ -20,7 +20,6 @@ namespace Dibix.Sdk
           , string title
           , string version
           , string description
-          , string baseUrl
           , string defaultOutputFilePath
           , string clientOutputFilePath
           , string externalAssemblyReferenceDirectory
@@ -38,11 +37,20 @@ namespace Dibix.Sdk
           , out string[] additionalAssemblyReferences
         )
         {
+            IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(projectDirectory);
+            SqlCoreTaskConfiguration configuration = SqlCoreTaskConfiguration.Create(configurationFilePath, fileSystemProvider, logger);
+
+            if (logger.HasLoggedErrors)
+            {
+                additionalAssemblyReferences = null;
+                return false;
+            }
+
             TSqlModel sqlModel = PublicSqlDataSchemaModelLoader.Load(projectName, databaseSchemaProviderName, modelCollation, source, sqlReferencePath, logger);
             bool analysisResult = SqlCodeAnalysisTask.Execute
             (
                 projectName
-              , namingConventionPrefix
+              , configuration.SqlCodeAnalysis
               , isEmbedded
               , staticCodeAnalysisSucceededFile
               , resultsFile
@@ -67,7 +75,7 @@ namespace Dibix.Sdk
               , title
               , version
               , description
-              , baseUrl
+              , configuration.Endpoints
               , defaultOutputFilePath
               , clientOutputFilePath
               , externalAssemblyReferenceDirectory
@@ -80,6 +88,7 @@ namespace Dibix.Sdk
               , databaseSchemaProviderName
               , modelCollation
               , sqlReferencePath
+              , fileSystemProvider
               , logger
               , sqlModel
               , out additionalAssemblyReferences

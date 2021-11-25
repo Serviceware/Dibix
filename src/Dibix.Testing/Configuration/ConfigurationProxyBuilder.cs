@@ -64,7 +64,7 @@ namespace Dibix.Testing
 
             // Call base ctor
             ctorIL.Emit(OpCodes.Ldarg_0); // this
-            ctorIL.Emit(OpCodes.Call, type.GetConstructor(new Type[0])); // this
+            ctorIL.Emit(OpCodes.Call, type.GetConstructor(Type.EmptyTypes)); // this
             ctorIL.Emit(OpCodes.Nop);
             
             ctorIL.Emit(OpCodes.Nop);

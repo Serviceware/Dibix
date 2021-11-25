@@ -11,7 +11,7 @@
             (
                 projectName: configuration.GetSingleValue<string>("ProjectName")
               , projectDirectory: configuration.GetSingleValue<string>("ProjectDirectory")
-              , namingConventionPrefix: configuration.GetSingleValue<string>("NamingConventionPrefix")
+              , configurationFilePath: configuration.GetSingleValue<string>("ConfigurationFilePath")
               , staticCodeAnalysisSucceededFile: configuration.GetSingleValue<string>("StaticCodeAnalysisSucceededFile")
               , resultsFile: configuration.GetSingleValue<string>("ResultsFile")
               , productName: configuration.GetSingleValue<string>("ProductName")
@@ -19,7 +19,6 @@
               , title: configuration.GetSingleValue<string>("Title")
               , version: configuration.GetSingleValue<string>("Version")
               , description: configuration.GetSingleValue<string>("Description")
-              , baseUrl: configuration.GetSingleValue<string>("BaseUrl")
               , defaultOutputFilePath: configuration.GetSingleValue<string>("DefaultOutputFilePath")
               , clientOutputFilePath: configuration.GetSingleValue<string>("ClientOutputFilePath")
               , externalAssemblyReferenceDirectory: configuration.GetSingleValue<string>("ExternalAssemblyReferenceDir")

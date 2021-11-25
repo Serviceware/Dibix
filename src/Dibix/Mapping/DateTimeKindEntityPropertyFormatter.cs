@@ -18,7 +18,7 @@ namespace Dibix
         {
             Expression[] expressionsArray = arguments as Expression[] ?? arguments.ToArray();
             Type targetType = property.PropertyType == typeof(DateTime?) ? typeof(DateTimeKindEntityPropertyFormatter) : typeof(DateTime);
-            Expression call = Expression.Call(targetType, nameof(SpecifyKind), new Type[0], expressionsArray);
+            Expression call = Expression.Call(targetType, nameof(SpecifyKind), Type.EmptyTypes, expressionsArray);
             return call;
         }
 

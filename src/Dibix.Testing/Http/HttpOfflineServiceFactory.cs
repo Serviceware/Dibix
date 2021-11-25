@@ -94,7 +94,7 @@ namespace Dibix.Testing.Http
             BuildMethodImplementation(typeBuilder, methodToImplement, (parameterTypes, ilGenerator) =>
             {
                 Type exceptionType = typeof(NotImplementedException);
-                ConstructorInfo exceptionCtor = exceptionType.GetConstructor(new Type[0]);
+                ConstructorInfo exceptionCtor = exceptionType.GetConstructor(Type.EmptyTypes);
                 if (exceptionCtor == null)
                     throw new InvalidOperationException($"Could not find a parameterless constructor on type: '{exceptionType}'");
 

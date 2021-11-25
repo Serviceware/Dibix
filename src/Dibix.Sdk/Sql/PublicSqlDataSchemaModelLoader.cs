@@ -140,7 +140,7 @@ namespace Dibix.Sdk.Sql
             Expression sqlReferencePathAssign = Expression.Assign(sqlReferencePathProperty, sqlReferencePathParameter);
 
             // hostLoader.Load(null, loggingHelper);
-            Expression loadCall = Expression.Call(hostLoaderVariable, "Load", new Type[0], Expression.Constant(null, typeof(ITaskHost)), loggingHelperVariable);
+            Expression loadCall = Expression.Call(hostLoaderVariable, "Load", Type.EmptyTypes, Expression.Constant(null, typeof(ITaskHost)), loggingHelperVariable);
 
             // while (errorEnumerator.MoveNext())
             // {
@@ -148,7 +148,7 @@ namespace Dibix.Sdk.Sql
             //     logger.LogError(error.ErrorCode.ToString(), error.Message, error.Document, error.Line, error.Column);
             // }
             Expression errorManagerProperty = Expression.Property(hostLoaderVariable, "LoadedErrorManager");
-            Expression errorsCall = Expression.Call(errorManagerProperty, "GetAllErrors", new Type[0]);
+            Expression errorsCall = Expression.Call(errorManagerProperty, "GetAllErrors", Type.EmptyTypes);
             Type dataSchemaErrorType = DacReflectionUtility.SchemaSqlAssembly.GetType("Microsoft.Data.Tools.Schema.DataSchemaError", true);
             ExpressionUtility.Foreach
             (
@@ -209,8 +209,8 @@ namespace Dibix.Sdk.Sql
             (
                 loggerParameter
               , nameof(ILogger.LogError)
-              , new Type[0]
-              , Expression.Call(Expression.Property(builder.Element, "ErrorCode"), "ToString", new Type[0])
+              , Type.EmptyTypes
+              , Expression.Call(Expression.Property(builder.Element, "ErrorCode"), "ToString", Type.EmptyTypes)
               , Expression.Property(builder.Element, "Message")
               , Expression.Property(builder.Element, "Document")
               , Expression.Convert(Expression.Property(builder.Element, "Line"), typeof(int?))

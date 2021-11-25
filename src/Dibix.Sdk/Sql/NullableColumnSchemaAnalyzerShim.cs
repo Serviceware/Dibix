@@ -144,7 +144,7 @@ namespace Dibix.Sdk.Sql
             (
                 instanceParameter
               , "TryGetModelElementFromPossibilities"
-              , new Type[0]
+              , Type.EmptyTypes
               , possibilitiesParameter
               , schemaModelProperty
               , elementVariable

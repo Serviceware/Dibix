@@ -32,6 +32,7 @@ namespace Dibix.Sdk.CodeGeneration
           , out string[] additionalAssemblyReferences
         )
         {
+            IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(projectDirectory);
             return Execute
             (
                 projectName
@@ -41,7 +42,7 @@ namespace Dibix.Sdk.CodeGeneration
               , title
               , version
               , description
-              , baseUrl
+              , new EndpointConfiguration(baseUrl)
               , defaultOutputFilePath
               , clientOutputFilePath
               , externalAssemblyReferenceDirectory
@@ -54,6 +55,7 @@ namespace Dibix.Sdk.CodeGeneration
               , databaseSchemaProviderName
               , modelCollation
               , sqlReferencePath
+              , fileSystemProvider
               , logger
               , sqlModel: null
               , out additionalAssemblyReferences
@@ -68,7 +70,7 @@ namespace Dibix.Sdk.CodeGeneration
           , string title
           , string version
           , string description
-          , string baseUrl
+          , EndpointConfiguration endpointConfiguration
           , string defaultOutputFilePath
           , string clientOutputFilePath
           , string externalAssemblyReferenceDirectory
@@ -81,6 +83,7 @@ namespace Dibix.Sdk.CodeGeneration
           , string databaseSchemaProviderName
           , string modelCollation
           , ICollection<TaskItem> sqlReferencePath
+          , IFileSystemProvider fileSystemProvider
           , ILogger logger
           , TSqlModel sqlModel
           , out string[] additionalAssemblyReferences
@@ -96,7 +99,7 @@ namespace Dibix.Sdk.CodeGeneration
               , title
               , version
               , description
-              , baseUrl
+              , endpointConfiguration
               , defaultOutputFilePath
               , clientOutputFilePath
               , externalAssemblyReferenceDirectory
@@ -110,6 +113,7 @@ namespace Dibix.Sdk.CodeGeneration
               , modelCollation
               , sqlReferencePath
               , schemaRegistry
+              , fileSystemProvider
               , logger
               , sqlModel
             );

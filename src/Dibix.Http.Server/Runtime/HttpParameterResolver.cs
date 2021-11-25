@@ -387,7 +387,7 @@ namespace Dibix.Http.Server
             // }
             Expression argumentsKey = Expression.Constant(parameter.InternalParameterName);
             ParameterExpression defaultValue = Expression.Parameter(typeof(object), $"{parameter.InternalParameterName}DefaultValue");
-            Expression tryGetValue = Expression.Call(argumentsParameter, nameof(IDictionary<object, object>.TryGetValue), new Type[0], argumentsKey, defaultValue);
+            Expression tryGetValue = Expression.Call(argumentsParameter, nameof(IDictionary<object, object>.TryGetValue), Type.EmptyTypes, argumentsKey, defaultValue);
             Expression emptyParameterValue = Expression.Equal(defaultValue, Expression.Constant(null));
             Expression condition = Expression.And(tryGetValue, emptyParameterValue);
             Expression property = Expression.Property(argumentsParameter, "Item", argumentsKey);

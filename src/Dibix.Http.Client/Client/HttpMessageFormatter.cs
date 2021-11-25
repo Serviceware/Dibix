@@ -140,7 +140,7 @@ Response
         {
             ParameterExpression headers = Expression.Parameter(typeof(HttpHeaders), "headers");
 
-            Expression call = Expression.Call(headers, "GetHeaderStrings", new Type[0]);
+            Expression call = Expression.Call(headers, "GetHeaderStrings", Type.EmptyTypes);
             Expression<Func<HttpHeaders, IEnumerable<KeyValuePair<string, string>>>> lambda = Expression.Lambda<Func<HttpHeaders, IEnumerable<KeyValuePair<string, string>>>>(call, headers);
             Func<HttpHeaders, IEnumerable<KeyValuePair<string, string>>> compiled = lambda.Compile();
             return compiled;

@@ -149,8 +149,9 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         private void Check(string name, NamingConvention namingConvention, Action<PatternNormalizer> replacements, TSqlFragment target, string displayName) => this.Check(name, namingConvention, replacements, base.FailIfUnsuppressed, target, displayName);
         private void Check<T>(string name, NamingConvention namingConvention, Action<PatternNormalizer> replacements, Action<T, string, object[]> failAction, T target, string displayName)
         {
-            string mask = namingConvention.NormalizePattern(base.NamingConventionPrefix, replacements);
-            string description = namingConvention.NormalizeDescription(this.NamingConventionPrefix);
+            string namingConventionPrefix = this.Configuration.NamingConventionPrefix;
+            string mask = namingConvention.NormalizePattern(namingConventionPrefix, replacements);
+            string description = namingConvention.NormalizeDescription(namingConventionPrefix);
             if (Regex.IsMatch(name, mask))
                 return;
 

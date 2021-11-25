@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
 
-namespace Dibix.Sdk.CodeGeneration
+namespace Dibix.Sdk
 {
     internal abstract class JsonSchemaDefinitionReader
     {
@@ -22,7 +22,7 @@ namespace Dibix.Sdk.CodeGeneration
             this.Logger = logger;
         }
 
-        protected  void Collect(IEnumerable<string> inputs)
+        protected void Collect(IEnumerable<string> inputs)
         {
             foreach (string filePath in this.FileSystemProvider.GetFiles(null, inputs.Select(x => (VirtualPath)x), Array.Empty<VirtualPath>()))
             {
@@ -34,7 +34,7 @@ namespace Dibix.Sdk.CodeGeneration
                         {
                             JObject json = JObject.Load(jsonReader/*, new JsonLoadSettings { DuplicatePropertyNameHandling = DuplicatePropertyNameHandling.Error }*/);
 
-                            if (!json.IsValid(JsonSchemaDefinition.GetSchema($"{this.GetType().Namespace}.Schema", this.SchemaName), out IList<ValidationError> errors))
+                            if (!json.IsValid(JsonSchemaDefinition.GetSchema($"{typeof(JsonSchemaDefinitionReader).Namespace}.Schema", this.SchemaName), out IList<ValidationError> errors))
                             {
                                 foreach (ValidationError error in errors.Flatten())
                                 {

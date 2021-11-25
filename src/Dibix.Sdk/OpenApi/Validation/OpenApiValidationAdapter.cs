@@ -45,7 +45,7 @@ namespace Dibix.Sdk.OpenApi.Validation
                 ParameterExpression itemParameter = Expression.Parameter(typeof(object), "item");
                 ParameterExpression typeParameter = Expression.Parameter(typeof(Type), "type");
 
-                Expression call = Expression.Call(validatorParameter, "Validate", new Type[0], itemParameter, typeParameter);
+                Expression call = Expression.Call(validatorParameter, "Validate", Type.EmptyTypes, itemParameter, typeParameter);
                 Expression<Action<Microsoft.OpenApi.Validations.OpenApiValidator, object, Type>> lambda = Expression.Lambda<Action<Microsoft.OpenApi.Validations.OpenApiValidator, object, Type>>(call, validatorParameter, itemParameter, typeParameter);
                 Action<Microsoft.OpenApi.Validations.OpenApiValidator, object, Type> compiled = lambda.Compile();
                 return compiled;

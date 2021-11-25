@@ -65,7 +65,7 @@ namespace Dibix.Http.Server.Tests
             Expression errorCollectionAssign = Expression.Assign(errorCollectionVariable, errorCollectionValue);
 
             ParameterExpression exceptionVariable = Expression.Variable(sqlExceptionType, "exception");
-            Expression exceptionValue = Expression.Call(sqlExceptionType, "CreateException", new Type[0], errorCollectionVariable, serverVersionParameter);
+            Expression exceptionValue = Expression.Call(sqlExceptionType, "CreateException", Type.EmptyTypes, errorCollectionVariable, serverVersionParameter);
             Expression exceptionAssign = Expression.Assign(exceptionVariable, exceptionValue);
 
 

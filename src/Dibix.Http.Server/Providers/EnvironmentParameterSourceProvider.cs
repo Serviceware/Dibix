@@ -29,6 +29,6 @@ namespace Dibix.Http.Server
 
         public static int GetCurrentProcessId() => Process.GetCurrentProcess().Id;
 
-        private static Expression BuildMethodCallExpression(string methodName) => Expression.Call(typeof(EnvironmentParameterSourceProvider), methodName, new Type[0]);
+        private static Expression BuildMethodCallExpression(string methodName) => Expression.Call(typeof(EnvironmentParameterSourceProvider), methodName, Type.EmptyTypes);
     }
 }

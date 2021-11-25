@@ -40,7 +40,7 @@ namespace Dibix.Sdk.CodeAnalysis
             return Execute
             (
                 projectName
-              , namingConventionPrefix
+              , new SqlCodeAnalysisConfiguration(namingConventionPrefix)
               , isEmbedded
               , staticCodeAnalysisSucceededFile
               , resultsFile
@@ -53,7 +53,7 @@ namespace Dibix.Sdk.CodeAnalysis
         internal static bool Execute
         (
             string projectName
-          , string namingConventionPrefix
+          , SqlCodeAnalysisConfiguration configuration
           , bool isEmbedded
           , string staticCodeAnalysisSucceededFile
           , string resultsFile
@@ -68,7 +68,7 @@ namespace Dibix.Sdk.CodeAnalysis
 
             ExecuteNativeCodeAnalysis(model, logger, staticCodeAnalysisSucceededFile, resultsFile);
 
-            SqlCodeAnalysisRuleEngine codeAnalysisEngine = SqlCodeAnalysisRuleEngine.Create(model, projectName, namingConventionPrefix, isEmbedded, logger);
+            SqlCodeAnalysisRuleEngine codeAnalysisEngine = SqlCodeAnalysisRuleEngine.Create(model, projectName, configuration, isEmbedded, logger);
 
             foreach (TaskItem inputFile in source)
             {

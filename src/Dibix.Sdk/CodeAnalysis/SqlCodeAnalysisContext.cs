@@ -15,10 +15,9 @@ namespace Dibix.Sdk.CodeAnalysis
         private readonly ILogger _logger;
         private readonly string _hash;
 
-
         public SqlModel Model { get; }
         public TSqlFragment Fragment { get; }
-        public string NamingConventionPrefix { get; }
+        public SqlCodeAnalysisConfiguration Configuration { get; }
         public bool IsEmbedded { get; }
 
         public SqlCodeAnalysisContext
@@ -28,7 +27,7 @@ namespace Dibix.Sdk.CodeAnalysis
           , TSqlFragment fragment
           , bool isScriptArtifact
           , string projectName
-          , string namingConventionPrefix
+          , SqlCodeAnalysisConfiguration configuration
           , bool isEmbedded
           , ISqlCodeAnalysisSuppressionService suppressionService
           , ILogger logger
@@ -40,7 +39,7 @@ namespace Dibix.Sdk.CodeAnalysis
             this.Model = new SqlModel(source, fragment, isScriptArtifact, projectName, isEmbedded, model, logger);
             this._hash = CalculateHash(source);
             this.Fragment = fragment;
-            this.NamingConventionPrefix = namingConventionPrefix;
+            this.Configuration = configuration;
             this.IsEmbedded = isEmbedded;
         }
 

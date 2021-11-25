@@ -15,7 +15,7 @@ namespace Dibix.Testing
             {
                 Type propertyType = property.PropertyType;
 
-                if (propertyType.GetConstructor(new Type[0]) != null)
+                if (propertyType.GetConstructor(Type.EmptyTypes) != null)
                 {
                     ConfigurationProxyLookup nestedLookup = this.Collect(propertyType);
                     if (!this.ShouldCreateProxy(nestedLookup))

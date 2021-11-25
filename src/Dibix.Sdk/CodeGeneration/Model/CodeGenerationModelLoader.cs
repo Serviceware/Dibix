@@ -18,7 +18,7 @@ namespace Dibix.Sdk.CodeGeneration
           , string title
           , string version
           , string description
-          , string baseUrl
+          , EndpointConfiguration endpointConfiguration
           , string defaultOutputFilePath
           , string clientOutputFilePath
           , string externalAssemblyReferenceDirectory
@@ -32,6 +32,7 @@ namespace Dibix.Sdk.CodeGeneration
           , string modelCollation
           , ICollection<TaskItem> sqlReferencePath
           , ISchemaRegistry schemaRegistry
+          , IFileSystemProvider fileSystemProvider
           , ILogger logger
           , TSqlModel sqlModel
         )
@@ -52,7 +53,7 @@ namespace Dibix.Sdk.CodeGeneration
                 Title = title,
                 Version = version,
                 Description = description,
-                BaseUrl = baseUrl,
+                EndpointConfiguration = endpointConfiguration,
                 RootNamespace = rootNamespace,
                 DefaultClassName = defaultOutputName,
                 DefaultOutputFilePath = defaultOutputFilePath,
@@ -60,7 +61,6 @@ namespace Dibix.Sdk.CodeGeneration
             };
 
             Lazy<TSqlModel> modelAccessor = sqlModel != null ? new Lazy<TSqlModel>(() => sqlModel) : new Lazy<TSqlModel>(() => PublicSqlDataSchemaModelLoader.Load(projectName, databaseSchemaProviderName, modelCollation, source, sqlReferencePath, logger));
-            IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(projectDirectory);
             ISqlStatementFormatter formatter = isEmbedded ? (ISqlStatementFormatter)new TakeSourceSqlStatementFormatter() : new ExecStoredProcedureSqlStatementFormatter();
             formatter.StripWhiteSpace = model.CommandTextFormatting == CommandTextFormatting.StripWhiteSpace;
             DefaultAssemblyResolver assemblyResolver = new DefaultAssemblyResolver(projectDirectory, externalAssemblyReferenceDirectory, normalizedReferences);
@@ -77,7 +77,7 @@ namespace Dibix.Sdk.CodeGeneration
             model.Statements.AddRange(CollectStatements(normalizedSources, projectName, productName, areaName, isEmbedded, formatter, typeResolver, schemaRegistry, logger, modelAccessor));
             model.UserDefinedTypes.AddRange(userDefinedTypeProvider.Types);
             model.Contracts.AddRange(contractDefinitionProvider.Contracts);
-            model.Controllers.AddRange(CollectControllers(normalizedEndpoints, projectName, productName, areaName, defaultOutputName, model.Statements, normalizedDefaultSecuritySchemes, securitySchemeMap, assemblyResolver, fileSystemProvider, typeResolver, schemaRegistry, logger));
+            model.Controllers.AddRange(CollectControllers(normalizedEndpoints, projectName, productName, areaName, defaultOutputName, endpointConfiguration, model.Statements, normalizedDefaultSecuritySchemes, securitySchemeMap, assemblyResolver, fileSystemProvider, typeResolver, schemaRegistry, logger));
             model.SecuritySchemes.AddRange(securitySchemeMap.Values);
             model.Schemas.AddRange(schemaRegistry.Schemas);
 
@@ -112,6 +112,7 @@ namespace Dibix.Sdk.CodeGeneration
           , string productName
           , string areaName
           , string defaultOutputName
+          , EndpointConfiguration endpointConfiguration
           , ICollection<SqlStatementDescriptor> statements
           , ICollection<string> defaultSecuritySchemes
           , IDictionary<string, SecurityScheme> securitySchemeMap
@@ -122,7 +123,7 @@ namespace Dibix.Sdk.CodeGeneration
           , ILogger logger
         )
         {
-            ControllerDefinitionProvider controllerDefinitionProvider = new ControllerDefinitionProvider(projectName, productName, areaName, defaultOutputName, statements, endpoints, defaultSecuritySchemes, securitySchemeMap, typeResolver, referencedAssemblyInspector, schemaRegistry, fileSystemProvider, logger);
+            ControllerDefinitionProvider controllerDefinitionProvider = new ControllerDefinitionProvider(projectName, productName, areaName, defaultOutputName, endpointConfiguration, statements, endpoints, defaultSecuritySchemes, securitySchemeMap, typeResolver, referencedAssemblyInspector, schemaRegistry, fileSystemProvider, logger);
             return controllerDefinitionProvider.Controllers;
         }
     }
