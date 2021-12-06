@@ -11,7 +11,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             T result = referencedAssembliesHandler(this.GetReferencedAssemblies().Select(base.LoadAssembly));
             return result;
-        });
+        }, this);
 
         protected abstract IEnumerable<string> GetReferencedAssemblies();
     }

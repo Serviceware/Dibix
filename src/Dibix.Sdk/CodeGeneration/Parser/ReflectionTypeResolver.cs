@@ -102,7 +102,7 @@ namespace Dibix.Sdk.CodeGeneration
                 if (this._assemblyResolver.TryGetAssembly(assemblyName, out Assembly assembly))
                 {
                     Type type = assembly.GetType(typeName.Name, true);
-                    return ReflectionOnlyTypeInspector.Inspect(() => this.ResolveType(type, source, line, column, typeName.IsNullable, isEnumerable));
+                    return ReflectionOnlyTypeInspector.Inspect(() => this.ResolveType(type, source, line, column, typeName.IsNullable, isEnumerable), this._assemblyResolver);
                 }
 
                 this._logger.LogError(null, $"Could not locate assembly: {assemblyName}", source, line, column + parts[0].Length + 1);
