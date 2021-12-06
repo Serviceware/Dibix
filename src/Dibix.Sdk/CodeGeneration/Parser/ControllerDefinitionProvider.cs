@@ -464,12 +464,14 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             // Relative namespaces can not be resolved in neighbor projects
+            /*
             if (!isAbsolute)
             {
                 base.Logger.LogError(null, $@"Could not find action target: {target}
 Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
                 return null;
             }
+            */
 
             // 3. Target 'could' be a compiled method in a neighbour project
             if (!this.TryGetNeighborActionTarget(target, methodName, filePath, line, column, explicitParameters, pathParameters, bodyParameters, out actionDefinition))
