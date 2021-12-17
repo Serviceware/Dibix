@@ -178,8 +178,11 @@
       <ClientOutputName Condition="'$(ClientOutputName)' == '' and '$(AreaName)' != '' and '$(_HasEndpoints)' == 'true'">$(AreaName).Client</ClientOutputName>
       <_GenerateClient Condition="'$(ClientOutputName)' != ''">True</_GenerateClient>
       <_ClientIntermediatePathNoExt Condition="'$(_GenerateClient)' == 'true'">$(IntermediateOutputPath)$(ClientOutputName)</_ClientIntermediatePathNoExt>
-      <_ClientIntermediateBinaryPath Condition="'$(_ClientIntermediatePathNoExt)' != ''">$(_ClientIntermediatePathNoExt).dll</_ClientIntermediateBinaryPath>
-      <_IntermediateArtifactPackagePath>$(_ServerIntermediatePathNoExt).dbx</_IntermediateArtifactPackagePath>
+      <_ClientIntermediateBinaryPath Condition="'$(_GenerateClient)' == 'true'">$(_ClientIntermediatePathNoExt).dll</_ClientIntermediateBinaryPath>
+
+      <_ProductArtifactPackage Condition="'$(_HasEndpoints)' == 'true'">True</_ProductArtifactPackage>
+      <_ArtifactPackageName Condition="'$(_ProductArtifactPackage)' == 'true'">$(AreaName).dbx</_ArtifactPackageName>
+      <_IntermediateArtifactPackagePath Condition="'$(_ProductArtifactPackage)' == 'true'">$(IntermediateOutputPath)$(_ArtifactPackageName)</_IntermediateArtifactPackagePath>
     </PropertyGroup>
 
     <ItemGroup>
@@ -216,7 +219,7 @@
       <_SignAssembly>$(SignAssembly)</_SignAssembly>
       <_SignAssembly Condition="'$(_SignAssembly)' == '' and '$(AssemblyOriginatorKeyFile)' != ''">true</_SignAssembly>
       <_ServerIntermediateCodePath>$(_ServerIntermediatePathNoExt).cs</_ServerIntermediateCodePath>
-      <_ClientIntermediateCodePath Condition="'$(_ClientIntermediatePathNoExt)' != ''">$(_ClientIntermediatePathNoExt).cs</_ClientIntermediateCodePath>
+      <_ClientIntermediateCodePath Condition="'$(_GenerateClient)' == 'true'">$(_ClientIntermediatePathNoExt).cs</_ClientIntermediateCodePath>
     </PropertyGroup>
 
     <ItemGroup>
@@ -659,11 +662,14 @@ $(_SqlReferencePath)" />
           AfterTargets="CopyFilesToOutputDirectory"
           DependsOnTargets="SqlCore;CreatePackage;CopyFilesToOutputDirectory">
 
+    <PropertyGroup Condition="'$(_GenerateClient)' == 'true'">
+      <_ClientPathNoExt>$(TargetDir)$(ClientOutputName)</_ClientPathNoExt>
+      <ClientTargetPath>$(_ClientPathNoExt).dll</ClientTargetPath>
+      <ClientOutputSymbolsPath>$(_ClientPathNoExt).pdb</ClientOutputSymbolsPath>
+    </PropertyGroup>
+
     <PropertyGroup>
-      <_ClientPathNoExt Condition="'$(_GenerateClient)' == 'true'">$(TargetDir)$(ClientOutputName)</_ClientPathNoExt>
-      <ClientTargetPath Condition="'$(_ClientPathNoExt)' != ''">$(_ClientPathNoExt).dll</ClientTargetPath>
-      <ClientOutputSymbolsPath Condition="'$(_ClientPathNoExt)' != ''">$(_ClientPathNoExt).pdb</ClientOutputSymbolsPath>
-      <ArtifactPackagePath>$(TargetDir)$(_ServerOutputName).dbx</ArtifactPackagePath>
+      <ArtifactPackagePath Condition="'$(_ProductArtifactPackage)' == 'true'">$(TargetDir)$(_ArtifactPackageName)</ArtifactPackagePath>
     </PropertyGroup>
 
     <ItemGroup>
@@ -726,7 +732,8 @@ $(_SqlReferencePath)" />
   <Target Name="CreatePackage"
           DependsOnTargets="SetupSqlBuildInputs;SetupSqlBuildOutputs;SqlCore"
           Inputs="@(CreatePackageInput)"
-          Outputs="@(CreatePackageOutput)">
+          Outputs="@(CreatePackageOutput)"
+          Condition="'$(_ProductArtifactPackage)' == 'true'">
 
     <!-- Prepare & write input file then exec CLI -->
     <PropertyGroup>
@@ -735,7 +742,7 @@ $(_SqlReferencePath)" />
 
     <ItemGroup>
       <_CreatePackageInputItem Include="ArtifactName
-  $(_ServerOutputName)" />
+  $(AreaName)" />
       <_CreatePackageInputItem Include="OutputDirectory
   $(IntermediateOutputPath)" />
       <_CreatePackageInputItem Include="CompiledArtifactPath
