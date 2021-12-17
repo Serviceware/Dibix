@@ -16,6 +16,7 @@
     <NewtonsoftJsonNetFxVersion>12.0.3</NewtonsoftJsonNetFxVersion><!-- Update blocked by Processes -->
     <NewtonsoftJsonSchemaVersion>3.0.14</NewtonsoftJsonSchemaVersion>
     <OpenApiVersion>1.2.3</OpenApiVersion>
+    <IOPackageVersion>6.0.0</IOPackageVersion>
 
     <!-- VS integration -->
     <EnvDTEVersion>16.9.31023.347</EnvDTEVersion>

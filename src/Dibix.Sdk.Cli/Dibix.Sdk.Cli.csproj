@@ -62,6 +62,7 @@
       <_ToolDependency Include="Microsoft.SqlServer.TransactSql.ScriptDom.dll" />
       <_ToolDependency Include="Newtonsoft.Json.dll" />
       <_ToolDependency Include="Newtonsoft.Json.Schema.dll" />
+      <_ToolDependency Include="System.IO.Packaging.dll" />
     </ItemGroup>
 
 

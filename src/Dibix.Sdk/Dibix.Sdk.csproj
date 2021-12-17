@@ -12,6 +12,7 @@
     <EmbeddedResource Include="Schema\dibix.endpoints.schema.json" />
     <Compile Include="..\..\shared\CollectionExtensions.cs" Link="Extensions\CollectionExtensions.cs" />
     <Compile Include="..\..\shared\EnumerableExtensions.cs" Link="Extensions\EnumerableExtensions.cs" />
+    <Compile Include="..\..\shared\ReflectionExtensions.cs" Link="Extensions\ReflectionExtensions.cs" />
     <Compile Include="..\..\shared\ExpressionUtility.cs" Link="Utilities\ExpressionUtility.cs" />
     <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\Guard.cs" />
     <Compile Include="..\..\shared\SchemaName.cs" Link="Environment\SchemaName.cs" />
@@ -28,6 +29,7 @@
     <PackageReference Include="Microsoft.SqlServer.DacFx" Version="$(DacFxVersion)" />
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonNetFxVersion)" />
     <PackageReference Include="Newtonsoft.Json.Schema" Version="$(NewtonsoftJsonSchemaVersion)" />
+    <PackageReference Include="System.IO.Packaging" Version="$(IOPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>
@@ -37,5 +39,5 @@
     <Reference Include="Microsoft.Data.Tools.Schema.Utilities.Sql" HintPath="lib\Microsoft.Data.Tools.Schema.Utilities.Sql.dll" />
     <Reference Include="Microsoft.SqlServer.ConnectionInfo" HintPath="lib\Microsoft.SqlServer.ConnectionInfo.dll" />
   </ItemGroup>
-  
+
 </Project>

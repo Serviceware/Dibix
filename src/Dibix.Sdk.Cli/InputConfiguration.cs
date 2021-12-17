@@ -66,41 +66,46 @@ namespace Dibix.Sdk.Cli
                             continue;
 
                         (string value, IndentationLevel indentationLevel) = ParseValue(line);
-                        switch (indentationLevel)
-                        {
-                            case IndentationLevel.Property:
-                                currentProperty = new InputProperty(line);
-                                properties.Add(currentProperty);
-                                break;
-
-                            case IndentationLevel.Value:
-                                if (currentProperty == null)
-                                    throw new InvalidOperationException($"Trying to read property value for an uninitialized property ({i}): {line}");
-
-                                currentProperty.Values.Add(new TaskItem(value));
-                                break;
-
-                            case IndentationLevel.Metadata:
-                                if (currentProperty == null)
-                                    throw new InvalidOperationException($"Trying to read property metadata for an uninitialized property ({i}): {line}");
-
-                                if (!currentProperty.Values.Any())
-                                    throw new InvalidOperationException($"Trying to read property metadata for an uninitialized property value ({i}): {line}");
-
-                                string[] parts = value.Split(new[] { ' ' }, 2);
-                                if (parts.Length < 2)
-                                    throw new InvalidOperationException($"Property metadata not specified in the format \"Key Value\" ({i}): {line}");
-
-                                currentProperty.Values.Last().Add(parts[0], parts[1]);
-                                break;
-
-                            default:
-                                throw new ArgumentOutOfRangeException(null, indentationLevel, null);
-                        }
+                        CollectArgument(indentationLevel, line, value, currentPosition: i, properties, ref currentProperty);
                     }
 
                     return properties;
                 }
+            }
+        }
+
+        private static void CollectArgument(IndentationLevel indentationLevel, string line, string value, int currentPosition, ICollection<InputProperty> properties, ref InputProperty currentProperty)
+        {
+            switch (indentationLevel)
+            {
+                case IndentationLevel.Property:
+                    currentProperty = new InputProperty(line);
+                    properties.Add(currentProperty);
+                    break;
+
+                case IndentationLevel.Value:
+                    if (currentProperty == null)
+                        throw new InvalidOperationException($"Trying to read property value for an uninitialized property ({currentPosition}): {line}");
+
+                    currentProperty.Values.Add(new TaskItem(value));
+                    break;
+
+                case IndentationLevel.Metadata:
+                    if (currentProperty == null)
+                        throw new InvalidOperationException($"Trying to read property metadata for an uninitialized property ({currentPosition}): {line}");
+
+                    if (!currentProperty.Values.Any())
+                        throw new InvalidOperationException($"Trying to read property metadata for an uninitialized property value ({currentPosition}): {line}");
+
+                    string[] parts = value.Split(new[] { ' ' }, 2);
+                    if (parts.Length < 2)
+                        throw new InvalidOperationException($"Property metadata not specified in the format \"Key Value\" ({currentPosition}): {line}");
+
+                    currentProperty.Values.Last().Add(parts[0], parts[1]);
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(indentationLevel), indentationLevel, null);
             }
         }
 

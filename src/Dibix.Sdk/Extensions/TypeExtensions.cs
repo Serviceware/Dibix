@@ -40,19 +40,6 @@ namespace Dibix.Sdk
             return clrType;
         }
 
-        public static IEnumerable<Type> GetLoadableTypes(this Assembly assembly)
-        {
-            Guard.IsNotNull(assembly, nameof(assembly));
-            try
-            {
-                return assembly.GetTypes();
-            }
-            catch (ReflectionTypeLoadException e)
-            {
-                return e.Types.Where(t => t != null);
-            }
-        }
-
         public static bool IsNullable(this PropertyInfo property) => IsNullable(property.PropertyType, property.DeclaringType, property.CustomAttributes);
         public static bool IsNullable(this FieldInfo field) => IsNullable(field.FieldType, field.DeclaringType, field.CustomAttributes);
         public static bool IsNullable(this ParameterInfo parameter) => IsNullable(parameter.ParameterType, parameter.Member, parameter.CustomAttributes);

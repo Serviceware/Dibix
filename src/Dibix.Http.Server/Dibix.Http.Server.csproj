@@ -5,8 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\shared\ExpressionUtility.cs" Link="Utilities\ExpressionUtility.cs" />
     <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\Guard.cs" />
+    <Compile Include="..\..\shared\ReflectionExtensions.cs" Link="Extensions\ReflectionExtensions.cs" />
+    <Compile Include="..\..\shared\ExpressionUtility.cs" Link="Utilities\ExpressionUtility.cs" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' != 'net451'">
@@ -23,6 +24,14 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net451'">
     <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="$(AspNetWebApiNetFxVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' != 'net451'">
+    <PackageReference Include="System.IO.Packaging" Version="$(IOPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net451'">
+    <Reference Include="WindowsBase" /> <!-- System.IO.Packaging -->
   </ItemGroup>
   
 </Project>
