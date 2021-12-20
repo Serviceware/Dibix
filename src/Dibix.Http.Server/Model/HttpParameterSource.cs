@@ -1,7 +1,9 @@
 ﻿namespace Dibix.Http.Server
 {
-    public class HttpParameterSource
+    public abstract class HttpParameterSource
     {
+        public abstract string Description { get; }
+
         protected HttpParameterSource() { }
     }
 }

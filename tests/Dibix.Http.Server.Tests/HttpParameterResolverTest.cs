@@ -23,7 +23,8 @@ namespace Dibix.Http.Server.Tests
             TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
-    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver) {
+    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver,
+    Dibix.Http.Server.HttpActionDefinition $action) {
     .Block(Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
         $arguments.Item[""databaseAccessorFactory""] = (System.Object)$databaseaccessorfactorySource
@@ -59,7 +60,8 @@ namespace Dibix.Http.Server.Tests
             TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
-    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver) {
+    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver,
+    Dibix.Http.Server.HttpActionDefinition $action) {
     .Block(
         Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
         Dibix.Http.Server.Tests.HttpParameterResolverTest+LocaleHttpParameterSource $localeSource) {
@@ -98,7 +100,8 @@ namespace Dibix.Http.Server.Tests
             TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
-    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver) {
+    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver,
+    Dibix.Http.Server.HttpActionDefinition $action) {
     .Block(
         Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
         Dibix.Http.Server.Tests.HttpParameterResolverTest+ApplicationHttpParameterSource $applicationSource) {
@@ -107,7 +110,8 @@ namespace Dibix.Http.Server.Tests
         $arguments.Item[""databaseAccessorFactory""] = (System.Object)$databaseaccessorfactorySource;
         $arguments.Item[""applicationid""] = (System.Object).Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
             ""applicationid"",
-            $applicationSource.ApplicationId)
+            $applicationSource.ApplicationId,
+            $action)
     }
 }", result.Source);
             Assert.False(result.Parameters.Any());
@@ -121,7 +125,9 @@ namespace Dibix.Http.Server.Tests
 
             Exception exception = Assert.Throws<InvalidOperationException>(() => result.PrepareParameters(request, arguments, dependencyResolver.Object));
             Assert.Equal(@"Parameter mapping failed
-Parameter: applicationid", exception.Message);
+at GET Dibix/Test
+Parameter: applicationid
+Source: APPLICATION.ApplicationId", exception.Message);
             Assert.NotNull(exception.InnerException);
             Assert.Equal("Null object cannot be converted to a value type.", exception.InnerException.Message);
         }
@@ -133,7 +139,8 @@ Parameter: applicationid", exception.Message);
             Exception exception = Assert.Throws<InvalidOperationException>(() => Compile(x => x.ResolveParameterFromSource("lcid", "UNKNOWNSOURCE", "LocaleId")));
             Assert.Equal(@"Http parameter resolver compilation failed
 at GET Dibix/Test
-Parameter: lcid", exception.Message);
+Parameter: lcid
+Source: UNKNOWNSOURCE.LocaleId", exception.Message);
             Assert.NotNull(exception.InnerException);
             Assert.Equal("No source with the name 'UNKNOWNSOURCE' is registered", exception.InnerException.Message);
         }
@@ -160,7 +167,8 @@ Parameter: lcid", exception.Message);
             TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
-    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver) {
+    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver,
+    Dibix.Http.Server.HttpActionDefinition $action) {
     .Block(
         Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
         Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBody $bodySource,
@@ -188,7 +196,8 @@ Parameter: lcid", exception.Message);
         $input = .New Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyParameterInput();
         $input.targetid = .Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
             ""targetid"",
-            $bodySource.SourceId);
+            $bodySource.SourceId,
+            $action);
         $arguments.Item[""input""] = (System.Object)$input
     }
 }
@@ -257,7 +266,8 @@ Parameter: lcid", exception.Message);
             TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
-    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver) {
+    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver,
+    Dibix.Http.Server.HttpActionDefinition $action) {
     .Block(
         Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
         Dibix.Http.Server.Tests.HttpParameterResolverTest+ImplicitHttpBody $bodySource,
@@ -276,11 +286,13 @@ Parameter: lcid", exception.Message);
         $input = .New Dibix.Http.Server.Tests.HttpParameterResolverTest+ImplicitBodyHttpParameterInput();
         $input.sourceid = .Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
             ""sourceid"",
-            $bodySource.SourceId);
+            $bodySource.SourceId,
+            $action);
         $input.localeid = $bodySource.LocaleId;
         $input.fromuri = .Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
             ""fromuri"",
-            $arguments.Item[""fromuri""]);
+            $arguments.Item[""fromuri""],
+            $action);
         $arguments.Item[""input""] = (System.Object)$input
     }
 }
@@ -291,7 +303,8 @@ Parameter: lcid", exception.Message);
     .Call $x.Add(
         .Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
             ""type"",
-            $y.Type),
+            $y.Type,
+            $action),
         $y.Name)
 }
 
@@ -379,7 +392,8 @@ TextValue         ", itemsb.Dump());
             TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
-    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver) {
+    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver,
+    Dibix.Http.Server.HttpActionDefinition $action) {
     .Block(
         Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
         Dibix.Http.Server.Tests.HttpParameterResolverTest+HttpBody $bodySource) {
@@ -456,7 +470,8 @@ ENCRYPTED(Item2)               ", items.Dump());
             TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
-    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver) {
+    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver,
+    Dibix.Http.Server.HttpActionDefinition $action) {
     .Block(Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
         $arguments.Item[""databaseAccessorFactory""] = (System.Object)$databaseaccessorfactorySource;
@@ -495,7 +510,8 @@ ENCRYPTED(Item2)               ", items.Dump());
             TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
-    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver) {
+    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver,
+    Dibix.Http.Server.HttpActionDefinition $action) {
     .Block(
         Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
         Dibix.Http.Server.Tests.HttpParameterResolverTest+XmlHttpParameterInput $input) {
@@ -546,7 +562,8 @@ ENCRYPTED(Item2)               ", items.Dump());
             TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
-    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver) {
+    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver,
+    Dibix.Http.Server.HttpActionDefinition $action) {
     .Block(
         Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
         Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyParameterInput $input) {
@@ -612,7 +629,8 @@ Parameter: input", exception.Message);
             TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
-    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver) {
+    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver,
+    Dibix.Http.Server.HttpActionDefinition $action) {
     .Block(Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
         $arguments.Item[""databaseAccessorFactory""] = (System.Object)$databaseaccessorfactorySource;
@@ -655,7 +673,8 @@ Parameter: input", exception.Message);
             TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
-    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver) {
+    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver,
+    Dibix.Http.Server.HttpActionDefinition $action) {
     .Block(
         Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
         System.Object $idDefaultValue,
@@ -685,7 +704,8 @@ Parameter: input", exception.Message);
         };
         $arguments.Item[""name""] = (System.Object).Call Dibix.Http.Server.Tests.HttpParameterResolverTest+EncryptionHttpParameterConverter.Convert(.Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
                 ""name"",
-                $arguments.Item[""name""]));
+                $arguments.Item[""name""],
+                $action));
         $arguments.Item[""true""] = (System.Object)$arguments.Item[""true_""];
         .If (
             .Call $arguments.TryGetValue(
@@ -699,10 +719,12 @@ Parameter: input", exception.Message);
         $input = .New Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpUriParameterInput();
         $input.targetid = .Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
             ""targetid"",
-            $arguments.Item[""targetid""]);
+            $arguments.Item[""targetid""],
+            $action);
         $input.targetname = .Call Dibix.Http.Server.Tests.HttpParameterResolverTest+EncryptionHttpParameterConverter.Convert(.Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
                 ""targetname"",
-                $arguments.Item[""targetname_""]));
+                $arguments.Item[""targetname_""],
+                $action));
         $arguments.Item[""input""] = (System.Object)$input
     }
 }", result.Source);
@@ -788,7 +810,8 @@ Parameter: input", exception.Message);
             TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
-    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver) {
+    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver,
+    Dibix.Http.Server.HttpActionDefinition $action) {
     .Block(
         Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
         Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpUriParameterInput $input) {
@@ -797,10 +820,12 @@ Parameter: input", exception.Message);
         $input = .New Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpUriParameterInput();
         $input.targetid = .Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
             ""targetid"",
-            $arguments.Item[""targetid""]);
+            $arguments.Item[""targetid""],
+            $action);
         $input.targetname = .Call Dibix.Http.Server.Tests.HttpParameterResolverTest+EncryptionHttpParameterConverter.Convert(.Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
                 ""targetname"",
-                $arguments.Item[""targetname_""]));
+                $arguments.Item[""targetname_""],
+                $action));
         $arguments.Item[""input""] = (System.Object)$input
     }
 }", result.Source);
@@ -854,7 +879,8 @@ Parameter: input", exception.Message);
             TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
-    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver) {
+    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver,
+    Dibix.Http.Server.HttpActionDefinition $action) {
     .Block(Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
         $arguments.Item[""databaseAccessorFactory""] = (System.Object)$databaseaccessorfactorySource;
@@ -865,7 +891,8 @@ Parameter: input", exception.Message);
             ""tenantid"",
             .Call Dibix.Http.Server.HeaderParameterSourceProvider.GetHeader(
                 $request,
-                ""X-Tenant-Id""))
+                ""X-Tenant-Id""),
+            $action)
     }
 }", result.Source);
             Assert.Equal(2, result.Parameters.Count);
@@ -910,7 +937,8 @@ Parameter: input", exception.Message);
             TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
-    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver) {
+    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver,
+    Dibix.Http.Server.HttpActionDefinition $action) {
     .Block(Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
         $arguments.Item[""databaseAccessorFactory""] = (System.Object)$databaseaccessorfactorySource;
@@ -984,7 +1012,8 @@ en                ", clientLanguages.Dump());
             TestUtility.AssertEqualWithDiffTool(@".Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
-    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver) {
+    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver,
+    Dibix.Http.Server.HttpActionDefinition $action) {
     .Block(Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
         $arguments.Item[""databaseAccessorFactory""] = (System.Object)$databaseaccessorfactorySource;

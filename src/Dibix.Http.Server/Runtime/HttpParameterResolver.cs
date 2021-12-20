@@ -21,7 +21,7 @@ namespace Dibix.Http.Server
         #endregion
 
         #region Delegates
-        private delegate void ResolveParameters(HttpRequestMessage request, IDictionary<string, object> arguments, IParameterDependencyResolver dependencyResolver);
+        private delegate void ResolveParameters(HttpRequestMessage request, IDictionary<string, object> arguments, IParameterDependencyResolver dependencyResolver, HttpActionDefinition action);
         #endregion
 
         #region Public Methods
@@ -30,16 +30,18 @@ namespace Dibix.Http.Server
             CompilationContext compilationContext = new CompilationContext();
             try
             {
-                // (HttpRequestMessage request, IDictionary<string, object> arguments, IParameterDependencyResolver dependencyResolver) => 
+                // (HttpRequestMessage request, IDictionary<string, object> arguments, IParameterDependencyResolver dependencyResolver, HttpActionDefinition action) => 
                 ParameterExpression requestParameter = Expression.Parameter(typeof(HttpRequestMessage), "request");
                 ParameterExpression argumentsParameter = Expression.Parameter(typeof(IDictionary<string, object>), "arguments");
                 ParameterExpression dependencyResolverParameter = Expression.Parameter(typeof(IParameterDependencyResolver), "dependencyResolver");
+                ParameterExpression actionParameter = Expression.Parameter(typeof(HttpActionDefinition), "action");
                 compilationContext.Parameters.Add(requestParameter);
                 compilationContext.Parameters.Add(argumentsParameter);
                 compilationContext.Parameters.Add(dependencyResolverParameter);
+                compilationContext.Parameters.Add(actionParameter);
                 
                 IDictionary<string, Expression> sourceMap = new Dictionary<string, Expression>();
-                ICollection<HttpParameterInfo> @params = CollectParameters(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, parameters).ToArray();
+                ICollection<HttpParameterInfo> @params = CollectParameters(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap, parameters).ToArray();
 
                 // IDatabaseAccesorFactory databaseAccesorFactory = dependencyResolver.Resolve<IDatabaseAccesorFactory>();
                 // IActionAuthorizationContext actionAuthorizationContext = dependencyResolver.Resolve<IActionAuthorizationContext>();
@@ -54,7 +56,7 @@ namespace Dibix.Http.Server
                 //
                 // SomeInputParameterClass input = new SomeInputParameterClass();
                 // input.lcid = actionAuthorizationContext.LocaleId;
-                // input.id = HttpParameterResolver.ConvertValue<object, int>("id", arguments["id"]);
+                // input.id = HttpParameterResolver.ConvertValue<object, int>("id", arguments["id"], action);
                 // HttpParameterResolver.BindParametersFromBody<SomeValueFromBody, SomeInputParameterClass, SomeInputBinder>(arguments, input, "input");
                 // arguments["input"] = input;
                 //
@@ -62,10 +64,10 @@ namespace Dibix.Http.Server
                 // HttpParameterResolver.AddParameterFromBody<SomeValueFromBody, SomeUdt1, SomeUdt1InputConverter>(arguments, "someUdt1");
                 // HttpParameterResolver.AddParameterFromBody<SomeValueFromBody, SomeUdt2, SomeUdt2InputConverter>(arguments, "someUdt2");
                 // ...
-                CollectParameterAssignments(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, @params);
+                CollectParameterAssignments(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap, @params);
 
                 ResolveParameters compiled = Compile(compilationContext, out string source);
-                HttpParameterResolutionMethod method = new HttpParameterResolutionMethod(source, compiled);
+                HttpParameterResolutionMethod method = new HttpParameterResolutionMethod(action, source, compiled);
                 CollectApiParameters(method, @params, action.BodyContract);
                 return method;
             }
@@ -77,7 +79,7 @@ namespace Dibix.Http.Server
         #endregion
 
         #region Private Methods
-        private static IEnumerable<HttpParameterInfo> CollectParameters(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, IEnumerable<ParameterInfo> parameters)
+        private static IEnumerable<HttpParameterInfo> CollectParameters(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, Expression actionParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, IEnumerable<ParameterInfo> parameters)
         {
             HashSet<string> pathParameters = new HashSet<string>();
             if (!String.IsNullOrEmpty(action.ChildRoute))
@@ -97,7 +99,7 @@ namespace Dibix.Http.Server
                     string sourceName = parameter.ParameterType.Name.TrimStart('I');
                     sourceName = String.Concat(Char.ToLowerInvariant(sourceName[0]), sourceName.Substring(1));
                     IHttpParameterSourceProvider sourceProvider = new HttpParameterDependencySourceProvider(parameter.ParameterType);
-                    HttpParameterSourceInfo source = new HttpParameterSourceInfo(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, sourceName, sourceProvider, propertyPath: null);
+                    HttpParameterSourceInfo source = new HttpParameterSourceInfo(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap, sourceName, sourceProvider, propertyPath: null);
                     yield return HttpParameterInfo.SourceInstance(parameter.ParameterType, parameter.Name, source);
                     continue;
                 }
@@ -108,7 +110,7 @@ namespace Dibix.Http.Server
                     {
                         if (action.ParameterSources.TryGetValue(property.Name, out HttpParameterSource parameterSource))
                         {
-                            yield return CollectExplicitParameter(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, parameterSource, parameter, property.PropertyType, property.Name, isOptional: false, defaultValue: null);
+                            yield return CollectExplicitParameter(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap, parameterSource, parameter, property.PropertyType, property.Name, isOptional: false, defaultValue: null);
                         }
                         else if (action.BodyBinder != null)
                         {
@@ -116,7 +118,7 @@ namespace Dibix.Http.Server
                         }
                         else
                         {
-                            yield return CollectImplicitParameter(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, pathParameters, sourceMap, parameter, property.PropertyType, property.Name, false);
+                            yield return CollectImplicitParameter(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, pathParameters, sourceMap, parameter, property.PropertyType, property.Name, false);
                         }
                     }
                 }
@@ -124,7 +126,7 @@ namespace Dibix.Http.Server
                 {
                     if (action.ParameterSources.TryGetValue(parameter.Name, out HttpParameterSource parameterSource))
                     {
-                        yield return CollectExplicitParameter(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, parameterSource, contractParameter: null, parameter.ParameterType, parameter.Name, parameter.IsOptional, parameter.DefaultValue);
+                        yield return CollectExplicitParameter(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap, parameterSource, contractParameter: null, parameter.ParameterType, parameter.Name, parameter.IsOptional, parameter.DefaultValue);
                     }
                     else if (action.BodyBinder != null)
                     {
@@ -132,7 +134,7 @@ namespace Dibix.Http.Server
                     }
                     else
                     {
-                        yield return CollectImplicitParameter(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, pathParameters, sourceMap, contractParameter: null, parameter.ParameterType, parameter.Name, parameter.IsOptional, parameter.DefaultValue);
+                        yield return CollectImplicitParameter(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, pathParameters, sourceMap, contractParameter: null, parameter.ParameterType, parameter.Name, parameter.IsOptional, parameter.DefaultValue);
                     }
                 }
             }
@@ -140,7 +142,7 @@ namespace Dibix.Http.Server
             compilationContext.LastVisitedParameter = null;
         }
 
-        private static HttpParameterInfo CollectExplicitParameter(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterSource source, ParameterInfo contractParameter, Type parameterType, string parameterName, bool isOptional, object defaultValue)
+        private static HttpParameterInfo CollectExplicitParameter(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, Expression actionParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterSource source, ParameterInfo contractParameter, Type parameterType, string parameterName, bool isOptional, object defaultValue)
         {
             switch (source)
             {
@@ -153,11 +155,11 @@ namespace Dibix.Http.Server
                         if (!String.IsNullOrEmpty(propertySource.ConverterName))
                             converter = GetConverter(propertySource.ConverterName);
 
-                        HttpParameterSourceInfo sourceInfo = new HttpParameterSourceInfo(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, propertySource.SourceName, sourceProvider, propertySource.PropertyPath);
+                        HttpParameterSourceInfo sourceInfo = new HttpParameterSourceInfo(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap, propertySource.SourceName, sourceProvider, propertySource.PropertyPath);
                         return HttpParameterInfo.SourceProperty(contractParameter, parameterType, parameterName, isOptional, defaultValue, sourceInfo, converter);
                     }
 
-                    return CollectItemsParameter(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, contractParameter, parameterType, parameterName, isOptional, defaultValue, propertySource, sourceProvider);
+                    return CollectItemsParameter(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap, contractParameter, parameterType, parameterName, isOptional, defaultValue, propertySource, sourceProvider);
 
                 case HttpParameterBodySource bodySource:
                     Type inputConverter = Type.GetType(bodySource.ConverterName, true);
@@ -171,8 +173,8 @@ namespace Dibix.Http.Server
             }
         }
 
-        private static HttpParameterInfo CollectImplicitParameter(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, CompilationContext compilationContext, ICollection<string> pathParameters, IDictionary<string, Expression> sourceMap, ParameterInfo contractParameter, Type parameterType, string parameterName, bool isOptional) => CollectImplicitParameter(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, pathParameters, sourceMap, contractParameter, parameterType, parameterName, isOptional, null);
-        private static HttpParameterInfo CollectImplicitParameter(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, CompilationContext compilationContext, ICollection<string> pathParameters, IDictionary<string, Expression> sourceMap, ParameterInfo contractParameter, Type parameterType, string parameterName, bool isOptional, object defaultValue)
+        private static HttpParameterInfo CollectImplicitParameter(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, Expression actionParameter, CompilationContext compilationContext, ICollection<string> pathParameters, IDictionary<string, Expression> sourceMap, ParameterInfo contractParameter, Type parameterType, string parameterName, bool isOptional) => CollectImplicitParameter(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, pathParameters, sourceMap, contractParameter, parameterType, parameterName, isOptional, null);
+        private static HttpParameterInfo CollectImplicitParameter(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, Expression actionParameter, CompilationContext compilationContext, ICollection<string> pathParameters, IDictionary<string, Expression> sourceMap, ParameterInfo contractParameter, Type parameterType, string parameterName, bool isOptional, object defaultValue)
         {
             if (pathParameters.Contains(parameterName, StringComparer.OrdinalIgnoreCase))
                 return HttpParameterInfo.Path(contractParameter, parameterType, parameterName, isOptional, defaultValue);
@@ -190,9 +192,9 @@ namespace Dibix.Http.Server
 
             bool isItemsParameter = typeof(StructuredType).IsAssignableFrom(parameterType);
             if (isItemsParameter)
-                return CollectItemsParameter(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, contractParameter, parameterType, parameterName, isOptional, defaultValue, new HttpParameterPropertySource(BodyParameterSourceProvider.SourceName, sourcePropertyName, null), sourceProvider);
+                return CollectItemsParameter(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap, contractParameter, parameterType, parameterName, isOptional, defaultValue, new HttpParameterPropertySource(BodyParameterSourceProvider.SourceName, sourcePropertyName, null), sourceProvider);
 
-            HttpParameterSourceInfo sourceInfo = new HttpParameterSourceInfo(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, BodyParameterSourceProvider.SourceName, sourceProvider, propertyPath: sourcePropertyName);
+            HttpParameterSourceInfo sourceInfo = new HttpParameterSourceInfo(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap, BodyParameterSourceProvider.SourceName, sourceProvider, propertyPath: sourcePropertyName);
             return HttpParameterInfo.SourceProperty(contractParameter, parameterType, parameterName, isOptional, defaultValue, sourceInfo, converter: null);
         }
 
@@ -215,7 +217,7 @@ namespace Dibix.Http.Server
             return converter;
         }
 
-        private static HttpParameterInfo CollectItemsParameter(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, ParameterInfo contractParameter, Type parameterType, string parameterName, bool isOptional, object defaultValue, HttpParameterPropertySource propertySource, IHttpParameterSourceProvider sourceProvider)
+        private static HttpParameterInfo CollectItemsParameter(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, Expression actionParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, ParameterInfo contractParameter, Type parameterType, string parameterName, bool isOptional, object defaultValue, HttpParameterPropertySource propertySource, IHttpParameterSourceProvider sourceProvider)
         {
             string udtName = parameterType.GetCustomAttribute<StructuredTypeAttribute>()?.UdtName;
             MethodInfo addMethod = parameterType.GetMethod("Add");
@@ -228,9 +230,9 @@ namespace Dibix.Http.Server
                 if (!parameterMap.TryGetValue(x.Key, out Type itemParameterType))
                     throw new InvalidOperationException($"Target name does not match a UDT column: {udtName ?? parameterType.ToString()}.{x.Key}");
 
-                return CollectExplicitParameter(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, x.Value, null, itemParameterType, x.Key, isOptional, defaultValue);
+                return CollectExplicitParameter(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap, x.Value, null, itemParameterType, x.Key, isOptional, defaultValue);
             });
-            HttpParameterSourceInfo source = new HttpParameterSourceInfo(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, propertySource.SourceName, sourceProvider, propertySource.PropertyPath);
+            HttpParameterSourceInfo source = new HttpParameterSourceInfo(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap, propertySource.SourceName, sourceProvider, propertySource.PropertyPath);
             return HttpParameterInfo.SourcePropertyItemsSource(contractParameter, parameterType, parameterName, source, udtName, addMethod, itemSources);
         }
 
@@ -240,7 +242,7 @@ namespace Dibix.Http.Server
                 parameter.Source?.CollectSourceInstance();
         }
 
-        private static void CollectParameterAssignments(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, IEnumerable<HttpParameterInfo> parameters)
+        private static void CollectParameterAssignments(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, Expression actionParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, IEnumerable<HttpParameterInfo> parameters)
         {
             foreach (IGrouping<ParameterInfo, HttpParameterInfo> parameterGroup in parameters.GroupBy(x => x.ContractParameter))
             {
@@ -272,12 +274,12 @@ namespace Dibix.Http.Server
                             //     arguments["lcid"] = 5; // Default value
                             // }
                             // arguments["lcid"] = CONVERT(arguments["lcid"])
-                            CollectUriParameterAssignment(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, parameter);
+                            CollectUriParameterAssignment(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap, parameter);
                         }
                         else
                         {
                             // arguments[lcid"] = actionAuthorizationContext.LocaleId;
-                            CollectNonUserParameterAssignment(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, parameter);
+                            CollectNonUserParameterAssignment(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap, parameter);
                         }
                     }
                     else
@@ -292,13 +294,13 @@ namespace Dibix.Http.Server
                         }
                         else if (IsUri(parameter.Location))
                         {
-                            // input.id = HttpParameterResolver.ConvertValue<object, int>("id", arguments["id"]);
-                            CollectUriPropertyAssignment(action, requestParameter, dependencyResolverParameter, argumentsParameter, compilationContext, sourceMap, parameter, contractParameterVariable);
+                            // input.id = HttpParameterResolver.ConvertValue<object, int>("id", arguments["id"], action);
+                            CollectUriPropertyAssignment(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap, parameter, contractParameterVariable);
                         }
                         else
                         {
                             // input.lcid = actionAuthorizationContext.LocaleId;
-                            CollectNonUserPropertyAssignment(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, parameter, contractParameterVariable);
+                            CollectNonUserPropertyAssignment(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap, parameter, contractParameterVariable);
                         }
                     }
                 }
@@ -331,30 +333,30 @@ namespace Dibix.Http.Server
             return complexParameterVariable;
         }
 
-        private static void CollectNonUserParameterAssignment(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter)
+        private static void CollectNonUserParameterAssignment(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, Expression actionParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter)
         {
             // arguments["lcid"] = actionAuthorizationContext.LocaleId;
-            Expression value = CollectParameterValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, parameter);
+            Expression value = CollectParameterValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap, parameter);
             CollectParameterAssignment(compilationContext, parameter.InternalParameterName, argumentsParameter, value);
         }
 
-        private static void CollectNonUserPropertyAssignment(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter, Expression contractParameterVariable)
+        private static void CollectNonUserPropertyAssignment(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, Expression actionParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter, Expression contractParameterVariable)
         {
             // input.lcid = actionAuthorizationContext.LocaleId;
             Expression property = Expression.Property(contractParameterVariable, parameter.InternalParameterName);
-            Expression value = CollectParameterValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, parameter);
+            Expression value = CollectParameterValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap, parameter);
             Expression assign = Expression.Assign(property, value); 
             compilationContext.Statements.Add(assign);
         }
 
-        private static void CollectUriParameterAssignment(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter)
+        private static void CollectUriParameterAssignment(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, Expression actionParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter)
         {
             bool hasDefaultValue = parameter.DefaultValue != DBNull.Value && parameter.DefaultValue != null;
 
             if (parameter.SourceKind == HttpParameterSourceKind.SourceProperty) // QUERY or PATH source
             {
                 // arguments["lcid] = arguments["localeid"];
-                Expression value = CollectParameterValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, parameter, generateConverterStatement: !hasDefaultValue, ensureCorrectType: !hasDefaultValue);
+                Expression value = CollectParameterValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap, parameter, generateConverterStatement: !hasDefaultValue, ensureCorrectType: !hasDefaultValue);
                 CollectParameterAssignment(compilationContext, parameter.InternalParameterName, argumentsParameter, value);
             }
 
@@ -374,7 +376,7 @@ namespace Dibix.Http.Server
             if (parameter.Converter != null)
             {
                 Expression value = HttpParameterResolverUtility.BuildArgumentAccessorExpression(argumentsParameter, parameter.InternalParameterName);
-                value = CollectConverterStatement(parameter, value);
+                value = CollectConverterStatement(parameter, value, actionParameter);
                 CollectParameterAssignment(compilationContext, parameter.InternalParameterName, argumentsParameter, value);
             }
         }
@@ -398,11 +400,11 @@ namespace Dibix.Http.Server
             compilationContext.Statements.Add(@if);
         }
 
-        private static void CollectUriPropertyAssignment(HttpActionDefinition action, Expression requestParameter, Expression dependencyResolverParameter, Expression argumentsParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter, Expression contractParameterVariable)
+        private static void CollectUriPropertyAssignment(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, Expression actionParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter, Expression contractParameterVariable)
         {
-            // input.id = CONVERT(HttpParameterResolver.ConvertValue<object, int>("id", arguments["id"]));
+            // input.id = CONVERT(HttpParameterResolver.ConvertValue<object, int>("id", arguments["id"], action));
             Expression property = Expression.Property(contractParameterVariable, parameter.InternalParameterName);
-            Expression value = CollectParameterValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, parameter);
+            Expression value = CollectParameterValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap, parameter);
             Expression assign = Expression.Assign(property, value);
             compilationContext.Statements.Add(assign);
         }
@@ -442,7 +444,7 @@ namespace Dibix.Http.Server
             compilationContext.Statements.Add(assign);
         }
 
-        private static Expression CollectParameterValue(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter, bool generateConverterStatement = true, bool ensureCorrectType = true, bool ensureNullPropagation = false)
+        private static Expression CollectParameterValue(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, Expression actionParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter, bool generateConverterStatement = true, bool ensureCorrectType = true, bool ensureNullPropagation = false)
         {
             Expression value;
 
@@ -469,7 +471,7 @@ namespace Dibix.Http.Server
                         // Expand property path on an existing source instance variable
                         if (parameter.SourceKind == HttpParameterSourceKind.SourceProperty)
                         {
-                            value = CollectSourcePropertyValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, parameter, value, ensureNullPropagation);
+                            value = CollectSourcePropertyValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap, parameter, value, ensureNullPropagation);
                         }
                     }
                     else
@@ -482,23 +484,23 @@ namespace Dibix.Http.Server
             }
 
             if (generateConverterStatement) 
-                value = CollectConverterStatement(parameter, value);
+                value = CollectConverterStatement(parameter, value, actionParameter);
 
             // ResolveParameterFromNull
             if (parameter.SourceKind == HttpParameterSourceKind.ConstantValue && parameter.Value == null) 
                 return value;
 
             if (ensureCorrectType)
-                value = EnsureCorrectType(parameter.InternalParameterName, value, parameter.ParameterType);
+                value = EnsureCorrectType(parameter.InternalParameterName, value, parameter.ParameterType, actionParameter);
 
             return value;
         }
 
-        private static Expression CollectSourcePropertyValue(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter, Expression value, bool ensureNullPropagation)
+        private static Expression CollectSourcePropertyValue(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, Expression actionParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter, Expression value, bool ensureNullPropagation)
         {
-            return CollectSourcePropertyValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, parameter, value, ensureNullPropagation, parameter.Source.PropertyPath);
+            return CollectSourcePropertyValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap, parameter, value, ensureNullPropagation, parameter.Source.PropertyPath);
         }
-        private static Expression CollectSourcePropertyValue(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter, Expression value, bool ensureNullPropagation, string propertyPath)
+        private static Expression CollectSourcePropertyValue(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, Expression actionParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter, Expression value, bool ensureNullPropagation, string propertyPath)
         {
             string[] parts = propertyPath.Split('.');
             ICollection<Expression> nullCheckTargets = new Collection<Expression>();
@@ -509,7 +511,7 @@ namespace Dibix.Http.Server
                     continue;
 
                 MemberExpression sourcePropertyExpression = Expression.Property(value, propertyName);
-                value = parameter.Items != null ? CollectItemsParameterValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, parameter, sourcePropertyExpression, sourceMap, ensureNullPropagation) : sourcePropertyExpression;
+                value = parameter.Items != null ? CollectItemsParameterValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, parameter, sourcePropertyExpression, sourceMap, ensureNullPropagation) : sourcePropertyExpression;
 
                 if (ensureNullPropagation && i + 1 < parts.Length)
                     nullCheckTargets.Add(sourcePropertyExpression);
@@ -520,14 +522,26 @@ namespace Dibix.Http.Server
                 Expression test = nullCheckTargets.Select(x => Expression.NotEqual(x, Expression.Constant(null))).Aggregate(Expression.AndAlso /* Short-circuit behavior like && in C# */);
                 bool hasDefaultValue = parameter.DefaultValue != DBNull.Value && parameter.DefaultValue != null;
                 Expression fallbackValue = hasDefaultValue ? (Expression)Expression.Constant(parameter.DefaultValue) : Expression.Default(parameter.ParameterType);
-                value = EnsureCorrectType(parameter.InternalParameterName, value, parameter.ParameterType);
+                value = EnsureCorrectType(parameter.InternalParameterName, value, parameter.ParameterType, actionParameter);
                 value = Expression.Condition(test, value, fallbackValue);
             }
 
             return value;
         }
 
-        private static Expression CollectItemsParameterValue(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, CompilationContext compilationContext, HttpParameterInfo parameter, MemberExpression sourcePropertyExpression, IDictionary<string, Expression> sourceMap, bool ensureNullPropagation)
+        private static Expression CollectItemsParameterValue
+        (
+            HttpActionDefinition action
+          , Expression requestParameter
+          , Expression argumentsParameter
+          , Expression dependencyResolverParameter
+          , Expression actionParameter
+          , CompilationContext compilationContext
+          , HttpParameterInfo parameter
+          , Expression sourcePropertyExpression
+          , IDictionary<string, Expression> sourceMap
+          , bool ensureNullPropagation
+        )
         {
             Type itemType = GetItemType(sourcePropertyExpression.Type);
             IDictionary<string, Expression> addMethodParameterValues = parameter.Items.AddItemMethod.GetParameters().ToDictionary(x => x.Name, x => (Expression)null);
@@ -543,7 +557,7 @@ namespace Dibix.Http.Server
                 ParameterExpression itemSourceVariable;
                 if (itemSource.SourceKind == HttpParameterSourceKind.SourceProperty && itemSource.Source.PropertyPath == ItemIndexPropertyName) // ITEM.$INDEX => i
                 {
-                    HttpParameterSourceInfo source = new HttpParameterSourceInfo(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, ItemSourceName, sourceProvider: null, propertyPath: null);
+                    HttpParameterSourceInfo source = new HttpParameterSourceInfo(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap, ItemSourceName, sourceProvider: null, propertyPath: null);
                     itemParameter = HttpParameterInfo.SourceInstance(itemSource.ParameterType, itemSource.InternalParameterName, source);
                     if (addItemFuncIndexParameter == null)
                         addItemFuncIndexParameter = Expression.Parameter(typeof(int), "i"); // Lazy
@@ -557,7 +571,7 @@ namespace Dibix.Http.Server
                 }
 
                 sourceMap[ItemSourceName] = itemSourceVariable;
-                addMethodParameterValues[itemSource.InternalParameterName] = CollectParameterValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, compilationContext, sourceMap, itemParameter, ensureNullPropagation: ensureNullPropagation);
+                addMethodParameterValues[itemSource.InternalParameterName] = CollectParameterValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap, itemParameter, ensureNullPropagation: ensureNullPropagation);
             }
 
             foreach (KeyValuePair<string, Expression> addMethodParameter in addMethodParameterValues.Where(x => x.Value == null).ToArray())
@@ -580,7 +594,7 @@ namespace Dibix.Http.Server
                     throw new InvalidOperationException($@"Can not map UDT column: {parameter.Items.UdtName ?? parameter.ParameterType.ToString()}.{addMethodParameter.Key}
 Either create a mapping or make sure a property of the same name exists in the source: {parameter.Source.SourceName}.{parameter.Source.PropertyPath}");
 
-                source = EnsureCorrectType(addMethodParameter.Key, source, targetType);
+                source = EnsureCorrectType(addMethodParameter.Key, source, targetType, actionParameter);
                 addMethodParameterValues[addMethodParameter.Key] = source;
             }
 
@@ -595,17 +609,17 @@ Either create a mapping or make sure a property of the same name exists in the s
             return value;
         }
 
-        private static Expression CollectConverterStatement(HttpParameterInfo parameter, Expression value)
+        private static Expression CollectConverterStatement(HttpParameterInfo parameter, Expression value, Expression actionParameter)
         {
             if (parameter.Converter == null)
                 return value;
 
-            value = EnsureCorrectType(parameter.InternalParameterName, value, parameter.Converter.ExpectedInputType);
+            value = EnsureCorrectType(parameter.InternalParameterName, value, parameter.Converter.ExpectedInputType, actionParameter);
             value = parameter.Converter.ConvertValue(value);
             return value;
         }
 
-        private static Expression EnsureCorrectType(string parameterName, Expression valueExpression, Type targetType)
+        private static Expression EnsureCorrectType(string parameterName, Expression valueExpression, Type targetType, Expression actionParameter)
         {
             if (valueExpression.Type == targetType)
                 return valueExpression;
@@ -617,7 +631,7 @@ Either create a mapping or make sure a property of the same name exists in the s
             if (TryStructuredTypeConversion(parameterName, valueExpression, targetType, out Expression newValueExpression))
                 return newValueExpression;
 
-            Expression convertCall = Expression.Call(typeof(HttpParameterResolver), nameof(ConvertValue), new[] { valueExpression.Type, targetType }, Expression.Constant(parameterName), valueExpression);
+            Expression convertCall = Expression.Call(typeof(HttpParameterResolver), nameof(ConvertValue), new[] { valueExpression.Type, targetType }, Expression.Constant(parameterName), valueExpression, actionParameter);
             return convertCall;
         }
 
@@ -738,7 +752,7 @@ Either create a mapping or make sure a property of the same name exists in the s
             return target;
         }
 
-        private static TTarget ConvertValue<TSource, TTarget>(string parameterName, TSource value)
+        private static TTarget ConvertValue<TSource, TTarget>(string parameterName, TSource value, HttpActionDefinition action)
         {
             try
             {
@@ -772,7 +786,7 @@ Either create a mapping or make sure a property of the same name exists in the s
             }
             catch (Exception exception)
             {
-                throw CreateException("Parameter mapping failed", exception, null, parameterName);
+                throw CreateException("Parameter mapping failed", exception, action, parameterName);
             }
         }
 
@@ -795,6 +809,13 @@ Either create a mapping or make sure a property of the same name exists in the s
                 sb.AppendLine()
                   .Append("Parameter: ")
                   .Append(parameterName);
+
+                if (action != null && action.ParameterSources.TryGetValue(parameterName, out HttpParameterSource source))
+                {
+                    sb.AppendLine()
+                      .Append("Source: ")
+                      .Append(source.Description);
+                }
             }
 
             return new InvalidOperationException(sb.ToString(), innerException);
@@ -978,13 +999,14 @@ Either create a mapping or make sure a property of the same name exists in the s
             public Expression RequestParameter { get; }
             public Expression ArgumentsParameter { get; }
             public Expression DependencyResolverParameter { get; }
+            public Expression ActionParameter { get; }
             public string SourceName { get; }
             public string PropertyPath { get; }
             public HttpParameterInfo Parent { get; set; }
             public Expression Value { get; private set; }
             public HttpParameterLocation Location => this._sourceProvider?.Location ?? HttpParameterLocation.NonUser;
 
-            public HttpParameterSourceInfo(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, string sourceName, IHttpParameterSourceProvider sourceProvider, string propertyPath)
+            public HttpParameterSourceInfo(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, Expression actionParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, string sourceName, IHttpParameterSourceProvider sourceProvider, string propertyPath)
             {
                 this._compilationContext = compilationContext;
                 this._sourceMap = sourceMap;
@@ -993,6 +1015,7 @@ Either create a mapping or make sure a property of the same name exists in the s
                 this.RequestParameter = requestParameter;
                 this.ArgumentsParameter = argumentsParameter;
                 this.DependencyResolverParameter = dependencyResolverParameter;
+                this.ActionParameter = actionParameter;
                 this.SourceName = sourceName;
                 this.PropertyPath = propertyPath;
             }
@@ -1016,7 +1039,7 @@ Either create a mapping or make sure a property of the same name exists in the s
                 if (this.PropertyPath == null)
                     return;
 
-                this.Value = CollectSourcePropertyValue(this.Action, this.RequestParameter, this.ArgumentsParameter, this.DependencyResolverParameter, this._compilationContext, this._sourceMap, this.Parent, this.Value, ensureNullPropagation, propertyPath);
+                this.Value = CollectSourcePropertyValue(this.Action, this.RequestParameter, this.ArgumentsParameter, this.DependencyResolverParameter, this.ActionParameter, this._compilationContext, this._sourceMap, this.Parent, this.Value, ensureNullPropagation, propertyPath);
             }
 
             public void ResolveUsingValue(Expression value) => this.Value = value;
@@ -1041,13 +1064,15 @@ Either create a mapping or make sure a property of the same name exists in the s
 
         private sealed class HttpParameterResolutionMethod : IHttpParameterResolutionMethod
         {
+            private readonly HttpActionDefinition _action;
             private readonly ResolveParameters _compiled;
 
             public string Source { get; }
             public IDictionary<string, HttpActionParameter> Parameters { get; }
 
-            public HttpParameterResolutionMethod(string source, ResolveParameters compiled)
+            public HttpParameterResolutionMethod(HttpActionDefinition action, string source, ResolveParameters compiled)
             {
+                this._action = action;
                 this._compiled = compiled;
                 this.Source = source;
                 this.Parameters = new Dictionary<string, HttpActionParameter>();
@@ -1057,7 +1082,7 @@ Either create a mapping or make sure a property of the same name exists in the s
 
             public void PrepareParameters(HttpRequestMessage request, IDictionary<string, object> arguments, IParameterDependencyResolver dependencyResolver)
             {
-                this._compiled(request, arguments, dependencyResolver);
+                this._compiled(request, arguments, dependencyResolver, this._action);
             }
         }
         #endregion
