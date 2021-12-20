@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.Dac.CodeAnalysis;
 using Microsoft.SqlServer.Dac.Extensibility;
@@ -13,14 +11,6 @@ namespace Dibix.Sdk.CodeAnalysis
 {
     public static class SqlCodeAnalysisTask
     {
-        private static readonly string[] NativeSqlCASuppressions =
-        {
-            "17e91ede49a40673d7cc2e2cbee3b5af" // [dbo].[hlsysum_queryuserlistagent]#[ag].[fullname]#3372
-          , "aa6ad0d8bbb6f5cd66c8d243cb17dccb" // [dbo].[hlsysum_queryuserlistagent]#[ag].[description]#3389
-          , "64a7ef12999c6632d6b511d27588139f" // [dbo].[hlsysum_queryorgunitpersonlist]#ag.fullname#3686
-          , "6b6cec30fd76d59b6450459d150ee50e" // [dbo].[hlsysum_queryorgunitpersonlist]#[ag].[description]#3699
-        };
-
         public static bool Execute
         (
             string projectName
@@ -124,22 +114,8 @@ namespace Dibix.Sdk.CodeAnalysis
                 if (problem.ModelElement.IsExternal())
                     continue;
 
-                string hashKey = $"{problem.ModelElement.Name}#{problem.Fragment.Dump()}#{problem.Fragment.StartOffset}";
-                string hash = CalculateHash(hashKey);
-                if (NativeSqlCASuppressions.Contains(hash))
-                    continue;
-
                 string shortRuleId = problem.RuleId.Split('.').Last();
                 logger.LogError("StaticCodeAnalysis", shortRuleId, problem.Description, problem.SourceName, problem.StartLine, problem.StartColumn);
-            }
-        }
-
-        private static string CalculateHash(string input)
-        {
-            using (MD5 md5 = MD5.Create())
-            {
-                byte[] hash = md5.ComputeHash(Encoding.UTF8.GetBytes(input));
-                return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
             }
         }
 
