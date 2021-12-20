@@ -8,7 +8,7 @@ namespace Dibix.Http.Server
     {
         public static byte[] GetContent(string packagePath)
         {
-            using (Package package = Package.Open(packagePath, FileMode.Open))
+            using (Package package = Package.Open(packagePath, FileMode.Open, FileAccess.Read))
             {
                 Uri contentUri = new Uri("Content", UriKind.Relative);
                 Uri partUri = PackUriHelper.CreatePartUri(contentUri);
