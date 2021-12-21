@@ -11,23 +11,6 @@ namespace Dibix.Sdk.CodeGeneration
     internal sealed class ReflectionTypeResolver : TypeResolver
     {
         #region Fields
-        private static readonly IDictionary<Type, PrimitiveType> PrimitiveTypeMap = new Dictionary<Type, PrimitiveType>
-        {
-            [typeof(bool)]           = PrimitiveType.Boolean
-          , [typeof(byte)]           = PrimitiveType.Byte
-          , [typeof(short)]          = PrimitiveType.Int16
-          , [typeof(int)]            = PrimitiveType.Int32
-          , [typeof(long)]           = PrimitiveType.Int64
-          , [typeof(float)]          = PrimitiveType.Float
-          , [typeof(double)]         = PrimitiveType.Double
-          , [typeof(decimal)]        = PrimitiveType.Decimal
-          , [typeof(byte[])]         = PrimitiveType.Binary
-          , [typeof(DateTime)]       = PrimitiveType.DateTime
-          , [typeof(DateTimeOffset)] = PrimitiveType.DateTimeOffset
-          , [typeof(string)]         = PrimitiveType.String
-          , [typeof(Uri)]            = PrimitiveType.Uri
-          , [typeof(Guid)]           = PrimitiveType.UUID
-        };
         private readonly AssemblyResolver _assemblyResolver;
         private readonly ISchemaRegistry _schemaRegistry;
         private readonly ILogger _logger;
@@ -121,7 +104,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (type.IsByRef)
                 throw new InvalidOperationException($"By ref types are not supported: {type}");
 
-            if (PrimitiveTypeMap.TryGetValue(type, out PrimitiveType dataType))
+            if (PrimitiveTypeMap.TryParsePrimitiveType(type, out PrimitiveType dataType))
                 return new PrimitiveTypeReference(dataType, isNullable, isEnumerable, source, line, column);
 
             SchemaTypeReference schemaTypeReference = SchemaTypeReference.WithNamespace(type.Namespace, type.Name, source, line, column, isNullable, isEnumerable);

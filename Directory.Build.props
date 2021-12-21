@@ -27,18 +27,11 @@
     <SourceRoot Include="$(MSBuildThisFileDirectory)/" />
   </ItemGroup>
 
-  <!--
-  <ItemGroup>
-    <SourceLinkAzureDevOpsServerGitHost Include="azdops.serviceware.net" VirtualDirectory="sw" />
-  </ItemGroup>
-  -->
-
   <ItemGroup>
     <None Remove="*.dotsettings" />
   </ItemGroup>
 
   <ItemGroup>
-    <!--<PackageReference Include="Microsoft.SourceLink.AzureDevOpsServer.Git" Version="1.0.0" PrivateAssets="All" />-->
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
     <PackageReference Include="Nerdbank.GitVersioning" Version="3.4.194" PrivateAssets="All" />
   </ItemGroup>
