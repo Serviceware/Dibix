@@ -10,13 +10,14 @@
     <EmbeddedResource Include="Schema\dibix.configuration.schema.json" />
     <EmbeddedResource Include="Schema\dibix.contracts.schema.json" />
     <EmbeddedResource Include="Schema\dibix.endpoints.schema.json" />
+    <Compile Include="..\..\shared\ParameterSources\*.cs" Link="CodeGeneration\Model\%(Filename).cs" />
+    <Compile Include="..\..\shared\FuncEqualityComparer.cs" Link="Collections\FuncEqualityComparer.cs" />
+    <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\Guard.cs" />
+    <Compile Include="..\..\shared\SchemaName.cs" Link="Environment\SchemaName.cs" />
     <Compile Include="..\..\shared\CollectionExtensions.cs" Link="Extensions\CollectionExtensions.cs" />
     <Compile Include="..\..\shared\EnumerableExtensions.cs" Link="Extensions\EnumerableExtensions.cs" />
     <Compile Include="..\..\shared\ReflectionExtensions.cs" Link="Extensions\ReflectionExtensions.cs" />
     <Compile Include="..\..\shared\ExpressionUtility.cs" Link="Utilities\ExpressionUtility.cs" />
-    <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\Guard.cs" />
-    <Compile Include="..\..\shared\SchemaName.cs" Link="Environment\SchemaName.cs" />
-    <Compile Include="..\..\shared\FuncEqualityComparer.cs" Link="Collections\FuncEqualityComparer.cs" />
     <Compile Include="..\Dibix.Http.Server\Runtime\HttpErrorResponseParser.cs" Link="CodeGeneration\Parser\HttpErrorResponseParser.cs" />
     <Compile Include="..\Dibix.Http.Server\Runtime\HttpParameterUtility.cs" Link="CodeGeneration\Parser\HttpParameterUtility.cs" />
     <Compile Include="..\Dibix.Http.Server\Runtime\HttpParameterName.cs" Link="OpenApi\HttpParameterName.cs" />

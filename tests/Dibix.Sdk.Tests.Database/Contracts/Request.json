@@ -1,0 +1,10 @@
+﻿{
+  "Id": {
+    "Id": "int32",
+    "Name": "string"
+  },
+  "Request": {
+    "Id": "#Id",
+    "Ids": "#Id*"
+  }
+}

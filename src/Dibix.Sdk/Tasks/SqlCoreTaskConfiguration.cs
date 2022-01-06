@@ -3,6 +3,8 @@ using System.IO;
 using System.Linq;
 using Dibix.Sdk.CodeAnalysis;
 using Dibix.Sdk.CodeGeneration;
+using Dibix.Sdk.Json;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Dibix.Sdk
@@ -14,16 +16,15 @@ namespace Dibix.Sdk
 
         private SqlCoreTaskConfiguration() { }
 
-        public static SqlCoreTaskConfiguration Create(string filePath, IFileSystemProvider fileSystemProvider, ILogger logger)
+        public static SqlCoreTaskConfiguration Create(string filePath, IActionParameterSourceRegistry actionParameterSourceRegistry, IFileSystemProvider fileSystemProvider, ILogger logger)
         {
             SqlCoreTaskConfiguration configuration = new SqlCoreTaskConfiguration();
-            configuration.Endpoints.AppendBuiltInParameterSources();
             if (!File.Exists(filePath))
             {
                 return configuration;
             }
 
-            SqlCoreTaskConfigurationReader configurationReader = new SqlCoreTaskConfigurationReader(filePath, configuration, fileSystemProvider, logger);
+            SqlCoreTaskConfigurationReader configurationReader = new SqlCoreTaskConfigurationReader(filePath, configuration, actionParameterSourceRegistry, fileSystemProvider, logger);
             configurationReader.Collect();
             return configuration;
         }
@@ -32,11 +33,15 @@ namespace Dibix.Sdk
         {
             private readonly string _filePath;
             private readonly SqlCoreTaskConfiguration _configuration;
+            private readonly IActionParameterSourceRegistry _actionParameterSourceRegistry;
+            private readonly ILogger _logger;
 
-            public SqlCoreTaskConfigurationReader(string filePath, SqlCoreTaskConfiguration configuration, IFileSystemProvider fileSystemProvider, ILogger logger) : base(fileSystemProvider, logger)
+            public SqlCoreTaskConfigurationReader(string filePath, SqlCoreTaskConfiguration configuration, IActionParameterSourceRegistry actionParameterSourceRegistry, IFileSystemProvider fileSystemProvider, ILogger logger) : base(fileSystemProvider, logger)
             {
                 this._filePath = filePath;
                 this._configuration = configuration;
+                this._actionParameterSourceRegistry = actionParameterSourceRegistry;
+                this._logger = logger;
             }
 
             public void Collect() => base.Collect(Enumerable.Repeat(this._filePath, 1));
@@ -63,7 +68,7 @@ namespace Dibix.Sdk
                 }
             }
 
-            private static void CollectEndpointConfiguration(JObject json, EndpointConfiguration configuration)
+            private void CollectEndpointConfiguration(JObject json, EndpointConfiguration configuration)
             {
                 const string endpointConfigurationName = "Endpoints";
                 JObject endpointConfiguration = (JObject)json.Property(endpointConfigurationName)?.Value;
@@ -75,38 +80,41 @@ namespace Dibix.Sdk
                 {
                     configuration.BaseUrl = (string)baseUrlProperty.Value;
                 }
-                
-                JObject parameterSources = (JObject)endpointConfiguration.Property(nameof(EndpointConfiguration.ParameterSources))?.Value;
+
+                const string parameterSourcesName = "ParameterSources";
+                JObject parameterSources = (JObject)endpointConfiguration.Property(parameterSourcesName)?.Value;
                 if (parameterSources != null)
                 {
                     foreach (JProperty parameterSource in parameterSources.Properties())
                     {
-                        EndpointParameterSource httpParameterSource = new EndpointParameterSource(parameterSource.Name);
+                        if (this._actionParameterSourceRegistry.TryGetDefinition(parameterSource.Name, out ActionParameterSourceDefinition _))
+                        {
+                            IJsonLineInfo lineInfo = parameterSource.GetLineInfo();
+                            this._logger.LogError(null, $"Parameter source '{parameterSource.Name}' is already registered", this._filePath, lineInfo.LineNumber, lineInfo.LinePosition);
+                            continue;
+                        }
 
-                        CollectParameterSource(parameterSource.Value.Type, parameterSource.Value, httpParameterSource);
-                        configuration.ParameterSources.Add(httpParameterSource);
+                        CollectParameterSource(parameterSource.Name, parameterSource.Value.Type, parameterSource.Value, this._actionParameterSourceRegistry);
                     }
                 }
             }
 
-            private static void CollectParameterSource(JTokenType type, JToken value, EndpointParameterSource target)
+            private static void CollectParameterSource(string sourceName, JTokenType valueType, JToken value, IActionParameterSourceRegistry registry)
             {
-                switch (type)
+                switch (valueType)
                 {
                     case JTokenType.Null:
-                        target.IsDynamic = true;
+                        registry.Register(new DynamicParameterSource(sourceName), x => new DynamicParameterSourceValidator(x));
                         break;
 
                     case JTokenType.Array:
                         JArray parameterSourceProperties = (JArray)value;
-                        foreach (string parameterSourceProperty in parameterSourceProperties)
-                        {
-                            target.Properties.Add(parameterSourceProperty);
-                        }
+                        string[] propertyNames = parameterSourceProperties.Select(x => (string)x).ToArray();
+                        registry.Register(new DynamicPropertyParameterSource(sourceName, propertyNames), x => new DynamicPropertyParameterSourceValidator(x));
                         break;
 
                     default:
-                        throw new ArgumentOutOfRangeException(nameof(type), type, null);
+                        throw new ArgumentOutOfRangeException(nameof(valueType), valueType, null);
                 }
             }
         }

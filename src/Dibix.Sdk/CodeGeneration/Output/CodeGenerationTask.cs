@@ -32,6 +32,7 @@ namespace Dibix.Sdk.CodeGeneration
           , out string[] additionalAssemblyReferences
         )
         {
+            IActionParameterSourceRegistry actionParameterSourceRegistry = new ActionParameterSourceRegistry();
             IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(projectDirectory);
             return Execute
             (
@@ -55,6 +56,7 @@ namespace Dibix.Sdk.CodeGeneration
               , databaseSchemaProviderName
               , modelCollation
               , sqlReferencePath
+              , actionParameterSourceRegistry
               , fileSystemProvider
               , logger
               , sqlModel: null
@@ -83,6 +85,7 @@ namespace Dibix.Sdk.CodeGeneration
           , string databaseSchemaProviderName
           , string modelCollation
           , ICollection<TaskItem> sqlReferencePath
+          , IActionParameterSourceRegistry actionParameterSourceRegistry
           , IFileSystemProvider fileSystemProvider
           , ILogger logger
           , TSqlModel sqlModel
@@ -113,12 +116,17 @@ namespace Dibix.Sdk.CodeGeneration
               , modelCollation
               , sqlReferencePath
               , schemaRegistry
+              , actionParameterSourceRegistry
               , fileSystemProvider
               , logger
               , sqlModel
             );
 
-            ICodeArtifactsGenerationModelValidator modelValidator = new CompositeCodeArtifactsGenerationModelValidator(new ContractArtifactValidator(logger));
+            ICodeArtifactsGenerationModelValidator modelValidator = new CompositeCodeArtifactsGenerationModelValidator
+            (
+                new ContractArtifactModelValidator(logger)
+              , new ActionParameterPropertySourceModelValidator(actionParameterSourceRegistry, schemaRegistry, logger)
+            );
             if (!modelValidator.Validate(codeGenerationModel))
             {
                 additionalAssemblyReferences = null;

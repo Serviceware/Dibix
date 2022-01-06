@@ -8,7 +8,7 @@ namespace Dibix.Http.Server
 {
     internal sealed class HeaderParameterSourceProvider : NonUserParameterSourceProvider, IHttpParameterSourceProvider
     {
-        public const string SourceName = "HEADER";
+        public static readonly string SourceName = HeaderParameterSource.SourceName;
 
         public override HttpParameterLocation Location => HttpParameterLocation.Header;
         

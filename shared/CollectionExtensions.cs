@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Dibix.Sdk
+namespace Dibix
 {
     internal static class CollectionExtensions
     {

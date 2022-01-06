@@ -32,6 +32,7 @@ namespace Dibix.Sdk.CodeGeneration
           , string modelCollation
           , ICollection<TaskItem> sqlReferencePath
           , ISchemaRegistry schemaRegistry
+          , IActionParameterSourceRegistry actionParameterSourceRegistry
           , IFileSystemProvider fileSystemProvider
           , ILogger logger
           , TSqlModel sqlModel
@@ -77,7 +78,7 @@ namespace Dibix.Sdk.CodeGeneration
             model.Statements.AddRange(CollectStatements(normalizedSources, projectName, productName, areaName, isEmbedded, formatter, typeResolver, schemaRegistry, logger, modelAccessor));
             model.UserDefinedTypes.AddRange(userDefinedTypeProvider.Types);
             model.Contracts.AddRange(contractDefinitionProvider.Contracts);
-            model.Controllers.AddRange(CollectControllers(normalizedEndpoints, projectName, productName, areaName, defaultOutputName, endpointConfiguration, model.Statements, normalizedDefaultSecuritySchemes, securitySchemeMap, assemblyResolver, fileSystemProvider, typeResolver, schemaRegistry, logger));
+            model.Controllers.AddRange(CollectControllers(normalizedEndpoints, projectName, productName, areaName, defaultOutputName, endpointConfiguration, model.Statements, normalizedDefaultSecuritySchemes, securitySchemeMap, assemblyResolver, typeResolver, schemaRegistry, actionParameterSourceRegistry, fileSystemProvider, logger));
             model.SecuritySchemes.AddRange(securitySchemeMap.Values);
             model.Schemas.AddRange(schemaRegistry.Schemas);
 
@@ -117,13 +118,14 @@ namespace Dibix.Sdk.CodeGeneration
           , ICollection<string> defaultSecuritySchemes
           , IDictionary<string, SecurityScheme> securitySchemeMap
           , ReferencedAssemblyInspector referencedAssemblyInspector
-          , IFileSystemProvider fileSystemProvider
           , ITypeResolverFacade typeResolver
           , ISchemaRegistry schemaRegistry
+          , IActionParameterSourceRegistry actionParameterSourceRegistry
+          , IFileSystemProvider fileSystemProvider
           , ILogger logger
         )
         {
-            ControllerDefinitionProvider controllerDefinitionProvider = new ControllerDefinitionProvider(projectName, productName, areaName, defaultOutputName, endpointConfiguration, statements, endpoints, defaultSecuritySchemes, securitySchemeMap, typeResolver, referencedAssemblyInspector, schemaRegistry, fileSystemProvider, logger);
+            ControllerDefinitionProvider controllerDefinitionProvider = new ControllerDefinitionProvider(projectName, productName, areaName, defaultOutputName, endpointConfiguration, statements, endpoints, defaultSecuritySchemes, securitySchemeMap, typeResolver, referencedAssemblyInspector, schemaRegistry, actionParameterSourceRegistry, fileSystemProvider, logger);
             return controllerDefinitionProvider.Controllers;
         }
     }

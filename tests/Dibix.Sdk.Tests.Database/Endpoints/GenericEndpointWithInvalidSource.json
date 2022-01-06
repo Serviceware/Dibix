@@ -1,0 +1,29 @@
+﻿{
+  "$schema": "../../../src/Dibix.Sdk/CodeGeneration/Schema/dibix.endpoints.schema.json",
+  "GenericEndpoint": [
+    {
+      "method": "GET",
+      "target": "EmptyWithParams",
+      "params": {
+        "u": "WTF.Is.This",
+        "v": "ENV.MachinePassword"
+      }
+    },
+    {
+      "method": "POST",
+      "target": "EmptyWithParams",
+      "body": "Request",
+      "params": {
+        "v": "BODY.X",
+        "w": "BODY.Id.Nm",
+        "ids": {
+          "source": "BODY.Ids",
+          "items": {
+            "id": "ITEM.Id",
+            "name": "ITEM.Nm"
+          }
+        }
+      }
+    }
+  ]
+}

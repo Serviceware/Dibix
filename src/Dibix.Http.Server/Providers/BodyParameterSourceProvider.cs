@@ -9,7 +9,7 @@ namespace Dibix.Http.Server
 {
     internal sealed class BodyParameterSourceProvider : NonUserParameterSourceProvider, IHttpParameterSourceProvider
     {
-        public const string SourceName = "BODY";
+        public static readonly string SourceName = BodyParameterSource.SourceName;
         public const string RawPropertyName = "$RAW";
 
         public override void Resolve(IHttpParameterResolutionContext context)

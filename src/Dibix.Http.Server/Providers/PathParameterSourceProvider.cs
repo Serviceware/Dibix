@@ -2,7 +2,7 @@
 {
     internal sealed class PathParameterSourceProvider : ArgumentsSourceProvider, IHttpParameterSourceProvider
     {
-        public const string SourceName = "PATH";
+        public static readonly string SourceName = PathParameterSource.SourceName;
 
         public override HttpParameterLocation Location => HttpParameterLocation.Path;
     }

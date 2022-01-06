@@ -8,7 +8,7 @@ namespace Dibix.Http.Server
 {
     internal sealed class RequestParameterSourceProvider : NonUserParameterSourceProvider, IHttpParameterSourceProvider
     {
-        public const string SourceName = "REQUEST";
+        public static readonly string SourceName = RequestParameterSource.SourceName;
 
         public override void Resolve(IHttpParameterResolutionContext context)
         {

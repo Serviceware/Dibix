@@ -29,7 +29,8 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             (
                 isEmbedded: false
               , @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
-              , @"Types\dbx_codeanalysis_udt_generic.sql");
+              , @"Types\dbx_codeanalysis_udt_generic.sql"
+            );
         }
 
         [Fact]
@@ -39,7 +40,8 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             (
                 isEmbedded: false
               , @"Tests\Syntax\dbx_tests_syntax_empty_params_inputclass.sql"
-              , @"Types\dbx_codeanalysis_udt_generic.sql");
+              , @"Types\dbx_codeanalysis_udt_generic.sql"
+            );
         }
 
         [Fact]
@@ -385,17 +387,46 @@ Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly
             );
         }
 
+        [Fact]
+        public void Endpoint_WithInvalidPropertySource_Error()
+        {
+            this.ExecuteTestAndExpectError
+            (
+                sources: new[]
+                {
+                    @"Types\dbx_codeanalysis_udt_generic.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
+                }
+              , contract: @"Contracts\Request.json"
+              , endpoint: @"Endpoints\GenericEndpointWithInvalidSource.json"
+              , expectedException: @"One or more errors occured during code generation:
+Endpoints\GenericEndpointWithInvalidSource.json(8,15,8,15):error:Unknown property source 'WTF'
+Endpoints\GenericEndpointWithInvalidSource.json(9,19,9,19):error:Source 'ENV' does not support property 'MachinePassword'
+Endpoints\GenericEndpointWithInvalidSource.json(17,20,17,20):error:Property 'X' not found on contract 'Dibix.Sdk.Tests.DomainModel.Request'
+Endpoints\GenericEndpointWithInvalidSource.json(18,23,18,23):error:Property 'Nm' not found on contract 'Dibix.Sdk.Tests.DomainModel.Id'
+Endpoints\GenericEndpointWithInvalidSource.json(23,27,23,27):error:Property 'Nm' not found on contract 'Dibix.Sdk.Tests.DomainModel.Id'"
+            );
+        }
+
         [Fact(Skip = "Output parameters are now supported")]
         public void Endpoint_WithOutputParam_Error()
         {
-            this.ExecuteTestAndExpectError(@"Tests\Syntax\dbx_tests_syntax_empty_params_out.sql", @"Endpoints\GenericEndpointWithOutputParam.json", @"One or more errors occured during code generation:
-Endpoints\GenericEndpointWithOutputParam.json(6,18,6,18):error:Output parameters are not supported in endpoints: EmptyWithOutputParam");
+            this.ExecuteTestAndExpectError
+            (
+                source: @"Tests\Syntax\dbx_tests_syntax_empty_params_out.sql"
+              , endpoint: @"Endpoints\GenericEndpointWithOutputParam.json"
+              , expectedException: @"One or more errors occured during code generation:
+Endpoints\GenericEndpointWithOutputParam.json(6,18,6,18):error:Output parameters are not supported in endpoints: EmptyWithOutputParam"
+            );
         }
 
         [Fact]
         public void InvalidContractSchema_Error()
         {
-            this.ExecuteTestAndExpectError(Enumerable.Repeat(@"Contracts\Invalid.json", 1), @"One or more errors occured during code generation:
+            this.ExecuteTestAndExpectError
+            (
+                contracts: Enumerable.Repeat(@"Contracts\Invalid.json", 1)
+              , expectedException: @"One or more errors occured during code generation:
 Contracts\Invalid.json(3,12,3,12):error:String 'x' does not match regex pattern '^(binary|boolean|byte|datetime|datetimeoffset|decimal|double|float|int16|int32|int64|string|uri|uuid|xml)\??\*?$'. (Invalid.A)
 Contracts\Invalid.json(3,12,3,12):error:String 'x' does not match regex pattern '^#([\w]+)(.([\w]+))*\??\*?$'. (Invalid.A)
 Contracts\Invalid.json(3,12,3,12):error:JSON does not match any schemas from 'anyOf'. (Invalid.A)
@@ -405,7 +436,8 @@ Contracts\Invalid.json(3,12,3,12):error:Invalid type. Expected Object but got St
 Contracts\Invalid.json(3,12,3,12):error:Invalid type. Expected Object but got String. (Invalid.A)
 Contracts\Invalid.json(3,12,3,12):error:JSON does not match any schemas from 'anyOf'. (Invalid.A)
 Contracts\Invalid.json(2,14,2,14):error:Invalid type. Expected Array but got Object. (Invalid)
-Contracts\Invalid.json(2,14,2,14):error:JSON does not match any schemas from 'anyOf'. (Invalid)");
+Contracts\Invalid.json(2,14,2,14):error:JSON does not match any schemas from 'anyOf'. (Invalid)"
+            );
         }
     }
 }

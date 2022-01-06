@@ -24,13 +24,13 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly string _productName;
         private readonly string _areaName;
         private readonly string _outputName;
-        private readonly IDictionary<string, EndpointParameterSource> _parameterSourceMap;
         private readonly ICollection<SqlStatementDescriptor> _statements;
         private readonly IDictionary<string, SecurityScheme> _securitySchemeMap;
         private readonly ICollection<string> _defaultSecuritySchemes;
         private readonly ITypeResolverFacade _typeResolver;
         private readonly ReferencedAssemblyInspector _referencedAssemblyInspector;
         private readonly ISchemaRegistry _schemaRegistry;
+        private readonly IActionParameterSourceRegistry _actionParameterSourceRegistry;
         private readonly AssemblyResolver _assemblyResolver;
         #endregion
 
@@ -55,6 +55,7 @@ namespace Dibix.Sdk.CodeGeneration
           , ITypeResolverFacade typeResolver
           , ReferencedAssemblyInspector referencedAssemblyInspector
           , ISchemaRegistry schemaRegistry
+          , IActionParameterSourceRegistry actionParameterSourceRegistry
           , IFileSystemProvider fileSystemProvider
           , ILogger logger
         ) : base(fileSystemProvider, logger)
@@ -63,13 +64,13 @@ namespace Dibix.Sdk.CodeGeneration
             this._productName = productName;
             this._areaName = areaName;
             this._outputName = outputName;
-            this._parameterSourceMap = endpointConfiguration.ParameterSources.ToDictionary(x => x.Name);
             this._statements = statements;
             this._securitySchemeMap = securitySchemeMap;
             this._defaultSecuritySchemes = defaultSecuritySchemes;
             this._typeResolver = typeResolver;
             this._referencedAssemblyInspector = referencedAssemblyInspector;
             this._schemaRegistry = schemaRegistry;
+            this._actionParameterSourceRegistry = actionParameterSourceRegistry;
             this._assemblyResolver = referencedAssemblyInspector;
             this.Controllers = new Collection<ControllerDefinition>();
             this.SecuritySchemes = new Collection<SecurityScheme>();
@@ -295,7 +296,7 @@ namespace Dibix.Sdk.CodeGeneration
                     return true;
 
                 case JTokenType.String:
-                    source = ReadPropertySource((JValue)property.Value, filePath, isItem);
+                    source = ReadPropertySource((JValue)property.Value, filePath);
                     return true;
 
                 default:
@@ -306,27 +307,19 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static ActionParameterSource ReadConstantSource(JValue value) => new ActionParameterConstantSource(value.Value);
 
-        private ActionParameterPropertySource ReadPropertySource(JValue value, string filePath, bool isItem)
+        private ActionParameterPropertySource ReadPropertySource(JValue value, string filePath)
         {
             string[] parts = ((string)value.Value).Split(new[] { '.' }, 2);
             string sourceName = parts[0];
             string propertyName = parts[1];
             IJsonLineInfo valueLocation = value.GetLineInfo();
-            bool skipSourceValidation = isItem && sourceName == "ITEM";
 
-            if (!skipSourceValidation)
+            if (!this._actionParameterSourceRegistry.TryGetDefinition(sourceName, out ActionParameterSourceDefinition definition))
             {
-                if (!this._parameterSourceMap.TryGetValue(sourceName, out EndpointParameterSource source))
-                {
-                    base.Logger.LogError(null, $"Unknown property source '{sourceName}'", filePath, valueLocation.LineNumber, valueLocation.LinePosition);
-                }
-                else if (!source.IsDynamic && !source.Properties.Contains(propertyName))
-                {
-                    base.Logger.LogError(null, $"Source '{sourceName}' does not support property '{propertyName}'", filePath, valueLocation.LineNumber, valueLocation.LinePosition);
-                }
+                base.Logger.LogError(null, $"Unknown property source '{sourceName}'", filePath, valueLocation.LineNumber, valueLocation.LinePosition);
             }
 
-            ActionParameterPropertySource propertySource = new ActionParameterPropertySource(sourceName, propertyName);
+            ActionParameterPropertySource propertySource = new ActionParameterPropertySource(definition, propertyName, filePath, valueLocation.LineNumber, valueLocation.LinePosition);
             return propertySource;
         }
 
@@ -349,7 +342,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private ActionParameterSource ReadPropertyActionParameter(string parameterName, JObject container, JProperty sourceProperty, string filePath)
         {
-            ActionParameterPropertySource propertySource = ReadPropertySource((JValue)sourceProperty.Value, filePath, isItem: false);
+            ActionParameterPropertySource propertySource = ReadPropertySource((JValue)sourceProperty.Value, filePath);
 
             JProperty itemsProperty = container.Property("items");
             if (itemsProperty != null)
@@ -862,7 +855,7 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
                 if (explicitParameter.Source is ActionParameterPropertySource propertySource)
                 {
                     apiParameterName = propertySource.PropertyName.Split('.')[0];
-                    if (IsUserParameter(propertySource.SourceName, propertySource.PropertyName, ref location, ref apiParameterName))
+                    if (IsUserParameter(propertySource.Definition, propertySource.PropertyName, ref location, ref apiParameterName))
                     {
                         if (location == ActionParameterLocation.Path)
                             pathParameters.Remove(propertySource.PropertyName);
@@ -910,34 +903,34 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
                 case ActionParameterPropertySource actionParameterPropertySource:
                     ActionParameterLocation location = ActionParameterLocation.NonUser;
                     apiParameterName = actionParameterPropertySource.PropertyName.Split('.')[0];
-                    IsUserParameter(actionParameterPropertySource.SourceName, actionParameterPropertySource.PropertyName, ref location, ref apiParameterName);
+                    IsUserParameter(actionParameterPropertySource.Definition, actionParameterPropertySource.PropertyName, ref location, ref apiParameterName);
                     return location;
 
                 default: throw new ArgumentOutOfRangeException(nameof(parameterSource), parameterSource, null);
             }
         }
 
-        private static bool IsUserParameter(string sourceName, string propertyName, ref ActionParameterLocation location, ref string apiParameterName)
+        private static bool IsUserParameter(ActionParameterSourceDefinition source, string propertyName, ref ActionParameterLocation location, ref string apiParameterName)
         {
-            switch (sourceName)
+            switch (source)
             {
-                case "QUERY":
+                case QueryParameterSource _:
                     location = ActionParameterLocation.Query;
                     return true;
 
-                case "PATH":
+                case PathParameterSource _:
                     location = ActionParameterLocation.Path;
                     return true;
 
-                case "BODY":
+                case BodyParameterSource _:
                     location = ActionParameterLocation.Body;
                     return true;
 
-                case "HEADER":
+                case HeaderParameterSource _:
                     location = ActionParameterLocation.Header;
                     return true;
 
-                case "REQUEST" when propertyName == "Language":
+                case RequestParameterSource _ when propertyName == "Language":
                     location = ActionParameterLocation.Header;
                     apiParameterName = "Accept-Language";
                     return true;

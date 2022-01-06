@@ -15,9 +15,8 @@ namespace Dibix.Http.Server
         #region Fields
         private static readonly ICollection<Type> KnownDependencies = new[] { typeof(IDatabaseAccessorFactory) };
         private static readonly Lazy<PropertyAccessor> DebugViewAccessor = new Lazy<PropertyAccessor>(BuildDebugViewAccessor);
+        private static readonly string ItemSourceName = ItemParameterSource.SourceName;
         private const string SelfPropertyName = "$SELF";
-        private const string ItemSourceName = "ITEM";
-        private const string ItemIndexPropertyName = "$INDEX";
         #endregion
 
         #region Delegates
@@ -555,7 +554,7 @@ namespace Dibix.Http.Server
             {
                 HttpParameterInfo itemParameter;
                 ParameterExpression itemSourceVariable;
-                if (itemSource.SourceKind == HttpParameterSourceKind.SourceProperty && itemSource.Source.PropertyPath == ItemIndexPropertyName) // ITEM.$INDEX => i
+                if (itemSource.SourceKind == HttpParameterSourceKind.SourceProperty && itemSource.Source.PropertyPath == ItemParameterSource.IndexPropertyName) // ITEM.$INDEX => i
                 {
                     HttpParameterSourceInfo source = new HttpParameterSourceInfo(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap, ItemSourceName, sourceProvider: null, propertyPath: null);
                     itemParameter = HttpParameterInfo.SourceInstance(itemSource.ParameterType, itemSource.InternalParameterName, source);

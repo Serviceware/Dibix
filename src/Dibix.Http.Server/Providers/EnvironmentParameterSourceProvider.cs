@@ -7,7 +7,7 @@ namespace Dibix.Http.Server
 {
     public sealed class EnvironmentParameterSourceProvider : NonUserParameterSourceProvider, IHttpParameterSourceProvider
     {
-        public const string SourceName = "ENV";
+        public static readonly string SourceName = EnvironmentParameterSource.SourceName;
 
         public override void Resolve(IHttpParameterResolutionContext context)
         {
