@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
@@ -13,6 +15,18 @@ namespace Dibix.Http.Client
     public static class HttpClientExtensions
     {
         public static Task<HttpResponseMessage> PatchAsJsonAsync<T>(this HttpClient client, string requestUri, T value, CancellationToken cancellationToken = default) => client.SendAsync(new HttpRequestMessage(new HttpMethod("PATCH"), requestUri) { Content = new ObjectContent<T>(value, new JsonMediaTypeFormatter()) }, cancellationToken);
+
+        public static bool TryGetSingleValue(this HttpHeaders headers, string name, out string value)
+        {
+            if (headers.TryGetValues(name, out IEnumerable<string> values))
+            {
+                value = values.First();
+                return true;
+            }
+
+            value = null;
+            return false;
+        }
 
         public static HttpClient AddUserAgent(this HttpClient client, Action<IHttpUserAgentSelectorExpression> selector)
         {

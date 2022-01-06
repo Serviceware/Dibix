@@ -232,13 +232,13 @@ namespace Dibix.Sdk.OpenApi
                     if (sb.Length > 0)
                         sb.AppendLine();
 
-                    sb.Append($@"{HttpErrorResponseParser.ClientErrorCodeHeaderName}|{HttpErrorResponseParser.ClientErrorDescriptionHeaderName}
+                    sb.Append($@"{KnownHeaders.ClientErrorCodeHeaderName}|{KnownHeaders.ClientErrorDescriptionHeaderName}
 -|-
 {String.Join(Environment.NewLine, actionResponse.Errors.Select(x => $"{(x.ErrorCode != 0 ? x.ErrorCode.ToString() : "n/a")}|{x.Description}"))}");
 
                     if (actionResponse.Errors.Any(x => x.ErrorCode != 0))
                     {
-                        apiResponse.Headers.Add(HttpErrorResponseParser.ClientErrorCodeHeaderName, new OpenApiHeader
+                        apiResponse.Headers.Add(KnownHeaders.ClientErrorCodeHeaderName, new OpenApiHeader
                         {
                             Description = "Additional error code to handle the error on the client",
                             Schema = PrimitiveTypeMap[PrimitiveType.Int16]()
@@ -247,7 +247,7 @@ namespace Dibix.Sdk.OpenApi
 
                     if (actionResponse.Errors.Any(x => !String.IsNullOrEmpty(x.Description)))
                     {
-                        apiResponse.Headers.Add(HttpErrorResponseParser.ClientErrorDescriptionHeaderName, new OpenApiHeader
+                        apiResponse.Headers.Add(KnownHeaders.ClientErrorDescriptionHeaderName, new OpenApiHeader
                         {
                             Description = "A mesage describing the cause of the error",
                             Schema = PrimitiveTypeMap[PrimitiveType.String]()

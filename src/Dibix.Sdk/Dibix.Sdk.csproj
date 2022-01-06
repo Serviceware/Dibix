@@ -21,6 +21,7 @@
     <Compile Include="..\Dibix.Http.Server\Runtime\HttpErrorResponseParser.cs" Link="CodeGeneration\Parser\HttpErrorResponseParser.cs" />
     <Compile Include="..\Dibix.Http.Server\Runtime\HttpParameterUtility.cs" Link="CodeGeneration\Parser\HttpParameterUtility.cs" />
     <Compile Include="..\Dibix.Http.Server\Runtime\HttpParameterName.cs" Link="OpenApi\HttpParameterName.cs" />
+    <Compile Include="..\..\shared\KnownHeaders.cs" Link="OpenApi\KnownHeaders.cs" />
     <Compile Include="..\Dibix.Http.Server\Utilities\RouteBuilder.cs" Link="OpenApi\RouteBuilder.cs" />
   </ItemGroup>
 

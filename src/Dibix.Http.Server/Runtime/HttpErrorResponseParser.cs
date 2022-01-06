@@ -6,9 +6,6 @@ namespace Dibix.Http.Server
 {
     internal static class HttpErrorResponseParser
     {
-        public const string ClientErrorCodeHeaderName = "X-Error-Code";
-        public const string ClientErrorDescriptionHeaderName = "X-Error-Description";
-
         private static readonly int[] ClientErrorHttpStatuses =
         {
             (int)HttpStatusCode.BadRequest                 // Client syntax error (malformed request)

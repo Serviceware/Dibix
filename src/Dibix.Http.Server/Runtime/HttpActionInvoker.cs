@@ -55,9 +55,9 @@ namespace Dibix.Http.Server
             if (isClientError)
             {
                 if (errorCode != 0)
-                    errorResponse.Headers.Add(HttpErrorResponseParser.ClientErrorCodeHeaderName, errorCode.ToString());
+                    errorResponse.Headers.Add(KnownHeaders.ClientErrorCodeHeaderName, errorCode.ToString());
 
-                errorResponse.Headers.Add(HttpErrorResponseParser.ClientErrorDescriptionHeaderName, sqlException.Message);
+                errorResponse.Headers.Add(KnownHeaders.ClientErrorDescriptionHeaderName, sqlException.Message);
                 errorResponse.Content = new StringContent($"\"{sqlException.Message}\"", Encoding.UTF8, "application/json");
             }
 
