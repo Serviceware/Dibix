@@ -188,6 +188,7 @@
 //----------------------------------------------------------------------------*/
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Net.Http;
 using System.Net.Http.Formatting;
@@ -202,6 +203,12 @@ namespace Dibix.Sdk.Tests
     namespace DomainModel
     {
         #region Contracts
+        public sealed class Entry
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+        }
+
         public sealed class GenericContract
         {
             [DefaultValue("DefaultValue")]
@@ -225,10 +232,16 @@ namespace Dibix.Sdk.Tests
             public string U { get; set; }
             public string V { get; set; }
             public string W { get; set; }
+            public IList&lt;Dibix.Sdk.Tests.DomainModel.Entry&gt; Ids { get; private set; }
             public System.Guid X { get; set; }
             public string Password { get; set; }
             public bool Y { get; set; }
             public int Z { get; set; }
+
+            public InputContract()
+            {
+                this.Ids = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Entry&gt;();
+            }
         }
         #endregion
     }
@@ -244,6 +257,7 @@ namespace Dibix.Sdk.Tests
             Task&lt;HttpResponse&lt;System.IO.Stream&gt;&gt; FileResultAsync(int id, CancellationToken cancellationToken = default);
             Task&lt;HttpResponseMessage&gt; FileUploadAsync(System.IO.Stream body, CancellationToken cancellationToken = default);
             Task&lt;HttpResponseMessage&gt; EmptyWithParams2Async(Dibix.Sdk.Tests.DomainModel.InputContract body, CancellationToken cancellationToken = default);
+            Task&lt;HttpResponseMessage&gt; EmptyWithParams3Async(Dibix.Sdk.Tests.DomainModel.InputContract body, CancellationToken cancellationToken = default);
         }
         #endregion
 
@@ -354,6 +368,19 @@ namespace Dibix.Sdk.Tests
                     return responseMessage;
                 }
             }
+
+            public async Task&lt;HttpResponseMessage&gt; EmptyWithParams3Async(Dibix.Sdk.Tests.DomainModel.InputContract body, CancellationToken cancellationToken = default)
+            {
+                using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
+                {
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("PATCH"), "Tests/GenericEndpoint");
+                    requestMessage.Headers.Add("HLNS-SIT", this._authorizationProvider.GetValue("HLNS-SIT"));
+                    requestMessage.Headers.Add("HLNS-ClientId", this._authorizationProvider.GetValue("HLNS-ClientId"));
+                    requestMessage.Content = new ObjectContent&lt;Dibix.Sdk.Tests.DomainModel.InputContract&gt;(body, Formatter);
+                    HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
+                    return responseMessage;
+                }
+            }
         }
         #endregion
     }
@@ -379,6 +406,8 @@ namespace Dibix.Sdk.Tests
 // &lt;/auto-generated&gt;
 //----------------------------------------------------------------------------*/
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
@@ -506,6 +535,12 @@ namespace Dibix.Sdk.Tests
     namespace DomainModel
     {
         #region Contracts
+        public sealed class Entry
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+        }
+
         [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
         public sealed class GenericContract
         {
@@ -544,10 +579,16 @@ namespace Dibix.Sdk.Tests
             public string V { get; set; }
             [Optional]
             public string W { get; set; }
+            public IList&lt;Dibix.Sdk.Tests.DomainModel.Entry&gt; Ids { get; private set; }
             public System.Guid X { get; set; }
             public string Password { get; set; }
             public bool Y { get; set; }
             public int Z { get; set; }
+
+            public InputContract()
+            {
+                this.Ids = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Entry&gt;();
+            }
         }
         #endregion
     }
@@ -602,6 +643,16 @@ namespace Dibix.Sdk.Tests
                         y.Method = HttpApiMethod.Post;
                         y.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.InputContract);
                         y.ResolveParameterFromBody("ids", "Dibix.GenericContractIdsInputConverter");
+                    });
+                    x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), y =&gt;
+                    {
+                        y.Method = HttpApiMethod.Patch;
+                        y.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.InputContract);
+                        y.ResolveParameterFromSource("ids", "BODY", "Ids", z =&gt; 
+                        {
+                            z.ResolveParameterFromSource("id", "ITEM", "Id");
+                            z.ResolveParameterFromSource("name", "ITEM", "Name");
+                        });
                     });
                     x.ControllerImports.Add("Dibix.GenericEndpoint");
                 });
@@ -797,6 +848,23 @@ paths:
       security:
         - HLNS-SIT: [ ]
           HLNS-ClientId: [ ]
+    patch:
+      tags:
+        - GenericEndpoint
+      summary: EmptyWithParams3
+      operationId: EmptyWithParams3
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InputContract'
+        required: true
+      responses:
+        '204':
+          description: NoContent
+      security:
+        - HLNS-SIT: [ ]
+          HLNS-ClientId: [ ]
 components:
   schemas:
     GenericParameterSet:
@@ -848,6 +916,7 @@ components:
       required:
         - U
         - V
+        - Ids
         - X
         - Password
         - Y
@@ -860,6 +929,10 @@ components:
           type: string
         W:
           type: string
+        Ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/Entry'
         X:
           type: string
           format: uuid
@@ -870,6 +943,18 @@ components:
         Z:
           type: integer
           format: int32
+      additionalProperties: false
+    Entry:
+      required:
+        - Id
+        - Name
+      type: object
+      properties:
+        Id:
+          type: integer
+          format: int32
+        Name:
+          type: string
       additionalProperties: false
   securitySchemes:
     HLNS-SIT:

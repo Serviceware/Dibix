@@ -60,6 +60,20 @@
           "convertFromBody": "Dibix.GenericContractIdsInputConverter"
         }
       }
+    },
+    {
+      "method": "PATCH",
+      "target": "EmptyWithParams",
+      "body": "InputContract",
+      "params": {
+        "ids": {
+          "source": "BODY.Ids",
+          "items": {
+            "id": "ITEM.Id",
+            "name": "ITEM.Name"
+          }
+        }
+      }
     }
   ]
 }

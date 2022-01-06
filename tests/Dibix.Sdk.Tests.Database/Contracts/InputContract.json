@@ -6,6 +6,7 @@
       "type": "string",
       "isOptional": true
     },
+    "Ids": "#Entry*",
     "X": "uuid",
     "Password": "string",
     "Y": "boolean",

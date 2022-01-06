@@ -81,7 +81,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         private void ExecuteTestAndExpectError(string source, string expectedException) => this.ExecuteTestAndExpectError(Enumerable.Repeat(source, 1), Enumerable.Empty<string>(), Enumerable.Empty<string>(), expectedException);
         private void ExecuteTestAndExpectError(IEnumerable<string> contracts, string expectedException) => this.ExecuteTestAndExpectError(Enumerable.Empty<string>(), contracts, Enumerable.Empty<string>(), expectedException);
         private void ExecuteTestAndExpectError(string source, string endpoint, string expectedException) => this.ExecuteTestAndExpectError(Enumerable.Repeat(source, 1), Enumerable.Empty<string>(), Enumerable.Repeat(endpoint, 1), expectedException);
-        private void ExecuteTestAndExpectError(IEnumerable<string> sources, string contract, string endpoint, string expectedException) => this.ExecuteTestAndExpectError(sources, Enumerable.Repeat(contract, 1), Enumerable.Repeat(endpoint, 1), expectedException);
+        private void ExecuteTestAndExpectError(IEnumerable<string> sources, IEnumerable<string> contracts, string endpoint, string expectedException) => this.ExecuteTestAndExpectError(sources, contracts, Enumerable.Repeat(endpoint, 1), expectedException);
         private void ExecuteTestAndExpectError(IEnumerable<string> sources, IEnumerable<string> contracts, IEnumerable<string> endpoints, string expectedException)
         {
             try

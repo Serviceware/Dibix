@@ -22,6 +22,9 @@ namespace Dibix.Sdk.CodeGeneration
                 throw new InvalidOperationException($"Unexpected body contract type '{bodyTypeReference}'. Must be a complex object contract.");
 
             SchemaDefinition bodySchema = schemaRegistry.GetSchema(bodySchemaTypeReference);
+            if (bodySchema == null)
+                return false;
+            
             if (!(bodySchema is ObjectSchema bodyObjectSchema))
                 throw new InvalidOperationException($"Unexpected body contract type '{bodySchema} ({bodySchema.FullName})'. Must be a complex object contract.");
 
@@ -34,6 +37,9 @@ namespace Dibix.Sdk.CodeGeneration
                 throw new InvalidOperationException($"Unexpected items property contract type '{itemsPropertyTypeReference}'. Must be a complex object contract.");
 
             SchemaDefinition itemsPropertySchema = schemaRegistry.GetSchema(itemsPropertySchemaTypeReference);
+            if (itemsPropertySchema == null)
+                return false;
+
             if (!(itemsPropertySchema is ObjectSchema itemsPropertyObjectSchema))
                 throw new InvalidOperationException($"Unexpected items property contract type '{itemsPropertySchema} ({itemsPropertySchema.FullName})'. Must be a complex object contract.");
 

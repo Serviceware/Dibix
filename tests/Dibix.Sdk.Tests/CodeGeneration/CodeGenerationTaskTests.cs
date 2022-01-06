@@ -343,7 +343,8 @@ Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly
                 }
               , contracts: new []
                 {
-                    @"Contracts\GenericContract.json"
+                    @"Contracts\Entry.json"
+                  , @"Contracts\GenericContract.json"
                   , @"Contracts\InputContract.json"
                 }
               , endpoints: new[] { @"Endpoints\GenericEndpoint.json" }
@@ -374,7 +375,8 @@ Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly
                 }
               , contracts: new []
                 {
-                    @"Contracts\GenericContract.json"
+                    @"Contracts\Entry.json"
+                  , @"Contracts\GenericContract.json"
                   , @"Contracts\InputContract.json"
                 }
               , endpoints: new [] { @"Endpoints\GenericEndpoint.json" }
@@ -397,14 +399,18 @@ Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly
                     @"Types\dbx_codeanalysis_udt_generic.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
                 }
-              , contract: @"Contracts\Request.json"
+              , contracts: new []
+                {
+                    @"Contracts\Entry.json"
+                  , @"Contracts\Request.json"
+                }
               , endpoint: @"Endpoints\GenericEndpointWithInvalidSource.json"
               , expectedException: @"One or more errors occured during code generation:
 Endpoints\GenericEndpointWithInvalidSource.json(8,15,8,15):error:Unknown property source 'WTF'
 Endpoints\GenericEndpointWithInvalidSource.json(9,19,9,19):error:Source 'ENV' does not support property 'MachinePassword'
 Endpoints\GenericEndpointWithInvalidSource.json(17,20,17,20):error:Property 'X' not found on contract 'Dibix.Sdk.Tests.DomainModel.Request'
-Endpoints\GenericEndpointWithInvalidSource.json(18,23,18,23):error:Property 'Nm' not found on contract 'Dibix.Sdk.Tests.DomainModel.Id'
-Endpoints\GenericEndpointWithInvalidSource.json(23,27,23,27):error:Property 'Nm' not found on contract 'Dibix.Sdk.Tests.DomainModel.Id'"
+Endpoints\GenericEndpointWithInvalidSource.json(18,23,18,23):error:Property 'Nm' not found on contract 'Dibix.Sdk.Tests.DomainModel.Entry'
+Endpoints\GenericEndpointWithInvalidSource.json(23,27,23,27):error:Property 'Nm' not found on contract 'Dibix.Sdk.Tests.DomainModel.Entry'"
             );
         }
 

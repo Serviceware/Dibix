@@ -41,7 +41,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             foreach (ActionParameterSource itemPropertySource in propertySource.ItemSources.Values)
             {
-                if (this.ValidateSource(itemPropertySource, propertySource, action))
+                if (!this.ValidateSource(itemPropertySource, propertySource, action))
                     result = false;
             }
 

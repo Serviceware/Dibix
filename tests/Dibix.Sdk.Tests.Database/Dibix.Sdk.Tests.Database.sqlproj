@@ -178,6 +178,7 @@
     <None Include="Endpoints\GenericEndpointWithOutputParam.json" />
     <None Include="Endpoints\GenericEndpointWithInvalidSource.json" />
     <None Include="Contracts\Request.json" />
+    <None Include="Contracts\Entry.json" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\master.dacpac">
