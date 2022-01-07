@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Resources;
 using Xunit;
 
-namespace Dibix.Tests
+namespace Dibix
 {
     internal static class TestUtility
     {

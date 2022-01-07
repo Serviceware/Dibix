@@ -1,6 +1,5 @@
 ﻿using System.Text.RegularExpressions;
 using Dibix.Sdk.CodeGeneration;
-using Dibix.Tests;
 using Xunit;
 
 namespace Dibix.Sdk.VisualStudio.Tests

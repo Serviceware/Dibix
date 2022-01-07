@@ -7,7 +7,6 @@
   <ItemGroup>
     <None Remove="*.vspscc" />
     <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\Guard.cs" />
-    <Compile Include="..\..\src\Dibix\Reflection\TypeExtensions.cs" Link="Environment\TypeExtensions.cs" />
   </ItemGroup>
 
   <ItemGroup>

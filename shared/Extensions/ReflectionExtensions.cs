@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace Dibix
 {
-    public static class ReflectionExtensions
+    internal static class ReflectionExtensions
     {
         public static IEnumerable<Type> GetLoadableTypes(this Assembly assembly)
         {

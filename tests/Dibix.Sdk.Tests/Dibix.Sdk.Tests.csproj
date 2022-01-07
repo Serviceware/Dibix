@@ -8,8 +8,7 @@
     <Compile Update="CodeAnalysis\SqlCodeAnalysisRuleTests.Base.cs" DependentUpon="CodeAnalysis\SqlCodeAnalysisRuleTests.cs" />
     <Compile Update="CodeGeneration\CodeGenerationTaskTests.Base.cs" DependentUpon="CodeGeneration\CodeGenerationTaskTests.cs" />
     <EmbeddedResource Update="Resource.resx" />
-    <Compile Include="..\Dibix.Tests\TestUtility.cs" Link="TestUtility.cs" />
-    <Compile Include="..\..\src\Dibix\Reflection\TypeExtensions.cs" Link="TypeExtensions.cs" />
+    <Compile Include="..\..\shared\Utilities\TestUtility.cs" Link="TestUtility.cs" />
   </ItemGroup>
 
   <ItemGroup>

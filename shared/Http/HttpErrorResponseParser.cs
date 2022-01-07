@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Net;
 
-namespace Dibix.Http.Server
+namespace Dibix.Http
 {
     internal static class HttpErrorResponseParser
     {

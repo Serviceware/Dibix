@@ -5,7 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\shared\CollectionExtensions.cs" Link="Extensions\CollectionExtensions.cs" />
+    <Compile Include="..\..\shared\Extensions\CollectionExtensions.cs" Link="Extensions\CollectionExtensions.cs" />
+    <Compile Include="..\..\shared\Extensions\EnumerableExtensions.cs" Link="Extensions\EnumerableExtensions.cs" />
     <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\Guard.cs" />
   </ItemGroup>
 

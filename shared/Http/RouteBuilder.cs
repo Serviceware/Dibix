@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace Dibix.Http.Server
+namespace Dibix.Http
 {
     public static class RouteBuilder
     {

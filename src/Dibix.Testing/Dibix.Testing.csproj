@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\..\shared\Extensions\EnumerableExtensions.cs" Link="Utilities\EnumerableExtensions.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Dibix.Dapper\Dibix.Dapper.csproj" />
     <ProjectReference Include="..\Dibix.Http.Client\Dibix.Http.Client.csproj" />
   </ItemGroup>

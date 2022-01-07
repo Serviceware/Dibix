@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <Compile Update="HttpParameterResolverTest.Base.cs" DependentUpon="HttpParameterResolverTest.cs" />
+    <Compile Include="..\..\shared\Utilities\TestUtility.cs" Link="TestUtility.cs" />
   </ItemGroup>
 
   <ItemGroup>

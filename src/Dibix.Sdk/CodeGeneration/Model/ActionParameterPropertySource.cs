@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    public sealed class ActionParameterPropertySource : ActionParameterSource
+    internal sealed class ActionParameterPropertySource : ActionParameterSource
     {
         public ActionParameterSourceDefinition Definition { get; }
         public string PropertyName { get; }

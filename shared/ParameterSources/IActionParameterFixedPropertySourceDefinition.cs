@@ -1,6 +1,6 @@
 ﻿namespace Dibix
 {
-    public interface IActionParameterFixedPropertySourceDefinition
+    internal interface IActionParameterFixedPropertySourceDefinition
     {
         string[] Properties { get; }
     }

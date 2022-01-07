@@ -7,7 +7,6 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Xml.Linq;
-using Dibix.Tests;
 using Moq;
 using Newtonsoft.Json.Linq;
 using Xunit;

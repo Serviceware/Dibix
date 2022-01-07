@@ -10,7 +10,6 @@ using System.Xml;
 using System.Xml.Linq;
 using Dibix.Sdk.CodeAnalysis;
 using Dibix.Sdk.Sql;
-using Dibix.Tests;
 using Microsoft.SqlServer.Dac.Model;
 using Xunit.Abstractions;
 

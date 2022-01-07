@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Dibix
 {
-    public sealed class FuncEqualityComparer<T> : IEqualityComparer<T>
+    internal sealed class FuncEqualityComparer<T> : IEqualityComparer<T>
     {
         private readonly Func<T, T, bool> _comparer;
         private readonly Func<T, int> _hash;

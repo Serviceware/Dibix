@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Dibix.Sdk.Tests.CodeGeneration;
-using Dibix.Tests;
 using EnvDTE;
 using Microsoft.VisualStudio.TextTemplating;
 using Moq;
