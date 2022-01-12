@@ -5,6 +5,7 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public abstract class SqlParserVisitor : TSqlFragmentVisitor
     {
+        internal string RootNamespace { get; set; }
         internal string ProductName { get; set; }
         internal string AreaName { get; set; }
         internal TSqlFragmentAnalyzer FragmentAnalyzer { get; set; }

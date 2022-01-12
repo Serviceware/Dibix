@@ -7,21 +7,18 @@ using System.Threading;
 
 namespace Dibix.Sdk.CodeGeneration.CSharp
 {
-    public class CSharpStatementScope : CSharpStatement
+    public class CSharpStatementScope : CSharpExpression
     {
-        private readonly string _namespace;
         private readonly IList<CSharpExpression> _statements;
 
-        protected CSharpStatementScope(string @namespace) : this(@namespace, Enumerable.Empty<CSharpAnnotation>()) { }
-        protected CSharpStatementScope(string @namespace, IEnumerable<CSharpAnnotation> globalAnnotations) : base(MarkAnnotationsAsGlobal(globalAnnotations))
+        public CSharpStatementScope()
         {
-            this._namespace = @namespace;
             this._statements = new Collection<CSharpExpression>();
         }
 
-        public CSharpStatementScope BeginScope(string @namespace)
+        public virtual CSharpStatementScope BeginScope(string @namespace)
         {
-            CSharpStatementScope group = new CSharpStatementScope(@namespace);
+            CSharpNamespaceScope group = new CSharpNamespaceScope(@namespace);
             this._statements.Add(group);
             return group;
         }
@@ -60,27 +57,16 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             return Disposable.Create(() => this._statements.Add(new CSharpRegionEnd()));
         }
 
-        protected override void WriteBody(StringWriter writer)
+        public override void Write(StringWriter writer)
         {
-            writer.WriteLine(String.Concat("namespace ", this._namespace))
-                .WriteLine("{")
-                .PushIndent();
-
-            foreach (CSharpExpression expression in this._statements)
+            for (int i = 0; i < this._statements.Count; i++)
             {
+                CSharpExpression expression = this._statements[i];
                 expression.Write(writer);
-                writer.WriteLine();
+
+                if (i + 1 < this._statements.Count)
+                    writer.WriteLine();
             }
-
-            writer.PopIndent()
-                .Write("}");
-        }
-
-        private static IEnumerable<CSharpAnnotation> MarkAnnotationsAsGlobal(IEnumerable<CSharpAnnotation> globalAnnotations)
-        {
-            IEnumerable<CSharpAnnotation> globalAnnotationsEnumerated = globalAnnotations as ICollection<CSharpAnnotation> ?? globalAnnotations.ToArray();
-            globalAnnotationsEnumerated.Each(x => x.IsGlobal = true);
-            return globalAnnotationsEnumerated;
         }
 
         private class Disposable : IDisposable

@@ -39,9 +39,9 @@ namespace Dibix.Sdk.CodeGeneration
                 return "\"Please fix the errors first\"";
             
             StringWriter writer = new StringWriter();
-            writer.WriteLineRaw(Header);
+            writer.WriteLine(Header);
             this.Write(writer, model);
-            return writer.ToString();
+            return writer.ToString().Trim();
         }
         #endregion
 
@@ -54,11 +54,12 @@ namespace Dibix.Sdk.CodeGeneration
 
             // Prepare writer
             bool isArtifactAssembly = model.CompatibilityLevel == CodeGeneratorCompatibilityLevel.Full;
-            IEnumerable<CSharpAnnotation> globalAnnotations = this.CollectGlobalAnnotations(isArtifactAssembly)
+            IEnumerable<CSharpAnnotation> globalAnnotations = this.CollectGlobalAnnotations(model, isArtifactAssembly)
                                                                   .Concat(writers.SelectMany(x => x.GetGlobalAnnotations(model)));
-            CSharpWriter output = new CSharpWriter(writer, model.RootNamespace, globalAnnotations);
+            CSharpWriter csWriter = new CSharpWriter(writer, globalAnnotations);
+            CSharpStatementScope output = csWriter.Root.Output;
 
-            CodeGenerationContext context = new CodeGenerationContext(output.Root, model, this._schemaRegistry, this._logger);
+            CodeGenerationContext context = new CodeGenerationContext(csWriter.Root, model, this._schemaRegistry, this._logger);
             this.OnContextCreated(context, isArtifactAssembly);
 
             IList<IGrouping<string, ArtifactWriterBase>> childWriterGroups = writers.GroupBy(x => x.LayerName).ToArray();
@@ -68,26 +69,26 @@ namespace Dibix.Sdk.CodeGeneration
 
                 // Don't enter layer name if project has multiple areas
                 if (context.Model.AreaName != null)
-                    context.Output = output.Root.BeginScope(nestedWriterGroup.Key);
+                    context.SetScopeName(nestedWriterGroup.Key);
 
                 IList<ArtifactWriterBase> nestedWriters = nestedWriterGroup.ToArray();
                 for (int j = 0; j < nestedWriters.Count; j++)
                 {
                     ArtifactWriterBase nestedWriter = nestedWriters[j];
-                    using (context.Output.CreateRegion(nestedWriter.RegionName))
+                    using (output.CreateRegion(nestedWriter.RegionName))
                     {
                         nestedWriter.Write(context);
                     }
 
                     if (j + 1 < nestedWriters.Count)
-                        context.Output.AddSeparator();
+                        output.AddSeparator();
                 }
 
                 if (i + 1 < childWriterGroups.Count)
-                    output.Root.AddSeparator();
+                    output.AddSeparator();
             }
 
-            output.Generate();
+            csWriter.Generate();
         }
 
         protected virtual IEnumerable<ArtifactWriterBase> SelectWriters(CodeGenerationModel model)
@@ -95,7 +96,7 @@ namespace Dibix.Sdk.CodeGeneration
             yield break;
         }
 
-        protected virtual IEnumerable<CSharpAnnotation> CollectGlobalAnnotations(bool isArtifactAssembly)
+        protected virtual IEnumerable<CSharpAnnotation> CollectGlobalAnnotations(CodeGenerationModel model, bool isArtifactAssembly)
         {
             yield break;
         }

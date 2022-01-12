@@ -11,18 +11,20 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly ISchemaProvider _schemaProvider;
         private readonly ReferencedAssemblyInspector _referencedAssemblyInspector;
         private readonly ILogger _logger;
+        private readonly string _rootNamespace;
         private readonly string _productName;
         private readonly string _areaName;
         private readonly IDictionary<string, Type> _externalSchemas;
         #endregion
 
         #region Constructor
-        public ContractDefinitionSchemaTypeResolver(ISchemaRegistry schemaRegistry, IContractDefinitionProvider contractDefinitionProvider, ReferencedAssemblyInspector referencedAssemblyInspector, ILogger logger, string productName, string areaName)
+        public ContractDefinitionSchemaTypeResolver(ISchemaRegistry schemaRegistry, IContractDefinitionProvider contractDefinitionProvider, ReferencedAssemblyInspector referencedAssemblyInspector, ILogger logger, string rootNamespace, string productName, string areaName)
         {
             this._schemaProvider = contractDefinitionProvider;
             this._schemaRegistry = schemaRegistry;
             this._referencedAssemblyInspector = referencedAssemblyInspector;
             this._logger = logger;
+            this._rootNamespace = rootNamespace;
             this._productName = productName;
             this._areaName = areaName;
             this._externalSchemas = new Dictionary<string, Type>();
@@ -50,7 +52,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (!String.IsNullOrEmpty(relativeNamespace))
             {
-                string absoluteNamespace = NamespaceUtility.BuildAbsoluteNamespace(this._productName, this._areaName, LayerName.DomainModel, relativeNamespace);
+                string absoluteNamespace = NamespaceUtility.BuildAbsoluteNamespace(this._rootNamespace, this._productName, this._areaName, LayerName.DomainModel, relativeNamespace);
                 string key = $"{absoluteNamespace}.{typeName.Name}";
                 if (!this._schemaProvider.TryGetSchema(key, out schema))
                 {
@@ -59,7 +61,7 @@ namespace Dibix.Sdk.CodeGeneration
                     // This is actually a different behavior, as in C#, for example.
                     // Because there, when you are inside a namespace group and you want to get out of it, the type reference must be absolute.
                     // Unfortunately fixing this would introduce a breaking change. Therefore we allow it.
-                    string absoluteTypeName = NamespaceUtility.BuildAbsoluteNamespace(this._productName, this._areaName, LayerName.DomainModel, typeName.Name);
+                    string absoluteTypeName = NamespaceUtility.BuildAbsoluteNamespace(this._rootNamespace, this._productName, this._areaName, LayerName.DomainModel, typeName.Name);
                     if (!this._schemaProvider.TryGetSchema(absoluteTypeName, out schema))
                     {
                         schemaTypeReference = null;
@@ -73,7 +75,7 @@ namespace Dibix.Sdk.CodeGeneration
                 if (!this._schemaProvider.TryGetSchema(typeName.Name, out schema))
                 {
                     // Assume relative type name
-                    string absoluteTypeName = NamespaceUtility.BuildAbsoluteNamespace(this._productName, this._areaName, LayerName.DomainModel, typeName.Name);
+                    string absoluteTypeName = NamespaceUtility.BuildAbsoluteNamespace(this._rootNamespace, this._productName, this._areaName, LayerName.DomainModel, typeName.Name);
                     if (!this._schemaProvider.TryGetSchema(absoluteTypeName, out schema))
                     {
                         schemaTypeReference = null;
@@ -98,12 +100,12 @@ namespace Dibix.Sdk.CodeGeneration
             string absoluteTypeName;
             if (!String.IsNullOrEmpty(relativeNamespace))
             {
-                string absoluteNamespace = NamespaceUtility.BuildAbsoluteNamespace(this._productName, this._areaName, LayerName.DomainModel, relativeNamespace);
+                string absoluteNamespace = NamespaceUtility.BuildAbsoluteNamespace(this._rootNamespace, this._productName, this._areaName, LayerName.DomainModel, relativeNamespace);
                 absoluteTypeName = $"{absoluteNamespace}.{input}";
             }
             else
             {
-                absoluteTypeName = NamespaceUtility.BuildAbsoluteNamespace(this._productName, this._areaName, LayerName.DomainModel, input);
+                absoluteTypeName = NamespaceUtility.BuildAbsoluteNamespace(this._rootNamespace, this._productName, this._areaName, LayerName.DomainModel, input);
             }
 
             Type matchingType = this._referencedAssemblyInspector.Inspect(x => x.Where(y => y.IsArtifactAssembly())

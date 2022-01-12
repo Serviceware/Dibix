@@ -189,7 +189,7 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(5,2,5
             this.ExecuteTest
             (
                 source: @"Tests\Syntax\dbx_tests_syntax_gridresult_single.sql"
-              , contracts: new [] 
+              , contracts: new []
                 {
                     @"Contracts\Direction.json"
                   , @"Contracts\GenericContract.json"

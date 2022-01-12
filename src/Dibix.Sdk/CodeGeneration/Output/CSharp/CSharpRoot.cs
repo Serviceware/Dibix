@@ -4,12 +4,16 @@ using System.Linq;
 
 namespace Dibix.Sdk.CodeGeneration.CSharp
 {
-    public sealed class CSharpRoot : CSharpStatementScope
+    public sealed class CSharpRoot : CSharpStatement
     {
+        private readonly CSharpStatementScope _body;
         private readonly ICollection<string> _usings;
 
-        public CSharpRoot(string @namespace, IEnumerable<CSharpAnnotation> globalAnnotations) : base(@namespace, globalAnnotations)
+        public CSharpStatementScope Output => this._body;
+
+        public CSharpRoot(CSharpStatementScope body, IEnumerable<CSharpAnnotation> annotations) : base(MarkAnnotationsAsGlobal(annotations))
         {
+            this._body = body;
             this._usings = new SortedSet<string>(new UsingComparer());
         }
 
@@ -27,7 +31,19 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             if (this._usings.Any())
                 writer.WriteLine();
 
-            base.Write(writer);
+            if (base.WriteAnnotations(writer))
+                writer.WriteLine();
+
+            this.WriteBody(writer);
+        }
+
+        protected override void WriteBody(StringWriter writer) => this._body.Write(writer);
+
+        private static IEnumerable<CSharpAnnotation> MarkAnnotationsAsGlobal(IEnumerable<CSharpAnnotation> globalAnnotations)
+        {
+            IEnumerable<CSharpAnnotation> globalAnnotationsEnumerated = globalAnnotations as ICollection<CSharpAnnotation> ?? globalAnnotations.ToArray();
+            globalAnnotationsEnumerated.Each(x => x.IsGlobal = true);
+            return globalAnnotationsEnumerated;
         }
 
         private class UsingComparer : Comparer<string>

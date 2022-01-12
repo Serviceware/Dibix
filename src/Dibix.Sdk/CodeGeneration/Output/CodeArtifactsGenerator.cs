@@ -7,9 +7,9 @@ namespace Dibix.Sdk.CodeGeneration
         private static readonly Type[] Units =
         {
             typeof(ServerCodeArtifactGenerationUnit)
+          , typeof(EndpointCodeArtifactGenerationUnit)
           , typeof(ClientCodeArtifactGenerationUnit)
           , typeof(OpenApiArtifactsGenerationUnit)
-          , typeof(DumpModelUnit)
         };
 
         public bool Generate(CodeArtifactsGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger)

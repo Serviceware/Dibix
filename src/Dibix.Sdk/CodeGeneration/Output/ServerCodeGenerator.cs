@@ -12,14 +12,18 @@ namespace Dibix.Sdk.CodeGeneration
         #region Overrides
         protected override IEnumerable<ArtifactWriterBase> SelectWriters(CodeGenerationModel model)
         {
-            yield return new DaoExecutorWriter();
+            bool accessorOnly = model.EnableExperimentalFeatures;
+            const SchemaDefinitionSource schemaFilter = SchemaDefinitionSource.Local | SchemaDefinitionSource.Generated;
+            yield return new DaoExecutorWriter(accessorOnly);
             yield return new DaoExecutorInputClassWriter();
             yield return new DaoContractClassWriter(model);
-            yield return new DaoStructuredTypeWriter();
-            yield return new ApiDescriptionWriter();
+            yield return new DaoStructuredTypeWriter(model, schemaFilter);
+            
+            if (!model.EnableExperimentalFeatures)
+                yield return new ApiDescriptionWriter();
         }
 
-        protected override IEnumerable<CSharpAnnotation> CollectGlobalAnnotations(bool isArtifactAssembly)
+        protected override IEnumerable<CSharpAnnotation> CollectGlobalAnnotations(CodeGenerationModel model, bool isArtifactAssembly)
         {
             if (isArtifactAssembly)
                 yield return new CSharpAnnotation("ArtifactAssembly");

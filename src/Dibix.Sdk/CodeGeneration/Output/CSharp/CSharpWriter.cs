@@ -8,10 +8,10 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
 
         public CSharpRoot Root { get; }
 
-        public CSharpWriter(StringWriter writer, string @namespace, IEnumerable<CSharpAnnotation> globalAnnotations)
+        public CSharpWriter(StringWriter writer, IEnumerable<CSharpAnnotation> globalAnnotations)
         {
             this._writer = writer;
-            this.Root = new CSharpRoot(@namespace, globalAnnotations);
+            this.Root = new CSharpRoot(new CSharpStatementScope(), globalAnnotations);
         }
 
         public string Generate()

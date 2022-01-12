@@ -34,8 +34,9 @@ namespace Dibix.Sdk.CodeGeneration
         };
         private readonly CSharpRoot _root;
         private readonly ILogger _logger;
-
-        public CSharpStatementScope Output { get; internal set; }
+        private readonly string _rootNamespace;
+        private string _currentNamespace;
+        
         public CodeGenerationModel Model { get; }
         public ISchemaRegistry SchemaRegistry { get; }
         public bool WriteGuardChecks { get; set; }
@@ -45,7 +46,8 @@ namespace Dibix.Sdk.CodeGeneration
         internal CodeGenerationContext(CSharpRoot root, CodeGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             this._root = root;
-            this.Output = root;
+            this._rootNamespace = model.RootNamespace;
+            this._currentNamespace = this._rootNamespace;
             this.Model = model;
             this.SchemaRegistry = schemaRegistry;
             this._logger = logger;
@@ -56,6 +58,15 @@ namespace Dibix.Sdk.CodeGeneration
             this._root.AddUsing(@using);
             return this;
         }
+
+        public CodeGenerationContext AddSeparator()
+        {
+            this._root.Output.AddSeparator();
+            return this;
+        }
+
+        public CSharpStatementScope CreateOutputScope() => this.CreateOutputScope(this._currentNamespace);
+        public CSharpStatementScope CreateOutputScope(string @namespace) => this._root.Output.BeginScope(@namespace);
 
         public SchemaDefinition GetSchema(SchemaTypeReference reference) => this.SchemaRegistry.GetSchema(reference);
 
@@ -130,6 +141,12 @@ namespace Dibix.Sdk.CodeGeneration
                 return null;
                 
             return NamespaceUtility.BuildRelativeNamespace(this.Model.RootNamespace, layerName, relativeNamespace);
+        }
+
+        internal void SetScopeName(string name)
+        {
+            Guard.IsNotNullOrEmpty(name, nameof(name));
+            this._currentNamespace = $"{this._rootNamespace}.{name}";
         }
 
         private static CSharpValue BuildDefaultValueLiteral(PrimitiveType type, object value)

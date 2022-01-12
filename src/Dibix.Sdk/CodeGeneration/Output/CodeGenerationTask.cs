@@ -12,11 +12,13 @@ namespace Dibix.Sdk.CodeGeneration
           , string projectDirectory
           , string productName
           , string areaName
+          , string outputName
           , string title
           , string version
           , string description
           , string baseUrl
           , string defaultOutputFilePath
+          , string endpointOutputFilePath
           , string clientOutputFilePath
           , string externalAssemblyReferenceDirectory
           , ICollection<TaskItem> source
@@ -25,6 +27,7 @@ namespace Dibix.Sdk.CodeGeneration
           , IEnumerable<TaskItem> references
           , IEnumerable<TaskItem> defaultSecuritySchemes
           , bool isEmbedded
+          , bool enableExperimentalFeatures
           , string databaseSchemaProviderName
           , string modelCollation
           , ICollection<TaskItem> sqlReferencePath
@@ -40,11 +43,13 @@ namespace Dibix.Sdk.CodeGeneration
               , projectDirectory
               , productName
               , areaName
+              , outputName
               , title
               , version
               , description
               , new EndpointConfiguration(baseUrl)
               , defaultOutputFilePath
+              , endpointOutputFilePath
               , clientOutputFilePath
               , externalAssemblyReferenceDirectory
               , source
@@ -53,6 +58,7 @@ namespace Dibix.Sdk.CodeGeneration
               , references
               , defaultSecuritySchemes
               , isEmbedded
+              , enableExperimentalFeatures
               , databaseSchemaProviderName
               , modelCollation
               , sqlReferencePath
@@ -69,11 +75,13 @@ namespace Dibix.Sdk.CodeGeneration
           , string projectDirectory
           , string productName
           , string areaName
+          , string outputName
           , string title
           , string version
           , string description
           , EndpointConfiguration endpointConfiguration
           , string defaultOutputFilePath
+          , string endpointOutputFilePath
           , string clientOutputFilePath
           , string externalAssemblyReferenceDirectory
           , ICollection<TaskItem> source
@@ -82,6 +90,7 @@ namespace Dibix.Sdk.CodeGeneration
           , IEnumerable<TaskItem> references
           , IEnumerable<TaskItem> defaultSecuritySchemes
           , bool isEmbedded
+          , bool enableExperimentalFeatures
           , string databaseSchemaProviderName
           , string modelCollation
           , ICollection<TaskItem> sqlReferencePath
@@ -99,11 +108,13 @@ namespace Dibix.Sdk.CodeGeneration
               , projectDirectory
               , productName
               , areaName
+              , outputName
               , title
               , version
               , description
               , endpointConfiguration
               , defaultOutputFilePath
+              , endpointOutputFilePath
               , clientOutputFilePath
               , externalAssemblyReferenceDirectory
               , source
@@ -112,6 +123,7 @@ namespace Dibix.Sdk.CodeGeneration
               , references
               , defaultSecuritySchemes
               , isEmbedded
+              , enableExperimentalFeatures
               , databaseSchemaProviderName
               , modelCollation
               , sqlReferencePath

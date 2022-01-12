@@ -41,20 +41,21 @@ namespace Dibix.Sdk.CodeGeneration
 
             IDictionary<string, SecurityScheme> securitySchemeMap = context.Model.SecuritySchemes.ToDictionary(x => x.Name);
 
+            CSharpStatementScope output = context.CreateOutputScope();
             for (int i = 0; i < controllers.Count; i++)
             {
                 ControllerDefinition controller = controllers[i];
                 string serviceName = $"{controller.Name}Service";
-                this.WriteController(context, controller, serviceName, operationIdMap, securitySchemeMap);
+                this.WriteController(context, output, controller, serviceName, operationIdMap, securitySchemeMap);
 
                 if (i + 1 < controllers.Count)
-                    context.Output.AddSeparator();
+                    output.AddSeparator();
             }
         }
         #endregion
 
         #region Protected Methods
-        protected abstract void WriteController(CodeGenerationContext context, ControllerDefinition controller, string serviceName, IDictionary<ActionDefinition, string> operationIdMap, IDictionary<string, SecurityScheme> securitySchemeMap);
+        protected abstract void WriteController(CodeGenerationContext context, CSharpStatementScope output, ControllerDefinition controller, string serviceName, IDictionary<ActionDefinition, string> operationIdMap, IDictionary<string, SecurityScheme> securitySchemeMap);
 
         protected void AddMethod(ActionDefinition action, CodeGenerationContext context, IDictionary<ActionDefinition, string> operationIdMap, Func<string, string, CSharpMethod> methodTarget)
         {

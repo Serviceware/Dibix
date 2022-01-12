@@ -24,14 +24,9 @@ namespace Dibix.Sdk.CodeGeneration
             return sb.ToString();
         }
 
-        public static string BuildAbsoluteNamespace(string productName, string areaName, string layerName, string relativeNamespace)
+        public static string BuildAbsoluteNamespace(string rootNamespace, string productName, string areaName, string layerName, string relativeNamespace)
         {
-            if (productName == null)
-            {
-                // Namespaces not supported in this context (probably T4)
-                return null;
-            }
-
+            Guard.IsNotNullOrEmpty(productName, nameof(productName));
             Guard.IsNotNullOrEmpty(layerName, nameof(layerName));
 
             string[] parts = (relativeNamespace ?? String.Empty).Split('.');
@@ -45,12 +40,21 @@ namespace Dibix.Sdk.CodeGeneration
             relativeNamespace = String.Join(".", parts.Skip(multipleAreas ? 1 : 0));
 
 
-            StringBuilder sb = new StringBuilder(productName);
+            StringBuilder sb = new StringBuilder();
 
-            if (!String.IsNullOrEmpty(areaName))
+            if (!multipleAreas)
             {
-                sb.Append('.')
-                  .Append(areaName);
+                sb.Append(rootNamespace);
+            }
+            else
+            {
+                sb.Append(productName);
+
+                if (!String.IsNullOrEmpty(areaName))
+                {
+                    sb.Append('.')
+                      .Append(areaName);
+                }
             }
 
             sb.Append('.')

@@ -7,13 +7,27 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class DaoStructuredTypeWriter : ArtifactWriterBase
     {
+        #region Fields
+        private readonly ICollection<UserDefinedTypeSchema> _schemas;
+        #endregion
+
         #region Properties
         public override string LayerName => CodeGeneration.LayerName.Data;
         public override string RegionName => "Structured types";
         #endregion
 
+        #region Constructor
+        public DaoStructuredTypeWriter(CodeGenerationModel model, SchemaDefinitionSource schemaFilter)
+        {
+            this._schemas = model.Schemas
+                                 .OfType<UserDefinedTypeSchema>()
+                                 .Where(x => schemaFilter.HasFlag(x.Source))
+                                 .ToArray();
+        }
+        #endregion
+
         #region Overrides
-        public override bool HasContent(CodeGenerationModel model) => model.UserDefinedTypes.Any();
+        public override bool HasContent(CodeGenerationModel model) => this._schemas.Any();
 
         public override IEnumerable<CSharpAnnotation> GetGlobalAnnotations(CodeGenerationModel model) { yield break; }
 
@@ -21,16 +35,15 @@ namespace Dibix.Sdk.CodeGeneration
         {
             context.AddUsing("Dibix");
 
-            var namespaceGroups = context.Model
-                                         .UserDefinedTypes
-                                         .GroupBy(x => context.GetRelativeNamespace(this.LayerName, x.Namespace))
-                                         .ToArray();
+            var namespaceGroups = this._schemas
+                                      .GroupBy(x => x.Namespace)
+                                      .ToArray();
 
             for (int i = 0; i < namespaceGroups.Length; i++)
             {
                 IGrouping<string, UserDefinedTypeSchema> namespaceGroup = namespaceGroups[i];
                 IList<UserDefinedTypeSchema> userDefinedTypes = namespaceGroup.ToArray();
-                CSharpStatementScope scope = namespaceGroup.Key != null ? context.Output.BeginScope(namespaceGroup.Key) : context.Output;
+                CSharpStatementScope scope = /*namespaceGroup.Key != null ? */context.CreateOutputScope(namespaceGroup.Key)/* : context.Output*/;
                 for (int j = 0; j < userDefinedTypes.Count; j++)
                 {
                     UserDefinedTypeSchema userDefinedType = userDefinedTypes[j];
@@ -50,7 +63,7 @@ namespace Dibix.Sdk.CodeGeneration
                 }
 
                 if (i + 1 < namespaceGroups.Length)
-                    context.Output.AddSeparator();
+                    context.AddSeparator();
             }
         }
         #endregion

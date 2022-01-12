@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -39,11 +38,12 @@ namespace Dibix.Http.Server
 
         private static bool ShouldProcessPackagePath(string packagePath)
         {
-            string artifactName = Path.GetFileNameWithoutExtension(packagePath);
-            bool assemblyLoaded = AppDomain.CurrentDomain
-                                           .GetAssemblies()
-                                           .Any(x => x.GetName().Name == artifactName);
-            return !assemblyLoaded;
+            return true;
+            //string artifactName = Path.GetFileNameWithoutExtension(packagePath);
+            //bool assemblyLoaded = AppDomain.CurrentDomain
+            //                               .GetAssemblies()
+            //                               .Any(x => x.GetName().Name == artifactName);
+            //return !assemblyLoaded;
         }
 
         private static Assembly CollectAssembly(string packagePath)

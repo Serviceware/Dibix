@@ -26,6 +26,24 @@ namespace Dibix.Sdk.VisualStudio
 
             CodeGenerationModel model = new CodeGenerationModel(CodeGeneratorCompatibilityLevel.Legacy);
 
+            // Apply configuration defaults
+            if (model.RootNamespace == null)
+            {
+                model.RootNamespace = GetProjectDefaultNamespace(textTemplatingEngineHost, serviceProvider);
+            }
+
+            if (!String.IsNullOrEmpty(model.RootNamespace))
+            {
+                string[] parts = model.RootNamespace.Split(new[] { '.' }, 2);
+                model.ProductName = parts[0];
+
+                if (parts.Length > 1)
+                    model.AreaName = parts[1];
+            }
+
+            if (model.DefaultClassName == null)
+                model.DefaultClassName = Path.GetFileNameWithoutExtension(textTemplatingEngineHost.TemplateFile);
+
             // User configuration
             CodeGeneratorConfigurationExpression expression = new CodeGeneratorConfigurationExpression(model, fileSystemProvider);
             configure(expression);
@@ -41,13 +59,6 @@ namespace Dibix.Sdk.VisualStudio
 
                 input.Collect(model, typeResolverFacade, schemaRegistry, logger);
             }
-
-            // Apply configuration defaults
-            if (model.RootNamespace == null)
-                model.RootNamespace = GetProjectDefaultNamespace(textTemplatingEngineHost, serviceProvider);
-
-            if (model.DefaultClassName == null)
-                model.DefaultClassName = Path.GetFileNameWithoutExtension(textTemplatingEngineHost.TemplateFile);
 
             model.Schemas.AddRange(schemaRegistry.Schemas);
             return model;
@@ -105,7 +116,7 @@ namespace Dibix.Sdk.VisualStudio
             public ICodeGeneratorConfigurationExpression AddSource(string projectName, Action<IPhysicalSourceSelectionExpression> configuration)
             {
                 Guard.IsNotNullOrEmpty(projectName, nameof(projectName));
-                PhysicalSourceConfiguration sourceConfiguration = new PhysicalSourceConfiguration(this._fileSystemProvider, projectName);
+                PhysicalSourceConfiguration sourceConfiguration = new PhysicalSourceConfiguration(this._fileSystemProvider, projectName, this._model);
                 PhysicalSourceConfigurationExpression expression = new PhysicalSourceConfigurationExpression(sourceConfiguration);
                 configuration?.Invoke(expression);
                 this.Inputs.Add(sourceConfiguration);
@@ -115,7 +126,7 @@ namespace Dibix.Sdk.VisualStudio
             public ICodeGeneratorConfigurationExpression AddDacPac(string packagePath, Action<IDacPacSelectionExpression> configuration)
             {
                 Guard.IsNotNull(configuration, nameof(configuration));
-                DacPacSourceConfiguration sourceConfiguration = new DacPacSourceConfiguration(this._fileSystemProvider, packagePath);
+                DacPacSourceConfiguration sourceConfiguration = new DacPacSourceConfiguration(this._fileSystemProvider, packagePath, this._model);
                 DacPacSourceConfigurationExpression expression = new DacPacSourceConfigurationExpression(sourceConfiguration);
                 configuration(expression);
                 this.Inputs.Add(sourceConfiguration);

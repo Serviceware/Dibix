@@ -7,13 +7,15 @@ namespace Dibix.Sdk.VisualStudio
     {
         #region Fields
         private readonly string _packagePath;
+        private readonly CodeGenerationModel _model;
         private readonly ICollection<KeyValuePair<string, string>> _procedureNames;
         #endregion
 
         #region Constructor
-        public DacPacSourceConfiguration(IFileSystemProvider fileSystemProvider, string packagePath)
+        public DacPacSourceConfiguration(IFileSystemProvider fileSystemProvider, string packagePath, CodeGenerationModel model)
         {
             this._packagePath = new PhysicalFileSystemProvider(fileSystemProvider.CurrentDirectory).GetPhysicalFilePath(null, packagePath);
+            this._model = model;
             this._procedureNames = new HashSet<KeyValuePair<string, string>>();
         }
         #endregion
@@ -28,8 +30,9 @@ namespace Dibix.Sdk.VisualStudio
             SqlStatementCollector statementCollector = new DacPacSqlStatementCollector
             (
                 projectName: null
-              , productName: null
-              , areaName: null
+              , rootNamespace: this._model.RootNamespace
+              , productName: this._model.ProductName
+              , areaName: this._model.AreaName
               , parser: parser
               , formatter: formatter
               , typeResolver: typeResolver

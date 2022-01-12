@@ -8,6 +8,7 @@ namespace Dibix.Sdk.CodeGeneration
     public sealed class DacPacSqlStatementCollector : SqlStatementCollector
     {
         private readonly string _projectName;
+        private readonly string _rootNamespace;
         private readonly string _productName;
         private readonly string _areaName;
         private readonly ISqlStatementParser _parser;
@@ -21,6 +22,7 @@ namespace Dibix.Sdk.CodeGeneration
         public DacPacSqlStatementCollector
         (
             string projectName
+          , string rootNamespace
           , string productName
           , string areaName
           , ISqlStatementParser parser
@@ -32,6 +34,7 @@ namespace Dibix.Sdk.CodeGeneration
           , ICollection<KeyValuePair<string, string>> procedureNames)
         {
             this._projectName = projectName;
+            this._rootNamespace = rootNamespace;
             this._productName = productName;
             this._areaName = areaName;
             this._parser = parser;
@@ -71,6 +74,7 @@ namespace Dibix.Sdk.CodeGeneration
               , projectName: this._projectName
               , isEmbedded: false
               , analyzeAlways: false
+              , rootNamspace: this._rootNamespace
               , productName: this._productName
               , areaName: this._areaName
               , formatter: this._formatter

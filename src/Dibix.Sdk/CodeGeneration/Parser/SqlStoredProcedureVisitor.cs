@@ -91,7 +91,7 @@ namespace Dibix.Sdk.CodeGeneration
             this.ParseBody(statements);
         }
 
-        private string ParseNamespace(string relativeNamespace) => NamespaceUtility.BuildAbsoluteNamespace(base.ProductName, base.AreaName, LayerName.Data, relativeNamespace);
+        private string ParseNamespace(string relativeNamespace) => NamespaceUtility.BuildAbsoluteNamespace(base.RootNamespace, base.ProductName, base.AreaName, LayerName.Data, relativeNamespace);
 
         private string ParseName() => base.Markup.TryGetSingleElementValue(SqlMarkupKey.Name, base.Target.Source, base.Logger, out string name) ? name : base.Target.Name;
 
@@ -141,7 +141,7 @@ namespace Dibix.Sdk.CodeGeneration
                 gridResultTypeName = $"{base.Target.Name}{GridResultTypeSuffix}";
             }
 
-            string @namespace = NamespaceUtility.BuildAbsoluteNamespace(base.ProductName, base.AreaName, LayerName.DomainModel, gridResultTypeNamespace);
+            string @namespace = NamespaceUtility.BuildAbsoluteNamespace(base.RootNamespace, base.ProductName, base.AreaName, LayerName.DomainModel, gridResultTypeNamespace);
             SchemaTypeReference typeReference = SchemaTypeReference.WithNamespace(@namespace, gridResultTypeName, base.Target.Source, 0, 0, false, false);
             if (base.SchemaRegistry.IsRegistered(typeReference.Key)) 
                 return typeReference;

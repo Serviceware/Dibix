@@ -15,13 +15,20 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
 
         public override void Write(StringWriter writer)
         {
+            _ = this.WriteAnnotations(writer);
+            this.WriteBody(writer);
+        }
+
+        protected bool WriteAnnotations(StringWriter writer)
+        {
             IEnumerable<string> annotations = this.CollectAnnotations();
+            bool result = false;
             foreach (string annotation in annotations.OrderBy(x => x.Length))
             {
                 this.WriteAnnotation(writer, annotation);
+                result = true;
             }
-
-            this.WriteBody(writer);
+            return result;
         }
 
         protected abstract void WriteBody(StringWriter writer);

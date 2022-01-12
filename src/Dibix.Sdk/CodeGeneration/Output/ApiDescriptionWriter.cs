@@ -30,7 +30,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             string body = WriteBody(context, context.Model.Controllers);
 
-            context.Output
+            context.CreateOutputScope()
                    .AddClass("ApiConfiguration", CSharpModifiers.Public | CSharpModifiers.Sealed)
                    .Inherits("HttpApiDescriptor")
                    .AddMethod("Configure", "void", body, modifiers: CSharpModifiers.Public | CSharpModifiers.Override)

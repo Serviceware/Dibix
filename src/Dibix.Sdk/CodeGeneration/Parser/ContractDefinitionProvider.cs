@@ -13,6 +13,7 @@ namespace Dibix.Sdk.CodeGeneration
     {
         #region Fields
         private const string RootFolderName = "Contracts";
+        private readonly string _rootNamespace;
         private readonly string _productName;
         private readonly string _areaName;
         private readonly IDictionary<string, ContractDefinition> _contracts;
@@ -26,8 +27,9 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public ContractDefinitionProvider(IFileSystemProvider fileSystemProvider, ILogger logger, IEnumerable<string> contracts, string productName, string areaName) : base(fileSystemProvider, logger)
+        public ContractDefinitionProvider(IFileSystemProvider fileSystemProvider, ILogger logger, IEnumerable<string> contracts, string rootNamespace, string productName, string areaName) : base(fileSystemProvider, logger)
         {
+            this._rootNamespace = rootNamespace;
             this._productName = productName;
             this._areaName = areaName;
             this._contracts = new Dictionary<string, ContractDefinition>();
@@ -65,10 +67,10 @@ namespace Dibix.Sdk.CodeGeneration
 If this is not a project that has multiple areas, please make sure to define the <RootNamespace> tag in the following format: Product.Area");
 
             string relativeNamespace = String.Join(".", parts.Skip(1));
-            string currentNamespace = NamespaceUtility.BuildAbsoluteNamespace(this._productName, this._areaName, LayerName.DomainModel, relativeNamespace);
+            string currentNamespace = NamespaceUtility.BuildAbsoluteNamespace(this._rootNamespace, this._productName, this._areaName, LayerName.DomainModel, relativeNamespace);
 
             string root = multipleAreas ? parts[1] : null;
-            string rootNamespace = NamespaceUtility.BuildAbsoluteNamespace(this._productName, this._areaName, LayerName.DomainModel, root);
+            string rootNamespace = NamespaceUtility.BuildAbsoluteNamespace(this._rootNamespace, this._productName, this._areaName, LayerName.DomainModel, root);
 
             this.ReadContracts(rootNamespace, currentNamespace, json, filePath);
         }

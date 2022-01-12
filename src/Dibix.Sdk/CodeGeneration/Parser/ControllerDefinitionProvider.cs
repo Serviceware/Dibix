@@ -21,9 +21,10 @@ namespace Dibix.Sdk.CodeGeneration
     {
         #region Fields
         private readonly string _projectName;
+        private readonly string _rootNamespace;
         private readonly string _productName;
         private readonly string _areaName;
-        private readonly string _outputName;
+        private readonly string _className;
         private readonly ICollection<SqlStatementDescriptor> _statements;
         private readonly IDictionary<string, SecurityScheme> _securitySchemeMap;
         private readonly ICollection<string> _defaultSecuritySchemes;
@@ -44,9 +45,10 @@ namespace Dibix.Sdk.CodeGeneration
         public ControllerDefinitionProvider
         (
             string projectName
+          , string rootNamespace
           , string productName
           , string areaName
-          , string outputName
+          , string className
           , EndpointConfiguration endpointConfiguration
           , ICollection<SqlStatementDescriptor> statements
           , IEnumerable<string> endpoints
@@ -61,9 +63,10 @@ namespace Dibix.Sdk.CodeGeneration
         ) : base(fileSystemProvider, logger)
         {
             this._projectName = projectName;
+            this._rootNamespace = rootNamespace;
             this._productName = productName;
             this._areaName = areaName;
-            this._outputName = outputName;
+            this._className = className;
             this._statements = statements;
             this._securitySchemeMap = securitySchemeMap;
             this._defaultSecuritySchemes = defaultSecuritySchemes;
@@ -417,16 +420,16 @@ namespace Dibix.Sdk.CodeGeneration
             bool isAbsolute = target.StartsWith($"{this._productName}.", StringComparison.Ordinal);
             string normalizedNamespace = @namespace;
             if (!isAbsolute)
-                normalizedNamespace = NamespaceUtility.BuildAbsoluteNamespace(this._productName, this._areaName, LayerName.Data, @namespace);
+                normalizedNamespace = NamespaceUtility.BuildAbsoluteNamespace(this._rootNamespace, this._productName, this._areaName, LayerName.Data, @namespace);
 
-            string typeName = $"{normalizedNamespace}.{this._outputName}";
+            string typeName = $"{normalizedNamespace}.{this._className}";
             string methodName = target.Substring(statementNameIndex + 1);
 
             // 2. Target is a SQL statement within the current project
             SqlStatementDescriptor statement = this._statements.FirstOrDefault(x => x.Namespace == normalizedNamespace && x.Name == methodName);
             if (statement != null)
             {
-                ActionDefinitionTarget actionTarget = new LocalActionTarget(statement, this._outputName);
+                ActionDefinitionTarget actionTarget = new LocalActionTarget(statement, this._className);
                 actionDefinition = new ActionDefinition(actionTarget);
                 ActionParameterRegistry parameterRegistry = new ActionParameterRegistry(actionDefinition, pathParameters);
                 foreach (SqlQueryParameter parameter in statement.Parameters)

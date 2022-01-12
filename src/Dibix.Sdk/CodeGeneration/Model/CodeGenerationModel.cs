@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace Dibix.Sdk.CodeGeneration
 {
     public class CodeGenerationModel
     {
+        public string ProductName { get; set; }
         public string AreaName { get; set; }
         public string RootNamespace { get; set; }
         public string DefaultClassName { get; set; }
@@ -19,6 +19,7 @@ namespace Dibix.Sdk.CodeGeneration
         public IList<SecurityScheme> SecuritySchemes { get; }
         public ICollection<SchemaDefinition> Schemas { get; }
         public ICollection<string> AdditionalAssemblyReferences { get; }
+        public bool EnableExperimentalFeatures { get; set; }
 
         public CodeGenerationModel(CodeGeneratorCompatibilityLevel compatibilityLevel)
         {

@@ -17,7 +17,7 @@ namespace Dibix.Sdk.CodeGeneration
             yield return new ApiClientImplementationWriter();
         }
 
-        protected override IEnumerable<CSharpAnnotation> CollectGlobalAnnotations(bool isArtifactAssembly)
+        protected override IEnumerable<CSharpAnnotation> CollectGlobalAnnotations(CodeGenerationModel model, bool isArtifactAssembly)
         {
             if (isArtifactAssembly)
                 yield return new CSharpAnnotation("ArtifactAssembly");

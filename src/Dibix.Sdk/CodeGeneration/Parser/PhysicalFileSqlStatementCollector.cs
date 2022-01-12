@@ -9,6 +9,7 @@ namespace Dibix.Sdk.CodeGeneration
     public sealed class PhysicalFileSqlStatementCollector : SqlStatementCollector
     {
         private readonly string _projectName;
+        private readonly string _rootNamespace;
         private readonly string _productName;
         private readonly string _areaName;
         private readonly bool _isEmbedded;
@@ -26,6 +27,7 @@ namespace Dibix.Sdk.CodeGeneration
             string projectName
           , bool isEmbedded
           , bool analyzeAlways
+          , string rootNamespace
           , string productName
           , string areaName
           , ISqlStatementParser parser
@@ -40,6 +42,7 @@ namespace Dibix.Sdk.CodeGeneration
             this._projectName = projectName;
             this._isEmbedded = isEmbedded;
             this._analyzeAlways = analyzeAlways;
+            this._rootNamespace = rootNamespace;
             this._productName = productName;
             this._areaName = areaName;
             this._parser = parser;
@@ -75,6 +78,7 @@ namespace Dibix.Sdk.CodeGeneration
                   , projectName: this._projectName
                   , isEmbedded: this._isEmbedded
                   , analyzeAlways: this._analyzeAlways
+                  , rootNamspace: this._rootNamespace
                   , productName: this._productName
                   , areaName: this._areaName
                   , formatter: this._formatter

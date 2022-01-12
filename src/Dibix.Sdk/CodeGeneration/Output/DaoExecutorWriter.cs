@@ -15,11 +15,19 @@ namespace Dibix.Sdk.CodeGeneration
         #region Fields
         private const string ConstantSuffix = "CommandText";
         private const string MethodPrefix = "";//"Execute";
+        private readonly bool _accessorOnly;
         #endregion
 
         #region Properties
         public override string LayerName => CodeGeneration.LayerName.Data;
         public override string RegionName => "Accessor";
+        #endregion
+
+        #region Constructor
+        public DaoExecutorWriter(bool accessorOnly)
+        {
+            this._accessorOnly = accessorOnly;
+        }
         #endregion
 
         #region Overrides
@@ -29,9 +37,15 @@ namespace Dibix.Sdk.CodeGeneration
         {
             context.AddUsing("Dibix");
 
-            foreach (IGrouping<string, SqlStatementDescriptor> namespaceGroup in context.Model.Statements.GroupBy(x => context.GetRelativeNamespace(this.LayerName, x.Namespace)))
+            var namespaceGroups = context.Model
+                                         .Statements
+                                         .GroupBy(x => x.Namespace)
+                                         .ToArray();
+
+            for (int i = 0; i < namespaceGroups.Length; i++)
             {
-                CSharpStatementScope scope = namespaceGroup.Key != null ? context.Output.BeginScope(namespaceGroup.Key) : context.Output;
+                IGrouping<string, SqlStatementDescriptor> namespaceGroup = namespaceGroups[i];
+                CSharpStatementScope scope = /*namespaceGroup.Key != null ? */context.CreateOutputScope(namespaceGroup.Key) /* : context.Output*/;
                 IList<SqlStatementDescriptor> statementDescriptors = namespaceGroup.ToArray();
 
                 // Class
@@ -44,7 +58,10 @@ namespace Dibix.Sdk.CodeGeneration
 
                 // Execution methods
                 @class.AddSeparator();
-                AddExecutionMethods(@class, context, statementDescriptors);
+                this.AddExecutionMethods(@class, context, statementDescriptors);
+
+                if (i + 1 < namespaceGroups.Length)
+                    context.AddSeparator();
             }
         }
         #endregion
@@ -68,7 +85,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static void AddExecutionMethods(CSharpClass @class, CodeGenerationContext context, IList<SqlStatementDescriptor> statementDescriptors)
+        private void AddExecutionMethods(CSharpClass @class, CodeGenerationContext context, IList<SqlStatementDescriptor> statementDescriptors)
         {
             for (int i = 0; i < statementDescriptors.Count; i++)
             {
@@ -81,12 +98,16 @@ namespace Dibix.Sdk.CodeGeneration
                 string resultTypeName = ResolveTypeName(statementDescriptor, context);
                 string returnTypeName = DetermineReturnTypeName(statementDescriptor, resultTypeName, context);
 
-                IEnumerable<CSharpAnnotation> annotations = statementDescriptor.ErrorResponses
-                                                                     .Select(x => new CSharpAnnotation("ErrorResponse").AddParameter("statusCode", new CSharpValue(x.StatusCode.ToString()))
-                                                                                                                       .AddParameter("errorCode", new CSharpValue(x.ErrorCode.ToString()))
-                                                                                                                       .AddParameter("errorDescription", new CSharpStringValue(x.ErrorDescription)));
-                if (statementDescriptor.ErrorResponses.Any())
+                IEnumerable<CSharpAnnotation> annotations = Enumerable.Empty<CSharpAnnotation>();
+
+                if (!this._accessorOnly && statementDescriptor.ErrorResponses.Any())
+                {
+                    annotations = statementDescriptor.ErrorResponses
+                                                     .Select(x => new CSharpAnnotation("ErrorResponse").AddParameter("statusCode", new CSharpValue(x.StatusCode.ToString()))
+                                                                                                       .AddParameter("errorCode", new CSharpValue(x.ErrorCode.ToString()))
+                                                                                                       .AddParameter("errorDescription", new CSharpStringValue(x.ErrorDescription)));
                     context.AddDibixHttpServerReference();
+                }
 
                 CSharpModifiers modifiers = CSharpModifiers.Public | CSharpModifiers.Static;
                 if (statementDescriptor.Async)

@@ -25,13 +25,13 @@ namespace Dibix.Sdk.CodeGeneration
             var namespaceGroups = context.Model
                                          .Statements
                                          .Where(RequiresInput)
-                                         .GroupBy(x => context.GetRelativeNamespace(this.LayerName, x.Namespace))
+                                         .GroupBy(x => x.Namespace)
                                          .ToArray();
 
             for (int i = 0; i < namespaceGroups.Length; i++)
             {
                 IGrouping<string, SqlStatementDescriptor> namespaceGroup = namespaceGroups[i];
-                CSharpStatementScope scope = namespaceGroup.Key != null ? context.Output.BeginScope(namespaceGroup.Key) : context.Output;
+                CSharpStatementScope scope = /*namespaceGroup.Key != null ? */context.CreateOutputScope(namespaceGroup.Key)/* : context.Output*/;
                 IList<SqlStatementDescriptor> statements = namespaceGroup.ToArray();
                 for (int j = 0; j < statements.Count; j++)
                 {
@@ -55,7 +55,7 @@ namespace Dibix.Sdk.CodeGeneration
                 }
 
                 if (i + 1 < namespaceGroups.Length)
-                    context.Output.AddSeparator();
+                    context.AddSeparator();
             }
         }
         #endregion

@@ -131,9 +131,9 @@ using System.Collections.ObjectModel;
 using System.Data;
 using Dibix;
 
-namespace Dibix.Sdk.VisualStudio.Tests
+#region Accessor
+namespace Dibix.Sdk.VisualStudio.Tests.Data
 {
-    #region Accessor
     [DatabaseAccessor]
     internal static class ParserTest
     {
@@ -355,9 +355,12 @@ UNION ALL
             }
         }
     }
-    #endregion
+}
+#endregion
 
-    #region Contracts
+#region Contracts
+namespace Dibix.Sdk.VisualStudio.Tests.DomainModel
+{
     internal sealed class dbx_tests_parser_invalidcolumnsforentityResult
     {
         public IList&lt;int?&gt; A { get; private set; }
@@ -430,8 +433,8 @@ UNION ALL
             this.H = new Collection&lt;Dibix.Sdk.VisualStudio.Tests.Direction?&gt;();
         }
     }
-    #endregion
-}</value>
+}
+#endregion</value>
   </data>
   <data name="SourcesTest" xml:space="preserve">
     <value>/*------------------------------------------------------------------------------
@@ -445,9 +448,9 @@ UNION ALL
 using System.Data;
 using Dibix;
 
-namespace This.Is.A.Custom.Namespace
+#region Accessor
+namespace This.Is.A.Custom.Namespace.Data
 {
-    #region Accessor
     [DatabaseAccessor]
     internal static class Accessor
     {
@@ -508,7 +511,7 @@ namespace This.Is.A.Custom.Namespace
             }
         }
     }
-    #endregion
-}</value>
+}
+#endregion</value>
   </data>
 </root>

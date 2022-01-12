@@ -10,10 +10,10 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Overrides
-        protected override void WriteController(CodeGenerationContext context, ControllerDefinition controller, string serviceName, IDictionary<ActionDefinition, string> operationIdMap, IDictionary<string, SecurityScheme> securitySchemeMap)
+        protected override void WriteController(CodeGenerationContext context, CSharpStatementScope output, ControllerDefinition controller, string serviceName, IDictionary<ActionDefinition, string> operationIdMap, IDictionary<string, SecurityScheme> securitySchemeMap)
         {
             string interfaceName = $"I{serviceName}";
-            CSharpInterface @interface = context.Output.AddInterface(interfaceName, CSharpModifiers.Public);
+            CSharpInterface @interface = output.AddInterface(interfaceName, CSharpModifiers.Public);
 
             foreach (ActionDefinition action in controller.Actions)
             {

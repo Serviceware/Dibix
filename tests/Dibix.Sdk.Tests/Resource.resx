@@ -198,193 +198,194 @@ using Dibix.Http.Client;
 using UriBuilder = Dibix.Http.Client.UriBuilder;
 
 [assembly: ArtifactAssembly]
-namespace Dibix.Sdk.Tests
+
+#region Contracts
+namespace Dibix.Sdk.Tests.DomainModel
 {
-    namespace DomainModel
+    public sealed class Entry
     {
-        #region Contracts
-        public sealed class Entry
-        {
-            public int Id { get; set; }
-            public string Name { get; set; }
-        }
-
-        public sealed class GenericContract
-        {
-            [DefaultValue("DefaultValue")]
-            public string Name { get; set; } = "DefaultValue";
-            [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
-            public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
-            public System.DateTime? CreationTime { get; set; }
-            [RelativeHttpsUrl]
-            public System.Uri ImageUrl { get; set; }
-        }
-
-        public enum Role : int
-        {
-            None,
-            User,
-            Admin
-        }
-
-        public sealed class InputContract
-        {
-            public string U { get; set; }
-            public string V { get; set; }
-            public string W { get; set; }
-            public IList&lt;Dibix.Sdk.Tests.DomainModel.Entry&gt; Ids { get; private set; }
-            public System.Guid X { get; set; }
-            public string Password { get; set; }
-            public bool Y { get; set; }
-            public int Z { get; set; }
-
-            public InputContract()
-            {
-                this.Ids = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Entry&gt;();
-            }
-        }
-        #endregion
+        public int Id { get; set; }
+        public string Name { get; set; }
     }
 
-    namespace Client
+    public sealed class GenericContract
     {
-        #region Interfaces
-        public interface IGenericEndpointService
-        {
-            Task&lt;HttpResponseMessage&gt; EmptyWithParams1Async(string password, string userAgent, IEnumerable&lt;object&gt; ids, string? acceptLanguage = null, CancellationToken cancellationToken = default);
-            Task&lt;HttpResponseMessage&gt; EmptyWithParamsAnonymousAsync(string password, string u, string v, System.Guid? w, IEnumerable&lt;object&gt; ids, string? x = null, bool y = true, int? z = null, CancellationToken cancellationToken = default);
-            Task&lt;HttpResponse&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;&gt; SingleConrecteResultWithParamsAsync(IEnumerable&lt;int&gt; ids, CancellationToken cancellationToken = default);
-            Task&lt;HttpResponse&lt;System.IO.Stream&gt;&gt; FileResultAsync(int id, CancellationToken cancellationToken = default);
-            Task&lt;HttpResponseMessage&gt; FileUploadAsync(System.IO.Stream body, CancellationToken cancellationToken = default);
-            Task&lt;HttpResponseMessage&gt; EmptyWithParams2Async(Dibix.Sdk.Tests.DomainModel.InputContract body, CancellationToken cancellationToken = default);
-            Task&lt;HttpResponseMessage&gt; EmptyWithParams3Async(Dibix.Sdk.Tests.DomainModel.InputContract body, CancellationToken cancellationToken = default);
-        }
-        #endregion
-
-        #region Implementation
-        [HttpService(typeof(IGenericEndpointService))]
-        public sealed class GenericEndpointService : IGenericEndpointService
-        {
-            private static readonly Uri BaseAddress = new Uri("https://localhost/api/");
-            private static readonly MediaTypeFormatter Formatter = new JsonMediaTypeFormatter();
-            private readonly IHttpClientFactory _httpClientFactory;
-            private readonly IHttpAuthorizationProvider _authorizationProvider;
-
-            public GenericEndpointService(IHttpAuthorizationProvider authorizationProvider) : this(new DefaultHttpClientFactory(), authorizationProvider) { }
-            public GenericEndpointService(IHttpClientFactory httpClientFactory, IHttpAuthorizationProvider authorizationProvider)
-            {
-                this._httpClientFactory = httpClientFactory;
-                this._authorizationProvider = authorizationProvider;
-            }
-
-            public async Task&lt;HttpResponseMessage&gt; EmptyWithParams1Async(string password, string userAgent, IEnumerable&lt;object&gt; ids, string? acceptLanguage = null, CancellationToken cancellationToken = default)
-            {
-                using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
-                {
-                    Uri uri = UriBuilder.Create($"Tests/GenericEndpoint/{password}/Fixed", UriKind.Relative)
-                                        .AddQueryParam(nameof(ids), ids)
-                                        .Build();
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("GET"), uri);
-                    requestMessage.Headers.Add("HLNS-SIT", this._authorizationProvider.GetValue("HLNS-SIT"));
-                    requestMessage.Headers.Add("HLNS-ClientId", this._authorizationProvider.GetValue("HLNS-ClientId"));
-                    requestMessage.Headers.Add("User-Agent", userAgent);
-                    if (acceptLanguage != null)
-                        requestMessage.Headers.Add("Accept-Language", acceptLanguage);
-                    HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
-                    return responseMessage;
-                }
-            }
-
-            public async Task&lt;HttpResponseMessage&gt; EmptyWithParamsAnonymousAsync(string password, string u, string v, System.Guid? w, IEnumerable&lt;object&gt; ids, string? x = null, bool y = true, int? z = null, CancellationToken cancellationToken = default)
-            {
-                using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
-                {
-                    Uri uri = UriBuilder.Create($"Tests/GenericEndpoint/{password}/User", UriKind.Relative)
-                                        .AddQueryParam(nameof(u), u)
-                                        .AddQueryParam(nameof(v), v)
-                                        .AddQueryParam(nameof(w), w)
-                                        .AddQueryParam(nameof(ids), ids)
-                                        .AddQueryParam(nameof(x), x)
-                                        .AddQueryParam(nameof(y), y)
-                                        .AddQueryParam(nameof(z), z)
-                                        .Build();
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("GET"), uri);
-                    HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
-                    return responseMessage;
-                }
-            }
-
-            public async Task&lt;HttpResponse&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;&gt; SingleConrecteResultWithParamsAsync(IEnumerable&lt;int&gt; ids, CancellationToken cancellationToken = default)
-            {
-                using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
-                {
-                    Uri uri = UriBuilder.Create("Tests/GenericEndpoint/Array", UriKind.Relative)
-                                        .AddQueryParam(nameof(ids), ids)
-                                        .Build();
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("GET"), uri);
-                    requestMessage.Headers.Add("HLNS-SIT", this._authorizationProvider.GetValue("HLNS-SIT"));
-                    requestMessage.Headers.Add("HLNS-ClientId", this._authorizationProvider.GetValue("HLNS-ClientId"));
-                    HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
-                    Dibix.Sdk.Tests.DomainModel.GenericContract responseContent = await responseMessage.Content.ReadAsAsync&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(MediaTypeFormattersFactory.Create(client), cancellationToken).ConfigureAwait(false);
-                    return new HttpResponse&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(responseMessage, responseContent);
-                }
-            }
-
-            public async Task&lt;HttpResponse&lt;System.IO.Stream&gt;&gt; FileResultAsync(int id, CancellationToken cancellationToken = default)
-            {
-                using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
-                {
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("GET"), $"Tests/GenericEndpoint/{id}");
-                    if (this._authorizationProvider.GetValue("Bearer") != null)
-                        requestMessage.Headers.Add("Authorization", $"Bearer {this._authorizationProvider.GetValue("Bearer")}");
-                    HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
-                    System.IO.Stream responseContent = await responseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false);
-                    return new HttpResponse&lt;System.IO.Stream&gt;(responseMessage, responseContent);
-                }
-            }
-
-            public async Task&lt;HttpResponseMessage&gt; FileUploadAsync(System.IO.Stream body, CancellationToken cancellationToken = default)
-            {
-                using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
-                {
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("PUT"), "Tests/GenericEndpoint");
-                    requestMessage.Headers.Add("HLNS-SIT", this._authorizationProvider.GetValue("HLNS-SIT"));
-                    requestMessage.Headers.Add("HLNS-ClientId", this._authorizationProvider.GetValue("HLNS-ClientId"));
-                    requestMessage.Content = new StreamContent(body);
-                    HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
-                    return responseMessage;
-                }
-            }
-
-            public async Task&lt;HttpResponseMessage&gt; EmptyWithParams2Async(Dibix.Sdk.Tests.DomainModel.InputContract body, CancellationToken cancellationToken = default)
-            {
-                using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
-                {
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("POST"), "Tests/GenericEndpoint");
-                    requestMessage.Headers.Add("HLNS-SIT", this._authorizationProvider.GetValue("HLNS-SIT"));
-                    requestMessage.Headers.Add("HLNS-ClientId", this._authorizationProvider.GetValue("HLNS-ClientId"));
-                    requestMessage.Content = new ObjectContent&lt;Dibix.Sdk.Tests.DomainModel.InputContract&gt;(body, Formatter);
-                    HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
-                    return responseMessage;
-                }
-            }
-
-            public async Task&lt;HttpResponseMessage&gt; EmptyWithParams3Async(Dibix.Sdk.Tests.DomainModel.InputContract body, CancellationToken cancellationToken = default)
-            {
-                using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
-                {
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("PATCH"), "Tests/GenericEndpoint");
-                    requestMessage.Headers.Add("HLNS-SIT", this._authorizationProvider.GetValue("HLNS-SIT"));
-                    requestMessage.Headers.Add("HLNS-ClientId", this._authorizationProvider.GetValue("HLNS-ClientId"));
-                    requestMessage.Content = new ObjectContent&lt;Dibix.Sdk.Tests.DomainModel.InputContract&gt;(body, Formatter);
-                    HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
-                    return responseMessage;
-                }
-            }
-        }
-        #endregion
+        [DefaultValue("DefaultValue")]
+        public string Name { get; set; } = "DefaultValue";
+        [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
+        public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
+        public System.DateTime? CreationTime { get; set; }
+        [RelativeHttpsUrl]
+        public System.Uri ImageUrl { get; set; }
     }
-}</value>
+
+    public enum Role : int
+    {
+        None,
+        User,
+        Admin
+    }
+
+    public sealed class InputContract
+    {
+        public string U { get; set; }
+        public string V { get; set; }
+        public string W { get; set; }
+        public IList&lt;Dibix.Sdk.Tests.DomainModel.Entry&gt; Ids { get; private set; }
+        public System.Guid X { get; set; }
+        public string Password { get; set; }
+        public bool Y { get; set; }
+        public int Z { get; set; }
+
+        public InputContract()
+        {
+            this.Ids = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Entry&gt;();
+        }
+    }
+}
+#endregion
+
+#region Interfaces
+namespace Dibix.Sdk.Tests.Client
+{
+    public interface IGenericEndpointService
+    {
+        Task&lt;HttpResponseMessage&gt; EmptyWithParams1Async(string password, string userAgent, IEnumerable&lt;object&gt; ids, string? acceptLanguage = null, CancellationToken cancellationToken = default);
+        Task&lt;HttpResponseMessage&gt; EmptyWithParamsAnonymousAsync(string password, string u, string v, System.Guid? w, IEnumerable&lt;object&gt; ids, string? x = null, bool y = true, int? z = null, CancellationToken cancellationToken = default);
+        Task&lt;HttpResponse&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;&gt; SingleConrecteResultWithParamsAsync(IEnumerable&lt;int&gt; ids, CancellationToken cancellationToken = default);
+        Task&lt;HttpResponse&lt;System.IO.Stream&gt;&gt; FileResultAsync(int id, CancellationToken cancellationToken = default);
+        Task&lt;HttpResponseMessage&gt; FileUploadAsync(System.IO.Stream body, CancellationToken cancellationToken = default);
+        Task&lt;HttpResponseMessage&gt; EmptyWithParams2Async(Dibix.Sdk.Tests.DomainModel.InputContract body, CancellationToken cancellationToken = default);
+        Task&lt;HttpResponseMessage&gt; EmptyWithParams3Async(Dibix.Sdk.Tests.DomainModel.InputContract body, CancellationToken cancellationToken = default);
+    }
+}
+#endregion
+
+#region Implementation
+namespace Dibix.Sdk.Tests.Client
+{
+    [HttpService(typeof(IGenericEndpointService))]
+    public sealed class GenericEndpointService : IGenericEndpointService
+    {
+        private static readonly Uri BaseAddress = new Uri("https://localhost/api/");
+        private static readonly MediaTypeFormatter Formatter = new JsonMediaTypeFormatter();
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IHttpAuthorizationProvider _authorizationProvider;
+
+        public GenericEndpointService(IHttpAuthorizationProvider authorizationProvider) : this(new DefaultHttpClientFactory(), authorizationProvider) { }
+        public GenericEndpointService(IHttpClientFactory httpClientFactory, IHttpAuthorizationProvider authorizationProvider)
+        {
+            this._httpClientFactory = httpClientFactory;
+            this._authorizationProvider = authorizationProvider;
+        }
+
+        public async Task&lt;HttpResponseMessage&gt; EmptyWithParams1Async(string password, string userAgent, IEnumerable&lt;object&gt; ids, string? acceptLanguage = null, CancellationToken cancellationToken = default)
+        {
+            using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
+            {
+                Uri uri = UriBuilder.Create($"Tests/GenericEndpoint/{password}/Fixed", UriKind.Relative)
+                                    .AddQueryParam(nameof(ids), ids)
+                                    .Build();
+                HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("GET"), uri);
+                requestMessage.Headers.Add("HLNS-SIT", this._authorizationProvider.GetValue("HLNS-SIT"));
+                requestMessage.Headers.Add("HLNS-ClientId", this._authorizationProvider.GetValue("HLNS-ClientId"));
+                requestMessage.Headers.Add("User-Agent", userAgent);
+                if (acceptLanguage != null)
+                    requestMessage.Headers.Add("Accept-Language", acceptLanguage);
+                HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
+                return responseMessage;
+            }
+        }
+
+        public async Task&lt;HttpResponseMessage&gt; EmptyWithParamsAnonymousAsync(string password, string u, string v, System.Guid? w, IEnumerable&lt;object&gt; ids, string? x = null, bool y = true, int? z = null, CancellationToken cancellationToken = default)
+        {
+            using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
+            {
+                Uri uri = UriBuilder.Create($"Tests/GenericEndpoint/{password}/User", UriKind.Relative)
+                                    .AddQueryParam(nameof(u), u)
+                                    .AddQueryParam(nameof(v), v)
+                                    .AddQueryParam(nameof(w), w)
+                                    .AddQueryParam(nameof(ids), ids)
+                                    .AddQueryParam(nameof(x), x)
+                                    .AddQueryParam(nameof(y), y)
+                                    .AddQueryParam(nameof(z), z)
+                                    .Build();
+                HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("GET"), uri);
+                HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
+                return responseMessage;
+            }
+        }
+
+        public async Task&lt;HttpResponse&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;&gt; SingleConrecteResultWithParamsAsync(IEnumerable&lt;int&gt; ids, CancellationToken cancellationToken = default)
+        {
+            using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
+            {
+                Uri uri = UriBuilder.Create("Tests/GenericEndpoint/Array", UriKind.Relative)
+                                    .AddQueryParam(nameof(ids), ids)
+                                    .Build();
+                HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("GET"), uri);
+                requestMessage.Headers.Add("HLNS-SIT", this._authorizationProvider.GetValue("HLNS-SIT"));
+                requestMessage.Headers.Add("HLNS-ClientId", this._authorizationProvider.GetValue("HLNS-ClientId"));
+                HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
+                Dibix.Sdk.Tests.DomainModel.GenericContract responseContent = await responseMessage.Content.ReadAsAsync&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(MediaTypeFormattersFactory.Create(client), cancellationToken).ConfigureAwait(false);
+                return new HttpResponse&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(responseMessage, responseContent);
+            }
+        }
+
+        public async Task&lt;HttpResponse&lt;System.IO.Stream&gt;&gt; FileResultAsync(int id, CancellationToken cancellationToken = default)
+        {
+            using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
+            {
+                HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("GET"), $"Tests/GenericEndpoint/{id}");
+                if (this._authorizationProvider.GetValue("Bearer") != null)
+                    requestMessage.Headers.Add("Authorization", $"Bearer {this._authorizationProvider.GetValue("Bearer")}");
+                HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
+                System.IO.Stream responseContent = await responseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false);
+                return new HttpResponse&lt;System.IO.Stream&gt;(responseMessage, responseContent);
+            }
+        }
+
+        public async Task&lt;HttpResponseMessage&gt; FileUploadAsync(System.IO.Stream body, CancellationToken cancellationToken = default)
+        {
+            using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
+            {
+                HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("PUT"), "Tests/GenericEndpoint");
+                requestMessage.Headers.Add("HLNS-SIT", this._authorizationProvider.GetValue("HLNS-SIT"));
+                requestMessage.Headers.Add("HLNS-ClientId", this._authorizationProvider.GetValue("HLNS-ClientId"));
+                requestMessage.Content = new StreamContent(body);
+                HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
+                return responseMessage;
+            }
+        }
+
+        public async Task&lt;HttpResponseMessage&gt; EmptyWithParams2Async(Dibix.Sdk.Tests.DomainModel.InputContract body, CancellationToken cancellationToken = default)
+        {
+            using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
+            {
+                HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("POST"), "Tests/GenericEndpoint");
+                requestMessage.Headers.Add("HLNS-SIT", this._authorizationProvider.GetValue("HLNS-SIT"));
+                requestMessage.Headers.Add("HLNS-ClientId", this._authorizationProvider.GetValue("HLNS-ClientId"));
+                requestMessage.Content = new ObjectContent&lt;Dibix.Sdk.Tests.DomainModel.InputContract&gt;(body, Formatter);
+                HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
+                return responseMessage;
+            }
+        }
+
+        public async Task&lt;HttpResponseMessage&gt; EmptyWithParams3Async(Dibix.Sdk.Tests.DomainModel.InputContract body, CancellationToken cancellationToken = default)
+        {
+            using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
+            {
+                HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("PATCH"), "Tests/GenericEndpoint");
+                requestMessage.Headers.Add("HLNS-SIT", this._authorizationProvider.GetValue("HLNS-SIT"));
+                requestMessage.Headers.Add("HLNS-ClientId", this._authorizationProvider.GetValue("HLNS-ClientId"));
+                requestMessage.Content = new ObjectContent&lt;Dibix.Sdk.Tests.DomainModel.InputContract&gt;(body, Formatter);
+                HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
+                return responseMessage;
+            }
+        }
+    }
+}
+#endregion</value>
   </data>
   <data name="EmptyReturnSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
@@ -418,249 +419,250 @@ using Newtonsoft.Json;
 
 [assembly: ArtifactAssembly]
 [assembly: AreaRegistration("Tests")]
-namespace Dibix.Sdk.Tests
+
+#region Accessor
+namespace Dibix.Sdk.Tests.Data
 {
-    namespace Data
+    [DatabaseAccessor]
+    public static class TestAccessor
     {
-        #region Accessor
-        [DatabaseAccessor]
-        public static class TestAccessor
+        // EmptyWithParams
+        private const string EmptyWithParamsCommandText = "[dbo].[dbx_tests_syntax_empty_params]";
+
+        // FileResult
+        private const string FileResultCommandText = "[dbo].[dbx_tests_syntax_fileresult]";
+
+        // FileUpload
+        private const string FileUploadCommandText = "[dbo].[dbx_tests_syntax_fileupload]";
+
+        // SingleConrecteResultWithParams
+        private const string SingleConrecteResultWithParamsCommandText = "[dbo].[dbx_tests_syntax_singleconcreteresult_params]";
+
+        public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string u, string v, System.Guid? w, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? x = null, bool y = true, int? z = null)
         {
-            // EmptyWithParams
-            private const string EmptyWithParamsCommandText = "[dbo].[dbx_tests_syntax_empty_params]";
-
-            // FileResult
-            private const string FileResultCommandText = "[dbo].[dbx_tests_syntax_fileresult]";
-
-            // FileUpload
-            private const string FileUploadCommandText = "[dbo].[dbx_tests_syntax_fileupload]";
-
-            // SingleConrecteResultWithParams
-            private const string SingleConrecteResultWithParamsCommandText = "[dbo].[dbx_tests_syntax_singleconcreteresult_params]";
-
-            public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string u, string v, System.Guid? w, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? x = null, bool y = true, int? z = null)
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
-                using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
-                {
-                    ParametersVisitor @params = accessor.Parameters()
-                                                        .SetFromTemplate(new
-                                                        {
-                                                            u,
-                                                            v,
-                                                            w,
-                                                            ids,
-                                                            x,
-                                                            y,
-                                                            z
-                                                        })
-                                                        .SetString(nameof(password), password, true)
-                                                        .Build();
-                    accessor.Execute(EmptyWithParamsCommandText, CommandType.StoredProcedure, @params);
-                }
-            }
-
-            public static Dibix.FileEntity FileResult(this IDatabaseAccessorFactory databaseAccessorFactory, int id)
-            {
-                using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
-                {
-                    ParametersVisitor @params = accessor.Parameters()
-                                                        .SetFromTemplate(new
-                                                        {
-                                                            id
-                                                        })
-                                                        .Build();
-                    return accessor.QuerySingleOrDefault&lt;Dibix.FileEntity&gt;(FileResultCommandText, CommandType.StoredProcedure, @params);
-                }
-            }
-
-            public static void FileUpload(this IDatabaseAccessorFactory databaseAccessorFactory, System.IO.Stream data)
-            {
-                using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
-                {
-                    ParametersVisitor @params = accessor.Parameters()
-                                                        .SetFromTemplate(new
-                                                        {
-                                                            data
-                                                        })
-                                                        .Build();
-                    accessor.Execute(FileUploadCommandText, CommandType.StoredProcedure, @params);
-                }
-            }
-
-            public static Dibix.Sdk.Tests.DomainModel.GenericContract SingleConrecteResultWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, Dibix.Sdk.Tests.Data.IntParameterSet ids)
-            {
-                using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
-                {
-                    ParametersVisitor @params = accessor.Parameters()
-                                                        .SetFromTemplate(new
-                                                        {
-                                                            ids
-                                                        })
-                                                        .Build();
-                    return accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(SingleConrecteResultWithParamsCommandText, CommandType.StoredProcedure, @params);
-                }
-            }
-        }
-        #endregion
-
-        #region Structured types
-        [StructuredType("[dbo].[dbx_codeanalysis_udt_generic]")]
-        public sealed class GenericParameterSet : StructuredType&lt;GenericParameterSet, int, string?&gt;
-        {
-            public GenericParameterSet() : base("[dbo].[dbx_codeanalysis_udt_generic]")
-            {
-                base.ImportSqlMetadata(() =&gt; this.Add(default, default));
-            }
-            public void Add(int id, string? name)
-            {
-                base.AddValues(id, name);
+                ParametersVisitor @params = accessor.Parameters()
+                                                    .SetFromTemplate(new
+                                                    {
+                                                        u,
+                                                        v,
+                                                        w,
+                                                        ids,
+                                                        x,
+                                                        y,
+                                                        z
+                                                    })
+                                                    .SetString(nameof(password), password, true)
+                                                    .Build();
+                accessor.Execute(EmptyWithParamsCommandText, CommandType.StoredProcedure, @params);
             }
         }
 
-        [StructuredType("[dbo].[dbx_codeanalysis_udt_int]")]
-        public sealed class IntParameterSet : StructuredType&lt;IntParameterSet, int&gt;
+        public static Dibix.FileEntity FileResult(this IDatabaseAccessorFactory databaseAccessorFactory, int id)
         {
-            public IntParameterSet() : base("[dbo].[dbx_codeanalysis_udt_int]")
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
-                base.ImportSqlMetadata(() =&gt; this.Add(default));
-            }
-            public void Add(int id)
-            {
-                base.AddValues(id);
+                ParametersVisitor @params = accessor.Parameters()
+                                                    .SetFromTemplate(new
+                                                    {
+                                                        id
+                                                    })
+                                                    .Build();
+                return accessor.QuerySingleOrDefault&lt;Dibix.FileEntity&gt;(FileResultCommandText, CommandType.StoredProcedure, @params);
             }
         }
-        #endregion
+
+        public static void FileUpload(this IDatabaseAccessorFactory databaseAccessorFactory, System.IO.Stream data)
+        {
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
+            {
+                ParametersVisitor @params = accessor.Parameters()
+                                                    .SetFromTemplate(new
+                                                    {
+                                                        data
+                                                    })
+                                                    .Build();
+                accessor.Execute(FileUploadCommandText, CommandType.StoredProcedure, @params);
+            }
+        }
+
+        public static Dibix.Sdk.Tests.DomainModel.GenericContract SingleConrecteResultWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, Dibix.Sdk.Tests.Data.IntParameterSet ids)
+        {
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
+            {
+                ParametersVisitor @params = accessor.Parameters()
+                                                    .SetFromTemplate(new
+                                                    {
+                                                        ids
+                                                    })
+                                                    .Build();
+                return accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(SingleConrecteResultWithParamsCommandText, CommandType.StoredProcedure, @params);
+            }
+        }
+    }
+}
+#endregion
+
+#region Structured types
+namespace Dibix.Sdk.Tests.Data
+{
+    [StructuredType("[dbo].[dbx_codeanalysis_udt_generic]")]
+    public sealed class GenericParameterSet : StructuredType&lt;GenericParameterSet, int, string?&gt;
+    {
+        public GenericParameterSet() : base("[dbo].[dbx_codeanalysis_udt_generic]")
+        {
+            base.ImportSqlMetadata(() =&gt; this.Add(default, default));
+        }
+        public void Add(int id, string? name)
+        {
+            base.AddValues(id, name);
+        }
     }
 
-    namespace DomainModel
+    [StructuredType("[dbo].[dbx_codeanalysis_udt_int]")]
+    public sealed class IntParameterSet : StructuredType&lt;IntParameterSet, int&gt;
     {
-        #region Contracts
-        public sealed class Entry
+        public IntParameterSet() : base("[dbo].[dbx_codeanalysis_udt_int]")
         {
-            public int Id { get; set; }
-            public string Name { get; set; }
+            base.ImportSqlMetadata(() =&gt; this.Add(default));
         }
-
-        [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
-        public sealed class GenericContract
+        public void Add(int id)
         {
-            [Key]
-            [DataMember]
-            [JsonIgnore]
-            public int Id { get; set; }
-            [DataMember]
-            [DefaultValue("DefaultValue")]
-            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; } = "DefaultValue";
-            [DataMember]
-            [JsonIgnore]
-            [Discriminator]
-            public int? ParentId { get; set; }
-            [DataMember]
-            [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
-            public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
-            [DataMember]
-            [DateTimeKind(DateTimeKind.Utc)]
-            public System.DateTime? CreationTime { get; set; }
-            [DataMember]
-            public System.Uri ImageUrl { get; set; }
+            base.AddValues(id);
         }
+    }
+}
+#endregion
 
-        public enum Role : int
-        {
-            None,
-            User,
-            Admin
-        }
-
-        public sealed class InputContract
-        {
-            public string U { get; set; }
-            public string V { get; set; }
-            [Optional]
-            public string W { get; set; }
-            public IList&lt;Dibix.Sdk.Tests.DomainModel.Entry&gt; Ids { get; private set; }
-            public System.Guid X { get; set; }
-            public string Password { get; set; }
-            public bool Y { get; set; }
-            public int Z { get; set; }
-
-            public InputContract()
-            {
-                this.Ids = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Entry&gt;();
-            }
-        }
-        #endregion
+#region Contracts
+namespace Dibix.Sdk.Tests.DomainModel
+{
+    public sealed class Entry
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
     }
 
-    namespace Business
+    [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
+    public sealed class GenericContract
     {
-        #region Endpoints
-        public sealed class ApiConfiguration : HttpApiDescriptor
+        [Key]
+        [DataMember]
+        [JsonIgnore]
+        public int Id { get; set; }
+        [DataMember]
+        [DefaultValue("DefaultValue")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string Name { get; set; } = "DefaultValue";
+        [DataMember]
+        [JsonIgnore]
+        [Discriminator]
+        public int? ParentId { get; set; }
+        [DataMember]
+        [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
+        public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
+        [DataMember]
+        [DateTimeKind(DateTimeKind.Utc)]
+        public System.DateTime? CreationTime { get; set; }
+        [DataMember]
+        public System.Uri ImageUrl { get; set; }
+    }
+
+    public enum Role : int
+    {
+        None,
+        User,
+        Admin
+    }
+
+    public sealed class InputContract
+    {
+        public string U { get; set; }
+        public string V { get; set; }
+        [Optional]
+        public string W { get; set; }
+        public IList&lt;Dibix.Sdk.Tests.DomainModel.Entry&gt; Ids { get; private set; }
+        public System.Guid X { get; set; }
+        public string Password { get; set; }
+        public bool Y { get; set; }
+        public int Z { get; set; }
+
+        public InputContract()
         {
-            public override void Configure(IHttpApiDiscoveryContext context)
+            this.Ids = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Entry&gt;();
+        }
+    }
+}
+#endregion
+
+#region Endpoints
+namespace Dibix.Sdk.Tests.Business
+{
+    public sealed class ApiConfiguration : HttpApiDescriptor
+    {
+        public override void Configure(IHttpApiDiscoveryContext context)
+        {
+            base.RegisterController("GenericEndpoint", x =&gt; 
             {
-                base.RegisterController("GenericEndpoint", x =&gt; 
+                x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), y =&gt;
                 {
-                    x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), y =&gt;
-                    {
-                        y.Method = HttpApiMethod.Get;
-                        y.ChildRoute = "{password}/Fixed";
-                        y.ResolveParameterFromNull("password");
-                        y.ResolveParameterFromSource("u", "HEADER", "User-Agent");
-                        y.ResolveParameterFromSource("v", "HEADER", "Authorization.Parameter");
-                        y.ResolveParameterFromSource("w", "DBX", "X");
-                        y.ResolveParameterFromSource("x", "REQUEST", "Language");
-                        y.ResolveParameterFromConstant("y", true);
-                        y.ResolveParameterFromConstant("z", 5);
-                    });
-                    x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), y =&gt;
-                    {
-                        y.Method = HttpApiMethod.Get;
-                        y.ChildRoute = "{password}/User";
-                        y.IsAnonymous = true;
-                    });
-                    x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.SingleConrecteResultWithParams)), y =&gt;
-                    {
-                        y.Method = HttpApiMethod.Get;
-                        y.ChildRoute = "Array";
-                    });
-                    x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.FileResult)), y =&gt;
-                    {
-                        y.Method = HttpApiMethod.Get;
-                        y.ChildRoute = "{id}";
-                        y.IsAnonymous = true;
-                        y.FileResponse = new HttpFileResponseDefinition(cache: false);
-                    });
-                    x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.FileUpload)), y =&gt;
-                    {
-                        y.Method = HttpApiMethod.Put;
-                        y.BodyContract = typeof(System.IO.Stream);
-                        y.ResolveParameterFromSource("data", "BODY", "$RAW");
-                    });
-                    x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), y =&gt;
-                    {
-                        y.Method = HttpApiMethod.Post;
-                        y.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.InputContract);
-                        y.ResolveParameterFromBody("ids", "Dibix.GenericContractIdsInputConverter");
-                    });
-                    x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), y =&gt;
-                    {
-                        y.Method = HttpApiMethod.Patch;
-                        y.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.InputContract);
-                        y.ResolveParameterFromSource("ids", "BODY", "Ids", z =&gt; 
-                        {
-                            z.ResolveParameterFromSource("id", "ITEM", "Id");
-                            z.ResolveParameterFromSource("name", "ITEM", "Name");
-                        });
-                    });
-                    x.ControllerImports.Add("Dibix.GenericEndpoint");
+                    y.Method = HttpApiMethod.Get;
+                    y.ChildRoute = "{password}/Fixed";
+                    y.ResolveParameterFromNull("password");
+                    y.ResolveParameterFromSource("u", "HEADER", "User-Agent");
+                    y.ResolveParameterFromSource("v", "HEADER", "Authorization.Parameter");
+                    y.ResolveParameterFromSource("w", "DBX", "X");
+                    y.ResolveParameterFromSource("x", "REQUEST", "Language");
+                    y.ResolveParameterFromConstant("y", true);
+                    y.ResolveParameterFromConstant("z", 5);
                 });
-            }
+                x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), y =&gt;
+                {
+                    y.Method = HttpApiMethod.Get;
+                    y.ChildRoute = "{password}/User";
+                    y.IsAnonymous = true;
+                });
+                x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.SingleConrecteResultWithParams)), y =&gt;
+                {
+                    y.Method = HttpApiMethod.Get;
+                    y.ChildRoute = "Array";
+                });
+                x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.FileResult)), y =&gt;
+                {
+                    y.Method = HttpApiMethod.Get;
+                    y.ChildRoute = "{id}";
+                    y.IsAnonymous = true;
+                    y.FileResponse = new HttpFileResponseDefinition(cache: false);
+                });
+                x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.FileUpload)), y =&gt;
+                {
+                    y.Method = HttpApiMethod.Put;
+                    y.BodyContract = typeof(System.IO.Stream);
+                    y.ResolveParameterFromSource("data", "BODY", "$RAW");
+                });
+                x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), y =&gt;
+                {
+                    y.Method = HttpApiMethod.Post;
+                    y.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.InputContract);
+                    y.ResolveParameterFromBody("ids", "Dibix.GenericContractIdsInputConverter");
+                });
+                x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), y =&gt;
+                {
+                    y.Method = HttpApiMethod.Patch;
+                    y.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.InputContract);
+                    y.ResolveParameterFromSource("ids", "BODY", "Ids", z =&gt; 
+                    {
+                        z.ResolveParameterFromSource("id", "ITEM", "Id");
+                        z.ResolveParameterFromSource("name", "ITEM", "Name");
+                    });
+                });
+                x.ControllerImports.Add("Dibix.GenericEndpoint");
+            });
         }
-        #endregion
     }
-}</value>
+}
+#endregion</value>
   </data>
   <data name="Endpoints_OpenApi" xml:space="preserve">
     <value>openapi: 3.0.1
@@ -1008,28 +1010,26 @@ using System.Data;
 using Dibix;
 
 [assembly: ArtifactAssembly]
-namespace Dibix.Sdk.Tests
-{
-    namespace Data
-    {
-        #region Accessor
-        [DatabaseAccessor]
-        public static class TestAccessor
-        {
-            // Empty
-            private const string EmptyCommandText = "[dbo].[dbx_tests_syntax_empty]";
 
-            public static void Empty(this IDatabaseAccessorFactory databaseAccessorFactory)
+#region Accessor
+namespace Dibix.Sdk.Tests.Data
+{
+    [DatabaseAccessor]
+    public static class TestAccessor
+    {
+        // Empty
+        private const string EmptyCommandText = "[dbo].[dbx_tests_syntax_empty]";
+
+        public static void Empty(this IDatabaseAccessorFactory databaseAccessorFactory)
+        {
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
-                using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
-                {
-                    accessor.Execute(EmptyCommandText, CommandType.StoredProcedure, ParametersVisitor.Empty);
-                }
+                accessor.Execute(EmptyCommandText, CommandType.StoredProcedure, ParametersVisitor.Empty);
             }
         }
-        #endregion
     }
-}</value>
+}
+#endregion</value>
   </data>
   <data name="External_Empty_WithParams" xml:space="preserve">
     <value>/*------------------------------------------------------------------------------
@@ -1044,56 +1044,57 @@ using System.Data;
 using Dibix;
 
 [assembly: ArtifactAssembly]
-namespace Dibix.Sdk.Tests
+
+#region Accessor
+namespace Dibix.Sdk.Tests.Data
 {
-    namespace Data
+    [DatabaseAccessor]
+    public static class TestAccessor
     {
-        #region Accessor
-        [DatabaseAccessor]
-        public static class TestAccessor
-        {
-            // EmptyWithParams
-            private const string EmptyWithParamsCommandText = "[dbo].[dbx_tests_syntax_empty_params]";
+        // EmptyWithParams
+        private const string EmptyWithParamsCommandText = "[dbo].[dbx_tests_syntax_empty_params]";
 
-            public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string u, string v, System.Guid? w, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? x = null, bool y = true, int? z = null)
+        public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string u, string v, System.Guid? w, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? x = null, bool y = true, int? z = null)
+        {
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
-                using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
-                {
-                    ParametersVisitor @params = accessor.Parameters()
-                                                        .SetFromTemplate(new
-                                                        {
-                                                            u,
-                                                            v,
-                                                            w,
-                                                            ids,
-                                                            x,
-                                                            y,
-                                                            z
-                                                        })
-                                                        .SetString(nameof(password), password, true)
-                                                        .Build();
-                    accessor.Execute(EmptyWithParamsCommandText, CommandType.StoredProcedure, @params);
-                }
+                ParametersVisitor @params = accessor.Parameters()
+                                                    .SetFromTemplate(new
+                                                    {
+                                                        u,
+                                                        v,
+                                                        w,
+                                                        ids,
+                                                        x,
+                                                        y,
+                                                        z
+                                                    })
+                                                    .SetString(nameof(password), password, true)
+                                                    .Build();
+                accessor.Execute(EmptyWithParamsCommandText, CommandType.StoredProcedure, @params);
             }
         }
-        #endregion
-
-        #region Structured types
-        [StructuredType("[dbo].[dbx_codeanalysis_udt_generic]")]
-        public sealed class GenericParameterSet : StructuredType&lt;GenericParameterSet, int, string?&gt;
-        {
-            public GenericParameterSet() : base("[dbo].[dbx_codeanalysis_udt_generic]")
-            {
-                base.ImportSqlMetadata(() =&gt; this.Add(default, default));
-            }
-            public void Add(int id, string? name)
-            {
-                base.AddValues(id, name);
-            }
-        }
-        #endregion
     }
-}</value>
+}
+#endregion
+
+#region Structured types
+namespace Dibix.Sdk.Tests.Data
+{
+    [StructuredType("[dbo].[dbx_codeanalysis_udt_generic]")]
+    public sealed class GenericParameterSet : StructuredType&lt;GenericParameterSet, int, string?&gt;
+    {
+        public GenericParameterSet() : base("[dbo].[dbx_codeanalysis_udt_generic]")
+        {
+            base.ImportSqlMetadata(() =&gt; this.Add(default, default));
+        }
+        public void Add(int id, string? name)
+        {
+            base.AddValues(id, name);
+        }
+    }
+}
+#endregion</value>
   </data>
   <data name="External_Empty_WithParamsAndInputClass" xml:space="preserve">
     <value>/*------------------------------------------------------------------------------
@@ -1108,58 +1109,62 @@ using System.Data;
 using Dibix;
 
 [assembly: ArtifactAssembly]
-namespace Dibix.Sdk.Tests
+
+#region Accessor
+namespace Dibix.Sdk.Tests.Data
 {
-    namespace Data
+    [DatabaseAccessor]
+    public static class TestAccessor
     {
-        #region Accessor
-        [DatabaseAccessor]
-        public static class TestAccessor
-        {
-            // EmptyWithParams
-            private const string EmptyWithParamsCommandText = "[dbo].[dbx_tests_syntax_empty_params_inputclass]";
+        // EmptyWithParams
+        private const string EmptyWithParamsCommandText = "[dbo].[dbx_tests_syntax_empty_params_inputclass]";
 
-            public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] EmptyWithParamsInput input)
+        public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] EmptyWithParamsInput input)
+        {
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
-                using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
-                {
-                    ParametersVisitor @params = accessor.Parameters()
-                                                        .SetFromTemplate(input)
-                                                        .Build();
-                    accessor.Execute(EmptyWithParamsCommandText, CommandType.StoredProcedure, @params);
-                }
+                ParametersVisitor @params = accessor.Parameters()
+                                                    .SetFromTemplate(input)
+                                                    .Build();
+                accessor.Execute(EmptyWithParamsCommandText, CommandType.StoredProcedure, @params);
             }
         }
-        #endregion
-
-        #region Input types
-        public sealed class EmptyWithParamsInput
-        {
-            public System.Guid? x { get; set; }
-            [Obfuscated]
-            public string password { get; set; }
-            public Dibix.Sdk.Tests.Data.GenericParameterSet ids { get; set; }
-            public IOutParameter&lt;bool&gt; y { get; set; }
-            public int z { get; set; }
-        }
-        #endregion
-
-        #region Structured types
-        [StructuredType("[dbo].[dbx_codeanalysis_udt_generic]")]
-        public sealed class GenericParameterSet : StructuredType&lt;GenericParameterSet, int, string?&gt;
-        {
-            public GenericParameterSet() : base("[dbo].[dbx_codeanalysis_udt_generic]")
-            {
-                base.ImportSqlMetadata(() =&gt; this.Add(default, default));
-            }
-            public void Add(int id, string? name)
-            {
-                base.AddValues(id, name);
-            }
-        }
-        #endregion
     }
-}</value>
+}
+#endregion
+
+#region Input types
+namespace Dibix.Sdk.Tests.Data
+{
+    public sealed class EmptyWithParamsInput
+    {
+        public System.Guid? x { get; set; }
+        [Obfuscated]
+        public string password { get; set; }
+        public Dibix.Sdk.Tests.Data.GenericParameterSet ids { get; set; }
+        public IOutParameter&lt;bool&gt; y { get; set; }
+        public int z { get; set; }
+    }
+}
+#endregion
+
+#region Structured types
+namespace Dibix.Sdk.Tests.Data
+{
+    [StructuredType("[dbo].[dbx_codeanalysis_udt_generic]")]
+    public sealed class GenericParameterSet : StructuredType&lt;GenericParameterSet, int, string?&gt;
+    {
+        public GenericParameterSet() : base("[dbo].[dbx_codeanalysis_udt_generic]")
+        {
+            base.ImportSqlMetadata(() =&gt; this.Add(default, default));
+        }
+        public void Add(int id, string? name)
+        {
+            base.AddValues(id, name);
+        }
+    }
+}
+#endregion</value>
   </data>
   <data name="ImplicitAliasSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
@@ -1269,34 +1274,32 @@ using System.Data;
 using Dibix;
 
 [assembly: ArtifactAssembly]
-namespace Dibix.Sdk.Tests
-{
-    namespace Data
-    {
-        #region Accessor
-        [DatabaseAccessor]
-        public static class TestAccessor
-        {
-            // FileResult
-            private const string FileResultCommandText = "SELECT [type] = N'png'\r\n     , [data] = 0x0\r\nWHERE @id = 1";
 
-            public static Dibix.FileEntity FileResult(this IDatabaseAccessorFactory databaseAccessorFactory, int id)
+#region Accessor
+namespace Dibix.Sdk.Tests.Data
+{
+    [DatabaseAccessor]
+    public static class TestAccessor
+    {
+        // FileResult
+        private const string FileResultCommandText = "SELECT [type] = N'png'\r\n     , [data] = 0x0\r\nWHERE @id = 1";
+
+        public static Dibix.FileEntity FileResult(this IDatabaseAccessorFactory databaseAccessorFactory, int id)
+        {
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
-                using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
-                {
-                    ParametersVisitor @params = accessor.Parameters()
-                                                        .SetFromTemplate(new
-                                                        {
-                                                            id
-                                                        })
-                                                        .Build();
-                    return accessor.QuerySingleOrDefault&lt;Dibix.FileEntity&gt;(FileResultCommandText, CommandType.Text, @params);
-                }
+                ParametersVisitor @params = accessor.Parameters()
+                                                    .SetFromTemplate(new
+                                                    {
+                                                        id
+                                                    })
+                                                    .Build();
+                return accessor.QuerySingleOrDefault&lt;Dibix.FileEntity&gt;(FileResultCommandText, CommandType.Text, @params);
             }
         }
-        #endregion
     }
-}</value>
+}
+#endregion</value>
   </data>
   <data name="Inline_GridResult" xml:space="preserve">
     <value>/*------------------------------------------------------------------------------
@@ -1318,110 +1321,105 @@ using Dibix;
 using Newtonsoft.Json;
 
 [assembly: ArtifactAssembly]
-namespace Dibix.Sdk.Tests
+
+#region Accessor
+namespace Dibix.Sdk.Tests.Data.Grid
 {
-    namespace Data
+    [DatabaseAccessor]
+    public static class TestAccessor
     {
-        #region Accessor
-        namespace Grid
-        {
-            [DatabaseAccessor]
-            public static class TestAccessor
-            {
-                // GetGrid
-                private const string GetGridCommandText = "SELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 1\r\nUNION ALL\r\nSELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 2\r\n\r\nSELECT 1";
+        // GetGrid
+        private const string GetGridCommandText = "SELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 1\r\nUNION ALL\r\nSELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 2\r\n\r\nSELECT 1";
 
-                public static Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult GetGrid(this IDatabaseAccessorFactory databaseAccessorFactory)
+        public static Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult GetGrid(this IDatabaseAccessorFactory databaseAccessorFactory)
+        {
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
+            {
+                using (IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText, CommandType.Text, ParametersVisitor.Empty))
                 {
-                    using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
-                    {
-                        using (IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText, CommandType.Text, ParametersVisitor.Empty))
-                        {
-                            Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult();
-                            result.Item = reader.ReadSingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;("id");
-                            result.Directions.ReplaceWith(reader.ReadMany&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;());
-                            return result;
-                        }
-                    }
+                    Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult();
+                    result.Item = reader.ReadSingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;("id");
+                    result.Directions.ReplaceWith(reader.ReadMany&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;());
+                    return result;
                 }
             }
         }
-        #endregion
+    }
+}
+#endregion
+
+#region Contracts
+namespace Dibix.Sdk.Tests.DomainModel
+{
+    public enum Direction : int
+    {
+        Ascending,
+        Descending
     }
 
-    namespace DomainModel
+    [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
+    public sealed class GenericContract
     {
-        #region Contracts
-        public enum Direction : int
-        {
-            Ascending,
-            Descending
-        }
-
-        [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
-        public sealed class GenericContract
-        {
-            [Key]
-            [DataMember]
-            [JsonIgnore]
-            public int Id { get; set; }
-            [DataMember]
-            [DefaultValue("DefaultValue")]
-            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; } = "DefaultValue";
-            [DataMember]
-            [JsonIgnore]
-            [Discriminator]
-            public int? ParentId { get; set; }
-            [DataMember]
-            [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
-            public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
-            [DataMember]
-            [DateTimeKind(DateTimeKind.Utc)]
-            public System.DateTime? CreationTime { get; set; }
-            [DataMember]
-            public System.Uri ImageUrl { get; set; }
-        }
-
-        public enum Role : int
-        {
-            None,
-            User,
-            Admin
-        }
-
-        namespace Extension
-        {
-            public sealed class MultiMapContract
-            {
-                public System.Guid? X { get; set; }
-                public IList&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; }
-                public IList&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
-
-                public MultiMapContract()
-                {
-                    this.Y = new Collection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;();
-                    this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
-                }
-            }
-        }
-
-        namespace Grid
-        {
-            public sealed class GetGridResult
-            {
-                public Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract Item { get; set; }
-                public IList&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
-
-                public GetGridResult()
-                {
-                    this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
-                }
-            }
-        }
-        #endregion
+        [Key]
+        [DataMember]
+        [JsonIgnore]
+        public int Id { get; set; }
+        [DataMember]
+        [DefaultValue("DefaultValue")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string Name { get; set; } = "DefaultValue";
+        [DataMember]
+        [JsonIgnore]
+        [Discriminator]
+        public int? ParentId { get; set; }
+        [DataMember]
+        [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
+        public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
+        [DataMember]
+        [DateTimeKind(DateTimeKind.Utc)]
+        public System.DateTime? CreationTime { get; set; }
+        [DataMember]
+        public System.Uri ImageUrl { get; set; }
     }
-}</value>
+
+    public enum Role : int
+    {
+        None,
+        User,
+        Admin
+    }
+}
+
+namespace Dibix.Sdk.Tests.DomainModel.Extension
+{
+    public sealed class MultiMapContract
+    {
+        public System.Guid? X { get; set; }
+        public IList&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; }
+        public IList&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
+
+        public MultiMapContract()
+        {
+            this.Y = new Collection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;();
+            this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
+        }
+    }
+}
+
+namespace Dibix.Sdk.Tests.DomainModel.Grid
+{
+    public sealed class GetGridResult
+    {
+        public Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract Item { get; set; }
+        public IList&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
+
+        public GetGridResult()
+        {
+            this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
+        }
+    }
+}
+#endregion</value>
   </data>
   <data name="Inline_GridResult_MergeResult" xml:space="preserve">
     <value>/*------------------------------------------------------------------------------
@@ -1443,98 +1441,93 @@ using Dibix;
 using Newtonsoft.Json;
 
 [assembly: ArtifactAssembly]
-namespace Dibix.Sdk.Tests
+
+#region Accessor
+namespace Dibix.Sdk.Tests.Data.Grid
 {
-    namespace Data
+    [DatabaseAccessor]
+    public static class TestAccessor
     {
-        #region Accessor
-        namespace Grid
+        // GetGrid
+        private const string GetGridCommandText = "SELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 1\r\nUNION ALL\r\nSELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 2\r\n\r\nSELECT 1";
+
+        public static Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract GetGrid(this IDatabaseAccessorFactory databaseAccessorFactory)
         {
-            [DatabaseAccessor]
-            public static class TestAccessor
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
-                // GetGrid
-                private const string GetGridCommandText = "SELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 1\r\nUNION ALL\r\nSELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 2\r\n\r\nSELECT 1";
-
-                public static Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract GetGrid(this IDatabaseAccessorFactory databaseAccessorFactory)
+                using (IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText, CommandType.Text, ParametersVisitor.Empty))
                 {
-                    using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
-                    {
-                        using (IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText, CommandType.Text, ParametersVisitor.Empty))
-                        {
-                            Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract result = reader.ReadSingleOrDefault&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;("id");
-                            if (result == null)
-                                return null;
+                    Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract result = reader.ReadSingleOrDefault&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;("id");
+                    if (result == null)
+                        return null;
 
-                            result.Directions.ReplaceWith(reader.ReadMany&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;());
-                            return result;
-                        }
-                    }
+                    result.Directions.ReplaceWith(reader.ReadMany&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;());
+                    return result;
                 }
             }
         }
-        #endregion
     }
+}
+#endregion
 
-    namespace DomainModel
+#region Contracts
+namespace Dibix.Sdk.Tests.DomainModel
+{
+    public enum Direction : int
     {
-        #region Contracts
-        public enum Direction : int
-        {
-            Ascending,
-            Descending
-        }
-
-        [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
-        public sealed class GenericContract
-        {
-            [Key]
-            [DataMember]
-            [JsonIgnore]
-            public int Id { get; set; }
-            [DataMember]
-            [DefaultValue("DefaultValue")]
-            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; } = "DefaultValue";
-            [DataMember]
-            [JsonIgnore]
-            [Discriminator]
-            public int? ParentId { get; set; }
-            [DataMember]
-            [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
-            public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
-            [DataMember]
-            [DateTimeKind(DateTimeKind.Utc)]
-            public System.DateTime? CreationTime { get; set; }
-            [DataMember]
-            public System.Uri ImageUrl { get; set; }
-        }
-
-        public enum Role : int
-        {
-            None,
-            User,
-            Admin
-        }
-
-        namespace Extension
-        {
-            public sealed class MultiMapContract
-            {
-                public System.Guid? X { get; set; }
-                public IList&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; }
-                public IList&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
-
-                public MultiMapContract()
-                {
-                    this.Y = new Collection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;();
-                    this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
-                }
-            }
-        }
-        #endregion
+        Ascending,
+        Descending
     }
-}</value>
+
+    [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
+    public sealed class GenericContract
+    {
+        [Key]
+        [DataMember]
+        [JsonIgnore]
+        public int Id { get; set; }
+        [DataMember]
+        [DefaultValue("DefaultValue")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string Name { get; set; } = "DefaultValue";
+        [DataMember]
+        [JsonIgnore]
+        [Discriminator]
+        public int? ParentId { get; set; }
+        [DataMember]
+        [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
+        public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
+        [DataMember]
+        [DateTimeKind(DateTimeKind.Utc)]
+        public System.DateTime? CreationTime { get; set; }
+        [DataMember]
+        public System.Uri ImageUrl { get; set; }
+    }
+
+    public enum Role : int
+    {
+        None,
+        User,
+        Admin
+    }
+}
+
+namespace Dibix.Sdk.Tests.DomainModel.Extension
+{
+    public sealed class MultiMapContract
+    {
+        public System.Guid? X { get; set; }
+        public IList&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; }
+        public IList&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
+
+        public MultiMapContract()
+        {
+            this.Y = new Collection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;();
+            this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
+        }
+    }
+}
+#endregion</value>
   </data>
   <data name="Inline_GridResult_WithCustomResultContractName" xml:space="preserve">
     <value>/*------------------------------------------------------------------------------
@@ -1556,110 +1549,105 @@ using Dibix;
 using Newtonsoft.Json;
 
 [assembly: ArtifactAssembly]
-namespace Dibix.Sdk.Tests
+
+#region Accessor
+namespace Dibix.Sdk.Tests.Data.Grid
 {
-    namespace Data
+    [DatabaseAccessor]
+    public static class TestAccessor
     {
-        #region Accessor
-        namespace Grid
-        {
-            [DatabaseAccessor]
-            public static class TestAccessor
-            {
-                // GetGrid
-                private const string GetGridCommandText = "SELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 1\r\nUNION ALL\r\nSELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 2\r\n\r\nSELECT 1";
+        // GetGrid
+        private const string GetGridCommandText = "SELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 1\r\nUNION ALL\r\nSELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 2\r\n\r\nSELECT 1";
 
-                public static Dibix.Sdk.Tests.DomainModel.Grid.GridResult GetGrid(this IDatabaseAccessorFactory databaseAccessorFactory)
+        public static Dibix.Sdk.Tests.DomainModel.Grid.GridResult GetGrid(this IDatabaseAccessorFactory databaseAccessorFactory)
+        {
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
+            {
+                using (IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText, CommandType.Text, ParametersVisitor.Empty))
                 {
-                    using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
-                    {
-                        using (IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText, CommandType.Text, ParametersVisitor.Empty))
-                        {
-                            Dibix.Sdk.Tests.DomainModel.Grid.GridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GridResult();
-                            result.Item = reader.ReadSingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;("id");
-                            result.Directions.ReplaceWith(reader.ReadMany&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;());
-                            return result;
-                        }
-                    }
+                    Dibix.Sdk.Tests.DomainModel.Grid.GridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GridResult();
+                    result.Item = reader.ReadSingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;("id");
+                    result.Directions.ReplaceWith(reader.ReadMany&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;());
+                    return result;
                 }
             }
         }
-        #endregion
+    }
+}
+#endregion
+
+#region Contracts
+namespace Dibix.Sdk.Tests.DomainModel
+{
+    public enum Direction : int
+    {
+        Ascending,
+        Descending
     }
 
-    namespace DomainModel
+    [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
+    public sealed class GenericContract
     {
-        #region Contracts
-        public enum Direction : int
-        {
-            Ascending,
-            Descending
-        }
-
-        [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
-        public sealed class GenericContract
-        {
-            [Key]
-            [DataMember]
-            [JsonIgnore]
-            public int Id { get; set; }
-            [DataMember]
-            [DefaultValue("DefaultValue")]
-            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; } = "DefaultValue";
-            [DataMember]
-            [JsonIgnore]
-            [Discriminator]
-            public int? ParentId { get; set; }
-            [DataMember]
-            [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
-            public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
-            [DataMember]
-            [DateTimeKind(DateTimeKind.Utc)]
-            public System.DateTime? CreationTime { get; set; }
-            [DataMember]
-            public System.Uri ImageUrl { get; set; }
-        }
-
-        public enum Role : int
-        {
-            None,
-            User,
-            Admin
-        }
-
-        namespace Extension
-        {
-            public sealed class MultiMapContract
-            {
-                public System.Guid? X { get; set; }
-                public IList&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; }
-                public IList&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
-
-                public MultiMapContract()
-                {
-                    this.Y = new Collection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;();
-                    this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
-                }
-            }
-        }
-
-        namespace Grid
-        {
-            public sealed class GridResult
-            {
-                public Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract Item { get; set; }
-                public IList&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
-
-                public GridResult()
-                {
-                    this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
-                }
-            }
-        }
-        #endregion
+        [Key]
+        [DataMember]
+        [JsonIgnore]
+        public int Id { get; set; }
+        [DataMember]
+        [DefaultValue("DefaultValue")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string Name { get; set; } = "DefaultValue";
+        [DataMember]
+        [JsonIgnore]
+        [Discriminator]
+        public int? ParentId { get; set; }
+        [DataMember]
+        [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
+        public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
+        [DataMember]
+        [DateTimeKind(DateTimeKind.Utc)]
+        public System.DateTime? CreationTime { get; set; }
+        [DataMember]
+        public System.Uri ImageUrl { get; set; }
     }
-}</value>
+
+    public enum Role : int
+    {
+        None,
+        User,
+        Admin
+    }
+}
+
+namespace Dibix.Sdk.Tests.DomainModel.Extension
+{
+    public sealed class MultiMapContract
+    {
+        public System.Guid? X { get; set; }
+        public IList&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; }
+        public IList&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
+
+        public MultiMapContract()
+        {
+            this.Y = new Collection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;();
+            this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
+        }
+    }
+}
+
+namespace Dibix.Sdk.Tests.DomainModel.Grid
+{
+    public sealed class GridResult
+    {
+        public Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract Item { get; set; }
+        public IList&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
+
+        public GridResult()
+        {
+            this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
+        }
+    }
+}
+#endregion</value>
   </data>
   <data name="Inline_GridResult_WithExistingResultContract" xml:space="preserve">
     <value>/*------------------------------------------------------------------------------
@@ -1681,110 +1669,105 @@ using Dibix;
 using Newtonsoft.Json;
 
 [assembly: ArtifactAssembly]
-namespace Dibix.Sdk.Tests
+
+#region Accessor
+namespace Dibix.Sdk.Tests.Data.Grid
 {
-    namespace Data
+    [DatabaseAccessor]
+    public static class TestAccessor
     {
-        #region Accessor
-        namespace Grid
-        {
-            [DatabaseAccessor]
-            public static class TestAccessor
-            {
-                // GetGrid
-                private const string GetGridCommandText = "SELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 1\r\nUNION ALL\r\nSELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 2\r\n\r\nSELECT 1";
+        // GetGrid
+        private const string GetGridCommandText = "SELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 1\r\nUNION ALL\r\nSELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 2\r\n\r\nSELECT 1";
 
-                public static Dibix.Sdk.Tests.DomainModel.Grid.GridResult GetGrid(this IDatabaseAccessorFactory databaseAccessorFactory)
+        public static Dibix.Sdk.Tests.DomainModel.Grid.GridResult GetGrid(this IDatabaseAccessorFactory databaseAccessorFactory)
+        {
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
+            {
+                using (IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText, CommandType.Text, ParametersVisitor.Empty))
                 {
-                    using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
-                    {
-                        using (IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText, CommandType.Text, ParametersVisitor.Empty))
-                        {
-                            Dibix.Sdk.Tests.DomainModel.Grid.GridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GridResult();
-                            result.Item = reader.ReadSingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;("id");
-                            result.Directions.ReplaceWith(reader.ReadMany&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;());
-                            return result;
-                        }
-                    }
+                    Dibix.Sdk.Tests.DomainModel.Grid.GridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GridResult();
+                    result.Item = reader.ReadSingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;("id");
+                    result.Directions.ReplaceWith(reader.ReadMany&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;());
+                    return result;
                 }
             }
         }
-        #endregion
+    }
+}
+#endregion
+
+#region Contracts
+namespace Dibix.Sdk.Tests.DomainModel
+{
+    public enum Direction : int
+    {
+        Ascending,
+        Descending
     }
 
-    namespace DomainModel
+    [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
+    public sealed class GenericContract
     {
-        #region Contracts
-        public enum Direction : int
-        {
-            Ascending,
-            Descending
-        }
-
-        [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
-        public sealed class GenericContract
-        {
-            [Key]
-            [DataMember]
-            [JsonIgnore]
-            public int Id { get; set; }
-            [DataMember]
-            [DefaultValue("DefaultValue")]
-            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; } = "DefaultValue";
-            [DataMember]
-            [JsonIgnore]
-            [Discriminator]
-            public int? ParentId { get; set; }
-            [DataMember]
-            [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
-            public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
-            [DataMember]
-            [DateTimeKind(DateTimeKind.Utc)]
-            public System.DateTime? CreationTime { get; set; }
-            [DataMember]
-            public System.Uri ImageUrl { get; set; }
-        }
-
-        public enum Role : int
-        {
-            None,
-            User,
-            Admin
-        }
-
-        namespace Extension
-        {
-            public sealed class MultiMapContract
-            {
-                public System.Guid? X { get; set; }
-                public IList&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; }
-                public IList&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
-
-                public MultiMapContract()
-                {
-                    this.Y = new Collection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;();
-                    this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
-                }
-            }
-        }
-
-        namespace Grid
-        {
-            public sealed class GridResult
-            {
-                public Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract Item { get; set; }
-                public IList&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
-
-                public GridResult()
-                {
-                    this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
-                }
-            }
-        }
-        #endregion
+        [Key]
+        [DataMember]
+        [JsonIgnore]
+        public int Id { get; set; }
+        [DataMember]
+        [DefaultValue("DefaultValue")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string Name { get; set; } = "DefaultValue";
+        [DataMember]
+        [JsonIgnore]
+        [Discriminator]
+        public int? ParentId { get; set; }
+        [DataMember]
+        [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
+        public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
+        [DataMember]
+        [DateTimeKind(DateTimeKind.Utc)]
+        public System.DateTime? CreationTime { get; set; }
+        [DataMember]
+        public System.Uri ImageUrl { get; set; }
     }
-}</value>
+
+    public enum Role : int
+    {
+        None,
+        User,
+        Admin
+    }
+}
+
+namespace Dibix.Sdk.Tests.DomainModel.Extension
+{
+    public sealed class MultiMapContract
+    {
+        public System.Guid? X { get; set; }
+        public IList&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; }
+        public IList&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
+
+        public MultiMapContract()
+        {
+            this.Y = new Collection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;();
+            this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
+        }
+    }
+}
+
+namespace Dibix.Sdk.Tests.DomainModel.Grid
+{
+    public sealed class GridResult
+    {
+        public Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract Item { get; set; }
+        public IList&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
+
+        public GridResult()
+        {
+            this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
+        }
+    }
+}
+#endregion</value>
   </data>
   <data name="Inline_GridResult_WithProjection" xml:space="preserve">
     <value>/*------------------------------------------------------------------------------
@@ -1806,111 +1789,106 @@ using Dibix;
 using Newtonsoft.Json;
 
 [assembly: ArtifactAssembly]
-namespace Dibix.Sdk.Tests
+
+#region Accessor
+namespace Dibix.Sdk.Tests.Data.Grid
 {
-    namespace Data
+    [DatabaseAccessor]
+    public static class TestAccessor
     {
-        #region Accessor
-        namespace Grid
-        {
-            [DatabaseAccessor]
-            public static class TestAccessor
-            {
-                // GetGrid
-                private const string GetGridCommandText = "SELECT [id] = 1, [direction] = 0\r\nUNION ALL\r\nSELECT [id] = 2, [direction] = 1\r\n\r\nSELECT [accessrights] = 1";
+        // GetGrid
+        private const string GetGridCommandText = "SELECT [id] = 1, [direction] = 0\r\nUNION ALL\r\nSELECT [id] = 2, [direction] = 1\r\n\r\nSELECT [accessrights] = 1";
 
-                public static Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult GetGrid(this IDatabaseAccessorFactory databaseAccessorFactory)
+        public static Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult GetGrid(this IDatabaseAccessorFactory databaseAccessorFactory)
+        {
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
+            {
+                using (IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText, CommandType.Text, ParametersVisitor.Empty))
                 {
-                    using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
-                    {
-                        using (IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText, CommandType.Text, ParametersVisitor.Empty))
-                        {
-                            Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult();
-                            result.Items.ReplaceWith(reader.ReadMany&lt;Dibix.Sdk.Tests.DomainModel.GenericContract, Dibix.Sdk.Tests.DomainModel.Direction, Dibix.Sdk.Tests.DomainModel.JointContract&gt;("direction"));
-                            result.AccessRights = reader.ReadSingle&lt;Dibix.Sdk.Tests.DomainModel.AccessRights&gt;();
-                            return result;
-                        }
-                    }
+                    Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult();
+                    result.Items.ReplaceWith(reader.ReadMany&lt;Dibix.Sdk.Tests.DomainModel.GenericContract, Dibix.Sdk.Tests.DomainModel.Direction, Dibix.Sdk.Tests.DomainModel.JointContract&gt;("direction"));
+                    result.AccessRights = reader.ReadSingle&lt;Dibix.Sdk.Tests.DomainModel.AccessRights&gt;();
+                    return result;
                 }
             }
         }
-        #endregion
     }
+}
+#endregion
 
-    namespace DomainModel
+#region Contracts
+namespace Dibix.Sdk.Tests.DomainModel
+{
+    [Flags]
+    public enum AccessRights : int
     {
-        #region Contracts
-        [Flags]
-        public enum AccessRights : int
-        {
-            None = 0,
-            Read = 1,
-            Write = 2,
-            Execute = 4,
-            All = Read | Write | Execute
-        }
-
-        public enum Direction : int
-        {
-            Ascending,
-            Descending
-        }
-
-        [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
-        public sealed class GenericContract
-        {
-            [Key]
-            [DataMember]
-            [JsonIgnore]
-            public int Id { get; set; }
-            [DataMember]
-            [DefaultValue("DefaultValue")]
-            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; } = "DefaultValue";
-            [DataMember]
-            [JsonIgnore]
-            [Discriminator]
-            public int? ParentId { get; set; }
-            [DataMember]
-            [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
-            public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
-            [DataMember]
-            [DateTimeKind(DateTimeKind.Utc)]
-            public System.DateTime? CreationTime { get; set; }
-            [DataMember]
-            public System.Uri ImageUrl { get; set; }
-        }
-
-        public enum Role : int
-        {
-            None,
-            User,
-            Admin
-        }
-
-        public sealed class JointContract
-        {
-            public Dibix.Sdk.Tests.DomainModel.GenericContract A { get; set; }
-            public Dibix.Sdk.Tests.DomainModel.Direction B { get; set; }
-            public Dibix.Sdk.Tests.DomainModel.AccessRights C { get; set; }
-        }
-
-        namespace Grid
-        {
-            public sealed class GetGridResult
-            {
-                public IList&lt;Dibix.Sdk.Tests.DomainModel.JointContract&gt; Items { get; private set; }
-                public Dibix.Sdk.Tests.DomainModel.AccessRights AccessRights { get; set; }
-
-                public GetGridResult()
-                {
-                    this.Items = new Collection&lt;Dibix.Sdk.Tests.DomainModel.JointContract&gt;();
-                }
-            }
-        }
-        #endregion
+        None = 0,
+        Read = 1,
+        Write = 2,
+        Execute = 4,
+        All = Read | Write | Execute
     }
-}</value>
+
+    public enum Direction : int
+    {
+        Ascending,
+        Descending
+    }
+
+    [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
+    public sealed class GenericContract
+    {
+        [Key]
+        [DataMember]
+        [JsonIgnore]
+        public int Id { get; set; }
+        [DataMember]
+        [DefaultValue("DefaultValue")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string Name { get; set; } = "DefaultValue";
+        [DataMember]
+        [JsonIgnore]
+        [Discriminator]
+        public int? ParentId { get; set; }
+        [DataMember]
+        [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
+        public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
+        [DataMember]
+        [DateTimeKind(DateTimeKind.Utc)]
+        public System.DateTime? CreationTime { get; set; }
+        [DataMember]
+        public System.Uri ImageUrl { get; set; }
+    }
+
+    public enum Role : int
+    {
+        None,
+        User,
+        Admin
+    }
+
+    public sealed class JointContract
+    {
+        public Dibix.Sdk.Tests.DomainModel.GenericContract A { get; set; }
+        public Dibix.Sdk.Tests.DomainModel.Direction B { get; set; }
+        public Dibix.Sdk.Tests.DomainModel.AccessRights C { get; set; }
+    }
+}
+
+namespace Dibix.Sdk.Tests.DomainModel.Grid
+{
+    public sealed class GetGridResult
+    {
+        public IList&lt;Dibix.Sdk.Tests.DomainModel.JointContract&gt; Items { get; private set; }
+        public Dibix.Sdk.Tests.DomainModel.AccessRights AccessRights { get; set; }
+
+        public GetGridResult()
+        {
+            this.Items = new Collection&lt;Dibix.Sdk.Tests.DomainModel.JointContract&gt;();
+        }
+    }
+}
+#endregion</value>
   </data>
   <data name="Inline_MultiConcreteResult" xml:space="preserve">
     <value>/*------------------------------------------------------------------------------
@@ -1931,65 +1909,63 @@ using Dibix;
 using Newtonsoft.Json;
 
 [assembly: ArtifactAssembly]
-namespace Dibix.Sdk.Tests
-{
-    namespace Data
-    {
-        #region Accessor
-        [DatabaseAccessor]
-        public static class TestAccessor
-        {
-            // dbx_tests_syntax_multiconcreteresult
-            private const string dbx_tests_syntax_multiconcreteresultCommandText = "SELECT [id] = 1";
 
-            public static IEnumerable&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; dbx_tests_syntax_multiconcreteresult(this IDatabaseAccessorFactory databaseAccessorFactory)
+#region Accessor
+namespace Dibix.Sdk.Tests.Data
+{
+    [DatabaseAccessor]
+    public static class TestAccessor
+    {
+        // dbx_tests_syntax_multiconcreteresult
+        private const string dbx_tests_syntax_multiconcreteresultCommandText = "SELECT [id] = 1";
+
+        public static IEnumerable&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; dbx_tests_syntax_multiconcreteresult(this IDatabaseAccessorFactory databaseAccessorFactory)
+        {
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
-                using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
-                {
-                    return accessor.QueryMany&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(dbx_tests_syntax_multiconcreteresultCommandText, CommandType.Text, ParametersVisitor.Empty);
-                }
+                return accessor.QueryMany&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(dbx_tests_syntax_multiconcreteresultCommandText, CommandType.Text, ParametersVisitor.Empty);
             }
         }
-        #endregion
     }
+}
+#endregion
 
-    namespace DomainModel
+#region Contracts
+namespace Dibix.Sdk.Tests.DomainModel
+{
+    [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
+    public sealed class GenericContract
     {
-        #region Contracts
-        [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
-        public sealed class GenericContract
-        {
-            [Key]
-            [DataMember]
-            [JsonIgnore]
-            public int Id { get; set; }
-            [DataMember]
-            [DefaultValue("DefaultValue")]
-            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; } = "DefaultValue";
-            [DataMember]
-            [JsonIgnore]
-            [Discriminator]
-            public int? ParentId { get; set; }
-            [DataMember]
-            [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
-            public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
-            [DataMember]
-            [DateTimeKind(DateTimeKind.Utc)]
-            public System.DateTime? CreationTime { get; set; }
-            [DataMember]
-            public System.Uri ImageUrl { get; set; }
-        }
-
-        public enum Role : int
-        {
-            None,
-            User,
-            Admin
-        }
-        #endregion
+        [Key]
+        [DataMember]
+        [JsonIgnore]
+        public int Id { get; set; }
+        [DataMember]
+        [DefaultValue("DefaultValue")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string Name { get; set; } = "DefaultValue";
+        [DataMember]
+        [JsonIgnore]
+        [Discriminator]
+        public int? ParentId { get; set; }
+        [DataMember]
+        [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
+        public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
+        [DataMember]
+        [DateTimeKind(DateTimeKind.Utc)]
+        public System.DateTime? CreationTime { get; set; }
+        [DataMember]
+        public System.Uri ImageUrl { get; set; }
     }
-}</value>
+
+    public enum Role : int
+    {
+        None,
+        User,
+        Admin
+    }
+}
+#endregion</value>
   </data>
   <data name="Inline_SingleConcreteResult" xml:space="preserve">
     <value>/*------------------------------------------------------------------------------
@@ -2009,65 +1985,63 @@ using Dibix;
 using Newtonsoft.Json;
 
 [assembly: ArtifactAssembly]
-namespace Dibix.Sdk.Tests
-{
-    namespace Data
-    {
-        #region Accessor
-        [DatabaseAccessor]
-        public static class TestAccessor
-        {
-            // dbx_tests_syntax_singleconcreteresult
-            private const string dbx_tests_syntax_singleconcreteresultCommandText = "SELECT [id] = 1";
 
-            public static Dibix.Sdk.Tests.DomainModel.GenericContract dbx_tests_syntax_singleconcreteresult(this IDatabaseAccessorFactory databaseAccessorFactory)
+#region Accessor
+namespace Dibix.Sdk.Tests.Data
+{
+    [DatabaseAccessor]
+    public static class TestAccessor
+    {
+        // dbx_tests_syntax_singleconcreteresult
+        private const string dbx_tests_syntax_singleconcreteresultCommandText = "SELECT [id] = 1";
+
+        public static Dibix.Sdk.Tests.DomainModel.GenericContract dbx_tests_syntax_singleconcreteresult(this IDatabaseAccessorFactory databaseAccessorFactory)
+        {
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
-                using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
-                {
-                    return accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(dbx_tests_syntax_singleconcreteresultCommandText, CommandType.Text, ParametersVisitor.Empty);
-                }
+                return accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(dbx_tests_syntax_singleconcreteresultCommandText, CommandType.Text, ParametersVisitor.Empty);
             }
         }
-        #endregion
     }
+}
+#endregion
 
-    namespace DomainModel
+#region Contracts
+namespace Dibix.Sdk.Tests.DomainModel
+{
+    [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
+    public sealed class GenericContract
     {
-        #region Contracts
-        [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
-        public sealed class GenericContract
-        {
-            [Key]
-            [DataMember]
-            [JsonIgnore]
-            public int Id { get; set; }
-            [DataMember]
-            [DefaultValue("DefaultValue")]
-            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; } = "DefaultValue";
-            [DataMember]
-            [JsonIgnore]
-            [Discriminator]
-            public int? ParentId { get; set; }
-            [DataMember]
-            [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
-            public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
-            [DataMember]
-            [DateTimeKind(DateTimeKind.Utc)]
-            public System.DateTime? CreationTime { get; set; }
-            [DataMember]
-            public System.Uri ImageUrl { get; set; }
-        }
-
-        public enum Role : int
-        {
-            None,
-            User,
-            Admin
-        }
-        #endregion
+        [Key]
+        [DataMember]
+        [JsonIgnore]
+        public int Id { get; set; }
+        [DataMember]
+        [DefaultValue("DefaultValue")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string Name { get; set; } = "DefaultValue";
+        [DataMember]
+        [JsonIgnore]
+        [Discriminator]
+        public int? ParentId { get; set; }
+        [DataMember]
+        [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
+        public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
+        [DataMember]
+        [DateTimeKind(DateTimeKind.Utc)]
+        public System.DateTime? CreationTime { get; set; }
+        [DataMember]
+        public System.Uri ImageUrl { get; set; }
     }
-}</value>
+
+    public enum Role : int
+    {
+        None,
+        User,
+        Admin
+    }
+}
+#endregion</value>
   </data>
   <data name="Inline_SingleMultiMapResult" xml:space="preserve">
     <value>/*------------------------------------------------------------------------------
@@ -2089,93 +2063,91 @@ using Dibix;
 using Newtonsoft.Json;
 
 [assembly: ArtifactAssembly]
-namespace Dibix.Sdk.Tests
+
+#region Accessor
+namespace Dibix.Sdk.Tests.Data
 {
-    namespace Data
+    [DatabaseAccessor]
+    public static class TestAccessor
     {
-        #region Accessor
-        [DatabaseAccessor]
-        public static class TestAccessor
-        {
-            // dbx_tests_syntax_singlemultimapresult
-            private const string dbx_tests_syntax_singlemultimapresultCommandText = "SELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 1\r\nUNION ALL\r\nSELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 2\r\nWHERE @id = 1";
+        // dbx_tests_syntax_singlemultimapresult
+        private const string dbx_tests_syntax_singlemultimapresultCommandText = "SELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 1\r\nUNION ALL\r\nSELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 2\r\nWHERE @id = 1";
 
-            public static Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract dbx_tests_syntax_singlemultimapresult(this IDatabaseAccessorFactory databaseAccessorFactory, int id)
+        public static Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract dbx_tests_syntax_singlemultimapresult(this IDatabaseAccessorFactory databaseAccessorFactory, int id)
+        {
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
-                using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
-                {
-                    ParametersVisitor @params = accessor.Parameters()
-                                                        .SetFromTemplate(new
-                                                        {
-                                                            id
-                                                        })
-                                                        .Build();
-                    return accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(dbx_tests_syntax_singlemultimapresultCommandText, CommandType.Text, @params, "id");
-                }
+                ParametersVisitor @params = accessor.Parameters()
+                                                    .SetFromTemplate(new
+                                                    {
+                                                        id
+                                                    })
+                                                    .Build();
+                return accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(dbx_tests_syntax_singlemultimapresultCommandText, CommandType.Text, @params, "id");
             }
         }
-        #endregion
     }
+}
+#endregion
 
-    namespace DomainModel
+#region Contracts
+namespace Dibix.Sdk.Tests.DomainModel
+{
+    public enum Direction : int
     {
-        #region Contracts
-        public enum Direction : int
-        {
-            Ascending,
-            Descending
-        }
-
-        [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
-        public sealed class GenericContract
-        {
-            [Key]
-            [DataMember]
-            [JsonIgnore]
-            public int Id { get; set; }
-            [DataMember]
-            [DefaultValue("DefaultValue")]
-            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; } = "DefaultValue";
-            [DataMember]
-            [JsonIgnore]
-            [Discriminator]
-            public int? ParentId { get; set; }
-            [DataMember]
-            [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
-            public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
-            [DataMember]
-            [DateTimeKind(DateTimeKind.Utc)]
-            public System.DateTime? CreationTime { get; set; }
-            [DataMember]
-            public System.Uri ImageUrl { get; set; }
-        }
-
-        public enum Role : int
-        {
-            None,
-            User,
-            Admin
-        }
-
-        namespace Extension
-        {
-            public sealed class MultiMapContract
-            {
-                public System.Guid? X { get; set; }
-                public IList&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; }
-                public IList&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
-
-                public MultiMapContract()
-                {
-                    this.Y = new Collection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;();
-                    this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
-                }
-            }
-        }
-        #endregion
+        Ascending,
+        Descending
     }
-}</value>
+
+    [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
+    public sealed class GenericContract
+    {
+        [Key]
+        [DataMember]
+        [JsonIgnore]
+        public int Id { get; set; }
+        [DataMember]
+        [DefaultValue("DefaultValue")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string Name { get; set; } = "DefaultValue";
+        [DataMember]
+        [JsonIgnore]
+        [Discriminator]
+        public int? ParentId { get; set; }
+        [DataMember]
+        [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
+        public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
+        [DataMember]
+        [DateTimeKind(DateTimeKind.Utc)]
+        public System.DateTime? CreationTime { get; set; }
+        [DataMember]
+        public System.Uri ImageUrl { get; set; }
+    }
+
+    public enum Role : int
+    {
+        None,
+        User,
+        Admin
+    }
+}
+
+namespace Dibix.Sdk.Tests.DomainModel.Extension
+{
+    public sealed class MultiMapContract
+    {
+        public System.Guid? X { get; set; }
+        public IList&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; }
+        public IList&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
+
+        public MultiMapContract()
+        {
+            this.Y = new Collection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;();
+            this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
+        }
+    }
+}
+#endregion</value>
   </data>
   <data name="Inline_SingleMultiMapResult_WithProjection" xml:space="preserve">
     <value>/*------------------------------------------------------------------------------
@@ -2290,31 +2262,26 @@ using System.Data;
 using Dibix;
 
 [assembly: ArtifactAssembly]
-namespace Dibix.Sdk.Tests
-{
-    namespace Data
-    {
-        #region Accessor
-        namespace Extension.Primitive
-        {
-            [DatabaseAccessor]
-            public static class TestAccessor
-            {
-                // GetSinglePrimitiveResult
-                private const string GetSinglePrimitiveResultCommandText = "SELECT NEWID()";
 
-                public static System.Guid GetSinglePrimitiveResult(this IDatabaseAccessorFactory databaseAccessorFactory)
-                {
-                    using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
-                    {
-                        return accessor.QuerySingle&lt;System.Guid&gt;(GetSinglePrimitiveResultCommandText, CommandType.Text, ParametersVisitor.Empty);
-                    }
-                }
+#region Accessor
+namespace Dibix.Sdk.Tests.Data.Extension.Primitive
+{
+    [DatabaseAccessor]
+    public static class TestAccessor
+    {
+        // GetSinglePrimitiveResult
+        private const string GetSinglePrimitiveResultCommandText = "SELECT NEWID()";
+
+        public static System.Guid GetSinglePrimitiveResult(this IDatabaseAccessorFactory databaseAccessorFactory)
+        {
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
+            {
+                return accessor.QuerySingle&lt;System.Guid&gt;(GetSinglePrimitiveResultCommandText, CommandType.Text, ParametersVisitor.Empty);
             }
         }
-        #endregion
     }
-}</value>
+}
+#endregion</value>
   </data>
   <data name="Inline_SinglePrimitiveResult_Async" xml:space="preserve">
     <value>/*------------------------------------------------------------------------------
@@ -2331,31 +2298,26 @@ using System.Threading.Tasks;
 using Dibix;
 
 [assembly: ArtifactAssembly]
-namespace Dibix.Sdk.Tests
-{
-    namespace Data
-    {
-        #region Accessor
-        namespace Extension.Primitive
-        {
-            [DatabaseAccessor]
-            public static class TestAccessor
-            {
-                // GetSinglePrimitiveResult
-                private const string GetSinglePrimitiveResultCommandText = "SELECT NEWID()";
 
-                public static async Task&lt;System.Guid&gt; GetSinglePrimitiveResultAsync(this IDatabaseAccessorFactory databaseAccessorFactory, CancellationToken cancellationToken = default)
-                {
-                    using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
-                    {
-                        return await accessor.QuerySingleAsync&lt;System.Guid&gt;(GetSinglePrimitiveResultCommandText, CommandType.Text, ParametersVisitor.Empty, cancellationToken).ConfigureAwait(false);
-                    }
-                }
+#region Accessor
+namespace Dibix.Sdk.Tests.Data.Extension.Primitive
+{
+    [DatabaseAccessor]
+    public static class TestAccessor
+    {
+        // GetSinglePrimitiveResult
+        private const string GetSinglePrimitiveResultCommandText = "SELECT NEWID()";
+
+        public static async Task&lt;System.Guid&gt; GetSinglePrimitiveResultAsync(this IDatabaseAccessorFactory databaseAccessorFactory, CancellationToken cancellationToken = default)
+        {
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
+            {
+                return await accessor.QuerySingleAsync&lt;System.Guid&gt;(GetSinglePrimitiveResultCommandText, CommandType.Text, ParametersVisitor.Empty, cancellationToken).ConfigureAwait(false);
             }
         }
-        #endregion
     }
-}</value>
+}
+#endregion</value>
   </data>
   <data name="InsertWithoutColumnSpecificationSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
@@ -2618,10 +2580,7 @@ namespace Dibix.Sdk.Tests
 //----------------------------------------------------------------------------*/
 using Dibix;
 
-[assembly: ArtifactAssembly]
-namespace Dibix.Sdk.Tests
-{
-}</value>
+[assembly: ArtifactAssembly]</value>
   </data>
   <data name="UnsupportedDataTypeSqlCodeAnalysisRule" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
@@ -3122,106 +3081,101 @@ using Dibix;
 using Newtonsoft.Json;
 
 [assembly: ArtifactAssembly]
-namespace Dibix.Sdk.Tests
+
+#region Accessor
+namespace Dibix.Sdk.Tests.Data.Grid
 {
-    namespace Data
+    [DatabaseAccessor]
+    public static class TestAccessor
     {
-        #region Accessor
-        namespace Grid
-        {
-            [DatabaseAccessor]
-            public static class TestAccessor
-            {
-                // GetGrid
-                private const string GetGridCommandText = "SELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 1\r\nUNION ALL\r\nSELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 2\r\nWHERE @id = 1";
+        // GetGrid
+        private const string GetGridCommandText = "SELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 1\r\nUNION ALL\r\nSELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 2\r\nWHERE @id = 1";
 
-                public static Dibix.Sdk.Tests.DomainModel.Grid.GridResult GetGrid(this IDatabaseAccessorFactory databaseAccessorFactory, int id)
-                {
-                    using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
-                    {
-                        ParametersVisitor @params = accessor.Parameters()
-                                                            .SetFromTemplate(new
-                                                            {
-                                                                id
-                                                            })
-                                                            .Build();
-                        Dibix.Sdk.Tests.DomainModel.Grid.GridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GridResult();
-                        result.Item = accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(GetGridCommandText, CommandType.Text, @params, "id");
-                        return result;
-                    }
-                }
+        public static Dibix.Sdk.Tests.DomainModel.Grid.GridResult GetGrid(this IDatabaseAccessorFactory databaseAccessorFactory, int id)
+        {
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
+            {
+                ParametersVisitor @params = accessor.Parameters()
+                                                    .SetFromTemplate(new
+                                                    {
+                                                        id
+                                                    })
+                                                    .Build();
+                Dibix.Sdk.Tests.DomainModel.Grid.GridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GridResult();
+                result.Item = accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(GetGridCommandText, CommandType.Text, @params, "id");
+                return result;
             }
         }
-        #endregion
+    }
+}
+#endregion
+
+#region Contracts
+namespace Dibix.Sdk.Tests.DomainModel
+{
+    public enum Direction : int
+    {
+        Ascending,
+        Descending
     }
 
-    namespace DomainModel
+    [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
+    public sealed class GenericContract
     {
-        #region Contracts
-        public enum Direction : int
-        {
-            Ascending,
-            Descending
-        }
-
-        [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
-        public sealed class GenericContract
-        {
-            [Key]
-            [DataMember]
-            [JsonIgnore]
-            public int Id { get; set; }
-            [DataMember]
-            [DefaultValue("DefaultValue")]
-            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; } = "DefaultValue";
-            [DataMember]
-            [JsonIgnore]
-            [Discriminator]
-            public int? ParentId { get; set; }
-            [DataMember]
-            [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
-            public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
-            [DataMember]
-            [DateTimeKind(DateTimeKind.Utc)]
-            public System.DateTime? CreationTime { get; set; }
-            [DataMember]
-            public System.Uri ImageUrl { get; set; }
-        }
-
-        public enum Role : int
-        {
-            None,
-            User,
-            Admin
-        }
-
-        namespace Extension
-        {
-            public sealed class MultiMapContract
-            {
-                public System.Guid? X { get; set; }
-                public IList&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; }
-                public IList&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
-
-                public MultiMapContract()
-                {
-                    this.Y = new Collection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;();
-                    this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
-                }
-            }
-        }
-
-        namespace Grid
-        {
-            public sealed class GridResult
-            {
-                public Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract Item { get; set; }
-            }
-        }
-        #endregion
+        [Key]
+        [DataMember]
+        [JsonIgnore]
+        public int Id { get; set; }
+        [DataMember]
+        [DefaultValue("DefaultValue")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string Name { get; set; } = "DefaultValue";
+        [DataMember]
+        [JsonIgnore]
+        [Discriminator]
+        public int? ParentId { get; set; }
+        [DataMember]
+        [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
+        public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
+        [DataMember]
+        [DateTimeKind(DateTimeKind.Utc)]
+        public System.DateTime? CreationTime { get; set; }
+        [DataMember]
+        public System.Uri ImageUrl { get; set; }
     }
-}</value>
+
+    public enum Role : int
+    {
+        None,
+        User,
+        Admin
+    }
+}
+
+namespace Dibix.Sdk.Tests.DomainModel.Extension
+{
+    public sealed class MultiMapContract
+    {
+        public System.Guid? X { get; set; }
+        public IList&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; }
+        public IList&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
+
+        public MultiMapContract()
+        {
+            this.Y = new Collection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;();
+            this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
+        }
+    }
+}
+
+namespace Dibix.Sdk.Tests.DomainModel.Grid
+{
+    public sealed class GridResult
+    {
+        public Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract Item { get; set; }
+    }
+}
+#endregion</value>
   </data>
   <data name="Inline_GridResult_AndSingleResult" xml:space="preserve">
     <value>/*------------------------------------------------------------------------------
@@ -3243,106 +3197,101 @@ using Dibix;
 using Newtonsoft.Json;
 
 [assembly: ArtifactAssembly]
-namespace Dibix.Sdk.Tests
+
+#region Accessor
+namespace Dibix.Sdk.Tests.Data.Grid
 {
-    namespace Data
+    [DatabaseAccessor]
+    public static class TestAccessor
     {
-        #region Accessor
-        namespace Grid
-        {
-            [DatabaseAccessor]
-            public static class TestAccessor
-            {
-                // GetGrid
-                private const string GetGridCommandText = "SELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 1\r\nUNION ALL\r\nSELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 2\r\nWHERE @id = 1";
+        // GetGrid
+        private const string GetGridCommandText = "SELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 1\r\nUNION ALL\r\nSELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 2\r\nWHERE @id = 1";
 
-                public static Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult GetGrid(this IDatabaseAccessorFactory databaseAccessorFactory, int id)
-                {
-                    using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
-                    {
-                        ParametersVisitor @params = accessor.Parameters()
-                                                            .SetFromTemplate(new
-                                                            {
-                                                                id
-                                                            })
-                                                            .Build();
-                        Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult();
-                        result.Item = accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(GetGridCommandText, CommandType.Text, @params, "id");
-                        return result;
-                    }
-                }
+        public static Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult GetGrid(this IDatabaseAccessorFactory databaseAccessorFactory, int id)
+        {
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
+            {
+                ParametersVisitor @params = accessor.Parameters()
+                                                    .SetFromTemplate(new
+                                                    {
+                                                        id
+                                                    })
+                                                    .Build();
+                Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult();
+                result.Item = accessor.QuerySingle&lt;Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract&gt;(GetGridCommandText, CommandType.Text, @params, "id");
+                return result;
             }
         }
-        #endregion
+    }
+}
+#endregion
+
+#region Contracts
+namespace Dibix.Sdk.Tests.DomainModel
+{
+    public enum Direction : int
+    {
+        Ascending,
+        Descending
     }
 
-    namespace DomainModel
+    [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
+    public sealed class GenericContract
     {
-        #region Contracts
-        public enum Direction : int
-        {
-            Ascending,
-            Descending
-        }
-
-        [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
-        public sealed class GenericContract
-        {
-            [Key]
-            [DataMember]
-            [JsonIgnore]
-            public int Id { get; set; }
-            [DataMember]
-            [DefaultValue("DefaultValue")]
-            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; } = "DefaultValue";
-            [DataMember]
-            [JsonIgnore]
-            [Discriminator]
-            public int? ParentId { get; set; }
-            [DataMember]
-            [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
-            public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
-            [DataMember]
-            [DateTimeKind(DateTimeKind.Utc)]
-            public System.DateTime? CreationTime { get; set; }
-            [DataMember]
-            public System.Uri ImageUrl { get; set; }
-        }
-
-        public enum Role : int
-        {
-            None,
-            User,
-            Admin
-        }
-
-        namespace Extension
-        {
-            public sealed class MultiMapContract
-            {
-                public System.Guid? X { get; set; }
-                public IList&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; }
-                public IList&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
-
-                public MultiMapContract()
-                {
-                    this.Y = new Collection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;();
-                    this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
-                }
-            }
-        }
-
-        namespace Grid
-        {
-            public sealed class GetGridResult
-            {
-                public Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract Item { get; set; }
-            }
-        }
-        #endregion
+        [Key]
+        [DataMember]
+        [JsonIgnore]
+        public int Id { get; set; }
+        [DataMember]
+        [DefaultValue("DefaultValue")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string Name { get; set; } = "DefaultValue";
+        [DataMember]
+        [JsonIgnore]
+        [Discriminator]
+        public int? ParentId { get; set; }
+        [DataMember]
+        [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
+        public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
+        [DataMember]
+        [DateTimeKind(DateTimeKind.Utc)]
+        public System.DateTime? CreationTime { get; set; }
+        [DataMember]
+        public System.Uri ImageUrl { get; set; }
     }
-}</value>
+
+    public enum Role : int
+    {
+        None,
+        User,
+        Admin
+    }
+}
+
+namespace Dibix.Sdk.Tests.DomainModel.Extension
+{
+    public sealed class MultiMapContract
+    {
+        public System.Guid? X { get; set; }
+        public IList&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Y { get; private set; }
+        public IList&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
+
+        public MultiMapContract()
+        {
+            this.Y = new Collection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;();
+            this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
+        }
+    }
+}
+
+namespace Dibix.Sdk.Tests.DomainModel.Grid
+{
+    public sealed class GetGridResult
+    {
+        public Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract Item { get; set; }
+    }
+}
+#endregion</value>
   </data>
   <data name="External_Empty_WithOutputParam" xml:space="preserve">
     <value>/*------------------------------------------------------------------------------
@@ -3357,33 +3306,31 @@ using System.Data;
 using Dibix;
 
 [assembly: ArtifactAssembly]
-namespace Dibix.Sdk.Tests
-{
-    namespace Data
-    {
-        #region Accessor
-        [DatabaseAccessor]
-        public static class TestAccessor
-        {
-            // EmptyWithOutputParam
-            private const string EmptyWithOutputParamCommandText = "[dbo].[dbx_tests_syntax_empty_params_out]";
 
-            public static short EmptyWithOutputParam(this IDatabaseAccessorFactory databaseAccessorFactory, out short a)
+#region Accessor
+namespace Dibix.Sdk.Tests.Data
+{
+    [DatabaseAccessor]
+    public static class TestAccessor
+    {
+        // EmptyWithOutputParam
+        private const string EmptyWithOutputParamCommandText = "[dbo].[dbx_tests_syntax_empty_params_out]";
+
+        public static short EmptyWithOutputParam(this IDatabaseAccessorFactory databaseAccessorFactory, out short a)
+        {
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
-                using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
-                {
-                    ParametersVisitor @params = accessor.Parameters()
-                                                        .SetInt16(nameof(a), out IOutParameter&lt;short&gt; aOutput)
-                                                        .Build();
-                    short result = accessor.QuerySingle&lt;short&gt;(EmptyWithOutputParamCommandText, CommandType.StoredProcedure, @params);
-                    a = aOutput.Result;
-                    return result;
-                }
+                ParametersVisitor @params = accessor.Parameters()
+                                                    .SetInt16(nameof(a), out IOutParameter&lt;short&gt; aOutput)
+                                                    .Build();
+                short result = accessor.QuerySingle&lt;short&gt;(EmptyWithOutputParamCommandText, CommandType.StoredProcedure, @params);
+                a = aOutput.Result;
+                return result;
             }
         }
-        #endregion
     }
-}</value>
+}
+#endregion</value>
   </data>
   <data name="Inline_GridResultAsync" xml:space="preserve">
     <value>/*------------------------------------------------------------------------------
@@ -3407,94 +3354,89 @@ using Dibix;
 using Newtonsoft.Json;
 
 [assembly: ArtifactAssembly]
-namespace Dibix.Sdk.Tests
+
+#region Accessor
+namespace Dibix.Sdk.Tests.Data.Grid
 {
-    namespace Data
+    [DatabaseAccessor]
+    public static class TestAccessor
     {
-        #region Accessor
-        namespace Grid
-        {
-            [DatabaseAccessor]
-            public static class TestAccessor
-            {
-                // GetGrid
-                private const string GetGridCommandText = "SELECT [id] = 1\r\nUNION ALL\r\nSELECT [id] = 2\r\n\r\nSELECT 1";
+        // GetGrid
+        private const string GetGridCommandText = "SELECT [id] = 1\r\nUNION ALL\r\nSELECT [id] = 2\r\n\r\nSELECT 1";
 
-                public static async Task&lt;Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult&gt; GetGridAsync(this IDatabaseAccessorFactory databaseAccessorFactory, CancellationToken cancellationToken = default)
+        public static async Task&lt;Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult&gt; GetGridAsync(this IDatabaseAccessorFactory databaseAccessorFactory, CancellationToken cancellationToken = default)
+        {
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
+            {
+                using (IMultipleResultReader reader = await accessor.QueryMultipleAsync(GetGridCommandText, CommandType.Text, ParametersVisitor.Empty, cancellationToken).ConfigureAwait(false))
                 {
-                    using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
-                    {
-                        using (IMultipleResultReader reader = await accessor.QueryMultipleAsync(GetGridCommandText, CommandType.Text, ParametersVisitor.Empty, cancellationToken).ConfigureAwait(false))
-                        {
-                            Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult();
-                            result.Items.ReplaceWith(await reader.ReadManyAsync&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;().ConfigureAwait(false));
-                            result.Directions.ReplaceWith(await reader.ReadManyAsync&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;().ConfigureAwait(false));
-                            return result;
-                        }
-                    }
+                    Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult();
+                    result.Items.ReplaceWith(await reader.ReadManyAsync&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;().ConfigureAwait(false));
+                    result.Directions.ReplaceWith(await reader.ReadManyAsync&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;().ConfigureAwait(false));
+                    return result;
                 }
             }
         }
-        #endregion
     }
+}
+#endregion
 
-    namespace DomainModel
+#region Contracts
+namespace Dibix.Sdk.Tests.DomainModel
+{
+    public enum Direction : int
     {
-        #region Contracts
-        public enum Direction : int
-        {
-            Ascending,
-            Descending
-        }
-
-        [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
-        public sealed class GenericContract
-        {
-            [Key]
-            [DataMember]
-            [JsonIgnore]
-            public int Id { get; set; }
-            [DataMember]
-            [DefaultValue("DefaultValue")]
-            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public string Name { get; set; } = "DefaultValue";
-            [DataMember]
-            [JsonIgnore]
-            [Discriminator]
-            public int? ParentId { get; set; }
-            [DataMember]
-            [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
-            public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
-            [DataMember]
-            [DateTimeKind(DateTimeKind.Utc)]
-            public System.DateTime? CreationTime { get; set; }
-            [DataMember]
-            public System.Uri ImageUrl { get; set; }
-        }
-
-        public enum Role : int
-        {
-            None,
-            User,
-            Admin
-        }
-
-        namespace Grid
-        {
-            public sealed class GetGridResult
-            {
-                public IList&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Items { get; private set; }
-                public IList&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
-
-                public GetGridResult()
-                {
-                    this.Items = new Collection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;();
-                    this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
-                }
-            }
-        }
-        #endregion
+        Ascending,
+        Descending
     }
-}</value>
+
+    [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
+    public sealed class GenericContract
+    {
+        [Key]
+        [DataMember]
+        [JsonIgnore]
+        public int Id { get; set; }
+        [DataMember]
+        [DefaultValue("DefaultValue")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string Name { get; set; } = "DefaultValue";
+        [DataMember]
+        [JsonIgnore]
+        [Discriminator]
+        public int? ParentId { get; set; }
+        [DataMember]
+        [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
+        public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
+        [DataMember]
+        [DateTimeKind(DateTimeKind.Utc)]
+        public System.DateTime? CreationTime { get; set; }
+        [DataMember]
+        public System.Uri ImageUrl { get; set; }
+    }
+
+    public enum Role : int
+    {
+        None,
+        User,
+        Admin
+    }
+}
+
+namespace Dibix.Sdk.Tests.DomainModel.Grid
+{
+    public sealed class GetGridResult
+    {
+        public IList&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt; Items { get; private set; }
+        public IList&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt; Directions { get; private set; }
+
+        public GetGridResult()
+        {
+            this.Items = new Collection&lt;Dibix.Sdk.Tests.DomainModel.GenericContract&gt;();
+            this.Directions = new Collection&lt;Dibix.Sdk.Tests.DomainModel.Direction&gt;();
+        }
+    }
+}
+#endregion</value>
   </data>
 </root>

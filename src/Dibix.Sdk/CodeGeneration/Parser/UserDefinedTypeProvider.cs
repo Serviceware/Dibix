@@ -6,6 +6,7 @@ namespace Dibix.Sdk.CodeGeneration
     internal sealed class UserDefinedTypeProvider : IUserDefinedTypeProvider
     {
         #region Fields
+        private readonly string _rootNamespace;
         private readonly string _productName;
         private readonly string _areaName;
         private readonly ITypeResolverFacade _typeResolver;
@@ -19,8 +20,9 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public UserDefinedTypeProvider(string productName, string areaName, IEnumerable<string> inputs, ITypeResolverFacade typeResolver, ILogger logger)
+        public UserDefinedTypeProvider(string rootNamespace, string productName, string areaName, IEnumerable<string> inputs, ITypeResolverFacade typeResolver, ILogger logger)
         {
+            this._rootNamespace = rootNamespace;
             this._productName = productName;
             this._areaName = areaName;
             this._typeResolver = typeResolver;
@@ -46,7 +48,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Private Methods
         private void Collect(IEnumerable<string> inputs)
         {
-            SqlUserDefinedTypeParser parser = new SqlUserDefinedTypeParser(this._productName, this._areaName, this._typeResolver, this._logger);
+            SqlUserDefinedTypeParser parser = new SqlUserDefinedTypeParser(this._rootNamespace, this._productName, this._areaName, this._typeResolver, this._logger);
             this._schemas.AddRange(inputs.Select(x => parser.Parse(x))
                                          .Where(x => x != null)
                                          .Select(x => new KeyValuePair<string, UserDefinedTypeSchema>(x.FullName, x)));

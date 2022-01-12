@@ -29,7 +29,8 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         private void ExecuteTest(IEnumerable<string> sources, IEnumerable<string> contracts, IEnumerable<string> endpoints, bool isEmbedded, bool generateClient, bool assertOpenApi, IEnumerable<string> expectedAdditionalAssemblyReferences)
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), $"dibix-sdk-tests-{Guid.NewGuid()}");
-            string defaultOutputFilePath = Path.Combine(tempDirectory, "TestAccessor.cs");
+            string defaultOutputFilePath = Path.Combine(tempDirectory, "TestAccessor.Accessor.cs");
+            string endpointOutputFilePath = Path.Combine(tempDirectory, "TestAccessor.cs");
             string clientOutputFilePath = Path.Combine(tempDirectory, "TestAccessor.Client.cs");
             Directory.CreateDirectory(tempDirectory);
 
@@ -44,10 +45,12 @@ namespace Dibix.Sdk.Tests.CodeGeneration
               , resultsFile: null
               , productName: "Dibix.Sdk"
               , areaName: "Tests"
+              , outputName: "TestAccessor"
               , title: "Dibix.Sdk.Tests API title"
               , version: "1.0.1"
               , description: "Dibix.Sdk.Tests API description"
               , defaultOutputFilePath: defaultOutputFilePath
+              , endpointOutputFilePath: endpointOutputFilePath
               , clientOutputFilePath: generateClient ? clientOutputFilePath : null
               , externalAssemblyReferenceDirectory: Environment.CurrentDirectory
               , source: sources.Select(ToTaskItem).ToArray()
@@ -57,6 +60,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
               , references: Enumerable.Empty<TaskItem>()
               , defaultSecuritySchemes: new[] { "HLNS-SIT", "HLNS-ClientId" }.Select(ToTaskItem)
               , isEmbedded: isEmbedded
+              , enableExperimentalFeatures: false // TODO: Add test support for inspecting DBX file
               , databaseSchemaProviderName: DatabaseTestUtility.DatabaseSchemaProviderName
               , modelCollation: DatabaseTestUtility.ModelCollation
               , sqlReferencePath: Array.Empty<TaskItem>()
