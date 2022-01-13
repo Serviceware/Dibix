@@ -11,7 +11,6 @@
     <EmbeddedResource Include="Schema\dibix.contracts.schema.json" />
     <EmbeddedResource Include="Schema\dibix.endpoints.schema.json" />
     <Compile Include="..\..\shared\ParameterSources\*.cs" Link="CodeGeneration\Model\%(Filename).cs" />
-    <Compile Include="..\..\shared\Utilities\FuncEqualityComparer.cs" Link="Collections\FuncEqualityComparer.cs" />
     <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\Guard.cs" />
     <Compile Include="..\..\shared\SchemaName.cs" Link="Environment\SchemaName.cs" />
     <Compile Include="..\..\shared\Extensions\CollectionExtensions.cs" Link="Extensions\CollectionExtensions.cs" />

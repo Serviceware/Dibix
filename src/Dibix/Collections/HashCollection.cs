@@ -6,7 +6,7 @@ namespace Dibix
     // Unfortunately HashSet<T> does not support retrieval of items in .NET Standard 2.0
     // It was only introduced in .NET Core 2.0/.NET Framework 4.7.2
     // Therefore we use a dictionary with key = value
-    public sealed class HashCollection<T> : ICollection<T>, IEnumerable<T>
+    internal sealed class HashCollection<T> : ICollection<T>, IEnumerable<T>
     {
         #region Fields
         private readonly IDictionary<T, T> _dictionary;
