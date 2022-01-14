@@ -82,7 +82,7 @@ namespace Dibix.Sdk.CodeGeneration
             model.Statements.AddRange(CollectStatements(normalizedSources, projectName, rootNamespace, productName, areaName, isEmbedded, formatter, typeResolver, schemaRegistry, logger, modelAccessor));
             model.UserDefinedTypes.AddRange(userDefinedTypeProvider.Types);
             model.Contracts.AddRange(contractDefinitionProvider.Contracts);
-            model.Controllers.AddRange(CollectControllers(normalizedEndpoints, projectName, rootNamespace, productName, areaName, className, endpointConfiguration, model.Statements, normalizedDefaultSecuritySchemes, securitySchemeMap, assemblyResolver, typeResolver, schemaRegistry, actionParameterSourceRegistry, fileSystemProvider, logger));
+            model.Controllers.AddRange(CollectControllers(normalizedEndpoints, projectName, rootNamespace, productName, areaName, className, model.Statements, normalizedDefaultSecuritySchemes, securitySchemeMap, assemblyResolver, typeResolver, schemaRegistry, actionParameterSourceRegistry, fileSystemProvider, logger));
             model.SecuritySchemes.AddRange(securitySchemeMap.Values);
             model.Schemas.AddRange(schemaRegistry.Schemas);
 
@@ -119,7 +119,6 @@ namespace Dibix.Sdk.CodeGeneration
           , string productName
           , string areaName
           , string className
-          , EndpointConfiguration endpointConfiguration
           , ICollection<SqlStatementDescriptor> statements
           , ICollection<string> defaultSecuritySchemes
           , IDictionary<string, SecurityScheme> securitySchemeMap
@@ -131,7 +130,30 @@ namespace Dibix.Sdk.CodeGeneration
           , ILogger logger
         )
         {
-            ControllerDefinitionProvider controllerDefinitionProvider = new ControllerDefinitionProvider(projectName, rootNamespace, productName, areaName, className, endpointConfiguration, statements, endpoints, defaultSecuritySchemes, securitySchemeMap, typeResolver, referencedAssemblyInspector, schemaRegistry, actionParameterSourceRegistry, fileSystemProvider, logger);
+            IActionDefinitionResolverFacade actionResolver = new ActionDefinitionResolverFacade
+            (
+                projectName
+              , rootNamespace
+              , productName
+              , areaName
+              , className
+              , statements
+              , referencedAssemblyInspector
+              , schemaRegistry
+              , logger
+            );
+            ControllerDefinitionProvider controllerDefinitionProvider = new ControllerDefinitionProvider
+            (
+                endpoints
+              , defaultSecuritySchemes
+              , securitySchemeMap
+              , actionResolver
+              , typeResolver
+              , schemaRegistry
+              , actionParameterSourceRegistry
+              , fileSystemProvider
+              , logger
+            );
             return controllerDefinitionProvider.Controllers;
         }
     }
