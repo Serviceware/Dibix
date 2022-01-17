@@ -76,10 +76,11 @@ namespace Dibix.Sdk.CodeGeneration
                 resultType = ReflectionTypeResolver.ResolveType(returnType, filePath, line, column, base.SchemaRegistry, base.Logger);
 
             NeighborActionTarget target;
+            string accessorFullName = method.DeclaringType.FullName;
             if (isReflectionTarget)
-                target = new ReflectionActionTarget(assemblyName, method.DeclaringType.FullName, operationName, isAsync, hasRefParameters);
+                target = new ReflectionActionTarget(assemblyName, accessorFullName, operationName, isAsync, hasRefParameters);
             else
-                target = new NeighborActionTarget(method.DeclaringType.FullName, operationName, isAsync, hasRefParameters);
+                target = new NeighborActionTarget(accessorFullName, operationName, isAsync, hasRefParameters);
 
             ActionDefinition actionDefinition = new ActionDefinition(target);
             ActionParameterRegistry parameterRegistry = new ActionParameterRegistry(actionDefinition, pathParameters);

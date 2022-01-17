@@ -32,19 +32,6 @@ namespace Dibix.Sdk.CodeGeneration
         }
         #endregion
 
-        #region ISchemaProvider Members
-        public bool TryGetSchema(string name, out SchemaDefinition schema)
-        {
-            if (this._schemas.TryGetValue(name, out UserDefinedTypeSchema userDefinedTypeSchema))
-            {
-                schema = userDefinedTypeSchema;
-                return true;
-            }
-            schema = null;
-            return false;
-        }
-        #endregion
-
         #region Private Methods
         private void Collect(IEnumerable<string> inputs)
         {

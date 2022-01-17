@@ -14,8 +14,8 @@ namespace Dibix.Sdk.CodeGeneration
         {
             const bool accessorOnly = false;
             const SchemaDefinitionSource schemaFilter = SchemaDefinitionSource.Local | SchemaDefinitionSource.Generated | SchemaDefinitionSource.Foreign;
-            yield return new DaoExecutorWriter(accessorOnly);
-            yield return new DaoExecutorInputClassWriter();
+            yield return new DaoExecutorWriter(model, schemaFilter, accessorOnly);
+            yield return new DaoExecutorInputClassWriter(model, schemaFilter);
             yield return new DaoContractClassWriter(model);
             yield return new DaoStructuredTypeWriter(model, schemaFilter);
             yield return new ApiDescriptionWriter();

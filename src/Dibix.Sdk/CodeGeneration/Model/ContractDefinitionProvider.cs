@@ -23,7 +23,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Properties
         public IEnumerable<ContractDefinition> Contracts => this._contracts.Values;
         protected override string SchemaName => "dibix.contracts.schema";
-        IEnumerable<SchemaDefinition> ISchemaProvider.Schemas => this.Contracts.Select(x => x.Schema);
+        IEnumerable<SchemaDefinition> ISchemaProvider.Schemas => this._contracts.Values.Select(x => x.Schema);
         #endregion
 
         #region Constructor
@@ -38,7 +38,7 @@ namespace Dibix.Sdk.CodeGeneration
         }
         #endregion
 
-        #region ISchemaProvider Members
+        #region IContractDefinitionProvider Members
         public bool TryGetSchema(string name, out SchemaDefinition schema)
         {
             if (!this._contracts.TryGetValue(name, out ContractDefinition contract))

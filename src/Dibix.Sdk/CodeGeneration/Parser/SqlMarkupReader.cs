@@ -162,7 +162,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                     // @
                     case TokenType.Element when currentState == ReaderState.Start:
-                        element = new SqlElement(line, column + i);
+                        element = new SqlElement(source, line, column + i);
                         currentState = ReaderState.ElementName;
                         break;
 
@@ -307,12 +307,14 @@ namespace Dibix.Sdk.CodeGeneration
 
             public string Name { get; set; }
             public ISqlElementValue Value { get; private set; }
+            public string Source { get; }
             public int Line { get; }
             public int Column { get; }
 
-            public SqlElement(int line, int column)
+            public SqlElement(string source, int line, int column)
             {
                 this._properties = new Dictionary<string, SqlMarkupProperty>();
+                this.Source = source;
                 this.Line = line;
                 this.Column = column;
             }

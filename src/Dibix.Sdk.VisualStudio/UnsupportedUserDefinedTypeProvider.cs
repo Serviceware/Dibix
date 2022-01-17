@@ -8,7 +8,5 @@ namespace Dibix.Sdk.VisualStudio
     {
         public IEnumerable<UserDefinedTypeSchema> Types { get { yield break; } }
         public IEnumerable<SchemaDefinition> Schemas => throw new NotSupportedException();
-
-        public bool TryGetSchema(string name, out SchemaDefinition schema) => throw new NotSupportedException();
     }
 }

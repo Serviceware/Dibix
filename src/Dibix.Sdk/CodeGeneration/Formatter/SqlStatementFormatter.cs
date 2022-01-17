@@ -17,14 +17,14 @@ namespace Dibix.Sdk.CodeGeneration
 
         public bool StripWhiteSpace { get; set; }
 
-        FormattedSqlStatement ISqlStatementFormatter.Format(SqlStatementDescriptor statementDescriptor, StatementList statementList)
+        FormattedSqlStatement ISqlStatementFormatter.Format(SqlStatementDefinition statementDefinition, StatementList statementList)
         {
-            FormattedSqlStatement statement = this.Format(statementDescriptor, statementList);
+            FormattedSqlStatement statement = this.Format(statementDefinition, statementList);
             statement.Content = statement.Content.Trim();
             return statement;
         }
 
-        protected abstract FormattedSqlStatement Format(SqlStatementDescriptor statementDescriptor, StatementList statementList);
+        protected abstract FormattedSqlStatement Format(SqlStatementDefinition statementDefinition, StatementList statementList);
 
         protected void CollectStatements(StatementList statementList, Action<TSqlStatement, int, int> statementHandler, Action<TSqlParserToken> tokenHandler = null)
         {

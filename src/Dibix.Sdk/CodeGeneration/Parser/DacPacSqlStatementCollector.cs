@@ -46,31 +46,26 @@ namespace Dibix.Sdk.CodeGeneration
             this._procedureNames = procedureNames;
         }
 
-        public override IEnumerable<SqlStatementDescriptor> CollectStatements()
+        public override IEnumerable<SqlStatementDefinition> CollectStatements()
         {
             TSqlModel model = TSqlModel.LoadFromDacpac(this._packagePath, new ModelLoadOptions());
             return this._procedureNames.Select(x => this.CollectStatement(x.Value, x.Key, model)).Where(x => x != null);
         }
 
-        private SqlStatementDescriptor CollectStatement(string procedureName, string displayName, TSqlModel model)
+        private SqlStatementDefinition CollectStatement(string procedureName, string displayName, TSqlModel model)
         {
             ICollection<string> parts = procedureName.Split('.').Select(x => x.Trim('[', ']')).ToArray();
             TSqlObject element = model.GetObject(ModelSchema.Procedure, new ObjectIdentifier(parts), DacQueryScopes.All);
             Guard.IsNotNull(element, nameof(element), $"The element {procedureName} could not be found in dacpac");
 
             string script = element.GetScript();
-            SqlStatementDescriptor statement = new SqlStatementDescriptor
-            {
-                Name = displayName,
-                Source = this._packagePath
-            };
-
             bool result = this._parser.Read
             (
                 sourceKind: SqlParserSourceKind.String
-              , source: script
+              , content: script
+              , source: this._packagePath
+              , definitionName: displayName
               , modelAccessor: new Lazy<TSqlModel>(() => model)
-              , target: statement
               , projectName: this._projectName
               , isEmbedded: false
               , analyzeAlways: false
@@ -81,8 +76,8 @@ namespace Dibix.Sdk.CodeGeneration
               , typeResolver: this._typeResolver
               , schemaRegistry: this._schemaRegistry
               , logger: this._logger
-            );
-            return result ? statement : null;
+              , definition: out SqlStatementDefinition definition);
+            return result ? definition : null;
         }
     }
 }

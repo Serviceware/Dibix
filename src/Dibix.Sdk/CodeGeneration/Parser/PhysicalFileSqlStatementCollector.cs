@@ -54,27 +54,24 @@ namespace Dibix.Sdk.CodeGeneration
             this._logger = logger;
         }
 
-        public override IEnumerable<SqlStatementDescriptor> CollectStatements()
+        public override IEnumerable<SqlStatementDefinition> CollectStatements()
         {
             return this._files.Select(this.CollectStatement).Where(x => x != null);
         }
 
-        private SqlStatementDescriptor CollectStatement(string file)
+        private SqlStatementDefinition CollectStatement(string file)
         {
-            SqlStatementDescriptor statement = new SqlStatementDescriptor
-            {
-                Source = file,
-                Name = Path.GetFileNameWithoutExtension(file)
-            };
+            string definitionName = Path.GetFileNameWithoutExtension(file);
 
             try
             {
                 bool result = this._parser.Read
                 (
                     sourceKind: SqlParserSourceKind.Stream
-                  , source: File.OpenRead(file)
+                  , content: File.OpenRead(file)
+                  , source: file
+                  , definitionName: definitionName
                   , modelAccessor: this._modelAccessor
-                  , target: statement
                   , projectName: this._projectName
                   , isEmbedded: this._isEmbedded
                   , analyzeAlways: this._analyzeAlways
@@ -85,8 +82,9 @@ namespace Dibix.Sdk.CodeGeneration
                   , typeResolver: this._typeResolver
                   , schemaRegistry: this._schemaRegistry
                   , logger: this._logger
+                  , definition: out SqlStatementDefinition definition
                 );
-                return result ? statement : null;
+                return result ? definition : null;
             }
             catch (Exception exception)
             {

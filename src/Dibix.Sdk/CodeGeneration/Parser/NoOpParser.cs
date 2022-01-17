@@ -14,12 +14,12 @@ namespace Dibix.Sdk.CodeGeneration
             { SqlParserSourceKind.Stream, ReadFromStream }
         };
 
-        public bool Read(SqlParserSourceKind sourceKind, object source, Lazy<TSqlModel> modelAccessor, SqlStatementDescriptor target, string projectName, bool isEmbedded, bool analyzeAlways, string rootNamespace, string productName, string areaName, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger)
+        public bool Read(SqlParserSourceKind sourceKind, object content, string source, string definitionName, Lazy<TSqlModel> modelAccessor, string projectName, bool isEmbedded, bool analyzeAlways, string rootNamespace, string productName, string areaName, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger, out SqlStatementDefinition definition)
         {
             if (!SourceReaders.TryGetValue(sourceKind, out Func<object, string> reader))
                 throw new ArgumentOutOfRangeException(nameof(sourceKind), sourceKind, null);
 
-            target.Statement = new FormattedSqlStatement(reader(source), CommandType.Text);
+            definition = new SqlStatementDefinition(@namespace: null, definitionName, SchemaDefinitionSource.Local) { Statement = new FormattedSqlStatement(reader(content), CommandType.Text) };
             return true;
         }
 

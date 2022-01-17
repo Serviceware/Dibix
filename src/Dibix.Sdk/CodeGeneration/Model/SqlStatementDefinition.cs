@@ -3,11 +3,8 @@ using System.Collections.ObjectModel;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    public sealed class SqlStatementDescriptor
+    public sealed class SqlStatementDefinition : SchemaDefinition
     {
-        public string Source { get; set; }
-        public string Namespace { get; set; }
-        public string Name { get; set; }
         public FormattedSqlStatement Statement { get; set; }
         public string ProcedureName { get; set; }
         public bool MergeGridResult { get; set; }
@@ -20,7 +17,7 @@ namespace Dibix.Sdk.CodeGeneration
         public IList<SqlQueryResult> Results { get; }
         public ICollection<ErrorResponse> ErrorResponses { get; }
 
-        public SqlStatementDescriptor() 
+        public SqlStatementDefinition(string @namespace, string definitionName, SchemaDefinitionSource source) : base(@namespace, definitionName, source)
         {
             this.Parameters = new Collection<SqlQueryParameter>();
             this.Results = new Collection<SqlQueryResult>();

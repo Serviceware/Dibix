@@ -8,7 +8,7 @@ namespace Dibix.Sdk.CodeGeneration
     {
         #region Fields
         private readonly ISchemaRegistry _schemaRegistry;
-        private readonly ISchemaProvider _schemaProvider;
+        private readonly IContractDefinitionProvider _contractDefinitionProvider;
         private readonly ReferencedAssemblyInspector _referencedAssemblyInspector;
         private readonly ILogger _logger;
         private readonly string _rootNamespace;
@@ -20,8 +20,8 @@ namespace Dibix.Sdk.CodeGeneration
         #region Constructor
         public ContractDefinitionSchemaTypeResolver(ISchemaRegistry schemaRegistry, IContractDefinitionProvider contractDefinitionProvider, ReferencedAssemblyInspector referencedAssemblyInspector, ILogger logger, string rootNamespace, string productName, string areaName)
         {
-            this._schemaProvider = contractDefinitionProvider;
             this._schemaRegistry = schemaRegistry;
+            this._contractDefinitionProvider = contractDefinitionProvider;
             this._referencedAssemblyInspector = referencedAssemblyInspector;
             this._logger = logger;
             this._rootNamespace = rootNamespace;
@@ -54,7 +54,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 string absoluteNamespace = NamespaceUtility.BuildAbsoluteNamespace(this._rootNamespace, this._productName, this._areaName, LayerName.DomainModel, relativeNamespace);
                 string key = $"{absoluteNamespace}.{typeName.Name}";
-                if (!this._schemaProvider.TryGetSchema(key, out schema))
+                if (!this._contractDefinitionProvider.TryGetSchema(key, out schema))
                 {
                     // Scenario:
                     // We are inside a namespace group but the type reference includes this namespace group aswell, since it's assumed that all type references are relative to root.
@@ -62,7 +62,7 @@ namespace Dibix.Sdk.CodeGeneration
                     // Because there, when you are inside a namespace group and you want to get out of it, the type reference must be absolute.
                     // Unfortunately fixing this would introduce a breaking change. Therefore we allow it.
                     string absoluteTypeName = NamespaceUtility.BuildAbsoluteNamespace(this._rootNamespace, this._productName, this._areaName, LayerName.DomainModel, typeName.Name);
-                    if (!this._schemaProvider.TryGetSchema(absoluteTypeName, out schema))
+                    if (!this._contractDefinitionProvider.TryGetSchema(absoluteTypeName, out schema))
                     {
                         schemaTypeReference = null;
                         return false;
@@ -72,11 +72,11 @@ namespace Dibix.Sdk.CodeGeneration
             else
             {
                 // Assume absolute type name
-                if (!this._schemaProvider.TryGetSchema(typeName.Name, out schema))
+                if (!this._contractDefinitionProvider.TryGetSchema(typeName.Name, out schema))
                 {
                     // Assume relative type name
                     string absoluteTypeName = NamespaceUtility.BuildAbsoluteNamespace(this._rootNamespace, this._productName, this._areaName, LayerName.DomainModel, typeName.Name);
-                    if (!this._schemaProvider.TryGetSchema(absoluteTypeName, out schema))
+                    if (!this._contractDefinitionProvider.TryGetSchema(absoluteTypeName, out schema))
                     {
                         schemaTypeReference = null;
                         return false;

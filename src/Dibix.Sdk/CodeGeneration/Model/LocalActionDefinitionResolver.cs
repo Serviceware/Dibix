@@ -12,7 +12,7 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly string _productName;
         private readonly string _areaName;
         private readonly string _className;
-        private readonly ICollection<SqlStatementDescriptor> _statements;
+        private readonly ISqlStatementDefinitionProvider _sqlStatementDefinitionProvider;
         #endregion
 
         #region Constructor
@@ -22,7 +22,7 @@ namespace Dibix.Sdk.CodeGeneration
           , string productName
           , string areaName
           , string className
-          , ICollection<SqlStatementDescriptor> statements
+          , ISqlStatementDefinitionProvider sqlStatementDefinitionProvider
           , ISchemaRegistry schemaRegistry
           , ILogger logger
         ) : base(schemaRegistry, logger)
@@ -31,7 +31,7 @@ namespace Dibix.Sdk.CodeGeneration
             this._productName = productName;
             this._areaName = areaName;
             this._className = className;
-            this._statements = statements;
+            this._sqlStatementDefinitionProvider = sqlStatementDefinitionProvider;
         }
         #endregion
 
@@ -51,8 +51,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             string methodName = targetName.Substring(statementNameIndex + 1);
 
-            SqlStatementDescriptor statement = this._statements.FirstOrDefault(x => x.Namespace == normalizedNamespace && x.Name == methodName);
-            if (statement == null)
+            if (!this._sqlStatementDefinitionProvider.TryGetDefinition(normalizedNamespace, methodName, out SqlStatementDefinition definition))
             {
                 actionDefinition = null;
                 return false;
@@ -68,10 +67,14 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
             }
             */
 
-            ActionDefinitionTarget actionTarget = new LocalActionTarget(statement, this._className);
+            string accessorFullName = $"{definition.Namespace}.{this._className}";
+            string definitionName = definition.DefinitionName;
+            bool isAsync = definition.Async;
+            bool hasRefParameters = definition.Parameters.Any(x => x.IsOutput);
+            ActionDefinitionTarget actionTarget = new LocalActionTarget(accessorFullName, definitionName, isAsync, hasRefParameters);
             actionDefinition = new ActionDefinition(actionTarget);
             ActionParameterRegistry parameterRegistry = new ActionParameterRegistry(actionDefinition, pathParameters);
-            foreach (SqlQueryParameter parameter in statement.Parameters)
+            foreach (SqlQueryParameter parameter in definition.Parameters)
             {
                 base.CollectActionParameter
                 (
@@ -90,21 +93,21 @@ Tried: {normalizedNamespace}.{methodName}", filePath, line, column);
                 );
             }
 
-            foreach (ErrorResponse errorResponse in statement.ErrorResponses)
+            foreach (ErrorResponse errorResponse in definition.ErrorResponses)
                 RegisterErrorResponse(actionDefinition, errorResponse.StatusCode, errorResponse.ErrorCode, errorResponse.ErrorDescription);
 
-            CollectResponse(actionDefinition, statement);
+            CollectResponse(actionDefinition, definition);
             return true;
         }
         #endregion
 
         #region Private Methods
-        private static void CollectResponse(ActionDefinition actionDefinition, SqlStatementDescriptor statement)
+        private static void CollectResponse(ActionDefinition actionDefinition, SqlStatementDefinition definition)
         {
-            if (statement.FileResult != null)
-                actionDefinition.SetFileResponse(new ActionFileResponse(HttpMediaType.Binary), statement.Source, statement.FileResult.Line, statement.FileResult.Column);
+            if (definition.FileResult != null)
+                actionDefinition.SetFileResponse(new ActionFileResponse(HttpMediaType.Binary), definition.FileResult.Source, definition.FileResult.Line, definition.FileResult.Column);
             else
-                actionDefinition.DefaultResponseType = statement.ResultType;
+                actionDefinition.DefaultResponseType = definition.ResultType;
         }
         #endregion
     }

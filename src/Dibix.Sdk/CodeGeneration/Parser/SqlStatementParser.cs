@@ -24,35 +24,39 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region ISqlStatementParser Members
-        public bool Read(SqlParserSourceKind sourceKind, object source, Lazy<TSqlModel> modelAccessor, SqlStatementDescriptor target, string projectName, bool isEmbedded, bool analyzeAlways, string rootNamespace, string productName, string areaName, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger)
+        public bool Read(SqlParserSourceKind sourceKind, object content, string source, string definitionName, Lazy<TSqlModel> modelAccessor, string projectName, bool isEmbedded, bool analyzeAlways, string rootNamespace, string productName, string areaName, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger, out SqlStatementDefinition definition)
         {
             if (!SourceReaders.TryGetValue(sourceKind, out Func<object, TSqlFragment> reader))
                 throw new ArgumentOutOfRangeException(nameof(sourceKind), sourceKind, null);
 
-            TSqlFragment fragment = reader(source);
-            TSqlFragmentAnalyzer fragmentAnalyzer = new TSqlFragmentAnalyzer(target.Source, fragment, isScriptArtifact: false, projectName, isEmbedded, analyzeAlways, modelAccessor, logger);
-            return this.CollectStatementDescriptor(fragment, fragmentAnalyzer, target, rootNamespace, productName, areaName, formatter, typeResolver, schemaRegistry, logger);
+            TSqlFragment fragment = reader(content);
+            TSqlFragmentAnalyzer fragmentAnalyzer = new TSqlFragmentAnalyzer(source, fragment, isScriptArtifact: false, projectName, isEmbedded, analyzeAlways, modelAccessor, logger);
+            return this.TryCollectStatementDescriptor(fragment, fragmentAnalyzer, source, definitionName, rootNamespace, productName, areaName, formatter, typeResolver, schemaRegistry, logger, out definition);
         }
         #endregion
 
         #region Private Methods
-        private bool CollectStatementDescriptor(TSqlFragment fragment, TSqlFragmentAnalyzer fragmentAnalyzer, SqlStatementDescriptor target, string rootNamespace, string productName, string areaName, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger)
+        private bool TryCollectStatementDescriptor(TSqlFragment fragment, TSqlFragmentAnalyzer fragmentAnalyzer, string source, string definitionName, string rootNamespace, string productName, string areaName, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger, out SqlStatementDefinition definition)
         {
-            ISqlMarkupDeclaration markup = SqlMarkupReader.ReadHeader(fragment, target.Source, logger);
+            ISqlMarkupDeclaration markup = SqlMarkupReader.ReadHeader(fragment, source, logger);
             bool hasMarkup = markup.HasElements;
-            bool hasNoCompileElement = markup.HasSingleElement(SqlMarkupKey.NoCompile, target.Source, logger);
+            bool hasNoCompileElement = markup.HasSingleElement(SqlMarkupKey.NoCompile, source, logger);
             bool include = (!this._requireExplicitMarkup || hasMarkup) && !hasNoCompileElement;
             if (!include)
+            {
+                definition = null;
                 return false;
+            }
 
             TVisitor visitor = new TVisitor
             {
+                Source = source,
+                DefinitionName = definitionName,
                 RootNamespace = rootNamespace,
                 ProductName = productName,
                 AreaName = areaName,
                 FragmentAnalyzer = fragmentAnalyzer,
                 Formatter = formatter,
-                Target = target,
                 TypeResolver = typeResolver,
                 SchemaRegistry = schemaRegistry,
                 Logger = logger,
@@ -63,8 +67,22 @@ namespace Dibix.Sdk.CodeGeneration
 
             //if (visitor.Target.Content == null)
             //    logger.LogError(null, "File could not be parsed", target.Source, fragment.StartLine, fragment.StartColumn);
-            
-            return visitor.Target.Statement != null;
+
+            // TODO: Investigate and document use case
+            //if (visitor.Definition.Statement != null)
+            //{
+            //    definition = visitor.Definition;
+            //    return true;
+            //}
+
+            if (visitor.Definition != null)
+            {
+                definition = visitor.Definition;
+                return true;
+            }
+
+            definition = null;
+            return false;
         }
 
         private static TSqlFragment ReadFromString(object source) => ReadFromTextReader(new StringReader((string)source));

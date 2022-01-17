@@ -2,6 +2,7 @@
 {
     public interface ISqlElement
     {
+        string Source { get; }
         int Line { get; }
         int Column { get; }
         

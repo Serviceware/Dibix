@@ -15,7 +15,7 @@ namespace Dibix.Sdk.CodeGeneration
           , string productName
           , string areaName
           , string className
-          , ICollection<SqlStatementDescriptor> statements
+          , ISqlStatementDefinitionProvider sqlStatementDefinitionProvider
           , ReferencedAssemblyInspector referencedAssemblyInspector
           , ISchemaRegistry schemaRegistry
           , ILogger logger
@@ -31,7 +31,7 @@ namespace Dibix.Sdk.CodeGeneration
                   , productName
                   , areaName
                   , className
-                  , statements
+                  , sqlStatementDefinitionProvider
                   , schemaRegistry
                   , logger
                 )

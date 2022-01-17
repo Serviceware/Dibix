@@ -10,6 +10,7 @@ namespace Dibix.Sdk.CodeGeneration
     {
         #region Fields
         internal const string InputTypeSuffix = "Input";
+        private readonly ICollection<SqlStatementDefinition> _schemas;
         #endregion
 
         #region Properties
@@ -17,25 +18,33 @@ namespace Dibix.Sdk.CodeGeneration
         public override string RegionName => "Input types";
         #endregion
 
+        #region Constructor
+        public DaoExecutorInputClassWriter(CodeGenerationModel model, SchemaDefinitionSource schemaFilter)
+        {
+            this._schemas = model.Schemas
+                                 .OfType<SqlStatementDefinition>()
+                                 .Where(x => schemaFilter.HasFlag(x.Source) && RequiresInput(x))
+                                 .ToArray();
+        }
+        #endregion
+
         #region Overrides
-        public override bool HasContent(CodeGenerationModel model) => model.Statements.Any(RequiresInput);
+        public override bool HasContent(CodeGenerationModel model) => this._schemas.Any();
 
         public override void Write(CodeGenerationContext context)
         {
-            var namespaceGroups = context.Model
-                                         .Statements
-                                         .Where(RequiresInput)
-                                         .GroupBy(x => x.Namespace)
-                                         .ToArray();
+            var namespaceGroups = this._schemas
+                                      .GroupBy(x => x.Namespace)
+                                      .ToArray();
 
             for (int i = 0; i < namespaceGroups.Length; i++)
             {
-                IGrouping<string, SqlStatementDescriptor> namespaceGroup = namespaceGroups[i];
+                IGrouping<string, SqlStatementDefinition> namespaceGroup = namespaceGroups[i];
                 CSharpStatementScope scope = /*namespaceGroup.Key != null ? */context.CreateOutputScope(namespaceGroup.Key)/* : context.Output*/;
-                IList<SqlStatementDescriptor> statements = namespaceGroup.ToArray();
+                IList<SqlStatementDefinition> statements = namespaceGroup.ToArray();
                 for (int j = 0; j < statements.Count; j++)
                 {
-                    SqlStatementDescriptor statement = statements[j];
+                    SqlStatementDefinition statement = statements[j];
                     CSharpModifiers classVisibility = context.GeneratePublicArtifacts ? CSharpModifiers.Public : CSharpModifiers.Internal;
                     CSharpClass inputType = scope.AddClass(GetInputTypeName(statement), classVisibility | CSharpModifiers.Sealed);
 
@@ -61,9 +70,9 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private static bool RequiresInput(SqlStatementDescriptor statement) => statement.GenerateInputClass;
+        private static bool RequiresInput(SqlStatementDefinition statement) => statement.GenerateInputClass;
 
-        private static string GetInputTypeName(SqlStatementDescriptor statement) => String.Concat(statement.Name, InputTypeSuffix);
+        private static string GetInputTypeName(SqlStatementDefinition statement) => String.Concat(statement.DefinitionName, InputTypeSuffix);
 
         private static string ResolvePropertyTypeName(SqlQueryParameter parameter, CodeGenerationContext context)
         {

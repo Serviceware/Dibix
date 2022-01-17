@@ -16,6 +16,7 @@ namespace Dibix.Sdk.CodeGeneration
         private const string ConstantSuffix = "CommandText";
         private const string MethodPrefix = "";//"Execute";
         private readonly bool _accessorOnly;
+        private readonly ICollection<SqlStatementDefinition> _schemas;
         #endregion
 
         #region Properties
@@ -24,29 +25,32 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public DaoExecutorWriter(bool accessorOnly)
+        public DaoExecutorWriter(CodeGenerationModel model, SchemaDefinitionSource schemaFilter, bool accessorOnly)
         {
             this._accessorOnly = accessorOnly;
+            this._schemas = model.Schemas
+                                 .OfType<SqlStatementDefinition>()
+                                 .Where(x => schemaFilter.HasFlag(x.Source))
+                                 .ToArray();
         }
         #endregion
 
         #region Overrides
-        public override bool HasContent(CodeGenerationModel model) => model.Statements.Any();
+        public override bool HasContent(CodeGenerationModel model) => this._schemas.Any();
 
         public override void Write(CodeGenerationContext context)
         {
             context.AddUsing("Dibix");
 
-            var namespaceGroups = context.Model
-                                         .Statements
-                                         .GroupBy(x => x.Namespace)
-                                         .ToArray();
+            var namespaceGroups = this._schemas
+                                      .GroupBy(x => x.Namespace)
+                                      .ToArray();
 
             for (int i = 0; i < namespaceGroups.Length; i++)
             {
-                IGrouping<string, SqlStatementDescriptor> namespaceGroup = namespaceGroups[i];
+                IGrouping<string, SqlStatementDefinition> namespaceGroup = namespaceGroups[i];
                 CSharpStatementScope scope = /*namespaceGroup.Key != null ? */context.CreateOutputScope(namespaceGroup.Key) /* : context.Output*/;
-                IList<SqlStatementDescriptor> statementDescriptors = namespaceGroup.ToArray();
+                IList<SqlStatementDefinition> statementDescriptors = namespaceGroup.ToArray();
 
                 // Class
                 CSharpModifiers classVisibility = context.GeneratePublicArtifacts ? CSharpModifiers.Public : CSharpModifiers.Internal;
@@ -67,42 +71,42 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private static void AddCommandTextConstants(CSharpClass @class, CodeGenerationContext context, IList<SqlStatementDescriptor> statementDescriptors)
+        private static void AddCommandTextConstants(CSharpClass @class, CodeGenerationContext context, IList<SqlStatementDefinition> definitions)
         {
-            for (int i = 0; i < statementDescriptors.Count; i++)
+            for (int i = 0; i < definitions.Count; i++)
             {
-                SqlStatementDescriptor statementDescriptor = statementDescriptors[i];
-                //@class.AddComment(String.Concat("file:///", statementDescriptor.SourcePath.Replace(" ", "%20").Replace(@"\", "/")), false);
-                @class.AddComment(statementDescriptor.Name, false);
+                SqlStatementDefinition definition = definitions[i];
+                //@class.AddComment(String.Concat("file:///", definition.SourcePath.Replace(" ", "%20").Replace(@"\", "/")), false);
+                @class.AddComment(definition.DefinitionName, false);
                 CSharpModifiers fieldVisibility = context.GeneratePublicArtifacts ? CSharpModifiers.Private : CSharpModifiers.Public;
-                @class.AddField(name: String.Concat(statementDescriptor.Name, ConstantSuffix)
+                @class.AddField(name: String.Concat(definition.DefinitionName, ConstantSuffix)
                               , type: "string"
-                              , value: new CSharpStringValue(statementDescriptor.Statement.Content, context.Model.CommandTextFormatting == CommandTextFormatting.MultiLine)
+                              , value: new CSharpStringValue(definition.Statement.Content, context.Model.CommandTextFormatting == CommandTextFormatting.MultiLine)
                               , modifiers: fieldVisibility | CSharpModifiers.Const);
 
-                if (i + 1 < statementDescriptors.Count)
+                if (i + 1 < definitions.Count)
                     @class.AddSeparator();
             }
         }
 
-        private void AddExecutionMethods(CSharpClass @class, CodeGenerationContext context, IList<SqlStatementDescriptor> statementDescriptors)
+        private void AddExecutionMethods(CSharpClass @class, CodeGenerationContext context, IList<SqlStatementDefinition> definitions)
         {
-            for (int i = 0; i < statementDescriptors.Count; i++)
+            for (int i = 0; i < definitions.Count; i++)
             {
-                SqlStatementDescriptor statementDescriptor = statementDescriptors[i];
+                SqlStatementDefinition definition = definitions[i];
 
-                string methodName = String.Concat(MethodPrefix, statementDescriptor.Name);
-                if (statementDescriptor.Async)
+                string methodName = String.Concat(MethodPrefix, definition.DefinitionName);
+                if (definition.Async)
                     methodName = $"{methodName}Async";
 
-                string resultTypeName = ResolveTypeName(statementDescriptor, context);
-                string returnTypeName = DetermineReturnTypeName(statementDescriptor, resultTypeName, context);
+                string resultTypeName = ResolveTypeName(definition, context);
+                string returnTypeName = DetermineReturnTypeName(definition, resultTypeName, context);
 
                 IEnumerable<CSharpAnnotation> annotations = Enumerable.Empty<CSharpAnnotation>();
 
-                if (!this._accessorOnly && statementDescriptor.ErrorResponses.Any())
+                if (!this._accessorOnly && definition.ErrorResponses.Any())
                 {
-                    annotations = statementDescriptor.ErrorResponses
+                    annotations = definition.ErrorResponses
                                                      .Select(x => new CSharpAnnotation("ErrorResponse").AddParameter("statusCode", new CSharpValue(x.StatusCode.ToString()))
                                                                                                        .AddParameter("errorCode", new CSharpValue(x.ErrorCode.ToString()))
                                                                                                        .AddParameter("errorDescription", new CSharpStringValue(x.ErrorDescription)));
@@ -110,22 +114,22 @@ namespace Dibix.Sdk.CodeGeneration
                 }
 
                 CSharpModifiers modifiers = CSharpModifiers.Public | CSharpModifiers.Static;
-                if (statementDescriptor.Async)
+                if (definition.Async)
                     modifiers |= CSharpModifiers.Async;
 
                 CSharpMethod method = @class.AddMethod(name: methodName
                                                      , returnType: returnTypeName
-                                                     , body: GenerateMethodBody(statementDescriptor, resultTypeName, context)
+                                                     , body: GenerateMethodBody(definition, resultTypeName, context)
                                                      , annotations: annotations
                                                      , isExtension: true
                                                      , modifiers: modifiers);
                 method.AddParameter("databaseAccessorFactory", "IDatabaseAccessorFactory");
 
-                if (statementDescriptor.GenerateInputClass)
-                    method.AddParameter("input", $"{statementDescriptor.Name}{DaoExecutorInputClassWriter.InputTypeSuffix}", new CSharpAnnotation("InputClass"));
+                if (definition.GenerateInputClass)
+                    method.AddParameter("input", $"{definition.DefinitionName}{DaoExecutorInputClassWriter.InputTypeSuffix}", new CSharpAnnotation("InputClass"));
                 else
                 {
-                    foreach (SqlQueryParameter parameter in statementDescriptor.Parameters.OrderBy(x => x.DefaultValue != null))
+                    foreach (SqlQueryParameter parameter in definition.Parameters.OrderBy(x => x.DefaultValue != null))
                     {
                         ParameterKind parameterKind = parameter.IsOutput ? ParameterKind.Out : ParameterKind.Value;
                         CSharpValue defaultValue = parameter.DefaultValue != null ? context.BuildDefaultValueLiteral(parameter.DefaultValue) : null;
@@ -133,18 +137,18 @@ namespace Dibix.Sdk.CodeGeneration
                     }
                 }
 
-                if (statementDescriptor.Async)
+                if (definition.Async)
                 {
                     context.AddUsing<CancellationToken>();
-                    method.AddParameter("cancellationToken", nameof(CancellationToken), new CSharpValue("default"), default);
+                    method.AddParameter("cancellationToken", nameof(CancellationToken), new CSharpValue("default"));
                 }
 
-                if (i + 1 < statementDescriptors.Count)
+                if (i + 1 < definitions.Count)
                     @class.AddSeparator();
             }
         }
 
-        private static string DetermineReturnTypeName(SqlStatementDescriptor query, string resultTypeName, CodeGenerationContext context)
+        private static string DetermineReturnTypeName(SqlStatementDefinition query, string resultTypeName, CodeGenerationContext context)
         {
             if (!query.Async) 
                 return resultTypeName;
@@ -160,7 +164,7 @@ namespace Dibix.Sdk.CodeGeneration
             return returnTypeName;
         }
 
-        private static string ResolveTypeName(SqlStatementDescriptor query, CodeGenerationContext context)
+        private static string ResolveTypeName(SqlStatementDefinition query, CodeGenerationContext context)
         {
             if (query.Results.Any(x => x.Name != null)) // GridResult
                 return GetComplexTypeName(query, context);
@@ -168,13 +172,13 @@ namespace Dibix.Sdk.CodeGeneration
             return context.ResolveTypeName(query.ResultType, context);
         }
 
-        private static string GenerateMethodBody(SqlStatementDescriptor statementDescriptor, string resultTypeName, CodeGenerationContext context)
+        private static string GenerateMethodBody(SqlStatementDefinition definition, string resultTypeName, CodeGenerationContext context)
         {
             StringWriter writer = new StringWriter();
 
             if (context.WriteGuardChecks)
             {
-                ICollection<SqlQueryParameter> guardParameters = statementDescriptor.Parameters.Where(x => x.Check != ContractCheck.None).ToArray();
+                ICollection<SqlQueryParameter> guardParameters = definition.Parameters.Where(x => x.Check != ContractCheck.None).ToArray();
                 foreach (SqlQueryParameter parameter in guardParameters)
                     WriteGuardCheck(writer, parameter.Check, parameter.Name);
 
@@ -186,15 +190,15 @@ namespace Dibix.Sdk.CodeGeneration
                   .WriteLine("{")
                   .PushIndent();
 
-            if (statementDescriptor.Parameters.Any())
-                WriteParameters(writer, statementDescriptor, context);
+            if (definition.Parameters.Any())
+                WriteParameters(writer, definition, context);
 
-            bool hasOutputParameters = statementDescriptor.Parameters.Any(x => x.IsOutput);
-            WriteExecutor(writer, statementDescriptor, resultTypeName, hasOutputParameters, context);
+            bool hasOutputParameters = definition.Parameters.Any(x => x.IsOutput);
+            WriteExecutor(writer, definition, resultTypeName, hasOutputParameters, context);
 
-            WriteOutputParameterAssignment(writer, statementDescriptor);
+            WriteOutputParameterAssignment(writer, definition);
 
-            if (hasOutputParameters && statementDescriptor.ResultType != null)
+            if (hasOutputParameters && definition.ResultType != null)
                 writer.WriteLine("return result;");
 
             writer.PopIndent()
@@ -225,7 +229,7 @@ namespace Dibix.Sdk.CodeGeneration
                   .WriteLine();
         }
 
-        private static void WriteParameters(StringWriter writer, SqlStatementDescriptor query, CodeGenerationContext context)
+        private static void WriteParameters(StringWriter writer, SqlStatementDefinition query, CodeGenerationContext context)
         {
             writer.WriteLine("ParametersVisitor @params = accessor.Parameters()")
                   .SetTemporaryIndent(36);
@@ -285,7 +289,7 @@ namespace Dibix.Sdk.CodeGeneration
                   .ResetTemporaryIndent();
         }
 
-        private static void WriteExecutor(StringWriter writer, SqlStatementDescriptor query, string resultTypeName, bool hasOutputParameters, CodeGenerationContext context)
+        private static void WriteExecutor(StringWriter writer, SqlStatementDefinition query, string resultTypeName, bool hasOutputParameters, CodeGenerationContext context)
         {
             if (query.Results.Count > 1) // GridReader
             {
@@ -301,7 +305,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static void WriteSimpleResult(StringWriter writer, SqlStatementDescriptor query, string resultTypeName, bool hasOutputParameters, CodeGenerationContext context)
+        private static void WriteSimpleResult(StringWriter writer, SqlStatementDefinition query, string resultTypeName, bool hasOutputParameters, CodeGenerationContext context)
         {
             SqlQueryResult singleResult = query.Results.SingleOrDefault();
             bool isGridResult = singleResult?.Name != null;
@@ -325,13 +329,13 @@ namespace Dibix.Sdk.CodeGeneration
             writer.WriteLineRaw(";");
         }
 
-        private static void WriteSimpleMethodCall(StringWriter writer, SqlStatementDescriptor query, SqlQueryResult singleResult, CodeGenerationContext context)
+        private static void WriteSimpleMethodCall(StringWriter writer, SqlStatementDefinition query, SqlQueryResult singleResult, CodeGenerationContext context)
         {
             string methodName = singleResult != null ? GetExecutorMethodName(singleResult.ResultMode) : "Execute";
             WriteMethodCall(writer, query, methodName, singleResult, context);
         }
 
-        private static void WriteComplexResult(StringWriter writer, SqlStatementDescriptor query, string resultTypeName, bool hasOutputParameters, CodeGenerationContext context)
+        private static void WriteComplexResult(StringWriter writer, SqlStatementDefinition query, string resultTypeName, bool hasOutputParameters, CodeGenerationContext context)
         {
             if (hasOutputParameters)
             {
@@ -353,7 +357,7 @@ namespace Dibix.Sdk.CodeGeneration
                   .WriteLine("}");
         }
 
-        private static void WriteComplexResultBody(StringWriter writer, SqlStatementDescriptor query, string resultTypeName, bool hasOutputParameters, CodeGenerationContext context)
+        private static void WriteComplexResultBody(StringWriter writer, SqlStatementDefinition query, string resultTypeName, bool hasOutputParameters, CodeGenerationContext context)
         {
             WriteComplexResultInitializer(writer, query, resultTypeName, hasOutputParameters);
 
@@ -404,7 +408,7 @@ namespace Dibix.Sdk.CodeGeneration
                 writer.WriteLine("return result;");
         }
 
-        private static void WriteComplexResultInitializer(StringWriter writer, SqlStatementDescriptor query, string resultTypeName, bool hasOutputParameter)
+        private static void WriteComplexResultInitializer(StringWriter writer, SqlStatementDefinition query, string resultTypeName, bool hasOutputParameter)
         {
             writer.WriteIndent();
 
@@ -424,18 +428,14 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static void WriteComplexResultAssignment(StringWriter writer, SqlStatementDescriptor query, SqlQueryResult result, CodeGenerationContext context, bool isFirstResult, Action<StringWriter, SqlStatementDescriptor, SqlQueryResult, CodeGenerationContext> valueWriter)
+        private static void WriteComplexResultAssignment(StringWriter writer, SqlStatementDefinition query, SqlQueryResult result, CodeGenerationContext context, bool isFirstResult, Action<StringWriter, SqlStatementDefinition, SqlQueryResult, CodeGenerationContext> valueWriter)
         {
             bool isEnumerable = result.ResultMode == SqlQueryResultMode.Many;
             if (!isFirstResult || !query.MergeGridResult)
             {
                 writer.Write("result")
-                      .WriteRaw($".{result.Name}");
-
-                if (isEnumerable)
-                    writer.WriteRaw(".ReplaceWith(");
-                else
-                    writer.WriteRaw(" = ");
+                      .WriteRaw($".{result.Name}")
+                      .WriteRaw(isEnumerable ? ".ReplaceWith(" : " = ");
             }
 
             valueWriter(writer, query, result, context);
@@ -446,7 +446,7 @@ namespace Dibix.Sdk.CodeGeneration
             writer.WriteLineRaw(";");
         }
 
-        private static void WriteGridReaderMethodCall(StringWriter writer, SqlStatementDescriptor query, SqlQueryResult result, CodeGenerationContext context)
+        private static void WriteGridReaderMethodCall(StringWriter writer, SqlStatementDefinition query, SqlQueryResult result, CodeGenerationContext context)
         {
             if (query.Async)
                 writer.WriteRaw("await ");
@@ -469,7 +469,7 @@ namespace Dibix.Sdk.CodeGeneration
                 writer.WriteRaw(".ConfigureAwait(false)");
         }
 
-        private static void WriteMethodCall(StringWriter writer, SqlStatementDescriptor query, string methodName, SqlQueryResult singleResult, CodeGenerationContext context)
+        private static void WriteMethodCall(StringWriter writer, SqlStatementDefinition query, string methodName, SqlQueryResult singleResult, CodeGenerationContext context)
         {
             if (query.Async)
                 writer.WriteRaw("await ");
@@ -487,7 +487,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             context.AddUsing<CommandType>();
 
-            parameters.Add($"{query.Name}{ConstantSuffix}");
+            parameters.Add($"{query.DefinitionName}{ConstantSuffix}");
             parameters.Add($"{nameof(CommandType)}.{query.Statement.CommandType}");
             parameters.Add(query.Parameters.Any() ? "@params" : "ParametersVisitor.Empty");
 
@@ -554,12 +554,12 @@ namespace Dibix.Sdk.CodeGeneration
             writer.WriteRaw(' ');
         }
 
-        private static void WriteOutputParameterAssignment(StringWriter writer, SqlStatementDescriptor statementDescriptor)
+        private static void WriteOutputParameterAssignment(StringWriter writer, SqlStatementDefinition definition)
         {
-            if (!statementDescriptor.Parameters.Any(x => x.IsOutput) || statementDescriptor.GenerateInputClass)
+            if (!definition.Parameters.Any(x => x.IsOutput) || definition.GenerateInputClass)
                 return;
 
-            foreach (SqlQueryParameter parameter in statementDescriptor.Parameters.Where(parameter => parameter.IsOutput))
+            foreach (SqlQueryParameter parameter in definition.Parameters.Where(parameter => parameter.IsOutput))
             {
                 writer.WriteLine($"{parameter.Name} = {parameter.Name}Output.Result;");
             }
@@ -616,12 +616,12 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static string GetComplexTypeName(SqlStatementDescriptor statementDescriptor, CodeGenerationContext context)
+        private static string GetComplexTypeName(SqlStatementDefinition definition, CodeGenerationContext context)
         {
-            if (!(statementDescriptor.ResultType is SchemaTypeReference schemaTypeReference))
-                throw new InvalidOperationException($"Unexpected result type for grid result: {statementDescriptor.ResultType}");
+            if (!(definition.ResultType is SchemaTypeReference schemaTypeReference))
+                throw new InvalidOperationException($"Unexpected result type for grid result: {definition.ResultType}");
 
-            if (statementDescriptor.GenerateResultClass)
+            if (definition.GenerateResultClass)
             {
                 ObjectSchema schema = (ObjectSchema)context.GetSchema(schemaTypeReference);
                 if (schema == null)

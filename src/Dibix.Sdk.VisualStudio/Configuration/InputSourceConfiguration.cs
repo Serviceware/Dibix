@@ -24,13 +24,13 @@ namespace Dibix.Sdk.VisualStudio
             ISqlStatementParser parser = (ISqlStatementParser)Activator.CreateInstance(this.Parser);
             ISqlStatementFormatter formatter = (ISqlStatementFormatter)Activator.CreateInstance(this.Formatter);
             formatter.StripWhiteSpace = model.CommandTextFormatting == CommandTextFormatting.StripWhiteSpace;
-            foreach (SqlStatementDescriptor info in this.CollectStatements(parser, formatter, typeResolver, schemaRegistry, logger).Where(x => x != null)) 
-                model.Statements.Add(info);
+            foreach (SqlStatementDefinition info in this.CollectStatements(parser, formatter, typeResolver, schemaRegistry, logger).Where(x => x != null)) 
+                model.Schemas.Add(info);
         }
         #endregion
 
         #region Protected Methods
-        protected abstract IEnumerable<SqlStatementDescriptor> CollectStatements(ISqlStatementParser parser, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger);
+        protected abstract IEnumerable<SqlStatementDefinition> CollectStatements(ISqlStatementParser parser, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger);
         #endregion
     }
 }

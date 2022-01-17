@@ -9,7 +9,7 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public sealed class TakeSourceSqlStatementFormatter : SqlStatementFormatter, ISqlStatementFormatter
     {
-        protected override FormattedSqlStatement Format(SqlStatementDescriptor statementDescriptor, StatementList statementList)
+        protected override FormattedSqlStatement Format(SqlStatementDefinition statementDefinition, StatementList statementList)
         {
             StringBuilder sb = new StringBuilder();
 

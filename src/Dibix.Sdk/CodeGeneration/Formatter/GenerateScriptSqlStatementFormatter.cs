@@ -6,7 +6,7 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public sealed class GenerateScriptSqlStatementFormatter : SqlStatementFormatter, ISqlStatementFormatter
     {
-        protected override FormattedSqlStatement Format(SqlStatementDescriptor statementDescriptor, StatementList statementList)
+        protected override FormattedSqlStatement Format(SqlStatementDefinition statementDefinition, StatementList statementList)
         {
             TSqlBatch batch = new TSqlBatch();
 

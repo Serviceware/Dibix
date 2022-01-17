@@ -36,7 +36,7 @@ namespace Dibix.Sdk.VisualStudio
         #endregion
 
         #region Overrides
-        protected override IEnumerable<SqlStatementDescriptor> CollectStatements(ISqlStatementParser parser, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger)
+        protected override IEnumerable<SqlStatementDefinition> CollectStatements(ISqlStatementParser parser, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             IEnumerable<string> files = this._fileSystemProvider
                                             .GetFiles(this._projectName, this._include, this._exclude)
