@@ -100,6 +100,11 @@ namespace Dibix.Sdk.CodeGeneration
                     if (!result)
                         continue;
 
+                    if (this._definitions.ContainsKey(definition.FullName))
+                    {
+                        this._logger.LogError(null, $"Ambiguous procedure definition name: {definition.FullName}", file, 0, 0);
+                        continue;
+                    }
                     this._definitions.Add(definition.FullName, definition);
                 }
                 catch (Exception exception)
