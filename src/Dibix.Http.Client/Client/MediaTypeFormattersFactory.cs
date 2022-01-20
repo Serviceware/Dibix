@@ -1,5 +1,6 @@
 ﻿using System.Net.Http;
 using System.Net.Http.Formatting;
+using Newtonsoft.Json;
 
 namespace Dibix.Http.Client
 {
@@ -9,6 +10,7 @@ namespace Dibix.Http.Client
         {
             MediaTypeFormatterCollection mediaTypeFormatterCollection = new MediaTypeFormatterCollection();
             JsonMediaTypeFormatter jsonMediaTypeFormatter = mediaTypeFormatterCollection.JsonFormatter;
+            jsonMediaTypeFormatter.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Local;
             jsonMediaTypeFormatter.SerializerSettings.ContractResolver = new HttpClientJsonContractResolver(client.BaseAddress.Host, jsonMediaTypeFormatter);
             return mediaTypeFormatterCollection;
         }
