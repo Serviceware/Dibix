@@ -93,7 +93,8 @@ namespace Dibix.Testing.Http
             string actualText = JsonConvert.SerializeObject(response.ResponseContent, new JsonSerializerSettings
             {
                 ContractResolver = new DefaultContractResolver { NamingStrategy = new CamelCaseNamingStrategy() },
-                Formatting = Formatting.Indented
+                Formatting = Formatting.Indented,
+                DateTimeZoneHandling = DateTimeZoneHandling.Unspecified
             });
             JToken actualTextDom = JToken.Parse(actualText);
             string expectedTextReplaced = Regex.Replace(expectedText, @"\{(?<path>[A-Za-z.]+)\}", x =>
