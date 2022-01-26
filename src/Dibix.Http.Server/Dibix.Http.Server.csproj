@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   
   <PropertyGroup>
-    <TargetFrameworks>net5.0;netstandard2.0;net451</TargetFrameworks>
+    <TargetFrameworks>net5.0;netstandard2.0;net461</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,7 +17,7 @@
     <Compile Include="..\..\shared\Utilities\ExpressionUtility.cs" Link="Utilities\ExpressionUtility.cs" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' != 'net451'">
+  <ItemGroup Condition="'$(TargetFramework)' != 'net461'">
     <Compile Remove="Runtime\HttpObjectResponse.cs" />
   </ItemGroup>
 
@@ -29,15 +29,15 @@
     <PackageReference Include="System.Reflection.Emit" Version="$(ReflectionEmitVersion)" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net451'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
     <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="$(AspNetWebApiNetFxVersion)" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' != 'net451'">
+  <ItemGroup Condition="'$(TargetFramework)' != 'net461'">
     <PackageReference Include="System.IO.Packaging" Version="$(IOPackageVersion)" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net451'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
     <Reference Include="WindowsBase" /> <!-- System.IO.Packaging -->
   </ItemGroup>
   

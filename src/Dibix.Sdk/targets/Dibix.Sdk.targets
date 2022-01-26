@@ -367,7 +367,7 @@ $(_SqlReferencePath)" />
       <_ServerIntermediatePathNoExt>$(IntermediateOutputPath)$(_ServerOutputName).Accessor</_ServerIntermediatePathNoExt>
       <_ServerAssemblyInfoFile>$(_ServerIntermediatePathNoExt)_AssemblyInfo.cs</_ServerAssemblyInfoFile>
       <_ServerFileVersion>$(FileVersion)</_ServerFileVersion>
-      <_ServerTargetFrameworkNetFx>net451</_ServerTargetFrameworkNetFx>
+      <_ServerTargetFrameworkNetFx>net461</_ServerTargetFrameworkNetFx>
       <_ServerTargetFrameworkNetStandard>netstandard2.0</_ServerTargetFrameworkNetStandard>
       <_ServerTargetFramework>$(_ServerTargetFrameworkNetFx)</_ServerTargetFramework>
       <_ServerTargetFramework Condition="'$(CompileArtifactsNetStandard)' == 'true'">$(_ServerTargetFrameworkNetStandard)</_ServerTargetFramework>
@@ -521,7 +521,7 @@ $(_SqlReferencePath)" />
     <PropertyGroup Condition="'$(_ProduceArtifactPackage)' == 'true'">
       <_EndpointBinaryExt>.dbxc</_EndpointBinaryExt>
       <_EndpointIntermediateBinaryPath>$(IntermediateOutputPath)$(_EndpointOutputName)$(_EndpointBinaryExt)</_EndpointIntermediateBinaryPath>
-      <_EndpointTargetFrameworkNetFx>net451</_EndpointTargetFrameworkNetFx>
+      <_EndpointTargetFrameworkNetFx>net461</_EndpointTargetFrameworkNetFx>
       <_EndpointIntermediateProjectFilePath>$(IntermediateOutputPath)$(_EndpointOutputName).csproj</_EndpointIntermediateProjectFilePath>
       <_EndpointIntermediateProjectFileContent>
         <![CDATA[
