@@ -2359,11 +2359,6 @@ namespace Dibix.Sdk.Tests.Data.Extension.Primitive
     column="6" /&gt;
   &lt;error
     ruleid="1"
-    message="Invalid casing for 'sysname' [Identifier]"
-    line="6"
-    column="13" /&gt;
-  &lt;error
-    ruleid="1"
     message="Invalid casing for 'nvarchar' [Identifier]"
     line="7"
     column="13" /&gt;
