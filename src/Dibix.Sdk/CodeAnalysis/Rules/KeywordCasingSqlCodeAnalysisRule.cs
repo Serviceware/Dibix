@@ -95,13 +95,6 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                     .Each(this._tokenVisitor);
             }
 
-            // SYSNAME
-            public override void Visit(UserDataTypeReference node)
-            {
-                if (String.Compare(node.Name.BaseIdentifier.Value, "SYSNAME", StringComparison.OrdinalIgnoreCase) == 0 && node.Name.SchemaIdentifier == null)
-                    this.VisitFirstToken(node);
-            }
-
             // PARTITION
             public override void Visit(OverClause node)
             {

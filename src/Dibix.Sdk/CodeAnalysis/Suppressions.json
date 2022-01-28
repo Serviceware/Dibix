@@ -2,8 +2,7 @@
   "IndexSizeSqlCodeAnalysisRule": {
     "PK_hlom_udt_dlgelementassocvalidation": "3113993656d9b3c1ff30d1efc5cb8b22",
     "PK_hlpe_udt_dynamiclaneconfig": "da5d9863769d4fc38e28cdf9416da31d",
-    "PK_hlspparentprocattrmapping": "9075f64c2381f1bef23969b5438a2e81",
-    "UQ_hlsysportalconfig_cfg1": "db00f56842f2864e3ece85c61306ede3"
+    "PK_hlspparentprocattrmapping": "9075f64c2381f1bef23969b5438a2e81"
   },
   "InlineFunctionSqlCodeAnalysisRule": {
     "fnSplit": "88d0aa3b3a42962c453a447f75ec497e",
@@ -26,12 +25,6 @@
     "BlobDetail": "571cb352fdd9e58638c888cd8cfb6714",
     "fnSplit": "88d0aa3b3a42962c453a447f75ec497e",
     "hlsysbaselineattr#fixedvalue2": "655bc34ce38a042f2a76c3cd47bdc35d",
-    "hlsysportalconfig#attrpathacc1": "db00f56842f2864e3ece85c61306ede3",
-    "hlsysportalconfig#attrpathacc2": "db00f56842f2864e3ece85c61306ede3",
-    "hlsysportalconfig#attrpathapp1": "db00f56842f2864e3ece85c61306ede3",
-    "hlsysportalconfig#attrpathapp2": "db00f56842f2864e3ece85c61306ede3",
-    "hlsysportalconfig#attrpathpassword1": "db00f56842f2864e3ece85c61306ede3",
-    "hlsysportalconfig#attrpathpassword2": "db00f56842f2864e3ece85c61306ede3",
     "hlsysslmservicehoursentry#datetime1": "94a2e2bcc265aa23080876862d5ef58e",
     "hlsysslmservicehoursentry#datetime2": "94a2e2bcc265aa23080876862d5ef58e",
     "hlsysslmservicehoursentry#dayofweek1": "94a2e2bcc265aa23080876862d5ef58e",
@@ -118,10 +111,8 @@
     "PK_hlsysliclicenseseat#lic": "80de4fd1a3a0a99589d9311b1acc0cbf",
     "PK_hlsysliclicenseseat#token": "80de4fd1a3a0a99589d9311b1acc0cbf",
     "PK_hlsysnotificationprocessed#processtime": "c59063e7acb2bfcdd0a4923a13f7dc76",
-    "PK_hlsysobjectmodelassembly#assemblyname": "a60d3ae21b0ceb007c4609195b5587bb",
     "PK_hlsysoutqueuepending#requestid": "4c9d365dc5da2a3ddc77cdc092df3c8c",
     "PK_hlsysoutqueueprocessed#requestid": "6af37f1080a34a5df098757ae78cca6f",
-    "PK_hlsysportalconfig#instancename": "db00f56842f2864e3ece85c61306ede3",
     "PK_hlsysportalconfigurationaudit#audittime": "b7987015fc462a9caf9c48c17412c044",
     "PK_hlsysprjctprcssmp#instanceid": "343a6023f922217dd00f41a5b3daf560",
     "PK_hlsysprocparambool#parametername": "f8f45fa23f7bc550b869cfffcbcc9a8d",
@@ -235,7 +226,7 @@
     "PK_hlsysdocument(id)": "f9c6ba48e2c642a18205c70633f4e7ce",
     "PK_hlsysdxisetting(id)": "e27db6658ad337e24257ca5b27cfc1d0",
     "PK_hlsyssecinhtargetsvclogs(logid)": "106bd0c81c295800b91c20f9ade383ef",
-    "PK_hlsysservicebrokerlog(logid)": "d0f63cad44a8f84bc63eff1695aad9fe",
+    "PK_hlsysservicebrokerlog(logid)": "dffc0f0c7f5e3bd613f53428674041e7",
     "PK_hlsysslmcntragrmchangeadhoc(id)": "6d6dba473ceb1abbf315f7c1c60cf1e2",
     "PK_hlsysslmcntragrmchangewf(id)": "46c0a061a076d85c9e4c36797a603c09",
     "PK_hlsystablecfg(tablecfgid)": "2b54c8ec71c343be7d3b992708ec5755",
