@@ -59,9 +59,17 @@ namespace Dibix.Sdk.Sql
 
                 bool? isEmbedded = DacMetadataManager.IsEmbedded(path);
                 if (!isEmbedded.HasValue)
+                {
                     logger.LogError(null, $"Unsupported package reference: {path}", null, default, default);
+                }
                 else if (isEmbedded.Value)
+                {
+                    // TODO: Dirty suppression..
+                    if (projectName == "Helpline.DML")
+                        continue;
+                    
                     logger.LogError(null, $"Unsupported reference to DML package: {path}", null, default, default);
+                }
             }
         }
 
