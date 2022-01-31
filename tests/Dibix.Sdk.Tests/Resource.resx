@@ -3434,4 +3434,14 @@ namespace Dibix.Sdk.Tests.DomainModel.Grid
 }
 #endregion</value>
   </data>
+  <data name="InvalidFunctionUsageSqlCodeAnalysisRule" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;errors&gt;
+  &lt;error
+    ruleid="41"
+    message="The ISNULL function requires 2 argument(s)."
+    line="4"
+    column="15" /&gt;
+&lt;/errors&gt;</value>
+  </data>
 </root>

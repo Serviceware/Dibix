@@ -8,6 +8,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         protected override string ErrorMessageTemplate => "Unsupported DDL element reference in a DML project";
 
+        // Do not use EXEC to a procedure that is defined in the same DML project
         public override void Visit(ExecutableProcedureReference node)
         {
             if (!base.IsEmbedded)
