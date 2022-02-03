@@ -124,7 +124,7 @@
   </UsingTask>
 
   <!-- Define inputs and outputs so the targets know when they need to be rebuilt -->
-  <Target Name="SetupSqlBuildInputs" DependsOnTargets="_SetupSqlBuildInputs">
+  <Target Name="SetupSqlCoreInputs" DependsOnTargets="_SetupSqlBuildInputs">
     <PropertyGroup>
       <_DibixConfigurationPath>$(DibixConfigurationDirectory)\dibix.json</_DibixConfigurationPath>
     </PropertyGroup>
@@ -132,14 +132,20 @@
     <ItemGroup>
       <!-- Changed inputs that are relevant for all build targets -->
 
-      <!-- Some SSDT entries have to be added manually, since they are incorrect -->
+      <!-- Reuse inputs from SqlBuild target -->
+      <!-- Some entries have to be added manually, since they are incorrect -->
       <!-- For example: -->
       <!--<__SqlBuildInputItem Include="@(MSBuildAllProjects)" />-->
       <SqlBuildInputItem Include="$(MSBuildAllProjects)" />
       <SqlBuildInputItem Include="$(MSBuildProjectFullPath)" />
-
-      <!-- Import some inputs from SSDT -->
       <_SqlTargetInput Include="@(SqlBuildInputItem)" />
+
+      <!-- 
+        These inputs were relevant for .dacpac creation in SqlBuild,
+        but it doesn't make sense to outputs as inputs.
+       -->
+      <_SqlTargetInput Remove="$(IntermediateTargetFullFileName)" />
+      <_SqlTargetInput Remove="$(IntermediateSymbolsFullFileName)" />
 
       <!-- SDK changes -->
       <_SqlTargetInput Include="$(DibixCliPath)" />
@@ -166,7 +172,7 @@
       <SqlCoreInput Include="$(_DibixConfigurationPath)" />
     </ItemGroup>
   </Target>
-  <Target Name="SetupSqlBuildOutputs" BeforeTargets="_SetupSqlBuildOutputs">
+  <Target Name="SetupSqlCoreOutputs" BeforeTargets="_SetupSqlBuildOutputs">
     <PropertyGroup>
       <_HasEndpoints Condition="@(Endpoint->Count()) > 0">True</_HasEndpoints>
       <_ProduceArtifactPackage Condition="'$(_HasEndpoints)' == 'true'">True</_ProduceArtifactPackage>
@@ -191,7 +197,7 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="SetupCompilationArtifacts" BeforeTargets="SetupSqlBuildInputs">
+  <Target Name="SetupCompilationArtifacts" BeforeTargets="SetupSqlCoreInputs">
     <ItemGroup>
       <Contract Include="@(None)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(RelativeDir)', '^Contracts\\')) and %(Extension) == '.json'" />
       <Endpoint Include="@(None)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(RelativeDir)', '^Endpoints\\')) and %(Extension) == '.json'" />
@@ -200,7 +206,7 @@
 
   <!-- Run SQL code analysis and compile database access artifacts -->
   <Target Name="SqlCore"
-          DependsOnTargets="SetupSqlBuildInputs;SetupSqlBuildOutputs;ResolveArtifactReferences"
+          DependsOnTargets="SetupSqlCoreInputs;SetupSqlCoreOutputs;ResolveArtifactReferences"
           Inputs="@(SqlCoreInput)"
           Outputs="@(SqlCoreOutput)">
     <!-- Configuration -->
