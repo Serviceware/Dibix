@@ -104,7 +104,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             // Grid result is merged to first result type
             if (definition.MergeGridResult)
-                return definition.Results[0].ResultType;
+                return definition.Results[0].ReturnType;
 
             // Generate grid result type
             if (definition.Results.Any(x => x.Name != null))
@@ -113,7 +113,7 @@ namespace Dibix.Sdk.CodeGeneration
                 return this.GenerateGridResultType(definition, relativeNamespace);
             }
 
-            return definition.Results[0].ResultType;
+            return definition.Results[0].ReturnType;
         }
 
         private TypeReference GenerateGridResultType(SqlStatementDefinition definition, string relativeNamespace)
@@ -142,7 +142,7 @@ namespace Dibix.Sdk.CodeGeneration
                 return typeReference;
 
             ObjectSchema schema = new ObjectSchema(@namespace, gridResultTypeName, SchemaDefinitionSource.Generated);
-            schema.Properties.AddRange(definition.Results.Select(x => new ObjectSchemaProperty(x.Name, x.ResultType)));
+            schema.Properties.AddRange(definition.Results.Select(x => new ObjectSchemaProperty(x.Name, x.ReturnType)));
             base.SchemaRegistry.Populate(schema);
 
             return typeReference;

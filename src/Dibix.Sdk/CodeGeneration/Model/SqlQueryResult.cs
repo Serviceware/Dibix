@@ -12,7 +12,7 @@ namespace Dibix.Sdk.CodeGeneration
         public string Converter { get; set; }
         public string SplitOn { get; set; }
         public TypeReference ProjectToType { get; set; }
-        public TypeReference ResultType => this.ProjectToType ?? this.Types[0];
+        public TypeReference ReturnType { get; set; }
 
         public SqlQueryResult()
         {

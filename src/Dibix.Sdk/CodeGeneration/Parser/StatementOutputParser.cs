@@ -63,7 +63,8 @@ namespace Dibix.Sdk.CodeGeneration
             return new SqlQueryResult
             {
                 ResultMode = SqlQueryResultMode.SingleOrDefault,
-                Types = { typeReference }
+                Types = { typeReference },
+                ReturnType = typeReference
             };
         }
 
@@ -162,10 +163,28 @@ namespace Dibix.Sdk.CodeGeneration
                 ISqlElementValue splitOn = returnElement.GetPropertyValue(ReturnPropertySplitOn);
 
                 ValidateMergeGridResult(definition, node, returnElement.Source, i == 0, resultMode, resultName?.Value, logger);
+                TypeReference projectToType = ParseProjectionContract(node, returnElements, resultMode, returnElement, relativeNamespace, typeResolver, logger, out ISqlElementValue projectToTypeElement);
 
-                IList<TypeReference> resultTypes = ParseResultTypes(returnElement.Source, resultMode, typesHint, typeResolver, relativeNamespace).ToArray();
+                string[] typeNames = typesHint.Value.Split(';');
+                IList<TypeReference> resultTypes = ParseResultTypes(typeNames, returnElement.Source, resultMode, typesHint, typeResolver, relativeNamespace).ToArray();
                 if (!resultTypes.Any())
                     continue;
+
+                TypeReference returnType;
+                string returnTypeName;
+                ISqlElementValue returnTypeLocation;
+                if (projectToType != null)
+                {
+                    returnType = projectToType;
+                    returnTypeName = projectToTypeElement.Value;
+                    returnTypeLocation = projectToTypeElement;
+                }
+                else
+                {
+                    returnType = resultTypes[0];
+                    returnTypeName = typeNames[0];
+                    returnTypeLocation = typesHint;
+                }
 
                 OutputSelectResult output = visitor.Outputs[i];
                 ValidateResult
@@ -189,10 +208,14 @@ namespace Dibix.Sdk.CodeGeneration
                     ResultMode = resultMode,
                     Converter = converter?.Value,
                     SplitOn = splitOn?.Value,
-                    ProjectToType = ParseProjectionContract(node, returnElements, resultMode, returnElement, relativeNamespace, typeResolver, logger)
+                    ProjectToType = projectToType,
+                    ReturnType = returnType
                 };
                 result.Types.AddRange(resultTypes);
                 result.Columns.AddRange(output.Columns.Select(x => x.ColumnName));
+
+                if (!ValidateReturnType(returnType, returnTypeName, returnElement.Source, returnTypeLocation, resultMode, logger))
+                    continue;
 
                 yield return result;
             }
@@ -211,7 +234,7 @@ namespace Dibix.Sdk.CodeGeneration
         private static void ValidateMergeGridResult(SqlStatementDefinition definition, TSqlFragment node, string source, bool isFirstResult, SqlQueryResultMode resultMode, string resultName, ILogger logger)
         {
             SqlQueryResultMode[] supportedMergeGridResultModes = { SqlQueryResultMode.Single, SqlQueryResultMode.SingleOrDefault };
-            if (!definition.MergeGridResult || !isFirstResult) 
+            if (!definition.MergeGridResult || !isFirstResult)
                 return;
 
             if (!supportedMergeGridResultModes.Contains(resultMode))
@@ -225,9 +248,8 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static IEnumerable<TypeReference> ParseResultTypes(string source, SqlQueryResultMode resultMode, ISqlElementValue typesHint, ITypeResolverFacade typeResolver, string relativeNamespace)
+        private static IEnumerable<TypeReference> ParseResultTypes(IEnumerable<string> typeNames, string source, SqlQueryResultMode resultMode, ISqlElementValue typesHint, ITypeResolverFacade typeResolver, string relativeNamespace)
         {
-            string[] typeNames = typesHint.Value.Split(';');
             int column = typesHint.Column;
 
             foreach (string typeName in typeNames)
@@ -404,10 +426,10 @@ namespace Dibix.Sdk.CodeGeneration
             return true;
         }
 
-        private static TypeReference ParseProjectionContract(TSqlFragment node, ICollection<ISqlElement> returnElements, SqlQueryResultMode resultMode, ISqlElement returnElement, string relativeNamespace, ITypeResolverFacade typeResolver, ILogger logger)
+        private static TypeReference ParseProjectionContract(TSqlFragment node, ICollection<ISqlElement> returnElements, SqlQueryResultMode resultMode, ISqlElement returnElement, string relativeNamespace, ITypeResolverFacade typeResolver, ILogger logger, out ISqlElementValue resultType)
         {
             SqlQueryResultMode[] supportedResultTypeResultModes = { SqlQueryResultMode.Many };
-            if (!returnElement.TryGetPropertyValue(ReturnPropertyResultType, isDefault: false, out ISqlElementValue resultType))
+            if (!returnElement.TryGetPropertyValue(ReturnPropertyResultType, isDefault: false, out resultType))
                 return null;
 
             bool singleResult = returnElements.Count <= 1;
@@ -434,6 +456,35 @@ namespace Dibix.Sdk.CodeGeneration
                 return null;
 
             return typeResolver.ResolveType(resultType.Value, relativeNamespace, returnElement.Source, resultType.Line, resultType.Column, resultMode == SqlQueryResultMode.Many);
+        }
+
+        private static bool ValidateReturnType(TypeReference returnType, string returnTypeName, string source, ISqlElementValue returnTypeLocation, SqlQueryResultMode mode, ILogger logger)
+        {
+            // The point of this rule, is to stability the meaning of 'Default'.
+            // In C# all value types have a default, but they're not all the same (0, false, 0.0, "" for nullable-ref-types feature)
+            // This rule tries to isolate the default to two values: null and false (boolean)
+            if (mode != SqlQueryResultMode.SingleOrDefault)
+                return true;
+
+            if (returnType.IsNullable)
+                return true;
+
+            if (!(returnType is PrimitiveTypeReference primitiveTypeReference))
+                return true;
+
+            // In case of a boolean result, there are two options to fix the violation:
+            // 1. Change mode to 'Single' and make the statement always one row.
+            //    => This introduces complexity and decreases readability by wrapping the statement into an IIF statement
+            //    => It might even have a slight impact on performance to always return a row, even if it's not needed.
+            // 2. Return a nullable boolean
+            //    => This is bad design and inconvenient for the API consumer, as he associates words like 'Can', 'Allow', etc. with a true boolean answer (yes/no).
+            //    => The caller does not know what NULL in this case actually means.
+            // Regarding these downsides, having boolean results violate this rule, is inconvenient, therefore we allow it.
+            if (primitiveTypeReference.Type == PrimitiveType.Boolean)
+                return true;
+
+            logger.LogError(null, $"When using the result mode option '{mode}', the primitive return type must be nullable: {returnTypeName}", source, returnTypeLocation.Line, returnTypeLocation.Column);
+            return false;
         }
     }
 }

@@ -74,6 +74,13 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(5,2,5
         }
 
         [Fact]
+        public void Inline_SingleOrDefaultPrimitiveResult_WithModeSingleOrDefault_Error()
+        {
+            this.ExecuteTestAndExpectError(@"Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql", @"One or more errors occured during code generation:
+Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,21,1,21):error:When using the result mode option 'SingleOrDefault', the primitive return type must be nullable: int32");
+        }
+
+        [Fact]
         public void Inline_SingleConcreteResult()
         {
             this.ExecuteTest
