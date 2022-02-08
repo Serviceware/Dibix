@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Dibix.Dapper;
 
 namespace Dibix.Testing.Data
 {
@@ -47,7 +45,7 @@ namespace Dibix.Testing.Data
             }
         }
 
-        protected static IDatabaseAccessorFactory CreateDatabaseAccessorFactory(TConfiguration configuration) => new DapperDatabaseAccessorFactory(configuration.Database.ConnectionString);
+        protected static IDatabaseAccessorFactory CreateDatabaseAccessorFactory(TConfiguration configuration) => DatabaseTestUtility.CreateDatabaseAccessorFactory(configuration);
         #endregion
 
         #region Private Methods
@@ -75,45 +73,6 @@ namespace Dibix.Testing.Data
                                                   .Cast<TraceSource>()
                                                   .Single(x => x.Name == "Dibix.Sql");
             return traceSource;
-        }
-        #endregion
-
-        #region Nested Types
-        private sealed class DapperDatabaseAccessorFactory : IDatabaseAccessorFactory
-        {
-            private readonly string _connectionString;
-
-            public DapperDatabaseAccessorFactory(string connectionString) => this._connectionString = connectionString;
-
-            public IDatabaseAccessor Create()
-            {
-                SqlConnection connection = new SqlConnection(this._connectionString)
-                {
-                    FireInfoMessageEventOnUserErrors = true // Important for tracing when using RAISERROR WITH NOWAIT
-                };
-                connection.InfoMessage += OnInfoMessage;
-                return new DapperDatabaseAccessor(connection);
-            }
-
-            // We are using RAISERROR WITH NOWAIT to track long running progress.
-            // This however requires the property FireInfoMessageEventOnUserErrors to be set to true.
-            // When this is true, errors will trigger an info message event aswell, without throwing an exception.
-            // To restore the original behavior for errors, we have to throw ourselves.
-            private static void OnInfoMessage(object sender, SqlInfoMessageEventArgs e)
-            {
-                bool isError = e.Errors.Cast<SqlError>().Aggregate(false, (current, sqlError) => current || sqlError.Class > 10);
-                if (!isError) 
-                    return;
-
-                SqlErrorCollection errorCollection = e.Errors;
-                string serverVersion = null;
-                MethodInfo createExceptionMethod = typeof(SqlException).GetMethod("CreateException", BindingFlags.NonPublic | BindingFlags.Static, null, new[] { typeof(SqlErrorCollection), typeof(string) }, null);
-                SqlException exception = (SqlException)createExceptionMethod.Invoke(null, new object[] { errorCollection, serverVersion });
-                    
-                // Exceptions within the InfoMessage handler will generally be caught and traced.
-                // Unless they are of a severe exception type.
-                throw new AccessViolationException(exception.Message, exception);
-            }
         }
         #endregion
 
