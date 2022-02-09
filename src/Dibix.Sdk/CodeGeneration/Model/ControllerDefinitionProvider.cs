@@ -83,7 +83,7 @@ namespace Dibix.Sdk.CodeGeneration
                         break;
 
                     case JTokenType.String:
-                        ReadControllerImport(controller, (string)action);
+                        ReadControllerImport(controller, action, filePath);
                         break;
 
                     default:
@@ -230,8 +230,23 @@ namespace Dibix.Sdk.CodeGeneration
             return properties;
         }
 
-        private static void ReadControllerImport(ControllerDefinition controller, string typeName)
+        private void ReadControllerImport(ControllerDefinition controller, JToken value, string filePath)
         {
+            string[] knownControllerImports =
+            {
+                "Dibix.GenericEndpoint",
+                "Helpline.ProcessManagement.Business.Facade.DeskController,ProcessManagement.Business.Legacy",
+                "Helpline.Search.Business.Facade.ExpertSearchController,Search.Business.Legacy",
+                "Helpline.Search.Business.Facade.FullTextSearchController,Search.Business.Legacy"
+            };
+            string typeName = (string)value;
+            if (!knownControllerImports.Contains(typeName))
+            {
+                IJsonLineInfo lineInfo = value.GetLineInfo();
+                base.Logger.LogError(null, "Controller imports are not supported anymore", filePath, lineInfo.LineNumber, lineInfo.LinePosition);
+                return;
+            }
+
             controller.ControllerImports.Add(typeName);
         }
 
