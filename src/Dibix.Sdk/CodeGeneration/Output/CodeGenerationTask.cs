@@ -37,37 +37,41 @@ namespace Dibix.Sdk.CodeGeneration
         {
             IActionParameterSourceRegistry actionParameterSourceRegistry = new ActionParameterSourceRegistry();
             IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(projectDirectory);
-            return Execute
-            (
-                projectName
-              , projectDirectory
-              , productName
-              , areaName
-              , outputName
-              , title
-              , version
-              , description
-              , new EndpointConfiguration(baseUrl)
-              , defaultOutputFilePath
-              , endpointOutputFilePath
-              , clientOutputFilePath
-              , externalAssemblyReferenceDirectory
-              , source
-              , contracts
-              , endpoints
-              , references
-              , defaultSecuritySchemes
-              , isEmbedded
-              , enableExperimentalFeatures
-              , databaseSchemaProviderName
-              , modelCollation
-              , sqlReferencePath
-              , actionParameterSourceRegistry
-              , fileSystemProvider
-              , logger
-              , sqlModel: null
-              , out additionalAssemblyReferences
-            );
+            using (LockEntryManager lockEntryManager = LockEntryManager.Create())
+            {
+                return Execute
+                (
+                    projectName
+                  , projectDirectory
+                  , productName
+                  , areaName
+                  , outputName
+                  , title
+                  , version
+                  , description
+                  , new EndpointConfiguration(baseUrl)
+                  , defaultOutputFilePath
+                  , endpointOutputFilePath
+                  , clientOutputFilePath
+                  , externalAssemblyReferenceDirectory
+                  , source
+                  , contracts
+                  , endpoints
+                  , references
+                  , defaultSecuritySchemes
+                  , isEmbedded
+                  , enableExperimentalFeatures
+                  , databaseSchemaProviderName
+                  , modelCollation
+                  , sqlReferencePath
+                  , actionParameterSourceRegistry
+                  , lockEntryManager
+                  , fileSystemProvider
+                  , logger
+                  , sqlModel: null
+                  , out additionalAssemblyReferences
+                );
+            }
         }
         internal static bool Execute
         (
@@ -95,6 +99,7 @@ namespace Dibix.Sdk.CodeGeneration
           , string modelCollation
           , ICollection<TaskItem> sqlReferencePath
           , IActionParameterSourceRegistry actionParameterSourceRegistry
+          , LockEntryManager lockEntryManager
           , IFileSystemProvider fileSystemProvider
           , ILogger logger
           , TSqlModel sqlModel
@@ -129,6 +134,7 @@ namespace Dibix.Sdk.CodeGeneration
               , sqlReferencePath
               , schemaRegistry
               , actionParameterSourceRegistry
+              , lockEntryManager
               , fileSystemProvider
               , logger
               , sqlModel

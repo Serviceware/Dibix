@@ -1,7 +1,7 @@
 ﻿namespace Dibix.Sdk.Cli
 {
     [TaskRunner("core")]
-    internal sealed class SqlCoreTaskRunner : TaskRunner
+    internal sealed class SqlCoreTaskRunner : InputConfigurationTaskRunner
     {
         public SqlCoreTaskRunner(ILogger logger) : base(logger) { }
 

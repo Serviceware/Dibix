@@ -17,6 +17,7 @@ namespace Dibix.Sdk.CodeGeneration
           , string className
           , ISqlStatementDefinitionProvider sqlStatementDefinitionProvider
           , ReferencedAssemblyInspector referencedAssemblyInspector
+          , LockEntryManager lockEntryManager
           , ISchemaRegistry schemaRegistry
           , ILogger logger
         )
@@ -24,7 +25,7 @@ namespace Dibix.Sdk.CodeGeneration
             this._logger = logger;
             this._resolvers = new Collection<ActionDefinitionResolver>
             {
-                new ExternalActionDefinitionResolver(schemaRegistry, logger)
+                new ExternalActionDefinitionResolver(schemaRegistry, lockEntryManager, logger)
               , new LocalActionDefinitionResolver
                 (
                     rootNamespace

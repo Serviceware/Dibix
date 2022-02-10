@@ -1,7 +1,7 @@
 ﻿namespace Dibix.Sdk.Cli
 {
     [TaskRunner("pack")]
-    internal sealed class CreatePackageTaskRunner : TaskRunner
+    internal sealed class CreatePackageTaskRunner : InputConfigurationTaskRunner
     {
         public CreatePackageTaskRunner(ILogger logger) : base(logger) { }
 

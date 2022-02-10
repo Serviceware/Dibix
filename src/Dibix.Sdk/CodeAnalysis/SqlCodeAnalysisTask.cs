@@ -27,18 +27,22 @@ namespace Dibix.Sdk.CodeAnalysis
         )
         {
             TSqlModel model = PublicSqlDataSchemaModelLoader.Load(projectName, databaseSchemaProviderName, modelCollation, source, sqlReferencePath, logger);
-            return Execute
-            (
-                projectName
-              , new SqlCodeAnalysisConfiguration(namingConventionPrefix)
-              , isEmbedded
-              , staticCodeAnalysisSucceededFile
-              , resultsFile
-              , source
-              , scriptSource
-              , logger
-              , model
-            );
+            using (LockEntryManager lockEntryManager = LockEntryManager.Create())
+            {
+                return Execute
+                (
+                    projectName
+                  , new SqlCodeAnalysisConfiguration(namingConventionPrefix)
+                  , isEmbedded
+                  , staticCodeAnalysisSucceededFile
+                  , resultsFile
+                  , source
+                  , scriptSource
+                  , lockEntryManager
+                  , logger
+                  , model
+                );
+            }
         }
         internal static bool Execute
         (
@@ -49,6 +53,7 @@ namespace Dibix.Sdk.CodeAnalysis
           , string resultsFile
           , ICollection<TaskItem> source
           , IEnumerable<TaskItem> scriptSource
+          , LockEntryManager lockEntryManager
           , ILogger logger
           , TSqlModel model
         )
@@ -58,7 +63,7 @@ namespace Dibix.Sdk.CodeAnalysis
 
             ExecuteNativeCodeAnalysis(model, logger, staticCodeAnalysisSucceededFile, resultsFile);
 
-            SqlCodeAnalysisRuleEngine codeAnalysisEngine = SqlCodeAnalysisRuleEngine.Create(model, projectName, configuration, isEmbedded, logger);
+            SqlCodeAnalysisRuleEngine codeAnalysisEngine = SqlCodeAnalysisRuleEngine.Create(model, projectName, configuration, isEmbedded, lockEntryManager, logger);
 
             foreach (TaskItem inputFile in source)
             {
@@ -67,8 +72,6 @@ namespace Dibix.Sdk.CodeAnalysis
             }
 
             AnalyzeScripts(null, scriptSource.Select(x => x.GetFullPath()), codeAnalysisEngine, logger);
-
-            codeAnalysisEngine.ResetSuppressions();
 
             return !logger.HasLoggedErrors;
         }

@@ -12,6 +12,11 @@ namespace Dibix.Sdk.Cli
 
         public static IEnumerable<string> RegisteredTaskRunnerNames => Runners.Keys;
         protected ILogger Logger => this._logger;
+        protected bool BuildingInsideVisualStudio
+        {
+            get => this._logger.BuildingInsideVisualStudio;
+            set => this._logger.BuildingInsideVisualStudio = value;
+        }
 
         static TaskRunner()
         {
@@ -24,25 +29,17 @@ namespace Dibix.Sdk.Cli
 
         protected TaskRunner(ILogger logger) => this._logger = new VisualStudioAwareLogger(logger);
 
-        public static bool Execute(string runnerName, string inputConfigurationFile, ILogger logger)
+        public static bool Execute(string runnerName, string[] args, ILogger logger)
         {
             if (Runners.TryGetValue(runnerName, out Type runnerType))
             {
                 TaskRunner runner = (TaskRunner)Activator.CreateInstance(runnerType, logger);
-                runner.Execute(inputConfigurationFile);
-                return true;
+                return runner.Execute(args);
             }
             return false;
         }
 
-        protected abstract void Execute(InputConfiguration configuration);
-
-        private void Execute(string inputConfigurationFile)
-        {
-            InputConfiguration configuration = InputConfiguration.Parse(inputConfigurationFile);
-            this._logger.BuildingInsideVisualStudio = configuration.GetSingleValue<bool>("BuildingInsideVisualStudio", throwOnInvalidKey: false);
-            this.Execute(configuration);
-        }
+        protected abstract bool Execute(string[] args);
 
         // Unfortunately, VS doesn't parse the canonical error format correctly, leading to issues in the VS error list regarding error code and sub category.
         // This is not a fix nor a workaround. We just ignore the error code and add it to the text so it is more readable.

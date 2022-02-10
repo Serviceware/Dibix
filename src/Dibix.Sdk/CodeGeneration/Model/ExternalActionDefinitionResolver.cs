@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -7,7 +6,13 @@ namespace Dibix.Sdk.CodeGeneration
     // Target is a reflection target within a foreign assembly
     internal sealed class ExternalActionDefinitionResolver : ActionDefinitionResolver
     {
-        public ExternalActionDefinitionResolver(ISchemaRegistry schemaRegistry, ILogger logger) : base(schemaRegistry, logger) { }
+        private const string LockSectionName = "ExternalReflectionTarget";
+        private readonly LockEntryManager _lockEntryManager;
+
+        public ExternalActionDefinitionResolver(ISchemaRegistry schemaRegistry, LockEntryManager lockEntryManager, ILogger logger) : base(schemaRegistry, logger)
+        {
+            this._lockEntryManager = lockEntryManager;
+        }
 
         public override bool TryResolve(string targetName, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, out ActionDefinition actionDefinition)
         {
@@ -18,26 +23,7 @@ namespace Dibix.Sdk.CodeGeneration
                 return false;
             }
 
-            string[] knownReflectionTargets =
-            {
-                "Helpline.Connectivity.Business.Facade.ConfigurationController.UpdateEblScript,Connectivity.Business.Implementation",
-                "Helpline.KnowledgeBase.Business.KnowledgeController.Detail,KnowledgeBase.Business",
-                "Helpline.KnowledgeBase.Business.KnowledgeController.Overview,KnowledgeBase.Business",
-                "Helpline.KnowledgeBase.Business.KnowledgeController.SearchDetail,KnowledgeBase.Business",
-                "Helpline.KnowledgeBase.Business.KnowledgeController.SearchOverview,KnowledgeBase.Business",
-                "Helpline.ObjectManagement.Business.Details.DetailConfigurationTransfer.GetDetailConfigurationExportById,ObjectManagement.Business.Legacy",
-                "Helpline.ObjectManagement.Business.Details.DetailConfigurationTransfer.GetDetailConfigurationExportByObjectDef,ObjectManagement.Business.Legacy",
-                "Helpline.Server.OrderMgmt.Business.Facade.WebApiDataAccessorAdapter.GetFeatureDefinition,Server.OrderMgmt.Business",
-                "Helpline.Server.OrderMgmt.Business.Facade.WebApiDataAccessorAdapter.SaveProduct,Server.OrderMgmt.Business",
-                "Helpline.Server.OrderMgmt.Business.Facade.WebApiDataAccessorAdapter.SaveFeatureDefinition,Server.OrderMgmt.Business",
-                "Helpline.SessionManagement.Business.Facade.AuthenticationController.Authenticate,SessionManagement.Business.Implementation",
-                "Helpline.SessionManagement.Business.Facade.CredentialController.UpdateCredential,SessionManagement.Business.Implementation",
-                "Helpline.SessionManagement.Business.Facade.PortalAuthenticationController.AuthenticatePortal,SessionManagement.Business.Implementation",
-                "Helpline.SessionManagement.Business.Facade.SessionController.RefreshSession,SessionManagement.Business.Implementation",
-                "Helpline.SessionManagement.Business.Facade.SessionController.RefreshSessionWithAuthorizationToken,SessionManagement.Business.Implementation",
-                "Helpline.SessionManagement.Business.Facade.SessionController.GrantModifyScriptsPermission,SessionManagement.Business.Implementation"
-            };
-            if (!knownReflectionTargets.Contains(targetName))
+            if (!this._lockEntryManager.HasEntry(LockSectionName, targetName))
             {
                 base.Logger.LogError(null, "Reflection targets are not supported anymore", filePath, line, column);
                 actionDefinition = null;

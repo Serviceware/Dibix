@@ -51,58 +51,63 @@ namespace Dibix.Sdk
             }
 
             TSqlModel sqlModel = PublicSqlDataSchemaModelLoader.Load(projectName, databaseSchemaProviderName, modelCollation, source, sqlReferencePath, logger);
-            bool analysisResult = SqlCodeAnalysisTask.Execute
-            (
-                projectName
-              , configuration.SqlCodeAnalysis
-              , isEmbedded
-              , staticCodeAnalysisSucceededFile
-              , resultsFile
-              , source
-              , scriptSource
-              , logger
-              , sqlModel
-            );
-
-            if (!analysisResult)
+            using (LockEntryManager lockEntryManager = LockEntryManager.Create())
             {
-                additionalAssemblyReferences = null;
-                return false;
+                bool analysisResult = SqlCodeAnalysisTask.Execute
+                (
+                    projectName
+                  , configuration.SqlCodeAnalysis
+                  , isEmbedded
+                  , staticCodeAnalysisSucceededFile
+                  , resultsFile
+                  , source
+                  , scriptSource
+                  , lockEntryManager
+                  , logger
+                  , sqlModel
+                );
+
+                if (!analysisResult)
+                {
+                    additionalAssemblyReferences = null;
+                    return false;
+                }
+
+                bool codeGenerationResult = CodeGenerationTask.Execute
+                (
+                    projectName
+                  , projectDirectory
+                  , productName
+                  , areaName
+                  , outputName
+                  , title
+                  , version
+                  , description
+                  , configuration.Endpoints
+                  , defaultOutputFilePath
+                  , endpointOutputFilePath
+                  , clientOutputFilePath
+                  , externalAssemblyReferenceDirectory
+                  , source
+                  , contracts
+                  , endpoints
+                  , references
+                  , defaultSecuritySchemes
+                  , isEmbedded
+                  , enableExperimentalFeatures
+                  , databaseSchemaProviderName
+                  , modelCollation
+                  , sqlReferencePath
+                  , actionParameterSourceRegistry
+                  , lockEntryManager
+                  , fileSystemProvider
+                  , logger
+                  , sqlModel
+                  , out additionalAssemblyReferences
+                );
+
+                return codeGenerationResult;
             }
-
-            bool codeGenerationResult = CodeGenerationTask.Execute
-            (
-                projectName
-              , projectDirectory
-              , productName
-              , areaName
-              , outputName
-              , title
-              , version
-              , description
-              , configuration.Endpoints
-              , defaultOutputFilePath
-              , endpointOutputFilePath
-              , clientOutputFilePath
-              , externalAssemblyReferenceDirectory
-              , source
-              , contracts
-              , endpoints
-              , references
-              , defaultSecuritySchemes
-              , isEmbedded
-              , enableExperimentalFeatures
-              , databaseSchemaProviderName
-              , modelCollation
-              , sqlReferencePath
-              , actionParameterSourceRegistry
-              , fileSystemProvider
-              , logger
-              , sqlModel
-              , out additionalAssemblyReferences
-            );
-
-            return codeGenerationResult;
         }
     }
 }

@@ -3,7 +3,7 @@
 namespace Dibix.Sdk.Cli
 {
     [TaskRunner("sign")]
-    internal sealed class SignDacFileTaskRunner : TaskRunner
+    internal sealed class SignDacFileTaskRunner : InputConfigurationTaskRunner
     {
         public SignDacFileTaskRunner(ILogger logger) : base(logger) { }
 

@@ -15,12 +15,14 @@ namespace Dibix.Sdk.CodeGeneration
     internal sealed class ControllerDefinitionProvider : JsonSchemaDefinitionReader, IControllerDefinitionProvider
     {
         #region Fields
+        private const string LockSectionName = "ControllerImport";
         private readonly IDictionary<string, SecurityScheme> _securitySchemeMap;
         private readonly IActionDefinitionResolverFacade _actionResolver;
         private readonly ICollection<string> _defaultSecuritySchemes;
         private readonly ITypeResolverFacade _typeResolver;
         private readonly ISchemaRegistry _schemaRegistry;
         private readonly IActionParameterSourceRegistry _actionParameterSourceRegistry;
+        private readonly LockEntryManager _lockEntryManager;
         #endregion
 
         #region Properties
@@ -39,6 +41,7 @@ namespace Dibix.Sdk.CodeGeneration
           , ITypeResolverFacade typeResolver
           , ISchemaRegistry schemaRegistry
           , IActionParameterSourceRegistry actionParameterSourceRegistry
+          , LockEntryManager lockEntryManager
           , IFileSystemProvider fileSystemProvider
           , ILogger logger
         ) : base(fileSystemProvider, logger)
@@ -49,6 +52,7 @@ namespace Dibix.Sdk.CodeGeneration
             this._typeResolver = typeResolver;
             this._schemaRegistry = schemaRegistry;
             this._actionParameterSourceRegistry = actionParameterSourceRegistry;
+            this._lockEntryManager = lockEntryManager;
             this.Controllers = new Collection<ControllerDefinition>();
             this.SecuritySchemes = new Collection<SecurityScheme>();
             this.Collect(endpoints);
@@ -232,15 +236,8 @@ namespace Dibix.Sdk.CodeGeneration
 
         private void ReadControllerImport(ControllerDefinition controller, JToken value, string filePath)
         {
-            string[] knownControllerImports =
-            {
-                "Dibix.GenericEndpoint",
-                "Helpline.ProcessManagement.Business.Facade.DeskController,ProcessManagement.Business.Legacy",
-                "Helpline.Search.Business.Facade.ExpertSearchController,Search.Business.Legacy",
-                "Helpline.Search.Business.Facade.FullTextSearchController,Search.Business.Legacy"
-            };
             string typeName = (string)value;
-            if (!knownControllerImports.Contains(typeName))
+            if (!this._lockEntryManager.HasEntry(LockSectionName, typeName))
             {
                 IJsonLineInfo lineInfo = value.GetLineInfo();
                 base.Logger.LogError(null, "Controller imports are not supported anymore", filePath, lineInfo.LineNumber, lineInfo.LinePosition);

@@ -1,7 +1,7 @@
 ﻿{
   "$schema": "../../../src/Dibix.Sdk/CodeGeneration/Schema/dibix.endpoints.schema.json",
   "GenericEndpoint": [
-    "Dibix.GenericEndpoint",
+    //"Dibix.GenericEndpoint",
     {
       "method": "GET",
       "target": "EmptyWithParams",

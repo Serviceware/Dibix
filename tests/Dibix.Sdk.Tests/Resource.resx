@@ -657,7 +657,6 @@ namespace Dibix.Sdk.Tests.Business
                         z.ResolveParameterFromSource("name", "ITEM", "Name");
                     });
                 });
-                x.ControllerImports.Add("Dibix.GenericEndpoint");
             });
         }
     }

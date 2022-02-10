@@ -6,7 +6,7 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <EmbeddedResource Include="CodeAnalysis\Suppressions.json" />
+    <EmbeddedResource Include="Environment\lockfile" />
     <EmbeddedResource Include="Schema\dibix.configuration.schema.json" />
     <EmbeddedResource Include="Schema\dibix.contracts.schema.json" />
     <EmbeddedResource Include="Schema\dibix.endpoints.schema.json" />

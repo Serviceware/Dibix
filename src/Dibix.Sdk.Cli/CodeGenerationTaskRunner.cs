@@ -3,7 +3,7 @@
 namespace Dibix.Sdk.Cli
 {
     [TaskRunner("compile")]
-    internal sealed class CodeGenerationTaskRunner : TaskRunner
+    internal sealed class CodeGenerationTaskRunner : InputConfigurationTaskRunner
     {
         public CodeGenerationTaskRunner(ILogger logger) : base(logger) { }
 

@@ -16,14 +16,13 @@ namespace Dibix.Sdk.Cli
                 Environment.Exit(exitCode);
             };
 
-            if (args.Length < 2)
+            if (args.Length < 1)
                 return PrintHelp();
 
             string runnerName = args[0];
-            string inputConfigurationFile = args[1];
 
             ILogger logger = new ConsoleLogger();
-            if (!TaskRunner.Execute(runnerName, inputConfigurationFile, logger))
+            if (!TaskRunner.Execute(runnerName, args, logger))
                 return PrintHelp();
 
             return 0;
