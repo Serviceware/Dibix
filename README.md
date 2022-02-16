@@ -32,7 +32,7 @@ This project should contain only stored procedures. These will not be published 
 Since DDL gets published at the target database, this means that basically any simple T-SQL statement will end up inside a stored procedure. So far we don't have an exact idea if this is good or bad. The advantage of DDL over DML is that DDL can be easily devop'd at the customer site using [SSMS](https://docs.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms), whereas the DML is compiled into an assembly and therefore harder to patch, especially during development.
 
 ### Configuring the project
-Dibix provides [MSBuild](https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild) targets to integrate it seamlessly into the database project build pipeline. The idea is to install the [NuGet](https://tfs.pmcs-helpline.com/tfs/Helpline/Common/_packaging?_a=feed&feed=Dibix) package "Dibix.Sdk" into your project, which will automatically add the necessary imports.<br/>
+Dibix provides [MSBuild](https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild) targets to integrate it seamlessly into the database project build pipeline. The idea is to install the [Dibix.Sdk NuGet package](https://www.nuget.org/packages/Dibix.Sdk) into your project, which will automatically add the necessary imports.<br/>
 Unfortunately NuGet is [not supported](https://github.com/NuGet/Home/issues/545) in database projects (yet?). Therefore the import has to happen manually. Please check if there is any existing documentation in the product you are working on or ask [me](mailto:tommy.lohse@helpline.de) for assistance.
 
 

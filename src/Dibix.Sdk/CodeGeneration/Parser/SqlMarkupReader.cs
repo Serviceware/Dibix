@@ -310,6 +310,7 @@ namespace Dibix.Sdk.CodeGeneration
             public string Source { get; }
             public int Line { get; }
             public int Column { get; }
+            public IEnumerable<ISqlElementProperty> Properties => this._properties.Values;
 
             public SqlElement(string source, int line, int column)
             {
@@ -323,7 +324,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 if (this._properties.TryGetValue(propertyName, out SqlMarkupProperty property))
                 {
-                    value = property;
+                    value = property.Value;
                     return true;
                 }
 
@@ -337,7 +338,7 @@ namespace Dibix.Sdk.CodeGeneration
                 return false;
             }
 
-            public ISqlElementValue GetPropertyValue(string name) => this._properties.TryGetValue(name, out SqlMarkupProperty property) ? property : null;
+            public ISqlElementValue GetPropertyValue(string name) => this._properties.TryGetValue(name, out SqlMarkupProperty property) ? property.Value : null;
 
             public void SetValue(string value, int propertyColumn, int valueColumn, string source, ILogger logger)
             {
@@ -363,7 +364,8 @@ namespace Dibix.Sdk.CodeGeneration
                     return;
                 }
 
-                this._properties.Add(name, new SqlMarkupProperty(name, value, this.Line, valueColumn));
+                ISqlElementValue propertyValue = new SqlElementValue(value, this.Line, valueColumn);
+                this._properties.Add(name, new SqlMarkupProperty(name, propertyValue, this.Line, propertyColumn));
             }
         }
 
@@ -381,14 +383,14 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private sealed class SqlMarkupProperty : ISqlElementValue
+        private sealed class SqlMarkupProperty : ISqlElementProperty
         {
             public string Name { get; }
-            public string Value { get; }
+            public ISqlElementValue Value { get; }
             public int Line { get; }
             public int Column { get; }
 
-            public SqlMarkupProperty(string name, string value, int line, int column)
+            public SqlMarkupProperty(string name, ISqlElementValue value, int line, int column)
             {
                 this.Name = name;
                 this.Value = value;

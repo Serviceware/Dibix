@@ -1,6 +1,6 @@
 ﻿namespace Dibix.Sdk.CodeGeneration
 {
-    public class SqlMarkupKey
+    internal sealed class SqlMarkupKey : IdMap<SqlMarkupKey, string>
     {
         public const string Namespace = "Namespace";
         public const string Name = "Name";
