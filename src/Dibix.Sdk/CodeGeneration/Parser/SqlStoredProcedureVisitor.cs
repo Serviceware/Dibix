@@ -16,6 +16,9 @@ namespace Dibix.Sdk.CodeGeneration
         #region Overrides
         public override void ExplicitVisit(CreateProcedureStatement node)
         {
+            if (!ValidateMarkup(base.Markup, base.Logger))
+                return;
+
             _ = base.Markup.TryGetSingleElementValue(SqlMarkupKey.Namespace, base.Source, base.Logger, out string relativeNamespace);
 
             string @namespace = this.ParseNamespace(relativeNamespace);
@@ -176,6 +179,22 @@ namespace Dibix.Sdk.CodeGeneration
                 statementList = beginEndBlock.StatementList;
 
             definition.Statement = base.Formatter.Format(definition, statementList);
+        }
+
+        private static bool ValidateMarkup(ISqlMarkupDeclaration markup, ILogger logger)
+        {
+            foreach (string elementName in markup.ElementNames)
+            {
+                if (SqlMarkupKey.IsDefined(elementName))
+                    continue;
+
+                foreach (ISqlElement element in markup.GetElements(elementName))
+                {
+                    logger.LogError(null, $"Unexpected markup element '{elementName}'", element.Source, element.Line, element.Column);
+                }
+            }
+
+            return true;
         }
         #endregion
 

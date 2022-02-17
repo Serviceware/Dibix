@@ -5,6 +5,8 @@ namespace Dibix.Sdk.CodeGeneration
     public interface ISqlMarkupDeclaration
     {
         bool HasElements { get; }
+        ICollection<string> ElementNames { get; }
+
         bool TryGetSingleElement(string name, string source, ILogger logger, out ISqlElement element);
         bool TryGetSingleElementValue(string name, string source, ILogger logger, out string value);
         bool TryGetSingleElementValue(string name, string source, ILogger logger, out ISqlElementValue value);

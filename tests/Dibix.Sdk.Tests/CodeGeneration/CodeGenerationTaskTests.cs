@@ -328,10 +328,11 @@ Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly
         }
 
         [Fact]
-        public void Inline_SingleConcreteResult_WithInvalidReturnPropertyNameMarkup_Error()
+        public void Inline_SingleConcreteResult_WithInvalidMarkup_Error()
         {
-            this.ExecuteTestAndExpectError(@"Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidreturnproperty.sql", @"One or more errors occured during code generation:
-Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidreturnproperty.sql(3,38,3,38):error:Unexpected @Return property 'Wtf'");
+            this.ExecuteTestAndExpectError(@"Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql", @"One or more errors occured during code generation:
+Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(4,4,4,4):error:Unexpected markup element 'Wtf'
+Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38):error:Unexpected @Return property 'Wtf'");
         }
 
         [Fact]

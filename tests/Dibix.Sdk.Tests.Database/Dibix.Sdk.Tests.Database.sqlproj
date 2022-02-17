@@ -150,7 +150,7 @@
     <Build Include="Tests\Syntax\dbx_tests_syntax_fileupload.sql" />
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_041.sql" />
     <Build Include="Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql" />
-    <Build Include="Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidreturnproperty.sql" />
+    <Build Include="Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CodeAnalysis" />

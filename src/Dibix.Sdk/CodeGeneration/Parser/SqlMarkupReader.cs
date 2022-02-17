@@ -404,6 +404,7 @@ namespace Dibix.Sdk.CodeGeneration
             private readonly IDictionary<string, IList<SqlElement>> _elements = new Dictionary<string, IList<SqlElement>>();
 
             public bool HasElements => this._elements.Any();
+            public ICollection<string> ElementNames => this._elements.Keys;
 
             public bool TryGetSingleElement(string name, string source, ILogger logger, out ISqlElement element)
             {
