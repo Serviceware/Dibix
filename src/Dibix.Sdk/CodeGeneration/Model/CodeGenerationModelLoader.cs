@@ -35,6 +35,7 @@ namespace Dibix.Sdk.CodeGeneration
           , ICollection<TaskItem> sqlReferencePath
           , ISchemaRegistry schemaRegistry
           , IActionParameterSourceRegistry actionParameterSourceRegistry
+          , IActionParameterConverterRegistry actionParameterConverterRegistry
           , LockEntryManager lockEntryManager
           , IFileSystemProvider fileSystemProvider
           , ILogger logger
@@ -87,7 +88,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             ISqlStatementDefinitionProvider sqlStatementDefinitionProvider = new SqlStatementDefinitionProvider(projectName, isEmbedded, analyzeAlways: true, rootNamespace, productName, areaName, parser, formatter, typeResolver, schemaRegistry, logger, normalizedSources, modelAccessor);
             IActionDefinitionResolverFacade actionResolver = new ActionDefinitionResolverFacade(projectName, rootNamespace, productName, areaName, className, sqlStatementDefinitionProvider, assemblyResolver, lockEntryManager, schemaRegistry, logger);
-            IControllerDefinitionProvider controllerDefinitionProvider = new ControllerDefinitionProvider(normalizedEndpoints, normalizedDefaultSecuritySchemes, securitySchemeMap, actionResolver, typeResolver, schemaRegistry, actionParameterSourceRegistry, lockEntryManager, fileSystemProvider, logger);
+            IControllerDefinitionProvider controllerDefinitionProvider = new ControllerDefinitionProvider(normalizedEndpoints, normalizedDefaultSecuritySchemes, securitySchemeMap, actionResolver, typeResolver, schemaRegistry, actionParameterSourceRegistry, actionParameterConverterRegistry, lockEntryManager, fileSystemProvider, logger);
 
             schemaRegistry.ImportSchemas(sqlStatementDefinitionProvider);
 

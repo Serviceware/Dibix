@@ -41,6 +41,15 @@
         },
         "ParameterSources": {
           "$ref": "#/definitions/HttpParameterSourceConfiguration"
+        },
+        "Converters": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z]+$"
+          }
         }
       },
       "additionalProperties": false,

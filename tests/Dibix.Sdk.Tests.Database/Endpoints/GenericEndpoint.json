@@ -9,7 +9,10 @@
       "params": {
         "u": "HEADER.User-Agent",
         "v": "HEADER.Authorization.Parameter",
-        "w": "DBX.X",
+        "w": {
+          "source": "DBX.X",
+          "converter": "DBX"
+        },
         "password": null,
         "x": "REQUEST.Language",
         "y": true,

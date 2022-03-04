@@ -36,6 +36,7 @@ namespace Dibix.Sdk.CodeGeneration
         )
         {
             IActionParameterSourceRegistry actionParameterSourceRegistry = new ActionParameterSourceRegistry();
+            IActionParameterConverterRegistry actionParameterConverterRegistry = new ActionParameterConverterRegistry();
             IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(projectDirectory);
             using (LockEntryManager lockEntryManager = LockEntryManager.Create())
             {
@@ -65,6 +66,7 @@ namespace Dibix.Sdk.CodeGeneration
                   , modelCollation
                   , sqlReferencePath
                   , actionParameterSourceRegistry
+                  , actionParameterConverterRegistry
                   , lockEntryManager
                   , fileSystemProvider
                   , logger
@@ -99,6 +101,7 @@ namespace Dibix.Sdk.CodeGeneration
           , string modelCollation
           , ICollection<TaskItem> sqlReferencePath
           , IActionParameterSourceRegistry actionParameterSourceRegistry
+          , IActionParameterConverterRegistry actionParameterConverterRegistry
           , LockEntryManager lockEntryManager
           , IFileSystemProvider fileSystemProvider
           , ILogger logger
@@ -134,6 +137,7 @@ namespace Dibix.Sdk.CodeGeneration
               , sqlReferencePath
               , schemaRegistry
               , actionParameterSourceRegistry
+              , actionParameterConverterRegistry
               , lockEntryManager
               , fileSystemProvider
               , logger

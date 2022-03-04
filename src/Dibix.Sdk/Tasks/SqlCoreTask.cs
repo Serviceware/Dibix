@@ -40,9 +40,10 @@ namespace Dibix.Sdk
           , out string[] additionalAssemblyReferences
         )
         {
+            IActionParameterConverterRegistry actionParameterConverterRegistry = new ActionParameterConverterRegistry();
             IActionParameterSourceRegistry actionParameterSourceRegistry = new ActionParameterSourceRegistry();
             IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(projectDirectory);
-            SqlCoreTaskConfiguration configuration = SqlCoreTaskConfiguration.Create(configurationFilePath, actionParameterSourceRegistry, fileSystemProvider, logger);
+            SqlCoreTaskConfiguration configuration = SqlCoreTaskConfiguration.Create(configurationFilePath, actionParameterSourceRegistry, actionParameterConverterRegistry, fileSystemProvider, logger);
 
             if (logger.HasLoggedErrors)
             {
@@ -99,6 +100,7 @@ namespace Dibix.Sdk
                   , modelCollation
                   , sqlReferencePath
                   , actionParameterSourceRegistry
+                  , actionParameterConverterRegistry
                   , lockEntryManager
                   , fileSystemProvider
                   , logger

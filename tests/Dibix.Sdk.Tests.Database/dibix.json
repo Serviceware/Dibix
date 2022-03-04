@@ -5,6 +5,9 @@
       "DBX": [
         "X"
       ]
-    }
+    },
+    "Converters": [
+      "DBX"
+    ] 
   }
 }

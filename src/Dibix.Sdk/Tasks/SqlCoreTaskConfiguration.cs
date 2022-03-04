@@ -16,7 +16,7 @@ namespace Dibix.Sdk
 
         private SqlCoreTaskConfiguration() { }
 
-        public static SqlCoreTaskConfiguration Create(string filePath, IActionParameterSourceRegistry actionParameterSourceRegistry, IFileSystemProvider fileSystemProvider, ILogger logger)
+        public static SqlCoreTaskConfiguration Create(string filePath, IActionParameterSourceRegistry actionParameterSourceRegistry, IActionParameterConverterRegistry actionParameterConverterRegistry, IFileSystemProvider fileSystemProvider, ILogger logger)
         {
             SqlCoreTaskConfiguration configuration = new SqlCoreTaskConfiguration();
             if (!File.Exists(filePath))
@@ -24,7 +24,7 @@ namespace Dibix.Sdk
                 return configuration;
             }
 
-            SqlCoreTaskConfigurationReader configurationReader = new SqlCoreTaskConfigurationReader(filePath, configuration, actionParameterSourceRegistry, fileSystemProvider, logger);
+            SqlCoreTaskConfigurationReader configurationReader = new SqlCoreTaskConfigurationReader(filePath, configuration, actionParameterSourceRegistry, actionParameterConverterRegistry, fileSystemProvider, logger);
             configurationReader.Collect();
             return configuration;
         }
@@ -34,13 +34,15 @@ namespace Dibix.Sdk
             private readonly string _filePath;
             private readonly SqlCoreTaskConfiguration _configuration;
             private readonly IActionParameterSourceRegistry _actionParameterSourceRegistry;
+            private readonly IActionParameterConverterRegistry _actionParameterConverterRegistry;
             private readonly ILogger _logger;
 
-            public SqlCoreTaskConfigurationReader(string filePath, SqlCoreTaskConfiguration configuration, IActionParameterSourceRegistry actionParameterSourceRegistry, IFileSystemProvider fileSystemProvider, ILogger logger) : base(fileSystemProvider, logger)
+            public SqlCoreTaskConfigurationReader(string filePath, SqlCoreTaskConfiguration configuration, IActionParameterSourceRegistry actionParameterSourceRegistry, IActionParameterConverterRegistry actionParameterConverterRegistry, IFileSystemProvider fileSystemProvider, ILogger logger) : base(fileSystemProvider, logger)
             {
                 this._filePath = filePath;
                 this._configuration = configuration;
                 this._actionParameterSourceRegistry = actionParameterSourceRegistry;
+                this._actionParameterConverterRegistry = actionParameterConverterRegistry;
                 this._logger = logger;
             }
 
@@ -95,6 +97,24 @@ namespace Dibix.Sdk
                         }
 
                         CollectParameterSource(parameterSource.Name, parameterSource.Value.Type, parameterSource.Value, this._actionParameterSourceRegistry);
+                    }
+                }
+
+                const string convertersName = "Converters";
+                JArray converters = (JArray)endpointConfiguration.Property(convertersName)?.Value;
+                if (converters != null)
+                {
+                    foreach (JToken converter in converters)
+                    {
+                        string converterName = (string)converter;
+                        if (this._actionParameterConverterRegistry.IsRegistered(converterName))
+                        {
+                            IJsonLineInfo lineInfo = converter.GetLineInfo();
+                            this._logger.LogError(null, $"Parameter converter '{converterName}' is already registered", this._filePath, lineInfo.LineNumber, lineInfo.LinePosition);
+                            continue;
+                        }
+
+                        this._actionParameterConverterRegistry.Register(converterName);
                     }
                 }
             }

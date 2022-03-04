@@ -612,7 +612,7 @@ namespace Dibix.Sdk.Tests.Business
                     y.ResolveParameterFromNull("password");
                     y.ResolveParameterFromSource("u", "HEADER", "User-Agent");
                     y.ResolveParameterFromSource("v", "HEADER", "Authorization.Parameter");
-                    y.ResolveParameterFromSource("w", "DBX", "X");
+                    y.ResolveParameterFromSource("w", "DBX", "X", "DBX");
                     y.ResolveParameterFromSource("x", "REQUEST", "Language");
                     y.ResolveParameterFromConstant("y", true);
                     y.ResolveParameterFromConstant("z", 5);

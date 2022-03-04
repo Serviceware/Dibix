@@ -22,6 +22,7 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly ITypeResolverFacade _typeResolver;
         private readonly ISchemaRegistry _schemaRegistry;
         private readonly IActionParameterSourceRegistry _actionParameterSourceRegistry;
+        private readonly IActionParameterConverterRegistry _actionParameterConverterRegistry;
         private readonly LockEntryManager _lockEntryManager;
         #endregion
 
@@ -41,6 +42,7 @@ namespace Dibix.Sdk.CodeGeneration
           , ITypeResolverFacade typeResolver
           , ISchemaRegistry schemaRegistry
           , IActionParameterSourceRegistry actionParameterSourceRegistry
+          , IActionParameterConverterRegistry actionParameterConverterRegistry
           , LockEntryManager lockEntryManager
           , IFileSystemProvider fileSystemProvider
           , ILogger logger
@@ -52,6 +54,7 @@ namespace Dibix.Sdk.CodeGeneration
             this._typeResolver = typeResolver;
             this._schemaRegistry = schemaRegistry;
             this._actionParameterSourceRegistry = actionParameterSourceRegistry;
+            this._actionParameterConverterRegistry = actionParameterConverterRegistry;
             this._lockEntryManager = lockEntryManager;
             this.Controllers = new Collection<ControllerDefinition>();
             this.SecuritySchemes = new Collection<SecurityScheme>();
@@ -347,7 +350,14 @@ namespace Dibix.Sdk.CodeGeneration
             JProperty converterProperty = container.Property("converter");
             if (converterProperty != null)
             {
-                propertySource.Converter = (string)((JValue)converterProperty.Value).Value;
+                JToken converter = converterProperty.Value;
+                string converterName = (string)converter;
+                if (!this._actionParameterConverterRegistry.IsRegistered(converterName))
+                {
+                    IJsonLineInfo converterLocation = converter.GetLineInfo();
+                    base.Logger.LogError(null, $"Unknown property converter '{converterName}'", filePath, converterLocation.LineNumber, converterLocation.LinePosition);
+                }
+                propertySource.Converter = converterName;
                 return propertySource;
             }
 
