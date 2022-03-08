@@ -26,15 +26,15 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="System.Reflection.Emit" Version="$(ReflectionEmitVersion)" />
+    <PackageReference Include="System.Reflection.Emit" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
-    <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="$(AspNetWebApiNetFxVersion)" />
+    <PackageReference Include="Microsoft.AspNet.WebApi.Core" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' != 'net461'">
-    <PackageReference Include="System.IO.Packaging" Version="$(IOPackageVersion)" />
+    <PackageReference Include="System.IO.Packaging" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">

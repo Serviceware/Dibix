@@ -17,11 +17,11 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' != 'net461'">
-    <PackageReference Include="System.Data.SqlClient" Version="$(SqlClientVersion)" />
+    <PackageReference Include="System.Data.SqlClient" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="System.ComponentModel.Annotations" Version="$(DataAnnotationsVersion)" />
+    <PackageReference Include="System.ComponentModel.Annotations" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">

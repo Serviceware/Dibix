@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
-    <PackageReference Include="System.ComponentModel.Annotations" Version="$(DataAnnotationsVersion)" />
+    <PackageReference Include="System.ComponentModel.Annotations" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
@@ -22,10 +22,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="$(ConfigurationBinderVersion)" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="$(ConfigurationJsonVersion)" />
-    <PackageReference Include="MSTest.TestFramework" Version="$(MSTestFrameworkVersion)" />
-    <PackageReference Include="System.Diagnostics.EventLog" Version="$(EventLogVersion)" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
+    <PackageReference Include="MSTest.TestFramework" />
+    <PackageReference Include="System.Diagnostics.EventLog" />
   </ItemGroup>
   
 </Project>

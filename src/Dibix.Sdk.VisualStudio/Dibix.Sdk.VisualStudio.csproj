@@ -11,9 +11,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="EnvDTE" Version="$(EnvDTEVersion)" />
-    <PackageReference Include="Microsoft.VisualStudio.TextTemplating.Interfaces.10.0" Version="$(VSTextTemplatingInterfacesVersion)" />
-    <PackageReference Include="VSLangProj" Version="$(VSLangProjVersion)" />
+    <PackageReference Include="EnvDTE" />
+    <PackageReference Include="Microsoft.VisualStudio.TextTemplating.Interfaces.10.0" />
+    <PackageReference Include="VSLangProj" />
   </ItemGroup>
 
   <ItemGroup>

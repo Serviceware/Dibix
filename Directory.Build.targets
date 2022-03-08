@@ -1,0 +1,10 @@
+<Project>
+  <Sdk Name="Microsoft.Build.CentralPackageVersions" Version="2.0.1" />
+
+  <!-- Allow to override package version -->
+  <Target Name="SetPackageVersion" AfterTargets="GetBuildVersion">
+    <PropertyGroup>
+      <PackageVersion Condition="'$(PackageVersionOverride)' != ''">$(PackageVersionOverride)</PackageVersion>
+    </PropertyGroup>
+  </Target>
+</Project>

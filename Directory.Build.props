@@ -23,25 +23,7 @@
     <DebugType>embedded</DebugType>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(Configuration)' == 'Release' and '$(SourceRoot)'==''">
-    <SourceRoot Include="$(MSBuildThisFileDirectory)/" />
-  </ItemGroup>
-
   <ItemGroup>
     <None Remove="*.dotsettings" />
   </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
-    <PackageReference Include="Nerdbank.GitVersioning" Version="3.4.194" PrivateAssets="All" />
-  </ItemGroup>
-
-  <Import Project="$(MSBuildThisFileDirectory)build\dependencies.props" />
-
-  <!-- Allow to override package version -->
-  <Target Name="SetPackageVersion" AfterTargets="GetBuildVersion">
-    <PropertyGroup>
-      <PackageVersion Condition="'$(PackageVersionOverride)' != ''">$(PackageVersionOverride)</PackageVersion>
-    </PropertyGroup>
-  </Target>
 </Project>

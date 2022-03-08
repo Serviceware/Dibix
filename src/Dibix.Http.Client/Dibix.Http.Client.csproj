@@ -9,14 +9,9 @@
     <Compile Include="..\..\shared\KnownHeaders.cs" Link="Client\KnownHeaders.cs" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' != 'net46'">
-    <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="$(AspNetWebApiVersion)" />
-    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net46'">
-    <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="$(AspNetWebApiNetFxVersion)" />
-    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonNetFxVersion)" />
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNet.WebApi.Client" />
+    <PackageReference Include="Newtonsoft.Json" />
   </ItemGroup>
   
 </Project>

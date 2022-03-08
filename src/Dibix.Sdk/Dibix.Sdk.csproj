@@ -25,12 +25,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MSBuildUtilitiesVersion)" />
-    <PackageReference Include="Microsoft.OpenApi" Version="$(OpenApiVersion)" />
-    <PackageReference Include="Microsoft.SqlServer.DacFx" Version="$(DacFxVersion)" />
-    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonNetFxVersion)" />
-    <PackageReference Include="Newtonsoft.Json.Schema" Version="$(NewtonsoftJsonSchemaVersion)" />
-    <PackageReference Include="System.IO.Packaging" Version="$(IOPackageVersion)" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" />
+    <PackageReference Include="Microsoft.OpenApi" />
+    <PackageReference Include="Microsoft.SqlServer.DacFx" />
+    <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="Newtonsoft.Json.Schema" />
+    <PackageReference Include="System.IO.Packaging" />
   </ItemGroup>
 
   <ItemGroup>

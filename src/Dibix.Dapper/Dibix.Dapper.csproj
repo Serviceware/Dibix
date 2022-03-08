@@ -8,12 +8,8 @@
     <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\Guard.cs" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' != 'net461'">
-    <PackageReference Include="Dapper.StrongName" Version="$(DapperVersion)" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
-    <PackageReference Include="Dapper.StrongName" Version="$(DapperNetFxVersion)" />
+  <ItemGroup>
+    <PackageReference Include="Dapper.StrongName" />
   </ItemGroup>
 
   <ItemGroup>
