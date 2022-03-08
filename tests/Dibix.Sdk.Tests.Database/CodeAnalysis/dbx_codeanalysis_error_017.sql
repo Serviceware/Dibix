@@ -41,3 +41,7 @@ GO
 CREATE TYPE [dbo].[dbx_codeanalysis_error_017_fail_udt] AS TABLE ([id] INT NOT NULL PRIMARY KEY)
 GO
 CREATE TYPE [dbo].[dbx_codeanalysis_udt_error_017_success] AS TABLE ([id] INT NOT NULL PRIMARY KEY)
+GO
+CREATE PROCEDURE [dbo].[dbx_codeanalysis_error_017_param] @success BIT, @fAiL BIT
+AS
+    PRINT @success + fail

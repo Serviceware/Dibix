@@ -2551,6 +2551,11 @@ namespace Dibix.Sdk.Tests.Data.Extension.Primitive
     message="Type 'dbx_codeanalysis_error_017_fail_udt' does not match naming convention 'dbx*_udt_*'. Also make sure the name is all lowercase."
     line="41"
     column="19" /&gt;
+  &lt;error
+    ruleid="17"
+    message="Function parameter '@fAiL' does not match naming convention '^@[a-z0-9_]+$'. Also make sure the name is all lowercase."
+    line="45"
+    column="73" /&gt;
 &lt;/errors&gt;</value>
   </data>
   <data name="NoCursorSqlCodeAnalysisRule" xml:space="preserve">
