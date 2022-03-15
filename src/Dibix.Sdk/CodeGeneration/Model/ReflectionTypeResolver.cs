@@ -34,7 +34,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Public Methods
-        public static TypeReference ResolveType(Type type, string source, int line, int column, bool isNullable, bool isEnumerable, ISchemaRegistry schemaRegistry, ILogger logger) => ResolveType(type, source, line, column, isNullable, isEnumerable, udtName: null, schemaRegistry, logger);
+        public static TypeReference ResolveForeignType(Type type, string source, int line, int column, bool isNullable, bool isEnumerable, ISchemaRegistry schemaRegistry, ILogger logger, AssemblyResolver assemblyResolver) => ReflectionOnlyTypeInspector.Inspect(() => ResolveType(type, source, line, column, isNullable, isEnumerable, udtName: null, schemaRegistry, logger), assemblyResolver);
         public static TypeReference ResolveType(Type type, string source, int line, int column, string udtName, ISchemaRegistry schemaRegistry, ILogger logger) => ResolveType(type, source, line, column, isNullable: false, isEnumerable: false, udtName, schemaRegistry, logger);
         public static TypeReference ResolveType(Type type, string source, int line, int column, ISchemaRegistry schemaRegistry, ILogger logger)
         {

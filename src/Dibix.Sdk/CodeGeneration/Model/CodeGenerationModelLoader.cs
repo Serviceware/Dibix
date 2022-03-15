@@ -83,7 +83,7 @@ namespace Dibix.Sdk.CodeGeneration
             IUserDefinedTypeProvider userDefinedTypeProvider = new UserDefinedTypeProvider(rootNamespace, productName, areaName, normalizedSources, typeResolver, logger);
 
             schemaRegistry.ImportSchemas(contractDefinitionProvider, userDefinedTypeProvider);
-            typeResolver.Register(new ContractDefinitionSchemaTypeResolver(schemaRegistry, contractDefinitionProvider, assemblyResolver, logger, rootNamespace, productName, areaName), 1);
+            typeResolver.Register(new ContractDefinitionSchemaTypeResolver(schemaRegistry, contractDefinitionProvider, assemblyResolver, assemblyResolver, logger, rootNamespace, productName, areaName), 1);
             typeResolver.Register(new UserDefinedTypeSchemaTypeResolver(schemaRegistry, userDefinedTypeProvider, assemblyResolver, logger), 2);
 
             ISqlStatementDefinitionProvider sqlStatementDefinitionProvider = new SqlStatementDefinitionProvider(projectName, isEmbedded, analyzeAlways: true, rootNamespace, productName, areaName, parser, formatter, typeResolver, schemaRegistry, logger, normalizedSources, modelAccessor);

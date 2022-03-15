@@ -10,6 +10,7 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly ISchemaRegistry _schemaRegistry;
         private readonly IContractDefinitionProvider _contractDefinitionProvider;
         private readonly ReferencedAssemblyInspector _referencedAssemblyInspector;
+        private readonly AssemblyResolver _assemblyResolver;
         private readonly ILogger _logger;
         private readonly string _rootNamespace;
         private readonly string _productName;
@@ -18,11 +19,12 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public ContractDefinitionSchemaTypeResolver(ISchemaRegistry schemaRegistry, IContractDefinitionProvider contractDefinitionProvider, ReferencedAssemblyInspector referencedAssemblyInspector, ILogger logger, string rootNamespace, string productName, string areaName)
+        public ContractDefinitionSchemaTypeResolver(ISchemaRegistry schemaRegistry, IContractDefinitionProvider contractDefinitionProvider, ReferencedAssemblyInspector referencedAssemblyInspector, AssemblyResolver assemblyResolver, ILogger logger, string rootNamespace, string productName, string areaName)
         {
             this._schemaRegistry = schemaRegistry;
             this._contractDefinitionProvider = contractDefinitionProvider;
             this._referencedAssemblyInspector = referencedAssemblyInspector;
+            this._assemblyResolver = assemblyResolver;
             this._logger = logger;
             this._rootNamespace = rootNamespace;
             this._productName = productName;
@@ -39,7 +41,7 @@ namespace Dibix.Sdk.CodeGeneration
                 return schemaTypeReference;
 
             if (this.TryGetExternalType(input, relativeNamespace, out Type type))
-                return ReflectionTypeResolver.ResolveType(type, source, line, column, typeName.IsNullable, isEnumerable, this._schemaRegistry, this._logger);
+                return ReflectionTypeResolver.ResolveForeignType(type, source, line, column, typeName.IsNullable, isEnumerable, this._schemaRegistry, this._logger, this._assemblyResolver);
 
             return null;
         }
