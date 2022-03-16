@@ -27,7 +27,7 @@ namespace Dibix.Testing
         {
             yield return root;
 
-            if (!TryGetProfileName(testContext, out string profileName))
+            if (!TryGetProfileName(root, testContext, out string profileName))
                 profileName = "Default";
 
             IConfigurationSection profile = root.GetSection($"Profiles:{profileName}");
@@ -35,8 +35,12 @@ namespace Dibix.Testing
                 yield return profile;
         }
 
-        private static bool TryGetProfileName(TestContext testContext, out string profileName)
+        private static bool TryGetProfileName(IConfiguration configuration, TestContext testContext, out string profileName)
         {
+            profileName = configuration["Profile"];
+            if (profileName != null)
+                return true;
+
             MethodInfo testMethod = TestImplementationResolver.ResolveTestMethod(testContext);
             if (TryGetProfileName(testMethod, out profileName))
                 return true;
