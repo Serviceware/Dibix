@@ -420,6 +420,14 @@ namespace Microsoft.Extensions.Configuration.Dibix
 
         private static IEnumerable<PropertyInfo> GetAllProperties(TypeInfo type)
         {
+            // BEGIN EDIT TL
+            // Since DeclaredProperties does not return properties from base types,
+            // their base types are walked up to collect their properties.
+            // This however, returns virtual/overriden properties twice, each virtual and override.
+            // This causes undesired behavior, therefore GetProperties() should be used.
+            return type.GetProperties();
+
+            /*
             var allProperties = new List<PropertyInfo>();
 
             do
@@ -430,6 +438,8 @@ namespace Microsoft.Extensions.Configuration.Dibix
             while (type != typeof(object).GetTypeInfo());
 
             return allProperties;
+            */
+            // END EDIT TL
         }
     }
 
