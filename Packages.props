@@ -2,8 +2,8 @@
   <Import Project="$(MSBuildThisFileDirectory)build\dependencies.props" />
 
   <ItemGroup>
-    <GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0"   />
-    <GlobalPackageReference Include="Nerdbank.GitVersioning"      Version="3.4.194" />
+    <GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1"   />
+    <GlobalPackageReference Include="Nerdbank.GitVersioning"      Version="3.4.255" />
 
     <PackageReference Update="coverlet.msbuild"                                        Version="$(CoverletVersion)"                                                         />
     <PackageReference Update="Dapper.StrongName"                                       Version="$(DapperVersion)"              Condition="'$(TargetFramework)' != 'net461'" />

@@ -30,16 +30,16 @@
     <MSBuildUtilitiesVersion>16.9.0</MSBuildUtilitiesVersion>
 
     <!-- Testing -->
-    <ConfigurationBinderVersion>5.0.0</ConfigurationBinderVersion>
-    <ConfigurationEnvironmentVersion>5.0.0</ConfigurationEnvironmentVersion>
-    <ConfigurationJsonVersion>5.0.0</ConfigurationJsonVersion>
-    <ConfigurationUserSecretsVersion>5.0.0</ConfigurationUserSecretsVersion>
-    <CoverletVersion>3.0.3</CoverletVersion>
-    <EventLogVersion>5.0.1</EventLogVersion>
-    <MicrosoftTestSdkVersion>16.9.4</MicrosoftTestSdkVersion>
-    <MoqVersion>4.16.1</MoqVersion>
-    <MSTestFrameworkVersion>2.1.2</MSTestFrameworkVersion>
-    <RoslynVersion>3.9.0</RoslynVersion>
+    <ConfigurationBinderVersion>6.0.0</ConfigurationBinderVersion>
+    <ConfigurationEnvironmentVersion>6.0.1</ConfigurationEnvironmentVersion>
+    <ConfigurationJsonVersion>6.0.0</ConfigurationJsonVersion>
+    <ConfigurationUserSecretsVersion>6.0.1</ConfigurationUserSecretsVersion>
+    <CoverletVersion>3.1.2</CoverletVersion>
+    <EventLogVersion>6.0.0</EventLogVersion>
+    <MicrosoftTestSdkVersion>17.1.0</MicrosoftTestSdkVersion>
+    <MoqVersion>4.17.2</MoqVersion>
+    <MSTestFrameworkVersion>2.2.8</MSTestFrameworkVersion>
+    <RoslynVersion>4.1.0</RoslynVersion>
     <XUnitVersion>2.4.1</XUnitVersion>
     <XUnitVSVersion>2.4.3</XUnitVSVersion>
     <XUnitCliVersion>2.3.1</XUnitCliVersion>
