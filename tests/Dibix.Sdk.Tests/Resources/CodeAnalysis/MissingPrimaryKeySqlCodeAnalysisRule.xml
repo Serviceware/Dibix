@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<errors>
+  <error
+    ruleid="12"
+    message="Table 'dbx_codeanalysis_error_012_table' does not have a primary key"
+    line="3"
+    column="2" />
+  <error
+    ruleid="12"
+    message="User defined table type 'dbx_codeanalysis_udt_error_012' does not have a primary key"
+    line="8"
+    column="2" />
+</errors>

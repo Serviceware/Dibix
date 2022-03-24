@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<errors>
+  <error
+    ruleid="10"
+    message="Multiple table sources must be aliased"
+    line="7"
+    column="7" />
+  <error
+    ruleid="10"
+    message="Multiple table sources must be aliased"
+    line="11"
+    column="7" />
+</errors>

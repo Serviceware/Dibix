@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<errors>
+  <error
+    ruleid="22"
+    message="Missing ORDER BY for SELECT TOP statement"
+    line="10"
+    column="10" />
+  <error
+    ruleid="22"
+    message="Invalid TOP filter for single row equality statement"
+    line="18"
+    column="10" />
+  <error
+    ruleid="22"
+    message="Invalid TOP filter for single row equality statement"
+    line="24"
+    column="10" />
+</errors>

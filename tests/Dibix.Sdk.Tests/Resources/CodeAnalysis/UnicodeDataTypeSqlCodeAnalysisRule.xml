@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<errors>
+  <error
+    ruleid="5"
+    message="Use unicode data types instead of ascii. Replace 'CHAR' with 'NCHAR'."
+    line="1"
+    column="56" />
+  <error
+    ruleid="5"
+    message="Use unicode data types instead of ascii. Replace 'VARCHAR' with 'NVARCHAR'."
+    line="1"
+    column="70" />
+  <error
+    ruleid="5"
+    message="Use unicode data types instead of ascii. Replace 'CHAR' with 'NCHAR'."
+    line="4"
+    column="13" />
+  <error
+    ruleid="5"
+    message="Use unicode data types instead of ascii. Replace 'VARCHAR' with 'NVARCHAR'."
+    line="6"
+    column="13" />
+</errors>

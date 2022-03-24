@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<errors>
+  <error
+    ruleid="32"
+    message="Clustered index PK_dbx_codeanalysis_error_032_table_fail1 size is 901 bytes. The maximum key length is 900 bytes"
+    line="18"
+    column="5" />
+  <error
+    ruleid="32"
+    message="Clustered index PK_dbx_codeanalysis_error_032_table_fail2 size is 901 bytes. The maximum key length is 900 bytes"
+    line="35"
+    column="5" />
+  <error
+    ruleid="32"
+    message="Nonclustered index UQ_dbx_codeanalysis_error_032_table_fail2_ab size is 1701 bytes. The maximum key length is 1700 bytes"
+    line="36"
+    column="5" />
+  <error
+    ruleid="32"
+    message="Nonclustered index IX_dbx_codeanalysis_error_032_table_fail2_ac size is 1701 bytes. The maximum key length is 1700 bytes"
+    line="37"
+    column="5" />
+  <error
+    ruleid="32"
+    message="Clustered index PK_dbx_codeanalysis_error_032_type_fail1 size is 901 bytes. The maximum key length is 900 bytes"
+    line="96"
+    column="5" />
+  <error
+    ruleid="32"
+    message="Clustered index PK_dbx_codeanalysis_error_032_type_fail2 size is 901 bytes. The maximum key length is 900 bytes"
+    line="113"
+    column="5" />
+</errors>

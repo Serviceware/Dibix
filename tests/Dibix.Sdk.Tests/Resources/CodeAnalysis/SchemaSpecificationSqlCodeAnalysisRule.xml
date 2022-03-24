@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<errors>
+  <error
+    ruleid="2"
+    message="Missing schema specification"
+    line="9"
+    column="7" />
+  <error
+    ruleid="2"
+    message="Missing schema specification"
+    line="17"
+    column="7" />
+  <error
+    ruleid="2"
+    message="Missing schema specification"
+    line="22"
+    column="14" />
+  <error
+    ruleid="2"
+    message="Missing schema specification"
+    line="24"
+    column="14" />
+  <error
+    ruleid="2"
+    message="Missing schema specification"
+    line="24"
+    column="44" />
+  <error
+    ruleid="2"
+    message="Missing schema specification"
+    line="26"
+    column="28" />
+  <error
+    ruleid="2"
+    message="Missing schema specification"
+    line="28"
+    column="9" />
+  <error
+    ruleid="2"
+    message="Missing schema specification"
+    line="32"
+    column="28" />
+  <error
+    ruleid="2"
+    message="Missing schema specification"
+    line="35"
+    column="7" />
+  <error
+    ruleid="2"
+    message="Missing schema specification"
+    line="39"
+    column="7" />
+  <error
+    ruleid="2"
+    message="Missing schema specification"
+    line="54"
+    column="8" />
+  <error
+    ruleid="2"
+    message="Missing schema specification"
+    line="58"
+    column="8" />
+  <error
+    ruleid="2"
+    message="Missing schema specification"
+    line="75"
+    column="14" />
+  <error
+    ruleid="2"
+    message="Missing schema specification"
+    line="83"
+    column="7" />
+  <error
+    ruleid="2"
+    message="Missing schema specification"
+    line="84"
+    column="10" />
+</errors>

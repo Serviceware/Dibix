@@ -25,7 +25,8 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
         {
             // Determine rule by 'back in time development' and create instance
             string ruleName = new StackTrace().GetFrame(1).GetMethod().Name;
-            string expected = TestUtility.GetExpectedText(ruleName);
+            string resourceKey = $"CodeAnalysis.{ruleName}.xml";
+            string expected = TestUtility.GetExpectedText(resourceKey);
             Type ruleType = Type.GetType($"Dibix.Sdk.CodeAnalysis.Rules.{ruleName},{typeof(ISqlCodeAnalysisRule).Assembly.GetName().Name}");
             ISqlCodeAnalysisRule ruleInstance = (ISqlCodeAnalysisRule)Activator.CreateInstance(ruleType);
             SqlCodeAnalysisRuleAttribute descriptor = ruleType.GetCustomAttribute<SqlCodeAnalysisRuleAttribute>();

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<errors>
+  <error
+    ruleid="24"
+    message="Surrogate keys are only allowed, if a business key is defined: dbx_codeanalysis_error_024_fail1"
+    line="1"
+    column="1" />
+  <error
+    ruleid="24"
+    message="Surrogate keys are only allowed, if a business key is defined: dbx_codeanalysis_error_024_fail2"
+    line="8"
+    column="1" />
+  <error
+    ruleid="24"
+    message="Surrogate keys are only allowed, if a business key is defined: dbx_codeanalysis_error_024_fail3"
+    line="16"
+    column="1" />
+  <error
+    ruleid="24"
+    message="Business key can be used as the primary key and should replace surrogate key: dbx_codeanalysis_error_024_fail4"
+    line="24"
+    column="1" />
+  <error
+    ruleid="24"
+    message="IDENTITY columns are only allowed for a valid surrogate key: dbx_codeanalysis_error_024_fail5.b"
+    line="35"
+    column="5" />
+</errors>

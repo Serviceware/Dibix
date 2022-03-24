@@ -22,8 +22,4 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <DebugType>embedded</DebugType>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="*.dotsettings" />
-  </ItemGroup>
 </Project>

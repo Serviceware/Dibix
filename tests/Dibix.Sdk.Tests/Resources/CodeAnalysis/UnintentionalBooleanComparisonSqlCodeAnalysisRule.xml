@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<errors>
+  <error
+    ruleid="31"
+    message="Unintentional boolean comparison: 1 = 1"
+    line="4"
+    column="9" />
+  <error
+    ruleid="31"
+    message="Unintentional boolean comparison: @a = @a"
+    line="9"
+    column="9" />
+  <error
+    ruleid="31"
+    message="Unintentional boolean comparison: @b = @b"
+    line="9"
+    column="21" />
+  <error
+    ruleid="31"
+    message="Unintentional boolean comparison: 1 = 2"
+    line="12"
+    column="9" />
+  <error
+    ruleid="31"
+    message="Unintentional boolean comparison: 1 &gt; 2"
+    line="15"
+    column="9" />
+  <error
+    ruleid="31"
+    message="Unintentional boolean comparison: 1 &lt;&gt; 2"
+    line="18"
+    column="9" />
+  <error
+    ruleid="31"
+    message="Unintentional boolean comparison: 1 &lt; 2"
+    line="21"
+    column="9" />
+  <error
+    ruleid="31"
+    message="Unintentional boolean comparison: 1 IS NOT NULL"
+    line="24"
+    column="9" />
+</errors>

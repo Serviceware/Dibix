@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<errors>
+  <error
+    ruleid="14"
+    message="Table 'dbx_codeanalysis_error_014_fail1' has an unnamed primary key constraint"
+    line="3"
+    column="20" />
+  <error
+    ruleid="14"
+    message="Table 'dbx_codeanalysis_error_014_fail1' has an unnamed default constraint"
+    line="3"
+    column="32" />
+  <error
+    ruleid="14"
+    message="Table 'dbx_codeanalysis_error_014_fail2' has an unnamed primary key constraint"
+    line="14"
+    column="5" />
+</errors>

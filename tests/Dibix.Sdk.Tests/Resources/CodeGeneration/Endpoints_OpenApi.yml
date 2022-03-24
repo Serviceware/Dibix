@@ -1,0 +1,306 @@
+openapi: 3.0.1
+info:
+  title: Dibix.Sdk.Tests API title
+  description: Dibix.Sdk.Tests API description
+  version: 1.0.1
+servers:
+  - url: https://localhost/api
+paths:
+  '/Tests/GenericEndpoint/{password}/Fixed':
+    get:
+      tags:
+        - GenericEndpoint
+      summary: EmptyWithParams1
+      operationId: EmptyWithParams1
+      parameters:
+        - name: password
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: User-Agent
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: ids
+          in: query
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/GenericParameterSet'
+        - name: Accept-Language
+          in: header
+          schema:
+            type: string
+            default: 
+            nullable: true
+      responses:
+        '204':
+          description: NoContent
+      security:
+        - HLNS-SIT: [ ]
+          HLNS-ClientId: [ ]
+  '/Tests/GenericEndpoint/{password}/User':
+    get:
+      tags:
+        - GenericEndpoint
+      summary: EmptyWithParamsAnonymous
+      operationId: EmptyWithParamsAnonymous
+      parameters:
+        - name: password
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: u
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: v
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: w
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+            nullable: true
+        - name: ids
+          in: query
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/GenericParameterSet'
+        - name: x
+          in: query
+          schema:
+            type: string
+            default: 
+            nullable: true
+        - name: y
+          in: query
+          schema:
+            type: boolean
+            default: true
+        - name: z
+          in: query
+          schema:
+            type: integer
+            format: int32
+            default: 
+            nullable: true
+      responses:
+        '204':
+          description: NoContent
+  /Tests/GenericEndpoint/Array:
+    get:
+      tags:
+        - GenericEndpoint
+      summary: SingleConrecteResultWithParams
+      operationId: SingleConrecteResultWithParams
+      parameters:
+        - name: ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericContract'
+      security:
+        - HLNS-SIT: [ ]
+          HLNS-ClientId: [ ]
+  '/Tests/GenericEndpoint/{id}':
+    get:
+      tags:
+        - GenericEndpoint
+      summary: FileResult
+      operationId: FileResult
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            image/*:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: NotFound
+      security:
+        - { }
+        - Bearer: [ ]
+  /Tests/GenericEndpoint:
+    put:
+      tags:
+        - GenericEndpoint
+      summary: FileUpload
+      operationId: FileUpload
+      requestBody:
+        content:
+          image/png:
+            schema:
+              type: string
+              format: binary
+        required: true
+      responses:
+        '204':
+          description: NoContent
+      security:
+        - HLNS-SIT: [ ]
+          HLNS-ClientId: [ ]
+    post:
+      tags:
+        - GenericEndpoint
+      summary: EmptyWithParams2
+      operationId: EmptyWithParams2
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InputContract'
+        required: true
+      responses:
+        '204':
+          description: NoContent
+      security:
+        - HLNS-SIT: [ ]
+          HLNS-ClientId: [ ]
+    patch:
+      tags:
+        - GenericEndpoint
+      summary: EmptyWithParams3
+      operationId: EmptyWithParams3
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InputContract'
+        required: true
+      responses:
+        '204':
+          description: NoContent
+      security:
+        - HLNS-SIT: [ ]
+          HLNS-ClientId: [ ]
+components:
+  schemas:
+    GenericParameterSet:
+      required:
+        - id
+        - name
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+          nullable: true
+      additionalProperties: false
+    GenericContract:
+      required:
+        - Role
+        - CreationTime
+        - ImageUrl
+      type: object
+      properties:
+        Name:
+          type: string
+          default: DefaultValue
+        Role:
+          $ref: '#/components/schemas/Role'
+        CreationTime:
+          type: string
+          format: date-time
+          nullable: true
+        ImageUrl:
+          type: string
+          format: uri
+      additionalProperties: false
+    Role:
+      enum:
+        - 0
+        - 1
+        - 2
+      type: integer
+      description: 0 = None<br/>1 = User<br/>2 = Admin
+      format: int32
+      x-enum-varnames:
+        - None
+        - User
+        - Admin
+    InputContract:
+      required:
+        - U
+        - V
+        - Ids
+        - X
+        - Password
+        - Y
+        - Z
+      type: object
+      properties:
+        U:
+          type: string
+        V:
+          type: string
+        W:
+          type: string
+        Ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/Entry'
+        X:
+          type: string
+          format: uuid
+        Password:
+          type: string
+        Y:
+          type: boolean
+        Z:
+          type: integer
+          format: int32
+      additionalProperties: false
+    Entry:
+      required:
+        - Id
+        - Name
+      type: object
+      properties:
+        Id:
+          type: integer
+          format: int32
+        Name:
+          type: string
+      additionalProperties: false
+  securitySchemes:
+    HLNS-SIT:
+      type: apiKey
+      name: HLNS-SIT
+      in: header
+    HLNS-ClientId:
+      type: apiKey
+      name: HLNS-ClientId
+      in: header
+    Bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

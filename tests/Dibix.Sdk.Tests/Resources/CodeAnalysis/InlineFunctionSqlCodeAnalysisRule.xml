@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<errors>
+  <error
+    ruleid="37"
+    message="Make non inline table valued function inline or replace it with a stored procedure: dbx_codeanalysis_error_037_tvf_noninline"
+    line="14"
+    column="1" />
+  <error
+    ruleid="37"
+    message="Scalar functions should only be used for assignments or check constraints. Otherwise replace it with an inline table-valued function: dbx_codeanalysis_error_037_scalar"
+    line="40"
+    column="16" />
+  <error
+    ruleid="37"
+    message="Scalar functions should only be used for assignments or check constraints. Otherwise replace it with an inline table-valued function: dbx_codeanalysis_error_037_scalar"
+    line="42"
+    column="18" />
+</errors>

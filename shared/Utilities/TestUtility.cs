@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Resources;
 using Xunit;
 
 namespace Dibix
@@ -17,19 +16,28 @@ namespace Dibix
         public static void Evaluate(string generated) => Evaluate(TestName, generated);
         public static void Evaluate(string expectedTextKey, string generated)
         {
-            string expectedText = TestUtility.GetExpectedText(expectedTextKey);
+            const string extension = "cs";
+            string resourceKey = $"{expectedTextKey}.{extension}";
+            string expectedText = TestUtility.GetExpectedText(resourceKey);
             string actualText = generated;
-            TestUtility.AssertEqualWithDiffTool(expectedText, actualText, "cs");
+            TestUtility.AssertEqualWithDiffTool(expectedText, actualText, extension);
         }
-
+        
         public static string GetExpectedText(string key)
         {
-            ResourceManager resourceManager = new ResourceManager($"{ProjectName}.Resource", Assembly);
-            string resource = resourceManager.GetString(key);
-            if (resource == null)
-                throw new InvalidOperationException($"Invalid test resource name '{key}'");
+            string resourceKey = $"{Assembly.GetName().Name}.Resources.{key}";
+            using (Stream stream = Assembly.GetManifestResourceStream(resourceKey))
+            {
+                if (stream == null)
+                    throw new InvalidOperationException($@"Resource not found: {resourceKey}
+{Assembly.Location}");
 
-            return resource;
+                using (TextReader reader = new StreamReader(stream))
+                {
+                    string content = reader.ReadToEnd();
+                    return content;
+                }
+            }
         }
 
         public static void AssertEqualWithDiffTool(string expectedText, string actualText, string extension = null)

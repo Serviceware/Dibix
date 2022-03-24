@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<errors>
+  <error
+    ruleid="36"
+    message="Primary keys should not be updated: [target].[id] = [source].[id]"
+    line="7"
+    column="20" />
+  <error
+    ruleid="36"
+    message="Primary keys should not be updated: [id] = 1"
+    line="10"
+    column="31" />
+  <error
+    ruleid="36"
+    message="Primary keys should not be updated: [id] = 1"
+    line="18"
+    column="21" />
+  <error
+    ruleid="36"
+    message="Primary keys should not be updated: [id] = 1"
+    line="22"
+    column="21" />
+  <error
+    ruleid="36"
+    message="Primary keys should not be updated: [r].[id_current] = [r].[id_new]"
+    line="26"
+    column="17" />
+  <error
+    ruleid="36"
+    message="Primary keys should not be updated: [r].[id_current] = [r].[id_new]"
+    line="32"
+    column="17" />
+  <error
+    ruleid="36"
+    message="Primary keys should not be updated: [T].[id] = [S].[id]"
+    line="41"
+    column="14" />
+  <error
+    ruleid="36"
+    message="Primary keys should not be updated: [T].[id] = [S].[id]"
+    line="47"
+    column="14" />
+  <error
+    ruleid="36"
+    message="Primary keys should not be updated: [T].[idx] = [S].[id]"
+    line="57"
+    column="14" />
+  <error
+    ruleid="36"
+    message="Primary keys should not be updated: [T].[idx] = [S].[id]"
+    line="67"
+    column="14" />
+</errors>

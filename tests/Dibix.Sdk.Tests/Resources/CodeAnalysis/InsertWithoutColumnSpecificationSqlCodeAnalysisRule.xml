@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<errors>
+  <error
+    ruleid="15"
+    message="Missing column specification for INSERT statement"
+    line="4"
+    column="3" />
+  <error
+    ruleid="15"
+    message="Missing column specification for INSERT statement"
+    line="10"
+    column="4" />
+</errors>

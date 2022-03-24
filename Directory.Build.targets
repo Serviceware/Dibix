@@ -1,6 +1,10 @@
 <Project>
   <Sdk Name="Microsoft.Build.CentralPackageVersions" Version="2.0.1" />
 
+  <ItemGroup>
+    <None Remove="*.dotsettings" />
+  </ItemGroup>
+
   <!-- Allow to override package version -->
   <Target Name="SetPackageVersion" AfterTargets="GetBuildVersion">
     <PropertyGroup>

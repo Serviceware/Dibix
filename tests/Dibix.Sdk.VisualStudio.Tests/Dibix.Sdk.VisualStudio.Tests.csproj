@@ -5,10 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="Resource.resx" />
     <Compile Include="..\Dibix.Sdk.Tests\CodeGeneration\CodeGenerationException.cs" Link="CodeGenerationException.cs" />
     <Compile Update="TextTemplateCodeGeneratorTests.Base.cs" DependentUpon="TextTemplateCodeGeneratorTests.cs" />
     <Compile Include="..\..\shared\Utilities\TestUtility.cs" Link="TestUtility.cs" />
+    <Compile Remove="Resources\*.cs" />
+    <EmbeddedResource Include="Resources\**" />
 
     <None Update="FluentSourcesTest.tt">
       <LastGenOutput>FluentSourcesTest.cs</LastGenOutput>

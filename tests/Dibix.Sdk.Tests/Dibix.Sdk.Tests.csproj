@@ -7,8 +7,9 @@
   <ItemGroup>
     <Compile Update="CodeAnalysis\SqlCodeAnalysisRuleTests.Base.cs" DependentUpon="CodeAnalysis\SqlCodeAnalysisRuleTests.cs" />
     <Compile Update="CodeGeneration\CodeGenerationTaskTests.Base.cs" DependentUpon="CodeGeneration\CodeGenerationTaskTests.cs" />
-    <EmbeddedResource Update="Resource.resx" />
     <Compile Include="..\..\shared\Utilities\TestUtility.cs" Link="TestUtility.cs" />
+    <Compile Remove="Resources\CodeGeneration\*.cs" />
+    <EmbeddedResource Include="Resources\**" />
   </ItemGroup>
 
   <ItemGroup>

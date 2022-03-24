@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<errors>
+  <error
+    ruleid="1"
+    message="Invalid casing for 'nocount' [Identifier]"
+    line="3"
+    column="6" />
+  <error
+    ruleid="1"
+    message="Invalid casing for 'nvarchar' [Identifier]"
+    line="7"
+    column="13" />
+  <error
+    ruleid="1"
+    message="Invalid casing for 'max' [Identifier]"
+    line="7"
+    column="22" />
+  <error
+    ruleid="1"
+    message="Invalid casing for 'decimal' [Identifier]"
+    line="8"
+    column="13" />
+  <error
+    ruleid="1"
+    message="Invalid casing for 'cast' [Identifier]"
+    line="15"
+    column="25" />
+  <error
+    ruleid="1"
+    message="Invalid casing for 'count' [Identifier]"
+    line="17"
+    column="14" />
+  <error
+    ruleid="1"
+    message="Invalid casing for 'row_number' [Identifier]"
+    line="28"
+    column="9" />
+  <error
+    ruleid="1"
+    message="Invalid casing for 'partition' [Identifier]"
+    line="28"
+    column="27" />
+  <error
+    ruleid="1"
+    message="Invalid casing for 'set' [Set]"
+    line="3"
+    column="2" />
+  <error
+    ruleid="1"
+    message="Invalid casing for 'on' [On]"
+    line="3"
+    column="14" />
+  <error
+    ruleid="1"
+    message="Invalid casing for 'SeLeCT' [Select]"
+    line="17"
+    column="2" />
+  <error
+    ruleid="1"
+    message="Invalid casing for 'over' [Over]"
+    line="28"
+    column="22" />
+  <error
+    ruleid="1"
+    message="Invalid casing for 'by' [By]"
+    line="28"
+    column="37" />
+  <error
+    ruleid="1"
+    message="Invalid casing for 'order' [Order]"
+    line="28"
+    column="43" />
+  <error
+    ruleid="1"
+    message="Invalid casing for 'by' [By]"
+    line="28"
+    column="49" />
+</errors>

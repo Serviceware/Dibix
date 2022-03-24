@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<errors>
+  <error
+    ruleid="9"
+    message="Data type length not specified: NVARCHAR"
+    line="5"
+    column="13" />
+  <error
+    ruleid="9"
+    message="Data type length not specified: NCHAR"
+    line="6"
+    column="13" />
+  <error
+    ruleid="9"
+    message="Data type length not specified: BINARY"
+    line="7"
+    column="13" />
+  <error
+    ruleid="9"
+    message="Data type length not specified: VARBINARY"
+    line="8"
+    column="13" />
+  <error
+    ruleid="9"
+    message="Data type length not specified: DECIMAL"
+    line="9"
+    column="13" />
+  <error
+    ruleid="9"
+    message="Data type length not specified: NUMERIC"
+    line="10"
+    column="13" />
+  <error
+    ruleid="9"
+    message="Data type length not specified: FLOAT"
+    line="11"
+    column="13" />
+</errors>

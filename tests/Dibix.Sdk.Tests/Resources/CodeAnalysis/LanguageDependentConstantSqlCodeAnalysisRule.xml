@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<errors>
+  <error
+    ruleid="20"
+    message="Found language dependent expression: CAST(N'1990-01-01' AS DATETIME)"
+    line="3"
+    column="30" />
+  <error
+    ruleid="20"
+    message="Found language dependent expression: 1990-01-01"
+    line="4"
+    column="25" />
+  <error
+    ruleid="20"
+    message="Found language dependent expression: CONSTRAINT [DF_dbx_codeanalysis_error_020_table_value] DEFAULT N'1990-01-01'"
+    line="9"
+    column="90" />
+</errors>

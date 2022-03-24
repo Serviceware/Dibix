@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<errors>
+  <error
+    ruleid="39"
+    message="Procedure arguments should be named: EXEC [dbo].[dbx_codeanalysis_error_039_x] @id = @x"
+    line="13"
+    column="44" />
+  <error
+    ruleid="39"
+    message="Procedure arguments should be named: EXEC [dbo].[dbx_codeanalysis_error_039_x] @name = @name_"
+    line="13"
+    column="48" />
+  <error
+    ruleid="39"
+    message="Procedure arguments should be named: EXECUTE @procedurename [0] = @x"
+    line="18"
+    column="25" />
+  <error
+    ruleid="39"
+    message="Procedure arguments should be named: EXECUTE @procedurename [1] = @name_"
+    line="18"
+    column="29" />
+</errors>

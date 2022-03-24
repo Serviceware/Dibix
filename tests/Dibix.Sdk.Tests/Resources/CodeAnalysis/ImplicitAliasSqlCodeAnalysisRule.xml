@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<errors>
+  <error
+    ruleid="8"
+    message="Aliases must be marked with 'AS'"
+    line="3"
+    column="28" />
+  <error
+    ruleid="8"
+    message="Aliases must be marked with 'AS'"
+    line="4"
+    column="25" />
+  <error
+    ruleid="8"
+    message="Aliases must be marked with 'AS'"
+    line="12"
+    column="4" />
+</errors>

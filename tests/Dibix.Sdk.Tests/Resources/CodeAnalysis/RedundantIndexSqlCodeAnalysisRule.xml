@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<errors>
+  <error
+    ruleid="33"
+    message="Found duplicate indexes: PK_dbx_codeanalysis_error_033_fail1, UQ_dbx_codeanalysis_error_033_fail1_a, IX_dbx_codeanalysis_error_033_fail1_a"
+    line="5"
+    column="5" />
+  <error
+    ruleid="33"
+    message="Found duplicate indexes: IX_dbx_codeanalysis_error_033_fail1_b1, IX_dbx_codeanalysis_error_033_fail1_b2"
+    line="10"
+    column="1" />
+  <error
+    ruleid="33"
+    message="Found duplicate indexes with different includes: PK_dbx_codeanalysis_error_033_fail2, IX_dbx_codeanalysis_error_033_fail2_a"
+    line="19"
+    column="5" />
+</errors>

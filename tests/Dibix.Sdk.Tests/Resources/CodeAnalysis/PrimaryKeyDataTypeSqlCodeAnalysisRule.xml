@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<errors>
+  <error
+    ruleid="23"
+    message="Only TINYINT/SMALLINT/INT/BIGINT are allowed as primary key: dbx_codeanalysis_error_023_fail1.b (NVARCHAR)"
+    line="5"
+    column="72" />
+  <error
+    ruleid="23"
+    message="Only TINYINT/SMALLINT/INT/BIGINT are allowed as primary key: dbx_codeanalysis_error_023_fail2.b (NVARCHAR)"
+    line="12"
+    column="5" />
+  <error
+    ruleid="23"
+    message="Only TINYINT/SMALLINT/INT/BIGINT are allowed as primary key: dbx_codeanalysis_error_023_fail3.c (NVARCHAR)"
+    line="20"
+    column="72" />
+  <error
+    ruleid="23"
+    message="Only TINYINT/SMALLINT/INT/BIGINT are allowed as primary key: dbx_codeanalysis_error_023_fail4.a (NVARCHAR)"
+    line="30"
+    column="120" />
+</errors>

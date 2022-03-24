@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<errors>
+  <error
+    ruleid="28"
+    message="Use of non UTC date/time function: GETDATE"
+    line="4"
+    column="84" />
+</errors>
