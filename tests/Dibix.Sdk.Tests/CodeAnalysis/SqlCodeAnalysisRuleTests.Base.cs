@@ -10,23 +10,19 @@ using System.Xml;
 using System.Xml.Linq;
 using Dibix.Sdk.CodeAnalysis;
 using Dibix.Sdk.Sql;
+using Dibix.Testing;
 using Microsoft.SqlServer.Dac.Model;
-using Xunit.Abstractions;
 
 namespace Dibix.Sdk.Tests.CodeAnalysis
 {
-    public sealed partial class SqlCodeAnalysisRuleTests
+    public sealed partial class SqlCodeAnalysisRuleTests : TestBase
     {
-        private readonly ITestOutputHelper _output;
-
-        public SqlCodeAnalysisRuleTests(ITestOutputHelper output) => this._output = output;
-
         private void Execute()
         {
             // Determine rule by 'back in time development' and create instance
             string ruleName = new StackTrace().GetFrame(1).GetMethod().Name;
-            string resourceKey = $"CodeAnalysis.{ruleName}.xml";
-            string expected = TestUtility.GetExpectedText(resourceKey);
+            string resourceKey = ResourceUtility.BuildResourceKey($"CodeAnalysis.{ruleName}.xml");
+            string expected = base.GetEmbeddedResourceContent(resourceKey);
             Type ruleType = Type.GetType($"Dibix.Sdk.CodeAnalysis.Rules.{ruleName},{typeof(ISqlCodeAnalysisRule).Assembly.GetName().Name}");
             ISqlCodeAnalysisRule ruleInstance = (ISqlCodeAnalysisRule)Activator.CreateInstance(ruleType);
             SqlCodeAnalysisRuleAttribute descriptor = ruleType.GetCustomAttribute<SqlCodeAnalysisRuleAttribute>();
@@ -37,7 +33,7 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
                                                                              .Select(x => new TaskItem(x.Value) { ["FullPath"] = Path.Combine(DatabaseTestUtility.DatabaseProjectDirectory, x.Value) })
                                                                              .ToArray();
 
-            TestLogger logger = new TestLogger(this._output);
+            TestLogger logger = new TestLogger(base.Out);
 
             TSqlModel model = PublicSqlDataSchemaModelLoader.Load(DatabaseTestUtility.ProjectName, DatabaseTestUtility.DatabaseSchemaProviderName, DatabaseTestUtility.ModelCollation, sources, Array.Empty<TaskItem>(), logger);
             LockEntryManager lockEntryManager = LockEntryManager.Create();
@@ -45,7 +41,7 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
             IEnumerable<SqlCodeAnalysisError> errors = engine.Analyze(violationScriptPath, ruleInstance);
 
             string actual = GenerateXmlFromResults(errors);
-            TestUtility.AssertEqualWithDiffTool(expected, actual, "xml");
+            base.AssertEqual(expected, actual, extension: "xml");
         }
 
         private static string GenerateXmlFromResults(IEnumerable<SqlCodeAnalysisError> result)

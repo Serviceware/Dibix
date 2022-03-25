@@ -38,11 +38,9 @@
     <EventLogVersion>6.0.0</EventLogVersion>
     <MicrosoftTestSdkVersion>17.1.0</MicrosoftTestSdkVersion>
     <MoqVersion>4.17.2</MoqVersion>
+    <MSTestAdapterVersion>2.2.8</MSTestAdapterVersion>
     <MSTestFrameworkVersion>2.2.8</MSTestFrameworkVersion>
     <RoslynVersion>4.1.0</RoslynVersion>
-    <XUnitVersion>2.4.1</XUnitVersion>
-    <XUnitVSVersion>2.4.3</XUnitVSVersion>
-    <XUnitCliVersion>2.3.1</XUnitCliVersion>
 
   </PropertyGroup>
 </Project>

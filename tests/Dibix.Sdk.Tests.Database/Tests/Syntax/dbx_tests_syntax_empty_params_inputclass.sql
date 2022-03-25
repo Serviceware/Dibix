@@ -8,3 +8,4 @@ CREATE PROCEDURE [dbo].[dbx_tests_syntax_empty_params_inputclass]
   , @z INT
 AS
 	PRINT CONCAT(@x, @password, @ids, @y, @z)
+	SET @y = NULL

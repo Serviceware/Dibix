@@ -2,14 +2,13 @@
 
 namespace Dibix.Testing.Http
 {
-    public interface IHttpTestContext<out TService, out TConfiguration> : IHttpTestContext<TConfiguration>
+    public interface IHttpTestContext<out TService> : IHttpTestContext where TService : IHttpService
     {
         TService Service { get; }
     }
 
-    public interface IHttpTestContext<out TConfiguration>
+    public interface IHttpTestContext
     {
-        TConfiguration Configuration { get; }
         IHttpClientFactory HttpClientFactory { get; }
         IHttpAuthorizationProvider HttpAuthorizationProvider { get; }
     }

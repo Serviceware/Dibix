@@ -13,7 +13,8 @@ namespace Dibix.Sdk.CodeGeneration
         protected override void WriteController(CodeGenerationContext context, CSharpStatementScope output, ControllerDefinition controller, string serviceName, IDictionary<ActionDefinition, string> operationIdMap, IDictionary<string, SecurityScheme> securitySchemeMap)
         {
             string interfaceName = $"I{serviceName}";
-            CSharpInterface @interface = output.AddInterface(interfaceName, CSharpModifiers.Public);
+            CSharpInterface @interface = output.AddInterface(interfaceName, CSharpModifiers.Public)
+                                               .Implements("IHttpService");
 
             foreach (ActionDefinition action in controller.Actions)
             {

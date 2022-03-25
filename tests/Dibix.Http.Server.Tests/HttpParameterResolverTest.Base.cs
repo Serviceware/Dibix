@@ -1,23 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Xml.Linq;
+using Dibix.Testing;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Xunit;
 
 namespace Dibix.Http.Server.Tests
 {
-    public partial class HttpParameterResolverTest
+    public partial class HttpParameterResolverTest : TestBase
     {
-        private static IHttpParameterResolutionMethod Compile() => Compile(x => { });
-        private static IHttpParameterResolutionMethod Compile(Action<HttpActionDefinition> actionConfiguration)
+        private void AssertEqual(string expected, string actual) => base.AssertEqual(expected, actual, extension: "txt");
+
+        private IHttpParameterResolutionMethod Compile() => this.Compile(x => { });
+        private IHttpParameterResolutionMethod Compile(Action<HttpActionDefinition> actionConfiguration)
         {
-            HttpApiRegistration registration = new HttpApiRegistration(actionConfiguration);
+            HttpApiRegistration registration = new HttpApiRegistration(base.TestContext.TestName, actionConfiguration);
             registration.Configure(null);
             HttpActionDefinition action = registration.Controllers.Single().Actions.Single();
             MethodInfo method = action.Target.Build();
@@ -27,25 +28,16 @@ namespace Dibix.Http.Server.Tests
 
         private sealed class HttpApiRegistration : HttpApiDescriptor
         {
-            private readonly string _methodName = $"{DetermineTestName()}_Target";
+            private readonly string _methodName;
             private readonly Action<HttpActionDefinition> _actionConfiguration;
 
-            public HttpApiRegistration(Action<HttpActionDefinition> actionConfiguration) => this._actionConfiguration = actionConfiguration;
+            public HttpApiRegistration(string testName, Action<HttpActionDefinition> actionConfiguration)
+            {
+                this._methodName = $"{testName}_Target";
+                this._actionConfiguration = actionConfiguration;
+            }
 
             public override void Configure(IHttpApiDiscoveryContext context) => base.RegisterController("Test", x => x.AddAction(ReflectionHttpActionTarget.Create(typeof(HttpParameterResolverTest), this._methodName), this._actionConfiguration));
-
-            private static string DetermineTestName()
-            {
-                var query = from frame in new StackTrace().GetFrames()
-                            let method = frame.GetMethod()
-                            where method.IsDefined(typeof(FactAttribute))
-                            select method.Name;
-                string methodName = query.FirstOrDefault();
-                if (methodName == null)
-                    throw new InvalidOperationException("Could not detect test name");
-
-                return methodName;
-            }
         }
 
         private sealed class LocaleParameterHttpSourceProvider : HttpParameterPropertySourceProvider, IHttpParameterSourceProvider

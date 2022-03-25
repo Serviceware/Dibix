@@ -9,12 +9,14 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
         private readonly string _name;
         private readonly IList<CSharpExpression> _members;
         private readonly CSharpModifiers _modifiers;
+        private readonly IList<string> _implementedInterfaces;
 
         public CSharpInterface(string name, CSharpModifiers modifiers)
         {
             this._name = name;
             this._modifiers = modifiers;
             this._members = new Collection<CSharpExpression>();
+            this._implementedInterfaces = new Collection<string>();
         }
 
         public CSharpMethod AddMethod(string name, string returnType)
@@ -24,12 +26,30 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             return method;
         }
 
+        public CSharpInterface Implements(string interfaceName)
+        {
+            this._implementedInterfaces.Add(interfaceName);
+            return this;
+        }
+
         protected override void WriteBody(StringWriter writer)
         {
             WriteModifiers(writer, this._modifiers);
 
             writer.WriteRaw("interface ")
                   .WriteRaw(this._name);
+
+            if (this._implementedInterfaces.Any())
+                writer.WriteRaw(" : ");
+
+            for (int i = 0; i < this._implementedInterfaces.Count; i++)
+            {
+                string @base = this._implementedInterfaces[i];
+                writer.WriteRaw(@base);
+
+                if (i + 1 < this._implementedInterfaces.Count)
+                    writer.WriteRaw(", ");
+            }
 
             writer.WriteLine()
                   .WriteLine("{")

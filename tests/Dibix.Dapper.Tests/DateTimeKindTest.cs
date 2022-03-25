@@ -1,29 +1,23 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Xunit;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dibix.Dapper.Tests
 {
-    public class DateTimeKindTest : IClassFixture<DatabaseTestFixture>
+    [TestClass]
+    public class DateTimeKindTest : DapperTestBase
     {
-        private readonly DatabaseTestFixture _fixture;
-
-        public DateTimeKindTest(DatabaseTestFixture fixture) => this._fixture = fixture;
-
-        [Fact]
-        public async Task KindIsSpecified_AccordingToPropertySetting()
+        [TestMethod]
+        public Task KindIsSpecified_AccordingToPropertySetting() => base.ExecuteTest(async accessor =>
         {
-            using (IDatabaseAccessor accessor = this._fixture.CreateDatabaseAccessor())
-            {
-                const string commandText = "SELECT [creationtime] = CAST(43861.1666666667 AS DATETIME), [registrationtime] = CAST(43861.1666666667 AS DATETIME), [modifiedat] = CAST(43861.1666666667 AS DATETIME)";
-                Entity entity = await accessor.QuerySingleAsync<Entity>(commandText, cancellationToken: default).ConfigureAwait(false);
-                Assert.Equal(DateTimeKind.Unspecified, entity.CreationTime.Kind);
-                Assert.Equal(DateTimeKind.Utc, entity.RegistrationTime.Kind);
-                Assert.NotNull(entity.ModifiedAt);
-                Assert.Equal(DateTimeKind.Utc, entity.ModifiedAt.Value.Kind);
-                Assert.Null(entity.DeletedAt);
-            }
-        }
+            const string commandText = "SELECT [creationtime] = CAST(43861.1666666667 AS DATETIME), [registrationtime] = CAST(43861.1666666667 AS DATETIME), [modifiedat] = CAST(43861.1666666667 AS DATETIME)";
+            Entity entity = await accessor.QuerySingleAsync<Entity>(commandText, cancellationToken: default).ConfigureAwait(false);
+            Assert.AreEqual(DateTimeKind.Unspecified, entity.CreationTime.Kind);
+            Assert.AreEqual(DateTimeKind.Utc, entity.RegistrationTime.Kind);
+            Assert.IsNotNull(entity.ModifiedAt);
+            Assert.AreEqual(DateTimeKind.Utc, entity.ModifiedAt.Value.Kind);
+            Assert.IsNull(entity.DeletedAt);
+        });
 
         private sealed class Entity
         {

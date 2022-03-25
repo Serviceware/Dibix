@@ -5,15 +5,16 @@ using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Moq.Protected;
-using Xunit;
 
 namespace Dibix.Tests
 {
+    [TestClass]
     public class MappingTest
     {
-        [Fact]
+        [TestMethod]
         public void MultiMapper_WithoutProjection()
         {
             object[][] rows =
@@ -34,20 +35,20 @@ namespace Dibix.Tests
                     .Returns<string, CommandType, ParametersVisitor, Func<Character, Name, string, Name, Character>, string>((commandText, commandType, parameters, map, splitOn) => rows.Select(x => map((Character)x[0], (Name)x[1], (string)x[2], (Name)x[3])));
 
             Character result = accessor.Object.QuerySingle<Character, Name, string, Name>("commandText", parametersVisitor.Object, "splitOn");
-            Assert.NotNull(result.Name);
-            Assert.Equal("Luke", result.Name.FirstName);
-            Assert.Equal("Skywalker", result.Name.LastName);
-            Assert.Equal(2, result.Affiliations.Count);
-            Assert.Equal("Jedi Order", result.Affiliations[0]);
-            Assert.Equal("New Republic", result.Affiliations[1]);
-            Assert.Equal(2, result.Masters.Count);
-            Assert.Equal("Obi-Wan", result.Masters[0].FirstName);
-            Assert.Equal("Kenobi", result.Masters[0].LastName);
-            Assert.Equal("Yoda", result.Masters[1].FirstName);
-            Assert.Null(result.Masters[1].LastName);
+            Assert.IsNotNull(result.Name);
+            Assert.AreEqual("Luke", result.Name.FirstName);
+            Assert.AreEqual("Skywalker", result.Name.LastName);
+            Assert.AreEqual(2, result.Affiliations.Count);
+            Assert.AreEqual("Jedi Order", result.Affiliations[0]);
+            Assert.AreEqual("New Republic", result.Affiliations[1]);
+            Assert.AreEqual(2, result.Masters.Count);
+            Assert.AreEqual("Obi-Wan", result.Masters[0].FirstName);
+            Assert.AreEqual("Kenobi", result.Masters[0].LastName);
+            Assert.AreEqual("Yoda", result.Masters[1].FirstName);
+            Assert.IsNull(result.Masters[1].LastName);
         }
 
-        [Fact]
+        [TestMethod]
         public void MultiMapper_And_RecursiveMapper_WithoutProjection()
         {
             object[][] rows =
@@ -74,59 +75,59 @@ namespace Dibix.Tests
                     .Returns<string, CommandType, ParametersVisitor, Func<Category, CategoryBlacklistEntry, Category>, string>((commandText, commandType, parameters, map, splitOn) => rows.Select(x => map((Category)x[0], (CategoryBlacklistEntry)x[1])));
 
             IList<Category> categories = accessor.Object.QueryMany<Category, CategoryBlacklistEntry>("commandText", CommandType.Text, parametersVisitor.Object, "splitOn").ToArray();
-            Assert.NotNull(categories);
-            Assert.Equal(3, categories.Count);
+            Assert.IsNotNull(categories);
+            Assert.AreEqual(3, categories.Count);
 
-            Assert.Equal(1, categories[0].Id);
-            Assert.Equal("Hardware", categories[0].Name);
-            Assert.Null(categories[0].ParentCategoryId);
-            Assert.Equal(2, categories[0].Categories.Count);
-            Assert.Equal(4, categories[0].Categories[0].Id);
-            Assert.Equal("Computer", categories[0].Categories[0].Name);
-            Assert.Equal(1, categories[0].Categories[0].ParentCategoryId);
-            Assert.False(categories[0].Categories[0].Categories.Any());
-            Assert.False(categories[0].Categories[0].Blacklist.Any());
-            Assert.Equal(5, categories[0].Categories[1].Id);
-            Assert.Equal("Monitor", categories[0].Categories[1].Name);
-            Assert.Equal(1, categories[0].Categories[1].ParentCategoryId);
-            Assert.False(categories[0].Categories[1].Categories.Any());
-            Assert.False(categories[0].Categories[1].Blacklist.Any());
-            Assert.False(categories[0].Blacklist.Any());
-            Assert.Equal(2, categories[1].Id);
-            Assert.Equal("Software", categories[1].Name);
-            Assert.Null(categories[1].ParentCategoryId);
-            Assert.Equal(2, categories[1].Categories.Count);
-            Assert.Equal(6, categories[1].Categories[0].Id);
-            Assert.Equal("Developer Tools", categories[1].Categories[0].Name);
-            Assert.Equal(2, categories[1].Categories[0].ParentCategoryId);
-            Assert.Equal(2, categories[1].Categories[0].Categories.Count);
-            Assert.Equal(9, categories[1].Categories[0].Categories[0].Id);
-            Assert.Equal("SQL Server", categories[1].Categories[0].Categories[0].Name);
-            Assert.Equal(6, categories[1].Categories[0].Categories[0].ParentCategoryId);
-            Assert.False(categories[1].Categories[0].Categories[0].Categories.Any());
-            Assert.False(categories[1].Categories[0].Categories[0].Blacklist.Any());
-            Assert.Equal(8, categories[1].Categories[0].Categories[1].Id);
-            Assert.Equal("Visual Studio", categories[1].Categories[0].Categories[1].Name);
-            Assert.Equal(6, categories[1].Categories[0].Categories[1].ParentCategoryId);
-            Assert.False(categories[1].Categories[0].Categories[1].Categories.Any());
-            Assert.False(categories[1].Categories[0].Categories[1].Blacklist.Any());
-            Assert.False(categories[1].Categories[0].Blacklist.Any());
-            Assert.Equal(7, categories[1].Categories[1].Id);
-            Assert.Equal("Windows", categories[1].Categories[1].Name);
-            Assert.Equal(2, categories[1].Categories[1].ParentCategoryId);
-            Assert.False(categories[1].Categories[1].Categories.Any());
-            Assert.False(categories[1].Categories[1].Blacklist.Any());
-            Assert.Equal(2, categories[1].Blacklist.Count);
-            Assert.Equal(1, categories[1].Blacklist[0].UserId);
-            Assert.Equal(2, categories[1].Blacklist[1].UserId);
-            Assert.Equal(3, categories[2].Id);
-            Assert.Equal("Uncategorized", categories[2].Name);
-            Assert.Null(categories[2].ParentCategoryId);
-            Assert.False(categories[2].Categories.Any());
-            Assert.False(categories[2].Blacklist.Any());
+            Assert.AreEqual(1, categories[0].Id);
+            Assert.AreEqual("Hardware", categories[0].Name);
+            Assert.IsNull(categories[0].ParentCategoryId);
+            Assert.AreEqual(2, categories[0].Categories.Count);
+            Assert.AreEqual(4, categories[0].Categories[0].Id);
+            Assert.AreEqual("Computer", categories[0].Categories[0].Name);
+            Assert.AreEqual(1, categories[0].Categories[0].ParentCategoryId);
+            Assert.IsFalse(categories[0].Categories[0].Categories.Any());
+            Assert.IsFalse(categories[0].Categories[0].Blacklist.Any());
+            Assert.AreEqual(5, categories[0].Categories[1].Id);
+            Assert.AreEqual("Monitor", categories[0].Categories[1].Name);
+            Assert.AreEqual(1, categories[0].Categories[1].ParentCategoryId);
+            Assert.IsFalse(categories[0].Categories[1].Categories.Any());
+            Assert.IsFalse(categories[0].Categories[1].Blacklist.Any());
+            Assert.IsFalse(categories[0].Blacklist.Any());
+            Assert.AreEqual(2, categories[1].Id);
+            Assert.AreEqual("Software", categories[1].Name);
+            Assert.IsNull(categories[1].ParentCategoryId);
+            Assert.AreEqual(2, categories[1].Categories.Count);
+            Assert.AreEqual(6, categories[1].Categories[0].Id);
+            Assert.AreEqual("Developer Tools", categories[1].Categories[0].Name);
+            Assert.AreEqual(2, categories[1].Categories[0].ParentCategoryId);
+            Assert.AreEqual(2, categories[1].Categories[0].Categories.Count);
+            Assert.AreEqual(9, categories[1].Categories[0].Categories[0].Id);
+            Assert.AreEqual("SQL Server", categories[1].Categories[0].Categories[0].Name);
+            Assert.AreEqual(6, categories[1].Categories[0].Categories[0].ParentCategoryId);
+            Assert.IsFalse(categories[1].Categories[0].Categories[0].Categories.Any());
+            Assert.IsFalse(categories[1].Categories[0].Categories[0].Blacklist.Any());
+            Assert.AreEqual(8, categories[1].Categories[0].Categories[1].Id);
+            Assert.AreEqual("Visual Studio", categories[1].Categories[0].Categories[1].Name);
+            Assert.AreEqual(6, categories[1].Categories[0].Categories[1].ParentCategoryId);
+            Assert.IsFalse(categories[1].Categories[0].Categories[1].Categories.Any());
+            Assert.IsFalse(categories[1].Categories[0].Categories[1].Blacklist.Any());
+            Assert.IsFalse(categories[1].Categories[0].Blacklist.Any());
+            Assert.AreEqual(7, categories[1].Categories[1].Id);
+            Assert.AreEqual("Windows", categories[1].Categories[1].Name);
+            Assert.AreEqual(2, categories[1].Categories[1].ParentCategoryId);
+            Assert.IsFalse(categories[1].Categories[1].Categories.Any());
+            Assert.IsFalse(categories[1].Categories[1].Blacklist.Any());
+            Assert.AreEqual(2, categories[1].Blacklist.Count);
+            Assert.AreEqual(1, categories[1].Blacklist[0].UserId);
+            Assert.AreEqual(2, categories[1].Blacklist[1].UserId);
+            Assert.AreEqual(3, categories[2].Id);
+            Assert.AreEqual("Uncategorized", categories[2].Name);
+            Assert.IsNull(categories[2].ParentCategoryId);
+            Assert.IsFalse(categories[2].Categories.Any());
+            Assert.IsFalse(categories[2].Blacklist.Any());
         }
 
-        [Fact]
+        [TestMethod]
         public void MultiMapper_WithProjection()
         {
             object[][] rows =
@@ -150,12 +151,12 @@ namespace Dibix.Tests
             using (IMultipleResultReader reader = accessor.Object.QueryMultiple("commandText"))
             {
                 CharacterInfo result = reader.ReadMany<Name, Name, CharacterInfo>("splitOn").Single();
-                Assert.NotNull(result.Name);
-                Assert.Equal("Darth", result.Name.FirstName);
-                Assert.Equal("Vader", result.Name.LastName);
-                Assert.NotNull(result.Name);
-                Assert.Equal("Anakin", result.AlternateName.FirstName);
-                Assert.Equal("Skywalker", result.AlternateName.LastName);
+                Assert.IsNotNull(result.Name);
+                Assert.AreEqual("Darth", result.Name.FirstName);
+                Assert.AreEqual("Vader", result.Name.LastName);
+                Assert.IsNotNull(result.Name);
+                Assert.AreEqual("Anakin", result.AlternateName.FirstName);
+                Assert.AreEqual("Skywalker", result.AlternateName.LastName);
             }
         }
 

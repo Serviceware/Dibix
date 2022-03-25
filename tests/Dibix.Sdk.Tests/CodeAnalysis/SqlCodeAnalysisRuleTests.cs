@@ -1,130 +1,131 @@
-﻿using Xunit;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dibix.Sdk.Tests.CodeAnalysis
 {
+    [TestClass]
     public sealed partial class SqlCodeAnalysisRuleTests
     {
-        [Fact]
+        [TestMethod]
         public void KeywordCasingSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void SchemaSpecificationSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void EmptyReturnSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void UnicodeConstantSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void UnicodeDataTypeSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void RedundantAliasSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void PrimitiveDataTypeIdentifierSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void ImplicitAliasSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void UnspecifiedDataTypeLengthSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void AliasSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void ConsistentlyQuotedIdentifierSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void MissingPrimaryKeySqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void NoCursorSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void UnnamedConstraintSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void InsertWithoutColumnSpecificationSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void UnsupportedDataTypeSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void NamingConventionSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void UnfilteredDataModificationSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void TruncateTableSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void LanguageDependentConstantSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void TemporaryTableSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void MisusedTopRowFilterSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void PrimaryKeyDataTypeSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void SurrogateKeySqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void ImplicitDefaultSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void LooseConstraintsSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void UniqueIndexSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void DateTimeSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void TableConstraintSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void SecurityAlgorithmSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void UnintentionalBooleanComparisonSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void IndexSizeSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void RedundantIndexSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void IsNullSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void AmbiguousCheckConstraintSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void PrimaryKeyUpdateSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void InlineFunctionSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void RedundantSymbolSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void ExplicitProcedureArgumentSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void UnsupportedEmbeddedSymbolReferenceSqlCodeAnalysisRule() => this.Execute();
 
-        [Fact]
+        [TestMethod]
         public void InvalidFunctionUsageSqlCodeAnalysisRule() => this.Execute();
     }
 }

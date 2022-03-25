@@ -6,14 +6,16 @@ using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
+using Dibix.Testing;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Xunit;
 
 namespace Dibix.Http.Server.Tests
 {
-    public class HttpActionInvokerTest
+    [TestClass]
+    public class HttpActionInvokerTest : TestBase
     {
-        [Fact]
+        [TestMethod]
         public async Task Invoke_WithResult()
         {
             Mock<IHttpParameterResolutionMethod> parameterResolver = new Mock<IHttpParameterResolutionMethod>(MockBehavior.Strict);
@@ -24,10 +26,10 @@ namespace Dibix.Http.Server.Tests
 
             HttpActionDefinition action = HttpActionDefinitionFactory.Create();
             object result = await HttpActionInvoker.Invoke(action, null, null, parameterResolver.Object, executor, null).ConfigureAwait(false);
-            Assert.Equal(1, result);
+            Assert.AreEqual(1, result);
         }
 
-        [Fact]
+        [TestMethod]
         public async Task Invoke_WithResponse()
         {
             Mock<IHttpParameterResolutionMethod> parameterResolver = new Mock<IHttpParameterResolutionMethod>(MockBehavior.Strict);
@@ -39,12 +41,12 @@ namespace Dibix.Http.Server.Tests
 
             HttpActionDefinition action = HttpActionDefinitionFactory.Create();
             object result = await HttpActionInvoker.Invoke(action, request, null, parameterResolver.Object, executor, null).ConfigureAwait(false);
-            HttpResponseMessage response = Assert.IsType<HttpResponseMessage>(result);
-            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
-            Assert.Equal(request, response.RequestMessage);
+            HttpResponseMessage response = AssertIsType<HttpResponseMessage>(result);
+            Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
+            Assert.AreEqual(request, response.RequestMessage);
         }
 
-        [Fact]
+        [TestMethod]
         public async Task Invoke_DDL_WithHttpServerError_IsMappedToHttpStatusCode()
         {
             SqlException sqlException = SqlExceptionFactory.Create(default, 504000, default, default, default, "Too late", default, default);
@@ -64,19 +66,19 @@ namespace Dibix.Http.Server.Tests
             }
             catch (HttpRequestExecutionException requestException)
             {
-                Assert.Equal(@"504 GatewayTimeout: Too late
+                Assert.AreEqual(@"504 GatewayTimeout: Too late
 CommandType: 0
 CommandText: <Dynamic>", requestException.Message);
-                Assert.IsType<DatabaseAccessException>(requestException.InnerException);
-                Assert.False(requestException.IsClientError);
-                Assert.Equal(HttpStatusCode.GatewayTimeout, requestException.ErrorResponse.StatusCode);
-                Assert.False(requestException.ErrorResponse.Headers.Contains("X-Error-Code"));
-                Assert.False(requestException.ErrorResponse.Headers.Contains("X-Error-Description"));
-                Assert.Equal(request, requestException.ErrorResponse.RequestMessage);
+                AssertIsType<DatabaseAccessException>(requestException.InnerException);
+                Assert.IsFalse(requestException.IsClientError);
+                Assert.AreEqual(HttpStatusCode.GatewayTimeout, requestException.ErrorResponse.StatusCode);
+                Assert.IsFalse(requestException.ErrorResponse.Headers.Contains("X-Error-Code"));
+                Assert.IsFalse(requestException.ErrorResponse.Headers.Contains("X-Error-Description"));
+                Assert.AreEqual(request, requestException.ErrorResponse.RequestMessage);
             }
         }
 
-        [Fact]
+        [TestMethod]
         public async Task Invoke_DDL_WithHttpClientError_IsMappedToHttpStatusCode()
         {
             SqlException sqlException = SqlExceptionFactory.Create(default, 403001, default, default, default, "Sorry", default, default);
@@ -96,19 +98,19 @@ CommandText: <Dynamic>", requestException.Message);
             }
             catch (HttpRequestExecutionException requestException)
             {
-                Assert.Equal(@"403 Forbidden: Sorry
+                Assert.AreEqual(@"403 Forbidden: Sorry
 CommandType: 0
 CommandText: <Dynamic>", requestException.Message);
-                Assert.IsType<DatabaseAccessException>(requestException.InnerException);
-                Assert.True(requestException.IsClientError);
-                Assert.Equal(HttpStatusCode.Forbidden, requestException.ErrorResponse.StatusCode);
-                Assert.Equal("1", requestException.ErrorResponse.Headers.GetValues("X-Error-Code").Single());
-                Assert.Equal("Sorry", requestException.ErrorResponse.Headers.GetValues("X-Error-Description").Single());
-                Assert.Equal(request, requestException.ErrorResponse.RequestMessage);
+                AssertIsType<DatabaseAccessException>(requestException.InnerException);
+                Assert.IsTrue(requestException.IsClientError);
+                Assert.AreEqual(HttpStatusCode.Forbidden, requestException.ErrorResponse.StatusCode);
+                Assert.AreEqual("1", requestException.ErrorResponse.Headers.GetValues("X-Error-Code").Single());
+                Assert.AreEqual("Sorry", requestException.ErrorResponse.Headers.GetValues("X-Error-Description").Single());
+                Assert.AreEqual(request, requestException.ErrorResponse.RequestMessage);
             }
         }
 
-        [Fact]
+        [TestMethod]
         public async Task Invoke_DDL_WithSqlException_WrappedExceptionIsThrown()
         {
             CommandType commandType = CommandType.StoredProcedure;
@@ -135,14 +137,14 @@ CommandText: <Dynamic>", requestException.Message);
             try
             {
                 await HttpActionInvoker.Invoke(null, null, null, parameterResolver.Object, null, null).ConfigureAwait(false);
-                Assert.True(false, "DatabaseAccessException was expected but not thrown");
+                Assert.IsTrue(false, "DatabaseAccessException was expected but not thrown");
             }
             catch (DatabaseAccessException ex)
             {
-                Assert.Equal(CommandType.StoredProcedure, ex.CommandType);
-                Assert.Equal("x", ex.CommandText);
-                Assert.Equal(parametersVisitor.Object, ex.Parameters);
-                Assert.Equal(@"Oops
+                Assert.AreEqual(CommandType.StoredProcedure, ex.CommandType);
+                Assert.AreEqual("x", ex.CommandText);
+                Assert.AreEqual(parametersVisitor.Object, ex.Parameters);
+                Assert.AreEqual(@"Oops
 CommandType: StoredProcedure
 CommandText: x
 Parameter a(Binary): System.Byte[]
@@ -154,7 +156,7 @@ intValue INT(4)  stringValue NVARCHAR(MAX)
             }
         }
 
-        [Fact]
+        [TestMethod]
         public async Task Invoke_DML_WithSqlException_WrappedExceptionIsThrown()
         {
             CommandType commandType = CommandType.Text;
@@ -181,14 +183,14 @@ intValue INT(4)  stringValue NVARCHAR(MAX)
             try
             {
                 await HttpActionInvoker.Invoke(null, null, null, parameterResolver.Object, null, null).ConfigureAwait(false);
-                Assert.True(false, "DatabaseAccessException was expected but not thrown");
+                Assert.IsTrue(false, "DatabaseAccessException was expected but not thrown");
             }
             catch (DatabaseAccessException ex)
             {
-                Assert.Equal(CommandType.Text, ex.CommandType);
-                Assert.Equal("x", ex.CommandText);
-                Assert.Equal(parametersVisitor.Object, ex.Parameters);
-                Assert.Equal(@"Oops
+                Assert.AreEqual(CommandType.Text, ex.CommandType);
+                Assert.AreEqual("x", ex.CommandText);
+                Assert.AreEqual(parametersVisitor.Object, ex.Parameters);
+                Assert.AreEqual(@"Oops
 CommandType: Text
 CommandText: <Dynamic>
 Parameter a(Binary): System.Byte[]

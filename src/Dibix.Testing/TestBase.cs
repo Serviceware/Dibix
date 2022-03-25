@@ -1,100 +1,143 @@
 ﻿using System;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Resources;
+using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dibix.Testing
 {
-    public abstract class TestBase<TConfiguration> : IDisposable where TConfiguration : new()
+    public abstract class TestBase<TConfiguration> : TestBase where TConfiguration : class, new()
+    {
+        private TConfiguration _configuration;
+
+        protected TConfiguration Configuration
+        {
+            get
+            {
+                if (this._configuration == null)
+                    throw new InvalidOperationException("Configuration not initialized");
+
+                return this._configuration;
+            }
+            private set => this._configuration = value;
+        }
+
+        protected override Task OnTestInitialized()
+        {
+            this.Configuration = TestConfigurationLoader.Load<TConfiguration>(this.TestContext);
+            return Task.CompletedTask;
+        }
+    }
+    
+    public abstract class TestBase : IDisposable
     {
         #region Fields
+        private readonly Assembly _assembly;
         private TestContext _testContext;
+        private TestOutputWriter _testOutputHelper;
+        private TestResultComposer _testResultComposer;
         #endregion
 
         #region Properties
         public TestContext TestContext
         {
-            get => this._testContext;
-            set
-            {
-                this._testContext = value;
-                TestOutputWriter testOutputHelper = new TestOutputWriter(testContext: value, outputToFile: true, tailOutput: this.AttachOutputObserver);
-                this.TestOutputHelper = testOutputHelper;
-            }
+            get => SafeGetProperty(ref this._testContext);
+            set => this._testContext = value;
         }
-        internal TestOutputWriter TestOutputHelper { get; private set; }
+        internal TestOutputWriter TestOutputHelper
+        {
+            get => SafeGetProperty(ref this._testOutputHelper);
+            private set => this._testOutputHelper = value;
+        }
         protected virtual bool AttachOutputObserver => false;
         protected virtual TextWriter Out => this.TestOutputHelper;
+        private TestResultComposer TestResultComposer
+        {
+            get => SafeGetProperty(ref this._testResultComposer);
+            set => this._testResultComposer = value;
+        }
         #endregion
 
         #region Constructor
         protected TestBase()
         {
-            AppDomain.CurrentDomain.FirstChanceException += this.OnFirstChanceException;
+            this._assembly = this.GetType().Assembly;
         }
         #endregion
 
         #region Public Methods
         [TestInitialize]
-        public Task OnTestInitialize() => this.OnTestInitialized();
+        public async Task OnTestInitialize()
+        {
+            this.TestResultComposer = new TestResultComposer(this.TestContext);
+            this.TestOutputHelper = new TestOutputWriter(this.TestContext, this.TestResultComposer, outputToFile: true, tailOutput: this.AttachOutputObserver);
+            AppDomain.CurrentDomain.FirstChanceException += this.OnFirstChanceException;
+
+            await this.OnTestInitialized().ConfigureAwait(false);
+        }
         #endregion
 
         #region Protected Methods
         protected virtual Task OnTestInitialized() => Task.CompletedTask;
 
-        protected TConfiguration LoadConfiguration() => TestConfigurationLoader.Load<TConfiguration>(this.TestContext);
-
         protected void WriteLine(string message) => this.TestOutputHelper.WriteLine(message);
 
-        protected void AssertEqualDiffTool(string expected, string actual, string message = null)
+        protected string GetEmbeddedResourceContent(string key) => ResourceUtility.GetEmbeddedResourceContent(this._assembly, key);
+
+        protected void AssertEqual(string expected, string actual, string extension, string message = null, bool normalizeLineEndings = false)
         {
-            if (!Equals(expected, actual))
-                this.TestContext.AddDiffToolInvoker(expected, actual);
+            string expectedNormalized = expected;
+            string actualNormalized = actual;
 
-            Assert.AreEqual(expected, actual, message);
-        }
-
-        protected void LogException(Exception exception) => this.TestContext.AddResultFile("AdditionalErrors.txt", exception.ToString());
-
-        protected void AddResultFile(string fileName, string content) => this.TestContext.AddResultFile(fileName, content);
-
-        protected static string ResolveExpectedTextFromEmbeddedResource(Assembly assembly, string resourceName)
-        {
-            string key = $"{resourceName}.json";
-            using (Stream stream = assembly.GetManifestResourceStream(key))
+            if (normalizeLineEndings)
             {
-                if (stream == null)
-                    throw new MissingManifestResourceException($"Could not find resource '{key}' in assembly '{assembly}'");
-
-                using (TextReader reader = new StreamReader(stream))
-                {
-                    string content = reader.ReadToEnd();
-                    return content;
-                }
+                expectedNormalized = expected.NormalizeLineEndings();
+                actualNormalized = actual.NormalizeLineEndings();
             }
+
+            if (!Equals(expectedNormalized, actualNormalized))
+                this.TestResultComposer.AddFileComparison(expectedNormalized, actualNormalized, extension);
+
+            Assert.AreEqual(expectedNormalized, actualNormalized, message);
         }
 
-        protected static string ResolveExpectedTextFromResourceManager(Type caller, string resourceName)
+        protected void LogException(Exception exception) => this.TestResultComposer.AddFile("AdditionalErrors.txt", exception.ToString());
+
+        protected void AddResultFile(string fileName, string content) => this.TestResultComposer.AddFile(fileName, content);
+
+        protected static void AssertAreEqual<T>(IEnumerable<T> expected, IEnumerable<T> actual) => Assert.IsTrue(expected.SequenceEqual(actual), "expected.SequenceEqual(actual)");
+
+        protected static TType AssertIsType<TType>(object instance) where TType : class
         {
-            ResourceManager resourceManager = new ResourceManager($"{caller.Namespace}.Resource", caller.Assembly);
-            return resourceManager.GetString(resourceName);
+            if (instance is TType result) 
+                return result;
+
+            throw new AssertFailedException($@"Instance is not of the expected type '{typeof(TType)}'
+Actual type: {instance?.GetType()}
+Value: {instance}");
         }
 
-        protected static MethodBase ResolveTestMethod()
+        protected static TException AssertThrows<TException>(Action action) where TException : Exception
         {
-            MethodBase method = new StackTrace().GetFrames()
-                                                .Select(x => x.GetMethod())
-                                                .FirstOrDefault(x => x.IsDefined(typeof(TestMethodAttribute)));
-
-            if (method == null)
-                throw new InvalidOperationException("Could not detect test name");
-
-            return method;
+            Type expectedExceptionType = typeof(TException);
+            try
+            {
+                action();
+                throw new AssertFailedException($"Expected exception of type '{expectedExceptionType}' but none was thrown");
+            }
+            catch (TException exception)
+            {
+                return exception;
+            }
+            catch (Exception exception)
+            {
+                Type actualExceptionType = exception.GetType();
+                throw new AssertFailedException($"Expected exception of type '{expectedExceptionType}' but an exception of '{actualExceptionType}' was thrown instead");
+            }
         }
 
         protected static Task Retry(Func<Task<bool>> retryMethod) => Retry(retryMethod, x => x);
@@ -116,12 +159,20 @@ namespace Dibix.Testing
 #if NET5_0
                 if (OperatingSystem.IsWindows())
 #endif
-                    this.TestContext.AddLastEventLogErrors();
+                    this.TestResultComposer.AddLastEventLogErrors();
             }
             catch (Exception exception)
             {
                 this.LogException(exception);
             }
+        }
+
+        private static T SafeGetProperty<T>(ref T field, [CallerMemberName] string propertyName = null) where T : class
+        {
+            if (field == null)
+                throw new InvalidOperationException($"Property '{propertyName}' not initialized");
+
+            return field;
         }
         #endregion
 
@@ -137,6 +188,7 @@ namespace Dibix.Testing
             if (disposing)
             {
                 this.TestOutputHelper?.Dispose();
+                TestResultComposer.Complete();
             }
         }
         #endregion

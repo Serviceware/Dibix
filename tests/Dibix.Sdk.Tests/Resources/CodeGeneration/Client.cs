@@ -68,7 +68,7 @@ namespace Dibix.Sdk.Tests.DomainModel
 #region Interfaces
 namespace Dibix.Sdk.Tests.Client
 {
-    public interface IGenericEndpointService
+    public interface IGenericEndpointService : IHttpService
     {
         Task<HttpResponseMessage> EmptyWithParams1Async(string password, string userAgent, IEnumerable<object> ids, string? acceptLanguage = null, CancellationToken cancellationToken = default);
         Task<HttpResponseMessage> EmptyWithParamsAnonymousAsync(string password, string u, string v, System.Guid? w, IEnumerable<object> ids, string? x = null, bool y = true, int? z = null, CancellationToken cancellationToken = default);

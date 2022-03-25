@@ -1,32 +1,27 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using Xunit;
+using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dibix.Dapper.Tests
 {
-    public class TextObfuscationTest : IClassFixture<DatabaseTestFixture>
+    [TestClass]
+    public class TextObfuscationTest : DapperTestBase
     {
-        private readonly DatabaseTestFixture _fixture;
-
-        public TextObfuscationTest(DatabaseTestFixture fixture) => this._fixture = fixture;
-
-        [Fact]
-        public void ObfuscateAndDeobfuscate_OriginalValueIsRestored()
+        [TestMethod]
+        public Task ObfuscateAndDeobfuscate_OriginalValueIsRestored() => base.ExecuteTest(accessor =>
         {
-            using (IDatabaseAccessor accessor = this._fixture.CreateDatabaseAccessor())
-            {
-                const string commandText = "SELECT [id] = 1, [password] = @password1, [id] = 1, [password] = @password2";
-                InputClass input = new InputClass { password2 = "test2" };
-                ParametersVisitor parameters = accessor.Parameters()
-                                                       .SetString("password1", "test1", true)
-                                                       .SetFromTemplate(input)
-                                                       .Build();
-                Entity entity = accessor.QuerySingle<Entity, Entity>(commandText, parameters, "id");
-                Assert.Equal("test1", entity.Password);
-                Assert.Equal("test2", entity.RelatedEntities.Single().Password);
-            }
-        }
+            const string commandText = "SELECT [id] = 1, [password] = @password1, [id] = 1, [password] = @password2";
+            InputClass input = new InputClass { password2 = "test2" };
+            ParametersVisitor parameters = accessor.Parameters()
+                                                   .SetString("password1", "test1", true)
+                                                   .SetFromTemplate(input)
+                                                   .Build();
+            Entity entity = accessor.QuerySingle<Entity, Entity>(commandText, parameters, "id");
+            Assert.AreEqual("test1", entity.Password);
+            Assert.AreEqual("test2", entity.RelatedEntities.Single().Password);
+        });
 
         private sealed class InputClass
         {

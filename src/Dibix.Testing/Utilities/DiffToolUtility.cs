@@ -9,13 +9,13 @@ namespace Dibix.Testing
     {
         private const string WinMergeProcessName = "winmergeU";
 
-        public static string GenerateReferencingBatchFile(TestContext context, string expected, string actual, out bool privateResultsDirectorySpecified)
+        public static string GenerateReferencingBatchFile(TestContext context, string expected, string actual, string extension, out bool privateResultsDirectorySpecified)
         {
             string privateResultsDirectory = context.GetPrivateResultsDirectory(out privateResultsDirectorySpecified);
             string publicResultsDirectory = context.GetPublicResultsDirectory();
 
-            string expectedFileName = "expected.txt";
-            string actualFileName = "actual.txt";
+            string expectedFileName = $"expected.{extension}";
+            string actualFileName = $"actual.{extension}";
 
             string expectedPrivatePath = Path.Combine(privateResultsDirectory, expectedFileName);
             string actualPrivatePath = Path.Combine(privateResultsDirectory, actualFileName);

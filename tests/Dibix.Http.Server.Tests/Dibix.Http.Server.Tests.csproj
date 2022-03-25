@@ -12,19 +12,19 @@
 
   <ItemGroup>
     <Compile Update="HttpParameterResolverTest.Base.cs" DependentUpon="HttpParameterResolverTest.cs" />
-    <Compile Include="..\..\shared\Utilities\TestUtility.cs" Link="TestUtility.cs" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="coverlet.msbuild" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Moq" />
-    <PackageReference Include="xunit" />
-    <PackageReference Include="xunit.runner.visualstudio" />
-    <PackageReference Include="coverlet.msbuild" />
+    <PackageReference Include="MSTest.TestAdapter" />
+    <PackageReference Include="MSTest.TestFramework" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Dibix.Http.Server\Dibix.Http.Server.csproj" />
+    <ProjectReference Include="..\..\src\Dibix.Testing\Dibix.Testing.csproj" />
   </ItemGroup>
 
 </Project>

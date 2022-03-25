@@ -94,8 +94,7 @@ jobs:
         **/Dibix.Tests.csproj
     env:
       # Required for Dibix.Dapper.Tests
-      DefaultConnection:ConnectionString: 'Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Dibix;Integrated Security=True;'
-      DefaultConnection:ProviderName: System.Data.SqlClient
+      Database:ConnectionString: 'Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Dibix;Integrated Security=True;'
 
 - job: Packaging
   dependsOn: TestWin

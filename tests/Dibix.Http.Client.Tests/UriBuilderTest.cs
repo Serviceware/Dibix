@@ -1,11 +1,12 @@
 ﻿using System;
-using Xunit;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dibix.Http.Client.Tests
 {
+    [TestClass]
     public sealed class UriBuilderTest
     {
-        [Fact]
+        [TestMethod]
         public void CrossCheck()
         {
             Uri uri = UriBuilder.Create("some/kind/{of}/uri", UriKind.Relative)
@@ -17,7 +18,7 @@ namespace Dibix.Http.Client.Tests
                                 .AddQueryParam("anotherarray", "one", "two")
                                 .AddQueryParam("andanotherone", new int?[] { 1, null, 3 })
                                 .Build();
-            Assert.Equal("some/kind/{of}/uri?name=luke&id=&bool=true&array[]=first&array[]=second&anotherarray[]=one&anotherarray[]=two&andanotherone[]=1&andanotherone[]=&andanotherone[]=3", uri.ToString());
+            Assert.AreEqual("some/kind/{of}/uri?name=luke&id=&bool=true&array[]=first&array[]=second&anotherarray[]=one&anotherarray[]=two&andanotherone[]=1&andanotherone[]=&andanotherone[]=3", uri.ToString());
         }
     }
 }

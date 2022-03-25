@@ -1,11 +1,12 @@
 ﻿using System.Linq;
-using Xunit;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dibix.Sdk.Tests.CodeGeneration
 {
+    [TestClass]
     public sealed partial class CodeGenerationTaskTests
     {
-        [Fact]
+        [TestMethod]
         public void NoMatchingSources_EmptyStatement()
         {
             this.ExecuteTest
@@ -16,13 +17,13 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             );
         }
 
-        [Fact]
+        [TestMethod]
         public void External_Empty()
         {
             this.ExecuteTest(@"Tests\Syntax\dbx_tests_syntax_empty.sql", isEmbedded: false);
         }
 
-        [Fact]
+        [TestMethod]
         public void External_Empty_WithParams()
         {
             this.ExecuteTest
@@ -33,7 +34,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             );
         }
 
-        [Fact]
+        [TestMethod]
         public void External_Empty_WithParamsAndInputClass()
         {
             this.ExecuteTest
@@ -44,7 +45,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             );
         }
 
-        [Fact]
+        [TestMethod]
         public void External_Empty_WithOutputParam()
         {
             this.ExecuteTest
@@ -54,33 +55,33 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             );
         }
 
-        [Fact]
+        [TestMethod]
         public void Inline_SinglePrimitiveResult()
         {
             this.ExecuteTest(@"Tests\Syntax\dbx_tests_syntax_singleprimitiveresult.sql");
         }
 
-        [Fact]
+        [TestMethod]
         public void Inline_SinglePrimitiveResult_Async()
         {
             this.ExecuteTest(@"Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_async.sql");
         }
 
-        [Fact]
+        [TestMethod]
         public void Inline_SinglePrimitiveResult_WithoutDeclaration_Error()
         {
             this.ExecuteTestAndExpectError(@"Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql", @"One or more errors occured during code generation:
 Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(5,2,5,2):error:Missing return declaration for output. Please decorate the statement with the following hint to describe the output: -- @Return <ContractName>");
         }
 
-        [Fact]
+        [TestMethod]
         public void Inline_SingleOrDefaultPrimitiveResult_WithModeSingleOrDefault_Error()
         {
             this.ExecuteTestAndExpectError(@"Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql", @"One or more errors occured during code generation:
 Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,21,1,21):error:When using the result mode option 'SingleOrDefault', the primitive return type must be nullable: int32");
         }
 
-        [Fact]
+        [TestMethod]
         public void Inline_SingleConcreteResult()
         {
             this.ExecuteTest
@@ -95,7 +96,7 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
             );
         }
 
-        [Fact]
+        [TestMethod]
         public void Inline_MultiConcreteResult()
         {
             this.ExecuteTest
@@ -110,7 +111,7 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
             );
         }
 
-        [Fact]
+        [TestMethod]
         public void Inline_SingleMultiMapResult()
         {
             this.ExecuteTest
@@ -130,7 +131,8 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
             );
         }
 
-        [Fact(Skip = "Projection using the 'ResultType' property is currently only supported in a part of a grid result")]
+        [TestMethod]
+        [Ignore("Projection using the 'ResultType' property is currently only supported in a part of a grid result")]
         public void Inline_SingleMultiMapResult_WithProjection()
         {
             this.ExecuteTest
@@ -151,7 +153,7 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
             );
         }
 
-        [Fact]
+        [TestMethod]
         public void Inline_GridResult()
         {
             this.ExecuteTest
@@ -171,7 +173,7 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
             );
         }
 
-        [Fact]
+        [TestMethod]
         public void Inline_GridResultAsync()
         {
             this.ExecuteTest
@@ -190,7 +192,7 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
             );
         }
 
-        [Fact]
+        [TestMethod]
         public void Inline_GridResult_AndSingleResult()
         {
             this.ExecuteTest
@@ -210,7 +212,7 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
             );
         }
 
-        [Fact]
+        [TestMethod]
         public void Inline_GridResult_WithCustomResultContractName()
         {
             this.ExecuteTest
@@ -230,7 +232,7 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
             );
         }
 
-        [Fact]
+        [TestMethod]
         public void Inline_GridResult_WithCustomResultContractName_AndSingleResult()
         {
             this.ExecuteTest
@@ -250,7 +252,7 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
             );
         }
 
-        [Fact]
+        [TestMethod]
         public void Inline_GridResult_WithExistingResultContract()
         {
             this.ExecuteTest
@@ -271,7 +273,7 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
             );
         }
 
-        [Fact]
+        [TestMethod]
         public void Inline_GridResult_MergeResult()
         {
             this.ExecuteTest
@@ -291,7 +293,7 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
             );
         }
 
-        [Fact]
+        [TestMethod]
         public void Inline_GridResult_WithProjection()
         {
             this.ExecuteTest
@@ -312,14 +314,14 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
             );
         }
 
-        [Fact]
+        [TestMethod]
         public void Inline_SingleConcreteResult_WithUnknownResultContract_Error()
         {
             this.ExecuteTestAndExpectError(@"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontract.sql", @"One or more errors occured during code generation:
 Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontract.sql(1,21,1,21):error:Could not resolve type 'X'");
         }
 
-        [Fact]
+        [TestMethod]
         public void Inline_SingleConcreteResult_WithUnknownResultContractAssembly_Error()
         {
             this.ExecuteTestAndExpectError(@"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly.sql", @"One or more errors occured during code generation:
@@ -327,7 +329,7 @@ Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly
 Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly.sql(1,21,1,21):error:Could not resolve type 'X,A'");
         }
 
-        [Fact]
+        [TestMethod]
         public void Inline_SingleConcreteResult_WithInvalidMarkup_Error()
         {
             this.ExecuteTestAndExpectError(@"Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql", @"One or more errors occured during code generation:
@@ -335,13 +337,13 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(4,4,4,4):e
 Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38):error:Unexpected @Return property 'Wtf'");
         }
 
-        [Fact]
+        [TestMethod]
         public void Inline_FileResult()
         {
             this.ExecuteTest(@"Tests\Syntax\dbx_tests_syntax_fileresult.sql");
         }
 
-        [Fact]
+        [TestMethod]
         public void Client()
         {
             this.ExecuteTest
@@ -374,12 +376,12 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
             );
         }
 
-        [Fact]
+        [TestMethod]
         public void Endpoints()
         {
             this.ExecuteTest
             (
-                sources: new [] 
+                sources: new []
                 { 
                     @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_fileresult.sql"
@@ -404,7 +406,7 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
             );
         }
 
-        [Fact]
+        [TestMethod]
         public void Endpoint_WithInvalidPropertySource_Error()
         {
             this.ExecuteTestAndExpectError
@@ -429,7 +431,8 @@ Endpoints\GenericEndpointWithInvalidSource.json(23,27,23,27):error:Property 'Nm'
             );
         }
 
-        [Fact(Skip = "Output parameters are now supported")]
+        [TestMethod]
+        [Ignore("Output parameters are now supported")]
         public void Endpoint_WithOutputParam_Error()
         {
             this.ExecuteTestAndExpectError
@@ -441,7 +444,7 @@ Endpoints\GenericEndpointWithOutputParam.json(6,18,6,18):error:Output parameters
             );
         }
 
-        [Fact]
+        [TestMethod]
         public void InvalidContractSchema_Error()
         {
             this.ExecuteTestAndExpectError

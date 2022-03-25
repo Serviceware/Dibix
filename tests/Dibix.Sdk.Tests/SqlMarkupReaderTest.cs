@@ -3,14 +3,15 @@ using System.Linq;
 using Dibix.Sdk.CodeGeneration;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Xunit;
 
 namespace Dibix.Sdk.Tests
 {
+    [TestClass]
     public sealed class SqlMarkupReaderTest
     {
-        [Fact]
+        [TestMethod]
         public void CrossCheck()
         {
             const string sql = @"-- @Namespace  X
@@ -27,49 +28,49 @@ AS
             TSqlFragment fragment = ScriptDomFacade.Parse(sql);
             ISqlMarkupDeclaration map = SqlMarkupReader.ReadHeader(fragment, null, null);
 
-            Assert.True(map.TryGetSingleElement("Namespace", null, null, out ISqlElement element));
-            Assert.Equal(1, element.Line);
-            Assert.Equal(4, element.Column);
+            Assert.IsTrue(map.TryGetSingleElement("Namespace", null, null, out ISqlElement element));
+            Assert.AreEqual(1, element.Line);
+            Assert.AreEqual(4, element.Column);
 
-            Assert.True(map.TryGetSingleElementValue("Namespace", null, null, out string value));
-            Assert.Equal("X", value);
+            Assert.IsTrue(map.TryGetSingleElementValue("Namespace", null, null, out string value));
+            Assert.AreEqual("X", value);
 
-            Assert.True(map.HasSingleElement("OmitResult", null, null));
+            Assert.IsTrue(map.HasSingleElement("OmitResult", null, null));
 
-            Assert.True(map.TryGetSingleElement("Cake", null, null, out element));
-            Assert.Equal(7, element.Line);
+            Assert.IsTrue(map.TryGetSingleElement("Cake", null, null, out element));
+            Assert.AreEqual(7, element.Line);
             ISqlElementValue prop1 = element.GetPropertyValue("Prop1");
-            Assert.Equal("true", prop1.Value);
-            Assert.Equal(7, prop1.Line);
-            Assert.Equal(13, prop1.Column);
+            Assert.AreEqual("true", prop1.Value);
+            Assert.AreEqual(7, prop1.Line);
+            Assert.AreEqual(13, prop1.Column);
             ISqlElementValue prop2 = element.GetPropertyValue("Prop2");
-            Assert.Equal("False;But;True", prop2.Value);
-            Assert.Equal(7, prop2.Line);
-            Assert.Equal(24, prop2.Column);
+            Assert.AreEqual("False;But;True", prop2.Value);
+            Assert.AreEqual(7, prop2.Line);
+            Assert.AreEqual(24, prop2.Column);
 
             IList<ISqlElement> returnElements = map.GetElements("Return").ToArray();
-            Assert.Equal(2, returnElements.Count);
-            Assert.True(returnElements[0].TryGetPropertyValue("ClrTypes", isDefault: true, out ISqlElementValue elementValue));
-            Assert.Equal("x", elementValue.Value);
-            Assert.Equal(2, elementValue.Line);
-            Assert.Equal(21, elementValue.Column);
-            Assert.True(returnElements[1].TryGetPropertyValue("ClrTypes", isDefault: true, out elementValue));
-            Assert.Equal("y", elementValue.Value);
-            Assert.Equal(3, elementValue.Line);
-            Assert.Equal(26, elementValue.Column);
-            Assert.True(returnElements[1].TryGetPropertyValue("Mode", isDefault: false, out elementValue));
-            Assert.Equal(3, elementValue.Line);
-            Assert.Equal(19, elementValue.Column);
+            Assert.AreEqual(2, returnElements.Count);
+            Assert.IsTrue(returnElements[0].TryGetPropertyValue("ClrTypes", isDefault: true, out ISqlElementValue elementValue));
+            Assert.AreEqual("x", elementValue.Value);
+            Assert.AreEqual(2, elementValue.Line);
+            Assert.AreEqual(21, elementValue.Column);
+            Assert.IsTrue(returnElements[1].TryGetPropertyValue("ClrTypes", isDefault: true, out elementValue));
+            Assert.AreEqual("y", elementValue.Value);
+            Assert.AreEqual(3, elementValue.Line);
+            Assert.AreEqual(26, elementValue.Column);
+            Assert.IsTrue(returnElements[1].TryGetPropertyValue("Mode", isDefault: false, out elementValue));
+            Assert.AreEqual(3, elementValue.Line);
+            Assert.AreEqual(19, elementValue.Column);
 
             ProcedureParameter parameter = ((ProcedureStatementBodyBase)((TSqlScript)fragment).Batches[0].Statements[0]).Parameters[0];
             map = SqlMarkupReader.ReadFragment(parameter, null, null);
-            Assert.True(map.TryGetSingleElementValue("ClrType", null, null, out elementValue));
-            Assert.Equal("Dibix.Sdk.VisualStudio.Tests.Direction", elementValue.Value);
-            Assert.Equal(9, elementValue.Line);
-            Assert.Equal(42, elementValue.Column);
+            Assert.IsTrue(map.TryGetSingleElementValue("ClrType", null, null, out elementValue));
+            Assert.AreEqual("Dibix.Sdk.VisualStudio.Tests.Direction", elementValue.Value);
+            Assert.AreEqual(9, elementValue.Line);
+            Assert.AreEqual(42, elementValue.Column);
         }
 
-        [Fact]
+        [TestMethod]
         public void MissingPropertyValue_LogsError()
         {
             const string sql = @"-- @Return Name:
@@ -87,7 +88,7 @@ AS
             logger.Verify();
         }
 
-        [Fact]
+        [TestMethod]
         public void DuplicateProperty_LogsError()
         {
             const string sql = @"-- @Return ClrTypes:A ClrTypes:B
@@ -105,7 +106,7 @@ AS
             logger.Verify();
         }
 
-        [Fact]
+        [TestMethod]
         public void DuplicateDefaultValue_LogsError()
         {
             const string sql = @"-- @Return A B

@@ -24,6 +24,7 @@
     <PackageReference Update="Microsoft.SqlServer.DacFx"                               Version="$(DacFxVersion)"                                                            />
     <PackageReference Update="Microsoft.VisualStudio.TextTemplating.Interfaces.10.0"   Version="$(VSTextTemplatingInterfacesVersion)"                                       />
     <PackageReference Update="Moq"                                                     Version="$(MoqVersion)"                                                              />
+    <PackageReference Update="MSTest.TestAdapter"                                      Version="$(MSTestAdapterVersion)"                                                    />
     <PackageReference Update="MSTest.TestFramework"                                    Version="$(MSTestFrameworkVersion)"                                                  />
     <PackageReference Update="Newtonsoft.Json"                                         Version="$(NewtonsoftJsonVersion)"      Condition="'$(TargetFramework)' != 'net46'"  />
     <PackageReference Update="Newtonsoft.Json"                                         Version="$(NewtonsoftJsonNetFxVersion)" Condition="'$(TargetFramework)' == 'net46'"  />
@@ -34,7 +35,5 @@
     <PackageReference Update="System.IO.Packaging"                                     Version="$(IOPackageVersion)"                                                        />
     <PackageReference Update="System.Reflection.Emit"                                  Version="$(ReflectionEmitVersion)"                                                   />
     <PackageReference Update="VSLangProj"                                              Version="$(VSLangProjVersion)"                                                       />
-    <PackageReference Update="xunit"                                                   Version="$(XUnitVersion)"                                                            />
-    <PackageReference Update="xunit.runner.visualstudio"                               Version="$(XUnitVSVersion)"                                                          />
   </ItemGroup>
 </Project>

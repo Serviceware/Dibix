@@ -14,25 +14,21 @@ namespace Dibix.Testing
         private readonly string _outputPath;
         private readonly StreamWriter _output;
         private readonly TestContext _testContext;
-        private readonly bool _isAzureDevops;
         private readonly bool _outputToFile;
         private bool _collectingLine;
         private readonly Process _tail;
 
         public override Encoding Encoding => Encoding.UTF8;
 
-        public TestOutputWriter(TestContext testContext, bool outputToFile, bool tailOutput)
+        public TestOutputWriter(TestContext testContext, TestResultComposer testResultComposer, bool outputToFile, bool tailOutput)
         {
             this._testContext = testContext;
             this._outputToFile = outputToFile;
 
-            string privateResultsDirectory = testContext.GetPrivateResultsDirectory(out bool isSpecified);
-            this._isAzureDevops = isSpecified;
-
             if (!this._outputToFile) 
                 return;
 
-            this._outputPath = Path.Combine(privateResultsDirectory, OutputFileName);
+            this._outputPath = testResultComposer.AddFile(OutputFileName);
             this._output = new StreamWriter(this._outputPath);
 
             if (!tailOutput) 
@@ -66,13 +62,6 @@ namespace Dibix.Testing
 
             if (!this._outputToFile)
                 return;
-
-            // Unfortunately azure devops does not add the output to the test result, if it has passed.
-            // Therefore we add our output to the result here.
-            if (this._isAzureDevops && this._testContext.CurrentTestOutcome == UnitTestOutcome.Passed)
-            {
-                this._testContext.AddResultFile(this._outputPath);
-            }
 
             this._output.Dispose();
             this.EndOutputTail();

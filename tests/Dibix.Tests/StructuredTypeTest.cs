@@ -1,10 +1,11 @@
-﻿using Xunit;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dibix.Tests
 {
+    [TestClass]
     public class StructuredTypeTest
     {
-        [Fact]
+        [TestMethod]
         public void StructuredType_IntString_Dump()
         {
             X set = new X
@@ -14,7 +15,7 @@ namespace Dibix.Tests
             };
             string dump = set.Dump();
 
-            Assert.Equal(@"intValue INT(4)  stringValue NVARCHAR(MAX)
+            Assert.AreEqual(@"intValue INT(4)  stringValue NVARCHAR(MAX)
 ---------------  -------------------------
 2                X                        
 7                y                        ", dump);
