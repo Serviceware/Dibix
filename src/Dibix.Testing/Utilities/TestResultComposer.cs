@@ -112,7 +112,7 @@ namespace Dibix.Testing
             string actualDirectory = new DirectoryInfo(this.GetActualDirectory()).Name;
 
             WriteContentToFile(path, $@"@echo off
-winmergeU ""{expectedDirectory}"" ""{actualDirectory}""");
+start winmergeU ""{expectedDirectory}"" ""{actualDirectory}""");
             this.RegisterFile(path);
         }
 
