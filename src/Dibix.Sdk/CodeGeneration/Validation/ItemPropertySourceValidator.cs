@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class ItemPropertySourceValidator : StaticActionParameterPropertySourceValidator<ItemParameterSource>
+    internal sealed class ItemPropertySourceValidator : ObjectSchemaPropertySourceValidator<ItemParameterSource>
     {
         public override bool Validate(ActionParameterPropertySource value, ActionParameterPropertySource parent, ActionDefinition actionDefinition, ISchemaRegistry schemaRegistry, ILogger logger)
         {
@@ -17,7 +17,14 @@ namespace Dibix.Sdk.CodeGeneration
                 throw new InvalidOperationException("Complex/enumerable source properties are currently not supported");
             }
 
-            TypeReference bodyTypeReference = actionDefinition.RequestBody.Contract;
+            TypeReference bodyTypeReference = actionDefinition.RequestBody?.Contract; 
+            if (bodyTypeReference == null)
+            {
+                // No body contract => No validation possible
+                // This *should* be a warning though
+                return true;
+            }
+
             if (!(bodyTypeReference is SchemaTypeReference bodySchemaTypeReference))
                 throw new InvalidOperationException($"Unexpected body contract type '{bodyTypeReference}'. Must be a complex object contract.");
 
@@ -32,27 +39,10 @@ namespace Dibix.Sdk.CodeGeneration
             if (itemsProperty == null)
                 throw new InvalidOperationException($"Could not find a property '{parent.PropertyName}' on contract '{bodyObjectSchema.FullName}'");
 
-            TypeReference itemsPropertyTypeReference = itemsProperty.Type;
-            if (!(itemsPropertyTypeReference is SchemaTypeReference itemsPropertySchemaTypeReference))
-                throw new InvalidOperationException($"Unexpected items property contract type '{itemsPropertyTypeReference}'. Must be a complex object contract.");
-
-            SchemaDefinition itemsPropertySchema = schemaRegistry.GetSchema(itemsPropertySchemaTypeReference);
-            if (itemsPropertySchema == null)
-                return false;
-
-            if (!(itemsPropertySchema is ObjectSchema itemsPropertyObjectSchema))
-                throw new InvalidOperationException($"Unexpected items property contract type '{itemsPropertySchema} ({itemsPropertySchema.FullName})'. Must be a complex object contract.");
-
             if (value.PropertyName == ItemParameterSource.IndexPropertyName)
                 return true;
 
-            if (itemsPropertyObjectSchema.Properties.All(x => x.Name != value.PropertyName))
-            {
-                int column = value.Column + value.Definition.Name.Length + 1; // Skip source name + dot
-                logger.LogError(null, $"Property '{value.PropertyName}' not found on contract '{itemsPropertyObjectSchema.FullName}'", value.FilePath, value.Line, column);
-                return false;
-            }
-            return true;
+            return base.Validate(value, itemsProperty.Type, schemaRegistry, logger);
         }
     }
 }
