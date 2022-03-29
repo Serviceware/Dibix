@@ -154,6 +154,11 @@ namespace Dibix
             try { return action(); }
             catch (Exception ex) { throw DatabaseAccessException.Create(commandType, commandText, parameters, ex); }
         }
+        private static async Task<T> Execute<T>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<Task<T>> action)
+        {
+            try { return await action(); }
+            catch (Exception ex) { throw DatabaseAccessException.Create(commandType, commandText, parameters, ex); }
+        }
 
         private static void OnInfoMessage(object sender, SqlInfoMessageEventArgs e)
         {
