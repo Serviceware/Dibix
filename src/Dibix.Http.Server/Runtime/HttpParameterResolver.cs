@@ -375,7 +375,7 @@ namespace Dibix.Http.Server
             if (parameter.Converter != null)
             {
                 Expression value = HttpParameterResolverUtility.BuildArgumentAccessorExpression(argumentsParameter, parameter.InternalParameterName);
-                value = CollectConverterStatement(parameter, value, actionParameter);
+                value = CollectConverterStatement(parameter, value, actionParameter, dependencyResolverParameter);
                 CollectParameterAssignment(compilationContext, parameter.InternalParameterName, argumentsParameter, value);
             }
         }
@@ -483,7 +483,7 @@ namespace Dibix.Http.Server
             }
 
             if (generateConverterStatement) 
-                value = CollectConverterStatement(parameter, value, actionParameter);
+                value = CollectConverterStatement(parameter, value, actionParameter, dependencyResolverParameter);
 
             // ResolveParameterFromNull
             if (parameter.SourceKind == HttpParameterSourceKind.ConstantValue && parameter.Value == null) 
@@ -608,13 +608,13 @@ Either create a mapping or make sure a property of the same name exists in the s
             return value;
         }
 
-        private static Expression CollectConverterStatement(HttpParameterInfo parameter, Expression value, Expression actionParameter)
+        private static Expression CollectConverterStatement(HttpParameterInfo parameter, Expression value, Expression actionParameter, Expression dependencyResolverParameter)
         {
             if (parameter.Converter == null)
                 return value;
 
             value = EnsureCorrectType(parameter.InternalParameterName, value, parameter.Converter.ExpectedInputType, actionParameter);
-            value = parameter.Converter.ConvertValue(value);
+            value = parameter.Converter.ConvertValue(value, dependencyResolverParameter);
             return value;
         }
 

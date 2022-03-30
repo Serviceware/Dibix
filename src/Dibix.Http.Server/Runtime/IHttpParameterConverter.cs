@@ -6,7 +6,7 @@ namespace Dibix.Http.Server
     public interface IHttpParameterConverter
     {
         Type ExpectedInputType { get; }
-
-        Expression ConvertValue(Expression value);
+        
+        Expression ConvertValue(Expression value, Expression dependencyResolverParameter);
     }
 }
