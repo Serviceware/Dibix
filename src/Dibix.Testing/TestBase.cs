@@ -105,7 +105,8 @@ namespace Dibix.Testing
             Assert.AreEqual(expectedNormalized, actualNormalized, message);
         }
 
-        protected void LogException(Exception exception) => this.TestResultComposer.AddFile("AdditionalErrors.txt", exception.ToString());
+        protected void LogException(Exception exception) => this.TestResultComposer.AddFile("AdditionalErrors.txt", $@"An error occured while collecting the last event log errors
+{exception}");
 
         protected void AddResultFile(string fileName, string content) => this.TestResultComposer.AddFile(fileName, content);
 
@@ -163,7 +164,23 @@ Value: {instance}");
             }
             catch (Exception exception)
             {
-                this.LogException(exception);
+                try
+                {
+                    this.LogException(exception);
+                }
+                catch (Exception loggingException)
+                {
+                    this.TestContext.WriteLine($@"An error occured while collecting the last event log errors
+{exception}
+
+Additionally, the following error occured while trying to log the previous error to file
+{loggingException}");
+                    
+                    Console.WriteLine("---");
+                    Console.WriteLine();
+                    Console.WriteLine(exception);
+                    //throw;
+                }
             }
         }
 
