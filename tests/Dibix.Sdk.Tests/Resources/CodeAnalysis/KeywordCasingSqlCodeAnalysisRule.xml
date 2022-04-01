@@ -33,12 +33,12 @@
   <error
     ruleid="1"
     message="Invalid casing for 'row_number' [Identifier]"
-    line="28"
+    line="22"
     column="9" />
   <error
     ruleid="1"
     message="Invalid casing for 'partition' [Identifier]"
-    line="28"
+    line="22"
     column="27" />
   <error
     ruleid="1"
@@ -58,21 +58,21 @@
   <error
     ruleid="1"
     message="Invalid casing for 'over' [Over]"
-    line="28"
+    line="22"
     column="22" />
   <error
     ruleid="1"
     message="Invalid casing for 'by' [By]"
-    line="28"
+    line="22"
     column="37" />
   <error
     ruleid="1"
     message="Invalid casing for 'order' [Order]"
-    line="28"
+    line="22"
     column="43" />
   <error
     ruleid="1"
     message="Invalid casing for 'by' [By]"
-    line="28"
+    line="22"
     column="49" />
 </errors>

@@ -7,6 +7,7 @@ namespace Dibix.Sdk.CodeAnalysis
     {
         public static readonly ICollection<string> ReservedFunctionNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
+            "exist",   // XML
             "nodes",   // XML
             "query",   // XML
             "value",   // XML
