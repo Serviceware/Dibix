@@ -18,7 +18,6 @@ namespace Dibix.Worker.Host
         {
             HostApplicationBuilder builder = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder(args);
             builder.Configuration.AddJsonFile($"appsettings.{Environment.MachineName}.json", optional: true, reloadOnChange: true);
-
             IServiceCollection services = builder.Services;
 
             // EventLog settings are not automatically read from appsettings.json

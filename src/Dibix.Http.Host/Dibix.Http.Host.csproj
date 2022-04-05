@@ -1,33 +1,30 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
-
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+  
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
-    <UserSecretsId>dibix-worker-host</UserSecretsId>
+    <UserSecretsId>dibix-http-host</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Hosting\ComponentAssemblyLoadContext.cs" Link="Hosting\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Hosting\ExtensionRegistrationUtility.cs" Link="Hosting\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Hosting\Data\*" Link="Data\%(Filename)%(Extension)" />
-    <Compile Remove="..\..\shared\Hosting\Data\DatabaseOptions.cs" />
     <Compile Include="..\..\shared\Extensions\BindConfigurationExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Extensions\EnumerableExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Extensions\ReflectionExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
-    <Compile Include="..\..\shared\Extensions\ServiceCollectionServiceExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
-    <Compile Include="..\..\shared\Hosting\ComponentAssemblyLoadContext.cs" Link="Hosting\%(Filename)%(Extension)" />
-    <Compile Include="..\..\shared\Hosting\ExtensionRegistrationUtility.cs" Link="Hosting\%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" />
-    <PackageReference Include="Microsoft.Extensions.Http" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Dibix.Dapper\Dibix.Dapper.csproj" />
-    <ProjectReference Include="..\Dibix.Http.Client\Dibix.Http.Client.csproj" />
-    <ProjectReference Include="..\Dibix.Worker.Abstractions\Dibix.Worker.Abstractions.csproj" />
+    <ProjectReference Include="..\Dibix.Http.Server\Dibix.Http.Server.csproj" />
   </ItemGroup>
-
+  
 </Project>

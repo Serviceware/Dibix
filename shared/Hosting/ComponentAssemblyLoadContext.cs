@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Runtime.Loader;
 
-namespace Dibix.Worker.Host
+namespace Dibix.Hosting.Abstractions
 {
     internal sealed class ComponentAssemblyLoadContext : AssemblyLoadContext
     {

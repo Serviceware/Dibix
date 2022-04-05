@@ -19,6 +19,7 @@ steps:
 - template: publish-multiple.yml
   parameters:
     projects:
+    - Dibix.Http.Host
     - Dibix.Worker.Host
     configuration: ${{ parameters.configuration }}
     runtimeIdentifier: ${{ parameters.runtimeIdentifier }}

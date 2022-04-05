@@ -24,13 +24,8 @@ namespace Dibix.Http.Server
 
         #region Factory Methods
         public static IHttpApiRegistry Discover(string directory) => Discover(directory, Enumerable.Empty<Assembly>());
-        public static IHttpApiRegistry Discover(string directory, IEnumerable<Assembly> additionalAssemblies)
-        {
-            HttpApiDiscoveryContext context = new HttpApiDiscoveryContext();
-            ICollection<HttpApiDescriptor> apis = CollectHttpApiDescriptors(context, directory, additionalAssemblies).ToArray();
-            context.FinishProxyAssembly();
-            return new HttpApiRegistry(apis);
-        }
+        public static IHttpApiRegistry Discover(string directory, IEnumerable<Assembly> additionalAssemblies) => Discover(CollectDiscoveryStrategies(directory, additionalAssemblies));
+        public static IHttpApiRegistry Discover(IHttpApiDiscoveryStrategy strategy) => Discover(EnumerableExtensions.Create(strategy));
         #endregion
 
         #region IHttpApiRegistry Members
@@ -46,16 +41,17 @@ namespace Dibix.Http.Server
         #endregion
 
         #region Private Methods
-        private static IEnumerable<HttpApiDescriptor> CollectHttpApiDescriptors(IHttpApiDiscoveryContext context, string directory, IEnumerable<Assembly> additionalAssemblies)
+        private static IHttpApiRegistry Discover(IEnumerable<IHttpApiDiscoveryStrategy> strategies)
         {
-            IEnumerable<IHttpApiDiscoveryStrategy> strategies = CollectDiscoveryStrategies(directory, additionalAssemblies);
-            IEnumerable<HttpApiDescriptor> descriptors = strategies.SelectMany(x => x.Collect(context));
-            return descriptors;
+            HttpApiDiscoveryContext context = new HttpApiDiscoveryContext();
+            ICollection<HttpApiDescriptor> apis = strategies.SelectMany(x => x.Collect(context)).ToArray();
+            context.FinishProxyAssembly();
+            return new HttpApiRegistry(apis);
         }
 
         private static IEnumerable<IHttpApiDiscoveryStrategy> CollectDiscoveryStrategies(string directory, IEnumerable<Assembly> additionalAssemblies)
         {
-            yield return new ArtifactPackageHttpApiDiscoveryStrategy(directory);
+            yield return new DirectoryArtifactPackageHttpApiDiscoveryStrategy(directory);
             yield return new AssemblyHttpApiDiscoveryStrategy(additionalAssemblies);
         }
 

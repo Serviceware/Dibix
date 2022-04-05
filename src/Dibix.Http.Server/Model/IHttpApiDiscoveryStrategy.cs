@@ -2,7 +2,7 @@
 
 namespace Dibix.Http.Server
 {
-    internal interface IHttpApiDiscoveryStrategy
+    public interface IHttpApiDiscoveryStrategy
     {
         IEnumerable<HttpApiDescriptor> Collect(IHttpApiDiscoveryContext context);
     }
