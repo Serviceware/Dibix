@@ -18,11 +18,6 @@
     <OpenApiVersion>1.2.3</OpenApiVersion>
     <IOPackageVersion>6.0.0</IOPackageVersion>
 
-    <!-- VS integration -->
-    <EnvDTEVersion>16.9.31023.347</EnvDTEVersion>
-    <VSLangProjVersion>16.9.31023.347</VSLangProjVersion>
-    <VSTextTemplatingInterfacesVersion>10.0.30320</VSTextTemplatingInterfacesVersion>
-
     <!-- MSBuild -->
     <ILRepackVersion>2.0.18</ILRepackVersion>
 

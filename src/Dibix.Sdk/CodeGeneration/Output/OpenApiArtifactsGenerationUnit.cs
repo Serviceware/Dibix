@@ -13,9 +13,9 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class OpenApiArtifactsGenerationUnit : CodeArtifactGenerationUnit
     {
-        public override bool ShouldGenerate(CodeArtifactsGenerationModel model) => model.Controllers.Any();
+        public override bool ShouldGenerate(CodeGenerationModel model) => model.Controllers.Any();
 
-        public override bool Generate(CodeArtifactsGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger)
+        public override bool Generate(CodeGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             if (logger.HasLoggedErrors)
                 return false;

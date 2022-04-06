@@ -53,9 +53,8 @@ namespace Dibix.Sdk.CodeGeneration
                 IList<SqlStatementDefinition> statementDescriptors = namespaceGroup.ToArray();
 
                 // Class
-                CSharpModifiers classVisibility = context.GeneratePublicArtifacts ? CSharpModifiers.Public : CSharpModifiers.Internal;
                 ICollection<CSharpAnnotation> annotations = new Collection<CSharpAnnotation> { new CSharpAnnotation("DatabaseAccessor") };
-                CSharpClass @class = scope.AddClass(context.Model.DefaultClassName, classVisibility | CSharpModifiers.Static, annotations);
+                CSharpClass @class = scope.AddClass(context.Model.DefaultClassName, CSharpModifiers.Public | CSharpModifiers.Static, annotations);
 
                 // Command text constants
                 AddCommandTextConstants(@class, context, statementDescriptors);
@@ -78,11 +77,10 @@ namespace Dibix.Sdk.CodeGeneration
                 SqlStatementDefinition definition = definitions[i];
                 //@class.AddComment(String.Concat("file:///", definition.SourcePath.Replace(" ", "%20").Replace(@"\", "/")), false);
                 @class.AddComment(definition.DefinitionName, false);
-                CSharpModifiers fieldVisibility = context.GeneratePublicArtifacts ? CSharpModifiers.Private : CSharpModifiers.Public;
                 @class.AddField(name: String.Concat(definition.DefinitionName, ConstantSuffix)
                               , type: "string"
                               , value: new CSharpStringValue(definition.Statement.Content, context.Model.CommandTextFormatting == CommandTextFormatting.MultiLine)
-                              , modifiers: fieldVisibility | CSharpModifiers.Const);
+                              , modifiers: CSharpModifiers.Private | CSharpModifiers.Const);
 
                 if (i + 1 < definitions.Count)
                     @class.AddSeparator();
@@ -624,16 +622,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (definition.GenerateResultClass)
             {
                 ObjectSchema schema = (ObjectSchema)context.GetSchema(schemaTypeReference);
-                if (schema == null)
-                    return null;
-
-                StringBuilder sb = new StringBuilder();
-                if (context.WriteNamespaces)
-                    sb.Append(schema.Namespace)
-                      .Append('.');
-
-                sb.Append(schema.DefinitionName);
-                return sb.ToString();
+                return schema != null ? $"{schema.Namespace}.{schema.DefinitionName}" : null;
             }
 
             return schemaTypeReference.Key;

@@ -120,7 +120,6 @@
           # It might be possible to use a vm with SQL server installed, have to look into it
           **/Dibix.Dapper.Tests.csproj
           **/Dibix.Sdk.Tests.csproj
-          **/Dibix.Sdk.VisualStudio.Tests.csproj
           **/Dibix.Tests.csproj
       env:
         # Required for Dibix.Dapper.Tests

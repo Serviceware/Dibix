@@ -40,8 +40,6 @@ namespace Dibix.Sdk.CodeGeneration
         public CodeGenerationModel Model { get; }
         public ISchemaRegistry SchemaRegistry { get; }
         public bool WriteGuardChecks { get; set; }
-        public bool GeneratePublicArtifacts => this.Model.CompatibilityLevel == CodeGeneratorCompatibilityLevel.Full;
-        public bool WriteNamespaces => this.Model.CompatibilityLevel == CodeGeneratorCompatibilityLevel.Full;
 
         internal CodeGenerationContext(CSharpRoot root, CodeGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger)
         {
@@ -133,14 +131,6 @@ namespace Dibix.Sdk.CodeGeneration
                 default:
                     throw new ArgumentOutOfRangeException(nameof(defaultValue), defaultValue, $"Unexpected default value reference: {defaultValue?.GetType()}");
             }
-        }
-
-        public string GetRelativeNamespace(string layerName, string relativeNamespace)
-        {
-            if (!this.WriteNamespaces)
-                return null;
-                
-            return NamespaceUtility.BuildRelativeNamespace(this.Model.RootNamespace, layerName, relativeNamespace);
         }
 
         internal void SetScopeName(string name)

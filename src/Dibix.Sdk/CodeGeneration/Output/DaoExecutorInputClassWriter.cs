@@ -45,8 +45,7 @@ namespace Dibix.Sdk.CodeGeneration
                 for (int j = 0; j < statements.Count; j++)
                 {
                     SqlStatementDefinition statement = statements[j];
-                    CSharpModifiers classVisibility = context.GeneratePublicArtifacts ? CSharpModifiers.Public : CSharpModifiers.Internal;
-                    CSharpClass inputType = scope.AddClass(GetInputTypeName(statement), classVisibility | CSharpModifiers.Sealed);
+                    CSharpClass inputType = scope.AddClass(GetInputTypeName(statement), CSharpModifiers.Public | CSharpModifiers.Sealed);
 
                     foreach (SqlQueryParameter parameter in statement.Parameters)
                     {

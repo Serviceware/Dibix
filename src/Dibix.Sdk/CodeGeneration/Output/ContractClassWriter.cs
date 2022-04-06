@@ -97,8 +97,7 @@ namespace Dibix.Sdk.CodeGeneration
             ICollection<CSharpAnnotation> classAnnotations = new Collection<CSharpAnnotation>();
             this.BeginProcessClass(schema, classAnnotations, context);
 
-            CSharpModifiers classVisibility = context.GeneratePublicArtifacts ? CSharpModifiers.Public : CSharpModifiers.Internal;
-            CSharpClass @class = scope.AddClass(schema.DefinitionName, classVisibility | CSharpModifiers.Sealed, classAnnotations);
+            CSharpClass @class = scope.AddClass(schema.DefinitionName, CSharpModifiers.Public | CSharpModifiers.Sealed, classAnnotations);
             ICollection<string> ctorAssignments = new Collection<string>();
             foreach (ObjectSchemaProperty property in schema.Properties)
             {

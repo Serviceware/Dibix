@@ -9,8 +9,13 @@ namespace Dibix.Sdk.CodeGeneration
         public string AreaName { get; set; }
         public string RootNamespace { get; set; }
         public string DefaultClassName { get; set; }
+        public string Title { get; set; }
+        public string Version { get; set; }
+        public string Description { get; set; }
+        public string DefaultOutputFilePath { get; set; }
+        public string EndpointOutputFilePath { get; set; }
+        public string ClientOutputFilePath { get; set; }
         public EndpointConfiguration EndpointConfiguration { get; set; }
-        public CodeGeneratorCompatibilityLevel CompatibilityLevel { get; }
         public CommandTextFormatting CommandTextFormatting { get; set; }
         public ICollection<ContractDefinition> Contracts { get; }
         public IList<ControllerDefinition> Controllers { get; }
@@ -19,9 +24,8 @@ namespace Dibix.Sdk.CodeGeneration
         public ICollection<string> AdditionalAssemblyReferences { get; }
         public bool EnableExperimentalFeatures { get; set; }
 
-        public CodeGenerationModel(CodeGeneratorCompatibilityLevel compatibilityLevel)
+        public CodeGenerationModel()
         {
-            this.CompatibilityLevel = compatibilityLevel;
             this.Contracts = new Collection<ContractDefinition>();
             this.Controllers = new Collection<ControllerDefinition>();
             this.SecuritySchemes = new Collection<SecurityScheme>();

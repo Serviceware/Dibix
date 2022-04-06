@@ -12,7 +12,7 @@ namespace Dibix.Sdk.CodeGeneration
           , typeof(OpenApiArtifactsGenerationUnit)
         };
 
-        public bool Generate(CodeArtifactsGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger)
+        public bool Generate(CodeGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             bool failed = false;
             foreach (Type unitType in Units)

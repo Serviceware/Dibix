@@ -2,6 +2,6 @@
 {
     internal interface ICodeArtifactsGenerator
     {
-        bool Generate(CodeArtifactsGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger);
+        bool Generate(CodeGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger);
     }
 }

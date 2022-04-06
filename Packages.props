@@ -8,7 +8,6 @@
     <PackageReference Update="coverlet.msbuild"                                        Version="$(CoverletVersion)"                                                         />
     <PackageReference Update="Dapper.StrongName"                                       Version="$(DapperVersion)"              Condition="'$(TargetFramework)' != 'net461'" />
     <PackageReference Update="Dapper.StrongName"                                       Version="$(DapperNetFxVersion)"         Condition="'$(TargetFramework)' == 'net461'" />
-    <PackageReference Update="EnvDTE"                                                  Version="$(EnvDTEVersion)"                                                           />
     <PackageReference Update="ILRepack"                                                Version="$(ILRepackVersion)"                                                         />
     <PackageReference Update="Microsoft.AspNet.WebApi.Client"                          Version="$(AspNetWebApiVersion)"        Condition="'$(TargetFramework)' != 'net46'"  />
     <PackageReference Update="Microsoft.AspNet.WebApi.Client"                          Version="$(AspNetWebApiNetFxVersion)"   Condition="'$(TargetFramework)' == 'net46'"  />
@@ -22,7 +21,6 @@
     <PackageReference Update="Microsoft.NET.Test.Sdk"                                  Version="$(MicrosoftTestSdkVersion)"                                                 />
     <PackageReference Update="Microsoft.OpenApi"                                       Version="$(OpenApiVersion)"                                                          />
     <PackageReference Update="Microsoft.SqlServer.DacFx"                               Version="$(DacFxVersion)"                                                            />
-    <PackageReference Update="Microsoft.VisualStudio.TextTemplating.Interfaces.10.0"   Version="$(VSTextTemplatingInterfacesVersion)"                                       />
     <PackageReference Update="Moq"                                                     Version="$(MoqVersion)"                                                              />
     <PackageReference Update="MSTest.TestAdapter"                                      Version="$(MSTestAdapterVersion)"                                                    />
     <PackageReference Update="MSTest.TestFramework"                                    Version="$(MSTestFrameworkVersion)"                                                  />
@@ -34,6 +32,5 @@
     <PackageReference Update="System.Diagnostics.EventLog"                             Version="$(EventLogVersion)"                                                         />
     <PackageReference Update="System.IO.Packaging"                                     Version="$(IOPackageVersion)"                                                        />
     <PackageReference Update="System.Reflection.Emit"                                  Version="$(ReflectionEmitVersion)"                                                   />
-    <PackageReference Update="VSLangProj"                                              Version="$(VSLangProjVersion)"                                                       />
   </ItemGroup>
 </Project>

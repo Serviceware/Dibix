@@ -78,10 +78,6 @@
     <Build Include="Tests\Parser\dbx_tests_parser_nestedifs.sql" />
     <Build Include="Tests\Parser\dbx_tests_parser_nobeginend.sql" />
     <Build Include="Tests\Parser\dbx_tests_parser_xmlparam.sql" />
-    <Build Include="Tests\Sources\Excluded\dbx_tests_sources_excluded.sql" />
-    <Build Include="Tests\Sources\Excluded\Nested\dbx_tests_sources_excludednested.sql" />
-    <Build Include="Tests\Sources\Included\Nested\dbx_tests_sources_includednested.sql" />
-    <Build Include="Tests\Sources\dbx_tests_sources_externalsp.sql" />
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_007.sql" />
     <Build Include="Types\dbx_codeanalysis_udt_generic.sql" />
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_008.sql" />
@@ -157,11 +153,6 @@
     <Folder Include="Tables\" />
     <Folder Include="Tests\" />
     <Folder Include="Tests\Parser\" />
-    <Folder Include="Tests\Sources\" />
-    <Folder Include="Tests\Sources\Excluded\" />
-    <Folder Include="Tests\Sources\Excluded\Nested\" />
-    <Folder Include="Tests\Sources\Included\" />
-    <Folder Include="Tests\Sources\Included\Nested\" />
     <Folder Include="Types" />
     <Folder Include="Tests\Syntax" />
     <Folder Include="Contracts" />

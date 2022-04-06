@@ -23,16 +23,14 @@ namespace Dibix.Sdk.CodeGeneration
                 yield return new ApiDescriptionWriter();
         }
 
-        protected override IEnumerable<CSharpAnnotation> CollectGlobalAnnotations(CodeGenerationModel model, bool isArtifactAssembly)
+        protected override IEnumerable<CSharpAnnotation> CollectGlobalAnnotations(CodeGenerationModel model)
         {
-            if (isArtifactAssembly)
-                yield return new CSharpAnnotation("ArtifactAssembly");
+            yield return new CSharpAnnotation("ArtifactAssembly");
         }
 
-        protected override void OnContextCreated(CodeGenerationContext context, bool isArtifactAssembly)
+        protected override void OnContextCreated(CodeGenerationContext context)
         {
-            if (isArtifactAssembly)
-                context.AddUsing("Dibix");
+            context.AddUsing("Dibix");
         }
         #endregion
     }

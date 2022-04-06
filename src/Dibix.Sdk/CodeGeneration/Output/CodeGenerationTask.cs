@@ -110,7 +110,7 @@ namespace Dibix.Sdk.CodeGeneration
         )
         {
             ISchemaRegistry schemaRegistry = new SchemaRegistry(logger);
-            CodeArtifactsGenerationModel codeGenerationModel = CodeGenerationModelLoader.Create
+            CodeGenerationModel codeGenerationModel = CodeGenerationModelLoader.Create
             (
                 projectName
               , projectDirectory
@@ -144,7 +144,7 @@ namespace Dibix.Sdk.CodeGeneration
               , sqlModel
             );
 
-            ICodeArtifactsGenerationModelValidator modelValidator = new CompositeCodeArtifactsGenerationModelValidator
+            ICodeGenerationModelValidator modelValidator = new CompositeCodeGenerationModelValidator
             (
                 new ContractArtifactModelValidator(logger)
               , new ActionParameterPropertySourceModelValidator(actionParameterSourceRegistry, schemaRegistry, logger)

@@ -1,6 +1,6 @@
 ﻿namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class ContractArtifactModelValidator : ICodeArtifactsGenerationModelValidator
+    internal sealed class ContractArtifactModelValidator : ICodeGenerationModelValidator
     {
         private readonly ILogger _logger;
 

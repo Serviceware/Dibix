@@ -126,7 +126,7 @@
   <!-- Define inputs and outputs so the targets know when they need to be rebuilt -->
   <Target Name="SetupSqlCoreInputs" DependsOnTargets="_SetupSqlBuildInputs">
     <PropertyGroup>
-      <_DibixConfigurationPath>$(DibixConfigurationDirectory)\dibix.json</_DibixConfigurationPath>
+      <_DibixConfigurationPath>$(DibixConfigurationDirectory)dibix.json</_DibixConfigurationPath>
     </PropertyGroup>
 
     <ItemGroup>

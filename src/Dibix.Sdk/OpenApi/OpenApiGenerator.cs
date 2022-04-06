@@ -35,7 +35,7 @@ namespace Dibix.Sdk.OpenApi
         private static readonly string[] ReservedOpenApiHeaders = { "Accept", "Authorization", "Content-Type" };
         private static readonly OpenApiSchema NullSchema = new OpenApiSchema { Type = "null" };
 
-        public static OpenApiDocument Generate(CodeArtifactsGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger)
+        public static OpenApiDocument Generate(CodeGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             OpenApiDocument document = new OpenApiDocument
             {

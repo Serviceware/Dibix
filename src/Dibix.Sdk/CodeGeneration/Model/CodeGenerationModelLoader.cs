@@ -8,7 +8,7 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal static class CodeGenerationModelLoader
     {
-        public static CodeArtifactsGenerationModel Create
+        public static CodeGenerationModel Create
         (
             string projectName
           , string projectDirectory
@@ -51,7 +51,7 @@ namespace Dibix.Sdk.CodeGeneration
             ICollection<string> normalizedReferences = references.Select(x => x.GetFullPath()).ToArray();
             ICollection<string> normalizedDefaultSecuritySchemes = defaultSecuritySchemes.Select(x => x.ItemSpec).ToArray();
 
-            CodeArtifactsGenerationModel model = new CodeArtifactsGenerationModel(CodeGeneratorCompatibilityLevel.Full)
+            CodeGenerationModel model = new CodeGenerationModel
             {
                 ProductName = productName,
                 AreaName = areaName,

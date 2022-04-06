@@ -53,14 +53,13 @@ namespace Dibix.Sdk.CodeGeneration
             //    return;
 
             // Prepare writer
-            bool isArtifactAssembly = model.CompatibilityLevel == CodeGeneratorCompatibilityLevel.Full;
-            IEnumerable<CSharpAnnotation> globalAnnotations = this.CollectGlobalAnnotations(model, isArtifactAssembly)
+            IEnumerable<CSharpAnnotation> globalAnnotations = this.CollectGlobalAnnotations(model)
                                                                   .Concat(writers.SelectMany(x => x.GetGlobalAnnotations(model)));
             CSharpWriter csWriter = new CSharpWriter(writer, globalAnnotations);
             CSharpStatementScope output = csWriter.Root.Output;
 
             CodeGenerationContext context = new CodeGenerationContext(csWriter.Root, model, this._schemaRegistry, this._logger);
-            this.OnContextCreated(context, isArtifactAssembly);
+            this.OnContextCreated(context);
 
             IList<IGrouping<string, ArtifactWriterBase>> childWriterGroups = writers.GroupBy(x => x.LayerName).ToArray();
             for (int i = 0; i < childWriterGroups.Count; i++)
@@ -96,12 +95,12 @@ namespace Dibix.Sdk.CodeGeneration
             yield break;
         }
 
-        protected virtual IEnumerable<CSharpAnnotation> CollectGlobalAnnotations(CodeGenerationModel model, bool isArtifactAssembly)
+        protected virtual IEnumerable<CSharpAnnotation> CollectGlobalAnnotations(CodeGenerationModel model)
         {
             yield break;
         }
 
-        protected virtual void OnContextCreated(CodeGenerationContext context, bool isArtifactAssembly)
+        protected virtual void OnContextCreated(CodeGenerationContext context)
         {
         }
         #endregion

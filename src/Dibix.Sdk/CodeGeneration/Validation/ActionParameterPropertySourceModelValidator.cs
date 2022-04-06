@@ -2,7 +2,7 @@
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class ActionParameterPropertySourceModelValidator : ICodeArtifactsGenerationModelValidator
+    internal sealed class ActionParameterPropertySourceModelValidator : ICodeGenerationModelValidator
     {
         private readonly IActionParameterSourceRegistry _actionParameterSourceRegistry;
         private readonly ISchemaRegistry _schemaRegistry;
