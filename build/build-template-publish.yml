@@ -1,0 +1,10 @@
+﻿parameters:
+- name: kind
+  type: string
+- name: platform
+  type: string
+ 
+steps:
+- publish: $(Build.ArtifactStagingDirectory)
+  displayName: 💾 Publish '${{ parameters.kind }} output (${{ parameters.platform }}) artifact'
+  artifact: ${{ parameters.kind }} output (${{ parameters.platform }})

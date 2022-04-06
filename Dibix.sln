@@ -20,13 +20,17 @@ Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Dibix.Sdk.Tests.Database", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{62C58971-8516-42E1-8D2A-70A0CE779FFE}"
 	ProjectSection(SolutionItems) = preProject
-		build\azure-pipelines.yml = build\azure-pipelines.yml
+		build\build-template-build.yml = build\build-template-build.yml
+		build\build-template-pack.yml = build\build-template-pack.yml
+		build\build-template-publish.yml = build\build-template-publish.yml
+		build\build.ps1 = build\build.ps1
+		build\build.yml = build\build.yml
 		build\dependencies.props = build\dependencies.props
 		Directory.Build.props = Directory.Build.props
 		Directory.Build.targets = Directory.Build.targets
-		build\dotnet-pack-template.yml = build\dotnet-pack-template.yml
 		NuGet.config = NuGet.config
 		Packages.props = Packages.props
+		build\release.yml = build\release.yml
 		version.json = version.json
 	EndProjectSection
 EndProject

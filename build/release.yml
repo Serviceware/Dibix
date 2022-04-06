@@ -1,0 +1,56 @@
+trigger: none # We only want to trigger manually or based on resources
+pr: none
+
+resources:
+  pipelines:
+  - pipeline: CI
+    source: Dibix
+    trigger:
+      tags:
+      - auto-release
+
+jobs:
+- job: Linux
+  pool:
+    vmImage: ubuntu-latest
+  steps:
+  # The default behavior is as if checkout: self were the first step, and the current repository is checked out.
+  # We don't need sources, therefore, disable it
+  - checkout: none
+  - powershell: |
+      Write-Host "##vso[build.updatebuildnumber]$(resources.pipeline.CI.runName)"
+      if ('$(resources.pipeline.CI.runName)'.Contains('-')) {
+        Write-Host "##vso[task.setvariable variable=IsPrerelease]true"
+      } else {
+        Write-Host "##vso[task.setvariable variable=IsPrerelease]false"
+      }
+    displayName: 🖌️ Update pipeline instance name
+  - download: CI
+    artifact: NuGet packages
+    displayName: 📬 Download 'NuGet packages' artifact
+  - task: GitHubRelease@1
+    displayName: 📝 Create GitHub release
+    inputs:
+      gitHubConnection: github.com_C0nquistadore
+      repositoryName: $(Build.Repository.Name)
+      target: $(resources.pipeline.CI.sourceCommit)
+      tagSource: userSpecifiedTag
+      tag: v$(resources.pipeline.CI.runName)
+      title: v$(resources.pipeline.CI.runName)
+      isDraft: true # After running this step, visit the new draft release, edit, and publish.
+      isPreRelease: $(IsPrerelease)
+      assets: $(Pipeline.Workspace)/CI/NuGet packages/*.nupkg
+      changeLogCompareToRelease: lastNonDraftRelease
+      changeLogType: commitBased
+      changeLogLabels: |
+        [
+          { "label" : "bug", "displayName" : "Fixes", "state" : "closed" },
+          { "label" : "enhancement", "displayName": "Enhancements", "state" : "closed" }
+        ]
+  - task: NuGetCommand@2
+    displayName: 🚀 Publish packages
+    inputs:
+      command: push
+      packagesToPush: "$(Pipeline.Workspace)/CI/NuGet packages/*.nupkg"
+      nuGetFeedType: external
+      publishFeedCredentials: NuGet.org
