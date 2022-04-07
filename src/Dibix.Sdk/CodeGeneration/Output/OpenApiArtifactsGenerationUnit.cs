@@ -22,15 +22,13 @@ namespace Dibix.Sdk.CodeGeneration
 
             OpenApiDocument document = OpenApiGenerator.Generate(model, schemaRegistry, logger);
 
-            string targetDirectory = Path.GetDirectoryName(model.DefaultOutputFilePath);
-
-            string jsonFilePath = BuildOutputPath(targetDirectory, model.AreaName, "json");
+            string jsonFilePath = BuildOutputPath(model.OutputDirectory, model.AreaName, "json");
             using (Stream stream = File.Open(jsonFilePath, FileMode.Create))
             {
                 document.SerializeAsJson(stream, OpenApiSpecVersion.OpenApi3_0);
             }
 
-            string yamlFilePath = BuildOutputPath(targetDirectory, model.AreaName, "yml");
+            string yamlFilePath = BuildOutputPath(model.OutputDirectory, model.AreaName, "yml");
             using (Stream stream = File.Open(yamlFilePath, FileMode.Create))
             {
                 document.SerializeAsYaml(stream, OpenApiSpecVersion.OpenApi3_0);

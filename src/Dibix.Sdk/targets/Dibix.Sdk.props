@@ -6,6 +6,7 @@
     <DibixSdkPath>$(DibixToolsDirectory)Dibix.Sdk.dll</DibixSdkPath>
     <DibixRuntimeDirectory>$(DibixToolsDirectory)</DibixRuntimeDirectory>
     <DibixConfigurationDirectory Condition="'$(DibixConfigurationDirectory)' == ''">$(MSBuildProjectDirectory)</DibixConfigurationDirectory>
+    <DibixTargetFramework Condition="'$(DibixTargetFramework)' == ''">net461</DibixTargetFramework>
     <DibixSdkVersion>$([System.IO.Path]::GetFileName($([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..))))</DibixSdkVersion>
 
     <IsEmbedded>$(MSBuildProjectName.EndsWith('.DML'))</IsEmbedded>

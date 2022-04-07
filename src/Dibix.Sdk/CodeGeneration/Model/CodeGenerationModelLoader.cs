@@ -14,14 +14,13 @@ namespace Dibix.Sdk.CodeGeneration
           , string projectDirectory
           , string productName
           , string areaName
-          , string outputName
           , string title
           , string version
           , string description
           , EndpointConfiguration endpointConfiguration
-          , string defaultOutputFilePath
-          , string endpointOutputFilePath
-          , string clientOutputFilePath
+          , string outputDirectory
+          , string defaultOutputName
+          , string clientOutputName
           , string externalAssemblyReferenceDirectory
           , ICollection<TaskItem> source
           , IEnumerable<TaskItem> contracts
@@ -43,7 +42,7 @@ namespace Dibix.Sdk.CodeGeneration
         )
         {
             string rootNamespace = NamespaceUtility.BuildRootNamespace(productName, areaName);
-            string className = outputName.Replace(".", String.Empty);
+            string className = defaultOutputName.Replace(".", String.Empty);
 
             ICollection<string> normalizedSources = source.Select(x => x.GetFullPath()).ToArray();
             IEnumerable<string> normalizedContracts = contracts.Select(x => x.GetFullPath());
@@ -61,9 +60,9 @@ namespace Dibix.Sdk.CodeGeneration
                 EndpointConfiguration = endpointConfiguration,
                 RootNamespace = rootNamespace,
                 DefaultClassName = className,
-                DefaultOutputFilePath = defaultOutputFilePath,
-                EndpointOutputFilePath = endpointOutputFilePath,
-                ClientOutputFilePath = clientOutputFilePath,
+                OutputDirectory = outputDirectory,
+                DefaultOutputName = defaultOutputName,
+                ClientOutputName = clientOutputName,
                 EnableExperimentalFeatures = enableExperimentalFeatures
             };
 

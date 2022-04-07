@@ -12,9 +12,9 @@ namespace Dibix.Sdk.CodeGeneration
         public string Title { get; set; }
         public string Version { get; set; }
         public string Description { get; set; }
-        public string DefaultOutputFilePath { get; set; }
-        public string EndpointOutputFilePath { get; set; }
-        public string ClientOutputFilePath { get; set; }
+        public string OutputDirectory { get; set; }
+        public string DefaultOutputName { get; set; }
+        public string ClientOutputName { get; set; }
         public EndpointConfiguration EndpointConfiguration { get; set; }
         public CommandTextFormatting CommandTextFormatting { get; set; }
         public ICollection<ContractDefinition> Contracts { get; }

@@ -17,13 +17,12 @@ namespace Dibix.Sdk
           , string resultsFile
           , string productName
           , string areaName
-          , string outputName
           , string title
           , string version
           , string description
-          , string defaultOutputFilePath
-          , string endpointOutputFilePath
-          , string clientOutputFilePath
+          , string outputDirectory
+          , string defaultOutputName
+          , string clientOutputName
           , string externalAssemblyReferenceDirectory
           , ICollection<TaskItem> source
           , IEnumerable<TaskItem> scriptSource
@@ -80,14 +79,13 @@ namespace Dibix.Sdk
                   , projectDirectory
                   , productName
                   , areaName
-                  , outputName
                   , title
                   , version
                   , description
                   , configuration.Endpoints
-                  , defaultOutputFilePath
-                  , endpointOutputFilePath
-                  , clientOutputFilePath
+                  , outputDirectory
+                  , defaultOutputName
+                  , clientOutputName
                   , externalAssemblyReferenceDirectory
                   , source
                   , contracts

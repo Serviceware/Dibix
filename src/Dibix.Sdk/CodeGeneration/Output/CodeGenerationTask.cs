@@ -12,14 +12,13 @@ namespace Dibix.Sdk.CodeGeneration
           , string projectDirectory
           , string productName
           , string areaName
-          , string outputName
           , string title
           , string version
           , string description
           , string baseUrl
-          , string defaultOutputFilePath
-          , string endpointOutputFilePath
-          , string clientOutputFilePath
+          , string outputDirectory
+          , string defaultOutputName
+          , string clientOutputName
           , string externalAssemblyReferenceDirectory
           , ICollection<TaskItem> source
           , IEnumerable<TaskItem> contracts
@@ -46,14 +45,13 @@ namespace Dibix.Sdk.CodeGeneration
                   , projectDirectory
                   , productName
                   , areaName
-                  , outputName
                   , title
                   , version
                   , description
                   , new EndpointConfiguration(baseUrl)
-                  , defaultOutputFilePath
-                  , endpointOutputFilePath
-                  , clientOutputFilePath
+                  , outputDirectory
+                  , defaultOutputName
+                  , clientOutputName
                   , externalAssemblyReferenceDirectory
                   , source
                   , contracts
@@ -81,14 +79,13 @@ namespace Dibix.Sdk.CodeGeneration
           , string projectDirectory
           , string productName
           , string areaName
-          , string outputName
           , string title
           , string version
           , string description
           , EndpointConfiguration endpointConfiguration
-          , string defaultOutputFilePath
-          , string endpointOutputFilePath
-          , string clientOutputFilePath
+          , string outputDirectory
+          , string defaultOutputName
+          , string clientOutputName
           , string externalAssemblyReferenceDirectory
           , ICollection<TaskItem> source
           , IEnumerable<TaskItem> contracts
@@ -116,14 +113,13 @@ namespace Dibix.Sdk.CodeGeneration
               , projectDirectory
               , productName
               , areaName
-              , outputName
               , title
               , version
               , description
               , endpointConfiguration
-              , defaultOutputFilePath
-              , endpointOutputFilePath
-              , clientOutputFilePath
+              , outputDirectory
+              , defaultOutputName
+              , clientOutputName
               , externalAssemblyReferenceDirectory
               , source
               , contracts

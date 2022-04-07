@@ -18,7 +18,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (!logger.HasLoggedErrors)
             {
-                string outputFilePath = this.GetOutputFilePath(model);
+                string outputFilePath = Path.Combine(model.OutputDirectory, $"{this.GetOutputName(model)}.cs");
                 File.WriteAllText(outputFilePath, generated);
                 return true;
             }
@@ -28,6 +28,6 @@ namespace Dibix.Sdk.CodeGeneration
 
         protected abstract TGenerator CreateGenerator(CodeGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger);
 
-        protected abstract string GetOutputFilePath(CodeGenerationModel model);
+        protected abstract string GetOutputName(CodeGenerationModel model);
     }
 }

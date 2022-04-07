@@ -25,10 +25,11 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         private void ExecuteTest(IEnumerable<string> sources, IEnumerable<string> contracts, IEnumerable<string> endpoints, bool isEmbedded, bool generateClient, bool assertOpenApi, IEnumerable<string> expectedAdditionalAssemblyReferences)
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), $"dibix-sdk-tests-{Guid.NewGuid()}");
-            string defaultOutputFilePath = Path.Combine(tempDirectory, "TestAccessor.Accessor.cs");
-            string endpointOutputFilePath = Path.Combine(tempDirectory, "TestAccessor.cs");
-            string clientOutputFilePath = Path.Combine(tempDirectory, "TestAccessor.Client.cs");
             Directory.CreateDirectory(tempDirectory);
+            const string defaultOutputName = "TestAccessor";
+            const string clientOutputName = "TestAccessor.Client";
+            string defaultOutputFilePath = Path.Combine(tempDirectory, $"{defaultOutputName}.Accessor.cs");
+            string clientOutputFilePath = Path.Combine(tempDirectory, $"{clientOutputName}.cs");
 
             TestLogger logger = new TestLogger(base.Out);
 
@@ -41,13 +42,12 @@ namespace Dibix.Sdk.Tests.CodeGeneration
               , resultsFile: null
               , productName: "Dibix.Sdk"
               , areaName: "Tests"
-              , outputName: "TestAccessor"
               , title: "Dibix.Sdk.Tests API title"
               , version: "1.0.1"
               , description: "Dibix.Sdk.Tests API description"
-              , defaultOutputFilePath: defaultOutputFilePath
-              , endpointOutputFilePath: endpointOutputFilePath
-              , clientOutputFilePath: generateClient ? clientOutputFilePath : null
+              , outputDirectory: tempDirectory
+              , defaultOutputName: defaultOutputName
+              , clientOutputName: generateClient ? clientOutputName : null
               , externalAssemblyReferenceDirectory: Environment.CurrentDirectory
               , source: sources.Select(ToTaskItem).ToArray()
               , scriptSource: Enumerable.Empty<TaskItem>()
