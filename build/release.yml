@@ -19,11 +19,8 @@ jobs:
   - checkout: none
   - powershell: |
       Write-Host "##vso[build.updatebuildnumber]$(resources.pipeline.CI.runName)"
-      if ('$(resources.pipeline.CI.runName)'.Contains('-')) {
-        Write-Host "##vso[task.setvariable variable=IsPrerelease]true"
-      } else {
-        Write-Host "##vso[task.setvariable variable=IsPrerelease]false"
-      }
+      Write-Host "##vso[task.setvariable variable=IsPreRelease]$('$(resources.pipeline.CI.runName)'.Contains('-'))"
+      Write-Host "##vso[task.setvariable variable=IsPreview]$('$(resources.pipeline.CI.runName)'.Contains('+'))"
     displayName: 🖌️ Update pipeline instance name
   - download: CI
     artifact: NuGet packages
@@ -38,7 +35,7 @@ jobs:
       tag: v$(resources.pipeline.CI.runName)
       title: v$(resources.pipeline.CI.runName)
       isDraft: true # After running this step, visit the new draft release, edit, and publish.
-      isPreRelease: $(IsPrerelease)
+      isPreRelease: $(IsPreRelease)
       assets: $(Pipeline.Workspace)/CI/NuGet packages/*.nupkg
       changeLogCompareToRelease: lastNonDraftRelease
       changeLogType: commitBased
@@ -47,6 +44,7 @@ jobs:
           { "label" : "bug", "displayName" : "Fixes", "state" : "closed" },
           { "label" : "enhancement", "displayName": "Enhancements", "state" : "closed" }
         ]
+    condition: and(succeeded(), eq(variables['IsPreview'], 'False'))
   - task: NuGetCommand@2
     displayName: 🚀 Publish packages
     inputs:
