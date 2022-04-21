@@ -68,7 +68,15 @@ namespace Dibix
             return this.ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>((a, b, c, d, e, f) => multiMapper.MapRow<TReturn>(false, a, b, c, d, e, f), splitOn)
                        .PostProcess(multiMapper);
         });
-        
+
+        // UserManagement (GetCaseAccessGraphConfiguration)
+        public IEnumerable<TReturn> ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(string splitOn) where TReturn : new() => this.Execute(() =>
+        {
+            MultiMapper multiMapper = new MultiMapper();
+            return this.ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>((a, b, c, d, e, f, g) => multiMapper.MapRow<TReturn>(false, a, b, c, d, e, f, g), splitOn)
+                       .PostProcess(multiMapper);
+        });
+
         IEnumerable<TReturn> IMultipleResultReader.ReadMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> map, string splitOn) => this.Execute(() => this.ReadMany(map, splitOn).PostProcess());
 
         T IMultipleResultReader.ReadSingle<T>() => this.Execute(() => this.ReadSingle<T>().PostProcess());
@@ -137,6 +145,8 @@ namespace Dibix
         protected abstract IEnumerable<TReturn> ReadMany<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> map, string splitOn);
 
         protected abstract IEnumerable<TReturn> ReadMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> map, string splitOn);
+        
+        protected abstract IEnumerable<TReturn> ReadMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> map, string splitOn);
         
         protected abstract IEnumerable<TReturn> ReadMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TReturn> map, string splitOn);
 
