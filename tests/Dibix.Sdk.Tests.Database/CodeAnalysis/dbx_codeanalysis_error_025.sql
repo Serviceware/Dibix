@@ -26,3 +26,12 @@ GO
 CREATE NONCLUSTERED INDEX [IX_dbx_codeanalysis_error_025_table_success1_b] ON [dbo].[dbx_codeanalysis_error_025_table_success1] ([b])
 GO
 CREATE CLUSTERED INDEX [IX_dbx_codeanalysis_error_025_table_success2_a] ON [dbo].[dbx_codeanalysis_error_025_table_success2] ([a])
+GO
+
+-- 3. Default JOIN type
+CREATE PROCEDURE [dbo].[dbx_codeanalysis_error_025]
+AS
+    SELECT [x].[id]
+    FROM (VALUES (1)) AS [x]([id])
+    JOIN (VALUES (1)) AS [y]([id]) ON [x].[id] = [y].[id]       -- Implicit INNER JOIN => Fail
+    INNER JOIN (VALUES (1)) AS [z]([id]) ON [x].[id] = [z].[id] -- Explicit INNER JOIN => Success
