@@ -8,11 +8,11 @@
   <error
     ruleid="37"
     message="Scalar functions should only be used for assignments or check constraints. Otherwise replace it with an inline table-valued function: dbx_codeanalysis_error_037_scalar"
-    line="40"
+    line="41"
     column="16" />
   <error
     ruleid="37"
     message="Scalar functions should only be used for assignments or check constraints. Otherwise replace it with an inline table-valued function: dbx_codeanalysis_error_037_scalar"
-    line="42"
+    line="43"
     column="18" />
 </errors>

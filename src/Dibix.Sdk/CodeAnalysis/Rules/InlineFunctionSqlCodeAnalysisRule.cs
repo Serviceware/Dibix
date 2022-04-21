@@ -40,6 +40,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         public override void Visit(CheckConstraintDefinition node)
         {
+            // CONSTRAINT [CK_dbx_codeanalysis_error_037_table_x] CHECK ([dbo].[dbx_codeanalysis_error_037_scalar]() = 0)
             ScalarFunctionCallVisitor visitor = new ScalarFunctionCallVisitor(this.IsScalarFunctionCall);
             node.CheckCondition.Accept(visitor);
             foreach (FunctionCall call in visitor.Locations)
@@ -51,6 +52,14 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         public override void Visit(DeclareVariableElement node)
         {
+            // DECLARE @y INT = [dbo].[dbx_codeanalysis_error_037_scalar]()
+            if (node.Value is FunctionCall call)
+            {
+                VisitFunctionCall(call);
+                return;
+            }
+
+            // DECLARE @x INT = (SELECT [dbo].[dbx_codeanalysis_error_037_scalar]())
             if (node.Value is ScalarSubquery scalarSubquery
              && scalarSubquery.QueryExpression is QuerySpecification querySpecification)
                 this.VisitQuerySpecification(querySpecification);
@@ -58,32 +67,47 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         public override void Visit(SelectStatement node)
         {
+            // SELECT @x = [dbo].[dbx_codeanalysis_error_037_scalar]()
+            // and
+            // SELECT [dbo].[dbx_codeanalysis_error_037_scalar]()
             if (node.QueryExpression is QuerySpecification querySpecification)
                 this.VisitQuerySpecification(querySpecification);
         }
 
         public override void Visit(SetVariableStatement node)
         {
-            TSqlFragment target = node?.Expression;
-            if (target == null)
-                return;
-
-            if (this._scalarFunctionCalls.ContainsKey(target.StartOffset))
-                this._scalarFunctionCalls.Remove(target.StartOffset);
+            // SET @x = [dbo].[dbx_codeanalysis_error_037_scalar]()
+            if (node?.Expression is FunctionCall call)
+                VisitFunctionCall(call);
         }
 
         private void VisitQuerySpecification(QuerySpecification node)
         {
-            if (node.SelectElements.Count == 1
-             && node.FromClause == null)
-            {
-                TSqlFragment target = node.SelectElements[0];
-                if (target is SelectSetVariable selectSetVariable)
-                    target = selectSetVariable.Expression;
+            if (node.SelectElements.Count != 1 || node.FromClause != null) 
+                return;
 
-                if (this._scalarFunctionCalls.ContainsKey(target.StartOffset))
-                    this._scalarFunctionCalls.Remove(target.StartOffset);
+            TSqlFragment target = node.SelectElements[0];
+            switch (target)
+            {
+                // SELECT @x = [dbo].[dbx_codeanalysis_error_037_scalar]()
+                case SelectSetVariable selectSetVariable:
+                    target = selectSetVariable.Expression;
+                    break;
+
+                // DECLARE @x INT = (SELECT [dbo].[dbx_codeanalysis_error_037_scalar]())
+                case SelectScalarExpression selectScalarExpression:
+                    target = selectScalarExpression.Expression;
+                    break;
             }
+
+            if (target is FunctionCall call)
+                this.VisitFunctionCall(call);
+        }
+
+        private void VisitFunctionCall(FunctionCall call)
+        {
+            if (this._scalarFunctionCalls.ContainsKey(call.StartOffset) && IsScalarFunctionCall(call))
+                this._scalarFunctionCalls.Remove(call.StartOffset);
         }
 
         private bool IsScalarFunctionCall(FunctionCall call) => base.Model.IsScalarFunction(call);

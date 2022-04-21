@@ -31,6 +31,7 @@ AS
 BEGIN
 	
 	DECLARE @x INT = (SELECT [dbo].[dbx_codeanalysis_error_037_scalar]()) -- OK
+	DECLARE @y INT = [dbo].[dbx_codeanalysis_error_037_scalar]() -- OK
 	SELECT @x = [dbo].[dbx_codeanalysis_error_037_scalar]() -- OK
 	SET @x = [dbo].[dbx_codeanalysis_error_037_scalar]() -- OK
 	SELECT [dbo].[dbx_codeanalysis_error_037_scalar]() -- OK
