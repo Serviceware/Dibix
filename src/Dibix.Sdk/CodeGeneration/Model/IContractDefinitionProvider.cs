@@ -7,6 +7,6 @@ namespace Dibix.Sdk.CodeGeneration
         IEnumerable<ContractDefinition> Contracts { get; }
         bool HasSchemaErrors { get; }
 
-        bool TryGetSchema(string name, out SchemaDefinition schema);
+        bool TryGetSchema(string fullName, out SchemaDefinition schema);
     }
 }

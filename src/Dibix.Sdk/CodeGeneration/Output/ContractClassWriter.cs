@@ -18,13 +18,12 @@ namespace Dibix.Sdk.CodeGeneration
         #region Properties
         public override string LayerName => CodeGeneration.LayerName.DomainModel;
         public override string RegionName => "Contracts";
-        protected abstract SchemaDefinitionSource SchemaFilter { get; }
         #endregion
 
         #region Constructor
-        protected ContractClassWriter(CodeGenerationModel model)
+        protected ContractClassWriter(CodeGenerationModel model, SchemaDefinitionSource schemaFilter)
         {
-            this._schemas = model.Schemas.Where(IsValidSchema).ToArray();
+            this._schemas = model.Schemas.Where(x => IsValidSchema(x, schemaFilter)).ToArray();
         }
         #endregion
 
@@ -81,17 +80,6 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private bool IsValidSchema(SchemaDefinition schema)
-        {
-            if (!this.SchemaFilter.HasFlag(schema.Source))
-                return false;
-
-            if (schema.GetType() == typeof(ObjectSchema) || schema is EnumSchema)
-                return true;
-
-            return false;
-        }
-
         private void ProcessObjectSchema(CodeGenerationContext context, CSharpStatementScope scope, ObjectSchema schema)
         {
             ICollection<CSharpAnnotation> classAnnotations = new Collection<CSharpAnnotation>();
@@ -150,6 +138,17 @@ namespace Dibix.Sdk.CodeGeneration
                 @enum.AddMember(member.Name, member.StringValue)
                      .Inherits("int");
             }
+        }
+
+        private static bool IsValidSchema(SchemaDefinition schema, SchemaDefinitionSource schemaFilter)
+        {
+            if (!schemaFilter.HasFlag(schema.Source))
+                return false;
+
+            if (schema.GetType() == typeof(ObjectSchema) || schema is EnumSchema)
+                return true;
+
+            return false;
         }
         #endregion
     }

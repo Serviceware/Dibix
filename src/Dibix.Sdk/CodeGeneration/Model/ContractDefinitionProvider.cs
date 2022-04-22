@@ -39,9 +39,9 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region IContractDefinitionProvider Members
-        public bool TryGetSchema(string name, out SchemaDefinition schema)
+        public bool TryGetSchema(string fullName, out SchemaDefinition schema)
         {
-            if (!this._contracts.TryGetValue(name, out ContractDefinition contract))
+            if (!this._contracts.TryGetValue(fullName, out ContractDefinition contract))
             {
                 schema = null;
                 return false;
@@ -110,7 +110,7 @@ If this is not a project that has multiple areas, please make sure to define the
 
         private void ReadObjectContract(string rootNamespace, string currentNamespace, string definitionName, JToken value, string filePath, IJsonLineInfo lineInfo)
         {
-            ObjectSchema contract = new ObjectSchema(currentNamespace, definitionName, SchemaDefinitionSource.Local);
+            ObjectSchema contract = new ObjectSchema(currentNamespace, definitionName, SchemaDefinitionSource.Defined);
             foreach (JProperty property in ((JObject)value).Properties())
             {
                 if (property.Name == "$wcfNs")
@@ -170,7 +170,7 @@ If this is not a project that has multiple areas, please make sure to define the
 
         private void ReadEnumContract(string currentNamespace, string definitionName, JToken definitionValue, string filePath, IJsonLineInfo lineInfo)
         {
-            EnumSchema contract = new EnumSchema(currentNamespace, definitionName, SchemaDefinitionSource.Local, isFlaggable: false);
+            EnumSchema contract = new EnumSchema(currentNamespace, definitionName, SchemaDefinitionSource.Defined, isFlaggable: false);
 
             ICollection<EnumValue> values = ReadEnumValues(definitionValue).ToArray();
             IDictionary<string, int> actualValues = values.Where(x => x.ActualValue.HasValue).ToDictionary(x => x.Name, x => x.ActualValue.Value);

@@ -383,6 +383,8 @@ $(_SqlReferencePath)" />
     </ItemGroup>
 
     <ItemGroup>
+      <_ServerCompilationEmbeddedResource Include="&lt;EmbeddedResource Include=&quot;$(_ArtifactModelFileName)&quot; LogicalName=&quot;Model&quot; /&gt;"
+                                          Condition="'$(_HasEndpoints)' != 'true'" />
       <_ServerCompilationReferenceItem Include="@(ServerCompilationReference->'&lt;Reference Include=&quot;%(Filename)&quot; HintPath=&quot;%(FullPath)&quot; Private=&quot;False&quot; /&gt;')" />
       <_ServerCompilationReferenceItem Include="&lt;PackageReference Include=&quot;$(_DibixHttpServerName)&quot; Version=&quot;$(DibixSdkVersion)&quot; ExcludeAssets=&quot;runtime&quot; /&gt;"
                                        Condition="'$(EnableExperimentalFeatures)' != 'true'" />
@@ -415,6 +417,7 @@ $(_SqlReferencePath)" />
 
   <ItemGroup>
     <Compile Include="$(_ServerCodeFileName)" />
+    @(_ServerCompilationEmbeddedResource)
   </ItemGroup>
 
   <ItemGroup>
@@ -527,11 +530,6 @@ $(_SqlReferencePath)" />
 
   <ItemGroup Condition="'%24(TargetFramework)' == '$(_ServerTargetFrameworkNetFx)'">
     <Reference Include="System.ComponentModel.DataAnnotations" />
-  </ItemGroup>
-
-  <!-- TODO: Remove, once collecting foreign SqlStatementInfos is implmented -->
-  <ItemGroup>
-@(_ServerCompilationReferenceItem)
   </ItemGroup>
 
 </Project>

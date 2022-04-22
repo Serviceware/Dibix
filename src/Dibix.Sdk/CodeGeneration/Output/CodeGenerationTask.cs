@@ -106,6 +106,8 @@ namespace Dibix.Sdk.CodeGeneration
           , out string[] additionalAssemblyReferences
         )
         {
+            logger.LogMessage("Generating code artifacts...");
+
             ISchemaRegistry schemaRegistry = new SchemaRegistry(logger);
             CodeGenerationModel codeGenerationModel = CodeGenerationModelLoader.Create
             (

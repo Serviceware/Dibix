@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dibix.Sdk.CodeGeneration.Model;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -9,6 +10,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Fields
         private readonly ISchemaRegistry _schemaRegistry;
         private readonly IContractDefinitionProvider _contractDefinitionProvider;
+        private readonly IExternalSchemaResolver _externalSchemaResolver;
         private readonly ReferencedAssemblyInspector _referencedAssemblyInspector;
         private readonly AssemblyResolver _assemblyResolver;
         private readonly ILogger _logger;
@@ -19,10 +21,22 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public ContractDefinitionSchemaTypeResolver(ISchemaRegistry schemaRegistry, IContractDefinitionProvider contractDefinitionProvider, ReferencedAssemblyInspector referencedAssemblyInspector, AssemblyResolver assemblyResolver, ILogger logger, string rootNamespace, string productName, string areaName)
+        public ContractDefinitionSchemaTypeResolver
+        (
+            ISchemaRegistry schemaRegistry
+          , IContractDefinitionProvider contractDefinitionProvider
+          , IExternalSchemaResolver externalSchemaResolver
+          , ReferencedAssemblyInspector referencedAssemblyInspector
+          , AssemblyResolver assemblyResolver
+          , ILogger logger
+          , string rootNamespace
+          , string productName
+          , string areaName
+        )
         {
             this._schemaRegistry = schemaRegistry;
             this._contractDefinitionProvider = contractDefinitionProvider;
+            this._externalSchemaResolver = externalSchemaResolver;
             this._referencedAssemblyInspector = referencedAssemblyInspector;
             this._assemblyResolver = assemblyResolver;
             this._logger = logger;
@@ -37,21 +51,23 @@ namespace Dibix.Sdk.CodeGeneration
         public override TypeReference ResolveType(string input, string relativeNamespace, string source, int line, int column, bool isEnumerable)
         {
             NullableTypeName typeName = input;
-            if (this.TryGetLocalType(input, relativeNamespace, source, line, column, isEnumerable, out SchemaTypeReference schemaTypeReference))
+            if (this.TryGetLocalSchema(input, relativeNamespace, out SchemaDefinition schema)
+             || this.TryGetExternalSchema(input, relativeNamespace, out schema))
+            {
+                SchemaTypeReference schemaTypeReference = new SchemaTypeReference(schema.FullName, typeName.IsNullable, isEnumerable, source, line, column);
                 return schemaTypeReference;
+            }
 
-            if (this.TryGetExternalType(input, relativeNamespace, out Type type))
-                return ReflectionTypeResolver.ResolveForeignType(type, source, line, column, typeName.IsNullable, isEnumerable, this._schemaRegistry, this._logger, this._assemblyResolver);
+            //if (this.TryGetExternalType(input, relativeNamespace, out Type type))
+            //    return ReflectionTypeResolver.ResolveForeignType(type, source, line, column, typeName.IsNullable, isEnumerable, this._schemaRegistry, this._logger, this._assemblyResolver);
 
             return null;
         }
         #endregion
 
         #region Private Methods
-        private bool TryGetLocalType(NullableTypeName typeName, string relativeNamespace, string source, int line, int column, bool isEnumerable, out SchemaTypeReference schemaTypeReference)
+        private bool TryGetLocalSchema(NullableTypeName typeName, string relativeNamespace, out SchemaDefinition schema)
         {
-            SchemaDefinition schema;
-
             if (!String.IsNullOrEmpty(relativeNamespace))
             {
                 string absoluteNamespace = NamespaceUtility.BuildAbsoluteNamespace(this._rootNamespace, this._productName, this._areaName, LayerName.DomainModel, relativeNamespace);
@@ -66,7 +82,7 @@ namespace Dibix.Sdk.CodeGeneration
                     string absoluteTypeName = NamespaceUtility.BuildAbsoluteNamespace(this._rootNamespace, this._productName, this._areaName, LayerName.DomainModel, typeName.Name);
                     if (!this._contractDefinitionProvider.TryGetSchema(absoluteTypeName, out schema))
                     {
-                        schemaTypeReference = null;
+                        schema = null;
                         return false;
                     }
                 }
@@ -80,14 +96,55 @@ namespace Dibix.Sdk.CodeGeneration
                     string absoluteTypeName = NamespaceUtility.BuildAbsoluteNamespace(this._rootNamespace, this._productName, this._areaName, LayerName.DomainModel, typeName.Name);
                     if (!this._contractDefinitionProvider.TryGetSchema(absoluteTypeName, out schema))
                     {
-                        schemaTypeReference = null;
+                        schema = null;
                         return false;
                     }
                 }
             }
 
-            schemaTypeReference = new SchemaTypeReference(schema.FullName, typeName.IsNullable, isEnumerable, source, line, column);
             return true;
+        }
+
+        private bool TryGetExternalSchema(string input, string relativeNamespace, out SchemaDefinition schema)
+        {
+            // This sounds more like something for ReflectionTypeResolver => Skip for performance reasons
+            if (input.Contains(","))
+            {
+                schema = null;
+                return false;
+            }
+
+            string absoluteTypeName;
+            if (!String.IsNullOrEmpty(relativeNamespace))
+            {
+                string absoluteNamespace = NamespaceUtility.BuildAbsoluteNamespace(this._rootNamespace, this._productName, this._areaName, LayerName.DomainModel, relativeNamespace);
+                absoluteTypeName = $"{absoluteNamespace}.{input}";
+            }
+            else
+            {
+                absoluteTypeName = NamespaceUtility.BuildAbsoluteNamespace(this._rootNamespace, this._productName, this._areaName, LayerName.DomainModel, input);
+            }
+
+            // Assume absolute type name
+            if (this.TryGetExternalSchema(input, out schema))
+                return true;
+
+            // Assume relative type name
+            if (this.TryGetExternalSchema(absoluteTypeName, out schema))
+                return true;
+
+            return false;
+        }
+        private bool TryGetExternalSchema(string fullName, out SchemaDefinition schema)
+        {
+            if (this._externalSchemaResolver.TryGetSchema(fullName, out ExternalSchemaDefinition externalSchemaDefinition))
+            {
+                schema = externalSchemaDefinition.SchemaDefinition;
+                return true;
+            }
+
+            schema = null;
+            return false;
         }
 
         private bool TryGetExternalType(string input, string relativeNamespace, out Type externalType)

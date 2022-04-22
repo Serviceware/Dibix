@@ -7,9 +7,20 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class ApiDescriptionWriter : ArtifactWriterBase
     {
+        #region Fields
+        private readonly bool _assumeEmbeddedActionTargets;
+        #endregion
+
         #region Properties
         public override string LayerName => CodeGeneration.LayerName.Business;
         public override string RegionName => "Endpoints";
+        #endregion
+
+        #region Constructor
+        public ApiDescriptionWriter(bool assumeEmbeddedActionTargets)
+        {
+            this._assumeEmbeddedActionTargets = assumeEmbeddedActionTargets;
+        }
         #endregion
 
         #region Overrides
@@ -28,7 +39,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (context.Model.Controllers.Any(x => x.ControllerImports.Any()))
                 context.AddUsing<Type>();
 
-            string body = WriteBody(context, context.Model.Controllers);
+            string body = this.WriteBody(context, context.Model.Controllers);
 
             context.CreateOutputScope()
                    .AddClass("ApiConfiguration", CSharpModifiers.Public | CSharpModifiers.Sealed)
@@ -39,7 +50,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private static string WriteBody(CodeGenerationContext context, IList<ControllerDefinition> controllers)
+        private string WriteBody(CodeGenerationContext context, IList<ControllerDefinition> controllers)
         {
             StringWriter writer = new StringWriter();
             for (int i = 0; i < controllers.Count; i++)
@@ -62,7 +73,12 @@ namespace Dibix.Sdk.CodeGeneration
                     }
                     else
                     {
-                        writer.WriteRaw($"typeof({action.Target.AccessorFullName}), nameof({action.Target.AccessorFullName}.")
+                        string accessorFullName = action.Target.AccessorFullName;
+
+                        if (!this._assumeEmbeddedActionTargets && action.Target is LocalActionTarget localActionTarget)
+                            accessorFullName = localActionTarget.ExternalAccessorFullName;
+
+                        writer.WriteRaw($"typeof({accessorFullName}), nameof({accessorFullName}.")
                               .WriteRaw(action.Target.OperationName);
                         
                         if (action.Target.IsAsync)

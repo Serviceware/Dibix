@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    public class CodeGenerationModel
+    public class CodeGenerationModel : IPersistedCodeGenerationModel
     {
         public string ProductName { get; set; }
         public string AreaName { get; set; }
@@ -17,6 +17,7 @@ namespace Dibix.Sdk.CodeGeneration
         public string ClientOutputName { get; set; }
         public EndpointConfiguration EndpointConfiguration { get; set; }
         public CommandTextFormatting CommandTextFormatting { get; set; }
+        public ICollection<SqlStatementDefinition> SqlStatements { get; }
         public ICollection<ContractDefinition> Contracts { get; }
         public IList<ControllerDefinition> Controllers { get; }
         public IList<SecurityScheme> SecuritySchemes { get; }
@@ -26,6 +27,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public CodeGenerationModel()
         {
+            this.SqlStatements = new Collection<SqlStatementDefinition>();
             this.Contracts = new Collection<ContractDefinition>();
             this.Controllers = new Collection<ControllerDefinition>();
             this.SecuritySchemes = new Collection<SecurityScheme>();

@@ -64,10 +64,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region ISqlStatementDefinitionProvider Members
-        public bool TryGetDefinition(string @namespace, string definitionName, out SqlStatementDefinition definition)
-        {
-            return this._definitions.TryGetValue($"{@namespace}.{definitionName}", out definition);
-        }
+        public bool TryGetDefinition(string fullName, out SqlStatementDefinition definition) => this._definitions.TryGetValue(fullName, out definition);
         #endregion
 
         #region Private Methods

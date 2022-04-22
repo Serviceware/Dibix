@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Dibix.Sdk.CodeGeneration.Model;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.Dac.Model;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
@@ -47,19 +48,26 @@ namespace Dibix.Sdk.CodeGeneration
                 return null;
 
             ValidateFileResult(definition, node, source, returnElements, results, logger);
-            return CreateBuiltInResult("Dibix.FileEntity,Dibix", fileResultElement, typeResolver);
+            //return CreateBuiltInResult("Dibix.FileEntity,Dibix", fileResultElement, typeResolver);
+            return CreateBuiltInResult(BuiltInSchemaProvider.FileEntitySchema, fileResultElement);
         }
 
         private static SqlQueryResult CreateBuiltInResult(string typeName, ISqlElement element, ITypeResolverFacade typeResolver)
         {
             TypeReference typeReference = typeResolver.ResolveType(typeName, relativeNamespace: null, element.Source, element.Line, element.Column, isEnumerable: false);
-            return new SqlQueryResult
-            {
-                ResultMode = SqlQueryResultMode.SingleOrDefault,
-                Types = { typeReference },
-                ReturnType = typeReference
-            };
+            return CreateBuiltInResult(typeReference);
         }
+        private static SqlQueryResult CreateBuiltInResult(SchemaDefinition schema, ISqlElement element)
+        {
+            TypeReference typeReference = new SchemaTypeReference(schema.FullName, isNullable: false, isEnumerable: false, element.Source, element.Line, element.Column);
+            return CreateBuiltInResult(typeReference);
+        }
+        private static SqlQueryResult CreateBuiltInResult(TypeReference typeReference) => new SqlQueryResult
+        {
+            ResultMode = SqlQueryResultMode.SingleOrDefault,
+            Types = { typeReference },
+            ReturnType = typeReference
+        };
 
         private static void ValidateFileResult(SqlStatementDefinition definition, TSqlFragment node, string source, IEnumerable<ISqlElement> returnElements, IList<OutputSelectResult> results, ILogger logger)
         {

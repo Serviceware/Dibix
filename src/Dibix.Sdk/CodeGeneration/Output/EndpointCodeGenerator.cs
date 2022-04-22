@@ -13,12 +13,13 @@ namespace Dibix.Sdk.CodeGeneration
         protected override IEnumerable<ArtifactWriterBase> SelectWriters(CodeGenerationModel model)
         {
             const bool accessorOnly = false;
-            const SchemaDefinitionSource schemaFilter = SchemaDefinitionSource.Local | SchemaDefinitionSource.Generated | SchemaDefinitionSource.Foreign;
+            const bool assumeEmbeddedActionTargets = true;
+            const SchemaDefinitionSource schemaFilter = SchemaDefinitionSource.Local | SchemaDefinitionSource.Foreign;
             yield return new DaoExecutorWriter(model, schemaFilter, accessorOnly);
             yield return new DaoExecutorInputClassWriter(model, schemaFilter);
-            yield return new DaoContractClassWriter(model);
+            yield return new DaoContractClassWriter(model, schemaFilter);
             yield return new DaoStructuredTypeWriter(model, schemaFilter);
-            yield return new ApiDescriptionWriter();
+            yield return new ApiDescriptionWriter(assumeEmbeddedActionTargets);
         }
 
         protected override IEnumerable<CSharpAnnotation> CollectGlobalAnnotations(CodeGenerationModel model)

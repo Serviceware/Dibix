@@ -19,7 +19,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (!SourceReaders.TryGetValue(sourceKind, out Func<object, string> reader))
                 throw new ArgumentOutOfRangeException(nameof(sourceKind), sourceKind, null);
 
-            definition = new SqlStatementDefinition(@namespace: null, definitionName, SchemaDefinitionSource.Local) { Statement = new FormattedSqlStatement(reader(content), CommandType.Text) };
+            definition = new SqlStatementDefinition(@namespace: null, definitionName, SchemaDefinitionSource.Defined) { Statement = new FormattedSqlStatement(reader(content), CommandType.Text) };
             return true;
         }
 

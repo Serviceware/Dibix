@@ -63,21 +63,14 @@ namespace Dibix.Sdk.CodeAnalysis
 
             ExecuteNativeCodeAnalysis(model, logger, staticCodeAnalysisSucceededFile, resultsFile);
 
-            SqlCodeAnalysisRuleEngine codeAnalysisEngine = SqlCodeAnalysisRuleEngine.Create(model, projectName, configuration, isEmbedded, lockEntryManager, logger);
-
-            foreach (TaskItem inputFile in source)
-            {
-                string inputFilePath = inputFile.GetFullPath();
-                AnalyzeItem(inputFilePath, codeAnalysisEngine, logger);
-            }
-
-            AnalyzeScripts(null, scriptSource.Select(x => x.GetFullPath()), codeAnalysisEngine, logger);
+            ExecuteExtendedCodeAnalysis(projectName, configuration, isEmbedded, source, scriptSource, lockEntryManager, logger, model);
 
             return !logger.HasLoggedErrors;
         }
 
         private static bool ExecuteNativeCodeAnalysis(TSqlModel model, ILogger logger, string staticCodeAnalysisSucceededFile, string resultsFile)
         {
+            logger.LogMessage("Performing native code analysis...");
             CodeAnalysisServiceSettings settings = new CodeAnalysisServiceSettings
             {
                 CodeAnalysisSucceededFile = staticCodeAnalysisSucceededFile,
@@ -94,6 +87,20 @@ namespace Dibix.Sdk.CodeAnalysis
                 ReportAnalysisResults(analysisResult, logger);
             }
             return analysisResult != null;
+        }
+
+        private static void ExecuteExtendedCodeAnalysis(string projectName, SqlCodeAnalysisConfiguration configuration, bool isEmbedded, ICollection<TaskItem> source, IEnumerable<TaskItem> scriptSource, LockEntryManager lockEntryManager, ILogger logger, TSqlModel model)
+        {
+            logger.LogMessage("Performing extended code analysis...");
+            SqlCodeAnalysisRuleEngine codeAnalysisEngine = SqlCodeAnalysisRuleEngine.Create(model, projectName, configuration, isEmbedded, lockEntryManager, logger);
+
+            foreach (TaskItem inputFile in source)
+            {
+                string inputFilePath = inputFile.GetFullPath();
+                AnalyzeItem(inputFilePath, codeAnalysisEngine, logger);
+            }
+
+            AnalyzeScripts(null, scriptSource.Select(x => x.GetFullPath()), codeAnalysisEngine, logger);
         }
 
         private static void ReportExtensibilityErrors(ICollection<ExtensibilityError> errors, object category, bool blocksBuild, ILogger logger)

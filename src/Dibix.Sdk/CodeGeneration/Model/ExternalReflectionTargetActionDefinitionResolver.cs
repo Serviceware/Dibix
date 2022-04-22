@@ -4,12 +4,12 @@ using System.Collections.Generic;
 namespace Dibix.Sdk.CodeGeneration
 {
     // Target is a reflection target within a foreign assembly
-    internal sealed class ExternalActionDefinitionResolver : ActionDefinitionResolver
+    internal sealed class ExternalReflectionTargetActionDefinitionResolver : ActionDefinitionResolver
     {
         private const string LockSectionName = "ExternalReflectionTarget";
         private readonly LockEntryManager _lockEntryManager;
 
-        public ExternalActionDefinitionResolver(ISchemaRegistry schemaRegistry, LockEntryManager lockEntryManager, ILogger logger) : base(schemaRegistry, logger)
+        public ExternalReflectionTargetActionDefinitionResolver(ISchemaRegistry schemaRegistry, LockEntryManager lockEntryManager, ILogger logger) : base(schemaRegistry, logger)
         {
             this._lockEntryManager = lockEntryManager;
         }

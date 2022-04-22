@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Dibix.Sdk.CodeGeneration
 {
     // Target is a compiled method in a neighbour project
-    internal sealed class NeighborActionDefinitionResolver : ActionDefinitionResolver
+    internal sealed class NeighborReflectionActionDefinitionResolver : ActionDefinitionResolver
     {
         #region Fields
         private readonly string _projectName;
@@ -17,7 +17,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public NeighborActionDefinitionResolver
+        public NeighborReflectionActionDefinitionResolver
         (
             string projectName
           , ReferencedAssemblyInspector referencedAssemblyInspector

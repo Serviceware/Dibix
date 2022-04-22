@@ -138,7 +138,7 @@ namespace Dibix.Sdk.CodeGeneration
                 // Validate path parameters
                 foreach (PathParameter pathSegment in pathParameters.Values)
                 {
-                    base.Logger.LogError(null, $"Undefined path parameter: {pathSegment}", filePath, pathSegment.Line, pathSegment.Column);
+                    base.Logger.LogError(null, $"Undefined path parameter: {pathSegment.Name}", filePath, pathSegment.Line, pathSegment.Column);
                 }
             }
 

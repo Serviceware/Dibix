@@ -6,6 +6,6 @@ namespace Dibix.Sdk.CodeGeneration
     {
         IEnumerable<SqlStatementDefinition> SqlStatements { get; }
 
-        bool TryGetDefinition(string @namespace, string definitionName, out SqlStatementDefinition definition);
+        bool TryGetDefinition(string fullName, out SqlStatementDefinition definition);
     }
 }

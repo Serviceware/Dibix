@@ -19,7 +19,7 @@ namespace Dibix.Sdk.CodeGeneration
             this._typeResolvers = new Collection<TypeResolver>
             {
                 new PrimitiveTypeResolver()
-              , new ReflectionTypeResolver(assemblyResolver, schemaRegistry, logger)
+            //, new ReflectionTypeResolver(assemblyResolver, schemaRegistry, logger)
             };
         }
         #endregion
