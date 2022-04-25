@@ -4,26 +4,25 @@ using Dibix.Sdk.Tests.CodeGeneration;
 
 namespace Dibix.Sdk.Tests
 {
-    internal class TestLogger : ILogger
+    internal class TestLogger : Logger, ILogger
     {
-        private readonly TextWriter _messageOutput;
         private readonly StringBuilder _errorOutput;
 
-        public bool HasLoggedErrors => this._errorOutput.Length > 0;
-
-        public TestLogger(TextWriter messageOutput)
+        public TestLogger(TextWriter output, bool distinctErrorLogging) : base(output, distinctErrorLogging)
         {
-            this._messageOutput = messageOutput;
             this._errorOutput = new StringBuilder();
         }
 
-        public void LogMessage(string text) => this._messageOutput.WriteLine(text);
-
-        public void LogError(string code, string text, string source, int? line, int? column) => this.LogError(subCategory: null, code: code, text: text, source: source, line: line, column: column);
-        public void LogError(string subCategory, string code, string text, string source, int? line, int? column)
+        public override void LogError(string subCategory, string code, string text, string source, int? line, int? column)
         {
             string relativeSource = source.Substring(DatabaseTestUtility.DatabaseProjectDirectory.Length + 1);
-            this._errorOutput.AppendLine(CanonicalLogFormat.ToErrorString(subCategory, code, text, relativeSource, line, column));
+            base.LogError(subCategory, code, text, relativeSource, line, column);
+        }
+
+        protected override void LogError(string text)
+        {
+            base.LogError(text);
+            this._errorOutput.AppendLine(text);
         }
 
         public void Verify()

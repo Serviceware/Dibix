@@ -170,15 +170,15 @@ namespace Dibix.Sdk.CodeGeneration
                         if (parentSourceSelectorVariable != null)
                             throw new InvalidOperationException("Nested item sources are not supported");
 
-                        char itemSourceSelectorVariable = 'z';
+                        const char itemSourceSelectorVariable = 'z';
                         writer.WriteRaw($", {itemSourceSelectorVariable} => ")
                               .WriteLine()
                               .WriteLine("{")
                               .PushIndent();
 
-                        foreach (KeyValuePair<string, ActionParameterSource> parameterSource in property.ItemSources)
+                        foreach (ActionParameterItemSource parameterSource in property.ItemSources)
                         {
-                            WriteParameter(writer, parameterSource.Key, parameterSource.Value, itemSourceSelectorVariable);
+                            WriteParameter(writer, parameterSource.ParameterName, parameterSource.Source, itemSourceSelectorVariable);
                         }
 
                         writer.PopIndent()

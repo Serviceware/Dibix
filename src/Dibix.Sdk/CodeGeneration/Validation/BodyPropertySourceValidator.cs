@@ -2,17 +2,20 @@
 {
     internal sealed class BodyPropertySourceValidator : ObjectSchemaPropertySourceValidator<BodyParameterSource>
     {
-        public override bool Validate(ActionParameterPropertySource value, ActionParameterPropertySource parent, ActionDefinition actionDefinition, ISchemaRegistry schemaRegistry, ILogger logger)
+        public override bool Validate(ActionParameter rootParameter, ActionParameterInfo currentParameter, ActionParameterPropertySource currentValue, ActionParameterPropertySource parentValue, ActionDefinition actionDefinition, ISchemaRegistry schemaRegistry, ILogger logger)
         {
-            TypeReference type = actionDefinition.RequestBody?.Contract;
-            if (type == null)
+            if (actionDefinition.RequestBody == null)
             {
-                // No body contract => No validation possible
+                // No body => No validation possible
                 // This *should* be a warning though
                 return true;
             }
 
-            return base.Validate(value, type, schemaRegistry, logger);
+            TypeReference bodyContract = actionDefinition.RequestBody.Contract;
+            if (bodyContract == null) // Already logged at 'TypeResolverFacade.ResolveType'
+                return false;
+
+            return base.Validate(currentValue, bodyContract, schemaRegistry, logger);
         }
     }
 }

@@ -48,7 +48,7 @@ namespace Dibix.Sdk.CodeGeneration
                 return;
             }
 
-            ActionParameter actionParameter = this.CreateActionParameter(parameterName, parameterType, defaultValue, explicitParameters, pathParameters, bodyParameters);
+            ActionParameter actionParameter = this.CreateActionParameter(parameterName, parameterType, defaultValue, explicitParameters, pathParameters, bodyParameters, filePath, line, column);
             parameterRegistry.Add(actionParameter);
         }
 
@@ -110,7 +110,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private ActionParameter CreateActionParameter(string name, TypeReference type, ValueReference defaultValue, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters)
+        private ActionParameter CreateActionParameter(string name, TypeReference type, ValueReference defaultValue, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, string filePath, int line, int column)
         {
             ActionParameterLocation location = ActionParameterLocation.NonUser;
             string apiParameterName = name;
@@ -157,7 +157,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             bool isRequired = this.IsParameterRequired(type, location, defaultValue);
-            return new ActionParameter(apiParameterName, internalParameterName, type, location, isRequired, defaultValue, explicitParameter?.Source);
+            return new ActionParameter(apiParameterName, internalParameterName, type, location, isRequired, defaultValue, explicitParameter?.Source, filePath, line, column);
         }
         #endregion
     }

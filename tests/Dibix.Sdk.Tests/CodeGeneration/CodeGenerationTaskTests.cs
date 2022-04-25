@@ -29,6 +29,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             this.ExecuteTest
             (
                 isEmbedded: false
+              , contracts: Enumerable.Repeat(@"Contracts\Direction.json", 1)
               , @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
               , @"Types\dbx_codeanalysis_udt_generic.sql"
             );
@@ -359,7 +360,10 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
                 }
               , contracts: new []
                 {
-                    @"Contracts\Entry.json"
+                    @"Contracts\AnotherInputContract.json"
+                  , @"Contracts\AnotherEntry.json"
+                  , @"Contracts\Direction.json"
+                  , @"Contracts\Entry.json"
                   , @"Contracts\GenericContract.json"
                   , @"Contracts\InputContract.json"
                 }
@@ -391,7 +395,10 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
                 }
               , contracts: new []
                 {
-                    @"Contracts\Entry.json"
+                    @"Contracts\AnotherInputContract.json"
+                  , @"Contracts\AnotherEntry.json"
+                  , @"Contracts\Direction.json"
+                  , @"Contracts\Entry.json"
                   , @"Contracts\GenericContract.json"
                   , @"Contracts\InputContract.json"
                 }
@@ -417,7 +424,8 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
                 }
               , contracts: new []
                 {
-                    @"Contracts\Entry.json"
+                    @"Contracts\Direction.json"
+                  , @"Contracts\Entry.json"
                   , @"Contracts\Request.json"
                 }
               , endpoint: @"Endpoints\GenericEndpointWithInvalidSource.json"
@@ -454,10 +462,6 @@ Contracts\Invalid.json(3,12,3,12):error:String 'x' does not match regex pattern 
 Contracts\Invalid.json(3,12,3,12):error:String 'x' does not match regex pattern '^#([\w]+)(.([\w]+))*\??\*?$'. (Invalid.A)
 Contracts\Invalid.json(3,12,3,12):error:JSON does not match any schemas from 'anyOf'. (Invalid.A)
 Contracts\Invalid.json(3,12,3,12):error:Invalid type. Expected Object but got String. (Invalid.A)
-Contracts\Invalid.json(3,12,3,12):error:Invalid type. Expected Object but got String. (Invalid.A)
-Contracts\Invalid.json(3,12,3,12):error:Invalid type. Expected Object but got String. (Invalid.A)
-Contracts\Invalid.json(3,12,3,12):error:Invalid type. Expected Object but got String. (Invalid.A)
-Contracts\Invalid.json(3,12,3,12):error:JSON does not match any schemas from 'anyOf'. (Invalid.A)
 Contracts\Invalid.json(2,14,2,14):error:Invalid type. Expected Array but got Object. (Invalid)
 Contracts\Invalid.json(2,14,2,14):error:JSON does not match any schemas from 'anyOf'. (Invalid)"
             );

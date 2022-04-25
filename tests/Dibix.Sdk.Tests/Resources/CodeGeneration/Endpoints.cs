@@ -38,7 +38,7 @@ namespace Dibix.Sdk.Tests.Data
         // SingleConrecteResultWithParams
         private const string SingleConrecteResultWithParamsCommandText = "[dbo].[dbx_tests_syntax_singleconcreteresult_params]";
 
-        public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string u, string v, System.Guid? w, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? x = null, bool y = true, int? z = null)
+        public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string u, string v, System.Guid? w, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? x = null, bool y = true, Dibix.Sdk.Tests.DomainModel.Direction? z = null)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
@@ -138,6 +138,36 @@ namespace Dibix.Sdk.Tests.Data
 #region Contracts
 namespace Dibix.Sdk.Tests.DomainModel
 {
+    public sealed class AnotherInputContract
+    {
+        public string U { get; set; }
+        public string V { get; set; }
+        [Optional]
+        public string W { get; set; }
+        public IList<Dibix.Sdk.Tests.DomainModel.AnotherEntry> SomeIds { get; private set; }
+        public System.Guid X { get; set; }
+        public string Password { get; set; }
+        public bool Y { get; set; }
+        public int Z { get; set; }
+
+        public AnotherInputContract()
+        {
+            this.SomeIds = new Collection<Dibix.Sdk.Tests.DomainModel.AnotherEntry>();
+        }
+    }
+
+    public sealed class AnotherEntry
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+    }
+
+    public enum Direction : int
+    {
+        Ascending,
+        Descending
+    }
+
     public sealed class Entry
     {
         public int Id { get; set; }
@@ -251,10 +281,14 @@ namespace Dibix.Sdk.Tests.Business
                 {
                     y.Method = HttpApiMethod.Patch;
                     y.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.InputContract);
-                    y.ResolveParameterFromSource("ids", "BODY", "Ids", z => 
+                });
+                x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), y =>
+                {
+                    y.Method = HttpApiMethod.Delete;
+                    y.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.AnotherInputContract);
+                    y.ResolveParameterFromSource("ids", "BODY", "SomeIds", z => 
                     {
-                        z.ResolveParameterFromSource("id", "ITEM", "Id");
-                        z.ResolveParameterFromSource("name", "ITEM", "Name");
+                        z.ResolveParameterFromSource("name", "ITEM", "Title");
                     });
                 });
             });

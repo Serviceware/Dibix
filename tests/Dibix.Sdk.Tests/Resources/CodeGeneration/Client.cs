@@ -22,6 +22,35 @@ using UriBuilder = Dibix.Http.Client.UriBuilder;
 #region Contracts
 namespace Dibix.Sdk.Tests.DomainModel
 {
+    public sealed class AnotherInputContract
+    {
+        public string U { get; set; }
+        public string V { get; set; }
+        public string W { get; set; }
+        public IList<Dibix.Sdk.Tests.DomainModel.AnotherEntry> SomeIds { get; private set; }
+        public System.Guid X { get; set; }
+        public string Password { get; set; }
+        public bool Y { get; set; }
+        public int Z { get; set; }
+
+        public AnotherInputContract()
+        {
+            this.SomeIds = new Collection<Dibix.Sdk.Tests.DomainModel.AnotherEntry>();
+        }
+    }
+
+    public sealed class AnotherEntry
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+    }
+
+    public enum Direction : int
+    {
+        Ascending,
+        Descending
+    }
+
     public sealed class Entry
     {
         public int Id { get; set; }
@@ -71,12 +100,13 @@ namespace Dibix.Sdk.Tests.Client
     public interface IGenericEndpointService : IHttpService
     {
         Task<HttpResponseMessage> EmptyWithParams1Async(string password, string userAgent, IEnumerable<object> ids, string? acceptLanguage = null, CancellationToken cancellationToken = default);
-        Task<HttpResponseMessage> EmptyWithParamsAnonymousAsync(string password, string u, string v, System.Guid? w, IEnumerable<object> ids, string? x = null, bool y = true, int? z = null, CancellationToken cancellationToken = default);
+        Task<HttpResponseMessage> EmptyWithParamsAnonymousAsync(string password, string u, string v, System.Guid? w, IEnumerable<object> ids, string? x = null, bool y = true, Dibix.Sdk.Tests.DomainModel.Direction? z = null, CancellationToken cancellationToken = default);
         Task<HttpResponse<Dibix.Sdk.Tests.DomainModel.GenericContract>> SingleConrecteResultWithParamsAsync(IEnumerable<int> ids, CancellationToken cancellationToken = default);
         Task<HttpResponse<System.IO.Stream>> FileResultAsync(int id, CancellationToken cancellationToken = default);
         Task<HttpResponseMessage> FileUploadAsync(System.IO.Stream body, CancellationToken cancellationToken = default);
         Task<HttpResponseMessage> EmptyWithParams2Async(Dibix.Sdk.Tests.DomainModel.InputContract body, CancellationToken cancellationToken = default);
         Task<HttpResponseMessage> EmptyWithParams3Async(Dibix.Sdk.Tests.DomainModel.InputContract body, CancellationToken cancellationToken = default);
+        Task<HttpResponseMessage> EmptyWithParams4Async(Dibix.Sdk.Tests.DomainModel.AnotherInputContract body, CancellationToken cancellationToken = default);
     }
 }
 #endregion
@@ -117,7 +147,7 @@ namespace Dibix.Sdk.Tests.Client
             }
         }
 
-        public async Task<HttpResponseMessage> EmptyWithParamsAnonymousAsync(string password, string u, string v, System.Guid? w, IEnumerable<object> ids, string? x = null, bool y = true, int? z = null, CancellationToken cancellationToken = default)
+        public async Task<HttpResponseMessage> EmptyWithParamsAnonymousAsync(string password, string u, string v, System.Guid? w, IEnumerable<object> ids, string? x = null, bool y = true, Dibix.Sdk.Tests.DomainModel.Direction? z = null, CancellationToken cancellationToken = default)
         {
             using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
             {
@@ -199,6 +229,19 @@ namespace Dibix.Sdk.Tests.Client
                 requestMessage.Headers.Add("HLNS-SIT", this._authorizationProvider.GetValue("HLNS-SIT"));
                 requestMessage.Headers.Add("HLNS-ClientId", this._authorizationProvider.GetValue("HLNS-ClientId"));
                 requestMessage.Content = new ObjectContent<Dibix.Sdk.Tests.DomainModel.InputContract>(body, Formatter);
+                HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
+                return responseMessage;
+            }
+        }
+
+        public async Task<HttpResponseMessage> EmptyWithParams4Async(Dibix.Sdk.Tests.DomainModel.AnotherInputContract body, CancellationToken cancellationToken = default)
+        {
+            using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
+            {
+                HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("DELETE"), "Tests/GenericEndpoint");
+                requestMessage.Headers.Add("HLNS-SIT", this._authorizationProvider.GetValue("HLNS-SIT"));
+                requestMessage.Headers.Add("HLNS-ClientId", this._authorizationProvider.GetValue("HLNS-ClientId"));
+                requestMessage.Content = new ObjectContent<Dibix.Sdk.Tests.DomainModel.AnotherInputContract>(body, Formatter);
                 HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
                 return responseMessage;
             }

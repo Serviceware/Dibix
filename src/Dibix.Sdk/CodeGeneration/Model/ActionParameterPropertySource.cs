@@ -1,5 +1,5 @@
-﻿using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -11,7 +11,7 @@ namespace Dibix.Sdk.CodeGeneration
         public int Line { get; }
         public int Column { get; }
         public string Converter { get; set; }
-        public IDictionary<string, ActionParameterSource> ItemSources { get; }
+        public ICollection<ActionParameterItemSource> ItemSources { get; }
 
         internal ActionParameterPropertySource(ActionParameterSourceDefinition definition, string propertyName, string filePath, int line, int column)
         {
@@ -20,7 +20,7 @@ namespace Dibix.Sdk.CodeGeneration
             this.FilePath = filePath;
             this.Line = line;
             this.Column = column;
-            this.ItemSources = new ConcurrentDictionary<string, ActionParameterSource>();
+            this.ItemSources = new Collection<ActionParameterItemSource>();
         }
     }
 }

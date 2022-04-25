@@ -7,6 +7,6 @@ CREATE PROCEDURE [dbo].[dbx_tests_syntax_empty_params]
   , @ids [dbo].[dbx_codeanalysis_udt_generic] READONLY
   , @x NVARCHAR(50) NULL = NULL
   , @y BIT = 1
-  , @z INT NULL = NULL
+  , /* @ClrType Direction */ @z INT NULL = NULL
 AS
 	PRINT CONCAT(@u, @v, @w, @password, @ids, @x, @y, @z)

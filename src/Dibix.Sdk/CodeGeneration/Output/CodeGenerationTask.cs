@@ -146,7 +146,9 @@ namespace Dibix.Sdk.CodeGeneration
             (
                 new ContractArtifactModelValidator(logger)
               , new ActionParameterPropertySourceModelValidator(actionParameterSourceRegistry, schemaRegistry, logger)
+              , new UserDefinedTypeParameterModelValidator(schemaRegistry, logger)
             );
+
             if (!modelValidator.Validate(codeGenerationModel))
             {
                 additionalAssemblyReferences = null;

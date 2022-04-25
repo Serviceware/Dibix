@@ -24,7 +24,7 @@ namespace Dibix.Sdk.CodeGeneration
                 {
                     foreach (ActionParameter parameter in action.Parameters)
                     {
-                        if (!ValidateSource(parameter.Source, parent: null, action))
+                        if (!ValidateSource(parameter, new ActionParameterInfo(parameter.InternalParameterName, parameter.FilePath, parameter.Line, parameter.Column), parameter.Source, parentValue: null, action))
                             result = false;
                     }
                 }
@@ -32,34 +32,34 @@ namespace Dibix.Sdk.CodeGeneration
             return result;
         }
 
-        private bool ValidateSource(ActionParameterSource source, ActionParameterPropertySource parent, ActionDefinition action)
+        private bool ValidateSource(ActionParameter rootParameter, ActionParameterInfo currentParameter, ActionParameterSource currentValue, ActionParameterPropertySource parentValue, ActionDefinition action)
         {
-            if (!(source is ActionParameterPropertySource propertySource)) 
+            if (!(currentValue is ActionParameterPropertySource propertySource)) 
                 return true;
 
-            bool result = this.ValidatePropertySource(propertySource, parent, action);
+            bool result = this.ValidatePropertySource(rootParameter, currentParameter, propertySource, parentValue, action);
 
-            foreach (ActionParameterSource itemPropertySource in propertySource.ItemSources.Values)
+            foreach (ActionParameterItemSource itemPropertySource in propertySource.ItemSources)
             {
-                if (!this.ValidateSource(itemPropertySource, propertySource, action))
+                if (!this.ValidateSource(rootParameter, new ActionParameterInfo(itemPropertySource.ParameterName, itemPropertySource.FilePath, itemPropertySource.Line, itemPropertySource.Column), itemPropertySource.Source, propertySource, action))
                     result = false;
             }
 
             return result;
         }
 
-        private bool ValidatePropertySource(ActionParameterPropertySource source, ActionParameterPropertySource parent, ActionDefinition action)
+        private bool ValidatePropertySource(ActionParameter rootParameter, ActionParameterInfo currentParameter, ActionParameterPropertySource currentValue, ActionParameterPropertySource parentValue, ActionDefinition action)
         {
-            if (source.Definition == null) // Unknown source is logged at ControllerDefinitionProvider.ReadPropertySource
-                return true;
+            if (currentValue.Definition == null) // Unknown source is logged at ControllerDefinitionProvider.ReadPropertySource
+                return false;
 
-            if (!this._actionParameterSourceRegistry.TryGetValidator(source.Definition, out IActionParameterPropertySourceValidator validator))
+            if (!this._actionParameterSourceRegistry.TryGetValidator(currentValue.Definition, out IActionParameterPropertySourceValidator validator))
             {
                 //return true;
-                throw new InvalidOperationException($"No validator is registered for source '{source.Definition} ({source.Definition.GetType()})'");
+                throw new InvalidOperationException($"No validator is registered for source '{currentValue.Definition} ({currentValue.Definition.GetType()})'");
             }
 
-            bool result = validator.Validate(source, parent, action, this._schemaRegistry, this._logger);
+            bool result = validator.Validate(rootParameter, currentParameter, currentValue, parentValue, action, this._schemaRegistry, this._logger);
             return result;
         }
     }

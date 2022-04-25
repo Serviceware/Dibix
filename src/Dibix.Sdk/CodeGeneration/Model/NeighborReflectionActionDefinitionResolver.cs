@@ -78,9 +78,9 @@ namespace Dibix.Sdk.CodeGeneration
             NeighborActionTarget target;
             string accessorFullName = method.DeclaringType.FullName;
             if (isReflectionTarget)
-                target = new ReflectionActionTarget(assemblyName, accessorFullName, operationName, isAsync, hasRefParameters);
+                target = new ReflectionActionTarget(assemblyName, accessorFullName, operationName, isAsync, hasRefParameters, filePath, line, column);
             else
-                target = new NeighborActionTarget(accessorFullName, operationName, isAsync, hasRefParameters);
+                target = new NeighborActionTarget(accessorFullName, operationName, isAsync, hasRefParameters, filePath, line, column);
 
             ActionDefinition actionDefinition = new ActionDefinition(target);
             ActionParameterRegistry parameterRegistry = new ActionParameterRegistry(actionDefinition, pathParameters);

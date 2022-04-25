@@ -20,7 +20,7 @@ namespace Dibix.Sdk.Tests.Data
         // EmptyWithParams
         private const string EmptyWithParamsCommandText = "[dbo].[dbx_tests_syntax_empty_params]";
 
-        public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string u, string v, System.Guid? w, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? x = null, bool y = true, int? z = null)
+        public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string u, string v, System.Guid? w, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? x = null, bool y = true, Dibix.Sdk.Tests.DomainModel.Direction? z = null)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
@@ -58,6 +58,17 @@ namespace Dibix.Sdk.Tests.Data
         {
             base.AddValues(id, name);
         }
+    }
+}
+#endregion
+
+#region Contracts
+namespace Dibix.Sdk.Tests.DomainModel
+{
+    public enum Direction : int
+    {
+        Ascending,
+        Descending
     }
 }
 #endregion

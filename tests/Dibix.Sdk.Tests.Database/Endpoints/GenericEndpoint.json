@@ -67,13 +67,17 @@
     {
       "method": "PATCH",
       "target": "EmptyWithParams",
-      "body": "InputContract",
+      "body": "InputContract"
+    },
+    {
+      "method": "DELETE",
+      "target": "EmptyWithParams",
+      "body": "AnotherInputContract",
       "params": {
         "ids": {
-          "source": "BODY.Ids",
+          "source": "BODY.SomeIds",
           "items": {
-            "id": "ITEM.Id",
-            "name": "ITEM.Name"
+            "name": "ITEM.Title"
           }
         }
       }

@@ -33,7 +33,7 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
                                                                              .Select(x => new TaskItem(x.Value) { ["FullPath"] = Path.Combine(DatabaseTestUtility.DatabaseProjectDirectory, x.Value) })
                                                                              .ToArray();
 
-            TestLogger logger = new TestLogger(base.Out);
+            TestLogger logger = new TestLogger(base.Out, distinctErrorLogging: true);
 
             TSqlModel model = PublicSqlDataSchemaModelLoader.Load(DatabaseTestUtility.ProjectName, DatabaseTestUtility.DatabaseSchemaProviderName, DatabaseTestUtility.ModelCollation, sources, Array.Empty<TaskItem>(), logger);
             LockEntryManager lockEntryManager = LockEntryManager.Create();

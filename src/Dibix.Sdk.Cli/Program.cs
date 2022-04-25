@@ -21,7 +21,7 @@ namespace Dibix.Sdk.Cli
 
             string runnerName = args[0];
 
-            ILogger logger = new ConsoleLogger();
+            ILogger logger = new Logger(Console.Out, distinctErrorLogging: true);
             if (!TaskRunner.Execute(runnerName, args, logger))
                 return PrintHelp();
 

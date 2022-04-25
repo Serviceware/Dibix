@@ -90,10 +90,7 @@ paths:
         - name: z
           in: query
           schema:
-            type: integer
-            format: int32
-            default: 
-            nullable: true
+            $ref: '#/components/schemas/Direction'
       responses:
         '204':
           description: NoContent
@@ -200,6 +197,23 @@ paths:
       security:
         - HLNS-SIT: [ ]
           HLNS-ClientId: [ ]
+    delete:
+      tags:
+        - GenericEndpoint
+      summary: EmptyWithParams4
+      operationId: EmptyWithParams4
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnotherInputContract'
+        required: true
+      responses:
+        '204':
+          description: NoContent
+      security:
+        - HLNS-SIT: [ ]
+          HLNS-ClientId: [ ]
 components:
   schemas:
     GenericParameterSet:
@@ -215,6 +229,16 @@ components:
           type: string
           nullable: true
       additionalProperties: false
+    Direction:
+      enum:
+        - 0
+        - 1
+      type: integer
+      description: 0 = Ascending<br/>1 = Descending
+      format: int32
+      x-enum-varnames:
+        - Ascending
+        - Descending
     GenericContract:
       required:
         - Role
@@ -289,6 +313,50 @@ components:
           type: integer
           format: int32
         Name:
+          type: string
+      additionalProperties: false
+    AnotherInputContract:
+      required:
+        - U
+        - V
+        - SomeIds
+        - X
+        - Password
+        - Y
+        - Z
+      type: object
+      properties:
+        U:
+          type: string
+        V:
+          type: string
+        W:
+          type: string
+        SomeIds:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnotherEntry'
+        X:
+          type: string
+          format: uuid
+        Password:
+          type: string
+        Y:
+          type: boolean
+        Z:
+          type: integer
+          format: int32
+      additionalProperties: false
+    AnotherEntry:
+      required:
+        - Id
+        - Title
+      type: object
+      properties:
+        Id:
+          type: integer
+          format: int32
+        Title:
           type: string
       additionalProperties: false
   securitySchemes:

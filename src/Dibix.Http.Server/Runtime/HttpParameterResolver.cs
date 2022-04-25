@@ -590,8 +590,10 @@ namespace Dibix.Http.Server
                     source = Expression.Property(addItemFuncItemParameter, property);
                 }
                 else
+                {
                     throw new InvalidOperationException($@"Can not map UDT column: {parameter.Items.UdtName ?? parameter.ParameterType.ToString()}.{addMethodParameter.Key}
 Either create a mapping or make sure a property of the same name exists in the source: {parameter.Source.SourceName}.{parameter.Source.PropertyPath}");
+                }
 
                 source = EnsureCorrectType(addMethodParameter.Key, source, targetType, actionParameter);
                 addMethodParameterValues[addMethodParameter.Key] = source;

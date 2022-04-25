@@ -55,7 +55,7 @@ namespace Dibix.Sdk.CodeGeneration
             actionDefinition = ReflectionOnlyTypeInspector.Inspect(() => this.CreateActionDefinition(targetName, assemblyName, method, filePath, line, column, explicitParameters, pathParameters, bodyParameters));
             */
 
-            actionDefinition = new ActionDefinition(new ReflectionActionTarget(assemblyName, typeName, methodName, isAsync: false, hasRefParameters: false));
+            actionDefinition = new ActionDefinition(new ReflectionActionTarget(assemblyName, typeName, methodName, isAsync: false, hasRefParameters: false, filePath, line, column));
             ActionParameterRegistry parameterRegistry = new ActionParameterRegistry(actionDefinition, pathParameters);
             foreach (ExplicitParameter parameter in explicitParameters.Values)
             {
@@ -76,7 +76,7 @@ namespace Dibix.Sdk.CodeGeneration
                 }
 
                 bool isRequired = base.IsParameterRequired(type, location, defaultValue);
-                parameterRegistry.Add(new ActionParameter(apiParameterName, internalParameterName, type, location, isRequired, defaultValue, parameter.Source));
+                parameterRegistry.Add(new ActionParameter(apiParameterName, internalParameterName, type, location, isRequired, defaultValue, parameter.Source, filePath, parameter.Line, parameter.Column));
             }
 
             foreach (PathParameter pathParameter in pathParameters.Values)
@@ -84,7 +84,7 @@ namespace Dibix.Sdk.CodeGeneration
                 TypeReference typeReference = new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: false, filePath, pathParameter.Line, pathParameter.Column);
                 const ActionParameterLocation location = ActionParameterLocation.Path;
                 bool isRequired = base.IsParameterRequired(type: null, location, defaultValue: null);
-                ActionParameter parameter = new ActionParameter(pathParameter.Name, pathParameter.Name, typeReference, location, isRequired, defaultValue: null, source: null);
+                ActionParameter parameter = new ActionParameter(pathParameter.Name, pathParameter.Name, typeReference, location, isRequired, defaultValue: null, source: null, filePath, pathParameter.Line, pathParameter.Column);
                 actionDefinition.Parameters.Add(parameter);
             }
 

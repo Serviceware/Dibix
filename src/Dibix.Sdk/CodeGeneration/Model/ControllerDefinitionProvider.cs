@@ -342,7 +342,10 @@ namespace Dibix.Sdk.CodeGeneration
                 foreach (JProperty itemProperty in itemsObject.Properties())
                 {
                     if (TryReadSource(itemProperty, filePath, isItem: true, out ActionParameterSource itemPropertySource))
-                        propertySource.ItemSources.Add(itemProperty.Name, itemPropertySource);
+                    {
+                        IJsonLineInfo lineInfo = itemProperty.GetLineInfo();
+                        propertySource.ItemSources.Add(new ActionParameterItemSource(itemProperty.Name, itemPropertySource, filePath, lineInfo.LineNumber, lineInfo.LinePosition));
+                    }
                 }
                 return propertySource;
             }

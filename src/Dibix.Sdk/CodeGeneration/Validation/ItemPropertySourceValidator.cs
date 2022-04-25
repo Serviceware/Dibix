@@ -5,44 +5,72 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class ItemPropertySourceValidator : ObjectSchemaPropertySourceValidator<ItemParameterSource>
     {
-        public override bool Validate(ActionParameterPropertySource value, ActionParameterPropertySource parent, ActionDefinition actionDefinition, ISchemaRegistry schemaRegistry, ILogger logger)
+        public override bool Validate(ActionParameter rootParameter, ActionParameterInfo currentParameter, ActionParameterPropertySource currentValue, ActionParameterPropertySource parentValue, ActionDefinition actionDefinition, ISchemaRegistry schemaRegistry, ILogger logger)
         {
-            if (parent == null)
-                throw new ArgumentNullException(nameof(parent), "Item property source must map from a parent property source");
+            if (parentValue == null)
+                throw new ArgumentNullException(nameof(parentValue), "Item property source must map from a parent property source");
 
-            if (!(parent.Definition is BodyParameterSource))
+            if (!(rootParameter.Type is SchemaTypeReference parameterSchemaTypeReference))
+            {
+                logger.LogError(null, $"Unexpected parameter type '{rootParameter.Type}'. The ITEM property source can only be used to map to an UDT parameter.", currentValue.FilePath, currentValue.Line, currentValue.Column);
+                return false;
+            }
+
+            SchemaDefinition parameterSchema = schemaRegistry.GetSchema(parameterSchemaTypeReference);
+            if (!(parameterSchema is UserDefinedTypeSchema userDefinedTypeSchema))
+            {
+                logger.LogError(null, $"Unexpected parameter type '{parameterSchema}'. The ITEM property source can only be used to map to an UDT parameter.", currentValue.FilePath, currentValue.Line, currentValue.Column);
+                return false;
+            }
+
+            if (!userDefinedTypeSchema.Properties.Any(x => String.Equals(x.Name, currentParameter.ParameterName, StringComparison.OrdinalIgnoreCase)))
+            {
+                logger.LogError(null, $"Column '{currentParameter.ParameterName}' does not exist on UDT '{userDefinedTypeSchema.UdtName}'", currentParameter.FilePath, currentParameter.Line, currentParameter.Column);
+                return false;
+            }
+
+            if (parentValue.Definition is QueryParameterSource)
+                return true;
+
+            if (!(parentValue.Definition is BodyParameterSource))
             {
                 // Mapping from an enumerable item, means that the source property must be enumerable.
                 // However mapping from a custom source with an enumerable property is currently not supported.
-                throw new InvalidOperationException("Complex/enumerable source properties are currently not supported");
+                logger.LogError(null, $"Source '{parentValue.Definition.Name}' does not support mapping properties to an UDT", parentValue.FilePath, parentValue.Line, parentValue.Column);
+                return false;
             }
 
-            TypeReference bodyTypeReference = actionDefinition.RequestBody?.Contract; 
-            if (bodyTypeReference == null)
+            if (actionDefinition.RequestBody == null)
             {
-                // No body contract => No validation possible
+                // No body => No validation possible
                 // This *should* be a warning though
                 return true;
             }
 
-            if (!(bodyTypeReference is SchemaTypeReference bodySchemaTypeReference))
-                throw new InvalidOperationException($"Unexpected body contract type '{bodyTypeReference}'. Must be a complex object contract.");
+            TypeReference bodyContract = actionDefinition.RequestBody.Contract;
+            if (bodyContract == null) // Already logged at 'TypeResolverFacade.ResolveType'
+                return false;
+
+            if (!(bodyContract is SchemaTypeReference bodySchemaTypeReference))
+            {
+                logger.LogError(null, $"Unexpected request body contract '{bodyContract}'. Expected object schema when mapping complex UDT parameter: @{rootParameter.InternalParameterName} {userDefinedTypeSchema.UdtName}.", bodyContract.Source, bodyContract.Line, bodyContract.Column);
+                return false;
+            }
 
             SchemaDefinition bodySchema = schemaRegistry.GetSchema(bodySchemaTypeReference);
-            if (bodySchema == null)
-                return false;
-            
             if (!(bodySchema is ObjectSchema bodyObjectSchema))
-                throw new InvalidOperationException($"Unexpected body contract type '{bodySchema} ({bodySchema.FullName})'. Must be a complex object contract.");
+            {
+                logger.LogError(null, $"Unexpected request body contract '{bodySchema}'. Expected object schema when mapping complex UDT parameter: @{rootParameter.InternalParameterName} {userDefinedTypeSchema.UdtName}.", bodyContract.Source, bodyContract.Line, bodyContract.Column);
+                return false;
+            }
 
-            ObjectSchemaProperty itemsProperty = bodyObjectSchema.Properties.SingleOrDefault(x => x.Name == parent.PropertyName);
-            if (itemsProperty == null)
-                throw new InvalidOperationException($"Could not find a property '{parent.PropertyName}' on contract '{bodyObjectSchema.FullName}'");
+            if (!TryGetProperty(bodyObjectSchema, parentValue.PropertyName, parentValue, logger, out ObjectSchemaProperty itemsProperty))
+                return false;
 
-            if (value.PropertyName == ItemParameterSource.IndexPropertyName)
+            if (currentValue.PropertyName == ItemParameterSource.IndexPropertyName)
                 return true;
 
-            return base.Validate(value, itemsProperty.Type, schemaRegistry, logger);
+            return base.Validate(currentValue, itemsProperty.Type, schemaRegistry, logger);
         }
     }
 }
