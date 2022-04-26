@@ -55,14 +55,14 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (!(bodyContract is SchemaTypeReference bodySchemaTypeReference))
             {
-                this._logger.LogError(null, $"Unexpected request body contract '{bodyContract}'. Expected object schema when mapping complex UDT parameter: @{parameter.InternalParameterName} {userDefinedTypeSchema.UdtName}.", bodyContract.Source, bodyContract.Line, bodyContract.Column);
+                this._logger.LogError($"Unexpected request body contract '{bodyContract}'. Expected object schema when mapping complex UDT parameter: @{parameter.InternalParameterName} {userDefinedTypeSchema.UdtName}.", bodyContract.Source, bodyContract.Line, bodyContract.Column);
                 return false;
             }
 
             SchemaDefinition bodySchema = this._schemaRegistry.GetSchema(bodySchemaTypeReference);
             if (!(bodySchema is ObjectSchema bodyObjectSchema))
             {
-                this._logger.LogError(null, $"Unexpected request body contract '{bodySchema}'. Expected object schema when mapping complex UDT parameter: @{parameter.InternalParameterName} {userDefinedTypeSchema.UdtName}.", bodyContract.Source, bodyContract.Line, bodyContract.Column);
+                this._logger.LogError($"Unexpected request body contract '{bodySchema}'. Expected object schema when mapping complex UDT parameter: @{parameter.InternalParameterName} {userDefinedTypeSchema.UdtName}.", bodyContract.Source, bodyContract.Line, bodyContract.Column);
                 return false;
             }
 
@@ -74,13 +74,13 @@ namespace Dibix.Sdk.CodeGeneration
             ActionDefinitionTarget target = action.Target;
             if (sourceProperty == null)
             {
-                this._logger.LogError(null, $"Target parameter '@{parameter.InternalParameterName}' can not be mapped from body contract '{bodySchemaTypeReference.Key}' and no explicit parameter override exists", target.Source, target.Line, target.Column);
+                this._logger.LogError($"Target parameter '@{parameter.InternalParameterName}' can not be mapped from body contract '{bodySchemaTypeReference.Key}' and no explicit parameter override exists", target.Source, target.Line, target.Column);
                 return false;
             }
 
             if (!(sourceProperty.Type is SchemaTypeReference sourcePropertySchemaTypeReference))
             {
-                this._logger.LogError(null, $"Unexpected contract '{sourceProperty.Type}' for source property '{bodySchemaTypeReference.Key}.{sourceProperty.Name}'. Expected object schema when mapping complex UDT parameter: @{parameter.InternalParameterName} {userDefinedTypeSchema.UdtName}.", target.Source, target.Line, target.Column);
+                this._logger.LogError($"Unexpected contract '{sourceProperty.Type}' for source property '{bodySchemaTypeReference.Key}.{sourceProperty.Name}'. Expected object schema when mapping complex UDT parameter: @{parameter.InternalParameterName} {userDefinedTypeSchema.UdtName}.", target.Source, target.Line, target.Column);
                 return false;
             }
 
@@ -90,7 +90,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (!(sourcePropertySchema is ObjectSchema sourcePropertyObjectSchema))
             {
-                this._logger.LogError(null, $"Unexpected contract '{sourcePropertySchema}' for source property '{bodySchemaTypeReference.Key}.{sourceProperty.Name}'. Expected object schema when mapping complex UDT parameter: @{parameter.InternalParameterName} {userDefinedTypeSchema.UdtName}.", target.Source, target.Line, target.Column);
+                this._logger.LogError($"Unexpected contract '{sourcePropertySchema}' for source property '{bodySchemaTypeReference.Key}.{sourceProperty.Name}'. Expected object schema when mapping complex UDT parameter: @{parameter.InternalParameterName} {userDefinedTypeSchema.UdtName}.", target.Source, target.Line, target.Column);
                 return false;
             }
 
@@ -107,7 +107,7 @@ namespace Dibix.Sdk.CodeGeneration
                 if (sourceProperties.Contains(targetPropertyName))
                     continue;
 
-                this._logger.LogError(null, $"UDT column '{userDefinedTypeSchema.UdtName}.[{targetPropertyName}]' can not be mapped. Create a property on source contract '{sourcePropertySchemaTypeReference.Key}' of the same name or create an explicit parameter mapping on the endpoint action.", target.Source, target.Line, target.Column);
+                this._logger.LogError($"UDT column '{userDefinedTypeSchema.UdtName}.[{targetPropertyName}]' can not be mapped. Create a property on source contract '{sourcePropertySchemaTypeReference.Key}' of the same name or create an explicit parameter mapping on the endpoint action.", target.Source, target.Line, target.Column);
                 result = false;
             }
 

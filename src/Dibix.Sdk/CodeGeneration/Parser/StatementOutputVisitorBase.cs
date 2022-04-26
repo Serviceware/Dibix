@@ -72,7 +72,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             if (selectElement is SelectStarExpression)
             {
-                this.Logger.LogError(null, "Star expressions are not supported", this.SourcePath, selectElement.StartLine, selectElement.StartColumn);
+                this.Logger.LogError("Star expressions are not supported", this.SourcePath, selectElement.StartLine, selectElement.StartColumn);
                 return null;
             }
 
@@ -89,7 +89,7 @@ namespace Dibix.Sdk.CodeGeneration
                 {
                     if (columnReference.ColumnType != Microsoft.SqlServer.TransactSql.ScriptDom.ColumnType.Regular)
                     {
-                        this.Logger.LogError(null, $"Cannot determine name for unaliased column: {columnReference.Dump()}", this.SourcePath, selectElement.StartLine, selectElement.StartColumn);
+                        this.Logger.LogError($"Cannot determine name for unaliased column: {columnReference.Dump()}", this.SourcePath, selectElement.StartLine, selectElement.StartColumn);
                         return null;
                     }
 

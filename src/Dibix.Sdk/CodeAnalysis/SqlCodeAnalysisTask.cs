@@ -114,7 +114,7 @@ namespace Dibix.Sdk.CodeAnalysis
 
         private static void ReportExtensibilityError(ExtensibilityError error, object category, bool blocksBuild, ILogger logger)
         {
-            logger.LogError(error.ErrorCode.ToString(), error.Message, error.Document, error.Line, error.Column);
+            logger.LogError(error.Message, error.Document, error.Line, error.Column);
         }
 
         private static void ReportAnalysisResults(CodeAnalysisResult analysisResult, ILogger logger)
@@ -153,7 +153,7 @@ namespace Dibix.Sdk.CodeAnalysis
             {
                 foreach (SqlCodeAnalysisError error in analyzeFunction(codeAnalysisEngine))
                 {
-                    logger.LogError($"DBX{error.RuleId:000}", error.Message, inputFilePath, error.Line, error.Column);
+                    logger.LogError($"DBX{error.RuleId:D3}", error.Message, inputFilePath, error.Line, error.Column);
                 }
             }
             catch (Exception e)

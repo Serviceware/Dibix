@@ -52,7 +52,7 @@ namespace Dibix.Sdk.Sql
             if (markup.TryGetSingleElementValue(SqlMarkupKey.ClrType, source, logger, out ISqlElementValue typeImplementationName) && !(dataTypeReference is SqlDataTypeReference))
             {
                 udtName = null;
-                logger.LogError(null, $@"The @ClrType hint is only supported for primitive types
+                logger.LogError($@"The @ClrType hint is only supported for primitive types
 Name: {name}
 DataType: {dataTypeReference.GetType()}", source, dataTypeReference.StartLine, dataTypeReference.StartColumn);
                 return null;
@@ -80,7 +80,7 @@ DataType: {dataTypeReference.GetType()}", source, dataTypeReference.StartLine, d
                     if (PrimitiveTypeMap.TryGetValue(sqlDataTypeReference.SqlDataTypeOption, out PrimitiveType dataType))
                         return new PrimitiveTypeReference(dataType, isNullable, false, source, dataTypeReference.StartLine, dataTypeReference.StartColumn);
 
-                    logger.LogError(null, $@"Unsupported sql data type
+                    logger.LogError($@"Unsupported sql data type
 Name: {name}
 DataType: {sqlDataTypeReference.SqlDataTypeOption}", source, dataTypeReference.StartLine, dataTypeReference.StartColumn);
                     return null;

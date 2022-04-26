@@ -25,7 +25,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (!this._lockEntryManager.HasEntry(LockSectionName, targetName))
             {
-                base.Logger.LogError(null, "Reflection targets are not supported anymore", filePath, line, column);
+                base.Logger.LogError("Reflection targets are not supported anymore", filePath, line, column);
                 actionDefinition = null;
                 return false;
             }

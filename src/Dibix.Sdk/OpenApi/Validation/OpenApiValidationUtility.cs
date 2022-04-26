@@ -15,7 +15,7 @@ namespace Dibix.Sdk.OpenApi
             if (!TryCollectErrorLocation(error, json, out string path, out int line, out int column)) 
                 path = error.Pointer;
 
-            logger.LogError(null, $"{error.Message} ({path})", jsonFilePath, line, column);
+            logger.LogError($"{error.Message} ({path})", jsonFilePath, line, column);
         }
 
         private static bool TryCollectErrorLocation(OpenApiError error, JToken json, out string jsonPath, out int line, out int column)

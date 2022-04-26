@@ -43,7 +43,7 @@ namespace Dibix.Sdk.Sql
 
                 if (reference.TryGetValue("SuppressMissingDependenciesErrors", out string suppressionValue) && Boolean.Parse(suppressionValue))
                 {
-                    logger.LogError(null, $"SuppressMissingDependenciesErrors is not supported: {path}", null, default, default);
+                    logger.LogError($"SuppressMissingDependenciesErrors is not supported: {path}", null, default, default);
                     continue;
                 }
 
@@ -60,7 +60,7 @@ namespace Dibix.Sdk.Sql
                 bool? isEmbedded = DacMetadataManager.IsEmbedded(path);
                 if (!isEmbedded.HasValue)
                 {
-                    logger.LogError(null, $"Unsupported package reference: {path}", null, default, default);
+                    logger.LogError($"Unsupported package reference: {path}", null, default, default);
                 }
                 else if (isEmbedded.Value)
                 {
@@ -68,7 +68,7 @@ namespace Dibix.Sdk.Sql
                     if (projectName == "Helpline.DML")
                         continue;
                     
-                    logger.LogError(null, $"Unsupported reference to DML package: {path}", null, default, default);
+                    logger.LogError($"Unsupported reference to DML package: {path}", null, default, default);
                 }
             }
         }
@@ -259,9 +259,9 @@ namespace Dibix.Sdk.Sql
 
             public BuildEngine(ILogger logger) => this._logger = logger;
 
-            void IBuildEngine.LogErrorEvent(BuildErrorEventArgs e) => this._logger.LogError(e.Code, e.Message, e.File, e.LineNumber, e.ColumnNumber);
+            void IBuildEngine.LogErrorEvent(BuildErrorEventArgs e) => this._logger.LogError(e.Message, e.File, e.LineNumber, e.ColumnNumber);
 
-            void IBuildEngine.LogWarningEvent(BuildWarningEventArgs e) => this._logger.LogError(e.Code, e.Message, e.File, e.LineNumber, e.ColumnNumber);
+            void IBuildEngine.LogWarningEvent(BuildWarningEventArgs e) => this._logger.LogError(e.Message, e.File, e.LineNumber, e.ColumnNumber);
 
             void IBuildEngine.LogMessageEvent(BuildMessageEventArgs e) => this._logger.LogMessage(e.Message);
 

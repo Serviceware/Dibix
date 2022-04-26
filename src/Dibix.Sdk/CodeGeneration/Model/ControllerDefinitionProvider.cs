@@ -132,13 +132,13 @@ namespace Dibix.Sdk.CodeGeneration
                 // Validate explicit parameters
                 foreach (ExplicitParameter explicitParameter in explicitParameters.Values)
                 {
-                    base.Logger.LogError(null, $"Parameter '{explicitParameter.Name}' not found on action: {actionDefinition.Target.OperationName}", filePath, explicitParameter.Line, explicitParameter.Column);
+                    base.Logger.LogError($"Parameter '{explicitParameter.Name}' not found on action: {actionDefinition.Target.OperationName}", filePath, explicitParameter.Line, explicitParameter.Column);
                 }
 
                 // Validate path parameters
                 foreach (PathParameter pathSegment in pathParameters.Values)
                 {
-                    base.Logger.LogError(null, $"Undefined path parameter: {pathSegment.Name}", filePath, pathSegment.Line, pathSegment.Column);
+                    base.Logger.LogError($"Undefined path parameter: {pathSegment.Name}", filePath, pathSegment.Line, pathSegment.Column);
                 }
             }
 
@@ -174,7 +174,7 @@ namespace Dibix.Sdk.CodeGeneration
                 sb.Append('/').Append(actionDefinition.ChildRoute);
 
             IJsonLineInfo lineInfo = action;
-            base.Logger.LogError(null, $"Duplicate action registration: {sb}", filePath, lineInfo.LineNumber, lineInfo.LinePosition);
+            base.Logger.LogError($"Duplicate action registration: {sb}", filePath, lineInfo.LineNumber, lineInfo.LinePosition);
         }
 
         private ActionRequestBody ReadBody(JObject action, string filePath)
@@ -212,7 +212,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (contractName == null)
             {
                 IJsonLineInfo valueLocation = value;
-                base.Logger.LogError(null, "Body is missing 'contract' property", filePath, valueLocation.LineNumber, valueLocation.LinePosition);
+                base.Logger.LogError("Body is missing 'contract' property", filePath, valueLocation.LineNumber, valueLocation.LinePosition);
                 return null;
             }
 
@@ -243,7 +243,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (!this._lockEntryManager.HasEntry(LockSectionName, typeName))
             {
                 IJsonLineInfo lineInfo = value.GetLineInfo();
-                base.Logger.LogError(null, "Controller imports are not supported anymore", filePath, lineInfo.LineNumber, lineInfo.LinePosition);
+                base.Logger.LogError("Controller imports are not supported anymore", filePath, lineInfo.LineNumber, lineInfo.LinePosition);
                 return;
             }
 
@@ -307,7 +307,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (!this._actionParameterSourceRegistry.TryGetDefinition(sourceName, out ActionParameterSourceDefinition definition))
             {
-                base.Logger.LogError(null, $"Unknown property source '{sourceName}'", filePath, valueLocation.LineNumber, valueLocation.LinePosition);
+                base.Logger.LogError($"Unknown property source '{sourceName}'", filePath, valueLocation.LineNumber, valueLocation.LinePosition);
             }
 
             ActionParameterPropertySource propertySource = new ActionParameterPropertySource(definition, propertyName, filePath, valueLocation.LineNumber, valueLocation.LinePosition);
@@ -358,7 +358,7 @@ namespace Dibix.Sdk.CodeGeneration
                 if (!this._actionParameterConverterRegistry.IsRegistered(converterName))
                 {
                     IJsonLineInfo converterLocation = converter.GetLineInfo();
-                    base.Logger.LogError(null, $"Unknown property converter '{converterName}'", filePath, converterLocation.LineNumber, converterLocation.LinePosition);
+                    base.Logger.LogError($"Unknown property converter '{converterName}'", filePath, converterLocation.LineNumber, converterLocation.LinePosition);
                 }
                 propertySource.Converter = converterName;
                 return propertySource;
@@ -494,7 +494,7 @@ namespace Dibix.Sdk.CodeGeneration
                                                                             .Schemes
                                                                             .Select(x => x.Name)
                                                                             .Concat(this._defaultSecuritySchemes));
-                    base.Logger.LogError(null, $"Unknown authorization scheme '{name}'. Possible values are: {possibleValues}", filePath, lineInfo.LineNumber, lineInfo.LinePosition);
+                    base.Logger.LogError($"Unknown authorization scheme '{name}'. Possible values are: {possibleValues}", filePath, lineInfo.LineNumber, lineInfo.LinePosition);
                     return;
                 }
                 this._securitySchemeMap.Add(name, scheme);

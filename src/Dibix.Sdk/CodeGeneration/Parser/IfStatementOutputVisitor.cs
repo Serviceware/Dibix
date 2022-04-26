@@ -19,7 +19,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 if (left.Outputs.Any())
                 {
-                    base.Logger.LogError(null, "IF statements that produce outputs but do not have an ELSE block are not supported, because the number of output results isn't guaranteed", base.SourcePath, node.StartLine, node.StartColumn);
+                    base.Logger.LogError("IF statements that produce outputs but do not have an ELSE block are not supported, because the number of output results isn't guaranteed", base.SourcePath, node.StartLine, node.StartColumn);
                 }
                 return;
             }
@@ -31,7 +31,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 if (!left.Outputs.Any() && !left._containsThrow || !right.Outputs.Any() && !right._containsThrow)
                 {
-                    base.Logger.LogError(null, "The number of output statements in IF THEN block does not match the number in ELSE block", base.SourcePath, node.StartLine, node.StartColumn);
+                    base.Logger.LogError("The number of output statements in IF THEN block does not match the number in ELSE block", base.SourcePath, node.StartLine, node.StartColumn);
                     return;
                 }
             }
@@ -45,7 +45,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                     if (leftResult.Columns.Count != rightResult.Columns.Count)
                     {
-                        base.Logger.LogError(null, "The number of columns in output statement in IF THEN block does not match the number in ELSE block", base.SourcePath, leftResult.Line, leftResult.Column);
+                        base.Logger.LogError("The number of columns in output statement in IF THEN block does not match the number in ELSE block", base.SourcePath, leftResult.Line, leftResult.Column);
                         break;
                     }
 
@@ -56,7 +56,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                         if (leftColumn.ColumnName != rightColumn.ColumnName)
                         {
-                            base.Logger.LogError(null, $@"The column names in output statement in IF THEN block do not match those in ELSE block
+                            base.Logger.LogError($@"The column names in output statement in IF THEN block do not match those in ELSE block
 Column in THEN: {leftColumn.ColumnName}
 Column in ELSE: {rightColumn.ColumnName}", base.SourcePath, leftColumn.ColumnNameSource.StartLine, leftColumn.ColumnNameSource.StartColumn);
                             break;

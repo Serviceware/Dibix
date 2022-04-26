@@ -32,7 +32,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (this._schemas.TryGetValue(reference.Key, out SchemaDefinition schema)) 
                 return schema;
 
-            this._logger.LogError(null, $"Schema is not registered: {reference.Key}", reference.Source, reference.Line, reference.Column);
+            this._logger.LogError($"Schema is not registered: {reference.Key}", reference.Source, reference.Line, reference.Column);
             return null;
         }
 

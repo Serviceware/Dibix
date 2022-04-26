@@ -64,7 +64,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
             if (!isPartOfPrimaryKey.HasValue)
             {
-                base.LogError(node.Column, "71502", $"Cannot resolve reference to object {String.Join(".", elementLocation.Identifiers)}");
+                base.LogError(node.Column, "SQL71502", $"Cannot resolve reference to object {String.Join(".", elementLocation.Identifiers)}");
                 return;
             }
 

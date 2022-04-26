@@ -19,7 +19,8 @@ namespace Dibix.Sdk
 
         public void LogMessage(string text) => this._output.WriteLine(text);
 
-        public void LogError(string code, string text, string source, int? line, int? column) => this.LogError(subCategory: null, code: code, text: text, source: source, line: line, column: column);
+        public void LogError(string text, string source, int? line, int? column) => this.LogError(subCategory: null, code: null, text, source, line, column);
+        public void LogError(string code, string text, string source, int? line, int? column) => this.LogError(subCategory: null, code, text, source, line, column);
         public virtual void LogError(string subCategory, string code, string text, string source, int? line, int? column)
         {
             string message = CanonicalLogFormat.ToErrorString(subCategory, code, text, source, line, column);

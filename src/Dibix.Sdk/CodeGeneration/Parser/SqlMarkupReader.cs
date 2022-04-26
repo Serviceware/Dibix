@@ -344,7 +344,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 if (this.Value != null)
                 {
-                    logger.LogError(null, $"Multiple default properties specified for @{this.Name}", source, this.Line, propertyColumn);
+                    logger.LogError($"Multiple default properties specified for @{this.Name}", source, this.Line, propertyColumn);
                     return;
                 }
                 this.Value = new SqlElementValue(value, this.Line, valueColumn);
@@ -354,13 +354,13 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 if (this._properties.ContainsKey(name))
                 {
-                    logger.LogError(null, $"Duplicate property for @{this.Name}.{name}", source, this.Line, propertyColumn);
+                    logger.LogError($"Duplicate property for @{this.Name}.{name}", source, this.Line, propertyColumn);
                     return;
                 }
 
                 if (value.Length == 0)
                 {
-                    logger.LogError(null, $"Missing value for '{name}' property", source, this.Line, propertyColumn);
+                    logger.LogError($"Missing value for '{name}' property", source, this.Line, propertyColumn);
                     return;
                 }
 
@@ -439,7 +439,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                 if (element.Value == null)
                 {
-                    logger.LogError(null, $"Element has no value: {name}", source, element.Line, element.Column);
+                    logger.LogError($"Element has no value: {name}", source, element.Line, element.Column);
                     value = null;
                     return false;
                 }
@@ -475,7 +475,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                 if (elements.Count > 1)
                 {
-                    logger.LogError(null, $"Found multiple elements with name: {name}", source, elements[1].Line, elements[1].Column);
+                    logger.LogError($"Found multiple elements with name: {name}", source, elements[1].Line, elements[1].Column);
                     element = null;
                     return false;
                 }

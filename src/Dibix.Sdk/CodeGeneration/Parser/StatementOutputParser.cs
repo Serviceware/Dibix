@@ -73,17 +73,17 @@ namespace Dibix.Sdk.CodeGeneration
         {
             if (returnElements.Any())
             {
-                logger.LogError(null, "When using the @FileResult option, no return declarations should be defined", source, node.StartLine, node.StartColumn);
+                logger.LogError("When using the @FileResult option, no return declarations should be defined", source, node.StartLine, node.StartColumn);
             }
             
             if (!IsValidFileResult(results))
             {
-                logger.LogError(null, "When using the @FileResult option, the query should return only one output statement with the following schema: ([type] NVARCHAR, [data] VARBINARY, [filename] NVARCHAR NULL)", source, node.StartLine, node.StartColumn);
+                logger.LogError("When using the @FileResult option, the query should return only one output statement with the following schema: ([type] NVARCHAR, [data] VARBINARY, [filename] NVARCHAR NULL)", source, node.StartLine, node.StartColumn);
             }
 
             if (definition.MergeGridResult)
             {
-                logger.LogError(null, "When using the @FileResult option, the @MergeGridResult option is invalid", source, node.StartLine, node.StartColumn);
+                logger.LogError("When using the @FileResult option, the @MergeGridResult option is invalid", source, node.StartLine, node.StartColumn);
             }
         }
 
@@ -121,7 +121,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (!definition.MergeGridResult || returnElements.Count > 1) 
                 return;
 
-            logger.LogError(null, "The @MergeGridResult option only works with a grid result so at least two results should be specified with the @Return hint", source, node.StartLine, node.StartColumn);
+            logger.LogError("The @MergeGridResult option only works with a grid result so at least two results should be specified with the @Return hint", source, node.StartLine, node.StartColumn);
         }
 
         private static bool ValidateReturnElement(ISqlElement returnElement, ILogger logger)
@@ -129,7 +129,7 @@ namespace Dibix.Sdk.CodeGeneration
             foreach (ISqlElementProperty property in returnElement.Properties)
             {
                 if (!SqlReturnMarkupProperty.IsDefined(property.Name))
-                    logger.LogError(null, $"Unexpected @Return property '{property.Name}'", returnElement.Source, property.Line, property.Column);
+                    logger.LogError($"Unexpected @Return property '{property.Name}'", returnElement.Source, property.Line, property.Column);
             }
 
             return true;
@@ -141,14 +141,14 @@ namespace Dibix.Sdk.CodeGeneration
             for (int i = results.Count; i < returnElements.Count; i++)
             {
                 ISqlElement redundantReturnElement = returnElements[i];
-                logger.LogError(null, "There are more output declarations than actual outputs being produced by the statement", source, redundantReturnElement.Line, redundantReturnElement.Column);
+                logger.LogError("There are more output declarations than actual outputs being produced by the statement", source, redundantReturnElement.Line, redundantReturnElement.Column);
                 result = false;
             }
 
             for (int i = returnElements.Count; i < results.Count; i++)
             {
                 OutputSelectResult output = results[i];
-                logger.LogError(null, "Missing return declaration for output. Please decorate the statement with the following hint to describe the output: -- @Return <ContractName>", source, output.Line, output.Column);
+                logger.LogError("Missing return declaration for output. Please decorate the statement with the following hint to describe the output: -- @Return <ContractName>", source, output.Line, output.Column);
                 result = false;
             }
 
@@ -163,7 +163,7 @@ namespace Dibix.Sdk.CodeGeneration
                 ISqlElement returnElement = returnElements[i];
                 if (!returnElement.TryGetPropertyValue(SqlReturnMarkupProperty.ClrTypes, isDefault: true, out ISqlElementValue typesHint))
                 {
-                    logger.LogError(null, $"Missing property '{SqlReturnMarkupProperty.ClrTypes}'", returnElement.Source, returnElement.Line, returnElement.Column);
+                    logger.LogError($"Missing property '{SqlReturnMarkupProperty.ClrTypes}'", returnElement.Source, returnElement.Line, returnElement.Column);
                     yield break;
                 }
 
@@ -239,7 +239,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (!returnElement.TryGetPropertyValue(SqlReturnMarkupProperty.Mode, isDefault: false, out ISqlElementValue resultModeHint) || Enum.TryParse(resultModeHint.Value, out resultMode)) 
                 return true;
 
-            logger.LogError(null, $"Result mode not supported: {resultModeHint.Value}", returnElement.Source, resultModeHint.Line, resultModeHint.Column);
+            logger.LogError($"Result mode not supported: {resultModeHint.Value}", returnElement.Source, resultModeHint.Line, resultModeHint.Column);
             return false;
         }
 
@@ -251,12 +251,12 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (!supportedMergeGridResultModes.Contains(resultMode))
             {
-                logger.LogError(null, $"When using the @MergeGridResult option, the first result should specify one of the following result modes using the 'Mode' property: {String.Join(", ", supportedMergeGridResultModes)}", source, node.StartLine, node.StartColumn);
+                logger.LogError($"When using the @MergeGridResult option, the first result should specify one of the following result modes using the 'Mode' property: {String.Join(", ", supportedMergeGridResultModes)}", source, node.StartLine, node.StartColumn);
             }
 
             if (!String.IsNullOrEmpty(resultName))
             {
-                logger.LogError(null, "When using the @MergeGridResult option, the 'Name' property must not be set on the first result", source, node.StartLine, node.StartColumn);
+                logger.LogError("When using the @MergeGridResult option, the 'Name' property must not be set on the first result", source, node.StartLine, node.StartColumn);
             }
         }
 
@@ -324,7 +324,7 @@ namespace Dibix.Sdk.CodeGeneration
                     if (!singleColumn)
                     {
                         TSqlFragment firstColumn = columnGroup[0].ColumnNameSource;
-                        logger.LogError(null, $"Cannot map complex result to primitive type '{primitiveTypeName}'", returnElement.Source, firstColumn.StartLine, firstColumn.StartColumn);
+                        logger.LogError($"Cannot map complex result to primitive type '{primitiveTypeName}'", returnElement.Source, firstColumn.StartLine, firstColumn.StartColumn);
                     }
 
                     // SELECT 1 => Query<int>/Single<int> => No entity property validation + No missing alias validation
@@ -340,7 +340,7 @@ namespace Dibix.Sdk.CodeGeneration
                     // i.E.: SELECT COUNT(*) no alias
                     if (!columnResult.HasName)
                     {
-                        logger.LogError(null, $"Missing alias for expression '{columnResult.PrimarySource.Dump()}'", returnElement.Source, columnResult.PrimarySource.StartLine, columnResult.PrimarySource.StartColumn);
+                        logger.LogError($"Missing alias for expression '{columnResult.PrimarySource.Dump()}'", returnElement.Source, columnResult.PrimarySource.StartLine, columnResult.PrimarySource.StartColumn);
                         continue;
                     }
 
@@ -349,7 +349,7 @@ namespace Dibix.Sdk.CodeGeneration
                     // Validate if entity property exists
                     if (property == null)
                     {
-                        logger.LogError(null, $"Property '{columnResult.ColumnName}' not found on return type '{schema.FullName}'", returnElement.Source, columnResult.ColumnNameSource.StartLine, columnResult.ColumnNameSource.StartColumn);
+                        logger.LogError($"Property '{columnResult.ColumnName}' not found on return type '{schema.FullName}'", returnElement.Source, columnResult.ColumnNameSource.StartLine, columnResult.ColumnNameSource.StartColumn);
                         continue;
                     }
 
@@ -366,14 +366,14 @@ namespace Dibix.Sdk.CodeGeneration
             if (name != null)
             {
                 if (usedOutputNames.Contains(name.Value))
-                    logger.LogError(null, $"The name '{name.Value}' is already defined for another output result", returnElement.Source, name.Line, name.Column);
+                    logger.LogError($"The name '{name.Value}' is already defined for another output result", returnElement.Source, name.Line, name.Column);
                 //else if (numberOfReturnElements == 1)
                 //    logger.LogError(null, "The 'Name' property is irrelevant when a single output is returned", returnElement.Source, name.Line, name.Column);
                 else
                     usedOutputNames.Add(name.Value);
             }
             else if (numberOfReturnElements > 1 && (!target.MergeGridResult || !isFirstResult))
-                logger.LogError(null, "The 'Name' property must be specified when multiple outputs are returned. Mark it in the @Return hint: -- @Return ClrTypes:<ClrTypeName> Name:<ResultName>", returnElement.Source, returnElement.Line, returnElement.Column);
+                logger.LogError("The 'Name' property must be specified when multiple outputs are returned. Mark it in the @Return hint: -- @Return ClrTypes:<ClrTypeName> Name:<ResultName>", returnElement.Source, returnElement.Line, returnElement.Column);
         }
 
         private static bool TrySplitColumns(IList<OutputColumnResult> columns, int resultTypeCount, ISqlElement returnElement, ISqlElementValue splitOn, ILogger logger, out IList<IList<OutputColumnResult>> columnGroups)
@@ -383,7 +383,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 if (resultTypeCount > 1)
                 {
-                    logger.LogError(null, "The 'SplitOn' property must be specified when using multiple return types. Mark it in the @Return hint: -- @Return ClrTypes:<ClrTypeName> Name:<ResultName> SplitOn:<SplitColumnName>", returnElement.Source, returnElement.Line, returnElement.Column);
+                    logger.LogError("The 'SplitOn' property must be specified when using multiple return types. Mark it in the @Return hint: -- @Return ClrTypes:<ClrTypeName> Name:<ResultName> SplitOn:<SplitColumnName>", returnElement.Source, returnElement.Line, returnElement.Column);
                     return false;
                 }
 
@@ -395,7 +395,7 @@ namespace Dibix.Sdk.CodeGeneration
             int expectedPageCount = splitColumns.Count + 1;
             if (resultTypeCount != expectedPageCount)
             {
-                logger.LogError(null, "The 'SplitOn' property does not match the number of return types", returnElement.Source, splitOn.Line, splitOn.Column);
+                logger.LogError("The 'SplitOn' property does not match the number of return types", returnElement.Source, splitOn.Line, splitOn.Column);
                 return false;
             }
 
@@ -431,7 +431,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (columnGroups.Count != expectedPageCount)
             {
-                logger.LogError(null, $"SplitOn column '{splitColumn}' does not match any column on the result", returnElement.Source, splitOn.Line, position);
+                logger.LogError($"SplitOn column '{splitColumn}' does not match any column on the result", returnElement.Source, splitOn.Line, position);
                 return false;
             }
 
@@ -456,12 +456,12 @@ namespace Dibix.Sdk.CodeGeneration
                 // To implement this they can only be distinguished by a different method name.
                 // Currently the invest is bigger than the benefit
                 // The current workaround is to always have a root result (the first one) that contains at least one property (for example: the key)
-                logger.LogError(null, "Projection using the 'ResultType' property is currently only supported in a part of a grid result", returnElement.Source, node.StartLine, node.StartColumn);
+                logger.LogError("Projection using the 'ResultType' property is currently only supported in a part of a grid result", returnElement.Source, node.StartLine, node.StartColumn);
             }
 
             if (isResultTypeSupported)
             {
-                logger.LogError(null, $"Projection using the 'ResultType' property is currently only supported for the following result modes using the 'Mode' property: {String.Join(", ", supportedResultTypeResultModes)}", returnElement.Source, node.StartLine, node.StartColumn);
+                logger.LogError($"Projection using the 'ResultType' property is currently only supported for the following result modes using the 'Mode' property: {String.Join(", ", supportedResultTypeResultModes)}", returnElement.Source, node.StartLine, node.StartColumn);
             }
 
             if (singleResult || isResultTypeSupported) 
@@ -495,7 +495,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (primitiveTypeReference.Type == PrimitiveType.Boolean)
                 return true;
 
-            logger.LogError(null, $"When using the result mode option '{mode}', the primitive return type must be nullable: {returnTypeName}", source, returnTypeLocation.Line, returnTypeLocation.Column);
+            logger.LogError($"When using the result mode option '{mode}', the primitive return type must be nullable: {returnTypeName}", source, returnTypeLocation.Line, returnTypeLocation.Column);
             return false;
         }
     }

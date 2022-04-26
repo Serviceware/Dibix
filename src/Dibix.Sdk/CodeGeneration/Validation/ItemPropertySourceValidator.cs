@@ -12,20 +12,20 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (!(rootParameter.Type is SchemaTypeReference parameterSchemaTypeReference))
             {
-                logger.LogError(null, $"Unexpected parameter type '{rootParameter.Type}'. The ITEM property source can only be used to map to an UDT parameter.", currentValue.FilePath, currentValue.Line, currentValue.Column);
+                logger.LogError($"Unexpected parameter type '{rootParameter.Type}'. The ITEM property source can only be used to map to an UDT parameter.", currentValue.FilePath, currentValue.Line, currentValue.Column);
                 return false;
             }
 
             SchemaDefinition parameterSchema = schemaRegistry.GetSchema(parameterSchemaTypeReference);
             if (!(parameterSchema is UserDefinedTypeSchema userDefinedTypeSchema))
             {
-                logger.LogError(null, $"Unexpected parameter type '{parameterSchema}'. The ITEM property source can only be used to map to an UDT parameter.", currentValue.FilePath, currentValue.Line, currentValue.Column);
+                logger.LogError($"Unexpected parameter type '{parameterSchema}'. The ITEM property source can only be used to map to an UDT parameter.", currentValue.FilePath, currentValue.Line, currentValue.Column);
                 return false;
             }
 
             if (!userDefinedTypeSchema.Properties.Any(x => String.Equals(x.Name, currentParameter.ParameterName, StringComparison.OrdinalIgnoreCase)))
             {
-                logger.LogError(null, $"Column '{currentParameter.ParameterName}' does not exist on UDT '{userDefinedTypeSchema.UdtName}'", currentParameter.FilePath, currentParameter.Line, currentParameter.Column);
+                logger.LogError($"Column '{currentParameter.ParameterName}' does not exist on UDT '{userDefinedTypeSchema.UdtName}'", currentParameter.FilePath, currentParameter.Line, currentParameter.Column);
                 return false;
             }
 
@@ -36,7 +36,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 // Mapping from an enumerable item, means that the source property must be enumerable.
                 // However mapping from a custom source with an enumerable property is currently not supported.
-                logger.LogError(null, $"Source '{parentValue.Definition.Name}' does not support mapping properties to an UDT", parentValue.FilePath, parentValue.Line, parentValue.Column);
+                logger.LogError($"Source '{parentValue.Definition.Name}' does not support mapping properties to an UDT", parentValue.FilePath, parentValue.Line, parentValue.Column);
                 return false;
             }
 
@@ -53,14 +53,14 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (!(bodyContract is SchemaTypeReference bodySchemaTypeReference))
             {
-                logger.LogError(null, $"Unexpected request body contract '{bodyContract}'. Expected object schema when mapping complex UDT parameter: @{rootParameter.InternalParameterName} {userDefinedTypeSchema.UdtName}.", bodyContract.Source, bodyContract.Line, bodyContract.Column);
+                logger.LogError($"Unexpected request body contract '{bodyContract}'. Expected object schema when mapping complex UDT parameter: @{rootParameter.InternalParameterName} {userDefinedTypeSchema.UdtName}.", bodyContract.Source, bodyContract.Line, bodyContract.Column);
                 return false;
             }
 
             SchemaDefinition bodySchema = schemaRegistry.GetSchema(bodySchemaTypeReference);
             if (!(bodySchema is ObjectSchema bodyObjectSchema))
             {
-                logger.LogError(null, $"Unexpected request body contract '{bodySchema}'. Expected object schema when mapping complex UDT parameter: @{rootParameter.InternalParameterName} {userDefinedTypeSchema.UdtName}.", bodyContract.Source, bodyContract.Line, bodyContract.Column);
+                logger.LogError($"Unexpected request body contract '{bodySchema}'. Expected object schema when mapping complex UDT parameter: @{rootParameter.InternalParameterName} {userDefinedTypeSchema.UdtName}.", bodyContract.Source, bodyContract.Line, bodyContract.Column);
                 return false;
             }
 

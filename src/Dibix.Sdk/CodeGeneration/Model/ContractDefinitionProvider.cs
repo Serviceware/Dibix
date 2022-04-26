@@ -198,8 +198,8 @@ If this is not a project that has multiple areas, please make sure to define the
             string name = definition.FullName;
             if (this._contracts.TryGetValue(name, out ContractDefinition otherContract))
             {
-                this.Logger.LogError(null, $"Ambiguous contract definition: {definition.FullName}", otherContract.FilePath, otherContract.Line, otherContract.Column);
-                this.Logger.LogError(null, $"Ambiguous contract definition: {definition.FullName}", filePath, lineInfo.LineNumber, lineInfo.LinePosition);
+                this.Logger.LogError($"Ambiguous contract definition: {definition.FullName}", otherContract.FilePath, otherContract.Line, otherContract.Column);
+                this.Logger.LogError($"Ambiguous contract definition: {definition.FullName}", filePath, lineInfo.LineNumber, lineInfo.LinePosition);
                 return;
             }
 

@@ -37,7 +37,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             int definitionNameOffset = source.Definition.Name.Length + 1; // Skip source name + dot
             int column = source.Column + definitionNameOffset + columnOffset;
-            logger.LogError(null, $"Property '{propertyName}' not found on contract '{schema.FullName}'", source.FilePath, source.Line, column);
+            logger.LogError($"Property '{propertyName}' not found on contract '{schema.FullName}'", source.FilePath, source.Line, column);
             return false;
         }
     }

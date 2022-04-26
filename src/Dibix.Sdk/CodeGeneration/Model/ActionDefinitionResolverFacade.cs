@@ -52,7 +52,7 @@ namespace Dibix.Sdk.CodeGeneration
                     return definition;
             }
 
-            this._logger.LogError(null, $"Could not resolve action target: {targetName}", filePath, line, column);
+            this._logger.LogError($"Could not resolve action target: {targetName}", filePath, line, column);
             return null;
         }
     }

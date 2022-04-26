@@ -10,7 +10,7 @@ namespace Dibix.Sdk.CodeGeneration
                 return true;
 
             int column = currentValue.Column + currentValue.Definition.Name.Length + 1; // Skip source name + dot
-            logger.LogError(null, $"Source '{currentValue.Definition.Name}' does not support property '{currentValue.PropertyName}'", currentValue.FilePath, currentValue.Line, column);
+            logger.LogError($"Source '{currentValue.Definition.Name}' does not support property '{currentValue.PropertyName}'", currentValue.FilePath, currentValue.Line, column);
             return false;
         }
     }

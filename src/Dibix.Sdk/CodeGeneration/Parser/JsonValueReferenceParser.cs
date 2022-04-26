@@ -14,14 +14,14 @@ namespace Dibix.Sdk.CodeGeneration
                     if (TryParseValue(value, value.Type, primitiveTypeReference.Type, out object rawValue))
                         return new PrimitiveValueReference(primitiveTypeReference, rawValue, filePath, location.LineNumber, location.LinePosition);
 
-                    logger.LogError(null, $"Could not convert value '{value}' to type '{primitiveTypeReference.Type}'", filePath, location.LineNumber, location.LinePosition);
+                    logger.LogError($"Could not convert value '{value}' to type '{primitiveTypeReference.Type}'", filePath, location.LineNumber, location.LinePosition);
                     return null;
 
                 case SchemaTypeReference schemaTypeReference:
                     return ParseEnumValue(value, value.Type, schemaTypeReference, filePath, location, logger);
 
                 default:
-                    logger.LogError(null, $"Unexpected target type for constant value: {targetType?.GetType()}", filePath, location.LineNumber, location.LinePosition);
+                    logger.LogError($"Unexpected target type for constant value: {targetType?.GetType()}", filePath, location.LineNumber, location.LinePosition);
                     return null;
             }
         }
@@ -130,7 +130,7 @@ namespace Dibix.Sdk.CodeGeneration
                     return new EnumMemberStringReference(targetType, strValue, filePath, location.LineNumber, location.LinePosition);
 
                 default:
-                    logger.LogError(null, $"Unexpected constant value type: {sourceType}", filePath, location.LineNumber, location.LinePosition);
+                    logger.LogError($"Unexpected constant value type: {sourceType}", filePath, location.LineNumber, location.LinePosition);
                     return null;
             }
         }

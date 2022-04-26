@@ -20,7 +20,7 @@ namespace Dibix.Sdk.CodeGeneration
                 //  return this.TryParseDefaultValue(parameterName, variableReference, targetType);
 
                 default:
-                    logger.LogError(null, $"Unexpected constant value type: {value?.GetType()})", filePath, value.StartLine, value.StartColumn);
+                    logger.LogError($"Unexpected constant value type: {value?.GetType()})", filePath, value.StartLine, value.StartColumn);
                     return null;
             }
         }
@@ -32,14 +32,14 @@ namespace Dibix.Sdk.CodeGeneration
                     if (TryParseDefaultValue(value, value.LiteralType, primitiveTypeReference, out object rawValue))
                         return new PrimitiveValueReference(primitiveTypeReference, rawValue, filePath, value.StartLine, value.StartColumn);
 
-                    logger.LogError(null, $"Could not convert value '{value.Dump()}' to type '{primitiveTypeReference.Type}'", filePath, value.StartLine, value.StartColumn);
+                    logger.LogError($"Could not convert value '{value.Dump()}' to type '{primitiveTypeReference.Type}'", filePath, value.StartLine, value.StartColumn);
                     return null;
 
                 case SchemaTypeReference schemaTypeReference:
                     return ParseEnumValue(value, value.LiteralType, schemaTypeReference, filePath, logger);
 
                 default:
-                    logger.LogError(null, $"Unexpected target type for constant value: {targetType?.GetType()}", filePath, value.StartLine, value.StartColumn);
+                    logger.LogError($"Unexpected target type for constant value: {targetType?.GetType()}", filePath, value.StartLine, value.StartColumn);
                     return null;
             }
         }
@@ -143,7 +143,7 @@ namespace Dibix.Sdk.CodeGeneration
                     return new EnumMemberStringReference(targetType, literal.Value, filePath, literal.StartLine, literal.StartColumn);
 
                 default:
-                    logger.LogError(null, $"Unexpected constant value type: {sourceType}", filePath, literal.StartLine, literal.StartColumn);
+                    logger.LogError($"Unexpected constant value type: {sourceType}", filePath, literal.StartLine, literal.StartColumn);
                     return null;
             }
         }

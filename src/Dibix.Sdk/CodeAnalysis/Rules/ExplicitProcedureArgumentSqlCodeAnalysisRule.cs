@@ -18,7 +18,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             IList<string> parameterNames = null;
             if (procedureReference.ProcedureReference.ProcedureReference != null && !base.Model.TryGetFunctionParameterNames(procedureReference.ProcedureReference.ProcedureReference.Name, out parameterNames))
             {
-                base.LogError(procedureReference.ProcedureReference.ProcedureReference, "71502", $"Cannot resolve reference to object {procedureReference.ProcedureReference.ProcedureReference.Name.Dump()}");
+                base.LogError(procedureReference.ProcedureReference.ProcedureReference, "SQL71502", $"Cannot resolve reference to object {procedureReference.ProcedureReference.ProcedureReference.Name.Dump()}");
                 return;
             }
 

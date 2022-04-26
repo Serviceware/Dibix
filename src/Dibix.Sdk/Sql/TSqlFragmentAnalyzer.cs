@@ -95,7 +95,7 @@ namespace Dibix.Sdk.Sql
                     if (IsSupportedDDLStatement(projectName, statement))
                         continue;
 
-                    logger.LogError(null, "Only CREATE PROCEDURE is a supported DDL statement within a DML project", source, statement.StartLine, statement.StartColumn);
+                    logger.LogError("Only CREATE PROCEDURE is a supported DDL statement within a DML project", source, statement.StartLine, statement.StartColumn);
                 }
             }
 

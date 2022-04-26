@@ -17,7 +17,7 @@
                     return new EnumMemberNumericReference(schemaTypeReference, intValue, filePath, line, column);
 
                 default:
-                    logger.LogError(null, $"Unexpected target type for constant value: {targetType?.GetType()}", filePath, line, column);
+                    logger.LogError($"Unexpected target type for constant value: {targetType?.GetType()}", filePath, line, column);
                     return null;
             }
         }

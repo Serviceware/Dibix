@@ -55,6 +55,7 @@ namespace Dibix.Sdk.Cli
 
             public void LogMessage(string text) => this._logger.LogMessage(text);
 
+            public void LogError(string text, string source, int? line, int? column) => LogError(code: null, text, source, line, column);
             public void LogError(string code, string text, string source, int? line, int? column)
             {
                 this.AdjustParameters(ref code, ref text);

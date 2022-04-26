@@ -11,7 +11,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (member != null)
                 return member;
 
-            logger.LogError(code: null, $"Enum '{schema.FullName}' does not define a member with value '{reference.Value}'", reference.Source, reference.Line, reference.Column);
+            logger.LogError($"Enum '{schema.FullName}' does not define a member with value '{reference.Value}'", reference.Source, reference.Line, reference.Column);
             return null;
         }
         public static EnumSchemaMember GetEnumMember(this EnumMemberStringReference reference, ISchemaRegistry schemaRegistry, ILogger logger)
@@ -21,7 +21,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (member != null)
                 return member;
 
-            logger.LogError(code: null, $"Enum '{schema.FullName}' does not define a member named '{reference.Value}'", reference.Source, reference.Line, reference.Column);
+            logger.LogError($"Enum '{schema.FullName}' does not define a member named '{reference.Value}'", reference.Source, reference.Line, reference.Column);
             return null;
         }
     }

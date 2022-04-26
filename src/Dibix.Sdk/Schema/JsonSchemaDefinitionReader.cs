@@ -39,7 +39,7 @@ namespace Dibix.Sdk
                                 foreach (ValidationError error in errors.Flatten())
                                 {
                                     string errorMessage = $"{error.Message} ({error.Path})";
-                                    this.Logger.LogError(null, errorMessage, filePath, error.LineNumber, error.LinePosition);
+                                    this.Logger.LogError(errorMessage, filePath, error.LineNumber, error.LinePosition);
                                 }
                                 this.HasSchemaErrors = true;
                                 continue;

@@ -19,7 +19,7 @@
                 if (!contractDefinition.HasReferences)
                 {
                     isValid = false;
-                    this._logger.LogError(null, $"Unused contract definition: {contractFullName}", contractDefinition.FilePath, contractDefinition.Line, contractDefinition.Column);
+                    this._logger.LogError($"Unused contract definition: {contractFullName}", contractDefinition.FilePath, contractDefinition.Line, contractDefinition.Column);
                 }
             }
 

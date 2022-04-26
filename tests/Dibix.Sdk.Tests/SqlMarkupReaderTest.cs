@@ -80,7 +80,7 @@ AS
             
             Mock<ILogger> logger = new Mock<ILogger>(MockBehavior.Strict);
 
-            logger.Setup(x => x.LogError(null, "Missing value for 'Name' property", null, 1, 12)).Verifiable();
+            logger.Setup(x => x.LogError("Missing value for 'Name' property", null, 1, 12)).Verifiable();
 
             TSqlFragment fragment = ScriptDomFacade.Parse(sql);
             _ = SqlMarkupReader.ReadHeader(fragment, null, logger.Object);
@@ -98,7 +98,7 @@ AS
             
             Mock<ILogger> logger = new Mock<ILogger>(MockBehavior.Strict);
 
-            logger.Setup(x => x.LogError(null, "Duplicate property for @Return.ClrTypes", null, 1, 23)).Verifiable();
+            logger.Setup(x => x.LogError("Duplicate property for @Return.ClrTypes", null, 1, 23)).Verifiable();
 
             TSqlFragment fragment = ScriptDomFacade.Parse(sql);
             _ = SqlMarkupReader.ReadHeader(fragment, null, logger.Object);
@@ -116,7 +116,7 @@ AS
 
             Mock<ILogger> logger = new Mock<ILogger>(MockBehavior.Strict);
 
-            logger.Setup(x => x.LogError(null, "Multiple default properties specified for @Return", null, 1, 14)).Verifiable();
+            logger.Setup(x => x.LogError("Multiple default properties specified for @Return", null, 1, 14)).Verifiable();
 
             TSqlFragment fragment = ScriptDomFacade.Parse(sql);
             _ = SqlMarkupReader.ReadHeader(fragment, null, logger.Object);

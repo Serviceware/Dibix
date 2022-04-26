@@ -190,7 +190,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                 foreach (ISqlElement element in markup.GetElements(elementName))
                 {
-                    logger.LogError(null, $"Unexpected markup element '{elementName}'", element.Source, element.Line, element.Column);
+                    logger.LogError($"Unexpected markup element '{elementName}'", element.Source, element.Line, element.Column);
                 }
             }
 

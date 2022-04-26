@@ -92,7 +92,7 @@ namespace Dibix.Sdk
                         if (this._actionParameterSourceRegistry.TryGetDefinition(parameterSource.Name, out ActionParameterSourceDefinition _))
                         {
                             IJsonLineInfo lineInfo = parameterSource.GetLineInfo();
-                            this._logger.LogError(null, $"Parameter source '{parameterSource.Name}' is already registered", this._filePath, lineInfo.LineNumber, lineInfo.LinePosition);
+                            this._logger.LogError($"Parameter source '{parameterSource.Name}' is already registered", this._filePath, lineInfo.LineNumber, lineInfo.LinePosition);
                             continue;
                         }
 
@@ -110,7 +110,7 @@ namespace Dibix.Sdk
                         if (this._actionParameterConverterRegistry.IsRegistered(converterName))
                         {
                             IJsonLineInfo lineInfo = converter.GetLineInfo();
-                            this._logger.LogError(null, $"Parameter converter '{converterName}' is already registered", this._filePath, lineInfo.LineNumber, lineInfo.LinePosition);
+                            this._logger.LogError($"Parameter converter '{converterName}' is already registered", this._filePath, lineInfo.LineNumber, lineInfo.LinePosition);
                             continue;
                         }
 
