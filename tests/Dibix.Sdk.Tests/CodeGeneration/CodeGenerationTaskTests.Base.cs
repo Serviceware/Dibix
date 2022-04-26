@@ -144,7 +144,14 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                         return;
 
                     StringBuilder sb = new StringBuilder();
-                    foreach (Diagnostic error in emitResult.Diagnostics)
+                    ICollection<Diagnostic> errors = emitResult.Diagnostics
+                                                               .Where(x => x.Severity == DiagnosticSeverity.Error)
+                                                               .ToArray();
+                    
+                    if (!errors.Any())
+                        errors = emitResult.Diagnostics;
+
+                    foreach (Diagnostic error in errors)
                         sb.AppendLine(error.ToString());
 
                     throw new CodeCompilationException(sb.ToString());

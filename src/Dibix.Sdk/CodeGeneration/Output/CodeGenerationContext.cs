@@ -68,7 +68,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public SchemaDefinition GetSchema(SchemaTypeReference reference) => this.SchemaRegistry.GetSchema(reference);
 
-        public string ResolveTypeName(TypeReference reference, CodeGenerationContext context, bool includeEnumerable = true)
+        public string ResolveTypeName(TypeReference reference, CodeGenerationContext context, EnumerableBehavior enumerableBehavior = EnumerableBehavior.Enumerable)
         {
             string typeName;
             bool requiresNullabilityMarker;
@@ -94,16 +94,30 @@ namespace Dibix.Sdk.CodeGeneration
             if (reference.IsNullable/* && requiresNullabilityMarker*/)
                 typeName = $"{typeName}?";
 
-            if (reference.IsEnumerable && includeEnumerable) 
-                typeName = this.WrapInEnumerable(typeName, context);
+            if (reference.IsEnumerable) 
+                typeName = this.WrapInEnumerable(typeName, context, enumerableBehavior);
 
             return typeName;
         }
 
-        public string WrapInEnumerable(string typeName, CodeGenerationContext context)
+        public string WrapInEnumerable(string typeName, CodeGenerationContext context, EnumerableBehavior enumerableBehavior = EnumerableBehavior.Enumerable)
         {
-            context.AddUsing<IEnumerable<object>>();
-            return $"{nameof(IEnumerable<object>)}<{typeName}>";
+            switch (enumerableBehavior)
+            {
+                case EnumerableBehavior.None: 
+                    return typeName;
+
+                case EnumerableBehavior.Enumerable:
+                    context.AddUsing<IEnumerable<object>>();
+                    return $"{nameof(IEnumerable<object>)}<{typeName}>";
+
+                case EnumerableBehavior.Collection:
+                    context.AddUsing<ICollection<object>>();
+                    return $"{nameof(ICollection<object>)}<{typeName}>";
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(enumerableBehavior), enumerableBehavior, null);
+            }
         }
 
         public CSharpValue BuildDefaultValueLiteral(ValueReference defaultValue)

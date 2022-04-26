@@ -35,6 +35,9 @@ namespace Dibix.Sdk.Tests.Data
         // FileUpload
         private const string FileUploadCommandText = "[dbo].[dbx_tests_syntax_fileupload]";
 
+        // MultiConcreteResult
+        private const string MultiConcreteResultCommandText = "[dbo].[dbx_tests_syntax_multiconcreteresult]";
+
         // SingleConrecteResultWithParams
         private const string SingleConrecteResultWithParamsCommandText = "[dbo].[dbx_tests_syntax_singleconcreteresult_params]";
 
@@ -84,6 +87,14 @@ namespace Dibix.Sdk.Tests.Data
                                                     })
                                                     .Build();
                 accessor.Execute(FileUploadCommandText, CommandType.StoredProcedure, @params);
+            }
+        }
+
+        public static IEnumerable<Dibix.Sdk.Tests.DomainModel.GenericContract> MultiConcreteResult(this IDatabaseAccessorFactory databaseAccessorFactory)
+        {
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
+            {
+                return accessor.QueryMany<Dibix.Sdk.Tests.DomainModel.GenericContract>(MultiConcreteResultCommandText, CommandType.StoredProcedure, ParametersVisitor.Empty);
             }
         }
 
@@ -235,6 +246,10 @@ namespace Dibix.Sdk.Tests.Business
         {
             base.RegisterController("GenericEndpoint", x => 
             {
+                x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.MultiConcreteResult)), y =>
+                {
+                    y.Method = HttpApiMethod.Get;
+                });
                 x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), y =>
                 {
                     y.Method = HttpApiMethod.Get;

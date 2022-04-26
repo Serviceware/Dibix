@@ -4,6 +4,10 @@
     //"Dibix.GenericEndpoint",
     {
       "method": "GET",
+      "target": "MultiConcreteResult"
+    },
+    {
+      "method": "GET",
       "target": "EmptyWithParams",
       "childRoute": "{password}/Fixed",
       "params": {
@@ -52,7 +56,7 @@
       },
       "params": {
         "data": "BODY.$RAW"
-      } 
+      }
     },
     {
       "method": "POST",

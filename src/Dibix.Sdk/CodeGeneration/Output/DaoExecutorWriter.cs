@@ -507,7 +507,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             for (int i = 0; i < result.Types.Count; i++)
             {
-                string returnType = context.ResolveTypeName(result.Types[i], context, includeEnumerable: false);
+                string returnType = context.ResolveTypeName(result.Types[i], context, enumerableBehavior: EnumerableBehavior.None);
                 writer.WriteRaw(returnType);
                 if (i + 1 < result.Types.Count)
                     writer.WriteRaw(", ");
@@ -515,7 +515,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (result.ProjectToType != null)
                 writer.WriteRaw(", ")
-                      .WriteRaw(context.ResolveTypeName(result.ProjectToType, context, includeEnumerable: false));
+                      .WriteRaw(context.ResolveTypeName(result.ProjectToType, context, enumerableBehavior: EnumerableBehavior.None));
 
             writer.WriteRaw('>');
         }

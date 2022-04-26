@@ -99,6 +99,7 @@ namespace Dibix.Sdk.Tests.Client
 {
     public interface IGenericEndpointService : IHttpService
     {
+        Task<HttpResponse<ICollection<Dibix.Sdk.Tests.DomainModel.GenericContract>>> MultiConcreteResultAsync(CancellationToken cancellationToken = default);
         Task<HttpResponseMessage> EmptyWithParams1Async(string password, string userAgent, IEnumerable<object> ids, string? acceptLanguage = null, CancellationToken cancellationToken = default);
         Task<HttpResponseMessage> EmptyWithParamsAnonymousAsync(string password, string u, string v, System.Guid? w, IEnumerable<object> ids, string? x = null, bool y = true, Dibix.Sdk.Tests.DomainModel.Direction? z = null, CancellationToken cancellationToken = default);
         Task<HttpResponse<Dibix.Sdk.Tests.DomainModel.GenericContract>> SingleConrecteResultWithParamsAsync(IEnumerable<int> ids, CancellationToken cancellationToken = default);
@@ -127,6 +128,19 @@ namespace Dibix.Sdk.Tests.Client
         {
             this._httpClientFactory = httpClientFactory;
             this._authorizationProvider = authorizationProvider;
+        }
+
+        public async Task<HttpResponse<ICollection<Dibix.Sdk.Tests.DomainModel.GenericContract>>> MultiConcreteResultAsync(CancellationToken cancellationToken = default)
+        {
+            using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
+            {
+                HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("GET"), "Tests/GenericEndpoint");
+                requestMessage.Headers.Add("HLNS-SIT", this._authorizationProvider.GetValue("HLNS-SIT"));
+                requestMessage.Headers.Add("HLNS-ClientId", this._authorizationProvider.GetValue("HLNS-ClientId"));
+                HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
+                ICollection<Dibix.Sdk.Tests.DomainModel.GenericContract> responseContent = await responseMessage.Content.ReadAsAsync<ICollection<Dibix.Sdk.Tests.DomainModel.GenericContract>>(MediaTypeFormattersFactory.Create(client), cancellationToken).ConfigureAwait(false);
+                return new HttpResponse<ICollection<Dibix.Sdk.Tests.DomainModel.GenericContract>>(responseMessage, responseContent);
+            }
         }
 
         public async Task<HttpResponseMessage> EmptyWithParams1Async(string password, string userAgent, IEnumerable<object> ids, string? acceptLanguage = null, CancellationToken cancellationToken = default)

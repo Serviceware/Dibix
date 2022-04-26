@@ -101,7 +101,7 @@ namespace Dibix.Sdk.CodeGeneration
                     propertyAnnotations.Add(new CSharpAnnotation("DefaultValue", defaultValue));
                 }
 
-                string clrTypeName = context.ResolveTypeName(property.Type, context, includeEnumerable: false);
+                string clrTypeName = context.ResolveTypeName(property.Type, context, enumerableBehavior: EnumerableBehavior.None);
                 @class.AddProperty(property.Name, !property.Type.IsEnumerable ? clrTypeName : $"{nameof(IList<object>)}<{clrTypeName}>", propertyAnnotations)
                       .Getter(null)
                       .Setter(null, property.Type.IsEnumerable ? CSharpModifiers.Private : default)

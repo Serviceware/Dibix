@@ -6,6 +6,93 @@ info:
 servers:
   - url: https://localhost/api
 paths:
+  /Tests/GenericEndpoint:
+    get:
+      tags:
+        - GenericEndpoint
+      summary: MultiConcreteResult
+      operationId: MultiConcreteResult
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GenericContract'
+      security:
+        - HLNS-SIT: [ ]
+          HLNS-ClientId: [ ]
+    put:
+      tags:
+        - GenericEndpoint
+      summary: FileUpload
+      operationId: FileUpload
+      requestBody:
+        content:
+          image/png:
+            schema:
+              type: string
+              format: binary
+        required: true
+      responses:
+        '204':
+          description: NoContent
+      security:
+        - HLNS-SIT: [ ]
+          HLNS-ClientId: [ ]
+    post:
+      tags:
+        - GenericEndpoint
+      summary: EmptyWithParams2
+      operationId: EmptyWithParams2
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InputContract'
+        required: true
+      responses:
+        '204':
+          description: NoContent
+      security:
+        - HLNS-SIT: [ ]
+          HLNS-ClientId: [ ]
+    patch:
+      tags:
+        - GenericEndpoint
+      summary: EmptyWithParams3
+      operationId: EmptyWithParams3
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InputContract'
+        required: true
+      responses:
+        '204':
+          description: NoContent
+      security:
+        - HLNS-SIT: [ ]
+          HLNS-ClientId: [ ]
+    delete:
+      tags:
+        - GenericEndpoint
+      summary: EmptyWithParams4
+      operationId: EmptyWithParams4
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnotherInputContract'
+        required: true
+      responses:
+        '204':
+          description: NoContent
+      security:
+        - HLNS-SIT: [ ]
+          HLNS-ClientId: [ ]
   '/Tests/GenericEndpoint/{password}/Fixed':
     get:
       tags:
@@ -144,101 +231,8 @@ paths:
       security:
         - { }
         - Bearer: [ ]
-  /Tests/GenericEndpoint:
-    put:
-      tags:
-        - GenericEndpoint
-      summary: FileUpload
-      operationId: FileUpload
-      requestBody:
-        content:
-          image/png:
-            schema:
-              type: string
-              format: binary
-        required: true
-      responses:
-        '204':
-          description: NoContent
-      security:
-        - HLNS-SIT: [ ]
-          HLNS-ClientId: [ ]
-    post:
-      tags:
-        - GenericEndpoint
-      summary: EmptyWithParams2
-      operationId: EmptyWithParams2
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InputContract'
-        required: true
-      responses:
-        '204':
-          description: NoContent
-      security:
-        - HLNS-SIT: [ ]
-          HLNS-ClientId: [ ]
-    patch:
-      tags:
-        - GenericEndpoint
-      summary: EmptyWithParams3
-      operationId: EmptyWithParams3
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InputContract'
-        required: true
-      responses:
-        '204':
-          description: NoContent
-      security:
-        - HLNS-SIT: [ ]
-          HLNS-ClientId: [ ]
-    delete:
-      tags:
-        - GenericEndpoint
-      summary: EmptyWithParams4
-      operationId: EmptyWithParams4
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AnotherInputContract'
-        required: true
-      responses:
-        '204':
-          description: NoContent
-      security:
-        - HLNS-SIT: [ ]
-          HLNS-ClientId: [ ]
 components:
   schemas:
-    GenericParameterSet:
-      required:
-        - id
-        - name
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int32
-        name:
-          type: string
-          nullable: true
-      additionalProperties: false
-    Direction:
-      enum:
-        - 0
-        - 1
-      type: integer
-      description: 0 = Ascending<br/>1 = Descending
-      format: int32
-      x-enum-varnames:
-        - Ascending
-        - Descending
     GenericContract:
       required:
         - Role
@@ -359,6 +353,29 @@ components:
         Title:
           type: string
       additionalProperties: false
+    GenericParameterSet:
+      required:
+        - id
+        - name
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+          nullable: true
+      additionalProperties: false
+    Direction:
+      enum:
+        - 0
+        - 1
+      type: integer
+      description: 0 = Ascending<br/>1 = Descending
+      format: int32
+      x-enum-varnames:
+        - Ascending
+        - Descending
   securitySchemes:
     HLNS-SIT:
       type: apiKey

@@ -113,7 +113,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Private Methods
         private static string ResolveReturnTypeName(TypeReference resultType, CodeGenerationContext context)
         {
-            string typeName = $"Task<HttpResponse{(resultType != null ? $"<{context.ResolveTypeName(resultType, context)}>" : "Message")}>";
+            string typeName = $"Task<HttpResponse{(resultType != null ? $"<{context.ResolveTypeName(resultType, context, EnumerableBehavior.Collection)}>" : "Message")}>";
             return typeName;
         }
 
@@ -130,7 +130,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 // Note: Deep object query parameters require a separate input class, which is not yet supported
                 // Therefore in this case we currently return object, which obviously will not work at runtime
-                string enumerableTypeName = userDefinedTypeSchema.Properties.Count == 1 ? context.ResolveTypeName(userDefinedTypeSchema.Properties[0].Type, context, includeEnumerable: false) : "object";
+                string enumerableTypeName = userDefinedTypeSchema.Properties.Count == 1 ? context.ResolveTypeName(userDefinedTypeSchema.Properties[0].Type, context, enumerableBehavior: EnumerableBehavior.None) : "object";
                 return context.WrapInEnumerable(enumerableTypeName, context);
             }
             return context.ResolveTypeName(parameter.Type, context);

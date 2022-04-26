@@ -185,7 +185,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             string responseContentType = null;
             if (action.DefaultResponseType != null)
-                responseContentType = context.ResolveTypeName(action.DefaultResponseType, context);
+                responseContentType = context.ResolveTypeName(action.DefaultResponseType, context, EnumerableBehavior.Collection);
 
             if (responseContentType != null)
             {

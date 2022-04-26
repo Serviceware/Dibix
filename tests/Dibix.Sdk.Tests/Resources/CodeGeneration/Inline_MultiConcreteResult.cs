@@ -23,14 +23,14 @@ namespace Dibix.Sdk.Tests.Data
     [DatabaseAccessor]
     public static class TestAccessor
     {
-        // dbx_tests_syntax_multiconcreteresult
-        private const string dbx_tests_syntax_multiconcreteresultCommandText = "SELECT [id] = 1";
+        // MultiConcreteResult
+        private const string MultiConcreteResultCommandText = "SELECT [id] = 1";
 
-        public static IEnumerable<Dibix.Sdk.Tests.DomainModel.GenericContract> dbx_tests_syntax_multiconcreteresult(this IDatabaseAccessorFactory databaseAccessorFactory)
+        public static IEnumerable<Dibix.Sdk.Tests.DomainModel.GenericContract> MultiConcreteResult(this IDatabaseAccessorFactory databaseAccessorFactory)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
-                return accessor.QueryMany<Dibix.Sdk.Tests.DomainModel.GenericContract>(dbx_tests_syntax_multiconcreteresultCommandText, CommandType.Text, ParametersVisitor.Empty);
+                return accessor.QueryMany<Dibix.Sdk.Tests.DomainModel.GenericContract>(MultiConcreteResultCommandText, CommandType.Text, ParametersVisitor.Empty);
             }
         }
     }
