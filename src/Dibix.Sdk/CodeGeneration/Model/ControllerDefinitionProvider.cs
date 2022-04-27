@@ -147,7 +147,7 @@ namespace Dibix.Sdk.CodeGeneration
             actionDefinition.Method = method;
             actionDefinition.OperationId = (string)action.Property("operationId")?.Value ?? actionDefinition.Target.OperationName;
             actionDefinition.Description = (string)action.Property("description")?.Value;
-            actionDefinition.ChildRoute = childRoute;
+            actionDefinition.ChildRoute = childRouteProperty.ToToken(childRoute, filePath);
             actionDefinition.RequestBody = requestBody;
 
             if (TryReadFileResponse(action, out ActionFileResponse fileResponse, out IJsonLineInfo fileResponseLocation))
@@ -170,7 +170,7 @@ namespace Dibix.Sdk.CodeGeneration
               .Append(' ')
               .Append(controller.Name);
 
-            if (!String.IsNullOrEmpty(actionDefinition.ChildRoute))
+            if (actionDefinition.ChildRoute != null)
                 sb.Append('/').Append(actionDefinition.ChildRoute);
 
             IJsonLineInfo lineInfo = action;

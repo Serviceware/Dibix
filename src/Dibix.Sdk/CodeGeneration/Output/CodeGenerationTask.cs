@@ -144,8 +144,9 @@ namespace Dibix.Sdk.CodeGeneration
 
             ICodeGenerationModelValidator modelValidator = new CompositeCodeGenerationModelValidator
             (
-                new ContractArtifactModelValidator(logger)
-              , new ActionParameterPropertySourceModelValidator(actionParameterSourceRegistry, schemaRegistry, logger)
+                new ActionParameterPropertySourceModelValidator(actionParameterSourceRegistry, schemaRegistry, logger)
+              , new ContractArtifactModelValidator(logger)
+              , new EndpointModelValidator(logger)
               , new UserDefinedTypeParameterModelValidator(schemaRegistry, logger)
             );
 

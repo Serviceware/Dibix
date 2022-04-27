@@ -170,7 +170,7 @@
     <None Include="Endpoints\GenericEndpoint.json" />
     <None Include="Contracts\InputContract.json" />
     <None Include="Endpoints\GenericEndpointWithOutputParam.json" />
-    <None Include="Endpoints\GenericEndpointWithInvalidSource.json" />
+    <None Include="Endpoints\GenericEndpointWithErrors.json" />
     <None Include="Contracts\Request.json" />
     <None Include="Contracts\Entry.json" />
     <None Include="Contracts\AnotherInputContract.json" />

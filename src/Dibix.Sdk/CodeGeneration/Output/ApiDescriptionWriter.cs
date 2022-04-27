@@ -96,8 +96,8 @@ namespace Dibix.Sdk.CodeGeneration
                     if (!String.IsNullOrEmpty(action.Description))
                         writer.WriteLine($"y.Description = \"{action.Description}\";");
 
-                    if (!String.IsNullOrEmpty(action.ChildRoute))
-                        writer.WriteLine($"y.ChildRoute = \"{action.ChildRoute}\";");
+                    if (action.ChildRoute != null)
+                        writer.WriteLine($"y.ChildRoute = \"{action.ChildRoute.Value}\";");
 
                     // TODO: Involves a breaking change
                     //if (action.RequestBody != null)

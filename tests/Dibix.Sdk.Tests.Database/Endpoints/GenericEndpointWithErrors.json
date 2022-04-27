@@ -13,6 +13,7 @@
       "method": "POST",
       "target": "EmptyWithParams",
       "body": "Request",
+      "childRoute": "this/get/is/wrong",
       "params": {
         "v": "BODY.X",
         "w": "BODY.Id.Nm",
