@@ -126,7 +126,6 @@ start winmergeU ""{expectedDirectory}"" ""{actualDirectory}""");
             eventLog.Entries
                     .Cast<EventLogEntry>()
                     .Where(x => x.EntryType == eventLogEntryType)
-                    .OrderByDescending(x => x.TimeWritten)
                     .Take(count)
                     .Each((x, i) => this.AddFile($"EventLog{eventLogEntryType}_{i}.txt", $@"{DateTime.Now:O}
 ---
