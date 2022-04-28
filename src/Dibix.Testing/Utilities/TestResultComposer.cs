@@ -69,8 +69,8 @@ namespace Dibix.Testing
 
         private void EnsureFileComparisonContent(string directory, string extension, string content)
         {
-            EnsureFileComparisonContent(Path.Combine(directory, $"{this._testContext.TestName}.{extension}"), content);
-            EnsureFileComparisonContent(Path.Combine(this._testDirectory, $"{new DirectoryInfo(directory).Name}.{extension}"), content);
+            this.EnsureFileComparisonContent(Path.Combine(directory, $"{this._testContext.TestName}.{extension}"), content);
+            this.EnsureFileComparisonContent(Path.Combine(this._testDirectory, $"{new DirectoryInfo(directory).Name}.{extension}"), content);
         }
         private void EnsureFileComparisonContent(string path, string content)
         {

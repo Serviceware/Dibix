@@ -15,23 +15,24 @@ namespace Dibix.Sdk.Tests.CodeGeneration
 {
     public sealed partial class CodeGenerationTaskTests : TestBase
     {
-        private void ExecuteTest(string source, bool isEmbedded = true) => this.ExecuteTest(isEmbedded, source);
-        private void ExecuteTest(bool isEmbedded = true, params string[] sources) => this.ExecuteTest(sources, Enumerable.Empty<string>(), Enumerable.Empty<string>(), isEmbedded, false, false, Enumerable.Empty<string>());
-        private void ExecuteTest(bool isEmbedded, IEnumerable<string> contracts, params string[] sources) => this.ExecuteTest(sources, contracts, Enumerable.Empty<string>(), isEmbedded, false, false, Enumerable.Empty<string>());
-        private void ExecuteTest(string source, string contract, params string[] expectedAdditionalAssemblyReferences) => this.ExecuteTest(source, Enumerable.Repeat(contract, 1), expectedAdditionalAssemblyReferences);
-        private void ExecuteTest(string source, IEnumerable<string> contracts, IEnumerable<string> expectedAdditionalAssemblyReferences) => this.ExecuteTest(Enumerable.Repeat(source, 1), contracts, Enumerable.Empty<string>(), true, expectedAdditionalAssemblyReferences);
-        private void ExecuteTest(IEnumerable<string> sources, IEnumerable<string> contracts, IEnumerable<string> endpoints, bool isEmbedded, IEnumerable<string> expectedAdditionalAssemblyReferences) => this.ExecuteTest(sources, contracts, endpoints, isEmbedded, false, false, expectedAdditionalAssemblyReferences);
-        private void ExecuteTest(IEnumerable<string> sources, IEnumerable<string> contracts, IEnumerable<string> endpoints, IEnumerable<string> expectedAdditionalAssemblyReferences) => this.ExecuteTest(false, sources, contracts, endpoints, expectedAdditionalAssemblyReferences);
-        private void ExecuteTest(bool generateClient, IEnumerable<string> sources, IEnumerable<string> contracts, IEnumerable<string> endpoints, IEnumerable<string> expectedAdditionalAssemblyReferences) => this.ExecuteTest(sources, contracts, endpoints, false, generateClient, !generateClient, expectedAdditionalAssemblyReferences);
-        private void ExecuteTest(IEnumerable<string> sources, IEnumerable<string> contracts, IEnumerable<string> endpoints, bool isEmbedded, bool generateClient, bool assertOpenApi, IEnumerable<string> expectedAdditionalAssemblyReferences)
+        private void ExecuteTest
+        (
+            IEnumerable<string> sources = null
+          , IEnumerable<string> contracts = null
+          , IEnumerable<string> endpoints = null
+          , bool isEmbedded = true
+          , bool enableExperimentalFeatures = false
+          , AssertOutputKind outputKind = AssertOutputKind.None
+          , IEnumerable<string> expectedAdditionalAssemblyReferences = null
+        )
         {
-            string tempDirectory = Path.Combine(Path.GetTempPath(), $"dibix-sdk-tests-{Guid.NewGuid()}");
-            Directory.CreateDirectory(tempDirectory);
+            string outputDirectory = Path.Combine(base.TestContext.TestRunResultsDirectory, "Output", base.TestContext.TestName);
+            Directory.CreateDirectory(outputDirectory);
+            const string areaName = "Tests";
             const string defaultOutputName = "TestAccessor";
             const string clientOutputName = "TestAccessor.Client";
-            string defaultOutputFilePath = Path.Combine(tempDirectory, $"{defaultOutputName}.Accessor.cs");
-            string clientOutputFilePath = Path.Combine(tempDirectory, $"{clientOutputName}.cs");
 
+            ICollection<TaskItem> endpointItems = (endpoints ?? Enumerable.Empty<string>()).Select(ToTaskItem).ToArray();
             TestLogger logger = new TestLogger(base.Out, distinctErrorLogging: true);
 
             bool result = SqlCoreTask.Execute
@@ -42,22 +43,22 @@ namespace Dibix.Sdk.Tests.CodeGeneration
               , staticCodeAnalysisSucceededFile: null
               , resultsFile: null
               , productName: "Dibix.Sdk"
-              , areaName: "Tests"
+              , areaName: areaName
               , title: "Dibix.Sdk.Tests API title"
               , version: "1.0.1"
               , description: "Dibix.Sdk.Tests API description"
-              , outputDirectory: tempDirectory
+              , outputDirectory: outputDirectory
               , defaultOutputName: defaultOutputName
-              , clientOutputName: generateClient ? clientOutputName : null
+              , clientOutputName: outputKind == AssertOutputKind.Client ? clientOutputName : null
               , externalAssemblyReferenceDirectory: Environment.CurrentDirectory
-              , source: sources.Select(ToTaskItem).ToArray()
+              , source: (sources ?? Enumerable.Empty<string>()).Select(ToTaskItem).ToArray()
               , scriptSource: Enumerable.Empty<TaskItem>()
-              , contracts: contracts.Select(ToTaskItem)
-              , endpoints: endpoints.Select(ToTaskItem)
+              , contracts: (contracts ?? Enumerable.Empty<string>()).Select(ToTaskItem)
+              , endpoints: endpointItems
               , references: Enumerable.Empty<TaskItem>()
               , defaultSecuritySchemes: new[] { "HLNS-SIT", "HLNS-ClientId" }.Select(ToTaskItem)
               , isEmbedded: isEmbedded
-              , enableExperimentalFeatures: false // TODO: Add test support for inspecting DBX file
+              , enableExperimentalFeatures: enableExperimentalFeatures // TODO: Add test support for inspecting DBX file
               , databaseSchemaProviderName: DatabaseTestUtility.DatabaseSchemaProviderName
               , modelCollation: DatabaseTestUtility.ModelCollation
               , sqlReferencePath: Array.Empty<TaskItem>()
@@ -68,28 +69,56 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             logger.Verify();
 
             Assert.IsTrue(result, "MSBuild task result was false");
-            AssertAreEqual(expectedAdditionalAssemblyReferences, additionalAssemblyReferences);
-            this.AssertFile(generateClient ? clientOutputFilePath : defaultOutputFilePath);
+            AssertAreEqual(expectedAdditionalAssemblyReferences ?? Enumerable.Empty<string>(), additionalAssemblyReferences);
 
-            if (assertOpenApi)
+            bool hasEndpoints = endpointItems.Any();
+            string endpointOutputFilePath = Path.Combine(outputDirectory, $"{areaName}.cs");
+            Assert.AreEqual(hasEndpoints, File.Exists(endpointOutputFilePath), "hasEndpoints == File.Exists(endpointOutputFilePath)");
+
+            switch (outputKind)
             {
-                string openApiDocumentFilePath = Path.Combine(tempDirectory, "Tests.yml");
+                case AssertOutputKind.None:
+                    break;
 
-                // The OpenAPI SDK uses LF but even if we would use LF in the expected file, Git's autocrlf feature would mess it up again
-                const bool normalizeLineEndings = true;
-                this.AssertFileContent(openApiDocumentFilePath, normalizeLineEndings);
+                case AssertOutputKind.Accessor:
+                    string accessorOutputFilePath = Path.Combine(outputDirectory, $"{defaultOutputName}.Accessor.cs");
+                    this.AssertFile(accessorOutputFilePath);
+                    break;
+
+                case AssertOutputKind.Endpoint:
+                    this.AssertFile(endpointOutputFilePath);
+                    break;
+
+                case AssertOutputKind.Client:
+                    string clientOutputFilePath = Path.Combine(outputDirectory, $"{clientOutputName}.cs");
+                    this.AssertFile(clientOutputFilePath);
+                    break;
+
+                case AssertOutputKind.OpenApi:
+                    string openApiDocumentFilePath = Path.Combine(outputDirectory, "Tests.yml");
+
+                    // The OpenAPI SDK uses LF but even if we would use LF in the expected file, Git's autocrlf feature would mess it up again
+                    const bool normalizeLineEndings = true;
+                    this.AssertFileContent(openApiDocumentFilePath, normalizeLineEndings);
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(outputKind), outputKind, null);
             }
         }
 
-        private void ExecuteTestAndExpectError(string source, string expectedException) => this.ExecuteTestAndExpectError(Enumerable.Repeat(source, 1), Enumerable.Empty<string>(), Enumerable.Empty<string>(), expectedException);
-        private void ExecuteTestAndExpectError(IEnumerable<string> contracts, string expectedException) => this.ExecuteTestAndExpectError(Enumerable.Empty<string>(), contracts, Enumerable.Empty<string>(), expectedException);
-        private void ExecuteTestAndExpectError(string source, string endpoint, string expectedException) => this.ExecuteTestAndExpectError(Enumerable.Repeat(source, 1), Enumerable.Empty<string>(), Enumerable.Repeat(endpoint, 1), expectedException);
-        private void ExecuteTestAndExpectError(IEnumerable<string> sources, IEnumerable<string> contracts, string endpoint, string expectedException) => this.ExecuteTestAndExpectError(sources, contracts, Enumerable.Repeat(endpoint, 1), expectedException);
-        private void ExecuteTestAndExpectError(IEnumerable<string> sources, IEnumerable<string> contracts, IEnumerable<string> endpoints, string expectedException)
+        private void ExecuteTestAndExpectError
+        (
+            string expectedException
+          , IEnumerable<string> sources = null
+          , IEnumerable<string> contracts = null
+          , IEnumerable<string> endpoints = null
+          , bool isEmbedded = true
+        )
         {
             try
             {
-                this.ExecuteTest(sources, contracts, endpoints, isEmbedded: false, expectedAdditionalAssemblyReferences: Enumerable.Empty<string>());
+                this.ExecuteTest(sources, contracts, endpoints, isEmbedded);
                 Assert.IsTrue(false, "CodeGenerationException was expected but not thrown");
             }
             catch (CodeGenerationException ex)
@@ -104,7 +133,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             AssertFileCompilation(generatedFilePath);
         }
 
-        private void AssertFileContent(string generatedFilePath, bool normalizeLineEndings = false) => AssertFileContent(base.TestContext.TestName, generatedFilePath, normalizeLineEndings);
+        private void AssertFileContent(string generatedFilePath, bool normalizeLineEndings = false) => this.AssertFileContent(base.TestContext.TestName, generatedFilePath, normalizeLineEndings);
         private void AssertFileContent(string expectedTextKey, string generatedFilePath, bool normalizeLineEndings = false)
         {
             string actualText = Regex.Replace(File.ReadAllText(generatedFilePath)
@@ -162,5 +191,14 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         private static MetadataReference ResolveReference<T>() => MetadataReference.CreateFromFile(typeof(T).Assembly.Location);
 
         private static TaskItem ToTaskItem(string relativePath) => new TaskItem(relativePath) { ["FullPath"] = Path.Combine(DatabaseTestUtility.DatabaseProjectDirectory, relativePath) };
+
+        public enum AssertOutputKind
+        {
+            None,
+            Accessor,
+            Endpoint,
+            Client,
+            OpenApi
+        }
     }
 }

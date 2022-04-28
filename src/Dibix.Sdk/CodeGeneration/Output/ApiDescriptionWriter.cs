@@ -56,7 +56,7 @@ namespace Dibix.Sdk.CodeGeneration
             for (int i = 0; i < controllers.Count; i++)
             {
                 ControllerDefinition controller = controllers[i];
-                writer.WriteLine($"base.RegisterController(\"{controller.Name}\", x => ")
+                writer.WriteLine($"base.RegisterController(\"{controller.Name}\", x =>")
                       .WriteLine("{")
                       .PushIndent();
 
@@ -171,7 +171,7 @@ namespace Dibix.Sdk.CodeGeneration
                             throw new InvalidOperationException("Nested item sources are not supported");
 
                         const char itemSourceSelectorVariable = 'z';
-                        writer.WriteRaw($", {itemSourceSelectorVariable} => ")
+                        writer.WriteRaw($", {itemSourceSelectorVariable} =>")
                               .WriteLine()
                               .WriteLine("{")
                               .PushIndent();

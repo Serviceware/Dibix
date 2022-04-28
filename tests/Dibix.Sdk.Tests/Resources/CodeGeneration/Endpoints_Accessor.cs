@@ -14,11 +14,9 @@ using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Runtime.Serialization;
 using Dibix;
-using Dibix.Http.Server;
 using Newtonsoft.Json;
 
 [assembly: ArtifactAssembly]
-[assembly: AreaRegistration("Tests")]
 
 #region Accessor
 namespace Dibix.Sdk.Tests.Data
@@ -232,81 +230,6 @@ namespace Dibix.Sdk.Tests.DomainModel
         public InputContract()
         {
             this.Ids = new Collection<Dibix.Sdk.Tests.DomainModel.Entry>();
-        }
-    }
-}
-#endregion
-
-#region Endpoints
-namespace Dibix.Sdk.Tests.Business
-{
-    public sealed class ApiConfiguration : HttpApiDescriptor
-    {
-        public override void Configure(IHttpApiDiscoveryContext context)
-        {
-            base.RegisterController("GenericEndpoint", x =>
-            {
-                x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.MultiConcreteResult)), y =>
-                {
-                    y.Method = HttpApiMethod.Get;
-                });
-                x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), y =>
-                {
-                    y.Method = HttpApiMethod.Get;
-                    y.ChildRoute = "{password}/Fixed";
-                    y.ResolveParameterFromNull("password");
-                    y.ResolveParameterFromSource("u", "HEADER", "User-Agent");
-                    y.ResolveParameterFromSource("v", "HEADER", "Authorization.Parameter");
-                    y.ResolveParameterFromSource("w", "DBX", "X", "DBX");
-                    y.ResolveParameterFromSource("x", "REQUEST", "Language");
-                    y.ResolveParameterFromConstant("y", true);
-                    y.ResolveParameterFromConstant("z", 5);
-                });
-                x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), y =>
-                {
-                    y.Method = HttpApiMethod.Get;
-                    y.ChildRoute = "{password}/User";
-                    y.IsAnonymous = true;
-                });
-                x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.SingleConrecteResultWithParams)), y =>
-                {
-                    y.Method = HttpApiMethod.Get;
-                    y.ChildRoute = "Array";
-                });
-                x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.FileResult)), y =>
-                {
-                    y.Method = HttpApiMethod.Get;
-                    y.ChildRoute = "{id}";
-                    y.IsAnonymous = true;
-                    y.FileResponse = new HttpFileResponseDefinition(cache: false);
-                });
-                x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.FileUpload)), y =>
-                {
-                    y.Method = HttpApiMethod.Put;
-                    y.BodyContract = typeof(System.IO.Stream);
-                    y.ResolveParameterFromSource("data", "BODY", "$RAW");
-                });
-                x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), y =>
-                {
-                    y.Method = HttpApiMethod.Post;
-                    y.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.InputContract);
-                    y.ResolveParameterFromBody("ids", "Dibix.GenericContractIdsInputConverter");
-                });
-                x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), y =>
-                {
-                    y.Method = HttpApiMethod.Patch;
-                    y.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.InputContract);
-                });
-                x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), y =>
-                {
-                    y.Method = HttpApiMethod.Delete;
-                    y.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.AnotherInputContract);
-                    y.ResolveParameterFromSource("ids", "BODY", "SomeIds", z =>
-                    {
-                        z.ResolveParameterFromSource("name", "ITEM", "Title");
-                    });
-                });
-            });
         }
     }
 }
