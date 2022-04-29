@@ -43,7 +43,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 if (HttpMethods.Contains(segment))
                 {
-                    this._logger.LogError($"The path segment '{segment}' is a known HTTP verb, which should be indicated by the action method and is therefore redundant: {action.ChildRoute.Value}", action.ChildRoute.Source, action.ChildRoute.Line, columnOffset);
+                    this._logger.LogError($"The path segment '{segment}' is a known HTTP verb, which should be indicated by the action method and is therefore redundant: {action.ChildRoute.Value}", action.ChildRoute.Source, action.ChildRoute.Line, action.ChildRoute.Column + columnOffset);
                     result = false;
                 }
                 columnOffset += segment.Length + 1; // Skip segment and slash

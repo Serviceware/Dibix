@@ -147,7 +147,7 @@ namespace Dibix.Sdk.CodeGeneration
             actionDefinition.Method = method;
             actionDefinition.OperationId = (string)action.Property("operationId")?.Value ?? actionDefinition.Target.OperationName;
             actionDefinition.Description = (string)action.Property("description")?.Value;
-            actionDefinition.ChildRoute = childRouteProperty.ToToken(childRoute, filePath);
+            actionDefinition.ChildRoute = childRouteProperty?.Value.ToToken(childRoute, filePath);
             actionDefinition.RequestBody = requestBody;
 
             if (TryReadFileResponse(action, out ActionFileResponse fileResponse, out IJsonLineInfo fileResponseLocation))

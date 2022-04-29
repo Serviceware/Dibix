@@ -541,7 +541,7 @@ Endpoints\GenericEndpointWithErrors.json(9,19,9,19):error:Source 'ENV' does not 
 Endpoints\GenericEndpointWithErrors.json(18,20,18,20):error:Property 'X' not found on contract 'Dibix.Sdk.Tests.DomainModel.Request'
 Endpoints\GenericEndpointWithErrors.json(19,23,19,23):error:Property 'Nm' not found on contract 'Dibix.Sdk.Tests.DomainModel.Entry'
 Endpoints\GenericEndpointWithErrors.json(24,27,24,27):error:Property 'Nm' not found on contract 'Dibix.Sdk.Tests.DomainModel.Entry'
-Endpoints\GenericEndpointWithErrors.json(16,5,16,5):error:The path segment 'get' is a known HTTP verb, which should be indicated by the action method and is therefore redundant: this/get/is/wrong"
+Endpoints\GenericEndpointWithErrors.json(16,27,16,27):error:The path segment 'get' is a known HTTP verb, which should be indicated by the action method and is therefore redundant: this/get/is/wrong"
             );
         }
 
