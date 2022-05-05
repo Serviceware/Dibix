@@ -1,0 +1,11 @@
+﻿steps:
+#- powershell: (gci  env:* | sort-object name) # Print env variables
+ - task: DotNetCoreCLI@2
+   displayName: 🤓 Install NBGV
+   inputs:
+     command: custom
+     custom: tool
+     arguments: install --tool-path $(Agent.TempDirectory) nbgv
+
+ - script: $(Agent.TempDirectory)/nbgv cloud
+   displayName: 🖌️ Update pipeline instance name

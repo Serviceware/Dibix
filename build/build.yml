@@ -1,159 +1,76 @@
-﻿stages:
+parameters:
+- name: buildConfiguration
+  displayName: Build configuration
+  type: string
+  default: Release
+  values:
+  - Debug
+  - Release
+
+stages:
 - stage: Initialize
   jobs:
   - job: Linux
     pool:
       vmImage: ubuntu-latest
     steps:
-   #- powershell: (gci  env:* | sort-object name) # Print env variables
-    - task: DotNetCoreCLI@2  
-      displayName: 🤓 Install NBGV
-      inputs:
-        command: custom
-        custom: tool
-        arguments: install --tool-path . nbgv
-    - script: ./nbgv cloud
-      displayName: 🖌️ Update pipeline instance name
+    - template: azure-pipelines-template/initialize.yml
 
-- stage: Build
+- stage: Run
   jobs:
   - job: Linux
     pool:
       vmImage: ubuntu-latest
+    variables:
+    - template: azure-pipelines-template/variables.yml
     steps:
-    - template: build-template-build.yml
+    - template: azure-pipelines-template/restore.yml
+    - template: azure-pipelines-template/build.yml
       parameters:
-        configuration: Debug
-    - template: build-template-build.yml
+        configuration: ${{ parameters.buildConfiguration }}
+    - template: azure-pipelines-template/test-unix.yml
       parameters:
-        configuration: Release
-    - template: build-template-publish.yml
+        configuration: ${{ parameters.buildConfiguration }}
+    - template: azure-pipelines-template/pack.yml
       parameters:
-        kind: Build
-        platform: Linux
-
+        configuration: ${{ parameters.buildConfiguration }}
+  
   - job: macOS
     pool:
       vmImage: macOS-latest
+    variables:
+    - template: azure-pipelines-template/variables.yml
     steps:
-    - template: build-template-build.yml
+    - template: azure-pipelines-template/restore.yml
+    - template: azure-pipelines-template/build.yml
       parameters:
-        configuration: Debug
-    - template: build-template-build.yml
+        configuration: ${{ parameters.buildConfiguration }}
+    - template: azure-pipelines-template/test-unix.yml
       parameters:
-        configuration: Release
-    - template: build-template-publish.yml
-      parameters:
-        kind: Build
-        platform: macOS
-
+        configuration: ${{ parameters.buildConfiguration }}
+  
   - job: Windows
     pool:
       vmImage: windows-latest
+    variables:
+    - template: azure-pipelines-template/variables.yml
     steps:
-    - template: build-template-build.yml
+    - template: azure-pipelines-template/restore.yml
+    - template: azure-pipelines-template/build.yml
       parameters:
-        configuration: Debug
-    - template: build-template-build.yml
+        configuration: ${{ parameters.buildConfiguration }}
+    - template: azure-pipelines-template/test-windows.yml
       parameters:
-        configuration: Release
-    - template: build-template-publish.yml
-      parameters:
-        kind: Build
-        platform: Windows
+        configuration: ${{ parameters.buildConfiguration }}
 
-- stage: Test
+- stage: Finalize
+  condition: succeededOrFailed()
   jobs:
-  - job: Linux
-    pool:
-      vmImage: ubuntu-latest
-    steps:
-    - task: DotNetCoreCLI@2
-      displayName: 🧪 Run unit tests
-      inputs:
-        command: test
-        projects: |
-          **/Dibix.Http.Client.Tests.csproj
-          **/Dibix.Http.Server.Tests.csproj
-          **/Dibix.Tests.csproj
-    - template: build-template-publish.yml
-      parameters:
-        kind: Test
-        platform: Linux
-
-  - job: MacOS
-    pool:
-      vmImage: macOS-latest
-    steps:
-    - task: DotNetCoreCLI@2
-      displayName: 🧪 Run unit tests
-      inputs:
-        command: test
-        projects: |
-          **/Dibix.Http.Client.Tests.csproj
-          **/Dibix.Http.Server.Tests.csproj
-          **/Dibix.Tests.csproj
-    - template: build-template-publish.yml
-      parameters:
-        kind: Test
-        platform: macOS
-
   - job: Windows
     pool:
+      # Use windows pool, because we are using the coverage outputs from the tests, that ran on windows.
+      # Otherwise the report generator cannot resolve the original file paths.
       vmImage: windows-latest
+
     steps:
-    - script: sqllocaldb start mssqllocaldb
-      displayName: 🔌 Start MSSQLLocalDB instance for Dibix.Dapper.Tests
-
-    - script: sqlcmd -S (localdb)\MSSQLLocalDB -Q "CREATE DATABASE [Dibix]"
-      displayName: 🗄 Create database for Dibix.Dapper.Tests
-
-    - script: sqlcmd -S (localdb)\MSSQLLocalDB -i tests/Dibix.Dapper.Tests/Environment/Initialize.sql -d Dibix
-      displayName: 🔧 Initialize database for Dibix.Dapper.Tests
-
-    - task: DotNetCoreCLI@2
-      displayName: 🧪 Run unit tests
-      inputs:
-        command: test
-        projects:  |
-          # Currently running Dapper tests only on Windows, because sqllocaldb is not supported on linux
-          # It might be possible to use a vm with SQL server installed, have to look into it
-          **/Dibix.Dapper.Tests.csproj
-          **/Dibix.Sdk.Tests.csproj
-          **/Dibix.Tests.csproj
-      env:
-        # Required for Dibix.Dapper.Tests
-        Database:ConnectionString: Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Dibix;Integrated Security=True;
-    - template: build-template-publish.yml
-      parameters:
-        kind: Test
-        platform: Windows
-
-- stage: Packaging
-  jobs:
-  - job: Linux
-    pool:
-      vmImage: ubuntu-latest
-    steps:
-   #- task: DotNetCoreCLI@2
-   #  displayName: 📦 Create packages
-   #  inputs:
-   #    command: pack
-   #    packagesToPack: src\Dibix;src\Dibix.Dapper;src\Dibix.Http.Client;src\Dibix.Http.Server;src\Dibix.Sdk;src\Dibix.Testing
-   #    configuration: Release
-   #    verbosityPack: Normal
-   #    arguments: /p:SonarQubeExclude=True
-
-    # Using custom DotNetCoreCLI task for dotnet pack, because the pack command does not accept arguments
-    - template: build-template-pack.yml
-      parameters:
-        packagesToPack:
-        - Dibix
-        - Dibix.Dapper
-        - Dibix.Http.Client
-        - Dibix.Http.Server
-        - Dibix.Sdk.Cli
-        - Dibix.Testing
-    - publish: $(Build.ArtifactStagingDirectory)
-      displayName: 💾 Publish 'NuGet packages' artifact
-      artifact: NuGet packages
+    - template: azure-pipelines-template/publish-coverage.yml

@@ -5,7 +5,10 @@
     <GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1"   />
     <GlobalPackageReference Include="Nerdbank.GitVersioning"      Version="3.4.255" />
 
-    <PackageReference Update="coverlet.msbuild"                                        Version="$(CoverletVersion)"                                                         />
+    <PackageReference Update="coverlet.collector"                                      Version="$(CoverletVersion)"                                                         >
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Update="Dapper.StrongName"                                       Version="$(DapperVersion)"              Condition="'$(TargetFramework)' != 'net461'" />
     <PackageReference Update="Dapper.StrongName"                                       Version="$(DapperNetFxVersion)"         Condition="'$(TargetFramework)' == 'net461'" />
     <PackageReference Update="ILRepack"                                                Version="$(ILRepackVersion)"                                                         />

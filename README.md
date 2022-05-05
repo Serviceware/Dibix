@@ -1,7 +1,7 @@
 # Dibix
 Seamlessly create use case oriented REST APIs based on T-SQL stored procedures.
 
-[![Build Status](https://img.shields.io/azure-devops/build/serviceware/dibix/2/main)](https://dev.azure.com/serviceware/Dibix/_build/latest?definitionId=2&branchName=main) [![Test Status](https://img.shields.io/azure-devops/tests/serviceware/dibix/2/main)](https://dev.azure.com/serviceware/Dibix/_build/latest?definitionId=2&branchName=main)
+[![Build Status](https://img.shields.io/azure-devops/build/serviceware/dibix/2/main)](https://dev.azure.com/serviceware/Dibix/_build/latest?definitionId=2&branchName=main) [![Test Status](https://img.shields.io/azure-devops/tests/serviceware/dibix/2/main)](https://dev.azure.com/serviceware/Dibix/_build/latest?definitionId=2&branchName=main) [![Code coverage](https://img.shields.io/azure-devops/coverage/serviceware/dibix/2/main)](https://dev.azure.com/serviceware/Dibix/_build/latest?definitionId=2&branchName=main)
 
 ## Packages
 | Package | NuGet |

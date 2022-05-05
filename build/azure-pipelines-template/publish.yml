@@ -1,0 +1,15 @@
+﻿parameters:
+- name: artifact
+  type: string
+- name: folder
+  type: string
+ 
+steps:
+- pwsh: New-Item -ItemType Directory -Force -Path $(Build.ArtifactStagingDirectory)/${{ parameters.folder }}
+  displayName: 👮 Ensure artifact folder '${{ parameters.folder }}' exists
+  condition: succeededOrFailed()
+
+- publish: $(Build.ArtifactStagingDirectory)/${{ parameters.folder }}
+  condition: succeededOrFailed()
+  displayName: 💾 Publish '${{ parameters.artifact }}' artifact
+  artifact: ${{ parameters.artifact }}

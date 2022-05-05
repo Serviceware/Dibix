@@ -1,0 +1,58 @@
+﻿parameters:
+- name: configuration
+  type: string
+  values:
+  - Debug
+  - Release
+  
+steps:
+- template: test-unix-dotnet.yml
+  parameters:
+    projects:
+   #  Currently running Dapper tests only on Windows, because sqllocaldb is not supported on linux
+   #  It might be possible to use a vm with SQL server installed, have to look into it
+   #- Dibix.Dapper.Tests
+    - Dibix.Http.Client.Tests
+    - Dibix.Http.Server.Tests
+   #  System.TypeLoadException: Could not load type of field 'Microsoft.Data.Tools.Schema.Common.Diagnostics.EtwProvider:m_provider' (1) due to: Could not resolve type with token 01000013 from typeref (expected class 'System.Diagnostics.Eventing.EventProvider' in assembly 'System.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089') assembly:System.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089 type:System.Diagnostics.Eventing.EventProvider member:(null)
+   #    at Microsoft.Data.Tools.Diagnostics.Tracer.TraceEvent (System.Diagnostics.TraceEventType eventType, Microsoft.Data.Tools.Diagnostics.TraceId traceId, System.String message) [0x0002e] in <75bb8805ce2a4ba6b762417c4b44d8c3>:0 
+   #    at Microsoft.Data.Tools.Diagnostics.PerfTracer.TraceEvent (Microsoft.Data.Tools.Diagnostics.PerfTraceIds traceId, System.String message) [0x00040] in <75bb8805ce2a4ba6b762417c4b44d8c3>:0 
+   #    at Microsoft.Data.Tools.Diagnostics.TraceDuration.Start () [0x0002f] in <75bb8805ce2a4ba6b762417c4b44d8c3>:0 
+   #    at Microsoft.Data.Tools.Diagnostics.TraceDuration..ctor (Microsoft.Data.Tools.Diagnostics.PerfTraceIds traceId, System.String details, System.String operationName) [0x0001b] in <75bb8805ce2a4ba6b762417c4b44d8c3>:0 
+   #    at Microsoft.Data.Tools.Diagnostics.TraceDuration.CreateNew (Microsoft.Data.Tools.Diagnostics.PerfTraceIds traceId, System.String details, System.String operationName) [0x00000] in <75bb8805ce2a4ba6b762417c4b44d8c3>:0 
+   #    at Microsoft.Data.Tools.Schema.Extensibility.ExtensionTypeLoader.LoadTypes () [0x00000] in <3ee3924064684e34beae3dfc1e9c683c>:0 
+   #    at Microsoft.Data.Tools.Schema.Extensibility.ExtensionManager..ctor (System.String databaseSchemaProviderType) [0x00026] in <3ee3924064684e34beae3dfc1e9c683c>:0 
+   #    ...
+   #    at Dibix.Sdk.Sql.PublicSqlDataSchemaModelLoader.Load (System.String projectName, System.String databaseSchemaProviderName, System.String modelCollation, System.Collections.Generic.IEnumerable`1[T] source, System.Collections.Generic.ICollection`1[T] sqlReferencePath, Dibix.Sdk.ILogger logger) [0x00055] in <5d23df369ee4498e9a0d34a57cd21f8a>:0 
+   #- Dibix.Sdk.Tests
+    - Dibix.Tests
+    configuration: ${{ parameters.configuration }}
+
+- task: DotNetCoreCLI@2
+  displayName: 📈 Install ReportGenerator
+  condition: succeededOrFailed()
+  inputs:
+    command: custom
+    custom: tool
+    arguments: install --tool-path $(Agent.TempDirectory) dotnet-reportgenerator-globaltool
+
+- script: >
+    $(Agent.TempDirectory)/reportgenerator
+    -reports:$(Build.ArtifactStagingDirectory)/test/*.xml
+    -targetdir:$(Build.ArtifactStagingDirectory)/test
+    "-reporttypes:Cobertura"
+  displayName: 🔗 Merge code coverage results (*.xml)
+  condition: succeededOrFailed()
+
+- script: >
+    $(Agent.TempDirectory)/reportgenerator
+    -reports:$(Build.ArtifactStagingDirectory)/test/Cobertura.xml
+    -targetdir:$(Build.ArtifactStagingDirectory)/test/HTML
+    "-reporttypes:HtmlInline_AzurePipelines_Dark"
+  displayName: 🔗 Merge code coverage results (*.html)
+  condition: succeededOrFailed()
+
+- template: publish.yml
+  parameters:
+    artifact: Test output ($(operatingSystem))
+    folder: test

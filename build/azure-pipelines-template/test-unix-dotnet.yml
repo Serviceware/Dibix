@@ -1,0 +1,44 @@
+﻿parameters:
+- name: projects
+  type: object
+  default: { }
+- name: configuration
+  type: string
+  values:
+  - Debug
+  - Release
+ 
+steps:
+- ${{ each project in parameters.projects }}:
+  - task: DotNetCoreCLI@2
+    displayName: 🧪 Test ${{ project }}
+    condition: succeededOrFailed()
+    inputs:
+      command: test
+      projects: tests/${{ project }}
+      testRunTitle: ${{ project }} ($(operatingSystem))
+      arguments: >
+        --logger trx;LogFileName=${{ project }}.trx
+        --configuration ${{ parameters.configuration }}
+        --no-restore
+        --collect:"XPlat Code Coverage"
+
+  - task: CopyFiles@2
+    displayName: 🪂 Prepare test artifacts
+    condition: succeededOrFailed()
+    inputs:
+      SourceFolder: $(Agent.TempDirectory)
+      TargetFolder: $(Build.ArtifactStagingDirectory)/test
+      flattenFolders: true
+      Contents: '*/*.xml'
+
+  - task: DeleteFiles@1
+    displayName: 🧹 Cleanup previous coverage reports
+    condition: succeededOrFailed()
+    inputs:
+      SourceFolder: $(Agent.TempDirectory)
+      Contents: '*/coverage.cobertura.xml'
+
+  - pwsh: Rename-Item -Path $(Build.ArtifactStagingDirectory)/test\coverage.cobertura.xml -NewName ${{ project }}.xml
+    displayName: 🎨 Rename coverage.cobertura.xml -> ${{ project }}.xml
+    condition: succeededOrFailed()

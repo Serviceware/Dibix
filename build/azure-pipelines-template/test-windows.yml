@@ -1,0 +1,53 @@
+﻿parameters:
+- name: configuration
+  type: string
+  values:
+  - Debug
+  - Release
+  
+steps:
+- script: sqllocaldb start mssqllocaldb
+  displayName: 🔌 Start MSSQLLocalDB instance for Dibix.Dapper.Tests
+
+- script: sqlcmd -S (localdb)\MSSQLLocalDB -Q "CREATE DATABASE [Dibix]"
+  displayName: 🗄 Create database for Dibix.Dapper.Tests
+
+- script: sqlcmd -S (localdb)\MSSQLLocalDB -i tests/Dibix.Dapper.Tests/Environment/Initialize.sql -d Dibix
+  displayName: 🔧 Initialize database for Dibix.Dapper.Tests
+
+- template: test-windows-dotnet.yml
+  parameters:
+    projects:
+    - Dibix.Dapper.Tests
+    configuration: ${{ parameters.configuration }}
+    arguments: -e Database:ConnectionString="Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Dibix;Integrated Security=True;"
+
+- template: test-windows-dotnet.yml
+  parameters:
+    projects:
+    - Dibix.Http.Client.Tests
+    - Dibix.Http.Server.Tests
+    - Dibix.Sdk.Tests
+    - Dibix.Tests
+    configuration: ${{ parameters.configuration }}
+
+- task: DotNetCoreCLI@2
+  displayName: 📈 Install dotnet-coverage
+  condition: succeededOrFailed()
+  inputs:
+    command: custom
+    custom: tool
+    arguments: install --tool-path $(Agent.TempDirectory) dotnet-coverage
+
+- script: >
+    $(Agent.TempDirectory)/dotnet-coverage
+    merge
+    --output $(Build.ArtifactStagingDirectory)/test/CodeCoverage.coverage
+    $(Build.ArtifactStagingDirectory)/test/*.coverage
+  displayName: 🔗 Merge code coverage results (*.coverage)
+  condition: succeededOrFailed()
+
+- template: publish.yml
+  parameters:
+    artifact: Test output ($(operatingSystem))
+    folder: test

@@ -1,0 +1,24 @@
+﻿parameters:
+- name: configuration
+  type: string
+  values:
+  - Debug
+  - Release
+
+steps:
+- template: build-all.yml
+  parameters:
+    projects:
+    - Dibix
+    - Dibix.Dapper
+    - Dibix.Http.Client
+    - Dibix.Http.Server
+    - Dibix.Sdk
+    - Dibix.Sdk.Cli
+    - Dibix.Testing
+    configuration: ${{ parameters.configuration }}
+
+- template: publish.yml
+  parameters:
+    artifact: Build output ($(operatingSystem))
+    folder: build

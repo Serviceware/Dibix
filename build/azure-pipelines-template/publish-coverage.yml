@@ -1,0 +1,30 @@
+﻿steps:
+- download: current
+  artifact: Test output (Windows)
+  displayName: 📬 Download 'Test output (Windows)' artifact
+
+- task: DotNetCoreCLI@2
+  displayName: 📈 Install dotnet-coverage
+  condition: succeededOrFailed()
+  inputs:
+    command: custom
+    custom: tool
+    arguments: install --tool-path $(Agent.TempDirectory) dotnet-coverage
+
+- script: >
+    $(Agent.TempDirectory)/dotnet-coverage
+    merge
+    --output "$(Pipeline.Workspace)/Test output (Windows)/output.cobertura.xml"
+    --output-format cobertura
+    "$(Pipeline.Workspace)/Test output (Windows)/CodeCoverage.coverage"
+  displayName: 🔗 Merge code coverage results (*.xml)
+  condition: succeededOrFailed()
+
+- task: PublishCodeCoverageResults@1
+  displayName: ☑️ Publish code coverage
+  condition: succeededOrFailed()
+  inputs:
+    codeCoverageTool: Cobertura
+    summaryFileLocation: $(Pipeline.Workspace)/Test output (Windows)/output.cobertura.xml
+    pathToSources: $(Build.SourcesDirectory)
+    failIfCoverageEmpty: true

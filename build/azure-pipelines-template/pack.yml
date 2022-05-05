@@ -1,0 +1,30 @@
+﻿parameters:
+- name: configuration
+  type: string
+  values:
+  - Debug
+  - Release
+
+steps:
+- template: pack-dotnet.yml
+  parameters:
+    projects:
+    - Dibix
+    - Dibix.Dapper
+    - Dibix.Http.Client
+    - Dibix.Http.Server
+    - Dibix.Sdk.Cli
+    - Dibix.Testing
+    configuration: ${{ parameters.configuration }}
+
+- task: CopyFiles@2
+  displayName: 🪂 Prepare package artifacts
+  inputs:
+    SourceFolder: $(Agent.TempDirectory)
+    TargetFolder: $(Build.ArtifactStagingDirectory)/packages
+    Contents: '*.nupkg'
+
+- template: publish.yml
+  parameters:
+    artifact: NuGet packages
+    folder: packages

@@ -20,10 +20,6 @@ Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Dibix.Sdk.Tests.Database", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{62C58971-8516-42E1-8D2A-70A0CE779FFE}"
 	ProjectSection(SolutionItems) = preProject
-		build\build-template-build.yml = build\build-template-build.yml
-		build\build-template-pack.yml = build\build-template-pack.yml
-		build\build-template-publish.yml = build\build-template-publish.yml
-		build\build.ps1 = build\build.ps1
 		build\build.yml = build\build.yml
 		build\dependencies.props = build\dependencies.props
 		Directory.Build.props = Directory.Build.props
@@ -51,6 +47,24 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Http.Client", "src\Dibix.Http.Client\Dibix.Http.Client.csproj", "{B169B4F5-937B-45C4-B645-7A37EECCAD55}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Http.Client.Tests", "tests\Dibix.Http.Client.Tests\Dibix.Http.Client.Tests.csproj", "{9543028A-A47A-460C-9BD4-0B104D04062D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "azure-pipeline-templates", "azure-pipeline-templates", "{D471D863-FB0C-44E3-904F-A3B8CC0B0256}"
+	ProjectSection(SolutionItems) = preProject
+		build\azure-pipelines-template\build-all.yml = build\azure-pipelines-template\build-all.yml
+		build\azure-pipelines-template\build-dotnet.yml = build\azure-pipelines-template\build-dotnet.yml
+		build\azure-pipelines-template\build.yml = build\azure-pipelines-template\build.yml
+		build\azure-pipelines-template\initialize.yml = build\azure-pipelines-template\initialize.yml
+		build\azure-pipelines-template\pack-dotnet.yml = build\azure-pipelines-template\pack-dotnet.yml
+		build\azure-pipelines-template\pack.yml = build\azure-pipelines-template\pack.yml
+		build\azure-pipelines-template\publish-coverage.yml = build\azure-pipelines-template\publish-coverage.yml
+		build\azure-pipelines-template\publish.yml = build\azure-pipelines-template\publish.yml
+		build\azure-pipelines-template\restore.yml = build\azure-pipelines-template\restore.yml
+		build\azure-pipelines-template\test-unix-dotnet.yml = build\azure-pipelines-template\test-unix-dotnet.yml
+		build\azure-pipelines-template\test-unix.yml = build\azure-pipelines-template\test-unix.yml
+		build\azure-pipelines-template\test-windows-dotnet.yml = build\azure-pipelines-template\test-windows-dotnet.yml
+		build\azure-pipelines-template\test-windows.yml = build\azure-pipelines-template\test-windows.yml
+		build\azure-pipelines-template\variables.yml = build\azure-pipelines-template\variables.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -127,6 +141,7 @@ Global
 		{C9882C3B-89DE-41CE-BD2B-29203381006C} = {118B0BCE-C81F-4DA0-814C-2F8AC4867710}
 		{B169B4F5-937B-45C4-B645-7A37EECCAD55} = {118B0BCE-C81F-4DA0-814C-2F8AC4867710}
 		{9543028A-A47A-460C-9BD4-0B104D04062D} = {B1D5F4EA-842C-494E-9B2F-1FF271591E29}
+		{D471D863-FB0C-44E3-904F-A3B8CC0B0256} = {62C58971-8516-42E1-8D2A-70A0CE779FFE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F25BA702-70BE-4E04-8583-C71369C6D3D0}
