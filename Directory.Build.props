@@ -9,17 +9,15 @@
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)build\signing-key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
 
+    <DebugType>embedded</DebugType>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <ContinuousIntegrationBuild Condition="'$(TF_BUILD)' == 'true'">true</ContinuousIntegrationBuild>
+
     <PackageProjectUrl>https://github.com/Serviceware/Dibix</PackageProjectUrl>
     <RepositoryType>Git</RepositoryType>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <PackageTags>Dibix</PackageTags>
     <Description>Seamlessly create use case oriented REST APIs based on T-SQL stored procedures.</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <DebugType>embedded</DebugType>
   </PropertyGroup>
 </Project>
