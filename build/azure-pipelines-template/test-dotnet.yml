@@ -1,0 +1,33 @@
+﻿parameters:
+- name: projects
+  type: object
+  default: { }
+- name: configuration
+  type: string
+  values:
+  - Debug
+  - Release
+- name: codeCoverageEngine
+  type: string
+  values:
+  - Native
+  - Cobertura
+- name: arguments
+  type: string
+  default:
+ 
+steps:
+- ${{ if eq(parameters.codeCoverageEngine, 'Native') }}:
+  - template: test-dotnet-native.yml
+    parameters:
+      projects: ${{ parameters.projects }}
+      configuration: ${{ parameters.configuration }}
+      arguments: ${{ parameters.arguments }}
+
+- ${{ if eq(parameters.codeCoverageEngine, 'Cobertura') }}:
+  - template: test-dotnet-cobertura.yml
+    parameters:
+      projects: ${{ parameters.projects }}
+      configuration: ${{ parameters.configuration }}
+      arguments: ${{ parameters.arguments }}
+  

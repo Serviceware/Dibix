@@ -1,0 +1,35 @@
+﻿parameters:
+- name: operatingSystem
+  type: string
+  values:
+  - Linux
+  - macOS
+  - Windows
+- name: configuration
+  type: string
+  values:
+  - Debug
+  - Release
+- name: codeCoverageEngine
+  type: string
+  values:
+  - Native
+  - Cobertura
+
+steps:
+- template: restore.yml
+
+- template: build.yml
+  parameters:
+    configuration: ${{ parameters.configuration }}
+
+- template: test.yml
+  parameters:
+    operatingSystem: ${{ parameters.operatingSystem }}
+    configuration: ${{ parameters.configuration }}
+    codeCoverageEngine: ${{ parameters.codeCoverageEngine }}
+
+- ${{ if eq(parameters.operatingSystem, 'Linux') }}:
+  - template: pack.yml
+    parameters:
+      configuration: ${{ parameters.configuration }}

@@ -7,6 +7,9 @@
   values:
   - Debug
   - Release
+- name: arguments
+  type: string
+  default:
  
 steps:
 - ${{ each project in parameters.projects }}:
@@ -22,6 +25,12 @@ steps:
         --configuration ${{ parameters.configuration }}
         --no-restore
         --collect:"XPlat Code Coverage"
+        ${{ parameters.arguments }}
+        -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.DeterministicReport=True
+  
+  - pwsh: Get-ChildItem $(Agent.TempDirectory)/*/coverage.cobertura.xml | %{ Rename-Item -Path $_.FullName -NewName ${{ project }}.xml }
+    displayName: 🎨 Rename coverage.cobertura.xml -> ${{ project }}.xml
+    condition: succeededOrFailed()
 
   - task: CopyFiles@2
     displayName: 🪂 Prepare test artifacts
@@ -30,15 +39,4 @@ steps:
       SourceFolder: $(Agent.TempDirectory)
       TargetFolder: $(Build.ArtifactStagingDirectory)/test
       flattenFolders: true
-      Contents: '*/*.xml'
-
-  - task: DeleteFiles@1
-    displayName: 🧹 Cleanup previous coverage reports
-    condition: succeededOrFailed()
-    inputs:
-      SourceFolder: $(Agent.TempDirectory)
-      Contents: '*/coverage.cobertura.xml'
-
-  - pwsh: Rename-Item -Path $(Build.ArtifactStagingDirectory)/test\coverage.cobertura.xml -NewName ${{ project }}.xml
-    displayName: 🎨 Rename coverage.cobertura.xml -> ${{ project }}.xml
-    condition: succeededOrFailed()
+      Contents: '*/${{ project }}.xml'

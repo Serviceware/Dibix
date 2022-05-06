@@ -1,22 +1,28 @@
-﻿steps:
+﻿parameters:
+- name: codeCoverageEngine
+  type: string
+  values:
+  - Native
+  - Cobertura
+
+steps:
 - download: current
   artifact: Test output (Windows)
   displayName: 📬 Download 'Test output (Windows)' artifact
 
 - task: DotNetCoreCLI@2
-  displayName: 📈 Install dotnet-coverage
+  displayName: 📈 Install ReportGenerator
   condition: succeededOrFailed()
   inputs:
     command: custom
     custom: tool
-    arguments: install --tool-path $(Agent.TempDirectory) dotnet-coverage
+    arguments: install --tool-path $(Agent.TempDirectory) dotnet-reportgenerator-globaltool
 
 - script: >
-    $(Agent.TempDirectory)/dotnet-coverage
-    merge
-    --output "$(Pipeline.Workspace)/Test output (Windows)/output.cobertura.xml"
-    --output-format cobertura
-    "$(Pipeline.Workspace)/Test output (Windows)/CodeCoverage.coverage"
+    $(Agent.TempDirectory)/reportgenerator
+    -reports:"$(Pipeline.Workspace)/Test output (Windows)/*.xml"
+    -targetdir:"$(Pipeline.Workspace)/Test output (Windows)"
+    -reporttypes:Cobertura
   displayName: 🔗 Merge code coverage results (*.xml)
   condition: succeededOrFailed()
 
@@ -25,6 +31,7 @@
   condition: succeededOrFailed()
   inputs:
     codeCoverageTool: Cobertura
-    summaryFileLocation: $(Pipeline.Workspace)/Test output (Windows)/output.cobertura.xml
+    summaryFileLocation: $(Pipeline.Workspace)/Test output (Windows)/Cobertura.xml
+    reportDirectory: $(Pipeline.Workspace)/Test output (Windows)/Report
     pathToSources: $(Build.SourcesDirectory)
     failIfCoverageEmpty: true

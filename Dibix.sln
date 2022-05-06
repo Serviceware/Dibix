@@ -59,10 +59,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "azure-pipeline-templates", 
 		build\azure-pipelines-template\publish-coverage.yml = build\azure-pipelines-template\publish-coverage.yml
 		build\azure-pipelines-template\publish.yml = build\azure-pipelines-template\publish.yml
 		build\azure-pipelines-template\restore.yml = build\azure-pipelines-template\restore.yml
-		build\azure-pipelines-template\test-unix-dotnet.yml = build\azure-pipelines-template\test-unix-dotnet.yml
-		build\azure-pipelines-template\test-unix.yml = build\azure-pipelines-template\test-unix.yml
-		build\azure-pipelines-template\test-windows-dotnet.yml = build\azure-pipelines-template\test-windows-dotnet.yml
-		build\azure-pipelines-template\test-windows.yml = build\azure-pipelines-template\test-windows.yml
+		build\azure-pipelines-template\run.yml = build\azure-pipelines-template\run.yml
+		build\azure-pipelines-template\test-dotnet-cobertura.yml = build\azure-pipelines-template\test-dotnet-cobertura.yml
+		build\azure-pipelines-template\test-dotnet-native.yml = build\azure-pipelines-template\test-dotnet-native.yml
+		build\azure-pipelines-template\test-dotnet.yml = build\azure-pipelines-template\test-dotnet.yml
+		build\azure-pipelines-template\test-initialize-localdb.yml = build\azure-pipelines-template\test-initialize-localdb.yml
+		build\azure-pipelines-template\test.yml = build\azure-pipelines-template\test.yml
 		build\azure-pipelines-template\variables.yml = build\azure-pipelines-template\variables.yml
 	EndProjectSection
 EndProject

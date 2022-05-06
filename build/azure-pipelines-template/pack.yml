@@ -17,13 +17,6 @@ steps:
     - Dibix.Testing
     configuration: ${{ parameters.configuration }}
 
-- task: CopyFiles@2
-  displayName: 🪂 Prepare package artifacts
-  inputs:
-    SourceFolder: $(Agent.TempDirectory)
-    TargetFolder: $(Build.ArtifactStagingDirectory)/packages
-    Contents: '*.nupkg'
-
 - template: publish.yml
   parameters:
     artifact: NuGet packages

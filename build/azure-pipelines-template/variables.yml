@@ -1,2 +1,5 @@
 ﻿variables:
-  operatingSystem: $(Agent.JobName)
+  operatingSystem: $(Agent.JobName) # Runtime
+  codeCoverageEngine: Native        # Compile-time
+
+  disable.coverage.autogenerate: 'true'

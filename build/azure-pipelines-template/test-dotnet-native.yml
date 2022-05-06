@@ -30,7 +30,7 @@ steps:
         ${{ parameters.arguments }}
         -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.CodeCoverage.ModulePaths.Include.ModulePath=^^.*\Dibix[^^\]*.dll
         -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.CodeCoverage.ModulePaths.Exclude.ModulePath=^^.*.Tests.dll$
-
+  
   - task: PublishTestResults@2
     displayName: 📗 Publish test results
     condition: succeededOrFailed()
@@ -42,11 +42,11 @@ steps:
       buildConfiguration: ${{ parameters.configuration }}
       mergeTestResults: true
       failTaskOnFailedTests: false
-
+  
   - pwsh: Get-ChildItem $(Agent.TempDirectory)/*/*.coverage | %{ Rename-Item -Path $_.FullName -NewName ${{ project }}.coverage }
     displayName: 🎨 Rename *.coverage -> ${{ project }}.coverage
     condition: succeededOrFailed()
-
+  
   - task: CopyFiles@2
     displayName: 🪂 Prepare test artifacts
     condition: succeededOrFailed()
@@ -54,15 +54,36 @@ steps:
       SourceFolder: $(Agent.TempDirectory)
       TargetFolder: $(Build.ArtifactStagingDirectory)/test
       flattenFolders: true
-      Contents: |
-        *.trx
-        */*.coverage
-
+      Contents: '*/*.coverage'
+  
   - task: DeleteFiles@1
-    displayName: 🧹 Cleanup previous test results
+    displayName: 🧹 Cleanup previous coverage reports
     condition: succeededOrFailed()
     inputs:
       SourceFolder: $(Agent.TempDirectory)
-      Contents: |
-        ${{ project }}.trx
-        */${{ project }}.coverage
+      Contents: '*/${{ project }}.coverage'
+
+- task: DotNetCoreCLI@2
+  displayName: 📈 Install dotnet-coverage
+  condition: succeededOrFailed()
+  inputs:
+    command: custom
+    custom: tool
+    arguments: install --tool-path $(Agent.TempDirectory) dotnet-coverage
+
+- script: >
+    $(Agent.TempDirectory)/dotnet-coverage
+    merge
+    --output $(Build.ArtifactStagingDirectory)/test/CodeCoverage.coverage
+    $(Build.ArtifactStagingDirectory)/test/*.coverage
+  displayName: 🔗 Merge code coverage results (*.coverage)
+  condition: succeededOrFailed()
+  
+- script: >
+    $(Agent.TempDirectory)/dotnet-coverage
+    merge
+    --output $(Build.ArtifactStagingDirectory)/test/Cobertura.xml
+    --output-format cobertura
+    $(Build.ArtifactStagingDirectory)/test/CodeCoverage.coverage"
+  displayName: 🔗 Merge code coverage results (*.xml)
+  condition: succeededOrFailed()

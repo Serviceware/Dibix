@@ -6,6 +6,9 @@ parameters:
   values:
   - Debug
   - Release
+  
+variables:
+- template: azure-pipelines-template/variables.yml
 
 stages:
 - stage: Initialize
@@ -21,47 +24,32 @@ stages:
   - job: Linux
     pool:
       vmImage: ubuntu-latest
-    variables:
-    - template: azure-pipelines-template/variables.yml
     steps:
-    - template: azure-pipelines-template/restore.yml
-    - template: azure-pipelines-template/build.yml
+    - template: azure-pipelines-template/run.yml
       parameters:
+        operatingSystem: Linux
         configuration: ${{ parameters.buildConfiguration }}
-    - template: azure-pipelines-template/test-unix.yml
-      parameters:
-        configuration: ${{ parameters.buildConfiguration }}
-    - template: azure-pipelines-template/pack.yml
-      parameters:
-        configuration: ${{ parameters.buildConfiguration }}
+        codeCoverageEngine: ${{ variables.codeCoverageEngine }}
   
   - job: macOS
     pool:
       vmImage: macOS-latest
-    variables:
-    - template: azure-pipelines-template/variables.yml
     steps:
-    - template: azure-pipelines-template/restore.yml
-    - template: azure-pipelines-template/build.yml
+    - template: azure-pipelines-template/run.yml
       parameters:
+        operatingSystem: macOS
         configuration: ${{ parameters.buildConfiguration }}
-    - template: azure-pipelines-template/test-unix.yml
-      parameters:
-        configuration: ${{ parameters.buildConfiguration }}
+        codeCoverageEngine: ${{ variables.codeCoverageEngine }}
   
   - job: Windows
     pool:
       vmImage: windows-latest
-    variables:
-    - template: azure-pipelines-template/variables.yml
     steps:
-    - template: azure-pipelines-template/restore.yml
-    - template: azure-pipelines-template/build.yml
+    - template: azure-pipelines-template/run.yml
       parameters:
+        operatingSystem: Windows
         configuration: ${{ parameters.buildConfiguration }}
-    - template: azure-pipelines-template/test-windows.yml
-      parameters:
-        configuration: ${{ parameters.buildConfiguration }}
+        codeCoverageEngine: ${{ variables.codeCoverageEngine }}
 
 - stage: Finalize
   condition: succeededOrFailed()
@@ -74,3 +62,5 @@ stages:
 
     steps:
     - template: azure-pipelines-template/publish-coverage.yml
+      parameters:
+        codeCoverageEngine: ${{ variables.codeCoverageEngine }}

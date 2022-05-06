@@ -1,6 +1,10 @@
 <Project>
   <Sdk Name="Microsoft.Build.CentralPackageVersions" Version="2.0.1" />
 
+  <PropertyGroup>
+    <DefaultItemExcludes Condition="'$(IsTestProject)' == 'true'">$(DefaultItemExcludes);TestResults\**</DefaultItemExcludes>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Remove="*.dotsettings" />
   </ItemGroup>
