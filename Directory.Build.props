@@ -9,7 +9,9 @@
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)build\signing-key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
 
-    <DebugType>embedded</DebugType>
+    <DebugType Condition="'$(TF_BUILD)' != 'true'">embedded</DebugType>
+    <IncludeSymbols Condition="'$(DebugType)' != 'embedded'">true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <ContinuousIntegrationBuild Condition="'$(TF_BUILD)' == 'true'">true</ContinuousIntegrationBuild>
 

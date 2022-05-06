@@ -11,6 +11,13 @@
     <SuppressDependenciesWhenPacking>True</SuppressDependenciesWhenPacking>
     <!-- This project has a target framework, however the NuGet package doesn't include this as a dependency. -->
     <NoWarn>$(NoWarn);NU5128</NoWarn>
+    <!-- 
+      NU5017: Cannot create a package that has no dependencies nor content.
+      Might be caused by 'IncludeBuildOutput' property.
+      I have not found a way yet to serve symbols for the binaries, that reside in the tools folder though.
+    -->
+    <DebugType>embedded</DebugType>
+    <IncludeSymbols>False</IncludeSymbols>
   </PropertyGroup>
 
   <ItemGroup>
