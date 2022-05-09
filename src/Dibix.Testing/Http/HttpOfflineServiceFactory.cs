@@ -66,7 +66,7 @@ namespace Dibix.Testing.Http
             Expression call = Expression.Call(instance, targetMethod, parameters);
             LambdaExpression lambda = Expression.Lambda(call, parameters);
             MethodBuilder methodDelegateBuilder = typeBuilder.DefineMethod($"{targetMethod.Name}Impl", MethodAttributes.Private | MethodAttributes.Static);
-#if NET5_0
+#if !NETFRAMEWORK
             throw new PlatformNotSupportedException("LambdaExpression.CompileToMethod is not supported on this platform");
 #else
             lambda.CompileToMethod(methodDelegateBuilder);

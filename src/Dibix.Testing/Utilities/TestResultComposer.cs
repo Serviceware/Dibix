@@ -62,7 +62,7 @@ namespace Dibix.Testing
             this.RegisterFile(path);
         }
 
-#if NET5_0
+#if NETCOREAPP
         [System.Runtime.Versioning.SupportedOSPlatform("windows")]
 #endif
         public void AddLastEventLogErrors(int count = 5) => this.AddLastEventLogEntries(EventLogEntryType.Error, count);
@@ -116,7 +116,7 @@ start winmergeU ""{expectedDirectory}"" ""{actualDirectory}""");
             this.RegisterFile(path);
         }
 
-#if NET5_0
+#if NETCOREAPP
         [System.Runtime.Versioning.SupportedOSPlatform("windows")]
 #endif
         private void AddLastEventLogEntries(EventLogEntryType eventLogEntryType, int count)

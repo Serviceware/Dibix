@@ -157,7 +157,7 @@ Value: {instance}");
 
             try
             {
-#if NET5_0
+#if NETCOREAPP
                 if (OperatingSystem.IsWindows())
 #endif
                     this.TestResultComposer.AddLastEventLogErrors();

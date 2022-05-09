@@ -10,7 +10,12 @@ namespace Dibix
             if (nullableType != null)
                 type = nullableType;
 
-            return type.IsPrimitive || type.IsEnum || type == typeof(string) || type == typeof(Guid) || type == typeof(DateTime);
+            return type.IsPrimitive
+                || type.IsEnum
+                || type == typeof(decimal)
+                || type == typeof(string)
+                || type == typeof(Guid)
+                || type == typeof(DateTime);
         }
     }
 }
