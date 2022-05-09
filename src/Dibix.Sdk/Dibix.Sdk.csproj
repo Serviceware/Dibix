@@ -18,7 +18,6 @@
     <Compile Include="..\..\shared\Extensions\CollectionExtensions.cs" Link="Extensions\CollectionExtensions.cs" />
     <Compile Include="..\..\shared\Extensions\EnumerableExtensions.cs" Link="Extensions\EnumerableExtensions.cs" />
     <Compile Include="..\..\shared\Extensions\ReflectionExtensions.cs" Link="Extensions\ReflectionExtensions.cs" />
-    <Compile Include="..\..\shared\Http\HttpParameterName.cs" Link="OpenApi\HttpParameterName.cs" />
     <Compile Include="..\..\shared\KnownHeaders.cs" Link="OpenApi\KnownHeaders.cs" />
     <Compile Include="..\..\shared\Http\RouteBuilder.cs" Link="OpenApi\RouteBuilder.cs" />
     <Compile Include="..\..\shared\Utilities\ExpressionUtility.cs" Link="Utilities\ExpressionUtility.cs" />

@@ -14,104 +14,40 @@ namespace Dibix.Sdk
 
         public static IdMap<TFlag> Create(Type type) => new IdMap<TFlag>(type);
 
-        public string GetName(TFlag flag) => FlagMap.GetFlagName(this._type, flag);
+        public string GetDefinitionName(TFlag flag) => FlagCache.GetFlagName(this._type, flag);
 
-        public bool TryGetName(TFlag flag, out string definitionName) => FlagMap.TryGetFlagName(this._type, flag, out definitionName);
+        public bool TryGetDefinitionName(TFlag flag, out string definitionName) => FlagCache.TryGetFlagName(this._type, flag, out definitionName);
     }
 
     internal abstract class IdMap<TType, TFlag>
     {
-        public static string GetName(TFlag flag) => FlagMap.GetFlagName<TType, TFlag>(flag);
-        public static bool IsDefined(TFlag flag) => FlagMap.IsDefined<TType, TFlag>(flag);
+        public static string GetDefinitionName(TFlag flag) => FlagCache.GetFlagName(typeof(TType), flag);
+
+        public static bool IsDefined(TFlag flag) => FlagCache.IsDefined(typeof(TType), flag);
     }
 
-    internal static class FlagMap
-    {
-        public static string GetFlagName<TType, TFlag>(TFlag value) => GetFlagName(typeof(TType), value);
-        public static string GetFlagName<TFlag>(Type type, TFlag value)
-        {
-            FlagDescriptorCache<TFlag> flagDescriptorCache = FlagTypeCache.GetFlagCache<TFlag>(type);
-            return flagDescriptorCache.GetDescriptorByValue(value).Name;
-        }
-
-        public static bool TryGetFlagName<TFlag>(Type type, TFlag flag, out string definitionName)
-        {
-            FlagDescriptorCache<TFlag> flagDescriptorCache = FlagTypeCache.GetFlagCache<TFlag>(type);
-            if (flagDescriptorCache.TryGetDescriptorByValue(flag, out FlagDescriptor<TFlag> descriptor))
-            {
-                definitionName = descriptor.Name;
-                return true;
-            }
-
-            definitionName = null;
-            return false;
-        }
-
-        public static bool IsDefined<TType, TFlag>(TFlag value)
-        {
-            FlagDescriptorCache<TFlag> flagDescriptorCache = FlagTypeCache.GetFlagCache<TFlag>(typeof(TType));
-            return flagDescriptorCache.IsValueDefined(value);
-        }
-    }
-
-    internal static class FlagTypeCache
+    internal static class FlagCache
     {
         private static readonly ConcurrentDictionary<Type, object> FlagTypeMap = new ConcurrentDictionary<Type, object>();
 
-        public static FlagDescriptorCache<TFlag> GetFlagCache<TFlag>(Type type) => (FlagDescriptorCache<TFlag>)FlagTypeMap.GetOrAdd(type, CreateFlagDescriptorCache<TFlag>);
+        public static string GetFlagName<TFlag>(Type type, TFlag flag) => GetFlagMap<TFlag>(type)[flag];
 
-        private static object CreateFlagDescriptorCache<TFlag>(Type type) => FlagDescriptorCache<TFlag>.Create(type);
-    }
+        public static bool TryGetFlagName<TFlag>(Type type, TFlag flag, out string definitionName) => GetFlagMap<TFlag>(type).TryGetValue(flag, out definitionName);
+        
+        public static bool IsDefined<TFlag>(Type type, TFlag flag) => GetFlagMap<TFlag>(type).ContainsKey(flag);
 
-    internal sealed class FlagDescriptorCache<TFlag>
-    {
-        private readonly IDictionary<string, FlagDescriptor<TFlag>> _nameMap;
-        private readonly IDictionary<TFlag, FlagDescriptor<TFlag>> _valueMap;
+        private static IDictionary<TFlag, string> GetFlagMap<TFlag>(Type type) => (IDictionary<TFlag, string>)FlagTypeMap.GetOrAdd(type, CreateFlagMap<TFlag>);
 
-        public Type Type { get; }
+        private static IDictionary<TFlag, string> CreateFlagMap<TFlag>(Type type) => CollectFlags<TFlag>(type).ToDictionary(x => x.Key, x => x.Value);
 
-        private FlagDescriptorCache(Type type, ICollection<FlagDescriptor<TFlag>> descriptors)
-        {
-            this.Type = type;
-            this._nameMap = descriptors.ToDictionary(x => x.Name);
-            this._valueMap = descriptors.ToDictionary(x => x.Value);
-        }
-
-        public FlagDescriptor<TFlag> GetDescriptorByName(string name) => this._nameMap[name];
-        public FlagDescriptor<TFlag> GetDescriptorByValue(TFlag value) => this._valueMap[value];
-
-        public bool TryGetDescriptorByName(string name, out FlagDescriptor<TFlag> descriptor) => this._nameMap.TryGetValue(name, out descriptor);
-        public bool TryGetDescriptorByValue(TFlag value, out FlagDescriptor<TFlag> descriptor) => this._valueMap.TryGetValue(value, out descriptor);
-
-        public bool IsNameDefined(string name) => this._nameMap.ContainsKey(name);
-        public bool IsValueDefined(TFlag value) => this._valueMap.ContainsKey(value);
-
-        public static FlagDescriptorCache<TFlag> Create(Type type)
-        {
-            ICollection<FlagDescriptor<TFlag>> descriptors = CollectFlags(type).ToArray();
-            return new FlagDescriptorCache<TFlag>(type, descriptors);
-        }
-
-        private static IEnumerable<FlagDescriptor<TFlag>> CollectFlags(IReflect type)
+        private static IEnumerable<KeyValuePair<TFlag, string>> CollectFlags<TFlag>(IReflect type)
         {
             foreach (FieldInfo field in type.GetFields(BindingFlags.Public | BindingFlags.Static))
             {
                 object value = field.GetRawConstantValue();
                 if (value is TFlag id)
-                    yield return new FlagDescriptor<TFlag>(field.Name, id);
+                    yield return new KeyValuePair<TFlag, string>(id, field.Name);
             }
-        }
-    }
-
-    internal sealed class FlagDescriptor<TFlag>
-    {
-        public string Name { get; }
-        public TFlag Value { get; }
-
-        public FlagDescriptor(string name, TFlag value)
-        {
-            this.Name = name;
-            this.Value = value;
         }
     }
 }

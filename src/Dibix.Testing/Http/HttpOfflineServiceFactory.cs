@@ -29,7 +29,7 @@ namespace Dibix.Testing.Http
             Type contractType = typeof(TService);
             Type implementationType = ResolveImplementationType(contractType);
 
-            string targetMethodName = $"{callExpression.Method.Name}Async";
+            string targetMethodName = callExpression.Method.Name;
             MethodInfo implementationMethod = SafeGetMethod(implementationType, targetMethodName);
             MethodInfo contractMethod = SafeGetMethod(contractType, targetMethodName);
 
