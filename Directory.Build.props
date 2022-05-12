@@ -1,4 +1,5 @@
 <Project>
+
   <PropertyGroup>
     <Product>Dibix</Product>
     <Company>Serviceware SE</Company>
@@ -21,5 +22,11 @@
     <PackageTags>Dibix</PackageTags>
     <Description>Seamlessly create use case oriented REST APIs based on T-SQL stored procedures.</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
+
 </Project>
