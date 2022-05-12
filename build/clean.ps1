@@ -1,2 +1,1 @@
-$rootDirectory = Split-Path $MyInvocation.MyCommand.Path -Parent | Split-Path -Parent
-Get-ChildItem $rootDirectory -Recurse -Include "bin", "obj", ".vs" | Remove-Item -Force -Recurse
+Get-ChildItem (Resolve-Path "$PSScriptRoot/..") -Directory -Recurse -Force -Include ".vs", "bin", "obj", "TestResults" | % { Write-Output $_.FullName; Remove-Item -Recurse -Force -ErrorAction Ignore $_.FullName }

@@ -2,7 +2,7 @@
 $userSecretsId = "dibix"
 
 #region Functions
-function Prompt-WithCurrentValue([string] $msg, [string] $currentValue)
+function Read-ValueFromUserInput([string] $msg, [string] $currentValue)
 {
     if ($silent) 
     {
@@ -15,7 +15,7 @@ function Prompt-WithCurrentValue([string] $msg, [string] $currentValue)
     }
 }
 
-function Execute-Command($cmd)
+function Exec($cmd)
 {
     Invoke-Expression "& $cmd"
 
@@ -41,16 +41,13 @@ function Get-Secret($key, $id)
 
 function Set-Secret($key, $value, $id)
 {
-    Execute-Command "dotnet user-secrets set $key ""$value"" --id $id"
+    Exec "dotnet user-secrets set $key ""$value"" --id $id"
 }
 #endregion
 
-$connectionStringKey = "DefaultConnection:ConnectionString"
-$providerNameKey = "DefaultConnection:ProviderName"
+$connectionStringKey = "Database:ConnectionString"
 
 $connectionString = Get-Secret $connectionStringKey $userSecretsId
-$connectionString = Prompt-WithCurrentValue "Enter connection string:" $connectionString
-$providerName = "System.Data.SqlClient"
+$connectionString = Read-ValueFromUserInput "Enter connection string:" $connectionString
 
 Set-Secret $connectionStringKey $connectionString $userSecretsId
-Set-Secret $providerNameKey $providerName $userSecretsId

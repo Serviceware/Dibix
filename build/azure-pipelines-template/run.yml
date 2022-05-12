@@ -17,6 +17,11 @@
   - Cobertura
 
 steps:
+- task: UseDotNet@2
+  displayName: 🧰 Ensure .NET SDK 6
+  inputs:
+    version: 6.x
+
 - template: restore.yml
 
 - template: build.yml
