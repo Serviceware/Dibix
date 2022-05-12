@@ -9,10 +9,10 @@
     <None Remove="*.dotsettings" />
   </ItemGroup>
 
-  <!-- Allow to override package version -->
-  <Target Name="SetPackageVersion" AfterTargets="GetBuildVersion">
+  <Target Name="PrepareNuspec" BeforeTargets="GenerateNuspec" DependsOnTargets="GetBuildVersion">
     <PropertyGroup>
       <PackageVersion Condition="'$(PackageVersionOverride)' != ''">$(PackageVersionOverride)</PackageVersion>
+      <PackageReleaseNotes>$(PackageProjectUrl)/releases/tag/v$(PackageVersion)</PackageReleaseNotes>
     </PropertyGroup>
   </Target>
 </Project>
