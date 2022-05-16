@@ -10,6 +10,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private NullableTypeName(string input)
         {
+            Guard.IsNotNullOrEmpty(input, nameof(input));
             this.IsNullable = input[input.Length - 1] == '?';
             this.Name = input.TrimEnd('?');
         }

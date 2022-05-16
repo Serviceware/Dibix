@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
@@ -31,10 +32,14 @@ namespace Dibix.Sdk.CodeGeneration
         public TypeReference ResolveType(string input, string relativeNamespace, string source, int line, int column, bool isEnumerable) => this.ResolveType(TypeResolutionScope.All, input, relativeNamespace, source, line, column, isEnumerable);
         public TypeReference ResolveType(TypeResolutionScope scope, string input, string relativeNamespace, string source, int line, int column, bool isEnumerable)
         {
-            TypeReference type = this._typeResolvers
-                                     .Where(x => x.Scope == scope)
-                                     .Select(x => x.ResolveType(input, relativeNamespace, source, line, column, isEnumerable))
-                                     .FirstOrDefault(x => x != null);
+            TypeReference type = null;
+            if (!String.IsNullOrEmpty(input))
+            {
+                type = this._typeResolvers
+                           .Where(x => x.Scope == scope)
+                           .Select(x => x.ResolveType(input, relativeNamespace, source, line, column, isEnumerable))
+                           .FirstOrDefault(x => x != null);
+            }
 
             if (type == null)
                 this._logger.LogError($"Could not resolve type '{input}'", source, line, column);
