@@ -1,0 +1,5 @@
+﻿steps:
+- task: UseDotNet@2
+  displayName: 🧰 Ensure .NET SDK
+  inputs:
+    useGlobalJson: true
