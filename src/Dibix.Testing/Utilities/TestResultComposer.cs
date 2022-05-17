@@ -123,11 +123,12 @@ start winmergeU ""{expectedDirectory}"" ""{actualDirectory}""");
         {
             EventLog eventLog = new EventLog("Application");
 
-            eventLog.Entries
-                    .Cast<EventLogEntry>()
-                    .Where(x => x.EntryType == eventLogEntryType)
-                    .Take(count)
-                    .Each((x, i) => this.AddFile($"EventLog{eventLogEntryType}_{i}.txt", $@"{DateTime.Now:O}
+            Enumerable.Range(0, eventLog.Entries.Count)
+                      .Reverse()
+                      .Select(x => eventLog.Entries[x])
+                      .Where(x => x.EntryType == eventLogEntryType)
+                      .Take(count)
+                      .Each((x, i) => this.AddFile($"EventLog{eventLogEntryType}_{i}.txt", $@"{x.TimeGenerated:O} - {x.EntryType} - {x.Source}
 ---
 {x.Message}"));
         }
