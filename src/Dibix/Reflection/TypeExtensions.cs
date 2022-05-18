@@ -12,10 +12,8 @@ namespace Dibix
 
             return type.IsPrimitive
                 || type.IsEnum
-                || type == typeof(decimal)
-                || type == typeof(string)
-                || type == typeof(Guid)
-                || type == typeof(DateTime);
+                || type.IsValueType
+                || type == typeof(string);
         }
     }
 }
