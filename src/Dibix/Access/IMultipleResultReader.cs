@@ -13,6 +13,7 @@ namespace Dibix
         IEnumerable<TReturn> ReadMany<TReturn, TSecond>(string splitOn) where TReturn : new();
         IEnumerable<TReturn> ReadMany<TFirst, TSecond, TReturn>(Func<TFirst, TSecond, TReturn> map, string splitOn);
         IEnumerable<TReturn> ReadManyProjection<TFirst, TSecond, TReturn>(string splitOn) where TReturn : new();
+        IEnumerable<TReturn> ReadMany<TReturn, TSecond, TThird>(string splitOn) where TReturn : new();
         IEnumerable<TReturn> ReadMany<TFirst, TSecond, TThird, TReturn>(Func<TFirst, TSecond, TThird, TReturn> map, string splitOn);
         IEnumerable<TReturn> ReadMany<TReturn, TSecond, TThird, TFourth>(string splitOn) where TReturn : new();
         IEnumerable<TReturn> ReadMany<TFirst, TSecond, TThird, TFourth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TReturn> map, string splitOn);

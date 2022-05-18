@@ -49,6 +49,14 @@ namespace Dibix
 
         IEnumerable<TReturn> IMultipleResultReader.ReadMany<TFirst, TSecond, TThird, TReturn>(Func<TFirst, TSecond, TThird, TReturn> map, string splitOn) => this.Execute(() => this.ReadMany(map, splitOn).PostProcess());
 
+        // OrderManagement (LoadProductRuntime)
+        public IEnumerable<TReturn> ReadMany<TReturn, TSecond, TThird>(string splitOn) where TReturn : new() => this.Execute(() =>
+        {
+            MultiMapper multiMapper = new MultiMapper();
+            return this.ReadMany<TReturn, TSecond, TThird, TReturn>((a, b, c) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c), splitOn)
+                       .PostProcess(multiMapper);
+        });
+
         // OrderManagement (GetProduct)
         public IEnumerable<TReturn> ReadMany<TReturn, TSecond, TThird, TFourth>(string splitOn) where TReturn : new() => this.Execute(() =>
         {
