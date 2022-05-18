@@ -34,16 +34,16 @@ namespace Dibix
         public IEnumerable<TReturn> ReadMany<TReturn, TSecond>(string splitOn) where TReturn : new() => this.Execute(() =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.ReadMany<TReturn, TSecond, TReturn>((a, b) => multiMapper.MapRow<TReturn>(false, a, b), splitOn)
+            return this.ReadMany<TReturn, TSecond, TReturn>((a, b) => multiMapper.MapRow<TReturn>(useProjection: false, a, b), splitOn)
                        .PostProcess(multiMapper);
         });
 
         IEnumerable<TReturn> IMultipleResultReader.ReadMany<TFirst, TSecond, TReturn>(Func<TFirst, TSecond, TReturn> map, string splitOn) => this.Execute(() => this.ReadMany(map, splitOn).PostProcess());
 
-        public IEnumerable<TReturn> ReadMany<TFirst, TSecond, TReturn>(string splitOn) where TReturn : new() => this.Execute(() =>
+        public IEnumerable<TReturn> ReadManyProjection<TFirst, TSecond, TReturn>(string splitOn) where TReturn : new() => this.Execute(() =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.ReadMany<TFirst, TSecond, TReturn>((a, b) => multiMapper.MapRow<TReturn>(true, a, b), splitOn)
+            return this.ReadMany<TFirst, TSecond, TReturn>((a, b) => multiMapper.MapRow<TReturn>(useProjection: true, a, b), splitOn)
                        .PostProcess(multiMapper);
         });
 
@@ -53,7 +53,7 @@ namespace Dibix
         public IEnumerable<TReturn> ReadMany<TReturn, TSecond, TThird, TFourth>(string splitOn) where TReturn : new() => this.Execute(() =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.ReadMany<TReturn, TSecond, TThird, TFourth, TReturn>((a, b, c, d) => multiMapper.MapRow<TReturn>(false, a, b, c, d), splitOn)
+            return this.ReadMany<TReturn, TSecond, TThird, TFourth, TReturn>((a, b, c, d) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c, d), splitOn)
                        .PostProcess(multiMapper);
         });
 
@@ -65,7 +65,7 @@ namespace Dibix
         public IEnumerable<TReturn> ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth>(string splitOn) where TReturn : new() => this.Execute(() =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>((a, b, c, d, e, f) => multiMapper.MapRow<TReturn>(false, a, b, c, d, e, f), splitOn)
+            return this.ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>((a, b, c, d, e, f) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c, d, e, f), splitOn)
                        .PostProcess(multiMapper);
         });
 
@@ -73,7 +73,7 @@ namespace Dibix
         public IEnumerable<TReturn> ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(string splitOn) where TReturn : new() => this.Execute(() =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>((a, b, c, d, e, f, g) => multiMapper.MapRow<TReturn>(false, a, b, c, d, e, f, g), splitOn)
+            return this.ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>((a, b, c, d, e, f, g) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c, d, e, f, g), splitOn)
                        .PostProcess(multiMapper);
         });
 
@@ -81,7 +81,7 @@ namespace Dibix
         public IEnumerable<TReturn> ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>(string splitOn) where TReturn : new() => this.Execute(() =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TReturn>((a, b, c, d, e, f, g, h, i) => multiMapper.MapRow<TReturn>(false, a, b, c, d, e, f, g, h, i), splitOn)
+            return this.ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TReturn>((a, b, c, d, e, f, g, h, i) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c, d, e, f, g, h, i), splitOn)
                        .PostProcess(multiMapper);
         });
 
@@ -95,7 +95,7 @@ namespace Dibix
         public TReturn ReadSingle<TReturn, TSecond>(string splitOn) where TReturn : new() => this.Execute(() =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.ReadMany<TReturn, TSecond, TReturn>((a, b) => multiMapper.MapRow<TReturn>(false, a, b), splitOn)
+            return this.ReadMany<TReturn, TSecond, TReturn>((a, b) => multiMapper.MapRow<TReturn>(useProjection: false, a, b), splitOn)
                        .PostProcess(multiMapper)
                        .Single();
         });
@@ -104,7 +104,7 @@ namespace Dibix
         public TReturn ReadSingle<TReturn, TSecond, TThird, TFourth, TFifth>(string splitOn) where TReturn : new() => this.Execute(() =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TReturn>((a, b, c, d, e) => multiMapper.MapRow<TReturn>(false, a, b, c, d, e), splitOn)
+            return this.ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TReturn>((a, b, c, d, e) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c, d, e), splitOn)
                        .PostProcess(multiMapper)
                        .Single();
         });
@@ -113,7 +113,7 @@ namespace Dibix
         public TReturn ReadSingle<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth>(string splitOn) where TReturn : new() => this.Execute(() =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TReturn>((a, b, c, d, e, f, g, h, i, j) => multiMapper.MapRow<TReturn>(false, a, b, c, d, e, f, g, h, i, j), splitOn)
+            return this.ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TReturn>((a, b, c, d, e, f, g, h, i, j) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c, d, e, f, g, h, i, j), splitOn)
                        .PostProcess(multiMapper)
                        .Single();
         });
@@ -124,7 +124,7 @@ namespace Dibix
         public TReturn ReadSingleOrDefault<TReturn, TSecond>(string splitOn) where TReturn : new() => this.Execute(() =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.ReadMany<TReturn, TSecond, TReturn>((a, b) => multiMapper.MapRow<TReturn>(false, a, b), splitOn)
+            return this.ReadMany<TReturn, TSecond, TReturn>((a, b) => multiMapper.MapRow<TReturn>(useProjection: false, a, b), splitOn)
                        .PostProcess(multiMapper)
                        .SingleOrDefault();
         });
@@ -133,7 +133,7 @@ namespace Dibix
         public TReturn ReadSingleOrDefault<TReturn, TSecond, TThird>(string splitOn) where TReturn : new() => this.Execute(() =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.ReadMany<TReturn, TSecond, TThird, TReturn>((a, b, c) => multiMapper.MapRow<TReturn>(false, a, b, c), splitOn)
+            return this.ReadMany<TReturn, TSecond, TThird, TReturn>((a, b, c) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c), splitOn)
                        .PostProcess(multiMapper)
                        .SingleOrDefault();
         });

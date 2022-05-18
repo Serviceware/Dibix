@@ -153,7 +153,7 @@ namespace Dibix.Tests
 
             using (IMultipleResultReader reader = accessor.Object.QueryMultiple("commandText"))
             {
-                CharacterInfo result = reader.ReadMany<Name, Name, CharacterInfo>("splitOn").Single();
+                CharacterInfo result = reader.ReadManyProjection<Name, Name, CharacterInfo>("splitOn").Single();
                 Assert.IsNotNull(result.Name);
                 Assert.AreEqual("Darth", result.Name.FirstName);
                 Assert.AreEqual("Vader", result.Name.LastName);

@@ -452,6 +452,9 @@ namespace Dibix.Sdk.CodeGeneration
             writer.WriteRaw("reader.")
                   .WriteRaw(GetMultipleResultReaderMethodName(result.ResultMode));
 
+            if (result.ProjectToType != null)
+                writer.WriteRaw("Projection");
+
             if (query.Async)
                 writer.WriteRaw("Async");
 
@@ -474,6 +477,9 @@ namespace Dibix.Sdk.CodeGeneration
 
             writer.WriteRaw("accessor.")
                   .WriteRaw(methodName);
+
+            if (singleResult?.ProjectToType != null)
+                writer.WriteRaw("Projection");
 
             if (query.Async)
                 writer.WriteRaw("Async");

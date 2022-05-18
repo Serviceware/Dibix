@@ -47,7 +47,7 @@ namespace Dibix
         public IEnumerable<TReturn> QueryMany<TReturn, TSecond>(string commandText, CommandType commandType, ParametersVisitor parameters, string splitOn) where TReturn : new() => Execute(commandText, commandType, parameters, () =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.QueryMany<TReturn, TSecond, TReturn>(commandText, commandType, parameters, (a, b) => multiMapper.MapRow<TReturn>(false, a, b), splitOn)
+            return this.QueryMany<TReturn, TSecond, TReturn>(commandText, commandType, parameters, (a, b) => multiMapper.MapRow<TReturn>(useProjection: false, a, b), splitOn)
                        .PostProcess(multiMapper);
         });
 
@@ -56,7 +56,7 @@ namespace Dibix
         public IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird>(string commandText, CommandType commandType, ParametersVisitor parameters, string splitOn) where TReturn : new() => Execute(commandText, commandType, parameters, () =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.QueryMany<TReturn, TSecond, TThird, TReturn>(commandText, commandType, parameters, (a, b, c) => multiMapper.MapRow<TReturn>(false, a, b, c), splitOn)
+            return this.QueryMany<TReturn, TSecond, TThird, TReturn>(commandText, commandType, parameters, (a, b, c) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c), splitOn)
                        .PostProcess(multiMapper);
         });
 
@@ -65,7 +65,7 @@ namespace Dibix
         public IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird, TFourth>(string commandText, CommandType commandType, ParametersVisitor parameters, string splitOn) where TReturn : new() => Execute(commandText, commandType, parameters, () =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.QueryMany<TReturn, TSecond, TThird, TFourth, TReturn>(commandText, commandType, parameters, (a, b, c,d ) => multiMapper.MapRow<TReturn>(false, a, b, c, d), splitOn)
+            return this.QueryMany<TReturn, TSecond, TThird, TFourth, TReturn>(commandText, commandType, parameters, (a, b, c,d ) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c, d), splitOn)
                        .PostProcess(multiMapper);
         });
 
@@ -86,7 +86,7 @@ namespace Dibix
         public TReturn QuerySingle<TReturn, TSecond>(string commandText, CommandType commandType, ParametersVisitor parameters, string splitOn) where TReturn : new() => Execute(commandText, commandType, parameters, () =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.QueryMany<TReturn, TSecond, TReturn>(commandText, commandType, parameters, (a, b) => multiMapper.MapRow<TReturn>(false, a, b), splitOn)
+            return this.QueryMany<TReturn, TSecond, TReturn>(commandText, commandType, parameters, (a, b) => multiMapper.MapRow<TReturn>(useProjection: false, a, b), splitOn)
                        .PostProcess(multiMapper)
                        .Single();
         });
@@ -94,7 +94,7 @@ namespace Dibix
         public TReturn QuerySingle<TReturn, TSecond, TThird>(string commandText, CommandType commandType, ParametersVisitor parameters, string splitOn) where TReturn : new() => Execute(commandText, commandType, parameters, () =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.QueryMany<TReturn, TSecond, TThird, TReturn>(commandText, commandType, parameters, (a, b, c) => multiMapper.MapRow<TReturn>(false, a, b, c), splitOn)
+            return this.QueryMany<TReturn, TSecond, TThird, TReturn>(commandText, commandType, parameters, (a, b, c) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c), splitOn)
                        .PostProcess(multiMapper)
                        .Single();
         });
@@ -102,7 +102,7 @@ namespace Dibix
         public TReturn QuerySingle<TReturn, TSecond, TThird, TFourth>(string commandText, CommandType commandType, ParametersVisitor parameters, string splitOn) where TReturn : new() => Execute(commandText, commandType, parameters, () =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.QueryMany<TReturn, TSecond, TThird, TFourth, TReturn>(commandText, commandType, parameters, (a, b, c, d) => multiMapper.MapRow<TReturn>(false, a, b, c, d), splitOn)
+            return this.QueryMany<TReturn, TSecond, TThird, TFourth, TReturn>(commandText, commandType, parameters, (a, b, c, d) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c, d), splitOn)
                        .PostProcess(multiMapper)
                        .Single();
         });
