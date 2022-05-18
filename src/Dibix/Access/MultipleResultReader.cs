@@ -100,6 +100,15 @@ namespace Dibix
                        .Single();
         });
 
+        // OrderManagement (LoadProductRuntime)
+        public TReturn ReadSingle<TReturn, TSecond, TThird, TFourth>(string splitOn) where TReturn : new() => this.Execute(() =>
+        {
+            MultiMapper multiMapper = new MultiMapper();
+            return this.ReadMany<TReturn, TSecond, TThird, TFourth, TReturn>((a, b, c, d) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c, d), splitOn)
+                       .PostProcess(multiMapper)
+                       .Single();
+        });
+
         // OrderManagement (GetProduct)
         public TReturn ReadSingle<TReturn, TSecond, TThird, TFourth, TFifth>(string splitOn) where TReturn : new() => this.Execute(() =>
         {
