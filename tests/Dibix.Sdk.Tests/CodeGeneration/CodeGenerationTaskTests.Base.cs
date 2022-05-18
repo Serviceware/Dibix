@@ -22,7 +22,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
           , IEnumerable<string> endpoints = null
           , bool isEmbedded = true
           , bool enableExperimentalFeatures = false
-          , AssertOutputKind outputKind = AssertOutputKind.None
+          , AssertOutputKind outputKind = AssertOutputKind.Accessor
           , IEnumerable<string> expectedAdditionalAssemblyReferences = null
         )
         {
