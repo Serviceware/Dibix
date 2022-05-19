@@ -394,7 +394,7 @@ namespace Dibix.Sdk.OpenApi
             if (UseRelativeNamespaces)
             {
                 typeName = schemaDefinition.DefinitionName;
-                string relativeNamespace = NamespaceUtility.BuildRelativeNamespace(rootNamespace, LayerName.DomainModel, schemaDefinition.Namespace);
+                string relativeNamespace = PathUtility.BuildRelativeNamespace(rootNamespace, LayerName.DomainModel, schemaDefinition.Namespace);
                 if (!String.IsNullOrEmpty(relativeNamespace))
                     typeName = $"{relativeNamespace}.{typeName}";
             }

@@ -42,7 +42,7 @@ namespace Dibix.Sdk.CodeGeneration
           , TSqlModel sqlModel
         )
         {
-            string rootNamespace = NamespaceUtility.BuildRootNamespace(productName, areaName);
+            string rootNamespace = PathUtility.BuildRootNamespace(productName, areaName);
             string className = defaultOutputName.Replace(".", String.Empty);
 
             ICollection<string> normalizedSources = source.Select(x => x.GetFullPath()).ToArray();
@@ -80,17 +80,17 @@ namespace Dibix.Sdk.CodeGeneration
             IDictionary<string, SecurityScheme> securitySchemeMap = new Dictionary<string, SecurityScheme>();
 
             ISchemaProvider builtInSchemaProvider = new BuiltInSchemaProvider();
-            IContractDefinitionProvider contractDefinitionProvider = new ContractDefinitionProvider(fileSystemProvider, logger, normalizedContracts, rootNamespace, productName, areaName);
+            IContractDefinitionProvider contractDefinitionProvider = new ContractDefinitionProvider(fileSystemProvider, logger, normalizedContracts, productName, areaName);
             IUserDefinedTypeProvider userDefinedTypeProvider = new UserDefinedTypeProvider(rootNamespace, productName, areaName, normalizedSources, typeResolver, logger);
             //ISchemaProvider externalSchemaProvider = new ExternalSchemaProvider(assemblyResolver);
             schemaRegistry.ImportSchemas(builtInSchemaProvider, contractDefinitionProvider, userDefinedTypeProvider/*, externalSchemaProvider*/);
 
             IExternalSchemaResolver externalSchemaResolver = new ExternalSchemaResolver(assemblyResolver, schemaRegistry);
-            typeResolver.Register(new ContractDefinitionSchemaTypeResolver(schemaRegistry, contractDefinitionProvider, externalSchemaResolver, assemblyResolver, assemblyResolver, logger, rootNamespace, productName, areaName), 1);
+            typeResolver.Register(new ContractDefinitionSchemaTypeResolver(schemaRegistry, contractDefinitionProvider, externalSchemaResolver, assemblyResolver, assemblyResolver, logger, productName, areaName), 1);
             typeResolver.Register(new UserDefinedTypeSchemaTypeResolver(schemaRegistry, userDefinedTypeProvider, externalSchemaResolver, assemblyResolver, logger), 2);
 
             ISqlStatementDefinitionProvider sqlStatementDefinitionProvider = new SqlStatementDefinitionProvider(projectName, isEmbedded, analyzeAlways: true, rootNamespace, productName, areaName, parser, formatter, typeResolver, schemaRegistry, logger, normalizedSources, modelAccessor);
-            IActionDefinitionResolverFacade actionResolver = new ActionDefinitionResolverFacade(projectName, rootNamespace, productName, areaName, className, sqlStatementDefinitionProvider, externalSchemaResolver, assemblyResolver, lockEntryManager, schemaRegistry, logger);
+            IActionDefinitionResolverFacade actionResolver = new ActionDefinitionResolverFacade(productName, areaName, className, sqlStatementDefinitionProvider, externalSchemaResolver, assemblyResolver, lockEntryManager, schemaRegistry, logger);
             IControllerDefinitionProvider controllerDefinitionProvider = new ControllerDefinitionProvider(normalizedEndpoints, normalizedDefaultSecuritySchemes, securitySchemeMap, actionResolver, typeResolver, schemaRegistry, actionParameterSourceRegistry, actionParameterConverterRegistry, lockEntryManager, fileSystemProvider, logger);
 
             schemaRegistry.ImportSchemas(sqlStatementDefinitionProvider);

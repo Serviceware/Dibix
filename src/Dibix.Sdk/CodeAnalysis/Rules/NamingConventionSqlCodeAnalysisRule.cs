@@ -276,7 +276,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         public string Normalize()
         {
-            string replacementPattern = String.Join("|", new[] { @"\*" }.Concat(this._map.Keys.Select(x => $@"\<{x}\>")));
+            string replacementPattern = String.Join("|", EnumerableExtensions.Create(@"\*").Concat(this._map.Keys.Select(x => $@"\<{x}\>")));
             string mask = Regex.Replace(this._pattern, replacementPattern, this.OnMatch);
             return mask;
         }

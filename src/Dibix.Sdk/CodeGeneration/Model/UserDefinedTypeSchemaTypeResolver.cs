@@ -40,9 +40,9 @@ namespace Dibix.Sdk.CodeGeneration
 
         public override TypeReference ResolveType(string input, string relativeNamespace, string source, int line, int column, bool isEnumerable)
         {
-            if (this.TryGetLocalSchema(input, relativeNamespace, out UserDefinedTypeSchema schema)
-             || this.TryGetExternalSchema(input, relativeNamespace, out schema)
-             || this.TryGetExternalSchemaByUDTName(input, relativeNamespace, out schema))
+            if (this.TryGetLocalSchemaByUDTName(input, out UserDefinedTypeSchema schema)
+             || this.TryGetExternalSchemaByUDTName(input, out schema)/*
+             || this.TryGetExternalSchemaByAbsoluteTypePath(input, relativeNamespace, out schema)*/)
             {
                 SchemaTypeReference schemaTypeReference = new SchemaTypeReference(schema.FullName, isNullable: false, isEnumerable: false, source, line, column);
                 return schemaTypeReference;
@@ -54,24 +54,14 @@ namespace Dibix.Sdk.CodeGeneration
             return null;
         }
 
-        private bool TryGetLocalSchema(NullableTypeName typeName, string relativeNamespace, out UserDefinedTypeSchema schema)
+        // Based on SP parameter type
+        private bool TryGetLocalSchemaByUDTName(NullableTypeName typeName, out UserDefinedTypeSchema schema)
         {
             return this._localSchemas.TryGetValue(typeName.Name, out schema);
         }
 
-        private bool TryGetExternalSchema(string input, string relativeNamespace, out UserDefinedTypeSchema schemaDefinition)
-        {
-            if (this._externalSchemaResolver.TryGetSchema(input, out ExternalSchemaDefinition externalSchemaDefinition))
-            {
-                schemaDefinition = externalSchemaDefinition.GetSchema<UserDefinedTypeSchema>();
-                return true;
-            }
-
-            schemaDefinition = null;
-            return false;
-        }
-
-        private bool TryGetExternalSchemaByUDTName(string input, string relativeNamespace, out UserDefinedTypeSchema schemaDefinition)
+        // Based on SP parameter type
+        private bool TryGetExternalSchemaByUDTName(string input, out UserDefinedTypeSchema schemaDefinition)
         {
             if (this._externalSchemas.TryGetValue(input, out schemaDefinition))
             {
@@ -81,6 +71,18 @@ namespace Dibix.Sdk.CodeGeneration
                 return true;
             }
 
+            return false;
+        }
+
+        private bool TryGetExternalSchemaByAbsoluteTypePath(string input, string relativeNamespace, out UserDefinedTypeSchema schemaDefinition)
+        {
+            if (this._externalSchemaResolver.TryGetSchema(input, out ExternalSchemaDefinition externalSchemaDefinition))
+            {
+                schemaDefinition = externalSchemaDefinition.GetSchema<UserDefinedTypeSchema>();
+                return true;
+            }
+
+            schemaDefinition = null;
             return false;
         }
 

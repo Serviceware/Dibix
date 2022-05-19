@@ -11,9 +11,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public ActionDefinitionResolverFacade
         (
-            string projectName
-          , string rootNamespace
-          , string productName
+            string productName
           , string areaName
           , string className
           , ISqlStatementDefinitionProvider sqlStatementDefinitionProvider
@@ -30,8 +28,7 @@ namespace Dibix.Sdk.CodeGeneration
                 new ExternalReflectionTargetActionDefinitionResolver(schemaRegistry, lockEntryManager, logger)
               , new SqlStatementDefinitionActionDefinitionResolver
                 (
-                    rootNamespace
-                  , productName
+                    productName
                   , areaName
                   , className
                   , sqlStatementDefinitionProvider

@@ -10,7 +10,10 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         public override void Visit(JoinTableReference node)
         {
-            TableReferenceWithAlias unaliasedTable = new[] { node.FirstTableReference, node.SecondTableReference }.OfType<TableReferenceWithAlias>().FirstOrDefault(x => x.Alias == null);
+            TableReferenceWithAlias unaliasedTable = EnumerableExtensions.Create(node.FirstTableReference, node.SecondTableReference)
+                                                                         .OfType<TableReferenceWithAlias>()
+                                                                         .FirstOrDefault(x => x.Alias == null);
+
             if (unaliasedTable != null)
                 base.Fail(unaliasedTable, "Multiple table sources must be aliased");
         }

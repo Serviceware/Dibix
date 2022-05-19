@@ -14,7 +14,6 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly ReferencedAssemblyInspector _referencedAssemblyInspector;
         private readonly AssemblyResolver _assemblyResolver;
         private readonly ILogger _logger;
-        private readonly string _rootNamespace;
         private readonly string _productName;
         private readonly string _areaName;
         private readonly IDictionary<string, Type> _externalSchemas;
@@ -29,7 +28,6 @@ namespace Dibix.Sdk.CodeGeneration
           , ReferencedAssemblyInspector referencedAssemblyInspector
           , AssemblyResolver assemblyResolver
           , ILogger logger
-          , string rootNamespace
           , string productName
           , string areaName
         )
@@ -40,7 +38,6 @@ namespace Dibix.Sdk.CodeGeneration
             this._referencedAssemblyInspector = referencedAssemblyInspector;
             this._assemblyResolver = assemblyResolver;
             this._logger = logger;
-            this._rootNamespace = rootNamespace;
             this._productName = productName;
             this._areaName = areaName;
             this._externalSchemas = new Dictionary<string, Type>();
@@ -51,8 +48,7 @@ namespace Dibix.Sdk.CodeGeneration
         public override TypeReference ResolveType(string input, string relativeNamespace, string source, int line, int column, bool isEnumerable)
         {
             NullableTypeName typeName = input;
-            if (this.TryGetLocalSchema(input, relativeNamespace, out SchemaDefinition schema)
-             || this.TryGetExternalSchema(input, relativeNamespace, out schema))
+            if (this.TryGetSchemaByProbing(typeName, relativeNamespace, out SchemaDefinition schema))
             {
                 SchemaTypeReference schemaTypeReference = new SchemaTypeReference(schema.FullName, typeName.IsNullable, isEnumerable, source, line, column);
                 return schemaTypeReference;
@@ -66,81 +62,22 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private bool TryGetLocalSchema(NullableTypeName typeName, string relativeNamespace, out SchemaDefinition schema)
+        private bool TryGetSchemaByProbing(NullableTypeName typeName, string relativeNamespace, out SchemaDefinition schema)
         {
-            if (!String.IsNullOrEmpty(relativeNamespace))
+            foreach (string candidate in SymbolNameProbing.EvaluateProbingCandidates(this._productName, this._areaName, LayerName.DomainModel, relativeNamespace, typeName.Name))
             {
-                string absoluteNamespace = NamespaceUtility.BuildAbsoluteNamespace(this._rootNamespace, this._productName, this._areaName, LayerName.DomainModel, relativeNamespace);
-                string key = $"{absoluteNamespace}.{typeName.Name}";
-                if (!this._contractDefinitionProvider.TryGetSchema(key, out schema))
+                // Try local schema
+                if (this._contractDefinitionProvider.TryGetSchema(candidate, out schema))
                 {
-                    // Scenario:
-                    // We are inside a namespace group but the type reference includes this namespace group aswell, since it's assumed that all type references are relative to root.
-                    // This is actually a different behavior, as in C#, for example.
-                    // Because there, when you are inside a namespace group and you want to get out of it, the type reference must be absolute.
-                    // Unfortunately fixing this would introduce a breaking change. Therefore we allow it.
-                    string absoluteTypeName = NamespaceUtility.BuildAbsoluteNamespace(this._rootNamespace, this._productName, this._areaName, LayerName.DomainModel, typeName.Name);
-                    if (!this._contractDefinitionProvider.TryGetSchema(absoluteTypeName, out schema))
-                    {
-                        schema = null;
-                        return false;
-                    }
+                    return true;
                 }
-            }
-            else
-            {
-                // Assume absolute type name
-                if (!this._contractDefinitionProvider.TryGetSchema(typeName.Name, out schema))
+
+                // Try external schema
+                if (this._externalSchemaResolver.TryGetSchema(candidate, out ExternalSchemaDefinition externalSchemaDefinition))
                 {
-                    // Assume relative type name
-                    string absoluteTypeName = NamespaceUtility.BuildAbsoluteNamespace(this._rootNamespace, this._productName, this._areaName, LayerName.DomainModel, typeName.Name);
-                    if (!this._contractDefinitionProvider.TryGetSchema(absoluteTypeName, out schema))
-                    {
-                        schema = null;
-                        return false;
-                    }
+                    schema = externalSchemaDefinition.SchemaDefinition;
+                    return true;
                 }
-            }
-
-            return true;
-        }
-
-        private bool TryGetExternalSchema(string input, string relativeNamespace, out SchemaDefinition schema)
-        {
-            // This sounds more like something for ReflectionTypeResolver => Skip for performance reasons
-            if (input.Contains(","))
-            {
-                schema = null;
-                return false;
-            }
-
-            string absoluteTypeName;
-            if (!String.IsNullOrEmpty(relativeNamespace))
-            {
-                string absoluteNamespace = NamespaceUtility.BuildAbsoluteNamespace(this._rootNamespace, this._productName, this._areaName, LayerName.DomainModel, relativeNamespace);
-                absoluteTypeName = $"{absoluteNamespace}.{input}";
-            }
-            else
-            {
-                absoluteTypeName = NamespaceUtility.BuildAbsoluteNamespace(this._rootNamespace, this._productName, this._areaName, LayerName.DomainModel, input);
-            }
-
-            // Assume absolute type name
-            if (this.TryGetExternalSchema(input, out schema))
-                return true;
-
-            // Assume relative type name
-            if (this.TryGetExternalSchema(absoluteTypeName, out schema))
-                return true;
-
-            return false;
-        }
-        private bool TryGetExternalSchema(string fullName, out SchemaDefinition schema)
-        {
-            if (this._externalSchemaResolver.TryGetSchema(fullName, out ExternalSchemaDefinition externalSchemaDefinition))
-            {
-                schema = externalSchemaDefinition.SchemaDefinition;
-                return true;
             }
 
             schema = null;
@@ -155,21 +92,11 @@ namespace Dibix.Sdk.CodeGeneration
             // This sounds more like something for ReflectionTypeResolver => Skip for performance reasons
             if (input.Contains(","))
                 return false;
-
-            string absoluteTypeName;
-            if (!String.IsNullOrEmpty(relativeNamespace))
-            {
-                string absoluteNamespace = NamespaceUtility.BuildAbsoluteNamespace(this._rootNamespace, this._productName, this._areaName, LayerName.DomainModel, relativeNamespace);
-                absoluteTypeName = $"{absoluteNamespace}.{input}";
-            }
-            else
-            {
-                absoluteTypeName = NamespaceUtility.BuildAbsoluteNamespace(this._rootNamespace, this._productName, this._areaName, LayerName.DomainModel, input);
-            }
-
+            
+            TargetPath absoluteTypeName = PathUtility.BuildAbsoluteTargetName(this._productName, this._areaName, LayerName.DomainModel, relativeNamespace, input);
             Type matchingType = this._referencedAssemblyInspector.Inspect(x => x.Where(y => y.IsArtifactAssembly())
                                                                                 .SelectMany(y => y.GetTypes())
-                                                                                .FirstOrDefault(y => IsMatchingType(input, absoluteTypeName, y)));
+                                                                                .FirstOrDefault(y => IsMatchingType(input, absoluteTypeName.Path, y)));
 
             if (matchingType != null)
             {

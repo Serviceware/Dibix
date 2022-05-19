@@ -31,12 +31,12 @@ namespace Dibix.Sdk.CodeGeneration
 
             TSqlFragment fragment = reader(content);
             TSqlFragmentAnalyzer fragmentAnalyzer = new TSqlFragmentAnalyzer(source, fragment, isScriptArtifact: false, projectName, isEmbedded, analyzeAlways, modelAccessor, logger);
-            return this.TryCollectStatementDescriptor(fragment, fragmentAnalyzer, source, definitionName, rootNamespace, productName, areaName, formatter, typeResolver, schemaRegistry, logger, out definition);
+            return this.TryCollectStatementDescriptor(fragment, fragmentAnalyzer, source, definitionName, productName, areaName, formatter, typeResolver, schemaRegistry, logger, out definition);
         }
         #endregion
 
         #region Private Methods
-        private bool TryCollectStatementDescriptor(TSqlFragment fragment, TSqlFragmentAnalyzer fragmentAnalyzer, string source, string definitionName, string rootNamespace, string productName, string areaName, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger, out SqlStatementDefinition definition)
+        private bool TryCollectStatementDescriptor(TSqlFragment fragment, TSqlFragmentAnalyzer fragmentAnalyzer, string source, string definitionName, string productName, string areaName, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger, out SqlStatementDefinition definition)
         {
             ISqlMarkupDeclaration markup = SqlMarkupReader.ReadHeader(fragment, source, logger);
             bool hasMarkup = markup.HasElements;
@@ -52,7 +52,6 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 Source = source,
                 DefinitionName = definitionName,
-                RootNamespace = rootNamespace,
                 ProductName = productName,
                 AreaName = areaName,
                 FragmentAnalyzer = fragmentAnalyzer,

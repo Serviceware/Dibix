@@ -7,7 +7,6 @@ namespace Dibix.Sdk.CodeGeneration
     {
         internal string Source { get; set; }
         internal string DefinitionName { get; set; }
-        internal string RootNamespace { get; set; }
         internal string ProductName { get; set; }
         internal string AreaName { get; set; }
         internal SqlStatementDefinition Definition { get; set; }

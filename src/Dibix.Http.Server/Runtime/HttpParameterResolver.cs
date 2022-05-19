@@ -13,7 +13,7 @@ namespace Dibix.Http.Server
     public static class HttpParameterResolver
     {
         #region Fields
-        private static readonly ICollection<Type> KnownDependencies = new[] { typeof(IDatabaseAccessorFactory) };
+        private static readonly Type[] KnownDependencies = { typeof(IDatabaseAccessorFactory) };
         private static readonly Lazy<PropertyAccessor> DebugViewAccessor = new Lazy<PropertyAccessor>(BuildDebugViewAccessor);
         private static readonly string ItemSourceName = ItemParameterSource.SourceName;
         private const string SelfPropertyName = "$SELF";
@@ -690,7 +690,7 @@ Either create a mapping or make sure a property of the same name exists in the s
               , out Expression enumeratorStatement
             );
 
-            Expression block = Expression.Block(new[] { structureTypeVariable, enumeratorVariable }, structuredTypeAssign, enumeratorStatement, structureTypeVariable);
+            Expression block = Expression.Block(EnumerableExtensions.Create(structureTypeVariable, enumeratorVariable), structuredTypeAssign, enumeratorStatement, structureTypeVariable);
             return block;
         }
 

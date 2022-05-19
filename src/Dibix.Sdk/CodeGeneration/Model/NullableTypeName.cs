@@ -3,7 +3,7 @@
 namespace Dibix.Sdk.CodeGeneration
 {
     [DebuggerDisplay("{ToString()}")]
-    public sealed class NullableTypeName
+    public readonly struct NullableTypeName
     {
         public string Name { get; }
         public bool IsNullable { get; }

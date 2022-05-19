@@ -8,10 +8,5 @@
         {
             this.Key = key;
         }
-
-        public static SchemaTypeReference WithNamespace(string @namespace, string definitionName, string source, int line, int column, bool isNullable, bool isEnumerable)
-        {
-            return new SchemaTypeReference($"{@namespace}.{definitionName}", isNullable, isEnumerable, source, line, column);
-        }
     }
 }

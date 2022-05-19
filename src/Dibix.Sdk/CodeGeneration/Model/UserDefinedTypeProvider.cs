@@ -35,7 +35,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Private Methods
         private void Collect(IEnumerable<string> inputs)
         {
-            SqlUserDefinedTypeParser parser = new SqlUserDefinedTypeParser(this._rootNamespace, this._productName, this._areaName, this._typeResolver, this._logger);
+            SqlUserDefinedTypeParser parser = new SqlUserDefinedTypeParser(this._productName, this._areaName, this._typeResolver, this._logger);
             this._schemas.AddRange(inputs.Select(x => parser.Parse(x))
                                          .Where(x => x != null)
                                          .Select(x => new KeyValuePair<string, UserDefinedTypeSchema>(x.FullName, x)));

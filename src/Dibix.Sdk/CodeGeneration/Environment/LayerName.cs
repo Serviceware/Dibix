@@ -1,6 +1,6 @@
 ﻿namespace Dibix.Sdk.CodeGeneration
 {
-    internal static class LayerName
+    public static class LayerName
     {
         public const string Business = "Business";
         public const string Data = "Data";

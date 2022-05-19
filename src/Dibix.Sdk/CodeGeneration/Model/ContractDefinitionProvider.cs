@@ -13,7 +13,6 @@ namespace Dibix.Sdk.CodeGeneration
     {
         #region Fields
         private const string RootFolderName = "Contracts";
-        private readonly string _rootNamespace;
         private readonly string _productName;
         private readonly string _areaName;
         private readonly IDictionary<string, ContractDefinition> _contracts;
@@ -27,9 +26,8 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public ContractDefinitionProvider(IFileSystemProvider fileSystemProvider, ILogger logger, IEnumerable<string> contracts, string rootNamespace, string productName, string areaName) : base(fileSystemProvider, logger)
+        public ContractDefinitionProvider(IFileSystemProvider fileSystemProvider, ILogger logger, IEnumerable<string> contracts, string productName, string areaName) : base(fileSystemProvider, logger)
         {
-            this._rootNamespace = rootNamespace;
             this._productName = productName;
             this._areaName = areaName;
             this._contracts = new Dictionary<string, ContractDefinition>();
@@ -67,10 +65,10 @@ namespace Dibix.Sdk.CodeGeneration
 If this is not a project that has multiple areas, please make sure to define the <RootNamespace> tag in the following format: Product.Area");
 
             string relativeNamespace = String.Join(".", parts.Skip(1));
-            string currentNamespace = NamespaceUtility.BuildAbsoluteNamespace(this._rootNamespace, this._productName, this._areaName, LayerName.DomainModel, relativeNamespace);
+            NamespacePath currentNamespace = PathUtility.BuildAbsoluteNamespace(this._productName, this._areaName, LayerName.DomainModel, relativeNamespace);
 
             string root = multipleAreas ? parts[1] : null;
-            string rootNamespace = NamespaceUtility.BuildAbsoluteNamespace(this._rootNamespace, this._productName, this._areaName, LayerName.DomainModel, root);
+            NamespacePath rootNamespace = PathUtility.BuildAbsoluteNamespace(this._productName, this._areaName, LayerName.DomainModel, relativeNamespace: root);
 
             this.ReadContracts(rootNamespace, currentNamespace, json, filePath);
         }
@@ -83,7 +81,7 @@ If this is not a project that has multiple areas, please make sure to define the
             this.CollectReferenceCounts();
         }
 
-        private void ReadContracts(string rootNamespace, string currentNamespace, JObject contracts, string filePath)
+        private void ReadContracts(NamespacePath rootNamespace, NamespacePath currentNamespace, JObject contracts, string filePath)
         {
             foreach (JProperty definitionProperty in contracts.Properties())
             {
@@ -91,7 +89,7 @@ If this is not a project that has multiple areas, please make sure to define the
             }
         }
 
-        private void ReadContract(string rootNamespace, string currentNamespace, string definitionName, JToken value, string filePath, IJsonLineInfo lineInfo)
+        private void ReadContract(NamespacePath rootNamespace, NamespacePath currentNamespace, string definitionName, JToken value, string filePath, IJsonLineInfo lineInfo)
         {
             switch (value.Type)
             {
@@ -108,9 +106,9 @@ If this is not a project that has multiple areas, please make sure to define the
             }
         }
 
-        private void ReadObjectContract(string rootNamespace, string currentNamespace, string definitionName, JToken value, string filePath, IJsonLineInfo lineInfo)
+        private void ReadObjectContract(NamespacePath rootNamespace, NamespacePath currentNamespace, string definitionName, JToken value, string filePath, IJsonLineInfo lineInfo)
         {
-            ObjectSchema contract = new ObjectSchema(currentNamespace, definitionName, SchemaDefinitionSource.Defined);
+            ObjectSchema contract = new ObjectSchema(currentNamespace.Path, definitionName, SchemaDefinitionSource.Defined);
             foreach (JProperty property in ((JObject)value).Properties())
             {
                 if (property.Name == "$wcfNs")
@@ -168,9 +166,9 @@ If this is not a project that has multiple areas, please make sure to define the
             this.CollectContract(contract, filePath, lineInfo);
         }
 
-        private void ReadEnumContract(string currentNamespace, string definitionName, JToken definitionValue, string filePath, IJsonLineInfo lineInfo)
+        private void ReadEnumContract(NamespacePath currentNamespace, string definitionName, JToken definitionValue, string filePath, IJsonLineInfo lineInfo)
         {
-            EnumSchema contract = new EnumSchema(currentNamespace, definitionName, SchemaDefinitionSource.Defined, isFlaggable: false);
+            EnumSchema contract = new EnumSchema(currentNamespace.Path, definitionName, SchemaDefinitionSource.Defined, isFlaggable: false);
 
             ICollection<EnumValue> values = ReadEnumValues(definitionValue).ToArray();
             IDictionary<string, int> actualValues = values.Where(x => x.ActualValue.HasValue).ToDictionary(x => x.Name, x => x.ActualValue.Value);
@@ -242,7 +240,7 @@ If this is not a project that has multiple areas, please make sure to define the
             }
         }
 
-        private TypeReference ParsePropertyType(string typeName, string rootNamespace, string filePath, JToken value)
+        private TypeReference ParsePropertyType(string typeName, NamespacePath rootNamespace, string filePath, JToken value)
         {
             bool isEnumerable = typeName.EndsWith("*", StringComparison.Ordinal);
             typeName = typeName.TrimEnd('*');

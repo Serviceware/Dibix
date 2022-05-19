@@ -107,7 +107,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (PrimitiveTypeMap.TryParsePrimitiveType(type, out PrimitiveType dataType))
                 return new PrimitiveTypeReference(dataType, isNullable, isEnumerable, source, line, column);
 
-            SchemaTypeReference schemaTypeReference = SchemaTypeReference.WithNamespace(type.Namespace, type.Name, source, line, column, isNullable, isEnumerable);
+            SchemaTypeReference schemaTypeReference = new SchemaTypeReference($"{type.Namespace}.{type.Name}", isNullable, isEnumerable, source, line, column);
             if (schemaRegistry.IsRegistered(schemaTypeReference.Key))
                 return schemaTypeReference;
 

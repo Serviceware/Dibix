@@ -10,14 +10,12 @@ namespace Dibix.Sdk.CodeGeneration
     internal sealed class SqlUserDefinedTypeParser
     {
         private readonly ILogger _logger;
-        private readonly string _rootNamespace;
         private readonly string _productName;
         private readonly string _areaName;
         private readonly ITypeResolverFacade _typeResolver;
 
-        public SqlUserDefinedTypeParser(string rootNamespace, string productName, string areaName, ITypeResolverFacade typeResolver, ILogger logger)
+        public SqlUserDefinedTypeParser(string productName, string areaName, ITypeResolverFacade typeResolver, ILogger logger)
         {
-            this._rootNamespace = rootNamespace;
             this._productName = productName;
             this._areaName = areaName;
             this._typeResolver = typeResolver;
@@ -27,7 +25,7 @@ namespace Dibix.Sdk.CodeGeneration
         public UserDefinedTypeSchema Parse(string filePath)
         {
             TSqlFragment fragment = ScriptDomFacade.Load(filePath);
-            UserDefinedTypeVisitor visitor = new UserDefinedTypeVisitor(this._rootNamespace, this._productName, this._areaName, filePath, fragment, this._typeResolver, this._logger);
+            UserDefinedTypeVisitor visitor = new UserDefinedTypeVisitor(this._productName, this._areaName, filePath, fragment, this._typeResolver, this._logger);
             fragment.Accept(visitor);
             return visitor.Definition;
         }
@@ -35,7 +33,6 @@ namespace Dibix.Sdk.CodeGeneration
         private class UserDefinedTypeVisitor : TSqlFragmentVisitor
         {
             private readonly Lazy<ISqlMarkupDeclaration> _markupAccessor;
-            private readonly string _rootNamespace;
             private readonly string _productName;
             private readonly string _areaName;
             private readonly string _source;
@@ -44,9 +41,8 @@ namespace Dibix.Sdk.CodeGeneration
 
             public UserDefinedTypeSchema Definition { get; private set; }
 
-            public UserDefinedTypeVisitor(string rootNamespace, string productName, string areaName, string source, TSqlFragment fragment, ITypeResolverFacade typeResolver, ILogger logger)
+            public UserDefinedTypeVisitor(string productName, string areaName, string source, TSqlFragment fragment, ITypeResolverFacade typeResolver, ILogger logger)
             {
-                this._rootNamespace = rootNamespace;
                 this._productName = productName;
                 this._areaName = areaName;
                 this._source = source;
@@ -63,9 +59,9 @@ namespace Dibix.Sdk.CodeGeneration
                 if (!this._markupAccessor.Value.TryGetSingleElementValue(SqlMarkupKey.Name, this._source, this._logger, out string definitionName))
                     definitionName = GenerateDefinitionName(typeName);
 
-                string @namespace = NamespaceUtility.BuildAbsoluteNamespace(this._rootNamespace, this._productName, this._areaName, LayerName.Data, relativeNamespace);
+                NamespacePath @namespace = PathUtility.BuildAbsoluteNamespace(this._productName, this._areaName, LayerName.Data, relativeNamespace);
                 ICollection<string> notNullableColumns = new HashSet<string>(GetNotNullableColumns(node.Definition));
-                this.Definition = new UserDefinedTypeSchema(@namespace, definitionName, SchemaDefinitionSource.Defined, typeName);
+                this.Definition = new UserDefinedTypeSchema(@namespace.Path, definitionName, SchemaDefinitionSource.Defined, typeName);
                 this.Definition.Properties.AddRange(node.Definition.ColumnDefinitions.Select(x => this.MapColumn(x, relativeNamespace, notNullableColumns)));
             }
 

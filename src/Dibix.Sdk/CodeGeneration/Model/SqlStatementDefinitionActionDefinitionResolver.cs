@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Dibix.Sdk.CodeGeneration.Model;
 
@@ -9,7 +8,6 @@ namespace Dibix.Sdk.CodeGeneration
     internal sealed class SqlStatementDefinitionActionDefinitionResolver : ActionDefinitionResolver
     {
         #region Fields
-        private readonly string _rootNamespace;
         private readonly string _productName;
         private readonly string _areaName;
         private readonly string _className;
@@ -22,8 +20,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Constructor
         public SqlStatementDefinitionActionDefinitionResolver
         (
-            string rootNamespace
-          , string productName
+            string productName
           , string areaName
           , string className
           , ISqlStatementDefinitionProvider sqlStatementDefinitionProvider
@@ -33,7 +30,6 @@ namespace Dibix.Sdk.CodeGeneration
           , ILogger logger
         ) : base(schemaRegistry, logger)
         {
-            this._rootNamespace = rootNamespace;
             this._productName = productName;
             this._areaName = areaName;
             this._className = className;
@@ -47,22 +43,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Overrides
         public override bool TryResolve(string targetName, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, out ActionDefinition actionDefinition)
         {
-            // Use explicit namespace if it can be extracted
-            int statementNameIndex = targetName.LastIndexOf('.');
-            string @namespace = statementNameIndex >= 0 ? targetName.Substring(0, statementNameIndex) : null;
-
-            // Detect absolute namespace if it is prefixed with the product name
-            // i.E.: Data.Runtime is a relative namespace
-            bool isAbsolute = targetName.StartsWith($"{this._productName}.", StringComparison.Ordinal);
-            string normalizedNamespace = @namespace;
-            if (!isAbsolute)
-                normalizedNamespace = NamespaceUtility.BuildAbsoluteNamespace(this._rootNamespace, this._productName, this._areaName, LayerName.Data, @namespace);
-
-            string methodName = targetName.Substring(statementNameIndex + 1);
-            string fullName = $"{normalizedNamespace}.{methodName}";
-
-            if (!this.TryGetLocalStatementDefinition(fullName, out SqlStatementDefinition statementDefinition, out string accessorClassName)
-             && !this.TryGetExternalStatementDefinition(fullName, out statementDefinition, out accessorClassName))
+            if (!this.TryGetStatementDefinitionByProbing(targetName, out SqlStatementDefinition statementDefinition, out string accessorClassName))
             {
                 actionDefinition = null;
                 return false;
@@ -104,25 +85,24 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private bool TryGetLocalStatementDefinition(string fullName, out SqlStatementDefinition statementDefinition, out string accessorClassName)
+        private bool TryGetStatementDefinitionByProbing(string targetName, out SqlStatementDefinition statementDefinition, out string accessorClassName)
         {
-            if (this._sqlStatementDefinitionProvider.TryGetDefinition(fullName, out statementDefinition))
+            foreach (string candidate in SymbolNameProbing.EvaluateProbingCandidates(this._productName, this._areaName, LayerName.Data, relativeNamespace: null, targetName))
             {
-                accessorClassName = this._className;
-                return true;
-            }
+                // Try local definition
+                if (this._sqlStatementDefinitionProvider.TryGetDefinition(candidate, out statementDefinition))
+                {
+                    accessorClassName = this._className;
+                    return true;
+                }
 
-            accessorClassName = null;
-            return false;
-        }
-
-        private bool TryGetExternalStatementDefinition(string fullName, out SqlStatementDefinition statementDefinition, out string accessorClassName)
-        {
-            if (this._externalSchemaResolver.TryGetSchema(fullName, out ExternalSchemaDefinition externalSchemaDefinition))
-            {
-                statementDefinition = externalSchemaDefinition.GetSchema<SqlStatementDefinition>();
-                accessorClassName = externalSchemaDefinition.Owner.DefaultClassName;
-                return true;
+                // Try external definition
+                if (this._externalSchemaResolver.TryGetSchema(candidate, out ExternalSchemaDefinition externalSchemaDefinition))
+                {
+                    statementDefinition = externalSchemaDefinition.GetSchema<SqlStatementDefinition>();
+                    accessorClassName = externalSchemaDefinition.Owner.DefaultClassName;
+                    return true;
+                }
             }
 
             statementDefinition = null;
