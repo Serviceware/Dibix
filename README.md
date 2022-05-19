@@ -38,14 +38,14 @@ Unfortunately NuGet is [not supported](https://github.com/NuGet/Home/issues/545)
 
 ## Creating a REST API
 In this walkthrough, we try to create the following endpoints, that make up a RESTful API:<br />
-Number|Method|URL|Description
--|-|-|-
-[GetPersons](#getpersons)|**GET**|api/Person|Get a list of persons
-[GetPerson](#getperson)|**GET**|api/Person/{personId}|Get details of a person
-[CreatePerson](#createperson)|**POST**|api/Person|Create a person
-[UpdatePerson](#updateperson)|**PUT**|api/Person/{personId}|Update a person
-[UpdatePersonName](#updatepersonname)|**PATCH**|api/Person/{personId}/Name|Update the name of a person (partial update)
-[DeletePersons](#deletepersons)|**DELETE**|api/Person?personIds={personIds}|Delete multiple persons
+| Number | Method | URL | Description |
+| - | - | - | - |
+| [GetPersons](#getpersons) | **GET** | api/Person|Get a list of persons |
+| [GetPerson](#getperson) | **GET** | api/Person/{personId} | Get details of a person |
+| [CreatePerson](#createperson) | **POST** | api/Person | Create a person |
+| [UpdatePerson](#updateperson) | **PUT** | api/Person/{personId} | Update a person |
+| [UpdatePersonName](#updatepersonname) | **PATCH** | api/Person/{personId}/Name | Update the name of a person (partial update) |
+| [DeletePersons](#deletepersons) | **DELETE** | api/Person?personIds={personIds} | Delete multiple persons |
 
 ### Contracts
 - Ensure, that there is a folder named "Contracts" at the root of the project
@@ -393,10 +393,10 @@ As of right now Dibix itself does not contain a runtime implementation for the w
 ### Consuming endpoints
 If the project contains any HTTP endpoints, a client assembly and an [OpenAPI](https://github.com/OAI/OpenAPI-Specification) document are also created during compilation. The client assembly contains a service interface and implementation for each endpoint defined in the project along with their referenced contracts. A host project can consume these client assemblies and register the implementation in the DI container to make the interface available to consumers via IoC. <br />
 The implementation is based on the [Dibix.Http.Client](https://www.nuget.org/packages/Dibix.Http.Client) runtime and the generated services may require a few dependencies:
-|Type|Required|Implementation(s)|
-|-|-|-|
-|[`IHttpClientFactory`](https://github.com/Serviceware/Dibix/blob/main/src/Dibix.Http.Client/Client/IHttpClientFactory.cs)|Optional|[`DefaultHttpClientFactory`](https://github.com/Serviceware/Dibix/blob/main/src/Dibix.Http.Client/Client/DefaultHttpClientFactory.cs)
-|[`IHttpAuthorizationProvider`](https://github.com/Serviceware/Dibix/blob/main/src/Dibix.Http.Client/Client/IHttpAuthorizationProvider.cs)|Required (if endpoint requires authorization)|-
+| Type | Required | Implementation(s) |
+| - | - | - |
+| [`IHttpClientFactory`](https://github.com/Serviceware/Dibix/blob/main/src/Dibix.Http.Client/Client/IHttpClientFactory.cs) | Optional |[`DefaultHttpClientFactory`](https://github.com/Serviceware/Dibix/blob/main/src/Dibix.Http.Client/Client/DefaultHttpClientFactory.cs) |
+| [`IHttpAuthorizationProvider`](https://github.com/Serviceware/Dibix/blob/main/src/Dibix.Http.Client/Client/IHttpAuthorizationProvider.cs) | Required (if endpoint requires authorization) | - |
 
 The OpenAPI document will be generated in YAML and JSON format and can be used to generate other artifacts, for example clients in other languages like TypeScript.
 
@@ -476,13 +476,13 @@ To return an error response, use the T-SQL [THROW](https://docs.microsoft.com/en
 #### 4xx client error
 Supported:
 Code|Name|Sample use cases
--|-|-
-[400](https://httpstatuses.com/400)|BadRequest|Client syntax error (malformed request)
-[401](https://httpstatuses.com/401)|Unauthorized|Either the request is missing credentials or the credentials were not accepted
-[403](https://httpstatuses.com/403)|Forbidden|The authorized user is not allowed to access the current resource
-[404](https://httpstatuses.com/404)|NotFound|Resource with given ID not found, Feature not available/configured
-[409](https://httpstatuses.com/409)|Conflict|The resource is currently locked by another request (might resolve by retry)
-[422](https://httpstatuses.com/422)|UnprocessableEntity|The client content was not accepted because of a semantic error (i.E. schema validation)
+| - | - | - |
+| [400](https://httpstatuses.com/400) | BadRequest | Client syntax error (malformed request) |
+| [401](https://httpstatuses.com/401) | Unauthorized | Either the request is missing credentials or the credentials were not accepted |
+| [403](https://httpstatuses.com/403) | Forbidden | The authorized user is not allowed to access the current resource |
+| [404](https://httpstatuses.com/404) | NotFound | Resource with given ID not found, Feature not available/configured |
+| [409](https://httpstatuses.com/409) | Conflict | The resource is currently locked by another request (might resolve by retry) |
+| [422](https://httpstatuses.com/422) | UnprocessableEntity | The client content was not accepted because of a semantic error (i.E. schema validation) |
 
 ##### SQL
 ```sql
@@ -501,8 +501,8 @@ For server errors, custom error codes are not supported, since they quite possib
 
 Supported:
 Code|Name|Sample use cases
--|-|-
-[504](https://httpstatuses.com/504)|GatewayTimeout|External service did not respond in time
+| - | - | - |
+| [504](https://httpstatuses.com/504) | GatewayTimeout | External service did not respond in time |
 
 ##### SQL
 ```sql
@@ -547,15 +547,15 @@ This source provides access to the request headers. For example `HEADER.Authoriz
 #### REQUEST
 This source provides access to the HTTP request. It supports the following properties:
 PropertyName|Type|Value
--|-|-
-Language|string|The value provided in the `Accept-Language` header
+| - | - | - |
+| Language | string | The value provided in the `Accept-Language` header |
 
 #### ENV
 This source provides access to the server environment. It supports the following properties:
 PropertyName|Type|Value
--|-|-
-MachineName|string|The value of [`System.Environment.MachineName`](https://docs.microsoft.com/en-us/dotnet/api/system.environment.machinename)
-CurrentProcessId|int|The value of [`System.Diagnostics.Process.GetCurrentProcess()`](https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.process.getcurrentprocess)[`.Id`](https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.process.id)
+| - | - | - |
+| MachineName | string | The value of [`System.Environment.MachineName`](https://docs.microsoft.com/en-us/dotnet/api/system.environment.machinename) |
+| CurrentProcessId | int | The value of [`System.Diagnostics.Process.GetCurrentProcess()`](https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.process.getcurrentprocess)[`.Id`](https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.process.id)
 
 ## Roadmap
 - [ ] Continue writing this documentation 🤓
