@@ -127,10 +127,10 @@ namespace Dibix
         });
 
         // OrderManagement (GetProductDesign)
-        public TReturn ReadSingle<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth>(string splitOn) where TReturn : new() => this.Execute(() =>
+        public TReturn ReadSingle<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>(string splitOn) where TReturn : new() => this.Execute(() =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TReturn>((a, b, c, d, e, f, g, h, i, j) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c, d, e, f, g, h, i, j), splitOn)
+            return this.ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TReturn>((a, b, c, d, e, f, g, h, i) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c, d, e, f, g, h, i), splitOn)
                        .PostProcess(multiMapper)
                        .Single();
         });

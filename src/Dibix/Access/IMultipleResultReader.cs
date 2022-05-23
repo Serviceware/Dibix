@@ -27,7 +27,7 @@ namespace Dibix
         TReturn ReadSingle<TReturn, TSecond>(string splitOn) where TReturn : new();
         TReturn ReadSingle<TReturn, TSecond, TThird, TFourth>(string splitOn) where TReturn : new();
         TReturn ReadSingle<TReturn, TSecond, TThird, TFourth, TFifth>(string splitOn) where TReturn : new();
-        TReturn ReadSingle<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth>(string splitOn) where TReturn : new();
+        TReturn ReadSingle<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>(string splitOn) where TReturn : new();
         T ReadSingleOrDefault<T>();
         TReturn ReadSingleOrDefault<TReturn, TSecond>(string splitOn) where TReturn : new();
         TReturn ReadSingleOrDefault<TReturn, TSecond, TThird>(string splitOn) where TReturn : new();
