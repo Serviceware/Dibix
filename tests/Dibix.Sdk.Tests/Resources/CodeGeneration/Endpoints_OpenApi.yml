@@ -140,17 +140,17 @@ paths:
           required: true
           schema:
             type: string
-        - name: u
+        - name: a
           in: query
           required: true
           schema:
             type: string
-        - name: v
+        - name: b
           in: query
           required: true
           schema:
             type: string
-        - name: w
+        - name: c
           in: query
           required: true
           schema:
@@ -163,21 +163,27 @@ paths:
             type: array
             items:
               $ref: '#/components/schemas/GenericParameterSet'
-        - name: x
+        - name: d
           in: query
           schema:
             type: string
             default: 
             nullable: true
-        - name: y
+        - name: e
           in: query
           schema:
             type: boolean
             default: true
-        - name: z
+        - name: f
           in: query
           schema:
             $ref: '#/components/schemas/Direction'
+        - name: g
+          in: query
+          schema:
+            type: string
+            default: Cake
+            nullable: true
       responses:
         '204':
           description: NoContent
@@ -267,35 +273,38 @@ components:
         - Admin
     InputContract:
       required:
-        - U
-        - V
+        - A
+        - B
         - Ids
-        - X
+        - D
         - Password
-        - Y
-        - Z
+        - E
+        - F
+        - G
       type: object
       properties:
-        U:
+        A:
           type: string
-        V:
+        B:
           type: string
-        W:
+        C:
           type: string
         Ids:
           type: array
           items:
             $ref: '#/components/schemas/Entry'
-        X:
+        D:
           type: string
           format: uuid
         Password:
           type: string
-        Y:
+        E:
           type: boolean
-        Z:
+        F:
           type: integer
           format: int32
+        G:
+          type: string
       additionalProperties: false
     Entry:
       required:
@@ -311,35 +320,38 @@ components:
       additionalProperties: false
     AnotherInputContract:
       required:
-        - U
-        - V
+        - A
+        - B
         - SomeIds
-        - X
+        - D
         - Password
-        - Y
-        - Z
+        - E
+        - F
+        - G
       type: object
       properties:
-        U:
+        A:
           type: string
-        V:
+        B:
           type: string
-        W:
+        C:
           type: string
         SomeIds:
           type: array
           items:
             $ref: '#/components/schemas/AnotherEntry'
-        X:
+        D:
           type: string
           format: uuid
         Password:
           type: string
-        Y:
+        E:
           type: boolean
-        Z:
+        F:
           type: integer
           format: int32
+        G:
+          type: string
       additionalProperties: false
     AnotherEntry:
       required:

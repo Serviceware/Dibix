@@ -20,20 +20,21 @@ namespace Dibix.Sdk.Tests.Data
         // EmptyWithParams
         private const string EmptyWithParamsCommandText = "[dbo].[dbx_tests_syntax_empty_params]";
 
-        public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string u, string v, System.Guid? w, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? x = null, bool y = true, Dibix.Sdk.Tests.DomainModel.Direction? z = null)
+        public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake")
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
                 ParametersVisitor @params = accessor.Parameters()
                                                     .SetFromTemplate(new
                                                     {
-                                                        u,
-                                                        v,
-                                                        w,
+                                                        a,
+                                                        b,
+                                                        c,
                                                         ids,
-                                                        x,
-                                                        y,
-                                                        z
+                                                        d,
+                                                        e,
+                                                        f,
+                                                        g
                                                     })
                                                     .SetString(nameof(password), password, true)
                                                     .Build();

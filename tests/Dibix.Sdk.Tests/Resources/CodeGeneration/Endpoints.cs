@@ -41,20 +41,21 @@ namespace Dibix.Sdk.Tests.Data
         // SingleConrecteResultWithParams
         private const string SingleConrecteResultWithParamsCommandText = "[dbo].[dbx_tests_syntax_singleconcreteresult_params]";
 
-        public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string u, string v, System.Guid? w, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? x = null, bool y = true, Dibix.Sdk.Tests.DomainModel.Direction? z = null)
+        public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake")
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
                 ParametersVisitor @params = accessor.Parameters()
                                                     .SetFromTemplate(new
                                                     {
-                                                        u,
-                                                        v,
-                                                        w,
+                                                        a,
+                                                        b,
+                                                        c,
                                                         ids,
-                                                        x,
-                                                        y,
-                                                        z
+                                                        d,
+                                                        e,
+                                                        f,
+                                                        g
                                                     })
                                                     .SetString(nameof(password), password, true)
                                                     .Build();
@@ -151,15 +152,16 @@ namespace Dibix.Sdk.Tests.DomainModel
 {
     public sealed class AnotherInputContract
     {
-        public string U { get; set; }
-        public string V { get; set; }
+        public string A { get; set; }
+        public string B { get; set; }
         [Optional]
-        public string W { get; set; }
+        public string C { get; set; }
         public IList<Dibix.Sdk.Tests.DomainModel.AnotherEntry> SomeIds { get; private set; }
-        public System.Guid X { get; set; }
+        public System.Guid D { get; set; }
         public string Password { get; set; }
-        public bool Y { get; set; }
-        public int Z { get; set; }
+        public bool E { get; set; }
+        public int F { get; set; }
+        public string G { get; set; }
 
         public AnotherInputContract()
         {
@@ -219,15 +221,16 @@ namespace Dibix.Sdk.Tests.DomainModel
 
     public sealed class InputContract
     {
-        public string U { get; set; }
-        public string V { get; set; }
+        public string A { get; set; }
+        public string B { get; set; }
         [Optional]
-        public string W { get; set; }
+        public string C { get; set; }
         public IList<Dibix.Sdk.Tests.DomainModel.Entry> Ids { get; private set; }
-        public System.Guid X { get; set; }
+        public System.Guid D { get; set; }
         public string Password { get; set; }
-        public bool Y { get; set; }
-        public int Z { get; set; }
+        public bool E { get; set; }
+        public int F { get; set; }
+        public string G { get; set; }
 
         public InputContract()
         {
@@ -255,12 +258,13 @@ namespace Dibix.Sdk.Tests.Business
                     y.Method = HttpApiMethod.Get;
                     y.ChildRoute = "{password}/Fixed";
                     y.ResolveParameterFromNull("password");
-                    y.ResolveParameterFromSource("u", "HEADER", "User-Agent");
-                    y.ResolveParameterFromSource("v", "HEADER", "Authorization.Parameter");
-                    y.ResolveParameterFromSource("w", "DBX", "X", "DBX");
-                    y.ResolveParameterFromSource("x", "REQUEST", "Language");
-                    y.ResolveParameterFromConstant("y", true);
-                    y.ResolveParameterFromConstant("z", 5);
+                    y.ResolveParameterFromSource("a", "HEADER", "User-Agent");
+                    y.ResolveParameterFromSource("b", "HEADER", "Authorization.Parameter");
+                    y.ResolveParameterFromSource("c", "DBX", "X", "DBX");
+                    y.ResolveParameterFromSource("d", "REQUEST", "Language");
+                    y.ResolveParameterFromConstant("e", true);
+                    y.ResolveParameterFromConstant("f", 5);
+                    y.ResolveParameterFromConstant("g", "cake");
                 });
                 x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), y =>
                 {

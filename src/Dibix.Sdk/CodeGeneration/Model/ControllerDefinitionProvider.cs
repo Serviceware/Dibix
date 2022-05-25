@@ -287,7 +287,12 @@ namespace Dibix.Sdk.CodeGeneration
                     return true;
 
                 case JTokenType.String:
-                    source = ReadPropertySource((JValue)property.Value, filePath);
+                    string stringValue = (string)property.Value;
+                    if (stringValue != null && stringValue.Contains('.'))
+                        source = this.ReadPropertySource((JValue)property.Value, filePath);
+                    else
+                        source = ReadConstantSource((JValue)property.Value);
+
                     return true;
 
                 default:

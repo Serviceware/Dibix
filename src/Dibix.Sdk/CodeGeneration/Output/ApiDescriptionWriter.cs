@@ -203,6 +203,7 @@ namespace Dibix.Sdk.CodeGeneration
             switch (value)
             {
                 case bool boolValue: return boolValue.ToString().ToLowerInvariant();
+                case string stringValue: return $"\"{stringValue}\"";
                 case null: return "null";
                 default: return value.ToString();
             }

@@ -5,8 +5,8 @@
       "method": "GET",
       "target": "EmptyWithParams",
       "params": {
-        "u": "WTF.Is.This",
-        "v": "ENV.MachinePassword"
+        "a": "WTF.Is.This",
+        "b": "ENV.MachinePassword"
       }
     },
     {
@@ -15,8 +15,8 @@
       "body": "Request",
       "childRoute": "this/get/is/wrong",
       "params": {
-        "v": "BODY.X",
-        "w": "BODY.Id.Nm",
+        "a": "BODY.X",
+        "b": "BODY.Id.Nm",
         "ids": {
           "source": "BODY.Ids",
           "items": {

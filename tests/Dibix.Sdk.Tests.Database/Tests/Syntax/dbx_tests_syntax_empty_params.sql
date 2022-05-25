@@ -1,12 +1,13 @@
 ﻿-- @Name EmptyWithParams
 CREATE PROCEDURE [dbo].[dbx_tests_syntax_empty_params]
-    @u NVARCHAR(50)
-  , @v NVARCHAR(50)
-  , @w UNIQUEIDENTIFIER NULL
+    @a NVARCHAR(50)
+  , @b NVARCHAR(50)
+  , @c UNIQUEIDENTIFIER NULL
   , /* @Obfuscate */ @password NVARCHAR(128)
   , @ids [dbo].[dbx_codeanalysis_udt_generic] READONLY
-  , @x NVARCHAR(50) NULL = NULL
-  , @y BIT = 1
-  , /* @ClrType Direction */ @z INT NULL = NULL
+  , @d NVARCHAR(50) NULL = NULL
+  , @e BIT = 1
+  , /* @ClrType Direction */ @f INT NULL = NULL
+  , @g NVARCHAR(50) NULL = N'Cake'
 AS
-	PRINT CONCAT(@u, @v, @w, @password, @ids, @x, @y, @z)
+	PRINT CONCAT(@a, @b, @c, @password, @ids, @d, @e, @f, @g)

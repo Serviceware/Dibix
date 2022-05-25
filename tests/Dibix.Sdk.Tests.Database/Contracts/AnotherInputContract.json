@@ -1,15 +1,16 @@
 ﻿{
   "AnotherInputContract": {
-    "U": "string",
-    "V": "string",
-    "W": {
+    "A": "string",
+    "B": "string",
+    "C": {
       "type": "string",
       "isOptional": true
     },
     "SomeIds": "#AnotherEntry*",
-    "X": "uuid",
+    "D": "uuid",
     "Password": "string",
-    "Y": "boolean",
-    "Z": "int32"
+    "E": "boolean",
+    "F": "int32",
+    "G": "string"
   }
 }

@@ -11,16 +11,17 @@
       "target": "EmptyWithParams",
       "childRoute": "{password}/Fixed",
       "params": {
-        "u": "HEADER.User-Agent",
-        "v": "HEADER.Authorization.Parameter",
-        "w": {
+        "a": "HEADER.User-Agent",
+        "b": "HEADER.Authorization.Parameter",
+        "c": {
           "source": "DBX.X",
           "converter": "DBX"
         },
         "password": null,
-        "x": "REQUEST.Language",
-        "y": true,
-        "z": 5
+        "d": "REQUEST.Language",
+        "e": true,
+        "f": 5,
+        "g": "cake"
       }
     },
     {
