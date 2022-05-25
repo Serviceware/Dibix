@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Net.Http;
 using System.Reflection;
 using System.Xml.Linq;
 using Dibix.Testing;
@@ -16,25 +15,15 @@ namespace Dibix.Http.Server.Tests
     {
         private void AssertEqual(string expected, string actual) => base.AssertEqual(expected, actual, extension: "txt");
 
-        private (IHttpParameterResolutionMethod method, MethodInfo methodInfo) Compile() => this.Compile(x => { });
-        private (IHttpParameterResolutionMethod method, MethodInfo methodInfo) Compile(Action<HttpActionDefinition> actionConfiguration)
+        private IHttpParameterResolutionMethod Compile() => this.Compile(x => { });
+        private IHttpParameterResolutionMethod Compile(Action<HttpActionDefinition> actionConfiguration)
         {
             HttpApiRegistration registration = new HttpApiRegistration(base.TestContext.TestName, actionConfiguration);
             registration.Configure(null);
             HttpActionDefinition action = registration.Controllers.Single().Actions.Single();
-            MethodInfo methodInfo = action.Target.Build();
-            IHttpParameterResolutionMethod method = HttpParameterResolver.Compile(action, methodInfo.GetParameters());
-            return (method, methodInfo);
-        }
-
-        private static void PrepareAndInvoke(IHttpParameterResolutionMethod method, MethodBase methodInfo, HttpRequestMessage request, IDictionary<string, object> arguments, IParameterDependencyResolver dependencyResolver)
-        {
-            method.PrepareParameters(request, arguments, dependencyResolver);
-
-            object[] parameters = methodInfo.GetParameters()
-                                            .Select(x => arguments[x.Name])
-                                            .ToArray();
-            methodInfo.Invoke(null, parameters);
+            MethodInfo method = action.Target.Build();
+            IHttpParameterResolutionMethod result = HttpParameterResolver.Compile(action, method.GetParameters());
+            return result;
         }
 
         private sealed class HttpApiRegistration : HttpApiDescriptor
