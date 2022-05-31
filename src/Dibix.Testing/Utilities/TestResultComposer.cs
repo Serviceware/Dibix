@@ -60,6 +60,8 @@ namespace Dibix.Testing
                 }
             }
             this.RegisterFile(path);
+
+            this.PersistTestOutputOnSuccessfulTest();
         }
 
 #if NETCOREAPP
@@ -133,12 +135,47 @@ start winmergeU ""{expectedDirectory}"" ""{actualDirectory}""");
 {x.Message}"));
         }
 
+        // The test run directory is cleaned up, if all tests in the current run have passed.
+        // Therefore we copy the test output to a dedicated directory, if specified.
+        // Ultimately, this is done once after the whole test run is completed, to determine, if all tests have actually passed.
+        // Unfortunately, there is no way for us at this level to execute code with a test context, after the whole test run has completed.
+        // So this is executed after each test, that has passed, without knowing, if there is another failed test in the run,
+        // preventing the original test results folder from getting cleaned up.
+        private void PersistTestOutputOnSuccessfulTest()
+        {
+            if (this._testContext.CurrentTestOutcome != UnitTestOutcome.Passed)
+                return;
+
+            string privateTestResultsDirectory = (string)this._testContext.Properties["PrivateTestResultsDirectory"];
+            if (privateTestResultsDirectory == null)
+                return;
+
+            CopyDirectoryContents(this._runDirectory, privateTestResultsDirectory);
+        }
+
         private static void WriteContentToFile(string path, string content)
         {
             if (File.Exists(path))
                 throw new InvalidOperationException($"Path exists already: {path}");
 
             File.WriteAllText(path, content);
+        }
+
+        private static void CopyDirectoryContents(string sourceDirectory, string targetDirectory)
+        {
+            foreach (string directory in Directory.EnumerateDirectories(sourceDirectory, "*", SearchOption.AllDirectories))
+            {
+                string relativeDirectoryPath = directory.Substring(sourceDirectory.Length + 1);
+                string targetDirectoryPath = Path.Combine(targetDirectory, relativeDirectoryPath);
+                Directory.CreateDirectory(targetDirectoryPath);
+            }
+
+            foreach (string file in Directory.EnumerateFiles(sourceDirectory, "*", SearchOption.AllDirectories))
+            {
+                string relativeFilePath = file.Substring(sourceDirectory.Length + 1);
+                string targetFilePath = Path.Combine(targetDirectory, relativeFilePath);
+                File.Copy(file, targetFilePath);
+            }
         }
     }
 }
