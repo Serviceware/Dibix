@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -14,20 +13,22 @@ namespace Dibix.Testing
         private readonly TestContext _testContext;
         private readonly string _runDirectory;
         private readonly string _testDirectory;
-        private readonly IDictionary<string, ICollection<string>> _testNameFileMap;
+        private readonly ICollection<string> _testRunFiles;
+        private readonly ICollection<string> _testFiles;
 
         public TestResultComposer(TestContext testContext)
         {
             this._testContext = testContext;
             this._runDirectory = testContext.TestRunResultsDirectory;
             this._testDirectory = this.EnsureDirectory("TestResults", testContext.TestName);
-            this._testNameFileMap = new Dictionary<string, ICollection<string>>();
+            this._testRunFiles = new HashSet<string>();
+            this._testFiles = new HashSet<string>();
         }
 
         public string AddFile(string fileName)
         {
             string path = Path.Combine(this._testDirectory, fileName);
-            this.RegisterFile(path);
+            this.RegisterFile(path, scopeIsTestRun: false);
             return path;
         }
         public string AddFile(string fileName, string content)
@@ -46,22 +47,8 @@ namespace Dibix.Testing
 
         public void Complete()
         {
-            if (!this._testNameFileMap.TryGetValue(this._testContext.TestName, out ICollection<string> files))
-                return;
-
-            string path = Path.Combine(this._testDirectory, $"{this._testContext.TestName}.zip");
-            using (ZipArchive archive = ZipFile.Open(path, ZipArchiveMode.Create))
-            {
-                foreach (string file in files)
-                {
-                    int relativePathIndex = this._runDirectory.Length + 1;
-                    string relativePath = file.Substring(relativePathIndex, file.Length - relativePathIndex);
-                    archive.CreateEntryFromFile(file, relativePath);
-                }
-            }
-            this.RegisterFile(path);
-
-            this.PersistTestOutputOnSuccessfulTest();
+            this.ZipTestOutput();
+            this.CopyTestOutput();
         }
 
 #if NETCOREAPP
@@ -77,7 +64,7 @@ namespace Dibix.Testing
         private void EnsureFileComparisonContent(string path, string content)
         {
             WriteContentToFile(path, content);
-            this.RegisterFile(path);
+            this.RegisterFile(path, scopeIsTestRun: false);
         }
 
         private string GetExpectedDirectory() => this.EnsureDirectory("expected");
@@ -86,20 +73,33 @@ namespace Dibix.Testing
 
         private string EnsureDirectory(params string[] directoryNames)
         {
-            string path = Path.Combine(Enumerable.Repeat(this._runDirectory, 1).Concat(directoryNames).ToArray());
+            string path = Path.Combine(EnumerableExtensions.Create(this._runDirectory).Concat(directoryNames).ToArray());
             Directory.CreateDirectory(path);
             return path;
         }
 
-        private void RegisterFile(string path)
+        private bool ShouldRegisterTestRunFile(string path)
         {
-            this._testContext.AddResultFile(path);
-            
-            if (!this._testNameFileMap.TryGetValue(this._testContext.TestName, out ICollection<string> files))
+            if (File.Exists(path))
             {
-                files = new Collection<string>();
-                this._testNameFileMap.Add(this._testContext.TestName, files);
+                // Ultimately, test run files are collected once the whole test run is completed.
+                // Unfortunately, there is no easy way for us to execute code at this level apart from AssemblyCleanup.
+                // However the AssemblyCleanup method doesn't accept a TestContext and is also not inheritable.
+                // Therefore this step is executed after each test and involves to skip these files in subsequent tests of the current run.
+                this._testRunFiles.Add(path);
+                return false;
             }
+
+            return true;
+        }
+
+        private void RegisterFile(string path, bool scopeIsTestRun)
+        {
+            ICollection<string> files = scopeIsTestRun ? this._testRunFiles : this._testFiles;
+            if (files.Contains(path))
+                throw new InvalidOperationException($"Test result file already registered: {path}");
+
+            this._testContext.AddResultFile(path);
             files.Add(path);
         }
 
@@ -107,7 +107,8 @@ namespace Dibix.Testing
         {
             const string fileName = "winmerge.bat";
             string path = Path.Combine(this._runDirectory, fileName);
-            if (File.Exists(path))
+
+            if (!this.ShouldRegisterTestRunFile(path))
                 return;
 
             string expectedDirectory = new DirectoryInfo(this.GetExpectedDirectory()).Name;
@@ -115,7 +116,7 @@ namespace Dibix.Testing
 
             WriteContentToFile(path, $@"@echo off
 start winmergeU ""{expectedDirectory}"" ""{actualDirectory}""");
-            this.RegisterFile(path);
+            this.RegisterFile(path, scopeIsTestRun: true);
         }
 
 #if NETCOREAPP
@@ -135,24 +136,6 @@ start winmergeU ""{expectedDirectory}"" ""{actualDirectory}""");
 {x.Message}"));
         }
 
-        // The test run directory is cleaned up, if all tests in the current run have passed.
-        // Therefore we copy the test output to a dedicated directory, if specified.
-        // Ultimately, this is done once after the whole test run is completed, to determine, if all tests have actually passed.
-        // Unfortunately, there is no way for us at this level to execute code with a test context, after the whole test run has completed.
-        // So this is executed after each test, that has passed, without knowing, if there is another failed test in the run,
-        // preventing the original test results folder from getting cleaned up.
-        private void PersistTestOutputOnSuccessfulTest()
-        {
-            if (this._testContext.CurrentTestOutcome != UnitTestOutcome.Passed)
-                return;
-
-            string privateTestResultsDirectory = (string)this._testContext.Properties["PrivateTestResultsDirectory"];
-            if (privateTestResultsDirectory == null)
-                return;
-
-            CopyDirectoryContents(this._runDirectory, privateTestResultsDirectory);
-        }
-
         private static void WriteContentToFile(string path, string content)
         {
             if (File.Exists(path))
@@ -161,20 +144,48 @@ start winmergeU ""{expectedDirectory}"" ""{actualDirectory}""");
             File.WriteAllText(path, content);
         }
 
-        private static void CopyDirectoryContents(string sourceDirectory, string targetDirectory)
+        private void ZipTestOutput()
         {
-            foreach (string directory in Directory.EnumerateDirectories(sourceDirectory, "*", SearchOption.AllDirectories))
+            ICollection<string> files = this._testRunFiles.Concat(this._testFiles).ToArray();
+            if (!files.Any())
+                return;
+
+            string path = Path.Combine(this._testDirectory, $"{this._testContext.TestName}.zip");
+            using (ZipArchive archive = ZipFile.Open(path, ZipArchiveMode.Create))
             {
-                string relativeDirectoryPath = directory.Substring(sourceDirectory.Length + 1);
-                string targetDirectoryPath = Path.Combine(targetDirectory, relativeDirectoryPath);
-                Directory.CreateDirectory(targetDirectoryPath);
+                foreach (string file in files)
+                {
+                    int relativePathIndex = this._runDirectory.Length + 1;
+                    string relativePath = file.Substring(relativePathIndex, file.Length - relativePathIndex);
+                    archive.CreateEntryFromFile(file, relativePath);
+                }
             }
 
-            foreach (string file in Directory.EnumerateFiles(sourceDirectory, "*", SearchOption.AllDirectories))
+            this.RegisterFile(path, scopeIsTestRun: false);
+        }
+
+        // Copy the test output to a dedicated directory, if specified.
+        private void CopyTestOutput()
+        {
+            string privateTestResultsDirectory = (string)this._testContext.Properties["PrivateTestResultsDirectory"];
+            if (privateTestResultsDirectory == null)
+                return;
+
+            this.CopyFiles(this._testRunFiles, privateTestResultsDirectory, ignoreIfExists: true);
+            this.CopyFiles(this._testFiles, privateTestResultsDirectory);
+        }
+
+        private void CopyFiles(IEnumerable<string> files, string targetDirectory, bool ignoreIfExists = false)
+        {
+            foreach (string file in files)
             {
-                string relativeFilePath = file.Substring(sourceDirectory.Length + 1);
+                string relativeFilePath = file.Substring(this._runDirectory.Length + 1);
                 string targetFilePath = Path.Combine(targetDirectory, relativeFilePath);
-                File.Copy(file, targetFilePath);
+                string fullTargetDirectory = Path.GetDirectoryName(targetFilePath);
+                Directory.CreateDirectory(fullTargetDirectory);
+
+                if (!ignoreIfExists || !File.Exists(targetFilePath))
+                    File.Copy(file, targetFilePath);
             }
         }
     }

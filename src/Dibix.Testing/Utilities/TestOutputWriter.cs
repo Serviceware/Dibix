@@ -13,7 +13,6 @@ namespace Dibix.Testing
         private const string OutputFileName = "output.log";
         private readonly string _outputPath;
         private readonly StreamWriter _output;
-        private readonly TestContext _testContext;
         private readonly bool _outputToFile;
         private bool _collectingLine;
         private readonly Process _tail;
@@ -22,7 +21,6 @@ namespace Dibix.Testing
 
         public TestOutputWriter(TestContext testContext, TestResultComposer testResultComposer, bool outputToFile, bool tailOutput)
         {
-            this._testContext = testContext;
             this._outputToFile = outputToFile;
 
             if (!this._outputToFile) 
