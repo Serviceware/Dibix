@@ -93,12 +93,5 @@ namespace Dibix
             }, splitOn);
             return cache.Single();
         }
-
-        // OrderManagement (LoadOrder)
-        public static TReturn QuerySingle<TReturn, TSecond, TThird, TFourth, TFifth>(this IDatabaseAccessor accessor, string commandText, ParametersVisitor parameters, string splitOn) where TReturn : new()
-        {
-            Guard.IsNotNull(accessor, nameof(accessor));
-            return accessor.QuerySingle<TReturn, TSecond, TThird, TFourth, TFifth>(commandText, CommandType.Text, parameters, splitOn);
-        }
     }
 }
