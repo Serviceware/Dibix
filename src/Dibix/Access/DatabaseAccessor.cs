@@ -107,6 +107,14 @@ namespace Dibix
                        .Single();
         });
 
+        public TReturn QuerySingle<TReturn, TSecond, TThird, TFourth, TFifth>(string commandText, CommandType commandType, ParametersVisitor parameters, string splitOn) where TReturn : new() => Execute(commandText, commandType, parameters, () =>
+        {
+            MultiMapper multiMapper = new MultiMapper();
+            return this.QueryMany<TReturn, TSecond, TThird, TFourth, TFifth, TReturn>(commandText, commandType, parameters, (a, b, c, d, e) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c, d, e), splitOn)
+                       .PostProcess(multiMapper)
+                       .Single();
+        });
+
         T IDatabaseAccessor.QuerySingleOrDefault<T>(string commandText, CommandType commandType, ParametersVisitor parameters) => Execute(commandText, commandType, parameters, () => this.QuerySingleOrDefault<T>(commandText, commandType, parameters).PostProcess());
 
         IMultipleResultReader IDatabaseAccessor.QueryMultiple(string commandText, CommandType commandType, ParametersVisitor parameters) => Execute(commandText, commandType, parameters, () => this.QueryMultiple(commandText, commandType, parameters));
