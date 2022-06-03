@@ -55,6 +55,13 @@ namespace Dibix.Testing
         }
         protected virtual bool AttachOutputObserver => false;
         protected virtual TextWriter Out => this.TestOutputHelper;
+
+        /// <summary>
+        /// By default, the test results directory is cleaned up by MSTest, after all tests of a run have passed.
+        /// It might be desired to keep the test output even if all tests have passed, i.E. for investigation purposes.
+        /// Setting this property to true, will store the output in the temp directory, so they are still available after each run.
+        /// </summary>
+        protected virtual bool UseDedicatedTestResultsDirectory => true;
         private TestResultComposer TestResultComposer
         {
             get => SafeGetProperty(ref this._testResultComposer);
@@ -73,7 +80,7 @@ namespace Dibix.Testing
         [TestInitialize]
         public async Task OnTestInitialize()
         {
-            this.TestResultComposer = new TestResultComposer(this.TestContext);
+            this.TestResultComposer = new TestResultComposer(this.TestContext, this.UseDedicatedTestResultsDirectory);
             this.TestOutputHelper = new TestOutputWriter(this.TestContext, this.TestResultComposer, outputToFile: true, tailOutput: this.AttachOutputObserver);
             AppDomain.CurrentDomain.FirstChanceException += this.OnFirstChanceException;
 

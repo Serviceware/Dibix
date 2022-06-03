@@ -4,23 +4,36 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dibix.Testing
 {
     internal sealed class TestResultComposer
     {
+        private const string ExpectedDirectoryName = "expected";
+        private const string ActualDirectoryName = "actual";
         private readonly TestContext _testContext;
+        private readonly bool _useDedicatedTestResultsDirectory;
+        private readonly string _defaultRunDirectory;
+        private readonly string _dedicatedRunDirectory;
         private readonly string _runDirectory;
         private readonly string _testDirectory;
+        private readonly string _expectedDirectory;
+        private readonly string _actualDirectory;
         private readonly ICollection<string> _testRunFiles;
         private readonly ICollection<string> _testFiles;
 
-        public TestResultComposer(TestContext testContext)
+        public TestResultComposer(TestContext testContext, bool useDedicatedTestResultsDirectory)
         {
             this._testContext = testContext;
-            this._runDirectory = testContext.TestRunResultsDirectory;
-            this._testDirectory = this.EnsureDirectory("TestResults", testContext.TestName);
+            this._useDedicatedTestResultsDirectory = useDedicatedTestResultsDirectory;
+            this._defaultRunDirectory = testContext.TestRunResultsDirectory;
+            this._dedicatedRunDirectory = BuildDedicatedRunDirectory(testContext);
+            this._runDirectory = this._useDedicatedTestResultsDirectory ? this._dedicatedRunDirectory : this._defaultRunDirectory;
+            this._testDirectory = Path.Combine(this._runDirectory, "TestResults", testContext.TestName);
+            this._expectedDirectory = Path.Combine(this._runDirectory, ExpectedDirectoryName);
+            this._actualDirectory = Path.Combine(this._runDirectory, ActualDirectoryName);
             this._testRunFiles = new HashSet<string>();
             this._testFiles = new HashSet<string>();
         }
@@ -40,8 +53,8 @@ namespace Dibix.Testing
 
         public void AddFileComparison(string expectedContent, string actualContent, string extension)
         {
-            this.EnsureFileComparisonContent(this.GetExpectedDirectory(), extension, expectedContent);
-            this.EnsureFileComparisonContent(this.GetActualDirectory(), extension, actualContent);
+            this.EnsureFileComparisonContent(this._expectedDirectory, extension, expectedContent);
+            this.EnsureFileComparisonContent(this._actualDirectory, extension, actualContent);
             this.EnsureWinMergeStarter();
         }
 
@@ -67,17 +80,6 @@ namespace Dibix.Testing
             this.RegisterFile(path, scopeIsTestRun: false);
         }
 
-        private string GetExpectedDirectory() => this.EnsureDirectory("expected");
-        
-        private string GetActualDirectory() => this.EnsureDirectory("actual");
-
-        private string EnsureDirectory(params string[] directoryNames)
-        {
-            string path = Path.Combine(EnumerableExtensions.Create(this._runDirectory).Concat(directoryNames).ToArray());
-            Directory.CreateDirectory(path);
-            return path;
-        }
-
         private bool ShouldRegisterTestRunFile(string path)
         {
             if (File.Exists(path))
@@ -99,6 +101,7 @@ namespace Dibix.Testing
             if (files.Contains(path))
                 throw new InvalidOperationException($"Test result file already registered: {path}");
 
+            EnsureDirectory(path);
             this._testContext.AddResultFile(path);
             files.Add(path);
         }
@@ -111,11 +114,8 @@ namespace Dibix.Testing
             if (!this.ShouldRegisterTestRunFile(path))
                 return;
 
-            string expectedDirectory = new DirectoryInfo(this.GetExpectedDirectory()).Name;
-            string actualDirectory = new DirectoryInfo(this.GetActualDirectory()).Name;
-
             WriteContentToFile(path, $@"@echo off
-start winmergeU ""{expectedDirectory}"" ""{actualDirectory}""");
+start winmergeU ""{ExpectedDirectoryName}"" ""{ActualDirectoryName}""");
             this.RegisterFile(path, scopeIsTestRun: true);
         }
 
@@ -164,15 +164,13 @@ start winmergeU ""{expectedDirectory}"" ""{actualDirectory}""");
             this.RegisterFile(path, scopeIsTestRun: false);
         }
 
-        // Copy the test output to a dedicated directory, if specified.
         private void CopyTestOutput()
         {
-            string privateTestResultsDirectory = (string)this._testContext.Properties["PrivateTestResultsDirectory"];
-            if (privateTestResultsDirectory == null)
+            if (!this._useDedicatedTestResultsDirectory)
                 return;
 
-            this.CopyFiles(this._testRunFiles, privateTestResultsDirectory, ignoreIfExists: true);
-            this.CopyFiles(this._testFiles, privateTestResultsDirectory);
+            this.CopyFiles(this._testRunFiles, this._defaultRunDirectory, ignoreIfExists: true);
+            this.CopyFiles(this._testFiles, this._defaultRunDirectory);
         }
 
         private void CopyFiles(IEnumerable<string> files, string targetDirectory, bool ignoreIfExists = false)
@@ -181,12 +179,26 @@ start winmergeU ""{expectedDirectory}"" ""{actualDirectory}""");
             {
                 string relativeFilePath = file.Substring(this._runDirectory.Length + 1);
                 string targetFilePath = Path.Combine(targetDirectory, relativeFilePath);
-                string fullTargetDirectory = Path.GetDirectoryName(targetFilePath);
-                Directory.CreateDirectory(fullTargetDirectory);
+                EnsureDirectory(targetFilePath);
 
                 if (!ignoreIfExists || !File.Exists(targetFilePath))
                     File.Copy(file, targetFilePath);
             }
+        }
+
+        private static void EnsureDirectory(string path)
+        {
+            string directory = Path.GetDirectoryName(path);
+            Directory.CreateDirectory(directory);
+        }
+
+        private static string BuildDedicatedRunDirectory(TestContext testContext)
+        {
+            Assembly assembly = TestImplementationResolver.ResolveTestAssembly(testContext);
+            string assemblyName = assembly.GetName().Name;
+            string directoryName = new DirectoryInfo(testContext.TestRunDirectory).Name;
+            string path = Path.Combine(Path.GetTempPath(), assemblyName, "TestResults", directoryName);
+            return path;
         }
     }
 }
