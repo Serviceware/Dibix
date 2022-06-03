@@ -16,7 +16,6 @@ namespace Dibix.Testing
         private readonly TestContext _testContext;
         private readonly bool _useDedicatedTestResultsDirectory;
         private readonly string _defaultRunDirectory;
-        private readonly string _dedicatedRunDirectory;
         private readonly string _runDirectory;
         private readonly string _testDirectory;
         private readonly string _expectedDirectory;
@@ -29,8 +28,8 @@ namespace Dibix.Testing
             this._testContext = testContext;
             this._useDedicatedTestResultsDirectory = useDedicatedTestResultsDirectory;
             this._defaultRunDirectory = testContext.TestRunResultsDirectory;
-            this._dedicatedRunDirectory = BuildDedicatedRunDirectory(testContext);
-            this._runDirectory = this._useDedicatedTestResultsDirectory ? this._dedicatedRunDirectory : this._defaultRunDirectory;
+            string dedicatedRunDirectory = BuildDedicatedRunDirectory(testContext);
+            this._runDirectory = this._useDedicatedTestResultsDirectory ? dedicatedRunDirectory : this._defaultRunDirectory;
             this._testDirectory = Path.Combine(this._runDirectory, "TestResults", testContext.TestName);
             this._expectedDirectory = Path.Combine(this._runDirectory, ExpectedDirectoryName);
             this._actualDirectory = Path.Combine(this._runDirectory, ActualDirectoryName);
@@ -197,7 +196,7 @@ start winmergeU ""{ExpectedDirectoryName}"" ""{ActualDirectoryName}""");
             Assembly assembly = TestImplementationResolver.ResolveTestAssembly(testContext);
             string assemblyName = assembly.GetName().Name;
             string directoryName = new DirectoryInfo(testContext.TestRunDirectory).Name;
-            string path = Path.Combine(Path.GetTempPath(), assemblyName, "TestResults", directoryName);
+            string path = Path.Combine(Path.GetTempPath(), assemblyName, directoryName);
             return path;
         }
     }
