@@ -8,7 +8,7 @@ namespace Dibix.Testing.Http
 {
     public sealed class OfflineHttpClientFactory : DefaultHttpClientFactory, IHttpClientFactory
     {
-        protected override void CreateClient(IHttpClientBuilder builder)
+        protected override void ConfigureClient(IHttpClientBuilder builder)
         {
             builder.ConfigurePrimaryHttpMessageHandler(new OfflineHttpMessageHandler());
         }

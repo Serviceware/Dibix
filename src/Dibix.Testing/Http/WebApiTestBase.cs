@@ -161,7 +161,7 @@ namespace Dibix.Testing.Http
                 this._additionalClientConfiguration = additionalClientConfiguration;
             }
 
-            protected override void CreateClient(IHttpClientBuilder builder)
+            protected override void ConfigureClient(IHttpClientBuilder builder)
             {
                 this._additionalClientConfiguration(builder);
                 builder.ConfigureClient(this.ConfigureClient);
