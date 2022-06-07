@@ -40,6 +40,7 @@ namespace Dibix.Testing
         public string AddFile(string fileName)
         {
             string path = Path.Combine(this._testDirectory, fileName);
+            EnsureDirectory(path);
             this.RegisterFile(path, scopeIsTestRun: false);
             return path;
         }
@@ -100,7 +101,6 @@ namespace Dibix.Testing
             if (files.Contains(path))
                 throw new InvalidOperationException($"Test result file already registered: {path}");
 
-            EnsureDirectory(path);
             this._testContext.AddResultFile(path);
             files.Add(path);
         }
@@ -140,6 +140,7 @@ start winmergeU ""{ExpectedDirectoryName}"" ""{ActualDirectoryName}""");
             if (File.Exists(path))
                 throw new InvalidOperationException($"Path exists already: {path}");
 
+            EnsureDirectory(path);
             File.WriteAllText(path, content);
         }
 
@@ -195,8 +196,9 @@ start winmergeU ""{ExpectedDirectoryName}"" ""{ActualDirectoryName}""");
         {
             Assembly assembly = TestImplementationResolver.ResolveTestAssembly(testContext);
             string assemblyName = assembly.GetName().Name;
-            string directoryName = new DirectoryInfo(testContext.TestRunDirectory).Name;
-            string path = Path.Combine(Path.GetTempPath(), assemblyName, directoryName);
+            string testRunDirectoryName = new DirectoryInfo(testContext.TestRunDirectory).Name;
+            string directoryName = $"Run_{testRunDirectoryName.Split(' ').Last()}";
+            string path = Path.Combine(Path.GetTempPath(), "TestResults", directoryName, assemblyName);
             return path;
         }
     }
