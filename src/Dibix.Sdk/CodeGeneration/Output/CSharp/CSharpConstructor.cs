@@ -21,9 +21,9 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             this._parameters = new Collection<CSharpParameter>();
         }
 
-        public CSharpConstructor AddParameter(string name, string type)
+        public CSharpConstructor AddParameter(string name, string type, CSharpValue defaultValue = null)
         {
-            CSharpParameter parameter = new CSharpParameter(name, type, default, null, Enumerable.Empty<CSharpAnnotation>());
+            CSharpParameter parameter = new CSharpParameter(name, type, default, defaultValue, Enumerable.Empty<CSharpAnnotation>());
             this._parameters.Add(parameter);
             return this;
         }

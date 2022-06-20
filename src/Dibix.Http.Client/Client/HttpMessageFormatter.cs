@@ -7,7 +7,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Dibix.Http.Client
 {
@@ -40,14 +39,6 @@ Response
         #endregion
 
         #region Internal Methods
-        internal static async Task<string> Format(HttpRequestMessage requestMessage, bool maskSensitiveData)
-        {
-            string requestMessageContent = null;
-            if (requestMessage.Content != null)
-                requestMessageContent = await requestMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
-
-            return Format(requestMessage, requestMessageContent, maskSensitiveData);
-        }
         internal static string Format(HttpRequestMessage requestMessage, string requestContentText, bool maskSensitiveData)
         {
             Guard.IsNotNull(requestMessage, nameof(requestMessage));
@@ -81,11 +72,6 @@ Response
             return formattedRequest;
         }
 
-        internal static async Task<string> Format(HttpResponseMessage responseMessage)
-        {
-            string responseContentText = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
-            return Format(responseMessage, responseContentText);
-        }
         internal static string Format(HttpResponseMessage responseMessage, string responseContentText)
         {
             Guard.IsNotNull(responseMessage, nameof(responseMessage));

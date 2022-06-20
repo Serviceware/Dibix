@@ -47,9 +47,9 @@ namespace Dibix.Http.Client
         #endregion
 
         #region Private Methods
-        private Task TraceRequest(HttpRequestMessage request) => this._tracer.TraceRequestAsync(request);
+        private Task TraceRequest(HttpRequestMessage request) => this._tracer.TraceRequestMessageAsync(request);
 
-        private Task TraceResponse(HttpResponseMessage response) => this._tracer.TraceResponseAsync(response, this._requestDurationTracker.Elapsed);
+        private Task TraceResponse(HttpResponseMessage response) => this._tracer.TraceResponseMessageAsync(response, this._requestDurationTracker.Elapsed);
 
         private void StartTracking() => this._requestDurationTracker.Restart();
 

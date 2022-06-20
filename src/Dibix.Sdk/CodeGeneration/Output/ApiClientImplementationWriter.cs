@@ -41,45 +41,23 @@ namespace Dibix.Sdk.CodeGeneration
                 @class.AddField("Formatter", "MediaTypeFormatter", new CSharpValue("new JsonMediaTypeFormatter()"), CSharpModifiers.Private | CSharpModifiers.Static | CSharpModifiers.ReadOnly);
             }
 
+            @class.AddField("_httpClientName", "string", modifiers: CSharpModifiers.Private | CSharpModifiers.ReadOnly);
             @class.AddField("_httpClientFactory", "IHttpClientFactory", modifiers: CSharpModifiers.Private | CSharpModifiers.ReadOnly);
 
             if (requiresAuthorization)
-                @class.AddField("_authorizationProvider", "IHttpAuthorizationProvider", modifiers: CSharpModifiers.Private | CSharpModifiers.ReadOnly);
+                @class.AddField("_httpAuthorizationProvider", "IHttpAuthorizationProvider", modifiers: CSharpModifiers.Private | CSharpModifiers.ReadOnly);
 
             @class.AddSeparator();
 
-            CSharpConstructor ctor1 = @class.AddConstructor();
-
-            if (requiresAuthorization)
-                ctor1.AddParameter("authorizationProvider", "IHttpAuthorizationProvider");
-
-            ICSharpConstructorInvocationExpression constructorBaseCall = ctor1.CallThis()
-                                                                              .AddParameter(new CSharpValue("new DefaultHttpClientFactory()"));
-
-            if (requiresAuthorization)
-                constructorBaseCall.AddParameter(new CSharpValue("authorizationProvider"));
-
-            StringBuilder ctorBodySb = new StringBuilder("this._httpClientFactory = httpClientFactory;");
-
-            if (requiresAuthorization)
-            {
-                ctorBodySb.AppendLine()
-                          .Append("this._authorizationProvider = authorizationProvider;");
-            }
-
-            string ctorBody = ctorBodySb.ToString();
-            CSharpConstructor ctor2 = @class.AddConstructor(ctorBody)
-                                            .AddParameter("httpClientFactory", "IHttpClientFactory");
-
-            if (requiresAuthorization)
-                ctor2.AddParameter("authorizationProvider", "IHttpAuthorizationProvider");
+            AddCtorWithoutClientName(@class, requiresAuthorization);
+            AddPrimaryCtor(@class, requiresAuthorization);
 
             @class.AddSeparator();
 
             for (int i = 0; i < controller.Actions.Count; i++)
             {
                 ActionDefinition action = controller.Actions[i];
-                string body = this.GeneratedMethodBody(controller, action, context, securitySchemeMap);
+                string body = this.GenerateMethodBody(controller, action, context, securitySchemeMap);
                 base.AddMethod(action, context, operationIdMap, (methodName, returnType) => @class.AddMethod(methodName, returnType, body, modifiers: CSharpModifiers.Public | CSharpModifiers.Async));
 
                 if (i + 1 < controller.Actions.Count)
@@ -89,14 +67,54 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private string GeneratedMethodBody(ControllerDefinition controller, ActionDefinition action, CodeGenerationContext context, IDictionary<string, SecurityScheme> securitySchemeMap)
+        private static void AddPrimaryCtor(CSharpClass @class, bool requiresAuthorization)
+        {
+            StringBuilder ctorBodySb = new StringBuilder("this._httpClientFactory = httpClientFactory;");
+
+            if (requiresAuthorization)
+            {
+                ctorBodySb.AppendLine()
+                          .Append("this._httpAuthorizationProvider = httpAuthorizationProvider;");
+            }
+
+            ctorBodySb.AppendLine()
+                      .Append("this._httpClientName = httpClientName;");
+
+            string ctorBody = ctorBodySb.ToString();
+            CSharpConstructor ctor = @class.AddConstructor(ctorBody)
+                                           .AddParameter("httpClientFactory", "IHttpClientFactory");
+
+            if (requiresAuthorization)
+                ctor.AddParameter("httpAuthorizationProvider", "IHttpAuthorizationProvider");
+
+            ctor.AddParameter("httpClientName", "string");
+        }
+
+        private static void AddCtorWithoutClientName(CSharpClass @class, bool requiresAuthorization)
+        {
+            CSharpConstructor ctor = @class.AddConstructor()
+                                           .AddParameter("httpClientFactory", "IHttpClientFactory");
+
+            if (requiresAuthorization)
+                ctor.AddParameter("httpAuthorizationProvider", "IHttpAuthorizationProvider");
+
+            ICSharpConstructorInvocationExpression constructorThisCall = ctor.CallThis()
+                                                                             .AddParameter(new CSharpValue("httpClientFactory"));
+
+            if (requiresAuthorization)
+                constructorThisCall.AddParameter(new CSharpValue("httpAuthorizationProvider"));
+            
+            constructorThisCall.AddParameter(new CSharpValue("DefaultHttpClientFactory.DefaultClientName"));
+        }
+
+        private string GenerateMethodBody(ControllerDefinition controller, ActionDefinition action, CodeGenerationContext context, IDictionary<string, SecurityScheme> securitySchemeMap)
         {
             ICollection<ActionParameter> distinctParameters = action.Parameters
                                                                     .DistinctBy(x => x.ApiParameterName)
                                                                     .ToArray();
 
             StringWriter writer = new StringWriter();
-            writer.WriteLine($"using ({nameof(HttpClient)} client = this._httpClientFactory.CreateClient(BaseAddress))")
+            writer.WriteLine($"using ({nameof(HttpClient)} client = this._httpClientFactory.CreateClient(this._httpClientName, BaseAddress))")
                   .WriteLine("{")
                   .PushIndent();
 
@@ -131,7 +149,7 @@ namespace Dibix.Sdk.CodeGeneration
             bool oneOf = action.SecuritySchemes.Count > 1;
             foreach (string securitySchemeName in action.SecuritySchemes.SelectMany(x => x).Where(x => x != SecuritySchemes.Anonymous.Name))
             {
-                string getAuthorizationValueCall = $"this._authorizationProvider.GetValue(\"{securitySchemeName}\")";
+                string getAuthorizationValueCall = $"this._httpAuthorizationProvider.GetValue(\"{securitySchemeName}\")";
                 if (oneOf)
                 {
                     writer.WriteLine($"if ({getAuthorizationValueCall} != null)")

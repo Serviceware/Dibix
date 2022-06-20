@@ -12,12 +12,15 @@ namespace Dibix.Http.Client.OpenIdConnect
 
         public TimeSpan CacheDuration { get; set; } = TimeSpan.FromHours(24d);
 
-        public async Task<OpenIdConnectDiscoveryDocument> GetDiscoveryDocument(IHttpClientFactory httpClientFactory, Uri authority)
+        public Task<OpenIdConnectDiscoveryDocument> GetDiscoveryDocument(IHttpClientFactory httpClientFactory, Uri authority) => GetDiscoveryDocument(httpClientFactory, DefaultHttpClientFactory.DefaultClientName, authority, requestFormatter: null);
+        public Task<OpenIdConnectDiscoveryDocument> GetDiscoveryDocument(IHttpClientFactory httpClientFactory, Uri authority, Action<HttpRequestMessage> requestFormatter) => GetDiscoveryDocument(httpClientFactory, DefaultHttpClientFactory.DefaultClientName, authority, requestFormatter);
+        public Task<OpenIdConnectDiscoveryDocument> GetDiscoveryDocument(IHttpClientFactory httpClientFactory, string httpClientName, Uri authority) => GetDiscoveryDocument(httpClientFactory, httpClientName, authority, requestFormatter: null);
+        public async Task<OpenIdConnectDiscoveryDocument> GetDiscoveryDocument(IHttpClientFactory httpClientFactory, string httpClientName, Uri authority, Action<HttpRequestMessage> requestFormatter)
         {
             Uri sanitizedAuthority = EnsureTrailingSlash(authority);
             if (!this._cache.TryGetValue(sanitizedAuthority, out DiscoveryDocumentCacheItem cacheItem) || cacheItem.NextReload <= DateTime.UtcNow)
             {
-                cacheItem = await this.CollectDiscoveryDocument(httpClientFactory, sanitizedAuthority).ConfigureAwait(false);
+                cacheItem = await this.CollectDiscoveryDocument(httpClientFactory, httpClientName, sanitizedAuthority, requestFormatter).ConfigureAwait(false);
                 this._cache[sanitizedAuthority] = cacheItem;
             }
             return cacheItem.Document;
@@ -25,12 +28,16 @@ namespace Dibix.Http.Client.OpenIdConnect
 
         public void InvalidateCache(Uri authority) => this._cache.Remove(authority);
 
-        private async Task<DiscoveryDocumentCacheItem> CollectDiscoveryDocument(IHttpClientFactory httpClientFactory, Uri sanitizedAuthority)
+        private async Task<DiscoveryDocumentCacheItem> CollectDiscoveryDocument(IHttpClientFactory httpClientFactory, string httpClientName, Uri sanitizedAuthority, Action<HttpRequestMessage> requestFormatter)
         {
-            using (HttpClient client = httpClientFactory.CreateClient())
+            using (HttpClient client = httpClientFactory.CreateClient(httpClientName))
             {
                 client.BaseAddress = sanitizedAuthority;
-                HttpResponseMessage response = await client.GetAsync(".well-known/openid-configuration").ConfigureAwait(false);
+
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, ".well-known/openid-configuration");
+                requestFormatter?.Invoke(request);
+
+                HttpResponseMessage response = await client.SendAsync(request).ConfigureAwait(false);
                 response.EnsureSuccessStatusCode();
 
                 OpenIdConnectDiscoveryDocument document = await response.Content.ReadAsAsync<OpenIdConnectDiscoveryDocument>().ConfigureAwait(false);

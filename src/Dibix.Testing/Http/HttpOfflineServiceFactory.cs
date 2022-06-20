@@ -59,7 +59,12 @@ namespace Dibix.Testing.Http
             foreach (ParameterInfo parameter in targetMethod.GetParameters())
                 parameters.Add(Expression.Parameter(parameter.ParameterType, parameter.Name));
 
-            Expression httpClientFactory = Expression.New(typeof(OfflineHttpClientFactory));
+            ConstructorInfo httpClientFactoryConstructor = typeof(DefaultHttpClientFactory).GetConstructor(new[] { typeof(HttpClientConfiguration[]) });
+            if (httpClientFactoryConstructor == null)
+                throw new InvalidOperationException($"Could not find constructor {typeof(DefaultHttpClientFactory)}({typeof(HttpClientConfiguration)}[])");
+
+            Expression offlineClientConfiguration = Expression.New(typeof(OfflineHttpClientConfiguration));
+            Expression httpClientFactory = Expression.New(httpClientFactoryConstructor, Expression.NewArrayInit(typeof(HttpClientConfiguration), offlineClientConfiguration));
             Expression httpAuthorizationProvider = Expression.New(typeof(EmptyHttpAuthorizationProvider));
             ConstructorInfo constructor = ResolveConstructor(targetMethod.DeclaringType);
             Expression instance = Expression.New(constructor, httpClientFactory, httpAuthorizationProvider);

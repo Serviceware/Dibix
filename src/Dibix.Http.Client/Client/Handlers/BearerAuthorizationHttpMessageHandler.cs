@@ -15,7 +15,7 @@ namespace Dibix.Http.Client
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            string token = await this.GetToken().ConfigureAwait(false);
+            string token = await this.GetToken(request).ConfigureAwait(false);
             if (String.IsNullOrEmpty(token))
                 throw new InvalidOperationException("Bearer token is empty");
 
@@ -23,6 +23,6 @@ namespace Dibix.Http.Client
             return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
         }
 
-        protected virtual Task<string> GetToken() => Task.FromResult(this._token);
+        protected virtual Task<string> GetToken(HttpRequestMessage requestMessage) => Task.FromResult(this._token);
     }
 }

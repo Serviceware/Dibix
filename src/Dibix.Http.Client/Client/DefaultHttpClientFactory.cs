@@ -12,13 +12,16 @@ namespace Dibix.Http.Client
     /// <summary>
     /// Roughly inspired by https://github.com/dotnet/runtime/blob/0712aebead42b6605fda32687b341de08f530a3c/src/libraries/Microsoft.Extensions.Http/src/DefaultHttpClientFactory.cs
     /// </summary>
+    /// <remarks>
+    /// Important: This class should only be used as a singleton within the application, as the cleanup timer can prevent this class from being GC'd.
+    /// </remarks>
     public class DefaultHttpClientFactory : IHttpClientFactory
     {
         #region Fields
+        public const string DefaultClientName = "";
         private static readonly TraceSource TraceSource = new TraceSource(typeof(DefaultHttpClientFactory).FullName);
         private static readonly TimerCallback CleanupCallback = s => ((DefaultHttpClientFactory)s).CleanupTimer_Tick();
-        private readonly Uri _baseAddress;
-        private readonly HttpRequestTracer _httpRequestTracer;
+        private readonly IDictionary<string, HttpClientBuilder> _configurations;
 
         // Default time of 10s for cleanup seems reasonable.
         // Quick math:
@@ -50,16 +53,10 @@ namespace Dibix.Http.Client
         private readonly TimerCallback _expiryCallback;
         #endregion
 
-        #region Properties
-        public bool FollowRedirectsForGetRequests { get; set; } = true;
-        #endregion
-
         #region Constructor
-        public DefaultHttpClientFactory(Uri baseAddress = null, HttpRequestTracer httpRequestTracer = null)
+        public DefaultHttpClientFactory(params HttpClientConfiguration[] configurations)
         {
-            this._baseAddress = baseAddress;
-            this._httpRequestTracer = httpRequestTracer;
-
+            this._configurations = CollectConfigurations(configurations).ToDictionary(x => x.Key, x => BuildConfiguration(x.Value));
             this._activeHandlers = new ConcurrentDictionary<string, Lazy<ActiveHandlerTrackingEntry>>(StringComparer.Ordinal);
 
             this._expiredHandlers = new ConcurrentQueue<ExpiredHandlerTrackingEntry>();
@@ -71,69 +68,56 @@ namespace Dibix.Http.Client
         #endregion
 
         #region IHttpClientFactory Members
-        public HttpClient CreateClient() => this.CreateClient(this._baseAddress);
-        public HttpClient CreateClient(Uri baseAddress)
+        public HttpClient CreateClient() => this.CreateClient(name: DefaultClientName, baseAddress: null);
+        public HttpClient CreateClient(string name) => this.CreateClient(name, baseAddress: null);
+        public HttpClient CreateClient(Uri baseAddress) => this.CreateClient(name: DefaultClientName, baseAddress);
+        public HttpClient CreateClient(string name, Uri baseAddress)
         {
-            const string name = "";
-            HttpClientBuilder builder = new HttpClientBuilder();
-            ICollection<Action<HttpClient>> postActions = new Collection<Action<HttpClient>>();
-            this.ConfigureClientCore(builder, postActions);
-            this.ConfigureClient(builder);
+            Guard.IsNotNull(name, nameof(name));
+
+            if (!this._configurations.TryGetValue(name, out HttpClientBuilder clientBuilder))
+                throw new InvalidOperationException($"No client with name '{name}' is registered. Please implement '{typeof(HttpClientConfiguration)}' and pass it to the constructor of '{typeof(DefaultHttpClientFactory)}'.");
 
             // Wrap the handler so we can ensure the inner handler outlives the outer handler.
-            HttpMessageHandler handler = this.CreateHandler(builder, name);
+            HttpMessageHandler handler = this.CreateHandler(clientBuilder, name, out bool handlerAlreadyCreated);
+
             HttpClient client = new HttpClient(handler, disposeHandler: false);
             client.BaseAddress = baseAddress;
-            builder.ConfigureClient(client);
 
-            foreach (Action<HttpClient> postAction in postActions)
-                postAction(client);
+            foreach (Action<HttpClient> configure in clientBuilder.HttpClientActions)
+                configure(client);
+
+            ConfigureTimeoutHandler(handler, handlerAlreadyCreated, client);
 
             return client;
         }
         #endregion
 
-        #region Protected Methods
-        protected virtual void ConfigureClient(IHttpClientBuilder builder) { }
-        #endregion
-
         #region Private Methods
-        private void ConfigureClientCore(IHttpClientBuilder builder, ICollection<Action<HttpClient>> postActions)
+        private HttpMessageHandler CreateHandler(HttpClientBuilder clientBuilder, string name, out bool handlerAlreadyCreated)
         {
-            builder.AddHttpMessageHandler<EnsureSuccessStatusCodeHttpMessageHandler>();
-            
-            if (this.FollowRedirectsForGetRequests)
-                builder.AddHttpMessageHandler<FollowRedirectHttpMessageHandler>();
-            
-            builder.AddHttpMessageHandler<TraceProxyHttpMessageHandler>();
+            Lazy<ActiveHandlerTrackingEntry> CreateEntry(string key) => new Lazy<ActiveHandlerTrackingEntry>(() => CreateHandlerEntry(clientBuilder, key), LazyThreadSafetyMode.ExecutionAndPublication);
 
-            if (this._httpRequestTracer != null)
-                builder.AddHttpMessageHandler(new TracingHttpMessageHandler(this._httpRequestTracer));
-
-            TimeoutHttpMessageHandler timeoutHandler = new TimeoutHttpMessageHandler();
-            builder.AddHttpMessageHandler(timeoutHandler);
-            postActions.Add(x =>
-            {
-                timeoutHandler.Timeout = x.Timeout;
-                x.Timeout = Timeout.InfiniteTimeSpan;
-            });
-        }
-
-        private HttpMessageHandler CreateHandler(HttpClientBuilder builder, string name)
-        {
-            Lazy<ActiveHandlerTrackingEntry> CreateEntry(string key) => new Lazy<ActiveHandlerTrackingEntry>(() => CreateHandlerEntry(builder, key), LazyThreadSafetyMode.ExecutionAndPublication);
-
-            ActiveHandlerTrackingEntry entry = _activeHandlers.GetOrAdd(name, CreateEntry).Value;
+            Lazy<ActiveHandlerTrackingEntry> entryAccessor = this._activeHandlers.GetOrAdd(name, CreateEntry);
+            handlerAlreadyCreated = entryAccessor.IsValueCreated;
+            ActiveHandlerTrackingEntry entry = entryAccessor.Value;
 
             StartHandlerEntryTimer(entry);
 
             return entry.Handler;
         }
 
-        private static ActiveHandlerTrackingEntry CreateHandlerEntry(HttpClientBuilder builder, string name)
+        private static ActiveHandlerTrackingEntry CreateHandlerEntry(HttpClientBuilder clientBuilder, string name)
         {
+            HttpMessageHandlerBuilder handlerBuilder = new HttpMessageHandlerBuilder();
+
+            foreach (Action<HttpMessageHandlerBuilder> configure in clientBuilder.HttpMessageHandlerBuilderActions)
+            {
+                configure(handlerBuilder);
+            }
+
             // Wrap the handler so we can ensure the inner handler outlives the outer handler.
-            var handler = new LifetimeTrackingHttpMessageHandler(CreateHandlerPipeline(builder));
+            var handler = new LifetimeTrackingHttpMessageHandler(handlerBuilder.Build());
 
             // Note that we can't start the timer here. That would introduce a very very subtle race condition
             // with very short expiry times. We need to wait until we've actually handed out the handler once
@@ -153,7 +137,7 @@ namespace Dibix.Http.Client
             // our entry in the collection, then this is a bug.
             bool removed = _activeHandlers.TryRemove(active.Name, out Lazy<ActiveHandlerTrackingEntry> found);
             Debug.Assert(removed, "Entry not found. We should always be able to remove the entry");
-            Debug.Assert(object.ReferenceEquals(active, found.Value), "Different entry found. The entry should not have been replaced");
+            Debug.Assert(ReferenceEquals(active, found.Value), "Different entry found. The entry should not have been replaced");
 
             // At this point the handler is no longer 'active' and will not be handed out to any new clients.
             // However we haven't dropped our strong reference to the handler, so we can't yet determine if
@@ -264,109 +248,160 @@ namespace Dibix.Http.Client
             }
         }
 
-        private static HttpMessageHandler CreateHandlerPipeline(HttpClientBuilder clientBuilder)
+        private static HttpClientBuilder BuildConfiguration(HttpClientConfiguration configuration)
         {
-            // Subsequent handlers, that make their own requests with the same tracer, might overwrite the last request trace
-            // Therefore we move the tracing handler before user handlers
-            for (int i = 0; i < clientBuilder.AdditionalHandlers.Count; i++)
+            HttpClientBuilder builder = new HttpClientBuilder();
+            configuration.Configure(builder);
+            builder.ConfigureDefaults();
+            return builder;
+        }
+
+        private static IEnumerable<KeyValuePair<string, HttpClientConfiguration>> CollectConfigurations(ICollection<HttpClientConfiguration> configurations)
+        {
+            if (configurations.All(x => x.Name != DefaultClientName))
+                yield return new KeyValuePair<string, HttpClientConfiguration>(DefaultClientName, new DefaultHttpClientConfiguration());
+
+            foreach (HttpClientConfiguration configuration in configurations)
+                yield return new KeyValuePair<string, HttpClientConfiguration>(configuration.Name, configuration);
+        }
+
+        private static void ConfigureTimeoutHandler(HttpMessageHandler handler, bool handlerAlreadyCreated, HttpClient client)
+        {
+            if (!TryFindHandler(handler, out TimeoutHttpMessageHandler timeoutHandler)) 
+                return;
+
+            if (!handlerAlreadyCreated)
+                timeoutHandler.Timeout = client.Timeout;
+
+            client.Timeout = Timeout.InfiniteTimeSpan;
+        }
+
+        private static bool TryFindHandler<THandler>(HttpMessageHandler primaryHandler, out THandler handler)
+        {
+            HttpMessageHandler currentHandler = primaryHandler;
+            do
             {
-                DelegatingHandler handler = clientBuilder.AdditionalHandlers[i];
-                if (!(handler is TracingHttpMessageHandler))
-                    continue;
-
-                clientBuilder.AdditionalHandlers.RemoveAt(i);
-                clientBuilder.AdditionalHandlers.Add(handler);
-                break;
-            }
-
-            HttpMessageHandler next = clientBuilder.PrimaryHttpMessageHandler;
-            for (int i = clientBuilder.AdditionalHandlers.Count - 1; i >= 0; i--)
-            {
-                DelegatingHandler handler = clientBuilder.AdditionalHandlers[i];
-
-                // Checking for this allows us to catch cases where someone has tried to re-use a handler. That really won't
-                // work the way you want and it can be tricky for callers to figure out.
-                if (handler.InnerHandler != null)
+                if (currentHandler is THandler matchingHandler)
                 {
-                    string message = $@"The '{nameof(DelegatingHandler.InnerHandler)}' property must be null. '{nameof(DelegatingHandler)}' instances provided to '{nameof(IHttpClientBuilder)}' must not be reused or cached.
-Handler: '{handler}'";
-                    throw new InvalidOperationException(message);
+                    handler = matchingHandler;
+                    return true;
                 }
 
-                handler.InnerHandler = next;
-                next = handler;
-            }
+                currentHandler = currentHandler is DelegatingHandler delegatingHandler ? delegatingHandler.InnerHandler : null;
 
-            return next;
+            } while (currentHandler != null);
+
+            handler = default;
+            return false;
         }
         #endregion
 
         #region Nested Types
         private sealed class HttpClientBuilder : IHttpClientBuilder
         {
-            private readonly ICollection<Action<HttpClient>> _clientActions;
-
-            public HttpMessageHandler PrimaryHttpMessageHandler { get; set; } = new HttpClientHandler();
-            public IList<DelegatingHandler> AdditionalHandlers { get; }
-
-            public HttpClientBuilder()
-            {
-                this._clientActions = new Collection<Action<HttpClient>>();
-                this.AdditionalHandlers = new Collection<DelegatingHandler>();
-            }
+            public bool EnsureSuccessStatusCode { get; set; } = true;
+            public bool FollowRedirectsGetRequests { get; set; } = true;
+            public bool WrapTimeoutsInException { get; set; } = true;
+            public bool TraceProxy { get; set; } = true;
+            public HttpRequestTracer Tracer { get; set; }
+            public IList<Action<HttpMessageHandlerBuilder>> HttpMessageHandlerBuilderActions { get; } = new Collection<Action<HttpMessageHandlerBuilder>>();
+            public IList<Action<HttpClient>> HttpClientActions { get; } = new Collection<Action<HttpClient>>();
 
             public IHttpClientBuilder ConfigureClient(Action<HttpClient> configure)
             {
                 Guard.IsNotNull(configure, nameof(configure));
-                this._clientActions.Add(configure);
+                this.HttpClientActions.Add(configure);
                 return this;
             }
 
-            public IHttpClientBuilder ConfigureClient(HttpClient client)
+            public IHttpClientBuilder AddHttpMessageHandler<THandler>() where THandler : DelegatingHandler, new() => this.AddHttpMessageHandler(() => new THandler());
+            public IHttpClientBuilder AddHttpMessageHandler(Func<DelegatingHandler> handlerFactory)
             {
-                foreach (Action<HttpClient> configure in this._clientActions) 
-                    configure(client);
-
+                Guard.IsNotNull(handlerFactory, nameof(handlerFactory));
+                this.HttpMessageHandlerBuilderActions.Add(x => x.AdditionalHandlers.Add(handlerFactory()));
                 return this;
             }
 
             public IHttpClientBuilder ConfigurePrimaryHttpMessageHandler<THandler>() where THandler : HttpMessageHandler, new()
             {
-                this.ConfigurePrimaryHttpMessageHandler(new THandler());
+                this.ConfigurePrimaryHttpMessageHandler(() => new THandler());
                 return this;
             }
-            public IHttpClientBuilder ConfigurePrimaryHttpMessageHandler<THandler>(THandler handler) where THandler : HttpMessageHandler
+            public IHttpClientBuilder ConfigurePrimaryHttpMessageHandler<THandler>(Func<THandler> handlerFactory) where THandler : HttpMessageHandler
             {
-                this.PrimaryHttpMessageHandler = handler;
+                this.HttpMessageHandlerBuilderActions.Add(x => x.PrimaryHandler = handlerFactory());
                 return this;
             }
 
-            public IHttpClientBuilder AddHttpMessageHandler<THandler>() where THandler : DelegatingHandler, new() => this.AddHttpMessageHandler(new THandler());
-            public IHttpClientBuilder AddHttpMessageHandler(DelegatingHandler handler)
+            public void ConfigureDefaults()
             {
-                Guard.IsNotNull(handler, nameof(handler));
-                this.AdditionalHandlers.Add(handler);
-                return this;
+                // Ensure the tracing handler is ran before all other handlers
+                ICollection<Action<HttpMessageHandlerBuilder>> httpMessageHandlerBuilderActions = this.HttpMessageHandlerBuilderActions.ToArray();
+                this.HttpMessageHandlerBuilderActions.Clear();
+
+                if (this.Tracer != null)
+                    this.AddHttpMessageHandler(() => new TracingHttpMessageHandler(this.Tracer));
+
+                this.HttpMessageHandlerBuilderActions.AddRange(httpMessageHandlerBuilderActions);
+
+                if (this.WrapTimeoutsInException)
+                    this.AddHttpMessageHandler<TimeoutHttpMessageHandler>();
+
+                if (this.FollowRedirectsGetRequests)
+                    this.AddHttpMessageHandler<FollowRedirectHttpMessageHandler>();
+
+                if (this.TraceProxy)
+                    this.AddHttpMessageHandler<TraceProxyHttpMessageHandler>();
+
+                if (this.EnsureSuccessStatusCode)
+                    this.AddHttpMessageHandler<EnsureSuccessStatusCodeHttpMessageHandler>();
+            }
+        }
+
+        private sealed class HttpMessageHandlerBuilder
+        {
+            public HttpMessageHandler PrimaryHandler { get; set; } = new HttpClientHandler();
+            public IList<DelegatingHandler> AdditionalHandlers { get; } = new Collection<DelegatingHandler>();
+
+            public HttpMessageHandler Build()
+            {
+                if (PrimaryHandler == null)
+                {
+                    string message = $"The '{nameof(this.PrimaryHandler)}' must not be null.";
+                    throw new InvalidOperationException(message);
+                }
+                return CreateHandlerPipeline(PrimaryHandler, AdditionalHandlers);
             }
 
-            public IHttpClientBuilder RemoveHttpMessageHandler<THandler>() where THandler : DelegatingHandler
+            private static HttpMessageHandler CreateHandlerPipeline(HttpMessageHandler primaryHandler, IList<DelegatingHandler> additionalHandlers)
             {
-                foreach (THandler handler in this.AdditionalHandlers.OfType<THandler>().ToArray()) 
-                    this.AdditionalHandlers.Remove(handler);
+                HttpMessageHandler next = primaryHandler;
+                for (int i = additionalHandlers.Count - 1; i >= 0; i--)
+                {
+                    DelegatingHandler handler = additionalHandlers[i];
 
-                return this;
-            }
-            public IHttpClientBuilder RemoveHttpMessageHandler(DelegatingHandler handler)
-            {
-                this.AdditionalHandlers.Remove(handler);
-                return this;
-            }
+                    // Checking for this allows us to catch cases where someone has tried to re-use a handler. That really won't
+                    // work the way you want and it can be tricky for callers to figure out.
+                    if (handler.InnerHandler != null)
+                    {
+                        string message = $@"The '{nameof(DelegatingHandler.InnerHandler)}' property must be null. '{nameof(DelegatingHandler)}' instances provided to '{nameof(IHttpClientBuilder)}' must not be reused or cached.
+Handler: '{handler}'";
+                        throw new InvalidOperationException(message);
+                    }
 
-            public IHttpClientBuilder ClearHttpMessageHandlers()
-            {
-                this.AdditionalHandlers.Clear();
-                return this;
+                    handler.InnerHandler = next;
+                    next = handler;
+                }
+
+                return next;
             }
+        }
+
+        private sealed class DefaultHttpClientConfiguration : HttpClientConfiguration
+        {
+            public override string Name => "Dibix.Http.Client.DefaultHttpClient";
+
+            public override void Configure(IHttpClientBuilder builder) { }
         }
 
         // Thread-safety: We treat this class as immutable except for the timer. Creating a new object

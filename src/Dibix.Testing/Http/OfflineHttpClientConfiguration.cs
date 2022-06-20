@@ -6,11 +6,13 @@ using Dibix.Http.Client;
 
 namespace Dibix.Testing.Http
 {
-    public sealed class OfflineHttpClientFactory : DefaultHttpClientFactory, IHttpClientFactory
+    public sealed class OfflineHttpClientConfiguration : HttpClientConfiguration
     {
-        protected override void ConfigureClient(IHttpClientBuilder builder)
+        public override string Name => "Dibix.Testing.Http.OfflineHttpClient";
+
+        public override void Configure(IHttpClientBuilder builder)
         {
-            builder.ConfigurePrimaryHttpMessageHandler(new OfflineHttpMessageHandler());
+            builder.ConfigurePrimaryHttpMessageHandler(() => new OfflineHttpMessageHandler());
         }
 
         private sealed class OfflineHttpMessageHandler : HttpMessageHandler

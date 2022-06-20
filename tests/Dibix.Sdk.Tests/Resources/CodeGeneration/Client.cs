@@ -122,23 +122,25 @@ namespace Dibix.Sdk.Tests.Client
     {
         private static readonly Uri BaseAddress = new Uri("https://localhost/api/");
         private static readonly MediaTypeFormatter Formatter = new JsonMediaTypeFormatter();
+        private readonly string _httpClientName;
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly IHttpAuthorizationProvider _authorizationProvider;
+        private readonly IHttpAuthorizationProvider _httpAuthorizationProvider;
 
-        public GenericEndpointService(IHttpAuthorizationProvider authorizationProvider) : this(new DefaultHttpClientFactory(), authorizationProvider) { }
-        public GenericEndpointService(IHttpClientFactory httpClientFactory, IHttpAuthorizationProvider authorizationProvider)
+        public GenericEndpointService(IHttpClientFactory httpClientFactory, IHttpAuthorizationProvider httpAuthorizationProvider) : this(httpClientFactory, httpAuthorizationProvider, DefaultHttpClientFactory.DefaultClientName) { }
+        public GenericEndpointService(IHttpClientFactory httpClientFactory, IHttpAuthorizationProvider httpAuthorizationProvider, string httpClientName)
         {
             this._httpClientFactory = httpClientFactory;
-            this._authorizationProvider = authorizationProvider;
+            this._httpAuthorizationProvider = httpAuthorizationProvider;
+            this._httpClientName = httpClientName;
         }
 
         public async Task<HttpResponse<ICollection<Dibix.Sdk.Tests.DomainModel.GenericContract>>> MultiConcreteResultAsync(CancellationToken cancellationToken = default)
         {
-            using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
+            using (HttpClient client = this._httpClientFactory.CreateClient(this._httpClientName, BaseAddress))
             {
                 HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("GET"), "Tests/GenericEndpoint");
-                requestMessage.Headers.Add("HLNS-SIT", this._authorizationProvider.GetValue("HLNS-SIT"));
-                requestMessage.Headers.Add("HLNS-ClientId", this._authorizationProvider.GetValue("HLNS-ClientId"));
+                requestMessage.Headers.Add("HLNS-SIT", this._httpAuthorizationProvider.GetValue("HLNS-SIT"));
+                requestMessage.Headers.Add("HLNS-ClientId", this._httpAuthorizationProvider.GetValue("HLNS-ClientId"));
                 HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
                 ICollection<Dibix.Sdk.Tests.DomainModel.GenericContract> responseContent = await responseMessage.Content.ReadAsAsync<ICollection<Dibix.Sdk.Tests.DomainModel.GenericContract>>(MediaTypeFormattersFactory.Create(client), cancellationToken).ConfigureAwait(false);
                 return new HttpResponse<ICollection<Dibix.Sdk.Tests.DomainModel.GenericContract>>(responseMessage, responseContent);
@@ -147,14 +149,14 @@ namespace Dibix.Sdk.Tests.Client
 
         public async Task<HttpResponseMessage> EmptyWithParams1Async(string password, string userAgent, IEnumerable<object> ids, string? acceptLanguage = null, CancellationToken cancellationToken = default)
         {
-            using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
+            using (HttpClient client = this._httpClientFactory.CreateClient(this._httpClientName, BaseAddress))
             {
                 Uri uri = UriBuilder.Create($"Tests/GenericEndpoint/{password}/Fixed", UriKind.Relative)
                                     .AddQueryParam(nameof(ids), ids)
                                     .Build();
                 HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("GET"), uri);
-                requestMessage.Headers.Add("HLNS-SIT", this._authorizationProvider.GetValue("HLNS-SIT"));
-                requestMessage.Headers.Add("HLNS-ClientId", this._authorizationProvider.GetValue("HLNS-ClientId"));
+                requestMessage.Headers.Add("HLNS-SIT", this._httpAuthorizationProvider.GetValue("HLNS-SIT"));
+                requestMessage.Headers.Add("HLNS-ClientId", this._httpAuthorizationProvider.GetValue("HLNS-ClientId"));
                 requestMessage.Headers.Add("User-Agent", userAgent);
                 if (acceptLanguage != null)
                     requestMessage.Headers.Add("Accept-Language", acceptLanguage);
@@ -165,7 +167,7 @@ namespace Dibix.Sdk.Tests.Client
 
         public async Task<HttpResponseMessage> EmptyWithParamsAnonymousAsync(string password, string a, string b, System.Guid? c, IEnumerable<object> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", CancellationToken cancellationToken = default)
         {
-            using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
+            using (HttpClient client = this._httpClientFactory.CreateClient(this._httpClientName, BaseAddress))
             {
                 Uri uri = UriBuilder.Create($"Tests/GenericEndpoint/{password}/User", UriKind.Relative)
                                     .AddQueryParam(nameof(a), a)
@@ -185,14 +187,14 @@ namespace Dibix.Sdk.Tests.Client
 
         public async Task<HttpResponse<Dibix.Sdk.Tests.DomainModel.GenericContract>> SingleConrecteResultWithParamsAsync(IEnumerable<int> ids, CancellationToken cancellationToken = default)
         {
-            using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
+            using (HttpClient client = this._httpClientFactory.CreateClient(this._httpClientName, BaseAddress))
             {
                 Uri uri = UriBuilder.Create("Tests/GenericEndpoint/Array", UriKind.Relative)
                                     .AddQueryParam(nameof(ids), ids)
                                     .Build();
                 HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("GET"), uri);
-                requestMessage.Headers.Add("HLNS-SIT", this._authorizationProvider.GetValue("HLNS-SIT"));
-                requestMessage.Headers.Add("HLNS-ClientId", this._authorizationProvider.GetValue("HLNS-ClientId"));
+                requestMessage.Headers.Add("HLNS-SIT", this._httpAuthorizationProvider.GetValue("HLNS-SIT"));
+                requestMessage.Headers.Add("HLNS-ClientId", this._httpAuthorizationProvider.GetValue("HLNS-ClientId"));
                 HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
                 Dibix.Sdk.Tests.DomainModel.GenericContract responseContent = await responseMessage.Content.ReadAsAsync<Dibix.Sdk.Tests.DomainModel.GenericContract>(MediaTypeFormattersFactory.Create(client), cancellationToken).ConfigureAwait(false);
                 return new HttpResponse<Dibix.Sdk.Tests.DomainModel.GenericContract>(responseMessage, responseContent);
@@ -201,11 +203,11 @@ namespace Dibix.Sdk.Tests.Client
 
         public async Task<HttpResponse<System.IO.Stream>> FileResultAsync(int id, CancellationToken cancellationToken = default)
         {
-            using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
+            using (HttpClient client = this._httpClientFactory.CreateClient(this._httpClientName, BaseAddress))
             {
                 HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("GET"), $"Tests/GenericEndpoint/{id}");
-                if (this._authorizationProvider.GetValue("Bearer") != null)
-                    requestMessage.Headers.Add("Authorization", $"Bearer {this._authorizationProvider.GetValue("Bearer")}");
+                if (this._httpAuthorizationProvider.GetValue("Bearer") != null)
+                    requestMessage.Headers.Add("Authorization", $"Bearer {this._httpAuthorizationProvider.GetValue("Bearer")}");
                 HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
                 System.IO.Stream responseContent = await responseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false);
                 return new HttpResponse<System.IO.Stream>(responseMessage, responseContent);
@@ -214,11 +216,11 @@ namespace Dibix.Sdk.Tests.Client
 
         public async Task<HttpResponseMessage> FileUploadAsync(System.IO.Stream body, CancellationToken cancellationToken = default)
         {
-            using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
+            using (HttpClient client = this._httpClientFactory.CreateClient(this._httpClientName, BaseAddress))
             {
                 HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("PUT"), "Tests/GenericEndpoint");
-                requestMessage.Headers.Add("HLNS-SIT", this._authorizationProvider.GetValue("HLNS-SIT"));
-                requestMessage.Headers.Add("HLNS-ClientId", this._authorizationProvider.GetValue("HLNS-ClientId"));
+                requestMessage.Headers.Add("HLNS-SIT", this._httpAuthorizationProvider.GetValue("HLNS-SIT"));
+                requestMessage.Headers.Add("HLNS-ClientId", this._httpAuthorizationProvider.GetValue("HLNS-ClientId"));
                 requestMessage.Content = new StreamContent(body);
                 HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
                 return responseMessage;
@@ -227,11 +229,11 @@ namespace Dibix.Sdk.Tests.Client
 
         public async Task<HttpResponseMessage> EmptyWithParams2Async(Dibix.Sdk.Tests.DomainModel.InputContract body, CancellationToken cancellationToken = default)
         {
-            using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
+            using (HttpClient client = this._httpClientFactory.CreateClient(this._httpClientName, BaseAddress))
             {
                 HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("POST"), "Tests/GenericEndpoint");
-                requestMessage.Headers.Add("HLNS-SIT", this._authorizationProvider.GetValue("HLNS-SIT"));
-                requestMessage.Headers.Add("HLNS-ClientId", this._authorizationProvider.GetValue("HLNS-ClientId"));
+                requestMessage.Headers.Add("HLNS-SIT", this._httpAuthorizationProvider.GetValue("HLNS-SIT"));
+                requestMessage.Headers.Add("HLNS-ClientId", this._httpAuthorizationProvider.GetValue("HLNS-ClientId"));
                 requestMessage.Content = new ObjectContent<Dibix.Sdk.Tests.DomainModel.InputContract>(body, Formatter);
                 HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
                 return responseMessage;
@@ -240,11 +242,11 @@ namespace Dibix.Sdk.Tests.Client
 
         public async Task<HttpResponseMessage> EmptyWithParams3Async(Dibix.Sdk.Tests.DomainModel.InputContract body, CancellationToken cancellationToken = default)
         {
-            using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
+            using (HttpClient client = this._httpClientFactory.CreateClient(this._httpClientName, BaseAddress))
             {
                 HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("PATCH"), "Tests/GenericEndpoint");
-                requestMessage.Headers.Add("HLNS-SIT", this._authorizationProvider.GetValue("HLNS-SIT"));
-                requestMessage.Headers.Add("HLNS-ClientId", this._authorizationProvider.GetValue("HLNS-ClientId"));
+                requestMessage.Headers.Add("HLNS-SIT", this._httpAuthorizationProvider.GetValue("HLNS-SIT"));
+                requestMessage.Headers.Add("HLNS-ClientId", this._httpAuthorizationProvider.GetValue("HLNS-ClientId"));
                 requestMessage.Content = new ObjectContent<Dibix.Sdk.Tests.DomainModel.InputContract>(body, Formatter);
                 HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
                 return responseMessage;
@@ -253,11 +255,11 @@ namespace Dibix.Sdk.Tests.Client
 
         public async Task<HttpResponseMessage> EmptyWithParams4Async(Dibix.Sdk.Tests.DomainModel.AnotherInputContract body, CancellationToken cancellationToken = default)
         {
-            using (HttpClient client = this._httpClientFactory.CreateClient(BaseAddress))
+            using (HttpClient client = this._httpClientFactory.CreateClient(this._httpClientName, BaseAddress))
             {
                 HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("DELETE"), "Tests/GenericEndpoint");
-                requestMessage.Headers.Add("HLNS-SIT", this._authorizationProvider.GetValue("HLNS-SIT"));
-                requestMessage.Headers.Add("HLNS-ClientId", this._authorizationProvider.GetValue("HLNS-ClientId"));
+                requestMessage.Headers.Add("HLNS-SIT", this._httpAuthorizationProvider.GetValue("HLNS-SIT"));
+                requestMessage.Headers.Add("HLNS-ClientId", this._httpAuthorizationProvider.GetValue("HLNS-ClientId"));
                 requestMessage.Content = new ObjectContent<Dibix.Sdk.Tests.DomainModel.AnotherInputContract>(body, Formatter);
                 HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
                 return responseMessage;

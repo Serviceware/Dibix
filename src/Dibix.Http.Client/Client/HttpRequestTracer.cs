@@ -6,47 +6,99 @@ namespace Dibix.Http.Client
 {
     public class HttpRequestTracer
     {
-        public bool MaskSensitiveData { get; set; } = true;
+        public bool MaskSensitiveContent { get; } = true;
         public HttpRequestTrace LastRequest { get; private set; }
 
-        internal async Task TraceRequestAsync(HttpRequestMessage requestMessage)
+        public HttpRequestTracer() { }
+        public HttpRequestTracer(bool maskSensitiveContent)
         {
-            string requestContentText = await this.GetRequestContentTextAsync(requestMessage).ConfigureAwait(false);
-            string formattedRequestText = this.FormatRequest(requestMessage, requestContentText);
-            await this.TraceRequestAsync(requestMessage, formattedRequestText).ConfigureAwait(false);
+            this.MaskSensitiveContent = maskSensitiveContent;
         }
 
-        internal async Task TraceResponseAsync(HttpResponseMessage responseMessage, TimeSpan duration)
+        internal async Task TraceRequestMessageAsync(HttpRequestMessage requestMessage)
         {
-            string responseContentTest = await this.GetResponseContentTextAsync(responseMessage).ConfigureAwait(false);
-            string formattedResponseText = this.FormatResponse(responseMessage, responseContentTest);
-            await this.TraceResponseAsync(responseMessage, formattedResponseText, duration).ConfigureAwait(false);
+            await this.CollectLastRequest(requestMessage).ConfigureAwait(false);
+            await this.TraceRequestAsync(requestMessage).ConfigureAwait(false);
         }
 
-        protected virtual Task TraceRequestAsync(HttpRequestMessage requestMessage, string formattedRequestText)
+        internal async Task TraceResponseMessageAsync(HttpResponseMessage responseMessage, TimeSpan duration)
         {
+            await CompleteLastRequest(responseMessage, duration).ConfigureAwait(false);
+            await this.TraceResponseAsync(responseMessage, duration);
+        }
+
+        protected virtual Task TraceRequestAsync(HttpRequestMessage requestMessage) => Task.CompletedTask;
+
+        protected virtual Task TraceResponseAsync(HttpResponseMessage responseMessage, TimeSpan duration) => Task.CompletedTask;
+
+        protected virtual bool ShouldBufferRequestContent(HttpRequestMessage requestMessage) => false;
+
+        protected virtual bool ShouldBufferResponseContent(HttpRequestMessage requestMessage) => false;
+
+        private async Task CollectLastRequest(HttpRequestMessage requestMessage)
+        {
+            string formattedRequestText = await this.GetFormattedRequestContent(requestMessage).ConfigureAwait(false);
             this.LastRequest = new HttpRequestTrace(requestMessage, formattedRequestText);
-            return Task.CompletedTask;
         }
 
-        protected virtual Task TraceResponseAsync(HttpResponseMessage responseMessage, string formattedResponseText, TimeSpan duration)
+        private async Task CompleteLastRequest(HttpResponseMessage responseMessage, TimeSpan duration)
         {
             if (this.LastRequest == null)
                 throw new InvalidOperationException("Request not initialized");
 
+            string formattedResponseText = await this.GetFormattedResponseContent(responseMessage).ConfigureAwait(false);
             this.LastRequest.ResponseMessage = responseMessage;
             this.LastRequest.FormattedResponseText = formattedResponseText;
             this.LastRequest.Duration = duration;
-            
-            return Task.CompletedTask;
+
+            // Since non successful status code will throw an exception,
+            // it is now safe to restore the request content, that was not previously captured
+            HttpRequestMessage requestMessage = responseMessage.RequestMessage;
+            if (!this.ShouldBufferRequestContent(requestMessage) && !responseMessage.IsSuccessStatusCode)
+            {
+                string requestContentText = await GetRequestContentTextAsync(requestMessage, bufferRequestContent: true).ConfigureAwait(false);
+                this.LastRequest.FormattedRequestText = this.FormatRequest(requestMessage, requestContentText);
+            }
         }
 
-        protected virtual string FormatRequest(HttpRequestMessage requestMessage, string requestContentText) => HttpMessageFormatter.Format(requestMessage, requestContentText, this.MaskSensitiveData);
+        private async Task<string> GetFormattedRequestContent(HttpRequestMessage requestMessage)
+        {
+            bool bufferRequestContent = this.ShouldBufferRequestContent(requestMessage);
+            string requestContentText = await GetRequestContentTextAsync(requestMessage, bufferRequestContent).ConfigureAwait(false);
+            string formattedRequestText = this.FormatRequest(requestMessage, requestContentText);
+            return formattedRequestText;
+        }
 
-        protected virtual string FormatResponse(HttpResponseMessage responseMessage, string responseContentTest) => HttpMessageFormatter.Format(responseMessage, responseContentTest);
+        private async Task<string> GetFormattedResponseContent(HttpResponseMessage responseMessage)
+        {
+            bool bufferResponseContent = this.ShouldBufferResponseContent(responseMessage.RequestMessage) || !responseMessage.IsSuccessStatusCode;
+            string responseContentTest = await GetResponseContentTextAsync(responseMessage, bufferResponseContent).ConfigureAwait(false);
+            string formattedResponseText = HttpMessageFormatter.Format(responseMessage, responseContentTest);
+            return formattedResponseText;
+        }
 
-        protected virtual async Task<string> GetRequestContentTextAsync(HttpRequestMessage requestMessage) => requestMessage.Content != null ? await requestMessage.Content.ReadAsStringAsync().ConfigureAwait(false) : null;
-        
-        protected virtual Task<string> GetResponseContentTextAsync(HttpResponseMessage responseMessage) => responseMessage.Content.ReadAsStringAsync();
+        private string FormatRequest(HttpRequestMessage requestMessage, string requestContentText) => HttpMessageFormatter.Format(requestMessage, requestContentText, this.MaskSensitiveContent);
+
+        private static async Task<string> GetRequestContentTextAsync(HttpRequestMessage requestMessage, bool bufferRequestContent)
+        {
+            if (requestMessage.Content == null)
+                return null;
+
+            if (!bufferRequestContent)
+                return "<Request content unavailable>";
+
+            return await requestMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+        }
+
+        private static async Task<string> GetResponseContentTextAsync(HttpResponseMessage responseMessage, bool bufferResponseContent)
+        {
+            if (responseMessage.Content == null)
+                return null;
+
+            if (!bufferResponseContent)
+                return "<Response content unavailable>";
+
+            return await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+        }
     }
 }

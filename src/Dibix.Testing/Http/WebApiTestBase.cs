@@ -1,16 +1,10 @@
 ﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Net.Http;
-using System.Reflection;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 using Dibix.Http.Client;
 using Dibix.Testing.Data;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
@@ -19,21 +13,15 @@ namespace Dibix.Testing.Http
 {
     public abstract class WebApiTestBase<TConfiguration> : DatabaseTestBase<TConfiguration> where TConfiguration : DatabaseConfigurationBase, new()
     {
-        #region Fields
-        private static readonly Type[] ConstructorSignature =
-        {
-            typeof(IHttpClientFactory),
-            typeof(IHttpAuthorizationProvider)
-        };
-        #endregion
-
         #region Protected Methods
-        protected virtual Task ExecuteTest(Func<IHttpTestContext, Task> testFlow) => this.ExecuteTest(testFlow, CreateTestContext);
+        protected virtual Task ExecuteTest(Func<HttpTestContext, Task> testFlow) => this.ExecuteTest(testFlow, CreateTestContext);
 
-        protected virtual async Task ExecuteTest<TTestContext>(Func<TTestContext, Task> testFlow, Func<IHttpClientFactory, IHttpAuthorizationProvider, TTestContext> contextCreator) where TTestContext : IHttpTestContext
+        private protected async Task ExecuteTest<TTestContext>(Func<TTestContext, Task> testFlow, Func<IHttpClientFactory, IHttpAuthorizationProvider, TTestContext> contextCreator) where TTestContext : HttpTestContext
         {
-            IHttpClientFactory httpClientFactory = new HttpClientFactory(base.TestContext, base.Out, x => this.ConfigureClient(base.Configuration, x));
-            IHttpAuthorizationProvider authorizationProvider = await this.Authorize(httpClientFactory, base.Configuration).ConfigureAwait(false);
+            HttpClientConfiguration clientSetup = new TestHttpClientConfiguration(base.TestContext, base.Out, x => this.ConfigureClient(base.Configuration, x));
+            IHttpClientFactory httpClientFactory = new DefaultHttpClientFactory(clientSetup);
+            ITestAuthorizationContext authorizationContext = new TestAuthorizationContext(httpClientFactory);
+            IHttpAuthorizationProvider authorizationProvider = await this.Authorize(authorizationContext, base.Configuration).ConfigureAwait(false);
             TTestContext testContext = contextCreator(httpClientFactory, authorizationProvider);
             await testFlow(testContext).ConfigureAwait(false);
         }
@@ -45,37 +33,28 @@ namespace Dibix.Testing.Http
             this.Assert(response, expectedText);
             return response.ResponseContent;
         }
-        protected Task InvokeApi<TService>(IHttpTestContext context, Expression<Func<TService, Task<HttpResponseMessage>>> methodSelector) => InvokeApiCore<TService, HttpResponseMessage>(context, methodSelector);
-        protected async Task<TContent> InvokeApi<TService, TContent>(IHttpTestContext context, Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector)
+        protected Task InvokeApi<TService>(HttpTestContext context, Expression<Func<TService, Task<HttpResponseMessage>>> methodSelector) => InvokeApiCore<TService, HttpResponseMessage>(context, methodSelector);
+        protected async Task<TContent> InvokeApi<TService, TContent>(HttpTestContext context, Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector)
         {
             HttpResponse<TContent> response = await InvokeApiCore(context, methodSelector).ConfigureAwait(false);
             return response.ResponseContent;
         }
-        protected async Task<TContent> InvokeApi<TService, TContent>(IHttpTestContext context, Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector, string expectedText)
+        protected async Task<TContent> InvokeApi<TService, TContent>(HttpTestContext context, Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector, string expectedText)
         {
             HttpResponse<TContent> response = await InvokeApiCore(context, methodSelector).ConfigureAwait(false);
             this.Assert(response, expectedText);
             return response.ResponseContent;
         }
 
-        private protected static TService CreateServiceInstance<TService>(IHttpClientFactory httpClientFactory, IHttpAuthorizationProvider authorizationProvider)
-        {
-            Type contractType = typeof(TService);
-            Type implementationType = ResolveImplementationType(contractType);
-            ConstructorInfo constructor = ResolveConstructor(implementationType);
-            TService service = (TService)constructor.Invoke(new object[] { httpClientFactory, authorizationProvider });
-            return service;
-        }
-
         protected virtual void ConfigureClient(TConfiguration configuration, IHttpClientBuilder builder) { }
 
-        protected virtual Task<IHttpAuthorizationProvider> Authorize(IHttpClientFactory httpClientFactory, TConfiguration configuration) => Task.FromResult<IHttpAuthorizationProvider>(null);
+        protected virtual Task<IHttpAuthorizationProvider> Authorize(ITestAuthorizationContext context, TConfiguration configuration) => Task.FromResult<IHttpAuthorizationProvider>(null);
         #endregion
 
         #region Private Methods
-        private static Task<TResponse> InvokeApiCore<TService, TResponse>(IHttpTestContext context, Expression<Func<TService, Task<TResponse>>> methodSelector)
+        private static Task<TResponse> InvokeApiCore<TService, TResponse>(HttpTestContext context, Expression<Func<TService, Task<TResponse>>> methodSelector)
         {
-            TService service = CreateServiceInstance<TService>(context.HttpClientFactory, context.HttpAuthorizationProvider);
+            TService service = HttpServiceFactory.CreateServiceInstance<TService>(context.HttpClientFactory, context.HttpAuthorizationProvider);
             return InvokeApi(service, methodSelector);
         }
         private static async Task<TResponse> InvokeApi<TService, TResponse>(TService service, Expression<Func<TService, Task<TResponse>>> methodSelector)
@@ -106,101 +85,21 @@ namespace Dibix.Testing.Http
             base.AssertEqual(expectedTextReplaced, actualText, extension: "json");
         }
 
-        private static Type ResolveImplementationType(Type contractType)
-        {
-            foreach (Type type in contractType.Assembly.GetTypes())
-            {
-                HttpServiceAttribute attribute = type.GetCustomAttribute<HttpServiceAttribute>();
-                if (attribute?.ContractType == contractType)
-                    return type;
-            }
-
-            throw new InvalidOperationException($"Could not determine server implementation for type '{contractType}'. Is it a HTTP service generated by Dibix?");
-        }
-
-        private static ConstructorInfo ResolveConstructor(Type implementationType)
-        {
-            foreach (ConstructorInfo constructor in implementationType.GetConstructors())
-            {
-                if (ConstructorSignature.SequenceEqual(constructor.GetParameters().Select(x => x.ParameterType)))
-                    return constructor;
-            }
-
-            throw new InvalidOperationException($"Could not find constructor ({String.Join(", ", ConstructorSignature.Select(x => x.ToString()))}) on type: {implementationType}");
-        }
-
-        private static IHttpTestContext CreateTestContext(IHttpClientFactory httpClientFactory, IHttpAuthorizationProvider authorizationProvider)
+        private static HttpTestContext CreateTestContext(IHttpClientFactory httpClientFactory, IHttpAuthorizationProvider authorizationProvider)
         {
             return new HttpTestContext(httpClientFactory, authorizationProvider);
         }
         #endregion
 
         #region Nested Types
-        protected class HttpTestContext : IHttpTestContext
+        private sealed class TestAuthorizationContext : ITestAuthorizationContext
         {
-            public IHttpClientFactory HttpClientFactory { get; }
-            public IHttpAuthorizationProvider HttpAuthorizationProvider { get; }
+            private readonly IHttpClientFactory _httpClientFactory;
 
-            public HttpTestContext(IHttpClientFactory httpClientFactory, IHttpAuthorizationProvider httpAuthorizationProvider)
-            {
-                this.HttpClientFactory = httpClientFactory;
-                this.HttpAuthorizationProvider = httpAuthorizationProvider;
-            }
-        }
+            public TestAuthorizationContext(IHttpClientFactory httpClientFactory) => this._httpClientFactory = httpClientFactory;
 
-        private sealed class HttpClientFactory : DefaultHttpClientFactory, IHttpClientFactory
-        {
-            private readonly TestContext _testContext;
-            private readonly TextWriter _logger;
-            private readonly Action<IHttpClientBuilder> _additionalClientConfiguration;
-
-            public HttpClientFactory(TestContext testContext, TextWriter logger, Action<IHttpClientBuilder> additionalClientConfiguration)
-            {
-                this._testContext = testContext;
-                this._logger = logger;
-                this._additionalClientConfiguration = additionalClientConfiguration;
-            }
-
-            protected override void ConfigureClient(IHttpClientBuilder builder)
-            {
-                this._additionalClientConfiguration(builder);
-                builder.ConfigureClient(this.ConfigureClient);
-                builder.AddHttpMessageHandler(new LoggingHttpMessageHandler(this._logger));
-            }
-
-            private void ConfigureClient(HttpClient client)
-            {
-                Assembly testAssembly = TestImplementationResolver.ResolveTestAssembly(this._testContext);
-                client.AddUserAgent(y => y.FromAssembly(testAssembly, productName =>
-                {
-                    string normalizedProductName = productName.Replace(".", null);
-                    return normalizedProductName;
-                }));
-            }
-        }
-
-        private sealed class LoggingHttpMessageHandler : DelegatingHandler
-        {
-            private readonly TextWriter _output;
-
-            public LoggingHttpMessageHandler(TextWriter output) => this._output = output;
-
-            protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-            {
-                await this._output.WriteAsync($"{request.Method} {request.RequestUri}").ConfigureAwait(false);
-                try
-                {
-                    Stopwatch sw = Stopwatch.StartNew();
-                    HttpResponseMessage response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
-                    sw.Stop();
-                    await this._output.WriteAsync($" {(int)response.StatusCode} {response.StatusCode} {sw.Elapsed}").ConfigureAwait(false);
-                    return response;
-                }
-                finally
-                {
-                    await this._output.WriteLineAsync().ConfigureAwait(false);
-                }
-            }
+            public TService CreateService<TService>() => HttpServiceFactory.CreateServiceInstance<TService>(this._httpClientFactory);
+            public TService CreateService<TService>(IHttpAuthorizationProvider authorizationProvider) => HttpServiceFactory.CreateServiceInstance<TService>(this._httpClientFactory, authorizationProvider);
         }
         #endregion
     }

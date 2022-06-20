@@ -5,13 +5,16 @@ namespace Dibix.Http.Client
 {
     public interface IHttpClientBuilder
     {
+        bool EnsureSuccessStatusCode { get; set; }
+        bool FollowRedirectsGetRequests { get; set; }
+        bool WrapTimeoutsInException { get; set; }
+        bool TraceProxy { get; set; }
+        HttpRequestTracer Tracer { get; set; }
+
         IHttpClientBuilder ConfigureClient(Action<HttpClient> configure);
-        IHttpClientBuilder ConfigurePrimaryHttpMessageHandler<THandler>() where THandler : HttpMessageHandler, new();
-        IHttpClientBuilder ConfigurePrimaryHttpMessageHandler<THandler>(THandler handler) where THandler : HttpMessageHandler;
         IHttpClientBuilder AddHttpMessageHandler<THandler>() where THandler : DelegatingHandler, new();
-        IHttpClientBuilder AddHttpMessageHandler(DelegatingHandler handler);
-        IHttpClientBuilder RemoveHttpMessageHandler<THandler>() where THandler : DelegatingHandler;
-        IHttpClientBuilder RemoveHttpMessageHandler(DelegatingHandler handler);
-        IHttpClientBuilder ClearHttpMessageHandlers();
+        IHttpClientBuilder AddHttpMessageHandler(Func<DelegatingHandler> handlerFactory);
+        IHttpClientBuilder ConfigurePrimaryHttpMessageHandler<THandler>() where THandler : HttpMessageHandler, new();
+        IHttpClientBuilder ConfigurePrimaryHttpMessageHandler<THandler>(Func<THandler> handlerFactory) where THandler : HttpMessageHandler;
     }
 }
