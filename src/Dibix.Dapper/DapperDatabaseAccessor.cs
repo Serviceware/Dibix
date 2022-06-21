@@ -121,6 +121,13 @@ namespace Dibix.Dapper
             return base.Connection.QuerySingleOrDefault<T>(commandText, CollectParameters(parameters), this._transaction, commandType: commandType);
         }
 
+        protected override Task<T> QuerySingleOrDefaultAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken)
+        {
+            DecoratedTypeMap.Adapt<T>();
+            CommandDefinition command = new CommandDefinition(commandText, CollectParameters(parameters), this._transaction, commandType: commandType, cancellationToken: cancellationToken);
+            return base.Connection.QuerySingleOrDefaultAsync<T>(command);
+        }
+
         protected override IMultipleResultReader QueryMultiple(string commandText, CommandType commandType, ParametersVisitor parameters)
         {
             SqlMapper.GridReader reader = base.Connection.QueryMultiple(commandText, CollectParameters(parameters), this._transaction, commandType: commandType);
