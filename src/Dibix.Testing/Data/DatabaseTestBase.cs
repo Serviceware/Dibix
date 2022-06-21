@@ -46,7 +46,7 @@ namespace Dibix.Testing.Data
             }
         }
 
-        protected async Task ExecuteStoredProcedure(string storedProcedureName, Action<IParameterBuilder> parameters = null, int commandTimeout = 600)
+        protected async Task ExecuteStoredProcedure(string storedProcedureName, Action<IParameterBuilder> parameters = null, int commandTimeout = 30)
         {
             using (IDatabaseAccessor accessor = this._databaseAccessorFactoryAccessor.Value.Create())
             {

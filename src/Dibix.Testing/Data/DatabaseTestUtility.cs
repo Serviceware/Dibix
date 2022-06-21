@@ -26,12 +26,12 @@ namespace Dibix.Testing.Data
         // RAISERROR WITH NOWAIT is useful to receive immediate progress of a long running command.
         // To make sure the messages are immediately received, there are two options:
         // 1. SqlConnection.FireInfoMessageEventOnUserErrors
-        // => This approach is generic but comes with the big downside, that all errors are sent to the InfoMessage and no exception is thrown.
-        //    They can be rethrown in a way, but the fact, that only severe exceptions are going through, and the call stack is confusing, makes this a very dirty option.
+        // => This approach is generic but comes with the big downside, that all errors are sent to the InfoMessage event handler and no exception is thrown.
+        //    They could be rethrown within the event handler, but due to the fact, that only severe exceptions are going through, and the call stack would be obscured by the event handler, makes this a very dirty option.
         // 2. Don't use SqlCommand.ExecuteNonQuery
         // => This approach is not generic and requires the caller to actually never use ExecuteNonQuery, even if it makes sense.
         //    It's still the best option, because it doesn't require custom exception handling like with option 1.
-        //    To ensure the caller doesn't use ExecuteNonQuery, we can provide a custom implementation that always replaces ExecuteNonQuery with ExecuteScalar.
+        //    To ensure the caller doesn't use ExecuteNonQuery, we can provide a custom implementation that always delegates ExecuteNonQuery to ExecuteScalar.
         private enum RaiseErrorWithNoWaitBehavior
         {
             None,
@@ -91,7 +91,7 @@ namespace Dibix.Testing.Data
                 this._raiseErrorWithNoWaitBehavior = raiseErrorWithNoWaitBehavior;
             }
 
-            // ExecuteNonQuery is optimized, and will not process any messages, so RAISERROR WITH NOWAIT will not work
+            // ExecuteNonQuery is optimized, and will not process any messages, so RAISERROR WITH NOWAIT will not work.
             // Here we override the underlying behavior, without the caller having to do it.
             protected override int Execute(string commandText, CommandType commandType, int? commandTimeout, ParametersVisitor parameters)
             {
