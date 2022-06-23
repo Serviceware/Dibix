@@ -10,36 +10,14 @@ using System.Text.RegularExpressions;
 
 namespace Dibix.Http.Client
 {
-    public static class HttpMessageFormatter
+    internal static class HttpMessageFormatter
     {
         #region Fields
         private static readonly Func<HttpHeaders, IEnumerable<KeyValuePair<string, string>>> GetHeaderStringsAccessor = CompileGetHeaderStrings();
         #endregion
 
         #region Public Methods
-        public static string Format(string formattedRequestText, string formattedResponseText, int? maxLength = null)
-        {
-            string formattedRequestTextTrimmed = formattedRequestText;
-            string formattedResponseTextTrimmed = formattedResponseText;
-
-            if (maxLength.HasValue)
-            {
-                formattedRequestTextTrimmed = formattedRequestTextTrimmed.TrimIfNecessary(maxLength.Value);
-                formattedResponseTextTrimmed = formattedResponseTextTrimmed.TrimIfNecessary(maxLength.Value);
-            }
-
-            return $@"Request
--------
-{formattedRequestTextTrimmed}
-
-Response
---------
-{formattedResponseTextTrimmed}";
-        }
-        #endregion
-
-        #region Internal Methods
-        internal static string Format(HttpRequestMessage requestMessage, string requestContentText, bool maskSensitiveData)
+        public static string Format(HttpRequestMessage requestMessage, string requestContentText, bool maskSensitiveData, int? maxContentLength)
         {
             Guard.IsNotNull(requestMessage, nameof(requestMessage));
 
@@ -59,20 +37,23 @@ Response
 
             if (requestContentText != null)
             {
-                string secureRequestContentText = requestContentText;
+                string normalizedRequestContentText = requestContentText;
                 if (maskSensitiveData)
-                    secureRequestContentText = Regex.Replace(secureRequestContentText, "password=[^&]+", "password=*****");
+                    normalizedRequestContentText = Regex.Replace(normalizedRequestContentText, "password=[^&]+", "password=*****");
+
+                if (maxContentLength.HasValue)
+                    normalizedRequestContentText = normalizedRequestContentText.TrimIfNecessary(maxContentLength.Value);
 
                 sb.AppendLine()
                   .AppendLine()
-                  .Append(secureRequestContentText);
+                  .Append(normalizedRequestContentText);
             }
 
             string formattedRequest = sb.ToString();
             return formattedRequest;
         }
 
-        internal static string Format(HttpResponseMessage responseMessage, string responseContentText)
+        public static string Format(HttpResponseMessage responseMessage, string responseContentText, int? maxContentLength)
         {
             Guard.IsNotNull(responseMessage, nameof(responseMessage));
 
@@ -92,9 +73,13 @@ Response
 
             if (responseContentText.Length > 0)
             {
+                string normalizedResponseContentText = responseContentText;
+                if (maxContentLength.HasValue) 
+                    normalizedResponseContentText = normalizedResponseContentText.TrimIfNecessary(maxContentLength.Value);
+
                 sb.AppendLine()
                   .AppendLine()
-                  .Append(responseContentText);
+                  .Append(normalizedResponseContentText);
             }
 
             string formattedResponse = sb.ToString();

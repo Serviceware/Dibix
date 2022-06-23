@@ -335,26 +335,23 @@ namespace Dibix.Http.Client
 
             public void ConfigureDefaults()
             {
-                // Ensure the tracing handler is ran before all other handlers
-                ICollection<Action<HttpMessageHandlerBuilder>> httpMessageHandlerBuilderActions = this.HttpMessageHandlerBuilderActions.ToArray();
-                this.HttpMessageHandlerBuilderActions.Clear();
-
-                if (this.Tracer != null)
-                    this.AddHttpMessageHandler(() => new TracingHttpMessageHandler(this.Tracer));
-
-                this.HttpMessageHandlerBuilderActions.AddRange(httpMessageHandlerBuilderActions);
-
-                if (this.WrapTimeoutsInException)
-                    this.AddHttpMessageHandler<TimeoutHttpMessageHandler>();
-
                 if (this.FollowRedirectsGetRequests)
                     this.AddHttpMessageHandler<FollowRedirectHttpMessageHandler>();
 
                 if (this.TraceProxy)
                     this.AddHttpMessageHandler<TraceProxyHttpMessageHandler>();
 
+                // Run tracing after all other handlers, that potentially modified the request, to ensure the trace includes the actual request that is sent.
+                if (this.Tracer != null)
+                    this.AddHttpMessageHandler(() => new TracingHttpMessageHandler(this.Tracer));
+
+                // Add this after each handler, that needs to access the response, before an exception is thrown. (i.E. TracingHttpMessageHandler)
                 if (this.EnsureSuccessStatusCode)
                     this.AddHttpMessageHandler<EnsureSuccessStatusCodeHttpMessageHandler>();
+
+                // This should be as close to the primary handler as possible to avoid timeouts caused by other handlers.
+                if (this.WrapTimeoutsInException)
+                    this.AddHttpMessageHandler<TimeoutHttpMessageHandler>();
             }
         }
 

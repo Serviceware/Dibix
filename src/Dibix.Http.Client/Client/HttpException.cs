@@ -13,7 +13,7 @@ namespace Dibix.Http.Client
         public HttpResponseMessage Response { get; }
         public string ResponseContentText { get; }
 
-        protected internal HttpException(HttpRequestMessage request, string requestContentText, HttpResponseMessage response, string responseContentText) : base(CreateMessage(response))
+        private protected HttpException(HttpRequestMessage request, string requestContentText, HttpResponseMessage response, string responseContentText) : base(CreateMessage(response))
         {
             this.Request = request;
             this.RequestContentText = requestContentText;
