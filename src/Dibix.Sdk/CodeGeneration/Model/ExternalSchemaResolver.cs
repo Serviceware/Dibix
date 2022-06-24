@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Reflection;
 
-namespace Dibix.Sdk.CodeGeneration.Model
+namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class ExternalSchemaResolver : IExternalSchemaResolver, ISchemaStore
     {
@@ -22,22 +22,16 @@ namespace Dibix.Sdk.CodeGeneration.Model
             if (!this._schemaMap.TryGetValue(fullName, out schema))
                 return false;
 
+            // Lazily collect schema and all their dependencies from external model
             ReferencingSchemaVisitor visitor = new ReferencingSchemaVisitor(this._schemaRegistry, this);
             visitor.Accept(schema.SchemaDefinition);
 
             return true;
         }
 
-        bool ISchemaStore.TryGetSchema(string fullName, out SchemaDefinition schema)
+        SchemaDefinition ISchemaStore.GetSchema(SchemaTypeReference schemaTypeReference)
         {
-            if (this._schemaMap.TryGetValue(fullName, out ExternalSchemaDefinition externalSchema))
-            {
-                schema = externalSchema.SchemaDefinition;
-                return true;
-            }
-
-            schema = null;
-            return false;
+            return this._schemaMap.TryGetValue(schemaTypeReference.Key, out ExternalSchemaDefinition externalSchema) ? externalSchema.SchemaDefinition : null;
         }
 
         private static IEnumerable<ExternalSchemaDefinition> Collect(ReferencedAssemblyInspector referencedAssemblyInspector)

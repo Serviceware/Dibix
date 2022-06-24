@@ -13,7 +13,7 @@ namespace Dibix.Sdk.CodeGeneration
           , typeof(PersistArtifactModelUnit)
         };
 
-        public bool Generate(CodeGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger)
+        public bool Generate(CodeGenerationModel model, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
         {
             bool failed = false;
             foreach (Type unitType in Units)
@@ -22,7 +22,7 @@ namespace Dibix.Sdk.CodeGeneration
                 if (!unit.ShouldGenerate(model))
                     continue;
 
-                if (!unit.Generate(model, schemaRegistry, logger))
+                if (!unit.Generate(model, schemaDefinitionResolver, logger))
                     failed = true;
             }
             return !failed;

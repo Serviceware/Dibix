@@ -6,13 +6,15 @@ namespace Dibix.Sdk.CodeGeneration
     internal abstract class ActionDefinitionResolver
     {
         #region Properties
+        protected ISchemaDefinitionResolver SchemaDefinitionResolver { get; }
         protected ISchemaRegistry SchemaRegistry { get; }
         protected ILogger Logger { get; }
         #endregion
 
         #region Constructor
-        protected ActionDefinitionResolver(ISchemaRegistry schemaRegistry, ILogger logger)
+        protected ActionDefinitionResolver(ISchemaDefinitionResolver schemaDefinitionResolver, ISchemaRegistry schemaRegistry, ILogger logger)
         {
+            this.SchemaDefinitionResolver = schemaDefinitionResolver;
             this.SchemaRegistry = schemaRegistry;
             this.Logger = logger;
         }
@@ -57,7 +59,7 @@ namespace Dibix.Sdk.CodeGeneration
             switch (location)
             {
                 case ActionParameterLocation.Query:
-                    return defaultValue == null && Equals(type?.IsUserDefinedType(this.SchemaRegistry), false);
+                    return defaultValue == null && Equals(type?.IsUserDefinedType(this.SchemaDefinitionResolver), false);
 
                 case ActionParameterLocation.Header:
                     return defaultValue == null;

@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
 
-namespace Dibix.Sdk.CodeGeneration.Model
+namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class BuiltInSchemaProvider : ISchemaProvider
     {
+        private const string Source = "<internal>";
+
         public static SchemaDefinition FileEntitySchema { get; } = CollectFileEntitySchema();
         public IEnumerable<SchemaDefinition> Schemas
         {
@@ -19,9 +21,9 @@ namespace Dibix.Sdk.CodeGeneration.Model
             {
                 Properties =
                 {
-                    new ObjectSchemaProperty("Type", new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: false, source: default, line: default, column: default))
-                  , new ObjectSchemaProperty("Data", new PrimitiveTypeReference(PrimitiveType.Binary, isNullable: false, isEnumerable: false, source: default, line: default, column: default))
-                  , new ObjectSchemaProperty("FileName", new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: false, source: default, line: default, column: default))
+                    new ObjectSchemaProperty(name: new Token<string>("Type", Source, line: default, column: default), new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: false, source: default, line: default, column: default))
+                  , new ObjectSchemaProperty(name: new Token<string>("Data", Source, line: default, column: default), new PrimitiveTypeReference(PrimitiveType.Binary, isNullable: false, isEnumerable: false, source: default, line: default, column: default))
+                  , new ObjectSchemaProperty(name: new Token<string>("FileName", Source, line: default, column: default), new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: false, source: default, line: default, column: default))
                 }
             };
             return schema;

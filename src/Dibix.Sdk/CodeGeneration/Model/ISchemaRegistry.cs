@@ -8,7 +8,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         bool IsRegistered(string name);
         void Populate(SchemaDefinition schema);
-        SchemaDefinition GetSchema(SchemaTypeReference reference);
+        bool TryGetSchema(SchemaTypeReference reference, out SchemaDefinition schemaDefinition);
         void ImportSchemas(params ISchemaProvider[] schemaProviders);
     }
 }

@@ -96,10 +96,11 @@ namespace Dibix.Sdk.CodeGeneration
 
             private ObjectSchemaProperty MapColumn(ColumnDefinition column, string relativeNamespace, ICollection<string> notNullableColumns)
             {
-                string columnName = column.ColumnIdentifier.Value;
+                Identifier columnIdentifier = column.ColumnIdentifier;
+                string columnName = columnIdentifier.Value;
                 bool isNullable = !notNullableColumns.Contains(columnName);
                 TypeReference typeReference = column.DataType.ToTypeReference(isNullable, columnName, relativeNamespace, this._source, this._markupAccessor.Value, this._typeResolver, this._logger, out string udtName);
-                return new ObjectSchemaProperty(columnName, typeReference);
+                return new ObjectSchemaProperty(name: new Token<string>(columnName, this._source, columnIdentifier.StartLine, columnIdentifier.StartColumn), typeReference);
             }
         }
     }

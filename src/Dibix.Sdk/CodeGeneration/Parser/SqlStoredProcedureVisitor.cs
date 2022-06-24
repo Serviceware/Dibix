@@ -96,7 +96,7 @@ namespace Dibix.Sdk.CodeGeneration
         private TypeReference DetermineResultType(SqlStatementDefinition definition, string relativeNamespace, ref bool generateResultClass)
         {
             // Explicit result type
-            if (base.Markup.TryGetSingleElementValue(SqlMarkupKey.ResultTypeName, base.Source, base.Logger, out ISqlElementValue value))
+            if (base.Markup.TryGetSingleElementValue(SqlMarkupKey.ResultTypeName, base.Source, base.Logger, out Token<string> value))
             {
                 TypeReference type = base.TypeResolver.ResolveType(value.Value, relativeNamespace, base.Source, value.Line, value.Column, false);
                 return type;
@@ -146,7 +146,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private void CollectResults(TSqlFragment node, ISqlMarkupDeclaration markup, SqlStatementDefinition definition, string relativeNamespace)
         {
-            IEnumerable<SqlQueryResult> results = StatementOutputParser.Parse(definition, node, base.Source, base.FragmentAnalyzer, markup, relativeNamespace, base.TypeResolver, base.SchemaRegistry, base.Logger);
+            IEnumerable<SqlQueryResult> results = StatementOutputParser.Parse(definition, node, base.Source, base.FragmentAnalyzer, markup, relativeNamespace, base.TypeResolver, base.SchemaDefinitionResolver, base.Logger);
             definition.Results.AddRange(results);
         }
 

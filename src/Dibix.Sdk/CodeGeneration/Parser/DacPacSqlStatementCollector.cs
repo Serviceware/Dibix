@@ -15,6 +15,7 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly ISqlStatementFormatter _formatter;
         private readonly ITypeResolverFacade _typeResolver;
         private readonly ISchemaRegistry _schemaRegistry;
+        private readonly ISchemaDefinitionResolver _schemaDefinitionResolver;
         private readonly ILogger _logger;
         private readonly string _packagePath;
         private readonly ICollection<KeyValuePair<string, string>> _procedureNames;
@@ -29,9 +30,11 @@ namespace Dibix.Sdk.CodeGeneration
           , ISqlStatementFormatter formatter
           , ITypeResolverFacade typeResolver
           , ISchemaRegistry schemaRegistry
+          , ISchemaDefinitionResolver schemaDefinitionResolver
           , ILogger logger
           , string packagePath
-          , ICollection<KeyValuePair<string, string>> procedureNames)
+          , ICollection<KeyValuePair<string, string>> procedureNames
+        )
         {
             this._projectName = projectName;
             this._rootNamespace = rootNamespace;
@@ -41,6 +44,7 @@ namespace Dibix.Sdk.CodeGeneration
             this._formatter = formatter;
             this._typeResolver = typeResolver;
             this._schemaRegistry = schemaRegistry;
+            this._schemaDefinitionResolver = schemaDefinitionResolver;
             this._logger = logger;
             this._packagePath = packagePath;
             this._procedureNames = procedureNames;
@@ -75,6 +79,7 @@ namespace Dibix.Sdk.CodeGeneration
               , formatter: this._formatter
               , typeResolver: this._typeResolver
               , schemaRegistry: this._schemaRegistry
+              , schemaDefinitionResolver: this._schemaDefinitionResolver
               , logger: this._logger
               , definition: out SqlStatementDefinition definition);
             return result ? definition : null;

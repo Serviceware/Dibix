@@ -47,6 +47,14 @@ namespace Dibix
                        .PostProcess(multiMapper);
         });
 
+        // Dibix (Inline_GridResult_WithProjection)
+        public IEnumerable<TReturn> ReadManyProjection<TFirst, TSecond, TThird, TReturn>(string splitOn) where TReturn : new() => this.Execute(() =>
+        {
+            MultiMapper multiMapper = new MultiMapper();
+            return this.ReadMany<TFirst, TSecond, TThird, TReturn>((a, b, c) => multiMapper.MapRow<TReturn>(useProjection: true, a, b, c), splitOn)
+                       .PostProcess(multiMapper);
+        });
+
         IEnumerable<TReturn> IMultipleResultReader.ReadMany<TFirst, TSecond, TThird, TReturn>(Func<TFirst, TSecond, TThird, TReturn> map, string splitOn) => this.Execute(() => this.ReadMany(map, splitOn).PostProcess());
 
         // OrderManagement (LoadProductRuntime)
@@ -104,6 +112,15 @@ namespace Dibix
         {
             MultiMapper multiMapper = new MultiMapper();
             return this.ReadMany<TReturn, TSecond, TReturn>((a, b) => multiMapper.MapRow<TReturn>(useProjection: false, a, b), splitOn)
+                       .PostProcess(multiMapper)
+                       .Single();
+        });
+
+        // Dibix (Inline_GridResult)
+        public TReturn ReadSingle<TReturn, TSecond, TThird>(string splitOn) where TReturn : new() => this.Execute(() =>
+        {
+            MultiMapper multiMapper = new MultiMapper();
+            return this.ReadMany<TReturn, TSecond, TThird, TReturn>((a, b, c) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c), splitOn)
                        .PostProcess(multiMapper)
                        .Single();
         });

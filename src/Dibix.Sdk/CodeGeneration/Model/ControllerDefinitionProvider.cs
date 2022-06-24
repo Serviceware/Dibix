@@ -20,7 +20,7 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly IActionDefinitionResolverFacade _actionResolver;
         private readonly ICollection<string> _defaultSecuritySchemes;
         private readonly ITypeResolverFacade _typeResolver;
-        private readonly ISchemaRegistry _schemaRegistry;
+        private readonly ISchemaDefinitionResolver _schemaDefinitionResolver;
         private readonly IActionParameterSourceRegistry _actionParameterSourceRegistry;
         private readonly IActionParameterConverterRegistry _actionParameterConverterRegistry;
         private readonly LockEntryManager _lockEntryManager;
@@ -40,7 +40,7 @@ namespace Dibix.Sdk.CodeGeneration
           , IDictionary<string, SecurityScheme> securitySchemeMap
           , IActionDefinitionResolverFacade actionResolver
           , ITypeResolverFacade typeResolver
-          , ISchemaRegistry schemaRegistry
+          , ISchemaDefinitionResolver schemaDefinitionResolver
           , IActionParameterSourceRegistry actionParameterSourceRegistry
           , IActionParameterConverterRegistry actionParameterConverterRegistry
           , LockEntryManager lockEntryManager
@@ -52,7 +52,7 @@ namespace Dibix.Sdk.CodeGeneration
             this._actionResolver = actionResolver;
             this._defaultSecuritySchemes = defaultSecuritySchemes;
             this._typeResolver = typeResolver;
-            this._schemaRegistry = schemaRegistry;
+            this._schemaDefinitionResolver = schemaDefinitionResolver;
             this._actionParameterSourceRegistry = actionParameterSourceRegistry;
             this._actionParameterConverterRegistry = actionParameterConverterRegistry;
             this._lockEntryManager = lockEntryManager;
@@ -102,9 +102,13 @@ namespace Dibix.Sdk.CodeGeneration
 
         private void ReadControllerAction(string filePath, ControllerDefinition controller, JObject action)
         {
+            // Collect body parameters
+            ActionRequestBody requestBody = this.ReadBody(action, filePath);
+            ICollection<string> bodyParameters = GetBodyProperties(requestBody?.Contract, this._schemaDefinitionResolver);
+
             // Collect explicit parameters
             IDictionary<string, ExplicitParameter> explicitParameters = new Dictionary<string, ExplicitParameter>();
-            CollectActionParameters(action, filePath, explicitParameters);
+            CollectActionParameters(action, filePath, explicitParameters, requestBody);
 
             // Collect path parameters
             IDictionary<string, PathParameter> pathParameters = new Dictionary<string, PathParameter>(StringComparer.OrdinalIgnoreCase);
@@ -116,10 +120,6 @@ namespace Dibix.Sdk.CodeGeneration
                 foreach (Group pathSegment in pathSegments) 
                     pathParameters.Add(pathSegment.Value, new PathParameter(childRouteProperty, pathSegment));
             }
-
-            // Collect body parameters
-            ActionRequestBody requestBody = this.ReadBody(action, filePath);
-            ICollection<string> bodyParameters = GetBodyProperties(requestBody?.Contract, this._schemaRegistry);
 
             // Resolve action target, parameters and create action definition
             ActionDefinition actionDefinition = this.CreateActionDefinition(action, filePath, explicitParameters, pathParameters, bodyParameters);
@@ -225,14 +225,14 @@ namespace Dibix.Sdk.CodeGeneration
             return new ActionRequestBody(contract);
         }
 
-        private static ICollection<string> GetBodyProperties(TypeReference bodyContract, ISchemaRegistry schemaRegistry)
+        private static ICollection<string> GetBodyProperties(TypeReference bodyContract, ISchemaDefinitionResolver schemaDefinitionResolver)
         {
             HashSet<string> properties = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             if (bodyContract is SchemaTypeReference schemaTypeReference)
             {
-                SchemaDefinition schema = schemaRegistry.GetSchema(schemaTypeReference);
+                SchemaDefinition schema = schemaDefinitionResolver.Resolve(schemaTypeReference);
                 if (schema is ObjectSchema objectSchema)
-                    properties.AddRange(objectSchema.Properties.Select(x => x.Name));
+                    properties.AddRange(objectSchema.Properties.Select(x => x.Name.Value));
             }
             return properties;
         }
@@ -250,7 +250,7 @@ namespace Dibix.Sdk.CodeGeneration
             controller.ControllerImports.Add(typeName);
         }
 
-        private void CollectActionParameters(JObject action, string filePath, IDictionary<string, ExplicitParameter> target)
+        private void CollectActionParameters(JObject action, string filePath, IDictionary<string, ExplicitParameter> target, ActionRequestBody requestBody)
         {
             JObject mappings = (JObject)action.Property("params")?.Value;
             if (mappings == null)
@@ -258,12 +258,12 @@ namespace Dibix.Sdk.CodeGeneration
 
             foreach (JProperty property in mappings.Properties())
             {
-                if (!TryReadSource(property, filePath, isItem: false, out ActionParameterSource source))
+                if (!this.TryReadSource(property, filePath, requestBody: requestBody, rootPropertySource: null, source: out ActionParameterSource source))
                 {
                     switch (property.Value.Type)
                     {
                         case JTokenType.Object:
-                            source = ReadComplexActionParameter(property.Name, (JObject)property.Value, filePath);
+                            source = this.ReadComplexActionParameter(property.Name, (JObject)property.Value, filePath, requestBody);
                             break;
 
                         default:
@@ -276,7 +276,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private bool TryReadSource(JProperty property, string filePath, bool isItem, out ActionParameterSource source)
+        private bool TryReadSource(JProperty property, string filePath, ActionRequestBody requestBody, ActionParameterPropertySource rootPropertySource, out ActionParameterSource source)
         {
             switch (property.Value.Type)
             {
@@ -289,7 +289,7 @@ namespace Dibix.Sdk.CodeGeneration
                 case JTokenType.String:
                     string stringValue = (string)property.Value;
                     if (stringValue != null && stringValue.Contains('.'))
-                        source = this.ReadPropertySource((JValue)property.Value, filePath);
+                        source = this.ReadPropertySource((JValue)property.Value, filePath, requestBody, rootPropertySource);
                     else
                         source = ReadConstantSource((JValue)property.Value);
 
@@ -303,7 +303,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static ActionParameterSource ReadConstantSource(JValue value) => new ActionParameterConstantSource(value.Value);
 
-        private ActionParameterPropertySource ReadPropertySource(JValue value, string filePath)
+        private ActionParameterPropertySource ReadPropertySource(JValue value, string filePath, ActionRequestBody requestBody, ActionParameterPropertySource rootParameterSource)
         {
             string[] parts = ((string)value.Value).Split(new[] { '.' }, 2);
             string sourceName = parts[0];
@@ -316,10 +316,11 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             ActionParameterPropertySource propertySource = new ActionParameterPropertySource(definition, propertyName, filePath, valueLocation.LineNumber, valueLocation.LinePosition);
+            this.CollectPropertySourceNodes(propertySource, requestBody, rootParameterSource);
             return propertySource;
         }
 
-        private ActionParameterSource ReadComplexActionParameter(string parameterName, JObject container, string filePath)
+        private ActionParameterSource ReadComplexActionParameter(string parameterName, JObject container, string filePath, ActionRequestBody requestBody)
         {
             JProperty bodyConverterProperty = container.Property("convertFromBody");
             if (bodyConverterProperty != null)
@@ -330,15 +331,15 @@ namespace Dibix.Sdk.CodeGeneration
             JProperty sourceProperty = container.Property("source");
             if (sourceProperty != null)
             {
-                return ReadPropertyActionParameter(parameterName, container, sourceProperty, filePath);
+                return this.ReadPropertyActionParameter(parameterName, container, sourceProperty, filePath, requestBody);
             }
 
             throw new InvalidOperationException($"Invalid object for parameter: {parameterName}");
         }
 
-        private ActionParameterSource ReadPropertyActionParameter(string parameterName, JObject container, JProperty sourceProperty, string filePath)
+        private ActionParameterSource ReadPropertyActionParameter(string parameterName, JObject container, JProperty sourceProperty, string filePath, ActionRequestBody requestBody)
         {
-            ActionParameterPropertySource propertySource = ReadPropertySource((JValue)sourceProperty.Value, filePath);
+            ActionParameterPropertySource propertySource = this.ReadPropertySource((JValue)sourceProperty.Value, filePath, requestBody, rootParameterSource: null);
 
             JProperty itemsProperty = container.Property("items");
             if (itemsProperty != null)
@@ -346,7 +347,7 @@ namespace Dibix.Sdk.CodeGeneration
                 JObject itemsObject = (JObject)itemsProperty.Value;
                 foreach (JProperty itemProperty in itemsObject.Properties())
                 {
-                    if (TryReadSource(itemProperty, filePath, isItem: true, out ActionParameterSource itemPropertySource))
+                    if (this.TryReadSource(itemProperty, filePath, requestBody: requestBody, rootPropertySource: propertySource, source: out ActionParameterSource itemPropertySource))
                     {
                         IJsonLineInfo lineInfo = itemProperty.GetLineInfo();
                         propertySource.ItemSources.Add(new ActionParameterItemSource(itemProperty.Name, itemPropertySource, filePath, lineInfo.LineNumber, lineInfo.LinePosition));
@@ -543,6 +544,106 @@ namespace Dibix.Sdk.CodeGeneration
             typeName = typeName.TrimEnd('*');
             TypeReference type = this._typeResolver.ResolveType(typeName, null, filePath, typeNameLocation.LineNumber, typeNameLocation.LinePosition, isEnumerable);
             return type;
+        }
+
+        private void CollectPropertySourceNodes(ActionParameterPropertySource propertySource, ActionRequestBody requestBody, ActionParameterPropertySource rootPropertySource)
+        {
+            switch (propertySource.Definition)
+            {
+                case BodyParameterSource _:
+                    CollectBodyPropertySourceNodes(propertySource, requestBody);
+                    break;
+
+                case ItemParameterSource _:
+                    CollectItemPropertySourceNodes(propertySource, rootPropertySource);
+                    break;
+
+                default: 
+                    return;
+            }
+        }
+
+        private void CollectBodyPropertySourceNodes(ActionParameterPropertySource propertySource, ActionRequestBody requestBody)
+        {
+            if (requestBody == null)
+            {
+                base.Logger.LogError("Must specify a body contract on the endpoint action when using BODY property source", propertySource.FilePath, propertySource.Line, propertySource.Column);
+                return;
+            }
+
+            // Only traverse, if the body is an object contract
+            TypeReference type = requestBody.Contract;
+            if (!(type is SchemaTypeReference bodySchemaTypeReference))
+                return;
+
+            if (!(this._schemaDefinitionResolver.Resolve(bodySchemaTypeReference) is ObjectSchema objectSchema))
+                return;
+
+            IList<string> segments = propertySource.PropertyName.Split('.');
+            CollectPropertySourceNodes(propertySource, segments, type, objectSchema);
+        }
+
+        private void CollectItemPropertySourceNodes(ActionParameterPropertySource propertySource, ActionParameterPropertySource rootPropertySource)
+        {
+            ActionParameterPropertySourceNode lastNode = rootPropertySource.Nodes.LastOrDefault();
+            if (lastNode == null)
+                throw new InvalidOperationException($"Missing resolved source property node for item property mapping ({rootPropertySource.PropertyName})");
+
+            TypeReference type = lastNode.Property.Type;
+            if (!(type is SchemaTypeReference propertySchemaTypeReference))
+            {
+                base.Logger.LogError($"Unexpected type '{type?.GetType()}' for property '{rootPropertySource.PropertyName}'. Only object schemas can be used for UDT item mappings.", rootPropertySource.FilePath, rootPropertySource.Line, rootPropertySource.Column);
+                return;
+            }
+
+            SchemaDefinition propertySchema = this._schemaDefinitionResolver.Resolve(propertySchemaTypeReference);
+            if (!(propertySchema is ObjectSchema objectSchema))
+            {
+                base.Logger.LogError($"Unexpected type '{propertySchema?.GetType()}' for property '{rootPropertySource.PropertyName}'. Only object schemas can be used for UDT item mappings.", rootPropertySource.FilePath, rootPropertySource.Line, rootPropertySource.Column);
+                return;
+            }
+
+            IList<string> segments = new Collection<string>();
+            segments.AddRange(propertySource.PropertyName.Split('.'));
+            if (segments.Last() == ItemParameterSource.IndexPropertyName)
+                segments.RemoveAt(segments.Count - 1);
+
+            CollectPropertySourceNodes(propertySource, segments, propertySchemaTypeReference, objectSchema);
+        }
+
+        private void CollectPropertySourceNodes(ActionParameterPropertySource propertySource, IEnumerable<string> segments, TypeReference typeReference, ObjectSchema schema)
+        {
+            TypeReference type = typeReference;
+            ObjectSchema objectSchema = schema;
+            string currentPath = null;
+            int columnOffset = 0;
+            foreach (string propertyName in segments)
+            {
+                currentPath = currentPath == null ? propertyName : $"{currentPath}.{propertyName}";
+
+                if (!CollectPropertyNode(type, objectSchema, propertyName, propertySource, base.Logger, columnOffset, out type))
+                    return;
+
+                columnOffset += propertyName.Length + 1; // Skip property name + dot
+                objectSchema = type is SchemaTypeReference schemaTypeReference ? this._schemaDefinitionResolver.Resolve(schemaTypeReference) as ObjectSchema : null;
+            }
+        }
+
+        private static bool CollectPropertyNode(TypeReference type, ObjectSchema objectSchema, string propertyName, ActionParameterPropertySource source, ILogger logger, int columnOffset, out TypeReference propertyType)
+        {
+            ObjectSchemaProperty property = objectSchema?.Properties.SingleOrDefault(x => x.Name.Value == propertyName);
+            if (property != null)
+            {
+                source.Nodes.Add(new ActionParameterPropertySourceNode(objectSchema, property));
+                propertyType = property.Type;
+                return true;
+            }
+
+            int definitionNameOffset = source.Definition.Name.Length + 1; // Skip source name + dot
+            int column = source.Column + definitionNameOffset + columnOffset;
+            logger.LogError($"Property '{propertyName}' not found on contract '{type.DisplayName}'", source.FilePath, source.Line, column);
+            propertyType = null;
+            return false;
         }
         #endregion
     }

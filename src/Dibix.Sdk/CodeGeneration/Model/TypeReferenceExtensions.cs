@@ -2,12 +2,12 @@
 {
     internal static class TypeReferenceExtensions
     {
-        public static bool IsUserDefinedType(this TypeReference typeReference, ISchemaRegistry schemaRegistry) => IsUserDefinedType(typeReference, schemaRegistry, out UserDefinedTypeSchema _);
-        public static bool IsUserDefinedType(this TypeReference typeReference, ISchemaRegistry schemaRegistry, out UserDefinedTypeSchema userDefinedTypeSchema)
+        public static bool IsUserDefinedType(this TypeReference typeReference, ISchemaDefinitionResolver schemaDefinitionResolver) => IsUserDefinedType(typeReference, schemaDefinitionResolver, out UserDefinedTypeSchema _);
+        public static bool IsUserDefinedType(this TypeReference typeReference, ISchemaDefinitionResolver schemaDefinitionResolver, out UserDefinedTypeSchema userDefinedTypeSchema)
         {
             if (typeReference is SchemaTypeReference schemaTypeReference)
             {
-                userDefinedTypeSchema = schemaRegistry.GetSchema(schemaTypeReference) as UserDefinedTypeSchema;
+                userDefinedTypeSchema = schemaDefinitionResolver.Resolve(schemaTypeReference) as UserDefinedTypeSchema;
                 return userDefinedTypeSchema != null;
             }
             userDefinedTypeSchema = null;

@@ -25,7 +25,7 @@ namespace Dibix.Sdk.Tests.Data.Grid
     public static class TestAccessor
     {
         // GetGrid
-        private const string GetGridCommandText = "SELECT [id] = 1, [direction] = 0\r\nUNION ALL\r\nSELECT [id] = 2, [direction] = 1\r\n\r\nSELECT [accessrights] = 1";
+        private const string GetGridCommandText = "SELECT [id] = 1, [name] = NULL, [parentid] = NULL, [role] = NULL, [creationtime] = NULL, [imageurl]= NULL, [direction] = 0, [accessrights] = 1\r\nUNION ALL\r\nSELECT [id] = 2, [name] = NULL, [parentid] = NULL, [role] = NULL, [creationtime] = NULL, [imageurl]= NULL, [direction] = 1, [accessrights] = 1\r\n\r\nSELECT [accessrights] = 1";
 
         public static Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult GetGrid(this IDatabaseAccessorFactory databaseAccessorFactory)
         {
@@ -34,7 +34,7 @@ namespace Dibix.Sdk.Tests.Data.Grid
                 using (IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText, CommandType.Text, ParametersVisitor.Empty))
                 {
                     Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult();
-                    result.Items.ReplaceWith(reader.ReadManyProjection<Dibix.Sdk.Tests.DomainModel.GenericContract, Dibix.Sdk.Tests.DomainModel.Direction, Dibix.Sdk.Tests.DomainModel.JointContract>("direction"));
+                    result.Items.ReplaceWith(reader.ReadManyProjection<Dibix.Sdk.Tests.DomainModel.GenericContract, Dibix.Sdk.Tests.DomainModel.Direction, Dibix.Sdk.Tests.DomainModel.AccessRights, Dibix.Sdk.Tests.DomainModel.JointContract>("direction,accessrights"));
                     result.AccessRights = reader.ReadSingle<Dibix.Sdk.Tests.DomainModel.AccessRights>();
                     return result;
                 }

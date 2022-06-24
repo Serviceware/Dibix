@@ -6,7 +6,7 @@ namespace Dibix.Sdk.CodeGeneration
     public sealed class ServerCodeGenerator : CodeGenerator
     {
         #region Constructor
-        public ServerCodeGenerator(CodeGenerationModel model, ILogger logger, ISchemaRegistry schemaRegistry) : base(model, logger, schemaRegistry) { }
+        public ServerCodeGenerator(CodeGenerationModel model, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger) : base(model, schemaDefinitionResolver, logger) { }
         #endregion
 
         #region Overrides

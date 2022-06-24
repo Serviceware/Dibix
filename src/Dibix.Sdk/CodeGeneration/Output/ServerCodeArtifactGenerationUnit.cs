@@ -4,6 +4,6 @@
     {
         public override bool ShouldGenerate(CodeGenerationModel model) => true;
         protected override string GetOutputName(CodeGenerationModel model) => $"{model.DefaultOutputName}.Accessor";
-        protected override ServerCodeGenerator CreateGenerator(CodeGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger) => new ServerCodeGenerator(model, logger, schemaRegistry);
+        protected override ServerCodeGenerator CreateGenerator(CodeGenerationModel model, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger) => new ServerCodeGenerator(model, schemaDefinitionResolver, logger);
     }
 }

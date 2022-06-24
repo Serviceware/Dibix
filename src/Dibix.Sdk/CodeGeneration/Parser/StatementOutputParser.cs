@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using Dibix.Sdk.CodeGeneration.Model;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.Dac.Model;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
@@ -11,7 +10,7 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal static class StatementOutputParser
     {
-        public static IEnumerable<SqlQueryResult> Parse(SqlStatementDefinition definition, TSqlFragment node, string source, TSqlFragmentAnalyzer fragmentAnalyzer, ISqlMarkupDeclaration markup, string relativeNamespace, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger)
+        public static IEnumerable<SqlQueryResult> Parse(SqlStatementDefinition definition, TSqlFragment node, string source, TSqlFragmentAnalyzer fragmentAnalyzer, ISqlMarkupDeclaration markup, string relativeNamespace, ITypeResolverFacade typeResolver, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
         {
             StatementOutputVisitor visitor = new StatementOutputVisitor(source, fragmentAnalyzer, logger);
             node.Accept(visitor);
@@ -31,7 +30,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (!ValidateReturnElements(source, returnElements, visitor.Outputs, logger))
                 yield break;
 
-            foreach (SqlQueryResult result in CollectResults(definition, node, typeResolver, schemaRegistry, logger, returnElements, visitor, relativeNamespace)) 
+            foreach (SqlQueryResult result in CollectResults(definition, node, typeResolver, schemaDefinitionResolver, logger, returnElements, visitor, relativeNamespace)) 
                 yield return result;
         }
 
@@ -128,8 +127,9 @@ namespace Dibix.Sdk.CodeGeneration
         {
             foreach (ISqlElementProperty property in returnElement.Properties)
             {
-                if (!SqlReturnMarkupProperty.IsDefined(property.Name))
-                    logger.LogError($"Unexpected @Return property '{property.Name}'", returnElement.Source, property.Line, property.Column);
+                Token<string> propertyName = property.Name;
+                if (!SqlReturnMarkupProperty.IsDefined(propertyName))
+                    logger.LogError($"Unexpected @Return property '{propertyName.Value}'", propertyName.Source, propertyName.Line, propertyName.Column);
             }
 
             return true;
@@ -155,13 +155,13 @@ namespace Dibix.Sdk.CodeGeneration
             return result;
         }
 
-        private static IEnumerable<SqlQueryResult> CollectResults(SqlStatementDefinition definition, TSqlFragment node, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger, IList<ISqlElement> returnElements, StatementOutputVisitorBase visitor, string relativeNamespace)
+        private static IEnumerable<SqlQueryResult> CollectResults(SqlStatementDefinition definition, TSqlFragment node, ITypeResolverFacade typeResolver, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger, IList<ISqlElement> returnElements, StatementOutputVisitorBase visitor, string relativeNamespace)
         {
             ICollection<string> usedOutputNames = new HashSet<string>();
             for (int i = 0; i < returnElements.Count; i++)
             {
                 ISqlElement returnElement = returnElements[i];
-                if (!returnElement.TryGetPropertyValue(SqlReturnMarkupProperty.ClrTypes, isDefault: true, out ISqlElementValue typesHint))
+                if (!returnElement.TryGetPropertyValue(SqlReturnMarkupProperty.ClrTypes, isDefault: true, out Token<string> typesHint))
                 {
                     logger.LogError($"Missing property '{SqlReturnMarkupProperty.ClrTypes}'", returnElement.Source, returnElement.Line, returnElement.Column);
                     yield break;
@@ -170,12 +170,12 @@ namespace Dibix.Sdk.CodeGeneration
                 if (!TryParseResultMode(returnElement, logger, out SqlQueryResultMode resultMode))
                     yield break;
 
-                ISqlElementValue resultName = returnElement.GetPropertyValue(SqlReturnMarkupProperty.ResultName);
-                ISqlElementValue converter = returnElement.GetPropertyValue(SqlReturnMarkupProperty.Converter);
-                ISqlElementValue splitOn = returnElement.GetPropertyValue(SqlReturnMarkupProperty.SplitOn);
+                Token<string> resultName = returnElement.GetPropertyValue(SqlReturnMarkupProperty.ResultName);
+                Token<string> converter = returnElement.GetPropertyValue(SqlReturnMarkupProperty.Converter);
+                Token<string> splitOn = returnElement.GetPropertyValue(SqlReturnMarkupProperty.SplitOn);
 
                 ValidateMergeGridResult(definition, node, returnElement.Source, i == 0, resultMode, resultName?.Value, logger);
-                TypeReference projectToType = ParseProjectionContract(node, returnElements, resultMode, returnElement, relativeNamespace, typeResolver, logger, out ISqlElementValue projectToTypeElement);
+                TypeReference projectToType = ParseProjectionContract(node, returnElements, resultMode, returnElement, relativeNamespace, typeResolver, logger, out Token<string> projectToTypeElement);
 
                 string[] typeNames = typesHint.Value.Split(';');
                 IList<TypeReference> resultTypes = ParseResultTypes(typeNames, returnElement.Source, resultMode, typesHint, typeResolver, relativeNamespace).ToArray();
@@ -184,7 +184,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                 TypeReference returnType;
                 string returnTypeName;
-                ISqlElementValue returnTypeLocation;
+                Token<string> returnTypeLocation;
                 if (projectToType != null)
                 {
                     returnType = projectToType;
@@ -210,18 +210,18 @@ namespace Dibix.Sdk.CodeGeneration
                   , columns: output.Columns
                   , usedOutputNames: usedOutputNames
                   , definition: definition
-                  , schemaRegistry: schemaRegistry
+                  , schemaDefinitionResolver: schemaDefinitionResolver
                   , logger: logger
                 );
                 
                 SqlQueryResult result = new SqlQueryResult
                 {
-                    Name = resultName?.Value,
+                    Name = resultName != null ? new Token<string>(resultName.Value, resultName.Source, resultName.Line, resultName.Column) : null,
                     ResultMode = resultMode,
                     Converter = converter?.Value,
                     SplitOn = splitOn?.Value,
                     ProjectToType = projectToType,
-                    ReturnType = returnType
+                    ReturnType = new Token<TypeReference>(returnType, returnTypeLocation.Source, returnTypeLocation.Line, returnTypeLocation.Column)
                 };
                 result.Types.AddRange(resultTypes);
                 result.Columns.AddRange(output.Columns.Select(x => x.ColumnName));
@@ -236,10 +236,10 @@ namespace Dibix.Sdk.CodeGeneration
         private static bool TryParseResultMode(ISqlElement returnElement, ILogger logger, out SqlQueryResultMode resultMode)
         {
             resultMode = SqlQueryResultMode.Many;
-            if (!returnElement.TryGetPropertyValue(SqlReturnMarkupProperty.Mode, isDefault: false, out ISqlElementValue resultModeHint) || Enum.TryParse(resultModeHint.Value, out resultMode)) 
+            if (!returnElement.TryGetPropertyValue(SqlReturnMarkupProperty.Mode, isDefault: false, out Token<string> resultModeHint) || Enum.TryParse(resultModeHint.Value, out resultMode)) 
                 return true;
 
-            logger.LogError($"Result mode not supported: {resultModeHint.Value}", returnElement.Source, resultModeHint.Line, resultModeHint.Column);
+            logger.LogError($"Result mode not supported: {resultModeHint.Value}", resultModeHint.Source, resultModeHint.Line, resultModeHint.Column);
             return false;
         }
 
@@ -260,7 +260,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static IEnumerable<TypeReference> ParseResultTypes(IEnumerable<string> typeNames, string source, SqlQueryResultMode resultMode, ISqlElementValue typesHint, ITypeResolverFacade typeResolver, string relativeNamespace)
+        private static IEnumerable<TypeReference> ParseResultTypes(IEnumerable<string> typeNames, string source, SqlQueryResultMode resultMode, Token<string> typesHint, ITypeResolverFacade typeResolver, string relativeNamespace)
         {
             int column = typesHint.Column;
 
@@ -279,13 +279,13 @@ namespace Dibix.Sdk.CodeGeneration
             bool isFirstResult
           , int numberOfReturnElements
           , ISqlElement returnElement
-          , ISqlElementValue name
-          , ISqlElementValue splitOn
+          , Token<string> name
+          , Token<string> splitOn
           , IList<TypeReference> resultTypes
           , IList<OutputColumnResult> columns
           , ICollection<string> usedOutputNames
           , SqlStatementDefinition definition
-          , ISchemaRegistry schemaRegistry
+          , ISchemaDefinitionResolver schemaDefinitionResolver
           , ILogger logger
         )
         {
@@ -307,7 +307,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                 SchemaDefinition schema = null;
                 if (returnType is SchemaTypeReference schemaTypeReference)
-                    schema = schemaRegistry.GetSchema(schemaTypeReference);
+                    schema = schemaDefinitionResolver.Resolve(schemaTypeReference);
                 
                 string primitiveTypeName;
                 
@@ -353,6 +353,12 @@ namespace Dibix.Sdk.CodeGeneration
                         continue;
                     }
 
+                    if (!IsPrimitiveType(property.Type, schemaDefinitionResolver))
+                    {
+                        logger.LogError($"Column '{columnResult.ColumnName}' cannot be mapped. Only primitive types are supported.", returnElement.Source, columnResult.ColumnNameSource.StartLine, columnResult.ColumnNameSource.StartColumn);
+                        continue;
+                    }
+
                     // Experimental
                     // Validate nullability
                     //if (columnResult.IsNullable.HasValue && columnResult.IsNullable.Value != property.Type.IsNullable)
@@ -361,12 +367,12 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static void ValidateName(bool isFirstResult, int numberOfReturnElements, ISqlElement returnElement, ISqlElementValue name, ICollection<string> usedOutputNames, SqlStatementDefinition target, ILogger logger)
+        private static void ValidateName(bool isFirstResult, int numberOfReturnElements, ISqlElement returnElement, Token<string> name, ICollection<string> usedOutputNames, SqlStatementDefinition target, ILogger logger)
         {
             if (name != null)
             {
                 if (usedOutputNames.Contains(name.Value))
-                    logger.LogError($"The name '{name.Value}' is already defined for another output result", returnElement.Source, name.Line, name.Column);
+                    logger.LogError($"The name '{name.Value}' is already defined for another output result", name.Source, name.Line, name.Column);
                 //else if (numberOfReturnElements == 1)
                 //    logger.LogError(null, "The 'Name' property is irrelevant when a single output is returned", returnElement.Source, name.Line, name.Column);
                 else
@@ -376,7 +382,7 @@ namespace Dibix.Sdk.CodeGeneration
                 logger.LogError("The 'Name' property must be specified when multiple outputs are returned. Mark it in the @Return hint: -- @Return ClrTypes:<ClrTypeName> Name:<ResultName>", returnElement.Source, returnElement.Line, returnElement.Column);
         }
 
-        private static bool TrySplitColumns(IList<OutputColumnResult> columns, int resultTypeCount, ISqlElement returnElement, ISqlElementValue splitOn, ILogger logger, out IList<IList<OutputColumnResult>> columnGroups)
+        private static bool TrySplitColumns(IList<OutputColumnResult> columns, int resultTypeCount, ISqlElement returnElement, Token<string> splitOn, ILogger logger, out IList<IList<OutputColumnResult>> columnGroups)
         {
             columnGroups = new Collection<IList<OutputColumnResult>>();
             if (splitOn == null)
@@ -395,7 +401,7 @@ namespace Dibix.Sdk.CodeGeneration
             int expectedPageCount = splitColumns.Count + 1;
             if (resultTypeCount != expectedPageCount)
             {
-                logger.LogError("The 'SplitOn' property does not match the number of return types", returnElement.Source, splitOn.Line, splitOn.Column);
+                logger.LogError("The 'SplitOn' property does not match the number of return types", splitOn.Source, splitOn.Line, splitOn.Column);
                 return false;
             }
 
@@ -431,14 +437,14 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (columnGroups.Count != expectedPageCount)
             {
-                logger.LogError($"SplitOn column '{splitColumn}' does not match any column on the result", returnElement.Source, splitOn.Line, position);
+                logger.LogError($"SplitOn column '{splitColumn}' does not match any column on the result", splitOn.Source, splitOn.Line, position);
                 return false;
             }
 
             return true;
         }
 
-        private static TypeReference ParseProjectionContract(TSqlFragment node, ICollection<ISqlElement> returnElements, SqlQueryResultMode resultMode, ISqlElement returnElement, string relativeNamespace, ITypeResolverFacade typeResolver, ILogger logger, out ISqlElementValue resultType)
+        private static TypeReference ParseProjectionContract(TSqlFragment node, ICollection<ISqlElement> returnElements, SqlQueryResultMode resultMode, ISqlElement returnElement, string relativeNamespace, ITypeResolverFacade typeResolver, ILogger logger, out Token<string> resultType)
         {
             SqlQueryResultMode[] supportedResultTypeResultModes = { SqlQueryResultMode.Many };
             if (!returnElement.TryGetPropertyValue(SqlReturnMarkupProperty.ResultType, isDefault: false, out resultType))
@@ -467,10 +473,10 @@ namespace Dibix.Sdk.CodeGeneration
             if (singleResult || isResultTypeSupported) 
                 return null;
 
-            return typeResolver.ResolveType(resultType.Value, relativeNamespace, returnElement.Source, resultType.Line, resultType.Column, resultMode == SqlQueryResultMode.Many);
+            return typeResolver.ResolveType(resultType.Value, relativeNamespace, resultType.Source, resultType.Line, resultType.Column, resultMode == SqlQueryResultMode.Many);
         }
 
-        private static bool ValidateReturnType(TypeReference returnType, string returnTypeName, string source, ISqlElementValue returnTypeLocation, SqlQueryResultMode mode, ILogger logger)
+        private static bool ValidateReturnType(TypeReference returnType, string returnTypeName, string source, Token<string> returnTypeLocation, SqlQueryResultMode mode, ILogger logger)
         {
             // The point of this rule, is to stability the meaning of 'Default'.
             // In C# all value types have a default, but they're not all the same (0, false, 0.0, "" for nullable-ref-types feature)
@@ -497,6 +503,11 @@ namespace Dibix.Sdk.CodeGeneration
 
             logger.LogError($"When using the result mode option '{mode}', the primitive return type must be nullable: {returnTypeName}", source, returnTypeLocation.Line, returnTypeLocation.Column);
             return false;
+        }
+
+        private static bool IsPrimitiveType(TypeReference type, ISchemaDefinitionResolver schemaDefinitionResolver)
+        {
+            return type is PrimitiveTypeReference || type is SchemaTypeReference schemaTypeReference && schemaDefinitionResolver.Resolve(schemaTypeReference) is EnumSchema;
         }
     }
 }

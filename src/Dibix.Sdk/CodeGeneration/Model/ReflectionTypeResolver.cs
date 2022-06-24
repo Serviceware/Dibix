@@ -120,7 +120,7 @@ namespace Dibix.Sdk.CodeGeneration
                     throw new InvalidOperationException($"Could not find 'Add' method on type: {type}");
 
                 udtSchema.Properties.AddRange(addMethod.GetParameters()
-                                                       .Select(x => new ObjectSchemaProperty(x.Name, ResolveType(x.ParameterType, source, line, column, schemaRegistry, logger))));
+                                                       .Select(x => new ObjectSchemaProperty(name: new Token<string>(x.Name, source, line, column), ResolveType(x.ParameterType, source, line, column, schemaRegistry, logger))));
                 schemaRegistry.Populate(udtSchema);
             }
             else if (type.IsEnum)
@@ -163,7 +163,7 @@ namespace Dibix.Sdk.CodeGeneration
             bool isDiscriminator = ResolveIsDiscriminator(property);
             bool isObfuscated = ResolveIsObfuscated(property);
             bool isRelativeHttpsUrl = ResolveIsRelativeHttpsUrl(property);
-            return new ObjectSchemaProperty(property.Name, typeReference, defaultValue, serializationBehavior, dateTimeKind, isPartOfKey, isOptional, isDiscriminator, isObfuscated, isRelativeHttpsUrl);
+            return new ObjectSchemaProperty(name: new Token<string>(property.Name, source, line, column), typeReference, defaultValue, serializationBehavior, dateTimeKind, isPartOfKey, isOptional, isDiscriminator, isObfuscated, isRelativeHttpsUrl);
         }
 
         private static bool ResolveIsPartOfKey(MemberInfo member) => IsDefined(member, "System.ComponentModel.DataAnnotations.KeyAttribute");

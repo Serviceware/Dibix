@@ -9,8 +9,7 @@ namespace Dibix.Sdk.CodeGeneration
         int Column { get; }
         IEnumerable<ISqlElementProperty> Properties { get; }
 
-
-        bool TryGetPropertyValue(string propertyName, bool isDefault, out ISqlElementValue value);
-        ISqlElementValue GetPropertyValue(string name);
+        bool TryGetPropertyValue(string propertyName, bool isDefault, out Token<string> value);
+        Token<string> GetPropertyValue(string name);
     }
 }

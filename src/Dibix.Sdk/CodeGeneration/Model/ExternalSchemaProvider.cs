@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
 
-namespace Dibix.Sdk.CodeGeneration.Model
+namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class ExternalSchemaProvider : ISchemaProvider
     {

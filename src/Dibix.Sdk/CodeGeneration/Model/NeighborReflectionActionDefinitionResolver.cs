@@ -21,9 +21,10 @@ namespace Dibix.Sdk.CodeGeneration
         (
             string projectName
           , ReferencedAssemblyInspector referencedAssemblyInspector
+          , ISchemaDefinitionResolver schemaDefinitionResolver
           , ISchemaRegistry schemaRegistry
           , ILogger logger
-        ) : base(schemaRegistry, logger)
+        ) : base(schemaDefinitionResolver, schemaRegistry, logger)
         {
             this._projectName = projectName;
             this._referencedAssemblyInspector = referencedAssemblyInspector;

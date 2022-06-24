@@ -63,7 +63,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             ICollection<string> shouldSerializeMethods = schema.Properties
                                                                .Where(x => x.SerializationBehavior == SerializationBehavior.IfNotEmpty && x.Type.IsEnumerable)
-                                                               .Select(x => x.Name)
+                                                               .Select(x => x.Name.Value)
                                                                .ToArray();
             if (!shouldSerializeMethods.Any()) 
                 return;

@@ -5,13 +5,13 @@ namespace Dibix.Sdk.CodeGeneration
     internal sealed class ActionParameterPropertySourceModelValidator : ICodeGenerationModelValidator
     {
         private readonly IActionParameterSourceRegistry _actionParameterSourceRegistry;
-        private readonly ISchemaRegistry _schemaRegistry;
+        private readonly ISchemaDefinitionResolver _schemaDefinitionResolver;
         private readonly ILogger _logger;
 
-        public ActionParameterPropertySourceModelValidator(IActionParameterSourceRegistry actionParameterSourceRegistry, ISchemaRegistry schemaRegistry, ILogger logger)
+        public ActionParameterPropertySourceModelValidator(IActionParameterSourceRegistry actionParameterSourceRegistry, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
         {
             this._actionParameterSourceRegistry = actionParameterSourceRegistry;
-            this._schemaRegistry = schemaRegistry;
+            this._schemaDefinitionResolver = schemaDefinitionResolver;
             this._logger = logger;
         }
 
@@ -59,7 +59,7 @@ namespace Dibix.Sdk.CodeGeneration
                 throw new InvalidOperationException($"No validator is registered for source '{currentValue.Definition} ({currentValue.Definition.GetType()})'");
             }
 
-            bool result = validator.Validate(rootParameter, currentParameter, currentValue, parentValue, action, this._schemaRegistry, this._logger);
+            bool result = validator.Validate(rootParameter, currentParameter, currentValue, parentValue, action, this._schemaDefinitionResolver, this._logger);
             return result;
         }
     }

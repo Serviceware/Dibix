@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Dibix.Sdk.CodeGeneration.Model;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -18,6 +17,7 @@ namespace Dibix.Sdk.CodeGeneration
           , IExternalSchemaResolver externalSchemaResolver
           , ReferencedAssemblyInspector referencedAssemblyInspector
           , LockEntryManager lockEntryManager
+          , ISchemaDefinitionResolver schemaDefinitionResolver
           , ISchemaRegistry schemaRegistry
           , ILogger logger
         )
@@ -25,7 +25,7 @@ namespace Dibix.Sdk.CodeGeneration
             this._logger = logger;
             this._resolvers = new Collection<ActionDefinitionResolver>
             {
-                new ExternalReflectionTargetActionDefinitionResolver(schemaRegistry, lockEntryManager, logger)
+                new ExternalReflectionTargetActionDefinitionResolver(schemaDefinitionResolver, schemaRegistry, lockEntryManager, logger)
               , new SqlStatementDefinitionActionDefinitionResolver
                 (
                     productName
@@ -34,6 +34,7 @@ namespace Dibix.Sdk.CodeGeneration
                   , sqlStatementDefinitionProvider
                   , externalSchemaResolver
                   , referencedAssemblyInspector
+                  , schemaDefinitionResolver
                   , schemaRegistry
                   , logger
                 )

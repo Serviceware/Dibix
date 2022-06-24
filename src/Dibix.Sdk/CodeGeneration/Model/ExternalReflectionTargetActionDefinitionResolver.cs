@@ -9,7 +9,7 @@ namespace Dibix.Sdk.CodeGeneration
         private const string LockSectionName = "ExternalReflectionTarget";
         private readonly LockEntryManager _lockEntryManager;
 
-        public ExternalReflectionTargetActionDefinitionResolver(ISchemaRegistry schemaRegistry, LockEntryManager lockEntryManager, ILogger logger) : base(schemaRegistry, logger)
+        public ExternalReflectionTargetActionDefinitionResolver(ISchemaDefinitionResolver schemaDefinitionResolver, ISchemaRegistry schemaRegistry, LockEntryManager lockEntryManager, ILogger logger) : base(schemaDefinitionResolver, schemaRegistry, logger)
         {
             this._lockEntryManager = lockEntryManager;
         }

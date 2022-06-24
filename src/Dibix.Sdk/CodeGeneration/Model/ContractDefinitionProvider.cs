@@ -158,7 +158,9 @@ If this is not a project that has multiple areas, please make sure to define the
                         defaultValue = JsonValueReferenceParser.Parse(type, defaultValueJson, filePath, defaultValueLocation, Logger);
                     }
 
-                    ObjectSchemaProperty objectSchemaProperty = new ObjectSchemaProperty(property.Name, type, defaultValue, serializationBehavior, dateTimeKind, isPartOfKey, isOptional, isDiscriminator, isObfuscated, isRelativeHttpsUrl);
+                    IJsonLineInfo propertyLineInfo = property.GetLineInfo();
+                    Token<string> propertyName = new Token<string>(property.Name, filePath, propertyLineInfo.LineNumber, propertyLineInfo.LinePosition);
+                    ObjectSchemaProperty objectSchemaProperty = new ObjectSchemaProperty(propertyName, type, defaultValue, serializationBehavior, dateTimeKind, isPartOfKey, isOptional, isDiscriminator, isObfuscated, isRelativeHttpsUrl);
                     contract.Properties.Add(objectSchemaProperty);
                 }
             }

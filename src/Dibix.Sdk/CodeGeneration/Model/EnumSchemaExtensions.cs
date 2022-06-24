@@ -4,9 +4,9 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal static class EnumSchemaExtensions
     {
-        public static EnumSchemaMember GetEnumMember(this EnumMemberNumericReference reference, ISchemaRegistry schemaRegistry, ILogger logger)
+        public static EnumSchemaMember GetEnumMember(this EnumMemberNumericReference reference, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
         {
-            EnumSchema schema = (EnumSchema)schemaRegistry.GetSchema(reference.Type);
+            EnumSchema schema = (EnumSchema)schemaDefinitionResolver.Resolve(reference.Type);
             EnumSchemaMember member = schema.Members.SingleOrDefault(x => Equals(x.ActualValue, reference.Value));
             if (member != null)
                 return member;
@@ -14,9 +14,9 @@ namespace Dibix.Sdk.CodeGeneration
             logger.LogError($"Enum '{schema.FullName}' does not define a member with value '{reference.Value}'", reference.Source, reference.Line, reference.Column);
             return null;
         }
-        public static EnumSchemaMember GetEnumMember(this EnumMemberStringReference reference, ISchemaRegistry schemaRegistry, ILogger logger)
+        public static EnumSchemaMember GetEnumMember(this EnumMemberStringReference reference, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
         {
-            EnumSchema schema = (EnumSchema)schemaRegistry.GetSchema(reference.Type);
+            EnumSchema schema = (EnumSchema)schemaDefinitionResolver.Resolve(reference.Type);
             EnumSchemaMember member = schema.Members.SingleOrDefault(x => x.Name == reference.Value);
             if (member != null)
                 return member;

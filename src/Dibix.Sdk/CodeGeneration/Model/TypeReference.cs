@@ -7,6 +7,7 @@
         public string Source { get; }
         public int Line { get; }
         public int Column { get; }
+        public abstract string DisplayName { get; }
 
         protected TypeReference(bool isNullable, bool isEnumerable, string source, int line, int column)
         {

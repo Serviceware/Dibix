@@ -38,16 +38,16 @@ namespace Dibix.Sdk.CodeGeneration
         private string _currentNamespace;
         
         public CodeGenerationModel Model { get; }
-        public ISchemaRegistry SchemaRegistry { get; }
+        public ISchemaDefinitionResolver SchemaDefinitionResolver { get; }
         public bool WriteGuardChecks { get; set; }
 
-        internal CodeGenerationContext(CSharpRoot root, CodeGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger)
+        internal CodeGenerationContext(CSharpRoot root, CodeGenerationModel model, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
         {
             this._root = root;
             this._rootNamespace = model.RootNamespace;
             this._currentNamespace = this._rootNamespace;
             this.Model = model;
-            this.SchemaRegistry = schemaRegistry;
+            this.SchemaDefinitionResolver = schemaDefinitionResolver;
             this._logger = logger;
         }
 
@@ -66,7 +66,7 @@ namespace Dibix.Sdk.CodeGeneration
         public CSharpStatementScope CreateOutputScope() => this.CreateOutputScope(this._currentNamespace);
         public CSharpStatementScope CreateOutputScope(string @namespace) => this._root.Output.BeginScope(@namespace);
 
-        public SchemaDefinition GetSchema(SchemaTypeReference reference) => this.SchemaRegistry.GetSchema(reference);
+        public SchemaDefinition GetSchema(SchemaTypeReference reference) => this.SchemaDefinitionResolver.Resolve(reference);
 
         public string ResolveTypeName(TypeReference reference, CodeGenerationContext context, EnumerableBehavior enumerableBehavior = EnumerableBehavior.Enumerable)
         {
@@ -132,13 +132,13 @@ namespace Dibix.Sdk.CodeGeneration
 
                 case EnumMemberNumericReference enumMemberNumericReference:
                 {
-                    EnumSchemaMember member = enumMemberNumericReference.GetEnumMember(this.SchemaRegistry, this._logger);
+                    EnumSchemaMember member = enumMemberNumericReference.GetEnumMember(this.SchemaDefinitionResolver, this._logger);
                     return new CSharpValue($"{member.Enum.FullName}.{member.Name}");
                 }
 
                 case EnumMemberStringReference enumMemberStringReference:
                 {
-                    EnumSchemaMember member = enumMemberStringReference.GetEnumMember(this.SchemaRegistry, this._logger);
+                    EnumSchemaMember member = enumMemberStringReference.GetEnumMember(this.SchemaDefinitionResolver, this._logger);
                     return new CSharpValue($"{member.Enum.FullName}.{member.Name}");
                 }
 

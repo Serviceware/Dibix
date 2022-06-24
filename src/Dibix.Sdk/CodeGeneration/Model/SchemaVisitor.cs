@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Dibix.Sdk.CodeGeneration.Model
+namespace Dibix.Sdk.CodeGeneration
 {
     internal abstract class SchemaVisitor
     {
@@ -13,6 +13,7 @@ namespace Dibix.Sdk.CodeGeneration.Model
         }
 
         public virtual void Accept(SchemaDefinition node) => this.VisitCore(node);
+        public virtual void Accept(TypeReference node) => this.VisitCore(node);
 
         protected virtual void Visit(SchemaDefinition node) { }
         protected virtual void Visit(TypeReference node) { }
@@ -49,7 +50,7 @@ namespace Dibix.Sdk.CodeGeneration.Model
                     throw new ArgumentOutOfRangeException(nameof(node));
             }
         }
-        private void VisitCore(TypeReference node)
+        private void VisitCore(TypeReference node, SchemaDefinition parent = null)
         {
             this.Visit(node);
 
@@ -60,7 +61,10 @@ namespace Dibix.Sdk.CodeGeneration.Model
                     break;
 
                 case SchemaTypeReference schemaTypeReference:
-                    this.VisitCore(schemaTypeReference);
+                    // Avoid endless recursions for self referencing properties
+                    if (!Equals(parent?.FullName, schemaTypeReference.Key))
+                        this.VisitCore(schemaTypeReference);
+
                     break;
 
                 default:
@@ -75,7 +79,7 @@ namespace Dibix.Sdk.CodeGeneration.Model
 
             foreach (ObjectSchemaProperty property in node.Properties)
             {
-                this.VisitCore(property.Type);
+                this.VisitCore(property.Type, node);
             }
         }
         private void VisitCore(SqlStatementDefinition node)
@@ -95,7 +99,8 @@ namespace Dibix.Sdk.CodeGeneration.Model
         {
             this.Visit(node);
 
-            if (this._schemaStore != null && this._schemaStore.TryGetSchema(node.Key, out SchemaDefinition schema))
+            SchemaDefinition schema = this._schemaStore.GetSchema(node);
+            if (schema != null)
                 this.VisitCore(schema);
         }
     }

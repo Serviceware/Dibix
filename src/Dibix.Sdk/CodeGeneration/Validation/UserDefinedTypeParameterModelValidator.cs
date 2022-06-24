@@ -6,12 +6,12 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class UserDefinedTypeParameterModelValidator : ICodeGenerationModelValidator
     {
-        private readonly ISchemaRegistry _schemaRegistry;
+        private readonly ISchemaDefinitionResolver _schemaDefinitionResolver;
         private readonly ILogger _logger;
 
-        public UserDefinedTypeParameterModelValidator(ISchemaRegistry schemaRegistry, ILogger logger)
+        public UserDefinedTypeParameterModelValidator(ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
         {
-            this._schemaRegistry = schemaRegistry;
+            this._schemaDefinitionResolver = schemaDefinitionResolver;
             this._logger = logger;
         }
 
@@ -37,7 +37,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (!(parameter.Type is SchemaTypeReference parameterSchemaTypeReference))
                 return true;
 
-            if (!(this._schemaRegistry.GetSchema(parameterSchemaTypeReference) is UserDefinedTypeSchema userDefinedTypeSchema))
+            if (!(this._schemaDefinitionResolver.Resolve(parameterSchemaTypeReference) is UserDefinedTypeSchema userDefinedTypeSchema))
                 return true;
 
             if (userDefinedTypeSchema.Properties.Count <= 1)
@@ -59,7 +59,7 @@ namespace Dibix.Sdk.CodeGeneration
                 return false;
             }
 
-            SchemaDefinition bodySchema = this._schemaRegistry.GetSchema(bodySchemaTypeReference);
+            SchemaDefinition bodySchema = this._schemaDefinitionResolver.Resolve(bodySchemaTypeReference);
             if (!(bodySchema is ObjectSchema bodyObjectSchema))
             {
                 this._logger.LogError($"Unexpected request body contract '{bodySchema}'. Expected object schema when mapping complex UDT parameter: @{parameter.InternalParameterName} {userDefinedTypeSchema.UdtName}.", bodyContract.Source, bodyContract.Line, bodyContract.Column);
@@ -80,21 +80,21 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (!(sourceProperty.Type is SchemaTypeReference sourcePropertySchemaTypeReference))
             {
-                this._logger.LogError($"Unexpected contract '{sourceProperty.Type}' for source property '{bodySchemaTypeReference.Key}.{sourceProperty.Name}'. Expected object schema when mapping complex UDT parameter: @{parameter.InternalParameterName} {userDefinedTypeSchema.UdtName}.", target.Source, target.Line, target.Column);
+                this._logger.LogError($"Unexpected contract '{sourceProperty.Type?.GetType()}' for source property '{bodySchemaTypeReference.Key}.{sourceProperty.Name.Value}'. Expected object schema when mapping complex UDT parameter: @{parameter.InternalParameterName} {userDefinedTypeSchema.UdtName}.", target.Source, target.Line, target.Column);
                 return false;
             }
 
-            SchemaDefinition sourcePropertySchema = this._schemaRegistry.GetSchema(sourcePropertySchemaTypeReference);
-            if (sourcePropertySchema == null) // Already logged at 'SchemaRegistry.GetSchema'
+            SchemaDefinition sourcePropertySchema = this._schemaDefinitionResolver.Resolve(sourcePropertySchemaTypeReference);
+            if (sourcePropertySchema == null) // Already logged at 'SchemaDefinitionResolver.Resolve'
                 return false;
 
             if (!(sourcePropertySchema is ObjectSchema sourcePropertyObjectSchema))
             {
-                this._logger.LogError($"Unexpected contract '{sourcePropertySchema}' for source property '{bodySchemaTypeReference.Key}.{sourceProperty.Name}'. Expected object schema when mapping complex UDT parameter: @{parameter.InternalParameterName} {userDefinedTypeSchema.UdtName}.", target.Source, target.Line, target.Column);
+                this._logger.LogError($"Unexpected contract '{sourcePropertySchema?.GetType()}' for source property '{bodySchemaTypeReference.Key}.{sourceProperty.Name.Value}'. Expected object schema when mapping complex UDT parameter: @{parameter.InternalParameterName} {userDefinedTypeSchema.UdtName}.", target.Source, target.Line, target.Column);
                 return false;
             }
 
-            HashSet<string> sourceProperties = new HashSet<string>(sourcePropertyObjectSchema.Properties.Select(x => x.Name), StringComparer.OrdinalIgnoreCase);
+            HashSet<string> sourceProperties = new HashSet<string>(sourcePropertyObjectSchema.Properties.Select(x => x.Name.Value), StringComparer.OrdinalIgnoreCase);
             if (propertySource != null)
             {
                 sourceProperties.AddRange(propertySource.ItemSources.Select(x => x.ParameterName));

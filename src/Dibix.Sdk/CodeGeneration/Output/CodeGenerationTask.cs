@@ -109,11 +109,13 @@ namespace Dibix.Sdk.CodeGeneration
             logger.LogMessage("Generating code artifacts...");
 
             ISchemaRegistry schemaRegistry = new SchemaRegistry(logger);
+            ICollection<string> normalizedReferences = references.Select(x => x.GetFullPath()).ToArray();
+            DefaultAssemblyResolver assemblyResolver = new DefaultAssemblyResolver(projectDirectory, externalAssemblyReferenceDirectory, normalizedReferences);
+            ExternalSchemaResolver externalSchemaResolver = new ExternalSchemaResolver(assemblyResolver, schemaRegistry);
+            SchemaDefinitionResolver schemaDefinitionResolver = new SchemaDefinitionResolver(schemaRegistry, externalSchemaResolver, logger);
             CodeGenerationModel codeGenerationModel = CodeGenerationModelLoader.Create
             (
-                projectName
-              , projectDirectory
-              , productName
+                projectName, productName
               , areaName
               , title
               , version
@@ -121,19 +123,18 @@ namespace Dibix.Sdk.CodeGeneration
               , endpointConfiguration
               , outputDirectory
               , defaultOutputName
-              , clientOutputName
-              , externalAssemblyReferenceDirectory
-              , source
+              , clientOutputName, source
               , contracts
-              , endpoints
-              , references
-              , defaultSecuritySchemes
+              , endpoints, defaultSecuritySchemes
               , isEmbedded
               , enableExperimentalFeatures
               , databaseSchemaProviderName
               , modelCollation
               , sqlReferencePath
               , schemaRegistry
+              , externalSchemaResolver
+              , schemaDefinitionResolver
+              , assemblyResolver
               , actionParameterSourceRegistry
               , actionParameterConverterRegistry
               , lockEntryManager
@@ -144,10 +145,10 @@ namespace Dibix.Sdk.CodeGeneration
 
             ICodeGenerationModelValidator modelValidator = new CompositeCodeGenerationModelValidator
             (
-                new ActionParameterPropertySourceModelValidator(actionParameterSourceRegistry, schemaRegistry, logger)
-              , new ContractArtifactModelValidator(logger)
+                new ActionParameterPropertySourceModelValidator(actionParameterSourceRegistry, schemaDefinitionResolver, logger)
+              , new ContractArtifactModelValidator(schemaDefinitionResolver, logger)
               , new EndpointModelValidator(logger)
-              , new UserDefinedTypeParameterModelValidator(schemaRegistry, logger)
+              , new UserDefinedTypeParameterModelValidator(schemaDefinitionResolver, logger)
             );
 
             if (!modelValidator.Validate(codeGenerationModel))
@@ -157,7 +158,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             ICodeArtifactsGenerator generator = new CodeArtifactsGenerator();
-            bool result = generator.Generate(codeGenerationModel, schemaRegistry, logger);
+            bool result = generator.Generate(codeGenerationModel, schemaDefinitionResolver, logger);
             additionalAssemblyReferences = codeGenerationModel.AdditionalAssemblyReferences.ToArray();
             return result;
         }

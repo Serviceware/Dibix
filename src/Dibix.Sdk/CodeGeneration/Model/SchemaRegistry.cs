@@ -27,14 +27,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public void Populate(SchemaDefinition schema) => this._schemas.Add(schema.FullName, schema);
 
-        public SchemaDefinition GetSchema(SchemaTypeReference reference)
-        {
-            if (this._schemas.TryGetValue(reference.Key, out SchemaDefinition schema)) 
-                return schema;
-
-            this._logger.LogError($"Schema is not registered: {reference.Key}", reference.Source, reference.Line, reference.Column);
-            return null;
-        }
+        public bool TryGetSchema(SchemaTypeReference reference, out SchemaDefinition schemaDefinition) => this._schemas.TryGetValue(reference.Key, out schemaDefinition);
 
         public void ImportSchemas(params ISchemaProvider[] schemaProviders) => schemaProviders.SelectMany(schemaProvider => schemaProvider.Schemas).Each(this.Populate);
         #endregion

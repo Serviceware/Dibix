@@ -18,15 +18,15 @@ namespace Dibix.Sdk.CodeGeneration
 // </auto-generated>
 //----------------------------------------------------------------------------*/";
         private readonly IList<ArtifactWriterBase> _writers;
+        private readonly ISchemaDefinitionResolver _schemaDefinitionResolver;
         private readonly ILogger _logger;
-        private readonly ISchemaRegistry _schemaRegistry;
         #endregion
 
         #region Constructor
-        protected CodeGenerator(CodeGenerationModel model, ILogger logger, ISchemaRegistry schemaRegistry)
+        protected CodeGenerator(CodeGenerationModel model, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
         {
+            this._schemaDefinitionResolver = schemaDefinitionResolver;
             this._logger = logger;
-            this._schemaRegistry = schemaRegistry;
             this._writers = new Collection<ArtifactWriterBase>();
             this._writers.AddRange(this.SelectWriters(model));
         }
@@ -58,7 +58,7 @@ namespace Dibix.Sdk.CodeGeneration
             CSharpWriter csWriter = new CSharpWriter(writer, globalAnnotations);
             CSharpStatementScope output = csWriter.Root.Output;
 
-            CodeGenerationContext context = new CodeGenerationContext(csWriter.Root, model, this._schemaRegistry, this._logger);
+            CodeGenerationContext context = new CodeGenerationContext(csWriter.Root, model, this._schemaDefinitionResolver, this._logger);
             this.OnContextCreated(context);
 
             IList<IGrouping<string, ArtifactWriterBase>> childWriterGroups = writers.GroupBy(x => x.LayerName).ToArray();

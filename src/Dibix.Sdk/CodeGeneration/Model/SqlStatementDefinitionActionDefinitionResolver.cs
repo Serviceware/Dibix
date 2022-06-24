@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Dibix.Sdk.CodeGeneration.Model;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -26,9 +25,10 @@ namespace Dibix.Sdk.CodeGeneration
           , ISqlStatementDefinitionProvider sqlStatementDefinitionProvider
           , IExternalSchemaResolver externalSchemaResolver
           , ReferencedAssemblyInspector referencedAssemblyInspector
+          , ISchemaDefinitionResolver schemaDefinitionResolver
           , ISchemaRegistry schemaRegistry
           , ILogger logger
-        ) : base(schemaRegistry, logger)
+        ) : base(schemaDefinitionResolver, schemaRegistry, logger)
         {
             this._productName = productName;
             this._areaName = areaName;
@@ -54,7 +54,7 @@ namespace Dibix.Sdk.CodeGeneration
             string definitionName = statementDefinition.DefinitionName;
             bool isAsync = statementDefinition.Async;
             bool hasRefParameters = statementDefinition.Parameters.Any(x => x.IsOutput);
-            ActionDefinitionTarget actionTarget = new LocalActionTarget(localAccessorFullName, externalAccessorFullName, definitionName, isAsync, hasRefParameters, filePath, line, column);
+            ActionDefinitionTarget actionTarget = new LocalActionTarget(statementDefinition, localAccessorFullName, externalAccessorFullName, definitionName, isAsync, hasRefParameters, filePath, line, column);
             actionDefinition = new ActionDefinition(actionTarget);
             ActionParameterRegistry parameterRegistry = new ActionParameterRegistry(actionDefinition, pathParameters);
             foreach (SqlQueryParameter parameter in statementDefinition.Parameters)

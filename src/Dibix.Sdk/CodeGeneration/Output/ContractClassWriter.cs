@@ -101,14 +101,15 @@ namespace Dibix.Sdk.CodeGeneration
                     propertyAnnotations.Add(new CSharpAnnotation("DefaultValue", defaultValue));
                 }
 
-                string clrTypeName = context.ResolveTypeName(property.Type, context, enumerableBehavior: EnumerableBehavior.None);
-                @class.AddProperty(property.Name, !property.Type.IsEnumerable ? clrTypeName : $"{nameof(IList<object>)}<{clrTypeName}>", propertyAnnotations)
+                TypeReference propertyType = property.Type;
+                string clrTypeName = context.ResolveTypeName(propertyType, context, enumerableBehavior: EnumerableBehavior.None);
+                @class.AddProperty(property.Name, !propertyType.IsEnumerable ? clrTypeName : $"{nameof(IList<object>)}<{clrTypeName}>", propertyAnnotations)
                       .Getter(null)
-                      .Setter(null, property.Type.IsEnumerable ? CSharpModifiers.Private : default)
+                      .Setter(null, propertyType.IsEnumerable ? CSharpModifiers.Private : default)
                       .Initializer(defaultValue);
 
-                if (property.Type.IsEnumerable)
-                    ctorAssignments.Add($"this.{property.Name} = new {nameof(Collection<object>)}<{clrTypeName}>();");
+                if (propertyType.IsEnumerable)
+                    ctorAssignments.Add($"this.{property.Name.Value} = new {nameof(Collection<object>)}<{clrTypeName}>();");
             }
 
             if (ctorAssignments.Any())

@@ -432,7 +432,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (!isFirstResult || !query.MergeGridResult)
             {
                 writer.Write("result")
-                      .WriteRaw($".{result.Name}")
+                      .WriteRaw($".{result.Name.Value}")
                       .WriteRaw(isEnumerable ? ".ReplaceWith(" : " = ");
             }
 

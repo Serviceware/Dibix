@@ -49,7 +49,7 @@ namespace Dibix.Sdk.Sql
           , out string udtName
         )
         {
-            if (markup.TryGetSingleElementValue(SqlMarkupKey.ClrType, source, logger, out ISqlElementValue typeImplementationName) && !(dataTypeReference is SqlDataTypeReference))
+            if (markup.TryGetSingleElementValue(SqlMarkupKey.ClrType, source, logger, out Token<string> typeImplementationName) && !(dataTypeReference is SqlDataTypeReference))
             {
                 udtName = null;
                 logger.LogError($@"The @ClrType hint is only supported for primitive types

@@ -5,14 +5,14 @@ namespace Dibix.Sdk.CodeGeneration
     internal abstract class CodeArtifactGenerationUnit
     {
         public abstract bool ShouldGenerate(CodeGenerationModel model);
-        public abstract bool Generate(CodeGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger);
+        public abstract bool Generate(CodeGenerationModel model, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger);
     }
 
     internal abstract class CodeArtifactGenerationUnit<TGenerator> : CodeArtifactGenerationUnit where TGenerator : CodeGenerator
     {
-        public override bool Generate(CodeGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger)
+        public override bool Generate(CodeGenerationModel model, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
         {
-            TGenerator generator = this.CreateGenerator(model, schemaRegistry, logger);
+            TGenerator generator = this.CreateGenerator(model, schemaDefinitionResolver, logger);
 
             string generated = generator.Generate(model);
 
@@ -26,7 +26,7 @@ namespace Dibix.Sdk.CodeGeneration
             return false;
         }
 
-        protected abstract TGenerator CreateGenerator(CodeGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger);
+        protected abstract TGenerator CreateGenerator(CodeGenerationModel model, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger);
 
         protected abstract string GetOutputName(CodeGenerationModel model);
     }

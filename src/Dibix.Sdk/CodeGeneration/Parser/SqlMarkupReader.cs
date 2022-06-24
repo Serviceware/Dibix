@@ -306,7 +306,7 @@ namespace Dibix.Sdk.CodeGeneration
             private readonly IDictionary<string, SqlMarkupProperty> _properties;
 
             public string Name { get; set; }
-            public ISqlElementValue Value { get; private set; }
+            public Token<string> Value { get; private set; }
             public string Source { get; }
             public int Line { get; }
             public int Column { get; }
@@ -320,7 +320,7 @@ namespace Dibix.Sdk.CodeGeneration
                 this.Column = column;
             }
 
-            public bool TryGetPropertyValue(string propertyName, bool isDefault, out ISqlElementValue value)
+            public bool TryGetPropertyValue(string propertyName, bool isDefault, out Token<string> value)
             {
                 if (this._properties.TryGetValue(propertyName, out SqlMarkupProperty property))
                 {
@@ -338,7 +338,7 @@ namespace Dibix.Sdk.CodeGeneration
                 return false;
             }
 
-            public ISqlElementValue GetPropertyValue(string name) => this._properties.TryGetValue(name, out SqlMarkupProperty property) ? property.Value : null;
+            public Token<string> GetPropertyValue(string name) => this._properties.TryGetValue(name, out SqlMarkupProperty property) ? property.Value : null;
 
             public void SetValue(string value, int propertyColumn, int valueColumn, string source, ILogger logger)
             {
@@ -347,7 +347,7 @@ namespace Dibix.Sdk.CodeGeneration
                     logger.LogError($"Multiple default properties specified for @{this.Name}", source, this.Line, propertyColumn);
                     return;
                 }
-                this.Value = new SqlElementValue(value, this.Line, valueColumn);
+                this.Value = new Token<string>(value, source, this.Line, valueColumn);
             }
 
             public void AddProperty(string name, string value, int propertyColumn, int valueColumn, string source, ILogger logger)
@@ -364,38 +364,21 @@ namespace Dibix.Sdk.CodeGeneration
                     return;
                 }
 
-                ISqlElementValue propertyValue = new SqlElementValue(value, this.Line, valueColumn);
-                this._properties.Add(name, new SqlMarkupProperty(name, propertyValue, this.Line, propertyColumn));
-            }
-        }
-
-        private sealed class SqlElementValue : ISqlElementValue
-        {
-            public string Value { get; }
-            public int Line { get; }
-            public int Column { get; }
-
-            public SqlElementValue(string value, int line, int column)
-            {
-                this.Value = value;
-                this.Line = line;
-                this.Column = column;
+                Token<string> propertyName = new Token<string>(name, source, this.Line, propertyColumn);
+                Token<string> propertyValue = new Token<string>(value, source, this.Line, valueColumn);
+                this._properties.Add(name, new SqlMarkupProperty(propertyName, propertyValue));
             }
         }
 
         private sealed class SqlMarkupProperty : ISqlElementProperty
         {
-            public string Name { get; }
-            public ISqlElementValue Value { get; }
-            public int Line { get; }
-            public int Column { get; }
+            public Token<string> Name { get; }
+            public Token<string> Value { get; }
 
-            public SqlMarkupProperty(string name, ISqlElementValue value, int line, int column)
+            public SqlMarkupProperty(Token<string> name, Token<string> value)
             {
                 this.Name = name;
                 this.Value = value;
-                this.Line = line;
-                this.Column = column;
             }
         }
 
@@ -420,7 +403,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             public bool TryGetSingleElementValue(string name, string source, ILogger logger, out string value)
             {
-                if (!this.TryGetSingleElementValue(name, source, logger, out ISqlElementValue elementValue))
+                if (!this.TryGetSingleElementValue(name, source, logger, out Token<string> elementValue))
                 {
                     value = null;
                     return false;
@@ -429,7 +412,7 @@ namespace Dibix.Sdk.CodeGeneration
                 value = elementValue.Value;
                 return true;
             }
-            public bool TryGetSingleElementValue(string name, string source, ILogger logger, out ISqlElementValue value)
+            public bool TryGetSingleElementValue(string name, string source, ILogger logger, out Token<string> value)
             {
                 if (!this.TryGetSingleElement(name, source, logger, out SqlElement element))
                 {

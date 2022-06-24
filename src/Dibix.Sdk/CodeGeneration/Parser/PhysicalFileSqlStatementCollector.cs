@@ -18,6 +18,7 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly ISqlStatementFormatter _formatter;
         private readonly ITypeResolverFacade _typeResolver;
         private readonly ISchemaRegistry _schemaRegistry;
+        private readonly ISchemaDefinitionResolver _schemaDefinitionResolver;
         private readonly ILogger _logger;
         private readonly IEnumerable<string> _files;
         private readonly Lazy<TSqlModel> _modelAccessor;
@@ -34,6 +35,7 @@ namespace Dibix.Sdk.CodeGeneration
           , ISqlStatementFormatter formatter
           , ITypeResolverFacade typeResolver
           , ISchemaRegistry schemaRegistry
+          , ISchemaDefinitionResolver schemaDefinitionResolver
           , ILogger logger
           , IEnumerable<string> files
           , Lazy<TSqlModel> modelAccessor
@@ -51,6 +53,7 @@ namespace Dibix.Sdk.CodeGeneration
             this._schemaRegistry = schemaRegistry;
             this._files = files;
             this._modelAccessor = modelAccessor;
+            this._schemaDefinitionResolver = schemaDefinitionResolver;
             this._logger = logger;
         }
 
@@ -81,6 +84,7 @@ namespace Dibix.Sdk.CodeGeneration
                   , formatter: this._formatter
                   , typeResolver: this._typeResolver
                   , schemaRegistry: this._schemaRegistry
+                  , schemaDefinitionResolver: this._schemaDefinitionResolver
                   , logger: this._logger
                   , definition: out SqlStatementDefinition definition
                 );

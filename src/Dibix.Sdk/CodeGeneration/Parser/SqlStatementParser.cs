@@ -24,19 +24,19 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region ISqlStatementParser Members
-        public bool Read(SqlParserSourceKind sourceKind, object content, string source, string definitionName, Lazy<TSqlModel> modelAccessor, string projectName, bool isEmbedded, bool analyzeAlways, string rootNamespace, string productName, string areaName, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger, out SqlStatementDefinition definition)
+        public bool Read(SqlParserSourceKind sourceKind, object content, string source, string definitionName, Lazy<TSqlModel> modelAccessor, string projectName, bool isEmbedded, bool analyzeAlways, string rootNamespace, string productName, string areaName, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger, out SqlStatementDefinition definition)
         {
             if (!SourceReaders.TryGetValue(sourceKind, out Func<object, TSqlFragment> reader))
                 throw new ArgumentOutOfRangeException(nameof(sourceKind), sourceKind, null);
 
             TSqlFragment fragment = reader(content);
             TSqlFragmentAnalyzer fragmentAnalyzer = new TSqlFragmentAnalyzer(source, fragment, isScriptArtifact: false, projectName, isEmbedded, analyzeAlways, modelAccessor, logger);
-            return this.TryCollectStatementDescriptor(fragment, fragmentAnalyzer, source, definitionName, productName, areaName, formatter, typeResolver, schemaRegistry, logger, out definition);
+            return this.TryCollectStatementDescriptor(fragment, fragmentAnalyzer, source, definitionName, productName, areaName, formatter, typeResolver, schemaRegistry, schemaDefinitionResolver, logger, out definition);
         }
         #endregion
 
         #region Private Methods
-        private bool TryCollectStatementDescriptor(TSqlFragment fragment, TSqlFragmentAnalyzer fragmentAnalyzer, string source, string definitionName, string productName, string areaName, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger, out SqlStatementDefinition definition)
+        private bool TryCollectStatementDescriptor(TSqlFragment fragment, TSqlFragmentAnalyzer fragmentAnalyzer, string source, string definitionName, string productName, string areaName, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger, out SqlStatementDefinition definition)
         {
             ISqlMarkupDeclaration markup = SqlMarkupReader.ReadHeader(fragment, source, logger);
             bool hasMarkup = markup.HasElements;
@@ -58,6 +58,7 @@ namespace Dibix.Sdk.CodeGeneration
                 Formatter = formatter,
                 TypeResolver = typeResolver,
                 SchemaRegistry = schemaRegistry,
+                SchemaDefinitionResolver = schemaDefinitionResolver,
                 Logger = logger,
                 Markup = markup
             };

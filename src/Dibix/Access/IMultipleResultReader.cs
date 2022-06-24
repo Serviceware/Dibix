@@ -13,6 +13,7 @@ namespace Dibix
         IEnumerable<TReturn> ReadMany<TReturn, TSecond>(string splitOn) where TReturn : new();
         IEnumerable<TReturn> ReadMany<TFirst, TSecond, TReturn>(Func<TFirst, TSecond, TReturn> map, string splitOn);
         IEnumerable<TReturn> ReadManyProjection<TFirst, TSecond, TReturn>(string splitOn) where TReturn : new();
+        IEnumerable<TReturn> ReadManyProjection<TFirst, TSecond, TThird, TReturn>(string splitOn) where TReturn : new();
         IEnumerable<TReturn> ReadMany<TReturn, TSecond, TThird>(string splitOn) where TReturn : new();
         IEnumerable<TReturn> ReadMany<TFirst, TSecond, TThird, TReturn>(Func<TFirst, TSecond, TThird, TReturn> map, string splitOn);
         IEnumerable<TReturn> ReadMany<TReturn, TSecond, TThird, TFourth>(string splitOn) where TReturn : new();
@@ -25,6 +26,7 @@ namespace Dibix
         T ReadSingle<T>();
         Task<T> ReadSingleAsync<T>();
         TReturn ReadSingle<TReturn, TSecond>(string splitOn) where TReturn : new();
+        TReturn ReadSingle<TReturn, TSecond, TThird>(string splitOn) where TReturn : new();
         TReturn ReadSingle<TReturn, TSecond, TThird, TFourth>(string splitOn) where TReturn : new();
         TReturn ReadSingle<TReturn, TSecond, TThird, TFourth, TFifth>(string splitOn) where TReturn : new();
         TReturn ReadSingle<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>(string splitOn) where TReturn : new();

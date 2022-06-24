@@ -54,7 +54,7 @@ namespace Dibix.Sdk.CodeGeneration
                           .CallBase()
                           .AddParameter(new CSharpStringValue(userDefinedType.UdtName));
 
-                    CSharpMethod method = @class.AddMethod("Add", "void", $"base.AddValues({String.Join(", ", userDefinedType.Properties.Select(x => x.Name))});");
+                    CSharpMethod method = @class.AddMethod("Add", "void", $"base.AddValues({String.Join(", ", userDefinedType.Properties.Select(x => x.Name.Value))});");
                     foreach (ObjectSchemaProperty column in userDefinedType.Properties)
                         method.AddParameter(column.Name, context.ResolveTypeName(column.Type, context));
 

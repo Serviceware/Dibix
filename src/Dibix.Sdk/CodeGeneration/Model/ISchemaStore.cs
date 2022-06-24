@@ -1,7 +1,7 @@
-﻿namespace Dibix.Sdk.CodeGeneration.Model
+﻿namespace Dibix.Sdk.CodeGeneration
 {
     public interface ISchemaStore
     {
-        bool TryGetSchema(string fullName, out SchemaDefinition schema);
+        SchemaDefinition GetSchema(SchemaTypeReference schemaTypeReference);
     }
 }

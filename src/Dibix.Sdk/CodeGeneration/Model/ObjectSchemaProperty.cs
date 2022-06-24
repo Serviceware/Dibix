@@ -4,7 +4,7 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public sealed class ObjectSchemaProperty
     {
-        public string Name { get; }
+        public Token<string> Name { get; }
         public TypeReference Type { get; }
         public ValueReference DefaultValue { get; }
         public DateTimeKind DateTimeKind { get; }
@@ -15,7 +15,7 @@ namespace Dibix.Sdk.CodeGeneration
         public bool IsObfuscated { get; }
         public bool IsRelativeHttpsUrl { get; }
 
-        public ObjectSchemaProperty(string name, TypeReference type = default, ValueReference defaultValue = default, SerializationBehavior serializationBehavior = default, DateTimeKind dateTimeKind = default, bool isPartOfKey = default, bool isOptional = default, bool isDiscriminator = default, bool isObfuscated = default, bool isRelativeHttpsUrl = default)
+        public ObjectSchemaProperty(Token<string> name, TypeReference type, ValueReference defaultValue = default, SerializationBehavior serializationBehavior = default, DateTimeKind dateTimeKind = default, bool isPartOfKey = default, bool isOptional = default, bool isDiscriminator = default, bool isObfuscated = default, bool isRelativeHttpsUrl = default)
         {
             this.Name = name;
             this.Type = type;
