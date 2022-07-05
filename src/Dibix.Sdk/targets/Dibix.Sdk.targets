@@ -161,10 +161,11 @@
       <CompileArtifactsInput Include="@(Endpoint)" />
 
       <!-- SqlCore -->
+      <_SqlCoreInput Include="$(_DibixConfigurationPath)" />
+      <SqlCoreInput Include="@(_SqlCoreInput)" Condition="Exists(%(FullPath))" />
       <SqlCoreInput Include="@(_SqlTargetInput)" />
       <SqlCoreInput Include="@(Contract)" />
       <SqlCoreInput Include="@(Endpoint)" />
-      <SqlCoreInput Include="$(_DibixConfigurationPath)" />
     </ItemGroup>
   </Target>
   <Target Name="SetupSqlCoreOutputs" BeforeTargets="_SetupSqlBuildOutputs">
