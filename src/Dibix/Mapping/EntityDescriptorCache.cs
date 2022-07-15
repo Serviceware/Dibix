@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Xml.Linq;
 
 namespace Dibix
 {
@@ -23,7 +24,7 @@ namespace Dibix
         private static EntityDescriptor BuildDescriptor(Type type)
         {
             EntityDescriptor descriptor = new EntityDescriptor();
-            if (type.IsPrimitive() || type == typeof(byte[]))
+            if (type.IsPrimitive() || type == typeof(byte[]) || type == typeof(XElement))
                 return descriptor;
 
             IDictionary<PropertyInfo, ICollection<IEntityPropertyFormatter>> formattableProperties = new Dictionary<PropertyInfo, ICollection<IEntityPropertyFormatter>>();

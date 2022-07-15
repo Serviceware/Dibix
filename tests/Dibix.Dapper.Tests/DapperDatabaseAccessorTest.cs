@@ -88,6 +88,14 @@ CommandText: <Dynamic>", exception.Message);
         });
 
         [TestMethod]
+        public Task QueryMany_WithXElementResult_Success() => base.ExecuteTest(accessor =>
+        {
+            const string commandText = "SELECT N'<xml/>'";
+            XElement element = accessor.QuerySingle<XElement>(commandText);
+            Assert.AreEqual("<xml />", element.ToString());
+        });
+
+        [TestMethod]
         public Task QuerySingle_MissingColumnName_ThrowsException() => base.ExecuteTest(accessor =>
         {
             const string commandText = "SELECT 1";
