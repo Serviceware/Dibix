@@ -172,7 +172,7 @@ Value: {instance}");
 #if NETCOREAPP
                 if (OperatingSystem.IsWindows())
 #endif
-                    this.TestResultComposer.AddLastEventLogErrors();
+                    this.TestResultComposer.AddLastEventLogEntries();
             }
             catch (Exception exception)
             {

@@ -67,7 +67,27 @@ namespace Dibix.Testing
 #if NETCOREAPP
         [System.Runtime.Versioning.SupportedOSPlatform("windows")]
 #endif
-        public void AddLastEventLogErrors(int count = 5) => this.AddLastEventLogEntries(EventLogEntryType.Error, count);
+        public void AddLastEventLogEntries(EventLogEntryType eventLogEntryType = EventLogEntryType.Error | EventLogEntryType.Warning, int count = 10)
+        {
+            string FormatContent(EventLogEntry entry)
+            {
+                string title = $" {entry.TimeGenerated:O} [{entry.EntryType}] {entry.Source} ";
+                string border = new string('=', title.Length);
+                return $@"{border}
+{title}
+{border}
+{entry.Message}";
+            }
+
+            EventLog eventLog = new EventLog("Application");
+
+            Enumerable.Range(0, eventLog.Entries.Count)
+                      .Reverse()
+                      .Select(x => eventLog.Entries[x])
+                      .Where(x => x.EntryType != 0 /* ?? */ && eventLogEntryType.HasFlag(x.EntryType))
+                      .Take(count)
+                      .Each((x, i) => this.AddFile($"EventLogEntry_{i + 1}_{x.EntryType}.txt", FormatContent(x)));
+        }
 
         private void EnsureFileComparisonContent(string directory, string extension, string content)
         {
@@ -116,23 +136,6 @@ namespace Dibix.Testing
             WriteContentToFile(path, $@"@echo off
 start winmergeU ""{ExpectedDirectoryName}"" ""{ActualDirectoryName}""");
             this.RegisterFile(path, scopeIsTestRun: true);
-        }
-
-#if NETCOREAPP
-        [System.Runtime.Versioning.SupportedOSPlatform("windows")]
-#endif
-        private void AddLastEventLogEntries(EventLogEntryType eventLogEntryType, int count)
-        {
-            EventLog eventLog = new EventLog("Application");
-
-            Enumerable.Range(0, eventLog.Entries.Count)
-                      .Reverse()
-                      .Select(x => eventLog.Entries[x])
-                      .Where(x => x.EntryType == eventLogEntryType)
-                      .Take(count)
-                      .Each((x, i) => this.AddFile($"EventLog{eventLogEntryType}_{i}.txt", $@"{x.TimeGenerated:O} - {x.EntryType} - {x.Source}
----
-{x.Message}"));
         }
 
         private static void WriteContentToFile(string path, string content)
