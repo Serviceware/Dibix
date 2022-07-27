@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<errors>
+  <error
+    ruleid="42"
+    message="Unsupported SET statement: SET ARITHABORT ON"
+    line="5"
+    column="2" />
+  <error
+    ruleid="42"
+    message="Unsupported SET statement: SET DATEFORMAT MDY"
+    line="6"
+    column="5" />
+  <error
+    ruleid="42"
+    message="Unsupported SET statement: SET FIPS_FLAGGER OFF"
+    line="7"
+    column="5" />
+  <error
+    ruleid="42"
+    message="Unsupported SET statement: SET ERRLVL 0"
+    line="8"
+    column="5" />
+  <error
+    ruleid="42"
+    message="Unsupported SET statement: SET NOEXEC OFF"
+    line="9"
+    column="5" />
+  <error
+    ruleid="42"
+    message="Unsupported SET statement: SET OFFSETS SELECT, FROM, EXECUTE ON"
+    line="10"
+    column="5" />
+  <error
+    ruleid="42"
+    message="Unsupported SET statement: SET ROWCOUNT 0"
+    line="11"
+    column="5" />
+  <error
+    ruleid="42"
+    message="Unsupported SET statement: SET STATISTICS TIME ON"
+    line="12"
+    column="5" />
+  <error
+    ruleid="42"
+    message="Unsupported SET statement: SET TEXTSIZE 0"
+    line="13"
+    column="5" />
+  <error
+    ruleid="42"
+    message="Unsupported SET statement: SETUSER N'x'"
+    line="14"
+    column="5" />
+  <error
+    ruleid="42"
+    message="Only LOW is supported for SET statement: SET DEADLOCK_PRIORITY HIGH"
+    line="15"
+    column="5" />
+  <error
+    ruleid="42"
+    message="Only ON is supported for SET statement: SET NOCOUNT OFF"
+    line="16"
+    column="5" />
+  <error
+    ruleid="42"
+    message="Only ON is supported for SET statement: SET XACT_ABORT OFF"
+    line="17"
+    column="5" />
+  <error
+    ruleid="42"
+    message="SET XACT_ABORT ON should be set when working with BEGIN TRANSACTION without a custom TRY..CATCH block to ensure the transaction is rolled back in case of an error"
+    line="30"
+    column="5" />
+  <error
+    ruleid="42"
+    message="SET XACT_ABORT ON should be set when working with BEGIN TRANSACTION without a custom TRY..CATCH block to ensure the transaction is rolled back in case of an error"
+    line="38"
+    column="9" />
+  <error
+    ruleid="42"
+    message="SET XACT_ABORT ON should be set when working with BEGIN TRANSACTION without a custom TRY..CATCH block to ensure the transaction is rolled back in case of an error"
+    line="52"
+    column="17" />
+</errors>

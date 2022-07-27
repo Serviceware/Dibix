@@ -127,5 +127,8 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
 
         [TestMethod]
         public void InvalidFunctionUsageSqlCodeAnalysisRule() => this.Execute();
+
+        [TestMethod]
+        public void SetStatementSqlCodeAnalysisRule() => this.Execute();
     }
 }
