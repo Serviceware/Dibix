@@ -72,7 +72,7 @@ namespace Dibix.Sdk.CodeGeneration
             bool requireExplicitMarkup = !isEmbedded;
             ISqlStatementParser parser = new SqlStoredProcedureParser(requireExplicitMarkup);
             Lazy<TSqlModel> modelAccessor = sqlModel != null ? new Lazy<TSqlModel>(() => sqlModel) : new Lazy<TSqlModel>(() => PublicSqlDataSchemaModelLoader.Load(projectName, databaseSchemaProviderName, modelCollation, source, sqlReferencePath, logger));
-            ISqlStatementFormatter formatter = isEmbedded ? (ISqlStatementFormatter)new TakeSourceSqlStatementFormatter() : new ExecStoredProcedureSqlStatementFormatter();
+            ISqlStatementFormatter formatter = SelectSqlStatementFormatter(isEmbedded);
             formatter.StripWhiteSpace = model.CommandTextFormatting == CommandTextFormatting.StripWhiteSpace;
             IDictionary<string, SecurityScheme> securitySchemeMap = new Dictionary<string, SecurityScheme>();
 
@@ -98,6 +98,14 @@ namespace Dibix.Sdk.CodeGeneration
             model.Schemas.AddRange(schemaRegistry.Schemas);
 
             return model;
+        }
+
+        private static ISqlStatementFormatter SelectSqlStatementFormatter(bool isEmbedded)
+        {
+            if (isEmbedded)
+                return new TakeSourceSqlStatementFormatter();
+            
+            return new ExecStoredProcedureSqlStatementFormatter();
         }
     }
 }

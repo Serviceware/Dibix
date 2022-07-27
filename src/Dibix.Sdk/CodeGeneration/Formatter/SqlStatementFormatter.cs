@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
@@ -9,12 +8,7 @@ namespace Dibix.Sdk.CodeGeneration
     public abstract class SqlStatementFormatter : ISqlStatementFormatter
     {
         protected const int Indentation = 4;
-
-        private static readonly Type[] ExcludedTypes = 
-        {
-            typeof(PredicateSetStatement)
-        };
-
+        
         public bool StripWhiteSpace { get; set; }
 
         FormattedSqlStatement ISqlStatementFormatter.Format(SqlStatementDefinition statementDefinition, StatementList statementList)
@@ -28,7 +22,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         protected void CollectStatements(StatementList statementList, Action<TSqlStatement, int, int> statementHandler, Action<TSqlParserToken> tokenHandler = null)
         {
-            IList<TSqlStatement> statements = GetStatements(statementList).ToArray();
+            IList<TSqlStatement> statements = statementList.Statements;
             for (int i = 0; i < statements.Count; i++)
             {
                 TSqlStatement statement = statements[i];
@@ -58,9 +52,5 @@ namespace Dibix.Sdk.CodeGeneration
                 statementHandler(statement, i, statements.Count);
             }
         }
-
-        private static IEnumerable<TSqlStatement> GetStatements(StatementList statementList) => statementList.Statements.Where(FilterStatement);
-
-        private static bool FilterStatement(TSqlStatement statement) => !ExcludedTypes.Any(statement.GetType().IsAssignableFrom);
     }
 }
