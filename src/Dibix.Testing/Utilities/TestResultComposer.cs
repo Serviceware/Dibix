@@ -84,7 +84,7 @@ namespace Dibix.Testing
             Enumerable.Range(0, eventLog.Entries.Count)
                       .Reverse()
                       .Select(x => eventLog.Entries[x])
-                      .Where(x => x.EntryType != 0 /* ?? */ && eventLogEntryType.HasFlag(x.EntryType))
+                      .Where(x => x.EntryType != 0 /* ?? */ && ((System.Diagnostics.EventLogEntryType)eventLogEntryType).HasFlag(x.EntryType))
                       .Take(count)
                       .Each((x, i) => this.AddFile($"EventLogEntry_{i + 1}_{x.EntryType}.txt", FormatContent(x)));
         }
@@ -203,6 +203,17 @@ start winmergeU ""{ExpectedDirectoryName}"" ""{ActualDirectoryName}""");
             string directoryName = $"Run_{testRunDirectoryName.Split(' ').Last()}";
             string path = Path.Combine(Path.GetTempPath(), "TestResults", directoryName, assemblyName);
             return path;
+        }
+
+        // Exposing the original enum System.Diagnostics.EventLogEntryType in the AddLastEventLogEntries method, causes the coverlet.collector to hang.
+        // Might be related to: https://github.com/coverlet-coverage/coverlet/issues/1044
+        public enum EventLogEntryType
+        {
+            Error = 1,
+            Warning = 2,
+            Information = 4,
+            SuccessAudit = 8,
+            FailureAudit = 16
         }
     }
 }
