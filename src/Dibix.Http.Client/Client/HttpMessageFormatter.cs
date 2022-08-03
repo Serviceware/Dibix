@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
+﻿using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -12,10 +8,6 @@ namespace Dibix.Http.Client
 {
     internal static class HttpMessageFormatter
     {
-        #region Fields
-        private static readonly Func<HttpHeaders, IEnumerable<KeyValuePair<string, string>>> GetHeaderStringsAccessor = CompileGetHeaderStrings();
-        #endregion
-
         #region Public Methods
         public static string Format(HttpRequestMessage requestMessage, string requestContentText, bool maskSensitiveData, int? maxContentLength)
         {
@@ -26,13 +18,13 @@ namespace Dibix.Http.Client
             if (requestMessage.Headers.Any())
             {
                 sb.AppendLine()
-                  .Append(Format(requestMessage.Headers));
+                  .Append(Format(requestMessage.Headers, maskSensitiveData));
             }
 
             if (Equals(requestMessage.Content?.Headers.Any(), true))
             {
                 sb.AppendLine()
-                  .Append(Format(requestMessage.Content.Headers));
+                  .Append(Format(requestMessage.Content.Headers, maskSensitiveData));
             }
 
             if (requestContentText != null)
@@ -53,7 +45,7 @@ namespace Dibix.Http.Client
             return formattedRequest;
         }
 
-        public static string Format(HttpResponseMessage responseMessage, string responseContentText, int? maxContentLength)
+        public static string Format(HttpResponseMessage responseMessage, string responseContentText, bool maskSensitiveData, int? maxContentLength)
         {
             Guard.IsNotNull(responseMessage, nameof(responseMessage));
 
@@ -62,13 +54,13 @@ namespace Dibix.Http.Client
             if (responseMessage.Headers.Any())
             {
                 sb.AppendLine()
-                  .Append(Format(responseMessage.Headers));
+                  .Append(Format(responseMessage.Headers, maskSensitiveData));
             }
 
             if (responseMessage.Content.Headers.Any())
             {
                 sb.AppendLine()
-                  .Append(Format(responseMessage.Content.Headers));
+                  .Append(Format(responseMessage.Content.Headers, maskSensitiveData));
             }
 
             if (responseContentText.Length > 0)
@@ -88,34 +80,17 @@ namespace Dibix.Http.Client
         #endregion
 
         #region Private Methods
-        private static string Format(HttpHeaders headers)
+        private static string Format(HttpHeaders headers, bool maskSensitiveData)
         {
-            IDictionary<string, string> headerStrings = GetHeaderStringsAccessor(headers).ToDictionary(x => x.Key, x => x.Value);
-            return String.Join(Environment.NewLine, headers.Select(x => $"{GetHeaderString(headers, headerStrings, x.Key)}"));
+            string formattedHeaders = headers.ToString().TrimEnd();
+            if (!maskSensitiveData)
+                return formattedHeaders;
+
+            string normalizedFormattedHeaders = Regex.Replace(formattedHeaders, @"(Authorization: [^ ]+ .{5})[^\s]+", "$1...");
+            return normalizedFormattedHeaders;
         }
-
-        // The only different to the base implementation is, that it doesn't print sensitive authorization header information
-        private static string GetHeaderString(IEnumerable headers, IDictionary<string, string> headerStrings, string headerName)
-        {
-            if (headers is HttpRequestHeaders requestHeaders && headerName == nameof(HttpRequestHeaders.Authorization))
-                return $"{nameof(HttpRequestHeaders.Authorization)}: {requestHeaders.Authorization.Scheme} {TrimAuthorizationValue(requestHeaders.Authorization.Parameter)}";
-
-            return $"{headerName}: {headerStrings[headerName]}";
-        }
-
-        private static string TrimAuthorizationValue(string value) => value.Length < 5 ? value : $"{value.Substring(0, 5)}...";
 
         private static string TrimIfNecessary(this string text, int maxLength) => text?.Length > maxLength ? $"{text.Substring(0, maxLength)}..." : text;
-
-        private static Func<HttpHeaders, IEnumerable<KeyValuePair<string, string>>> CompileGetHeaderStrings()
-        {
-            ParameterExpression headers = Expression.Parameter(typeof(HttpHeaders), "headers");
-
-            Expression call = Expression.Call(headers, "GetHeaderStrings", Type.EmptyTypes);
-            Expression<Func<HttpHeaders, IEnumerable<KeyValuePair<string, string>>>> lambda = Expression.Lambda<Func<HttpHeaders, IEnumerable<KeyValuePair<string, string>>>>(call, headers);
-            Func<HttpHeaders, IEnumerable<KeyValuePair<string, string>>> compiled = lambda.Compile();
-            return compiled;
-        }
         #endregion
     }
 }

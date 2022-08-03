@@ -1,5 +1,4 @@
-﻿using System;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace Dibix.Http.Client
 {
@@ -14,7 +13,7 @@ namespace Dibix.Http.Client
         public static string GetFormattedText(this HttpException exception, int? maxContentLength = null, bool maskSensitiveData = true)
         {
             string formattedRequest = HttpMessageFormatter.Format(exception.Request, exception.RequestContentText, maskSensitiveData, maxContentLength);
-            string formattedResponse = HttpMessageFormatter.Format(exception.Response, exception.ResponseContentText, maxContentLength);
+            string formattedResponse = HttpMessageFormatter.Format(exception.Response, exception.ResponseContentText, maskSensitiveData, maxContentLength);
             string text = $@"Request
 -------
 {formattedRequest}

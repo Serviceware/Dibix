@@ -9,9 +9,9 @@ namespace Dibix.Http.Client
             return HttpMessageFormatter.Format(requestMessage, requestContentText, maskSensitiveData, maxContentLength);
         }
 
-        public static string GetFormattedText(this HttpResponseMessage responseMessage, string responseContentText, int? maxContentLength = null)
+        public static string GetFormattedText(this HttpResponseMessage responseMessage, string responseContentText, int? maxContentLength = null, bool maskSensitiveData = true)
         {
-            return HttpMessageFormatter.Format(responseMessage, responseContentText, maxContentLength);
+            return HttpMessageFormatter.Format(responseMessage, responseContentText, maskSensitiveData, maxContentLength);
         }
     }
 }
