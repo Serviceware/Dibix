@@ -108,7 +108,7 @@ namespace Dibix
         private static EntityProperty BuildCollectionEntityProperty(PropertyInfo propertyInfo, Type collectionType)
         {
             Type entityType = collectionType.GenericTypeArguments[0];
-            return BuildEntityProperty(propertyInfo, entityType, true, (property, value) => Expression.Call(property, collectionType.GetMethod("Add"), value));
+            return BuildEntityProperty(propertyInfo, entityType, true, (property, value) => Expression.Call(property, collectionType.SafeGetMethod("Add"), value));
         }
 
         private static EntityProperty BuildEntityProperty(PropertyInfo property, Type entityType, bool isCollection, Func<Expression, Expression, Expression> valueSetter)

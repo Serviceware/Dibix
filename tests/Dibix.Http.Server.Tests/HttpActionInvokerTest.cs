@@ -57,7 +57,7 @@ namespace Dibix.Http.Server.Tests
             parametersVisitor.Setup(x => x.VisitInputParameters(It.IsAny<InputParameterVisitor>()));
 
             HttpRequestMessage request = new HttpRequestMessage();
-            Exception exception = (Exception)typeof(DatabaseAccessException).GetMethod("Create", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { null, null, parametersVisitor.Object, sqlException });
+            Exception exception = (Exception)typeof(DatabaseAccessException).SafeGetMethod("Create", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { null, null, parametersVisitor.Object, sqlException });
             parameterResolver.Setup(x => x.PrepareParameters(request, null, null)).Throws(exception);
 
             try
@@ -89,7 +89,7 @@ CommandText: <Dynamic>", requestException.Message);
             parametersVisitor.Setup(x => x.VisitInputParameters(It.IsAny<InputParameterVisitor>()));
 
             HttpRequestMessage request = new HttpRequestMessage();
-            Exception exception = (Exception)typeof(DatabaseAccessException).GetMethod("Create", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { null, null, parametersVisitor.Object, sqlException });
+            Exception exception = (Exception)typeof(DatabaseAccessException).SafeGetMethod("Create", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { null, null, parametersVisitor.Object, sqlException });
             parameterResolver.Setup(x => x.PrepareParameters(request, null, null)).Throws(exception);
 
             try
@@ -131,7 +131,7 @@ CommandText: <Dynamic>", requestException.Message);
                                  }, false, CustomInputType.None);
                              });
 
-            Exception exception = (Exception)typeof(DatabaseAccessException).GetMethod("Create", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { commandType, commandText, parametersVisitor.Object, sqlException });
+            Exception exception = (Exception)typeof(DatabaseAccessException).SafeGetMethod("Create", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { commandType, commandText, parametersVisitor.Object, sqlException });
             parameterResolver.Setup(x => x.PrepareParameters(null, null, null)).Throws(exception);
 
             try
@@ -177,7 +177,7 @@ intValue INT(4)  stringValue NVARCHAR(MAX)
                                  }, false, CustomInputType.None);
                              });
 
-            Exception exception = (Exception)typeof(DatabaseAccessException).GetMethod("Create", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { commandType, commandText, parametersVisitor.Object, sqlException });
+            Exception exception = (Exception)typeof(DatabaseAccessException).SafeGetMethod("Create", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { commandType, commandText, parametersVisitor.Object, sqlException });
             parameterResolver.Setup(x => x.PrepareParameters(null, null, null)).Throws(exception);
 
             try

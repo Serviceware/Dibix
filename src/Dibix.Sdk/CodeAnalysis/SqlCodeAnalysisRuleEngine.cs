@@ -85,7 +85,7 @@ namespace Dibix.Sdk.CodeAnalysis
             {
                 ParameterExpression contextParameter = Expression.Parameter(typeof(SqlCodeAnalysisContext), "context");
                 Expression ruleInstance = Expression.New(x);
-                MethodInfo analyzeMethod = typeof(ISqlCodeAnalysisRule).GetMethod(nameof(ISqlCodeAnalysisRule.Analyze));
+                MethodInfo analyzeMethod = typeof(ISqlCodeAnalysisRule).SafeGetMethod(nameof(ISqlCodeAnalysisRule.Analyze));
                 Expression analyzeCall = Expression.Call(ruleInstance, analyzeMethod, contextParameter);
                 Expression<Func<SqlCodeAnalysisContext, IEnumerable<SqlCodeAnalysisError>>> lambda = Expression.Lambda<Func<SqlCodeAnalysisContext, IEnumerable<SqlCodeAnalysisError>>>(analyzeCall, contextParameter);
                 Func<SqlCodeAnalysisContext, IEnumerable<SqlCodeAnalysisError>> compiled = lambda.Compile();

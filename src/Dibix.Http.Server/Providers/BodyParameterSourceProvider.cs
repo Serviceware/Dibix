@@ -24,7 +24,7 @@ namespace Dibix.Http.Server
             {
                 Expression contentProperty = Expression.Property(context.RequestParameter, nameof(HttpRequestMessage.Content));
                 Expression readAsStreamAsyncCall = Expression.Call(contentProperty, nameof(HttpContent.ReadAsStreamAsync), Type.EmptyTypes);
-                Expression getAwaiterCall = Expression.Call(readAsStreamAsyncCall, typeof(Task<Stream>).GetMethod(nameof(Task<Stream>.GetAwaiter)));
+                Expression getAwaiterCall = Expression.Call(readAsStreamAsyncCall, typeof(Task<Stream>).SafeGetMethod(nameof(Task<Stream>.GetAwaiter)));
                 Expression getResultCall = Expression.Call(getAwaiterCall, nameof(TaskAwaiter.GetResult), Type.EmptyTypes);
                 context.ResolveUsingValue(getResultCall);
             }

@@ -73,7 +73,7 @@ namespace Dibix.Testing.Data
 
                 SqlErrorCollection errorCollection = e.Errors;
                 string serverVersion = null;
-                MethodInfo createExceptionMethod = typeof(SqlException).GetMethod("CreateException", BindingFlags.NonPublic | BindingFlags.Static, null, new[] { typeof(SqlErrorCollection), typeof(string) }, null);
+                MethodInfo createExceptionMethod = typeof(SqlException).SafeGetMethod("CreateException", BindingFlags.NonPublic | BindingFlags.Static, new[] { typeof(SqlErrorCollection), typeof(string) });
                 SqlException exception = (SqlException)createExceptionMethod.Invoke(null, new object[] { errorCollection, serverVersion });
 
                 // Exceptions within the InfoMessage handler will generally be caught and traced.

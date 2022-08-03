@@ -198,7 +198,7 @@ namespace Dibix.Sdk.Sql
             bodyBuilder.AddAssignStatement(elementDescriptorVariable, elementDescriptorAssign);
 
             // Func<TSqlModel, TSqlObject> elementAccessor = elementDescriptor.GetModelElement;
-            MethodInfo getModelElementMethod = ElementDescriptorType.GetMethod("GetModelElement");
+            MethodInfo getModelElementMethod = ElementDescriptorType.SafeGetMethod("GetModelElement");
             Guard.IsNotNull(getModelElementMethod, nameof(getModelElementMethod), "Could not find method 'GetModelElement' on ElementDescriptor");
             Type elementAccessorType = typeof(Func<TSqlModel, TSqlObject>);
             ParameterExpression elementAccessorVariable = Expression.Variable(elementAccessorType, "elementAccessor");

@@ -187,7 +187,7 @@ namespace Dibix.Sdk.Sql
 
             // if (stream != null)
             //     stream.Dispose();
-            MethodInfo disposeMethod = typeof(IDisposable).GetMethod(nameof(IDisposable.Dispose));
+            MethodInfo disposeMethod = typeof(IDisposable).SafeGetMethod(nameof(IDisposable.Dispose));
             Expression disposeStream = Expression.Call(streamVariable, disposeMethod);
             Expression @null = Expression.Constant(null);
             Expression disposeStreamIf = Expression.IfThen(Expression.NotEqual(streamVariable, @null), disposeStream);

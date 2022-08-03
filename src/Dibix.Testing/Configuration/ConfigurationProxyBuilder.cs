@@ -10,9 +10,9 @@ namespace Dibix.Testing
     {
         private static readonly Type PropertyInitializationTrackerType = typeof(ConfigurationPropertyInitializationTracker);
         private static readonly ConstructorInfo PropertyInitializationTrackerCtor = PropertyInitializationTrackerType.GetConstructor(new[] { typeof(ConfigurationInitializationToken) });
-        private static readonly MethodInfo PropertyInitializationTrackerEnterSectionMethod = PropertyInitializationTrackerType.GetMethod(nameof(ConfigurationPropertyInitializationTracker.EnterSection), new[] { typeof(string) });
-        private static readonly MethodInfo PropertyInitializationTrackerVerifyMethod = PropertyInitializationTrackerType.GetMethod(nameof(ConfigurationPropertyInitializationTracker.Verify));
-        private static readonly MethodInfo PropertyInitializationTrackerInitializeMethod = PropertyInitializationTrackerType.GetMethod(nameof(ConfigurationPropertyInitializationTracker.Initialize));
+        private static readonly MethodInfo PropertyInitializationTrackerEnterSectionMethod = PropertyInitializationTrackerType.SafeGetMethod(nameof(ConfigurationPropertyInitializationTracker.EnterSection), new[] { typeof(string) });
+        private static readonly MethodInfo PropertyInitializationTrackerVerifyMethod = PropertyInitializationTrackerType.SafeGetMethod(nameof(ConfigurationPropertyInitializationTracker.Verify));
+        private static readonly MethodInfo PropertyInitializationTrackerInitializeMethod = PropertyInitializationTrackerType.SafeGetMethod(nameof(ConfigurationPropertyInitializationTracker.Initialize));
 
         private static readonly ConfigurationProxyDecisionStrategy Strategy = new VirtualMemberConfigurationProxyDecisionStrategy();
         //private static readonly ConfigurationProxyDecisionStrategy Strategy = new RequiredAttributeConfigurationProxyDecisionStrategy();
@@ -86,7 +86,7 @@ namespace Dibix.Testing
 
             // IConfigurationSectionHandler.EnterSection
             typeBuilder.AddInterfaceImplementation(typeof(IConfigurationSectionHandler));
-            MethodInfo enterSectionMethod = typeof(IConfigurationSectionHandler).GetMethod(nameof(IConfigurationSectionHandler.EnterSection), new[] { typeof(string) });
+            MethodInfo enterSectionMethod = typeof(IConfigurationSectionHandler).SafeGetMethod(nameof(IConfigurationSectionHandler.EnterSection), new[] { typeof(string) });
             MethodBuilder enterSectionMethodImpl = typeBuilder.DefineMethod(enterSectionMethod.Name, MethodAttributes.Private | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.Virtual | MethodAttributes.NewSlot, callingConvention: default, enterSectionMethod.ReturnType, new[] { typeof(string) });
             ILGenerator enterSectionMethodIL = enterSectionMethodImpl.GetILGenerator();
             enterSectionMethodIL.Emit(OpCodes.Ldarg_0); // this

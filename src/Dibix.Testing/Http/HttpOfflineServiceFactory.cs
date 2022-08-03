@@ -149,10 +149,7 @@ namespace Dibix.Testing.Http
 
         private static MethodInfo SafeGetMethod(Type type, string methodName)
         {
-            MethodInfo method = type.GetMethod(methodName);
-            if (method == null)
-                throw new InvalidOperationException($"Could not find method '{methodName}' on type '{type}'");
-
+            MethodInfo method = type.SafeGetMethod(methodName);
             return method;
         }
 

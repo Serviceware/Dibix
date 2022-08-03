@@ -27,7 +27,7 @@ namespace Dibix
             enumeratorVariable = Expression.Variable(typeof(IEnumerator<>).MakeGenericType(elementType), $"{name}Enumerator");
 
             // enumerator = enumerable.GetEnumerator();
-            Expression enumeratorValue = Expression.Call(enumerable, typeof(IEnumerable<>).MakeGenericType(elementType).GetMethod(nameof(IEnumerable<object>.GetEnumerator)));
+            Expression enumeratorValue = Expression.Call(enumerable, typeof(IEnumerable<>).MakeGenericType(elementType).SafeGetMethod(nameof(IEnumerable<object>.GetEnumerator)));
             Expression enumeratorAssign = Expression.Assign(enumeratorVariable, enumeratorValue);
 
             // T element = enumerator.Current;
@@ -42,7 +42,7 @@ namespace Dibix
             // {
             //     ...
             // }
-            Expression moveNextCall = Expression.Call(enumeratorVariable, typeof(IEnumerator).GetMethod(nameof(IEnumerator.MoveNext)));
+            Expression moveNextCall = Expression.Call(enumeratorVariable, typeof(IEnumerator).SafeGetMethod(nameof(IEnumerator.MoveNext)));
             Expression enumeratorIfCondition = Expression.IsTrue(moveNextCall);
             Expression enumeratorIfTrue = Expression.Block
             (
@@ -64,7 +64,7 @@ namespace Dibix
             //     if (enumerator != null)
             //         enumerator.Dispose();
             // }
-            MethodInfo disposeMethod = typeof(IDisposable).GetMethod(nameof(IDisposable.Dispose));
+            MethodInfo disposeMethod = typeof(IDisposable).SafeGetMethod(nameof(IDisposable.Dispose));
             Expression disposeEnumerator = Expression.Call(enumeratorVariable, disposeMethod);
             Expression disposeEnumeratorIf = Expression.IfThen(Expression.NotEqual(enumeratorVariable, Expression.Constant(null)), disposeEnumerator);
             Expression tryBlock = Expression.Block(enumeratorAssign, enumeratorLoop);

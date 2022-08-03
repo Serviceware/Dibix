@@ -42,12 +42,9 @@ namespace Dibix.Http.Server
             return Create(context, type, methodName, isExternal: true);
         }
 
-        private static IHttpActionTarget Create(IHttpApiDiscoveryContext context, IReflect type, string methodName, bool isExternal)
+        private static IHttpActionTarget Create(IHttpApiDiscoveryContext context, Type type, string methodName, bool isExternal)
         {
-            MethodInfo method = type.GetMethod(methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-            if (method == null)
-                throw new InvalidOperationException($"Could not find a public static method named '{methodName}' on {type}");
-
+            MethodInfo method = type.SafeGetMethod(methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
             ReflectionHttpActionTarget target = new ReflectionHttpActionTarget(method, isExternal);
             context?.RegisterProxyHandler(method, target.UpdateMethod);
             return target;

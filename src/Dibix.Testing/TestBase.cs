@@ -72,16 +72,16 @@ namespace Dibix.Testing
             get => SafeGetProperty(ref this._testResultComposer);
             set => this._testResultComposer = value;
         }
-#endregion
+        #endregion
 
-#region Constructor
+        #region Constructor
         protected TestBase()
         {
             this._assembly = this.GetType().Assembly;
         }
-#endregion
+        #endregion
 
-#region Public Methods
+        #region Public Methods
         [TestInitialize]
         public async Task OnTestInitialize()
         {
@@ -91,9 +91,9 @@ namespace Dibix.Testing
 
             await this.OnTestInitialized().ConfigureAwait(false);
         }
-#endregion
+        #endregion
 
-#region Protected Methods
+        #region Protected Methods
         protected virtual Task OnTestInitialized() => Task.CompletedTask;
 
         protected void WriteLine(string message) => this.TestOutputHelper.WriteLine(message);
@@ -157,9 +157,9 @@ Value: {instance}");
         protected static Task Retry(Func<CancellationToken, Task<bool>> retryMethod, TimeSpan timeout, CancellationToken cancellationToken = default) => Retry(retryMethod, x => x, timeout, cancellationToken);
         protected static Task<TResult> Retry<TResult>(Func<CancellationToken, Task<TResult>> retryMethod, Func<TResult, bool> condition, CancellationToken cancellationToken = default) => Retry(retryMethod, condition, TimeSpan.FromMinutes(30), cancellationToken);
         protected static Task<TResult> Retry<TResult>(Func<CancellationToken, Task<TResult>> retryMethod, Func<TResult, bool> condition, TimeSpan timeout, CancellationToken cancellationToken = default) => retryMethod.Retry(condition, (int)TimeSpan.FromSeconds(1).TotalMilliseconds, (int)timeout.TotalMilliseconds, cancellationToken: cancellationToken);
-#endregion
+        #endregion
 
-#region Private Methods
+        #region Private Methods
         private void OnFirstChanceException(object sender, FirstChanceExceptionEventArgs e)
         {
             if (e.Exception is UnitTestAssertException)
@@ -203,9 +203,9 @@ Additionally, the following error occured while trying to log the previous error
 
             return field;
         }
-#endregion
+        #endregion
 
-#region IDisposable Members
+        #region IDisposable Members
         public void Dispose()
         {
             this.Dispose(true);
@@ -220,6 +220,6 @@ Additionally, the following error occured while trying to log the previous error
                 TestResultComposer.Complete();
             }
         }
-#endregion
+        #endregion
     }
 }

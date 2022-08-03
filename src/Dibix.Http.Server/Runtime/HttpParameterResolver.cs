@@ -219,10 +219,7 @@ namespace Dibix.Http.Server
         private static HttpParameterInfo CollectItemsParameter(HttpActionDefinition action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, Expression actionParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, ParameterInfo contractParameter, Type parameterType, string parameterName, bool isOptional, object defaultValue, HttpParameterPropertySource propertySource, IHttpParameterSourceProvider sourceProvider)
         {
             string udtName = parameterType.GetCustomAttribute<StructuredTypeAttribute>()?.UdtName;
-            MethodInfo addMethod = parameterType.GetMethod("Add");
-            if (addMethod == null)
-                throw new InvalidOperationException($"Could not find 'Add' method on type: {parameterType}");
-
+            MethodInfo addMethod = parameterType.SafeGetMethod("Add");
             IDictionary<string, Type> parameterMap = addMethod.GetParameters().ToDictionary(x => x.Name, x => x.ParameterType);
             IEnumerable<HttpParameterInfo> itemSources = propertySource.ItemSources.Select(x =>
             {
@@ -694,12 +691,9 @@ Either create a mapping or make sure a property of the same name exists in the s
             return block;
         }
 
-        private static MethodInfo GetStructuredTypeAddMethod(IReflect type)
+        private static MethodInfo GetStructuredTypeAddMethod(Type type)
         {
-            MethodInfo addMethod = type.GetMethod("Add", BindingFlags.Public | BindingFlags.Instance);
-            if (addMethod == null)
-                throw new InvalidOperationException($"Structured type '{type}' does not have a public Add method");
-
+            MethodInfo addMethod = type.SafeGetMethod("Add", BindingFlags.Public | BindingFlags.Instance);
             return addMethod;
         }
 

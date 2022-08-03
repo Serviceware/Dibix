@@ -37,15 +37,12 @@ namespace Dibix.Sdk.OpenApi.Validation
             private static Action<Microsoft.OpenApi.Validations.OpenApiValidator, object, Type> CompileValidateAction()
             {
                 Type type = typeof(Microsoft.OpenApi.Validations.OpenApiValidator);
-                MethodInfo method = type.GetMethod("Validate", BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { typeof(object), typeof(Type) }, null);
-                if (method == null)
-                    throw new InvalidOperationException($"Could not find method 'private void Validate(object, Type)' on type '{type}");
-
+                MethodInfo method = type.SafeGetMethod("Validate", BindingFlags.NonPublic | BindingFlags.Instance, new[] { typeof(object), typeof(Type) });
                 ParameterExpression validatorParameter = Expression.Parameter(type, "validator");
                 ParameterExpression itemParameter = Expression.Parameter(typeof(object), "item");
                 ParameterExpression typeParameter = Expression.Parameter(typeof(Type), "type");
 
-                Expression call = Expression.Call(validatorParameter, "Validate", Type.EmptyTypes, itemParameter, typeParameter);
+                Expression call = Expression.Call(validatorParameter, method, itemParameter, typeParameter);
                 Expression<Action<Microsoft.OpenApi.Validations.OpenApiValidator, object, Type>> lambda = Expression.Lambda<Action<Microsoft.OpenApi.Validations.OpenApiValidator, object, Type>>(call, validatorParameter, itemParameter, typeParameter);
                 Action<Microsoft.OpenApi.Validations.OpenApiValidator, object, Type> compiled = lambda.Compile();
                 return compiled;

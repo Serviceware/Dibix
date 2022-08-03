@@ -52,8 +52,7 @@ namespace Dibix.Sdk.Sql
 
         private static MethodInfo SafeGetShimMethod(Type type, string methodName)
         {
-            MethodInfo method = type.GetMethod(methodName);
-            Guard.IsNotNull(method, nameof(method), $"Could not find method '{methodName}' on type {type.Name}");
+            MethodInfo method = type.SafeGetMethod(methodName);
             return method;
         }
 

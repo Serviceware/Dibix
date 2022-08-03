@@ -83,11 +83,7 @@ namespace Dibix.Testing
                 throw new InvalidOperationException($"Could not resolve test class: {testClassName}");
 
             string testMethodName = testContext.TestName;
-            MethodInfo testMethod = testClass.GetMethod(testMethodName);
-
-            if (testMethod == null)
-                throw new InvalidOperationException($"Could not resolve test class: {testMethodName}");
-
+            MethodInfo testMethod = testClass.SafeGetMethod(testMethodName);
             return testMethod;
         }
     }

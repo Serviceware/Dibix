@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <Compile Include="..\..\shared\Extensions\EnumerableExtensions.cs" Link="Extensions\EnumerableExtensions.cs" />
+    <Compile Include="..\..\shared\Extensions\ReflectionExtensions.cs" Link="Extensions\ReflectionExtensions.cs" />
     <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\Guard.cs" />
     <Compile Include="..\..\shared\SchemaName.cs" Link="Environment\SchemaName.cs" />
     <Compile Update="Access\DatabaseAccessorExtensions.Execute.cs"              DependentUpon="Access\DatabaseAccessorExtensions.cs" />

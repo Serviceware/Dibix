@@ -52,7 +52,7 @@ namespace Dibix.Http.Server
                 this._proxyTypeMap.Add(declaringType, proxyType);
             }
 
-            return proxyType.GetMethod(method.Name);
+            return proxyType.SafeGetMethod(method.Name);
         }
 
         private static void AddMethod(TypeBuilder typeBuilder, MethodInfo method)
