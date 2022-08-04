@@ -31,6 +31,7 @@ namespace Dibix.Sdk.OpenApi
           , [PrimitiveType.String]         = () => new OpenApiSchema { Type = "string"                        }
           , [PrimitiveType.Uri]            = () => new OpenApiSchema { Type = "string",  Format = "uri"       }
           , [PrimitiveType.UUID]           = () => new OpenApiSchema { Type = "string",  Format = "uuid"      }
+          , [PrimitiveType.Xml]            = () => new OpenApiSchema { Type = "string"                        }
         };
         private static readonly string[] ReservedOpenApiHeaders = { "Accept", "Authorization", "Content-Type" };
         private static readonly OpenApiSchema NullSchema = new OpenApiSchema { Type = "null" };
