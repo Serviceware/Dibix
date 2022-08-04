@@ -585,6 +585,12 @@ namespace Dibix.Sdk.CodeGeneration
 
         private void CollectItemPropertySourceNodes(ActionParameterPropertySource propertySource, ActionParameterPropertySource rootPropertySource)
         {
+            if (!rootPropertySource.Nodes.Any())
+            {
+                // Oops, a previous error should have been logged in this case
+                return;
+            }
+
             ActionParameterPropertySourceNode lastNode = rootPropertySource.Nodes.LastOrDefault();
             if (lastNode == null)
                 throw new InvalidOperationException($"Missing resolved source property node for item property mapping ({rootPropertySource.PropertyName})");
