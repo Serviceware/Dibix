@@ -35,7 +35,10 @@
     <MoqVersion>4.17.2</MoqVersion>
     <MSTestAdapterVersion>2.2.8</MSTestAdapterVersion>
     <MSTestFrameworkVersion>2.2.8</MSTestFrameworkVersion>
-    <RoslynVersion>4.1.0</RoslynVersion>
+    <RoslynVersion>4.2.0</RoslynVersion>
+
+    <!-- Generators -->
+    <AnalyzersVersion>3.3.3</AnalyzersVersion>
 
   </PropertyGroup>
 </Project>

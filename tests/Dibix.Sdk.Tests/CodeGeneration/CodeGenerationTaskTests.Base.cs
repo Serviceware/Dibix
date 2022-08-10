@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using Dibix.Testing;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -152,43 +150,23 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                 SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(SourceText.From(inputStream), path: generatedFilePath);
                 CSharpCompilation compilation = CSharpCompilation.Create(null)
                                                                  .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
-                                                                 .AddReferences(ResolveReference<Object>())
-                                                                 .AddReferences(ResolveReference<System.Runtime.Serialization.DataContractAttribute>())
-                                                                 .AddReferences(ResolveReference<System.ComponentModel.DataAnnotations.KeyAttribute>())
-                                                                 .AddReferences(ResolveReference<System.Data.CommandType>())
-                                                                 .AddReferences(ResolveReference<System.Linq.Expressions.Expression>())
-                                                                 .AddReferences(ResolveReference<System.Net.Http.HttpClient>())
-                                                                 .AddReferences(ResolveReference<Uri>())
                                                                  .AddReferences(MetadataReference.CreateFromFile("Dibix.dll"))
                                                                  .AddReferences(MetadataReference.CreateFromFile("Dibix.Http.Client.dll"))
                                                                  .AddReferences(MetadataReference.CreateFromFile("Dibix.Http.Server.dll"))
                                                                  .AddReferences(MetadataReference.CreateFromFile("Newtonsoft.Json.dll"))
                                                                  .AddReferences(MetadataReference.CreateFromFile("System.Net.Http.Formatting.dll"))
+                                                                 .AddReference<Object>()
+                                                                 .AddReference<System.Runtime.Serialization.DataContractAttribute>()
+                                                                 .AddReference<System.ComponentModel.DataAnnotations.KeyAttribute>()
+                                                                 .AddReference<System.Data.CommandType>()
+                                                                 .AddReference<System.Linq.Expressions.Expression>()
+                                                                 .AddReference<System.Net.Http.HttpClient>()
+                                                                 .AddReference<Uri>()
                                                                  .AddSyntaxTrees(syntaxTree);
 
-                using (Stream outputStream = new MemoryStream())
-                {
-                    EmitResult emitResult = compilation.Emit(outputStream);
-                    if (emitResult.Success) 
-                        return;
-
-                    StringBuilder sb = new StringBuilder();
-                    ICollection<Diagnostic> errors = emitResult.Diagnostics
-                                                               .Where(x => x.Severity == DiagnosticSeverity.Error)
-                                                               .ToArray();
-                    
-                    if (!errors.Any())
-                        errors = emitResult.Diagnostics;
-
-                    foreach (Diagnostic error in errors)
-                        sb.AppendLine(error.ToString());
-
-                    throw new CodeCompilationException(sb.ToString());
-                }
+                RoslynUtility.VerifyCompilation(compilation);
             }
         }
-
-        private static MetadataReference ResolveReference<T>() => MetadataReference.CreateFromFile(typeof(T).Assembly.Location);
 
         private static TaskItem ToTaskItem(string relativePath) => new TaskItem(relativePath) { ["FullPath"] = Path.Combine(DatabaseTestUtility.DatabaseProjectDirectory, relativePath) };
 

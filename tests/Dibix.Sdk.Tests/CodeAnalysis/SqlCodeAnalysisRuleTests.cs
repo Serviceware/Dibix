@@ -1,134 +1,80 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Xml;
+using System.Xml.Linq;
+using Dibix.Sdk.CodeAnalysis;
+using Dibix.Sdk.Sql;
+using Dibix.Testing;
+using Microsoft.SqlServer.Dac.Model;
 
 namespace Dibix.Sdk.Tests.CodeAnalysis
 {
-    [TestClass]
-    public sealed partial class SqlCodeAnalysisRuleTests
+    public sealed partial class SqlCodeAnalysisRuleTests : TestBase
     {
-        [TestMethod]
-        public void KeywordCasingSqlCodeAnalysisRule() => this.Execute();
+        partial void Execute(string testName)
+        {
+            // Determine rule by 'back in time development' and create instance
+            string resourceKey = ResourceUtility.BuildResourceKey($"CodeAnalysis.{testName}.xml");
+            string expected = base.GetEmbeddedResourceContent(resourceKey);
+            Type ruleType = Type.GetType($"Dibix.Sdk.CodeAnalysis.Rules.{testName},{typeof(ISqlCodeAnalysisRule).Assembly.GetName().Name}");
+            ISqlCodeAnalysisRule ruleInstance = (ISqlCodeAnalysisRule)Activator.CreateInstance(ruleType);
+            SqlCodeAnalysisRuleAttribute descriptor = ruleType.GetCustomAttribute<SqlCodeAnalysisRuleAttribute>();
+            string violationScriptPath = Path.Combine(DatabaseTestUtility.DatabaseProjectDirectory, "CodeAnalysis", $"dbx_codeanalysis_error_{descriptor.Id:D3}.sql");
 
-        [TestMethod]
-        public void SchemaSpecificationSqlCodeAnalysisRule() => this.Execute();
+            IEnumerable<TaskItem> sources = ((IEnumerable)DatabaseTestUtility.QueryProject("x:Project/x:ItemGroup/x:Build/@Include"))
+                                                                             .OfType<XAttribute>()
+                                                                             .Select(x => new TaskItem(x.Value) { ["FullPath"] = Path.Combine(DatabaseTestUtility.DatabaseProjectDirectory, x.Value) })
+                                                                             .ToArray();
 
-        [TestMethod]
-        public void EmptyReturnSqlCodeAnalysisRule() => this.Execute();
+            TestLogger logger = new TestLogger(base.Out, distinctErrorLogging: true);
 
-        [TestMethod]
-        public void UnicodeConstantSqlCodeAnalysisRule() => this.Execute();
+            TSqlModel model = PublicSqlDataSchemaModelLoader.Load(DatabaseTestUtility.ProjectName, DatabaseTestUtility.DatabaseSchemaProviderName, DatabaseTestUtility.ModelCollation, sources, Array.Empty<TaskItem>(), logger);
+            LockEntryManager lockEntryManager = LockEntryManager.Create();
+            ISqlCodeAnalysisRuleEngine engine = SqlCodeAnalysisRuleEngine.Create(model, DatabaseTestUtility.ProjectName, new SqlCodeAnalysisConfiguration("dbx"), false, lockEntryManager, logger);
+            IEnumerable<SqlCodeAnalysisError> errors = engine.Analyze(violationScriptPath, ruleInstance);
 
-        [TestMethod]
-        public void UnicodeDataTypeSqlCodeAnalysisRule() => this.Execute();
+            string actual = GenerateXmlFromResults(errors);
+            base.AssertEqual(expected, actual, extension: "xml");
+        }
 
-        [TestMethod]
-        public void RedundantAliasSqlCodeAnalysisRule() => this.Execute();
+        private static string GenerateXmlFromResults(IEnumerable<SqlCodeAnalysisError> result)
+        {
+            XDocument doc = new XDocument
+            (
+                new XElement
+                (
+                    "errors"
+                  , result.Select
+                    (
+                        x => new XElement
+                        (
+                            "error"
+                          , new XAttribute("ruleid", x.RuleId)
+                          , new XAttribute("message", x.Message)
+                          , new XAttribute("line", x.Line)
+                          , new XAttribute("column", x.Column)
+                        )
+                    )
+                    .ToArray()
+                )
+            );
 
-        [TestMethod]
-        public void PrimitiveDataTypeIdentifierSqlCodeAnalysisRule() => this.Execute();
+            using (TextWriter stringWriter = new Utf8StringWriter())
+            {
+                using (XmlWriter xmlWriter = XmlWriter.Create(stringWriter, new XmlWriterSettings { Indent = true, NewLineOnAttributes = true }))
+                {
+                    doc.Save(xmlWriter);
+                }
+                return stringWriter.ToString();
+            }
+        }
 
-        [TestMethod]
-        public void ImplicitAliasSqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void UnspecifiedDataTypeLengthSqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void AliasSqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void ConsistentlyQuotedIdentifierSqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void MissingPrimaryKeySqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void NoCursorSqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void UnnamedConstraintSqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void InsertWithoutColumnSpecificationSqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void UnsupportedDataTypeSqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void NamingConventionSqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void UnfilteredDataModificationSqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void TruncateTableSqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void LanguageDependentConstantSqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void TemporaryTableSqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void MisusedTopRowFilterSqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void PrimaryKeyDataTypeSqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void SurrogateKeySqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void ImplicitDefaultSqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void LooseConstraintsSqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void UniqueIndexSqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void DateTimeSqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void TableConstraintSqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void SecurityAlgorithmSqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void UnintentionalBooleanComparisonSqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void IndexSizeSqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void RedundantIndexSqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void IsNullSqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void AmbiguousCheckConstraintSqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void PrimaryKeyUpdateSqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void InlineFunctionSqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void RedundantSymbolSqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void ExplicitProcedureArgumentSqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void UnsupportedEmbeddedSymbolReferenceSqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void InvalidFunctionUsageSqlCodeAnalysisRule() => this.Execute();
-
-        [TestMethod]
-        public void SetStatementSqlCodeAnalysisRule() => this.Execute();
+        private sealed class Utf8StringWriter : StringWriter { public override Encoding Encoding => Encoding.UTF8; }
     }
 }

@@ -61,6 +61,7 @@ stages:
       vmImage: windows-latest
 
     steps:
+    - template: azure-pipelines-template/install-dotnet-sdk.yml
     - template: azure-pipelines-template/publish-coverage.yml
       parameters:
         codeCoverageEngine: ${{ variables.codeCoverageEngine }}

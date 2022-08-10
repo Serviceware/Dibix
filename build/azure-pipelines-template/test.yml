@@ -31,6 +31,7 @@ steps:
     parameters:
       projects:
       - Dibix.Dapper.Tests
+      - Dibix.Generators.Tests
       - Dibix.Http.Client.Tests
       - Dibix.Http.Server.Tests
       - Dibix.Sdk.Tests
@@ -45,6 +46,7 @@ steps:
      #  Currently running Dapper tests only on Windows, because sqllocaldb is not supported on linux
      #  It might be possible to use a vm with SQL server installed, have to look into it
      #- Dibix.Dapper.Tests
+      - Dibix.Generators.Tests
       - Dibix.Http.Client.Tests
       - Dibix.Http.Server.Tests
      #  System.TypeLoadException: Could not load type of field 'Microsoft.Data.Tools.Schema.Common.Diagnostics.EtwProvider:m_provider' (1) due to: Could not resolve type with token 01000013 from typeref (expected class 'System.Diagnostics.Eventing.EventProvider' in assembly 'System.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089') assembly:System.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089 type:System.Diagnostics.Eventing.EventProvider member:(null)
