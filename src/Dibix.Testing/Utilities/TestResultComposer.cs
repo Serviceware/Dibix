@@ -199,8 +199,7 @@ start winmergeU ""{ExpectedDirectoryName}"" ""{ActualDirectoryName}""");
         {
             Assembly assembly = TestImplementationResolver.ResolveTestAssembly(testContext);
             string assemblyName = assembly.GetName().Name;
-            string testRunDirectoryName = new DirectoryInfo(testContext.TestRunDirectory).Name;
-            string directoryName = $"Run_{testRunDirectoryName.Split(' ').Last()}";
+            string directoryName = $"Run_{DateTime.Now:yyyy-MM-dd HH_mm_ss}";
             string path = Path.Combine(Path.GetTempPath(), "TestResults", directoryName, assemblyName);
             return path;
         }
