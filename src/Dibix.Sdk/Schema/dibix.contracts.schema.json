@@ -131,7 +131,14 @@
               "minProperties": 2,
               "properties": {
                 "type": {
-                  "const": "uri"
+                  "anyOf": [
+                    {
+                      "const": "uri"
+                    },
+                    {
+                      "const": "uri?"
+                    }
+                  ]
                 },
                 "isRelativeHttpsUrl": {
                   "type": "boolean",
