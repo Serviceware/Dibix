@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -44,14 +45,18 @@ namespace Dibix.Generators.Tests
             Assert.AreEqual(1, runResult.Results.Length);
             Assert.AreEqual(1, runResult.Results[0].GeneratedSources.Length);
             RoslynUtility.VerifyCompilation(runResult.Results[0]);
+
+            string expectedCode = this.GetExpectedText();
+            SyntaxTree generatedSyntaxTree = outputCompilation.SyntaxTrees.ElementAt(1);
+            string fileName = Path.GetFileName(generatedSyntaxTree.FilePath);
+            string actualCode = generatedSyntaxTree.ToString();
+            base.AddResultFile(fileName, actualCode);
+            base.AssertEqual(expectedCode, actualCode, "cs");
+
             RoslynUtility.VerifyCompilation(outputCompilation);
             RoslynUtility.VerifyCompilation(diagnostics);
             Assert.AreEqual(2, outputCompilation.SyntaxTrees.Count());
-            Assert.AreEqual(inputCompilation.SyntaxTrees.First(), outputCompilation.SyntaxTrees.First());
-
-            string expectedCode = this.GetExpectedText();
-            string actualCode = outputCompilation.SyntaxTrees.ElementAt(1).ToString();
-            base.AssertEqual(expectedCode, actualCode, "cs");
+            Assert.AreEqual(inputCompilation.SyntaxTrees[0], outputCompilation.SyntaxTrees.First());
         }
 
         private string GetExpectedText([CallerMemberName] string? resourceName = null) => base.GetEmbeddedResourceContent($"{resourceName}.cs");

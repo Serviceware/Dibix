@@ -6,6 +6,7 @@ using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace Dibix.Generators
 {
@@ -16,17 +17,15 @@ namespace Dibix.Generators
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
-            var classDeclarations = context.SyntaxProvider.CreateSyntaxProvider(IsSyntaxTargetForGeneration, GetSemanticTargetForGeneration);
-            var compilationAndClasses = context.CompilationProvider.Combine(classDeclarations.Collect());
-            context.RegisterSourceOutput(compilationAndClasses, (sourceProductionContext, source) => GenerateSource(sourceProductionContext, source.Right));
+            IncrementalValueProvider<string?> rootNamespace = context.AnalyzerConfigOptionsProvider.Select((x, _) => GetRootNamespace(x));
+            IncrementalValuesProvider<IEnumerable<CodeGenerationTask>> classDeclarations = context.SyntaxProvider.CreateSyntaxProvider(IsAssemblyAttribute, CollectCodeGenerationTasks);
+            var all = context.CompilationProvider
+                             .Combine(classDeclarations.Collect())
+                             .Combine(rootNamespace);
+            context.RegisterSourceOutput(all, (sourceProductionContext, source) => GenerateSource(sourceProductionContext, source.Left.Right, source.Right));
         }
 
-        private static bool IsSyntaxTargetForGeneration(SyntaxNode node, CancellationToken cancellationToken)
-        {
-            return node is AttributeListSyntax { Target: { } } attributeList && attributeList.Target.Identifier.IsKind(SyntaxKind.AssemblyKeyword);
-        }
-
-        private static IEnumerable<CodeGenerationTask> GetSemanticTargetForGeneration(GeneratorSyntaxContext context, CancellationToken cancellationToken)
+        private static IEnumerable<CodeGenerationTask> CollectCodeGenerationTasks(GeneratorSyntaxContext context, CancellationToken cancellationToken)
         {
             AttributeListSyntax attributeList = (AttributeListSyntax)context.Node;
             var query = from attribute in attributeList.Attributes
@@ -56,38 +55,45 @@ namespace Dibix.Generators
             if (context.SemanticModel.GetSymbolInfo(typeSyntax).Symbol is not ITypeSymbol baseTypeSymbol)
                 return null;
 
-            string? @namespace = CollectNamespace(context, arguments);
-            if (@namespace == null) 
-                return null;
-
+            string? configuredNamespace = CollectNamespaceFromAttribute(context, arguments);
+            string? assemblyName = context.SemanticModel.Compilation.AssemblyName;
+            string baseTypeNamespace = CollectNamespaceFromType(baseTypeSymbol);
             DerivedTypeVisitor typeVisitor = new DerivedTypeVisitor(baseTypeSymbol);
             context.SemanticModel.Compilation.GlobalNamespace.Accept(typeVisitor);
 
-            return new CodeGenerationTask(@namespace, baseTypeSymbol.Name, typeVisitor.TypeNames);
+            return new CodeGenerationTask(configuredNamespace, assemblyName, baseTypeSymbol.Name, baseTypeNamespace, typeVisitor.TypeNames);
         }
 
-        private static string? CollectNamespace(GeneratorSyntaxContext context, SeparatedSyntaxList<AttributeArgumentSyntax> arguments)
+        private static string CollectNamespaceFromType(ITypeSymbol type) => type.ContainingNamespace.ToDisplayString();
+
+        private static string? CollectNamespaceFromAttribute(GeneratorSyntaxContext context, SeparatedSyntaxList<AttributeArgumentSyntax> arguments)
         {
-            string @namespace;
-            if (arguments.Count > 1)
-            {
-                if (arguments[1].Expression is not LiteralExpressionSyntax namespaceExpression)
-                    return null;
+            if (arguments.Count <= 1) 
+                return null;
 
-                @namespace = namespaceExpression.Token.ValueText;
-            }
-            else
-            {
-                @namespace = context.SemanticModel.Compilation.AssemblyName!;
-            }
-            return @namespace;
+            Optional<object?> value = context.SemanticModel.GetConstantValue(arguments[1].Expression);
+            if (!value.HasValue)
+                return null;
+
+            string? result = value.Value as string;
+            return result;
         }
 
-        private static void GenerateSource(SourceProductionContext context, ImmutableArray<IEnumerable<CodeGenerationTask>> taskGroups)
+        private static bool IsAssemblyAttribute(SyntaxNode node, CancellationToken cancellationToken)
         {
-            taskGroups.SelectMany(x => x).Each(x => GenerateSource(context, x));
+            return node is AttributeListSyntax { Target: { } } attributeList && attributeList.Target.Identifier.IsKind(SyntaxKind.AssemblyKeyword);
         }
-        private static void GenerateSource(SourceProductionContext context, CodeGenerationTask task)
+
+        private static string? GetRootNamespace(AnalyzerConfigOptionsProvider analyzerConfigOptionsProvider)
+        {
+            return analyzerConfigOptionsProvider.GlobalOptions.TryGetValue("build_property.rootnamespace", out string? rootNamespace) ? rootNamespace : null;
+        }
+
+        private static void GenerateSource(SourceProductionContext context, ImmutableArray<IEnumerable<CodeGenerationTask>> taskGroups, string? rootNamespace)
+        {
+            taskGroups.SelectMany(x => x).Each(x => GenerateSource(context, x, rootNamespace));
+        }
+        private static void GenerateSource(SourceProductionContext context, CodeGenerationTask task, string? rootNamespace)
         {
             string className = $"{task.BaseTypeName}Tests";
 
@@ -95,10 +101,11 @@ namespace Dibix.Generators
         public void {name}() => this.Execute();";
 
             string testMethods = String.Join($"{Environment.NewLine}{Environment.NewLine}", task.TypeNames.Select(TestMethodTemplate));
-            context.AddSource($"{className}.generated.cs", @$"using System.Runtime.CompilerServices;
+            string @namespace = task.Namespace ?? rootNamespace ?? task.AssemblyName ?? $"{task.BaseTypeNamespace}.Tests";
+            string source = @$"using System.Runtime.CompilerServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace {task.Namespace}
+namespace {@namespace}
 {{
     [TestClass]
     public sealed partial class {className}
@@ -107,19 +114,24 @@ namespace {task.Namespace}
 
         partial void Execute([CallerMemberName] string testName = null);
     }}
-}}");
+}}";
+            context.AddSource($"{className}.generated.cs", source);
         }
 
         private readonly struct CodeGenerationTask
         {
-            public string Namespace { get; }
+            public string? Namespace { get; }
+            public string? AssemblyName { get; }
             public string BaseTypeName { get; }
+            public string BaseTypeNamespace { get; }
             public ImmutableArray<string> TypeNames { get; }
 
-            public CodeGenerationTask(string @namespace, string baseTypeName, IEnumerable<string> typeNames)
+            public CodeGenerationTask(string? @namespace, string? assemblyName, string baseTypeName, string baseTypeNamespace, IEnumerable<string> typeNames)
             {
                 this.Namespace = @namespace;
+                this.AssemblyName = assemblyName;
                 this.BaseTypeName = baseTypeName;
+                this.BaseTypeNamespace = baseTypeNamespace;
                 this.TypeNames = typeNames.ToImmutableArray();
             }
         }
