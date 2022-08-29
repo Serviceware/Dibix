@@ -56,6 +56,8 @@ namespace Dibix.Testing
         }
         protected virtual bool AttachOutputObserver => false;
         protected virtual TextWriter Out => this.TestOutputHelper;
+        protected string RunDirectory => this.TestResultComposer.RunDirectory;
+        protected string TestDirectory => this.TestResultComposer.TestDirectory;
 
         /// <summary>
         /// By default, the test results directory is cleaned up by MSTest, after all tests of a run have passed.
