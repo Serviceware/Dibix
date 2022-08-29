@@ -16,12 +16,13 @@ namespace Dibix.Testing
         private readonly TestContext _testContext;
         private readonly bool _useDedicatedTestResultsDirectory;
         private readonly string _defaultRunDirectory;
-        private readonly string _runDirectory;
-        private readonly string _testDirectory;
         private readonly string _expectedDirectory;
         private readonly string _actualDirectory;
         private readonly ICollection<string> _testRunFiles;
         private readonly ICollection<string> _testFiles;
+
+        public string RunDirectory { get; }
+        public string TestDirectory { get; }
 
         public TestResultComposer(TestContext testContext, bool useDedicatedTestResultsDirectory)
         {
@@ -29,17 +30,17 @@ namespace Dibix.Testing
             this._useDedicatedTestResultsDirectory = useDedicatedTestResultsDirectory;
             this._defaultRunDirectory = testContext.TestRunResultsDirectory;
             string dedicatedRunDirectory = BuildDedicatedRunDirectory(testContext);
-            this._runDirectory = this._useDedicatedTestResultsDirectory ? dedicatedRunDirectory : this._defaultRunDirectory;
-            this._testDirectory = Path.Combine(this._runDirectory, "TestResults", testContext.TestName);
-            this._expectedDirectory = Path.Combine(this._runDirectory, ExpectedDirectoryName);
-            this._actualDirectory = Path.Combine(this._runDirectory, ActualDirectoryName);
+            this.RunDirectory = this._useDedicatedTestResultsDirectory ? dedicatedRunDirectory : this._defaultRunDirectory;
+            this.TestDirectory = Path.Combine(this.RunDirectory, "TestResults", testContext.TestName);
+            this._expectedDirectory = Path.Combine(this.RunDirectory, ExpectedDirectoryName);
+            this._actualDirectory = Path.Combine(this.RunDirectory, ActualDirectoryName);
             this._testRunFiles = new HashSet<string>();
             this._testFiles = new HashSet<string>();
         }
 
         public string AddFile(string fileName)
         {
-            string path = Path.Combine(this._testDirectory, fileName);
+            string path = Path.Combine(this.TestDirectory, fileName);
             EnsureDirectory(path);
             this.RegisterFile(path, scopeIsTestRun: false);
             return path;
@@ -92,7 +93,7 @@ namespace Dibix.Testing
         private void EnsureFileComparisonContent(string directory, string extension, string content)
         {
             this.EnsureFileComparisonContent(Path.Combine(directory, $"{this._testContext.TestName}.{extension}"), content);
-            this.EnsureFileComparisonContent(Path.Combine(this._testDirectory, $"{new DirectoryInfo(directory).Name}.{extension}"), content);
+            this.EnsureFileComparisonContent(Path.Combine(this.TestDirectory, $"{new DirectoryInfo(directory).Name}.{extension}"), content);
         }
         private void EnsureFileComparisonContent(string path, string content)
         {
@@ -128,7 +129,7 @@ namespace Dibix.Testing
         private void EnsureWinMergeStarter()
         {
             const string fileName = "winmerge.bat";
-            string path = Path.Combine(this._runDirectory, fileName);
+            string path = Path.Combine(this.RunDirectory, fileName);
 
             if (!this.ShouldRegisterTestRunFile(path))
                 return;
@@ -153,12 +154,12 @@ start winmergeU ""{ExpectedDirectoryName}"" ""{ActualDirectoryName}""");
             if (!files.Any())
                 return;
 
-            string path = Path.Combine(this._testDirectory, $"{this._testContext.TestName}.zip");
+            string path = Path.Combine(this.TestDirectory, $"{this._testContext.TestName}.zip");
             using (ZipArchive archive = ZipFile.Open(path, ZipArchiveMode.Create))
             {
                 foreach (string file in files)
                 {
-                    int relativePathIndex = this._runDirectory.Length + 1;
+                    int relativePathIndex = this.RunDirectory.Length + 1;
                     string relativePath = file.Substring(relativePathIndex, file.Length - relativePathIndex);
                     archive.CreateEntryFromFile(file, relativePath);
                 }
@@ -180,7 +181,7 @@ start winmergeU ""{ExpectedDirectoryName}"" ""{ActualDirectoryName}""");
         {
             foreach (string file in files)
             {
-                string relativeFilePath = file.Substring(this._runDirectory.Length + 1);
+                string relativeFilePath = file.Substring(this.RunDirectory.Length + 1);
                 string targetFilePath = Path.Combine(targetDirectory, relativeFilePath);
                 EnsureDirectory(targetFilePath);
 
