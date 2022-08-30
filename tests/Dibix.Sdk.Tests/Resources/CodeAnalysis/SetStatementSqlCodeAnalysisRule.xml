@@ -47,7 +47,7 @@
     column="5" />
   <error
     ruleid="42"
-    message="Unsupported SET statement: SETUSER N'x'"
+    message="Unsupported SET statement: SETUSER"
     line="14"
     column="5" />
   <error

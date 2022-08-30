@@ -11,7 +11,7 @@ BEGIN
     SET ROWCOUNT                          0        -- Fail => Unsupported option => Default is 0
     SET STATISTICS TIME                   ON       -- Fail => Unsupported option
     SET TEXTSIZE                          0        -- Fail => Unsupported option
-    SETUSER                               N'x'     -- Fail => Unsupported option
+    SETUSER                                        -- Fail => Unsupported option
     SET DEADLOCK_PRIORITY                 HIGH     -- Fail => Unsupported setting value
     SET NOCOUNT                           OFF      -- Fail => Unsupported setting value
     SET XACT_ABORT                        OFF      -- Fail => Unsupported setting value

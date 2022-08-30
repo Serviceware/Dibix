@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -32,9 +31,14 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
                                                                              .Select(x => new TaskItem(x.Value) { ["FullPath"] = Path.Combine(DatabaseTestUtility.DatabaseProjectDirectory, x.Value) })
                                                                              .ToArray();
 
+            // master.dacpac is actually required otherwise causes this error:
+            // CodeAnalysis\dbx_codeanalysis_error_002.sql(84,10,84,10):error 71502:Procedure: [dbo].[dbx_codeanalysis_error_002_x] has an unresolved reference to object [dbo].[sp_executesql].
+            // The master.dacpac lies in the VS IDE folder with an installed SSDT, which is not available in CI builds, therefore ignore it for now.
+            ICollection<TaskItem> references = Array.Empty<TaskItem>();
+
             TestLogger logger = new TestLogger(base.Out, distinctErrorLogging: true);
 
-            TSqlModel model = PublicSqlDataSchemaModelLoader.Load(DatabaseTestUtility.ProjectName, DatabaseTestUtility.DatabaseSchemaProviderName, DatabaseTestUtility.ModelCollation, sources, Array.Empty<TaskItem>(), logger);
+            TSqlModel model = PublicSqlDataSchemaModelLoader.Load(DatabaseTestUtility.ProjectName, DatabaseTestUtility.DatabaseSchemaProviderName, DatabaseTestUtility.ModelCollation, sources, references, logger);
             LockEntryManager lockEntryManager = LockEntryManager.Create();
             ISqlCodeAnalysisRuleEngine engine = SqlCodeAnalysisRuleEngine.Create(model, DatabaseTestUtility.ProjectName, new SqlCodeAnalysisConfiguration("dbx"), false, lockEntryManager, logger);
             IEnumerable<SqlCodeAnalysisError> errors = engine.Analyze(violationScriptPath, ruleInstance);
