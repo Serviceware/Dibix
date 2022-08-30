@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+using Dibix.Http;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -24,9 +27,31 @@ namespace Dibix.Sdk.CodeGeneration
                     if (!this.ValidateAction(action))
                         isValid = false;
                 }
+
+                var childRouteGroups = controller.Actions
+                                                 .Where(x => x.ChildRoute != null)
+                                                 .GroupBy(x => $"{x.Method}#{NormalizeChildRoute(x.ChildRoute)}");
+
+                foreach (IGrouping<string, ActionDefinition> childRouteGroup in childRouteGroups)
+                {
+                    if (childRouteGroup.Count() <= 1) 
+                        continue;
+
+                    foreach (ActionDefinition action in childRouteGroup)
+                    {
+                        string route = RouteBuilder.BuildRoute(model.AreaName, controller.Name, action.ChildRoute);
+                        this._logger.LogError($"Equivalent paths are not allowed: {action.Method.ToString().ToUpperInvariant()} {route}", action.ChildRoute.Source, action.ChildRoute.Line, action.ChildRoute.Column);
+                    }
+                }
             }
 
             return isValid;
+        }
+
+        private static string NormalizeChildRoute(string childRoute)
+        {
+            string normalizedChildRoute = Regex.Replace(childRoute, @"\{[^\}]+\}", "");
+            return normalizedChildRoute;
         }
 
         private bool ValidateAction(ActionDefinition action)

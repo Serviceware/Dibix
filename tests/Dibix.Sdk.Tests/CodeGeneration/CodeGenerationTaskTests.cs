@@ -518,7 +518,7 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
         }
 
         [TestMethod]
-        public void Endpoint_WithInvalidPropertySource_Error()
+        public void Endpoint_WithValidationErrors_Error()
         {
             this.ExecuteTestAndExpectError
             (
@@ -541,7 +541,9 @@ Endpoints\GenericEndpointWithErrors.json(18,20,18,20):error:Property 'X' not fou
 Endpoints\GenericEndpointWithErrors.json(19,23,19,23):error:Property 'Nm' not found on contract 'Dibix.Sdk.Tests.DomainModel.Entry'
 Endpoints\GenericEndpointWithErrors.json(24,27,24,27):error:Property 'Nm' not found on contract 'Dibix.Sdk.Tests.DomainModel.Entry'
 Endpoints\GenericEndpointWithErrors.json(9,19,9,19):error:Source 'ENV' does not support property 'MachinePassword'
-Endpoints\GenericEndpointWithErrors.json(16,27,16,27):error:The path segment 'get' is a known HTTP verb, which should be indicated by the action method and is therefore redundant: this/get/is/wrong"
+Endpoints\GenericEndpointWithErrors.json(16,27,16,27):error:The path segment 'get' is a known HTTP verb, which should be indicated by the action method and is therefore redundant: this/get/is/wrong
+Endpoints\GenericEndpointWithErrors.json(32,22,32,22):error:Equivalent paths are not allowed: GET Tests/GenericEndpoint/ambiguous/child/route/{a}
+Endpoints\GenericEndpointWithErrors.json(37,22,37,22):error:Equivalent paths are not allowed: GET Tests/GenericEndpoint/ambiguous/child/route/{b}"
             );
         }
 

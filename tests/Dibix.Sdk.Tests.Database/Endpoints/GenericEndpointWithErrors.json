@@ -25,6 +25,16 @@
           }
         }
       }
+    },
+    {
+      "method": "GET",
+      "target": "EmptyWithParams",
+      "childRoute": "ambiguous/child/route/{a}"
+    },
+    {
+      "method": "GET",
+      "target": "EmptyWithParams",
+      "childRoute": "ambiguous/child/route/{b}"
     }
   ]
 }
