@@ -112,8 +112,8 @@ namespace Dibix.Sdk.CodeGeneration
                     return $"{nameof(IEnumerable<object>)}<{typeName}>";
 
                 case EnumerableBehavior.Collection:
-                    context.AddUsing<ICollection<object>>();
-                    return $"{nameof(ICollection<object>)}<{typeName}>";
+                    context.AddUsing<IReadOnlyList<object>>();
+                    return $"{nameof(IReadOnlyList<object>)}<{typeName}>";
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(enumerableBehavior), enumerableBehavior, null);
