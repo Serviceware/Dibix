@@ -15,7 +15,7 @@ steps:
 - ${{ each project in parameters.projects }}:
   - task: DotNetCoreCLI@2
     displayName: 🧪 Test ${{ project }}
-    condition: succeededOrFailed()
+    continueOnError: true
     inputs:
       command: test
       projects: tests/${{ project }}
@@ -30,11 +30,9 @@ steps:
   
   - pwsh: Get-ChildItem $(Agent.TempDirectory)/*/coverage.cobertura.xml | %{ Rename-Item -Path $_.FullName -NewName ${{ project }}.xml }
     displayName: 🎨 Rename coverage.cobertura.xml -> ${{ project }}.xml
-    condition: succeededOrFailed()
 
   - task: CopyFiles@2
     displayName: 🪂 Prepare test artifacts
-    condition: succeededOrFailed()
     inputs:
       SourceFolder: $(Agent.TempDirectory)
       TargetFolder: $(Build.ArtifactStagingDirectory)/test

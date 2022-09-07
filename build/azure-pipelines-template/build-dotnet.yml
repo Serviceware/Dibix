@@ -16,4 +16,4 @@ steps:
     arguments: >
       --configuration ${{ parameters.configuration }}
       --no-restore
-      /bl:$(Build.ArtifactStagingDirectory)/build/logs/${{ parameters.configuration }}/${{ parameters.project }}.binlog
+      -bl:$(Build.ArtifactStagingDirectory)/build/logs/${{ parameters.configuration }}/${{ parameters.project }}.binlog

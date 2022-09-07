@@ -18,7 +18,7 @@ steps:
     - Dibix.Testing
     configuration: ${{ parameters.configuration }}
 
-- template: publish.yml
+- template: publish-artifact.yml
   parameters:
     artifact: Build output ($(operatingSystem))
     folder: build

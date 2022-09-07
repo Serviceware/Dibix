@@ -12,7 +12,6 @@ steps:
 
 - task: DotNetCoreCLI@2
   displayName: 📈 Install ReportGenerator
-  condition: succeededOrFailed()
   inputs:
     command: custom
     custom: tool
@@ -24,11 +23,9 @@ steps:
     -targetdir:"$(Pipeline.Workspace)/Test output (Windows)"
     -reporttypes:Cobertura
   displayName: 🔗 Merge code coverage results (*.xml)
-  condition: succeededOrFailed()
 
 - task: PublishCodeCoverageResults@1
   displayName: ☑️ Publish code coverage
-  condition: succeededOrFailed()
   inputs:
     codeCoverageTool: Cobertura
     summaryFileLocation: $(Pipeline.Workspace)/Test output (Windows)/Cobertura.xml

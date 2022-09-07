@@ -11,9 +11,13 @@
 steps:
 - ${{ each project in parameters.projects }}:
   - task: DotNetCoreCLI@2
-    displayName: 📦 Pack ${{ project }}
+    displayName: 📦 Pack ${{ project }} (${{ parameters.configuration }})
     inputs:
       command: custom
       projects: src/${{ project }}
       custom: pack
-      arguments: --no-build --output $(Build.ArtifactStagingDirectory)/packages --configuration ${{ parameters.configuration }}
+      arguments: >
+        --configuration ${{ parameters.configuration }}
+        --no-build
+        --no-restore
+        --output $(Build.ArtifactStagingDirectory)/packages

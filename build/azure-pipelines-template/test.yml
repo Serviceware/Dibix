@@ -19,7 +19,6 @@
 steps:
 - task: DotNetCoreCLI@2
   displayName: 📈 Install ReportGenerator
-  condition: succeededOrFailed()
   inputs:
     command: custom
     custom: tool
@@ -70,9 +69,8 @@ steps:
     -targetdir:$(Build.ArtifactStagingDirectory)/test/Report
     -reporttypes:HtmlInline_AzurePipelines_Dark
   displayName: 🔗 Merge code coverage results (*.html)
-  condition: succeededOrFailed()
 
-- template: publish.yml
+- template: publish-artifact.yml
   parameters:
     artifact: Test output ($(operatingSystem))
     folder: test
