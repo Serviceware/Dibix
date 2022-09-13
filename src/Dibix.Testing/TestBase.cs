@@ -102,7 +102,8 @@ namespace Dibix.Testing
 
         protected string GetEmbeddedResourceContent(string key) => ResourceUtility.GetEmbeddedResourceContent(this._assembly, key);
 
-        protected void AssertEqual(string expected, string actual, string extension, string message = null, bool normalizeLineEndings = false)
+        protected void AssertEqual(string expected, string actual, string extension, string message = null, bool normalizeLineEndings = false) => this.AssertEqual(expected, actual, this.TestContext.TestName, extension, message, normalizeLineEndings);
+        protected void AssertEqual(string expected, string actual, string outputName, string extension, string message = null, bool normalizeLineEndings = false)
         {
             string expectedNormalized = expected;
             string actualNormalized = actual;
@@ -114,7 +115,7 @@ namespace Dibix.Testing
             }
 
             if (!Equals(expectedNormalized, actualNormalized))
-                this.TestResultComposer.AddFileComparison(expectedNormalized, actualNormalized, extension);
+                this.TestResultComposer.AddFileComparison(expectedNormalized, actualNormalized, outputName, extension);
 
             Assert.AreEqual(expectedNormalized, actualNormalized, message);
         }

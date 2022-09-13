@@ -52,10 +52,10 @@ namespace Dibix.Testing
             return path;
         }
 
-        public void AddFileComparison(string expectedContent, string actualContent, string extension)
+        public void AddFileComparison(string expectedContent, string actualContent, string outputName, string extension)
         {
-            this.EnsureFileComparisonContent(this._expectedDirectory, extension, expectedContent);
-            this.EnsureFileComparisonContent(this._actualDirectory, extension, actualContent);
+            this.EnsureFileComparisonContent(this._expectedDirectory, outputName, extension, expectedContent);
+            this.EnsureFileComparisonContent(this._actualDirectory, outputName, extension, actualContent);
             this.EnsureWinMergeStarter();
         }
 
@@ -89,11 +89,21 @@ namespace Dibix.Testing
                       .Take(count)
                       .Each((x, i) => this.AddFile($"EventLogEntry_{i + 1}_{x.EntryType}.txt", FormatContent(x)));
         }
-
-        private void EnsureFileComparisonContent(string directory, string extension, string content)
+        
+        private void EnsureFileComparisonContent(string path, string outputName, string extension, string content)
         {
-            this.EnsureFileComparisonContent(Path.Combine(directory, $"{this._testContext.TestName}.{extension}"), content);
-            this.EnsureFileComparisonContent(Path.Combine(this.TestDirectory, $"{new DirectoryInfo(directory).Name}.{extension}"), content);
+            DirectoryInfo directory = new DirectoryInfo(path);
+            string fileName = outputName;
+            string alternativeFileName = directory.Name;
+
+            if (!String.IsNullOrEmpty(extension))
+            {
+                fileName = $"{fileName}.{extension}";
+                alternativeFileName = $"{alternativeFileName}.{extension}";
+            }
+
+            this.EnsureFileComparisonContent(Path.Combine(path, fileName), content);
+            this.EnsureFileComparisonContent(Path.Combine(this.TestDirectory, alternativeFileName), content);
         }
         private void EnsureFileComparisonContent(string path, string content)
         {
