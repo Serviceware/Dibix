@@ -9,6 +9,7 @@
     <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\Guard.cs" />
     <Compile Include="..\..\shared\Extensions\CollectionExtensions.cs" Link="Extensions\CollectionExtensions.cs" />
     <Compile Include="..\..\shared\Extensions\EnumerableExtensions.cs" Link="Extensions\EnumerableExtensions.cs" />
+    <EmbeddedResource Include="EmbeddedSources\**" Link="%(Identity)" />
   </ItemGroup>
 
   <ItemGroup>

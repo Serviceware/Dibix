@@ -30,7 +30,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Dibix\Dibix.csproj" />
-    <ProjectReference Include="..\..\src\Dibix.Generators\Dibix.Generators.csproj" PrivateAssets="all" OutputItemType="Analyzer" />
+    <ProjectReference Include="..\..\src\Dibix.Generators\Dibix.Generators.csproj" PrivateAssets="all" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\..\src\Dibix.Http.Client\Dibix.Http.Client.csproj" />
     <ProjectReference Include="..\..\src\Dibix.Http.Server\Dibix.Http.Server.csproj" />
     <ProjectReference Include="..\..\src\Dibix.Sdk\Dibix.Sdk.csproj" />

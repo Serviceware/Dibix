@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -13,7 +15,9 @@ namespace Dibix.Generators
     [Generator]
     public sealed class TestMethodGenerator : IIncrementalGenerator
     {
+        private static readonly Assembly ThisAssembly = typeof(TestMethodGenerator).Assembly;
         private static readonly string AttributeTypeName = typeof(TestMethodGenerationAttribute).FullName;
+        private const string EmbeddedSourcePrefix = $"{nameof(Dibix)}.{nameof(Generators)}.EmbeddedSources";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
@@ -23,6 +27,7 @@ namespace Dibix.Generators
                              .Combine(classDeclarations.Collect())
                              .Combine(rootNamespace);
             context.RegisterSourceOutput(all, (sourceProductionContext, source) => GenerateSource(sourceProductionContext, source.Left.Right, source.Right));
+            context.RegisterPostInitializationOutput(RegisterPostInitializationOutput);
         }
 
         private static IEnumerable<CodeGenerationTask> CollectCodeGenerationTasks(GeneratorSyntaxContext context, CancellationToken cancellationToken)
@@ -33,6 +38,33 @@ namespace Dibix.Generators
                         where task != null
                         select task.Value;
             return query;
+        }
+
+        private static void RegisterPostInitializationOutput(IncrementalGeneratorPostInitializationContext context)
+        {
+            foreach (string resourceName in ThisAssembly.GetManifestResourceNames())
+            {
+                if (!resourceName.StartsWith(EmbeddedSourcePrefix, StringComparison.Ordinal))
+                    continue;
+
+                string fileName = resourceName.Substring(EmbeddedSourcePrefix.Length + 1);
+                int extensionIndex = fileName.LastIndexOf('.');
+                if (extensionIndex < 0)
+                    extensionIndex = fileName.Length;
+
+                fileName = fileName.Insert(extensionIndex, ".generated");
+
+                string content;
+                using (Stream stream = ThisAssembly.GetManifestResourceStream(resourceName)!)
+                {
+                    using (TextReader reader = new StreamReader(stream))
+                    {
+                        content = reader.ReadToEnd();
+                    }
+                }
+
+                context.AddSource(fileName, content);
+            }
         }
 
         private static CodeGenerationTask? CollectCodeGenerationTask(GeneratorSyntaxContext context, AttributeSyntax attribute)

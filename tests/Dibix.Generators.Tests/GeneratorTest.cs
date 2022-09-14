@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using Dibix.Sdk.CodeAnalysis;
 using Dibix.Testing;
 using Microsoft.CodeAnalysis;
@@ -24,15 +24,14 @@ namespace Dibix.Generators.Tests
             CSharpCompilation inputCompilation = CSharpCompilation.Create(null)
                                                                   .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
                                                                   .AddReference<Type>()
-                                                                  .AddReference<GeneratorTest>()
                                                                   .AddReference<TestMethodAttribute>()
-                                                                  .AddReference<TestMethodGenerationAttribute>()
                                                                   .AddReference<SqlCodeAnalysisRule>()
                                                                   .AddReferences(MetadataReference.CreateFromFile(netStandardAssembly.Location))
                                                                   .AddReferences(MetadataReference.CreateFromFile(systemRuntimeAssembly.Location))
                                                                   .AddSyntaxTrees(syntaxTree);
 
-            RoslynUtility.VerifyCompilation(inputCompilation);
+            // At this state the compilation isn't valid because the generator will add the post initialization outputs that are used within this compilation
+            //RoslynUtility.VerifyCompilation(inputCompilation);
 
             IIncrementalGenerator generator = new TestMethodGenerator();
             GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
@@ -41,24 +40,33 @@ namespace Dibix.Generators.Tests
 
             GeneratorDriverRunResult runResult = driver.GetRunResult();
             RoslynUtility.VerifyCompilation(runResult.Diagnostics);
-            Assert.AreEqual(1, runResult.GeneratedTrees.Length);
             Assert.AreEqual(1, runResult.Results.Length);
-            Assert.AreEqual(1, runResult.Results[0].GeneratedSources.Length);
             RoslynUtility.VerifyCompilation(runResult.Results[0]);
+            IList<SyntaxTree> syntaxTrees = outputCompilation.SyntaxTrees.ToArray();
+            Assert.AreEqual(inputCompilation.SyntaxTrees[0], syntaxTrees[0]);
 
-            string expectedCode = this.GetExpectedText();
-            SyntaxTree generatedSyntaxTree = outputCompilation.SyntaxTrees.ElementAt(1);
-            string fileName = Path.GetFileName(generatedSyntaxTree.FilePath);
-            string actualCode = generatedSyntaxTree.ToString();
-            base.AddResultFile(fileName, actualCode);
-            base.AssertEqual(expectedCode, actualCode, "cs");
+            string[] expectedFiles =
+            {
+                "TestMethodGenerationAttribute.generated.cs",
+                "SqlCodeAnalysisRuleTests.generated.cs"
+            };
+            for (int i = 1; i < syntaxTrees.Count; i++)
+            {
+                SyntaxTree outputSyntaxTree = syntaxTrees[i];
+                FileInfo outputFile = new FileInfo(outputSyntaxTree.FilePath);
+                string actualCode = outputSyntaxTree.ToString();
+                this.AddResultFile(outputFile.Name, actualCode);
+                Assert.AreEqual(expectedFiles[i - 1], outputFile.Name);
+                string expectedCode = this.GetEmbeddedResourceContent(outputFile.Name);
+                this.AssertEqual(expectedCode, actualCode, outputName: Path.GetFileNameWithoutExtension(outputFile.Name), extension: outputFile.Extension.TrimStart('.'));
+            }
 
             RoslynUtility.VerifyCompilation(outputCompilation);
             RoslynUtility.VerifyCompilation(diagnostics);
-            Assert.AreEqual(2, outputCompilation.SyntaxTrees.Count());
-            Assert.AreEqual(inputCompilation.SyntaxTrees[0], outputCompilation.SyntaxTrees.First());
-        }
 
-        private string GetExpectedText([CallerMemberName] string? resourceName = null) => base.GetEmbeddedResourceContent($"{resourceName}.cs");
+            Assert.AreEqual(expectedFiles.Length, runResult!.GeneratedTrees.Length);
+            Assert.AreEqual(expectedFiles.Length, runResult!.Results[0].GeneratedSources.Length);
+            Assert.AreEqual(expectedFiles.Length + 1, syntaxTrees.Count);
+        }
     }
 }
