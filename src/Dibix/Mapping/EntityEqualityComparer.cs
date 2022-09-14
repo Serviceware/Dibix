@@ -40,11 +40,16 @@ namespace Dibix
             if (x is byte[] binaryX && y is byte[] binaryY)
                 return Enumerable.SequenceEqual(binaryX, binaryY);
 
-            EntityDescriptor entityDescriptor = EntityDescriptorCache.GetDescriptor(x.GetType());
-            if (!entityDescriptor.Keys.Any())
+            EntityDescriptor entityDescriptorX = EntityDescriptorCache.GetDescriptor(x.GetType());
+            EntityDescriptor entityDescriptorY = EntityDescriptorCache.GetDescriptor(y.GetType());
+
+            if (entityDescriptorX.IsPrimitive && entityDescriptorY.IsPrimitive)
+                return Equals(x, y);
+
+            if (!entityDescriptorX.Keys.Any())
                 return false;
 
-            return entityDescriptor.Keys.All(a => Equals(a.GetValue(x), a.GetValue(y)));
+            return entityDescriptorX.Keys.All(a => Equals(a.GetValue(x), a.GetValue(y)));
         }
 
         bool IEqualityComparer<object>.Equals(object x, object y) => this.EqualsCore(x, y);

@@ -67,7 +67,14 @@ namespace Dibix
         private static bool ShouldCollectValue(EntityProperty property, object instance, object newValue)
         {
             object currentValue = property.GetValue(instance);
-            return !property.IsCollection ? currentValue == null : !Contains(currentValue, newValue);
+            if (property.IsCollection)
+                return !Contains(currentValue, newValue);
+
+            EntityDescriptor descriptor = EntityDescriptorCache.GetDescriptor(property.EntityType);
+            if (descriptor.IsPrimitive)
+                return false; // MultiMap is being used to map a primitive property to a parent entity => Strange
+
+            return currentValue == null;
         }
 
         private static bool Contains(object collection, object item) => ((IEnumerable)collection).Cast<object>().Contains(item, EntityEqualityComparer.Instance);

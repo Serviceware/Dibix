@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -96,7 +97,7 @@ INNER JOIN (VALUES (7, N'black_de', N'black')
         });
 
         [TestMethod]
-        public Task QuerySingle_WithAutoMultiMap_NonEntity_Collection_ReferenceEqualityIsPerformed() => base.ExecuteTest(accessor =>
+        public Task QuerySingle_WithAutoMultiMap_NonEntityNonPrimitive_Collection_ReferenceEqualityIsPerformed() => base.ExecuteTest(accessor =>
         {
             const string commandText = @"SELECT [x].[name], [y].[name], [z].[data]
 FROM (VALUES (N'feature1')) AS [x]([name])
@@ -115,7 +116,7 @@ INNER JOIN (VALUES (0x1, N'feature1')
         });
 
         [TestMethod]
-        public Task QuerySingle_WithAutoMultiMap_NonEntity_SingleProperty_ReferenceEqualityIsPerformed() => base.ExecuteTest(accessor =>
+        public Task QuerySingle_WithAutoMultiMap_NonEntityNonPrimitive_SingleProperty_ReferenceEqualityIsPerformed() => base.ExecuteTest(accessor =>
         {
             const string commandText = @"SELECT [x].[name], [y].[data], [z].[name]
 FROM (VALUES (N'product1')) AS [x]([name])
@@ -126,6 +127,42 @@ INNER JOIN (VALUES (N'feature1', N'product1')
             ProductEntity result = accessor.QuerySingle<ProductEntity, byte[], FeatureEntity>(commandText, accessor.Parameters().Build(), "data,name");
             Assert.AreEqual("product1", result.Name);
             Assert.IsTrue(result.Picture.SequenceEqual(Enumerable.Repeat((byte)1, 1)));
+            Assert.AreEqual(2, result.Features.Count);
+            Assert.AreEqual("feature1", result.Features[0].Name);
+            Assert.AreEqual("feature2", result.Features[1].Name);
+        });
+
+        [TestMethod]
+        public Task QuerySingle_WithAutoMultiMap_Primitive_Collection_ReferenceEqualityIsPerformed() => base.ExecuteTest(accessor =>
+        {
+            const string commandText = @"SELECT [name] = [x].[feature_name], [name] = [y].[featureitem_name], [z].[featureitem_id]
+FROM (VALUES (N'feature1')) AS [x]([feature_name])
+INNER JOIN (VALUES (N'black', N'feature1')
+                 , (N'red', N'feature1')) AS [y]([featureitem_name], [feature_name]) ON [x].[feature_name] = [y].[feature_name]
+INNER JOIN (VALUES (1, N'feature1')
+                 , (2, N'feature1')) AS [z]([featureitem_id], [feature_name]) ON [x].[feature_name] = [z].[feature_name]";
+            FeatureEntity result = accessor.QuerySingle<FeatureEntity, FeatureItemEntity, int>(commandText, accessor.Parameters().Build(), "name,featureitem_id");
+            Assert.AreEqual("feature1", result.Name);
+            Assert.AreEqual(2, result.Items.Count);
+            Assert.AreEqual("black", result.Items[0].Name);
+            Assert.AreEqual("red", result.Items[1].Name);
+            Assert.AreEqual(2, result.FeatureItemIds.Count);
+            Assert.AreEqual(1, result.FeatureItemIds[0]);
+            Assert.AreEqual(2, result.FeatureItemIds[1]);
+        });
+
+        [TestMethod]
+        public Task QuerySingle_WithAutoMultiMap_Primitive_SingleProperty_NoMappingIsPerformed() => base.ExecuteTest(accessor =>
+        {
+            const string commandText = @"SELECT [name] = [x].[product_name], [y].[feature_id], [name] = [z].[feature_name]
+FROM (VALUES (N'product1')) AS [x]([product_name])
+INNER JOIN (VALUES (1, N'product1')
+                 , (2, N'product1')) AS [y]([feature_id], [product_name]) ON [x].[product_name] = [y].[product_name]
+INNER JOIN (VALUES (N'feature1', N'product1')
+                 , (N'feature2', N'product1')) AS [z]([feature_name], [product_name]) ON [x].[product_name] = [z].[product_name]";
+            ProductEntity result = accessor.QuerySingle<ProductEntity, int, FeatureEntity>(commandText, accessor.Parameters().Build(), "feature_id,name");
+            Assert.AreEqual("product1", result.Name);
+            Assert.AreEqual(0, result.FirstFeatureId); // Setting a primitive property using multi map doesn't make sense and is therefore not supported
             Assert.AreEqual(2, result.Features.Count);
             Assert.AreEqual("feature1", result.Features[0].Name);
             Assert.AreEqual("feature2", result.Features[1].Name);
@@ -152,6 +189,7 @@ INNER JOIN (VALUES (N'feature1', N'product1')
             public IList<FeatureItemEntity> Items { get; }
             public IList<DependentFeatureEntity> Dependencies { get; }
             public IList<byte[]> Pictures { get; }
+            public IList<int> FeatureItemIds { get; }
 
             public FeatureEntity()
             {
@@ -159,6 +197,7 @@ INNER JOIN (VALUES (N'feature1', N'product1')
                 this.Items = new Collection<FeatureItemEntity>();
                 this.Dependencies = new Collection<DependentFeatureEntity>();
                 this.Pictures = new Collection<byte[]>();
+                this.FeatureItemIds = new Collection<int>();
             }
         }
 
@@ -199,6 +238,7 @@ INNER JOIN (VALUES (N'feature1', N'product1')
             public string Name { get; set; }
             public byte[] Picture { get; set; }
             public IList<FeatureEntity> Features { get; }
+            public int FirstFeatureId { get; set; }
 
             public ProductEntity()
             {

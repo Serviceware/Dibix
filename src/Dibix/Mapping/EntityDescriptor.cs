@@ -8,12 +8,14 @@ namespace Dibix
     {
         private Delegate _postProcessor;
 
+        public bool IsPrimitive { get; }
         public ICollection<EntityKey> Keys { get; }
         public EntityKey Discriminator { get; set; }
         public IList<EntityProperty> Properties { get; }
 
-        public EntityDescriptor()
+        public EntityDescriptor(bool isPrimitive)
         {
+            this.IsPrimitive = isPrimitive;
             this.Keys = new Collection<EntityKey>();
             this.Properties = new Collection<EntityProperty>();
         }

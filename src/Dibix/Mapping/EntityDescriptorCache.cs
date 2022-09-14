@@ -23,8 +23,9 @@ namespace Dibix
 
         private static EntityDescriptor BuildDescriptor(Type type)
         {
-            EntityDescriptor descriptor = new EntityDescriptor();
-            if (type.IsPrimitive() || type == typeof(byte[]) || type == typeof(XElement))
+            bool isPrimitive = type.IsPrimitive();
+            EntityDescriptor descriptor = new EntityDescriptor(isPrimitive);
+            if (isPrimitive || type == typeof(byte[]) || type == typeof(XElement))
                 return descriptor;
 
             IDictionary<PropertyInfo, ICollection<IEntityPropertyFormatter>> formattableProperties = new Dictionary<PropertyInfo, ICollection<IEntityPropertyFormatter>>();
