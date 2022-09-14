@@ -22,9 +22,19 @@ jobs:
       Write-Host "##vso[task.setvariable variable=IsPreRelease]$('$(resources.pipeline.CI.runName)'.Contains('-'))"
       Write-Host "##vso[task.setvariable variable=IsPreview]$('$(resources.pipeline.CI.runName)'.Contains('+'))"
     displayName: 🖌️ Update pipeline instance name
+
   - download: CI
     artifact: NuGet packages
     displayName: 📬 Download 'NuGet packages' artifact
+
+  - task: NuGetCommand@2
+    displayName: 🚀 Publish packages
+    inputs:
+      command: push
+      packagesToPush: "$(Pipeline.Workspace)/CI/NuGet packages/*.nupkg"
+      nuGetFeedType: external
+      publishFeedCredentials: NuGet.org
+
   - task: GitHubRelease@1
     displayName: 📝 Create GitHub release
     inputs:
@@ -44,10 +54,3 @@ jobs:
           { "label" : "enhancement", "displayName": "Enhancements", "state" : "closed" }
         ]
     condition: and(succeeded(), eq(variables['IsPreview'], 'False'))
-  - task: NuGetCommand@2
-    displayName: 🚀 Publish packages
-    inputs:
-      command: push
-      packagesToPush: "$(Pipeline.Workspace)/CI/NuGet packages/*.nupkg"
-      nuGetFeedType: external
-      publishFeedCredentials: NuGet.org
