@@ -6,6 +6,8 @@ using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace Dibix.Testing
 {
@@ -36,6 +38,9 @@ namespace Dibix.Testing
             this._actualDirectory = Path.Combine(this.RunDirectory, ActualDirectoryName);
             this._testRunFiles = new HashSet<string>();
             this._testFiles = new HashSet<string>();
+#if DEBUG
+            this.EnsureTestContextDump();
+#endif
         }
 
         public string AddFile(string fileName)
@@ -136,16 +141,22 @@ namespace Dibix.Testing
             files.Add(path);
         }
 
-        private void EnsureWinMergeStarter()
+        private void EnsureWinMergeStarter() => AddTestRunFile("winmerge.bat", $@"@echo off
+start winmergeU ""{ExpectedDirectoryName}"" ""{ActualDirectoryName}""");
+        private void EnsureTestContextDump() => AddTestRunFile("TestContext.json", JsonConvert.SerializeObject(this._testContext, new JsonSerializerSettings
         {
-            const string fileName = "winmerge.bat";
+            Formatting = Formatting.Indented,
+            ContractResolver = new TestContextContractResolver()
+        }));
+
+        private void AddTestRunFile(string fileName, string content)
+        {
             string path = Path.Combine(this.RunDirectory, fileName);
 
             if (!this.ShouldRegisterTestRunFile(path))
                 return;
 
-            WriteContentToFile(path, $@"@echo off
-start winmergeU ""{ExpectedDirectoryName}"" ""{ActualDirectoryName}""");
+            WriteContentToFile(path, content);
             this.RegisterFile(path, scopeIsTestRun: true);
         }
 
@@ -224,6 +235,20 @@ start winmergeU ""{ExpectedDirectoryName}"" ""{ActualDirectoryName}""");
             Information = 4,
             SuccessAudit = 8,
             FailureAudit = 16
+        }
+
+        private sealed class TestContextContractResolver : DefaultContractResolver, IContractResolver
+        {
+            protected override JsonObjectContract CreateObjectContract(Type objectType)
+            {
+                JsonObjectContract contract = base.CreateObjectContract(objectType);
+                if (objectType.FullName == "Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.TestContextImplementation")
+                {
+                    // Self referencing loop detected for property 'Context' with type 'Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.TestContextImplementation'. Path ''.
+                    contract.Properties.Remove("Context");
+                }
+                return contract;
+            }
         }
     }
 }

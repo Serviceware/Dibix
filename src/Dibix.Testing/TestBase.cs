@@ -29,7 +29,7 @@ namespace Dibix.Testing
 
         protected override Task OnTestInitialized()
         {
-            this.Configuration = TestConfigurationLoader.Load<TConfiguration>(this.TestContext);
+            this.Configuration = TestConfigurationLoader.Load<TConfiguration>(base.TestContext);
             return Task.CompletedTask;
         }
     }
@@ -58,17 +58,7 @@ namespace Dibix.Testing
         protected virtual TextWriter Out => this.TestOutputHelper;
         protected string RunDirectory => this.TestResultComposer.RunDirectory;
         protected string TestDirectory => this.TestResultComposer.TestDirectory;
-
-        /// <summary>
-        /// By default, the test results directory is cleaned up by MSTest, after all tests of a run have passed.
-        /// It might be desired to keep the test output even if all tests have passed, i.E. for investigation purposes.
-        /// Setting this property to true, will store the output in the temp directory, so they are still available after each run.
-        /// </summary>
-#if CI_BUILD
         protected virtual bool UseDedicatedTestResultsDirectory => true;
-#else
-        protected virtual bool UseDedicatedTestResultsDirectory => false;
-#endif
         private TestResultComposer TestResultComposer
         {
             get => SafeGetProperty(ref this._testResultComposer);
@@ -219,8 +209,8 @@ Additionally, the following error occured while trying to log the previous error
         {
             if (disposing)
             {
-                this.TestOutputHelper?.Dispose();
-                TestResultComposer.Complete();
+                this._testOutputHelper?.Dispose();
+                this._testResultComposer?.Complete();
             }
         }
         #endregion
