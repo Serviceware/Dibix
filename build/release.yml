@@ -34,7 +34,6 @@ jobs:
       tagSource: userSpecifiedTag
       tag: v$(resources.pipeline.CI.runName)
       title: v$(resources.pipeline.CI.runName)
-      isDraft: true # After running this step, visit the new draft release, edit, and publish.
       isPreRelease: $(IsPreRelease)
       assets: $(Pipeline.Workspace)/CI/NuGet packages/*.nupkg
       changeLogCompareToRelease: lastNonDraftRelease
