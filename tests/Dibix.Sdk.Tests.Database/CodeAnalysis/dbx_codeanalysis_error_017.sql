@@ -44,4 +44,12 @@ CREATE TYPE [dbo].[dbx_codeanalysis_udt_error_017_success] AS TABLE ([id] INT NO
 GO
 CREATE PROCEDURE [dbo].[dbx_codeanalysis_error_017_param] @success BIT, @fAiL BIT
 AS
-    PRINT @success + fail
+    PRINT @success + @faiL
+GO
+CREATE PROCEDURE [dbo].[dbx_codeanalysis_error_017_length]
+AS
+    BEGIN TRANSACTION [dbx_codeanalysis_error_017_len_s]
+    ROLLBACK
+
+    BEGIN TRANSACTION [dbx_codeanalysis_error_017_len_fail]
+    ROLLBACK

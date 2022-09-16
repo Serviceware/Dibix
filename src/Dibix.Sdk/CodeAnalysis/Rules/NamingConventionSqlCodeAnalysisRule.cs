@@ -24,6 +24,18 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             this._looseConstraintDeclarations.ReplaceWith(visitor.LooseConstraintDeclarations);
         }
 
+        public override void Visit(BeginTransactionStatement node)
+        {
+            if (node.Name == null)
+                return;
+
+            string name = node.Name.Value;
+            if (name.Length > 32)
+            {
+                Fail(node.Name, $"The identifier that starts with '{name}' is too long. Maximum length is 32.");
+            }
+        }
+
         // Tables
         public override void Visit(CreateTableStatement node)
         {

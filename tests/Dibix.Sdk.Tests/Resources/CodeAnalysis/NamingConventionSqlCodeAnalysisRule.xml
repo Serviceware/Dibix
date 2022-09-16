@@ -60,4 +60,9 @@
     message="Function parameter '@fAiL' does not match naming convention '^@[a-z0-9_]+$'. Also make sure the name is all lowercase."
     line="45"
     column="73" />
+  <error
+    ruleid="17"
+    message="The identifier that starts with 'dbx_codeanalysis_error_017_len_fail' is too long. Maximum length is 32."
+    line="54"
+    column="23" />
 </errors>
