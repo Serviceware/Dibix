@@ -567,12 +567,7 @@ Endpoints\GenericEndpointWithOutputParam.json(6,18,6,18):error:Output parameters
             (
                 contracts: new [] { @"Contracts\Invalid.json" }
               , expectedException: @"One or more errors occured during code generation:
-Contracts\Invalid.json(3,12,3,12):error:String 'x' does not match regex pattern '^(binary|boolean|byte|datetime|datetimeoffset|decimal|double|float|int16|int32|int64|string|uri|uuid|xml)\??\*?$'. (Invalid.A)
-Contracts\Invalid.json(3,12,3,12):error:String 'x' does not match regex pattern '^#([\w]+)(.([\w]+))*\??\*?$'. (Invalid.A)
-Contracts\Invalid.json(3,12,3,12):error:JSON does not match any schemas from 'anyOf'. (Invalid.A)
-Contracts\Invalid.json(3,12,3,12):error:Invalid type. Expected Object but got String. (Invalid.A)
-Contracts\Invalid.json(2,14,2,14):error:Invalid type. Expected Array but got Object. (Invalid)
-Contracts\Invalid.json(2,14,2,14):error:JSON does not match any schemas from 'anyOf'. (Invalid)"
+Contracts\Invalid.json(2,14,2,14):error:Could not resolve type 'x'"
             );
         }
     }

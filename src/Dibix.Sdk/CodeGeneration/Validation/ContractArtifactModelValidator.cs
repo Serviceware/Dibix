@@ -18,42 +18,31 @@ namespace Dibix.Sdk.CodeGeneration
 
         public bool Validate(CodeGenerationModel model)
         {
-            bool isValid = this.ValidateUnusedContracts(model)
-                        && this.ValidateUnusedContractProperties(model);
+            bool isValid = this.ValidateUnusedContracts(model);
             return isValid;
         }
 
         private bool ValidateUnusedContracts(CodeGenerationModel model)
         {
-            bool isValid = true;
-            foreach (ContractDefinition contractDefinition in model.Contracts)
-            {
-                // Validate unused contracts
-                string contractFullName = contractDefinition.Schema.FullName;
-                if (!contractDefinition.HasReferences)
-                {
-                    isValid = false;
-                    this._logger.LogError($"Unused contract definition: {contractFullName}", contractDefinition.FilePath, contractDefinition.Line, contractDefinition.Column);
-                }
-            }
-            return isValid;
-        }
-
-        private bool ValidateUnusedContractProperties(CodeGenerationModel model)
-        {
-            IDictionary<ObjectSchema, ICollection<ObjectSchemaProperty>> schemaPropertyMap = model.Contracts
-                                                                                                  .Select(x => x.Schema)
-                                                                                                  .OfType<ObjectSchema>()
-                                                                                                  .ToDictionary(x => x, x => Clone(x.Properties));
+            IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap = CollectObjectContracts(model).ToDictionary(x => x.Schema);
 
             this.ValidateStatementContracts(model, schemaPropertyMap);
             this.ValidateEndpointContracts(model, schemaPropertyMap);
 
             bool isValid = true;
-            foreach (KeyValuePair<ObjectSchema, ICollection<ObjectSchemaProperty>> keyValuePair in schemaPropertyMap)
+            foreach (KeyValuePair<ObjectSchema, ObjectContractDefinition> keyValuePair in schemaPropertyMap)
             {
                 ObjectSchema objectSchema = keyValuePair.Key;
-                foreach (ObjectSchemaProperty property in keyValuePair.Value)
+                ObjectContractDefinition objectContractDefinition = keyValuePair.Value;
+                bool allPropertiesUnused = !objectSchema.Properties.Except(objectContractDefinition.Properties).Any();
+                if (allPropertiesUnused)
+                {
+                    ContractDefinition contractDefinition = objectContractDefinition.ContractDefinition;
+                    this._logger.LogError($"Unused contract definition: {objectSchema.FullName}", contractDefinition.FilePath, contractDefinition.Line, contractDefinition.Column);
+                    continue;
+                }
+                
+                foreach (ObjectSchemaProperty property in objectContractDefinition.Properties)
                 {
                     isValid = false;
                     Token<string> name = property.Name;
@@ -64,7 +53,16 @@ namespace Dibix.Sdk.CodeGeneration
             return isValid;
         }
 
-        private void ValidateStatementContracts(IPersistedCodeGenerationModel model, IDictionary<ObjectSchema, ICollection<ObjectSchemaProperty>> schemaPropertyMap)
+        private static IEnumerable<ObjectContractDefinition> CollectObjectContracts(CodeGenerationModel model)
+        {
+            foreach (ContractDefinition contractDefinition in model.Contracts)
+            {
+                if (contractDefinition.Schema is ObjectSchema objectSchema)
+                    yield return new ObjectContractDefinition(contractDefinition, objectSchema);
+            }
+        }
+
+        private void ValidateStatementContracts(IPersistedCodeGenerationModel model, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
         {
             foreach (SqlStatementDefinition statement in model.SqlStatements)
             {
@@ -79,7 +77,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private void ValidateResultSchemaProperties(SqlQueryResult result, IDictionary<ObjectSchema, ICollection<ObjectSchemaProperty>> schemaPropertyMap)
+        private void ValidateResultSchemaProperties(SqlQueryResult result, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
         {
             // These types will automatically be mapped on an existing property of the same type
             ICollection<string> multiMapTypes = new HashSet<string>(result.Types.Select(BuildKey));
@@ -95,7 +93,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private void ValidateResultSchemaProperties(SqlQueryResult result, TypeReference type, ICollection<string> multiMapTypes, IDictionary<ObjectSchema, ICollection<ObjectSchemaProperty>> schemaPropertyMap)
+        private void ValidateResultSchemaProperties(SqlQueryResult result, TypeReference type, ICollection<string> multiMapTypes, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
         {
             if (!(type is SchemaTypeReference resultSchemaTypeReference))
                 return;
@@ -107,15 +105,18 @@ namespace Dibix.Sdk.CodeGeneration
             if (objectSchema.Source == SchemaDefinitionSource.Internal)
                 return;
 
-            if (!schemaPropertyMap.TryGetValue(objectSchema, out ICollection<ObjectSchemaProperty> properties))
+            if (!schemaPropertyMap.TryGetValue(objectSchema, out ObjectContractDefinition objectContractDefinition))
                 return;
 
             foreach (ObjectSchemaProperty property in objectSchema.Properties)
             {
+                if (property.Type == null)
+                    continue;
+
                 if (!IsPropertyUsed(result, property, multiMapTypes))
                     continue;
 
-                VisitProperty(properties, property);
+                VisitProperty(objectContractDefinition.Properties, property);
             }
         }
 
@@ -134,7 +135,7 @@ namespace Dibix.Sdk.CodeGeneration
             VisitProperty(properties, property);
         }
 
-        private void ValidateEndpointContracts(CodeGenerationModel model, IDictionary<ObjectSchema, ICollection<ObjectSchemaProperty>> schemaPropertyMap)
+        private void ValidateEndpointContracts(CodeGenerationModel model, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
         {
             foreach (ControllerDefinition controller in model.Controllers)
             {
@@ -146,7 +147,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private void ValidateBodyContract(ActionDefinition action, IDictionary<ObjectSchema, ICollection<ObjectSchemaProperty>> schemaPropertyMap)
+        private void ValidateBodyContract(ActionDefinition action, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
         {
             if (!(action.RequestBody?.Contract is SchemaTypeReference schemaTypeReference))
                 return;
@@ -154,13 +155,13 @@ namespace Dibix.Sdk.CodeGeneration
             if (!(this._schemaDefinitionResolver.Resolve(schemaTypeReference) is ObjectSchema objectSchema))
                 return;
 
-            if (!schemaPropertyMap.TryGetValue(objectSchema, out ICollection<ObjectSchemaProperty> properties))
+            if (!schemaPropertyMap.TryGetValue(objectSchema, out ObjectContractDefinition objectContractDefinition))
                 return;
 
             switch (action.Target)
             {
                 case LocalActionTarget localActionTarget:
-                    this.VisitLocalActionTarget(action, localActionTarget, objectSchema, properties, schemaPropertyMap);
+                    this.VisitLocalActionTarget(action, localActionTarget, objectSchema, objectContractDefinition.Properties, schemaPropertyMap);
                     break;
 
                 case ReflectionActionTarget _:
@@ -169,7 +170,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private void ValidateResponseContracts(ActionDefinition action, IDictionary<ObjectSchema, ICollection<ObjectSchemaProperty>> schemaPropertyMap)
+        private void ValidateResponseContracts(ActionDefinition action, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
         {
             foreach (ActionResponse response in action.Responses.Values)
             {
@@ -180,7 +181,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private void VisitLocalActionTarget(ActionDefinition action, LocalActionTarget localActionTarget, ObjectSchema bodySchema, ICollection<ObjectSchemaProperty> bodyProperties, IDictionary<ObjectSchema, ICollection<ObjectSchemaProperty>> schemaPropertyMap)
+        private void VisitLocalActionTarget(ActionDefinition action, LocalActionTarget localActionTarget, ObjectSchema bodySchema, ICollection<ObjectSchemaProperty> bodyProperties, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
         {
             IDictionary<string, UserDefinedTypeParameter?> parameters = localActionTarget.SqlStatementDefinition.Parameters.ToDictionary(x => x.Name, this.CollectUDTParameter, StringComparer.OrdinalIgnoreCase);
             foreach (ActionParameter actionParameter in action.Parameters)
@@ -209,7 +210,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private void VisitReflectionActionTarget(SchemaDefinition bodySchema, IDictionary<ObjectSchema, ICollection<ObjectSchemaProperty>> schemaPropertyMap)
+        private void VisitReflectionActionTarget(SchemaDefinition bodySchema, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
         {
             // Visit all properties of the body, if the target is not visible to us
             this.VisitAllPropertiesNested(bodySchema, schemaPropertyMap);
@@ -223,7 +224,7 @@ namespace Dibix.Sdk.CodeGeneration
             return null;
         }
 
-        private void VisitParameterSource(ActionParameterSource parameterSource, ObjectSchema bodySchema, ICollection<ObjectSchemaProperty> bodyProperties, IDictionary<ObjectSchema, ICollection<ObjectSchemaProperty>> schemaPropertyMap)
+        private void VisitParameterSource(ActionParameterSource parameterSource, ObjectSchema bodySchema, ICollection<ObjectSchemaProperty> bodyProperties, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
         {
             switch (parameterSource)
             {
@@ -237,7 +238,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private void VisitBodySource(ActionParameterBodySource bodySource, SchemaDefinition bodySchema, IDictionary<ObjectSchema, ICollection<ObjectSchemaProperty>> schemaPropertyMap)
+        private void VisitBodySource(ActionParameterBodySource bodySource, SchemaDefinition bodySchema, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
         {
             if (bodySource.ConverterName == null)
                 return;
@@ -246,14 +247,14 @@ namespace Dibix.Sdk.CodeGeneration
             this.VisitAllPropertiesNested(bodySchema, schemaPropertyMap);
         }
 
-        private void VisitPropertySource(ActionParameterPropertySource propertySource, ObjectSchema bodySchema, ICollection<ObjectSchemaProperty> bodyProperties, IDictionary<ObjectSchema, ICollection<ObjectSchemaProperty>> schemaPropertyMap)
+        private void VisitPropertySource(ActionParameterPropertySource propertySource, ObjectSchema bodySchema, ICollection<ObjectSchemaProperty> bodyProperties, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
         {
             foreach (ActionParameterPropertySourceNode node in propertySource.Nodes)
             {
-                if (!schemaPropertyMap.TryGetValue(node.Schema, out ICollection<ObjectSchemaProperty> nodeProperties))
+                if (!schemaPropertyMap.TryGetValue(node.Schema, out ObjectContractDefinition objectContractDefinition))
                     continue;
 
-                VisitProperty(nodeProperties, node.Property);
+                VisitProperty(objectContractDefinition.Properties, node.Property);
             }
 
             foreach (ActionParameterItemSource itemSource in propertySource.ItemSources)
@@ -262,7 +263,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private void VisitUDTParameter(UserDefinedTypeParameter? userDefinedTypeParameter, SchemaDefinition bodySchema, ObjectSchemaProperty bodyProperty, IDictionary<ObjectSchema, ICollection<ObjectSchemaProperty>> schemaPropertyMap)
+        private void VisitUDTParameter(UserDefinedTypeParameter? userDefinedTypeParameter, SchemaDefinition bodySchema, ObjectSchemaProperty bodyProperty, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
         {
             if (userDefinedTypeParameter == null) 
                 return;
@@ -287,20 +288,20 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             ICollection<string> udtParameters = new HashSet<string>(userDefinedTypeParameter.Value.Schema.Properties.Select(x => x.Name.Value), StringComparer.OrdinalIgnoreCase);
-            if (!schemaPropertyMap.TryGetValue(propertySchema, out ICollection<ObjectSchemaProperty> properties))
+            if (!schemaPropertyMap.TryGetValue(propertySchema, out ObjectContractDefinition objectContractDefinition))
                 return;
 
             // Mark all nested source properties as used, if a matching column on the UDT exists
             foreach (ObjectSchemaProperty property in propertySchema.Properties)
             {
                 if (udtParameters.Contains(property.Name))
-                    VisitProperty(properties, property);
+                    VisitProperty(objectContractDefinition.Properties, property);
             }
         }
 
-        private void VisitAllPropertiesNested(SchemaDefinition schema, IDictionary<ObjectSchema, ICollection<ObjectSchemaProperty>> schemaPropertyMap) => VisitAllPropertiesNested(schema, schemaPropertyMap, (x, y) => x.Accept(y));
-        private void VisitAllPropertiesNested(TypeReference type, IDictionary<ObjectSchema, ICollection<ObjectSchemaProperty>> schemaPropertyMap) => VisitAllPropertiesNested(type, schemaPropertyMap, (x, y) => x.Accept(y));
-        private void VisitAllPropertiesNested<T>(T node, IDictionary<ObjectSchema, ICollection<ObjectSchemaProperty>> schemaPropertyMap, Action<SchemaVisitor, T> visitorHandler)
+        private void VisitAllPropertiesNested(SchemaDefinition schema, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap) => VisitAllPropertiesNested(schema, schemaPropertyMap, (x, y) => x.Accept(y));
+        private void VisitAllPropertiesNested(TypeReference type, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap) => VisitAllPropertiesNested(type, schemaPropertyMap, (x, y) => x.Accept(y));
+        private void VisitAllPropertiesNested<T>(T node, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap, Action<SchemaVisitor, T> visitorHandler)
         {
             ValidationSchemaVisitor visitor = new ValidationSchemaVisitor(this._schemaDefinitionResolver, schemaPropertyMap, VisitProperty);
             visitorHandler(visitor, node);
@@ -324,7 +325,7 @@ namespace Dibix.Sdk.CodeGeneration
             return false;
         }
 
-        private (ObjectSchema schema, IDictionary<string, ObjectSchemaProperty> propertyMap, ICollection<ObjectSchemaProperty> visitedProperties) CollectGridResultInfos(SqlStatementDefinition statement, IDictionary<ObjectSchema, ICollection<ObjectSchemaProperty>> schemaPropertyMap)
+        private (ObjectSchema schema, IDictionary<string, ObjectSchemaProperty> propertyMap, ICollection<ObjectSchemaProperty> visitedProperties) CollectGridResultInfos(SqlStatementDefinition statement, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
         {
             if (statement.Results.Count <= 1) 
                 return (null, null, null);
@@ -340,19 +341,12 @@ namespace Dibix.Sdk.CodeGeneration
                 throw new InvalidOperationException($"Unexpected grid result type: {schemaDefinition.GetType()}");
             }
 
-            if (!schemaPropertyMap.TryGetValue(objectSchema, out ICollection<ObjectSchemaProperty> visitedProperties))
+            if (!schemaPropertyMap.TryGetValue(objectSchema, out ObjectContractDefinition objectContractDefinition))
                 return (null, null, null);
 
             IDictionary<string, ObjectSchemaProperty> propertyMap = objectSchema.Properties.ToDictionary(x => x.Name.Value);
 
-            return (objectSchema, propertyMap, visitedProperties);
-        }
-
-        private static ICollection<ObjectSchemaProperty> Clone(IEnumerable<ObjectSchemaProperty> properties)
-        {
-            ICollection<ObjectSchemaProperty> collection = new Collection<ObjectSchemaProperty>();
-            collection.AddRange(properties);
-            return collection;
+            return (objectSchema, propertyMap, objectContractDefinition.Properties);
         }
 
         private static string BuildKey(TypeReference type)
@@ -362,6 +356,27 @@ namespace Dibix.Sdk.CodeGeneration
                 case PrimitiveTypeReference primitiveTypeReference: return $"{typeof(PrimitiveType)}.{primitiveTypeReference.Type}";
                 case SchemaTypeReference schemaTypeReference: return schemaTypeReference.Key;
                 default: throw new ArgumentOutOfRangeException(nameof(type));
+            }
+        }
+
+        private readonly struct ObjectContractDefinition
+        {
+            public ContractDefinition ContractDefinition { get; }
+            public ObjectSchema Schema { get; }
+            public ICollection<ObjectSchemaProperty> Properties { get; }
+
+            public ObjectContractDefinition(ContractDefinition contractDefinition, ObjectSchema schema)
+            {
+                this.ContractDefinition = contractDefinition;
+                this.Schema = schema;
+                this.Properties = Clone(schema.Properties);
+            }
+
+            private static ICollection<ObjectSchemaProperty> Clone(IEnumerable<ObjectSchemaProperty> properties)
+            {
+                ICollection<ObjectSchemaProperty> collection = new Collection<ObjectSchemaProperty>();
+                collection.AddRange(properties.Where(x => x.Type != null));
+                return collection;
             }
         }
 
@@ -379,10 +394,10 @@ namespace Dibix.Sdk.CodeGeneration
 
         private sealed class ValidationSchemaVisitor : SchemaVisitor
         {
-            private readonly IDictionary<ObjectSchema, ICollection<ObjectSchemaProperty>> _schemaPropertyMap;
+            private readonly IDictionary<ObjectSchema, ObjectContractDefinition> _schemaPropertyMap;
             private readonly Action<ICollection<ObjectSchemaProperty>, ObjectSchemaProperty> _propertyVisitor;
 
-            public ValidationSchemaVisitor(ISchemaStore schemaStore, IDictionary<ObjectSchema, ICollection<ObjectSchemaProperty>> schemaPropertyMap, Action<ICollection<ObjectSchemaProperty>, ObjectSchemaProperty> propertyVisitor) : base(schemaStore)
+            public ValidationSchemaVisitor(ISchemaStore schemaStore, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap, Action<ICollection<ObjectSchemaProperty>, ObjectSchemaProperty> propertyVisitor) : base(schemaStore)
             {
                 this._schemaPropertyMap = schemaPropertyMap;
                 this._propertyVisitor = propertyVisitor;
@@ -390,12 +405,12 @@ namespace Dibix.Sdk.CodeGeneration
 
             protected override void Visit(ObjectSchema node)
             {
-                if (!this._schemaPropertyMap.TryGetValue(node, out ICollection<ObjectSchemaProperty> properties)) 
+                if (!this._schemaPropertyMap.TryGetValue(node, out ObjectContractDefinition objectContractDefinition)) 
                     return;
 
                 foreach (ObjectSchemaProperty property in node.Properties)
                 {
-                    this._propertyVisitor(properties, property);
+                    this._propertyVisitor(objectContractDefinition.Properties, property);
                 }
             }
         }

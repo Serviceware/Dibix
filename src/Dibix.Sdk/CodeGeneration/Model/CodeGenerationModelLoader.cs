@@ -77,7 +77,7 @@ namespace Dibix.Sdk.CodeGeneration
             IDictionary<string, SecurityScheme> securitySchemeMap = new Dictionary<string, SecurityScheme>();
 
             ISchemaProvider builtInSchemaProvider = new BuiltInSchemaProvider();
-            IContractDefinitionProvider contractDefinitionProvider = new ContractDefinitionProvider(fileSystemProvider, logger, normalizedContracts, productName, areaName);
+            IContractDefinitionProvider contractDefinitionProvider = new ContractDefinitionProvider(fileSystemProvider, typeResolver, logger, normalizedContracts, productName, areaName);
             IUserDefinedTypeProvider userDefinedTypeProvider = new UserDefinedTypeProvider(rootNamespace, productName, areaName, normalizedSources, typeResolver, logger);
             //ISchemaProvider externalSchemaProvider = new ExternalSchemaProvider(assemblyResolver);
             schemaRegistry.ImportSchemas(builtInSchemaProvider, contractDefinitionProvider, userDefinedTypeProvider/*, externalSchemaProvider*/);

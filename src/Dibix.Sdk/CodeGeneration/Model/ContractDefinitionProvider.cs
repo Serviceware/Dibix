@@ -13,10 +13,10 @@ namespace Dibix.Sdk.CodeGeneration
     {
         #region Fields
         private const string RootFolderName = "Contracts";
+        private readonly ITypeResolverFacade _typeResolver;
         private readonly string _productName;
         private readonly string _areaName;
         private readonly IDictionary<string, ContractDefinition> _contracts;
-        private readonly ICollection<string> _referencedContracts;
         #endregion
 
         #region Properties
@@ -26,13 +26,13 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public ContractDefinitionProvider(IFileSystemProvider fileSystemProvider, ILogger logger, IEnumerable<string> contracts, string productName, string areaName) : base(fileSystemProvider, logger)
+        public ContractDefinitionProvider(IFileSystemProvider fileSystemProvider, ITypeResolverFacade typeResolver, ILogger logger, IEnumerable<string> contracts, string productName, string areaName) : base(fileSystemProvider, logger)
         {
+            this._typeResolver = typeResolver;
             this._productName = productName;
             this._areaName = areaName;
             this._contracts = new Dictionary<string, ContractDefinition>();
-            this._referencedContracts = new HashSet<string>();
-            this.CollectCore(contracts);
+            base.Collect(contracts);
         }
         #endregion
 
@@ -44,8 +44,6 @@ namespace Dibix.Sdk.CodeGeneration
                 schema = null;
                 return false;
             }
-
-            contract.HasReferences = true;
             schema = contract.Schema;
             return true;
         }
@@ -67,34 +65,25 @@ If this is not a project that has multiple areas, please make sure to define the
             string relativeNamespace = String.Join(".", parts.Skip(1));
             NamespacePath currentNamespace = PathUtility.BuildAbsoluteNamespace(this._productName, this._areaName, LayerName.DomainModel, relativeNamespace);
 
-            string root = multipleAreas ? parts[1] : null;
-            NamespacePath rootNamespace = PathUtility.BuildAbsoluteNamespace(this._productName, this._areaName, LayerName.DomainModel, relativeNamespace: root);
-
-            this.ReadContracts(rootNamespace, currentNamespace, json, filePath);
+            this.ReadContracts(currentNamespace, relativeNamespace, json, filePath);
         }
         #endregion
 
         #region Private Methods
-        private void CollectCore(IEnumerable<string> contracts)
-        {
-            base.Collect(contracts);
-            this.CollectReferenceCounts();
-        }
-
-        private void ReadContracts(NamespacePath rootNamespace, NamespacePath currentNamespace, JObject contracts, string filePath)
+        private void ReadContracts(NamespacePath currentNamespace, string relativeNamespace, JObject contracts, string filePath)
         {
             foreach (JProperty definitionProperty in contracts.Properties())
             {
-                this.ReadContract(rootNamespace, currentNamespace, definitionProperty.Name, definitionProperty.Value, filePath, definitionProperty.GetLineInfo());
+                this.ReadContract(currentNamespace, relativeNamespace, definitionProperty.Name, definitionProperty.Value, filePath, definitionProperty.GetLineInfo());
             }
         }
 
-        private void ReadContract(NamespacePath rootNamespace, NamespacePath currentNamespace, string definitionName, JToken value, string filePath, IJsonLineInfo lineInfo)
+        private void ReadContract(NamespacePath currentNamespace, string relativeNamespace, string definitionName, JToken value, string filePath, IJsonLineInfo lineInfo)
         {
             switch (value.Type)
             {
                 case JTokenType.Object:
-                    this.ReadObjectContract(rootNamespace, currentNamespace, definitionName, value, filePath, lineInfo);
+                    this.ReadObjectContract(currentNamespace, relativeNamespace, definitionName, value, filePath, lineInfo);
                     break;
 
                 case JTokenType.Array:
@@ -106,7 +95,7 @@ If this is not a project that has multiple areas, please make sure to define the
             }
         }
 
-        private void ReadObjectContract(NamespacePath rootNamespace, NamespacePath currentNamespace, string definitionName, JToken value, string filePath, IJsonLineInfo lineInfo)
+        private void ReadObjectContract(NamespacePath currentNamespace, string relativeNamespace, string definitionName, JToken value, string filePath, IJsonLineInfo lineInfo)
         {
             ObjectSchema contract = new ObjectSchema(currentNamespace.Path, definitionName, SchemaDefinitionSource.Defined);
             foreach (JProperty property in ((JObject)value).Properties())
@@ -150,17 +139,34 @@ If this is not a project that has multiple areas, please make sure to define the
                             throw new ArgumentOutOfRangeException(nameof(property.Type), property.Type, null);
                     }
 
-                    TypeReference type = this.ParsePropertyType(typeName, rootNamespace, filePath, typeNameValue);
-                    ValueReference defaultValue = null;
-                    if (defaultValueJson != null)
-                    {
-                        IJsonLineInfo defaultValueLocation = defaultValueJson.GetLineInfo();
-                        defaultValue = JsonValueReferenceParser.Parse(type, defaultValueJson, filePath, defaultValueLocation, Logger);
-                    }
-
                     IJsonLineInfo propertyLineInfo = property.GetLineInfo();
                     Token<string> propertyName = new Token<string>(property.Name, filePath, propertyLineInfo.LineNumber, propertyLineInfo.LinePosition);
-                    ObjectSchemaProperty objectSchemaProperty = new ObjectSchemaProperty(propertyName, type, defaultValue, serializationBehavior, dateTimeKind, isPartOfKey, isOptional, isDiscriminator, isObfuscated, isRelativeHttpsUrl);
+
+                    TypeReference ResolveType()
+                    {
+                        bool isEnumerable = typeName.EndsWith("*", StringComparison.Ordinal);
+                        typeName = typeName.TrimEnd('*');
+
+                        // TODO: Remove support
+                        typeName = typeName.TrimStart('#');
+
+                        IJsonLineInfo location = value.GetLineInfo();
+                        TypeReference type = this._typeResolver.ResolveType(typeName, relativeNamespace, filePath, location.LineNumber, location.LinePosition, isEnumerable);
+                        return type;
+                    }
+
+                    ValueReference ResolveDefaultValue(TypeReference typeReference)
+                    {
+                        ValueReference defaultValue = null;
+                        if (defaultValueJson != null)
+                        {
+                            IJsonLineInfo defaultValueLocation = defaultValueJson.GetLineInfo();
+                            defaultValue = JsonValueReferenceParser.Parse(typeReference, defaultValueJson, filePath, defaultValueLocation, Logger);
+                        }
+                        return defaultValue;
+                    }
+
+                    ObjectSchemaProperty objectSchemaProperty = new ObjectSchemaProperty(propertyName, ResolveType, ResolveDefaultValue, serializationBehavior, dateTimeKind, isPartOfKey, isOptional, isDiscriminator, isObfuscated, isRelativeHttpsUrl);
                     contract.Properties.Add(objectSchemaProperty);
                 }
             }
@@ -239,47 +245,6 @@ If this is not a project that has multiple areas, please make sure to define the
                 case JTokenType.Integer: return EnumValue.ExplicitValue(name, value.Value<int>());
                 case JTokenType.String: return EnumValue.DynamicValue(name, (string)value.Value);
                 default: throw new ArgumentOutOfRangeException(nameof(type), type, null);
-            }
-        }
-
-        private TypeReference ParsePropertyType(string typeName, NamespacePath rootNamespace, string filePath, JToken value)
-        {
-            bool isEnumerable = typeName.EndsWith("*", StringComparison.Ordinal);
-            typeName = typeName.TrimEnd('*');
-            
-            bool isNullable = typeName.EndsWith("?", StringComparison.Ordinal);
-            typeName = typeName.TrimEnd('?');
-
-            bool isTypeReference = typeName.StartsWith("#", StringComparison.Ordinal);
-            typeName = typeName.TrimStart('#');
-
-            IJsonLineInfo location = value.GetLineInfo();
-            if (isTypeReference)
-            {
-                // TODO: Actually the contracts should have a namespace group, just like the procedures.
-                // The folder itself should not indicate a namespace (just like in C#).
-                // Therefore a namespace property should be added to the contract schema.
-                // This would however introduce a breaking change, since in C#, when you are within a namespace group,
-                // and you want to reference a type from outside of the namespace, an absolute namespace must be used.
-                string key = $"{rootNamespace}.{typeName}";
-                this._referencedContracts.Add(key);
-                return new SchemaTypeReference(key, isNullable, isEnumerable, filePath, location.LineNumber, location.LinePosition);
-            }
-
-            PrimitiveType dataType = (PrimitiveType)Enum.Parse(typeof(PrimitiveType), typeName, ignoreCase: true /* JSON is camelCase while C# is PascalCase */);
-            return new PrimitiveTypeReference(dataType, isNullable, isEnumerable, filePath, location.LineNumber, location.LinePosition);
-        }
-
-        private void CollectReferenceCounts()
-        {
-            foreach (string name in this._referencedContracts)
-            {
-                if (!this._contracts.TryGetValue(name, out ContractDefinition contractDefinition))
-                {
-                    // The contract is quite possibly not defined in this project
-                    continue;
-                }
-                contractDefinition.HasReferences = true;
             }
         }
         #endregion
