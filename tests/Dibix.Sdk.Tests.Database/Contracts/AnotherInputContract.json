@@ -6,7 +6,7 @@
       "type": "string",
       "isOptional": true
     },
-    "SomeIds": "#AnotherEntry*",
+    "SomeIds": "AnotherEntry*",
     "D": "uuid",
     "Password": "string",
     "E": "boolean",

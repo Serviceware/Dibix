@@ -1,6 +1,6 @@
 ﻿{
   "GridResult": {
-    "Item": "#Extension.MultiMapContract",
-    "Directions": "#Direction*"
+    "Item": "Extension.MultiMapContract",
+    "Directions": "Direction*"
   }
 }

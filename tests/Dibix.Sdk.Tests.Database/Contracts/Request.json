@@ -1,6 +1,6 @@
 ﻿{
   "Request": {
-    "Id": "#Entry",
-    "Ids": "#Entry*"
+    "Id": "Entry",
+    "Ids": "Entry*"
   }
 }

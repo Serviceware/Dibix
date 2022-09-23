@@ -7,7 +7,7 @@
     },
     "SchemaTypeReference": {
       "type": "string",
-      "pattern": "^#([\\w]+)(.([\\w]+))*\\??\\*?$"
+      "pattern": "^([\\w]+)(.([\\w]+))*\\??\\*?$"
     },
     "PropertyType": {
       "anyOf": [

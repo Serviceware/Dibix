@@ -79,15 +79,15 @@ In this walkthrough, we try to create the following endpoints, that make up a RE
       "isPartOfKey": "true"
     },
     "Name": "string",
-    "Gender": "#Gender",
-    "AccessRights": "#AccessRights",
-    "BankAccounts": "#BankAccounts*",
+    "Gender": "Gender",
+    "AccessRights": "AccessRights",
+    "BankAccounts": "BankAccounts*",
     "PetId": "int64?"
   },
   "CreatePersonRequest": {
     "Name": "string",
-    "Gender": "#Gender",
-    "AccessRights": "#AccessRights",
+    "Gender": "Gender",
+    "AccessRights": "AccessRights",
     "PetId": "int64?"
   },
   "Pet":{
@@ -96,9 +96,9 @@ In this walkthrough, we try to create the following endpoints, that make up a RE
   },
   "UpdatePersonRequest": {
     "Name": "string",
-    "Gender": "#Gender",
-    "AccessRights": "#AccessRights",
-    "Pets": "#Pet*"
+    "Gender": "Gender",
+    "AccessRights": "AccessRights",
+    "Pets": "Pet*"
   }
 }
 ```

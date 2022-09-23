@@ -16,7 +16,7 @@
       "isDiscriminator": true
     },
     "Role": {
-      "type": "#Role",
+      "type": "Role",
       "default": "User"
     },
     "CreationTime": {

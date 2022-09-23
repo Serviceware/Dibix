@@ -1,7 +1,7 @@
 ﻿{
   "JointContract": {
-    "A": "#GenericContract",
-    "B": "#Direction",
-    "C": "#AccessRights"
+    "A": "GenericContract",
+    "B": "Direction",
+    "C": "AccessRights"
   }
 }
