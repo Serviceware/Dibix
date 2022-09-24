@@ -21,7 +21,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{62C58971-8516-42E1-8D2A-70A0CE779FFE}"
 	ProjectSection(SolutionItems) = preProject
 		build\build.yml = build\build.yml
-		build\dependencies.props = build\dependencies.props
 		Directory.Build.props = Directory.Build.props
 		Directory.Build.targets = Directory.Build.targets
 		global.json = global.json
@@ -58,8 +57,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "azure-pipeline-templates", 
 		build\azure-pipelines-template\install-dotnet-sdk.yml = build\azure-pipelines-template\install-dotnet-sdk.yml
 		build\azure-pipelines-template\pack-dotnet.yml = build\azure-pipelines-template\pack-dotnet.yml
 		build\azure-pipelines-template\pack.yml = build\azure-pipelines-template\pack.yml
-		build\azure-pipelines-template\publish-coverage.yml = build\azure-pipelines-template\publish-coverage.yml
 		build\azure-pipelines-template\publish-artifact.yml = build\azure-pipelines-template\publish-artifact.yml
+		build\azure-pipelines-template\publish-coverage.yml = build\azure-pipelines-template\publish-coverage.yml
 		build\azure-pipelines-template\restore.yml = build\azure-pipelines-template\restore.yml
 		build\azure-pipelines-template\run.yml = build\azure-pipelines-template\run.yml
 		build\azure-pipelines-template\test-dotnet-cobertura.yml = build\azure-pipelines-template\test-dotnet-cobertura.yml

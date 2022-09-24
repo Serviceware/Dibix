@@ -1,40 +1,35 @@
 <Project>
-  <Import Project="$(MSBuildThisFileDirectory)build\dependencies.props" />
-
   <ItemGroup>
-    <GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1"   />
+    <GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" />
     <GlobalPackageReference Include="Nerdbank.GitVersioning"      Version="3.4.255" />
 
-    <PackageReference Update="coverlet.collector"                                      Version="$(CoverletVersion)"                                                         >
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Update="Dapper.StrongName"                                       Version="$(DapperVersion)"              Condition="'$(TargetFramework)' != 'net461'" />
-    <PackageReference Update="Dapper.StrongName"                                       Version="$(DapperNetFxVersion)"         Condition="'$(TargetFramework)' == 'net461'" />
-    <PackageReference Update="ILRepack"                                                Version="$(ILRepackVersion)"                                                         />
-    <PackageReference Update="Microsoft.AspNet.WebApi.Client"                          Version="$(AspNetWebApiVersion)"        Condition="'$(TargetFramework)' != 'net461'" />
-    <PackageReference Update="Microsoft.AspNet.WebApi.Client"                          Version="$(AspNetWebApiNetFxVersion)"   Condition="'$(TargetFramework)' == 'net461'" />
-    <PackageReference Update="Microsoft.AspNet.WebApi.Core"                            Version="$(AspNetWebApiNetFxVersion)"   Condition="'$(TargetFramework)' == 'net461'" />
-    <PackageReference Update="Microsoft.Build.Utilities.Core"                          Version="$(MSBuildUtilitiesVersion)"                                                 />
-    <PackageReference Update="Microsoft.CodeAnalysis.CSharp"                           Version="$(RoslynVersion)"                                                           />
-    <PackageReference Update="Microsoft.CodeAnalysis.Analyzers"                        Version="$(AnalyzersVersion)"                                                        />
-    <PackageReference Update="Microsoft.Extensions.Configuration.Binder"               Version="$(ConfigurationBinderVersion)"                                              />
-    <PackageReference Update="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="$(ConfigurationEnvironmentVersion)"                                         />
-    <PackageReference Update="Microsoft.Extensions.Configuration.Json"                 Version="$(ConfigurationJsonVersion)"                                                />
-    <PackageReference Update="Microsoft.Extensions.Configuration.UserSecrets"          Version="$(ConfigurationUserSecretsVersion)"                                         />
-    <PackageReference Update="Microsoft.NET.Test.Sdk"                                  Version="$(MicrosoftTestSdkVersion)"                                                 />
-    <PackageReference Update="Microsoft.OpenApi"                                       Version="$(OpenApiVersion)"                                                          />
-    <PackageReference Update="Microsoft.SqlServer.DacFx"                               Version="$(DacFxVersion)"                                                            />
-    <PackageReference Update="Moq"                                                     Version="$(MoqVersion)"                                                              />
-    <PackageReference Update="MSTest.TestAdapter"                                      Version="$(MSTestAdapterVersion)"                                                    />
-    <PackageReference Update="MSTest.TestFramework"                                    Version="$(MSTestFrameworkVersion)"                                                  />
-    <PackageReference Update="Newtonsoft.Json"                                         Version="$(NewtonsoftJsonVersion)"      Condition="'$(TargetFramework)' != 'net461'" />
-    <PackageReference Update="Newtonsoft.Json"                                         Version="$(NewtonsoftJsonNetFxVersion)" Condition="'$(TargetFramework)' == 'net461'" />
-    <PackageReference Update="Newtonsoft.Json.Schema"                                  Version="$(NewtonsoftJsonSchemaVersion)"                                             />
-    <PackageReference Update="System.ComponentModel.Annotations"                       Version="$(DataAnnotationsVersion)"                                                  />
-    <PackageReference Update="System.Data.SqlClient"                                   Version="$(SqlClientVersion)"                                                        />
-    <PackageReference Update="System.Diagnostics.EventLog"                             Version="$(EventLogVersion)"                                                         />
-    <PackageReference Update="System.IO.Packaging"                                     Version="$(IOPackageVersion)"                                                        />
-    <PackageReference Update="System.Reflection.Emit"                                  Version="$(ReflectionEmitVersion)"                                                   />
+    <PackageReference Update="coverlet.collector"                                      Version="3.1.2"                                               />
+    <PackageReference Update="Dapper.StrongName"                                       Version="2.0.78" Condition="'$(TargetFramework)' != 'net461'" />
+    <PackageReference Update="Dapper.StrongName"                                       Version="1.50.5" Condition="'$(TargetFramework)' == 'net461'" />
+    <PackageReference Update="ILRepack"                                                Version="2.0.18"                                              />
+    <PackageReference Update="Microsoft.AspNet.WebApi.Client"                          Version="5.2.7"  Condition="'$(TargetFramework)' != 'net461'" />
+    <PackageReference Update="Microsoft.AspNet.WebApi.Client"                          Version="5.2.3"  Condition="'$(TargetFramework)' == 'net461'" />
+    <PackageReference Update="Microsoft.AspNet.WebApi.Core"                            Version="5.2.3"  Condition="'$(TargetFramework)' == 'net461'" />
+    <PackageReference Update="Microsoft.Build.Utilities.Core"                          Version="16.9.0"                                              />
+    <PackageReference Update="Microsoft.CodeAnalysis.CSharp"                           Version="4.2.0"                                               />
+    <PackageReference Update="Microsoft.CodeAnalysis.Analyzers"                        Version="3.3.3"                                               />
+    <PackageReference Update="Microsoft.Extensions.Configuration.Binder"               Version="6.0.0"                                               />
+    <PackageReference Update="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="6.0.1"                                               />
+    <PackageReference Update="Microsoft.Extensions.Configuration.Json"                 Version="6.0.0"                                               />
+    <PackageReference Update="Microsoft.Extensions.Configuration.UserSecrets"          Version="6.0.0"                                               />
+    <PackageReference Update="Microsoft.NET.Test.Sdk"                                  Version="17.1.0"                                              />
+    <PackageReference Update="Microsoft.OpenApi"                                       Version="1.2.3"                                               />
+    <PackageReference Update="Microsoft.SqlServer.DacFx"                               Version="150.5084.2"                                          />
+    <PackageReference Update="Moq"                                                     Version="4.17.2"                                              />
+    <PackageReference Update="MSTest.TestAdapter"                                      Version="2.2.8"                                               />
+    <PackageReference Update="MSTest.TestFramework"                                    Version="2.2.8"                                               />
+    <PackageReference Update="Newtonsoft.Json"                                         Version="13.0.1" Condition="'$(TargetFramework)' != 'net461'" />
+    <PackageReference Update="Newtonsoft.Json"                                         Version="12.0.3" Condition="'$(TargetFramework)' == 'net461'" />
+    <PackageReference Update="Newtonsoft.Json.Schema"                                  Version="3.0.14"                                              />
+    <PackageReference Update="System.ComponentModel.Annotations"                       Version="5.0.0"                                               />
+    <PackageReference Update="System.Data.SqlClient"                                   Version="4.8.2"                                               />
+    <PackageReference Update="System.Diagnostics.EventLog"                             Version="6.0.0"                                               />
+    <PackageReference Update="System.IO.Packaging"                                     Version="6.0.0"                                               />
+    <PackageReference Update="System.Reflection.Emit"                                  Version="4.7.0"                                               />
   </ItemGroup>
 </Project>
