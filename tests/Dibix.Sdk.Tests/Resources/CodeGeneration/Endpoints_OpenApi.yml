@@ -103,21 +103,25 @@ paths:
         - name: password
           in: path
           required: true
+          style: simple
           schema:
             type: string
         - name: User-Agent
           in: header
           required: true
+          style: simple
           schema:
             type: string
         - name: ids
           in: query
+          style: form
           schema:
             type: array
             items:
               $ref: '#/components/schemas/GenericParameterSet'
         - name: Accept-Language
           in: header
+          style: simple
           schema:
             type: string
             default: 
@@ -138,48 +142,57 @@ paths:
         - name: password
           in: path
           required: true
+          style: simple
           schema:
             type: string
         - name: a
           in: query
           required: true
+          style: form
           schema:
             type: string
         - name: b
           in: query
           required: true
+          style: form
           schema:
             type: string
         - name: c
           in: query
           required: true
+          style: form
           schema:
             type: string
             format: uuid
             nullable: true
         - name: ids
           in: query
+          style: form
           schema:
             type: array
             items:
               $ref: '#/components/schemas/GenericParameterSet'
         - name: d
           in: query
+          style: form
           schema:
             type: string
             default: 
             nullable: true
         - name: e
           in: query
+          style: form
           schema:
             type: boolean
             default: true
         - name: f
           in: query
+          style: form
           schema:
             $ref: '#/components/schemas/Direction'
         - name: g
           in: query
+          style: form
           schema:
             type: string
             default: Cake
@@ -196,6 +209,7 @@ paths:
       parameters:
         - name: ids
           in: query
+          style: form
           schema:
             type: array
             items:
@@ -221,6 +235,7 @@ paths:
         - name: id
           in: path
           required: true
+          style: simple
           schema:
             type: integer
             format: int32

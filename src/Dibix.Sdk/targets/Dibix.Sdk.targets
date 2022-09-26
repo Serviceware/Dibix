@@ -656,7 +656,7 @@ $(_SqlReferencePath)" />
 
   <ItemGroup>
     <PackageReference Include="$(_DibixHttpClientName)" Version="$(DibixSdkVersion)" ExcludeAssets="runtime" />
-    <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.3" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.9" ExcludeAssets="runtime" />
   </ItemGroup>
 
   <ItemGroup Condition="'%24(TargetFramework)' == '$(_ClientTargetFrameworkNetFx)'">
