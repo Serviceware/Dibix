@@ -11,27 +11,34 @@ namespace Dibix.Sdk.Sql
         private readonly string _source;
         private readonly TSqlFragment _sqlFragment;
         private readonly bool _isScriptArtifact;
-        private readonly string _projectName;
         private readonly bool _isEmbedded;
+        private readonly bool _limitDdlStatements;
         private readonly Lazy<TSqlModel> _modelAccessor;
         private readonly ILogger _logger;
         private SchemaAnalyzerResult _result;
 
-        public TSqlFragmentAnalyzer(string source, TSqlFragment sqlFragment, bool isScriptArtifact, string projectName, bool isEmbedded, bool analyzeAlways, Lazy<TSqlModel> modelAccessor, ILogger logger)
+        private TSqlFragmentAnalyzer(string source, TSqlFragment sqlFragment, bool isScriptArtifact, bool isEmbedded, bool limitDdlStatements, Lazy<TSqlModel> modelAccessor, ILogger logger)
         {
             this._source = source;
             this._sqlFragment = sqlFragment;
             this._isScriptArtifact = isScriptArtifact;
-            this._projectName = projectName;
             this._isEmbedded = isEmbedded;
+            this._limitDdlStatements = limitDdlStatements;
             this._modelAccessor = modelAccessor;
             this._logger = logger;
+        }
+
+        public static TSqlFragmentAnalyzer Create(string source, TSqlFragment sqlFragment, bool isScriptArtifact, string projectName, bool isEmbedded, bool limitDdlStatements, bool analyzeAlways, Lazy<TSqlModel> modelAccessor, ILogger logger)
+        {
+            TSqlFragmentAnalyzer analyzer = new TSqlFragmentAnalyzer(source, sqlFragment, isScriptArtifact, isEmbedded, limitDdlStatements, modelAccessor, logger);
 
             // Currently we always analyze. This ensures validating DML projects properly.
             // It is however prepared to be loaded in a lazy manner.
             // So if performance issues arise, optimizations can be evaluated and applied.
             if (analyzeAlways)
-                this._result = AnalyzeSchema(source, sqlFragment, isScriptArtifact, projectName, isEmbedded, this._modelAccessor.Value, logger);
+                _ = analyzer.GetResult();
+
+            return analyzer;
         }
 
         public bool TryGetElementLocation(TSqlFragment fragment, out ElementLocation location) => this.GetResult().Locations.TryGetValue(fragment.StartOffset, out location);
@@ -48,22 +55,23 @@ namespace Dibix.Sdk.Sql
             return false;
         }
 
-        private SchemaAnalyzerResult GetResult() => this._result ?? (this._result = AnalyzeSchema(this._source, this._sqlFragment, this._isScriptArtifact, this._projectName, this._isEmbedded, this._modelAccessor.Value, this._logger));
+        private SchemaAnalyzerResult GetResult() => this._result ??= AnalyzeSchema();
 
-        private static SchemaAnalyzerResult AnalyzeSchema(string source, TSqlFragment sqlFragment, bool isScriptArtifact, string projectName, bool isEmbedded, TSqlModel model, ILogger logger)
+        private SchemaAnalyzerResult AnalyzeSchema()
         {
-            SchemaAnalyzerResult schemaAnalyzerResult = SchemaAnalyzer.Analyze(model, sqlFragment);
+            TSqlModel model = this._modelAccessor.Value;
+            SchemaAnalyzerResult schemaAnalyzerResult = SchemaAnalyzer.Analyze(model, this._sqlFragment);
 
             // Loading the model of a PreDeploy/PostDeploy script is not officially supported, that's why these scripts aren't analyzed in the SQL projects.
             // We still wan't to be able to ensure our guidelines/patterns and apply our analysis rules to these artifacts aswell.
             // Therefore we have to implement a couple of workarounds.
-            if (isScriptArtifact)
+            if (this._isScriptArtifact)
             {
                 // 'The statement cannot be a top-level statement' for DeclareTableVariableStatement
                 // Just wrap the whole script in an SP, to make it a DDL statement
                 if (schemaAnalyzerResult.Errors.Any(x => x.ErrorCode == 70501))
                 {
-                    if (!(sqlFragment is TSqlScript script) || script.Batches.Count != 1)
+                    if (!(this._sqlFragment is TSqlScript script) || script.Batches.Count != 1)
                         throw new InvalidOperationException("Unable to determine DML statement from script artifact");
 
                     CreateProcedureStatement proc = new CreateProcedureStatement
@@ -88,22 +96,25 @@ namespace Dibix.Sdk.Sql
             if (schemaAnalyzerResult.Errors.Any())
                 throw new AggregateException("One or more errors occured while validating model schema", schemaAnalyzerResult.Errors.Select(ToException));
 
-            if (isEmbedded)
+            if (this._isEmbedded)
             {
                 foreach (TSqlFragment statement in schemaAnalyzerResult.DDLStatements)
                 {
-                    if (IsSupportedDDLStatement(projectName, statement))
+                    if (this.IsSupportedDdlStatement(statement))
                         continue;
 
-                    logger.LogError("Only CREATE PROCEDURE is a supported DDL statement within a DML project", source, statement.StartLine, statement.StartColumn);
+                    this._logger.LogError("Only CREATE PROCEDURE is a supported DDL statement within a DML project", this._source, statement.StartLine, statement.StartColumn);
                 }
             }
 
             return schemaAnalyzerResult;
         }
 
-        private static bool IsSupportedDDLStatement(string projectName, TSqlFragment fragment)
+        private bool IsSupportedDdlStatement(TSqlFragment fragment)
         {
+            if (!this._limitDdlStatements)
+                return true;
+
             // DML body is always defined in CREATE PROCEDURE
             if (fragment is CreateProcedureStatement)
                 return true;
@@ -116,10 +127,6 @@ namespace Dibix.Sdk.Sql
             if (fragment is AlterTableConstraintModificationStatement constraintModificationStatement && constraintModificationStatement.ConstraintEnforcement != ConstraintEnforcement.NotSpecified)
                 return true;
             
-            // TODO: Dirty suppression..
-            if (projectName == "VersionMigrator.Database.DML")
-                return true;
-
             return false;
         }
 

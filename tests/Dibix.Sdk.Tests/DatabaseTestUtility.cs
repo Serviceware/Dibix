@@ -11,7 +11,7 @@ namespace Dibix.Sdk.Tests
         private static readonly XDocument DatabaseProject;
         private static readonly XmlNamespaceManager DatabaseProjectNamespaceManager;
 
-        public static string ProjectName { get; } = "Dibix.Sdk.Tests.Database";
+        public static string ProjectName => "Dibix.Sdk.Tests.Database";
         public static string ProjectDirectory { get; } = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "..", "..", ".."));
         public static string DatabaseProjectDirectory { get; } = Path.GetFullPath(Path.Combine(ProjectDirectory, "..", ProjectName));
         public static string DatabaseSchemaProviderName { get; }

@@ -31,6 +31,8 @@ namespace Dibix.Sdk
           , IEnumerable<TaskItem> references
           , IEnumerable<TaskItem> defaultSecuritySchemes
           , bool isEmbedded
+          , bool limitDdlStatements
+          , bool preventDmlReferences
           , bool enableExperimentalFeatures
           , string databaseSchemaProviderName
           , string modelCollation
@@ -50,7 +52,7 @@ namespace Dibix.Sdk
                 return false;
             }
 
-            TSqlModel sqlModel = PublicSqlDataSchemaModelLoader.Load(projectName, databaseSchemaProviderName, modelCollation, source, sqlReferencePath, logger);
+            TSqlModel sqlModel = PublicSqlDataSchemaModelLoader.Load(preventDmlReferences, databaseSchemaProviderName, modelCollation, source, sqlReferencePath, logger);
             using (LockEntryManager lockEntryManager = LockEntryManager.Create())
             {
                 bool analysisResult = SqlCodeAnalysisTask.Execute
@@ -58,6 +60,7 @@ namespace Dibix.Sdk
                     projectName
                   , configuration.SqlCodeAnalysis
                   , isEmbedded
+                  , limitDdlStatements
                   , staticCodeAnalysisSucceededFile
                   , resultsFile
                   , source
@@ -93,6 +96,8 @@ namespace Dibix.Sdk
                   , references
                   , defaultSecuritySchemes
                   , isEmbedded
+                  , limitDdlStatements
+                  , preventDmlReferences
                   , enableExperimentalFeatures
                   , databaseSchemaProviderName
                   , modelCollation

@@ -17,18 +17,20 @@ namespace Dibix.Sdk.CodeAnalysis
         private readonly string _projectName;
         private readonly SqlCodeAnalysisConfiguration _configuration;
         private readonly bool _isEmbedded;
+        private readonly bool _limitDdlStatements;
         private readonly LockEntryManager _lockEntryManager;
         private readonly ILogger _logger;
         private readonly ICollection<Func<SqlCodeAnalysisContext, IEnumerable<SqlCodeAnalysisError>>> _rules;
         #endregion
 
         #region Constructor
-        private SqlCodeAnalysisRuleEngine(TSqlModel model, string projectName, SqlCodeAnalysisConfiguration configuration, bool isEmbedded, LockEntryManager lockEntryManager, ILogger logger)
+        private SqlCodeAnalysisRuleEngine(TSqlModel model, string projectName, SqlCodeAnalysisConfiguration configuration, bool isEmbedded, bool limitDdlStatements, LockEntryManager lockEntryManager, ILogger logger)
         {
             this._model = model;
             this._projectName = projectName;
             this._configuration = configuration;
             this._isEmbedded = isEmbedded;
+            this._limitDdlStatements = limitDdlStatements;
             this._lockEntryManager = lockEntryManager;
             this._logger = logger;
             this._rules = ScanRules().ToArray();
@@ -36,9 +38,9 @@ namespace Dibix.Sdk.CodeAnalysis
         #endregion
 
         #region Factory Methods
-        public static SqlCodeAnalysisRuleEngine Create(TSqlModel model, string projectName, SqlCodeAnalysisConfiguration configuration, bool isEmbedded, LockEntryManager lockEntryManager, ILogger logger)
+        public static SqlCodeAnalysisRuleEngine Create(TSqlModel model, string projectName, SqlCodeAnalysisConfiguration configuration, bool isEmbedded, bool limitDdlStatements, LockEntryManager lockEntryManager, ILogger logger)
         {
-            return new SqlCodeAnalysisRuleEngine(model, projectName, configuration, isEmbedded, lockEntryManager, logger);
+            return new SqlCodeAnalysisRuleEngine(model, projectName, configuration, isEmbedded, limitDdlStatements, lockEntryManager, logger);
         }
         #endregion
 
@@ -76,7 +78,7 @@ namespace Dibix.Sdk.CodeAnalysis
 
         private SqlCodeAnalysisContext CreateContext(string source, TSqlFragment fragment, bool isScriptArtifact)
         {
-            return new SqlCodeAnalysisContext(this._model, source, fragment, isScriptArtifact, this._projectName, this._configuration, this._isEmbedded, this, this._logger);
+            return new SqlCodeAnalysisContext(this._model, source, fragment, isScriptArtifact, this._projectName, this._configuration, this._isEmbedded, this._limitDdlStatements, this, this._logger);
         }
 
         private static IEnumerable<Func<SqlCodeAnalysisContext, IEnumerable<SqlCodeAnalysisError>>> ScanRules()

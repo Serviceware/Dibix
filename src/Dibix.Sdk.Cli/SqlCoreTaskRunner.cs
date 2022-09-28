@@ -30,6 +30,8 @@
               , references: configuration.GetItems("References")
               , defaultSecuritySchemes: configuration.GetItems("DefaultSecuritySchemes")
               , isEmbedded: configuration.GetSingleValue<bool>("IsEmbedded")
+              , limitDdlStatements: configuration.GetSingleValue<bool>("LimitDdlStatements")
+              , preventDmlReferences: configuration.GetSingleValue<bool>("PreventDmlReferences")
               , enableExperimentalFeatures: configuration.GetSingleValue<bool>("EnableExperimentalFeatures")
               , databaseSchemaProviderName: configuration.GetSingleValue<string>("DatabaseSchemaProviderName")
               , modelCollation: configuration.GetSingleValue<string>("ModelCollation")

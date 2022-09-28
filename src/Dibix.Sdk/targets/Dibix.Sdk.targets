@@ -302,6 +302,10 @@ $(_DefaultSecurityScheme)" />
   $(ModelCollation)" />
       <_SqlCoreInputItem Include="IsEmbedded
   $(IsEmbedded)" />
+      <_SqlCoreInputItem Include="LimitDdlStatements
+  $(LimitDdlStatements)" />
+      <_SqlCoreInputItem Include="PreventDmlReferences
+  $(PreventDmlReferences)" />
       <_SqlCoreInputItem Include="EnableExperimentalFeatures
   $(EnableExperimentalFeatures)" />
       <_SqlCoreInputItem Include="SqlReferencePath

@@ -38,9 +38,9 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
 
             TestLogger logger = new TestLogger(base.Out, distinctErrorLogging: true);
 
-            TSqlModel model = PublicSqlDataSchemaModelLoader.Load(DatabaseTestUtility.ProjectName, DatabaseTestUtility.DatabaseSchemaProviderName, DatabaseTestUtility.ModelCollation, sources, references, logger);
+            TSqlModel model = PublicSqlDataSchemaModelLoader.Load(preventDmlReferences: true, DatabaseTestUtility.DatabaseSchemaProviderName, DatabaseTestUtility.ModelCollation, sources, references, logger);
             LockEntryManager lockEntryManager = LockEntryManager.Create();
-            ISqlCodeAnalysisRuleEngine engine = SqlCodeAnalysisRuleEngine.Create(model, DatabaseTestUtility.ProjectName, new SqlCodeAnalysisConfiguration("dbx"), false, lockEntryManager, logger);
+            ISqlCodeAnalysisRuleEngine engine = SqlCodeAnalysisRuleEngine.Create(model, DatabaseTestUtility.ProjectName, new SqlCodeAnalysisConfiguration("dbx"), isEmbedded: false, limitDdlStatements: true, lockEntryManager, logger);
             IEnumerable<SqlCodeAnalysisError> errors = engine.Analyze(violationScriptPath, ruleInstance);
 
             string actual = GenerateXmlFromResults(errors);

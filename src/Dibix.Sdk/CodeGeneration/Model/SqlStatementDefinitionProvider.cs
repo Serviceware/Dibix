@@ -10,6 +10,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Fields
         private readonly string _projectName;
         private readonly bool _isEmbedded;
+        private readonly bool _limitDdlStatements;
         private readonly bool _analyzeAlways;
         private readonly string _rootNamespace;
         private readonly string _productName;
@@ -34,6 +35,7 @@ namespace Dibix.Sdk.CodeGeneration
         (
             string projectName
           , bool isEmbedded
+          , bool limitDdlStatements
           , bool analyzeAlways
           , string rootNamespace
           , string productName
@@ -50,6 +52,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             this._projectName = projectName;
             this._isEmbedded = isEmbedded;
+            this._limitDdlStatements = limitDdlStatements;
             this._analyzeAlways = analyzeAlways;
             this._rootNamespace = rootNamespace;
             this._productName = productName;
@@ -86,6 +89,7 @@ namespace Dibix.Sdk.CodeGeneration
                       , modelAccessor: this._modelAccessor
                       , projectName: this._projectName
                       , isEmbedded: this._isEmbedded
+                      , limitDdlStatements: this._limitDdlStatements
                       , analyzeAlways: this._analyzeAlways
                       , rootNamspace: this._rootNamespace
                       , productName: this._productName

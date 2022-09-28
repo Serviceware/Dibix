@@ -25,16 +25,16 @@ namespace Dibix.Sdk.Sql
         #endregion
 
         #region Public Methods
-        public static TSqlModel Load(string projectName, string databaseSchemaProviderName, string modelCollation, IEnumerable<TaskItem> source, ICollection<TaskItem> sqlReferencePath, ILogger logger)
+        public static TSqlModel Load(bool preventDmlReferences, string databaseSchemaProviderName, string modelCollation, IEnumerable<TaskItem> source, ICollection<TaskItem> sqlReferencePath, ILogger logger)
         {
-            RestrictEmbeddedReferences(projectName, sqlReferencePath, logger);
+            RestrictEmbeddedReferences(preventDmlReferences, sqlReferencePath, logger);
             ITask task = TaskCache.GetOrAdd(logger, CreateTask);
             return ModelFactory(databaseSchemaProviderName, modelCollation, source.ToMSBuildTaskItems(), sqlReferencePath.ToMSBuildTaskItems(), task, logger);
         }
         #endregion
 
         #region Private Methods
-        private static void RestrictEmbeddedReferences(string projectName, IEnumerable<TaskItem> sqlReferencePath, ILogger logger)
+        private static void RestrictEmbeddedReferences(bool preventDmlReferences, IEnumerable<TaskItem> sqlReferencePath, ILogger logger)
         {
             foreach (TaskItem reference in sqlReferencePath)
             {
@@ -64,8 +64,7 @@ namespace Dibix.Sdk.Sql
                 }
                 else if (isEmbedded.Value)
                 {
-                    // TODO: Dirty suppression..
-                    if (projectName == "Helpline.DML")
+                    if (!preventDmlReferences)
                         continue;
                     
                     logger.LogError($"Unsupported reference to DML package: {path}", null, default, default);

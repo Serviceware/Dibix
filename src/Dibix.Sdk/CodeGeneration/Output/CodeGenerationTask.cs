@@ -6,73 +6,6 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public static class CodeGenerationTask
     {
-        public static bool Execute
-        (
-            string projectName
-          , string projectDirectory
-          , string productName
-          , string areaName
-          , string title
-          , string version
-          , string description
-          , string baseUrl
-          , string outputDirectory
-          , string defaultOutputName
-          , string clientOutputName
-          , string externalAssemblyReferenceDirectory
-          , ICollection<TaskItem> source
-          , IEnumerable<TaskItem> contracts
-          , IEnumerable<TaskItem> endpoints
-          , IEnumerable<TaskItem> references
-          , IEnumerable<TaskItem> defaultSecuritySchemes
-          , bool isEmbedded
-          , bool enableExperimentalFeatures
-          , string databaseSchemaProviderName
-          , string modelCollation
-          , ICollection<TaskItem> sqlReferencePath
-          , ILogger logger
-          , out string[] additionalAssemblyReferences
-        )
-        {
-            IActionParameterSourceRegistry actionParameterSourceRegistry = new ActionParameterSourceRegistry();
-            IActionParameterConverterRegistry actionParameterConverterRegistry = new ActionParameterConverterRegistry();
-            IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(projectDirectory);
-            using (LockEntryManager lockEntryManager = LockEntryManager.Create())
-            {
-                return Execute
-                (
-                    projectName
-                  , projectDirectory
-                  , productName
-                  , areaName
-                  , title
-                  , version
-                  , description
-                  , new EndpointConfiguration(baseUrl)
-                  , outputDirectory
-                  , defaultOutputName
-                  , clientOutputName
-                  , externalAssemblyReferenceDirectory
-                  , source
-                  , contracts
-                  , endpoints
-                  , references
-                  , defaultSecuritySchemes
-                  , isEmbedded
-                  , enableExperimentalFeatures
-                  , databaseSchemaProviderName
-                  , modelCollation
-                  , sqlReferencePath
-                  , actionParameterSourceRegistry
-                  , actionParameterConverterRegistry
-                  , lockEntryManager
-                  , fileSystemProvider
-                  , logger
-                  , sqlModel: null
-                  , out additionalAssemblyReferences
-                );
-            }
-        }
         internal static bool Execute
         (
             string projectName
@@ -93,6 +26,8 @@ namespace Dibix.Sdk.CodeGeneration
           , IEnumerable<TaskItem> references
           , IEnumerable<TaskItem> defaultSecuritySchemes
           , bool isEmbedded
+          , bool limitDdlStatements
+          , bool preventDmlReferences
           , bool enableExperimentalFeatures
           , string databaseSchemaProviderName
           , string modelCollation
@@ -127,6 +62,8 @@ namespace Dibix.Sdk.CodeGeneration
               , contracts
               , endpoints, defaultSecuritySchemes
               , isEmbedded
+              , limitDdlStatements
+              , preventDmlReferences
               , enableExperimentalFeatures
               , databaseSchemaProviderName
               , modelCollation

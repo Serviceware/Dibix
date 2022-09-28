@@ -56,6 +56,8 @@ namespace Dibix.Sdk.Tests.CodeGeneration
               , references: Enumerable.Empty<TaskItem>()
               , defaultSecuritySchemes: new[] { "HLNS-SIT", "HLNS-ClientId" }.Select(ToTaskItem)
               , isEmbedded: isEmbedded
+              , limitDdlStatements: true
+              , preventDmlReferences: true
               , enableExperimentalFeatures: enableExperimentalFeatures // TODO: Add test support for inspecting DBX file
               , databaseSchemaProviderName: DatabaseTestUtility.DatabaseSchemaProviderName
               , modelCollation: DatabaseTestUtility.ModelCollation

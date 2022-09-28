@@ -29,6 +29,7 @@ namespace Dibix.Sdk.CodeAnalysis
           , string projectName
           , SqlCodeAnalysisConfiguration configuration
           , bool isEmbedded
+          , bool limitDdlStatements
           , ISqlCodeAnalysisSuppressionService suppressionService
           , ILogger logger
         )
@@ -36,7 +37,7 @@ namespace Dibix.Sdk.CodeAnalysis
             this._source = source;
             this._suppressionService = suppressionService;
             this._logger = logger;
-            this.Model = new SqlModel(source, fragment, isScriptArtifact, projectName, isEmbedded, model, logger);
+            this.Model = new SqlModel(source, fragment, isScriptArtifact, projectName, isEmbedded, limitDdlStatements, model, logger);
             this._hash = CalculateHash(source);
             this.Fragment = fragment;
             this.Configuration = configuration;

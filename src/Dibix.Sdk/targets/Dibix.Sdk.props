@@ -10,6 +10,8 @@
     <DibixSdkVersion>$([System.IO.Path]::GetFileName($([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..))))</DibixSdkVersion>
 
     <IsEmbedded>$(MSBuildProjectName.EndsWith('.DML'))</IsEmbedded>
+    <LimitDdlStatements>True</LimitDdlStatements>
+    <PreventDmlReferences>True</PreventDmlReferences>
   </PropertyGroup>
 
   <ItemGroup>

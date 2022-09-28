@@ -72,6 +72,7 @@ namespace Dibix.Sdk.CodeGeneration
               , modelAccessor: new Lazy<TSqlModel>(() => model)
               , projectName: this._projectName
               , isEmbedded: false
+              , limitDdlStatements: true
               , analyzeAlways: false
               , rootNamspace: this._rootNamespace
               , productName: this._productName

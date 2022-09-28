@@ -25,6 +25,8 @@ namespace Dibix.Sdk.CodeGeneration
           , IEnumerable<TaskItem> endpoints
           , IEnumerable<TaskItem> defaultSecuritySchemes
           , bool isEmbedded
+          , bool limitDdlStatements
+          , bool preventDmlReferences
           , bool enableExperimentalFeatures
           , string databaseSchemaProviderName
           , string modelCollation
@@ -71,7 +73,7 @@ namespace Dibix.Sdk.CodeGeneration
             // DDL statements however, need explicit markup, i.E. @Name at least
             bool requireExplicitMarkup = !isEmbedded;
             ISqlStatementParser parser = new SqlStoredProcedureParser(requireExplicitMarkup);
-            Lazy<TSqlModel> modelAccessor = sqlModel != null ? new Lazy<TSqlModel>(() => sqlModel) : new Lazy<TSqlModel>(() => PublicSqlDataSchemaModelLoader.Load(projectName, databaseSchemaProviderName, modelCollation, source, sqlReferencePath, logger));
+            Lazy<TSqlModel> modelAccessor = sqlModel != null ? new Lazy<TSqlModel>(() => sqlModel) : new Lazy<TSqlModel>(() => PublicSqlDataSchemaModelLoader.Load(preventDmlReferences, databaseSchemaProviderName, modelCollation, source, sqlReferencePath, logger));
             ISqlStatementFormatter formatter = SelectSqlStatementFormatter(isEmbedded);
             formatter.StripWhiteSpace = model.CommandTextFormatting == CommandTextFormatting.StripWhiteSpace;
             IDictionary<string, SecurityScheme> securitySchemeMap = new Dictionary<string, SecurityScheme>();
@@ -85,7 +87,7 @@ namespace Dibix.Sdk.CodeGeneration
             typeResolver.Register(new ContractDefinitionSchemaTypeResolver(schemaRegistry, contractDefinitionProvider, externalSchemaResolver, assemblyResolver, assemblyResolver, logger, productName, areaName), 1);
             typeResolver.Register(new UserDefinedTypeSchemaTypeResolver(schemaRegistry, userDefinedTypeProvider, externalSchemaResolver, assemblyResolver, logger), 2);
 
-            ISqlStatementDefinitionProvider sqlStatementDefinitionProvider = new SqlStatementDefinitionProvider(projectName, isEmbedded, analyzeAlways: true, rootNamespace, productName, areaName, parser, formatter, typeResolver, schemaRegistry, schemaDefinitionResolver, logger, normalizedSources, modelAccessor);
+            ISqlStatementDefinitionProvider sqlStatementDefinitionProvider = new SqlStatementDefinitionProvider(projectName, isEmbedded, limitDdlStatements, analyzeAlways: true, rootNamespace, productName, areaName, parser, formatter, typeResolver, schemaRegistry, schemaDefinitionResolver, logger, normalizedSources, modelAccessor);
             IActionDefinitionResolverFacade actionResolver = new ActionDefinitionResolverFacade(productName, areaName, className, sqlStatementDefinitionProvider, externalSchemaResolver, assemblyResolver, lockEntryManager, schemaDefinitionResolver, schemaRegistry, logger);
             IControllerDefinitionProvider controllerDefinitionProvider = new ControllerDefinitionProvider(normalizedEndpoints, normalizedDefaultSecuritySchemes, securitySchemeMap, actionResolver, typeResolver, schemaDefinitionResolver, actionParameterSourceRegistry, actionParameterConverterRegistry, lockEntryManager, fileSystemProvider, logger);
 

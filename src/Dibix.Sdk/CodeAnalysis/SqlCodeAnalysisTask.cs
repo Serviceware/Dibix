@@ -11,44 +11,12 @@ namespace Dibix.Sdk.CodeAnalysis
 {
     public static class SqlCodeAnalysisTask
     {
-        public static bool Execute
-        (
-            string projectName
-          , string databaseSchemaProviderName
-          , string modelCollation
-          , string namingConventionPrefix
-          , bool isEmbedded
-          , string staticCodeAnalysisSucceededFile
-          , string resultsFile
-          , ICollection<TaskItem> source
-          , IEnumerable<TaskItem> scriptSource
-          , ICollection<TaskItem> sqlReferencePath
-          , ILogger logger
-        )
-        {
-            TSqlModel model = PublicSqlDataSchemaModelLoader.Load(projectName, databaseSchemaProviderName, modelCollation, source, sqlReferencePath, logger);
-            using (LockEntryManager lockEntryManager = LockEntryManager.Create())
-            {
-                return Execute
-                (
-                    projectName
-                  , new SqlCodeAnalysisConfiguration(namingConventionPrefix)
-                  , isEmbedded
-                  , staticCodeAnalysisSucceededFile
-                  , resultsFile
-                  , source
-                  , scriptSource
-                  , lockEntryManager
-                  , logger
-                  , model
-                );
-            }
-        }
         internal static bool Execute
         (
             string projectName
           , SqlCodeAnalysisConfiguration configuration
           , bool isEmbedded
+          , bool limitDdlStatements
           , string staticCodeAnalysisSucceededFile
           , string resultsFile
           , ICollection<TaskItem> source
@@ -63,7 +31,7 @@ namespace Dibix.Sdk.CodeAnalysis
 
             ExecuteNativeCodeAnalysis(model, logger, staticCodeAnalysisSucceededFile, resultsFile);
 
-            ExecuteExtendedCodeAnalysis(projectName, configuration, isEmbedded, source, scriptSource, lockEntryManager, logger, model);
+            ExecuteExtendedCodeAnalysis(projectName, configuration, isEmbedded, limitDdlStatements, source, scriptSource, lockEntryManager, logger, model);
 
             return !logger.HasLoggedErrors;
         }
@@ -89,10 +57,10 @@ namespace Dibix.Sdk.CodeAnalysis
             return analysisResult != null;
         }
 
-        private static void ExecuteExtendedCodeAnalysis(string projectName, SqlCodeAnalysisConfiguration configuration, bool isEmbedded, ICollection<TaskItem> source, IEnumerable<TaskItem> scriptSource, LockEntryManager lockEntryManager, ILogger logger, TSqlModel model)
+        private static void ExecuteExtendedCodeAnalysis(string projectName, SqlCodeAnalysisConfiguration configuration, bool isEmbedded, bool limitDdlStatements, IEnumerable<TaskItem> source, IEnumerable<TaskItem> scriptSource, LockEntryManager lockEntryManager, ILogger logger, TSqlModel model)
         {
             logger.LogMessage("Performing extended code analysis...");
-            SqlCodeAnalysisRuleEngine codeAnalysisEngine = SqlCodeAnalysisRuleEngine.Create(model, projectName, configuration, isEmbedded, lockEntryManager, logger);
+            SqlCodeAnalysisRuleEngine codeAnalysisEngine = SqlCodeAnalysisRuleEngine.Create(model, projectName, configuration, isEmbedded, limitDdlStatements, lockEntryManager, logger);
 
             foreach (TaskItem inputFile in source)
             {
