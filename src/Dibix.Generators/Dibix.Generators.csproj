@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
@@ -16,5 +16,5 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
   </ItemGroup>
-  
+
 </Project>
