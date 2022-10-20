@@ -48,8 +48,8 @@ namespace Dibix.Generators.Tests
 
             string[] expectedFiles =
             {
-                "TestMethodGenerationAttribute.generated.cs",
-                "SqlCodeAnalysisRuleTests.generated.cs"
+                "TestMethodGenerationAttribute.g.cs",
+                "SqlCodeAnalysisRuleTests.g.cs"
             };
             for (int i = 1; i < syntaxTrees.Count; i++)
             {
@@ -131,12 +131,12 @@ namespace Dibix.Generators.Tests.Tasks
 
             string[] expectedFiles =
             {
-                "TaskPropertyAttribute.generated.cs",
-                "TaskPropertySource.generated.cs",
-                "TaskPropertyType.generated.cs",
-                "SqlCoreTask.generated.cs",
-                "SqlCoreTaskConfiguration.generated.cs",
-                "EndpointConfiguration.generated.cs"
+                "TaskPropertyAttribute.g.cs",
+                "TaskPropertySource.g.cs",
+                "TaskPropertyType.g.cs",
+                "SqlCoreTask.g.cs",
+                "SqlCoreTaskConfiguration.g.cs",
+                "EndpointConfiguration.g.cs"
             };
             for (int i = 1; i < syntaxTrees.Count; i++)
             {

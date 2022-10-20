@@ -41,7 +41,7 @@ namespace Dibix.Generators
                 if (extensionIndex < 0)
                     extensionIndex = fileName.Length;
 
-                fileName = fileName.Insert(extensionIndex, ".generated");
+                fileName = fileName.Insert(extensionIndex, ".g");
 
                 string content;
                 using (Stream stream = ThisAssembly.GetManifestResourceStream(resourceName)!)

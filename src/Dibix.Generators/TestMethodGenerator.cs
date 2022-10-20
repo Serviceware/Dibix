@@ -112,7 +112,7 @@ namespace {@namespace}
         partial void Execute([global::System.Runtime.CompilerServices.CallerMemberName] string testName = null);
     }}
 }}";
-            context.AddSource($"{className}.generated.cs", source);
+            context.AddSource($"{className}.g.cs", source);
         }
 
         private readonly struct CodeGenerationTask

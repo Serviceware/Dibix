@@ -126,7 +126,7 @@ namespace {@namespace}
         private partial bool Execute();
     }}
 }}";
-            context.AddSource($"{task.ClassName}.generated.cs", content);
+            context.AddSource($"{task.ClassName}.g.cs", content);
         }
 
         private static void GenerateTaskConfiguration(SourceProductionContext context, Task task, string? @namespace, IDictionary<string, ICollection<TaskProperty>> propertyCategoryMap)
@@ -148,7 +148,7 @@ namespace {@namespace}
     {{{propertiesText}
     }}
 }}";
-            context.AddSource($"{className}.generated.cs", content);
+            context.AddSource($"{className}.g.cs", content);
         }
 
         private static IEnumerable<string> CollectTaskConfigurationProperties(string? @namespace, IDictionary<string, ICollection<TaskProperty>> propertyCategoryMap)
@@ -193,7 +193,7 @@ namespace {@namespace}
     {{{propertiesText}
     }}
 }}";
-            context.AddSource($"{className}.generated.cs", content);
+            context.AddSource($"{className}.g.cs", content);
         }
 
         private static string GenerateConfigurationProperty(string categoryName, string? @namespace)
