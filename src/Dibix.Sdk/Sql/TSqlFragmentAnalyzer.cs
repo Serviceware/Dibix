@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Dibix.Sdk.Abstractions;
 using Microsoft.SqlServer.Dac.Extensibility;
 using Microsoft.SqlServer.Dac.Model;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
@@ -11,26 +12,24 @@ namespace Dibix.Sdk.Sql
         private readonly string _source;
         private readonly TSqlFragment _sqlFragment;
         private readonly bool _isScriptArtifact;
-        private readonly bool _isEmbedded;
-        private readonly bool _limitDdlStatements;
+        private readonly SqlCoreConfiguration _configuration;
         private readonly Lazy<TSqlModel> _modelAccessor;
         private readonly ILogger _logger;
         private SchemaAnalyzerResult _result;
 
-        private TSqlFragmentAnalyzer(string source, TSqlFragment sqlFragment, bool isScriptArtifact, bool isEmbedded, bool limitDdlStatements, Lazy<TSqlModel> modelAccessor, ILogger logger)
+        private TSqlFragmentAnalyzer(string source, TSqlFragment sqlFragment, bool isScriptArtifact, SqlCoreConfiguration configuration, Lazy<TSqlModel> modelAccessor, ILogger logger)
         {
             this._source = source;
             this._sqlFragment = sqlFragment;
             this._isScriptArtifact = isScriptArtifact;
-            this._isEmbedded = isEmbedded;
-            this._limitDdlStatements = limitDdlStatements;
+            this._configuration = configuration;
             this._modelAccessor = modelAccessor;
             this._logger = logger;
         }
 
-        public static TSqlFragmentAnalyzer Create(string source, TSqlFragment sqlFragment, bool isScriptArtifact, string projectName, bool isEmbedded, bool limitDdlStatements, bool analyzeAlways, Lazy<TSqlModel> modelAccessor, ILogger logger)
+        public static TSqlFragmentAnalyzer Create(string source, TSqlFragment sqlFragment, bool isScriptArtifact, SqlCoreConfiguration configuration, bool analyzeAlways, Lazy<TSqlModel> modelAccessor, ILogger logger)
         {
-            TSqlFragmentAnalyzer analyzer = new TSqlFragmentAnalyzer(source, sqlFragment, isScriptArtifact, isEmbedded, limitDdlStatements, modelAccessor, logger);
+            TSqlFragmentAnalyzer analyzer = new TSqlFragmentAnalyzer(source, sqlFragment, isScriptArtifact, configuration, modelAccessor, logger);
 
             // Currently we always analyze. This ensures validating DML projects properly.
             // It is however prepared to be loaded in a lazy manner.
@@ -96,7 +95,7 @@ namespace Dibix.Sdk.Sql
             if (schemaAnalyzerResult.Errors.Any())
                 throw new AggregateException("One or more errors occured while validating model schema", schemaAnalyzerResult.Errors.Select(ToException));
 
-            if (this._isEmbedded)
+            if (this._configuration.IsEmbedded)
             {
                 foreach (TSqlFragment statement in schemaAnalyzerResult.DDLStatements)
                 {
@@ -112,7 +111,7 @@ namespace Dibix.Sdk.Sql
 
         private bool IsSupportedDdlStatement(TSqlFragment fragment)
         {
-            if (!this._limitDdlStatements)
+            if (!this._configuration.LimitDdlStatements)
                 return true;
 
             // DML body is always defined in CREATE PROCEDURE

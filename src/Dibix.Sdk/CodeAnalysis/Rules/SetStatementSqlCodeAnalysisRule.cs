@@ -20,6 +20,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         protected override string ErrorMessageTemplate => "{0}";
 
+        public SetStatementSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         public override void Visit(PredicateSetStatement node)
         {
             // Validate supported SET statements

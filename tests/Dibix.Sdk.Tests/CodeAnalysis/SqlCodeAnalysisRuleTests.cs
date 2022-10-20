@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
+using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.CodeAnalysis;
 using Dibix.Sdk.Sql;
 using Dibix.Testing;
@@ -22,11 +23,10 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
             string resourceKey = ResourceUtility.BuildResourceKey($"CodeAnalysis.{testName}.xml");
             string expected = base.GetEmbeddedResourceContent(resourceKey);
             Type ruleType = Type.GetType($"Dibix.Sdk.CodeAnalysis.Rules.{testName},{typeof(ISqlCodeAnalysisRule).Assembly.GetName().Name}");
-            ISqlCodeAnalysisRule ruleInstance = (ISqlCodeAnalysisRule)Activator.CreateInstance(ruleType);
             SqlCodeAnalysisRuleAttribute descriptor = ruleType.GetCustomAttribute<SqlCodeAnalysisRuleAttribute>();
             string violationScriptPath = Path.Combine(DatabaseTestUtility.DatabaseProjectDirectory, "CodeAnalysis", $"dbx_codeanalysis_error_{descriptor.Id:D3}.sql");
 
-            IEnumerable<TaskItem> sources = ((IEnumerable)DatabaseTestUtility.QueryProject("x:Project/x:ItemGroup/x:Build/@Include"))
+            ICollection<TaskItem> sources = ((IEnumerable)DatabaseTestUtility.QueryProject("x:Project/x:ItemGroup/x:Build/@Include"))
                                                                              .OfType<XAttribute>()
                                                                              .Select(x => new TaskItem(x.Value) { ["FullPath"] = Path.Combine(DatabaseTestUtility.DatabaseProjectDirectory, x.Value) })
                                                                              .ToArray();
@@ -38,10 +38,25 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
 
             TestLogger logger = new TestLogger(base.Out, distinctErrorLogging: true);
 
-            TSqlModel model = PublicSqlDataSchemaModelLoader.Load(preventDmlReferences: true, DatabaseTestUtility.DatabaseSchemaProviderName, DatabaseTestUtility.ModelCollation, sources, references, logger);
+            SqlCoreTaskConfiguration configuration = new SqlCoreTaskConfiguration
+            {
+                SqlCore =
+                {
+                    ProjectName = DatabaseTestUtility.ProjectName,
+                    IsEmbedded = false,
+                    LimitDdlStatements = true,
+                    PreventDmlReferences = true,
+                    DatabaseSchemaProviderName = DatabaseTestUtility.DatabaseSchemaProviderName,
+                    ModelCollation = DatabaseTestUtility.ModelCollation,
+                    Source = sources,
+                    SqlReferencePath = references
+                },
+                SqlCodeAnalysis = { NamingConventionPrefix = "dbx" }
+            };
+            TSqlModel model = PublicSqlDataSchemaModelLoader.Load(configuration.SqlCore, logger);
             LockEntryManager lockEntryManager = LockEntryManager.Create();
-            ISqlCodeAnalysisRuleEngine engine = SqlCodeAnalysisRuleEngine.Create(model, DatabaseTestUtility.ProjectName, new SqlCodeAnalysisConfiguration("dbx"), isEmbedded: false, limitDdlStatements: true, lockEntryManager, logger);
-            IEnumerable<SqlCodeAnalysisError> errors = engine.Analyze(violationScriptPath, ruleInstance);
+            ISqlCodeAnalysisRuleEngine engine = SqlCodeAnalysisRuleEngine.Create(model, configuration.SqlCore, configuration.SqlCodeAnalysis, lockEntryManager, logger);
+            IEnumerable<SqlCodeAnalysisError> errors = engine.Analyze(violationScriptPath, ruleType);
 
             string actual = GenerateXmlFromResults(errors);
             base.AssertEqual(expected, actual, extension: "xml");

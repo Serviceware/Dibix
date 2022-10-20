@@ -15,6 +15,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         protected override string ErrorMessageTemplate => "The alias is redundant";
 
+        public RedundantAliasSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         public override void Visit(SelectScalarExpression node)
         {
             if (!(node.Expression is ColumnReferenceExpression columnReference) || node.ColumnName == null)

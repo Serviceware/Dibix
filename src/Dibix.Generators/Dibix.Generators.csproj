@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <IncludeBuildOutput>False</IncludeBuildOutput>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,4 +18,9 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
   </ItemGroup>
 
+  <ItemGroup><!-- An instance of analyzer Dibix.Generators.TaskGenerator cannot be created from Dibix.Generators.dll : Exception has been thrown by the target of an invocation.. -->
+    <!--<ProjectReference Include="..\Dibix.Sdk.Abstractions\Dibix.Sdk.Abstractions.csproj" PrivateAssets="all" />-->
+  
+    <EmbeddedResource Update="EmbeddedSources\TaskGenerator\TaskPropertySource.cs" Link="EmbeddedSources\TaskGenerator\TaskPropertySource.cs" />
+  </ItemGroup>
 </Project>

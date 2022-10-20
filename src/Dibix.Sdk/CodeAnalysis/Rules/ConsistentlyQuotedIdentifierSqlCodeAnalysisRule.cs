@@ -10,6 +10,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         protected override string ErrorMessageTemplate => "Identifier quotation should be consistent and not mixed. Either use all square brackets or none: {0}";
 
+        public ConsistentlyQuotedIdentifierSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         public override void Visit(MultiPartIdentifier node)
         {
             bool allEqual = node.Identifiers

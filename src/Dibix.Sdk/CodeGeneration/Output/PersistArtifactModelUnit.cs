@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
+using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -9,7 +10,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public override bool Generate(CodeGenerationModel model, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
         {
-            string jsonFilePath = Path.GetFullPath(Path.Combine(model.OutputDirectory, $"{model.DefaultOutputName}.Accessor.model.json"));
+            string jsonFilePath = Path.GetFullPath(Path.Combine(model.ArtifactGenerationConfiguration.OutputDirectory, $"{model.ArtifactGenerationConfiguration.DefaultOutputName}.Accessor.model.json"));
             CodeGenerationModelSerializer.Write(model, jsonFilePath);
             return true;
         }

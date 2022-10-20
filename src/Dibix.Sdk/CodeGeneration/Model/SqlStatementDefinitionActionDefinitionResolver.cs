@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -7,8 +8,7 @@ namespace Dibix.Sdk.CodeGeneration
     internal sealed class SqlStatementDefinitionActionDefinitionResolver : ActionDefinitionResolver
     {
         #region Fields
-        private readonly string _productName;
-        private readonly string _areaName;
+        private readonly ArtifactGenerationConfiguration _configuration;
         private readonly string _className;
         private readonly ISqlStatementDefinitionProvider _sqlStatementDefinitionProvider;
         private readonly ReferencedAssemblyInspector _referencedAssemblyInspector;
@@ -19,8 +19,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Constructor
         public SqlStatementDefinitionActionDefinitionResolver
         (
-            string productName
-          , string areaName
+            ArtifactGenerationConfiguration configuration
           , string className
           , ISqlStatementDefinitionProvider sqlStatementDefinitionProvider
           , IExternalSchemaResolver externalSchemaResolver
@@ -30,26 +29,25 @@ namespace Dibix.Sdk.CodeGeneration
           , ILogger logger
         ) : base(schemaDefinitionResolver, schemaRegistry, logger)
         {
-            this._productName = productName;
-            this._areaName = areaName;
-            this._className = className;
-            this._sqlStatementDefinitionProvider = sqlStatementDefinitionProvider;
-            this._externalSchemaResolver = externalSchemaResolver;
-            this._referencedAssemblyInspector = referencedAssemblyInspector;
-            this._externalDefinitions = new Dictionary<string, SqlStatementDefinition>();
+            _configuration = configuration;
+            _className = className;
+            _sqlStatementDefinitionProvider = sqlStatementDefinitionProvider;
+            _externalSchemaResolver = externalSchemaResolver;
+            _referencedAssemblyInspector = referencedAssemblyInspector;
+            _externalDefinitions = new Dictionary<string, SqlStatementDefinition>();
         }
         #endregion
 
         #region Overrides
         public override bool TryResolve(string targetName, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, out ActionDefinition actionDefinition)
         {
-            if (!this.TryGetStatementDefinitionByProbing(targetName, out SqlStatementDefinition statementDefinition, out string accessorClassName))
+            if (!TryGetStatementDefinitionByProbing(targetName, out SqlStatementDefinition statementDefinition, out string accessorClassName))
             {
                 actionDefinition = null;
                 return false;
             }
 
-            string localAccessorFullName = $"{statementDefinition.Namespace}.{this._className}";
+            string localAccessorFullName = $"{statementDefinition.Namespace}.{_className}";
             string externalAccessorFullName = $"{statementDefinition.Namespace}.{accessorClassName}";
             string definitionName = statementDefinition.DefinitionName;
             bool isAsync = statementDefinition.Async;
@@ -87,17 +85,17 @@ namespace Dibix.Sdk.CodeGeneration
         #region Private Methods
         private bool TryGetStatementDefinitionByProbing(string targetName, out SqlStatementDefinition statementDefinition, out string accessorClassName)
         {
-            foreach (string candidate in SymbolNameProbing.EvaluateProbingCandidates(this._productName, this._areaName, LayerName.Data, relativeNamespace: null, targetName))
+            foreach (string candidate in SymbolNameProbing.EvaluateProbingCandidates(_configuration.ProductName, _configuration.AreaName, LayerName.Data, relativeNamespace: null, targetName))
             {
                 // Try local definition
-                if (this._sqlStatementDefinitionProvider.TryGetDefinition(candidate, out statementDefinition))
+                if (_sqlStatementDefinitionProvider.TryGetDefinition(candidate, out statementDefinition))
                 {
-                    accessorClassName = this._className;
+                    accessorClassName = _className;
                     return true;
                 }
 
                 // Try external definition
-                if (this._externalSchemaResolver.TryGetSchema(candidate, out ExternalSchemaDefinition externalSchemaDefinition))
+                if (_externalSchemaResolver.TryGetSchema(candidate, out ExternalSchemaDefinition externalSchemaDefinition))
                 {
                     statementDefinition = externalSchemaDefinition.GetSchema<SqlStatementDefinition>();
                     accessorClassName = externalSchemaDefinition.Owner.DefaultClassName;
@@ -112,10 +110,10 @@ namespace Dibix.Sdk.CodeGeneration
 
         private bool TryGetExternalStatementDefinitionLazy(string fullName, out SqlStatementDefinition statementDefinition)
         {
-            if (this._externalDefinitions.TryGetValue(fullName, out statementDefinition))
+            if (_externalDefinitions.TryGetValue(fullName, out statementDefinition))
                 return true;
 
-            SqlStatementDefinition matchingDefinition = this._referencedAssemblyInspector.Inspect(referencedAssemblies =>
+            SqlStatementDefinition matchingDefinition = _referencedAssemblyInspector.Inspect(referencedAssemblies =>
             {
                 var query = from assembly in referencedAssemblies
                             let model = CodeGenerationModelSerializer.Read(assembly)
@@ -130,7 +128,7 @@ namespace Dibix.Sdk.CodeGeneration
                 return false;
 
             base.SchemaRegistry.Populate(matchingDefinition);
-            this._externalDefinitions.Add(fullName, matchingDefinition);
+            _externalDefinitions.Add(fullName, matchingDefinition);
             statementDefinition = matchingDefinition;
             return true;
         }

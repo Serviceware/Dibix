@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -18,7 +19,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (!logger.HasLoggedErrors)
             {
-                string outputFilePath = Path.Combine(model.OutputDirectory, $"{this.GetOutputName(model)}.cs");
+                string outputFilePath = Path.Combine(model.ArtifactGenerationConfiguration.OutputDirectory, $"{this.GetOutputName(model)}.cs");
                 File.WriteAllText(outputFilePath, generated);
                 return true;
             }

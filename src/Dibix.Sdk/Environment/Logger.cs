@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk
 {

@@ -8,6 +8,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         protected override string ErrorMessageTemplate => "The use of temporary tables is not allowed: {0}";
 
+        public TemporaryTableSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         public override void Visit(CreateTableStatement node)
         {
             if (node.IsTemporaryTable())

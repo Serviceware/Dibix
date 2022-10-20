@@ -16,7 +16,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         protected override string ErrorMessageTemplate => "{0}";
 
-        public MisusedTopRowFilterSqlCodeAnalysisRule()
+        public MisusedTopRowFilterSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context)
         {
             this._tableVariablesWithKey = new Dictionary<string, TableVariable>();
         }

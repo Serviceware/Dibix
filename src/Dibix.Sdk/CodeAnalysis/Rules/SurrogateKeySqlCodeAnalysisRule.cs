@@ -11,6 +11,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         protected override string ErrorMessageTemplate => "{0}";
 
+        public SurrogateKeySqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         public override void Visit(CreateTableStatement node)
         {
             if (node.IsTemporaryTable())

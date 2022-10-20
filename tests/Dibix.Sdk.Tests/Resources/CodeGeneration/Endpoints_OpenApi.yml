@@ -22,8 +22,8 @@ paths:
                 items:
                   $ref: '#/components/schemas/GenericContract'
       security:
-        - HLNS-SIT: [ ]
-          HLNS-ClientId: [ ]
+        - DBXNS-SIT: [ ]
+          DBXNS-ClientId: [ ]
     put:
       tags:
         - GenericEndpoint
@@ -40,8 +40,8 @@ paths:
         '204':
           description: NoContent
       security:
-        - HLNS-SIT: [ ]
-          HLNS-ClientId: [ ]
+        - DBXNS-SIT: [ ]
+          DBXNS-ClientId: [ ]
     post:
       tags:
         - GenericEndpoint
@@ -57,8 +57,8 @@ paths:
         '204':
           description: NoContent
       security:
-        - HLNS-SIT: [ ]
-          HLNS-ClientId: [ ]
+        - DBXNS-SIT: [ ]
+          DBXNS-ClientId: [ ]
     patch:
       tags:
         - GenericEndpoint
@@ -74,8 +74,8 @@ paths:
         '204':
           description: NoContent
       security:
-        - HLNS-SIT: [ ]
-          HLNS-ClientId: [ ]
+        - DBXNS-SIT: [ ]
+          DBXNS-ClientId: [ ]
     delete:
       tags:
         - GenericEndpoint
@@ -91,8 +91,8 @@ paths:
         '204':
           description: NoContent
       security:
-        - HLNS-SIT: [ ]
-          HLNS-ClientId: [ ]
+        - DBXNS-SIT: [ ]
+          DBXNS-ClientId: [ ]
   '/Tests/GenericEndpoint/{password}/Fixed':
     get:
       tags:
@@ -130,8 +130,8 @@ paths:
         '204':
           description: NoContent
       security:
-        - HLNS-SIT: [ ]
-          HLNS-ClientId: [ ]
+        - DBXNS-SIT: [ ]
+          DBXNS-ClientId: [ ]
   '/Tests/GenericEndpoint/{password}/User':
     get:
       tags:
@@ -223,8 +223,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericContract'
       security:
-        - HLNS-SIT: [ ]
-          HLNS-ClientId: [ ]
+        - DBXNS-SIT: [ ]
+          DBXNS-ClientId: [ ]
   '/Tests/GenericEndpoint/{id}':
     get:
       tags:
@@ -404,13 +404,13 @@ components:
         - Ascending
         - Descending
   securitySchemes:
-    HLNS-SIT:
+    DBXNS-SIT:
       type: apiKey
-      name: HLNS-SIT
+      name: DBXNS-SIT
       in: header
-    HLNS-ClientId:
+    DBXNS-ClientId:
       type: apiKey
-      name: HLNS-ClientId
+      name: DBXNS-ClientId
       in: header
     Bearer:
       type: http

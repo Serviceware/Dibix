@@ -1,4 +1,5 @@
-﻿using Dibix.Sdk.Sql;
+﻿using Dibix.Sdk.Abstractions;
+using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -7,8 +8,7 @@ namespace Dibix.Sdk.CodeGeneration
     {
         internal string Source { get; set; }
         internal string DefinitionName { get; set; }
-        internal string ProductName { get; set; }
-        internal string AreaName { get; set; }
+        internal ArtifactGenerationConfiguration Configuration { get; set; }
         internal SqlStatementDefinition Definition { get; set; }
         internal TSqlFragmentAnalyzer FragmentAnalyzer { get; set; }
         internal ISqlStatementFormatter Formatter { get; set; }

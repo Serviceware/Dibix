@@ -9,7 +9,9 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     public sealed class ExplicitProcedureArgumentSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
         protected override string ErrorMessageTemplate => "Procedure arguments should be named: {0} {1} = {2}";
-        
+
+        public ExplicitProcedureArgumentSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         public override void Visit(ExecuteSpecification node)
         {
             if (!(node.ExecutableEntity is ExecutableProcedureReference procedureReference))

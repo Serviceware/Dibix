@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using Dibix.Sdk.CodeAnalysis;
+using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.CodeGeneration;
 using Dibix.Sdk.Json;
 using Newtonsoft.Json;
@@ -9,24 +9,15 @@ using Newtonsoft.Json.Linq;
 
 namespace Dibix.Sdk
 {
-    internal sealed class SqlCoreTaskConfiguration
+    internal static class SqlCoreTaskConfigurationExtensions
     {
-        public SqlCodeAnalysisConfiguration SqlCodeAnalysis { get; } = new SqlCodeAnalysisConfiguration();
-        public EndpointConfiguration Endpoints { get; } = new EndpointConfiguration();
-
-        private SqlCoreTaskConfiguration() { }
-
-        public static SqlCoreTaskConfiguration Create(string filePath, IActionParameterSourceRegistry actionParameterSourceRegistry, IActionParameterConverterRegistry actionParameterConverterRegistry, IFileSystemProvider fileSystemProvider, ILogger logger)
+        public static void AppendUserConfiguration(this SqlCoreTaskConfiguration configuration, string filePath, IActionParameterSourceRegistry actionParameterSourceRegistry, IActionParameterConverterRegistry actionParameterConverterRegistry, IFileSystemProvider fileSystemProvider, ILogger logger)
         {
-            SqlCoreTaskConfiguration configuration = new SqlCoreTaskConfiguration();
             if (!File.Exists(filePath))
-            {
-                return configuration;
-            }
+                return;
 
             SqlCoreTaskConfigurationReader configurationReader = new SqlCoreTaskConfigurationReader(filePath, configuration, actionParameterSourceRegistry, actionParameterConverterRegistry, fileSystemProvider, logger);
             configurationReader.Collect();
-            return configuration;
         }
 
         private sealed class SqlCoreTaskConfigurationReader : JsonSchemaDefinitionReader
@@ -53,7 +44,7 @@ namespace Dibix.Sdk
             protected override void Read(string filePath, JObject json)
             {
                 CollectSqlCodeAnalysisConfiguration(json, this._configuration.SqlCodeAnalysis);
-                CollectEndpointConfiguration(json, this._configuration.Endpoints);
+                CollectArtifactGenerationConfiguration(json, this._configuration.ArtifactGeneration);
             }
 
             private static void CollectSqlCodeAnalysisConfiguration(JObject json, SqlCodeAnalysisConfiguration configuration)
@@ -70,14 +61,14 @@ namespace Dibix.Sdk
                 }
             }
 
-            private void CollectEndpointConfiguration(JObject json, EndpointConfiguration configuration)
+            private void CollectArtifactGenerationConfiguration(JObject json, ArtifactGenerationConfiguration configuration)
             {
                 const string endpointConfigurationName = "Endpoints";
                 JObject endpointConfiguration = (JObject)json.Property(endpointConfigurationName)?.Value;
                 if (endpointConfiguration == null)
                     return;
 
-                JProperty baseUrlProperty = endpointConfiguration.Property(nameof(EndpointConfiguration.BaseUrl));
+                JProperty baseUrlProperty = endpointConfiguration.Property(nameof(ArtifactGenerationConfiguration.BaseUrl));
                 if (baseUrlProperty != null)
                 {
                     configuration.BaseUrl = (string)baseUrlProperty.Value;

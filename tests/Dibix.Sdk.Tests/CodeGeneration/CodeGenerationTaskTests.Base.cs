@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Dibix.Sdk.Abstractions;
 using Dibix.Testing;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -33,43 +34,65 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             ICollection<TaskItem> endpointItems = (endpoints ?? Enumerable.Empty<string>()).Select(ToTaskItem).ToArray();
             TestLogger logger = new TestLogger(base.Out, distinctErrorLogging: true);
 
-            bool result = SqlCoreTask.Execute
-            (
-                projectName: DatabaseTestUtility.ProjectName
-              , projectDirectory: DatabaseTestUtility.DatabaseProjectDirectory
-              , configurationFilePath: Path.Combine(DatabaseTestUtility.DatabaseProjectDirectory, "dibix.json")
-              , staticCodeAnalysisSucceededFile: null
-              , resultsFile: null
-              , productName: "Dibix.Sdk"
-              , areaName: areaName
-              , title: "Dibix.Sdk.Tests API title"
-              , version: "1.0.1"
-              , description: "Dibix.Sdk.Tests API description"
-              , outputDirectory: outputDirectory
-              , defaultOutputName: defaultOutputName
-              , clientOutputName: outputKind == AssertOutputKind.Client ? clientOutputName : null
-              , externalAssemblyReferenceDirectory: Environment.CurrentDirectory
-              , source: (sources ?? Enumerable.Empty<string>()).Select(ToTaskItem).ToArray()
-              , scriptSource: Enumerable.Empty<TaskItem>()
-              , contracts: (contracts ?? Enumerable.Empty<string>()).Select(ToTaskItem)
-              , endpoints: endpointItems
-              , references: Enumerable.Empty<TaskItem>()
-              , defaultSecuritySchemes: new[] { "HLNS-SIT", "HLNS-ClientId" }.Select(ToTaskItem)
-              , isEmbedded: isEmbedded
-              , limitDdlStatements: true
-              , preventDmlReferences: true
-              , enableExperimentalFeatures: enableExperimentalFeatures // TODO: Add test support for inspecting DBX file
-              , databaseSchemaProviderName: DatabaseTestUtility.DatabaseSchemaProviderName
-              , modelCollation: DatabaseTestUtility.ModelCollation
-              , sqlReferencePath: Array.Empty<TaskItem>()
-              , logger: logger
-              , additionalAssemblyReferences: out string[] additionalAssemblyReferences
-            );
+            string inputConfigurationPath = base.AddResultFile("core.input", $@"ProjectName
+  {DatabaseTestUtility.ProjectName}
+ProjectDirectory
+  {DatabaseTestUtility.DatabaseProjectDirectory}
+ConfigurationFilePath
+  {Path.Combine(DatabaseTestUtility.DatabaseProjectDirectory, "dibix.json")}
+StaticCodeAnalysisSucceededFile
+ResultsFile
+ProductName
+  Dibix.Sdk
+AreaName
+  {areaName}
+Title
+  Dibix.Sdk.Tests API title
+Version
+  1.0.1
+Description
+  Dibix.Sdk.Tests API description
+OutputDirectory
+  {outputDirectory}
+DefaultOutputName
+  {defaultOutputName}
+ClientOutputName
+  {(outputKind == AssertOutputKind.Client ? clientOutputName : null)}
+ExternalAssemblyReferenceDir
+  {Environment.CurrentDirectory}
+BuildingInsideVisualStudio
+Source
+{CollectInputItems(sources)}
+ScriptSource
+Contracts
+{CollectInputItems(contracts)}
+Endpoints
+{CollectInputItems(endpoints)}
+References
+DefaultSecuritySchemes
+  DBXNS-SIT
+  DBXNS-ClientId
+DatabaseSchemaProviderName
+  {DatabaseTestUtility.DatabaseSchemaProviderName}
+ModelCollation
+  {DatabaseTestUtility.ModelCollation}
+IsEmbedded
+  {isEmbedded}
+LimitDdlStatements
+  True
+PreventDmlReferences
+  True
+EnableExperimentalFeatures
+  {enableExperimentalFeatures /* TODO: Add test support for inspecting DBX file */}
+SqlReferencePath");
+            InputConfiguration inputConfiguration = InputConfiguration.Parse(inputConfigurationPath);
+            SqlCoreTask task = new SqlCoreTask(logger, inputConfiguration);
+            bool result = ((ITask)task).Execute();
 
             logger.Verify();
 
             Assert.IsTrue(result, "MSBuild task result was false");
-            AssertAreEqual(expectedAdditionalAssemblyReferences ?? Enumerable.Empty<string>(), additionalAssemblyReferences);
+            AssertAreEqual(expectedAdditionalAssemblyReferences ?? Enumerable.Empty<string>(), task.AdditionalReferences);
 
             bool hasEndpoints = endpointItems.Any();
             string endpointOutputFilePath = Path.Combine(outputDirectory, $"{areaName}.cs");
@@ -105,6 +128,14 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                 default:
                     throw new ArgumentOutOfRangeException(nameof(outputKind), outputKind, null);
             }
+        }
+
+        private static string CollectInputItems(IEnumerable<string> items)
+        {
+            string GenerateItem(string x) => $@"  {x}
+    FullPath {Path.Combine(DatabaseTestUtility.DatabaseProjectDirectory, x)}";
+
+            return String.Join(Environment.NewLine, (items ?? Enumerable.Empty<string>()).Select(GenerateItem));
         }
 
         private void ExecuteTestAndExpectError

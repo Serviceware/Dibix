@@ -9,6 +9,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         protected override string ErrorMessageTemplate => "Missing where clause in {0} statement";
 
+        public UnfilteredDataModificationSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         public override void Visit(UpdateSpecification node)
         {
             if (node.WhereClause != null)

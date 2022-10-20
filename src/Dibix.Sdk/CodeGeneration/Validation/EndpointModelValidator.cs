@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Dibix.Http;
+using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -39,7 +40,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                     foreach (ActionDefinition action in childRouteGroup)
                     {
-                        string route = RouteBuilder.BuildRoute(model.AreaName, controller.Name, action.ChildRoute);
+                        string route = RouteBuilder.BuildRoute(model.ArtifactGenerationConfiguration.AreaName, controller.Name, action.ChildRoute);
                         this._logger.LogError($"Equivalent paths are not allowed: {action.Method.ToString().ToUpperInvariant()} {route}", action.ChildRoute.Source, action.ChildRoute.Line, action.ChildRoute.Column);
                     }
                 }

@@ -5,6 +5,8 @@
     {
         public override string ErrorMessage => "Unknown primary key source: {0}.{1}";
 
+        public UnknownPrimaryKeySourceSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         public override void Visit(CreateTableStatement node)
         {
             if (node.IsTemporaryTable())

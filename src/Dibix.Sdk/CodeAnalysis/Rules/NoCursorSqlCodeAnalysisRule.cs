@@ -8,6 +8,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         protected override string ErrorMessageTemplate => "Found use of CURSOR statement";
 
+        public NoCursorSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         protected override void Visit(TSqlParserToken token)
         {
             if (token.TokenType == SqlTokenType.Cursor)

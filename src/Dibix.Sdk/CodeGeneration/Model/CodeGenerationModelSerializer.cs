@@ -46,7 +46,8 @@ namespace Dibix.Sdk.CodeGeneration
                     // This is fine, and therefore we just return an empty model instead of throwing an exception.
                     // An empty model also ensures, that no endpoint can target an artifact from a referenced leaf project.
                     //throw new InvalidOperationException($"Model resource not found in assembly: {assembly}");
-                    return new CodeGenerationModel();
+                    SqlCoreTaskConfiguration configuration = new SqlCoreTaskConfiguration();
+                    return new CodeGenerationModel(globalConfiguration: configuration.SqlCore, artifactGenerationConfiguration: configuration.ArtifactGeneration, rootNamespace: default, defaultClassName: default);
                 }
 
                 using (TextReader textReader = new StreamReader(stream))

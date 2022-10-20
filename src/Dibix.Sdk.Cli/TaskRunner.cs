@@ -1,45 +1,70 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
+using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.Cli
 {
-    internal abstract class TaskRunner
+    internal static class TaskRunner
     {
-        private static readonly IDictionary<string, Type> Runners;
-        private readonly VisualStudioAwareLogger _logger;
-
-        public static IEnumerable<string> RegisteredTaskRunnerNames => Runners.Keys;
-        protected ILogger Logger => this._logger;
-        protected bool BuildingInsideVisualStudio
+        private static readonly Assembly SdkAssembly = typeof(Logger).Assembly;
+        private static readonly Type[] ConstructorSignature =
         {
-            get => this._logger.BuildingInsideVisualStudio;
-            set => this._logger.BuildingInsideVisualStudio = value;
-        }
+            typeof(ILogger),
+            typeof(InputConfiguration)
+        };
+        private static readonly IDictionary<string, Func<ILogger, InputConfiguration, ITask>> Tasks = CollectTasks().ToDictionary(x => x.name, x => x.factory);
 
-        static TaskRunner()
-        {
-            var query = from type in typeof(TaskRunner).Assembly.GetTypes()
-                        let attrib = type.GetCustomAttribute<TaskRunnerAttribute>()
-                        where attrib != null
-                        select new KeyValuePair<string, Type>(attrib.Name, type);
-            Runners = query.ToDictionary(x => x.Key, x => x.Value);
-        }
-
-        protected TaskRunner(ILogger logger) => this._logger = new VisualStudioAwareLogger(logger);
+        public static IEnumerable<string> RegisteredTaskRunnerNames => Tasks.Keys;
 
         public static bool Execute(string runnerName, string[] args, ILogger logger)
         {
-            if (Runners.TryGetValue(runnerName, out Type runnerType))
+            if (Tasks.TryGetValue(runnerName, out Func<ILogger, InputConfiguration, ITask> factory))
             {
-                TaskRunner runner = (TaskRunner)Activator.CreateInstance(runnerType, logger);
-                return runner.Execute(args);
+                InputConfiguration configuration = CollectInputConfiguration(args);
+                VisualStudioAwareLogger visualStudioAwareLogger = new VisualStudioAwareLogger(logger);
+                visualStudioAwareLogger.BuildingInsideVisualStudio = configuration.GetSingleValue<bool>("BuildingInsideVisualStudio", throwOnInvalidKey: false);
+                ITask task = factory(visualStudioAwareLogger, configuration);
+                return task.Execute();
             }
             return false;
         }
 
-        protected abstract bool Execute(string[] args);
+        private static InputConfiguration CollectInputConfiguration(IReadOnlyList<string> args)
+        {
+            if (args.Count < 2)
+                return InputConfiguration.Empty;
+
+            string inputConfigurationFile = args[1];
+            InputConfiguration configuration = InputConfiguration.Parse(inputConfigurationFile);
+            return configuration;
+        }
+
+        private static IEnumerable<(string name, Func<ILogger, InputConfiguration, ITask> factory)> CollectTasks()
+        {
+            Type taskInterfaceType = typeof(ITask);
+            foreach (Type type in SdkAssembly.GetTypes())
+            {
+                TaskAttribute taskAttribute = type.GetCustomAttribute<TaskAttribute>();
+                if (taskAttribute == null)
+                    continue;
+
+                if (!taskInterfaceType.IsAssignableFrom(type))
+                    throw new InvalidOperationException($"Type '{type}' is decorated with {nameof(TaskAttribute)}, but does not implement '{taskInterfaceType}'.");
+
+                ConstructorInfo ctor = type.GetConstructor(ConstructorSignature);
+                
+                ParameterExpression loggerParameter = Expression.Parameter(typeof(ILogger), "logger");
+                ParameterExpression inputConfigurationParameter = Expression.Parameter(typeof(InputConfiguration), "inputConfiguration");
+                Expression taskInstance = Expression.New(ctor, loggerParameter, inputConfigurationParameter);
+                Expression<Func<ILogger, InputConfiguration, ITask>> lambda = Expression.Lambda<Func<ILogger, InputConfiguration, ITask>>(taskInstance, loggerParameter, inputConfigurationParameter);
+                Func<ILogger, InputConfiguration, ITask> compiled = lambda.Compile();
+
+                yield return (taskAttribute.Name, compiled);
+            }
+        }
 
         // Unfortunately, VS doesn't parse the canonical error format correctly, leading to issues in the VS error list regarding error code and sub category.
         // This is not a fix nor a workaround. We just ignore the error code and add it to the text so it is more readable.

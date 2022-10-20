@@ -12,6 +12,8 @@ using Microsoft.Data.Tools.Schema.Tasks.Sql;
 using Microsoft.Data.Tools.Schema.Utilities.Sql.Common;
 using Microsoft.SqlServer.Dac.Model;
 using Assembly = System.Reflection.Assembly;
+using ILogger = Dibix.Sdk.Abstractions.ILogger;
+using TaskItem = Dibix.Sdk.Abstractions.TaskItem;
 
 namespace Dibix.Sdk.Sql
 {
@@ -25,11 +27,11 @@ namespace Dibix.Sdk.Sql
         #endregion
 
         #region Public Methods
-        public static TSqlModel Load(bool preventDmlReferences, string databaseSchemaProviderName, string modelCollation, IEnumerable<TaskItem> source, ICollection<TaskItem> sqlReferencePath, ILogger logger)
+        public static TSqlModel Load(SqlCoreConfiguration configuration, ILogger logger)
         {
-            RestrictEmbeddedReferences(preventDmlReferences, sqlReferencePath, logger);
+            RestrictEmbeddedReferences(configuration.PreventDmlReferences, configuration.SqlReferencePath, logger);
             ITask task = TaskCache.GetOrAdd(logger, CreateTask);
-            return ModelFactory(databaseSchemaProviderName, modelCollation, source.ToMSBuildTaskItems(), sqlReferencePath.ToMSBuildTaskItems(), task, logger);
+            return ModelFactory(configuration.DatabaseSchemaProviderName, configuration.ModelCollation, configuration.Source.ToMSBuildTaskItems(), configuration.SqlReferencePath.ToMSBuildTaskItems(), task, logger);
         }
         #endregion
 
@@ -303,7 +305,13 @@ namespace Dibix.Sdk.Sql
 
             public TaskItemWrapper(TaskItem item) => this._item = item;
 
-            string ITaskItem.GetMetadata(string metadataName) => this._item[metadataName];
+            string ITaskItem.GetMetadata(string metadataName)
+            {
+                if (!this._item.TryGetValue(metadataName, out string value))
+                    throw new KeyNotFoundException($"The item does not contain metadata with name '{metadataName}'");
+
+                return value;
+            }
 
             void ITaskItem.SetMetadata(string metadataName, string metadataValue) => throw new NotSupportedException();
 

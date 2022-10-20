@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using Dibix.Sdk.Abstractions;
 using Microsoft.SqlServer.Dac.Model;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -16,24 +17,20 @@ namespace Dibix.Sdk.CodeGeneration
 
         public bool Read
         (
-            SqlParserSourceKind sourceKind
-          , object content
-          , string source
-          , string definitionName
-          , Lazy<TSqlModel> modelAccessor
-          , string projectName
-          , bool isEmbedded
-          , bool limitDdlStatements
-          , bool analyzeAlways
-          , string rootNamespace
-          , string productName
-          , string areaName
-          , ISqlStatementFormatter formatter
-          , ITypeResolverFacade typeResolver
-          , ISchemaRegistry schemaRegistry
-          , ISchemaDefinitionResolver schemaDefinitionResolver
-          , ILogger logger
-          , out SqlStatementDefinition definition
+              SqlParserSourceKind sourceKind
+            , object content
+            , string source
+            , string definitionName
+            , Lazy<TSqlModel> modelAccessor
+            , SqlCoreConfiguration globalConfiguration
+            , ArtifactGenerationConfiguration artifactGenerationConfiguration
+            , bool analyzeAlways
+            , ISqlStatementFormatter formatter
+            , ITypeResolverFacade typeResolver
+            , ISchemaRegistry schemaRegistry
+            , ISchemaDefinitionResolver schemaDefinitionResolver
+            , ILogger logger
+            , out SqlStatementDefinition definition
         )
         {
             if (!SourceReaders.TryGetValue(sourceKind, out Func<object, string> reader))

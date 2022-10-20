@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="coverlet.collector" IncludeAssets="runtime;build;native;contentfiles;analyzers;buildtransitive" PrivateAssets="All" />
+    <PackageReference Include="coverlet.collector" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Moq" />
     <PackageReference Include="MSTest.TestAdapter" />

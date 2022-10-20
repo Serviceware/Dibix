@@ -8,6 +8,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         protected override string ErrorMessageTemplate => "{0} '{1}' does not have a primary key";
 
+        public MissingPrimaryKeySqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         protected override void Visit(TableModel tableModel, SchemaObjectName tableName, TableDefinition tableDefinition)
         {
             string name = tableName.BaseIdentifier.Value;

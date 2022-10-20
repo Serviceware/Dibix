@@ -8,6 +8,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         protected override string ErrorMessageTemplate => "Aliases must be marked with 'AS'";
 
+        public ImplicitAliasSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         public override void Visit(TableReferenceWithAlias node)
         {
             if (node.Alias == null)

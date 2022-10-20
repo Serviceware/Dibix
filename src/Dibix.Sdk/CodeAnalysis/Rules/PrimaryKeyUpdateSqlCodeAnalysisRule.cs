@@ -14,7 +14,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         protected override string ErrorMessageTemplate => "Primary keys should not be updated: {0}";
 
-        public PrimaryKeyUpdateSqlCodeAnalysisRule()
+        public PrimaryKeyUpdateSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context)
         {
             this._dynamicColumnSourceVariables = new Dictionary<string, IDictionary<string, DynamicColumn>>();
         }

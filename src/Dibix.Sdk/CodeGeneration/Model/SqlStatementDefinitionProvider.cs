@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using Dibix.Sdk.Abstractions;
 using Microsoft.SqlServer.Dac.Model;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -8,13 +10,10 @@ namespace Dibix.Sdk.CodeGeneration
     internal sealed class SqlStatementDefinitionProvider : ISqlStatementDefinitionProvider
     {
         #region Fields
-        private readonly string _projectName;
-        private readonly bool _isEmbedded;
-        private readonly bool _limitDdlStatements;
+        private readonly SqlCoreConfiguration _globalConfiguration;
+        private readonly ArtifactGenerationConfiguration _artifactGenerationConfiguration;
         private readonly bool _analyzeAlways;
         private readonly string _rootNamespace;
-        private readonly string _productName;
-        private readonly string _areaName;
         private readonly ISqlStatementParser _parser;
         private readonly ISqlStatementFormatter _formatter;
         private readonly ITypeResolverFacade _typeResolver;
@@ -26,51 +25,44 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Properties
-        public IEnumerable<SqlStatementDefinition> SqlStatements => this._definitions.Values;
-        IEnumerable<SchemaDefinition> ISchemaProvider.Schemas => this._definitions.Values;
+        public IEnumerable<SqlStatementDefinition> SqlStatements => _definitions.Values;
+        IEnumerable<SchemaDefinition> ISchemaProvider.Schemas => _definitions.Values;
         #endregion
 
         #region Constructor
         public SqlStatementDefinitionProvider
         (
-            string projectName
-          , bool isEmbedded
-          , bool limitDdlStatements
+            SqlCoreConfiguration globalConfiguration
+          , ArtifactGenerationConfiguration artifactGenerationConfiguration
           , bool analyzeAlways
           , string rootNamespace
-          , string productName
-          , string areaName
           , ISqlStatementParser parser
           , ISqlStatementFormatter formatter
           , ITypeResolverFacade typeResolver
           , ISchemaRegistry schemaRegistry
           , ISchemaDefinitionResolver schemaDefinitionResolver
           , ILogger logger
-          , IEnumerable<string> files
           , Lazy<TSqlModel> modelAccessor
         )
         {
-            this._projectName = projectName;
-            this._isEmbedded = isEmbedded;
-            this._limitDdlStatements = limitDdlStatements;
-            this._analyzeAlways = analyzeAlways;
-            this._rootNamespace = rootNamespace;
-            this._productName = productName;
-            this._areaName = areaName;
-            this._parser = parser;
-            this._formatter = formatter;
-            this._typeResolver = typeResolver;
-            this._schemaRegistry = schemaRegistry;
-            this._schemaDefinitionResolver = schemaDefinitionResolver;
-            this._logger = logger;
-            this._modelAccessor = modelAccessor;
-            this._definitions = new Dictionary<string, SqlStatementDefinition>();
-            this.Collect(files);
+            _globalConfiguration = globalConfiguration;
+            _artifactGenerationConfiguration = artifactGenerationConfiguration;
+            _analyzeAlways = analyzeAlways;
+            _rootNamespace = rootNamespace;
+            _parser = parser;
+            _formatter = formatter;
+            _typeResolver = typeResolver;
+            _schemaRegistry = schemaRegistry;
+            _schemaDefinitionResolver = schemaDefinitionResolver;
+            _logger = logger;
+            _modelAccessor = modelAccessor;
+            _definitions = new Dictionary<string, SqlStatementDefinition>();
+            Collect(globalConfiguration.Source.Select(x => x.GetFullPath()));
         }
         #endregion
 
         #region ISqlStatementDefinitionProvider Members
-        public bool TryGetDefinition(string fullName, out SqlStatementDefinition definition) => this._definitions.TryGetValue(fullName, out definition);
+        public bool TryGetDefinition(string fullName, out SqlStatementDefinition definition) => _definitions.TryGetValue(fullName, out definition);
         #endregion
 
         #region Private Methods
@@ -80,37 +72,33 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 try
                 {
-                    bool result = this._parser.Read
+                    bool result = _parser.Read
                     (
                         sourceKind: SqlParserSourceKind.Stream
                       , content: File.OpenRead(file)
                       , source: file
                       , definitionName: Path.GetFileNameWithoutExtension(file)
-                      , modelAccessor: this._modelAccessor
-                      , projectName: this._projectName
-                      , isEmbedded: this._isEmbedded
-                      , limitDdlStatements: this._limitDdlStatements
-                      , analyzeAlways: this._analyzeAlways
-                      , rootNamspace: this._rootNamespace
-                      , productName: this._productName
-                      , areaName: this._areaName
-                      , formatter: this._formatter
-                      , typeResolver: this._typeResolver
-                      , schemaRegistry: this._schemaRegistry
-                      , schemaDefinitionResolver: this._schemaDefinitionResolver
-                      , logger: this._logger
+                      , modelAccessor: _modelAccessor
+                      , globalConfiguration: _globalConfiguration
+                      , artifactGenerationConfiguration: _artifactGenerationConfiguration
+                      , analyzeAlways: _analyzeAlways
+                      , formatter: _formatter
+                      , typeResolver: _typeResolver
+                      , schemaRegistry: _schemaRegistry
+                      , schemaDefinitionResolver: _schemaDefinitionResolver
+                      , logger: _logger
                       , definition: out SqlStatementDefinition definition
                     );
 
                     if (!result)
                         continue;
 
-                    if (this._definitions.ContainsKey(definition.FullName))
+                    if (_definitions.ContainsKey(definition.FullName))
                     {
-                        this._logger.LogError($"Ambiguous procedure definition name: {definition.FullName}", file, 0, 0);
+                        _logger.LogError($"Ambiguous procedure definition name: {definition.FullName}", file, 0, 0);
                         continue;
                     }
-                    this._definitions.Add(definition.FullName, definition);
+                    _definitions.Add(definition.FullName, definition);
                 }
                 catch (Exception exception)
                 {

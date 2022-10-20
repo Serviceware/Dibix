@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
+using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.Dac.Model;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
@@ -14,85 +13,66 @@ namespace Dibix.Sdk.CodeAnalysis
         #region Fields
         private const string LockSectionName = "SqlCodeAnalysis";
         private readonly TSqlModel _model;
-        private readonly string _projectName;
-        private readonly SqlCodeAnalysisConfiguration _configuration;
-        private readonly bool _isEmbedded;
-        private readonly bool _limitDdlStatements;
+        private readonly SqlCoreConfiguration _globalConfiguration;
+        private readonly SqlCodeAnalysisConfiguration _codeAnalysisConfiguration;
         private readonly LockEntryManager _lockEntryManager;
         private readonly ILogger _logger;
-        private readonly ICollection<Func<SqlCodeAnalysisContext, IEnumerable<SqlCodeAnalysisError>>> _rules;
         #endregion
 
         #region Constructor
-        private SqlCodeAnalysisRuleEngine(TSqlModel model, string projectName, SqlCodeAnalysisConfiguration configuration, bool isEmbedded, bool limitDdlStatements, LockEntryManager lockEntryManager, ILogger logger)
+        private SqlCodeAnalysisRuleEngine(TSqlModel model, SqlCoreConfiguration globalConfiguration, SqlCodeAnalysisConfiguration codeAnalysisConfiguration, LockEntryManager lockEntryManager, ILogger logger)
         {
-            this._model = model;
-            this._projectName = projectName;
-            this._configuration = configuration;
-            this._isEmbedded = isEmbedded;
-            this._limitDdlStatements = limitDdlStatements;
-            this._lockEntryManager = lockEntryManager;
-            this._logger = logger;
-            this._rules = ScanRules().ToArray();
+            _model = model;
+            _globalConfiguration = globalConfiguration;
+            _codeAnalysisConfiguration = codeAnalysisConfiguration;
+            _lockEntryManager = lockEntryManager;
+            _logger = logger;
         }
         #endregion
 
         #region Factory Methods
-        public static SqlCodeAnalysisRuleEngine Create(TSqlModel model, string projectName, SqlCodeAnalysisConfiguration configuration, bool isEmbedded, bool limitDdlStatements, LockEntryManager lockEntryManager, ILogger logger)
+        public static SqlCodeAnalysisRuleEngine Create(TSqlModel model, SqlCoreConfiguration globalConfiguration, SqlCodeAnalysisConfiguration codeAnalysisConfiguration, LockEntryManager lockEntryManager, ILogger logger)
         {
-            return new SqlCodeAnalysisRuleEngine(model, projectName, configuration, isEmbedded, limitDdlStatements, lockEntryManager, logger);
+            return new SqlCodeAnalysisRuleEngine(model, globalConfiguration, codeAnalysisConfiguration, lockEntryManager, logger);
         }
         #endregion
 
         #region ISqlCodeAnalysisRuleEngine Members
-        public IEnumerable<SqlCodeAnalysisError> Analyze(string source)
-        {
-            TSqlFragment fragment = ScriptDomFacade.Load(source);
-            return this.Analyze(source, fragment, false);
-        }
-
-        public IEnumerable<SqlCodeAnalysisError> Analyze(string source, ISqlCodeAnalysisRule rule)
-        {
-            TSqlFragment fragment = ScriptDomFacade.Load(source);
-            SqlCodeAnalysisContext context = this.CreateContext(source, fragment, isScriptArtifact: false);
-            return rule.Analyze(context);
-        }
+        public IEnumerable<SqlCodeAnalysisError> Analyze(string source) => Analyze(source, SqlCodeAnalysisRuleMap.EnabledRules);
+        public IEnumerable<SqlCodeAnalysisError> Analyze(string source, Type ruleType) => Analyze(source, EnumerableExtensions.Create(ruleType));
 
         public IEnumerable<SqlCodeAnalysisError> AnalyzeScript(string source, string content)
         {
             TSqlFragment fragment = ScriptDomFacade.Parse(content);
-            return this.Analyze(source, fragment, true);
+            return Analyze(source, fragment, isScriptArtifact: true, SqlCodeAnalysisRuleMap.EnabledRules);
         }
         #endregion
 
         #region ISqlCodeAnalysisSuppressionService Members
-        public bool IsSuppressed(string ruleName, string key, string hash) => this._lockEntryManager.HasEntry(sectionName: LockSectionName, groupName: ruleName, recordName: key, signature: hash);
+        public bool IsSuppressed(string ruleName, string key, string hash) => _lockEntryManager.HasEntry(sectionName: LockSectionName, groupName: ruleName, recordName: key, signature: hash);
         #endregion
 
         #region Private Methods
-        private IEnumerable<SqlCodeAnalysisError> Analyze(string source, TSqlFragment fragment, bool isScriptArtifact)
+        private IEnumerable<SqlCodeAnalysisError> Analyze(string source, IEnumerable<Type> rules)
         {
-            SqlCodeAnalysisContext context = this.CreateContext(source, fragment, isScriptArtifact);
-            return this._rules.SelectMany(x => x.Invoke(context));
+            TSqlFragment fragment = ScriptDomFacade.Load(source);
+            return Analyze(source, fragment, isScriptArtifact: false, rules);
+        }
+        private IEnumerable<SqlCodeAnalysisError> Analyze(string source, TSqlFragment fragment, bool isScriptArtifact, IEnumerable<Type> rules)
+        {
+            SqlCodeAnalysisContext context = CreateContext(source, fragment, isScriptArtifact);
+            IEnumerable<SqlCodeAnalysisError> AnalyzeRule(Type ruleType)
+            {
+                Func<SqlCodeAnalysisContext, IEnumerable<SqlCodeAnalysisError>> handler = SqlCodeAnalysisRuleMap.GetHandler(ruleType);
+                IEnumerable<SqlCodeAnalysisError> errors = handler(context);
+                return errors;
+            }
+            return rules.SelectMany(AnalyzeRule);
         }
 
         private SqlCodeAnalysisContext CreateContext(string source, TSqlFragment fragment, bool isScriptArtifact)
         {
-            return new SqlCodeAnalysisContext(this._model, source, fragment, isScriptArtifact, this._projectName, this._configuration, this._isEmbedded, this._limitDdlStatements, this, this._logger);
-        }
-
-        private static IEnumerable<Func<SqlCodeAnalysisContext, IEnumerable<SqlCodeAnalysisError>>> ScanRules()
-        {
-            return SqlCodeAnalysisRuleMap.EnabledRules.Select(x =>
-            {
-                ParameterExpression contextParameter = Expression.Parameter(typeof(SqlCodeAnalysisContext), "context");
-                Expression ruleInstance = Expression.New(x);
-                MethodInfo analyzeMethod = typeof(ISqlCodeAnalysisRule).SafeGetMethod(nameof(ISqlCodeAnalysisRule.Analyze));
-                Expression analyzeCall = Expression.Call(ruleInstance, analyzeMethod, contextParameter);
-                Expression<Func<SqlCodeAnalysisContext, IEnumerable<SqlCodeAnalysisError>>> lambda = Expression.Lambda<Func<SqlCodeAnalysisContext, IEnumerable<SqlCodeAnalysisError>>>(analyzeCall, contextParameter);
-                Func<SqlCodeAnalysisContext, IEnumerable<SqlCodeAnalysisError>> compiled = lambda.Compile();
-                return compiled;
-            });
+            return new SqlCodeAnalysisContext(_model, source, fragment, isScriptArtifact, _globalConfiguration, _codeAnalysisConfiguration, this, _logger);
         }
         #endregion
     }

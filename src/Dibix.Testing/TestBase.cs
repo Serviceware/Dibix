@@ -113,7 +113,7 @@ namespace Dibix.Testing
         protected void LogException(Exception exception) => this.TestResultComposer.AddFile("AdditionalErrors.txt", $@"An error occured while collecting the last event log errors
 {exception}");
 
-        protected void AddResultFile(string fileName, string content) => this.TestResultComposer.AddFile(fileName, content);
+        protected string AddResultFile(string fileName, string content) => this.TestResultComposer.AddFile(fileName, content);
 
         protected static void AssertAreEqual<T>(IEnumerable<T> expected, IEnumerable<T> actual) => Assert.IsTrue(expected.SequenceEqual(actual), "expected.SequenceEqual(actual)");
 

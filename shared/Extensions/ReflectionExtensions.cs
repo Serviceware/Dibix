@@ -39,5 +39,16 @@ namespace Dibix
 
             return method;
         }
+
+        public static ConstructorInfo GetConstructor(this Type implementationType, params Type[] constructorSignature)
+        {
+            foreach (ConstructorInfo constructor in implementationType.GetConstructors())
+            {
+                if (constructorSignature.SequenceEqual(constructor.GetParameters().Select(x => x.ParameterType)))
+                    return constructor;
+            }
+
+            throw new InvalidOperationException($"Could not find constructor ({String.Join(", ", constructorSignature.Select(x => x.ToString()))}) on type: {implementationType}");
+        }
     }
 }

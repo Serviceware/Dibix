@@ -14,6 +14,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         protected override string ErrorMessageTemplate => "{0}";
 
+        public InlineFunctionSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         protected override void BeginStatement(TSqlScript node)
         {
             ScalarFunctionCallVisitor visitor = new ScalarFunctionCallVisitor(this.IsScalarFunctionCall);

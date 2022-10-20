@@ -4,12 +4,14 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 
-namespace Dibix.Sdk.Cli
+namespace Dibix.Sdk.Abstractions
 {
-    internal class InputConfiguration
+    public sealed class InputConfiguration
     {
         private const int IndentationSize = 2;
         private readonly IDictionary<string, InputProperty> _arguments;
+
+        public static InputConfiguration Empty { get; } = new InputConfiguration(new Dictionary<string, InputProperty>());
 
         private InputConfiguration(IDictionary<string, InputProperty> arguments) => this._arguments = arguments;
 

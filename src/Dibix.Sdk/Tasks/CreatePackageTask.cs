@@ -1,17 +1,18 @@
-﻿using Dibix.Sdk.Packaging;
+﻿using Dibix.Generators;
+using Dibix.Sdk.Abstractions;
+using Dibix.Sdk.Packaging;
 
 namespace Dibix.Sdk
 {
-    public static class CreatePackageTask
+    [Task("pack")]
+    [TaskProperty("ArtifactName", TaskPropertyType.String)]
+    [TaskProperty("OutputDirectory", TaskPropertyType.String)]
+    [TaskProperty("CompiledArtifactPath", TaskPropertyType.String)]
+    public sealed partial class CreatePackageTask
     {
-        public static bool Execute
-        (
-            string artifactName
-          , string outputDirectory
-          , string compiledArtifactPath
-        )
+        private partial bool Execute()
         {
-            ArtifactPackage.Create(artifactName, outputDirectory, compiledArtifactPath);
+            ArtifactPackage.Create(_configuration);
             return true;
         }
     }

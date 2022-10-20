@@ -11,9 +11,11 @@ steps:
     projects:
     - Dibix
     - Dibix.Dapper
+    - Dibix.Generators
     - Dibix.Http.Client
     - Dibix.Http.Server
     - Dibix.Sdk
+    - Dibix.Sdk.Abstractions
     - Dibix.Sdk.Cli
     - Dibix.Testing
     configuration: ${{ parameters.configuration }}

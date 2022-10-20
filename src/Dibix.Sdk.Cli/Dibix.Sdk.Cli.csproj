@@ -16,6 +16,8 @@
   <ItemGroup>
     <None Include="..\Dibix.Sdk\targets\**" Link="build\%(Filename)%(Extension)" Pack="true" PackagePath="build" />
     <None Include="..\Dibix.Sdk\Schema\*.json" Link="content\%(Filename)%(Extension)" Pack="true" PackagePath="content" />
+    <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\Guard.cs" />
+    <Compile Include="..\..\shared\Extensions\ReflectionExtensions.cs" Link="Extensions\ReflectionExtensions.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -47,6 +49,7 @@
       <_ToolDependency Include="Dibix.dll" />
       <_ToolDependency Include="Dibix.Http.Server.dll" />
       <_ToolDependency Include="$(_DibixSdkFileName)" />
+      <_ToolDependency Include="Dibix.Sdk.Abstractions.dll" />
       <_ToolDependency Include="Microsoft.Build.Framework.dll" />
       <_ToolDependency Include="Microsoft.Build.Utilities.Core.dll" />
       <_ToolDependency Include="Microsoft.Data.Tools.Components.dll" />

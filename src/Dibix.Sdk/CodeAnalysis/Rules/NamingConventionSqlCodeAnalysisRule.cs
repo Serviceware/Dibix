@@ -15,7 +15,10 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         protected override string ErrorMessageTemplate => "{0}";
 
-        public NamingConventionSqlCodeAnalysisRule() => this._looseConstraintDeclarations = new Dictionary<string, TSqlFragment>();
+        public NamingConventionSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context)
+        {
+            this._looseConstraintDeclarations = new Dictionary<string, TSqlFragment>();
+        }
 
         protected override void BeginStatement(TSqlScript node)
         {

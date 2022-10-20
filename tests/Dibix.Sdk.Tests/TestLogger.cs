@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Text;
+using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.Tests.CodeGeneration;
 
 namespace Dibix.Sdk.Tests

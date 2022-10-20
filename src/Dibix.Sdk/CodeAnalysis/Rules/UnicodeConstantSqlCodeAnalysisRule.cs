@@ -8,6 +8,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         protected override string ErrorMessageTemplate => "Invalid ascii string literal. Please specify unicode (N'')";
 
+        public UnicodeConstantSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         protected override void Visit(TSqlParserToken token)
         {
             if (token.TokenType == SqlTokenType.AsciiStringLiteral)

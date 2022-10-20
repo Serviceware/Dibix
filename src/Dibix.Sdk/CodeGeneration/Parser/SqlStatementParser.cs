@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.Dac.Model;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
@@ -26,37 +27,33 @@ namespace Dibix.Sdk.CodeGeneration
         #region ISqlStatementParser Members
         public bool Read
         (
-            SqlParserSourceKind sourceKind
-          , object content
-          , string source
-          , string definitionName
-          , Lazy<TSqlModel> modelAccessor
-          , string projectName
-          , bool isEmbedded
-          , bool limitDdlStatements
-          , bool analyzeAlways
-          , string rootNamespace
-          , string productName
-          , string areaName
-          , ISqlStatementFormatter formatter
-          , ITypeResolverFacade typeResolver
-          , ISchemaRegistry schemaRegistry
-          , ISchemaDefinitionResolver schemaDefinitionResolver
-          , ILogger logger
-          , out SqlStatementDefinition definition
+              SqlParserSourceKind sourceKind
+            , object content
+            , string source
+            , string definitionName
+            , Lazy<TSqlModel> modelAccessor
+            , SqlCoreConfiguration globalConfiguration
+            , ArtifactGenerationConfiguration artifactGenerationConfiguration
+            , bool analyzeAlways
+            , ISqlStatementFormatter formatter
+            , ITypeResolverFacade typeResolver
+            , ISchemaRegistry schemaRegistry
+            , ISchemaDefinitionResolver schemaDefinitionResolver
+            , ILogger logger
+            , out SqlStatementDefinition definition
         )
         {
             if (!SourceReaders.TryGetValue(sourceKind, out Func<object, TSqlFragment> reader))
                 throw new ArgumentOutOfRangeException(nameof(sourceKind), sourceKind, null);
 
             TSqlFragment fragment = reader(content);
-            TSqlFragmentAnalyzer fragmentAnalyzer = TSqlFragmentAnalyzer.Create(source, fragment, isScriptArtifact: false, projectName, isEmbedded, limitDdlStatements, analyzeAlways, modelAccessor, logger);
-            return this.TryCollectStatementDescriptor(fragment, fragmentAnalyzer, source, definitionName, productName, areaName, formatter, typeResolver, schemaRegistry, schemaDefinitionResolver, logger, out definition);
+            TSqlFragmentAnalyzer fragmentAnalyzer = TSqlFragmentAnalyzer.Create(source, fragment, isScriptArtifact: false, globalConfiguration, analyzeAlways, modelAccessor, logger);
+            return this.TryCollectStatementDescriptor(fragment, fragmentAnalyzer, source, definitionName, artifactGenerationConfiguration, formatter, typeResolver, schemaRegistry, schemaDefinitionResolver, logger, out definition);
         }
         #endregion
 
         #region Private Methods
-        private bool TryCollectStatementDescriptor(TSqlFragment fragment, TSqlFragmentAnalyzer fragmentAnalyzer, string source, string definitionName, string productName, string areaName, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger, out SqlStatementDefinition definition)
+        private bool TryCollectStatementDescriptor(TSqlFragment fragment, TSqlFragmentAnalyzer fragmentAnalyzer, string source, string definitionName, ArtifactGenerationConfiguration configuration, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger, out SqlStatementDefinition definition)
         {
             ISqlMarkupDeclaration markup = SqlMarkupReader.ReadHeader(fragment, source, logger);
             bool hasMarkup = markup.HasElements;
@@ -72,8 +69,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 Source = source,
                 DefinitionName = definitionName,
-                ProductName = productName,
-                AreaName = areaName,
+                Configuration = configuration,
                 FragmentAnalyzer = fragmentAnalyzer,
                 Formatter = formatter,
                 TypeResolver = typeResolver,

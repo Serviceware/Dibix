@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.Json;
 using Dibix.Sdk.OpenApi;
 using Dibix.Sdk.OpenApi.Validation;
@@ -22,13 +23,13 @@ namespace Dibix.Sdk.CodeGeneration
 
             OpenApiDocument document = OpenApiGenerator.Generate(model, schemaDefinitionResolver, logger);
 
-            string jsonFilePath = BuildOutputPath(model.OutputDirectory, model.AreaName, "json");
+            string jsonFilePath = BuildOutputPath(model.ArtifactGenerationConfiguration.OutputDirectory, model.ArtifactGenerationConfiguration.AreaName, "json");
             using (Stream stream = File.Open(jsonFilePath, FileMode.Create))
             {
                 document.SerializeAsJson(stream, OpenApiSpecVersion.OpenApi3_0);
             }
 
-            string yamlFilePath = BuildOutputPath(model.OutputDirectory, model.AreaName, "yml");
+            string yamlFilePath = BuildOutputPath(model.ArtifactGenerationConfiguration.OutputDirectory, model.ArtifactGenerationConfiguration.AreaName, "yml");
             using (Stream stream = File.Open(yamlFilePath, FileMode.Create))
             {
                 document.SerializeAsYaml(stream, OpenApiSpecVersion.OpenApi3_0);

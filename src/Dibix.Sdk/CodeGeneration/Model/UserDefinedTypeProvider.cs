@@ -1,42 +1,39 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class UserDefinedTypeProvider : IUserDefinedTypeProvider
     {
         #region Fields
-        private readonly string _rootNamespace;
-        private readonly string _productName;
-        private readonly string _areaName;
+        private readonly ArtifactGenerationConfiguration _configuration;
         private readonly ITypeResolverFacade _typeResolver;
         private readonly ILogger _logger;
         private readonly IDictionary<string, UserDefinedTypeSchema> _schemas;
         #endregion
 
         #region Properties
-        public IEnumerable<UserDefinedTypeSchema> Types => this._schemas.Values;
-        IEnumerable<SchemaDefinition> ISchemaProvider.Schemas => this.Types;
+        public IEnumerable<UserDefinedTypeSchema> Types => _schemas.Values;
+        IEnumerable<SchemaDefinition> ISchemaProvider.Schemas => Types;
         #endregion
 
         #region Constructor
-        public UserDefinedTypeProvider(string rootNamespace, string productName, string areaName, IEnumerable<string> inputs, ITypeResolverFacade typeResolver, ILogger logger)
+        public UserDefinedTypeProvider(SqlCoreConfiguration globalConfiguration, ArtifactGenerationConfiguration artifactGenerationConfiguration, ITypeResolverFacade typeResolver, ILogger logger)
         {
-            this._rootNamespace = rootNamespace;
-            this._productName = productName;
-            this._areaName = areaName;
-            this._typeResolver = typeResolver;
-            this._logger = logger;
-            this._schemas = new Dictionary<string, UserDefinedTypeSchema>();
-            this.Collect(inputs);
+            _configuration = artifactGenerationConfiguration;
+            _typeResolver = typeResolver;
+            _logger = logger;
+            _schemas = new Dictionary<string, UserDefinedTypeSchema>();
+            Collect(globalConfiguration.Source.Select(x => x.GetFullPath()));
         }
         #endregion
 
         #region Private Methods
         private void Collect(IEnumerable<string> inputs)
         {
-            SqlUserDefinedTypeParser parser = new SqlUserDefinedTypeParser(this._productName, this._areaName, this._typeResolver, this._logger);
-            this._schemas.AddRange(inputs.Select(x => parser.Parse(x))
+            SqlUserDefinedTypeParser parser = new SqlUserDefinedTypeParser(_configuration, _typeResolver, _logger);
+            _schemas.AddRange(inputs.Select(x => parser.Parse(x))
                                          .Where(x => x != null)
                                          .Select(x => new KeyValuePair<string, UserDefinedTypeSchema>(x.FullName, x)));
         }

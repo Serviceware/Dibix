@@ -25,6 +25,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         protected override string ErrorMessageTemplate => "{0} index {1} size is {2} bytes. The maximum key length is {3} bytes";
 
+        public IndexSizeSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         protected override void Visit(TableModel tableModel, SchemaObjectName tableName, TableDefinition tableDefinition)
         {
             foreach (Constraint constraint in base.Model.GetConstraints(tableModel, tableName))

@@ -1,4 +1,5 @@
 ﻿using System;
+using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 

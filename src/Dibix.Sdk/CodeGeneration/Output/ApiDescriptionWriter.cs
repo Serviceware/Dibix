@@ -28,7 +28,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public override IEnumerable<CSharpAnnotation> GetGlobalAnnotations(CodeGenerationModel model)
         {
-            string areaName = PathUtility.EnsureAreaName(model.AreaName);
+            string areaName = PathUtility.EnsureAreaName(model.ArtifactGenerationConfiguration.AreaName);
             yield return new CSharpAnnotation("AreaRegistration", new CSharpStringValue(areaName));
         }
 

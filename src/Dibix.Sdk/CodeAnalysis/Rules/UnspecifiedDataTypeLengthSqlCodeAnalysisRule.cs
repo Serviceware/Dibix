@@ -22,6 +22,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         protected override string ErrorMessageTemplate => "Data type length not specified: {0}";
 
+        public UnspecifiedDataTypeLengthSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         public override void Visit(SqlDataTypeReference node)
         {
             if (node.Parameters.Count > 0)

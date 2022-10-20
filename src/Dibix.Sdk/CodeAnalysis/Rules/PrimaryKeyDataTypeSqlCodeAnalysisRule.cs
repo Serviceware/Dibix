@@ -16,7 +16,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         protected override string ErrorMessageTemplate => "Only TINYINT/SMALLINT/INT/BIGINT are allowed as primary key: {0}.{1} ({2})";
 
-        public PrimaryKeyDataTypeSqlCodeAnalysisRule()
+        public PrimaryKeyDataTypeSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context)
         {
             this._primaryKeyColumnLocations = new Dictionary<string, TSqlFragment>();
         }

@@ -7,6 +7,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         protected override string ErrorMessageTemplate => "Constraints should be defined within the CREATE TABLE statement{0}";
 
+        public LooseConstraintsSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         public override void Visit(AlterTableAddTableElementStatement node)
         {
             foreach (ConstraintDefinition constraint in node.Definition.TableConstraints)

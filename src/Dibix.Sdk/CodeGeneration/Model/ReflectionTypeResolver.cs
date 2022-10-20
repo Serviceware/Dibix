@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using Dibix.Sdk.Abstractions;
 using Newtonsoft.Json;
 
 namespace Dibix.Sdk.CodeGeneration

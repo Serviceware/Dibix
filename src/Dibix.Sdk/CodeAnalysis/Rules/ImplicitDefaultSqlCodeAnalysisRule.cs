@@ -20,6 +20,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         protected override string ErrorMessageTemplate => "{0}";
 
+        public ImplicitDefaultSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         public override void Visit(CreateIndexStatement node)
         {
             if (!node.Clustered.HasValue)

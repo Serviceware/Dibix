@@ -14,6 +14,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         protected override string ErrorMessageTemplate => "{0}";
 
+        public InvalidFunctionUsageSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         public override void Visit(FunctionCall node)
         {
             string functionName = node.FunctionName.Value;

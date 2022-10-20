@@ -2,6 +2,7 @@
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.Dac.Model;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
@@ -26,27 +27,25 @@ namespace Dibix.Sdk.CodeAnalysis
           , string source
           , TSqlFragment fragment
           , bool isScriptArtifact
-          , string projectName
-          , SqlCodeAnalysisConfiguration configuration
-          , bool isEmbedded
-          , bool limitDdlStatements
+          , SqlCoreConfiguration globalConfiguration
+          , SqlCodeAnalysisConfiguration codeAnalysisConfiguration
           , ISqlCodeAnalysisSuppressionService suppressionService
           , ILogger logger
         )
         {
-            this._source = source;
-            this._suppressionService = suppressionService;
-            this._logger = logger;
-            this.Model = new SqlModel(source, fragment, isScriptArtifact, projectName, isEmbedded, limitDdlStatements, model, logger);
-            this._hash = CalculateHash(source);
-            this.Fragment = fragment;
-            this.Configuration = configuration;
-            this.IsEmbedded = isEmbedded;
+            _source = source;
+            _suppressionService = suppressionService;
+            _logger = logger;
+            Model = new SqlModel(source, fragment, isScriptArtifact, globalConfiguration, model, logger);
+            _hash = CalculateHash(source);
+            Fragment = fragment;
+            Configuration = codeAnalysisConfiguration;
+            IsEmbedded = globalConfiguration.IsEmbedded;
         }
 
-        public bool IsSuppressed(string ruleName, string key) => this._suppressionService.IsSuppressed(ruleName, key, this._hash);
+        public bool IsSuppressed(string ruleName, string key) => _suppressionService.IsSuppressed(ruleName, key, _hash);
 
-        public void LogError(string code, string text, int line, int column) => this._logger.LogError(code, text, this._source, line, column);
+        public void LogError(string code, string text, int line, int column) => _logger.LogError(code, text, _source, line, column);
 
         private static string CalculateHash(string filename)
         {

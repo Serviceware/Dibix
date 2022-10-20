@@ -13,7 +13,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         protected override string ErrorMessageTemplate => "Unused {0}: {1}";
 
-        public RedundantSymbolSqlCodeAnalysisRule()
+        public RedundantSymbolSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context)
         {
             this._variables = new Dictionary<string, DeclareVariableElement>();
             this._parameterReferences = new Dictionary<int, ParameterReference>();

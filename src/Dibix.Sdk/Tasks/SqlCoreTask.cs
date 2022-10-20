@@ -1,4 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using Dibix.Generators;
+using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.CodeAnalysis;
 using Dibix.Sdk.CodeGeneration;
 using Dibix.Sdk.Sql;
@@ -6,109 +9,74 @@ using Microsoft.SqlServer.Dac.Model;
 
 namespace Dibix.Sdk
 {
-    public static class SqlCoreTask
+    [Task("core")]
+    [TaskProperty("ProjectName", TaskPropertyType.String, Category = GlobalCategory)]
+    [TaskProperty("ProjectDirectory", TaskPropertyType.String, Category = GlobalCategory)]
+    [TaskProperty("ProjectName", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
+    [TaskProperty("ConfigurationFilePath", TaskPropertyType.String, Category = GlobalCategory)]
+    [TaskProperty("StaticCodeAnalysisSucceededFile", TaskPropertyType.String, Category = SqlCodeAnalysisCategory)]
+    [TaskProperty("ResultsFile", TaskPropertyType.String, Category = SqlCodeAnalysisCategory)]
+    [TaskProperty("ProductName", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
+    [TaskProperty("AreaName", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
+    [TaskProperty("Title", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
+    [TaskProperty("Version", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
+    [TaskProperty("Description", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
+    [TaskProperty("OutputDirectory", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
+    [TaskProperty("DefaultOutputName", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
+    [TaskProperty("ClientOutputName", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
+    [TaskProperty("ExternalAssemblyReferenceDir", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
+    [TaskProperty("Source", TaskPropertyType.Items, Category = GlobalCategory)]
+    [TaskProperty("ScriptSource", TaskPropertyType.Items, Category = SqlCodeAnalysisCategory)]
+    [TaskProperty("Contracts", TaskPropertyType.Items, Category = ArtifactGenerationCategory)]
+    [TaskProperty("Endpoints", TaskPropertyType.Items, Category = ArtifactGenerationCategory)]
+    [TaskProperty("References", TaskPropertyType.Items, Category = ArtifactGenerationCategory)]
+    [TaskProperty("DefaultSecuritySchemes", TaskPropertyType.Items, Category = ArtifactGenerationCategory)]
+    [TaskProperty("IsEmbedded", TaskPropertyType.Boolean, Category = GlobalCategory)]
+    [TaskProperty("LimitDdlStatements", TaskPropertyType.Boolean, Category = GlobalCategory)]
+    [TaskProperty("PreventDmlReferences", TaskPropertyType.Boolean, Category = GlobalCategory)]
+    [TaskProperty("EnableExperimentalFeatures", TaskPropertyType.Boolean, Category = ArtifactGenerationCategory)]
+    [TaskProperty("DatabaseSchemaProviderName", TaskPropertyType.String, Category = GlobalCategory)]
+    [TaskProperty("ModelCollation", TaskPropertyType.String, Category = GlobalCategory)]
+    [TaskProperty("SqlReferencePath", TaskPropertyType.Items, Category = GlobalCategory)]
+    [TaskProperty("NamingConventionPrefix", TaskPropertyType.String, Category = SqlCodeAnalysisCategory, Source = TaskPropertySource.UserDefined)]
+    [TaskProperty("BaseUrl", TaskPropertyType.String, Category = ArtifactGenerationCategory, DefaultValue = "http://localhost", Source = TaskPropertySource.UserDefined)]
+    public sealed partial class SqlCoreTask
     {
-        public static bool Execute
-        (
-            string projectName
-          , string projectDirectory
-          , string configurationFilePath
-          , string staticCodeAnalysisSucceededFile
-          , string resultsFile
-          , string productName
-          , string areaName
-          , string title
-          , string version
-          , string description
-          , string outputDirectory
-          , string defaultOutputName
-          , string clientOutputName
-          , string externalAssemblyReferenceDirectory
-          , ICollection<TaskItem> source
-          , IEnumerable<TaskItem> scriptSource
-          , IEnumerable<TaskItem> contracts
-          , IEnumerable<TaskItem> endpoints
-          , IEnumerable<TaskItem> references
-          , IEnumerable<TaskItem> defaultSecuritySchemes
-          , bool isEmbedded
-          , bool limitDdlStatements
-          , bool preventDmlReferences
-          , bool enableExperimentalFeatures
-          , string databaseSchemaProviderName
-          , string modelCollation
-          , ICollection<TaskItem> sqlReferencePath
-          , ILogger logger
-          , out string[] additionalAssemblyReferences
-        )
+        private const string GlobalCategory = "SqlCore";
+        private const string SqlCodeAnalysisCategory = "SqlCodeAnalysis";
+        private const string ArtifactGenerationCategory = "ArtifactGeneration";
+
+        public ICollection<string> AdditionalReferences { get; } = new Collection<string>();
+
+        private partial bool Execute()
         {
             IActionParameterConverterRegistry actionParameterConverterRegistry = new ActionParameterConverterRegistry();
             IActionParameterSourceRegistry actionParameterSourceRegistry = new ActionParameterSourceRegistry();
-            IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(projectDirectory);
-            SqlCoreTaskConfiguration configuration = SqlCoreTaskConfiguration.Create(configurationFilePath, actionParameterSourceRegistry, actionParameterConverterRegistry, fileSystemProvider, logger);
+            IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(_configuration.SqlCore.ProjectDirectory);
+            _configuration.AppendUserConfiguration(_configuration.SqlCore.ConfigurationFilePath, actionParameterSourceRegistry, actionParameterConverterRegistry, fileSystemProvider, _logger);
 
-            if (logger.HasLoggedErrors)
-            {
-                additionalAssemblyReferences = null;
+            if (_logger.HasLoggedErrors)
                 return false;
-            }
 
-            TSqlModel sqlModel = PublicSqlDataSchemaModelLoader.Load(preventDmlReferences, databaseSchemaProviderName, modelCollation, source, sqlReferencePath, logger);
+            TSqlModel sqlModel = PublicSqlDataSchemaModelLoader.Load(_configuration.SqlCore, _logger);
             using (LockEntryManager lockEntryManager = LockEntryManager.Create())
             {
-                bool analysisResult = SqlCodeAnalysisTask.Execute
-                (
-                    projectName
-                  , configuration.SqlCodeAnalysis
-                  , isEmbedded
-                  , limitDdlStatements
-                  , staticCodeAnalysisSucceededFile
-                  , resultsFile
-                  , source
-                  , scriptSource
-                  , lockEntryManager
-                  , logger
-                  , sqlModel
-                );
+                bool analysisResult = SqlCodeAnalysisTask.Execute(_configuration.SqlCore, _configuration.SqlCodeAnalysis, lockEntryManager, _logger, sqlModel);
 
                 if (!analysisResult)
-                {
-                    additionalAssemblyReferences = null;
                     return false;
-                }
 
                 bool codeGenerationResult = CodeGenerationTask.Execute
                 (
-                    projectName
-                  , projectDirectory
-                  , productName
-                  , areaName
-                  , title
-                  , version
-                  , description
-                  , configuration.Endpoints
-                  , outputDirectory
-                  , defaultOutputName
-                  , clientOutputName
-                  , externalAssemblyReferenceDirectory
-                  , source
-                  , contracts
-                  , endpoints
-                  , references
-                  , defaultSecuritySchemes
-                  , isEmbedded
-                  , limitDdlStatements
-                  , preventDmlReferences
-                  , enableExperimentalFeatures
-                  , databaseSchemaProviderName
-                  , modelCollation
-                  , sqlReferencePath
+                    _configuration.SqlCore
+                  , _configuration.ArtifactGeneration
                   , actionParameterSourceRegistry
                   , actionParameterConverterRegistry
                   , lockEntryManager
                   , fileSystemProvider
-                  , logger
+                  , _logger
                   , sqlModel
-                  , out additionalAssemblyReferences
+                  , AdditionalReferences
                 );
 
                 return codeGenerationResult;

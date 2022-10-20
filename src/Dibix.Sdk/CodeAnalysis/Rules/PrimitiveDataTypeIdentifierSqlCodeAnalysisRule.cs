@@ -8,6 +8,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         protected override string ErrorMessageTemplate => "Primitive data type identifiers must not be quoted: {0}";
 
+        public PrimitiveDataTypeIdentifierSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         public override void Visit(SqlDataTypeReference node)
         {
             Identifier identifier = node.Name.BaseIdentifier;

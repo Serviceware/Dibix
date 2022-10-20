@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
@@ -10,22 +11,20 @@ namespace Dibix.Sdk.CodeGeneration
     internal sealed class SqlUserDefinedTypeParser
     {
         private readonly ILogger _logger;
-        private readonly string _productName;
-        private readonly string _areaName;
+        private readonly ArtifactGenerationConfiguration _configuration;
         private readonly ITypeResolverFacade _typeResolver;
 
-        public SqlUserDefinedTypeParser(string productName, string areaName, ITypeResolverFacade typeResolver, ILogger logger)
+        public SqlUserDefinedTypeParser(ArtifactGenerationConfiguration configuration, ITypeResolverFacade typeResolver, ILogger logger)
         {
-            this._productName = productName;
-            this._areaName = areaName;
-            this._typeResolver = typeResolver;
-            this._logger = logger;
+            _configuration = configuration;
+            _typeResolver = typeResolver;
+            _logger = logger;
         }
 
         public UserDefinedTypeSchema Parse(string filePath)
         {
             TSqlFragment fragment = ScriptDomFacade.Load(filePath);
-            UserDefinedTypeVisitor visitor = new UserDefinedTypeVisitor(this._productName, this._areaName, filePath, fragment, this._typeResolver, this._logger);
+            UserDefinedTypeVisitor visitor = new UserDefinedTypeVisitor(_configuration, filePath, fragment, _typeResolver, _logger);
             fragment.Accept(visitor);
             return visitor.Definition;
         }
@@ -33,36 +32,34 @@ namespace Dibix.Sdk.CodeGeneration
         private class UserDefinedTypeVisitor : TSqlFragmentVisitor
         {
             private readonly Lazy<ISqlMarkupDeclaration> _markupAccessor;
-            private readonly string _productName;
-            private readonly string _areaName;
+            private readonly ArtifactGenerationConfiguration _configuration;
             private readonly string _source;
             private readonly ITypeResolverFacade _typeResolver;
             private readonly ILogger _logger;
 
             public UserDefinedTypeSchema Definition { get; private set; }
 
-            public UserDefinedTypeVisitor(string productName, string areaName, string source, TSqlFragment fragment, ITypeResolverFacade typeResolver, ILogger logger)
+            public UserDefinedTypeVisitor(ArtifactGenerationConfiguration configuration, string source, TSqlFragment fragment, ITypeResolverFacade typeResolver, ILogger logger)
             {
-                this._productName = productName;
-                this._areaName = areaName;
-                this._source = source;
-                this._typeResolver = typeResolver;
-                this._logger = logger;
-                this._markupAccessor = new Lazy<ISqlMarkupDeclaration>(() => SqlMarkupReader.ReadHeader(fragment, source, logger));
+                _configuration = configuration;
+                _source = source;
+                _typeResolver = typeResolver;
+                _logger = logger;
+                _markupAccessor = new Lazy<ISqlMarkupDeclaration>(() => SqlMarkupReader.ReadHeader(fragment, source, logger));
             }
 
             public override void Visit(CreateTypeTableStatement node)
             {
                 string typeName = node.Name.ToFullName();
-                _ = this._markupAccessor.Value.TryGetSingleElementValue(SqlMarkupKey.Namespace, this._source, this._logger, out string relativeNamespace);
+                _ = _markupAccessor.Value.TryGetSingleElementValue(SqlMarkupKey.Namespace, _source, _logger, out string relativeNamespace);
                 
-                if (!this._markupAccessor.Value.TryGetSingleElementValue(SqlMarkupKey.Name, this._source, this._logger, out string definitionName))
+                if (!_markupAccessor.Value.TryGetSingleElementValue(SqlMarkupKey.Name, _source, _logger, out string definitionName))
                     definitionName = GenerateDefinitionName(typeName);
 
-                NamespacePath @namespace = PathUtility.BuildAbsoluteNamespace(this._productName, this._areaName, LayerName.Data, relativeNamespace);
+                NamespacePath @namespace = PathUtility.BuildAbsoluteNamespace(_configuration.ProductName, _configuration.AreaName, LayerName.Data, relativeNamespace);
                 ICollection<string> notNullableColumns = new HashSet<string>(GetNotNullableColumns(node.Definition));
-                this.Definition = new UserDefinedTypeSchema(@namespace.Path, definitionName, SchemaDefinitionSource.Defined, typeName);
-                this.Definition.Properties.AddRange(node.Definition.ColumnDefinitions.Select(x => this.MapColumn(x, relativeNamespace, notNullableColumns)));
+                Definition = new UserDefinedTypeSchema(@namespace.Path, definitionName, SchemaDefinitionSource.Defined, typeName);
+                Definition.Properties.AddRange(node.Definition.ColumnDefinitions.Select(x => MapColumn(x, relativeNamespace, notNullableColumns)));
             }
 
             private static string GenerateDefinitionName(string udtName)
@@ -99,8 +96,8 @@ namespace Dibix.Sdk.CodeGeneration
                 Identifier columnIdentifier = column.ColumnIdentifier;
                 string columnName = columnIdentifier.Value;
                 bool isNullable = !notNullableColumns.Contains(columnName);
-                TypeReference typeReference = column.DataType.ToTypeReference(isNullable, columnName, relativeNamespace, this._source, this._markupAccessor.Value, this._typeResolver, this._logger, out string udtName);
-                return new ObjectSchemaProperty(name: new Token<string>(columnName, this._source, columnIdentifier.StartLine, columnIdentifier.StartColumn), typeReference);
+                TypeReference typeReference = column.DataType.ToTypeReference(isNullable, columnName, relativeNamespace, _source, _markupAccessor.Value, _typeResolver, _logger, out string udtName);
+                return new ObjectSchemaProperty(name: new Token<string>(columnName, _source, columnIdentifier.StartLine, columnIdentifier.StartColumn), typeReference);
             }
         }
     }

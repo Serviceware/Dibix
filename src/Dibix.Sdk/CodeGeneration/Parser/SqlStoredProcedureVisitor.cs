@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Dibix.Http;
+using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
@@ -45,7 +46,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private NamespacePath ParseNamespace(string relativeNamespace) => PathUtility.BuildAbsoluteNamespace(base.ProductName, base.AreaName, LayerName.Data, relativeNamespace);
+        private NamespacePath ParseNamespace(string relativeNamespace) => PathUtility.BuildAbsoluteNamespace(base.Configuration.ProductName, base.Configuration.AreaName, LayerName.Data, relativeNamespace);
 
         private string ParseName() => base.Markup.TryGetSingleElementValue(SqlMarkupKey.Name, base.Source, base.Logger, out string name) ? name : base.DefinitionName;
 
@@ -125,12 +126,12 @@ namespace Dibix.Sdk.CodeGeneration
             TargetPath targetPath;
             if (base.Markup.TryGetSingleElementValue(SqlMarkupKey.GeneratedResultTypeName, base.Source, base.Logger, out string gridResultTypeNameHint))
             {
-                targetPath = PathUtility.BuildAbsoluteTargetName(base.ProductName, base.AreaName, LayerName.DomainModel, relativeNamespace, targetNamePath: gridResultTypeNameHint);
+                targetPath = PathUtility.BuildAbsoluteTargetName(base.Configuration.ProductName, base.Configuration.AreaName, LayerName.DomainModel, relativeNamespace, targetNamePath: gridResultTypeNameHint);
             }
             else
             {
                 string generatedTypeName = $"{definition.DefinitionName}{GridResultTypeSuffix}";
-                targetPath = PathUtility.BuildAbsoluteTargetName(base.ProductName, base.AreaName, LayerName.DomainModel, relativeNamespace, targetNamePath: generatedTypeName);
+                targetPath = PathUtility.BuildAbsoluteTargetName(base.Configuration.ProductName, base.Configuration.AreaName, LayerName.DomainModel, relativeNamespace, targetNamePath: generatedTypeName);
             }
 
             SchemaTypeReference typeReference = new SchemaTypeReference(key: targetPath.Path, isNullable: false, isEnumerable: false, base.Source, line: 0, column: 0);

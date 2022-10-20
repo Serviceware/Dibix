@@ -874,7 +874,7 @@ Either create a mapping or make sure a property of the same name exists in the s
             public object DefaultValue { get; private set; }
             public Type InputConverter { get; private set; }                // IFormattedInputConverter<TSource, TTarget>
             public IHttpParameterConverter Converter { get; private set; }  // CONVERT(value)
-            public HttpParameterSourceInfo Source { get; private set; }     // HLSESSION.LocaleId / databaseAccessorFactory
+            public HttpParameterSourceInfo Source { get; private set; }     // DBX.LocaleId / databaseAccessorFactory
             public HttpItemsParameterInfo Items { get; private set; }       // udt_columnname = ITEM.SomePropertyName
 
             private HttpParameterInfo(HttpParameterLocation location, HttpParameterSourceKind sourceKind, Type parameterType, string internalParameterName, bool isOptional)

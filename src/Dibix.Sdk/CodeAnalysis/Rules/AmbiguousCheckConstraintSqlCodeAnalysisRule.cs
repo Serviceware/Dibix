@@ -10,6 +10,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         protected override string ErrorMessageTemplate => "Ambiguous check constraints: {0}";
 
+        public AmbiguousCheckConstraintSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         public override void Visit(CreateTableStatement node)
         {
             if (node.IsTemporaryTable())

@@ -42,6 +42,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         protected override string ErrorMessageTemplate => "Invalid casing for '{0}' [{1}]";
 
+        public KeywordCasingSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         protected override void BeginStatement(TSqlScript node)
         {
             if (this._identifierVisitor != null)

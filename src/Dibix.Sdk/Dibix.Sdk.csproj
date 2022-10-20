@@ -40,4 +40,9 @@
     <Reference Include="Microsoft.SqlServer.ConnectionInfo" HintPath="lib\Microsoft.SqlServer.ConnectionInfo.dll" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Dibix.Sdk.Abstractions\Dibix.Sdk.Abstractions.csproj" />
+    <ProjectReference Include="..\Dibix.Generators\Dibix.Generators.csproj" PrivateAssets="all" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
 </Project>

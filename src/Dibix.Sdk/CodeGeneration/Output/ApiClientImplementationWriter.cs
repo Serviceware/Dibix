@@ -26,7 +26,7 @@ namespace Dibix.Sdk.CodeGeneration
             CSharpAnnotation interfaceDescriptor = new CSharpAnnotation("HttpService", new CSharpValue($"typeof({interfaceName})"));
             CSharpClass @class = output.AddClass(className, CSharpModifiers.Public | CSharpModifiers.Sealed, interfaceDescriptor)
                                        .Implements(interfaceName)
-                                       .AddField("BaseAddress", nameof(Uri), new CSharpValue($"new {nameof(Uri)}(\"{context.Model.EndpointConfiguration.BaseUrl.TrimEnd('/')}/\")"), CSharpModifiers.Private | CSharpModifiers.Static | CSharpModifiers.ReadOnly);
+                                       .AddField("BaseAddress", nameof(Uri), new CSharpValue($"new {nameof(Uri)}(\"{context.Model.ArtifactGenerationConfiguration.BaseUrl.TrimEnd('/')}/\")"), CSharpModifiers.Private | CSharpModifiers.Static | CSharpModifiers.ReadOnly);
 
             bool hasBodyParameter = controller.Actions.Any(x => x.RequestBody != null);
             bool requiresAuthorization = controller.Actions
@@ -118,7 +118,7 @@ namespace Dibix.Sdk.CodeGeneration
                   .WriteLine("{")
                   .PushIndent();
 
-            string uri = RouteBuilder.BuildRoute(context.Model.AreaName, controller.Name, action.ChildRoute);
+            string uri = RouteBuilder.BuildRoute(context.Model.ArtifactGenerationConfiguration.AreaName, controller.Name, action.ChildRoute);
             string uriConstant = $"\"{uri}\"";
             if (uriConstant.Contains('{'))
                 uriConstant = $"${uriConstant}";

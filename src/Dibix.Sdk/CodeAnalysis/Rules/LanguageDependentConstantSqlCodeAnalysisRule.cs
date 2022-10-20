@@ -21,7 +21,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         protected override string ErrorMessageTemplate => "Found language dependent expression: {0}";
 
-        public LanguageDependentConstantSqlCodeAnalysisRule()
+        public LanguageDependentConstantSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context)
         {
             this._visitedLiterals = new HashSet<StringLiteral>();
         }

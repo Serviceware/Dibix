@@ -8,6 +8,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         protected override string ErrorMessageTemplate => "Missing column specification for INSERT statement";
 
+        public InsertWithoutColumnSpecificationSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         public override void Visit(InsertSpecification node)
         {
             if (!node.Columns.Any())

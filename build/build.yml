@@ -69,7 +69,7 @@ stages:
   # This will make the pipeline partially succeed.
   # Unfortunately, this will still trigger a release, because pipeline triggers only evaluate failed as non successful.
   # To ensure the build is failed, we throw after all steps have executed.
-- stage: Evaluate
+- stage: Verify
   condition: eq(dependencies.Run.result, 'SucceededWithIssues')
   jobs:
   - job: Linux

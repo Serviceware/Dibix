@@ -13,50 +13,50 @@ namespace Dibix.Sdk.CodeAnalysis
         private readonly string _name;
         private readonly int _id;
         private readonly Collection<SqlCodeAnalysisError> _errors;
-        private SqlCodeAnalysisContext _context;
+        private readonly SqlCodeAnalysisContext _context;
         #endregion
 
         #region Properties
         protected abstract string ErrorMessageTemplate { get; }
 
-        protected SqlModel Model => this._context.Model;
-        protected SqlCodeAnalysisConfiguration Configuration => this._context.Configuration;
-        protected bool IsEmbedded => this._context.IsEmbedded;
+        protected SqlModel Model => _context.Model;
+        protected SqlCodeAnalysisConfiguration Configuration => _context.Configuration;
+        protected bool IsEmbedded => _context.IsEmbedded;
         #endregion
 
         #region Constructor
-        protected SqlCodeAnalysisRule()
+        protected SqlCodeAnalysisRule(SqlCodeAnalysisContext context)
         {
-            Type type = this.GetType();
-            this._name = type.Name;
-            this._id = SqlCodeAnalysisRuleMap.GetRuleId(type);
-            this._errors = new Collection<SqlCodeAnalysisError>();
+            _context = context;
+            Type type = GetType();
+            _name = type.Name;
+            _id = SqlCodeAnalysisRuleMap.GetRuleId(type);
+            _errors = new Collection<SqlCodeAnalysisError>();
         }
         #endregion
 
         #region ISqlCodeAnalysisRule Members
-        IEnumerable<SqlCodeAnalysisError> ISqlCodeAnalysisRule.Analyze(SqlCodeAnalysisContext context)
+        IEnumerable<SqlCodeAnalysisError> ISqlCodeAnalysisRule.Analyze(TSqlFragment fragment)
         {
-            this._context = context;
-            context.Fragment.Accept(this);
-            return this._errors;
+            fragment.Accept(this);
+            return _errors;
         }
         #endregion
 
         #region Overrides
         public override void ExplicitVisit(TSqlScript node)
         {
-            this.BeginStatement(node);
+            BeginStatement(node);
             base.ExplicitVisit(node);
-            this.VisitTokens(node);
-            this.EndStatement(node);
+            VisitTokens(node);
+            EndStatement(node);
         }
 
         public override void ExplicitVisit(TSqlBatch node)
         {
-            this.BeginBatch(node);
+            BeginBatch(node);
             base.ExplicitVisit(node);
-            this.EndBatch(node);
+            EndBatch(node);
         }
 
         public override void Visit(CreateTableStatement node)
@@ -64,10 +64,10 @@ namespace Dibix.Sdk.CodeAnalysis
             if (node.IsTemporaryTable())
                 return;
 
-            this.Visit(TableModel.Table, node.SchemaObjectName, node.Definition);
+            Visit(TableModel.Table, node.SchemaObjectName, node.Definition);
         }
 
-        public override void Visit(CreateTypeTableStatement node) => this.Visit(TableModel.TableType, node.Name, node.Definition);
+        public override void Visit(CreateTypeTableStatement node) => Visit(TableModel.TableType, node.Name, node.Definition);
         #endregion
 
         #region Protected Methods
@@ -83,42 +83,42 @@ namespace Dibix.Sdk.CodeAnalysis
 
         protected virtual void Visit(TSqlParserToken token) { }
 
-        protected void LogError(TSqlFragment fragment, string code, string text) => this._context.LogError(code, text, fragment.StartLine, fragment.StartColumn);
+        protected void LogError(TSqlFragment fragment, string code, string text) => _context.LogError(code, text, fragment.StartLine, fragment.StartColumn);
 
-        protected void Fail(TSqlParserToken token, params object[] args) => this.Fail(token.Line, token.Column, args);
-        protected void Fail(TSqlFragment fragment, params object[] args) => this.Fail(fragment.StartLine, fragment.StartColumn, args);
-        protected void Fail(SourceInformation sourceInformation, params object[] args) => this.Fail(sourceInformation.StartLine, sourceInformation.StartColumn, args);
+        protected void Fail(TSqlParserToken token, params object[] args) => Fail(token.Line, token.Column, args);
+        protected void Fail(TSqlFragment fragment, params object[] args) => Fail(fragment.StartLine, fragment.StartColumn, args);
+        protected void Fail(SourceInformation sourceInformation, params object[] args) => Fail(sourceInformation.StartLine, sourceInformation.StartColumn, args);
 
         protected void FailIfUnsuppressed(TSqlFragment fragment, string suppressionKey, params object[] args)
         {
-            if (this._context.IsSuppressed(this._name, suppressionKey))
+            if (_context.IsSuppressed(_name, suppressionKey))
                 return;
 
-            this.Fail(fragment, args);
+            Fail(fragment, args);
         }
         protected void FailIfUnsuppressed(SourceInformation source, string suppressionKey, params object[] args)
         {
-            if (this._context.IsSuppressed(this._name, suppressionKey))
+            if (_context.IsSuppressed(_name, suppressionKey))
                 return;
 
-            this.Fail(source, args);
+            Fail(source, args);
         }
 
-        //protected bool IsSuppressed(string key) => this._context.IsSuppressed(this._name, key);
+        //protected bool IsSuppressed(string key) => _context.IsSuppressed(_name, key);
         #endregion
 
         #region Private Methods
         private void Fail(int line, int column, params object[] args)
         {
-            string message = String.Format(this.ErrorMessageTemplate, args);
-            SqlCodeAnalysisError error = new SqlCodeAnalysisError(this._id, message, line, column);
-            this._errors.Add(error);
+            string message = String.Format(ErrorMessageTemplate, args);
+            SqlCodeAnalysisError error = new SqlCodeAnalysisError(_id, message, line, column);
+            _errors.Add(error);
         }
 
         private void VisitTokens(TSqlScript node)
         {
             foreach (TSqlParserToken token in node.AsEnumerable())
-                this.Visit(token);
+                Visit(token);
         }
         #endregion
     }

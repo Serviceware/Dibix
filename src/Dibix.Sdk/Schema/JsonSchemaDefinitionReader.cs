@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.Json;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;

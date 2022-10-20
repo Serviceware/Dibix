@@ -8,6 +8,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         protected override string ErrorMessageTemplate => "Unique index should be replaced by a unique constraint on the table definition: {0}";
 
+        public UniqueIndexSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         public override void Visit(CreateIndexStatement node)
         {
             if (node.Unique && node.FilterPredicate == null && !node.IncludeColumns.Any())

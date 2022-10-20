@@ -7,6 +7,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         protected override string ErrorMessageTemplate => "{0}";
 
+        public DateTimeSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         public override void Visit(FunctionCall function)
         {
             if (function.FunctionName.Value.ToUpper() == "GETDATE")

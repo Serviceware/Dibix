@@ -1,4 +1,6 @@
-﻿namespace Dibix.Sdk.CodeGeneration
+﻿using Dibix.Sdk.Abstractions;
+
+namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class BodyPropertySourceValidator : StaticActionParameterPropertySourceValidator<BodyParameterSource>
     {

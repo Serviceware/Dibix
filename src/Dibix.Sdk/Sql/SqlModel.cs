@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dibix.Sdk.Abstractions;
 using Microsoft.SqlServer.Dac.Model;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
@@ -11,10 +12,10 @@ namespace Dibix.Sdk.Sql
         private readonly TSqlModel _model;
         private readonly TSqlFragmentAnalyzer _fragmentAnalyzer;
 
-        internal SqlModel(string source, TSqlFragment scriptFragment, bool isScriptArtifact, string projectName, bool isEmbedded, bool limitDdlStatements, TSqlModel model, ILogger logger)
+        internal SqlModel(string source, TSqlFragment scriptFragment, bool isScriptArtifact, SqlCoreConfiguration globalConfiguration, TSqlModel model, ILogger logger)
         {
             this._model = model;
-            this._fragmentAnalyzer = TSqlFragmentAnalyzer.Create(source, scriptFragment, isScriptArtifact, projectName, isEmbedded, limitDdlStatements, analyzeAlways: true, new Lazy<TSqlModel>(() => model), logger);
+            this._fragmentAnalyzer = TSqlFragmentAnalyzer.Create(source, scriptFragment, isScriptArtifact, globalConfiguration, analyzeAlways: true, new Lazy<TSqlModel>(() => model), logger);
         }
 
         public IEnumerable<Constraint> GetTableConstraints(SchemaObjectName tableName, bool throwOnError = true) => this.GetConstraints(TableModel.Table, tableName, throwOnError);

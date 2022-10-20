@@ -8,6 +8,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         protected override string ErrorMessageTemplate => "Table '{0}' has an unnamed {1}";
 
+        public UnnamedConstraintSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         public override void Visit(CreateTableStatement node)
         {
             if (node.IsTemporaryTable())

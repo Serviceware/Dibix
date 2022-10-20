@@ -9,24 +9,26 @@
     <Compile Remove="Resources\*.cs" />
     <EmbeddedResource Include="Resources\*" LogicalName="%(EmbeddedResource.Filename)%(EmbeddedResource.Extension)" />
   </ItemGroup>
-
+  
   <ItemGroup>
     <Compile Include="..\..\shared\Extensions\EnumerableExtensions.cs" Link="Extensions\EnumerableExtensions.cs" />
     <Compile Include="..\..\shared\Utilities\RoslynUtility.cs" Link="Utilities\RoslynUtility.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="coverlet.collector" IncludeAssets="runtime;build;native;contentfiles;analyzers;buildtransitive" PrivateAssets="All" />
+    <PackageReference Include="coverlet.collector" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+    <PackageReference Include="Moq" />
     <PackageReference Include="MSTest.TestAdapter" />
     <PackageReference Include="MSTest.TestFramework" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Dibix.Generators\Dibix.Generators.csproj" PrivateAssets="all" OutputItemType="Analyzer" />
+    <ProjectReference Include="..\..\src\Dibix.Generators\Dibix.Generators.csproj" />
     <ProjectReference Include="..\..\src\Dibix.Sdk\Dibix.Sdk.csproj" />
+    <ProjectReference Include="..\..\src\Dibix.Sdk.Abstractions\Dibix.Sdk.Abstractions.csproj" />
     <ProjectReference Include="..\..\src\Dibix.Testing\Dibix.Testing.csproj" />
   </ItemGroup>
-  
+
 </Project>

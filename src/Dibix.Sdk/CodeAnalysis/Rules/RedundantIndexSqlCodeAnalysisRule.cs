@@ -12,6 +12,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         protected override string ErrorMessageTemplate => "{0}";
 
+        public RedundantIndexSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         protected override void Visit(TableModel tableModel, SchemaObjectName tableName, TableDefinition tableDefinition)
         {
             IEnumerable<IndexHit> constraints = base.Model

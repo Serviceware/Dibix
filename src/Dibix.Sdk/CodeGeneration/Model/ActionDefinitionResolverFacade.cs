@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -10,8 +11,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public ActionDefinitionResolverFacade
         (
-            string productName
-          , string areaName
+            ArtifactGenerationConfiguration configuration
           , string className
           , ISqlStatementDefinitionProvider sqlStatementDefinitionProvider
           , IExternalSchemaResolver externalSchemaResolver
@@ -28,8 +28,7 @@ namespace Dibix.Sdk.CodeGeneration
                 new ExternalReflectionTargetActionDefinitionResolver(schemaDefinitionResolver, schemaRegistry, lockEntryManager, logger)
               , new SqlStatementDefinitionActionDefinitionResolver
                 (
-                    productName
-                  , areaName
+                    configuration
                   , className
                   , sqlStatementDefinitionProvider
                   , externalSchemaResolver

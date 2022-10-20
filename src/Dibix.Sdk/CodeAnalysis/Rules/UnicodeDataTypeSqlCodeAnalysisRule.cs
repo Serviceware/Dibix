@@ -7,6 +7,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         protected override string ErrorMessageTemplate => "Use unicode data types instead of ascii. Replace '{0}' with '{1}'.";
 
+        public UnicodeDataTypeSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         public override void Visit(SqlDataTypeReference node)
         {
             if (node.SqlDataTypeOption == SqlDataTypeOption.Char || node.SqlDataTypeOption == SqlDataTypeOption.VarChar)

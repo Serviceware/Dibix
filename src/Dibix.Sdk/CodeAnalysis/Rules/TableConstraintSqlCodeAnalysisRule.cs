@@ -8,6 +8,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         protected override string ErrorMessageTemplate => "The constraint '{0}' should be defined on the table, instead of the column '{1}'";
 
+        public TableConstraintSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         public override void Visit(CreateTableStatement node)
         {
             foreach (ColumnDefinition column in node.Definition.ColumnDefinitions)

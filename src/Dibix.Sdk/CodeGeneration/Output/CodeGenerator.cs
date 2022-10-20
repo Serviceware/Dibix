@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.CodeGeneration.CSharp;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -67,7 +68,7 @@ namespace Dibix.Sdk.CodeGeneration
                 IGrouping<string, ArtifactWriterBase> nestedWriterGroup = childWriterGroups[i];
 
                 // Don't enter layer name if project has multiple areas
-                if (context.Model.AreaName != null)
+                if (context.Model.ArtifactGenerationConfiguration.AreaName != null)
                     context.SetScopeName(nestedWriterGroup.Key);
 
                 IList<ArtifactWriterBase> nestedWriters = nestedWriterGroup.ToArray();

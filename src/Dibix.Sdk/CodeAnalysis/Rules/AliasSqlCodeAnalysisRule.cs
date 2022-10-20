@@ -8,6 +8,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         protected override string ErrorMessageTemplate => "{0}";
 
+        public AliasSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         public override void Visit(JoinTableReference node)
         {
             TableReferenceWithAlias unaliasedTable = EnumerableExtensions.Create(node.FirstTableReference, node.SecondTableReference)

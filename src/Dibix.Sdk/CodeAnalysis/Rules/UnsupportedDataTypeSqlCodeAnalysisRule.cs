@@ -17,6 +17,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         protected override string ErrorMessageTemplate => "{0}";
 
+        public UnsupportedDataTypeSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         public override void Visit(CreateTableStatement node)
         {
             this._tableName = node.SchemaObjectName.BaseIdentifier.Value;

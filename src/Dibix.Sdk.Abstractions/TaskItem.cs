@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace Dibix.Sdk
+namespace Dibix.Sdk.Abstractions
 {
     [DebuggerDisplay("{" + nameof(ItemSpec) + "}")]
     public sealed class TaskItem : Dictionary<string, string>

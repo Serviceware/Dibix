@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
+using Dibix.Sdk.Abstractions;
 using Microsoft.SqlServer.Dac.Model;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -8,66 +8,27 @@ namespace Dibix.Sdk.CodeGeneration
     {
         internal static bool Execute
         (
-            string projectName
-          , string projectDirectory
-          , string productName
-          , string areaName
-          , string title
-          , string version
-          , string description
-          , EndpointConfiguration endpointConfiguration
-          , string outputDirectory
-          , string defaultOutputName
-          , string clientOutputName
-          , string externalAssemblyReferenceDirectory
-          , ICollection<TaskItem> source
-          , IEnumerable<TaskItem> contracts
-          , IEnumerable<TaskItem> endpoints
-          , IEnumerable<TaskItem> references
-          , IEnumerable<TaskItem> defaultSecuritySchemes
-          , bool isEmbedded
-          , bool limitDdlStatements
-          , bool preventDmlReferences
-          , bool enableExperimentalFeatures
-          , string databaseSchemaProviderName
-          , string modelCollation
-          , ICollection<TaskItem> sqlReferencePath
+            SqlCoreConfiguration globalConfiguration
+          , ArtifactGenerationConfiguration artifactGenerationConfiguration
           , IActionParameterSourceRegistry actionParameterSourceRegistry
           , IActionParameterConverterRegistry actionParameterConverterRegistry
           , LockEntryManager lockEntryManager
           , IFileSystemProvider fileSystemProvider
           , ILogger logger
           , TSqlModel sqlModel
-          , out string[] additionalAssemblyReferences
+          , ICollection<string> additionalAssemblyReferences
         )
         {
             logger.LogMessage("Generating code artifacts...");
 
             ISchemaRegistry schemaRegistry = new SchemaRegistry(logger);
-            ICollection<string> normalizedReferences = references.Select(x => x.GetFullPath()).ToArray();
-            DefaultAssemblyResolver assemblyResolver = new DefaultAssemblyResolver(projectDirectory, externalAssemblyReferenceDirectory, normalizedReferences);
+            DefaultAssemblyResolver assemblyResolver = new DefaultAssemblyResolver(globalConfiguration, artifactGenerationConfiguration);
             ExternalSchemaResolver externalSchemaResolver = new ExternalSchemaResolver(assemblyResolver, schemaRegistry);
             SchemaDefinitionResolver schemaDefinitionResolver = new SchemaDefinitionResolver(schemaRegistry, externalSchemaResolver, logger);
             CodeGenerationModel codeGenerationModel = CodeGenerationModelLoader.Create
             (
-                projectName, productName
-              , areaName
-              , title
-              , version
-              , description
-              , endpointConfiguration
-              , outputDirectory
-              , defaultOutputName
-              , clientOutputName, source
-              , contracts
-              , endpoints, defaultSecuritySchemes
-              , isEmbedded
-              , limitDdlStatements
-              , preventDmlReferences
-              , enableExperimentalFeatures
-              , databaseSchemaProviderName
-              , modelCollation
-              , sqlReferencePath
+                globalConfiguration
+              , artifactGenerationConfiguration
               , schemaRegistry
               , externalSchemaResolver
               , schemaDefinitionResolver
@@ -90,13 +51,13 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (!modelValidator.Validate(codeGenerationModel))
             {
-                additionalAssemblyReferences = null;
                 return false;
             }
 
             ICodeArtifactsGenerator generator = new CodeArtifactsGenerator();
             bool result = generator.Generate(codeGenerationModel, schemaDefinitionResolver, logger);
-            additionalAssemblyReferences = codeGenerationModel.AdditionalAssemblyReferences.ToArray();
+
+            additionalAssemblyReferences.AddRange(codeGenerationModel.AdditionalAssemblyReferences);
             return result;
         }
     }

@@ -9,6 +9,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         protected override string ErrorMessageTemplate => "Missing schema specification";
 
+        public SchemaSpecificationSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         public override void Visit(SchemaObjectName name)
         {
             if (!base.Model.TryGetModelElement(name, out ElementLocation element)) 

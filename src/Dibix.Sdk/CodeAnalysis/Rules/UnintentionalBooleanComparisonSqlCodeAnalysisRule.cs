@@ -8,6 +8,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         protected override string ErrorMessageTemplate => "Unintentional boolean comparison: {0}";
 
+        public UnintentionalBooleanComparisonSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         public override void Visit(BooleanComparisonExpression node)
         {
             if (node.FirstExpression.Dump() == node.SecondExpression.Dump() // @a = @a

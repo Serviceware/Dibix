@@ -15,6 +15,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         protected override string ErrorMessageTemplate => "Found use of old security algorithm '{0}'. Please use any of these algorithms: {1}";
 
+        public SecurityAlgorithmSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         public override void Visit(FunctionCall node)
         {
             if (String.Equals(node.FunctionName.Value, "HASHBYTES", StringComparison.OrdinalIgnoreCase)

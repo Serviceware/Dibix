@@ -6,14 +6,14 @@ namespace Dibix.Sdk.Packaging
 {
     internal static class ArtifactPackage
     {
-        public static void Create(string artifactName, string outputDirectory, string compiledArtifactPath)
+        public static void Create(CreatePackageTaskConfiguration configuration)
         {
-            string outputPath = Path.Combine(outputDirectory, $"{artifactName}.dbx");
+            string outputPath = Path.Combine(configuration.OutputDirectory, $"{configuration.ArtifactName}.dbx");
             using (Package package = Package.Open(outputPath, FileMode.Create))
             {
                 Uri contentUri = PackUriHelper.CreatePartUri(new Uri("Content", UriKind.Relative));
                 PackagePart contentPart = package.CreatePart(contentUri, "application/octet-stream");
-                using (Stream contentInput = File.OpenRead(compiledArtifactPath))
+                using (Stream contentInput = File.OpenRead(configuration.CompiledArtifactPath))
                 {
                     using (Stream contentOutput = contentPart.GetStream())
                     {

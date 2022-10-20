@@ -8,6 +8,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
      {
         protected override string ErrorMessageTemplate => "Please specify a return code for the RETURN expression";
 
+        public EmptyReturnSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         public override void Visit(ProcedureStatementBodyBase node)
         {
             if (node is FunctionStatementBody function && function.ReturnType is TableValuedFunctionReturnType)

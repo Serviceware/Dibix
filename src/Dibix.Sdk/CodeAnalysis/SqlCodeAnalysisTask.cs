@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.Dac.CodeAnalysis;
 using Microsoft.SqlServer.Dac.Extensibility;
@@ -11,38 +12,25 @@ namespace Dibix.Sdk.CodeAnalysis
 {
     public static class SqlCodeAnalysisTask
     {
-        internal static bool Execute
-        (
-            string projectName
-          , SqlCodeAnalysisConfiguration configuration
-          , bool isEmbedded
-          , bool limitDdlStatements
-          , string staticCodeAnalysisSucceededFile
-          , string resultsFile
-          , ICollection<TaskItem> source
-          , IEnumerable<TaskItem> scriptSource
-          , LockEntryManager lockEntryManager
-          , ILogger logger
-          , TSqlModel model
-        )
+        internal static bool Execute(SqlCoreConfiguration globalConfiguration, SqlCodeAnalysisConfiguration codeAnalysisConfiguration, LockEntryManager lockEntryManager, ILogger logger, TSqlModel model)
         {
             if (logger.HasLoggedErrors)
                 return false;
 
-            ExecuteNativeCodeAnalysis(model, logger, staticCodeAnalysisSucceededFile, resultsFile);
+            ExecuteNativeCodeAnalysis(model, logger, codeAnalysisConfiguration);
 
-            ExecuteExtendedCodeAnalysis(projectName, configuration, isEmbedded, limitDdlStatements, source, scriptSource, lockEntryManager, logger, model);
+            ExecuteExtendedCodeAnalysis(globalConfiguration, codeAnalysisConfiguration, lockEntryManager, logger, model);
 
             return !logger.HasLoggedErrors;
         }
 
-        private static bool ExecuteNativeCodeAnalysis(TSqlModel model, ILogger logger, string staticCodeAnalysisSucceededFile, string resultsFile)
+        private static bool ExecuteNativeCodeAnalysis(TSqlModel model, ILogger logger, SqlCodeAnalysisConfiguration configuration)
         {
             logger.LogMessage("Performing native code analysis...");
             CodeAnalysisServiceSettings settings = new CodeAnalysisServiceSettings
             {
-                CodeAnalysisSucceededFile = staticCodeAnalysisSucceededFile,
-                ResultsFile = resultsFile,
+                CodeAnalysisSucceededFile = configuration.StaticCodeAnalysisSucceededFile,
+                ResultsFile = configuration.ResultsFile,
                 RuleSettings = new CodeAnalysisRuleSettings()
             };
             CodeAnalysisService service = new CodeAnalysisServiceFactory().CreateAnalysisService(model, settings);
@@ -57,18 +45,18 @@ namespace Dibix.Sdk.CodeAnalysis
             return analysisResult != null;
         }
 
-        private static void ExecuteExtendedCodeAnalysis(string projectName, SqlCodeAnalysisConfiguration configuration, bool isEmbedded, bool limitDdlStatements, IEnumerable<TaskItem> source, IEnumerable<TaskItem> scriptSource, LockEntryManager lockEntryManager, ILogger logger, TSqlModel model)
+        private static void ExecuteExtendedCodeAnalysis(SqlCoreConfiguration globalConfiguration, SqlCodeAnalysisConfiguration codeAnalysisConfiguration, LockEntryManager lockEntryManager, ILogger logger, TSqlModel model)
         {
             logger.LogMessage("Performing extended code analysis...");
-            SqlCodeAnalysisRuleEngine codeAnalysisEngine = SqlCodeAnalysisRuleEngine.Create(model, projectName, configuration, isEmbedded, limitDdlStatements, lockEntryManager, logger);
+            SqlCodeAnalysisRuleEngine codeAnalysisEngine = SqlCodeAnalysisRuleEngine.Create(model, globalConfiguration, codeAnalysisConfiguration, lockEntryManager, logger);
 
-            foreach (TaskItem inputFile in source)
+            foreach (TaskItem inputFile in globalConfiguration.Source)
             {
                 string inputFilePath = inputFile.GetFullPath();
                 AnalyzeItem(inputFilePath, codeAnalysisEngine, logger);
             }
 
-            AnalyzeScripts(null, scriptSource.Select(x => x.GetFullPath()), codeAnalysisEngine, logger);
+            AnalyzeScripts(null, codeAnalysisConfiguration.ScriptSource.Select(x => x.GetFullPath()), codeAnalysisEngine, logger);
         }
 
         private static void ReportExtensibilityErrors(ICollection<ExtensibilityError> errors, object category, bool blocksBuild, ILogger logger)

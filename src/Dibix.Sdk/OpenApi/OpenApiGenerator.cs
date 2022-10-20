@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using Dibix.Http;
+using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.CodeGeneration;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
@@ -42,15 +43,15 @@ namespace Dibix.Sdk.OpenApi
             {
                 Info = new OpenApiInfo
                 {
-                    Title = model.Title,
-                    Version = !String.IsNullOrEmpty(model.Version) ? model.Version : "1.0.0",
-                    Description = model.Description
+                    Title = model.ArtifactGenerationConfiguration.Title,
+                    Version = !String.IsNullOrEmpty(model.ArtifactGenerationConfiguration.Version) ? model.ArtifactGenerationConfiguration.Version : "1.0.0",
+                    Description = model.ArtifactGenerationConfiguration.Description
                 },
-                Servers = { new OpenApiServer { Url = model.EndpointConfiguration.BaseUrl } }
+                Servers = { new OpenApiServer { Url = model.ArtifactGenerationConfiguration.BaseUrl } }
             };
 
             AppendSecuritySchemes(document, model.SecuritySchemes);
-            AppendPaths(document, model.AreaName, model.Controllers, model.RootNamespace, schemaDefinitionResolver, logger);
+            AppendPaths(document, model.ArtifactGenerationConfiguration.AreaName, model.Controllers, model.RootNamespace, schemaDefinitionResolver, logger);
             return document;
         }
 

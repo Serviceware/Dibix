@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.Json;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -13,33 +14,31 @@ namespace Dibix.Sdk.CodeGeneration
     {
         #region Fields
         private const string RootFolderName = "Contracts";
+        private readonly ArtifactGenerationConfiguration _configuration;
         private readonly ITypeResolverFacade _typeResolver;
-        private readonly string _productName;
-        private readonly string _areaName;
         private readonly IDictionary<string, ContractDefinition> _contracts;
         #endregion
 
         #region Properties
-        public IEnumerable<ContractDefinition> Contracts => this._contracts.Values;
+        public IEnumerable<ContractDefinition> Contracts => _contracts.Values;
         protected override string SchemaName => "dibix.contracts.schema";
-        IEnumerable<SchemaDefinition> ISchemaProvider.Schemas => this._contracts.Values.Select(x => x.Schema);
+        IEnumerable<SchemaDefinition> ISchemaProvider.Schemas => _contracts.Values.Select(x => x.Schema);
         #endregion
 
         #region Constructor
-        public ContractDefinitionProvider(IFileSystemProvider fileSystemProvider, ITypeResolverFacade typeResolver, ILogger logger, IEnumerable<string> contracts, string productName, string areaName) : base(fileSystemProvider, logger)
+        public ContractDefinitionProvider(ArtifactGenerationConfiguration configuration, IFileSystemProvider fileSystemProvider, ITypeResolverFacade typeResolver, ILogger logger) : base(fileSystemProvider, logger)
         {
-            this._typeResolver = typeResolver;
-            this._productName = productName;
-            this._areaName = areaName;
-            this._contracts = new Dictionary<string, ContractDefinition>();
-            base.Collect(contracts);
+            _configuration = configuration;
+            _typeResolver = typeResolver;
+            _contracts = new Dictionary<string, ContractDefinition>();
+            base.Collect(configuration.Contracts.Select(x => x.GetFullPath()));
         }
         #endregion
 
         #region IContractDefinitionProvider Members
         public bool TryGetSchema(string fullName, out SchemaDefinition schema)
         {
-            if (!this._contracts.TryGetValue(fullName, out ContractDefinition contract))
+            if (!_contracts.TryGetValue(fullName, out ContractDefinition contract))
             {
                 schema = null;
                 return false;
@@ -57,15 +56,15 @@ namespace Dibix.Sdk.CodeGeneration
             if (parts[0] != RootFolderName)
                 throw new InvalidOperationException($"Expected contract root folder to be '{RootFolderName}' but got: {parts[0]}");
 
-            bool multipleAreas = this._areaName == null;
+            bool multipleAreas = _configuration.AreaName == null;
             if (multipleAreas && parts.Length < 2)
                 throw new InvalidOperationException(@"Expected the following folder structure for projects with multiple areas: Contracts\Area\*.json
 If this is not a project that has multiple areas, please make sure to define the <RootNamespace> tag in the following format: Product.Area");
 
             string relativeNamespace = String.Join(".", parts.Skip(1));
-            NamespacePath currentNamespace = PathUtility.BuildAbsoluteNamespace(this._productName, this._areaName, LayerName.DomainModel, relativeNamespace);
+            NamespacePath currentNamespace = PathUtility.BuildAbsoluteNamespace(_configuration.ProductName, _configuration.AreaName, LayerName.DomainModel, relativeNamespace);
 
-            this.ReadContracts(currentNamespace, relativeNamespace, json, filePath);
+            ReadContracts(currentNamespace, relativeNamespace, json, filePath);
         }
         #endregion
 
@@ -74,7 +73,7 @@ If this is not a project that has multiple areas, please make sure to define the
         {
             foreach (JProperty definitionProperty in contracts.Properties())
             {
-                this.ReadContract(currentNamespace, relativeNamespace, definitionProperty.Name, definitionProperty.Value, filePath, definitionProperty.GetLineInfo());
+                ReadContract(currentNamespace, relativeNamespace, definitionProperty.Name, definitionProperty.Value, filePath, definitionProperty.GetLineInfo());
             }
         }
 
@@ -83,11 +82,11 @@ If this is not a project that has multiple areas, please make sure to define the
             switch (value.Type)
             {
                 case JTokenType.Object:
-                    this.ReadObjectContract(currentNamespace, relativeNamespace, definitionName, value, filePath, lineInfo);
+                    ReadObjectContract(currentNamespace, relativeNamespace, definitionName, value, filePath, lineInfo);
                     break;
 
                 case JTokenType.Array:
-                    this.ReadEnumContract(currentNamespace, definitionName, value, filePath, lineInfo);
+                    ReadEnumContract(currentNamespace, definitionName, value, filePath, lineInfo);
                     break;
 
                 default:
@@ -151,7 +150,7 @@ If this is not a project that has multiple areas, please make sure to define the
                         typeName = typeName.TrimStart('#');
 
                         IJsonLineInfo location = value.GetLineInfo();
-                        TypeReference type = this._typeResolver.ResolveType(typeName, relativeNamespace, filePath, location.LineNumber, location.LinePosition, isEnumerable);
+                        TypeReference type = _typeResolver.ResolveType(typeName, relativeNamespace, filePath, location.LineNumber, location.LinePosition, isEnumerable);
                         return type;
                     }
 
@@ -171,7 +170,7 @@ If this is not a project that has multiple areas, please make sure to define the
                 }
             }
 
-            this.CollectContract(contract, filePath, lineInfo);
+            CollectContract(contract, filePath, lineInfo);
         }
 
         private void ReadEnumContract(NamespacePath currentNamespace, string definitionName, JToken definitionValue, string filePath, IJsonLineInfo lineInfo)
@@ -196,21 +195,21 @@ If this is not a project that has multiple areas, please make sure to define the
                 contract.Members.Add(new EnumSchemaMember(value.Name, actualValue, value.StringValue, contract));
             }
 
-            this.CollectContract(contract, filePath, lineInfo);
+            CollectContract(contract, filePath, lineInfo);
         }
 
         private void CollectContract(SchemaDefinition definition, string filePath, IJsonLineInfo lineInfo)
         {
             string name = definition.FullName;
-            if (this._contracts.TryGetValue(name, out ContractDefinition otherContract))
+            if (_contracts.TryGetValue(name, out ContractDefinition otherContract))
             {
-                this.Logger.LogError($"Ambiguous contract definition: {definition.FullName}", otherContract.FilePath, otherContract.Line, otherContract.Column);
-                this.Logger.LogError($"Ambiguous contract definition: {definition.FullName}", filePath, lineInfo.LineNumber, lineInfo.LinePosition);
+                Logger.LogError($"Ambiguous contract definition: {definition.FullName}", otherContract.FilePath, otherContract.Line, otherContract.Column);
+                Logger.LogError($"Ambiguous contract definition: {definition.FullName}", filePath, lineInfo.LineNumber, lineInfo.LinePosition);
                 return;
             }
 
             ContractDefinition contractDefinition = new ContractDefinition(definition, filePath, lineInfo.LineNumber, lineInfo.LinePosition);
-            this._contracts.Add(name, contractDefinition);
+            _contracts.Add(name, contractDefinition);
         }
 
         private static IEnumerable<EnumValue> ReadEnumValues(JToken members)
@@ -258,9 +257,9 @@ If this is not a project that has multiple areas, please make sure to define the
 
             private EnumValue(string name, int? actualValue, string stringValue)
             {
-                this.Name = name;
-                this.ActualValue = actualValue;
-                this.StringValue = stringValue;
+                Name = name;
+                ActualValue = actualValue;
+                StringValue = stringValue;
             }
 
             public static EnumValue ImplicitValue(string name, int actualValue) => new EnumValue(name, actualValue, null);

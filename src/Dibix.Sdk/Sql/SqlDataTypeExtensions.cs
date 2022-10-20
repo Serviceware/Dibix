@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.CodeGeneration;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 

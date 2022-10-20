@@ -7,6 +7,8 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     {
         protected override string ErrorMessageTemplate => "Found use of TRUNCATE TABLE statement";
 
+        public TruncateTableSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context) { }
+
         public override void Visit(TruncateTableStatement node) => base.Fail(node);
     }
 }
