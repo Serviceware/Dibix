@@ -9,7 +9,7 @@
 
 namespace Dibix.Generators
 {
-    [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "1.2.32.48572")]
+    [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
     internal enum TaskPropertyType
     {
         None,

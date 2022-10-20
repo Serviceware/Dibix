@@ -11,13 +11,13 @@ namespace Dibix.Generators.Tests.Tasks
 {
     public sealed partial class SqlCoreTask : global::Dibix.Sdk.Abstractions.ITask
     {
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "1.2.32.48572")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
         private readonly global::Dibix.Sdk.Abstractions.ILogger _logger;
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "1.2.32.48572")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
         private readonly global::Dibix.Generators.Tests.Tasks.SqlCoreTaskConfiguration _configuration;
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "1.2.32.48572")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         public SqlCoreTask(global::Dibix.Sdk.Abstractions.ILogger logger, global::Dibix.Sdk.Abstractions.InputConfiguration configuration)
         {
