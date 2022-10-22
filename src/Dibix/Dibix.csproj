@@ -5,10 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\shared\Extensions\EnumerableExtensions.cs" Link="Extensions\EnumerableExtensions.cs" />
-    <Compile Include="..\..\shared\Extensions\ReflectionExtensions.cs" Link="Extensions\ReflectionExtensions.cs" />
-    <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\Guard.cs" />
-    <Compile Include="..\..\shared\SchemaName.cs" Link="Environment\SchemaName.cs" />
+    <Compile Include="..\..\shared\Extensions\EnumerableExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Extensions\ReflectionExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\SchemaName.cs" Link="Environment\%(Filename)%(Extension)" />
     <Compile Update="Access\DatabaseAccessorExtensions.Execute.cs"              DependentUpon="Access\DatabaseAccessorExtensions.cs" />
     <Compile Update="Access\DatabaseAccessorExtensions.GridReader.cs"           DependentUpon="Access\DatabaseAccessorExtensions.cs" />
     <Compile Update="Access\DatabaseAccessorExtensions.QueryMany.cs"            DependentUpon="Access\DatabaseAccessorExtensions.cs" />

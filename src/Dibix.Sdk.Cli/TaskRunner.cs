@@ -15,26 +15,26 @@ namespace Dibix.Sdk.Cli
             typeof(ILogger),
             typeof(InputConfiguration)
         };
-        private static readonly IDictionary<string, Func<ILogger, InputConfiguration, ITask>> Tasks = CollectTasks().ToDictionary(x => x.name, x => x.factory);
+        private static readonly IDictionary<string, TaskRegistration> Tasks = CollectTasks().ToDictionary(x => x.Name);
 
         public static IEnumerable<string> RegisteredTaskRunnerNames => Tasks.Keys;
 
         public static bool Execute(string runnerName, string[] args, ILogger logger)
         {
-            if (Tasks.TryGetValue(runnerName, out Func<ILogger, InputConfiguration, ITask> factory))
+            if (Tasks.TryGetValue(runnerName, out TaskRegistration registration))
             {
-                InputConfiguration configuration = CollectInputConfiguration(args);
+                InputConfiguration configuration = CollectInputConfiguration(registration, args);
                 VisualStudioAwareLogger visualStudioAwareLogger = new VisualStudioAwareLogger(logger);
                 visualStudioAwareLogger.BuildingInsideVisualStudio = configuration.GetSingleValue<bool>("BuildingInsideVisualStudio", throwOnInvalidKey: false);
-                ITask task = factory(visualStudioAwareLogger, configuration);
+                ITask task = registration.Factory(visualStudioAwareLogger, configuration);
                 return task.Execute();
             }
             return false;
         }
 
-        private static InputConfiguration CollectInputConfiguration(IReadOnlyList<string> args)
+        private static InputConfiguration CollectInputConfiguration(TaskRegistration task, IReadOnlyList<string> args)
         {
-            if (args.Count < 2)
+            if (!task.SupportsInputConfiguration || args.Count < 2)
                 return InputConfiguration.Empty;
 
             string inputConfigurationFile = args[1];
@@ -42,7 +42,7 @@ namespace Dibix.Sdk.Cli
             return configuration;
         }
 
-        private static IEnumerable<(string name, Func<ILogger, InputConfiguration, ITask> factory)> CollectTasks()
+        private static IEnumerable<TaskRegistration> CollectTasks()
         {
             Type taskInterfaceType = typeof(ITask);
             foreach (Type type in SdkAssembly.GetTypes())
@@ -54,6 +54,7 @@ namespace Dibix.Sdk.Cli
                 if (!taskInterfaceType.IsAssignableFrom(type))
                     throw new InvalidOperationException($"Type '{type}' is decorated with {nameof(TaskAttribute)}, but does not implement '{taskInterfaceType}'.");
 
+                bool supportsInputConfiguration = type.GetCustomAttributes<TaskPropertyAttribute>().Any(x => x.Source == TaskPropertySource.Core);
                 ConstructorInfo ctor = type.GetConstructor(ConstructorSignature);
                 
                 ParameterExpression loggerParameter = Expression.Parameter(typeof(ILogger), "logger");
@@ -62,7 +63,21 @@ namespace Dibix.Sdk.Cli
                 Expression<Func<ILogger, InputConfiguration, ITask>> lambda = Expression.Lambda<Func<ILogger, InputConfiguration, ITask>>(taskInstance, loggerParameter, inputConfigurationParameter);
                 Func<ILogger, InputConfiguration, ITask> compiled = lambda.Compile();
 
-                yield return (taskAttribute.Name, compiled);
+                yield return new TaskRegistration(taskAttribute.Name, supportsInputConfiguration, compiled);
+            }
+        }
+
+        private readonly struct TaskRegistration
+        {
+            public string Name { get; }
+            public bool SupportsInputConfiguration { get; }
+            public Func<ILogger, InputConfiguration, ITask> Factory { get; }
+
+            public TaskRegistration(string name, bool supportsInputConfiguration, Func<ILogger, InputConfiguration, ITask> factory)
+            {
+                Name = name;
+                SupportsInputConfiguration = supportsInputConfiguration;
+                Factory = factory;
             }
         }
 

@@ -5,9 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\Guard.cs" />
-    <Compile Include="..\..\shared\KnownHeaders.cs" Link="Client\KnownHeaders.cs" />
-    <Compile Include="..\..\shared\Extensions\CollectionExtensions.cs" Link="Extensions\CollectionExtensions.cs" />
+    <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\KnownHeaders.cs" Link="Client\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Extensions\CollectionExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>

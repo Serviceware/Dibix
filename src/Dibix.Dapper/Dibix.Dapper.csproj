@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\Guard.cs" />
+    <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>

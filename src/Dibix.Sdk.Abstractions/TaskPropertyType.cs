@@ -1,6 +1,6 @@
-﻿namespace Dibix.Generators
+﻿namespace Dibix.Sdk.Abstractions
 {
-    internal enum TaskPropertyType
+    public enum TaskPropertyType
     {
         None,
         String,

@@ -29,14 +29,14 @@ namespace Dibix.Sdk.Sql
         #region Public Methods
         public static TSqlModel Load(SqlCoreConfiguration configuration, ILogger logger)
         {
-            RestrictEmbeddedReferences(configuration.PreventDmlReferences, configuration.SqlReferencePath, logger);
+            ValidateReferences(configuration.PreventDmlReferences, configuration.SqlReferencePath, logger);
             ITask task = TaskCache.GetOrAdd(logger, CreateTask);
             return ModelFactory(configuration.DatabaseSchemaProviderName, configuration.ModelCollation, configuration.Source.ToMSBuildTaskItems(), configuration.SqlReferencePath.ToMSBuildTaskItems(), task, logger);
         }
         #endregion
 
         #region Private Methods
-        private static void RestrictEmbeddedReferences(bool preventDmlReferences, IEnumerable<TaskItem> sqlReferencePath, ILogger logger)
+        private static void ValidateReferences(bool preventDmlReferences, IEnumerable<TaskItem> sqlReferencePath, ILogger logger)
         {
             foreach (TaskItem reference in sqlReferencePath)
             {

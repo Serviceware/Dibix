@@ -73,8 +73,7 @@ namespace Dibix.Generators.Tests
         [TestMethod]
         public void TaskGenerator()
         {
-            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(@"using Dibix.Generators;
-using Dibix.Sdk.Abstractions;
+            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(@"using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Generators.Tests.Tasks
 {
@@ -131,9 +130,6 @@ namespace Dibix.Generators.Tests.Tasks
 
             string[] expectedFiles =
             {
-                "TaskPropertyAttribute.g.cs",
-                "TaskPropertySource.g.cs",
-                "TaskPropertyType.g.cs",
                 "SqlCoreTask.g.cs",
                 "SqlCoreTaskConfiguration.g.cs",
                 "EndpointConfiguration.g.cs"

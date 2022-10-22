@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\Guard.cs" />
-    <Compile Include="..\..\shared\Extensions\ReflectionExtensions.cs" Link="Extensions\ReflectionExtensions.cs" />
+    <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Extensions\ReflectionExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>

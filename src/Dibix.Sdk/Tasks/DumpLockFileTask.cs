@@ -9,12 +9,12 @@ namespace Dibix.Sdk
         private partial bool Execute()
         {
             string[] args = Environment.GetCommandLineArgs();
-            if (args.Length < 2)
+            if (args.Length < 3)
                 return false;
 
             using (LockEntryManager lockEntryManager = LockEntryManager.Create())
             {
-                lockEntryManager.Write(args[1], encoded: false);
+                lockEntryManager.Write(args[2], encoded: false);
                 return true;
             }
         }

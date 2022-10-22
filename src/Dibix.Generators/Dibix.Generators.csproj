@@ -7,9 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\Guard.cs" />
-    <Compile Include="..\..\shared\Extensions\CollectionExtensions.cs" Link="Extensions\CollectionExtensions.cs" />
-    <Compile Include="..\..\shared\Extensions\EnumerableExtensions.cs" Link="Extensions\EnumerableExtensions.cs" />
+    <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Extensions\CollectionExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Extensions\EnumerableExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
     <EmbeddedResource Include="EmbeddedSources\**" Link="%(Identity)" />
   </ItemGroup>
 
@@ -18,10 +18,11 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
   </ItemGroup>
 
-  <!-- An instance of analyzer Dibix.Generators.TaskGenerator cannot be created from Dibix.Generators.dll : Exception has been thrown by the target of an invocation.. -->
-  <!--
   <ItemGroup>
-    <ProjectReference Include="..\Dibix.Sdk.Abstractions\Dibix.Sdk.Abstractions.csproj" PrivateAssets="all" />
+    <!--
+      OutputItemType="Analyzer" seems rather weird, but the Code Lens keeps on crashing with FileNotFoundException.
+      See: https://github.com/dotnet/roslyn/discussions/47517#discussioncomment-580567
+    -->
+    <ProjectReference Include="..\Dibix.Sdk.Abstractions\Dibix.Sdk.Abstractions.csproj" PrivateAssets="all" OutputItemType="Analyzer" />
   </ItemGroup>
-  -->
 </Project>

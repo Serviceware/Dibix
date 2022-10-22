@@ -5,16 +5,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\Guard.cs" />
-    <Compile Include="..\..\shared\Extensions\EnumerableExtensions.cs" Link="Extensions\EnumerableExtensions.cs" />
-    <Compile Include="..\..\shared\Extensions\ReflectionExtensions.cs" Link="Extensions\ReflectionExtensions.cs" />
-    <Compile Include="..\..\shared\ParameterSources\*.cs" Link="Providers\Sources\%(Filename).cs" />
-    <Compile Include="..\..\shared\KnownHeaders.cs" Link="Runtime\KnownHeaders.cs" />
-    <Compile Include="..\..\shared\Http\HttpErrorResponseParser.cs" Link="Runtime\HttpErrorResponseParser.cs" />
-    <Compile Include="..\..\shared\Http\HttpParameterUtility.cs" Link="Runtime\HttpParameterUtility.cs" />
-    <Compile Include="..\..\shared\Http\HttpParameterName.cs" Link="Runtime\HttpParameterName.cs" />
-    <Compile Include="..\..\shared\Http\RouteBuilder.cs" Link="Utilities\RouteBuilder.cs" />
-    <Compile Include="..\..\shared\Utilities\ExpressionUtility.cs" Link="Utilities\ExpressionUtility.cs" />
+    <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Extensions\EnumerableExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Extensions\ReflectionExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\ParameterSources\*.cs" Link="Providers\Sources\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\KnownHeaders.cs" Link="Runtime\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Http\HttpErrorResponseParser.cs" Link="Runtime\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Http\HttpParameterUtility.cs" Link="Runtime\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Http\HttpParameterName.cs" Link="Runtime\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Http\RouteBuilder.cs" Link="Utilities\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Utilities\ExpressionUtility.cs" Link="Utilities\%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' != 'net461'">

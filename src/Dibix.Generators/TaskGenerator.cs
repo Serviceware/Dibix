@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using Dibix.Sdk.Abstractions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -12,10 +13,6 @@ namespace Dibix.Generators
     [Generator]
     public sealed class TaskGenerator : IIncrementalGenerator
     {
-        // An instance of analyzer Dibix.Generators.TaskGenerator cannot be created from Dibix.Generators.dll : Exception has been thrown by the target of an invocation..
-        //private static readonly string TaskAttributeTypeName = typeof(TaskAttribute).FullName;
-        private const string TaskAttributeTypeName = "Dibix.Sdk.Abstractions.TaskAttribute"; //typeof(TaskAttribute).FullName;
-        private static readonly string TaskPropertyAttributeTypeName = typeof(TaskPropertyAttribute).FullName;
         private static readonly string DefaultAnnotationsStr = ComputeDefaultAnnotationsStr();
         private static readonly string GeneratedCodeAnnotationStr = ComputeGeneratedCodeAnnotationStr();
 
@@ -56,7 +53,7 @@ namespace Dibix.Generators
                     string displayString = methodSymbol.ContainingType.ToDisplayString();
                     SeparatedSyntaxList<AttributeArgumentSyntax> arguments = attribute.ArgumentList.Arguments;
 
-                    if (displayString == TaskAttributeTypeName)
+                    if (displayString == TypeNames.TaskAttributeTypeName)
                     {
                         if (arguments.Count != 1)
                             continue;
@@ -66,7 +63,7 @@ namespace Dibix.Generators
                         string taskName = GetAttributeValue<string>(context, arguments, index: 0);
                         task = new Task(@namespace, className, taskName);
                     }
-                    else if (displayString == TaskPropertyAttributeTypeName)
+                    else if (displayString == TypeNames.TaskPropertyAttributeTypeName)
                     {
                         string propertyName = GetAttributeValue<string>(context, arguments, index: 0);
                         TaskPropertyType type = GetAttributeValue<TaskPropertyType>(context, arguments, index: 1);

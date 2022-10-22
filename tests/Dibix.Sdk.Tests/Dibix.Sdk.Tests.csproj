@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\shared\Utilities\RoslynUtility.cs" Link="Utilities\RoslynUtility.cs" />
+    <Compile Include="..\..\shared\Utilities\RoslynUtility.cs" Link="Utilities\%(Filename)%(Extension)" />
     <Compile Remove="Resources\CodeGeneration\*.cs" />
     <EmbeddedResource Include="Resources\**" />
   </ItemGroup>
