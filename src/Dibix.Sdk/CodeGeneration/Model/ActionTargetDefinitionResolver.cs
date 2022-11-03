@@ -119,11 +119,13 @@ namespace Dibix.Sdk.CodeGeneration
             string apiParameterName = name;
             string internalParameterName = name;
 
+            ActionParameterSource source = null;
             if (explicitParameters.TryGetValue(name, out ExplicitParameter explicitParameter))
             {
                 explicitParameters.Remove(name);
+                source = explicitParameter.SourceBuilder.Build(type);
 
-                if (explicitParameter.Source is ActionParameterPropertySource propertySource)
+                if (source is ActionParameterPropertySource propertySource)
                 {
                     apiParameterName = propertySource.PropertyName.Split('.')[0];
                     if (IsUserParameter(propertySource.Definition, propertySource.PropertyName, ref location, ref apiParameterName))
@@ -160,7 +162,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             bool isRequired = this.IsParameterRequired(type, location, defaultValue);
-            return new ActionParameter(apiParameterName, internalParameterName, type, location, isRequired, defaultValue, explicitParameter?.Source, filePath, line, column);
+            return new ActionParameter(apiParameterName, internalParameterName, type, location, isRequired, defaultValue, source, filePath, line, column);
         }
         #endregion
     }

@@ -115,10 +115,11 @@ namespace Dibix.Sdk.CodeGeneration
             SchemaDefinitionSource schemaDefinitionSource = DetermineSchemaDefinitionSource(type);
             if (!String.IsNullOrEmpty(udtName))
             {
-                UserDefinedTypeSchema udtSchema = new UserDefinedTypeSchema(type.Namespace, type.Name, schemaDefinitionSource, udtName);
                 MethodInfo addMethod = type.SafeGetMethod("Add");
-                udtSchema.Properties.AddRange(addMethod.GetParameters()
-                                                       .Select(x => new ObjectSchemaProperty(name: new Token<string>(x.Name, source, line, column), ResolveType(x.ParameterType, source, line, column, schemaRegistry, logger))));
+                IList<ObjectSchemaProperty> udtProperties = addMethod.GetParameters()
+                                                                     .Select(x => new ObjectSchemaProperty(name: new Token<string>(x.Name, source, line, column), ResolveType(x.ParameterType, source, line, column, schemaRegistry, logger)))
+                                                                     .ToArray();
+                UserDefinedTypeSchema udtSchema = new UserDefinedTypeSchema(type.Namespace, type.Name, schemaDefinitionSource, udtName, udtProperties);
                 schemaRegistry.Populate(udtSchema);
             }
             else if (type.IsEnum)
@@ -138,10 +139,11 @@ namespace Dibix.Sdk.CodeGeneration
             }
             else
             {
-                ObjectSchema objectSchema = new ObjectSchema(type.Namespace, type.Name, schemaDefinitionSource);
-                schemaRegistry.Populate(objectSchema); // Register schema before traversing properties to avoid endless recursions for self referencing properties
-                objectSchema.Properties.AddRange(type.GetProperties()
-                                                     .Select(x => CreateProperty(x, source, line, column, schemaRegistry, logger)));
+                IList<ObjectSchemaProperty> objectSchemaProperties = type.GetProperties()
+                                                                         .Select(x => CreateProperty(x, source, line, column, schemaRegistry, logger))
+                                                                         .ToArray();
+                ObjectSchema objectSchema = new ObjectSchema(type.Namespace, type.Name, schemaDefinitionSource, objectSchemaProperties);
+                schemaRegistry.Populate(objectSchema);
             }
 
             return schemaTypeReference;

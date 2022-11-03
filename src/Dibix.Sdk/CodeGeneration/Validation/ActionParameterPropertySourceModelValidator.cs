@@ -35,7 +35,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private bool ValidateSource(ActionParameter rootParameter, ActionParameterInfo currentParameter, ActionParameterSource currentValue, ActionParameterPropertySource parentValue, ActionDefinition action)
         {
-            if (!(currentValue is ActionParameterPropertySource propertySource)) 
+            if (currentValue is not ActionParameterPropertySource propertySource) 
                 return true;
 
             bool result = this.ValidatePropertySource(rootParameter, currentParameter, propertySource, parentValue, action);

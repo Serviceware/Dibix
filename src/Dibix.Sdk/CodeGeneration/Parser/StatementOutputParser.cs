@@ -508,7 +508,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static bool IsPrimitiveType(TypeReference type, ISchemaDefinitionResolver schemaDefinitionResolver)
         {
-            return type is PrimitiveTypeReference || type is SchemaTypeReference schemaTypeReference && schemaDefinitionResolver.Resolve(schemaTypeReference) is EnumSchema;
+            return type is PrimitiveTypeReference || type.IsEnum(schemaDefinitionResolver);
         }
     }
 }

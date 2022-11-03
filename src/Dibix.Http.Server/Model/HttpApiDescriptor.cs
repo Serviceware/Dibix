@@ -216,19 +216,23 @@ namespace Dibix.Http.Server
 
             public void ResolveParameterFromConstant(string targetParameterName, bool value)
             {
-                ResolveParameter(targetParameterName, new HttpParameterConstantSource(value));
+                ResolveParameter(targetParameterName, new HttpParameterConstantSource(typeof(bool), value));
             }
             public void ResolveParameterFromConstant(string targetParameterName, int value)
             {
-                ResolveParameter(targetParameterName, new HttpParameterConstantSource(value));
+                ResolveParameter(targetParameterName, new HttpParameterConstantSource(typeof(int), value));
             }
             public void ResolveParameterFromConstant(string targetParameterName, string value)
             {
-                ResolveParameter(targetParameterName, new HttpParameterConstantSource(value));
+                ResolveParameter(targetParameterName, new HttpParameterConstantSource(typeof(string), value));
             }
-            public void ResolveParameterFromNull(string targetParameterName)
+            public void ResolveParameterFromConstant<T>(string targetParameterName, T value)
             {
-                ResolveParameter(targetParameterName, new HttpParameterConstantSource(null));
+                ResolveParameter(targetParameterName, new HttpParameterConstantSource(typeof(T), value));
+            }
+            public void ResolveParameterFromNull<T>(string targetParameterName)
+            {
+                ResolveParameter(targetParameterName, new HttpParameterConstantSource(typeof(T), null));
             }
             public void ResolveParameterFromSource(string targetParameterName, string sourceName, string sourcePropertyPath)
             {

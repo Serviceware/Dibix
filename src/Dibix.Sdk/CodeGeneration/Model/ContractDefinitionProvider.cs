@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -16,6 +17,7 @@ namespace Dibix.Sdk.CodeGeneration
         private const string RootFolderName = "Contracts";
         private readonly ArtifactGenerationConfiguration _configuration;
         private readonly ITypeResolverFacade _typeResolver;
+        private readonly ISchemaDefinitionResolver _schemaDefinitionResolver;
         private readonly IDictionary<string, ContractDefinition> _contracts;
         #endregion
 
@@ -26,10 +28,11 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public ContractDefinitionProvider(ArtifactGenerationConfiguration configuration, IFileSystemProvider fileSystemProvider, ITypeResolverFacade typeResolver, ILogger logger) : base(fileSystemProvider, logger)
+        public ContractDefinitionProvider(ArtifactGenerationConfiguration configuration, IFileSystemProvider fileSystemProvider, ITypeResolverFacade typeResolver, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger) : base(fileSystemProvider, logger)
         {
             _configuration = configuration;
             _typeResolver = typeResolver;
+            _schemaDefinitionResolver = schemaDefinitionResolver;
             _contracts = new Dictionary<string, ContractDefinition>();
             base.Collect(configuration.Contracts.Select(x => x.GetFullPath()));
         }
@@ -96,11 +99,14 @@ If this is not a project that has multiple areas, please make sure to define the
 
         private void ReadObjectContract(NamespacePath currentNamespace, string relativeNamespace, string definitionName, JToken value, string filePath, IJsonLineInfo lineInfo)
         {
-            ObjectSchema contract = new ObjectSchema(currentNamespace.Path, definitionName, SchemaDefinitionSource.Defined);
+            IList<ObjectSchemaProperty> properties = new Collection<ObjectSchemaProperty>();
+            string wcfNamespace = null;
             foreach (JProperty property in ((JObject)value).Properties())
             {
                 if (property.Name == "$wcfNs")
-                    contract.WcfNamespace = (string)property.Value;
+                {
+                    wcfNamespace = (string)property.Value;
+                }
                 else
                 {
                     JValue typeNameValue;
@@ -146,9 +152,6 @@ If this is not a project that has multiple areas, please make sure to define the
                         bool isEnumerable = typeName.EndsWith("*", StringComparison.Ordinal);
                         typeName = typeName.TrimEnd('*');
 
-                        // TODO: Remove support
-                        typeName = typeName.TrimStart('#');
-
                         IJsonLineInfo location = value.GetLineInfo();
                         TypeReference type = _typeResolver.ResolveType(typeName, relativeNamespace, filePath, location.LineNumber, location.LinePosition, isEnumerable);
                         return type;
@@ -159,17 +162,16 @@ If this is not a project that has multiple areas, please make sure to define the
                         ValueReference defaultValue = null;
                         if (defaultValueJson != null)
                         {
-                            IJsonLineInfo defaultValueLocation = defaultValueJson.GetLineInfo();
-                            defaultValue = JsonValueReferenceParser.Parse(typeReference, defaultValueJson, filePath, defaultValueLocation, Logger);
+                            defaultValue = JsonValueReferenceParser.Parse(typeReference, defaultValueJson, filePath, _schemaDefinitionResolver, Logger);
                         }
                         return defaultValue;
                     }
 
                     ObjectSchemaProperty objectSchemaProperty = new ObjectSchemaProperty(propertyName, ResolveType, ResolveDefaultValue, serializationBehavior, dateTimeKind, isPartOfKey, isOptional, isDiscriminator, isObfuscated, isRelativeHttpsUrl);
-                    contract.Properties.Add(objectSchemaProperty);
+                    properties.Add(objectSchemaProperty);
                 }
             }
-
+            ObjectSchema contract = new ObjectSchema(currentNamespace.Path, definitionName, SchemaDefinitionSource.Defined, properties, wcfNamespace);
             CollectContract(contract, filePath, lineInfo);
         }
 

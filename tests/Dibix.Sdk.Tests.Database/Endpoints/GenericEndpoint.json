@@ -20,7 +20,7 @@
         "password": null,
         "d": "REQUEST.Language",
         "e": true,
-        "f": 5,
+        "f": "Descending",
         "g": "cake"
       }
     },
@@ -82,6 +82,7 @@
         "ids": {
           "source": "BODY.SomeIds",
           "items": {
+            "id": 1,
             "name": "ITEM.Title"
           }
         }

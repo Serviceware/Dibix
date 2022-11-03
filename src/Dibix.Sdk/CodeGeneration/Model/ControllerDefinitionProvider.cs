@@ -258,12 +258,12 @@ namespace Dibix.Sdk.CodeGeneration
 
             foreach (JProperty property in mappings.Properties())
             {
-                if (!TryReadSource(property, filePath, requestBody: requestBody, rootPropertySource: null, source: out ActionParameterSource source))
+                if (!TryReadSource(property, filePath, requestBody: requestBody, rootPropertySourceBuilder: null, out ActionParameterSourceBuilder parameterSourceBuilder))
                 {
                     switch (property.Value.Type)
                     {
                         case JTokenType.Object:
-                            source = ReadComplexActionParameter(property.Name, (JObject)property.Value, filePath, requestBody);
+                            parameterSourceBuilder = ReadComplexActionParameter(property.Name, (JObject)property.Value, filePath, requestBody);
                             break;
 
                         default:
@@ -271,39 +271,40 @@ namespace Dibix.Sdk.CodeGeneration
                     }
                 }
 
-                ExplicitParameter parameter = new ExplicitParameter(property, source);
+                ExplicitParameter parameter = new ExplicitParameter(property, parameterSourceBuilder);
                 target.Add(property.Name, parameter);
             }
         }
 
-        private bool TryReadSource(JProperty property, string filePath, ActionRequestBody requestBody, ActionParameterPropertySource rootPropertySource, out ActionParameterSource source)
+        private bool TryReadSource(JProperty property, string filePath, ActionRequestBody requestBody, ActionParameterPropertySourceBuilder rootPropertySourceBuilder, out ActionParameterSourceBuilder parameterSourceBuilder)
         {
             switch (property.Value.Type)
             {
                 case JTokenType.Boolean:
                 case JTokenType.Integer:
                 case JTokenType.Null:
-                    source = ReadConstantSource((JValue)property.Value);
+                    parameterSourceBuilder = new ActionParameterConstantSourceBuilder((JValue)property.Value, filePath, _schemaDefinitionResolver, Logger);
                     return true;
 
                 case JTokenType.String:
                     string stringValue = (string)property.Value;
                     if (stringValue != null && stringValue.Contains('.'))
-                        source = ReadPropertySource((JValue)property.Value, filePath, requestBody, rootPropertySource);
+                    {
+                        parameterSourceBuilder = ReadPropertySource((JValue)property.Value, filePath, requestBody, rootPropertySourceBuilder);
+                    }
                     else
-                        source = ReadConstantSource((JValue)property.Value);
-
+                    {
+                        parameterSourceBuilder = new ActionParameterConstantSourceBuilder((JValue)property.Value, filePath, _schemaDefinitionResolver, Logger);
+                    }
                     return true;
 
                 default:
-                    source = null;
+                    parameterSourceBuilder = null;
                     return false;
             }
         }
 
-        private static ActionParameterSource ReadConstantSource(JValue value) => new ActionParameterConstantSource(value.Value);
-
-        private ActionParameterPropertySource ReadPropertySource(JValue value, string filePath, ActionRequestBody requestBody, ActionParameterPropertySource rootParameterSource)
+        private ActionParameterPropertySourceBuilder ReadPropertySource(JValue value, string filePath, ActionRequestBody requestBody, ActionParameterPropertySourceBuilder rootParameterSourceBuilder)
         {
             string[] parts = ((string)value.Value).Split(new[] { '.' }, 2);
             string sourceName = parts[0];
@@ -315,12 +316,12 @@ namespace Dibix.Sdk.CodeGeneration
                 base.Logger.LogError($"Unknown property source '{sourceName}'", filePath, valueLocation.LineNumber, valueLocation.LinePosition);
             }
 
-            ActionParameterPropertySource propertySource = new ActionParameterPropertySource(definition, propertyName, filePath, valueLocation.LineNumber, valueLocation.LinePosition);
-            CollectPropertySourceNodes(propertySource, requestBody, rootParameterSource);
-            return propertySource;
+            ActionParameterPropertySourceBuilder propertySourceBuilder = new ActionParameterPropertySourceBuilder(definition, propertyName, filePath, valueLocation.LineNumber, valueLocation.LinePosition);
+            CollectPropertySourceNodes(propertySourceBuilder, requestBody, rootParameterSourceBuilder);
+            return propertySourceBuilder;
         }
 
-        private ActionParameterSource ReadComplexActionParameter(string parameterName, JObject container, string filePath, ActionRequestBody requestBody)
+        private ActionParameterSourceBuilder ReadComplexActionParameter(string parameterName, JObject container, string filePath, ActionRequestBody requestBody)
         {
             JProperty bodyConverterProperty = container.Property("convertFromBody");
             if (bodyConverterProperty != null)
@@ -337,9 +338,9 @@ namespace Dibix.Sdk.CodeGeneration
             throw new InvalidOperationException($"Invalid object for parameter: {parameterName}");
         }
 
-        private ActionParameterSource ReadPropertyActionParameter(string parameterName, JObject container, JProperty sourceProperty, string filePath, ActionRequestBody requestBody)
+        private ActionParameterSourceBuilder ReadPropertyActionParameter(string parameterName, JObject container, JProperty sourceProperty, string filePath, ActionRequestBody requestBody)
         {
-            ActionParameterPropertySource propertySource = ReadPropertySource((JValue)sourceProperty.Value, filePath, requestBody, rootParameterSource: null);
+            ActionParameterPropertySourceBuilder propertySourceBuilder = ReadPropertySource((JValue)sourceProperty.Value, filePath, requestBody, rootParameterSourceBuilder: null);
 
             JProperty itemsProperty = container.Property("items");
             if (itemsProperty != null)
@@ -347,13 +348,13 @@ namespace Dibix.Sdk.CodeGeneration
                 JObject itemsObject = (JObject)itemsProperty.Value;
                 foreach (JProperty itemProperty in itemsObject.Properties())
                 {
-                    if (TryReadSource(itemProperty, filePath, requestBody: requestBody, rootPropertySource: propertySource, source: out ActionParameterSource itemPropertySource))
+                    if (TryReadSource(itemProperty, filePath, requestBody: requestBody, rootPropertySourceBuilder: propertySourceBuilder, out ActionParameterSourceBuilder itemPropertySourceBuilder))
                     {
                         IJsonLineInfo lineInfo = itemProperty.GetLineInfo();
-                        propertySource.ItemSources.Add(new ActionParameterItemSource(itemProperty.Name, itemPropertySource, filePath, lineInfo.LineNumber, lineInfo.LinePosition));
+                        propertySourceBuilder.ItemSources.Add(new ActionParameterItemSourceBuilder(itemProperty.Name, itemPropertySourceBuilder, filePath, lineInfo.LineNumber, lineInfo.LinePosition, _schemaDefinitionResolver, Logger));
                     }
                 }
-                return propertySource;
+                return propertySourceBuilder;
             }
 
             JProperty converterProperty = container.Property("converter");
@@ -366,17 +367,17 @@ namespace Dibix.Sdk.CodeGeneration
                     IJsonLineInfo converterLocation = converter.GetLineInfo();
                     base.Logger.LogError($"Unknown property converter '{converterName}'", filePath, converterLocation.LineNumber, converterLocation.LinePosition);
                 }
-                propertySource.Converter = converterName;
-                return propertySource;
+                propertySourceBuilder.Converter = converterName;
+                return propertySourceBuilder;
             }
 
             throw new InvalidOperationException($"Invalid object for parameter: {parameterName}");
         }
 
-        private static ActionParameterBodySource ReadBodyActionParameter(JProperty bodyConverterProperty)
+        private static ActionParameterSourceBuilder ReadBodyActionParameter(JProperty bodyConverterProperty)
         {
             string bodyConverterTypeName = (string)((JValue)bodyConverterProperty.Value).Value;
-            return new ActionParameterBodySource(bodyConverterTypeName);
+            return new StaticActionParameterSourceBuilder(new ActionParameterBodySource(bodyConverterTypeName));
         }
 
         private static bool TryReadFileResponse(JObject action, out ActionFileResponse fileResponse, out IJsonLineInfo location)
@@ -560,16 +561,16 @@ namespace Dibix.Sdk.CodeGeneration
             return type;
         }
 
-        private void CollectPropertySourceNodes(ActionParameterPropertySource propertySource, ActionRequestBody requestBody, ActionParameterPropertySource rootPropertySource)
+        private void CollectPropertySourceNodes(ActionParameterPropertySourceBuilder propertySourceBuilder, ActionRequestBody requestBody, ActionParameterPropertySourceBuilder rootPropertySourceBuilder)
         {
-            switch (propertySource.Definition)
+            switch (propertySourceBuilder.Definition)
             {
                 case BodyParameterSource _:
-                    CollectBodyPropertySourceNodes(propertySource, requestBody);
+                    CollectBodyPropertySourceNodes(propertySourceBuilder, requestBody);
                     break;
 
                 case ItemParameterSource _:
-                    CollectItemPropertySourceNodes(propertySource, rootPropertySource);
+                    CollectItemPropertySourceNodes(propertySourceBuilder, rootPropertySourceBuilder);
                     break;
 
                 default: 
@@ -577,11 +578,11 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private void CollectBodyPropertySourceNodes(ActionParameterPropertySource propertySource, ActionRequestBody requestBody)
+        private void CollectBodyPropertySourceNodes(ActionParameterPropertySourceBuilder propertySourceBuilder, ActionRequestBody requestBody)
         {
             if (requestBody == null)
             {
-                base.Logger.LogError("Must specify a body contract on the endpoint action when using BODY property source", propertySource.FilePath, propertySource.Line, propertySource.Column);
+                base.Logger.LogError("Must specify a body contract on the endpoint action when using BODY property source", propertySourceBuilder.FilePath, propertySourceBuilder.Line, propertySourceBuilder.Column);
                 return;
             }
 
@@ -593,33 +594,33 @@ namespace Dibix.Sdk.CodeGeneration
             if (!(_schemaDefinitionResolver.Resolve(bodySchemaTypeReference) is ObjectSchema objectSchema))
                 return;
 
-            IList<string> segments = propertySource.PropertyName.Split('.');
-            CollectPropertySourceNodes(propertySource, segments, type, objectSchema);
+            IList<string> segments = propertySourceBuilder.PropertyName.Split('.');
+            CollectPropertySourceNodes(propertySourceBuilder, segments, type, objectSchema);
         }
 
-        private void CollectItemPropertySourceNodes(ActionParameterPropertySource propertySource, ActionParameterPropertySource rootPropertySource)
+        private void CollectItemPropertySourceNodes(ActionParameterPropertySourceBuilder propertySource, ActionParameterPropertySourceBuilder rootPropertySourceBuilder)
         {
-            if (!rootPropertySource.Nodes.Any())
+            if (!rootPropertySourceBuilder.Nodes.Any())
             {
                 // Oops, a previous error should have been logged in this case
                 return;
             }
 
-            ActionParameterPropertySourceNode lastNode = rootPropertySource.Nodes.LastOrDefault();
+            ActionParameterPropertySourceNode lastNode = rootPropertySourceBuilder.Nodes.LastOrDefault();
             if (lastNode == null)
-                throw new InvalidOperationException($"Missing resolved source property node for item property mapping ({rootPropertySource.PropertyName})");
+                throw new InvalidOperationException($"Missing resolved source property node for item property mapping ({rootPropertySourceBuilder.PropertyName})");
 
             TypeReference type = lastNode.Property.Type;
             if (!(type is SchemaTypeReference propertySchemaTypeReference))
             {
-                base.Logger.LogError($"Unexpected type '{type?.GetType()}' for property '{rootPropertySource.PropertyName}'. Only object schemas can be used for UDT item mappings.", rootPropertySource.FilePath, rootPropertySource.Line, rootPropertySource.Column);
+                base.Logger.LogError($"Unexpected type '{type?.GetType()}' for property '{rootPropertySourceBuilder.PropertyName}'. Only object schemas can be used for UDT item mappings.", rootPropertySourceBuilder.FilePath, rootPropertySourceBuilder.Line, rootPropertySourceBuilder.Column);
                 return;
             }
 
             SchemaDefinition propertySchema = _schemaDefinitionResolver.Resolve(propertySchemaTypeReference);
             if (!(propertySchema is ObjectSchema objectSchema))
             {
-                base.Logger.LogError($"Unexpected type '{propertySchema?.GetType()}' for property '{rootPropertySource.PropertyName}'. Only object schemas can be used for UDT item mappings.", rootPropertySource.FilePath, rootPropertySource.Line, rootPropertySource.Column);
+                base.Logger.LogError($"Unexpected type '{propertySchema?.GetType()}' for property '{rootPropertySourceBuilder.PropertyName}'. Only object schemas can be used for UDT item mappings.", rootPropertySourceBuilder.FilePath, rootPropertySourceBuilder.Line, rootPropertySourceBuilder.Column);
                 return;
             }
 
@@ -631,7 +632,7 @@ namespace Dibix.Sdk.CodeGeneration
             CollectPropertySourceNodes(propertySource, segments, propertySchemaTypeReference, objectSchema);
         }
 
-        private void CollectPropertySourceNodes(ActionParameterPropertySource propertySource, IEnumerable<string> segments, TypeReference typeReference, ObjectSchema schema)
+        private void CollectPropertySourceNodes(ActionParameterPropertySourceBuilder propertySourceBuilder, IEnumerable<string> segments, TypeReference typeReference, ObjectSchema schema)
         {
             TypeReference type = typeReference;
             ObjectSchema objectSchema = schema;
@@ -641,7 +642,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 currentPath = currentPath == null ? propertyName : $"{currentPath}.{propertyName}";
 
-                if (!CollectPropertyNode(type, objectSchema, propertyName, propertySource, base.Logger, columnOffset, out type))
+                if (!CollectPropertyNode(type, objectSchema, propertyName, propertySourceBuilder, base.Logger, columnOffset, out type))
                     return;
 
                 columnOffset += propertyName.Length + 1; // Skip property name + dot
@@ -649,19 +650,19 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static bool CollectPropertyNode(TypeReference type, ObjectSchema objectSchema, string propertyName, ActionParameterPropertySource source, ILogger logger, int columnOffset, out TypeReference propertyType)
+        private static bool CollectPropertyNode(TypeReference type, ObjectSchema objectSchema, string propertyName, ActionParameterPropertySourceBuilder propertySourceBuilder, ILogger logger, int columnOffset, out TypeReference propertyType)
         {
             ObjectSchemaProperty property = objectSchema?.Properties.SingleOrDefault(x => x.Name.Value == propertyName);
             if (property != null)
             {
-                source.Nodes.Add(new ActionParameterPropertySourceNode(objectSchema, property));
+                propertySourceBuilder.Nodes.Add(new ActionParameterPropertySourceNode(objectSchema, property));
                 propertyType = property.Type;
                 return true;
             }
 
-            int definitionNameOffset = source.Definition.Name.Length + 1; // Skip source name + dot
-            int column = source.Column + definitionNameOffset + columnOffset;
-            logger.LogError($"Property '{propertyName}' not found on contract '{type.DisplayName}'", source.FilePath, source.Line, column);
+            int definitionNameOffset = propertySourceBuilder.Definition.Name.Length + 1; // Skip source name + dot
+            int column = propertySourceBuilder.Column + definitionNameOffset + columnOffset;
+            logger.LogError($"Property '{propertyName}' not found on contract '{type.DisplayName}'", propertySourceBuilder.FilePath, propertySourceBuilder.Line, column);
             propertyType = null;
             return false;
         }

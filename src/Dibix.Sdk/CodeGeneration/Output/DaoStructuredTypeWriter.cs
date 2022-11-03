@@ -48,7 +48,7 @@ namespace Dibix.Sdk.CodeGeneration
                 {
                     UserDefinedTypeSchema userDefinedType = userDefinedTypes[j];
                     CSharpClass @class = scope.AddClass(userDefinedType.DefinitionName, CSharpModifiers.Public | CSharpModifiers.Sealed, new CSharpAnnotation("StructuredType", new CSharpStringValue(userDefinedType.UdtName)))
-                                              .Inherits($"StructuredType<{userDefinedType.DefinitionName}, {String.Join(", ", userDefinedType.Properties.Select(x => context.ResolveTypeName(x.Type, context)))}>");
+                                              .Inherits($"StructuredType<{userDefinedType.DefinitionName}, {String.Join(", ", userDefinedType.Properties.Select(x => context.ResolveTypeName(x.Type)))}>");
 
                     @class.AddConstructor(body: $"base.ImportSqlMetadata(() => this.Add({String.Join(", ", userDefinedType.Properties.Select(x => "default"))}));")
                           .CallBase()
@@ -56,7 +56,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                     CSharpMethod method = @class.AddMethod("Add", "void", $"base.AddValues({String.Join(", ", userDefinedType.Properties.Select(x => x.Name.Value))});");
                     foreach (ObjectSchemaProperty column in userDefinedType.Properties)
-                        method.AddParameter(column.Name, context.ResolveTypeName(column.Type, context));
+                        method.AddParameter(column.Name, context.ResolveTypeName(column.Type));
 
                     if (j + 1 < userDefinedTypes.Count)
                         scope.AddSeparator();

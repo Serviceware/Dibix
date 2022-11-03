@@ -1,9 +1,9 @@
 ﻿namespace Dibix.Sdk.CodeGeneration
 {
-    public sealed class ActionParameterConstantSource : ActionParameterSource
+    internal sealed class ActionParameterConstantSource : ActionParameterSource
     {
-        public object Value { get; }
+        public ValueReference Value { get; }
 
-        internal ActionParameterConstantSource(object value) => this.Value = value;
+        public ActionParameterConstantSource(ValueReference value) => this.Value = value;
     }
 }

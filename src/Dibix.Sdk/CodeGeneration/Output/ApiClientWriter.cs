@@ -74,7 +74,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             if (action.RequestBody != null)
-                method.AddParameter("body", context.ResolveTypeName(action.RequestBody.Contract, context));
+                method.AddParameter("body", context.ResolveTypeName(action.RequestBody.Contract));
 
             foreach (ActionParameter parameter in action.Parameters.DistinctBy(x => x.ApiParameterName).OrderBy(x => x.DefaultValue != null))
             {
@@ -113,7 +113,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Private Methods
         private static string ResolveReturnTypeName(TypeReference resultType, CodeGenerationContext context)
         {
-            string typeName = $"Task<HttpResponse{(resultType != null ? $"<{context.ResolveTypeName(resultType, context, EnumerableBehavior.Collection)}>" : "Message")}>";
+            string typeName = $"Task<HttpResponse{(resultType != null ? $"<{context.ResolveTypeName(resultType, EnumerableBehavior.Collection)}>" : "Message")}>";
             return typeName;
         }
 
@@ -130,10 +130,10 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 // Note: Deep object query parameters require a separate input class, which is not yet supported
                 // Therefore in this case we currently return object, which obviously will not work at runtime
-                string enumerableTypeName = userDefinedTypeSchema.Properties.Count == 1 ? context.ResolveTypeName(userDefinedTypeSchema.Properties[0].Type, context, enumerableBehavior: EnumerableBehavior.None) : "object";
-                return context.WrapInEnumerable(enumerableTypeName, context);
+                string enumerableTypeName = userDefinedTypeSchema.Properties.Count == 1 ? context.ResolveTypeName(userDefinedTypeSchema.Properties[0].Type, enumerableBehavior: EnumerableBehavior.None) : "object";
+                return context.WrapInEnumerable(enumerableTypeName);
             }
-            return context.ResolveTypeName(parameter.Type, context);
+            return context.ResolveTypeName(parameter.Type);
         }
         #endregion
     }

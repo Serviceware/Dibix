@@ -196,7 +196,7 @@ namespace Dibix.Sdk.CodeGeneration
                         parameters.Add(actionParameter.ApiParameterName, userDefinedTypeParameter);
                 }
 
-                this.VisitParameterSource(actionParameter.Source, bodySchema, bodyProperties, schemaPropertyMap);
+                this.VisitParameterSource(actionParameter.Type, actionParameter.Source, bodySchema, bodyProperties, schemaPropertyMap);
             }
 
             // Visit target parameters that are mapped from body contract properties
@@ -225,7 +225,7 @@ namespace Dibix.Sdk.CodeGeneration
             return null;
         }
 
-        private void VisitParameterSource(ActionParameterSource parameterSource, ObjectSchema bodySchema, ICollection<ObjectSchemaProperty> bodyProperties, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
+        private void VisitParameterSource(TypeReference parameterType, ActionParameterSource parameterSource, ObjectSchema bodySchema, ICollection<ObjectSchemaProperty> bodyProperties, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
         {
             switch (parameterSource)
             {
@@ -234,7 +234,7 @@ namespace Dibix.Sdk.CodeGeneration
                     break;
 
                 case ActionParameterPropertySource propertySource:
-                    this.VisitPropertySource(propertySource, bodySchema, bodyProperties, schemaPropertyMap);
+                    this.VisitPropertySource(parameterType, propertySource, bodySchema, bodyProperties, schemaPropertyMap);
                     break;
             }
         }
@@ -248,7 +248,7 @@ namespace Dibix.Sdk.CodeGeneration
             this.VisitAllPropertiesNested(bodySchema, schemaPropertyMap);
         }
 
-        private void VisitPropertySource(ActionParameterPropertySource propertySource, ObjectSchema bodySchema, ICollection<ObjectSchemaProperty> bodyProperties, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
+        private void VisitPropertySource(TypeReference parameterType, ActionParameterPropertySource propertySource, ObjectSchema bodySchema, ICollection<ObjectSchemaProperty> bodyProperties, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
         {
             foreach (ActionParameterPropertySourceNode node in propertySource.Nodes)
             {
@@ -260,7 +260,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             foreach (ActionParameterItemSource itemSource in propertySource.ItemSources)
             {
-                this.VisitParameterSource(itemSource.Source, bodySchema, bodyProperties, schemaPropertyMap);
+                this.VisitParameterSource(parameterType, itemSource.Source, bodySchema, bodyProperties, schemaPropertyMap);
             }
         }
 

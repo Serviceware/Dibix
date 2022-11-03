@@ -63,7 +63,8 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 string apiParameterName = parameter.Name;
                 string internalParameterName = apiParameterName;
-                ActionParameterLocation location = ResolveParameterLocationFromSource(parameter.Source, ref apiParameterName);
+                ActionParameterSource source = parameter.SourceBuilder.Build(type: null);
+                ActionParameterLocation location = ResolveParameterLocationFromSource(source, ref apiParameterName);
                 if (location == ActionParameterLocation.Path)
                     pathParameters.Remove(apiParameterName);
 
@@ -78,7 +79,7 @@ namespace Dibix.Sdk.CodeGeneration
                 }
 
                 bool isRequired = base.IsParameterRequired(type, location, defaultValue);
-                parameterRegistry.Add(new ActionParameter(apiParameterName, internalParameterName, type, location, isRequired, defaultValue, parameter.Source, filePath, parameter.Line, parameter.Column));
+                parameterRegistry.Add(new ActionParameter(apiParameterName, internalParameterName, type, location, isRequired, defaultValue, source, filePath, parameter.Line, parameter.Column));
             }
 
             foreach (PathParameter pathParameter in pathParameters.Values)

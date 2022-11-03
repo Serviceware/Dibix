@@ -1,5 +1,6 @@
 ﻿using System;
 using Dibix.Sdk.Abstractions;
+using Dibix.Sdk.Json;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -7,8 +8,13 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal static class JsonValueReferenceParser
     {
-        public static ValueReference Parse(TypeReference targetType, JValue value, string filePath, IJsonLineInfo location, ILogger logger)
+        public static ValueReference Parse(TypeReference targetType, JValue value, string filePath, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
         {
+            IJsonLineInfo location = value.GetLineInfo();
+
+            if (value.Type == JTokenType.Null)
+                return new NullValueReference(targetType, filePath, location.LineNumber, location.LinePosition);
+
             switch (targetType)
             {
                 case PrimitiveTypeReference primitiveTypeReference:
@@ -19,7 +25,12 @@ namespace Dibix.Sdk.CodeGeneration
                     return null;
 
                 case SchemaTypeReference schemaTypeReference:
-                    return ParseEnumValue(value, value.Type, schemaTypeReference, filePath, location, logger);
+                    SchemaDefinition schemaDefinition = schemaDefinitionResolver.Resolve(schemaTypeReference);
+                    if (schemaDefinition is EnumSchema)
+                        return ParseEnumValue(value, value.Type, schemaTypeReference, filePath, location, logger);
+
+                    logger.LogError($"Unexpected schema type for constant value: {schemaDefinition?.GetType()}", filePath, location.LineNumber, location.LinePosition);
+                    return null;
 
                 default:
                     logger.LogError($"Unexpected target type for constant value: {targetType?.GetType()}", filePath, location.LineNumber, location.LinePosition);

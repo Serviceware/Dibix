@@ -1,9 +1,9 @@
 ﻿namespace Dibix.Sdk.CodeGeneration
 {
-    public sealed class ActionParameterBodySource : ActionParameterSource
+    internal sealed class ActionParameterBodySource : ActionParameterSource
     {
         public string ConverterName { get; }
 
-        internal ActionParameterBodySource(string converterName) => this.ConverterName = converterName;
+        public ActionParameterBodySource(string converterName) => this.ConverterName = converterName;
     }
 }

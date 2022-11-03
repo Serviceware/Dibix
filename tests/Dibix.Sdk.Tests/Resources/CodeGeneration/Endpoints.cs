@@ -275,13 +275,13 @@ namespace Dibix.Sdk.Tests.Business
                 {
                     action.Method = HttpApiMethod.Get;
                     action.ChildRoute = "{password}/Fixed";
-                    action.ResolveParameterFromNull("password");
+                    action.ResolveParameterFromNull<string>("password");
                     action.ResolveParameterFromSource("a", "HEADER", "User-Agent");
                     action.ResolveParameterFromSource("b", "HEADER", "Authorization.Parameter");
                     action.ResolveParameterFromSource("c", "DBX", "X", "DBX");
                     action.ResolveParameterFromSource("d", "REQUEST", "Language");
                     action.ResolveParameterFromConstant("e", true);
-                    action.ResolveParameterFromConstant("f", 5);
+                    action.ResolveParameterFromConstant("f", Dibix.Sdk.Tests.DomainModel.Direction.Descending);
                     action.ResolveParameterFromConstant("g", "cake");
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
@@ -325,10 +325,11 @@ namespace Dibix.Sdk.Tests.Business
                     action.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.AnotherInputContract);
                     action.WithAuthorization(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.AssertAuthorized)), authorization =>
                     {
-                        authorization.ResolveParameterFromConstant("right", 1);
+                        authorization.ResolveParameterFromConstant("right", (byte)1);
                     });
                     action.ResolveParameterFromSource("ids", "BODY", "SomeIds", items =>
                     {
+                        items.ResolveParameterFromConstant("id", 1);
                         items.ResolveParameterFromSource("name", "ITEM", "Title");
                     });
                 });

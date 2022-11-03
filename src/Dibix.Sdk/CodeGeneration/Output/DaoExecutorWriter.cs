@@ -131,7 +131,7 @@ namespace Dibix.Sdk.CodeGeneration
                     {
                         ParameterKind parameterKind = parameter.IsOutput ? ParameterKind.Out : ParameterKind.Value;
                         CSharpValue defaultValue = parameter.DefaultValue != null ? context.BuildDefaultValueLiteral(parameter.DefaultValue) : null;
-                        method.AddParameter(parameter.Name, context.ResolveTypeName(parameter.Type, context), defaultValue, parameterKind);
+                        method.AddParameter(parameter.Name, context.ResolveTypeName(parameter.Type), defaultValue, parameterKind);
                     }
                 }
 
@@ -167,7 +167,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (query.Results.Any(x => x.Name != null)) // GridResult
                 return GetComplexTypeName(query, context);
 
-            return context.ResolveTypeName(query.ResultType, context);
+            return context.ResolveTypeName(query.ResultType);
         }
 
         private static string GenerateMethodBody(SqlStatementDefinition definition, string resultTypeName, CodeGenerationContext context)
@@ -274,7 +274,7 @@ namespace Dibix.Sdk.CodeGeneration
                     if (parameter.IsOutput)
                     {
                         string methodName = GetSetParameterMethodName(parameter.Type);
-                        string clrTypeName = context.ResolveTypeName(parameter.Type, context);
+                        string clrTypeName = context.ResolveTypeName(parameter.Type);
                         writer.WriteLine($".{methodName}(nameof({parameter.Name}), out IOutParameter<{clrTypeName}> {parameter.Name}Output)");
                     }
 
@@ -513,7 +513,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             for (int i = 0; i < result.Types.Count; i++)
             {
-                string returnType = context.ResolveTypeName(result.Types[i], context, enumerableBehavior: EnumerableBehavior.None);
+                string returnType = context.ResolveTypeName(result.Types[i], enumerableBehavior: EnumerableBehavior.None);
                 writer.WriteRaw(returnType);
                 if (i + 1 < result.Types.Count)
                     writer.WriteRaw(", ");
@@ -521,7 +521,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (result.ProjectToType != null)
                 writer.WriteRaw(", ")
-                      .WriteRaw(context.ResolveTypeName(result.ProjectToType, context, enumerableBehavior: EnumerableBehavior.None));
+                      .WriteRaw(context.ResolveTypeName(result.ProjectToType, enumerableBehavior: EnumerableBehavior.None));
 
             writer.WriteRaw('>');
         }

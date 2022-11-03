@@ -119,7 +119,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             foreach (ActionParameter parameter in actionTargetDefinition.Parameters.Where(x => x.Source != null))
             {
-                WriteParameter(writer, parameter.InternalParameterName, parameter.Source, variableName);
+                WriteParameter(context, writer, parameter.InternalParameterName, parameter.Source, variableName);
             }
 
             writer.PopIndent()
@@ -145,7 +145,7 @@ namespace Dibix.Sdk.CodeGeneration
             //}
 
             if (action.RequestBody?.Contract != null)
-                writer.WriteLine($"{variableName}.BodyContract = typeof({context.ResolveTypeName(action.RequestBody.Contract, context)});");
+                writer.WriteLine($"{variableName}.BodyContract = typeof({context.ResolveTypeName(action.RequestBody.Contract)});");
 
             if (!String.IsNullOrEmpty(action.RequestBody?.Binder))
             {
@@ -157,7 +157,7 @@ namespace Dibix.Sdk.CodeGeneration
                 writer.WriteLine($"{variableName}.IsAnonymous = true;");
 
             if (action.FileResponse != null)
-                writer.WriteLine($"{variableName}.FileResponse = new HttpFileResponseDefinition(cache: {ComputeConstantLiteral(action.FileResponse.Cache)});");
+                writer.WriteLine($"{variableName}.FileResponse = new HttpFileResponseDefinition(cache: {ComputeConstantLiteral(context, action.FileResponse.Cache)});");
 
             if (action.Authorization != null)
             {
@@ -168,17 +168,12 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static void WriteAuthorizationBehavior(CodeGenerationContext context, StringWriter writer, AuthorizationBehavior authorization, string variableName) { }
 
-        private static void WriteParameter(StringWriter writer, string parameterName, ActionParameterSource value, string variableName)
+        private static void WriteParameter(CodeGenerationContext context, StringWriter writer, string parameterName, ActionParameterSource value, string variableName)
         {
             switch (value)
             {
-                case ActionParameterConstantSource constant when constant.Value != null:
-                    string constantLiteral = ComputeConstantLiteral(constant.Value);
-                    writer.WriteLine($"{variableName}.ResolveParameterFromConstant(\"{parameterName}\", {constantLiteral});");
-                    break;
-
-                case ActionParameterConstantSource constant when constant.Value == null:
-                    writer.WriteLine($"{variableName}.ResolveParameterFromNull(\"{parameterName}\");");
+                case ActionParameterConstantSource constant:
+                    WriteConstantParameter(context, writer, parameterName, variableName, constant.Value);
                     break;
 
                 case ActionParameterBodySource body:
@@ -198,7 +193,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                         foreach (ActionParameterItemSource parameterSource in property.ItemSources)
                         {
-                            WriteParameter(writer, parameterSource.ParameterName, parameterSource.Source, itemSourceSelectorVariable);
+                            WriteParameter(context, writer, parameterSource.ParameterName, parameterSource.Source, itemSourceSelectorVariable);
                         }
 
                         writer.PopIndent()
@@ -218,14 +213,87 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static string ComputeConstantLiteral(object value)
+        private static void WriteConstantParameter(CodeGenerationContext context, StringWriter writer, string parameterName, string variableName, ValueReference value)
         {
             switch (value)
             {
-                case bool boolValue: return boolValue.ToString().ToLowerInvariant();
-                case string stringValue: return $"\"{stringValue}\"";
-                case null: return "null";
-                default: return value.ToString();
+                case NullValueReference nullValueReference:
+                    writer.WriteLine($"{variableName}.ResolveParameterFromNull<{context.ResolveTypeName(nullValueReference.Type)}>(\"{parameterName}\");");
+                    break;
+                
+                case EnumMemberStringReference enumMemberStringReference:
+                    WriteConstantParameter(writer, parameterName, variableName, $"{enumMemberStringReference.Type.Key}.{enumMemberStringReference.Value}");
+                    break;
+                
+                case EnumMemberNumericReference enumMemberNumericReference:
+                    WriteConstantParameter(context, writer, parameterName, variableName, enumMemberNumericReference.Value);
+                    break;
+                
+                case PrimitiveValueReference primitiveValueReference:
+                    WriteConstantParameter(context, writer, parameterName, variableName, primitiveValueReference.Value);
+                    break;
+                
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(value));
+            }
+        }
+        private static void WriteConstantParameter(CodeGenerationContext context, StringWriter writer, string parameterName, string variableName, object value)
+        {
+            string constantLiteral = ComputeConstantLiteral(context, value);
+            WriteConstantParameter(writer, parameterName,variableName, constantLiteral);
+        }
+        private static void WriteConstantParameter(StringWriter writer, string parameterName, string variableName, string value)
+        {
+            writer.WriteLine($"{variableName}.ResolveParameterFromConstant(\"{parameterName}\", {value});");
+        }
+        
+        private static string ComputeConstantLiteral(CodeGenerationContext context, object value)
+        {
+            switch (value)
+            {
+                case bool:
+                    return $"{value}".ToLowerInvariant();
+
+                case string:
+                    return $"\"{value}\"";
+
+                case DateTime dateTimeValue:
+                    context.AddUsing<DateTime>();
+                    return $"new {nameof(DateTime)}({dateTimeValue.Ticks}, {nameof(DateTimeKind)}.{dateTimeValue.Kind})";
+
+                case DateTimeOffset dateTimeOffsetValue:
+                    context.AddUsing<DateTimeOffset>();
+                    return $"new {nameof(DateTimeOffset)}({dateTimeOffsetValue.Ticks}, {nameof(TimeSpan)}.{nameof(TimeSpan.FromTicks)}({dateTimeOffsetValue.Offset.Ticks}))";
+
+                case Uri:
+                    context.AddUsing<Uri>();
+                    return $"new {nameof(Uri)}(\"{value}\")";
+
+                case Guid:
+                    context.AddUsing<Guid>();
+                    return $"new {nameof(Guid)}(\"{value}\")";
+
+                case byte:
+                    return $"(byte){value}";
+
+                case short:
+                    return $"(short){value}";
+
+                case long:
+                    return $"{value}L";
+
+                case float:
+                    return $"{value}f";
+
+                case decimal:
+                    return $"{value}m";
+
+                case int:
+                case double:
+                    return $"{value}";
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(value), value, null);
             }
         }
         #endregion

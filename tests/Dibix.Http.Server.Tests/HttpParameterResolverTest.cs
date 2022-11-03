@@ -623,7 +623,7 @@ Parameter: input", exception.Message);
             {
                 x.ResolveParameterFromConstant("boolValue", true);
                 x.ResolveParameterFromConstant("intValue", 2);
-                x.ResolveParameterFromNull("nullValue");
+                x.ResolveParameterFromNull<object>("nullValue");
             });
             AssertEqual(@".Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
     System.Net.Http.HttpRequestMessage $request,

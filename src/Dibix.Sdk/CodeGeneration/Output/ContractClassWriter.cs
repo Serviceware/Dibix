@@ -102,7 +102,7 @@ namespace Dibix.Sdk.CodeGeneration
                 }
 
                 TypeReference propertyType = property.Type;
-                string clrTypeName = context.ResolveTypeName(propertyType, context, enumerableBehavior: EnumerableBehavior.None);
+                string clrTypeName = context.ResolveTypeName(propertyType, enumerableBehavior: EnumerableBehavior.None);
                 @class.AddProperty(property.Name, !propertyType.IsEnumerable ? clrTypeName : $"{nameof(IList<object>)}<{clrTypeName}>", propertyAnnotations)
                       .Getter(null)
                       .Setter(null, propertyType.IsEnumerable ? CSharpModifiers.Private : default)

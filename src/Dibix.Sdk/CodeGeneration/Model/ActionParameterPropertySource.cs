@@ -10,19 +10,20 @@ namespace Dibix.Sdk.CodeGeneration
         public string FilePath { get; }
         public int Line { get; }
         public int Column { get; }
-        public string Converter { get; set; }
-        public ICollection<ActionParameterPropertySourceNode> Nodes { get; }
-        public ICollection<ActionParameterItemSource> ItemSources { get; }
+        public string Converter { get; }
+        public IReadOnlyCollection<ActionParameterPropertySourceNode> Nodes { get; }
+        public IReadOnlyCollection<ActionParameterItemSource> ItemSources { get; }
 
-        internal ActionParameterPropertySource(ActionParameterSourceDefinition definition, string propertyName, string filePath, int line, int column)
+        public ActionParameterPropertySource(ActionParameterSourceDefinition definition, string propertyName, string filePath, int line, int column, string converter, IList<ActionParameterPropertySourceNode> nodes, IList<ActionParameterItemSource> itemSources)
         {
-            this.Definition = definition;
-            this.PropertyName = propertyName;
-            this.FilePath = filePath;
-            this.Line = line;
-            this.Column = column;
-            this.Nodes = new Collection<ActionParameterPropertySourceNode>();
-            this.ItemSources = new Collection<ActionParameterItemSource>();
+            Definition = definition;
+            PropertyName = propertyName;
+            FilePath = filePath;
+            Line = line;
+            Column = column;
+            Converter = converter;
+            Nodes = new ReadOnlyCollection<ActionParameterPropertySourceNode>(nodes);
+            ItemSources = new ReadOnlyCollection<ActionParameterItemSource>(itemSources);
         }
     }
 }
