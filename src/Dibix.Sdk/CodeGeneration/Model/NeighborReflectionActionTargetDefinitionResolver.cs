@@ -10,7 +10,7 @@ using Dibix.Sdk.Abstractions;
 namespace Dibix.Sdk.CodeGeneration
 {
     // Target is a compiled method in a neighbour project
-    internal sealed class NeighborReflectionActionDefinitionResolver : ActionDefinitionResolver
+    internal sealed class NeighborReflectionActionTargetDefinitionResolver : ActionTargetDefinitionResolver
     {
         #region Fields
         private readonly string _projectName;
@@ -18,7 +18,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public NeighborReflectionActionDefinitionResolver
+        public NeighborReflectionActionTargetDefinitionResolver
         (
             string projectName
           , ReferencedAssemblyInspector referencedAssemblyInspector
@@ -33,12 +33,12 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Overrides
-        public override bool TryResolve(string targetName, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, out ActionDefinition actionDefinition)
+        public override bool TryResolve<T>(string targetName, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, out T actionTargetDefinition)
         {
             int statementNameIndex = targetName.LastIndexOf('.');
             string methodName = targetName.Substring(statementNameIndex + 1);
 
-            actionDefinition = this._referencedAssemblyInspector.Inspect(referencedAssemblies =>
+            actionTargetDefinition = this._referencedAssemblyInspector.Inspect(referencedAssemblies =>
             {
                 var query = from assembly in referencedAssemblies
                             where assembly.IsArtifactAssembly()
@@ -47,17 +47,17 @@ namespace Dibix.Sdk.CodeGeneration
                             from method in type.GetMethods()
                             where method.Name == methodName
                                || method.Name == $"{methodName}Async"
-                            select this.CreateActionDefinition(targetName, assemblyName: null, method, filePath, line, column, explicitParameters, pathParameters, bodyParameters);
+                            select this.CreateActionTargetDefinition<T>(targetName, assemblyName: null, method, filePath, line, column, explicitParameters, pathParameters, bodyParameters);
 
                 return query.FirstOrDefault();
             });
 
-            return actionDefinition != null;
+            return actionTargetDefinition != null;
         }
         #endregion
 
         #region Private Methods
-        private ActionDefinition CreateActionDefinition(string targetName, string assemblyName, MethodInfo method, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters)
+        private T CreateActionTargetDefinition<T>(string targetName, string assemblyName, MethodInfo method, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters) where T : ActionTargetDefinition, new()
         {
             string operationName = method.Name;
             bool isReflectionTarget = assemblyName != null;
@@ -84,10 +84,11 @@ namespace Dibix.Sdk.CodeGeneration
             else
                 target = new NeighborActionTarget(accessorFullName, operationName, isAsync, hasRefParameters, filePath, line, column);
 
-            ActionDefinition actionDefinition = new ActionDefinition(target);
-            ActionParameterRegistry parameterRegistry = new ActionParameterRegistry(actionDefinition, pathParameters);
-            method.CollectErrorResponses((statusCode, errorCode, errorDescription) => RegisterErrorResponse(actionDefinition, statusCode, errorCode, errorDescription));
-            actionDefinition.DefaultResponseType = resultType;
+            T actionTargetDefinition = new T();
+            actionTargetDefinition.Target = target;
+            ActionParameterRegistry parameterRegistry = new ActionParameterRegistry(actionTargetDefinition, pathParameters);
+            method.CollectErrorResponses((statusCode, errorCode, errorDescription) => RegisterErrorResponse(actionTargetDefinition, statusCode, errorCode, errorDescription));
+            actionTargetDefinition.DefaultResponseType = resultType;
 
             IEnumerable<ParameterInfo> parameters = this.CollectReflectionInfo(() => method.GetExternalParameters(isAsync), isReflectionTarget, Enumerable.Empty<ParameterInfo>);
             foreach (ParameterInfo parameter in parameters)
@@ -125,7 +126,7 @@ namespace Dibix.Sdk.CodeGeneration
                 );
             }
 
-            return actionDefinition;
+            return actionTargetDefinition;
         }
 
         private Type CollectReturnType(MethodInfo method, bool isReflectionTarget)

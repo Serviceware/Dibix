@@ -24,6 +24,9 @@ namespace Dibix.Sdk.Tests.Data
     [DatabaseAccessor]
     public static class TestAccessor
     {
+        // AssertAuthorized
+        private const string AssertAuthorizedCommandText = "[dbo].[dbx_tests_authorization]";
+
         // EmptyWithParams
         private const string EmptyWithParamsCommandText = "[dbo].[dbx_tests_syntax_empty_params]";
 
@@ -38,6 +41,20 @@ namespace Dibix.Sdk.Tests.Data
 
         // SingleConrecteResultWithParams
         private const string SingleConrecteResultWithParamsCommandText = "[dbo].[dbx_tests_syntax_singleconcreteresult_params]";
+
+        public static void AssertAuthorized(this IDatabaseAccessorFactory databaseAccessorFactory, byte right)
+        {
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
+            {
+                ParametersVisitor @params = accessor.Parameters()
+                                                    .SetFromTemplate(new
+                                                    {
+                                                        right
+                                                    })
+                                                    .Build();
+                accessor.Execute(AssertAuthorizedCommandText, CommandType.StoredProcedure, @params);
+            }
+        }
 
         public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake")
         {

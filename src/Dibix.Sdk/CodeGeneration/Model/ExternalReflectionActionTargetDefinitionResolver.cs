@@ -5,29 +5,29 @@ using Dibix.Sdk.Abstractions;
 namespace Dibix.Sdk.CodeGeneration
 {
     // Target is a reflection target within a foreign assembly
-    internal sealed class ExternalReflectionTargetActionDefinitionResolver : ActionDefinitionResolver
+    internal sealed class ExternalReflectionActionTargetDefinitionResolver : ActionTargetDefinitionResolver
     {
         private const string LockSectionName = "ExternalReflectionTarget";
         private readonly LockEntryManager _lockEntryManager;
 
-        public ExternalReflectionTargetActionDefinitionResolver(ISchemaDefinitionResolver schemaDefinitionResolver, ISchemaRegistry schemaRegistry, LockEntryManager lockEntryManager, ILogger logger) : base(schemaDefinitionResolver, schemaRegistry, logger)
+        public ExternalReflectionActionTargetDefinitionResolver(ISchemaDefinitionResolver schemaDefinitionResolver, ISchemaRegistry schemaRegistry, LockEntryManager lockEntryManager, ILogger logger) : base(schemaDefinitionResolver, schemaRegistry, logger)
         {
             this._lockEntryManager = lockEntryManager;
         }
 
-        public override bool TryResolve(string targetName, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, out ActionDefinition actionDefinition)
+        public override bool TryResolve<T>(string targetName, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, out T actionTargetDefinition)
         {
             string[] parts = targetName.Split(',');
             if (parts.Length != 2)
             {
-                actionDefinition = null;
+                actionTargetDefinition = null;
                 return false;
             }
 
             if (!this._lockEntryManager.HasEntry(LockSectionName, targetName))
             {
                 base.Logger.LogError("Reflection targets are not supported anymore", filePath, line, column);
-                actionDefinition = null;
+                actionTargetDefinition = null;
                 return false;
             }
 
@@ -56,8 +56,9 @@ namespace Dibix.Sdk.CodeGeneration
             actionDefinition = ReflectionOnlyTypeInspector.Inspect(() => this.CreateActionDefinition(targetName, assemblyName, method, filePath, line, column, explicitParameters, pathParameters, bodyParameters));
             */
 
-            actionDefinition = new ActionDefinition(new ReflectionActionTarget(assemblyName, typeName, methodName, isAsync: false, hasRefParameters: false, filePath, line, column));
-            ActionParameterRegistry parameterRegistry = new ActionParameterRegistry(actionDefinition, pathParameters);
+            actionTargetDefinition = new T();
+            actionTargetDefinition.Target = new ReflectionActionTarget(assemblyName, typeName, methodName, isAsync: false, hasRefParameters: false, filePath, line, column);
+            ActionParameterRegistry parameterRegistry = new ActionParameterRegistry(actionTargetDefinition, pathParameters);
             foreach (ExplicitParameter parameter in explicitParameters.Values)
             {
                 string apiParameterName = parameter.Name;
@@ -86,7 +87,7 @@ namespace Dibix.Sdk.CodeGeneration
                 const ActionParameterLocation location = ActionParameterLocation.Path;
                 bool isRequired = base.IsParameterRequired(type: null, location, defaultValue: null);
                 ActionParameter parameter = new ActionParameter(pathParameter.Name, pathParameter.Name, typeReference, location, isRequired, defaultValue: null, source: null, filePath, pathParameter.Line, pathParameter.Column);
-                actionDefinition.Parameters.Add(parameter);
+                actionTargetDefinition.Parameters.Add(parameter);
             }
 
             return true;

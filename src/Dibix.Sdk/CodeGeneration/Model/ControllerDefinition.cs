@@ -11,9 +11,9 @@ namespace Dibix.Sdk.CodeGeneration
 
         public ControllerDefinition(string name)
         {
-            this.Name = name;
-            this.Actions = new ActionDefinitionCollection();
-            this.ControllerImports = new Collection<string>();
+            Name = name;
+            Actions = new ActionDefinitionCollection();
+            ControllerImports = new Collection<string>();
         }
     }
 }

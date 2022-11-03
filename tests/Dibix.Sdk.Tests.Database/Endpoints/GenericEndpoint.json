@@ -85,6 +85,12 @@
             "name": "ITEM.Title"
           }
         }
+      },
+      "authorization": {
+        "target": "AssertAuthorized",
+        "params": {
+          "right": 1
+        }
       }
     }
   ]

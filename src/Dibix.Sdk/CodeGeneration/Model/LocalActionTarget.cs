@@ -1,6 +1,6 @@
 ﻿namespace Dibix.Sdk.CodeGeneration
 {
-    public sealed class LocalActionTarget : ActionDefinitionTarget
+    public sealed class LocalActionTarget : ActionTarget
     {
         public SqlStatementDefinition SqlStatementDefinition { get; }
         public string ExternalAccessorFullName { get; }

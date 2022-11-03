@@ -4,12 +4,12 @@ using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class ActionDefinitionResolverFacade : IActionDefinitionResolverFacade
+    internal sealed class ActionTargetDefinitionResolverFacade : IActionTargetDefinitionResolverFacade
     {
-        private readonly ICollection<ActionDefinitionResolver> _resolvers;
+        private readonly ICollection<ActionTargetDefinitionResolver> _resolvers;
         private readonly ILogger _logger;
 
-        public ActionDefinitionResolverFacade
+        public ActionTargetDefinitionResolverFacade
         (
             ArtifactGenerationConfiguration configuration
           , string className
@@ -23,10 +23,10 @@ namespace Dibix.Sdk.CodeGeneration
         )
         {
             this._logger = logger;
-            this._resolvers = new Collection<ActionDefinitionResolver>
+            this._resolvers = new Collection<ActionTargetDefinitionResolver>
             {
-                new ExternalReflectionTargetActionDefinitionResolver(schemaDefinitionResolver, schemaRegistry, lockEntryManager, logger)
-              , new SqlStatementDefinitionActionDefinitionResolver
+                new ExternalReflectionActionTargetDefinitionResolver(schemaDefinitionResolver, schemaRegistry, lockEntryManager, logger)
+              , new SqlStatementDefinitionActionTargetDefinitionResolver
                 (
                     configuration
                   , className
@@ -37,15 +37,15 @@ namespace Dibix.Sdk.CodeGeneration
                   , schemaRegistry
                   , logger
                 )
-            //, new NeighborReflectionActionDefinitionResolver(projectName, referencedAssemblyInspector, schemaRegistry, logger)
+            //, new NeighborReflectionActionTargetDefinitionResolver(projectName, referencedAssemblyInspector, schemaRegistry, logger)
             };
         }
 
-        public ActionDefinition Resolve(string targetName, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters)
+        public T Resolve<T>(string targetName, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters) where T : ActionTargetDefinition, new()
         {
-            foreach (ActionDefinitionResolver resolver in this._resolvers)
+            foreach (ActionTargetDefinitionResolver resolver in this._resolvers)
             {
-                if (resolver.TryResolve(targetName, filePath, line, column, explicitParameters, pathParameters, bodyParameters, out ActionDefinition definition))
+                if (resolver.TryResolve(targetName, filePath, line, column, explicitParameters, pathParameters, bodyParameters, out T definition))
                     return definition;
             }
 

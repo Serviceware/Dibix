@@ -15,15 +15,17 @@ namespace Dibix.Http.Server
             HttpActionDefinition action
           , HttpRequestMessage request
           , IDictionary<string, object> arguments
-          , IHttpParameterResolutionMethod parameterResolver
-          , Func<Task<object>> executor
           , IParameterDependencyResolver parameterDependencyResolver
         )
         {
             try
             {
-                parameterResolver.PrepareParameters(request, arguments, parameterDependencyResolver);
-                object result = await executor().ConfigureAwait(false);
+                if (action.Authorization != null)
+                {
+                    _ = await Execute(action.Authorization, request, arguments, parameterDependencyResolver).ConfigureAwait(false);
+                }
+
+                object result = await Execute(action, request, arguments, parameterDependencyResolver).ConfigureAwait(false);
                 object formattedResult = HttpResponseFormatter.Format(action, result, request);
                 return formattedResult;
             }
@@ -40,6 +42,13 @@ namespace Dibix.Http.Server
 
                 throw;
             }
+        }
+
+        private static async Task<object> Execute(IHttpActionExecutionDefinition definition, HttpRequestMessage request, IDictionary<string, object> arguments, IParameterDependencyResolver parameterDependencyResolver)
+        {
+            definition.ParameterResolver.PrepareParameters(request, arguments, parameterDependencyResolver);
+            object result = await definition.Executor.Execute(arguments).ConfigureAwait(false);
+            return result;
         }
 
         private static bool TryParseHttpError(Exception innerException, SqlException sqlException, HttpRequestMessage request, out HttpRequestExecutionException exception)

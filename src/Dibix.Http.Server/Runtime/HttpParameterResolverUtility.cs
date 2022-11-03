@@ -6,7 +6,7 @@ namespace Dibix.Http.Server
 {
     internal static class HttpParameterResolverUtility
     {
-        public static Type SafeGetBodyContract(this HttpActionDefinition action)
+        public static Type SafeGetBodyContract(this IHttpActionDescriptor action)
         {
             if (action.BodyContract == null)
                 throw new InvalidOperationException("The body property on the action is not specified");

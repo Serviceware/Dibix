@@ -72,7 +72,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (sourceProperty == null && propertySource != null) 
                 sourceProperty = bodyObjectSchema.Properties.SingleOrDefault(x => String.Equals(x.Name, propertySource.PropertyName, StringComparison.OrdinalIgnoreCase));
 
-            ActionDefinitionTarget target = action.Target;
+            ActionTarget target = action.Target;
             if (sourceProperty == null)
             {
                 this._logger.LogError($"Target parameter '@{parameter.InternalParameterName}' can not be mapped from body contract '{bodySchemaTypeReference.Key}' and no explicit parameter override exists", target.Source, target.Line, target.Column);

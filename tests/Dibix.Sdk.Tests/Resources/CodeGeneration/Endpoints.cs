@@ -26,6 +26,9 @@ namespace Dibix.Sdk.Tests.Data
     [DatabaseAccessor]
     public static class TestAccessor
     {
+        // AssertAuthorized
+        private const string AssertAuthorizedCommandText = "[dbo].[dbx_tests_authorization]";
+
         // EmptyWithParams
         private const string EmptyWithParamsCommandText = "[dbo].[dbx_tests_syntax_empty_params]";
 
@@ -40,6 +43,21 @@ namespace Dibix.Sdk.Tests.Data
 
         // SingleConrecteResultWithParams
         private const string SingleConrecteResultWithParamsCommandText = "[dbo].[dbx_tests_syntax_singleconcreteresult_params]";
+
+        [ErrorResponse(statusCode: 403, errorCode: 1, errorDescription: "Forbidden")]
+        public static void AssertAuthorized(this IDatabaseAccessorFactory databaseAccessorFactory, byte right)
+        {
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
+            {
+                ParametersVisitor @params = accessor.Parameters()
+                                                    .SetFromTemplate(new
+                                                    {
+                                                        right
+                                                    })
+                                                    .Build();
+                accessor.Execute(AssertAuthorizedCommandText, CommandType.StoredProcedure, @params);
+            }
+        }
 
         public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake")
         {
@@ -247,67 +265,71 @@ namespace Dibix.Sdk.Tests.Business
     {
         public override void Configure(IHttpApiDiscoveryContext context)
         {
-            base.RegisterController("GenericEndpoint", x =>
+            base.RegisterController("GenericEndpoint", controller =>
             {
-                x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.MultiConcreteResult)), y =>
+                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.MultiConcreteResult)), action =>
                 {
-                    y.Method = HttpApiMethod.Get;
+                    action.Method = HttpApiMethod.Get;
                 });
-                x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), y =>
+                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
-                    y.Method = HttpApiMethod.Get;
-                    y.ChildRoute = "{password}/Fixed";
-                    y.ResolveParameterFromNull("password");
-                    y.ResolveParameterFromSource("a", "HEADER", "User-Agent");
-                    y.ResolveParameterFromSource("b", "HEADER", "Authorization.Parameter");
-                    y.ResolveParameterFromSource("c", "DBX", "X", "DBX");
-                    y.ResolveParameterFromSource("d", "REQUEST", "Language");
-                    y.ResolveParameterFromConstant("e", true);
-                    y.ResolveParameterFromConstant("f", 5);
-                    y.ResolveParameterFromConstant("g", "cake");
+                    action.Method = HttpApiMethod.Get;
+                    action.ChildRoute = "{password}/Fixed";
+                    action.ResolveParameterFromNull("password");
+                    action.ResolveParameterFromSource("a", "HEADER", "User-Agent");
+                    action.ResolveParameterFromSource("b", "HEADER", "Authorization.Parameter");
+                    action.ResolveParameterFromSource("c", "DBX", "X", "DBX");
+                    action.ResolveParameterFromSource("d", "REQUEST", "Language");
+                    action.ResolveParameterFromConstant("e", true);
+                    action.ResolveParameterFromConstant("f", 5);
+                    action.ResolveParameterFromConstant("g", "cake");
                 });
-                x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), y =>
+                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
-                    y.Method = HttpApiMethod.Get;
-                    y.ChildRoute = "{password}/User";
-                    y.IsAnonymous = true;
+                    action.Method = HttpApiMethod.Get;
+                    action.ChildRoute = "{password}/User";
+                    action.IsAnonymous = true;
                 });
-                x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.SingleConrecteResultWithParams)), y =>
+                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.SingleConrecteResultWithParams)), action =>
                 {
-                    y.Method = HttpApiMethod.Get;
-                    y.ChildRoute = "Array";
+                    action.Method = HttpApiMethod.Get;
+                    action.ChildRoute = "Array";
                 });
-                x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.FileResult)), y =>
+                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.FileResult)), action =>
                 {
-                    y.Method = HttpApiMethod.Get;
-                    y.ChildRoute = "{id}";
-                    y.IsAnonymous = true;
-                    y.FileResponse = new HttpFileResponseDefinition(cache: false);
+                    action.Method = HttpApiMethod.Get;
+                    action.ChildRoute = "{id}";
+                    action.IsAnonymous = true;
+                    action.FileResponse = new HttpFileResponseDefinition(cache: false);
                 });
-                x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.FileUpload)), y =>
+                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.FileUpload)), action =>
                 {
-                    y.Method = HttpApiMethod.Put;
-                    y.BodyContract = typeof(System.IO.Stream);
-                    y.ResolveParameterFromSource("data", "BODY", "$RAW");
+                    action.Method = HttpApiMethod.Put;
+                    action.BodyContract = typeof(System.IO.Stream);
+                    action.ResolveParameterFromSource("data", "BODY", "$RAW");
                 });
-                x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), y =>
+                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
-                    y.Method = HttpApiMethod.Post;
-                    y.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.InputContract);
-                    y.ResolveParameterFromBody("ids", "Dibix.GenericContractIdsInputConverter");
+                    action.Method = HttpApiMethod.Post;
+                    action.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.InputContract);
+                    action.ResolveParameterFromBody("ids", "Dibix.GenericContractIdsInputConverter");
                 });
-                x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), y =>
+                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
-                    y.Method = HttpApiMethod.Patch;
-                    y.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.InputContract);
+                    action.Method = HttpApiMethod.Patch;
+                    action.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.InputContract);
                 });
-                x.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), y =>
+                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
-                    y.Method = HttpApiMethod.Delete;
-                    y.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.AnotherInputContract);
-                    y.ResolveParameterFromSource("ids", "BODY", "SomeIds", z =>
+                    action.Method = HttpApiMethod.Delete;
+                    action.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.AnotherInputContract);
+                    action.WithAuthorization(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.AssertAuthorized)), authorization =>
                     {
-                        z.ResolveParameterFromSource("name", "ITEM", "Title");
+                        authorization.ResolveParameterFromConstant("right", 1);
+                    });
+                    action.ResolveParameterFromSource("ids", "BODY", "SomeIds", items =>
+                    {
+                        items.ResolveParameterFromSource("name", "ITEM", "Title");
                     });
                 });
             });

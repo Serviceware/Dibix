@@ -117,6 +117,26 @@
         }
       ]
     },
+    "ParameterMappings": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-z]+$": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Source"
+            },
+            {
+              "$ref": "#/definitions/ItemsPropertySource"
+            },
+            {
+              "$ref": "#/definitions/BodySource"
+            }
+          ]
+        }
+      },
+      "minProperties": 1,
+      "additionalProperties": false
+    },
     "Authorization": {
       "anyOf": [
         {
@@ -129,6 +149,21 @@
           "items": {
             "type": "string"
           }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "target": {
+              "$ref": "#/definitions/NameIdentifier"
+            },
+            "params": {
+              "$ref": "#/definitions/ParameterMappings"
+            }
+          },
+          "required": [
+            "target"
+          ],
+          "additionalProperties": false
         }
       ]
     },
@@ -225,24 +260,7 @@
           ]
         },
         "params": {
-          "type": "object",
-          "patternProperties": {
-            "^[a-z]+$": {
-              "anyOf": [
-                {
-                  "$ref": "#/definitions/Source"
-                },
-                {
-                  "$ref": "#/definitions/ItemsPropertySource"
-                },
-                {
-                  "$ref": "#/definitions/BodySource"
-                }
-              ]
-            }
-          },
-          "minProperties": 1,
-          "additionalProperties": false
+          "$ref": "#/definitions/ParameterMappings"
         },
         "authorization": {
           "$ref": "#/definitions/Authorization"

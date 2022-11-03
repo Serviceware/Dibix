@@ -4,7 +4,7 @@ using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal abstract class ActionDefinitionResolver
+    internal abstract class ActionTargetDefinitionResolver
     {
         #region Properties
         protected ISchemaDefinitionResolver SchemaDefinitionResolver { get; }
@@ -13,7 +13,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        protected ActionDefinitionResolver(ISchemaDefinitionResolver schemaDefinitionResolver, ISchemaRegistry schemaRegistry, ILogger logger)
+        protected ActionTargetDefinitionResolver(ISchemaDefinitionResolver schemaDefinitionResolver, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             this.SchemaDefinitionResolver = schemaDefinitionResolver;
             this.SchemaRegistry = schemaRegistry;
@@ -22,7 +22,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Abstract Methods
-        public abstract bool TryResolve(string targetName, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, out ActionDefinition actionDefinition);
+        public abstract bool TryResolve<T>(string targetName, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, out T actionTargetDefinition) where T : ActionTargetDefinition, new();
         #endregion
 
         #region Protected Methods
@@ -100,13 +100,13 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        protected static void RegisterErrorResponse(ActionDefinition actionDefinition, int statusCode, int errorCode, string errorDescription)
+        protected static void RegisterErrorResponse(ActionTargetDefinition actionTargetDefinition, int statusCode, int errorCode, string errorDescription)
         {
             HttpStatusCode httpStatusCode = (HttpStatusCode)statusCode;
-            if (!actionDefinition.Responses.TryGetValue(httpStatusCode, out ActionResponse response))
+            if (!actionTargetDefinition.Responses.TryGetValue(httpStatusCode, out ActionResponse response))
             {
                 response = new ActionResponse(httpStatusCode);
-                actionDefinition.Responses.Add(httpStatusCode, response);
+                actionTargetDefinition.Responses.Add(httpStatusCode, response);
             }
             response.Errors.Add(new ErrorDescription(errorCode, errorDescription));
         }

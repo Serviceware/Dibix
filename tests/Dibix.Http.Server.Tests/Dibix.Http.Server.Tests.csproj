@@ -13,6 +13,8 @@
   <ItemGroup>
     <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Extensions\ReflectionExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
+    <Compile Update="HttpActionInvokerTest.Base.cs" DependentUpon="HttpActionInvokerTest.cs" />
+    <Compile Update="HttpActionExecutorTest.Base.cs" DependentUpon="HttpActionExecutorTest.cs" />
     <Compile Update="HttpParameterResolverTest.Base.cs" DependentUpon="HttpParameterResolverTest.cs" />
   </ItemGroup>
 

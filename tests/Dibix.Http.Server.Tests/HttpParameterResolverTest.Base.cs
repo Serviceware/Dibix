@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using System.Xml.Linq;
 using Dibix.Testing;
 using Newtonsoft.Json;
@@ -15,29 +14,28 @@ namespace Dibix.Http.Server.Tests
     {
         private void AssertEqual(string expected, string actual) => base.AssertEqual(expected, actual, extension: "txt");
 
-        private IHttpParameterResolutionMethod Compile() => this.Compile(x => { });
-        private IHttpParameterResolutionMethod Compile(Action<HttpActionDefinition> actionConfiguration)
+        private IHttpParameterResolutionMethod Compile() => Compile(_ => { });
+        private IHttpParameterResolutionMethod Compile(Action<IHttpActionDefinitionBuilder> actionConfiguration)
         {
             HttpApiRegistration registration = new HttpApiRegistration(base.TestContext.TestName, actionConfiguration);
             registration.Configure(null);
             HttpActionDefinition action = registration.Controllers.Single().Actions.Single();
-            MethodInfo method = action.Target.Build();
-            IHttpParameterResolutionMethod result = HttpParameterResolver.Compile(action, method.GetParameters());
+            IHttpParameterResolutionMethod result = action.ParameterResolver;
             return result;
         }
 
         private sealed class HttpApiRegistration : HttpApiDescriptor
         {
             private readonly string _methodName;
-            private readonly Action<HttpActionDefinition> _actionConfiguration;
+            private readonly Action<IHttpActionDefinitionBuilder> _actionConfiguration;
 
-            public HttpApiRegistration(string testName, Action<HttpActionDefinition> actionConfiguration)
+            public HttpApiRegistration(string testName, Action<IHttpActionDefinitionBuilder> actionConfiguration)
             {
-                this._methodName = $"{testName}_Target";
-                this._actionConfiguration = actionConfiguration;
+                _methodName = $"{testName}_Target";
+                _actionConfiguration = actionConfiguration;
             }
 
-            public override void Configure(IHttpApiDiscoveryContext context) => base.RegisterController("Test", x => x.AddAction(ReflectionHttpActionTarget.Create(typeof(HttpParameterResolverTest), this._methodName), this._actionConfiguration));
+            public override void Configure(IHttpApiDiscoveryContext context) => base.RegisterController("Test", x => x.AddAction(ReflectionHttpActionTarget.Create(typeof(HttpParameterResolverTest), _methodName), _actionConfiguration));
         }
 
         private sealed class LocaleParameterHttpSourceProvider : HttpParameterPropertySourceProvider, IHttpParameterSourceProvider
@@ -74,7 +72,7 @@ namespace Dibix.Http.Server.Tests
 
             public ExplicitHttpBody()
             {
-                this.ItemsA = new Collection<ExplicitHttpBodyItem>();
+                ItemsA = new Collection<ExplicitHttpBodyItem>();
             }
         }
 
@@ -100,8 +98,8 @@ namespace Dibix.Http.Server.Tests
 
             public ExplicitHttpBodyItem(int id, string name)
             {
-                this.Id = id;
-                this.Name = name;
+                Id = id;
+                Name = name;
             }
         }
 
@@ -129,7 +127,7 @@ namespace Dibix.Http.Server.Tests
 
             public HttpBody()
             {
-                this.Items = new Collection<HttpBodyItem>();
+                Items = new Collection<HttpBodyItem>();
             }
         }
 
@@ -139,13 +137,13 @@ namespace Dibix.Http.Server.Tests
 
             public HttpBodyItem(string password)
             {
-                this.Password = password;
+                Password = password;
             }
         }
 
         private sealed class HttpBodyItemSet : StructuredType<HttpBodyItemSet, string>
         {
-            public HttpBodyItemSet() : base("x") => base.ImportSqlMetadata(() => this.Add(default));
+            public HttpBodyItemSet() : base("x") => base.ImportSqlMetadata(() => Add(default));
 
             public void Add(string encryptedpassword) => base.AddValues(encryptedpassword);
         }
@@ -170,8 +168,8 @@ namespace Dibix.Http.Server.Tests
 
             public ImplicitHttpBody()
             {
-                this.ItemsA = new Collection<ImplicitHttpBodyItem>();
-                this.ItemsB = new Collection<string>();
+                ItemsA = new Collection<ImplicitHttpBodyItem>();
+                ItemsB = new Collection<string>();
             }
         }
 
@@ -188,8 +186,8 @@ namespace Dibix.Http.Server.Tests
 
             public ImplicitHttpBodyItem(ImplicitHttpBodyItemType type, string name)
             {
-                this.Type = type;
-                this.Name = name;
+                Type = type;
+                Name = name;
             }
         }
 
@@ -207,21 +205,21 @@ namespace Dibix.Http.Server.Tests
         
         private sealed class ExplicitHttpBodyItemSet : StructuredType<ExplicitHttpBodyItemSet, int, int, int, string>
         {
-            public ExplicitHttpBodyItemSet() : base("x") => base.ImportSqlMetadata(() => this.Add(default, default, default, default));
+            public ExplicitHttpBodyItemSet() : base("x") => base.ImportSqlMetadata(() => Add(default, default, default, default));
 
             public void Add(int id_, int idx, int age_, string name_) => base.AddValues(id_, idx, age_, name_);
         }
         
         private sealed class ImplicitHttpBodyItemSet : StructuredType<ImplicitHttpBodyItemSet, short, string>
         {
-            public ImplicitHttpBodyItemSet() : base("x") => base.ImportSqlMetadata(() => this.Add(default, default));
+            public ImplicitHttpBodyItemSet() : base("x") => base.ImportSqlMetadata(() => Add(default, default));
 
             public void Add(short type, string name) => base.AddValues(type, name);
         }
         
         private sealed class StringSet : StructuredType<StringSet, string>
         {
-            public StringSet() : base("x") => base.ImportSqlMetadata(() => this.Add(default));
+            public StringSet() : base("x") => base.ImportSqlMetadata(() => Add(default));
 
             public void Add(string name) => base.AddValues(name);
         }

@@ -2,46 +2,22 @@
 
 namespace Dibix.Http.Server
 {
-    public sealed class HttpActionDefinition : HttpParameterSourceSelector
+    public sealed class HttpActionDefinition : IHttpActionExecutionDefinition
     {
-        private Uri _computedUri;
-
-        public HttpControllerDefinition Controller { get; }
-        public IHttpActionTarget Target { get; }
+        public HttpControllerDefinition Controller { get; internal set; }
+        public Uri Uri { get; set; }
+        public IHttpActionExecutionMethod Executor { get; set; }
+        public IHttpParameterResolutionMethod ParameterResolver { get; set; }
         public HttpApiMethod Method { get; set; }
         public string ChildRoute { get; set; }
-        public Type BodyContract { get; set; }
-        public Type BodyBinder { get; set; }
         public HttpRequestBody Body { get; set; }
         public bool IsAnonymous { get; set; }
         public HttpFileResponseDefinition FileResponse { get; set; }
         public string Description { get; set; }
-        public Uri ComputedUri => this._computedUri ?? (this._computedUri = this.BuildUri());
+        public HttpAuthorizationDefinition Authorization { get; set; }
 
-        internal HttpActionDefinition(HttpControllerDefinition controller, IHttpActionTarget target)
+        internal HttpActionDefinition()
         {
-            this.Controller = controller;
-            this.Target = target;
-        }
-
-        public void ResolveParameterFromBody(string targetParameterName, string bodyConverterName)
-        {
-            base.ResolveParameter(targetParameterName, new HttpParameterBodySource(bodyConverterName));
-        }
-        public void ResolveParameterFromSource(string targetParameterName, string sourceName, string sourcePropertyName, Action<IHttpParameterSourceSelector> itemSources)
-        {
-            HttpParameterPropertySource source = base.ResolveParameterFromSourceCore(targetParameterName, sourceName, sourcePropertyName, null);
-            if (itemSources == null) 
-                return;
-
-            HttpParameterSourceSelector sourceSelector = new HttpParameterSourceSelector();
-            itemSources.Invoke(sourceSelector);
-            source.ItemSources.AddRange(sourceSelector.ParameterSources);
-        }
-
-        private Uri BuildUri()
-        {
-            return new Uri(RouteBuilder.BuildRoute(this.Controller.AreaName, this.Controller.ControllerName, this.ChildRoute), UriKind.Relative);
         }
     }
 }

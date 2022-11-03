@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace Dibix.Http.Server
@@ -8,24 +7,15 @@ namespace Dibix.Http.Server
     {
         public string AreaName { get; }
         public string ControllerName { get; }
+        public IReadOnlyCollection<HttpActionDefinition> Actions { get; }
+        public IReadOnlyCollection<string> ControllerImports { get; }
 
-        public ICollection<HttpActionDefinition> Actions { get; }
-        public ICollection<string> ControllerImports { get; }
-
-        internal HttpControllerDefinition(string areaName, string controllerName)
+        internal HttpControllerDefinition(string areaName, string controllerName, IList<HttpActionDefinition> actions, IList<string> imports)
         {
-            this.AreaName = areaName;
-            this.ControllerName = controllerName;
-            this.Actions = new Collection<HttpActionDefinition>();
-            this.ControllerImports = new Collection<string>();
-        }
-
-        public void AddAction(IHttpActionTarget target, Action<HttpActionDefinition> setupAction)
-        {
-            HttpActionDefinition action = new HttpActionDefinition(this, target);
-            Guard.IsNotNull(setupAction, nameof(setupAction));
-            setupAction(action);
-            this.Actions.Add(action);
+            AreaName = areaName;
+            ControllerName = controllerName;
+            Actions = new ReadOnlyCollection<HttpActionDefinition>(actions);
+            ControllerImports = new ReadOnlyCollection<string>(imports);
         }
     }
 }

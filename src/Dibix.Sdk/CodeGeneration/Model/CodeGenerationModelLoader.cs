@@ -50,8 +50,8 @@ namespace Dibix.Sdk.CodeGeneration
             typeResolver.Register(new UserDefinedTypeSchemaTypeResolver(schemaRegistry, userDefinedTypeProvider, externalSchemaResolver, assemblyResolver, logger), 2);
 
             ISqlStatementDefinitionProvider sqlStatementDefinitionProvider = new SqlStatementDefinitionProvider(globalConfiguration, artifactGenerationConfiguration, analyzeAlways: true, rootNamespace, parser, formatter, typeResolver, schemaRegistry, schemaDefinitionResolver, logger, modelAccessor);
-            IActionDefinitionResolverFacade actionResolver = new ActionDefinitionResolverFacade(artifactGenerationConfiguration, className, sqlStatementDefinitionProvider, externalSchemaResolver, assemblyResolver, lockEntryManager, schemaDefinitionResolver, schemaRegistry, logger);
-            IControllerDefinitionProvider controllerDefinitionProvider = new ControllerDefinitionProvider(artifactGenerationConfiguration, securitySchemeMap, actionResolver, typeResolver, schemaDefinitionResolver, actionParameterSourceRegistry, actionParameterConverterRegistry, lockEntryManager, fileSystemProvider, logger);
+            IActionTargetDefinitionResolverFacade actionTargetResolver = new ActionTargetDefinitionResolverFacade(artifactGenerationConfiguration, className, sqlStatementDefinitionProvider, externalSchemaResolver, assemblyResolver, lockEntryManager, schemaDefinitionResolver, schemaRegistry, logger);
+            IControllerDefinitionProvider controllerDefinitionProvider = new ControllerDefinitionProvider(artifactGenerationConfiguration, securitySchemeMap, actionTargetResolver, typeResolver, schemaDefinitionResolver, actionParameterSourceRegistry, actionParameterConverterRegistry, lockEntryManager, fileSystemProvider, logger);
 
             schemaRegistry.ImportSchemas(sqlStatementDefinitionProvider);
 

@@ -5,7 +5,7 @@ namespace Dibix.Http.Server
 {
     public interface IHttpParameterResolutionContext
     {
-        HttpActionDefinition Action { get; }
+        IHttpActionDescriptor Action { get; }
         Expression RequestParameter { get; }
         Expression ArgumentsParameter { get; }
         Expression DependencyResolverParameter { get; }

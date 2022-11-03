@@ -5,7 +5,7 @@ using Dibix.Sdk.Abstractions;
 namespace Dibix.Sdk.CodeGeneration
 {
     // Target is a SQL statement within the current project or an external project
-    internal sealed class SqlStatementDefinitionActionDefinitionResolver : ActionDefinitionResolver
+    internal sealed class SqlStatementDefinitionActionTargetDefinitionResolver : ActionTargetDefinitionResolver
     {
         #region Fields
         private readonly ArtifactGenerationConfiguration _configuration;
@@ -17,7 +17,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public SqlStatementDefinitionActionDefinitionResolver
+        public SqlStatementDefinitionActionTargetDefinitionResolver
         (
             ArtifactGenerationConfiguration configuration
           , string className
@@ -39,11 +39,11 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Overrides
-        public override bool TryResolve(string targetName, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, out ActionDefinition actionDefinition)
+        public override bool TryResolve<T>(string targetName, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, out T actionTargetDefinition)
         {
             if (!TryGetStatementDefinitionByProbing(targetName, out SqlStatementDefinition statementDefinition, out string accessorClassName))
             {
-                actionDefinition = null;
+                actionTargetDefinition = null;
                 return false;
             }
 
@@ -52,9 +52,10 @@ namespace Dibix.Sdk.CodeGeneration
             string definitionName = statementDefinition.DefinitionName;
             bool isAsync = statementDefinition.Async;
             bool hasRefParameters = statementDefinition.Parameters.Any(x => x.IsOutput);
-            ActionDefinitionTarget actionTarget = new LocalActionTarget(statementDefinition, localAccessorFullName, externalAccessorFullName, definitionName, isAsync, hasRefParameters, filePath, line, column);
-            actionDefinition = new ActionDefinition(actionTarget);
-            ActionParameterRegistry parameterRegistry = new ActionParameterRegistry(actionDefinition, pathParameters);
+            ActionTarget actionTarget = new LocalActionTarget(statementDefinition, localAccessorFullName, externalAccessorFullName, definitionName, isAsync, hasRefParameters, filePath, line, column);
+            actionTargetDefinition = new T();
+            actionTargetDefinition.Target = actionTarget;
+            ActionParameterRegistry parameterRegistry = new ActionParameterRegistry(actionTargetDefinition, pathParameters);
             foreach (SqlQueryParameter parameter in statementDefinition.Parameters)
             {
                 base.CollectActionParameter
@@ -75,9 +76,9 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             foreach (ErrorResponse errorResponse in statementDefinition.ErrorResponses)
-                RegisterErrorResponse(actionDefinition, errorResponse.StatusCode, errorResponse.ErrorCode, errorResponse.ErrorDescription);
+                RegisterErrorResponse(actionTargetDefinition, errorResponse.StatusCode, errorResponse.ErrorCode, errorResponse.ErrorDescription);
 
-            CollectResponse(actionDefinition, statementDefinition);
+            CollectResponse(actionTargetDefinition, statementDefinition);
             return true;
         }
         #endregion
@@ -133,12 +134,12 @@ namespace Dibix.Sdk.CodeGeneration
             return true;
         }
 
-        private static void CollectResponse(ActionDefinition actionDefinition, SqlStatementDefinition definition)
+        private static void CollectResponse(ActionTargetDefinition actionTargetDefinition, SqlStatementDefinition definition)
         {
             if (definition.FileResult != null)
-                actionDefinition.SetFileResponse(new ActionFileResponse(HttpMediaType.Binary), definition.FileResult.Source, definition.FileResult.Line, definition.FileResult.Column);
+                actionTargetDefinition.SetFileResponse(new ActionFileResponse(HttpMediaType.Binary), definition.FileResult.Source, definition.FileResult.Line, definition.FileResult.Column);
             else
-                actionDefinition.DefaultResponseType = definition.ResultType;
+                actionTargetDefinition.DefaultResponseType = definition.ResultType;
         }
         #endregion
     }

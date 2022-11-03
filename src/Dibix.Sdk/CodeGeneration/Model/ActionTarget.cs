@@ -1,6 +1,6 @@
 ﻿namespace Dibix.Sdk.CodeGeneration
 {
-    public abstract class ActionDefinitionTarget
+    public abstract class ActionTarget
     {
         public string AccessorFullName { get; }
         public string OperationName { get; }
@@ -10,7 +10,7 @@
         public int Line { get; }
         public int Column { get; }
 
-        protected ActionDefinitionTarget(string accessorFullName, string operationName, bool isAsync, bool hasRefParameters, string source, int line, int column)
+        protected ActionTarget(string accessorFullName, string operationName, bool isAsync, bool hasRefParameters, string source, int line, int column)
         {
             this.AccessorFullName = accessorFullName;
             this.OperationName = operationName;

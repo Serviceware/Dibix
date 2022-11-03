@@ -18,7 +18,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Fields
         private const string LockSectionName = "ControllerImport";
         private readonly IDictionary<string, SecurityScheme> _securitySchemeMap;
-        private readonly IActionDefinitionResolverFacade _actionResolver;
+        private readonly IActionTargetDefinitionResolverFacade _actionTargetResolver;
         private readonly ICollection<string> _defaultSecuritySchemes;
         private readonly ITypeResolverFacade _typeResolver;
         private readonly ISchemaDefinitionResolver _schemaDefinitionResolver;
@@ -38,7 +38,7 @@ namespace Dibix.Sdk.CodeGeneration
         (
             ArtifactGenerationConfiguration configuration
           , IDictionary<string, SecurityScheme> securitySchemeMap
-          , IActionDefinitionResolverFacade actionResolver
+          , IActionTargetDefinitionResolverFacade actionTargetResolver
           , ITypeResolverFacade typeResolver
           , ISchemaDefinitionResolver schemaDefinitionResolver
           , IActionParameterSourceRegistry actionParameterSourceRegistry
@@ -49,7 +49,7 @@ namespace Dibix.Sdk.CodeGeneration
         ) : base(fileSystemProvider, logger)
         {
             _securitySchemeMap = securitySchemeMap;
-            _actionResolver = actionResolver;
+            _actionTargetResolver = actionTargetResolver;
             _defaultSecuritySchemes = configuration.DefaultSecuritySchemes.Select(x => x.ItemSpec).ToArray();
             _typeResolver = typeResolver;
             _schemaDefinitionResolver = schemaDefinitionResolver;
@@ -122,7 +122,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             // Resolve action target, parameters and create action definition
-            ActionDefinition actionDefinition = CreateActionDefinition(action, filePath, explicitParameters, pathParameters, bodyParameters);
+            ActionDefinition actionDefinition = CreateActionDefinition<ActionDefinition>(action, filePath, explicitParameters, pathParameters, bodyParameters);
             if (actionDefinition == null)
                 return;
 
@@ -406,11 +406,11 @@ namespace Dibix.Sdk.CodeGeneration
             return true;
         }
 
-        private ActionDefinition CreateActionDefinition(JObject action, string filePath, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters)
+        private T CreateActionDefinition<T>(JObject action, string filePath, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters) where T : ActionTargetDefinition, new()
         {
             JValue targetValue = (JValue)action.Property("target").Value;
             IJsonLineInfo lineInfo = targetValue.GetLineInfo();
-            ActionDefinition actionDefinition = _actionResolver.Resolve(targetName: (string)targetValue, filePath, lineInfo.LineNumber, lineInfo.LinePosition, explicitParameters, pathParameters, bodyParameters);
+            T actionDefinition = _actionTargetResolver.Resolve<T>(targetName: (string)targetValue, filePath, lineInfo.LineNumber, lineInfo.LinePosition, explicitParameters, pathParameters, bodyParameters);
             return actionDefinition;
         }
 
@@ -479,6 +479,11 @@ namespace Dibix.Sdk.CodeGeneration
 
                     break;
 
+                case JTokenType.Object:
+                    JObject @object = (JObject)property.Value;
+                    CollectAuthorizationBehaviors(actionDefinition, @object, filePath);
+                    break;
+
                 default:
                     throw new ArgumentOutOfRangeException(property.Value.Path, property.Value.Type, null);
             }
@@ -532,6 +537,15 @@ namespace Dibix.Sdk.CodeGeneration
                 }
                 yield return name;
             }
+        }
+
+        private void CollectAuthorizationBehaviors(ActionDefinition actionDefinition, JObject authorization, string filePath)
+        {
+            IDictionary<string, ExplicitParameter> explicitParameters = new Dictionary<string, ExplicitParameter>();
+            CollectActionParameters(authorization, filePath, explicitParameters, requestBody: null);
+            IDictionary<string, PathParameter> pathParameters = new Dictionary<string, PathParameter>();
+            ICollection<string> bodyParameters = new Collection<string>();
+            actionDefinition.Authorization = CreateActionDefinition<AuthorizationBehavior>(authorization, filePath, explicitParameters, pathParameters, bodyParameters);
         }
 
         private static SecurityScheme CreateDefaultSecurityScheme(string name) => new SecurityScheme(name, SecuritySchemeKind.ApiKey);

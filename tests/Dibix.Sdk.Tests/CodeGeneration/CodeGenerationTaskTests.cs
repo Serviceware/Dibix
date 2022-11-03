@@ -376,7 +376,8 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
             (
                 sources: new[]
                 {
-                    @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
+                    @"Tests\dbx_tests_authorization.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_fileresult.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_fileupload.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_multiconcreteresult.sql"
@@ -414,7 +415,8 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
             (
                 sources: new []
                 {
-                    @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
+                    @"Tests\dbx_tests_authorization.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_fileresult.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_fileupload.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_multiconcreteresult.sql"
@@ -451,7 +453,8 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
             (
                 sources: new []
                 {
-                    @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
+                    @"Tests\dbx_tests_authorization.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_fileresult.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_fileupload.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_multiconcreteresult.sql"
@@ -487,8 +490,9 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
             this.ExecuteTest
             (
                 sources: new []
-                { 
-                    @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
+                {
+                    @"Tests\dbx_tests_authorization.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_fileresult.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_fileupload.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_multiconcreteresult.sql"
