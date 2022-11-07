@@ -54,7 +54,7 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
                 SqlCodeAnalysis = { NamingConventionPrefix = "dbx" }
             };
             TSqlModel model = PublicSqlDataSchemaModelLoader.Load(configuration.SqlCore, logger);
-            LockEntryManager lockEntryManager = LockEntryManager.Create();
+            LockEntryManager lockEntryManager = LockEntryManager.Create(reset: false, filePath: null);
             ISqlCodeAnalysisRuleEngine engine = SqlCodeAnalysisRuleEngine.Create(model, configuration.SqlCore, configuration.SqlCodeAnalysis, lockEntryManager, logger);
             IEnumerable<SqlCodeAnalysisError> errors = engine.Analyze(violationScriptPath, ruleType);
 

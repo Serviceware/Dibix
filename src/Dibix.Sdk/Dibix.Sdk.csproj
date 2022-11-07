@@ -6,10 +6,7 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <EmbeddedResource Include="Environment\lockfile" />
-    <EmbeddedResource Include="Schema\dibix.configuration.schema.json" />
-    <EmbeddedResource Include="Schema\dibix.contracts.schema.json" />
-    <EmbeddedResource Include="Schema\dibix.endpoints.schema.json" />
+    <EmbeddedResource Include="Schema\*.json" />
     <Compile Include="..\..\shared\ParameterSources\*.cs" Link="CodeGeneration\Model\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\HttpParameterUtility.cs" Link="CodeGeneration\Model\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\HttpErrorResponseParser.cs" Link="CodeGeneration\Parser\%(Filename)%(Extension)" />

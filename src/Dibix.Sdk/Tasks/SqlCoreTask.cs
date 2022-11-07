@@ -13,6 +13,8 @@ namespace Dibix.Sdk
     [TaskProperty("ProjectDirectory", TaskPropertyType.String, Category = GlobalCategory)]
     [TaskProperty("ProjectName", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
     [TaskProperty("ConfigurationFilePath", TaskPropertyType.String, Category = GlobalCategory)]
+    [TaskProperty("LockFile", TaskPropertyType.String, Category = GlobalCategory)]
+    [TaskProperty("ResetLockFile", TaskPropertyType.Boolean, Category = GlobalCategory)]
     [TaskProperty("StaticCodeAnalysisSucceededFile", TaskPropertyType.String, Category = SqlCodeAnalysisCategory)]
     [TaskProperty("ResultsFile", TaskPropertyType.String, Category = SqlCodeAnalysisCategory)]
     [TaskProperty("ProductName", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
@@ -58,7 +60,7 @@ namespace Dibix.Sdk
                 return false;
 
             TSqlModel sqlModel = PublicSqlDataSchemaModelLoader.Load(_configuration.SqlCore, _logger);
-            using (LockEntryManager lockEntryManager = LockEntryManager.Create())
+            using (LockEntryManager lockEntryManager = LockEntryManager.Create(_configuration.SqlCore.ResetLockFile, _configuration.SqlCore.LockFile))
             {
                 bool analysisResult = SqlCodeAnalysisTask.Execute(_configuration.SqlCore, _configuration.SqlCodeAnalysis, lockEntryManager, _logger, sqlModel);
 

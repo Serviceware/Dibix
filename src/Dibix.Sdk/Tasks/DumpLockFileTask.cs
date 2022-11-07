@@ -9,12 +9,14 @@ namespace Dibix.Sdk
         private partial bool Execute()
         {
             string[] args = Environment.GetCommandLineArgs();
-            if (args.Length < 3)
+            if (args.Length < 4)
                 return false;
 
-            using (LockEntryManager lockEntryManager = LockEntryManager.Create())
+            string lockFilePath = args[2];
+            string dumpFilePath = args[3];
+            using (LockEntryManager lockEntryManager = LockEntryManager.Create(reset: false, lockFilePath))
             {
-                lockEntryManager.Write(args[2], encoded: false);
+                lockEntryManager.Write(dumpFilePath, encoded: false);
                 return true;
             }
         }

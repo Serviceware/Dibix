@@ -214,6 +214,7 @@
       <!--<ExternalAssemblyReferenceDir Condition="'$(ExternalAssemblyReferenceDir)' == ''">$(TargetDir)</ExternalAssemblyReferenceDir>-->
 
       <_MSBuildBinPath>$(MSBuildToolsPath)\msbuild.exe</_MSBuildBinPath>
+      <_LockFile>$(DibixConfigurationDirectory)dibix.lock</_LockFile>
       <_SignAssembly>$(SignAssembly)</_SignAssembly>
       <_SignAssembly Condition="'$(_SignAssembly)' == '' and '$(AssemblyOriginatorKeyFile)' != ''">true</_SignAssembly>
     </PropertyGroup>
@@ -260,6 +261,10 @@
   $(MSBuildProjectDirectory)" />
       <_SqlCoreInputItem Include="ConfigurationFilePath
   $(_DibixConfigurationPath)" />
+      <_SqlCoreInputItem Include="LockFile
+  $(_LockFile)" />
+      <_SqlCoreInputItem Include="ResetLockFile
+  $(ResetLockFile)" />
       <_SqlCoreInputItem Include="StaticCodeAnalysisSucceededFile
   $(StaticCodeAnalysisSucceededFile)" />
       <_SqlCoreInputItem Include="ResultsFile
@@ -320,7 +325,6 @@ $(_SqlReferencePath)" />
 
     <PropertyGroup>
       <_SqlCoreCommand>$(DibixCliPath) core "$(_SqlCoreInputFile)"</_SqlCoreCommand>
-      <_SqlCoreCommand Condition="'$(ResetSuppressions)' != ''">$(_SqlCoreCommand) -s $(ResetSuppressions)</_SqlCoreCommand>
     </PropertyGroup>
 
     <Exec Command="$(_SqlCoreCommand)" />

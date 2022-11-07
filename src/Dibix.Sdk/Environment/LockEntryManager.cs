@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -12,45 +11,41 @@ namespace Dibix.Sdk
 {
     public sealed class LockEntryManager : IDisposable
     {
-        private static readonly Assembly ThisAssembly = typeof(LockEntryManager).Assembly;
-        private static readonly string ResourcePath = $"{typeof(LockEntryManager).Namespace}.Environment.lockfile";
         private readonly IDictionary<LockRecordKey, LockRecord> _map;
-        private readonly bool _resetSuppressions;
-        private readonly string _resetSuppressionFilePath;
+        private readonly bool _reset;
+        private readonly string _filePath;
 
-        private LockEntryManager(LockStore store, bool resetSuppressions, string resetSuppressionFilePath)
+        private LockEntryManager(LockStore store, bool reset, string filePath)
         {
-            this._map = BuildMap(store);
-            this._resetSuppressions = resetSuppressions;
-            this._resetSuppressionFilePath = resetSuppressionFilePath;
+            _map = BuildMap(store);
+            _reset = reset;
+            _filePath = filePath;
         }
 
-        public static LockEntryManager Create()
+        public static LockEntryManager Create(bool reset, string filePath)
         {
-            string resetSuppressionFilePath = CollectResetSuppressionFilePath();
-            bool resetSuppressions = !String.IsNullOrEmpty(resetSuppressionFilePath);
-            LockStore store = Read(resetSuppressions, resetSuppressionFilePath);
-            return new LockEntryManager(store, resetSuppressions, resetSuppressionFilePath);
+            LockStore store = CreateStore(filePath);
+            return new LockEntryManager(store, reset, filePath);
         }
 
         public bool HasEntry(string sectionName, string recordName) => HasEntry(sectionName, groupName: null, recordName, signature: null);
         public bool HasEntry(string sectionName, string groupName, string recordName, string signature)
         {
             LockRecordKey key = new LockRecordKey(sectionName, groupName, recordName);
-            if (this._map.TryGetValue(key, out LockRecord record))
+            if (_map.TryGetValue(key, out LockRecord record))
             {
                 if (record.Signature == signature)
                     return true;
 
-                if (this._resetSuppressions)
+                if (_reset)
                 {
                     record.Signature = signature;
                     return true;
                 }
             }
-            else if (this._resetSuppressions)
+            else if (_reset)
             {
-                this._map.Add(new LockRecordKey(sectionName, groupName, recordName), new LockRecord(recordName, signature));
+                _map.Add(new LockRecordKey(sectionName, groupName, recordName), new LockRecord(recordName, signature));
                 return true;
             }
 
@@ -60,7 +55,7 @@ namespace Dibix.Sdk
         public void Write(string path, bool encoded)
         {
             LockStore store = new LockStore();
-            foreach (var sectionGroup in this._map.GroupBy(x => x.Key.SectionName))
+            foreach (var sectionGroup in _map.GroupBy(x => x.Key.SectionName))
             {
                 LockSection section = new LockSection(sectionGroup.Key);
 
@@ -81,9 +76,16 @@ namespace Dibix.Sdk
                 WritePlain(store, path);
         }
 
-        public void Dispose() => this.Write();
+        public void Dispose() => Write();
 
-        private static LockStore Read() => Read(OpenFromAssembly());
+        private static LockStore CreateStore(string suppressionFilePath)
+        {
+            if (File.Exists(suppressionFilePath))
+                return Read(suppressionFilePath);
+
+            return new LockStore();
+        }
+
         private static LockStore Read(string filePath) => Read(OpenFromPath(filePath));
         private static LockStore Read(Stream stream)
         {
@@ -109,24 +111,14 @@ namespace Dibix.Sdk
                 }
             }
         }
-        private static LockStore Read(bool resetSuppressions, string resetSuppressionFilePath)
-        {
-            if (!resetSuppressions)
-                return Read();
-
-            if (File.Exists(resetSuppressionFilePath))
-                return Read(resetSuppressionFilePath);
-
-            return new LockStore();
-        }
 
         private void Write()
         {
-            if (!this._resetSuppressions)
+            if (!_reset)
                 return;
                 //throw new InvalidOperationException("This action is only supported when resetting suppressions");
 
-            this.Write(this._resetSuppressionFilePath, encoded: true);
+            Write(_filePath, encoded: true);
         }
 
         private static void WritePlain(LockStore store, string path)
@@ -213,8 +205,6 @@ namespace Dibix.Sdk
                 }
             }
         }
-
-        private static Stream OpenFromAssembly() => ThisAssembly.GetManifestResourceStream(ResourcePath);
         
         private static Stream OpenFromPath(string path) => File.OpenRead(path);
 
@@ -232,25 +222,6 @@ namespace Dibix.Sdk
             return map;
         }
 
-        private static string CollectResetSuppressionFilePath()
-        {
-            bool foundFlag = false;
-            foreach (string arg in Environment.GetCommandLineArgs().Skip(3))
-            {
-                if (arg == "-s")
-                {
-                    foundFlag = true;
-                    continue;
-                }
-
-                if (foundFlag)
-                {
-                    return arg;
-                }
-            }
-            return null;
-        }
-
         private readonly struct LockRecordKey
         {
             public string SectionName { get; }
@@ -259,9 +230,9 @@ namespace Dibix.Sdk
 
             public LockRecordKey(string sectionName, string groupName, string recordName)
             {
-                this.SectionName = sectionName;
-                this.GroupName = groupName;
-                this.RecordName = recordName;
+                SectionName = sectionName;
+                GroupName = groupName;
+                RecordName = recordName;
             }
         }
     }
@@ -272,7 +243,7 @@ namespace Dibix.Sdk
 
         public LockStore()
         {
-            this.Sections = new SortedSet<LockSection>(Comparer<LockSection>.Create((x, y) => String.CompareOrdinal(x.Name, y.Name)));
+            Sections = new SortedSet<LockSection>(Comparer<LockSection>.Create((x, y) => String.CompareOrdinal(x.Name, y.Name)));
         }
     }
 
@@ -283,8 +254,8 @@ namespace Dibix.Sdk
 
         public LockSection(string name)
         {
-            this.Name = name;
-            this.Groups = new SortedSet<LockGroup>(Comparer<LockGroup>.Create((x, y) => String.CompareOrdinal(x.Name, y.Name)));
+            Name = name;
+            Groups = new SortedSet<LockGroup>(Comparer<LockGroup>.Create((x, y) => String.CompareOrdinal(x.Name, y.Name)));
         }
     }
 
@@ -295,8 +266,8 @@ namespace Dibix.Sdk
 
         public LockGroup(string name)
         {
-            this.Name = name;
-            this.Records = new SortedSet<LockRecord>(Comparer<LockRecord>.Create((x, y) => String.CompareOrdinal(x.Name, y.Name)));
+            Name = name;
+            Records = new SortedSet<LockRecord>(Comparer<LockRecord>.Create((x, y) => String.CompareOrdinal(x.Name, y.Name)));
         }
     }
 
@@ -307,8 +278,8 @@ namespace Dibix.Sdk
 
         public LockRecord(string name, string signature)
         {
-            this.Name = name;
-            this.Signature = signature;
+            Name = name;
+            Signature = signature;
         }
     }
 }
