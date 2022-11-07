@@ -40,6 +40,8 @@ ProjectDirectory
   {DatabaseTestUtility.DatabaseProjectDirectory}
 ConfigurationFilePath
   {Path.Combine(DatabaseTestUtility.DatabaseProjectDirectory, "dibix.json")}
+LockFile
+ResetLockFile
 StaticCodeAnalysisSucceededFile
 ResultsFile
 ProductName
