@@ -25,7 +25,7 @@ namespace Dibix.Sdk
     [TaskProperty("OutputDirectory", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
     [TaskProperty("DefaultOutputName", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
     [TaskProperty("ClientOutputName", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
-    [TaskProperty("ExternalAssemblyReferenceDir", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
+    [TaskProperty("ExternalAssemblyReferenceDirectory", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
     [TaskProperty("Source", TaskPropertyType.Items, Category = GlobalCategory)]
     [TaskProperty("ScriptSource", TaskPropertyType.Items, Category = SqlCodeAnalysisCategory)]
     [TaskProperty("Contracts", TaskPropertyType.Items, Category = ArtifactGenerationCategory)]
@@ -51,26 +51,72 @@ namespace Dibix.Sdk
 
         private partial bool Execute()
         {
+            CodeAnalysis.SqlCodeAnalysisConfiguration sqlCodeAnalysisConfiguration = new CodeAnalysis.SqlCodeAnalysisConfiguration
+            {
+                IsEmbedded = _configuration.SqlCore.IsEmbedded,
+                LimitDdlStatements = _configuration.SqlCore.LimitDdlStatements,
+                StaticCodeAnalysisSucceededFile = _configuration.SqlCodeAnalysis.StaticCodeAnalysisSucceededFile,
+                ResultsFile = _configuration.SqlCodeAnalysis.ResultsFile,
+                NamingConventionPrefix = _configuration.SqlCodeAnalysis.NamingConventionPrefix
+            };
+            CodeGenerationConfiguration codeGenerationConfiguration = new CodeGenerationConfiguration
+            {
+                ProductName = _configuration.ArtifactGeneration.ProductName,
+                AreaName = _configuration.ArtifactGeneration.AreaName,
+                IsEmbedded = _configuration.SqlCore.IsEmbedded,
+                LimitDdlStatements = _configuration.SqlCore.LimitDdlStatements,
+                ProjectDirectory = _configuration.SqlCore.ProjectDirectory,
+                OutputDirectory = _configuration.ArtifactGeneration.OutputDirectory,
+                ExternalAssemblyReferenceDirectory = _configuration.ArtifactGeneration.ExternalAssemblyReferenceDirectory,
+                DefaultOutputName = _configuration.ArtifactGeneration.DefaultOutputName,
+                ClientOutputName = _configuration.ArtifactGeneration.ClientOutputName,
+                Title = _configuration.ArtifactGeneration.Title,
+                Version = _configuration.ArtifactGeneration.Version,
+                Description = _configuration.ArtifactGeneration.Description,
+                EnableExperimentalFeatures = _configuration.ArtifactGeneration.EnableExperimentalFeatures
+            };
+            codeGenerationConfiguration.Source.AddRange(_configuration.SqlCore.Source);
+            codeGenerationConfiguration.Contracts.AddRange(_configuration.ArtifactGeneration.Contracts);
+            codeGenerationConfiguration.Endpoints.AddRange(_configuration.ArtifactGeneration.Endpoints);
+            codeGenerationConfiguration.References.AddRange(_configuration.ArtifactGeneration.References);
+            codeGenerationConfiguration.DefaultSecuritySchemes.AddRange(_configuration.ArtifactGeneration.DefaultSecuritySchemes);
+
+            IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(_configuration.SqlCore.ProjectDirectory);
             IActionParameterConverterRegistry actionParameterConverterRegistry = new ActionParameterConverterRegistry();
             IActionParameterSourceRegistry actionParameterSourceRegistry = new ActionParameterSourceRegistry();
-            IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(_configuration.SqlCore.ProjectDirectory);
-            _configuration.AppendUserConfiguration(_configuration.SqlCore.ConfigurationFilePath, actionParameterSourceRegistry, actionParameterConverterRegistry, fileSystemProvider, _logger);
+            UserConfigurationLoader userConfigurationLoader = new UserConfigurationLoader
+            (
+                _configuration.SqlCore.ConfigurationFilePath
+              , fileSystemProvider
+              , _logger
+              , new SqlCodeAnalysisUserConfigurationReader(sqlCodeAnalysisConfiguration)
+              , new CodeGenerationUserConfigurationReader(codeGenerationConfiguration, actionParameterSourceRegistry, actionParameterConverterRegistry, _logger)
+            );
+            userConfigurationLoader.Load();
 
             if (_logger.HasLoggedErrors)
                 return false;
 
-            TSqlModel sqlModel = PublicSqlDataSchemaModelLoader.Load(_configuration.SqlCore, _logger);
+            TSqlModel sqlModel = PublicSqlDataSchemaModelLoader.Load
+            (
+                preventDmlReferences: _configuration.SqlCore.PreventDmlReferences
+              , databaseSchemaProviderName: _configuration.SqlCore.DatabaseSchemaProviderName
+              , modelCollation: _configuration.SqlCore.ModelCollation
+              , source: _configuration.SqlCore.Source
+              , sqlReferencePath: _configuration.SqlCore.SqlReferencePath
+              , logger: _logger
+            );
+
             using (LockEntryManager lockEntryManager = LockEntryManager.Create(_configuration.SqlCore.ResetLockFile, _configuration.SqlCore.LockFile))
             {
-                bool analysisResult = SqlCodeAnalysisTask.Execute(_configuration.SqlCore, _configuration.SqlCodeAnalysis, lockEntryManager, _logger, sqlModel);
+                bool analysisResult = SqlCodeAnalysisTask.Execute(sqlCodeAnalysisConfiguration, lockEntryManager, _logger, sqlModel);
 
                 if (!analysisResult)
                     return false;
 
                 bool codeGenerationResult = CodeGenerationTask.Execute
                 (
-                    _configuration.SqlCore
-                  , _configuration.ArtifactGeneration
+                    codeGenerationConfiguration
                   , actionParameterSourceRegistry
                   , actionParameterConverterRegistry
                   , lockEntryManager

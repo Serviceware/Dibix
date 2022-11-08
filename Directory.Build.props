@@ -16,6 +16,7 @@
     <ContinuousIntegrationBuild Condition="'$(TF_BUILD)' == 'true'">true</ContinuousIntegrationBuild>
     <DefineConstants Condition="'$(ContinuousIntegrationBuild)' == 'true'">$(DefineConstants);CI_BUILD</DefineConstants>
 
+    <RootDirectory>$(MSBuildThisFileDirectory)</RootDirectory>
     <GitVersionBaseDirectory>$(MSBuildThisFileDirectory)</GitVersionBaseDirectory>
 
     <PackageProjectUrl>https://github.com/Serviceware/Dibix</PackageProjectUrl>

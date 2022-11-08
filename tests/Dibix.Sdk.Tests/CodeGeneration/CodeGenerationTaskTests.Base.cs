@@ -60,7 +60,7 @@ DefaultOutputName
   {defaultOutputName}
 ClientOutputName
   {(outputKind == AssertOutputKind.Client ? clientOutputName : null)}
-ExternalAssemblyReferenceDir
+ExternalAssemblyReferenceDirectory
   {Environment.CurrentDirectory}
 BuildingInsideVisualStudio
 Source

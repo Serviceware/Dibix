@@ -211,7 +211,7 @@
       <Title Condition="$(Title) == ''">$(AreaName)</Title>
       <Description Condition="$(Description) == '' and $(Build_Repository_Uri) != '' and $(Build_SourceVersion) != '' and $(Build_SourceBranch) != ''">__Build version:__ $([System.DateTime]::Now.ToString(G))\r\n\r\n__Source version:__ [$(Build_SourceVersion)]($(Build_Repository_Uri)/commit/$(Build_SourceVersion)?refName=$(Build_SourceBranch))</Description>
       <LangVersion>latest</LangVersion>
-      <!--<ExternalAssemblyReferenceDir Condition="'$(ExternalAssemblyReferenceDir)' == ''">$(TargetDir)</ExternalAssemblyReferenceDir>-->
+      <!--<ExternalAssemblyReferenceDirectory Condition="'$(ExternalAssemblyReferenceDirectory)' == ''">$(TargetDir)</ExternalAssemblyReferenceDirectory>-->
 
       <_MSBuildBinPath>$(MSBuildToolsPath)\msbuild.exe</_MSBuildBinPath>
       <_LockFile>$(DibixConfigurationDirectory)dibix.lock</_LockFile>
@@ -285,8 +285,8 @@
   $(_ServerOutputName)" />
       <_SqlCoreInputItem Include="ClientOutputName
   $(ClientOutputName)" />
-      <_SqlCoreInputItem Include="ExternalAssemblyReferenceDir
-  $(ExternalAssemblyReferenceDir)" />
+      <_SqlCoreInputItem Include="ExternalAssemblyReferenceDirectory
+  $(ExternalAssemblyReferenceDirectory)" />
       <_SqlCoreInputItem Include="BuildingInsideVisualStudio
   $(BuildingInsideVisualStudio)" />
       <_SqlCoreInputItem Include="Source

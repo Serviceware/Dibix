@@ -38,24 +38,16 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
 
             TestLogger logger = new TestLogger(base.Out, distinctErrorLogging: true);
 
-            SqlCoreTaskConfiguration configuration = new SqlCoreTaskConfiguration
+            Sdk.CodeAnalysis.SqlCodeAnalysisConfiguration configuration = new Sdk.CodeAnalysis.SqlCodeAnalysisConfiguration
             {
-                SqlCore =
-                {
-                    ProjectName = DatabaseTestUtility.ProjectName,
-                    IsEmbedded = false,
-                    LimitDdlStatements = true,
-                    PreventDmlReferences = true,
-                    DatabaseSchemaProviderName = DatabaseTestUtility.DatabaseSchemaProviderName,
-                    ModelCollation = DatabaseTestUtility.ModelCollation,
-                    Source = sources,
-                    SqlReferencePath = references
-                },
-                SqlCodeAnalysis = { NamingConventionPrefix = "dbx" }
+                IsEmbedded = false,
+                LimitDdlStatements = true,
+                NamingConventionPrefix = "dbx"
             };
-            TSqlModel model = PublicSqlDataSchemaModelLoader.Load(configuration.SqlCore, logger);
+            configuration.Source.AddRange(sources);
+            TSqlModel model = PublicSqlDataSchemaModelLoader.Load(preventDmlReferences: true, DatabaseTestUtility.DatabaseSchemaProviderName, DatabaseTestUtility.ModelCollation, sources, references, logger);
             LockEntryManager lockEntryManager = LockEntryManager.Create(reset: false, filePath: null);
-            ISqlCodeAnalysisRuleEngine engine = SqlCodeAnalysisRuleEngine.Create(model, configuration.SqlCore, configuration.SqlCodeAnalysis, lockEntryManager, logger);
+            ISqlCodeAnalysisRuleEngine engine = SqlCodeAnalysisRuleEngine.Create(model, configuration, lockEntryManager, logger);
             IEnumerable<SqlCodeAnalysisError> errors = engine.Analyze(violationScriptPath, ruleType);
 
             string actual = GenerateXmlFromResults(errors);

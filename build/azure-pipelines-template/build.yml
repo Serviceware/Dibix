@@ -17,6 +17,9 @@ steps:
     - Dibix.Sdk
     - Dibix.Sdk.Abstractions
     - Dibix.Sdk.Cli
+    - Dibix.Sdk.CodeAnalysis
+    - Dibix.Sdk.CodeGeneration
+    - Dibix.Sdk.Sql
     - Dibix.Testing
     configuration: ${{ parameters.configuration }}
 

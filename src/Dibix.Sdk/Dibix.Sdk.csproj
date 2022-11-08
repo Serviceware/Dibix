@@ -2,44 +2,20 @@
   
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-  
+
   <ItemGroup>
-    <EmbeddedResource Include="Schema\*.json" />
-    <Compile Include="..\..\shared\ParameterSources\*.cs" Link="CodeGeneration\Model\%(Filename)%(Extension)" />
-    <Compile Include="..\..\shared\Http\HttpParameterUtility.cs" Link="CodeGeneration\Model\%(Filename)%(Extension)" />
-    <Compile Include="..\..\shared\Http\HttpErrorResponseParser.cs" Link="CodeGeneration\Parser\%(Filename)%(Extension)" />
-    <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
-    <Compile Include="..\..\shared\SchemaName.cs" Link="Environment\%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Schema\*" LogicalName="%(EmbeddedResource.Filename)%(EmbeddedResource.Extension)" />
     <Compile Include="..\..\shared\Extensions\CollectionExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
-    <Compile Include="..\..\shared\Extensions\EnumerableExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
-    <Compile Include="..\..\shared\Extensions\ReflectionExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
-    <Compile Include="..\..\shared\KnownHeaders.cs" Link="OpenApi\%(Filename)%(Extension)" />
-    <Compile Include="..\..\shared\Http\RouteBuilder.cs" Link="OpenApi\%(Filename)%(Extension)" />
-    <Compile Include="..\..\shared\Utilities\ExpressionUtility.cs" Link="Utilities\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Json\JsonSchemaDefinition.cs" Link="Json\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Json\JsonSchemaDefinitionReader.cs" Link="Json\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Json\JsonSchemaExtensions.cs" Link="Json\%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build.Utilities.Core" />
-    <PackageReference Include="Microsoft.OpenApi" />
-    <PackageReference Include="Microsoft.SqlServer.DacFx" />
-    <PackageReference Include="Newtonsoft.Json" />
-    <PackageReference Include="Newtonsoft.Json.Schema" />
-    <PackageReference Include="System.IO.Packaging" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Microsoft.Data.Tools.Components" HintPath="lib\Microsoft.Data.Tools.Components.dll" />
-    <Reference Include="Microsoft.Data.Tools.Contracts" HintPath="lib\Microsoft.Data.Tools.Contracts.dll" />
-    <Reference Include="Microsoft.Data.Tools.Schema.Tasks.Sql" HintPath="lib\Microsoft.Data.Tools.Schema.Tasks.Sql.dll" />
-    <Reference Include="Microsoft.Data.Tools.Schema.Utilities.Sql" HintPath="lib\Microsoft.Data.Tools.Schema.Utilities.Sql.dll" />
-    <Reference Include="Microsoft.SqlServer.ConnectionInfo" HintPath="lib\Microsoft.SqlServer.ConnectionInfo.dll" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Dibix.Sdk.Abstractions\Dibix.Sdk.Abstractions.csproj" />
+    <ProjectReference Include="..\Dibix.Sdk.CodeAnalysis\Dibix.Sdk.CodeAnalysis.csproj" />
+    <ProjectReference Include="..\Dibix.Sdk.CodeGeneration\Dibix.Sdk.CodeGeneration.csproj" />
     <ProjectReference Include="..\Dibix.Generators\Dibix.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
-
 </Project>
