@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -31,8 +30,7 @@ namespace Dibix.Testing
             this._testContext = testContext;
             this._useDedicatedTestResultsDirectory = useDedicatedTestResultsDirectory;
             this._defaultRunDirectory = testContext.TestRunResultsDirectory;
-            string dedicatedRunDirectory = BuildDedicatedRunDirectory(testContext);
-            this.RunDirectory = this._useDedicatedTestResultsDirectory ? dedicatedRunDirectory : this._defaultRunDirectory;
+            this.RunDirectory = this._useDedicatedTestResultsDirectory ? TestRun.GetTestRunDirectory(testContext) : this._defaultRunDirectory;
             this.TestDirectory = Path.Combine(this.RunDirectory, "TestResults", testContext.TestName);
             this._expectedDirectory = Path.Combine(this.RunDirectory, ExpectedDirectoryName);
             this._actualDirectory = Path.Combine(this.RunDirectory, ActualDirectoryName);
@@ -215,15 +213,6 @@ start winmergeU ""{ExpectedDirectoryName}"" ""{ActualDirectoryName}""");
         {
             string directory = Path.GetDirectoryName(path);
             Directory.CreateDirectory(directory);
-        }
-
-        private static string BuildDedicatedRunDirectory(TestContext testContext)
-        {
-            Assembly assembly = TestImplementationResolver.ResolveTestAssembly(testContext);
-            string assemblyName = assembly.GetName().Name;
-            string directoryName = $"Run_{DateTime.Now:yyyy-MM-dd HH_mm_ss}";
-            string path = Path.Combine(Path.GetTempPath(), "TestResults", directoryName, assemblyName);
-            return path;
         }
 
         // Exposing the original enum System.Diagnostics.EventLogEntryType in the AddLastEventLogEntries method, causes the coverlet.collector to hang.
