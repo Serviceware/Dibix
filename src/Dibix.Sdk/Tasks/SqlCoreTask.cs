@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.CodeAnalysis;
 using Dibix.Sdk.CodeGeneration;
@@ -84,15 +85,19 @@ namespace Dibix.Sdk
             IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(_configuration.SqlCore.ProjectDirectory);
             IActionParameterConverterRegistry actionParameterConverterRegistry = new ActionParameterConverterRegistry();
             IActionParameterSourceRegistry actionParameterSourceRegistry = new ActionParameterSourceRegistry();
-            UserConfigurationLoader userConfigurationLoader = new UserConfigurationLoader
-            (
-                _configuration.SqlCore.ConfigurationFilePath
-              , fileSystemProvider
-              , _logger
-              , new SqlCodeAnalysisUserConfigurationReader(sqlCodeAnalysisConfiguration)
-              , new CodeGenerationUserConfigurationReader(codeGenerationConfiguration, actionParameterSourceRegistry, actionParameterConverterRegistry, _logger)
-            );
-            userConfigurationLoader.Load();
+
+            if (File.Exists(_configuration.SqlCore.ConfigurationFilePath))
+            {
+                UserConfigurationLoader userConfigurationLoader = new UserConfigurationLoader
+                (
+                    _configuration.SqlCore.ConfigurationFilePath
+                    , fileSystemProvider
+                    , _logger
+                    , new SqlCodeAnalysisUserConfigurationReader(sqlCodeAnalysisConfiguration)
+                    , new CodeGenerationUserConfigurationReader(codeGenerationConfiguration, actionParameterSourceRegistry, actionParameterConverterRegistry, _logger)
+                );
+                userConfigurationLoader.Load();
+            }
 
             if (_logger.HasLoggedErrors)
                 return false;
