@@ -18,9 +18,9 @@ namespace Dibix.Testing.Data
             TConfiguration configuration = TestConfigurationLoader.Load<TConfiguration>(testContext);
             return CreateDatabaseAccessorFactory(configuration);
         }
-        public static IDatabaseAccessorFactory CreateDatabaseAccessorFactory<TConfiguration>(TConfiguration configuration) where TConfiguration : DatabaseConfigurationBase, new()
+        public static IDatabaseAccessorFactory CreateDatabaseAccessorFactory<TConfiguration>(TConfiguration configuration, int? defaultCommandTimeout = null) where TConfiguration : DatabaseConfigurationBase, new()
         {
-            return new DapperDatabaseAccessorFactory(configuration.Database.ConnectionString, RaiseErrorWithNoWaitBehavior.ExecuteScalar);
+            return new DapperDatabaseAccessorFactory(configuration.Database.ConnectionString, RaiseErrorWithNoWaitBehavior.ExecuteScalar, defaultCommandTimeout);
         }
 
         // RAISERROR WITH NOWAIT is useful to receive immediate progress of a long running command.
@@ -43,24 +43,26 @@ namespace Dibix.Testing.Data
         {
             private readonly string _connectionString;
             private readonly RaiseErrorWithNoWaitBehavior _raiseErrorWithNoWaitBehavior;
+            private readonly int? _defaultCommandTimeout;
 
-            public DapperDatabaseAccessorFactory(string connectionString, RaiseErrorWithNoWaitBehavior raiseErrorWithNoWaitBehavior)
+            public DapperDatabaseAccessorFactory(string connectionString, RaiseErrorWithNoWaitBehavior raiseErrorWithNoWaitBehavior, int? defaultCommandTimeout)
             {
-                this._connectionString = connectionString;
-                this._raiseErrorWithNoWaitBehavior = raiseErrorWithNoWaitBehavior;
+                _connectionString = connectionString;
+                _raiseErrorWithNoWaitBehavior = raiseErrorWithNoWaitBehavior;
+                _defaultCommandTimeout = defaultCommandTimeout;
             }
 
             public IDatabaseAccessor Create()
             {
-                SqlConnection connection = new SqlConnection(this._connectionString);
+                SqlConnection connection = new SqlConnection(_connectionString);
 
-                if (this._raiseErrorWithNoWaitBehavior == RaiseErrorWithNoWaitBehavior.FireInfoMessageEventOnUserErrors)
+                if (_raiseErrorWithNoWaitBehavior == RaiseErrorWithNoWaitBehavior.FireInfoMessageEventOnUserErrors)
                 {
                     connection.FireInfoMessageEventOnUserErrors = true;
                     connection.InfoMessage += OnInfoMessage;
                 }
 
-                return new DapperDatabaseAccessor(connection, this._raiseErrorWithNoWaitBehavior);
+                return new DapperDatabaseAccessor(connection, _raiseErrorWithNoWaitBehavior, _defaultCommandTimeout);
             }
 
             // When FireInfoMessageEventOnUserErrors is true, errors will trigger an info message event aswell, without throwing an exception.
@@ -85,28 +87,30 @@ namespace Dibix.Testing.Data
         private sealed class DapperDatabaseAccessor : Dapper.DapperDatabaseAccessor
         {
             private readonly RaiseErrorWithNoWaitBehavior _raiseErrorWithNoWaitBehavior;
+            private readonly int? _defaultCommandTimeout;
 
-            public DapperDatabaseAccessor(DbConnection connection, RaiseErrorWithNoWaitBehavior raiseErrorWithNoWaitBehavior) : base(connection)
+            public DapperDatabaseAccessor(DbConnection connection, RaiseErrorWithNoWaitBehavior raiseErrorWithNoWaitBehavior, int? defaultCommandTimeout) : base(connection, defaultCommandTimeout: defaultCommandTimeout)
             {
-                this._raiseErrorWithNoWaitBehavior = raiseErrorWithNoWaitBehavior;
+                _raiseErrorWithNoWaitBehavior = raiseErrorWithNoWaitBehavior;
+                _defaultCommandTimeout = defaultCommandTimeout;
             }
 
             // ExecuteNonQuery is optimized, and will not process any messages, so RAISERROR WITH NOWAIT will not work.
             // Here we override the underlying behavior, without the caller having to do it.
             protected override int Execute(string commandText, CommandType commandType, int? commandTimeout, ParametersVisitor parameters)
             {
-                if (this._raiseErrorWithNoWaitBehavior != RaiseErrorWithNoWaitBehavior.ExecuteScalar)
+                if (_raiseErrorWithNoWaitBehavior != RaiseErrorWithNoWaitBehavior.ExecuteScalar)
                     return base.Execute(commandText, commandType, commandTimeout, parameters);
 
-                _ = base.Connection.ExecuteScalar(commandText, CollectParameters(parameters), transaction: null, commandTimeout, commandType);
+                _ = base.Connection.ExecuteScalar(commandText, CollectParameters(parameters), transaction: null, _defaultCommandTimeout ?? commandTimeout, commandType);
                 return default;
             }
             protected override async Task<int> ExecuteAsync(string commandText, CommandType commandType, int? commandTimeout, ParametersVisitor parameters, CancellationToken cancellationToken)
             {
-                if (this._raiseErrorWithNoWaitBehavior != RaiseErrorWithNoWaitBehavior.ExecuteScalar)
-                    return await base.ExecuteAsync(commandText, commandType, commandTimeout, parameters, cancellationToken);
+                if (_raiseErrorWithNoWaitBehavior != RaiseErrorWithNoWaitBehavior.ExecuteScalar)
+                    return await base.ExecuteAsync(commandText, commandType, commandTimeout, parameters, cancellationToken).ConfigureAwait(false);
 
-                CommandDefinition command = new CommandDefinition(commandText, CollectParameters(parameters), transaction: null, commandTimeout, commandType, cancellationToken: cancellationToken);
+                CommandDefinition command = new CommandDefinition(commandText, CollectParameters(parameters), transaction: null, _defaultCommandTimeout ?? commandTimeout, commandType, cancellationToken: cancellationToken);
                 _ = await base.Connection.ExecuteScalarAsync(command).ConfigureAwait(false);
                 return default;
             }

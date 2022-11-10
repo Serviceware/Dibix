@@ -23,7 +23,7 @@ namespace Dibix.Testing.Data
         #region Constructor
         protected DatabaseTestBase()
         {
-            this._databaseAccessorFactoryAccessor = new Lazy<IDatabaseAccessorFactory>(() => CreateDatabaseAccessorFactory(base.Configuration));
+            this._databaseAccessorFactoryAccessor = new Lazy<IDatabaseAccessorFactory>(() => CreateDatabaseAccessorFactory());
         }
         #endregion
 
@@ -55,11 +55,11 @@ namespace Dibix.Testing.Data
                 await accessor.ExecuteAsync(storedProcedureName, CommandType.StoredProcedure, commandTimeout, parameterBuilder.Build(), CancellationToken.None).ConfigureAwait(false);
             }
         }
+
+        protected IDatabaseAccessorFactory CreateDatabaseAccessorFactory(int? commandTimeout = 30) => DatabaseTestUtility.CreateDatabaseAccessorFactory(base.Configuration, commandTimeout);
         #endregion
 
         #region Private Methods
-        private static IDatabaseAccessorFactory CreateDatabaseAccessorFactory(TConfiguration configuration) => DatabaseTestUtility.CreateDatabaseAccessorFactory(configuration);
-
         private static TraceSource GetDibixTraceSource()
         {
             const string fieldName = "TraceSource";
