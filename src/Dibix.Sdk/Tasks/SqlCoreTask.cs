@@ -60,6 +60,9 @@ namespace Dibix.Sdk
                 ResultsFile = _configuration.SqlCodeAnalysis.ResultsFile,
                 NamingConventionPrefix = _configuration.SqlCodeAnalysis.NamingConventionPrefix
             };
+            sqlCodeAnalysisConfiguration.Source.AddRange(_configuration.SqlCore.Source);
+            sqlCodeAnalysisConfiguration.ScriptSource.AddRange(_configuration.SqlCodeAnalysis.ScriptSource);
+
             CodeGenerationConfiguration codeGenerationConfiguration = new CodeGenerationConfiguration
             {
                 ProductName = _configuration.ArtifactGeneration.ProductName,
