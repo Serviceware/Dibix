@@ -16,3 +16,10 @@ AS
 
 	SELECT [idx] = [x].[id]
 	FROM [dbo].[dbx_table] AS [x]
+
+	DECLARE @table TABLE ([x] BIT)
+	INSERT INTO @table ([x]) VALUES (1)
+	INSERT @table ([x]) VALUES (1)
+	DELETE FROM @table WHERE [x] = 1
+	DELETE [t] FROM @table AS [t] WHERE [x] = 1
+	DELETE @table WHERE [x] = 1

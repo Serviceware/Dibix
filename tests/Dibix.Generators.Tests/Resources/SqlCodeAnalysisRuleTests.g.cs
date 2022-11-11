@@ -52,13 +52,13 @@ namespace Dibix.Generators.Tests
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
-        public void ImplicitAliasSqlCodeAnalysisRule() => this.Execute();
+        public void ImplicitDefaultSqlCodeAnalysisRule() => this.Execute();
 
         [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
-        public void ImplicitDefaultSqlCodeAnalysisRule() => this.Execute();
+        public void ImplicitSyntaxSqlCodeAnalysisRule() => this.Execute();
 
         [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]

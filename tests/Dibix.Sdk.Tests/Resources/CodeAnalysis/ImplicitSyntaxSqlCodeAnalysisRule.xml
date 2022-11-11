@@ -15,4 +15,14 @@
     message="Aliases must be marked with 'AS'"
     line="12"
     column="4" />
+  <error
+    ruleid="8"
+    message="Use INSERT INTO rather than just INSERT"
+    line="22"
+    column="9" />
+  <error
+    ruleid="8"
+    message="Use DELETE FROM rather than just DELETE"
+    line="25"
+    column="9" />
 </errors>
