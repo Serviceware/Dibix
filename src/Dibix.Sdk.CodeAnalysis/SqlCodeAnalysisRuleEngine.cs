@@ -47,7 +47,7 @@ namespace Dibix.Sdk.CodeAnalysis
         #endregion
 
         #region ISqlCodeAnalysisSuppressionService Members
-        public bool IsSuppressed(string ruleName, string key, string hash) => _lockEntryManager.HasEntry(sectionName: LockSectionName, groupName: ruleName, recordName: key, signature: hash);
+        public bool IsSuppressed(string ruleName, string key, string source) => _lockEntryManager.HasEntry(sectionName: LockSectionName, groupName: ruleName, recordName: key, source);
         #endregion
 
         #region Private Methods

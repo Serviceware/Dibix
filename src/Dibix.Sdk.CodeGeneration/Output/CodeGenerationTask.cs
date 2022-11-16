@@ -9,6 +9,7 @@ namespace Dibix.Sdk.CodeGeneration
         public static bool Execute
         (
             CodeGenerationConfiguration configuration
+          , SecuritySchemes securitySchemes
           , IActionParameterSourceRegistry actionParameterSourceRegistry
           , IActionParameterConverterRegistry actionParameterConverterRegistry
           , ILockEntryManager lockEntryManager
@@ -27,6 +28,7 @@ namespace Dibix.Sdk.CodeGeneration
             CodeGenerationModel model = CodeGenerationModelLoader.Load
             (
                 configuration
+              , securitySchemes
               , schemaRegistry
               , externalSchemaResolver
               , schemaDefinitionResolver

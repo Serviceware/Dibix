@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-
-namespace Dibix.Sdk.CodeGeneration
+﻿namespace Dibix.Sdk.CodeGeneration
 {
     public sealed class ActionDefinition : ActionTargetDefinition
     {
@@ -10,12 +7,7 @@ namespace Dibix.Sdk.CodeGeneration
         public string Description { get; set; }
         public Token<string> ChildRoute { get; set; }
         public ActionRequestBody RequestBody { get; set; }
-        public ICollection<ICollection<string>> SecuritySchemes { get; }
+        public SecuritySchemeRequirements SecuritySchemes { get; } = new SecuritySchemeRequirements(SecuritySchemeOperator.Or);
         public AuthorizationBehavior Authorization { get; set; }
-
-        public ActionDefinition()
-        {
-            SecuritySchemes = new Collection<ICollection<string>>();
-        }
     }
 }

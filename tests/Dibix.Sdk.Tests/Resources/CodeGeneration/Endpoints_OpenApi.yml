@@ -23,7 +23,6 @@ paths:
                   $ref: '#/components/schemas/GenericContract'
       security:
         - DBXNS-SIT: [ ]
-          DBXNS-ClientId: [ ]
     put:
       tags:
         - GenericEndpoint
@@ -41,7 +40,6 @@ paths:
           description: NoContent
       security:
         - DBXNS-SIT: [ ]
-          DBXNS-ClientId: [ ]
     post:
       tags:
         - GenericEndpoint
@@ -58,29 +56,11 @@ paths:
           description: NoContent
       security:
         - DBXNS-SIT: [ ]
-          DBXNS-ClientId: [ ]
     patch:
       tags:
         - GenericEndpoint
       summary: EmptyWithParams3
       operationId: EmptyWithParams3
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InputContract'
-        required: true
-      responses:
-        '204':
-          description: NoContent
-      security:
-        - DBXNS-SIT: [ ]
-          DBXNS-ClientId: [ ]
-    delete:
-      tags:
-        - GenericEndpoint
-      summary: EmptyWithParams4
-      operationId: EmptyWithParams4
       requestBody:
         content:
           application/json:
@@ -91,8 +71,77 @@ paths:
         '204':
           description: NoContent
       security:
+        - DBXNS-ClientId: [ ]
         - DBXNS-SIT: [ ]
-          DBXNS-ClientId: [ ]
+    delete:
+      tags:
+        - GenericEndpoint
+      summary: EmptyWithParams4
+      operationId: EmptyWithParams4
+      parameters:
+        - name: a
+          in: query
+          required: true
+          style: form
+          schema:
+            type: string
+        - name: b
+          in: query
+          required: true
+          style: form
+          schema:
+            type: string
+        - name: c
+          in: query
+          required: true
+          style: form
+          schema:
+            type: string
+            format: uuid
+            nullable: true
+        - name: password
+          in: query
+          required: true
+          style: form
+          schema:
+            type: string
+        - name: ids
+          in: query
+          style: form
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/GenericParameterSet'
+        - name: d
+          in: query
+          style: form
+          schema:
+            type: string
+            default: 
+            nullable: true
+        - name: e
+          in: query
+          style: form
+          schema:
+            type: boolean
+            default: true
+        - name: f
+          in: query
+          style: form
+          schema:
+            $ref: '#/components/schemas/Direction'
+        - name: g
+          in: query
+          style: form
+          schema:
+            type: string
+            default: Cake
+            nullable: true
+      responses:
+        '204':
+          description: NoContent
+      security:
+        - DBXNS-SIT: [ ]
   '/Tests/GenericEndpoint/{password}/Fixed':
     get:
       tags:
@@ -131,7 +180,6 @@ paths:
           description: NoContent
       security:
         - DBXNS-SIT: [ ]
-          DBXNS-ClientId: [ ]
   '/Tests/GenericEndpoint/{password}/User':
     get:
       tags:
@@ -224,7 +272,6 @@ paths:
                 $ref: '#/components/schemas/GenericContract'
       security:
         - DBXNS-SIT: [ ]
-          DBXNS-ClientId: [ ]
   '/Tests/GenericEndpoint/{id}':
     get:
       tags:
@@ -404,15 +451,15 @@ components:
         - Ascending
         - Descending
   securitySchemes:
-    DBXNS-SIT:
-      type: apiKey
-      name: DBXNS-SIT
-      in: header
-    DBXNS-ClientId:
-      type: apiKey
-      name: DBXNS-ClientId
-      in: header
     Bearer:
       type: http
       scheme: bearer
       bearerFormat: JWT
+    DBXNS-ClientId:
+      type: apiKey
+      name: DBXNS-ClientId
+      in: header
+    DBXNS-SIT:
+      type: apiKey
+      name: DBXNS-SIT
+      in: header

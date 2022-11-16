@@ -2,11 +2,11 @@
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal static class SecuritySchemes
+    public sealed class SecuritySchemes
     {
         private static readonly SecurityScheme AnonymousScheme = new SecurityScheme("Anonymous", SecuritySchemeKind.None);
         private static readonly SecurityScheme BearerScheme = new SecurityScheme("Bearer", SecuritySchemeKind.Bearer);
-        private static readonly IDictionary<string, SecurityScheme> Map = new Dictionary<string, SecurityScheme>
+        private readonly IDictionary<string, SecurityScheme> _map = new Dictionary<string, SecurityScheme>
         {
             { "Anonymous", AnonymousScheme }
           , { "Bearer",    BearerScheme }
@@ -14,8 +14,17 @@ namespace Dibix.Sdk.CodeGeneration
 
         public static SecurityScheme Anonymous => AnonymousScheme;
         public static SecurityScheme Bearer => BearerScheme;
-        public static IEnumerable<SecurityScheme> Schemes => Map.Values;
+        public IEnumerable<SecurityScheme> Schemes => _map.Values;
 
-        public static bool TryFindSecurityScheme(string name, out SecurityScheme scheme) => Map.TryGetValue(name, out scheme);
+        public bool TryFindSecurityScheme(string name, out SecurityScheme scheme) => _map.TryGetValue(name, out scheme);
+
+        public bool RegisterSecurityScheme(SecurityScheme scheme)
+        {
+            if (_map.ContainsKey(scheme.Name))
+                return false;
+
+            _map.Add(scheme.Name, scheme);
+            return true;
+        }
     }
 }

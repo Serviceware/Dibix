@@ -71,9 +71,6 @@ Contracts
 Endpoints
 {CollectInputItems(endpoints)}
 References
-DefaultSecuritySchemes
-  DBXNS-SIT
-  DBXNS-ClientId
 DatabaseSchemaProviderName
   {DatabaseTestUtility.DatabaseSchemaProviderName}
 ModelCollation

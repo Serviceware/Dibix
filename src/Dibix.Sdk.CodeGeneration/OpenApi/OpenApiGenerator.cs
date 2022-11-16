@@ -140,7 +140,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
         {
             // Header parameters named Accept, Content-Type and Authorization are not allowed. To describe these headers, use the corresponding OpenAPI keywords
             // See: https://swagger.io/docs/specification/describing-parameters/#header-parameters
-            if (ReservedOpenApiHeaders.Contains(parameter.ApiParameterName) || action.SecuritySchemes.SelectMany(x => x).Any(x => x == parameter.ApiParameterName))
+            if (ReservedOpenApiHeaders.Contains(parameter.ApiParameterName) || action.SecuritySchemes.Requirements.Any(x => x.Scheme.Name == parameter.ApiParameterName))
             {
                 return;
             }
@@ -251,27 +251,29 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
 
         private static void AppendSecuritySchemes(OpenApiDocument document, ActionDefinition action, OpenApiOperation operation)
         {
-            if (action.SecuritySchemes.SelectMany(x => x).All(x => x == SecuritySchemes.Anonymous.Name))
+            if (!action.SecuritySchemes.HasEffectiveRequirements)
                 return;
 
-            foreach (ICollection<string> securitySchemeGroup in action.SecuritySchemes)
+            OpenApiSecurityRequirement requirement = null;
+            foreach (SecuritySchemeRequirement securitySchemeRequirement in action.SecuritySchemes.Requirements)
             {
-                OpenApiSecurityRequirement requirement = new OpenApiSecurityRequirement();
-                foreach (string securitySchemeName in securitySchemeGroup)
+                if (action.SecuritySchemes.Operator != SecuritySchemeOperator.And || requirement == null)
                 {
-                    if (securitySchemeName == SecuritySchemes.Anonymous.Name)
-                        continue;
-
-                    OpenApiSecurityScheme scheme = document.Components.SecuritySchemes[securitySchemeName];
-                    requirement.Add(scheme, new Collection<string>());
+                    requirement = new OpenApiSecurityRequirement();
+                    operation.Security.Add(requirement);
                 }
-                operation.Security.Add(requirement);
+
+                if (securitySchemeRequirement.Scheme == SecuritySchemes.Anonymous) 
+                    continue;
+
+                OpenApiSecurityScheme scheme = document.Components.SecuritySchemes[securitySchemeRequirement.Scheme.Name];
+                requirement.Add(scheme, new Collection<string>());
             }
         }
 
         private static void AppendSecuritySchemes(OpenApiDocument document, IEnumerable<SecurityScheme> securitySchemes)
         {
-            foreach (SecurityScheme modelSecurityScheme in securitySchemes)
+            foreach (SecurityScheme modelSecurityScheme in securitySchemes.OrderBy(x => x.Name))
             {
                 string name = modelSecurityScheme.Name;
                 OpenApiSecurityScheme openApiSecurityScheme = CreateSecurityScheme(name, modelSecurityScheme.Kind);

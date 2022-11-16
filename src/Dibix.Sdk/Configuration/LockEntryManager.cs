@@ -4,6 +4,8 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Security.Cryptography;
+using System.Text;
 using Dibix.Sdk.Abstractions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -12,13 +14,15 @@ namespace Dibix.Sdk
 {
     public sealed class LockEntryManager : ILockEntryManager, IDisposable
     {
-        private readonly IDictionary<LockRecordKey, LockRecord> _map;
+        private readonly IDictionary<LockRecordKey, LockRecord> _recordMap;
+        private readonly IDictionary<string, string> _filePathSignatureMap;
         private readonly bool _reset;
         private readonly string _filePath;
 
         private LockEntryManager(LockStore store, bool reset, string filePath)
         {
-            _map = BuildMap(store);
+            _recordMap = BuildMap(store);
+            _filePathSignatureMap = new Dictionary<string, string>();
             _reset = reset;
             _filePath = filePath;
         }
@@ -29,11 +33,13 @@ namespace Dibix.Sdk
             return new LockEntryManager(store, reset, filePath);
         }
 
-        public bool HasEntry(string sectionName, string recordName) => HasEntry(sectionName, groupName: null, recordName, signature: null);
-        public bool HasEntry(string sectionName, string groupName, string recordName, string signature)
+        public bool HasEntry(string sectionName, string recordName) => HasEntry(sectionName, groupName: null, recordName, filePath: null);
+        public bool HasEntry(string sectionName, string recordName, string filePath) => HasEntry(sectionName, groupName: null, recordName, filePath);
+        public bool HasEntry(string sectionName, string groupName, string recordName, string filePath)
         {
+            string signature = GetSignature(filePath);
             LockRecordKey key = new LockRecordKey(sectionName, groupName, recordName);
-            if (_map.TryGetValue(key, out LockRecord record))
+            if (_recordMap.TryGetValue(key, out LockRecord record))
             {
                 if (record.Signature == signature)
                     return true;
@@ -46,7 +52,7 @@ namespace Dibix.Sdk
             }
             else if (_reset)
             {
-                _map.Add(new LockRecordKey(sectionName, groupName, recordName), new LockRecord(recordName, signature));
+                _recordMap.Add(new LockRecordKey(sectionName, groupName, recordName), new LockRecord(recordName, signature));
                 return true;
             }
 
@@ -56,7 +62,7 @@ namespace Dibix.Sdk
         public void Write(string path, bool encoded)
         {
             LockStore store = new LockStore();
-            foreach (var sectionGroup in _map.GroupBy(x => x.Key.SectionName))
+            foreach (var sectionGroup in _recordMap.GroupBy(x => x.Key.SectionName))
             {
                 LockSection section = new LockSection(sectionGroup.Key);
 
@@ -78,6 +84,20 @@ namespace Dibix.Sdk
         }
 
         public void Dispose() => Write();
+
+        private string GetSignature(string filePath)
+        {
+            if (filePath == null)
+                return null;
+
+            if (!_filePathSignatureMap.TryGetValue(filePath, out string signature))
+            {
+                signature = CalculateHash(filePath);
+                _filePathSignatureMap.Add(filePath, signature);
+            }
+
+            return signature;
+        }
 
         private static LockStore CreateStore(string suppressionFilePath)
         {
@@ -220,6 +240,16 @@ namespace Dibix.Sdk
                         };
             IDictionary<LockRecordKey, LockRecord> map = query.ToDictionary(x => x.Key, x => x.Value);
             return map;
+        }
+
+        private static string CalculateHash(string filename)
+        {
+            using (MD5 md5 = MD5.Create())
+            {
+                string input = String.Join("\n", File.ReadAllLines(filename));
+                byte[] hash = md5.ComputeHash(Encoding.UTF8.GetBytes(input));
+                return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+            }
         }
 
         private readonly struct LockRecordKey

@@ -16,9 +16,10 @@ namespace Dibix.Sdk.CodeGeneration
     {
         #region Fields
         private const string LockSectionName = "ControllerImport";
-        private readonly IDictionary<string, SecurityScheme> _securitySchemeMap;
+        private readonly IDictionary<string, SecurityScheme> _usedSecuritySchemes;
+        private readonly SecuritySchemes _securitySchemes;
+        private readonly ConfigurationTemplates _templates;
         private readonly IActionTargetDefinitionResolverFacade _actionTargetResolver;
-        private readonly ICollection<string> _defaultSecuritySchemes;
         private readonly ITypeResolverFacade _typeResolver;
         private readonly ISchemaDefinitionResolver _schemaDefinitionResolver;
         private readonly IActionParameterSourceRegistry _actionParameterSourceRegistry;
@@ -28,7 +29,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         #region Properties
         public ICollection<ControllerDefinition> Controllers { get; }
-        public ICollection<SecurityScheme> SecuritySchemes { get; }
+        public ICollection<SecurityScheme> SecuritySchemes => _usedSecuritySchemes.Values;
         protected override string SchemaName => "dibix.endpoints.schema";
         #endregion
 
@@ -36,8 +37,8 @@ namespace Dibix.Sdk.CodeGeneration
         public ControllerDefinitionProvider
         (
             IEnumerable<TaskItem> endpoints
-          , IEnumerable<TaskItem> defaultSecuritySchemes
-          , IDictionary<string, SecurityScheme> securitySchemeMap
+          , SecuritySchemes securitySchemes
+          , ConfigurationTemplates templates
           , IActionTargetDefinitionResolverFacade actionTargetResolver
           , ITypeResolverFacade typeResolver
           , ISchemaDefinitionResolver schemaDefinitionResolver
@@ -48,16 +49,16 @@ namespace Dibix.Sdk.CodeGeneration
           , ILogger logger
         ) : base(fileSystemProvider, logger)
         {
-            _securitySchemeMap = securitySchemeMap;
+            _usedSecuritySchemes = new Dictionary<string, SecurityScheme>();
+            _securitySchemes = securitySchemes;
+            _templates = templates;
             _actionTargetResolver = actionTargetResolver;
-            _defaultSecuritySchemes = defaultSecuritySchemes.Select(x => x.ItemSpec).ToArray();
             _typeResolver = typeResolver;
             _schemaDefinitionResolver = schemaDefinitionResolver;
             _actionParameterSourceRegistry = actionParameterSourceRegistry;
             _actionParameterConverterRegistry = actionParameterConverterRegistry;
             _lockEntryManager = lockEntryManager;
             Controllers = new Collection<ControllerDefinition>();
-            SecuritySchemes = new Collection<SecurityScheme>();
             Collect(endpoints.Select(x => x.GetFullPath()));
         }
         #endregion
@@ -81,27 +82,33 @@ namespace Dibix.Sdk.CodeGeneration
         private void ReadController(string filePath, string controllerName, JArray actions)
         {
             ControllerDefinition controller = new ControllerDefinition(controllerName);
-            foreach (JToken action in actions)
-            {
-                switch (action.Type)
-                {
-                    case JTokenType.Object:
-                        ReadControllerAction(filePath, controller, (JObject)action);
-                        break;
+            foreach (JToken action in actions) 
+                ReadControllerItem(filePath, action, action.Type, controller);
 
-                    case JTokenType.String:
-                        ReadControllerImport(controller, action, filePath);
-                        break;
-
-                    default:
-                        throw new ArgumentOutOfRangeException(action.Path, action.Type, null);
-                }
-            }
             Controllers.Add(controller);
+        }
+
+        private void ReadControllerItem(string filePath, JToken action, JTokenType type, ControllerDefinition controller)
+        {
+            switch (type)
+            {
+                case JTokenType.Object:
+                    ReadControllerAction(filePath, controller, (JObject)action);
+                    break;
+
+                case JTokenType.String:
+                    ReadControllerImport(controller, action, filePath);
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, action.Path);
+            }
         }
 
         private void ReadControllerAction(string filePath, ControllerDefinition controller, JObject action)
         {
+            JObject actionMerged = ApplyTemplate(_templates.Default.Action, action);
+
             // Collect body parameters
             ActionRequestBody requestBody = ReadBody(action, filePath);
             ICollection<string> bodyParameters = GetBodyProperties(requestBody?.Contract, _schemaDefinitionResolver);
@@ -153,14 +160,13 @@ namespace Dibix.Sdk.CodeGeneration
             if (TryReadFileResponse(action, out ActionFileResponse fileResponse, out IJsonLineInfo fileResponseLocation))
                 actionDefinition.SetFileResponse(fileResponse, filePath, fileResponseLocation.LineNumber, fileResponseLocation.LinePosition);
 
+            IJsonLineInfo actionLineInfo = action.GetLineInfo();
             CollectActionResponses(action, actionDefinition, filePath);
-            CollectSecuritySchemes(action, actionDefinition, filePath);
+            CollectSecuritySchemes(actionMerged, actionDefinition, actionLineInfo, filePath);
+            CollectAuthorization(actionMerged, actionDefinition, actionLineInfo, filePath);
 
             if (!actionDefinition.Responses.Any())
                 actionDefinition.DefaultResponseType = null;
-
-            if (!actionDefinition.SecuritySchemes.Any()) 
-                actionDefinition.SecuritySchemes.Add(EnsureDefaultSecuritySchemes().ToArray());
 
             if (controller.Actions.TryAdd(actionDefinition))
                 return;
@@ -177,25 +183,39 @@ namespace Dibix.Sdk.CodeGeneration
             base.Logger.LogError($"Duplicate action registration: {sb}", filePath, lineInfo.LineNumber, lineInfo.LinePosition);
         }
 
+        private static T ApplyTemplate<T>(T source, T target) where T : JContainer
+        {
+            if (source == null)
+                return target;
+
+            T merged = (T)source.DeepClone();
+            merged.Merge(target);
+            return merged;
+        }
+
         private ActionRequestBody ReadBody(JObject action, string filePath)
         {
             JToken bodyValue = action.Property("body")?.Value;
             if (bodyValue == null) 
                 return null;
 
-            switch (bodyValue.Type)
-            {
-                case JTokenType.Object:
-                    return ReadBodyValue((JObject)bodyValue, filePath);
-
-                case JTokenType.String:
-                    return ReadBodyValue((JValue)bodyValue, filePath);
-
-                default:
-                    throw new ArgumentOutOfRangeException(bodyValue.Path, bodyValue.Type, null);
-            }
+            return ReadBodyValue(filePath, bodyValue, bodyValue.Type);
         }
 
+        private ActionRequestBody ReadBodyValue(string filePath, JToken value, JTokenType type)
+        {
+            switch (type)
+            {
+                case JTokenType.Object:
+                    return ReadBodyValue((JObject)value, filePath);
+
+                case JTokenType.String:
+                    return ReadBodyValue((JValue)value, filePath);
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, value.Path);
+            }
+        }
         private ActionRequestBody ReadBodyValue(JObject value, string filePath)
         {
             JValue contractName = (JValue)value.Property("contract")?.Value;
@@ -260,19 +280,20 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 if (!TryReadSource(property, filePath, requestBody: requestBody, rootPropertySourceBuilder: null, out ActionParameterSourceBuilder parameterSourceBuilder))
                 {
-                    switch (property.Value.Type)
-                    {
-                        case JTokenType.Object:
-                            parameterSourceBuilder = ReadComplexActionParameter(property.Name, (JObject)property.Value, filePath, requestBody);
-                            break;
-
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(property.Value.Path), property.Value.Type, null);
-                    }
+                    parameterSourceBuilder = CollectActionParameterSource(filePath, requestBody, property, property.Value.Type);
                 }
 
                 ExplicitParameter parameter = new ExplicitParameter(property, parameterSourceBuilder);
                 target.Add(property.Name, parameter);
+            }
+        }
+
+        private ActionParameterSourceBuilder CollectActionParameterSource(string filePath, ActionRequestBody requestBody, JProperty property, JTokenType type)
+        {
+            switch (type)
+            {
+                case JTokenType.Object: return ReadComplexActionParameter(property.Name, (JObject)property.Value, filePath, requestBody);
+                default: throw new ArgumentOutOfRangeException(nameof(type), type, property.Value.Path);
             }
         }
 
@@ -421,135 +442,136 @@ namespace Dibix.Sdk.CodeGeneration
             if (responses == null)
                 return;
 
-            foreach (JProperty property in responses.Properties())
+            foreach (JProperty property in responses.Properties()) 
+                CollectActionResponse(property, property.Value.Type, actionDefinition, filePath);
+        }
+
+        private void CollectActionResponse(JProperty property, JTokenType type, ActionTargetDefinition actionTargetDefinition, string filePath)
+        {
+            HttpStatusCode statusCode = (HttpStatusCode)Int32.Parse(property.Name);
+
+            if (!actionTargetDefinition.Responses.TryGetValue(statusCode, out ActionResponse response))
             {
-                HttpStatusCode statusCode = (HttpStatusCode)Int32.Parse(property.Name);
+                response = new ActionResponse(statusCode);
+                actionTargetDefinition.Responses.Add(statusCode, response);
+            }
 
-                if (!actionDefinition.Responses.TryGetValue(statusCode, out ActionResponse response))
-                {
-                    response = new ActionResponse(statusCode);
-                    actionDefinition.Responses.Add(statusCode, response);
-                }
+            switch (type)
+            {
+                case JTokenType.Null: return;
 
-                switch (property.Value.Type)
-                {
-                    case JTokenType.Null: continue;
+                case JTokenType.String when response.ResultType == null:
+                    response.ResultType = ResolveType((JValue)property.Value, filePath);
+                    break;
 
-                    case JTokenType.String when response.ResultType == null:
-                        response.ResultType = ResolveType((JValue)property.Value, filePath);
-                        break;
+                case JTokenType.Object:
+                    JObject responseObject = (JObject)property.Value;
+                    string description = (string)responseObject.Property("description")?.Value;
 
-                    case JTokenType.Object:
-                        JObject responseObject = (JObject)property.Value;
-                        string description = (string)responseObject.Property("description")?.Value;
+                    if (description != null)
+                        response.Description = description;
 
-                        if (description != null)
-                            response.Description = description;
+                    if (response.ResultType == null)
+                    {
+                        JValue typeNameValue = (JValue)responseObject.Property("type")?.Value;
+                        if (typeNameValue != null)
+                            response.ResultType = ResolveType(typeNameValue, filePath);
+                    }
 
-                        if (response.ResultType == null)
-                        {
-                            JValue typeNameValue = (JValue)responseObject.Property("type")?.Value;
-                            if (typeNameValue != null)
-                                response.ResultType = ResolveType(typeNameValue, filePath);
-                        }
+                    break;
 
-                        break;
-
-                    default:
-                        throw new ArgumentOutOfRangeException(property.Value.Path, property.Value.Type, null);
-                }
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, property.Value.Path);
             }
         }
 
-        private void CollectSecuritySchemes(JObject actionJson, ActionDefinition actionDefinition, string filePath)
+        private void CollectSecuritySchemes(JObject actionJson, ActionDefinition actionDefinition, IJsonLineInfo actionLineInfo, string filePath)
         {
-            JProperty property = actionJson.Property("authorization");
+            const string propertyName = "securitySchemes";
+            JProperty property = actionJson.Property(propertyName);
             if (property == null)
+            {
+                base.Logger.LogError($"Missing required property '{propertyName}'", filePath, actionLineInfo.LineNumber, actionLineInfo.LinePosition);
                 return;
+            }
 
-            switch (property.Value.Type)
+            IEnumerable<SecurityScheme> schemes = CollectSecurityScheme(property, property.Value.Type, filePath);
+            actionDefinition.SecuritySchemes.Requirements.AddRange(schemes.Select(x => new SecuritySchemeRequirement(x)));
+        }
+
+        private IEnumerable<SecurityScheme> CollectSecurityScheme(JProperty property, JTokenType type, string filePath)
+        {
+            switch (type)
             {
                 case JTokenType.String:
-                    CollectSecurityScheme(actionDefinition, property.Value, filePath);
+                    foreach (SecurityScheme securityScheme in CollectSecurityScheme(property.Value, property.Value.Type, filePath))
+                        yield return securityScheme;
+
                     break;
 
                 case JTokenType.Array:
                     JArray array = (JArray)property.Value;
-                    foreach (JToken value in array)
-                        CollectSecurityScheme(actionDefinition, value, filePath);
+                    foreach (SecurityScheme securityScheme in array.SelectMany(x => CollectSecurityScheme(x, x.Type, filePath)))
+                        yield return securityScheme;
 
-                    break;
-
-                case JTokenType.Object:
-                    JObject @object = (JObject)property.Value;
-                    CollectAuthorizationBehaviors(actionDefinition, @object, filePath);
                     break;
 
                 default:
-                    throw new ArgumentOutOfRangeException(property.Value.Path, property.Value.Type, null);
+                    throw new ArgumentOutOfRangeException(nameof(type), type, property.Value.Path);
             }
         }
-
-        private void CollectSecurityScheme(ActionDefinition actionDefinition, JToken value, string filePath)
+        private IEnumerable<SecurityScheme> CollectSecurityScheme(JToken value, JTokenType type, string filePath)
         {
-            if (value.Type != JTokenType.String)
-                throw new ArgumentOutOfRangeException(value.Path, value.Type, null);
+            if (type != JTokenType.String)
+                throw new ArgumentOutOfRangeException(nameof(type), type, value.Path);
 
             string name = (string)value;
-            if (!_securitySchemeMap.ContainsKey(name))
+            if (!_usedSecuritySchemes.TryGetValue(name, out SecurityScheme scheme))
             {
-                if (!CodeGeneration.SecuritySchemes.TryFindSecurityScheme(name, out SecurityScheme scheme)
-                 && !TryGetDefaultSecurityScheme(name, out scheme))
+                if (!_securitySchemes.TryFindSecurityScheme(name, out scheme))
                 {
                     IJsonLineInfo lineInfo = value;
-                    string possibleValues = String.Join(", ", CodeGeneration.SecuritySchemes
-                                                                            .Schemes
-                                                                            .Select(x => x.Name)
-                                                                            .Concat(_defaultSecuritySchemes));
+                    string possibleValues = String.Join(", ", _securitySchemes.Schemes.Select(x => x.Name));
                     base.Logger.LogError($"Unknown authorization scheme '{name}'. Possible values are: {possibleValues}", filePath, lineInfo.LineNumber, lineInfo.LinePosition);
-                    return;
+                    yield break;
                 }
-                _securitySchemeMap.Add(name, scheme);
+                _usedSecuritySchemes.Add(name, scheme);
             }
-
-            actionDefinition.SecuritySchemes.Add(new[] { name });
+            yield return scheme;
         }
 
-        private bool TryGetDefaultSecurityScheme(string name, out SecurityScheme scheme)
+        private void CollectAuthorization(JObject actionJson, ActionDefinition actionDefinition, IJsonLineInfo actionLineInfo, string filePath)
         {
-            if (_defaultSecuritySchemes.Contains(name))
+            const string propertyName = "authorization";
+            JProperty property = actionJson.Property(propertyName);
+            if (property == null)
             {
-                scheme = CreateDefaultSecurityScheme(name);
-                return true;
+                base.Logger.LogError($"Missing required property '{propertyName}'", filePath, actionLineInfo.LineNumber, actionLineInfo.LinePosition);
+                return;
             }
 
-            scheme = null;
-            return false;
+            CollectAuthorization(property, property.Value.Type, actionDefinition, filePath);
         }
-
-        private IEnumerable<string> EnsureDefaultSecuritySchemes()
+        private void CollectAuthorization(JProperty property, JTokenType type, ActionDefinition actionDefinition, string filePath)
         {
-            foreach (string name in _defaultSecuritySchemes)
+            switch (type)
             {
-                if (!_securitySchemeMap.ContainsKey(name))
-                {
-                    SecurityScheme scheme = CreateDefaultSecurityScheme(name);
-                    _securitySchemeMap.Add(name, scheme);
-                }
-                yield return name;
+                case JTokenType.Object:
+                    JObject authorization = (JObject)property.Value;
+                    IDictionary<string, ExplicitParameter> explicitParameters = new Dictionary<string, ExplicitParameter>();
+                    CollectActionParameters(authorization, filePath, explicitParameters, requestBody: null);
+                    IDictionary<string, PathParameter> pathParameters = new Dictionary<string, PathParameter>();
+                    ICollection<string> bodyParameters = new Collection<string>();
+                    actionDefinition.Authorization = CreateActionDefinition<AuthorizationBehavior>(authorization, filePath, explicitParameters, pathParameters, bodyParameters);
+                    break;
+
+                case JTokenType.String when (string)property.Value == "none":
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, property.Value.Path);
             }
         }
-
-        private void CollectAuthorizationBehaviors(ActionDefinition actionDefinition, JObject authorization, string filePath)
-        {
-            IDictionary<string, ExplicitParameter> explicitParameters = new Dictionary<string, ExplicitParameter>();
-            CollectActionParameters(authorization, filePath, explicitParameters, requestBody: null);
-            IDictionary<string, PathParameter> pathParameters = new Dictionary<string, PathParameter>();
-            ICollection<string> bodyParameters = new Collection<string>();
-            actionDefinition.Authorization = CreateActionDefinition<AuthorizationBehavior>(authorization, filePath, explicitParameters, pathParameters, bodyParameters);
-        }
-
-        private static SecurityScheme CreateDefaultSecurityScheme(string name) => new SecurityScheme(name, SecuritySchemeKind.ApiKey);
 
         private TypeReference ResolveType(JValue typeNameValue, string filePath)
         {

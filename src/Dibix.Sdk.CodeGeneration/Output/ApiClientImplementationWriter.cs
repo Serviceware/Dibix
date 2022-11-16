@@ -29,10 +29,7 @@ namespace Dibix.Sdk.CodeGeneration
                                        .AddField("BaseAddress", nameof(Uri), new CSharpValue($"new {nameof(Uri)}(\"{context.Model.BaseUrl.TrimEnd('/')}/\")"), CSharpModifiers.Private | CSharpModifiers.Static | CSharpModifiers.ReadOnly);
 
             bool hasBodyParameter = controller.Actions.Any(x => x.RequestBody != null);
-            bool requiresAuthorization = controller.Actions
-                                                   .SelectMany(x => x.SecuritySchemes)
-                                                   .SelectMany(x => x)
-                                                   .Any(x => x != SecuritySchemes.Anonymous.Name);
+            bool requiresAuthorization = controller.Actions.Any(x => x.SecuritySchemes.HasEffectiveRequirements);
 
             if (hasBodyParameter)
             {
@@ -146,9 +143,10 @@ namespace Dibix.Sdk.CodeGeneration
 
             writer.WriteLine($"{nameof(HttpRequestMessage)} requestMessage = new {nameof(HttpRequestMessage)}(new {nameof(HttpMethod)}(\"{action.Method.ToString().ToUpperInvariant()}\"), {uriConstant});");
 
-            bool oneOf = action.SecuritySchemes.Count > 1;
-            foreach (string securitySchemeName in action.SecuritySchemes.SelectMany(x => x).Where(x => x != SecuritySchemes.Anonymous.Name))
+            bool oneOf = action.SecuritySchemes.Operator == SecuritySchemeOperator.Or && action.SecuritySchemes.Requirements.Count > 1;
+            foreach (SecuritySchemeRequirement securitySchemeRequirement in action.SecuritySchemes.Requirements.Where(x => x.Scheme != SecuritySchemes.Anonymous))
             {
+                string securitySchemeName = securitySchemeRequirement.Scheme.Name;
                 string getAuthorizationValueCall = $"this._httpAuthorizationProvider.GetValue(\"{securitySchemeName}\")";
                 if (oneOf)
                 {
@@ -167,7 +165,7 @@ namespace Dibix.Sdk.CodeGeneration
             foreach (ActionParameter parameter in distinctParameters.Where(x => x.Location == ActionParameterLocation.Header))
             {
                 // Will be handled by SecurityScheme/IHttpAuthorizationProvider
-                if (parameter.ApiParameterName == "Authorization" || action.SecuritySchemes.SelectMany(x => x).Any(x => x == parameter.ApiParameterName))
+                if (parameter.ApiParameterName == "Authorization" || action.SecuritySchemes.Requirements.Any(x => x.Scheme.Name == parameter.ApiParameterName))
                     continue;
 
                 string normalizedApiParameterName = NormalizeApiParameterName(parameter.ApiParameterName);

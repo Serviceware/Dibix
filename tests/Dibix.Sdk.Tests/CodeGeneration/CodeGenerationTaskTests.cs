@@ -541,13 +541,13 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
               , isEmbedded: false
               , expectedException: @"One or more errors occured during code generation:
 Endpoints\GenericEndpointWithErrors.json(8,15,8,15):error:Unknown property source 'WTF'
-Endpoints\GenericEndpointWithErrors.json(18,20,18,20):error:Property 'X' not found on contract 'Dibix.Sdk.Tests.DomainModel.Request'
-Endpoints\GenericEndpointWithErrors.json(19,23,19,23):error:Property 'Nm' not found on contract 'Dibix.Sdk.Tests.DomainModel.Entry'
-Endpoints\GenericEndpointWithErrors.json(24,27,24,27):error:Property 'Nm' not found on contract 'Dibix.Sdk.Tests.DomainModel.Entry'
+Endpoints\GenericEndpointWithErrors.json(19,20,19,20):error:Property 'X' not found on contract 'Dibix.Sdk.Tests.DomainModel.Request'
+Endpoints\GenericEndpointWithErrors.json(20,23,20,23):error:Property 'Nm' not found on contract 'Dibix.Sdk.Tests.DomainModel.Entry'
+Endpoints\GenericEndpointWithErrors.json(25,27,25,27):error:Property 'Nm' not found on contract 'Dibix.Sdk.Tests.DomainModel.Entry'
 Endpoints\GenericEndpointWithErrors.json(9,19,9,19):error:Source 'ENV' does not support property 'MachinePassword'
-Endpoints\GenericEndpointWithErrors.json(16,27,16,27):error:The path segment 'get' is a known HTTP verb, which should be indicated by the action method and is therefore redundant: this/get/is/wrong
-Endpoints\GenericEndpointWithErrors.json(32,22,32,22):error:Equivalent paths are not allowed: GET Tests/GenericEndpoint/ambiguous/child/route/{a}
-Endpoints\GenericEndpointWithErrors.json(37,22,37,22):error:Equivalent paths are not allowed: GET Tests/GenericEndpoint/ambiguous/child/route/{b}"
+Endpoints\GenericEndpointWithErrors.json(17,27,17,27):error:The path segment 'get' is a known HTTP verb, which should be indicated by the action method and is therefore redundant: this/get/is/wrong
+Endpoints\GenericEndpointWithErrors.json(34,22,34,22):error:Equivalent paths are not allowed: GET Tests/GenericEndpoint/ambiguous/child/route/{a}
+Endpoints\GenericEndpointWithErrors.json(40,22,40,22):error:Equivalent paths are not allowed: GET Tests/GenericEndpoint/ambiguous/child/route/{b}"
             );
         }
 

@@ -7,7 +7,8 @@
       "params": {
         "a": "WTF.Is.This",
         "b": "ENV.MachinePassword"
-      }
+      },
+      "authorization": "none"
     },
     {
       "method": "POST",
@@ -24,17 +25,20 @@
             "name": "ITEM.Nm"
           }
         }
-      }
+      },
+      "authorization": "none"
     },
     {
       "method": "GET",
       "target": "EmptyWithParams",
-      "childRoute": "ambiguous/child/route/{a}"
+      "childRoute": "ambiguous/child/route/{a}",
+      "authorization": "none"
     },
     {
       "method": "GET",
       "target": "EmptyWithParams",
-      "childRoute": "ambiguous/child/route/{b}"
+      "childRoute": "ambiguous/child/route/{b}",
+      "authorization": "none"
     }
   ]
 }

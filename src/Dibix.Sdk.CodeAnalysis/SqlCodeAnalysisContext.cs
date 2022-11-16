@@ -1,8 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Security.Cryptography;
-using System.Text;
-using Dibix.Sdk.Abstractions;
+﻿using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.Dac.Model;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
@@ -14,7 +10,6 @@ namespace Dibix.Sdk.CodeAnalysis
         private readonly string _source;
         private readonly ISqlCodeAnalysisSuppressionService _suppressionService;
         private readonly ILogger _logger;
-        private readonly string _hash;
 
         public SqlModel Model { get; }
         public TSqlFragment Fragment { get; }
@@ -35,23 +30,12 @@ namespace Dibix.Sdk.CodeAnalysis
             _suppressionService = suppressionService;
             _logger = logger;
             Model = new SqlModel(source, fragment, isScriptArtifact, configuration.IsEmbedded, configuration.LimitDdlStatements, model, logger);
-            _hash = CalculateHash(source);
             Fragment = fragment;
             Configuration = configuration;
         }
 
-        public bool IsSuppressed(string ruleName, string key) => _suppressionService.IsSuppressed(ruleName, key, _hash);
+        public bool IsSuppressed(string ruleName, string key) => _suppressionService.IsSuppressed(ruleName, key, _source);
 
         public void LogError(string code, string text, int line, int column) => _logger.LogError(code, text, _source, line, column);
-
-        private static string CalculateHash(string filename)
-        {
-            using (MD5 md5 = MD5.Create())
-            {
-                string input = String.Join("\n", File.ReadAllLines(filename));
-                byte[] hash = md5.ComputeHash(Encoding.UTF8.GetBytes(input));
-                return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
-            }
-        }
     }
 }

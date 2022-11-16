@@ -50,6 +50,24 @@
             "type": "string",
             "pattern": "^[A-Z]+$"
           }
+        },
+        "CustomSecuritySchemes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "Templates": {
+          "$ref": "#/definitions/Templates"
         }
       },
       "additionalProperties": false,
@@ -73,6 +91,51 @@
               "type": "null"
             }
           ]
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 1
+    },
+    "SecuritySchemes": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "ActionTemplate": {
+      "type": "object",
+      "properties": {
+        "securitySchemes": {
+          "$ref": "#/definitions/SecuritySchemes"
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 1
+    },
+    "Template": {
+      "type": "object",
+      "properties": {
+        "Action": {
+          "$ref": "#/definitions/ActionTemplate"
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 1
+    },
+    "Templates": {
+      "type": "object",
+      "properties": {
+        "Default": {
+          "$ref": "#/definitions/Template"
         }
       },
       "additionalProperties": false,

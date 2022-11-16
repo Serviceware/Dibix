@@ -153,7 +153,7 @@ namespace Dibix.Sdk.CodeGeneration
                 writer.WriteLine($"{variableName}.BodyBinder = Type.GetType(\"{action.RequestBody.Binder}\", true);");
             }
 
-            if (action.SecuritySchemes.Any(x => x.Contains(SecuritySchemes.Anonymous.Name)))
+            if (action.SecuritySchemes.Requirements.Any(x => x.Scheme == SecuritySchemes.Anonymous))
                 writer.WriteLine($"{variableName}.IsAnonymous = true;");
 
             if (action.FileResponse != null)

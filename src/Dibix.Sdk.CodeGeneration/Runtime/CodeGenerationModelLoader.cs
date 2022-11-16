@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Dibix.Sdk.Abstractions;
 using Microsoft.SqlServer.Dac.Model;
 
@@ -10,6 +9,7 @@ namespace Dibix.Sdk.CodeGeneration
         public static CodeGenerationModel Load
         (
             CodeGenerationConfiguration configuration
+          , SecuritySchemes securitySchemes
           , ISchemaRegistry schemaRegistry
           , IExternalSchemaResolver externalSchemaResolver
           , ISchemaDefinitionResolver schemaDefinitionResolver
@@ -48,7 +48,6 @@ namespace Dibix.Sdk.CodeGeneration
             ISqlStatementParser parser = new SqlStoredProcedureParser(requireExplicitMarkup);
             ISqlStatementFormatter formatter = SelectSqlStatementFormatter(configuration.IsEmbedded);
             formatter.StripWhiteSpace = model.CommandTextFormatting == CommandTextFormatting.StripWhiteSpace;
-            IDictionary<string, SecurityScheme> securitySchemeMap = new Dictionary<string, SecurityScheme>();
 
             ISchemaProvider builtInSchemaProvider = new BuiltInSchemaProvider();
             IContractDefinitionProvider contractDefinitionProvider = new ContractDefinitionProvider(configuration.ProductName, configuration.AreaName, configuration.Contracts, fileSystemProvider, typeResolver, schemaDefinitionResolver, logger);
@@ -61,14 +60,14 @@ namespace Dibix.Sdk.CodeGeneration
 
             ISqlStatementDefinitionProvider sqlStatementDefinitionProvider = new SqlStatementDefinitionProvider(configuration.IsEmbedded, configuration.LimitDdlStatements, analyzeAlways: true, configuration.ProductName, configuration.AreaName, configuration.Source, parser, formatter, typeResolver, schemaRegistry, schemaDefinitionResolver, logger, sqlModel);
             IActionTargetDefinitionResolverFacade actionTargetResolver = new ActionTargetDefinitionResolverFacade(configuration.ProductName, configuration.AreaName, defaultClassName, sqlStatementDefinitionProvider, externalSchemaResolver, assemblyResolver, lockEntryManager, schemaDefinitionResolver, schemaRegistry, logger);
-            IControllerDefinitionProvider controllerDefinitionProvider = new ControllerDefinitionProvider(configuration.Endpoints, configuration.DefaultSecuritySchemes, securitySchemeMap, actionTargetResolver, typeResolver, schemaDefinitionResolver, actionParameterSourceRegistry, actionParameterConverterRegistry, lockEntryManager, fileSystemProvider, logger);
+            IControllerDefinitionProvider controllerDefinitionProvider = new ControllerDefinitionProvider(configuration.Endpoints, securitySchemes, configuration.ConfigurationTemplates, actionTargetResolver, typeResolver, schemaDefinitionResolver, actionParameterSourceRegistry, actionParameterConverterRegistry, lockEntryManager, fileSystemProvider, logger);
 
             schemaRegistry.ImportSchemas(sqlStatementDefinitionProvider);
 
             model.SqlStatements.AddRange(sqlStatementDefinitionProvider.SqlStatements);
             model.Contracts.AddRange(contractDefinitionProvider.Contracts);
             model.Controllers.AddRange(controllerDefinitionProvider.Controllers);
-            model.SecuritySchemes.AddRange(securitySchemeMap.Values);
+            model.SecuritySchemes.AddRange(controllerDefinitionProvider.SecuritySchemes);
             model.Schemas.AddRange(schemaRegistry.Schemas);
 
             return model;

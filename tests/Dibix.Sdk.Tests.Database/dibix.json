@@ -8,6 +8,17 @@
     },
     "Converters": [
       "DBX"
-    ] 
+    ],
+    "CustomSecuritySchemes": [
+      "DBXNS-ClientId",
+      "DBXNS-SIT"
+    ],
+    "Templates": {
+      "Default": {
+        "Action": {
+          "securitySchemes": "DBXNS-SIT"
+        }
+      }
+    }
   }
 }

@@ -4,7 +4,8 @@
     //"Dibix.GenericEndpoint",
     {
       "method": "GET",
-      "target": "MultiConcreteResult"
+      "target": "MultiConcreteResult",
+      "authorization": "none"
     },
     {
       "method": "GET",
@@ -22,32 +23,36 @@
         "e": true,
         "f": "Descending",
         "g": "cake"
-      }
+      },
+      "authorization": "none"
     },
     {
       "method": "GET",
       "target": "EmptyWithParams",
       "childRoute": "{password}/User",
-      "authorization": "Anonymous",
-      "operationId": "EmptyWithParamsAnonymous"
+      "securitySchemes": "Anonymous",
+      "operationId": "EmptyWithParamsAnonymous",
+      "authorization": "none"
     },
     {
       "method": "GET",
       "target": "SingleConrecteResultWithParams",
-      "childRoute": "Array"
+      "childRoute": "Array",
+      "authorization": "none"
     },
     {
       "method": "GET",
       "target": "FileResult",
       "childRoute": "{id}",
-      "authorization": [
+      "securitySchemes": [
         "Anonymous",
         "Bearer"
       ],
       "fileResponse": {
         "mediaType": "image/*",
         "cache": false
-      }
+      },
+      "authorization": "none"
     },
     {
       "method": "PUT",
@@ -57,7 +62,8 @@
       },
       "params": {
         "data": "BODY.$RAW"
-      }
+      },
+      "authorization": "none"
     },
     {
       "method": "POST",
@@ -67,15 +73,11 @@
         "ids": {
           "convertFromBody": "Dibix.GenericContractIdsInputConverter"
         }
-      }
+      },
+      "authorization": "none"
     },
     {
       "method": "PATCH",
-      "target": "EmptyWithParams",
-      "body": "InputContract"
-    },
-    {
-      "method": "DELETE",
       "target": "EmptyWithParams",
       "body": "AnotherInputContract",
       "params": {
@@ -87,6 +89,15 @@
           }
         }
       },
+      "securitySchemes": [
+        "DBXNS-ClientId",
+        "DBXNS-SIT"
+      ],
+      "authorization": "none"
+    },
+    {
+      "method": "DELETE",
+      "target": "EmptyWithParams",
       "authorization": {
         "target": "AssertAuthorized",
         "params": {

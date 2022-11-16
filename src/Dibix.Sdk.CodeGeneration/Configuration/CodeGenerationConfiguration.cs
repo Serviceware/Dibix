@@ -20,10 +20,10 @@ namespace Dibix.Sdk.CodeGeneration
         public string BaseUrl { get; set; }
         public string Description { get; set; }
         public bool EnableExperimentalFeatures { get; set; }
+        public ConfigurationTemplates ConfigurationTemplates { get; } = new ConfigurationTemplates();
         public ICollection<TaskItem> Source { get; } = new Collection<TaskItem>();
         public ICollection<TaskItem> Contracts { get; } = new Collection<TaskItem>();
         public ICollection<TaskItem> Endpoints { get; } = new Collection<TaskItem>();
         public ICollection<TaskItem> References { get; } = new Collection<TaskItem>();
-        public ICollection<TaskItem> DefaultSecuritySchemes { get; } = new Collection<TaskItem>();
     }
 }

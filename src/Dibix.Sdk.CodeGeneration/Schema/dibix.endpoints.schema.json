@@ -1,5 +1,5 @@
 {
-  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$schema": "http://json-schema.org/draft-05/schema#",
   "definitions": {
     "NameIdentifier": {
       "type": "string",
@@ -137,7 +137,7 @@
       "minProperties": 1,
       "additionalProperties": false
     },
-    "Authorization": {
+    "SecuritySchemes": {
       "anyOf": [
         {
           "type": "string"
@@ -149,6 +149,13 @@
           "items": {
             "type": "string"
           }
+        }
+      ]
+    },
+    "Authorization": {
+      "anyOf": [
+        {
+          "const": "none"
         },
         {
           "type": "object",
@@ -261,6 +268,9 @@
         },
         "params": {
           "$ref": "#/definitions/ParameterMappings"
+        },
+        "securitySchemes": {
+          "$ref": "#/definitions/SecuritySchemes"
         },
         "authorization": {
           "$ref": "#/definitions/Authorization"

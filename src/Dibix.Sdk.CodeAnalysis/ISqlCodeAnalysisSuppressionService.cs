@@ -2,6 +2,6 @@
 {
     public interface ISqlCodeAnalysisSuppressionService
     {
-        bool IsSuppressed(string ruleName, string key, string hash);
+        bool IsSuppressed(string ruleName, string key, string source);
     }
 }

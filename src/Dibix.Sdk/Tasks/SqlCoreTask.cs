@@ -32,7 +32,6 @@ namespace Dibix.Sdk
     [TaskProperty("Contracts", TaskPropertyType.Items, Category = ArtifactGenerationCategory)]
     [TaskProperty("Endpoints", TaskPropertyType.Items, Category = ArtifactGenerationCategory)]
     [TaskProperty("References", TaskPropertyType.Items, Category = ArtifactGenerationCategory)]
-    [TaskProperty("DefaultSecuritySchemes", TaskPropertyType.Items, Category = ArtifactGenerationCategory)]
     [TaskProperty("IsEmbedded", TaskPropertyType.Boolean, Category = GlobalCategory)]
     [TaskProperty("LimitDdlStatements", TaskPropertyType.Boolean, Category = GlobalCategory)]
     [TaskProperty("PreventDmlReferences", TaskPropertyType.Boolean, Category = GlobalCategory)]
@@ -83,9 +82,9 @@ namespace Dibix.Sdk
             codeGenerationConfiguration.Contracts.AddRange(_configuration.ArtifactGeneration.Contracts);
             codeGenerationConfiguration.Endpoints.AddRange(_configuration.ArtifactGeneration.Endpoints);
             codeGenerationConfiguration.References.AddRange(_configuration.ArtifactGeneration.References);
-            codeGenerationConfiguration.DefaultSecuritySchemes.AddRange(_configuration.ArtifactGeneration.DefaultSecuritySchemes);
 
             IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(_configuration.SqlCore.ProjectDirectory);
+            SecuritySchemes securitySchemes = new SecuritySchemes();
             IActionParameterConverterRegistry actionParameterConverterRegistry = new ActionParameterConverterRegistry();
             IActionParameterSourceRegistry actionParameterSourceRegistry = new ActionParameterSourceRegistry();
 
@@ -97,7 +96,7 @@ namespace Dibix.Sdk
                     , fileSystemProvider
                     , _logger
                     , new SqlCodeAnalysisUserConfigurationReader(sqlCodeAnalysisConfiguration)
-                    , new CodeGenerationUserConfigurationReader(codeGenerationConfiguration, actionParameterSourceRegistry, actionParameterConverterRegistry, _logger)
+                    , new CodeGenerationUserConfigurationReader(codeGenerationConfiguration, securitySchemes, actionParameterSourceRegistry, actionParameterConverterRegistry, _logger)
                 );
                 userConfigurationLoader.Load();
             }
@@ -125,6 +124,7 @@ namespace Dibix.Sdk
                 bool codeGenerationResult = CodeGenerationTask.Execute
                 (
                     codeGenerationConfiguration
+                  , securitySchemes
                   , actionParameterSourceRegistry
                   , actionParameterConverterRegistry
                   , lockEntryManager
