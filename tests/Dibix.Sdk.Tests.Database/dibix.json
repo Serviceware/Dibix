@@ -18,6 +18,11 @@
         "Action": {
           "securitySchemes": "DBXNS-SIT"
         }
+      },
+      "Authorization": {
+        "AssertAuthorizedTemplate": {
+          "target": "AssertAuthorized"
+        }
       }
     }
   }

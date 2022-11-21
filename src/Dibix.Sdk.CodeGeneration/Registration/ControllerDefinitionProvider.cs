@@ -557,7 +557,14 @@ namespace Dibix.Sdk.CodeGeneration
             switch (type)
             {
                 case JTokenType.Object:
-                    JObject authorization = (JObject)property.Value;
+                    JObject authorizationValue = (JObject)property.Value;
+                    JProperty templateProperty = authorizationValue.Property("name");
+                    JObject authorization = authorizationValue;
+
+                    // In case of error that has been previously logged
+                    if (templateProperty != null && (authorization = ApplyAuthorizationTemplate(templateProperty, filePath, authorizationValue)) == null)
+                        return;
+
                     IDictionary<string, ExplicitParameter> explicitParameters = new Dictionary<string, ExplicitParameter>();
                     CollectActionParameters(authorization, filePath, explicitParameters, requestBody: null);
                     IDictionary<string, PathParameter> pathParameters = new Dictionary<string, PathParameter>();
@@ -571,6 +578,35 @@ namespace Dibix.Sdk.CodeGeneration
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, property.Value.Path);
             }
+        }
+
+        private JObject ApplyAuthorizationTemplate(JProperty templateNameProperty, string filePath, JObject authorizationTemplateReference)
+        {
+            string templateName = (string)templateNameProperty.Value;
+            if (!_templates.Authorization.TryGetTemplate(templateName, out ConfigurationAuthorizationTemplate template))
+            {
+                IJsonLineInfo templateNameLineInfo = templateNameProperty.Value.GetLineInfo();
+                Logger.LogError($"Unknown authorization template '{templateName}'", filePath, templateNameLineInfo.LineNumber, templateNameLineInfo.LinePosition);
+                return null;
+            }
+
+            templateNameProperty.Remove();
+
+            JObject resolvedAuthorization = new JObject();
+
+            if (authorizationTemplateReference.HasValues)
+            {
+                JObject @params = new JObject();
+                resolvedAuthorization.Add(new JProperty("params", @params));
+
+                foreach (JProperty authorizationParameterProperty in authorizationTemplateReference.Properties())
+                {
+                    @params.Add(authorizationParameterProperty);
+                }
+            }
+
+            JObject mergedAuthorization = ApplyTemplate(template.Content, resolvedAuthorization);
+            return mergedAuthorization;
         }
 
         private TypeReference ResolveType(JValue typeNameValue, string filePath)

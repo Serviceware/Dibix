@@ -104,6 +104,15 @@
           "right": 1
         }
       }
+    },
+    {
+      "method": "DELETE",
+      "childRoute": "Alternative",
+      "target": "EmptyWithParams",
+      "authorization": {
+        "name": "AssertAuthorizedTemplate",
+        "right": 1
+      }
     }
   ]
 }

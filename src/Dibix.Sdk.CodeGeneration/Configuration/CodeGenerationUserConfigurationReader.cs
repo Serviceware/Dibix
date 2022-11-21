@@ -133,7 +133,10 @@ namespace Dibix.Sdk.CodeGeneration
 
             foreach (JProperty template in templates.Properties())
             {
-                CollectTemplate(template.Name, (JObject)template.Value);
+                if (template.Name == "Authorization")
+                    CollectAuthorizationTemplate((JObject)template.Value);
+                else
+                    CollectTemplate(template.Name, (JObject)template.Value);
             }
         }
 
@@ -148,6 +151,15 @@ namespace Dibix.Sdk.CodeGeneration
             const string propertyName = "Action";
             JProperty actionTemplateProperty = templateJson.Property(propertyName)!;
             template.Action = (JObject)actionTemplateProperty.Value;
+        }
+
+        private void CollectAuthorizationTemplate(JObject templates)
+        {
+            foreach (JProperty templateJson in templates.Properties())
+            {
+                ConfigurationAuthorizationTemplate template = new ConfigurationAuthorizationTemplate(templateJson.Name, (JObject)templateJson.Value);
+                _configuration.ConfigurationTemplates.Authorization.Register(template);
+            }
         }
     }
 }

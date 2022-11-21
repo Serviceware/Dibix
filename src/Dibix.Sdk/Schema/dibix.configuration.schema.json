@@ -1,6 +1,169 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "definitions": {
+    "NameIdentifier": {
+      "type": "string",
+      "pattern": "^[A-Z]([A-Za-z.]+)?(,[A-Z]([A-Za-z.]+)?)?$"
+    },
+    "ConstantSource": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "string",
+          "pattern": "^[^.]+$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "ConstantSource": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "string",
+          "pattern": "^[^.]+$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "PropertySource": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[A-Z]+((\\.[A-Za-z-]+)|((\\.[A-Z][A-Za-z]+?){1,})|(\\.\\$[A-Z]+))$"
+        },
+        {
+          "$ref": "#/definitions/ComplexPropertySource"
+        }
+      ]
+    },
+    "ComplexPropertySource": {
+      "type": "object",
+      "minProperties": 2,
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "$ref": "#/definitions/PropertySource"
+        },
+        "converter": {
+          "type": "string",
+          "pattern": "^[A-Z]+$"
+        }
+      },
+      "required": [
+        "source",
+        "converter"
+      ]
+    },
+    "ItemsPropertySource": {
+      "type": "object",
+      "minProperties": 2,
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "$ref": "#/definitions/PropertySource"
+        },
+        "items": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-z]+$": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/Source"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "required": [
+        "source",
+        "items"
+      ]
+    },
+    "BodySource": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "properties": {
+        "convertFromBody": {
+          "$ref": "#/definitions/NameIdentifier"
+        }
+      }
+    },
+    "Source": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/ConstantSource"
+        },
+        {
+          "$ref": "#/definitions/PropertySource"
+        }
+      ]
+    },
+    "ParameterMappings": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-z]+$": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Source"
+            },
+            {
+              "$ref": "#/definitions/ItemsPropertySource"
+            },
+            {
+              "$ref": "#/definitions/BodySource"
+            }
+          ]
+        }
+      },
+      "minProperties": 1,
+      "additionalProperties": false
+    },
+    "SecuritySchemes": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "AuthorizationTarget": {
+      "type": "object",
+      "properties": {
+        "target": {
+          "$ref": "#/definitions/NameIdentifier"
+        },
+        "params": {
+          "$ref": "#/definitions/ParameterMappings"
+        }
+      },
+      "required": [
+        "target"
+      ],
+      "additionalProperties": false
+    },
     "Configuration": {
       "type": "object",
       "properties": {
@@ -96,21 +259,6 @@
       "additionalProperties": false,
       "minProperties": 1
     },
-    "SecuritySchemes": {
-      "anyOf": [
-        {
-          "type": "string"
-        },
-        {
-          "type": "array",
-          "minItems": 1,
-          "uniqueItems": true,
-          "items": {
-            "type": "string"
-          }
-        }
-      ]
-    },
     "ActionTemplate": {
       "type": "object",
       "properties": {
@@ -131,11 +279,24 @@
       "additionalProperties": false,
       "minProperties": 1
     },
+    "AuthorizationTemplate": {
+      "type": "object",
+      "patternProperties": {
+        "^[A-Z]([A-Za-z]+)?$": {
+          "$ref": "#/definitions/AuthorizationTarget"
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 1
+    },
     "Templates": {
       "type": "object",
       "properties": {
         "Default": {
           "$ref": "#/definitions/Template"
+        },
+        "Authorization": {
+          "$ref": "#/definitions/AuthorizationTemplate"
         }
       },
       "additionalProperties": false,

@@ -152,7 +152,7 @@
         }
       ]
     },
-    "Authorization": {
+    "AuthorizationTarget": {
       "anyOf": [
         {
           "const": "none"
@@ -173,6 +173,23 @@
           "additionalProperties": false
         }
       ]
+    },
+    "AuthorizationTemplateReference": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/definitions/NameIdentifier"
+        }
+      },
+      "patternProperties": {
+        "^[a-z]+$": {
+          "$ref": "#/definitions/ConstantSource"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
     },
     "FileResponse": {
       "properties": {
@@ -273,7 +290,14 @@
           "$ref": "#/definitions/SecuritySchemes"
         },
         "authorization": {
-          "$ref": "#/definitions/Authorization"
+          "anyOf": [
+            {
+              "$ref": "#/definitions/AuthorizationTarget"
+            },
+            {
+              "$ref": "#/definitions/AuthorizationTemplateReference"
+            }
+          ]
         },
         "fileResponse": {
           "$ref": "#/definitions/FileResponse"
