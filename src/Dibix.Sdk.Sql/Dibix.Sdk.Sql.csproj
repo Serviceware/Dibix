@@ -9,7 +9,6 @@
     <Compile Include="..\..\shared\Extensions\CollectionExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Extensions\ReflectionExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
-    <Compile Include="..\..\shared\SchemaName.cs" Link="Environment\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Utilities\ExpressionUtility.cs" Link="Utilities\%(Filename)%(Extension)" />
   </ItemGroup>
 

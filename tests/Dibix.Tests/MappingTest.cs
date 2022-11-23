@@ -139,7 +139,7 @@ namespace Dibix.Tests
 
             Mock<DbConnection> connection = new Mock<DbConnection>(MockBehavior.Strict);
             Mock<DatabaseAccessor> accessor = new Mock<DatabaseAccessor>(MockBehavior.Strict, connection.Object);
-            Mock<MultipleResultReader> multipleResultReader = new Mock<MultipleResultReader>(MockBehavior.Strict, null, null, null);
+            Mock<MultipleResultReader> multipleResultReader = new Mock<MultipleResultReader>(MockBehavior.Strict, null, null, null, false);
 
             connection.Protected().Setup(nameof(IDisposable.Dispose), exactParameterMatch: true, false);
             accessor.As<IDatabaseAccessor>()

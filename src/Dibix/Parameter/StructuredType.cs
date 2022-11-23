@@ -23,7 +23,7 @@ namespace Dibix
         protected StructuredType(string typeName)
         {
             this._records = new Collection<SqlDataRecord>();
-            this.TypeName = NormalizeTypeName(typeName);
+            this.TypeName = typeName;
         }
         #endregion
 
@@ -56,16 +56,8 @@ namespace Dibix
         }
         #endregion
 
-        #region Private Methods
-        private static string NormalizeTypeName(string typeName)
-        {
-            Guard.IsNotNullOrEmpty(typeName, nameof(typeName));
-            IList<string> parts = typeName.Split('.').Select(x => x.TrimStart('[').TrimEnd(']')).ToList();
-            if (parts.Count < 2)
-                parts.Insert(0, SchemaName.Default);
-
-            return String.Join(".", parts.Select(x => $"[{x}]"));
-        }
+        #region Internal Methods
+        public IEnumerable<SqlMetaData> GetMetadata() => _metadata;
         #endregion
 
         #region IEnumerable Members

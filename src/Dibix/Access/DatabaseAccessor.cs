@@ -14,6 +14,7 @@ namespace Dibix
     {
         #region Fields
         private static readonly TraceSource TraceSource = new TraceSource("Dibix.Sql");
+        private readonly bool _isSqlClient;
         #endregion
 
         #region Properties
@@ -23,9 +24,14 @@ namespace Dibix
         #region Constructor
         protected DatabaseAccessor(DbConnection connection)
         {
+            _isSqlClient = false;
             Connection = connection;
+
             if (Connection is SqlConnection sqlConnection)
+            {
                 sqlConnection.InfoMessage += OnInfoMessage;
+                _isSqlClient = true;
+            }
         }
         #endregion
 
@@ -170,16 +176,16 @@ namespace Dibix
         #endregion
 
         #region Private Methods
-        private static T Execute<T>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<T> action)
+        private T Execute<T>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<T> action)
         {
             try { return action(); }
-            catch (Exception exception) { throw DatabaseAccessException.Create(commandType, commandText, parameters, exception); }
+            catch (Exception exception) { throw DatabaseAccessException.Create(commandType, commandText, parameters, exception, _isSqlClient); }
         }
-        private static async Task<T> Execute<T>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<Task<T>> action)
+        private async Task<T> Execute<T>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<Task<T>> action)
         {
             try { return await action().ConfigureAwait(false); }
-            catch (AggregateException exception) { throw DatabaseAccessException.Create(commandType, commandText, parameters, exception.InnerException ?? exception); }
-            catch (Exception exception) { throw DatabaseAccessException.Create(commandType, commandText, parameters, exception); }
+            catch (AggregateException exception) { throw DatabaseAccessException.Create(commandType, commandText, parameters, exception.InnerException ?? exception, _isSqlClient); }
+            catch (Exception exception) { throw DatabaseAccessException.Create(commandType, commandText, parameters, exception, _isSqlClient); }
         }
 
         private static void OnInfoMessage(object sender, SqlInfoMessageEventArgs e)

@@ -5,6 +5,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Dibix.Testing;
 using Moq;
@@ -37,9 +38,17 @@ namespace Dibix.Http.Server.Tests
                 parametersVisitorSetup.Callback(inputParameterVisitor);
 
             SqlException sqlException = SqlExceptionFactory.Create(serverVersion: default, infoNumber: errorInfoNumber, errorState: default, errorClass: default, server: default, errorMessage, procedure: default, lineNumber: default);
+            const bool isSqlClient = true;
 
-            Exception exception = (Exception)typeof(DatabaseAccessException).SafeGetMethod("Create", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { commandType, commandText, parametersVisitor.Object, sqlException });
+            Exception exception = (Exception)typeof(DatabaseAccessException).SafeGetMethod("Create", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { commandType, commandText, parametersVisitor.Object, sqlException, isSqlClient });
             return exception;
+        }
+
+        private static string GetExceptionTextWithoutCallStack(Exception exception)
+        {
+            string exceptionText = exception.ToString();
+            string normalizedExceptionText = Regex.Replace(exceptionText, @"(?<CallStack> --->(.|\n)+)\nDebug statement:", String.Empty);
+            return normalizedExceptionText;
         }
 
         private sealed class HttpApiRegistration : HttpApiDescriptor

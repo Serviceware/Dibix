@@ -44,7 +44,7 @@ namespace Dibix.Http.Server.Tests
             {
                 Assert.AreEqual(@"504 GatewayTimeout: Too late
 CommandType: 0
-CommandText: <Dynamic>", requestException.Message);
+CommandText: <Inline>", requestException.Message);
                 AssertIsType<DatabaseAccessException>(requestException.InnerException);
                 Assert.IsFalse(requestException.IsClientError);
                 Assert.AreEqual(HttpStatusCode.GatewayTimeout, requestException.ErrorResponse.StatusCode);
@@ -68,7 +68,7 @@ CommandText: <Dynamic>", requestException.Message);
             {
                 Assert.AreEqual(@"403 Forbidden: Sorry
 CommandType: 0
-CommandText: <Dynamic>", requestException.Message);
+CommandText: <Inline>", requestException.Message);
                 AssertIsType<DatabaseAccessException>(requestException.InnerException);
                 Assert.IsTrue(requestException.IsClientError);
                 Assert.AreEqual(HttpStatusCode.Forbidden, requestException.ErrorResponse.StatusCode);
@@ -92,7 +92,7 @@ CommandText: <Dynamic>", requestException.Message);
             {
                 Assert.AreEqual(@"403 Forbidden: Sorry
 CommandType: 0
-CommandText: <Dynamic>", requestException.Message);
+CommandText: <Inline>", requestException.Message);
                 AssertIsType<DatabaseAccessException>(requestException.InnerException);
                 Assert.IsTrue(requestException.IsClientError);
                 Assert.AreEqual(HttpStatusCode.Forbidden, requestException.ErrorResponse.StatusCode);
@@ -118,13 +118,33 @@ CommandText: <Dynamic>", requestException.Message);
                 Assert.AreEqual("x", ex.CommandText);
                 Assert.AreEqual(@"Oops
 CommandType: StoredProcedure
-CommandText: x
-Parameter a(Binary): System.Byte[]
-Parameter b([dbo].[x]):
+CommandText: x", ex.Message);
+                Assert.AreEqual(@"Parameter a(Binary): System.Byte[]
+Parameter b(x):
 intValue INT(4)  stringValue NVARCHAR(MAX)
 ---------------  -------------------------
 1                I                        
-2                II                       ", ex.Message);
+2                II                       ", ex.ParameterDump);
+                Assert.AreEqual(@"DECLARE @a VARBINARY(MAX) = 0x01
+DECLARE @b [x]
+INSERT INTO @b ([intValue], [stringValue])
+        VALUES (1         , N'I'         )
+             , (2         , N'II'        )
+
+EXEC x @a = @a
+     , @b = @b", ex.SqlDebugStatement);
+                Assert.AreEqual(@"Dibix.DatabaseAccessException: Oops
+CommandType: StoredProcedure
+CommandText: x
+
+DECLARE @a VARBINARY(MAX) = 0x01
+DECLARE @b [x]
+INSERT INTO @b ([intValue], [stringValue])
+        VALUES (1         , N'I'         )
+             , (2         , N'II'        )
+
+EXEC x @a = @a
+     , @b = @b", GetExceptionTextWithoutCallStack(ex));
             }
         }
         private static void Invoke_DDL_WithSqlException_WrappedExceptionIsThrown_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw CreateException(errorInfoNumber: 50000, errorMessage: "Oops", CommandType.StoredProcedure, commandText: "x", visitParameter =>
@@ -151,13 +171,27 @@ intValue INT(4)  stringValue NVARCHAR(MAX)
                 Assert.AreEqual("x", ex.CommandText);
                 Assert.AreEqual(@"Oops
 CommandType: Text
-CommandText: <Dynamic>
-Parameter a(Binary): System.Byte[]
-Parameter b([dbo].[x]):
+CommandText: <Inline>", ex.Message);
+                Assert.AreEqual(@"Parameter a(Binary): System.Byte[]
+Parameter b(x):
 intValue INT(4)  stringValue NVARCHAR(MAX)
 ---------------  -------------------------
 1                I                        
-2                II                       ", ex.Message);
+2                II                       ", ex.ParameterDump);
+                Assert.AreEqual(@"DECLARE @a VARBINARY(MAX) = 0x01
+DECLARE @b [x]
+INSERT INTO @b ([intValue], [stringValue])
+        VALUES (1         , N'I'         )
+             , (2         , N'II'        )", ex.SqlDebugStatement);
+                Assert.AreEqual(@"Dibix.DatabaseAccessException: Oops
+CommandType: Text
+CommandText: <Inline>
+
+DECLARE @a VARBINARY(MAX) = 0x01
+DECLARE @b [x]
+INSERT INTO @b ([intValue], [stringValue])
+        VALUES (1         , N'I'         )
+             , (2         , N'II'        )", GetExceptionTextWithoutCallStack(ex));
             }
         }
         private static void Invoke_DML_WithSqlException_WrappedExceptionIsThrown_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw CreateException(errorInfoNumber: default, errorMessage: "Oops", CommandType.Text, commandText: "x", (InputParameterVisitor visitParameter) =>

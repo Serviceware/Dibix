@@ -19,7 +19,7 @@ namespace Dibix.Dapper.Tests
             DatabaseAccessException exception = AssertThrows<DatabaseAccessException>(() => accessor.QuerySingle<byte>(commandText));
             Assert.AreEqual(@"Sequence contains more than one element
 CommandType: Text
-CommandText: <Dynamic>", exception.Message);
+CommandText: <Inline>", exception.Message);
         });
 
         [TestMethod]
@@ -102,7 +102,7 @@ CommandText: <Dynamic>", exception.Message);
             DatabaseAccessException exception = AssertThrows<DatabaseAccessException>(() => accessor.QuerySingle<Entity>(commandText));
             Assert.AreEqual(@"Column name was not specified, therefore it cannot be mapped to type 'Dibix.Dapper.Tests.Entity'
 CommandType: Text
-CommandText: <Dynamic>", exception.Message);
+CommandText: <Inline>", exception.Message);
         });
 
         [TestMethod]
@@ -112,7 +112,7 @@ CommandText: <Dynamic>", exception.Message);
             DatabaseAccessException exception = AssertThrows<DatabaseAccessException>(() => accessor.QuerySingle<Entity>(commandText));
             Assert.AreEqual(@"Column 'idx' does not match a property on type 'Dibix.Dapper.Tests.Entity'
 CommandType: Text
-CommandText: <Dynamic>", exception.Message);
+CommandText: <Inline>", exception.Message);
         });
 
         [TestMethod]

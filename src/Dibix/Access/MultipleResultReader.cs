@@ -11,163 +11,165 @@ namespace Dibix
         #region Fields
         private readonly string _commandText;
         private readonly CommandType _commandType;
+        private readonly bool _isSqlClient;
         private readonly ParametersVisitor _parameters;
         #endregion
 
         #region Constructor
-        protected MultipleResultReader(string commandText, CommandType commandType, ParametersVisitor parameters)
+        protected MultipleResultReader(string commandText, CommandType commandType, ParametersVisitor parameters, bool isSqlClient)
         {
-            this._commandText = commandText;
-            this._commandType = commandType;
-            this._parameters = parameters;
+            _commandText = commandText;
+            _commandType = commandType;
+            _parameters = parameters;
+            _isSqlClient = isSqlClient;
         }
         #endregion
 
         #region IMultipleResultReader Members
         public abstract bool IsConsumed { get; }
-        IEnumerable<T> IMultipleResultReader.ReadMany<T>() => this.Execute(() => this.ReadMany<T>().PostProcess());
+        IEnumerable<T> IMultipleResultReader.ReadMany<T>() => Execute(() => ReadMany<T>().PostProcess());
 
         // TaskReminder
-        Task<IEnumerable<T>> IMultipleResultReader.ReadManyAsync<T>() => this.Execute(() => this.ReadManyAsync<T>().PostProcess());
+        Task<IEnumerable<T>> IMultipleResultReader.ReadManyAsync<T>() => Execute(() => ReadManyAsync<T>().PostProcess());
 
         // ObjectManagement (GetDetailConfigurationExportById, GetDetailConfigurationExportByObjectDef)
-        public IEnumerable<TReturn> ReadMany<TReturn, TSecond>(string splitOn) where TReturn : new() => this.Execute(() =>
+        public IEnumerable<TReturn> ReadMany<TReturn, TSecond>(string splitOn) where TReturn : new() => Execute(() =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.ReadMany<TReturn, TSecond, TReturn>((a, b) => multiMapper.MapRow<TReturn>(useProjection: false, a, b), splitOn)
+            return ReadMany<TReturn, TSecond, TReturn>((a, b) => multiMapper.MapRow<TReturn>(useProjection: false, a, b), splitOn)
                        .PostProcess(multiMapper);
         });
 
-        IEnumerable<TReturn> IMultipleResultReader.ReadMany<TFirst, TSecond, TReturn>(Func<TFirst, TSecond, TReturn> map, string splitOn) => this.Execute(() => this.ReadMany(map, splitOn).PostProcess());
+        IEnumerable<TReturn> IMultipleResultReader.ReadMany<TFirst, TSecond, TReturn>(Func<TFirst, TSecond, TReturn> map, string splitOn) => Execute(() => ReadMany(map, splitOn).PostProcess());
 
-        public IEnumerable<TReturn> ReadManyProjection<TFirst, TSecond, TReturn>(string splitOn) where TReturn : new() => this.Execute(() =>
+        public IEnumerable<TReturn> ReadManyProjection<TFirst, TSecond, TReturn>(string splitOn) where TReturn : new() => Execute(() =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.ReadMany<TFirst, TSecond, TReturn>((a, b) => multiMapper.MapRow<TReturn>(useProjection: true, a, b), splitOn)
+            return ReadMany<TFirst, TSecond, TReturn>((a, b) => multiMapper.MapRow<TReturn>(useProjection: true, a, b), splitOn)
                        .PostProcess(multiMapper);
         });
 
         // Dibix (Inline_GridResult_WithProjection)
-        public IEnumerable<TReturn> ReadManyProjection<TFirst, TSecond, TThird, TReturn>(string splitOn) where TReturn : new() => this.Execute(() =>
+        public IEnumerable<TReturn> ReadManyProjection<TFirst, TSecond, TThird, TReturn>(string splitOn) where TReturn : new() => Execute(() =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.ReadMany<TFirst, TSecond, TThird, TReturn>((a, b, c) => multiMapper.MapRow<TReturn>(useProjection: true, a, b, c), splitOn)
+            return ReadMany<TFirst, TSecond, TThird, TReturn>((a, b, c) => multiMapper.MapRow<TReturn>(useProjection: true, a, b, c), splitOn)
                        .PostProcess(multiMapper);
         });
 
-        IEnumerable<TReturn> IMultipleResultReader.ReadMany<TFirst, TSecond, TThird, TReturn>(Func<TFirst, TSecond, TThird, TReturn> map, string splitOn) => this.Execute(() => this.ReadMany(map, splitOn).PostProcess());
+        IEnumerable<TReturn> IMultipleResultReader.ReadMany<TFirst, TSecond, TThird, TReturn>(Func<TFirst, TSecond, TThird, TReturn> map, string splitOn) => Execute(() => ReadMany(map, splitOn).PostProcess());
 
         // OrderManagement (LoadProductRuntime)
-        public IEnumerable<TReturn> ReadMany<TReturn, TSecond, TThird>(string splitOn) where TReturn : new() => this.Execute(() =>
+        public IEnumerable<TReturn> ReadMany<TReturn, TSecond, TThird>(string splitOn) where TReturn : new() => Execute(() =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.ReadMany<TReturn, TSecond, TThird, TReturn>((a, b, c) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c), splitOn)
+            return ReadMany<TReturn, TSecond, TThird, TReturn>((a, b, c) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c), splitOn)
                        .PostProcess(multiMapper);
         });
 
         // OrderManagement (GetProduct)
-        public IEnumerable<TReturn> ReadMany<TReturn, TSecond, TThird, TFourth>(string splitOn) where TReturn : new() => this.Execute(() =>
+        public IEnumerable<TReturn> ReadMany<TReturn, TSecond, TThird, TFourth>(string splitOn) where TReturn : new() => Execute(() =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.ReadMany<TReturn, TSecond, TThird, TFourth, TReturn>((a, b, c, d) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c, d), splitOn)
+            return ReadMany<TReturn, TSecond, TThird, TFourth, TReturn>((a, b, c, d) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c, d), splitOn)
                        .PostProcess(multiMapper);
         });
 
-        IEnumerable<TReturn> IMultipleResultReader.ReadMany<TFirst, TSecond, TThird, TFourth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TReturn> map, string splitOn) => this.Execute(() => this.ReadMany(map, splitOn).PostProcess());
+        IEnumerable<TReturn> IMultipleResultReader.ReadMany<TFirst, TSecond, TThird, TFourth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TReturn> map, string splitOn) => Execute(() => ReadMany(map, splitOn).PostProcess());
 
-        IEnumerable<TReturn> IMultipleResultReader.ReadMany<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> map, string splitOn) => this.Execute(() => this.ReadMany(map, splitOn).PostProcess());
+        IEnumerable<TReturn> IMultipleResultReader.ReadMany<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> map, string splitOn) => Execute(() => ReadMany(map, splitOn).PostProcess());
 
         // OrderManagement (GetProductDesign)
-        public IEnumerable<TReturn> ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth>(string splitOn) where TReturn : new() => this.Execute(() =>
+        public IEnumerable<TReturn> ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth>(string splitOn) where TReturn : new() => Execute(() =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>((a, b, c, d, e, f) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c, d, e, f), splitOn)
+            return ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>((a, b, c, d, e, f) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c, d, e, f), splitOn)
                        .PostProcess(multiMapper);
         });
 
         // UserManagement (GetCaseAccessGraphConfiguration)
-        public IEnumerable<TReturn> ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(string splitOn) where TReturn : new() => this.Execute(() =>
+        public IEnumerable<TReturn> ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(string splitOn) where TReturn : new() => Execute(() =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>((a, b, c, d, e, f, g) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c, d, e, f, g), splitOn)
+            return ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>((a, b, c, d, e, f, g) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c, d, e, f, g), splitOn)
                        .PostProcess(multiMapper);
         });
 
         // UserManagement (GetCaseAccessGraphConfiguration)
-        public IEnumerable<TReturn> ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>(string splitOn) where TReturn : new() => this.Execute(() =>
+        public IEnumerable<TReturn> ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>(string splitOn) where TReturn : new() => Execute(() =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TReturn>((a, b, c, d, e, f, g, h, i) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c, d, e, f, g, h, i), splitOn)
+            return ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TReturn>((a, b, c, d, e, f, g, h, i) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c, d, e, f, g, h, i), splitOn)
                        .PostProcess(multiMapper);
         });
 
-        IEnumerable<TReturn> IMultipleResultReader.ReadMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> map, string splitOn) => this.Execute(() => this.ReadMany(map, splitOn).PostProcess());
+        IEnumerable<TReturn> IMultipleResultReader.ReadMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> map, string splitOn) => Execute(() => ReadMany(map, splitOn).PostProcess());
 
-        T IMultipleResultReader.ReadSingle<T>() => this.Execute(() => this.ReadSingle<T>().PostProcess());
+        T IMultipleResultReader.ReadSingle<T>() => Execute(() => ReadSingle<T>().PostProcess());
 
         // ObjectManagement (LoadGroupACLForSystemIdOrObjectId)
-        Task<T> IMultipleResultReader.ReadSingleAsync<T>() => this.Execute(() => this.ReadSingleAsync<T>().PostProcess());
+        Task<T> IMultipleResultReader.ReadSingleAsync<T>() => Execute(() => ReadSingleAsync<T>().PostProcess());
 
-        public TReturn ReadSingle<TReturn, TSecond>(string splitOn) where TReturn : new() => this.Execute(() =>
+        public TReturn ReadSingle<TReturn, TSecond>(string splitOn) where TReturn : new() => Execute(() =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.ReadMany<TReturn, TSecond, TReturn>((a, b) => multiMapper.MapRow<TReturn>(useProjection: false, a, b), splitOn)
+            return ReadMany<TReturn, TSecond, TReturn>((a, b) => multiMapper.MapRow<TReturn>(useProjection: false, a, b), splitOn)
                        .PostProcess(multiMapper)
                        .Single();
         });
 
         // Dibix (Inline_GridResult)
-        public TReturn ReadSingle<TReturn, TSecond, TThird>(string splitOn) where TReturn : new() => this.Execute(() =>
+        public TReturn ReadSingle<TReturn, TSecond, TThird>(string splitOn) where TReturn : new() => Execute(() =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.ReadMany<TReturn, TSecond, TThird, TReturn>((a, b, c) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c), splitOn)
+            return ReadMany<TReturn, TSecond, TThird, TReturn>((a, b, c) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c), splitOn)
                        .PostProcess(multiMapper)
                        .Single();
         });
 
         // OrderManagement (LoadProductRuntime)
-        public TReturn ReadSingle<TReturn, TSecond, TThird, TFourth>(string splitOn) where TReturn : new() => this.Execute(() =>
+        public TReturn ReadSingle<TReturn, TSecond, TThird, TFourth>(string splitOn) where TReturn : new() => Execute(() =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.ReadMany<TReturn, TSecond, TThird, TFourth, TReturn>((a, b, c, d) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c, d), splitOn)
+            return ReadMany<TReturn, TSecond, TThird, TFourth, TReturn>((a, b, c, d) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c, d), splitOn)
                        .PostProcess(multiMapper)
                        .Single();
         });
 
         // OrderManagement (GetProduct)
-        public TReturn ReadSingle<TReturn, TSecond, TThird, TFourth, TFifth>(string splitOn) where TReturn : new() => this.Execute(() =>
+        public TReturn ReadSingle<TReturn, TSecond, TThird, TFourth, TFifth>(string splitOn) where TReturn : new() => Execute(() =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TReturn>((a, b, c, d, e) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c, d, e), splitOn)
+            return ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TReturn>((a, b, c, d, e) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c, d, e), splitOn)
                        .PostProcess(multiMapper)
                        .Single();
         });
 
         // OrderManagement (GetProductDesign)
-        public TReturn ReadSingle<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>(string splitOn) where TReturn : new() => this.Execute(() =>
+        public TReturn ReadSingle<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>(string splitOn) where TReturn : new() => Execute(() =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TReturn>((a, b, c, d, e, f, g, h, i) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c, d, e, f, g, h, i), splitOn)
+            return ReadMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TReturn>((a, b, c, d, e, f, g, h, i) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c, d, e, f, g, h, i), splitOn)
                        .PostProcess(multiMapper)
                        .Single();
         });
 
-        T IMultipleResultReader.ReadSingleOrDefault<T>() => this.Execute(() => this.ReadSingleOrDefault<T>().PostProcess());
+        T IMultipleResultReader.ReadSingleOrDefault<T>() => Execute(() => ReadSingleOrDefault<T>().PostProcess());
 
         // AI (GetConfiguration)
-        public TReturn ReadSingleOrDefault<TReturn, TSecond>(string splitOn) where TReturn : new() => this.Execute(() =>
+        public TReturn ReadSingleOrDefault<TReturn, TSecond>(string splitOn) where TReturn : new() => Execute(() =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.ReadMany<TReturn, TSecond, TReturn>((a, b) => multiMapper.MapRow<TReturn>(useProjection: false, a, b), splitOn)
+            return ReadMany<TReturn, TSecond, TReturn>((a, b) => multiMapper.MapRow<TReturn>(useProjection: false, a, b), splitOn)
                        .PostProcess(multiMapper)
                        .SingleOrDefault();
         });
 
         // Search (GlobalSearchGroups)
-        public TReturn ReadSingleOrDefault<TReturn, TSecond, TThird>(string splitOn) where TReturn : new() => this.Execute(() =>
+        public TReturn ReadSingleOrDefault<TReturn, TSecond, TThird>(string splitOn) where TReturn : new() => Execute(() =>
         {
             MultiMapper multiMapper = new MultiMapper();
-            return this.ReadMany<TReturn, TSecond, TThird, TReturn>((a, b, c) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c), splitOn)
+            return ReadMany<TReturn, TSecond, TThird, TReturn>((a, b, c) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c), splitOn)
                        .PostProcess(multiMapper)
                        .SingleOrDefault();
         });
@@ -205,7 +207,7 @@ namespace Dibix
         private T Execute<T>(Func<T> action)
         {
             try { return action(); }
-            catch (Exception ex) { throw DatabaseAccessException.Create(this._commandType, this._commandText, this._parameters, ex); }
+            catch (Exception ex) { throw DatabaseAccessException.Create(_commandType, _commandText, _parameters, ex, _isSqlClient); }
         }
 
         #endregion

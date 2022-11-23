@@ -28,18 +28,18 @@ namespace Dibix
               .Append(" ")
               .Append(metadata.TypeName.ToUpperInvariant())
               .Append('(')
-              .Append(metadata.MaxLength < 0 ? "MAX" : (object)metadata.MaxLength)
+              .Append(metadata.MaxLength < 0 ? "MAX" : metadata.MaxLength)
               .Append(')');
             return sb.ToString();
         }
 
-        private static string ToTable(string[] columns, string[][] rows, string separator = "  ")
+        private static string ToTable(IReadOnlyList<string> columns, string[][] rows, string separator = "  ")
         {
             StringBuilder sb = new StringBuilder();
-            int[] sizes = new int[columns.Length];
+            int[] sizes = new int[columns.Count];
 
             // Compute column sizes
-            for (int i = 0; i < columns.Length; i++)
+            for (int i = 0; i < columns.Count; i++)
             {
                 int columnHeaderSize = columns[i].Length;
                 int maxCellSize = rows.Any() ? rows.Max(x => x[i].Length) : 0;
@@ -47,10 +47,10 @@ namespace Dibix
             }
 
             // Write column header
-            for (int i = 0; i < columns.Length; i++)
+            for (int i = 0; i < columns.Count; i++)
             {
                 sb.Append(columns[i].PadRight(sizes[i], ' '));
-                if (i + 1 < columns.Length)
+                if (i + 1 < columns.Count)
                     sb.Append(separator);
             }
             sb.AppendLine();
