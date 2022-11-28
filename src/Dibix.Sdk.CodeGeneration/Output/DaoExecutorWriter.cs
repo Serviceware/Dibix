@@ -146,14 +146,14 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static string DetermineReturnTypeName(SqlStatementDefinition query, string resultTypeName, CodeGenerationContext context)
+        private static string DetermineReturnTypeName(SqlStatementDefinition definition, string resultTypeName, CodeGenerationContext context)
         {
-            if (!query.Async) 
+            if (!definition.Async) 
                 return resultTypeName;
 
             context.AddUsing<Task>();
             StringBuilder sb = new StringBuilder(nameof(Task));
-            if (query.ResultType != null)
+            if (definition.ResultType != null)
                 sb.Append('<')
                   .Append(resultTypeName)
                   .Append('>');
@@ -162,12 +162,12 @@ namespace Dibix.Sdk.CodeGeneration
             return returnTypeName;
         }
 
-        private static string ResolveTypeName(SqlStatementDefinition query, CodeGenerationContext context)
+        private static string ResolveTypeName(SqlStatementDefinition definition, CodeGenerationContext context)
         {
-            if (query.Results.Any(x => x.Name != null)) // GridResult
-                return GetComplexTypeName(query, context);
+            if (definition.IsGridResult())
+                return GetComplexTypeName(definition, context);
 
-            return context.ResolveTypeName(query.ResultType);
+            return context.ResolveTypeName(definition.ResultType);
         }
 
         private static string GenerateMethodBody(SqlStatementDefinition definition, string resultTypeName, CodeGenerationContext context)
@@ -227,18 +227,18 @@ namespace Dibix.Sdk.CodeGeneration
                   .WriteLine();
         }
 
-        private static void WriteParameters(StringWriter writer, SqlStatementDefinition query, CodeGenerationContext context)
+        private static void WriteParameters(StringWriter writer, SqlStatementDefinition definition, CodeGenerationContext context)
         {
             writer.WriteLine("ParametersVisitor @params = accessor.Parameters()")
                   .SetTemporaryIndent(36);
 
-            bool hasImplicitParameters = query.GenerateInputClass || query.Parameters.Any(x => !x.IsOutput && !x.Obfuscate);
+            bool hasImplicitParameters = definition.GenerateInputClass || definition.Parameters.Any(x => !x.IsOutput && !x.Obfuscate);
 
             if (hasImplicitParameters)
             {
                 writer.Write(".SetFromTemplate(");
 
-                if (query.GenerateInputClass)
+                if (definition.GenerateInputClass)
                     writer.WriteRaw("input");
                 else
                 {
@@ -246,15 +246,15 @@ namespace Dibix.Sdk.CodeGeneration
                           .WriteLine("{")
                           .PushIndent();
 
-                    for (int i = 0; i < query.Parameters.Count; i++)
+                    for (int i = 0; i < definition.Parameters.Count; i++)
                     {
-                        SqlQueryParameter parameter = query.Parameters[i];
+                        SqlQueryParameter parameter = definition.Parameters[i];
                         if (parameter.Obfuscate || parameter.IsOutput)
                             continue;
 
                         writer.Write(parameter.Name);
 
-                        if (i + 1 < query.Parameters.Count)
+                        if (i + 1 < definition.Parameters.Count)
                             writer.WriteRaw(",");
 
                         writer.WriteLine();
@@ -267,9 +267,9 @@ namespace Dibix.Sdk.CodeGeneration
                 writer.WriteLineRaw(")");
             }
 
-            if (!query.GenerateInputClass)
+            if (!definition.GenerateInputClass)
             {
-                foreach (SqlQueryParameter parameter in query.Parameters)
+                foreach (SqlQueryParameter parameter in definition.Parameters)
                 {
                     if (parameter.IsOutput)
                     {
@@ -287,15 +287,15 @@ namespace Dibix.Sdk.CodeGeneration
                   .ResetTemporaryIndent();
         }
 
-        private static void WriteExecutor(StringWriter writer, SqlStatementDefinition query, string resultTypeName, bool hasOutputParameters, CodeGenerationContext context)
+        private static void WriteExecutor(StringWriter writer, SqlStatementDefinition definition, string resultTypeName, bool hasOutputParameters, CodeGenerationContext context)
         {
-            if (query.Results.Count > 1) // GridReader
+            if (definition.Results.Count > 1) // GridReader
             {
-                WriteComplexResult(writer, query, resultTypeName, hasOutputParameters, context);
+                WriteComplexResult(writer, definition, resultTypeName, hasOutputParameters, context);
             }
-            else if (query.Results.Count <= 1) // Execute or Query<T>/QuerySingle<T>/etc.
+            else if (definition.Results.Count <= 1) // Execute or Query<T>/QuerySingle<T>/etc.
             {
-                WriteSimpleResult(writer, query, resultTypeName, hasOutputParameters, context);
+                WriteSimpleResult(writer, definition, resultTypeName, hasOutputParameters, context);
             }
             else
             {
@@ -303,15 +303,15 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static void WriteSimpleResult(StringWriter writer, SqlStatementDefinition query, string resultTypeName, bool hasOutputParameters, CodeGenerationContext context)
+        private static void WriteSimpleResult(StringWriter writer, SqlStatementDefinition definition, string resultTypeName, bool hasOutputParameters, CodeGenerationContext context)
         {
-            SqlQueryResult singleResult = query.Results.SingleOrDefault();
+            SqlQueryResult singleResult = definition.Results.SingleOrDefault();
             bool isGridResult = singleResult?.Name != null;
 
             if (isGridResult)
             {
-                WriteComplexResultInitializer(writer, query, resultTypeName, hasOutputParameters);
-                WriteComplexResultAssignment(writer, query, singleResult, context, isFirstResult: true, WriteSimpleMethodCall);
+                WriteComplexResultInitializer(writer, definition, resultTypeName, hasOutputParameters);
+                WriteComplexResultAssignment(writer, definition, singleResult, context, isFirstResult: true, WriteSimpleMethodCall);
             }
 
             writer.WriteIndent();
@@ -320,20 +320,20 @@ namespace Dibix.Sdk.CodeGeneration
                 WriteResultInitialization(writer, resultTypeName, hasOutputParameters);
 
             if (!isGridResult)
-                WriteSimpleMethodCall(writer, query, singleResult, context);
+                WriteSimpleMethodCall(writer, definition, singleResult, context);
             else if (!hasOutputParameters)
                 writer.WriteRaw("result");
 
             writer.WriteLineRaw(";");
         }
 
-        private static void WriteSimpleMethodCall(StringWriter writer, SqlStatementDefinition query, SqlQueryResult singleResult, CodeGenerationContext context)
+        private static void WriteSimpleMethodCall(StringWriter writer, SqlStatementDefinition definition, SqlQueryResult singleResult, CodeGenerationContext context)
         {
             string methodName = singleResult != null ? GetExecutorMethodName(singleResult.ResultMode) : "Execute";
-            WriteMethodCall(writer, query, methodName, singleResult, context);
+            WriteMethodCall(writer, definition, methodName, singleResult, context);
         }
 
-        private static void WriteComplexResult(StringWriter writer, SqlStatementDefinition query, string resultTypeName, bool hasOutputParameters, CodeGenerationContext context)
+        private static void WriteComplexResult(StringWriter writer, SqlStatementDefinition definition, string resultTypeName, bool hasOutputParameters, CodeGenerationContext context)
         {
             if (hasOutputParameters)
             {
@@ -343,34 +343,34 @@ namespace Dibix.Sdk.CodeGeneration
 
             writer.Write("using (IMultipleResultReader reader = ");
 
-            WriteMethodCall(writer, query, "QueryMultiple", null, context);
+            WriteMethodCall(writer, definition, "QueryMultiple", null, context);
 
             writer.WriteLineRaw(")")
                   .WriteLine("{")
                   .PushIndent();
 
-            WriteComplexResultBody(writer, query, resultTypeName, hasOutputParameters, context);
+            WriteComplexResultBody(writer, definition, resultTypeName, hasOutputParameters, context);
 
             writer.PopIndent()
                   .WriteLine("}");
         }
 
-        private static void WriteComplexResultBody(StringWriter writer, SqlStatementDefinition query, string resultTypeName, bool hasOutputParameters, CodeGenerationContext context)
+        private static void WriteComplexResultBody(StringWriter writer, SqlStatementDefinition definition, string resultTypeName, bool hasOutputParameters, CodeGenerationContext context)
         {
-            WriteComplexResultInitializer(writer, query, resultTypeName, hasOutputParameters);
+            WriteComplexResultInitializer(writer, definition, resultTypeName, hasOutputParameters);
 
             bool performNullCheck = false;
-            for (int i = 0; i < query.Results.Count; i++)
+            for (int i = 0; i < definition.Results.Count; i++)
             {
-                SqlQueryResult result = query.Results[i];
+                SqlQueryResult result = definition.Results[i];
                 bool isFirstResult = i == 0;
-                bool isLastResult = i + 1 == query.Results.Count;
+                bool isLastResult = i + 1 == definition.Results.Count;
 
-                WriteComplexResultAssignment(writer, query, result, context, isFirstResult, WriteGridReaderMethodCall);
+                WriteComplexResultAssignment(writer, definition, result, context, isFirstResult, WriteGridReaderMethodCall);
 
                 // Make sure subsequent results are not merged, when the root result returned null
                 if (isFirstResult) 
-                    performNullCheck = query.MergeGridResult && result.ResultMode == SqlQueryResultMode.SingleOrDefault;
+                    performNullCheck = definition.MergeGridResult && result.ResultMode == SqlQueryResultMode.SingleOrDefault;
 
                 if (!performNullCheck) 
                     continue;
@@ -406,7 +406,7 @@ namespace Dibix.Sdk.CodeGeneration
                 writer.WriteLine("return result;");
         }
 
-        private static void WriteComplexResultInitializer(StringWriter writer, SqlStatementDefinition query, string resultTypeName, bool hasOutputParameter)
+        private static void WriteComplexResultInitializer(StringWriter writer, SqlStatementDefinition definition, string resultTypeName, bool hasOutputParameter)
         {
             writer.WriteIndent();
 
@@ -418,7 +418,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             writer.WriteRaw("result = ");
 
-            if (!query.MergeGridResult)
+            if (!definition.MergeGridResult)
             {
                 writer.WriteRaw("new ")
                       .WriteRaw(resultTypeName)
@@ -426,27 +426,27 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static void WriteComplexResultAssignment(StringWriter writer, SqlStatementDefinition query, SqlQueryResult result, CodeGenerationContext context, bool isFirstResult, Action<StringWriter, SqlStatementDefinition, SqlQueryResult, CodeGenerationContext> valueWriter)
+        private static void WriteComplexResultAssignment(StringWriter writer, SqlStatementDefinition definition, SqlQueryResult result, CodeGenerationContext context, bool isFirstResult, Action<StringWriter, SqlStatementDefinition, SqlQueryResult, CodeGenerationContext> valueWriter)
         {
             bool isEnumerable = result.ResultMode == SqlQueryResultMode.Many;
-            if (!isFirstResult || !query.MergeGridResult)
+            if (!isFirstResult || !definition.MergeGridResult)
             {
                 writer.Write("result")
                       .WriteRaw($".{result.Name.Value}")
                       .WriteRaw(isEnumerable ? ".ReplaceWith(" : " = ");
             }
 
-            valueWriter(writer, query, result, context);
+            valueWriter(writer, definition, result, context);
 
-            if (isEnumerable && (!isFirstResult || !query.MergeGridResult))
+            if (isEnumerable && (!isFirstResult || !definition.MergeGridResult))
                 writer.WriteRaw(')'); // ReplaceWith
 
             writer.WriteLineRaw(";");
         }
 
-        private static void WriteGridReaderMethodCall(StringWriter writer, SqlStatementDefinition query, SqlQueryResult result, CodeGenerationContext context)
+        private static void WriteGridReaderMethodCall(StringWriter writer, SqlStatementDefinition definition, SqlQueryResult result, CodeGenerationContext context)
         {
-            if (query.Async)
+            if (definition.Async)
                 writer.WriteRaw("await ");
 
             writer.WriteRaw("reader.")
@@ -455,7 +455,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (result.ProjectToType != null)
                 writer.WriteRaw("Projection");
 
-            if (query.Async)
+            if (definition.Async)
                 writer.WriteRaw("Async");
 
             WriteGenericTypeArguments(writer, result, context);
@@ -466,13 +466,13 @@ namespace Dibix.Sdk.CodeGeneration
 
             WriteMethodParameters(writer, parameters);
 
-            if (query.Async)
+            if (definition.Async)
                 writer.WriteRaw(".ConfigureAwait(false)");
         }
 
-        private static void WriteMethodCall(StringWriter writer, SqlStatementDefinition query, string methodName, SqlQueryResult singleResult, CodeGenerationContext context)
+        private static void WriteMethodCall(StringWriter writer, SqlStatementDefinition definition, string methodName, SqlQueryResult singleResult, CodeGenerationContext context)
         {
-            if (query.Async)
+            if (definition.Async)
                 writer.WriteRaw("await ");
 
             writer.WriteRaw("accessor.")
@@ -481,7 +481,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (singleResult?.ProjectToType != null)
                 writer.WriteRaw("Projection");
 
-            if (query.Async)
+            if (definition.Async)
                 writer.WriteRaw("Async");
 
             if (singleResult != null)
@@ -491,19 +491,19 @@ namespace Dibix.Sdk.CodeGeneration
 
             context.AddUsing<CommandType>();
 
-            parameters.Add($"{query.DefinitionName}{ConstantSuffix}");
-            parameters.Add($"{nameof(CommandType)}.{query.Statement.CommandType}");
-            parameters.Add(query.Parameters.Any() ? "@params" : "ParametersVisitor.Empty");
+            parameters.Add($"{definition.DefinitionName}{ConstantSuffix}");
+            parameters.Add($"{nameof(CommandType)}.{definition.Statement.CommandType}");
+            parameters.Add(definition.Parameters.Any() ? "@params" : "ParametersVisitor.Empty");
 
             if (singleResult != null)
                 AppendMultiMapParameters(singleResult, parameters);
 
-            if (query.Async)
+            if (definition.Async)
                 parameters.Add("cancellationToken");
 
             WriteMethodParameters(writer, parameters);
 
-            if (query.Async)
+            if (definition.Async)
                 writer.WriteRaw(".ConfigureAwait(false)");
         }
 

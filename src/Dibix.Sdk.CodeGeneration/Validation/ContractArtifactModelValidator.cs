@@ -150,10 +150,10 @@ namespace Dibix.Sdk.CodeGeneration
 
         private void ValidateBodyContract(ActionDefinition action, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
         {
-            if (!(action.RequestBody?.Contract is SchemaTypeReference schemaTypeReference))
+            if (action.RequestBody?.Contract is not SchemaTypeReference schemaTypeReference)
                 return;
 
-            if (!(this._schemaDefinitionResolver.Resolve(schemaTypeReference) is ObjectSchema objectSchema))
+            if (this._schemaDefinitionResolver.Resolve(schemaTypeReference) is not ObjectSchema objectSchema)
                 return;
 
             if (!schemaPropertyMap.TryGetValue(objectSchema, out ObjectContractDefinition objectContractDefinition))
@@ -165,15 +165,15 @@ namespace Dibix.Sdk.CodeGeneration
                     this.VisitLocalActionTarget(action, localActionTarget, objectSchema, objectContractDefinition.Properties, schemaPropertyMap);
                     break;
 
-                case ReflectionActionTarget _:
+                case ReflectionActionTarget:
                     this.VisitReflectionActionTarget(objectSchema, schemaPropertyMap);
                     break;
             }
         }
 
-        private void ValidateResponseContracts(ActionDefinition action, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
+        private void ValidateResponseContracts(ActionTargetDefinition actionTargetDefinition, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
         {
-            foreach (ActionResponse response in action.Responses.Values)
+            foreach (ActionResponse response in actionTargetDefinition.Responses.Values)
             {
                 if (response.ResultType == null)
                     continue;
@@ -182,10 +182,10 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private void VisitLocalActionTarget(ActionDefinition action, LocalActionTarget localActionTarget, ObjectSchema bodySchema, ICollection<ObjectSchemaProperty> bodyProperties, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
+        private void VisitLocalActionTarget(ActionTargetDefinition actionTargetDefinition, LocalActionTarget localActionTarget, ObjectSchema bodySchema, ICollection<ObjectSchemaProperty> bodyProperties, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
         {
             IDictionary<string, UserDefinedTypeParameter?> parameters = localActionTarget.SqlStatementDefinition.Parameters.ToDictionary(x => x.Name, this.CollectUDTParameter, StringComparer.OrdinalIgnoreCase);
-            foreach (ActionParameter actionParameter in action.Parameters)
+            foreach (ActionParameter actionParameter in actionTargetDefinition.Parameters)
             {
                 if (parameters.TryGetValue(actionParameter.InternalParameterName, out UserDefinedTypeParameter? userDefinedTypeParameter))
                 {
@@ -328,7 +328,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private (ObjectSchema schema, IDictionary<string, ObjectSchemaProperty> propertyMap, ICollection<ObjectSchemaProperty> visitedProperties) CollectGridResultInfos(SqlStatementDefinition statement, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
         {
-            if (statement.Results.Count <= 1) 
+            if (!statement.IsGridResult())
                 return (null, null, null);
 
             if (!(statement.ResultType is SchemaTypeReference gridResultSchemaTypeReference))

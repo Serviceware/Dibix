@@ -110,7 +110,7 @@ namespace Dibix.Sdk.CodeGeneration
                 return definition.Results[0].ReturnType;
 
             // Generate grid result type
-            if (definition.Results.Any(x => x.Name != null))
+            if (definition.IsGridResult())
             {
                 generateResultClass = true;
                 return this.GenerateGridResultType(definition, relativeNamespace);

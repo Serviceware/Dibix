@@ -3,8 +3,10 @@ using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal static class EnumSchemaExtensions
+    internal static class SchemaExtensions
     {
+        public static bool IsGridResult(this SqlStatementDefinition sqlStatementDefinition) => sqlStatementDefinition.Results.Any(x => x.Name != null);
+
         public static EnumSchemaMember GetEnumMember(this EnumMemberNumericReference reference, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
         {
             EnumSchema schema = (EnumSchema)schemaDefinitionResolver.Resolve(reference.Type);
