@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.SqlClient;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,23 +15,43 @@ namespace Dibix.Testing
 
                 for (int i = 1;; i++)
                 {
-                    TResult result = await taskMethod(cancellationToken).ConfigureAwait(false);
-                    if (condition(result))
-                        return result;
-
                     try
                     {
+                        TResult result = await taskMethod(cts.Token).ConfigureAwait(false);
+                        if (condition(result))
+                            return result;
+                        
                         await Task.Delay(millisecondsDelay, cts.Token).ConfigureAwait(false);
                     }
-                    catch (OperationCanceledException)
+                    catch (Exception exception) when (IsCancellationException(exception, cts.Token))
                     {
-                        if (cts.IsCancellationRequested)
-                            throw new InvalidOperationException($"Awaiting asynchronous response timed out after {TimeSpan.FromMilliseconds(millisecondsTimeout)} and {i} attempts");
-
-                        throw;
+                        throw new InvalidOperationException($"Awaiting asynchronous response timed out after {TimeSpan.FromMilliseconds(millisecondsTimeout)} and {i} attempts");
                     }
                 }
             }
+        }
+        
+        private static bool IsCancellationException(Exception exception, CancellationToken cancellationToken)
+        {
+            if (!cancellationToken.IsCancellationRequested)
+                return false;
+
+            switch (exception)
+            {
+                case DatabaseAccessException databaseAccessException: return IsCancellationException(databaseAccessException.InnerException, cancellationToken);
+                case SqlException sqlException: return IsPossiblySqlCommandCancellation(sqlException);
+                case TaskCanceledException _: return true;
+                case OperationCanceledException _: return true;
+                default: return false;
+            }
+
+        }
+
+        private static bool IsPossiblySqlCommandCancellation(SqlException sqlException)
+        {
+            // A severe error occurred on the current command.  The results, if any, should be discarded.
+            // Operation cancelled by user.
+            return sqlException.Class == 11 && sqlException.Number == 0;
         }
     }
 }
