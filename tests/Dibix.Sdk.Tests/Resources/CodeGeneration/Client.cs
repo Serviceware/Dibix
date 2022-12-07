@@ -111,6 +111,7 @@ namespace Dibix.Sdk.Tests.Client
         Task<HttpResponseMessage> EmptyWithParams3Async(Dibix.Sdk.Tests.DomainModel.AnotherInputContract body, CancellationToken cancellationToken = default);
         Task<HttpResponseMessage> EmptyWithParams4Async(string a, string b, System.Guid? c, string password, IEnumerable<object> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", CancellationToken cancellationToken = default);
         Task<HttpResponseMessage> EmptyWithParams5Async(string a, string b, System.Guid? c, string password, IEnumerable<object> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", CancellationToken cancellationToken = default);
+        Task<HttpResponseMessage> EmptyWithParams6Async(string a, string b, System.Guid? c, string password, IEnumerable<object> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", CancellationToken cancellationToken = default);
     }
 }
 #endregion
@@ -278,6 +279,28 @@ namespace Dibix.Sdk.Tests.Client
             using (HttpClient client = this._httpClientFactory.CreateClient(this._httpClientName, BaseAddress))
             {
                 Uri uri = UriBuilder.Create("Tests/GenericEndpoint/Alternative", UriKind.Relative)
+                                    .AddQueryParam(nameof(a), a)
+                                    .AddQueryParam(nameof(b), b)
+                                    .AddQueryParam(nameof(c), c)
+                                    .AddQueryParam(nameof(password), password)
+                                    .AddQueryParam(nameof(ids), ids)
+                                    .AddQueryParam(nameof(d), d)
+                                    .AddQueryParam(nameof(e), e)
+                                    .AddQueryParam(nameof(f), f)
+                                    .AddQueryParam(nameof(g), g)
+                                    .Build();
+                HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("DELETE"), uri);
+                requestMessage.Headers.Add("DBXNS-SIT", this._httpAuthorizationProvider.GetValue("DBXNS-SIT"));
+                HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
+                return responseMessage;
+            }
+        }
+
+        public async Task<HttpResponseMessage> EmptyWithParams6Async(string a, string b, System.Guid? c, string password, IEnumerable<object> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", CancellationToken cancellationToken = default)
+        {
+            using (HttpClient client = this._httpClientFactory.CreateClient(this._httpClientName, BaseAddress))
+            {
+                Uri uri = UriBuilder.Create("Tests/GenericEndpoint/AnotherAlternative", UriKind.Relative)
                                     .AddQueryParam(nameof(a), a)
                                     .AddQueryParam(nameof(b), b)
                                     .AddQueryParam(nameof(c), c)

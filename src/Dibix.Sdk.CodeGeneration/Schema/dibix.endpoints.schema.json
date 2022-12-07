@@ -175,21 +175,28 @@
       ]
     },
     "AuthorizationTemplateReference": {
-      "type": "object",
-      "properties": {
-        "name": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "name": {
+              "$ref": "#/definitions/NameIdentifier"
+            }
+          },
+          "patternProperties": {
+            "^[a-z]+$": {
+              "$ref": "#/definitions/ConstantSource"
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        {
           "$ref": "#/definitions/NameIdentifier"
         }
-      },
-      "patternProperties": {
-        "^[a-z]+$": {
-          "$ref": "#/definitions/ConstantSource"
-        }
-      },
-      "required": [
-        "name"
-      ],
-      "additionalProperties": false
+      ]
     },
     "FileResponse": {
       "properties": {

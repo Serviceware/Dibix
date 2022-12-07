@@ -559,25 +559,33 @@ namespace Dibix.Sdk.CodeGeneration
                 case JTokenType.Object:
                     JObject authorizationValue = (JObject)property.Value;
                     JProperty templateProperty = authorizationValue.Property("name");
-                    JObject authorization = authorizationValue;
-
-                    // In case of error that has been previously logged
-                    if (templateProperty != null && (authorization = ApplyAuthorizationTemplate(templateProperty, filePath, authorizationValue)) == null)
-                        return;
-
-                    IDictionary<string, ExplicitParameter> explicitParameters = new Dictionary<string, ExplicitParameter>();
-                    CollectActionParameters(authorization, filePath, explicitParameters, requestBody: null);
-                    IDictionary<string, PathParameter> pathParameters = new Dictionary<string, PathParameter>();
-                    ICollection<string> bodyParameters = new Collection<string>();
-                    actionDefinition.Authorization = CreateActionDefinition<AuthorizationBehavior>(authorization, filePath, explicitParameters, pathParameters, bodyParameters);
+                    CollectAuthorization(templateProperty, authorizationValue, actionDefinition, filePath);
                     break;
 
                 case JTokenType.String when (string)property.Value == "none":
                     break;
 
+                case JTokenType.String:
+                    CollectAuthorization(templateProperty: property, authorizationValue: new JObject(), actionDefinition, filePath);
+                    break;
+
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, property.Value.Path);
             }
+        }
+        private void CollectAuthorization(JProperty templateProperty, JObject authorizationValue, ActionDefinition actionDefinition, string filePath)
+        {
+            JObject authorization = authorizationValue;
+
+            if (templateProperty != null
+             && (authorization = ApplyAuthorizationTemplate(templateProperty, filePath, authorizationValue)) == null) // In case of error that has been previously logged
+                return;
+
+            IDictionary<string, ExplicitParameter> explicitParameters = new Dictionary<string, ExplicitParameter>();
+            CollectActionParameters(authorization, filePath, explicitParameters, requestBody: null);
+            IDictionary<string, PathParameter> pathParameters = new Dictionary<string, PathParameter>();
+            ICollection<string> bodyParameters = new Collection<string>();
+            actionDefinition.Authorization = CreateActionDefinition<AuthorizationBehavior>(authorization, filePath, explicitParameters, pathParameters, bodyParameters);
         }
 
         private JObject ApplyAuthorizationTemplate(JProperty templateNameProperty, string filePath, JObject authorizationTemplateReference)

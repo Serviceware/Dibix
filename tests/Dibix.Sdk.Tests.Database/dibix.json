@@ -20,8 +20,14 @@
         }
       },
       "Authorization": {
-        "AssertAuthorizedTemplate": {
+        "AssertAuthorized": {
           "target": "AssertAuthorized"
+        },
+        "AssertAuthorizedOne": {
+          "target": "AssertAuthorized",
+          "params": {
+            "right": 1
+          } 
         }
       }
     }

@@ -341,6 +341,15 @@ namespace Dibix.Sdk.Tests.Business
                         authorization.ResolveParameterFromConstant("right", (byte)1);
                     });
                 });
+                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
+                {
+                    action.Method = HttpApiMethod.Delete;
+                    action.ChildRoute = "AnotherAlternative";
+                    action.WithAuthorization(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.AssertAuthorized)), authorization =>
+                    {
+                        authorization.ResolveParameterFromConstant("right", (byte)1);
+                    });
+                });
             });
         }
     }

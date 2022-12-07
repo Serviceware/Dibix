@@ -369,6 +369,76 @@ paths:
           description: NoContent
       security:
         - DBXNS-SIT: [ ]
+  /Tests/GenericEndpoint/AnotherAlternative:
+    delete:
+      tags:
+        - GenericEndpoint
+      summary: EmptyWithParams6
+      operationId: EmptyWithParams6
+      parameters:
+        - name: a
+          in: query
+          required: true
+          style: form
+          schema:
+            type: string
+        - name: b
+          in: query
+          required: true
+          style: form
+          schema:
+            type: string
+        - name: c
+          in: query
+          required: true
+          style: form
+          schema:
+            type: string
+            format: uuid
+            nullable: true
+        - name: password
+          in: query
+          required: true
+          style: form
+          schema:
+            type: string
+        - name: ids
+          in: query
+          style: form
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/GenericParameterSet'
+        - name: d
+          in: query
+          style: form
+          schema:
+            type: string
+            default: 
+            nullable: true
+        - name: e
+          in: query
+          style: form
+          schema:
+            type: boolean
+            default: true
+        - name: f
+          in: query
+          style: form
+          schema:
+            $ref: '#/components/schemas/Direction'
+        - name: g
+          in: query
+          style: form
+          schema:
+            type: string
+            default: Cake
+            nullable: true
+      responses:
+        '204':
+          description: NoContent
+      security:
+        - DBXNS-SIT: [ ]
 components:
   schemas:
     GenericContract:

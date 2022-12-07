@@ -110,9 +110,15 @@
       "childRoute": "Alternative",
       "target": "EmptyWithParams",
       "authorization": {
-        "name": "AssertAuthorizedTemplate",
+        "name": "AssertAuthorized",
         "right": 1
       }
+    },
+    {
+      "method": "DELETE",
+      "childRoute": "AnotherAlternative",
+      "target": "EmptyWithParams",
+      "authorization": "AssertAuthorizedOne"
     }
   ]
 }
