@@ -1,5 +1,4 @@
 ﻿using System.Text.RegularExpressions;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -8,17 +7,20 @@ namespace Dibix.Sdk.CodeGeneration
     {
         public string Name { get; }
         public int Index { get; }
+        public string FilePath { get; set; }
         public int Line { get; }
         public int Column { get; }
+        public bool Visited { get; set; }
 
         public PathParameter(JProperty childRouteProperty, Group segment)
         {
-            this.Name = segment.Value;
-            this.Index = segment.Index;
-            IJsonLineInfo childRouteValueLocation = childRouteProperty.Value.GetLineInfo();
+            Name = segment.Value;
+            Index = segment.Index;
+            JsonSourceInfo childRouteValueLocation = childRouteProperty.Value.GetSourceInfo();
             int matchIndex = segment.Index - 1;
-            this.Line = childRouteValueLocation.LineNumber;
-            this.Column = childRouteValueLocation.LinePosition + matchIndex;
+            FilePath = childRouteValueLocation.FilePath;
+            Line = childRouteValueLocation.LineNumber;
+            Column = childRouteValueLocation.LinePosition + matchIndex;
         }
     }
 }

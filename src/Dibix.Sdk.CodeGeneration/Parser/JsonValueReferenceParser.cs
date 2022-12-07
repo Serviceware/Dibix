@@ -1,38 +1,37 @@
 ﻿using System;
 using Dibix.Sdk.Abstractions;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Dibix.Sdk.CodeGeneration
 {
     internal static class JsonValueReferenceParser
     {
-        public static ValueReference Parse(TypeReference targetType, JValue value, string filePath, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
+        public static ValueReference Parse(TypeReference targetType, JValue value, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
         {
-            IJsonLineInfo location = value.GetLineInfo();
+            JsonSourceInfo sourceInfo = value.GetSourceInfo();
 
             if (value.Type == JTokenType.Null)
-                return new NullValueReference(targetType, filePath, location.LineNumber, location.LinePosition);
+                return new NullValueReference(targetType, sourceInfo.FilePath, sourceInfo.LineNumber, sourceInfo.LinePosition);
 
             switch (targetType)
             {
                 case PrimitiveTypeReference primitiveTypeReference:
                     if (TryParseValue(value, value.Type, primitiveTypeReference.Type, out object rawValue))
-                        return new PrimitiveValueReference(primitiveTypeReference, rawValue, filePath, location.LineNumber, location.LinePosition);
+                        return new PrimitiveValueReference(primitiveTypeReference, rawValue, sourceInfo.FilePath, sourceInfo.LineNumber, sourceInfo.LinePosition);
 
-                    logger.LogError($"Could not convert value '{value}' to type '{primitiveTypeReference.Type}'", filePath, location.LineNumber, location.LinePosition);
+                    logger.LogError($"Could not convert value '{value}' to type '{primitiveTypeReference.Type}'", sourceInfo.FilePath, sourceInfo.LineNumber, sourceInfo.LinePosition);
                     return null;
 
                 case SchemaTypeReference schemaTypeReference:
                     SchemaDefinition schemaDefinition = schemaDefinitionResolver.Resolve(schemaTypeReference);
                     if (schemaDefinition is EnumSchema)
-                        return ParseEnumValue(value, value.Type, schemaTypeReference, filePath, location, logger);
+                        return ParseEnumValue(value, value.Type, schemaTypeReference, sourceInfo.FilePath, sourceInfo, logger);
 
-                    logger.LogError($"Unexpected schema type for constant value: {schemaDefinition?.GetType()}", filePath, location.LineNumber, location.LinePosition);
+                    logger.LogError($"Unexpected schema type for constant value: {schemaDefinition?.GetType()}", sourceInfo.FilePath, sourceInfo.LineNumber, sourceInfo.LinePosition);
                     return null;
 
                 default:
-                    logger.LogError($"Unexpected target type for constant value: {targetType?.GetType()}", filePath, location.LineNumber, location.LinePosition);
+                    logger.LogError($"Unexpected target type for constant value: {targetType?.GetType()}", sourceInfo.FilePath, sourceInfo.LineNumber, sourceInfo.LinePosition);
                     return null;
             }
         }
@@ -128,7 +127,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static ValueReference ParseEnumValue(JValue jsonValue, JTokenType sourceType, SchemaTypeReference targetType, string filePath, IJsonLineInfo location, ILogger logger)
+        private static ValueReference ParseEnumValue(JValue jsonValue, JTokenType sourceType, SchemaTypeReference targetType, string filePath, JsonSourceInfo location, ILogger logger)
         {
             switch (sourceType)
             {

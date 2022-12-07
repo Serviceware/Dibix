@@ -43,7 +43,7 @@ namespace Dibix.Sdk.CodeGeneration
             };
         }
 
-        public T Resolve<T>(string targetName, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters) where T : ActionTargetDefinition, new()
+        public T Resolve<T>(string targetName, string filePath, int line, int column, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters) where T : ActionTargetDefinition, new()
         {
             foreach (ActionTargetDefinitionResolver resolver in this._resolvers)
             {

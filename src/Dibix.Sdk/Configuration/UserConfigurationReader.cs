@@ -5,7 +5,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Dibix.Sdk
 {
-    internal sealed class UserConfigurationLoader : JsonSchemaDefinitionReader
+    internal sealed class UserConfigurationLoader : ValidatingJsonDefinitionReader
     {
         private readonly string _filePath;
         private readonly ICollection<IUserConfigurationReader> _readers;
@@ -20,11 +20,11 @@ namespace Dibix.Sdk
 
         public void Load() => base.Collect(Enumerable.Repeat(this._filePath, 1));
 
-        protected override void Read(string filePath, JObject json)
+        protected override void Read(JObject json)
         {
             foreach (IUserConfigurationReader reader in _readers)
             {
-                reader.Read(filePath, json);
+                reader.Read(json);
             }
         }
     }

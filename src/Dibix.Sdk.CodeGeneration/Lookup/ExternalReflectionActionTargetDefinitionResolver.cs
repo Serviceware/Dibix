@@ -15,7 +15,7 @@ namespace Dibix.Sdk.CodeGeneration
             this._lockEntryManager = lockEntryManager;
         }
 
-        public override bool TryResolve<T>(string targetName, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, out T actionTargetDefinition)
+        public override bool TryResolve<T>(string targetName, string filePath, int line, int column, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, out T actionTargetDefinition)
         {
             string[] parts = targetName.Split(',');
             if (parts.Length != 2)
@@ -65,8 +65,8 @@ namespace Dibix.Sdk.CodeGeneration
                 string internalParameterName = apiParameterName;
                 ActionParameterSource source = parameter.SourceBuilder.Build(type: null);
                 ActionParameterLocation location = ResolveParameterLocationFromSource(source, ref apiParameterName);
-                if (location == ActionParameterLocation.Path)
-                    pathParameters.Remove(apiParameterName);
+                if (location == ActionParameterLocation.Path && pathParameters.TryGetValue(apiParameterName, out PathParameter pathParameter))
+                    pathParameter.Visited = true;
 
                 TypeReference type = null;
                 ValueReference defaultValue = null;

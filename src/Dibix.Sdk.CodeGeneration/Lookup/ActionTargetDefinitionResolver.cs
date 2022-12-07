@@ -22,7 +22,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Abstract Methods
-        public abstract bool TryResolve<T>(string targetName, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, out T actionTargetDefinition) where T : ActionTargetDefinition, new();
+        public abstract bool TryResolve<T>(string targetName, string filePath, int line, int column, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> readOnlyDictionary, ICollection<string> bodyParameters, out T actionTargetDefinition) where T : ActionTargetDefinition, new();
         #endregion
 
         #region Protected Methods
@@ -37,8 +37,8 @@ namespace Dibix.Sdk.CodeGeneration
           , int line
           , int column
           , ActionParameterRegistry parameterRegistry
-          , IDictionary<string, ExplicitParameter> explicitParameters
-          , IDictionary<string, PathParameter> pathParameters
+          , IReadOnlyDictionary<string, ExplicitParameter> explicitParameters
+          , IReadOnlyDictionary<string, PathParameter> pathParameters
           , ICollection<string> bodyParameters
         )
         {
@@ -113,7 +113,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private ActionParameter CreateActionParameter(string name, TypeReference type, ValueReference defaultValue, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, string filePath, int line, int column)
+        private ActionParameter CreateActionParameter(string name, TypeReference type, ValueReference defaultValue, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, string filePath, int line, int column)
         {
             ActionParameterLocation location = ActionParameterLocation.NonUser;
             string apiParameterName = name;
@@ -122,16 +122,17 @@ namespace Dibix.Sdk.CodeGeneration
             ActionParameterSource source = null;
             if (explicitParameters.TryGetValue(name, out ExplicitParameter explicitParameter))
             {
-                explicitParameters.Remove(name);
+                explicitParameter.Visited = true;
                 source = explicitParameter.SourceBuilder.Build(type);
 
+                PathParameter pathParameter;
                 if (source is ActionParameterPropertySource propertySource)
                 {
                     apiParameterName = propertySource.PropertyName.Split('.')[0];
                     if (IsUserParameter(propertySource.Definition, propertySource.PropertyName, ref location, ref apiParameterName))
                     {
-                        if (location == ActionParameterLocation.Path)
-                            pathParameters.Remove(propertySource.PropertyName);
+                        if (location == ActionParameterLocation.Path && pathParameters.TryGetValue(propertySource.PropertyName, out pathParameter))
+                            pathParameter.Visited = true;
                     }
                 }
 
@@ -143,14 +144,17 @@ namespace Dibix.Sdk.CodeGeneration
                 // "params": {
                 //    "password": null
                 // }
-                if (pathParameters.Remove(name))
+                if (pathParameters.TryGetValue(name, out pathParameter))
+                {
                     location = ActionParameterLocation.Path;
+                    pathParameter.Visited = true;
+                }
             }
             else if (pathParameters.TryGetValue(name, out PathParameter pathParameter))
             {
                 apiParameterName = pathParameter.Name;
                 location = ActionParameterLocation.Path;
-                pathParameters.Remove(name);
+                pathParameter.Visited = true;
             }
             else if (bodyParameters.Contains(name))
             {

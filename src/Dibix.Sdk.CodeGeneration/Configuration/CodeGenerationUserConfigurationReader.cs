@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using Dibix.Sdk.Abstractions;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -23,7 +22,7 @@ namespace Dibix.Sdk.CodeGeneration
             _logger = logger;
         }
 
-        public void Read(string filePath, JObject json)
+        public void Read(JObject json)
         {
             const string endpointConfigurationName = "Endpoints";
             JObject endpointConfiguration = (JObject)json.Property(endpointConfigurationName)?.Value;
@@ -31,9 +30,9 @@ namespace Dibix.Sdk.CodeGeneration
                 return;
 
             CollectBaseUrl(endpointConfiguration);
-            CollectParameterSources(filePath, endpointConfiguration);
-            CollectConverters(filePath, endpointConfiguration);
-            CollectCustomSecuritySchemes(filePath, endpointConfiguration);
+            CollectParameterSources(endpointConfiguration);
+            CollectConverters(endpointConfiguration);
+            CollectCustomSecuritySchemes(endpointConfiguration);
             CollectTemplates(endpointConfiguration);
         }
 
@@ -46,7 +45,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private void CollectParameterSources(string filePath, JObject endpointConfiguration)
+        private void CollectParameterSources(JObject endpointConfiguration)
         {
             const string propertyName = "ParameterSources";
             JObject parameterSources = (JObject)endpointConfiguration.Property(propertyName)?.Value;
@@ -57,8 +56,8 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 if (_actionParameterSourceRegistry.TryGetDefinition(parameterSource.Name, out ActionParameterSourceDefinition _))
                 {
-                    IJsonLineInfo lineInfo = parameterSource.GetLineInfo();
-                    _logger.LogError($"Parameter source '{parameterSource.Name}' is already registered", filePath, lineInfo.LineNumber, lineInfo.LinePosition);
+                    JsonSourceInfo sourceInfo = parameterSource.GetSourceInfo();
+                    _logger.LogError($"Parameter source '{parameterSource.Name}' is already registered", sourceInfo.FilePath, sourceInfo.LineNumber, sourceInfo.LinePosition);
                     continue;
                 }
 
@@ -85,7 +84,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private void CollectConverters(string filePath, JObject endpointConfiguration)
+        private void CollectConverters(JObject endpointConfiguration)
         {
             const string propertyName = "Converters";
             JArray converters = (JArray)endpointConfiguration.Property(propertyName)?.Value;
@@ -97,8 +96,8 @@ namespace Dibix.Sdk.CodeGeneration
                 string converterName = (string)converter;
                 if (_actionParameterConverterRegistry.IsRegistered(converterName))
                 {
-                    IJsonLineInfo lineInfo = converter.GetLineInfo();
-                    _logger.LogError($"Parameter converter '{converterName}' is already registered", filePath, lineInfo.LineNumber, lineInfo.LinePosition);
+                    JsonSourceInfo sourceInfo = converter.GetSourceInfo();
+                    _logger.LogError($"Parameter converter '{converterName}' is already registered", sourceInfo.FilePath, sourceInfo.LineNumber, sourceInfo.LinePosition);
                     continue;
                 }
 
@@ -106,7 +105,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private void CollectCustomSecuritySchemes(string filePath, JObject endpointConfiguration)
+        private void CollectCustomSecuritySchemes(JObject endpointConfiguration)
         {
             const string propertyName = "CustomSecuritySchemes";
             JArray customSecuritySchemes = (JArray)endpointConfiguration.Property(propertyName)?.Value;
@@ -119,8 +118,8 @@ namespace Dibix.Sdk.CodeGeneration
                 if (_securitySchemes.RegisterSecurityScheme(new SecurityScheme(customSecuritySchemeName, SecuritySchemeKind.ApiKey))) 
                     continue;
 
-                IJsonLineInfo lineInfo = customSecurityScheme.GetLineInfo();
-                _logger.LogError($"Security scheme '{customSecuritySchemeName}' is already registered", filePath, lineInfo.LineNumber, lineInfo.LinePosition);
+                JsonSourceInfo sourceInfo = customSecurityScheme.GetSourceInfo();
+                _logger.LogError($"Security scheme '{customSecuritySchemeName}' is already registered", sourceInfo.FilePath, sourceInfo.LineNumber, sourceInfo.LinePosition);
             }
         }
 

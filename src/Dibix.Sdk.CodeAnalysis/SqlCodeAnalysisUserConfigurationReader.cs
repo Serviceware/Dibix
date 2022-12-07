@@ -12,7 +12,7 @@ namespace Dibix.Sdk.CodeAnalysis
             _configuration = configuration;
         }
 
-        public void Read(string filePath, JObject json)
+        public void Read(JObject json)
         {
             const string sqlCodeAnalysisConfigurationName = "SqlCodeAnalysis";
             JObject sqlCodeAnalysisConfiguration = (JObject)json.Property(sqlCodeAnalysisConfigurationName)?.Value;

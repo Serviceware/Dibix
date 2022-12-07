@@ -7,12 +7,11 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Dibix.Http;
 using Dibix.Sdk.Abstractions;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class ControllerDefinitionProvider : JsonSchemaDefinitionReader, IControllerDefinitionProvider
+    internal sealed class ControllerDefinitionProvider : ValidatingJsonDefinitionReader, IControllerDefinitionProvider
     {
         #region Fields
         private const string LockSectionName = "ControllerImport";
@@ -64,40 +63,40 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Overrides
-        protected override void Read(string filePath, JObject json) => ReadControllers(filePath, json);
+        protected override void Read(JObject json) => ReadControllers(json);
         #endregion
 
         #region Private Methods
-        private void ReadControllers(string filePath, JObject apis)
+        private void ReadControllers(JObject apis)
         {
             foreach (JProperty apiProperty in apis.Properties())
             {
                 if (apiProperty.Name == "$schema")
                     continue;
 
-                ReadController(filePath, apiProperty.Name, (JArray)apiProperty.Value);
+                ReadController(apiProperty.Name, (JArray)apiProperty.Value);
             }
         }
 
-        private void ReadController(string filePath, string controllerName, JArray actions)
+        private void ReadController(string controllerName, JArray actions)
         {
             ControllerDefinition controller = new ControllerDefinition(controllerName);
             foreach (JToken action in actions) 
-                ReadControllerItem(filePath, action, action.Type, controller);
+                ReadControllerItem(action, action.Type, controller);
 
             Controllers.Add(controller);
         }
 
-        private void ReadControllerItem(string filePath, JToken action, JTokenType type, ControllerDefinition controller)
+        private void ReadControllerItem(JToken action, JTokenType type, ControllerDefinition controller)
         {
             switch (type)
             {
                 case JTokenType.Object:
-                    ReadControllerAction(filePath, controller, (JObject)action);
+                    ReadControllerAction(controller, (JObject)action);
                     break;
 
                 case JTokenType.String:
-                    ReadControllerImport(controller, action, filePath);
+                    ReadControllerImport(controller, action);
                     break;
 
                 default:
@@ -105,47 +104,51 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private void ReadControllerAction(string filePath, ControllerDefinition controller, JObject action)
+        private void ReadControllerAction(ControllerDefinition controller, JObject action)
         {
-            JObject actionMerged = ApplyTemplate(_templates.Default.Action, action);
+            JObject actionMerged = action.Merge<JObject>(_templates.Default.Action);
 
             // Collect body parameters
-            ActionRequestBody requestBody = ReadBody(action, filePath);
+            ActionRequestBody requestBody = ReadBody(action);
             ICollection<string> bodyParameters = GetBodyProperties(requestBody?.Contract, _schemaDefinitionResolver);
 
             // Collect path parameters
-            IDictionary<string, PathParameter> pathParameters = new Dictionary<string, PathParameter>(StringComparer.OrdinalIgnoreCase);
+            Token<string> childRoute = null;
             JProperty childRouteProperty = action.Property("childRoute");
-            string childRoute = (string)childRouteProperty?.Value;
+            IReadOnlyDictionary<string, PathParameter> pathParameters;
             if (childRouteProperty != null)
             {
-                IEnumerable<Group> pathSegments = HttpParameterUtility.ExtractPathParameters(childRoute);
-                foreach (Group pathSegment in pathSegments) 
-                    pathParameters.Add(pathSegment.Value, new PathParameter(childRouteProperty, pathSegment));
+                string childRouteValue = (string)childRouteProperty.Value;
+                JsonSourceInfo childRoutePropertyLocation = childRouteProperty.GetSourceInfo();
+                childRoute = childRouteProperty?.Value.ToToken(childRouteValue, childRoutePropertyLocation.FilePath);
+                pathParameters = new ReadOnlyDictionary<string, PathParameter>(CollectPathParameters(childRouteProperty, childRouteValue).ToDictionary(x => x.Key, x => x.Value, StringComparer.OrdinalIgnoreCase));
+            }
+            else
+            {
+                pathParameters = new ReadOnlyDictionary<string, PathParameter>(new Dictionary<string, PathParameter>());
             }
 
             // Collect explicit parameters
-            IDictionary<string, ExplicitParameter> explicitParameters = new Dictionary<string, ExplicitParameter>();
-            CollectActionParameters(action, filePath, explicitParameters, requestBody, pathParameters);
+            IReadOnlyDictionary<string, ExplicitParameter> explicitParameters = CollectExplicitParameters(action, requestBody, pathParameters);
 
             // Resolve action target, parameters and create action definition
-            ActionDefinition actionDefinition = CreateActionDefinition<ActionDefinition>(action, filePath, explicitParameters, pathParameters, bodyParameters);
+            ActionDefinition actionDefinition = CreateActionDefinition<ActionDefinition>(action, explicitParameters, pathParameters, bodyParameters);
             if (actionDefinition == null)
                 return;
 
             // Unfortunately we do not have any metadata on reflection targets
-            if (!(actionDefinition.Target is ReflectionActionTarget))
+            if (actionDefinition.Target is not ReflectionActionTarget)
             {
                 // Validate explicit parameters
-                foreach (ExplicitParameter explicitParameter in explicitParameters.Values)
+                foreach (ExplicitParameter explicitParameter in explicitParameters.Values.Where(x => !x.Visited))
                 {
-                    base.Logger.LogError($"Parameter '{explicitParameter.Name}' not found on action: {actionDefinition.Target.OperationName}", filePath, explicitParameter.Line, explicitParameter.Column);
+                    base.Logger.LogError($"Parameter '{explicitParameter.Name}' not found on action: {actionDefinition.Target.OperationName}", explicitParameter.FilePath, explicitParameter.Line, explicitParameter.Column);
                 }
 
                 // Validate path parameters
-                foreach (PathParameter pathSegment in pathParameters.Values)
+                foreach (PathParameter pathSegment in pathParameters.Values.Where(x => !x.Visited))
                 {
-                    base.Logger.LogError($"Undefined path parameter: {pathSegment.Name}", filePath, pathSegment.Line, pathSegment.Column);
+                    base.Logger.LogError($"Undefined path parameter: {pathSegment.Name}", pathSegment.FilePath, pathSegment.Line, pathSegment.Column);
                 }
             }
 
@@ -154,16 +157,16 @@ namespace Dibix.Sdk.CodeGeneration
             actionDefinition.Method = method;
             actionDefinition.OperationId = (string)action.Property("operationId")?.Value ?? actionDefinition.Target.OperationName;
             actionDefinition.Description = (string)action.Property("description")?.Value;
-            actionDefinition.ChildRoute = childRouteProperty?.Value.ToToken(childRoute, filePath);
             actionDefinition.RequestBody = requestBody;
+            actionDefinition.ChildRoute = childRoute;
 
-            if (TryReadFileResponse(action, out ActionFileResponse fileResponse, out IJsonLineInfo fileResponseLocation))
-                actionDefinition.SetFileResponse(fileResponse, filePath, fileResponseLocation.LineNumber, fileResponseLocation.LinePosition);
+            if (TryReadFileResponse(action, out ActionFileResponse fileResponse, out JsonSourceInfo fileResponseLocation))
+                actionDefinition.SetFileResponse(fileResponse, fileResponseLocation.FilePath, fileResponseLocation.LineNumber, fileResponseLocation.LinePosition);
 
-            IJsonLineInfo actionLineInfo = action.GetLineInfo();
-            CollectActionResponses(action, actionDefinition, filePath);
-            CollectSecuritySchemes(actionMerged, actionDefinition, actionLineInfo, filePath);
-            CollectAuthorization(actionMerged, actionDefinition, actionLineInfo, filePath);
+            JsonSourceInfo actionLineInfo = action.GetSourceInfo();
+            CollectActionResponses(action, actionDefinition);
+            CollectSecuritySchemes(actionMerged, actionDefinition, actionLineInfo);
+            CollectAuthorization(actionMerged, actionDefinition, actionLineInfo, pathParameters);
 
             if (!actionDefinition.Responses.Any())
                 actionDefinition.DefaultResponseType = null;
@@ -179,44 +182,34 @@ namespace Dibix.Sdk.CodeGeneration
             if (actionDefinition.ChildRoute != null)
                 sb.Append('/').Append(actionDefinition.ChildRoute);
 
-            IJsonLineInfo lineInfo = action;
-            base.Logger.LogError($"Duplicate action registration: {sb}", filePath, lineInfo.LineNumber, lineInfo.LinePosition);
+            JsonSourceInfo sourceInfo = action.GetSourceInfo();
+            base.Logger.LogError($"Duplicate action registration: {sb}", sourceInfo.FilePath, sourceInfo.LineNumber, sourceInfo.LinePosition);
         }
 
-        private static T ApplyTemplate<T>(T source, T target) where T : JContainer
-        {
-            if (source == null)
-                return target;
-
-            T merged = (T)source.DeepClone();
-            merged.Merge(target);
-            return merged;
-        }
-
-        private ActionRequestBody ReadBody(JObject action, string filePath)
+        private ActionRequestBody ReadBody(JObject action)
         {
             JToken bodyValue = action.Property("body")?.Value;
             if (bodyValue == null) 
                 return null;
 
-            return ReadBodyValue(filePath, bodyValue, bodyValue.Type);
+            return ReadBodyValue(bodyValue, bodyValue.Type);
         }
 
-        private ActionRequestBody ReadBodyValue(string filePath, JToken value, JTokenType type)
+        private ActionRequestBody ReadBodyValue(JToken value, JTokenType type)
         {
             switch (type)
             {
                 case JTokenType.Object:
-                    return ReadBodyValue((JObject)value, filePath);
+                    return ReadBodyValue((JObject)value);
 
                 case JTokenType.String:
-                    return ReadBodyValue((JValue)value, filePath);
+                    return ReadBodyValue((JValue)value);
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, value.Path);
             }
         }
-        private ActionRequestBody ReadBodyValue(JObject value, string filePath)
+        private ActionRequestBody ReadBodyValue(JObject value)
         {
             JValue contractName = (JValue)value.Property("contract")?.Value;
             JToken mediaTypeJson = value.Property("mediaType")?.Value;
@@ -225,23 +218,23 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (mediaTypeJson != null && mediaType != HttpMediaType.Json)
             {
-                IJsonLineInfo mediaTypeLocation = mediaTypeJson.GetLineInfo();
-                return new ActionRequestBody(mediaType, ActionDefinitionUtility.CreateStreamTypeReference(filePath, mediaTypeLocation.LineNumber, mediaTypeLocation.LinePosition));
+                JsonSourceInfo mediaTypeLocation = mediaTypeJson.GetSourceInfo();
+                return new ActionRequestBody(mediaType, ActionDefinitionUtility.CreateStreamTypeReference(mediaTypeLocation.FilePath, mediaTypeLocation.LineNumber, mediaTypeLocation.LinePosition));
             }
 
             if (contractName == null)
             {
-                IJsonLineInfo valueLocation = value;
-                base.Logger.LogError("Body is missing 'contract' property", filePath, valueLocation.LineNumber, valueLocation.LinePosition);
+                JsonSourceInfo valueLocation = value.GetSourceInfo();
+                base.Logger.LogError("Body is missing 'contract' property", valueLocation.FilePath, valueLocation.LineNumber, valueLocation.LinePosition);
                 return null;
             }
 
-            TypeReference contract = ResolveType(contractName, filePath);
+            TypeReference contract = ResolveType(contractName);
             return new ActionRequestBody(mediaType, contract, binder);
         }
-        private ActionRequestBody ReadBodyValue(JValue value, string filePath)
+        private ActionRequestBody ReadBodyValue(JValue value)
         {
-            TypeReference contract = ResolveType(value, filePath);
+            TypeReference contract = ResolveType(value);
             return new ActionRequestBody(contract);
         }
 
@@ -257,20 +250,27 @@ namespace Dibix.Sdk.CodeGeneration
             return properties;
         }
 
-        private void ReadControllerImport(ControllerDefinition controller, JToken value, string filePath)
+        private void ReadControllerImport(ControllerDefinition controller, JToken value)
         {
             string typeName = (string)value;
             if (!_lockEntryManager.HasEntry(LockSectionName, typeName))
             {
-                IJsonLineInfo lineInfo = value.GetLineInfo();
-                base.Logger.LogError("Controller imports are not supported anymore", filePath, lineInfo.LineNumber, lineInfo.LinePosition);
+                JsonSourceInfo sourceInfo = value.GetSourceInfo();
+                base.Logger.LogError("Controller imports are not supported anymore", sourceInfo.FilePath, sourceInfo.LineNumber, sourceInfo.LinePosition);
                 return;
             }
 
             controller.ControllerImports.Add(typeName);
         }
 
-        private void CollectActionParameters(JObject action, string filePath, IDictionary<string, ExplicitParameter> target, ActionRequestBody requestBody, IDictionary<string, PathParameter> pathParameters)
+        private IReadOnlyDictionary<string, ExplicitParameter> CollectExplicitParameters(JObject action, ActionRequestBody requestBody, IReadOnlyDictionary<string, PathParameter> pathParameters)
+        {
+            IDictionary<string, ExplicitParameter> target = new Dictionary<string, ExplicitParameter>();
+            CollectExplicitParameters(action, target, requestBody, pathParameters);
+            IReadOnlyDictionary<string, ExplicitParameter> explicitParameters = new ReadOnlyDictionary<string, ExplicitParameter>(target);
+            return explicitParameters;
+        }
+        private void CollectExplicitParameters(JObject action, IDictionary<string, ExplicitParameter> target, ActionRequestBody requestBody, IReadOnlyDictionary<string, PathParameter> pathParameters)
         {
             JObject mappings = (JObject)action.Property("params")?.Value;
             if (mappings == null)
@@ -278,9 +278,9 @@ namespace Dibix.Sdk.CodeGeneration
 
             foreach (JProperty property in mappings.Properties())
             {
-                if (!TryReadSource(property, filePath, requestBody: requestBody, rootPropertySourceBuilder: null, pathParameters, out ActionParameterSourceBuilder parameterSourceBuilder))
+                if (!TryReadSource(property, requestBody: requestBody, rootPropertySourceBuilder: null, pathParameters, out ActionParameterSourceBuilder parameterSourceBuilder))
                 {
-                    parameterSourceBuilder = CollectActionParameterSource(filePath, requestBody, property, property.Value.Type, pathParameters);
+                    parameterSourceBuilder = CollectActionParameterSource(requestBody, property, property.Value.Type, pathParameters);
                 }
 
                 ExplicitParameter parameter = new ExplicitParameter(property, parameterSourceBuilder);
@@ -288,34 +288,41 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private ActionParameterSourceBuilder CollectActionParameterSource(string filePath, ActionRequestBody requestBody, JProperty property, JTokenType type, IDictionary<string, PathParameter> pathParameters)
+        private static IEnumerable<KeyValuePair<string, PathParameter>> CollectPathParameters(JProperty childRouteProperty, string childRouteValue)
+        {
+            IEnumerable<Group> pathSegments = HttpParameterUtility.ExtractPathParameters(childRouteValue);
+            foreach (Group pathSegment in pathSegments)
+                yield return new KeyValuePair<string, PathParameter>(pathSegment.Value, new PathParameter(childRouteProperty, pathSegment));
+        }
+
+        private ActionParameterSourceBuilder CollectActionParameterSource(ActionRequestBody requestBody, JProperty property, JTokenType type, IReadOnlyDictionary<string, PathParameter> pathParameters)
         {
             switch (type)
             {
-                case JTokenType.Object: return ReadComplexActionParameter(property.Name, (JObject)property.Value, filePath, requestBody, pathParameters);
+                case JTokenType.Object: return ReadComplexActionParameter(property.Name, (JObject)property.Value, requestBody, pathParameters);
                 default: throw new ArgumentOutOfRangeException(nameof(type), type, property.Value.Path);
             }
         }
 
-        private bool TryReadSource(JProperty property, string filePath, ActionRequestBody requestBody, ActionParameterPropertySourceBuilder rootPropertySourceBuilder, IDictionary<string, PathParameter> pathParameters, out ActionParameterSourceBuilder parameterSourceBuilder)
+        private bool TryReadSource(JProperty property, ActionRequestBody requestBody, ActionParameterPropertySourceBuilder rootPropertySourceBuilder, IReadOnlyDictionary<string, PathParameter> pathParameters, out ActionParameterSourceBuilder parameterSourceBuilder)
         {
             switch (property.Value.Type)
             {
                 case JTokenType.Boolean:
                 case JTokenType.Integer:
                 case JTokenType.Null:
-                    parameterSourceBuilder = new ActionParameterConstantSourceBuilder((JValue)property.Value, filePath, _schemaDefinitionResolver, Logger);
+                    parameterSourceBuilder = new ActionParameterConstantSourceBuilder((JValue)property.Value, _schemaDefinitionResolver, Logger);
                     return true;
 
                 case JTokenType.String:
                     string stringValue = (string)property.Value;
                     if (stringValue != null && stringValue.Contains('.'))
                     {
-                        parameterSourceBuilder = ReadPropertySource((JValue)property.Value, filePath, requestBody, rootPropertySourceBuilder, pathParameters);
+                        parameterSourceBuilder = ReadPropertySource((JValue)property.Value, requestBody, rootPropertySourceBuilder, pathParameters);
                     }
                     else
                     {
-                        parameterSourceBuilder = new ActionParameterConstantSourceBuilder((JValue)property.Value, filePath, _schemaDefinitionResolver, Logger);
+                        parameterSourceBuilder = new ActionParameterConstantSourceBuilder((JValue)property.Value, _schemaDefinitionResolver, Logger);
                     }
                     return true;
 
@@ -325,24 +332,24 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private ActionParameterPropertySourceBuilder ReadPropertySource(JValue value, string filePath, ActionRequestBody requestBody, ActionParameterPropertySourceBuilder rootParameterSourceBuilder, IDictionary<string, PathParameter> pathParameters)
+        private ActionParameterPropertySourceBuilder ReadPropertySource(JValue value, ActionRequestBody requestBody, ActionParameterPropertySourceBuilder rootParameterSourceBuilder, IReadOnlyDictionary<string, PathParameter> pathParameters)
         {
             string[] parts = ((string)value.Value).Split(new[] { '.' }, 2);
             string sourceName = parts[0];
             string propertyName = parts[1];
-            IJsonLineInfo valueLocation = value.GetLineInfo();
+            JsonSourceInfo valueLocation = value.GetSourceInfo();
 
             if (!_actionParameterSourceRegistry.TryGetDefinition(sourceName, out ActionParameterSourceDefinition definition))
             {
-                base.Logger.LogError($"Unknown property source '{sourceName}'", filePath, valueLocation.LineNumber, valueLocation.LinePosition);
+                base.Logger.LogError($"Unknown property source '{sourceName}'", valueLocation.FilePath, valueLocation.LineNumber, valueLocation.LinePosition);
             }
 
-            ActionParameterPropertySourceBuilder propertySourceBuilder = new ActionParameterPropertySourceBuilder(definition, propertyName, filePath, valueLocation.LineNumber, valueLocation.LinePosition);
+            ActionParameterPropertySourceBuilder propertySourceBuilder = new ActionParameterPropertySourceBuilder(definition, propertyName, valueLocation.FilePath, valueLocation.LineNumber, valueLocation.LinePosition);
             CollectPropertySourceNodes(propertySourceBuilder, requestBody, rootParameterSourceBuilder, pathParameters);
             return propertySourceBuilder;
         }
 
-        private ActionParameterSourceBuilder ReadComplexActionParameter(string parameterName, JObject container, string filePath, ActionRequestBody requestBody, IDictionary<string, PathParameter> pathParameters)
+        private ActionParameterSourceBuilder ReadComplexActionParameter(string parameterName, JObject container, ActionRequestBody requestBody, IReadOnlyDictionary<string, PathParameter> pathParameters)
         {
             JProperty bodyConverterProperty = container.Property("convertFromBody");
             if (bodyConverterProperty != null)
@@ -353,15 +360,15 @@ namespace Dibix.Sdk.CodeGeneration
             JProperty sourceProperty = container.Property("source");
             if (sourceProperty != null)
             {
-                return ReadPropertyActionParameter(parameterName, container, sourceProperty, filePath, requestBody, pathParameters);
+                return ReadPropertyActionParameter(parameterName, container, sourceProperty, requestBody, pathParameters);
             }
 
             throw new InvalidOperationException($"Invalid object for parameter: {parameterName}");
         }
 
-        private ActionParameterSourceBuilder ReadPropertyActionParameter(string parameterName, JObject container, JProperty sourceProperty, string filePath, ActionRequestBody requestBody, IDictionary<string, PathParameter> pathParameters)
+        private ActionParameterSourceBuilder ReadPropertyActionParameter(string parameterName, JObject container, JProperty sourceProperty, ActionRequestBody requestBody, IReadOnlyDictionary<string, PathParameter> pathParameters)
         {
-            ActionParameterPropertySourceBuilder propertySourceBuilder = ReadPropertySource((JValue)sourceProperty.Value, filePath, requestBody, rootParameterSourceBuilder: null, pathParameters);
+            ActionParameterPropertySourceBuilder propertySourceBuilder = ReadPropertySource((JValue)sourceProperty.Value, requestBody, rootParameterSourceBuilder: null, pathParameters);
 
             JProperty itemsProperty = container.Property("items");
             if (itemsProperty != null)
@@ -369,10 +376,10 @@ namespace Dibix.Sdk.CodeGeneration
                 JObject itemsObject = (JObject)itemsProperty.Value;
                 foreach (JProperty itemProperty in itemsObject.Properties())
                 {
-                    if (TryReadSource(itemProperty, filePath, requestBody: requestBody, rootPropertySourceBuilder: propertySourceBuilder, pathParameters, parameterSourceBuilder: out ActionParameterSourceBuilder itemPropertySourceBuilder))
+                    if (TryReadSource(itemProperty, requestBody: requestBody, rootPropertySourceBuilder: propertySourceBuilder, pathParameters, parameterSourceBuilder: out ActionParameterSourceBuilder itemPropertySourceBuilder))
                     {
-                        IJsonLineInfo lineInfo = itemProperty.GetLineInfo();
-                        propertySourceBuilder.ItemSources.Add(new ActionParameterItemSourceBuilder(itemProperty.Name, itemPropertySourceBuilder, filePath, lineInfo.LineNumber, lineInfo.LinePosition, _schemaDefinitionResolver, Logger));
+                        JsonSourceInfo sourceInfo = itemProperty.GetSourceInfo();
+                        propertySourceBuilder.ItemSources.Add(new ActionParameterItemSourceBuilder(itemProperty.Name, itemPropertySourceBuilder, sourceInfo.FilePath, sourceInfo.LineNumber, sourceInfo.LinePosition, _schemaDefinitionResolver, Logger));
                     }
                 }
                 return propertySourceBuilder;
@@ -385,8 +392,8 @@ namespace Dibix.Sdk.CodeGeneration
                 string converterName = (string)converter;
                 if (!_actionParameterConverterRegistry.IsRegistered(converterName))
                 {
-                    IJsonLineInfo converterLocation = converter.GetLineInfo();
-                    base.Logger.LogError($"Unknown property converter '{converterName}'", filePath, converterLocation.LineNumber, converterLocation.LinePosition);
+                    JsonSourceInfo converterLocation = converter.GetSourceInfo();
+                    base.Logger.LogError($"Unknown property converter '{converterName}'", converterLocation.FilePath, converterLocation.LineNumber, converterLocation.LinePosition);
                 }
                 propertySourceBuilder.Converter = converterName;
                 return propertySourceBuilder;
@@ -401,7 +408,7 @@ namespace Dibix.Sdk.CodeGeneration
             return new StaticActionParameterSourceBuilder(new ActionParameterBodySource(bodyConverterTypeName));
         }
 
-        private static bool TryReadFileResponse(JObject action, out ActionFileResponse fileResponse, out IJsonLineInfo location)
+        private static bool TryReadFileResponse(JObject action, out ActionFileResponse fileResponse, out JsonSourceInfo location)
         {
             JProperty fileResponseProperty = action.Property("fileResponse");
             JObject fileResponseValue = (JObject)fileResponseProperty?.Value;
@@ -420,7 +427,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             string mediaType = (string)mediaTypeProperty.Value;
             fileResponse = new ActionFileResponse(mediaType);
-            location = fileResponseProperty.GetLineInfo();
+            location = fileResponseProperty.GetSourceInfo();
 
             if (cacheProperty != null)
                 fileResponse.Cache = (bool)cacheProperty.Value;
@@ -428,25 +435,25 @@ namespace Dibix.Sdk.CodeGeneration
             return true;
         }
 
-        private T CreateActionDefinition<T>(JObject action, string filePath, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters) where T : ActionTargetDefinition, new()
+        private T CreateActionDefinition<T>(JObject action, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters) where T : ActionTargetDefinition, new()
         {
             JValue targetValue = (JValue)action.Property("target").Value;
-            IJsonLineInfo lineInfo = targetValue.GetLineInfo();
-            T actionDefinition = _actionTargetResolver.Resolve<T>(targetName: (string)targetValue, filePath, lineInfo.LineNumber, lineInfo.LinePosition, explicitParameters, pathParameters, bodyParameters);
+            JsonSourceInfo sourceInfo = targetValue.GetSourceInfo();
+            T actionDefinition = _actionTargetResolver.Resolve<T>(targetName: (string)targetValue, filePath: sourceInfo.FilePath, line: sourceInfo.LineNumber, column: sourceInfo.LinePosition, explicitParameters, pathParameters, bodyParameters);
             return actionDefinition;
         }
 
-        private void CollectActionResponses(JObject actionJson, ActionDefinition actionDefinition, string filePath)
+        private void CollectActionResponses(JObject actionJson, ActionDefinition actionDefinition)
         {
             JObject responses = (JObject)actionJson.Property("responses")?.Value;
             if (responses == null)
                 return;
 
             foreach (JProperty property in responses.Properties()) 
-                CollectActionResponse(property, property.Value.Type, actionDefinition, filePath);
+                CollectActionResponse(property, property.Value.Type, actionDefinition);
         }
 
-        private void CollectActionResponse(JProperty property, JTokenType type, ActionTargetDefinition actionTargetDefinition, string filePath)
+        private void CollectActionResponse(JProperty property, JTokenType type, ActionTargetDefinition actionTargetDefinition)
         {
             HttpStatusCode statusCode = (HttpStatusCode)Int32.Parse(property.Name);
 
@@ -461,7 +468,7 @@ namespace Dibix.Sdk.CodeGeneration
                 case JTokenType.Null: return;
 
                 case JTokenType.String when response.ResultType == null:
-                    response.ResultType = ResolveType((JValue)property.Value, filePath);
+                    response.ResultType = ResolveType((JValue)property.Value);
                     break;
 
                 case JTokenType.Object:
@@ -475,7 +482,7 @@ namespace Dibix.Sdk.CodeGeneration
                     {
                         JValue typeNameValue = (JValue)responseObject.Property("type")?.Value;
                         if (typeNameValue != null)
-                            response.ResultType = ResolveType(typeNameValue, filePath);
+                            response.ResultType = ResolveType(typeNameValue);
                     }
 
                     break;
@@ -485,33 +492,33 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private void CollectSecuritySchemes(JObject actionJson, ActionDefinition actionDefinition, IJsonLineInfo actionLineInfo, string filePath)
+        private void CollectSecuritySchemes(JObject actionJson, ActionDefinition actionDefinition, JsonSourceInfo actionLineInfo)
         {
             const string propertyName = "securitySchemes";
             JProperty property = actionJson.Property(propertyName);
             if (property == null)
             {
-                base.Logger.LogError($"Missing required property '{propertyName}'", filePath, actionLineInfo.LineNumber, actionLineInfo.LinePosition);
+                base.Logger.LogError($"Missing required property '{propertyName}'", actionLineInfo.FilePath, actionLineInfo.LineNumber, actionLineInfo.LinePosition);
                 return;
             }
 
-            IEnumerable<SecurityScheme> schemes = CollectSecurityScheme(property, property.Value.Type, filePath);
+            IEnumerable<SecurityScheme> schemes = CollectSecurityScheme(property, property.Value.Type);
             actionDefinition.SecuritySchemes.Requirements.AddRange(schemes.Select(x => new SecuritySchemeRequirement(x)));
         }
 
-        private IEnumerable<SecurityScheme> CollectSecurityScheme(JProperty property, JTokenType type, string filePath)
+        private IEnumerable<SecurityScheme> CollectSecurityScheme(JProperty property, JTokenType type)
         {
             switch (type)
             {
                 case JTokenType.String:
-                    foreach (SecurityScheme securityScheme in CollectSecurityScheme(property.Value, property.Value.Type, filePath))
+                    foreach (SecurityScheme securityScheme in CollectSecurityScheme(property.Value, property.Value.Type))
                         yield return securityScheme;
 
                     break;
 
                 case JTokenType.Array:
                     JArray array = (JArray)property.Value;
-                    foreach (SecurityScheme securityScheme in array.SelectMany(x => CollectSecurityScheme(x, x.Type, filePath)))
+                    foreach (SecurityScheme securityScheme in array.SelectMany(x => CollectSecurityScheme(x, x.Type)))
                         yield return securityScheme;
 
                     break;
@@ -520,7 +527,7 @@ namespace Dibix.Sdk.CodeGeneration
                     throw new ArgumentOutOfRangeException(nameof(type), type, property.Value.Path);
             }
         }
-        private IEnumerable<SecurityScheme> CollectSecurityScheme(JToken value, JTokenType type, string filePath)
+        private IEnumerable<SecurityScheme> CollectSecurityScheme(JToken value, JTokenType type)
         {
             if (type != JTokenType.String)
                 throw new ArgumentOutOfRangeException(nameof(type), type, value.Path);
@@ -530,9 +537,9 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 if (!_securitySchemes.TryFindSecurityScheme(name, out scheme))
                 {
-                    IJsonLineInfo lineInfo = value;
+                    JsonSourceInfo sourceInfo = value.GetSourceInfo();
                     string possibleValues = String.Join(", ", _securitySchemes.Schemes.Select(x => x.Name));
-                    base.Logger.LogError($"Unknown authorization scheme '{name}'. Possible values are: {possibleValues}", filePath, lineInfo.LineNumber, lineInfo.LinePosition);
+                    base.Logger.LogError($"Unknown authorization scheme '{name}'. Possible values are: {possibleValues}", sourceInfo.FilePath, sourceInfo.LineNumber, sourceInfo.LinePosition);
                     yield break;
                 }
                 _usedSecuritySchemes.Add(name, scheme);
@@ -540,61 +547,59 @@ namespace Dibix.Sdk.CodeGeneration
             yield return scheme;
         }
 
-        private void CollectAuthorization(JObject actionJson, ActionDefinition actionDefinition, IJsonLineInfo actionLineInfo, string filePath)
+        private void CollectAuthorization(JObject actionJson, ActionDefinition actionDefinition, JsonSourceInfo actionLineInfo, IReadOnlyDictionary<string, PathParameter> pathParameters)
         {
             const string propertyName = "authorization";
             JProperty property = actionJson.Property(propertyName);
             if (property == null)
             {
-                base.Logger.LogError($"Missing required property '{propertyName}'", filePath, actionLineInfo.LineNumber, actionLineInfo.LinePosition);
+                base.Logger.LogError($"Missing required property '{propertyName}'", actionLineInfo.FilePath, actionLineInfo.LineNumber, actionLineInfo.LinePosition);
                 return;
             }
 
-            CollectAuthorization(property, property.Value.Type, actionDefinition, filePath);
+            CollectAuthorization(property, property.Value.Type, actionDefinition, pathParameters);
         }
-        private void CollectAuthorization(JProperty property, JTokenType type, ActionDefinition actionDefinition, string filePath)
+        private void CollectAuthorization(JProperty property, JTokenType type, ActionDefinition actionDefinition, IReadOnlyDictionary<string, PathParameter> pathParameters)
         {
             switch (type)
             {
                 case JTokenType.Object:
                     JObject authorizationValue = (JObject)property.Value;
                     JProperty templateProperty = authorizationValue.Property("name");
-                    CollectAuthorization(templateProperty, authorizationValue, actionDefinition, filePath);
+                    CollectAuthorization(templateProperty, authorizationValue, actionDefinition, pathParameters);
                     break;
 
                 case JTokenType.String when (string)property.Value == "none":
                     break;
 
                 case JTokenType.String:
-                    CollectAuthorization(templateProperty: property, authorizationValue: new JObject(), actionDefinition, filePath);
+                    CollectAuthorization(templateProperty: property, authorizationValue: new JObject(), actionDefinition, pathParameters);
                     break;
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, property.Value.Path);
             }
         }
-        private void CollectAuthorization(JProperty templateProperty, JObject authorizationValue, ActionDefinition actionDefinition, string filePath)
+        private void CollectAuthorization(JProperty templateProperty, JObject authorizationValue, ActionDefinition actionDefinition, IReadOnlyDictionary<string, PathParameter> pathParameters)
         {
             JObject authorization = authorizationValue;
 
             if (templateProperty != null
-             && (authorization = ApplyAuthorizationTemplate(templateProperty, filePath, authorizationValue)) == null) // In case of error that has been previously logged
+             && (authorization = ApplyAuthorizationTemplate(templateProperty, authorizationValue)) == null) // In case of error that has been previously logged
                 return;
 
-            IDictionary<string, ExplicitParameter> explicitParameters = new Dictionary<string, ExplicitParameter>();
-            CollectActionParameters(authorization, filePath, explicitParameters, requestBody: null, pathParameters: new Dictionary<string, PathParameter>());
-            IDictionary<string, PathParameter> pathParameters = new Dictionary<string, PathParameter>();
+            IReadOnlyDictionary<string, ExplicitParameter> explicitParameters = CollectExplicitParameters(authorization, requestBody: null, pathParameters);
             ICollection<string> bodyParameters = new Collection<string>();
-            actionDefinition.Authorization = CreateActionDefinition<AuthorizationBehavior>(authorization, filePath, explicitParameters, pathParameters, bodyParameters);
+            actionDefinition.Authorization = CreateActionDefinition<AuthorizationBehavior>(authorization, explicitParameters, pathParameters, bodyParameters);
         }
 
-        private JObject ApplyAuthorizationTemplate(JProperty templateNameProperty, string filePath, JObject authorizationTemplateReference)
+        private JObject ApplyAuthorizationTemplate(JProperty templateNameProperty, JObject authorizationTemplateReference)
         {
             string templateName = (string)templateNameProperty.Value;
             if (!_templates.Authorization.TryGetTemplate(templateName, out ConfigurationAuthorizationTemplate template))
             {
-                IJsonLineInfo templateNameLineInfo = templateNameProperty.Value.GetLineInfo();
-                Logger.LogError($"Unknown authorization template '{templateName}'", filePath, templateNameLineInfo.LineNumber, templateNameLineInfo.LinePosition);
+                JsonSourceInfo templateNameLineInfo = templateNameProperty.Value.GetSourceInfo();
+                Logger.LogError($"Unknown authorization template '{templateName}'", templateNameLineInfo.FilePath, templateNameLineInfo.LineNumber, templateNameLineInfo.LinePosition);
                 return null;
             }
 
@@ -613,21 +618,21 @@ namespace Dibix.Sdk.CodeGeneration
                 }
             }
 
-            JObject mergedAuthorization = ApplyTemplate(template.Content, resolvedAuthorization);
+            JObject mergedAuthorization = resolvedAuthorization.Merge<JObject>(template.Content);
             return mergedAuthorization;
         }
 
-        private TypeReference ResolveType(JValue typeNameValue, string filePath)
+        private TypeReference ResolveType(JValue typeNameValue)
         {
             string typeName = (string)typeNameValue;
-            IJsonLineInfo typeNameLocation = typeNameValue.GetLineInfo();
+            JsonSourceInfo typeNameLocation = typeNameValue.GetSourceInfo();
             bool isEnumerable = typeName.EndsWith("*", StringComparison.Ordinal);
             typeName = typeName.TrimEnd('*');
-            TypeReference type = _typeResolver.ResolveType(typeName, null, filePath, typeNameLocation.LineNumber, typeNameLocation.LinePosition, isEnumerable);
+            TypeReference type = _typeResolver.ResolveType(typeName, null, typeNameLocation.FilePath, typeNameLocation.LineNumber, typeNameLocation.LinePosition, isEnumerable);
             return type;
         }
 
-        private void CollectPropertySourceNodes(ActionParameterPropertySourceBuilder propertySourceBuilder, ActionRequestBody requestBody, ActionParameterPropertySourceBuilder rootPropertySourceBuilder, IDictionary<string, PathParameter> pathParameters)
+        private void CollectPropertySourceNodes(ActionParameterPropertySourceBuilder propertySourceBuilder, ActionRequestBody requestBody, ActionParameterPropertySourceBuilder rootPropertySourceBuilder, IReadOnlyDictionary<string, PathParameter> pathParameters)
         {
             switch (propertySourceBuilder.Definition)
             {
@@ -737,7 +742,7 @@ namespace Dibix.Sdk.CodeGeneration
             return false;
         }
 
-        private void ValidatePathProperty(ActionParameterPropertySourceBuilder propertySourceBuilder, IDictionary<string, PathParameter> pathParameters)
+        private void ValidatePathProperty(ActionParameterPropertySourceBuilder propertySourceBuilder, IReadOnlyDictionary<string, PathParameter> pathParameters)
         {
             if (!pathParameters.ContainsKey(propertySourceBuilder.PropertyName))
             {

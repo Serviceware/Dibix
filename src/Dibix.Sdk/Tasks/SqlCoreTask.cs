@@ -93,10 +93,10 @@ namespace Dibix.Sdk
                 UserConfigurationLoader userConfigurationLoader = new UserConfigurationLoader
                 (
                     _configuration.SqlCore.ConfigurationFilePath
-                    , fileSystemProvider
-                    , _logger
-                    , new SqlCodeAnalysisUserConfigurationReader(sqlCodeAnalysisConfiguration)
-                    , new CodeGenerationUserConfigurationReader(codeGenerationConfiguration, securitySchemes, actionParameterSourceRegistry, actionParameterConverterRegistry, _logger)
+                  , fileSystemProvider
+                  , _logger
+                  , new SqlCodeAnalysisUserConfigurationReader(sqlCodeAnalysisConfiguration)
+                  , new CodeGenerationUserConfigurationReader(codeGenerationConfiguration, securitySchemes, actionParameterSourceRegistry, actionParameterConverterRegistry, _logger)
                 );
                 userConfigurationLoader.Load();
             }

@@ -11,7 +11,7 @@ namespace Dibix.Sdk.CodeGeneration
         private int _previousPathSegmentIndex;
         private int _previousPathParameterIndex = -1;
 
-        public ActionParameterRegistry(ActionTargetDefinition actionTargetDefinition, IDictionary<string, PathParameter> pathParameters)
+        public ActionParameterRegistry(ActionTargetDefinition actionTargetDefinition, IReadOnlyDictionary<string, PathParameter> pathParameters)
         {
             _actionTargetDefinition = actionTargetDefinition;
             _pathSegmentIndexMap = pathParameters.OrderBy(x => x.Value.Index)

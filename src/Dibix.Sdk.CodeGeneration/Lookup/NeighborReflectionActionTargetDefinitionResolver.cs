@@ -33,7 +33,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Overrides
-        public override bool TryResolve<T>(string targetName, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, out T actionTargetDefinition)
+        public override bool TryResolve<T>(string targetName, string filePath, int line, int column, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, out T actionTargetDefinition)
         {
             int statementNameIndex = targetName.LastIndexOf('.');
             string methodName = targetName.Substring(statementNameIndex + 1);
@@ -57,7 +57,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private T CreateActionTargetDefinition<T>(string targetName, string assemblyName, MethodInfo method, string filePath, int line, int column, IDictionary<string, ExplicitParameter> explicitParameters, IDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters) where T : ActionTargetDefinition, new()
+        private T CreateActionTargetDefinition<T>(string targetName, string assemblyName, MethodInfo method, string filePath, int line, int column, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters) where T : ActionTargetDefinition, new()
         {
             string operationName = method.Name;
             bool isReflectionTarget = assemblyName != null;

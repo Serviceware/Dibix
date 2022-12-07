@@ -1,6 +1,5 @@
 ﻿using System;
 using Dibix.Sdk.Abstractions;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -8,14 +7,12 @@ namespace Dibix.Sdk.CodeGeneration
     internal sealed class ActionParameterConstantSourceBuilder : ActionParameterSourceBuilder
     {
         private readonly JValue _value;
-        private readonly string _filePath;
         private readonly ISchemaDefinitionResolver _schemaDefinitionResolver;
         private readonly ILogger _logger;
 
-        public ActionParameterConstantSourceBuilder(JValue value, string filePath, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
+        public ActionParameterConstantSourceBuilder(JValue value, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
         {
             _value = value;
-            _filePath = filePath;
             _schemaDefinitionResolver = schemaDefinitionResolver;
             _logger = logger;
         }
@@ -24,22 +21,22 @@ namespace Dibix.Sdk.CodeGeneration
         {
             if (type == null) // Information not available => ExternalReflectionActionTargetDefinitionResolver
             {
-                IJsonLineInfo location = _value.GetLineInfo();
+                JsonSourceInfo location = _value.GetSourceInfo();
                 return new ActionParameterConstantSource(BuildConstantValueReference(_value.Type, location));
             }
 
-            ValueReference valueReference = JsonValueReferenceParser.Parse(type, _value, _filePath, _schemaDefinitionResolver, _logger);
+            ValueReference valueReference = JsonValueReferenceParser.Parse(type, _value, _schemaDefinitionResolver, _logger);
             return new ActionParameterConstantSource(valueReference);
         }
 
-        private ValueReference BuildConstantValueReference(JTokenType type, IJsonLineInfo location)
+        private ValueReference BuildConstantValueReference(JTokenType type, JsonSourceInfo location)
         {
             switch (type)
             {
-                case JTokenType.Integer: return new PrimitiveValueReference(new PrimitiveTypeReference(PrimitiveType.Int32, isNullable: false, isEnumerable: false, _filePath, location.LineNumber, location.LinePosition), (int)_value, _filePath, location.LineNumber, location.LinePosition);
-                case JTokenType.String: return new PrimitiveValueReference(new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: false, _filePath, location.LineNumber, location.LinePosition), (string)_value, _filePath, location.LineNumber, location.LinePosition);
-                case JTokenType.Boolean: return new PrimitiveValueReference(new PrimitiveTypeReference(PrimitiveType.Boolean, isNullable: false, isEnumerable: false, _filePath, location.LineNumber, location.LinePosition), (bool)_value, _filePath, location.LineNumber, location.LinePosition);
-                case JTokenType.Null: return new NullValueReference(type: null, _filePath, location.LineNumber, location.LinePosition);
+                case JTokenType.Integer: return new PrimitiveValueReference(new PrimitiveTypeReference(PrimitiveType.Int32, isNullable: false, isEnumerable: false, location.FilePath, location.LineNumber, location.LinePosition), (int)_value, location.FilePath, location.LineNumber, location.LinePosition);
+                case JTokenType.String: return new PrimitiveValueReference(new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: false, location.FilePath, location.LineNumber, location.LinePosition), (string)_value, location.FilePath, location.LineNumber, location.LinePosition);
+                case JTokenType.Boolean: return new PrimitiveValueReference(new PrimitiveTypeReference(PrimitiveType.Boolean, isNullable: false, isEnumerable: false, location.FilePath, location.LineNumber, location.LinePosition), (bool)_value, location.FilePath, location.LineNumber, location.LinePosition);
+                case JTokenType.Null: return new NullValueReference(type: null, location.FilePath, location.LineNumber, location.LinePosition);
                 default: throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
         }

@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -10,8 +9,8 @@ namespace Dibix.Sdk.CodeGeneration
             if (json == null)
                 return null;
 
-            IJsonLineInfo lineInfo = json.GetLineInfo();
-            return new Token<T>(value, source, lineInfo.LineNumber, lineInfo.LinePosition);
+            JsonSourceInfo sourceInfo = json.GetSourceInfo();
+            return new Token<T>(value, source, sourceInfo.LineNumber, sourceInfo.LinePosition);
         }
     }
 }

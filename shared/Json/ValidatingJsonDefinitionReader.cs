@@ -9,14 +9,14 @@ using Newtonsoft.Json.Schema;
 
 namespace Dibix.Sdk
 {
-    internal abstract class JsonSchemaDefinitionReader
+    internal abstract class ValidatingJsonDefinitionReader
     {
         public bool HasSchemaErrors { get; private set; }
         protected IFileSystemProvider FileSystemProvider { get; }
         protected ILogger Logger { get; }
         protected abstract string SchemaName { get; }
 
-        protected JsonSchemaDefinitionReader(IFileSystemProvider fileSystemProvider, ILogger logger)
+        protected ValidatingJsonDefinitionReader(IFileSystemProvider fileSystemProvider, ILogger logger)
         {
             this.FileSystemProvider = fileSystemProvider;
             this.Logger = logger;
@@ -33,6 +33,7 @@ namespace Dibix.Sdk
                         using (JsonReader jsonReader = new JsonTextReader(textReader))
                         {
                             JObject json = JObject.Load(jsonReader/*, new JsonLoadSettings { DuplicatePropertyNameHandling = DuplicatePropertyNameHandling.Error }*/);
+                            json.SetFileSource(filePath);
 
                             if (!json.IsValid(JsonSchemaDefinition.GetSchema(this.GetType().Assembly, this.SchemaName), out IList<ValidationError> errors))
                             {
@@ -45,13 +46,13 @@ namespace Dibix.Sdk
                                 continue;
                             }
 
-                            this.Read(filePath, json);
+                            this.Read(json);
                         }
                     }
                 }
             }
         }
 
-        protected abstract void Read(string filePath, JObject json);
+        protected abstract void Read(JObject json);
     }
 }

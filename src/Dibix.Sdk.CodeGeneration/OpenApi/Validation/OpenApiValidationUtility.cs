@@ -1,7 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using Dibix.Sdk.Abstractions;
 using Microsoft.OpenApi.Models;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Dibix.Sdk.CodeGeneration.OpenApi
@@ -29,9 +28,9 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                 return false;
             }
 
-            IJsonLineInfo lineInfo = token.GetLineInfo();
-            line = lineInfo.LineNumber;
-            column = lineInfo.LinePosition;
+            JsonSourceInfo sourceInfo = token.GetSourceInfo();
+            line = sourceInfo.LineNumber;
+            column = sourceInfo.LinePosition;
             return true;
         }
 

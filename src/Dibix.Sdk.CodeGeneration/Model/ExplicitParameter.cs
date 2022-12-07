@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -7,14 +6,17 @@ namespace Dibix.Sdk.CodeGeneration
     {
         public string Name { get; }
         public ActionParameterSourceBuilder SourceBuilder { get; }
+        public string FilePath { get; set; }
         public int Line { get; }
         public int Column { get; }
+        public bool Visited { get; set; }
 
         public ExplicitParameter(JProperty property, ActionParameterSourceBuilder sourceBuilder)
         {
             SourceBuilder = sourceBuilder;
             Name = property.Name;
-            IJsonLineInfo location = property.GetLineInfo();
+            JsonSourceInfo location = property.GetSourceInfo();
+            FilePath = location.FilePath;
             Line = location.LineNumber;
             Column = location.LinePosition;
         }
