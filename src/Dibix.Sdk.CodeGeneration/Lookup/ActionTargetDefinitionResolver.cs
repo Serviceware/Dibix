@@ -137,7 +137,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                 // See CodeGenerationTaskTests.Endpoints
                 // Here the user parameter is expected, but overwritten internally
-                // Not sure if this really a use case
+                // Not sure if this is really a use case
                 // 
                 // "childRoute": "{password}/Fixed",
                 // "params": {

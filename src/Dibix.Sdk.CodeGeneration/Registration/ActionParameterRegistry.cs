@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -19,7 +20,7 @@ namespace Dibix.Sdk.CodeGeneration
                                                           Index = i,
                                                           Key = x.Key
                                                       })
-                                                      .ToDictionary(x => x.Key, x => x.Index);
+                                                      .ToDictionary(x => x.Key, x => x.Index, StringComparer.OrdinalIgnoreCase);
         }
 
         public void Add(ActionParameter actionParameter)
@@ -28,7 +29,9 @@ namespace Dibix.Sdk.CodeGeneration
             if (actionParameter.Location == ActionParameterLocation.Path)
             {
                 // Restore original path parameter order from route template
-                int currentPathSegmentIndex = _pathSegmentIndexMap[actionParameter.ApiParameterName];
+                if (!_pathSegmentIndexMap.TryGetValue(actionParameter.ApiParameterName, out int currentPathSegmentIndex))
+                    return;
+
                 bool insertBefore = _previousPathSegmentIndex > currentPathSegmentIndex;
                 _previousPathSegmentIndex = currentPathSegmentIndex;
                 if (insertBefore)

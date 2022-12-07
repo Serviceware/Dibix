@@ -113,10 +113,6 @@ namespace Dibix.Sdk.CodeGeneration
             ActionRequestBody requestBody = ReadBody(action, filePath);
             ICollection<string> bodyParameters = GetBodyProperties(requestBody?.Contract, _schemaDefinitionResolver);
 
-            // Collect explicit parameters
-            IDictionary<string, ExplicitParameter> explicitParameters = new Dictionary<string, ExplicitParameter>();
-            CollectActionParameters(action, filePath, explicitParameters, requestBody);
-
             // Collect path parameters
             IDictionary<string, PathParameter> pathParameters = new Dictionary<string, PathParameter>(StringComparer.OrdinalIgnoreCase);
             JProperty childRouteProperty = action.Property("childRoute");
@@ -127,6 +123,10 @@ namespace Dibix.Sdk.CodeGeneration
                 foreach (Group pathSegment in pathSegments) 
                     pathParameters.Add(pathSegment.Value, new PathParameter(childRouteProperty, pathSegment));
             }
+
+            // Collect explicit parameters
+            IDictionary<string, ExplicitParameter> explicitParameters = new Dictionary<string, ExplicitParameter>();
+            CollectActionParameters(action, filePath, explicitParameters, requestBody, pathParameters);
 
             // Resolve action target, parameters and create action definition
             ActionDefinition actionDefinition = CreateActionDefinition<ActionDefinition>(action, filePath, explicitParameters, pathParameters, bodyParameters);
@@ -270,7 +270,7 @@ namespace Dibix.Sdk.CodeGeneration
             controller.ControllerImports.Add(typeName);
         }
 
-        private void CollectActionParameters(JObject action, string filePath, IDictionary<string, ExplicitParameter> target, ActionRequestBody requestBody)
+        private void CollectActionParameters(JObject action, string filePath, IDictionary<string, ExplicitParameter> target, ActionRequestBody requestBody, IDictionary<string, PathParameter> pathParameters)
         {
             JObject mappings = (JObject)action.Property("params")?.Value;
             if (mappings == null)
@@ -278,9 +278,9 @@ namespace Dibix.Sdk.CodeGeneration
 
             foreach (JProperty property in mappings.Properties())
             {
-                if (!TryReadSource(property, filePath, requestBody: requestBody, rootPropertySourceBuilder: null, out ActionParameterSourceBuilder parameterSourceBuilder))
+                if (!TryReadSource(property, filePath, requestBody: requestBody, rootPropertySourceBuilder: null, pathParameters, out ActionParameterSourceBuilder parameterSourceBuilder))
                 {
-                    parameterSourceBuilder = CollectActionParameterSource(filePath, requestBody, property, property.Value.Type);
+                    parameterSourceBuilder = CollectActionParameterSource(filePath, requestBody, property, property.Value.Type, pathParameters);
                 }
 
                 ExplicitParameter parameter = new ExplicitParameter(property, parameterSourceBuilder);
@@ -288,16 +288,16 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private ActionParameterSourceBuilder CollectActionParameterSource(string filePath, ActionRequestBody requestBody, JProperty property, JTokenType type)
+        private ActionParameterSourceBuilder CollectActionParameterSource(string filePath, ActionRequestBody requestBody, JProperty property, JTokenType type, IDictionary<string, PathParameter> pathParameters)
         {
             switch (type)
             {
-                case JTokenType.Object: return ReadComplexActionParameter(property.Name, (JObject)property.Value, filePath, requestBody);
+                case JTokenType.Object: return ReadComplexActionParameter(property.Name, (JObject)property.Value, filePath, requestBody, pathParameters);
                 default: throw new ArgumentOutOfRangeException(nameof(type), type, property.Value.Path);
             }
         }
 
-        private bool TryReadSource(JProperty property, string filePath, ActionRequestBody requestBody, ActionParameterPropertySourceBuilder rootPropertySourceBuilder, out ActionParameterSourceBuilder parameterSourceBuilder)
+        private bool TryReadSource(JProperty property, string filePath, ActionRequestBody requestBody, ActionParameterPropertySourceBuilder rootPropertySourceBuilder, IDictionary<string, PathParameter> pathParameters, out ActionParameterSourceBuilder parameterSourceBuilder)
         {
             switch (property.Value.Type)
             {
@@ -311,7 +311,7 @@ namespace Dibix.Sdk.CodeGeneration
                     string stringValue = (string)property.Value;
                     if (stringValue != null && stringValue.Contains('.'))
                     {
-                        parameterSourceBuilder = ReadPropertySource((JValue)property.Value, filePath, requestBody, rootPropertySourceBuilder);
+                        parameterSourceBuilder = ReadPropertySource((JValue)property.Value, filePath, requestBody, rootPropertySourceBuilder, pathParameters);
                     }
                     else
                     {
@@ -325,7 +325,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private ActionParameterPropertySourceBuilder ReadPropertySource(JValue value, string filePath, ActionRequestBody requestBody, ActionParameterPropertySourceBuilder rootParameterSourceBuilder)
+        private ActionParameterPropertySourceBuilder ReadPropertySource(JValue value, string filePath, ActionRequestBody requestBody, ActionParameterPropertySourceBuilder rootParameterSourceBuilder, IDictionary<string, PathParameter> pathParameters)
         {
             string[] parts = ((string)value.Value).Split(new[] { '.' }, 2);
             string sourceName = parts[0];
@@ -338,11 +338,11 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             ActionParameterPropertySourceBuilder propertySourceBuilder = new ActionParameterPropertySourceBuilder(definition, propertyName, filePath, valueLocation.LineNumber, valueLocation.LinePosition);
-            CollectPropertySourceNodes(propertySourceBuilder, requestBody, rootParameterSourceBuilder);
+            CollectPropertySourceNodes(propertySourceBuilder, requestBody, rootParameterSourceBuilder, pathParameters);
             return propertySourceBuilder;
         }
 
-        private ActionParameterSourceBuilder ReadComplexActionParameter(string parameterName, JObject container, string filePath, ActionRequestBody requestBody)
+        private ActionParameterSourceBuilder ReadComplexActionParameter(string parameterName, JObject container, string filePath, ActionRequestBody requestBody, IDictionary<string, PathParameter> pathParameters)
         {
             JProperty bodyConverterProperty = container.Property("convertFromBody");
             if (bodyConverterProperty != null)
@@ -353,15 +353,15 @@ namespace Dibix.Sdk.CodeGeneration
             JProperty sourceProperty = container.Property("source");
             if (sourceProperty != null)
             {
-                return ReadPropertyActionParameter(parameterName, container, sourceProperty, filePath, requestBody);
+                return ReadPropertyActionParameter(parameterName, container, sourceProperty, filePath, requestBody, pathParameters);
             }
 
             throw new InvalidOperationException($"Invalid object for parameter: {parameterName}");
         }
 
-        private ActionParameterSourceBuilder ReadPropertyActionParameter(string parameterName, JObject container, JProperty sourceProperty, string filePath, ActionRequestBody requestBody)
+        private ActionParameterSourceBuilder ReadPropertyActionParameter(string parameterName, JObject container, JProperty sourceProperty, string filePath, ActionRequestBody requestBody, IDictionary<string, PathParameter> pathParameters)
         {
-            ActionParameterPropertySourceBuilder propertySourceBuilder = ReadPropertySource((JValue)sourceProperty.Value, filePath, requestBody, rootParameterSourceBuilder: null);
+            ActionParameterPropertySourceBuilder propertySourceBuilder = ReadPropertySource((JValue)sourceProperty.Value, filePath, requestBody, rootParameterSourceBuilder: null, pathParameters);
 
             JProperty itemsProperty = container.Property("items");
             if (itemsProperty != null)
@@ -369,7 +369,7 @@ namespace Dibix.Sdk.CodeGeneration
                 JObject itemsObject = (JObject)itemsProperty.Value;
                 foreach (JProperty itemProperty in itemsObject.Properties())
                 {
-                    if (TryReadSource(itemProperty, filePath, requestBody: requestBody, rootPropertySourceBuilder: propertySourceBuilder, out ActionParameterSourceBuilder itemPropertySourceBuilder))
+                    if (TryReadSource(itemProperty, filePath, requestBody: requestBody, rootPropertySourceBuilder: propertySourceBuilder, pathParameters, parameterSourceBuilder: out ActionParameterSourceBuilder itemPropertySourceBuilder))
                     {
                         IJsonLineInfo lineInfo = itemProperty.GetLineInfo();
                         propertySourceBuilder.ItemSources.Add(new ActionParameterItemSourceBuilder(itemProperty.Name, itemPropertySourceBuilder, filePath, lineInfo.LineNumber, lineInfo.LinePosition, _schemaDefinitionResolver, Logger));
@@ -582,7 +582,7 @@ namespace Dibix.Sdk.CodeGeneration
                 return;
 
             IDictionary<string, ExplicitParameter> explicitParameters = new Dictionary<string, ExplicitParameter>();
-            CollectActionParameters(authorization, filePath, explicitParameters, requestBody: null);
+            CollectActionParameters(authorization, filePath, explicitParameters, requestBody: null, pathParameters: new Dictionary<string, PathParameter>());
             IDictionary<string, PathParameter> pathParameters = new Dictionary<string, PathParameter>();
             ICollection<string> bodyParameters = new Collection<string>();
             actionDefinition.Authorization = CreateActionDefinition<AuthorizationBehavior>(authorization, filePath, explicitParameters, pathParameters, bodyParameters);
@@ -627,7 +627,7 @@ namespace Dibix.Sdk.CodeGeneration
             return type;
         }
 
-        private void CollectPropertySourceNodes(ActionParameterPropertySourceBuilder propertySourceBuilder, ActionRequestBody requestBody, ActionParameterPropertySourceBuilder rootPropertySourceBuilder)
+        private void CollectPropertySourceNodes(ActionParameterPropertySourceBuilder propertySourceBuilder, ActionRequestBody requestBody, ActionParameterPropertySourceBuilder rootPropertySourceBuilder, IDictionary<string, PathParameter> pathParameters)
         {
             switch (propertySourceBuilder.Definition)
             {
@@ -637,6 +637,10 @@ namespace Dibix.Sdk.CodeGeneration
 
                 case ItemParameterSource _:
                     CollectItemPropertySourceNodes(propertySourceBuilder, rootPropertySourceBuilder);
+                    break;
+
+                case PathParameterSource _:
+                    ValidatePathProperty(propertySourceBuilder, pathParameters);
                     break;
 
                 default: 
@@ -731,6 +735,14 @@ namespace Dibix.Sdk.CodeGeneration
             logger.LogError($"Property '{propertyName}' not found on contract '{type.DisplayName}'", propertySourceBuilder.FilePath, propertySourceBuilder.Line, column);
             propertyType = null;
             return false;
+        }
+
+        private void ValidatePathProperty(ActionParameterPropertySourceBuilder propertySourceBuilder, IDictionary<string, PathParameter> pathParameters)
+        {
+            if (!pathParameters.ContainsKey(propertySourceBuilder.PropertyName))
+            {
+                Logger.LogError($"Property '{propertySourceBuilder.PropertyName}' not found in path", propertySourceBuilder.FilePath, propertySourceBuilder.Line, propertySourceBuilder.Column);
+            }
         }
         #endregion
     }
