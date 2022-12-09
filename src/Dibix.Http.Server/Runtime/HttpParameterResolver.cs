@@ -371,7 +371,7 @@ namespace Dibix.Http.Server
             // arguments["lcid"] = CONVERT(arguments["lcid"])
             if (parameter.Converter != null)
             {
-                Expression value = HttpParameterResolverUtility.BuildArgumentAccessorExpression(argumentsParameter, parameter.InternalParameterName);
+                Expression value = HttpParameterResolverUtility.BuildReadableArgumentAccessorExpression(argumentsParameter, parameter.InternalParameterName);
                 value = CollectConverterStatement(parameter, value, actionParameter, dependencyResolverParameter);
                 CollectParameterAssignment(compilationContext, parameter.InternalParameterName, argumentsParameter, value);
             }
@@ -434,7 +434,7 @@ namespace Dibix.Http.Server
 
         private static void CollectParameterAssignment(CompilationContext compilationContext, string parameterName, Expression argumentsParameter, Expression value)
         {
-            Expression property = HttpParameterResolverUtility.BuildArgumentAccessorExpression(argumentsParameter, parameterName);
+            Expression property = HttpParameterResolverUtility.BuildWritableArgumentAccessorExpression(argumentsParameter, parameterName);
             Expression valueCast = Expression.Convert(value, typeof(object));
             Expression assign = Expression.Assign(property, valueCast);
             compilationContext.Statements.Add(assign);
@@ -452,7 +452,7 @@ namespace Dibix.Http.Server
 
                 case HttpParameterSourceKind.Query:
                 case HttpParameterSourceKind.Path:
-                    value = HttpParameterResolverUtility.BuildArgumentAccessorExpression(argumentsParameter, parameter.InternalParameterName);
+                    value = HttpParameterResolverUtility.BuildReadableArgumentAccessorExpression(argumentsParameter, parameter.InternalParameterName);
                     break;
 
                 case HttpParameterSourceKind.SourceInstance:

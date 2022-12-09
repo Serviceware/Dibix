@@ -290,7 +290,9 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
         $input.localeid = $bodySource.LocaleId;
         $input.fromuri = .Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
             ""fromuri"",
-            $arguments.Item[""fromuri""],
+            .Call Dibix.Http.Server.HttpParameterResolverUtility.ReadArgument(
+                $arguments,
+                ""fromuri""),
             $action);
         $arguments.Item[""input""] = (System.Object)$input
     }
@@ -691,7 +693,9 @@ Parameter: input", exception.Message);
         } .Else {
             .Default(System.Void)
         };
-        $arguments.Item[""name""] = (System.Object)$arguments.Item[""name_""];
+        $arguments.Item[""name""] = (System.Object).Call Dibix.Http.Server.HttpParameterResolverUtility.ReadArgument(
+            $arguments,
+            ""name_"");
         .If (
             .Call $arguments.TryGetValue(
                 ""name"",
@@ -703,9 +707,13 @@ Parameter: input", exception.Message);
         };
         $arguments.Item[""name""] = (System.Object).Call Dibix.Http.Server.Tests.HttpParameterResolverTest+EncryptionHttpParameterConverter.Convert(.Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
                 ""name"",
-                $arguments.Item[""name""],
+                .Call Dibix.Http.Server.HttpParameterResolverUtility.ReadArgument(
+                    $arguments,
+                    ""name""),
                 $action));
-        $arguments.Item[""true""] = (System.Object)$arguments.Item[""true_""];
+        $arguments.Item[""true""] = (System.Object).Call Dibix.Http.Server.HttpParameterResolverUtility.ReadArgument(
+            $arguments,
+            ""true_"");
         .If (
             .Call $arguments.TryGetValue(
                 ""true"",
@@ -718,11 +726,15 @@ Parameter: input", exception.Message);
         $input = .New Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpUriParameterInput();
         $input.targetid = .Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
             ""targetid"",
-            $arguments.Item[""targetid""],
+            .Call Dibix.Http.Server.HttpParameterResolverUtility.ReadArgument(
+                $arguments,
+                ""targetid""),
             $action);
         $input.targetname = .Call Dibix.Http.Server.Tests.HttpParameterResolverTest+EncryptionHttpParameterConverter.Convert(.Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
                 ""targetname"",
-                $arguments.Item[""targetname_""],
+                .Call Dibix.Http.Server.HttpParameterResolverUtility.ReadArgument(
+                    $arguments,
+                    ""targetname_""),
                 $action));
         $arguments.Item[""input""] = (System.Object)$input
     }
@@ -819,11 +831,15 @@ Parameter: input", exception.Message);
         $input = .New Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpUriParameterInput();
         $input.targetid = .Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
             ""targetid"",
-            $arguments.Item[""targetid""],
+            .Call Dibix.Http.Server.HttpParameterResolverUtility.ReadArgument(
+                $arguments,
+                ""targetid""),
             $action);
         $input.targetname = .Call Dibix.Http.Server.Tests.HttpParameterResolverTest+EncryptionHttpParameterConverter.Convert(.Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
                 ""targetname"",
-                $arguments.Item[""targetname_""],
+                .Call Dibix.Http.Server.HttpParameterResolverUtility.ReadArgument(
+                    $arguments,
+                    ""targetname_""),
                 $action));
         $arguments.Item[""input""] = (System.Object)$input
     }

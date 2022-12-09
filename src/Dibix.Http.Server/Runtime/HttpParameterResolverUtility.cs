@@ -24,11 +24,18 @@ namespace Dibix.Http.Server
 
         public static TBody ReadBody<TBody>(IDictionary<string, object> arguments) => ReadArgument<TBody>(arguments, HttpParameterName.Body);
 
-        public static Expression BuildArgumentAccessorExpression(Expression argumentsParameter, string key)
+        public static Expression BuildWritableArgumentAccessorExpression(Expression argumentsParameter, string key)
         {
             Expression argumentsKey = Expression.Constant(key);
             Expression property = Expression.Property(argumentsParameter, "Item", argumentsKey);
             return property;
+        }
+
+        public static Expression BuildReadableArgumentAccessorExpression(Expression argumentsParameter, string key)
+        {
+            Expression argumentsKey = Expression.Constant(key);
+            Expression call = Expression.Call(typeof(HttpParameterResolverUtility), nameof(ReadArgument), new[] { typeof(object) }, argumentsParameter, argumentsKey);
+            return call;
         }
     }
 }
