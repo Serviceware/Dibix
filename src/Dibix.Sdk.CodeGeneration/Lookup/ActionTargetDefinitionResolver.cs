@@ -129,10 +129,20 @@ namespace Dibix.Sdk.CodeGeneration
                 if (source is ActionParameterPropertySource propertySource)
                 {
                     apiParameterName = propertySource.PropertyName.Split('.')[0];
-                    if (IsUserParameter(propertySource.Definition, propertySource.PropertyName, ref location, ref apiParameterName))
+                    _ = IsUserParameter(propertySource.Definition, propertySource.PropertyName, ref location, ref apiParameterName);
+
+                    if (propertySource.Definition is PathParameterSource)
                     {
-                        if (location == ActionParameterLocation.Path && pathParameters.TryGetValue(propertySource.PropertyName, out pathParameter))
+                        // Use case sensitive comparison, because the runtime does not support case insensitive argument resolution
+                        if (!pathParameters.TryGetValue(apiParameterName, out pathParameter) || pathParameter.Name != apiParameterName)
+                        {
+                            Logger.LogError($"Property '{apiParameterName}' not found in path", propertySource.FilePath, propertySource.Line, propertySource.Column);
+                        }
+
+                        if (pathParameter != null)
+                        {
                             pathParameter.Visited = true;
+                        }
                     }
                 }
 

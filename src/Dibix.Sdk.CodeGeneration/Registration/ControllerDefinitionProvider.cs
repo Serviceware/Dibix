@@ -644,10 +644,6 @@ namespace Dibix.Sdk.CodeGeneration
                     CollectItemPropertySourceNodes(propertySourceBuilder, rootPropertySourceBuilder);
                     break;
 
-                case PathParameterSource _:
-                    ValidatePathProperty(propertySourceBuilder, pathParameters);
-                    break;
-
                 default: 
                     return;
             }
@@ -740,14 +736,6 @@ namespace Dibix.Sdk.CodeGeneration
             logger.LogError($"Property '{propertyName}' not found on contract '{type.DisplayName}'", propertySourceBuilder.FilePath, propertySourceBuilder.Line, column);
             propertyType = null;
             return false;
-        }
-
-        private void ValidatePathProperty(ActionParameterPropertySourceBuilder propertySourceBuilder, IReadOnlyDictionary<string, PathParameter> pathParameters)
-        {
-            if (!pathParameters.ContainsKey(propertySourceBuilder.PropertyName))
-            {
-                Logger.LogError($"Property '{propertySourceBuilder.PropertyName}' not found in path", propertySourceBuilder.FilePath, propertySourceBuilder.Line, propertySourceBuilder.Column);
-            }
         }
         #endregion
     }
