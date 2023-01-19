@@ -125,6 +125,14 @@ namespace Dibix
                        .Single();
         });
 
+        public TReturn QuerySingle<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>(string commandText, CommandType commandType, ParametersVisitor parameters, string splitOn) where TReturn : new() => Execute(commandText, commandType, parameters, () =>
+        {
+            MultiMapper multiMapper = new MultiMapper();
+            return QueryMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TReturn>(commandText, commandType, parameters, (a, b, c, d, e, f, g, h) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c, d, e, f, g, h), splitOn)
+                       .PostProcess(multiMapper)
+                       .Single();
+        });
+
         T IDatabaseAccessor.QuerySingleOrDefault<T>(string commandText, CommandType commandType, ParametersVisitor parameters) => Execute(commandText, commandType, parameters, () => QuerySingleOrDefault<T>(commandText, commandType, parameters).PostProcess());
 
         Task<T> IDatabaseAccessor.QuerySingleOrDefaultAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken) => Execute(commandText, commandType, parameters, () => QuerySingleOrDefaultAsync<T>(commandText, commandType, parameters, cancellationToken).PostProcess());
@@ -152,7 +160,10 @@ namespace Dibix
         protected abstract IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> map, string splitOn);
 
         protected abstract IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> map, string splitOn);
+        
         protected abstract IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> map, string splitOn);
+        
+        protected abstract IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TReturn> map, string splitOn);
 
         protected abstract IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TReturn> map, string splitOn);
 
