@@ -15,7 +15,7 @@ namespace Dibix.Http.Server
             if (file == null)
                 return requestMessage.CreateResponse(HttpStatusCode.NotFound);
 
-            string mediaType = MimeTypes.GetMimeType(file.Type);
+            string mediaType = MimeTypes.IsRegistered(file.Type) ? file.Type : MimeTypes.GetMimeType(file.Type);
 
             HttpResponseMessage response = requestMessage.CreateResponse();
             response.Content = new ByteArrayContent(file.Data);

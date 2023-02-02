@@ -11,7 +11,7 @@ namespace Dibix.Http.Server
     internal static class MimeTypes
     {
         private const string DefaultMimeType = "application/octet-stream";
-        private static readonly IDictionary<string, string> _mappings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        private static readonly IDictionary<string, string> MimeTypeMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             { "323", "text/h323" },
             { "3g2", "video/3gpp2" },
@@ -574,6 +574,9 @@ namespace Dibix.Http.Server
             { "z", "application/x-compress" },
             { "zip", "application/x-zip-compressed" }
         };
+        private static readonly HashSet<string> AllMimeTypes = new HashSet<string>(MimeTypeMap.Values, StringComparer.OrdinalIgnoreCase);
+
+        public static bool IsRegistered(string mimeType) => AllMimeTypes.Contains(mimeType);
 
         public static string GetMimeType(string fileNameOrExtension)
         {
@@ -586,7 +589,7 @@ namespace Dibix.Http.Server
             fileNameOrExtension = fileNameOrExtension.TrimStart('.');
 
             string mimeType;
-            return _mappings.TryGetValue(fileNameOrExtension, out mimeType) ? mimeType : DefaultMimeType;
+            return MimeTypeMap.TryGetValue(fileNameOrExtension, out mimeType) ? mimeType : DefaultMimeType;
         }
     }
 }
