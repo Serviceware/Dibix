@@ -129,6 +129,7 @@ namespace Dibix.Testing
                 // However the AssemblyCleanup method doesn't accept a TestContext and is also not inheritable.
                 // Therefore this step is executed after each test and involves to skip these files in subsequent tests of the current run.
                 this._testRunFiles.Add(path);
+                this._testContext.AddResultFile(path);
                 return false;
             }
 
