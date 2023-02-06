@@ -4,36 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dibix.Testing
 {
-    public abstract class TestBase<TConfiguration> : TestBase where TConfiguration : class, new()
-    {
-        private TConfiguration _configuration;
-
-        protected TConfiguration Configuration
-        {
-            get
-            {
-                if (this._configuration == null)
-                    throw new InvalidOperationException("Configuration not initialized");
-
-                return this._configuration;
-            }
-            private set => this._configuration = value;
-        }
-
-        protected override Task OnTestInitialized()
-        {
-            this.Configuration = TestConfigurationLoader.Load<TConfiguration>(base.TestContext);
-            return Task.CompletedTask;
-        }
-    }
-    
     public abstract class TestBase : IDisposable
     {
         #region Fields
@@ -41,6 +17,7 @@ namespace Dibix.Testing
         private TestContext _testContext;
         private TestOutputWriter _testOutputHelper;
         private TestResultComposer _testResultComposer;
+        private IDisposable _unhandledExceptionDiagnostics;
         #endregion
 
         #region Properties
@@ -79,7 +56,13 @@ namespace Dibix.Testing
         {
             this.TestResultComposer = new TestResultComposer(this.TestContext, this.UseDedicatedTestResultsDirectory);
             this.TestOutputHelper = new TestOutputWriter(this.TestContext, this.TestResultComposer, outputToFile: true, tailOutput: this.AttachOutputObserver);
-            AppDomain.CurrentDomain.FirstChanceException += this.OnFirstChanceException;
+
+#if NETCOREAPP
+            if (OperatingSystem.IsWindows())
+                _unhandledExceptionDiagnostics = new UnhandledExceptionDiagnostics(Out, LogException, TestResultComposer);
+#else
+            _unhandledExceptionDiagnostics = new UnhandledExceptionDiagnostics(Out, LogException, TestResultComposer);
+#endif
 
             await this.OnTestInitialized().ConfigureAwait(false);
         }
@@ -152,43 +135,7 @@ Value: {instance}");
         protected static Task<TResult> Retry<TResult>(Func<CancellationToken, Task<TResult>> retryMethod, Func<TResult, bool> condition, TimeSpan timeout, CancellationToken cancellationToken = default) => retryMethod.Retry(condition, (int)TimeSpan.FromSeconds(1).TotalMilliseconds, (int)timeout.TotalMilliseconds, cancellationToken: cancellationToken);
         #endregion
 
-        #region Private Methods
-        private void OnFirstChanceException(object sender, FirstChanceExceptionEventArgs e)
-        {
-            if (e.Exception is UnitTestAssertException)
-                return;
-
-            AppDomain.CurrentDomain.FirstChanceException -= this.OnFirstChanceException;
-
-            try
-            {
-#if NETCOREAPP
-                if (OperatingSystem.IsWindows())
-#endif
-                    this.TestResultComposer.AddLastEventLogEntries();
-            }
-            catch (Exception exception)
-            {
-                try
-                {
-                    this.LogException(exception);
-                }
-                catch (Exception loggingException)
-                {
-                    this.TestContext.WriteLine($@"An error occured while collecting the last event log errors
-{exception}
-
-Additionally, the following error occured while trying to log the previous error to file
-{loggingException}");
-                    
-                    Console.WriteLine("---");
-                    Console.WriteLine();
-                    Console.WriteLine(exception);
-                    //throw;
-                }
-            }
-        }
-
+        #region Private
         private static T SafeGetProperty<T>(ref T field, [CallerMemberName] string propertyName = null) where T : class
         {
             if (field == null)
@@ -209,10 +156,33 @@ Additionally, the following error occured while trying to log the previous error
         {
             if (disposing)
             {
+                this._unhandledExceptionDiagnostics?.Dispose();
                 this._testOutputHelper?.Dispose();
                 this._testResultComposer?.Complete();
             }
         }
         #endregion
+    }
+    public abstract class TestBase<TConfiguration> : TestBase where TConfiguration : class, new()
+    {
+        private TConfiguration _configuration;
+
+        protected TConfiguration Configuration
+        {
+            get
+            {
+                if (_configuration == null)
+                    throw new InvalidOperationException("Configuration not initialized");
+
+                return _configuration;
+            }
+            private set => _configuration = value;
+        }
+
+        protected override Task OnTestInitialized()
+        {
+            Configuration = TestConfigurationLoader.Load<TConfiguration>(base.TestContext);
+            return Task.CompletedTask;
+        }
     }
 }
