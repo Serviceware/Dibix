@@ -58,7 +58,7 @@ namespace Dibix.Generators.Tests
                 string actualCode = outputSyntaxTree.ToString();
                 this.AddResultFile(outputFile.Name, actualCode);
                 Assert.AreEqual(expectedFiles[i - 1], outputFile.Name);
-                string expectedCode = this.GetEmbeddedResourceContent(outputFile.Name).Replace("%GENERATORVERSION%", ThisAssembly.AssemblyFileVersion);
+                string expectedCode = this.GetEmbeddedResourceContent(outputFile.Name).Replace("%GENERATORVERSION%", TestUtility.GeneratorFileVersion);
                 this.AssertEqual(expectedCode, actualCode, outputName: Path.GetFileNameWithoutExtension(outputFile.Name), extension: outputFile.Extension.TrimStart('.'));
             }
 
@@ -141,7 +141,7 @@ namespace Dibix.Generators.Tests.Tasks
                 string actualCode = outputSyntaxTree.ToString();
                 this.AddResultFile(outputFile.Name, actualCode);
                 Assert.AreEqual(expectedFiles[i - 1], outputFile.Name);
-                string expectedCode = this.GetEmbeddedResourceContent(outputFile.Name).Replace("%GENERATORVERSION%", ThisAssembly.AssemblyFileVersion);
+                string expectedCode = this.GetEmbeddedResourceContent(outputFile.Name).Replace("%GENERATORVERSION%", TestUtility.GeneratorFileVersion);
                 this.AssertEqual(expectedCode, actualCode, outputName: Path.GetFileNameWithoutExtension(outputFile.Name), extension: outputFile.Extension.TrimStart('.'));
             }
 
