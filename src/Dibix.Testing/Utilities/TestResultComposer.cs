@@ -25,6 +25,7 @@ namespace Dibix.Testing
         private bool _eventLogCollected;
 
         public string RunDirectory { get; }
+        public string TestRootDirectory { get; }
         public string TestDirectory { get; }
 
         public TestResultComposer(TestContext testContext, bool useDedicatedTestResultsDirectory)
@@ -33,7 +34,8 @@ namespace Dibix.Testing
             this._useDedicatedTestResultsDirectory = useDedicatedTestResultsDirectory;
             this._defaultRunDirectory = testContext.TestRunResultsDirectory;
             this.RunDirectory = this._useDedicatedTestResultsDirectory ? TestRun.GetTestRunDirectory(testContext) : this._defaultRunDirectory;
-            this.TestDirectory = Path.Combine(this.RunDirectory, "TestResults", testContext.TestName);
+            this.TestRootDirectory = Path.Combine(this.RunDirectory, "TestResults");
+            this.TestDirectory = Path.Combine(this.TestRootDirectory, testContext.TestName);
             this._expectedDirectory = Path.Combine(this.RunDirectory, ExpectedDirectoryName);
             this._actualDirectory = Path.Combine(this.RunDirectory, ActualDirectoryName);
             this._testRunFiles = new HashSet<string>();
@@ -137,6 +139,9 @@ namespace Dibix.Testing
 
         private void RegisterFile(string path, bool scopeIsTestRun)
         {
+            if (path.Length > 255)
+                throw new ArgumentException($"Test result file path too long: {path}", nameof(path));
+
             ICollection<string> files = scopeIsTestRun ? this._testRunFiles : this._testFiles;
             if (files.Contains(path))
                 throw new InvalidOperationException($"Test result file already registered: {path}");
@@ -179,7 +184,7 @@ start winmergeU ""{ExpectedDirectoryName}"" ""{ActualDirectoryName}""");
             if (!files.Any())
                 return;
 
-            string path = Path.Combine(this.TestDirectory, $"{this._testContext.TestName}.zip");
+            string path = Path.Combine(this.TestRootDirectory, $"{this._testContext.TestName}.zip");
             using (ZipArchive archive = ZipFile.Open(path, ZipArchiveMode.Create))
             {
                 foreach (string file in files)
