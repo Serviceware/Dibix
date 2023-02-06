@@ -21,6 +21,7 @@ namespace Dibix.Testing
         private readonly string _actualDirectory;
         private readonly ICollection<string> _testRunFiles;
         private readonly ICollection<string> _testFiles;
+        private bool _eventLogCollected;
 
         public string RunDirectory { get; }
         public string TestDirectory { get; }
@@ -82,6 +83,11 @@ namespace Dibix.Testing
 {border}
 {entry.Message}";
             }
+
+            if (_eventLogCollected)
+                return;
+
+            _eventLogCollected = true;
 
             EventLog eventLog = new EventLog("Application");
 
