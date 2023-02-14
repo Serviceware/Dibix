@@ -8,27 +8,31 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class ContractArtifactModelValidator : ICodeGenerationModelValidator
     {
-        private readonly ISchemaDefinitionResolver _schemaDefinitionResolver;
+        private readonly ISchemaRegistry _schemaRegistry;
         private readonly ILogger _logger;
 
-        public ContractArtifactModelValidator(ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
+        public ContractArtifactModelValidator(ISchemaRegistry schemaRegistry, ILogger logger)
         {
-            this._schemaDefinitionResolver = schemaDefinitionResolver;
-            this._logger = logger;
+            _schemaRegistry = schemaRegistry;
+            _logger = logger;
         }
 
         public bool Validate(CodeGenerationModel model)
         {
-            bool isValid = this.ValidateUnusedContracts(model);
+            bool isValid = ValidateUnusedContracts(model);
             return isValid;
         }
 
         private bool ValidateUnusedContracts(CodeGenerationModel model)
         {
-            IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap = CollectObjectContracts(model).ToDictionary(x => x.Schema);
+            IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap = model.Schemas
+                                                                                         .Where(x => x.Source == SchemaDefinitionSource.Defined)
+                                                                                         .OfType<ObjectSchema>()
+                                                                                         .Select(x => new ObjectContractDefinition(x))
+                                                                                         .ToDictionary(x => x.Schema);
 
-            this.ValidateStatementContracts(model, schemaPropertyMap);
-            this.ValidateEndpointContracts(model, schemaPropertyMap);
+            ValidateStatementContracts(model, schemaPropertyMap);
+            ValidateEndpointContracts(model, schemaPropertyMap);
 
             bool isValid = true;
             foreach (KeyValuePair<ObjectSchema, ObjectContractDefinition> keyValuePair in schemaPropertyMap)
@@ -38,8 +42,7 @@ namespace Dibix.Sdk.CodeGeneration
                 bool allPropertiesUnused = !objectSchema.Properties.Except(objectContractDefinition.Properties).Any();
                 if (allPropertiesUnused)
                 {
-                    ContractDefinition contractDefinition = objectContractDefinition.ContractDefinition;
-                    this._logger.LogError($"Unused contract definition: {objectSchema.FullName}", contractDefinition.FilePath, contractDefinition.Line, contractDefinition.Column);
+                    _logger.LogError($"Unused contract definition: {objectSchema.FullName}", objectContractDefinition.Schema.Location.Source, objectContractDefinition.Schema.Location.Line, objectContractDefinition.Schema.Location.Column);
                     continue;
                 }
                 
@@ -47,32 +50,23 @@ namespace Dibix.Sdk.CodeGeneration
                 {
                     isValid = false;
                     Token<string> name = property.Name;
-                    this._logger.LogError($"Unused contract definition property: {objectSchema.FullName}.{name.Value}", name.Source, name.Line, name.Column);
+                    _logger.LogError($"Unused contract definition property: {objectSchema.FullName}.{name.Value}", name.Location.Source, name.Location.Line, name.Location.Column);
                 }
             }
             
             return isValid;
         }
 
-        private static IEnumerable<ObjectContractDefinition> CollectObjectContracts(CodeGenerationModel model)
-        {
-            foreach (ContractDefinition contractDefinition in model.Contracts)
-            {
-                if (contractDefinition.Schema is ObjectSchema objectSchema)
-                    yield return new ObjectContractDefinition(contractDefinition, objectSchema);
-            }
-        }
-
         private void ValidateStatementContracts(IPersistedCodeGenerationModel model, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
         {
-            foreach (SqlStatementDefinition statement in model.SqlStatements)
+            foreach (SqlStatementDefinition statement in model.Schemas.OfType<SqlStatementDefinition>())
             {
-                (ObjectSchema gridResultSchema, IDictionary<string, ObjectSchemaProperty> gridResultSchemaPropertyMap, ICollection<ObjectSchemaProperty> gridResultSchemaProperties) = this.CollectGridResultInfos(statement, schemaPropertyMap);
+                (ObjectSchema gridResultSchema, IDictionary<string, ObjectSchemaProperty> gridResultSchemaPropertyMap, ICollection<ObjectSchemaProperty> gridResultSchemaProperties) = CollectGridResultInfos(statement, schemaPropertyMap);
 
                 for (int i = 0; i < statement.Results.Count; i++)
                 {
                     SqlQueryResult result = statement.Results[i];
-                    this.ValidateResultSchemaProperties(result, schemaPropertyMap);
+                    ValidateResultSchemaProperties(result, schemaPropertyMap);
                     ValidateGridResultSchemaProperties(statement, result, i, gridResultSchema, gridResultSchemaPropertyMap, gridResultSchemaProperties);
                 }
             }
@@ -85,12 +79,12 @@ namespace Dibix.Sdk.CodeGeneration
 
             foreach (TypeReference type in result.Types)
             {
-                this.ValidateResultSchemaProperties(result, type, multiMapTypes, schemaPropertyMap);
+                ValidateResultSchemaProperties(result, type, multiMapTypes, schemaPropertyMap);
             }
 
             if (result.ProjectToType != null)
             {
-                this.ValidateResultSchemaProperties(result, result.ProjectToType, multiMapTypes, schemaPropertyMap);
+                ValidateResultSchemaProperties(result, result.ProjectToType, multiMapTypes, schemaPropertyMap);
             }
         }
 
@@ -99,7 +93,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (!(type is SchemaTypeReference resultSchemaTypeReference))
                 return;
 
-            if (!(this._schemaDefinitionResolver.Resolve(resultSchemaTypeReference) is ObjectSchema objectSchema))
+            if (_schemaRegistry.GetSchema(resultSchemaTypeReference) is not ObjectSchema objectSchema)
                 return;
 
             // Some properties in Dibix.FileEntity for example are optional
@@ -153,7 +147,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (action.RequestBody?.Contract is not SchemaTypeReference schemaTypeReference)
                 return;
 
-            if (this._schemaDefinitionResolver.Resolve(schemaTypeReference) is not ObjectSchema objectSchema)
+            if (_schemaRegistry.GetSchema(schemaTypeReference) is not ObjectSchema objectSchema)
                 return;
 
             if (!schemaPropertyMap.TryGetValue(objectSchema, out ObjectContractDefinition objectContractDefinition))
@@ -162,11 +156,11 @@ namespace Dibix.Sdk.CodeGeneration
             switch (action.Target)
             {
                 case LocalActionTarget localActionTarget:
-                    this.VisitLocalActionTarget(action, localActionTarget, objectSchema, objectContractDefinition.Properties, schemaPropertyMap);
+                    VisitLocalActionTarget(action, localActionTarget, objectSchema, objectContractDefinition.Properties, schemaPropertyMap);
                     break;
 
                 case ReflectionActionTarget:
-                    this.VisitReflectionActionTarget(objectSchema, schemaPropertyMap);
+                    VisitReflectionActionTarget(objectSchema, schemaPropertyMap);
                     break;
             }
         }
@@ -184,7 +178,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private void VisitLocalActionTarget(ActionTargetDefinition actionTargetDefinition, LocalActionTarget localActionTarget, ObjectSchema bodySchema, ICollection<ObjectSchemaProperty> bodyProperties, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
         {
-            IDictionary<string, UserDefinedTypeParameter?> parameters = localActionTarget.SqlStatementDefinition.Parameters.ToDictionary(x => x.Name, this.CollectUDTParameter, StringComparer.OrdinalIgnoreCase);
+            IDictionary<string, UserDefinedTypeParameter?> parameters = localActionTarget.SqlStatementDefinition.Parameters.ToDictionary(x => x.Name, CollectUDTParameter, StringComparer.OrdinalIgnoreCase);
             foreach (ActionParameter actionParameter in actionTargetDefinition.Parameters)
             {
                 if (parameters.TryGetValue(actionParameter.InternalParameterName, out UserDefinedTypeParameter? userDefinedTypeParameter))
@@ -196,7 +190,7 @@ namespace Dibix.Sdk.CodeGeneration
                         parameters.Add(actionParameter.ApiParameterName, userDefinedTypeParameter);
                 }
 
-                this.VisitParameterSource(actionParameter.Type, actionParameter.Source, bodySchema, bodyProperties, schemaPropertyMap);
+                VisitParameterSource(actionParameter.Type, actionParameter.ParameterSource, bodySchema, bodyProperties, schemaPropertyMap);
             }
 
             // Visit target parameters that are mapped from body contract properties
@@ -207,19 +201,19 @@ namespace Dibix.Sdk.CodeGeneration
                     continue;
 
                 VisitProperty(bodyProperties, property);
-                this.VisitUDTParameter(userDefinedTypeParameter, bodySchema, property, schemaPropertyMap);
+                VisitUDTParameter(userDefinedTypeParameter, bodySchema, property, schemaPropertyMap);
             }
         }
 
         private void VisitReflectionActionTarget(SchemaDefinition bodySchema, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
         {
             // Visit all properties of the body, if the target is not visible to us
-            this.VisitAllPropertiesNested(bodySchema, schemaPropertyMap);
+            VisitAllPropertiesNested(bodySchema, schemaPropertyMap);
         }
 
         private UserDefinedTypeParameter? CollectUDTParameter(SqlQueryParameter parameter)
         {
-            if (parameter.Type is SchemaTypeReference schemaTypeReference && this._schemaDefinitionResolver.Resolve(schemaTypeReference) is UserDefinedTypeSchema userDefinedTypeSchema)
+            if (parameter.Type is SchemaTypeReference schemaTypeReference && _schemaRegistry.GetSchema(schemaTypeReference) is UserDefinedTypeSchema userDefinedTypeSchema)
                 return new UserDefinedTypeParameter(parameter.Name, userDefinedTypeSchema);
 
             return null;
@@ -230,11 +224,11 @@ namespace Dibix.Sdk.CodeGeneration
             switch (parameterSource)
             {
                 case ActionParameterBodySource bodySource:
-                    this.VisitBodySource(bodySource, bodySchema, schemaPropertyMap);
+                    VisitBodySource(bodySource, bodySchema, schemaPropertyMap);
                     break;
 
                 case ActionParameterPropertySource propertySource:
-                    this.VisitPropertySource(parameterType, propertySource, bodySchema, bodyProperties, schemaPropertyMap);
+                    VisitPropertySource(parameterType, propertySource, bodySchema, bodyProperties, schemaPropertyMap);
                     break;
             }
         }
@@ -245,7 +239,7 @@ namespace Dibix.Sdk.CodeGeneration
                 return;
 
             // Visit all properties of the body, if they are used within a converter, that is not visible to us
-            this.VisitAllPropertiesNested(bodySchema, schemaPropertyMap);
+            VisitAllPropertiesNested(bodySchema, schemaPropertyMap);
         }
 
         private void VisitPropertySource(TypeReference parameterType, ActionParameterPropertySource propertySource, ObjectSchema bodySchema, ICollection<ObjectSchemaProperty> bodyProperties, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
@@ -260,7 +254,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             foreach (ActionParameterItemSource itemSource in propertySource.ItemSources)
             {
-                this.VisitParameterSource(parameterType, itemSource.Source, bodySchema, bodyProperties, schemaPropertyMap);
+                VisitParameterSource(parameterType, itemSource.Source, bodySchema, bodyProperties, schemaPropertyMap);
             }
         }
 
@@ -277,14 +271,14 @@ namespace Dibix.Sdk.CodeGeneration
                 if (userDefinedTypeParameter.Value.Schema.Properties.Count == 1)
                     return;
 
-                this._logger.LogError($"Unexpected property contract '{bodyProperty.Type?.GetType()}' for property '{bodySchema.FullName}.{bodyProperty.Name}'. Expected object schema when mapping complex UDT parameter: @{parameterName} {udtName}.", bodyProperty.Type.Source, bodyProperty.Type.Line, bodyProperty.Type.Column);
+                _logger.LogError($"Unexpected property contract '{bodyProperty.Type?.GetType()}' for property '{bodySchema.FullName}.{bodyProperty.Name}'. Expected object schema when mapping complex UDT parameter: @{parameterName} {udtName}.", bodyProperty.Type.Location.Source, bodyProperty.Type.Location.Line, bodyProperty.Type.Location.Column);
                 return;
             }
 
-            SchemaDefinition schemaDefinition = this._schemaDefinitionResolver.Resolve(schemaTypeReference);
+            SchemaDefinition schemaDefinition = _schemaRegistry.GetSchema(schemaTypeReference);
             if (!(schemaDefinition is ObjectSchema propertySchema))
             {
-                this._logger.LogError($"Unexpected property contract '{schemaDefinition?.GetType()}' for property '{bodySchema.FullName}.{bodyProperty.Name}'. Expected object schema when mapping complex UDT parameter: @{parameterName} {udtName}.", bodyProperty.Type.Source, bodyProperty.Type.Line, bodyProperty.Type.Column);
+                _logger.LogError($"Unexpected property contract '{schemaDefinition?.GetType()}' for property '{bodySchema.FullName}.{bodyProperty.Name}'. Expected object schema when mapping complex UDT parameter: @{parameterName} {udtName}.", bodyProperty.Type.Location.Source, bodyProperty.Type.Location.Line, bodyProperty.Type.Location.Column);
                 return;
             }
 
@@ -304,7 +298,7 @@ namespace Dibix.Sdk.CodeGeneration
         private void VisitAllPropertiesNested(TypeReference type, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap) => VisitAllPropertiesNested(type, schemaPropertyMap, (x, y) => x.Accept(y));
         private void VisitAllPropertiesNested<T>(T node, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap, Action<SchemaVisitor, T> visitorHandler)
         {
-            ValidationSchemaVisitor visitor = new ValidationSchemaVisitor(this._schemaDefinitionResolver, schemaPropertyMap, VisitProperty);
+            ValidationSchemaVisitor visitor = new ValidationSchemaVisitor(_schemaRegistry, schemaPropertyMap, VisitProperty);
             visitorHandler(visitor, node);
         }
 
@@ -336,7 +330,7 @@ namespace Dibix.Sdk.CodeGeneration
                 throw new InvalidOperationException($"Unexpected grid result type: {statement.ResultType.GetType()}");
             }
 
-            SchemaDefinition schemaDefinition = this._schemaDefinitionResolver.Resolve(gridResultSchemaTypeReference);
+            SchemaDefinition schemaDefinition = _schemaRegistry.GetSchema(gridResultSchemaTypeReference);
             if (!(schemaDefinition is ObjectSchema objectSchema))
             {
                 throw new InvalidOperationException($"Unexpected grid result type: {schemaDefinition.GetType()}");
@@ -362,15 +356,13 @@ namespace Dibix.Sdk.CodeGeneration
 
         private readonly struct ObjectContractDefinition
         {
-            public ContractDefinition ContractDefinition { get; }
             public ObjectSchema Schema { get; }
             public ICollection<ObjectSchemaProperty> Properties { get; }
 
-            public ObjectContractDefinition(ContractDefinition contractDefinition, ObjectSchema schema)
+            public ObjectContractDefinition(ObjectSchema schema)
             {
-                this.ContractDefinition = contractDefinition;
-                this.Schema = schema;
-                this.Properties = Clone(schema.Properties);
+                Schema = schema;
+                Properties = Clone(schema.Properties);
             }
 
             private static ICollection<ObjectSchemaProperty> Clone(IEnumerable<ObjectSchemaProperty> properties)
@@ -388,8 +380,8 @@ namespace Dibix.Sdk.CodeGeneration
 
             public UserDefinedTypeParameter(string name, UserDefinedTypeSchema schema)
             {
-                this.Name = name;
-                this.Schema = schema;
+                Name = name;
+                Schema = schema;
             }
         }
 
@@ -398,20 +390,20 @@ namespace Dibix.Sdk.CodeGeneration
             private readonly IDictionary<ObjectSchema, ObjectContractDefinition> _schemaPropertyMap;
             private readonly Action<ICollection<ObjectSchemaProperty>, ObjectSchemaProperty> _propertyVisitor;
 
-            public ValidationSchemaVisitor(ISchemaStore schemaStore, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap, Action<ICollection<ObjectSchemaProperty>, ObjectSchemaProperty> propertyVisitor) : base(schemaStore)
+            public ValidationSchemaVisitor(ISchemaRegistry schemaRegistry, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap, Action<ICollection<ObjectSchemaProperty>, ObjectSchemaProperty> propertyVisitor) : base(schemaRegistry)
             {
-                this._schemaPropertyMap = schemaPropertyMap;
-                this._propertyVisitor = propertyVisitor;
+                _schemaPropertyMap = schemaPropertyMap;
+                _propertyVisitor = propertyVisitor;
             }
 
             protected override void Visit(ObjectSchema node)
             {
-                if (!this._schemaPropertyMap.TryGetValue(node, out ObjectContractDefinition objectContractDefinition)) 
+                if (!_schemaPropertyMap.TryGetValue(node, out ObjectContractDefinition objectContractDefinition)) 
                     return;
 
                 foreach (ObjectSchemaProperty property in node.Properties)
                 {
-                    this._propertyVisitor(objectContractDefinition.Properties, property);
+                    _propertyVisitor(objectContractDefinition.Properties, property);
                 }
             }
         }

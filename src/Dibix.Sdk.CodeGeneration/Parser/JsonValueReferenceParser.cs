@@ -6,32 +6,32 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal static class JsonValueReferenceParser
     {
-        public static ValueReference Parse(TypeReference targetType, JValue value, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
+        public static ValueReference Parse(TypeReference targetType, JValue value, ISchemaRegistry schemaRegistry, ILogger logger)
         {
-            JsonSourceInfo sourceInfo = value.GetSourceInfo();
+            SourceLocation sourceInfo = value.GetSourceInfo();
 
             if (value.Type == JTokenType.Null)
-                return new NullValueReference(targetType, sourceInfo.FilePath, sourceInfo.LineNumber, sourceInfo.LinePosition);
+                return new NullValueReference(targetType, sourceInfo);
 
             switch (targetType)
             {
                 case PrimitiveTypeReference primitiveTypeReference:
                     if (TryParseValue(value, value.Type, primitiveTypeReference.Type, out object rawValue))
-                        return new PrimitiveValueReference(primitiveTypeReference, rawValue, sourceInfo.FilePath, sourceInfo.LineNumber, sourceInfo.LinePosition);
+                        return new PrimitiveValueReference(primitiveTypeReference, rawValue, sourceInfo);
 
-                    logger.LogError($"Could not convert value '{value}' to type '{primitiveTypeReference.Type}'", sourceInfo.FilePath, sourceInfo.LineNumber, sourceInfo.LinePosition);
+                    logger.LogError($"Could not convert value '{value}' to type '{primitiveTypeReference.Type}'", sourceInfo.Source, sourceInfo.Line, sourceInfo.Column);
                     return null;
 
                 case SchemaTypeReference schemaTypeReference:
-                    SchemaDefinition schemaDefinition = schemaDefinitionResolver.Resolve(schemaTypeReference);
+                    SchemaDefinition schemaDefinition = schemaRegistry.GetSchema(schemaTypeReference);
                     if (schemaDefinition is EnumSchema)
-                        return ParseEnumValue(value, value.Type, schemaTypeReference, sourceInfo.FilePath, sourceInfo, logger);
+                        return ParseEnumValue(value, value.Type, schemaTypeReference, sourceInfo.Source, sourceInfo, logger);
 
-                    logger.LogError($"Unexpected schema type for constant value: {schemaDefinition?.GetType()}", sourceInfo.FilePath, sourceInfo.LineNumber, sourceInfo.LinePosition);
+                    logger.LogError($"Unexpected schema type for constant value: {schemaDefinition?.GetType()}", sourceInfo.Source, sourceInfo.Line, sourceInfo.Column);
                     return null;
 
                 default:
-                    logger.LogError($"Unexpected target type for constant value: {targetType?.GetType()}", sourceInfo.FilePath, sourceInfo.LineNumber, sourceInfo.LinePosition);
+                    logger.LogError($"Unexpected target type for constant value: {targetType?.GetType()}", sourceInfo.Source, sourceInfo.Line, sourceInfo.Column);
                     return null;
             }
         }
@@ -127,20 +127,20 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static ValueReference ParseEnumValue(JValue jsonValue, JTokenType sourceType, SchemaTypeReference targetType, string filePath, JsonSourceInfo location, ILogger logger)
+        private static ValueReference ParseEnumValue(JValue jsonValue, JTokenType sourceType, SchemaTypeReference targetType, string filePath, SourceLocation location, ILogger logger)
         {
             switch (sourceType)
             {
                 case JTokenType.Integer:
                     int intValue = (int)jsonValue;
-                    return new EnumMemberNumericReference(targetType, intValue, filePath, location.LineNumber, location.LinePosition);
+                    return new EnumMemberNumericReference(targetType, intValue, new SourceLocation(filePath, location.Line, location.Column));
 
                 case JTokenType.String:
                     string strValue = (string)jsonValue;
-                    return new EnumMemberStringReference(targetType, strValue, filePath, location.LineNumber, location.LinePosition);
+                    return new EnumMemberStringReference(targetType, strValue, new SourceLocation(filePath, location.Line, location.Column));
 
                 default:
-                    logger.LogError($"Unexpected constant value type: {sourceType}", filePath, location.LineNumber, location.LinePosition);
+                    logger.LogError($"Unexpected constant value type: {sourceType}", filePath, location.Line, location.Column);
                     return null;
             }
         }

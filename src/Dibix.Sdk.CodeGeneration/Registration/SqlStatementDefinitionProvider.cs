@@ -7,7 +7,7 @@ using Microsoft.SqlServer.Dac.Model;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class SqlStatementDefinitionProvider : ISqlStatementDefinitionProvider
+    internal sealed class SqlStatementDefinitionProvider : ISchemaProvider
     {
         #region Fields
         private readonly bool _isEmbedded;
@@ -15,19 +15,14 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly bool _analyzeAlways;
         private readonly string _productName;
         private readonly string _areaName;
+        private readonly IEnumerable<TaskItem> _files;
         private readonly ISqlStatementParser _parser;
         private readonly ISqlStatementFormatter _formatter;
         private readonly ITypeResolverFacade _typeResolver;
         private readonly ISchemaRegistry _schemaRegistry;
-        private readonly ISchemaDefinitionResolver _schemaDefinitionResolver;
         private readonly ILogger _logger;
         private readonly TSqlModel _model;
         private readonly IDictionary<string, SqlStatementDefinition> _definitions;
-        #endregion
-
-        #region Properties
-        public IEnumerable<SqlStatementDefinition> SqlStatements => _definitions.Values;
-        IEnumerable<SchemaDefinition> ISchemaProvider.Schemas => _definitions.Values;
         #endregion
 
         #region Constructor
@@ -43,7 +38,6 @@ namespace Dibix.Sdk.CodeGeneration
           , ISqlStatementFormatter formatter
           , ITypeResolverFacade typeResolver
           , ISchemaRegistry schemaRegistry
-          , ISchemaDefinitionResolver schemaDefinitionResolver
           , ILogger logger
           , TSqlModel model
         )
@@ -53,20 +47,23 @@ namespace Dibix.Sdk.CodeGeneration
             _analyzeAlways = analyzeAlways;
             _productName = productName;
             _areaName = areaName;
+            _files = source;
             _parser = parser;
             _formatter = formatter;
             _typeResolver = typeResolver;
             _schemaRegistry = schemaRegistry;
-            _schemaDefinitionResolver = schemaDefinitionResolver;
             _logger = logger;
             _model = model;
             _definitions = new Dictionary<string, SqlStatementDefinition>();
-            Collect(source.Select(x => x.GetFullPath()));
         }
         #endregion
 
-        #region ISqlStatementDefinitionProvider Members
-        public bool TryGetDefinition(string fullName, out SqlStatementDefinition definition) => _definitions.TryGetValue(fullName, out definition);
+        #region ISchemaProvider Members
+        public IEnumerable<SchemaDefinition> Collect()
+        {
+            Collect(_files.Select(x => x.GetFullPath()));
+            return _definitions.Values;
+        }
         #endregion
 
         #region Private Methods
@@ -91,7 +88,6 @@ namespace Dibix.Sdk.CodeGeneration
                       , formatter: _formatter
                       , typeResolver: _typeResolver
                       , schemaRegistry: _schemaRegistry
-                      , schemaDefinitionResolver: _schemaDefinitionResolver
                       , logger: _logger
                       , definition: out SqlStatementDefinition definition
                     );

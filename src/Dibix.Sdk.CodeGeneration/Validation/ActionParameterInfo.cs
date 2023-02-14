@@ -1,18 +1,16 @@
-﻿namespace Dibix.Sdk.CodeGeneration
+﻿using Dibix.Sdk.Abstractions;
+
+namespace Dibix.Sdk.CodeGeneration
 {
     public sealed class ActionParameterInfo
     {
         public string ParameterName { get; }
-        public string FilePath { get; }
-        public int Line { get; }
-        public int Column { get; }
+        public SourceLocation Location { get; }
 
-        public ActionParameterInfo(string parameterName, string filePath, int line, int column)
+        public ActionParameterInfo(string parameterName, SourceLocation location)
         {
-            this.ParameterName = parameterName;
-            this.FilePath = filePath;
-            this.Line = line;
-            this.Column = column;
+            ParameterName = parameterName;
+            Location = location;
         }
     }
 }

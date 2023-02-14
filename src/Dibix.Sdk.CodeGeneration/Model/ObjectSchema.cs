@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -8,7 +9,7 @@ namespace Dibix.Sdk.CodeGeneration
         public string WcfNamespace { get; }
         public IReadOnlyList<ObjectSchemaProperty> Properties { get; }
 
-        public ObjectSchema(string @namespace, string definitionName, SchemaDefinitionSource source, IList<ObjectSchemaProperty> properties, string wcfNamespace = null) : base(@namespace, definitionName, source)
+        public ObjectSchema(string @namespace, string definitionName, SchemaDefinitionSource source, SourceLocation location, IList<ObjectSchemaProperty> properties, string wcfNamespace = null) : base(@namespace, definitionName, source, location)
         {
             WcfNamespace = wcfNamespace;
             Properties = new ReadOnlyCollection<ObjectSchemaProperty>(properties);

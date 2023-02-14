@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Net;
+using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -22,10 +23,10 @@ namespace Dibix.Sdk.CodeGeneration
             Responses = new Dictionary<HttpStatusCode, ActionResponse>();
         }
 
-        public void SetFileResponse(ActionFileResponse actionFileResponse, string source, int line, int column)
+        public void SetFileResponse(ActionFileResponse actionFileResponse, SourceLocation location)
         {
             FileResponse = actionFileResponse;
-            Responses[HttpStatusCode.OK] = new ActionResponse(HttpStatusCode.OK, actionFileResponse.MediaType, resultType: ActionDefinitionUtility.CreateStreamTypeReference(source, line, column));
+            Responses[HttpStatusCode.OK] = new ActionResponse(HttpStatusCode.OK, actionFileResponse.MediaType, resultType: ActionDefinitionUtility.CreateStreamTypeReference(location));
             Responses[HttpStatusCode.NotFound] = new ActionResponse(HttpStatusCode.NotFound);
         }
 

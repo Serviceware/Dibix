@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -29,8 +31,12 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 Formatting = Formatting.Indented,
                 TypeNameHandling = TypeNameHandling.Objects,
-                ContractResolver = new JsonContractResolver(),
-                Converters = { new StringEnumConverter() }
+                ContractResolver = new WriteModelJsonContractResolver(),
+                Converters =
+                {
+                    new StringEnumConverter(),
+                    new SchemaCollectionConverter()
+                }
             });
             File.WriteAllText(path, serializedModelJson);
         }
@@ -89,11 +95,19 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private sealed class JsonContractResolver : DefaultContractResolver
+        private sealed class WriteModelJsonContractResolver : DefaultContractResolver
         {
+            private static readonly MemberInfo[] IgnoredMembers =
+            {
+                typeof(SchemaDefinition).GetProperty(nameof(SchemaDefinition.ExternalSchemaInfo))
+            };
+
             // Preserve value type when serializing 'object'
             protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
             {
+                if (IgnoredMembers.Contains(member))
+                    return null;
+
                 JsonProperty property = base.CreateProperty(member, memberSerialization);
 
                 if (member.DeclaringType == typeof(PrimitiveValueReference) && member.Name == nameof(PrimitiveValueReference.Value))
@@ -104,7 +118,6 @@ namespace Dibix.Sdk.CodeGeneration
                 return property;
             }
 
-
             // Only serialize CodeGenerationModel members from IPersistedCodeGenerationModel
             protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
             {
@@ -114,6 +127,23 @@ namespace Dibix.Sdk.CodeGeneration
                 IList<JsonProperty> properties = base.CreateProperties(type, memberSerialization);
                 return properties;
             }
+        }
+
+        // Only serialize local schemas
+        private sealed class SchemaCollectionConverter : JsonConverter
+        {
+            public override bool CanRead => false;
+            public override bool CanWrite => true;
+
+            public override bool CanConvert(Type objectType) => objectType == typeof(Collection<SchemaDefinition>);
+
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+            {
+                ICollection<SchemaDefinition> schemaDefinitions = ((ICollection<SchemaDefinition>)value).Where(x => SchemaDefinitionSource.Local.HasFlag(x.Source)).ToArray();
+                serializer.Serialize(writer, schemaDefinitions);
+            }
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer) => throw new NotSupportedException();
         }
 
         // Preserve value type when serializing 'object'

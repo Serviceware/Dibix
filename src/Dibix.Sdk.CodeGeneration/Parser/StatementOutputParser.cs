@@ -11,7 +11,7 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal static class StatementOutputParser
     {
-        public static IEnumerable<SqlQueryResult> Parse(SqlStatementDefinition definition, TSqlFragment node, string source, TSqlFragmentAnalyzer fragmentAnalyzer, ISqlMarkupDeclaration markup, string relativeNamespace, ITypeResolverFacade typeResolver, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
+        public static IEnumerable<SqlQueryResult> Parse(SqlStatementDefinition definition, TSqlFragment node, string source, TSqlFragmentAnalyzer fragmentAnalyzer, ISqlMarkupDeclaration markup, string relativeNamespace, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             StatementOutputVisitor visitor = new StatementOutputVisitor(source, fragmentAnalyzer, logger);
             node.Accept(visitor);
@@ -31,7 +31,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (!ValidateReturnElements(source, returnElements, visitor.Outputs, logger))
                 yield break;
 
-            foreach (SqlQueryResult result in CollectResults(definition, node, typeResolver, schemaDefinitionResolver, logger, returnElements, visitor, relativeNamespace)) 
+            foreach (SqlQueryResult result in CollectResults(definition, node, typeResolver, schemaRegistry, logger, returnElements, visitor, relativeNamespace)) 
                 yield return result;
         }
 
@@ -54,12 +54,12 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static SqlQueryResult CreateBuiltInResult(string typeName, ISqlElement element, ITypeResolverFacade typeResolver)
         {
-            TypeReference typeReference = typeResolver.ResolveType(typeName, relativeNamespace: null, element.Source, element.Line, element.Column, isEnumerable: false);
+            TypeReference typeReference = typeResolver.ResolveType(typeName, relativeNamespace: null, location: element.Location, isEnumerable: false);
             return CreateBuiltInResult(typeReference);
         }
         private static SqlQueryResult CreateBuiltInResult(SchemaDefinition schema, ISqlElement element)
         {
-            TypeReference typeReference = new SchemaTypeReference(schema.FullName, isNullable: false, isEnumerable: false, element.Source, element.Line, element.Column);
+            TypeReference typeReference = new SchemaTypeReference(schema.FullName, isNullable: false, isEnumerable: false, element.Location);
             return CreateBuiltInResult(typeReference);
         }
         private static SqlQueryResult CreateBuiltInResult(TypeReference typeReference) => new SqlQueryResult
@@ -130,7 +130,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 Token<string> propertyName = property.Name;
                 if (!SqlReturnMarkupProperty.IsDefined(propertyName))
-                    logger.LogError($"Unexpected @Return property '{propertyName.Value}'", propertyName.Source, propertyName.Line, propertyName.Column);
+                    logger.LogError($"Unexpected @Return property '{propertyName.Value}'", propertyName.Location.Source, propertyName.Location.Line, propertyName.Location.Column);
             }
 
             return true;
@@ -142,7 +142,7 @@ namespace Dibix.Sdk.CodeGeneration
             for (int i = results.Count; i < returnElements.Count; i++)
             {
                 ISqlElement redundantReturnElement = returnElements[i];
-                logger.LogError("There are more output declarations than actual outputs being produced by the statement", source, redundantReturnElement.Line, redundantReturnElement.Column);
+                logger.LogError("There are more output declarations than actual outputs being produced by the statement", source, redundantReturnElement.Location.Line, redundantReturnElement.Location.Column);
                 result = false;
             }
 
@@ -156,7 +156,7 @@ namespace Dibix.Sdk.CodeGeneration
             return result;
         }
 
-        private static IEnumerable<SqlQueryResult> CollectResults(SqlStatementDefinition definition, TSqlFragment node, ITypeResolverFacade typeResolver, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger, IList<ISqlElement> returnElements, StatementOutputVisitorBase visitor, string relativeNamespace)
+        private static IEnumerable<SqlQueryResult> CollectResults(SqlStatementDefinition definition, TSqlFragment node, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger, IList<ISqlElement> returnElements, StatementOutputVisitorBase visitor, string relativeNamespace)
         {
             ICollection<string> usedOutputNames = new HashSet<string>();
             for (int i = 0; i < returnElements.Count; i++)
@@ -164,7 +164,7 @@ namespace Dibix.Sdk.CodeGeneration
                 ISqlElement returnElement = returnElements[i];
                 if (!returnElement.TryGetPropertyValue(SqlReturnMarkupProperty.ClrTypes, isDefault: true, out Token<string> typesHint))
                 {
-                    logger.LogError($"Missing property '{SqlReturnMarkupProperty.ClrTypes}'", returnElement.Source, returnElement.Line, returnElement.Column);
+                    logger.LogError($"Missing property '{SqlReturnMarkupProperty.ClrTypes}'", returnElement.Location.Source, returnElement.Location.Line, returnElement.Location.Column);
                     yield break;
                 }
 
@@ -175,11 +175,11 @@ namespace Dibix.Sdk.CodeGeneration
                 Token<string> converter = returnElement.GetPropertyValue(SqlReturnMarkupProperty.Converter);
                 Token<string> splitOn = returnElement.GetPropertyValue(SqlReturnMarkupProperty.SplitOn);
 
-                ValidateMergeGridResult(definition, node, returnElement.Source, i == 0, resultMode, resultName?.Value, logger);
+                ValidateMergeGridResult(definition, node, returnElement.Location.Source, i == 0, resultMode, resultName?.Value, logger);
                 TypeReference projectToType = ParseProjectionContract(node, returnElements, resultMode, returnElement, relativeNamespace, typeResolver, logger, out Token<string> projectToTypeElement);
 
                 string[] typeNames = typesHint.Value.Split(';');
-                IList<TypeReference> resultTypes = ParseResultTypes(typeNames, returnElement.Source, resultMode, typesHint, typeResolver, relativeNamespace).ToArray();
+                IList<TypeReference> resultTypes = ParseResultTypes(typeNames, resultMode, typesHint, typeResolver, relativeNamespace).ToArray();
                 if (!resultTypes.Any())
                     continue;
 
@@ -204,30 +204,30 @@ namespace Dibix.Sdk.CodeGeneration
                 (
                     isFirstResult: i == 0
                   , numberOfReturnElements: returnElements.Count
-                  , returnElement: returnElement
+                  , returnElement
                   , name: resultName
-                  , splitOn: splitOn
+                  , splitOn
                   , resultTypes: resultTypes
                   , columns: output.Columns
-                  , usedOutputNames: usedOutputNames
-                  , definition: definition
-                  , schemaDefinitionResolver: schemaDefinitionResolver
-                  , logger: logger
+                  , usedOutputNames
+                  , definition
+                  , schemaRegistry
+                  , logger
                 );
                 
                 SqlQueryResult result = new SqlQueryResult
                 {
-                    Name = resultName != null ? new Token<string>(resultName.Value, resultName.Source, resultName.Line, resultName.Column) : null,
+                    Name = resultName,
                     ResultMode = resultMode,
                     Converter = converter?.Value,
                     SplitOn = splitOn?.Value,
                     ProjectToType = projectToType,
-                    ReturnType = new Token<TypeReference>(returnType, returnTypeLocation.Source, returnTypeLocation.Line, returnTypeLocation.Column)
+                    ReturnType = new Token<TypeReference>(returnType, returnTypeLocation.Location)
                 };
                 result.Types.AddRange(resultTypes);
                 result.Columns.AddRange(output.Columns.Select(x => x.ColumnName));
 
-                if (!ValidateReturnType(returnType, returnTypeName, returnElement.Source, returnTypeLocation, resultMode, logger))
+                if (!ValidateReturnType(returnType, returnTypeName, returnElement.Location.Source, returnTypeLocation, resultMode, logger))
                     continue;
 
                 yield return result;
@@ -240,7 +240,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (!returnElement.TryGetPropertyValue(SqlReturnMarkupProperty.Mode, isDefault: false, out Token<string> resultModeHint) || Enum.TryParse(resultModeHint.Value, out resultMode)) 
                 return true;
 
-            logger.LogError($"Result mode not supported: {resultModeHint.Value}", resultModeHint.Source, resultModeHint.Line, resultModeHint.Column);
+            logger.LogError($"Result mode not supported: {resultModeHint.Value}", resultModeHint.Location.Source, resultModeHint.Location.Line, resultModeHint.Location.Column);
             return false;
         }
 
@@ -261,13 +261,13 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static IEnumerable<TypeReference> ParseResultTypes(IEnumerable<string> typeNames, string source, SqlQueryResultMode resultMode, Token<string> typesHint, ITypeResolverFacade typeResolver, string relativeNamespace)
+        private static IEnumerable<TypeReference> ParseResultTypes(IEnumerable<string> typeNames, SqlQueryResultMode resultMode, Token<string> typesHint, ITypeResolverFacade typeResolver, string relativeNamespace)
         {
-            int column = typesHint.Column;
+            int column = typesHint.Location.Column;
 
             foreach (string typeName in typeNames)
             {
-                TypeReference typeReference = typeResolver.ResolveType(typeName, relativeNamespace, source, typesHint.Line, column, resultMode == SqlQueryResultMode.Many);
+                TypeReference typeReference = typeResolver.ResolveType(typeName, relativeNamespace, new SourceLocation(typesHint.Location.Source, typesHint.Location.Line, column), resultMode == SqlQueryResultMode.Many);
                 if (typeReference != null)
                     yield return typeReference;
 
@@ -286,7 +286,7 @@ namespace Dibix.Sdk.CodeGeneration
           , IList<OutputColumnResult> columns
           , ICollection<string> usedOutputNames
           , SqlStatementDefinition definition
-          , ISchemaDefinitionResolver schemaDefinitionResolver
+          , ISchemaRegistry schemaRegistry
           , ILogger logger
         )
         {
@@ -308,7 +308,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                 SchemaDefinition schema = null;
                 if (returnType is SchemaTypeReference schemaTypeReference)
-                    schema = schemaDefinitionResolver.Resolve(schemaTypeReference);
+                    schema = schemaRegistry.GetSchema(schemaTypeReference);
                 
                 string primitiveTypeName;
                 
@@ -325,7 +325,7 @@ namespace Dibix.Sdk.CodeGeneration
                     if (!singleColumn)
                     {
                         TSqlFragment firstColumn = columnGroup[0].ColumnNameSource;
-                        logger.LogError($"Cannot map complex result to primitive type '{primitiveTypeName}'", returnElement.Source, firstColumn.StartLine, firstColumn.StartColumn);
+                        logger.LogError($"Cannot map complex result to primitive type '{primitiveTypeName}'", returnElement.Location.Source, firstColumn.StartLine, firstColumn.StartColumn);
                     }
 
                     // SELECT 1 => Query<int>/Single<int> => No entity property validation + No missing alias validation
@@ -341,7 +341,7 @@ namespace Dibix.Sdk.CodeGeneration
                     // i.E.: SELECT COUNT(*) no alias
                     if (!columnResult.HasName)
                     {
-                        logger.LogError($"Missing alias for expression '{columnResult.PrimarySource.Dump()}'", returnElement.Source, columnResult.PrimarySource.StartLine, columnResult.PrimarySource.StartColumn);
+                        logger.LogError($"Missing alias for expression '{columnResult.PrimarySource.Dump()}'", returnElement.Location.Source, columnResult.PrimarySource.StartLine, columnResult.PrimarySource.StartColumn);
                         continue;
                     }
 
@@ -350,13 +350,13 @@ namespace Dibix.Sdk.CodeGeneration
                     // Validate if entity property exists
                     if (property == null)
                     {
-                        logger.LogError($"Property '{columnResult.ColumnName}' not found on return type '{schema.FullName}'", returnElement.Source, columnResult.ColumnNameSource.StartLine, columnResult.ColumnNameSource.StartColumn);
+                        logger.LogError($"Property '{columnResult.ColumnName}' not found on return type '{schema.FullName}'", returnElement.Location.Source, columnResult.ColumnNameSource.StartLine, columnResult.ColumnNameSource.StartColumn);
                         continue;
                     }
 
-                    if (!IsPrimitiveType(property.Type, schemaDefinitionResolver))
+                    if (!IsPrimitiveType(property.Type, schemaRegistry))
                     {
-                        logger.LogError($"Column '{columnResult.ColumnName}' cannot be mapped. Only primitive types are supported.", returnElement.Source, columnResult.ColumnNameSource.StartLine, columnResult.ColumnNameSource.StartColumn);
+                        logger.LogError($"Column '{columnResult.ColumnName}' cannot be mapped. Only primitive types are supported.", returnElement.Location.Source, columnResult.ColumnNameSource.StartLine, columnResult.ColumnNameSource.StartColumn);
                         continue;
                     }
 
@@ -373,14 +373,14 @@ namespace Dibix.Sdk.CodeGeneration
             if (name != null)
             {
                 if (usedOutputNames.Contains(name.Value))
-                    logger.LogError($"The name '{name.Value}' is already defined for another output result", name.Source, name.Line, name.Column);
+                    logger.LogError($"The name '{name.Value}' is already defined for another output result", name.Location.Source, name.Location.Line, name.Location.Column);
                 //else if (numberOfReturnElements == 1)
                 //    logger.LogError(null, "The 'Name' property is irrelevant when a single output is returned", returnElement.Source, name.Line, name.Column);
                 else
                     usedOutputNames.Add(name.Value);
             }
             else if (numberOfReturnElements > 1 && (!target.MergeGridResult || !isFirstResult))
-                logger.LogError("The 'Name' property must be specified when multiple outputs are returned. Mark it in the @Return hint: -- @Return ClrTypes:<ClrTypeName> Name:<ResultName>", returnElement.Source, returnElement.Line, returnElement.Column);
+                logger.LogError("The 'Name' property must be specified when multiple outputs are returned. Mark it in the @Return hint: -- @Return ClrTypes:<ClrTypeName> Name:<ResultName>", returnElement.Location.Source, returnElement.Location.Line, returnElement.Location.Column);
         }
 
         private static bool TrySplitColumns(IList<OutputColumnResult> columns, int resultTypeCount, ISqlElement returnElement, Token<string> splitOn, ILogger logger, out IList<IList<OutputColumnResult>> columnGroups)
@@ -390,7 +390,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 if (resultTypeCount > 1)
                 {
-                    logger.LogError("The 'SplitOn' property must be specified when using multiple return types. Mark it in the @Return hint: -- @Return ClrTypes:<ClrTypeName> Name:<ResultName> SplitOn:<SplitColumnName>", returnElement.Source, returnElement.Line, returnElement.Column);
+                    logger.LogError("The 'SplitOn' property must be specified when using multiple return types. Mark it in the @Return hint: -- @Return ClrTypes:<ClrTypeName> Name:<ResultName> SplitOn:<SplitColumnName>", returnElement.Location.Source, returnElement.Location.Line, returnElement.Location.Column);
                     return false;
                 }
 
@@ -402,12 +402,12 @@ namespace Dibix.Sdk.CodeGeneration
             int expectedPageCount = splitColumns.Count + 1;
             if (resultTypeCount != expectedPageCount)
             {
-                logger.LogError("The 'SplitOn' property does not match the number of return types", splitOn.Source, splitOn.Line, splitOn.Column);
+                logger.LogError("The 'SplitOn' property does not match the number of return types", splitOn.Location.Source, splitOn.Location.Line, splitOn.Location.Column);
                 return false;
             }
 
             string splitColumn = null;
-            int position = splitOn.Column;
+            int position = splitOn.Location.Column;
             IList<OutputColumnResult> page = new Collection<OutputColumnResult>();
             for (int i = 0; i < columns.Count; i++)
             {
@@ -438,7 +438,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (columnGroups.Count != expectedPageCount)
             {
-                logger.LogError($"SplitOn column '{splitColumn}' does not match any column on the result", splitOn.Source, splitOn.Line, position);
+                logger.LogError($"SplitOn column '{splitColumn}' does not match any column on the result", splitOn.Location.Source, splitOn.Location.Line, position);
                 return false;
             }
 
@@ -463,18 +463,18 @@ namespace Dibix.Sdk.CodeGeneration
                 // To implement this they can only be distinguished by a different method name.
                 // Currently the invest is bigger than the benefit
                 // The current workaround is to always have a root result (the first one) that contains at least one property (for example: the key)
-                logger.LogError("Projection using the 'ResultType' property is currently only supported in a part of a grid result", returnElement.Source, node.StartLine, node.StartColumn);
+                logger.LogError("Projection using the 'ResultType' property is currently only supported in a part of a grid result", returnElement.Location.Source, node.StartLine, node.StartColumn);
             }
 
             if (isResultTypeSupported)
             {
-                logger.LogError($"Projection using the 'ResultType' property is currently only supported for the following result modes using the 'Mode' property: {String.Join(", ", supportedResultTypeResultModes)}", returnElement.Source, node.StartLine, node.StartColumn);
+                logger.LogError($"Projection using the 'ResultType' property is currently only supported for the following result modes using the 'Mode' property: {String.Join(", ", supportedResultTypeResultModes)}", returnElement.Location.Source, node.StartLine, node.StartColumn);
             }
 
             if (singleResult || isResultTypeSupported) 
                 return null;
 
-            return typeResolver.ResolveType(resultType.Value, relativeNamespace, resultType.Source, resultType.Line, resultType.Column, resultMode == SqlQueryResultMode.Many);
+            return typeResolver.ResolveType(resultType.Value, relativeNamespace, resultType.Location, resultMode == SqlQueryResultMode.Many);
         }
 
         private static bool ValidateReturnType(TypeReference returnType, string returnTypeName, string source, Token<string> returnTypeLocation, SqlQueryResultMode mode, ILogger logger)
@@ -502,13 +502,13 @@ namespace Dibix.Sdk.CodeGeneration
             if (primitiveTypeReference.Type == PrimitiveType.Boolean)
                 return true;
 
-            logger.LogError($"When using the result mode option '{mode}', the primitive return type must be nullable: {returnTypeName}", source, returnTypeLocation.Line, returnTypeLocation.Column);
+            logger.LogError($"When using the result mode option '{mode}', the primitive return type must be nullable: {returnTypeName}", source, returnTypeLocation.Location.Line, returnTypeLocation.Location.Column);
             return false;
         }
 
-        private static bool IsPrimitiveType(TypeReference type, ISchemaDefinitionResolver schemaDefinitionResolver)
+        private static bool IsPrimitiveType(TypeReference type, ISchemaRegistry schemaRegistry)
         {
-            return type is PrimitiveTypeReference || type.IsEnum(schemaDefinitionResolver);
+            return type is PrimitiveTypeReference || type.IsEnum(schemaRegistry);
         }
     }
 }

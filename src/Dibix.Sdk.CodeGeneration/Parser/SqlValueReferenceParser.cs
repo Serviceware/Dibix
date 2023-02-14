@@ -12,7 +12,7 @@ namespace Dibix.Sdk.CodeGeneration
             switch (value)
             {
                 case NullLiteral _:
-                    return new NullValueReference(targetType, filePath, value.StartLine, value.StartColumn);
+                    return new NullValueReference(targetType, new SourceLocation(filePath, value.StartLine, value.StartColumn));
 
                 case Literal literal:
                     return ParseDefaultValue(parameterName, literal, targetType, filePath, logger);
@@ -31,7 +31,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 case PrimitiveTypeReference primitiveTypeReference:
                     if (TryParseDefaultValue(value, value.LiteralType, primitiveTypeReference, out object rawValue))
-                        return new PrimitiveValueReference(primitiveTypeReference, rawValue, filePath, value.StartLine, value.StartColumn);
+                        return new PrimitiveValueReference(primitiveTypeReference, rawValue, new SourceLocation(filePath, value.StartLine, value.StartColumn));
 
                     logger.LogError($"Could not convert value '{value.Dump()}' to type '{primitiveTypeReference.Type}'", filePath, value.StartLine, value.StartColumn);
                     return null;
@@ -138,10 +138,10 @@ namespace Dibix.Sdk.CodeGeneration
             switch (sourceType)
             {
                 case LiteralType.Integer when Int32.TryParse(literal.Value, out int intValue):
-                    return new EnumMemberNumericReference(targetType, intValue, filePath, literal.StartLine, literal.StartColumn);
+                    return new EnumMemberNumericReference(targetType, intValue, new SourceLocation(filePath, literal.StartLine, literal.StartColumn));
 
                 case LiteralType.String:
-                    return new EnumMemberStringReference(targetType, literal.Value, filePath, literal.StartLine, literal.StartColumn);
+                    return new EnumMemberStringReference(targetType, literal.Value, new SourceLocation(filePath, literal.StartLine, literal.StartColumn));
 
                 default:
                     logger.LogError($"Unexpected constant value type: {sourceType}", filePath, literal.StartLine, literal.StartColumn);

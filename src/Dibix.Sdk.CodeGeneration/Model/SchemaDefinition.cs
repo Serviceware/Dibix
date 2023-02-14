@@ -1,17 +1,22 @@
-﻿namespace Dibix.Sdk.CodeGeneration
+﻿using Dibix.Sdk.Abstractions;
+
+namespace Dibix.Sdk.CodeGeneration
 {
     public abstract class SchemaDefinition
     {
         public string Namespace { get; }
         public string DefinitionName { get; }
         public SchemaDefinitionSource Source { get; }
-        public string FullName => $"{this.Namespace}.{this.DefinitionName}";
+        public SourceLocation Location { get; }
+        public ExternalSchemaInfo ExternalSchemaInfo { get; set; }
+        public string FullName => $"{Namespace}.{DefinitionName}";
 
-        protected SchemaDefinition(string @namespace, string definitionName, SchemaDefinitionSource source)
+        protected SchemaDefinition(string @namespace, string definitionName, SchemaDefinitionSource source, SourceLocation location)
         {
-            this.Namespace = @namespace;
-            this.DefinitionName = definitionName;
-            this.Source = source;
+            Namespace = @namespace;
+            DefinitionName = definitionName;
+            Source = source;
+            Location = location;
         }
     }
 }

@@ -21,7 +21,7 @@ namespace Dibix.Sdk
                 SetFileSource(token, filePath);
         }
 
-        public static JsonSourceInfo GetSourceInfo(this JToken token)
+        public static SourceLocation GetSourceInfo(this JToken token)
         {
             string filePath = (token.Annotation<JsonFileSourceAnnotation>() ?? token.Root.Annotation<JsonFileSourceAnnotation>())?.FilePath;
 
@@ -45,7 +45,7 @@ namespace Dibix.Sdk
                 }
             }
 
-            return new JsonSourceInfo(filePath, lineNumber, linePosition);
+            return new SourceLocation(filePath, lineNumber, linePosition);
         }
 
         public static T Merge<T>(this T source, T content) where T : JContainer
@@ -71,7 +71,7 @@ namespace Dibix.Sdk
         {
             IJsonLineInfo lineInfo = value;
             StringBuilder sb = new StringBuilder();
-            using (TextWriter textWriter = new System.IO.StringWriter(sb))
+            using (TextWriter textWriter = new StringWriter(sb))
             {
                 using (JsonWriter jsonWriter = new JsonTextWriter(textWriter))
                 {
@@ -92,20 +92,6 @@ namespace Dibix.Sdk
             IJsonLineInfo lineInfo = property;
             int result = lineInfo.LinePosition - 1 - property.Name.Length;
             return result;
-        }
-    }
-
-    internal sealed class JsonSourceInfo
-    {
-        public string FilePath { get; }
-        public int LineNumber { get; }
-        public int LinePosition { get; }
-
-        public JsonSourceInfo(string filePath, int lineNumber, int linePosition)
-        {
-            FilePath = filePath;
-            LineNumber = lineNumber;
-            LinePosition = linePosition;
         }
     }
 

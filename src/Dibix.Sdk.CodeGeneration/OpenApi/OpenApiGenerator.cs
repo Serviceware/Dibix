@@ -16,7 +16,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
         private static readonly string[] ReservedOpenApiHeaders = { "Accept", "Authorization", "Content-Type" };
         private static readonly OpenApiSchema NullSchema = new OpenApiSchema { Type = "null" };
 
-        public static OpenApiDocument Generate(CodeGenerationModel model, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
+        public static OpenApiDocument Generate(CodeGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             OpenApiDocument document = new OpenApiDocument
             {
@@ -30,11 +30,11 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             };
 
             AppendSecuritySchemes(document, model.SecuritySchemes);
-            AppendPaths(document, model.AreaName, model.Controllers, model.RootNamespace, schemaDefinitionResolver, logger);
+            AppendPaths(document, model.AreaName, model.Controllers, model.RootNamespace, schemaRegistry, logger);
             return document;
         }
 
-        private static void AppendPaths(OpenApiDocument document, string areaName, ICollection<ControllerDefinition> controllers, string rootNamespace, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
+        private static void AppendPaths(OpenApiDocument document, string areaName, ICollection<ControllerDefinition> controllers, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             IDictionary<ActionDefinition, string> operationIds = controllers.SelectMany(x => x.Actions)
                                                                             .GroupBy(x => x.OperationId)
@@ -63,9 +63,9 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                         operation.Summary = action.Description ?? operationId;
                         operation.OperationId = operationId;
 
-                        AppendParameters(document, operation, action, rootNamespace, schemaDefinitionResolver, logger);
-                        AppendBody(document, operation, action, rootNamespace, schemaDefinitionResolver, logger);
-                        AppendResponses(document, operation, action, rootNamespace, schemaDefinitionResolver, logger);
+                        AppendParameters(document, operation, action, rootNamespace, schemaRegistry, logger);
+                        AppendBody(document, operation, action, rootNamespace, schemaRegistry, logger);
+                        AppendResponses(document, operation, action, rootNamespace, schemaRegistry, logger);
                         AppendSecuritySchemes(document, action, operation);
 
                         value.AddOperation(operationType, operation);
@@ -79,33 +79,33 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             }
         }
 
-        private static void AppendParameters(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, string rootNamespace, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
+        private static void AppendParameters(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             foreach (ActionParameter parameter in action.Parameters.DistinctBy(x => x.ApiParameterName))
             {
-                if (parameter.Location != ActionParameterLocation.Query
-                 && parameter.Location != ActionParameterLocation.Path
-                 && parameter.Location != ActionParameterLocation.Header) 
+                if (parameter.ParameterLocation != ActionParameterLocation.Query
+                 && parameter.ParameterLocation != ActionParameterLocation.Path
+                 && parameter.ParameterLocation != ActionParameterLocation.Header) 
                     continue;
 
-                AppendUserParameter(document, operation, action, parameter, parameter.Location, rootNamespace, schemaDefinitionResolver, logger);
+                AppendUserParameter(document, operation, action, parameter, parameter.ParameterLocation, rootNamespace, schemaRegistry, logger);
             }
         }
 
-        private static void AppendUserParameter(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, ActionParameter parameter, ActionParameterLocation location, string rootNamespace, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
+        private static void AppendUserParameter(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, ActionParameter parameter, ActionParameterLocation location, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             switch (location)
             {
                 case ActionParameterLocation.Query:
-                    AppendQueryParameter(document, operation, parameter, parameter.Type, rootNamespace, schemaDefinitionResolver, logger);
+                    AppendQueryParameter(document, operation, parameter, parameter.Type, rootNamespace, schemaRegistry, logger);
                     break;
                 
                 case ActionParameterLocation.Path:
-                    AppendPathParameter(document, operation, parameter, rootNamespace, schemaDefinitionResolver, logger);
+                    AppendPathParameter(document, operation, parameter, rootNamespace, schemaRegistry, logger);
                     break;
                 
                 case ActionParameterLocation.Header:
-                    AppendHeaderParameter(document, operation, action, parameter, rootNamespace, schemaDefinitionResolver, logger);
+                    AppendHeaderParameter(document, operation, action, parameter, rootNamespace, schemaRegistry, logger);
                     break;
 
                 default:
@@ -113,17 +113,17 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             }
         }
 
-        private static void AppendQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, TypeReference parameterType, string rootNamespace, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
+        private static void AppendQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, TypeReference parameterType, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             switch (parameterType)
             {
                 case PrimitiveTypeReference _:
-                    AppendQueryParameter(document, operation, parameter, rootNamespace, schemaDefinitionResolver, logger);
+                    AppendQueryParameter(document, operation, parameter, rootNamespace, schemaRegistry, logger);
                     break;
 
                 case SchemaTypeReference schemaTypeReference:
-                    SchemaDefinition schema = schemaDefinitionResolver.Resolve(schemaTypeReference);
-                    AppendComplexQueryParameter(document, operation, parameter, schema, rootNamespace, schemaDefinitionResolver, logger);
+                    SchemaDefinition schema = schemaRegistry.GetSchema(schemaTypeReference);
+                    AppendComplexQueryParameter(document, operation, parameter, schema, rootNamespace, schemaRegistry, logger);
                     break;
 
                 default:
@@ -131,12 +131,12 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             }
         }
 
-        private static void AppendPathParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, string rootNamespace, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
+        private static void AppendPathParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
-            AppendParameter(document, operation, parameter, ParameterLocation.Path, rootNamespace, schemaDefinitionResolver, logger);
+            AppendParameter(document, operation, parameter, ParameterLocation.Path, rootNamespace, schemaRegistry, logger);
         }
 
-        private static void AppendHeaderParameter(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, ActionParameter parameter, string rootNamespace, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
+        private static void AppendHeaderParameter(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, ActionParameter parameter, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             // Header parameters named Accept, Content-Type and Authorization are not allowed. To describe these headers, use the corresponding OpenAPI keywords
             // See: https://swagger.io/docs/specification/describing-parameters/#header-parameters
@@ -145,22 +145,22 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                 return;
             }
 
-            AppendParameter(document, operation, parameter, ParameterLocation.Header, rootNamespace, schemaDefinitionResolver, logger);
+            AppendParameter(document, operation, parameter, ParameterLocation.Header, rootNamespace, schemaRegistry, logger);
         }
 
-        private static void AppendQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, string rootNamespace, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger) => AppendQueryParameter(document, operation, parameter, parameter.Type, parameter.Type.IsEnumerable, rootNamespace, schemaDefinitionResolver, logger);
-        private static void AppendQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, TypeReference parameterType, bool isEnumerable, string rootNamespace, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger) => AppendParameter(document, operation, parameter, parameterType, isEnumerable, ParameterLocation.Query, rootNamespace, schemaDefinitionResolver, logger);
+        private static void AppendQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger) => AppendQueryParameter(document, operation, parameter, parameter.Type, parameter.Type.IsEnumerable, rootNamespace, schemaRegistry, logger);
+        private static void AppendQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, TypeReference parameterType, bool isEnumerable, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger) => AppendParameter(document, operation, parameter, parameterType, isEnumerable, ParameterLocation.Query, rootNamespace, schemaRegistry, logger);
 
-        private static void AppendComplexQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, SchemaDefinition parameterSchema, string rootNamespace, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
+        private static void AppendComplexQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, SchemaDefinition parameterSchema, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             switch (parameterSchema)
             {
                 case EnumSchema _:
-                    AppendQueryParameter(document, operation, parameter, rootNamespace, schemaDefinitionResolver, logger);
+                    AppendQueryParameter(document, operation, parameter, rootNamespace, schemaRegistry, logger);
                     break;
 
                 case UserDefinedTypeSchema userDefinedTypeSchema:
-                    AppendQueryArrayParameter(document, operation, parameter, userDefinedTypeSchema, rootNamespace, schemaDefinitionResolver, logger);
+                    AppendQueryArrayParameter(document, operation, parameter, userDefinedTypeSchema, rootNamespace, schemaRegistry, logger);
                     break;
 
                 default:
@@ -168,44 +168,44 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             }
         }
 
-        private static void AppendQueryArrayParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, ObjectSchema parameterSchema, string rootNamespace, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
+        private static void AppendQueryArrayParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, ObjectSchema parameterSchema, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             TypeReference parameterType = parameterSchema.Properties.Count > 1 ? parameter.Type : parameterSchema.Properties[0].Type;
-            AppendQueryParameter(document, operation, parameter, parameterType, true, rootNamespace, schemaDefinitionResolver, logger);
+            AppendQueryParameter(document, operation, parameter, parameterType, true, rootNamespace, schemaRegistry, logger);
         }
 
-        private static void AppendParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, ParameterLocation parameterLocation, string rootNamespace, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger) => AppendParameter(document, operation, parameter, parameter.Type, parameter.Type.IsEnumerable, parameterLocation, rootNamespace, schemaDefinitionResolver, logger);
-        private static OpenApiParameter AppendParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter actionParameter, TypeReference parameterType, bool isEnumerable, ParameterLocation parameterLocation, string rootNamespace, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
+        private static void AppendParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, ParameterLocation parameterLocation, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger) => AppendParameter(document, operation, parameter, parameter.Type, parameter.Type.IsEnumerable, parameterLocation, rootNamespace, schemaRegistry, logger);
+        private static OpenApiParameter AppendParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter actionParameter, TypeReference parameterType, bool isEnumerable, ParameterLocation parameterLocation, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             OpenApiParameter apiParameter = new OpenApiParameter
             {
                 In = parameterLocation,
                 Required = actionParameter.IsRequired,
                 Name = actionParameter.ApiParameterName,
-                Schema = CreateSchema(document, parameterType, isEnumerable, actionParameter.DefaultValue, rootNamespace, schemaDefinitionResolver, logger)
+                Schema = CreateSchema(document, parameterType, isEnumerable, actionParameter.DefaultValue, rootNamespace, schemaRegistry, logger)
             };
             operation.Parameters.Add(apiParameter);
             return apiParameter;
         }
 
-        private static void AppendBody(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, string rootNamespace, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
+        private static void AppendBody(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             if (action.RequestBody == null)
                 return;
 
             OpenApiRequestBody body = new OpenApiRequestBody { Required = true };
-            AppendContent(document, body.Content, action.RequestBody.MediaType, action.RequestBody.Contract, rootNamespace, schemaDefinitionResolver, logger);
+            AppendContent(document, body.Content, action.RequestBody.MediaType, action.RequestBody.Contract, rootNamespace, schemaRegistry, logger);
             operation.RequestBody = body;
         }
 
-        private static void AppendResponses(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, string rootNamespace, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
+        private static void AppendResponses(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             foreach (ActionResponse actionResponse in action.Responses.Values.OrderBy(x => x.StatusCode))
             {
                 OpenApiResponse apiResponse = new OpenApiResponse();
 
                 if (actionResponse.ResultType != null)
-                    AppendContent(document, apiResponse.Content, actionResponse.MediaType, actionResponse.ResultType, rootNamespace, schemaDefinitionResolver, logger);
+                    AppendContent(document, apiResponse.Content, actionResponse.MediaType, actionResponse.ResultType, rootNamespace, schemaRegistry, logger);
 
                 StringBuilder sb = new StringBuilder(actionResponse.Description);
                 if (actionResponse.Errors.Any())
@@ -243,9 +243,9 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             }
         }
 
-        private static void AppendContent(OpenApiDocument document, IDictionary<string, OpenApiMediaType> target, string mediaType, TypeReference typeReference, string rootNamespace, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
+        private static void AppendContent(OpenApiDocument document, IDictionary<string, OpenApiMediaType> target, string mediaType, TypeReference typeReference, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
-            OpenApiMediaType content = new OpenApiMediaType { Schema = CreateSchema(document, typeReference, rootNamespace, schemaDefinitionResolver, logger) };
+            OpenApiMediaType content = new OpenApiMediaType { Schema = CreateSchema(document, typeReference, rootNamespace, schemaRegistry, logger) };
             target.Add(mediaType, content);
         }
 
@@ -328,10 +328,10 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             }
         }
 
-        private static OpenApiSchema CreateSchema(OpenApiDocument document, TypeReference typeReference, string rootNamespace, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger) => CreateSchema(document, typeReference, typeReference.IsEnumerable, defaultValue: null, rootNamespace, schemaDefinitionResolver, logger);
-        private static OpenApiSchema CreateSchema(OpenApiDocument document, TypeReference typeReference, bool isEnumerable, ValueReference defaultValue, string rootNamespace, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
+        private static OpenApiSchema CreateSchema(OpenApiDocument document, TypeReference typeReference, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger) => CreateSchema(document, typeReference, typeReference.IsEnumerable, defaultValue: null, rootNamespace, schemaRegistry, logger);
+        private static OpenApiSchema CreateSchema(OpenApiDocument document, TypeReference typeReference, bool isEnumerable, ValueReference defaultValue, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
-            OpenApiSchema schema = CreateSchemaCore(document, typeReference, defaultValue, rootNamespace, schemaDefinitionResolver, logger);
+            OpenApiSchema schema = CreateSchemaCore(document, typeReference, defaultValue, rootNamespace, schemaRegistry, logger);
 
             if (isEnumerable)
             {
@@ -345,17 +345,17 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             return schema;
         }
 
-        private static OpenApiSchema CreateSchemaCore(OpenApiDocument document, TypeReference typeReference, ValueReference defaultValue, string rootNamespace, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
+        private static OpenApiSchema CreateSchemaCore(OpenApiDocument document, TypeReference typeReference, ValueReference defaultValue, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             switch (typeReference)
             {
-                case PrimitiveTypeReference primitiveContractPropertyType: return CreatePrimitiveTypeSchema(primitiveContractPropertyType, defaultValue, schemaDefinitionResolver, logger);
-                case SchemaTypeReference contractPropertyTypeReference: return CreateReferenceSchema(document, contractPropertyTypeReference, rootNamespace, schemaDefinitionResolver, logger);
+                case PrimitiveTypeReference primitiveContractPropertyType: return CreatePrimitiveTypeSchema(primitiveContractPropertyType, defaultValue, schemaRegistry, logger);
+                case SchemaTypeReference contractPropertyTypeReference: return CreateReferenceSchema(document, contractPropertyTypeReference, rootNamespace, schemaRegistry, logger);
                 default: throw new ArgumentOutOfRangeException(nameof(typeReference), typeReference, $"Unexpected property type: {typeReference}");
             }
         }
 
-        private static OpenApiSchema CreatePrimitiveTypeSchema(PrimitiveTypeReference typeReference, ValueReference defaultValue, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
+        private static OpenApiSchema CreatePrimitiveTypeSchema(PrimitiveTypeReference typeReference, ValueReference defaultValue, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             if (!PrimitiveTypeMap.TryGetOpenApiFactory(typeReference.Type, out Func<OpenApiSchema> schemaFactory))
                 throw new InvalidOperationException($"Unexpected primitive type: {typeReference.Type}");
@@ -364,14 +364,14 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             schema.Nullable = typeReference.IsNullable;
 
             if (defaultValue != null)
-                schema.Default = ParseDefaultValue(defaultValue, schemaDefinitionResolver, logger);
+                schema.Default = ParseDefaultValue(defaultValue, schemaRegistry, logger);
 
             return schema;
         }
 
-        private static OpenApiSchema CreateReferenceSchema(OpenApiDocument document, SchemaTypeReference typeReference, string rootNamespace, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
+        private static OpenApiSchema CreateReferenceSchema(OpenApiDocument document, SchemaTypeReference typeReference, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
-            SchemaDefinition schemaDefinition = schemaDefinitionResolver.Resolve(typeReference);
+            SchemaDefinition schemaDefinition = schemaRegistry.GetSchema(typeReference);
             string typeName;
 
             if (UseRelativeNamespaces)
@@ -384,7 +384,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             else
                 typeName = schemaDefinition.FullName;
 
-            EnsureSchema(document, typeName, schemaDefinition, rootNamespace, schemaDefinitionResolver, logger);
+            EnsureSchema(document, typeName, schemaDefinition, rootNamespace, schemaRegistry, logger);
 
             OpenApiSchema openApiSchema = new OpenApiSchema
             {
@@ -414,18 +414,18 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             return openApiSchema;
         }
 
-        private static void EnsureSchema(OpenApiDocument document, string schemaName, SchemaDefinition contract, string rootNamespace, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
+        private static void EnsureSchema(OpenApiDocument document, string schemaName, SchemaDefinition contract, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             if (!EnsureComponents(document).Schemas.ContainsKey(schemaName))
-                AppendContractSchema(document, schemaName, contract, rootNamespace, schemaDefinitionResolver, logger);
+                AppendContractSchema(document, schemaName, contract, rootNamespace, schemaRegistry, logger);
         }
 
-        private static void AppendContractSchema(OpenApiDocument document, string schemaName, SchemaDefinition contract, string rootNamespace, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
+        private static void AppendContractSchema(OpenApiDocument document, string schemaName, SchemaDefinition contract, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             switch (contract)
             {
                 case ObjectSchema objectContract:
-                    AppendObjectSchema(document, schemaName, objectContract, rootNamespace, schemaDefinitionResolver, logger);
+                    AppendObjectSchema(document, schemaName, objectContract, rootNamespace, schemaRegistry, logger);
                     break;
 
                 case EnumSchema enumContract:
@@ -437,7 +437,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             }
         }
 
-        private static void AppendObjectSchema(OpenApiDocument document, string schemaName, ObjectSchema objectContract, string rootNamespace, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
+        private static void AppendObjectSchema(OpenApiDocument document, string schemaName, ObjectSchema objectContract, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             OpenApiSchema schema = new OpenApiSchema
             {
@@ -452,7 +452,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                 if (property.SerializationBehavior == SerializationBehavior.Never)
                     continue;
 
-                OpenApiSchema propertySchema = CreateSchema(document, property.Type, rootNamespace, schemaDefinitionResolver, logger);
+                OpenApiSchema propertySchema = CreateSchema(document, property.Type, rootNamespace, schemaRegistry, logger);
                 schema.Properties.Add(property.Name, propertySchema);
 
                 if (property.SerializationBehavior == SerializationBehavior.Always && !property.IsOptional)
@@ -461,7 +461,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                 if (property.DefaultValue == null) 
                     continue;
 
-                propertySchema.Default = ParseDefaultValue(property.DefaultValue, schemaDefinitionResolver, logger);
+                propertySchema.Default = ParseDefaultValue(property.DefaultValue, schemaRegistry, logger);
             }
         }
 
@@ -484,7 +484,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
 
         private static OpenApiComponents EnsureComponents(OpenApiDocument document) => document.Components ?? (document.Components = new OpenApiComponents());
 
-        private static IOpenApiAny ParseDefaultValue(ValueReference defaultValue, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
+        private static IOpenApiAny ParseDefaultValue(ValueReference defaultValue, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             switch (defaultValue)
             {
@@ -496,13 +496,13 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
 
                 case EnumMemberNumericReference enumMemberNumericReference:
                 {
-                    EnumSchemaMember member = enumMemberNumericReference.GetEnumMember(schemaDefinitionResolver, logger);
+                    EnumSchemaMember member = enumMemberNumericReference.GetEnumMember(schemaRegistry, logger);
                     return new OpenApiInteger(member.ActualValue);
                 }
 
                 case EnumMemberStringReference enumMemberStringReference:
                 {
-                    EnumSchemaMember member = enumMemberStringReference.GetEnumMember(schemaDefinitionResolver, logger);
+                    EnumSchemaMember member = enumMemberStringReference.GetEnumMember(schemaRegistry, logger);
                     return new OpenApiInteger(member.ActualValue);
                 }
 

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -17,7 +18,7 @@ namespace Dibix.Sdk.CodeGeneration
         public IList<SqlQueryResult> Results { get; }
         public ICollection<ErrorResponse> ErrorResponses { get; }
 
-        public SqlStatementDefinition(string @namespace, string definitionName, SchemaDefinitionSource source) : base(@namespace, definitionName, source)
+        public SqlStatementDefinition(string @namespace, string definitionName, SchemaDefinitionSource source, SourceLocation location) : base(@namespace, definitionName, source, location)
         {
             this.Parameters = new Collection<SqlQueryParameter>();
             this.Results = new Collection<SqlQueryResult>();

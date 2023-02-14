@@ -28,9 +28,9 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                 return false;
             }
 
-            JsonSourceInfo sourceInfo = token.GetSourceInfo();
-            line = sourceInfo.LineNumber;
-            column = sourceInfo.LinePosition;
+            SourceLocation sourceInfo = token.GetSourceInfo();
+            line = sourceInfo.Line;
+            column = sourceInfo.Column;
             return true;
         }
 

@@ -1,10 +1,12 @@
-﻿namespace Dibix.Sdk.CodeGeneration
+﻿using Dibix.Sdk.Abstractions;
+
+namespace Dibix.Sdk.CodeGeneration
 {
-    public class ReflectionActionTarget : NeighborActionTarget
+    public class ReflectionActionTarget : ActionTarget
     {
         public string AssemblyName { get; }
 
-        public ReflectionActionTarget(string assemblyName, string accessorFullName, string operationName, bool isAsync, bool hasRefParameters, string source, int line, int column) : base(accessorFullName, operationName, isAsync, hasRefParameters, source, line, column)
+        public ReflectionActionTarget(string assemblyName, string accessorFullName, string operationName, bool isAsync, bool hasRefParameters, SourceLocation sourceLocation) : base(accessorFullName, operationName, isAsync, hasRefParameters, sourceLocation)
         {
             this.AssemblyName = assemblyName;
         }

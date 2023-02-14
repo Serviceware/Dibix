@@ -6,14 +6,14 @@ namespace Dibix.Sdk.CodeGeneration
     internal sealed class ActionParameterPropertySourceModelValidator : ICodeGenerationModelValidator
     {
         private readonly IActionParameterSourceRegistry _actionParameterSourceRegistry;
-        private readonly ISchemaDefinitionResolver _schemaDefinitionResolver;
+        private readonly ISchemaRegistry _schemaRegistry;
         private readonly ILogger _logger;
 
-        public ActionParameterPropertySourceModelValidator(IActionParameterSourceRegistry actionParameterSourceRegistry, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
+        public ActionParameterPropertySourceModelValidator(IActionParameterSourceRegistry actionParameterSourceRegistry, ISchemaRegistry schemaRegistry, ILogger logger)
         {
-            this._actionParameterSourceRegistry = actionParameterSourceRegistry;
-            this._schemaDefinitionResolver = schemaDefinitionResolver;
-            this._logger = logger;
+            _actionParameterSourceRegistry = actionParameterSourceRegistry;
+            _schemaRegistry = schemaRegistry;
+            _logger = logger;
         }
 
         public bool Validate(CodeGenerationModel model)
@@ -25,7 +25,7 @@ namespace Dibix.Sdk.CodeGeneration
                 {
                     foreach (ActionParameter parameter in action.Parameters)
                     {
-                        if (!ValidateSource(parameter, new ActionParameterInfo(parameter.InternalParameterName, parameter.FilePath, parameter.Line, parameter.Column), parameter.Source, parentValue: null, action))
+                        if (!ValidateSource(parameter, new ActionParameterInfo(parameter.InternalParameterName, parameter.SourceLocation), parameter.ParameterSource, parentValue: null, action))
                             result = false;
                     }
                 }
@@ -38,11 +38,11 @@ namespace Dibix.Sdk.CodeGeneration
             if (currentValue is not ActionParameterPropertySource propertySource) 
                 return true;
 
-            bool result = this.ValidatePropertySource(rootParameter, currentParameter, propertySource, parentValue, action);
+            bool result = ValidatePropertySource(rootParameter, currentParameter, propertySource, parentValue, action);
 
             foreach (ActionParameterItemSource itemPropertySource in propertySource.ItemSources)
             {
-                if (!this.ValidateSource(rootParameter, new ActionParameterInfo(itemPropertySource.ParameterName, itemPropertySource.FilePath, itemPropertySource.Line, itemPropertySource.Column), itemPropertySource.Source, propertySource, action))
+                if (!ValidateSource(rootParameter, new ActionParameterInfo(itemPropertySource.ParameterName, itemPropertySource.Location), itemPropertySource.Source, propertySource, action))
                     result = false;
             }
 
@@ -54,13 +54,13 @@ namespace Dibix.Sdk.CodeGeneration
             if (currentValue.Definition == null) // Unknown source is logged at ControllerDefinitionProvider.ReadPropertySource
                 return false;
 
-            if (!this._actionParameterSourceRegistry.TryGetValidator(currentValue.Definition, out IActionParameterPropertySourceValidator validator))
+            if (!_actionParameterSourceRegistry.TryGetValidator(currentValue.Definition, out IActionParameterPropertySourceValidator validator))
             {
                 //return true;
                 throw new InvalidOperationException($"No validator is registered for source '{currentValue.Definition} ({currentValue.Definition.GetType()})'");
             }
 
-            bool result = validator.Validate(rootParameter, currentParameter, currentValue, parentValue, action, this._schemaDefinitionResolver, this._logger);
+            bool result = validator.Validate(rootParameter, currentParameter, currentValue, parentValue, action, _schemaRegistry, _logger);
             return result;
         }
     }

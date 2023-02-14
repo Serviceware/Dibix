@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
+using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
 {
     public interface ISqlElement
     {
-        string Source { get; }
-        int Line { get; }
-        int Column { get; }
+        SourceLocation Location { get; }
         IEnumerable<ISqlElementProperty> Properties { get; }
 
         bool TryGetPropertyValue(string propertyName, bool isDefault, out Token<string> value);

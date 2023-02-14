@@ -14,12 +14,12 @@ namespace Dibix.Sdk.CodeGeneration
     {
         public override bool ShouldGenerate(CodeGenerationModel model) => model.Controllers.Any();
 
-        public override bool Generate(CodeGenerationModel model, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
+        public override bool Generate(CodeGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             if (logger.HasLoggedErrors)
                 return false;
 
-            OpenApiDocument document = OpenApiGenerator.Generate(model, schemaDefinitionResolver, logger);
+            OpenApiDocument document = OpenApiGenerator.Generate(model, schemaRegistry, logger);
 
             string jsonFilePath = BuildOutputPath(model.OutputDirectory, model.AreaName, "json");
             using (Stream stream = File.Open(jsonFilePath, FileMode.Create))

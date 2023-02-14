@@ -4,6 +4,6 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public interface ISchemaProvider
     {
-        IEnumerable<SchemaDefinition> Schemas { get; }
+        IEnumerable<SchemaDefinition> Collect();
     }
 }

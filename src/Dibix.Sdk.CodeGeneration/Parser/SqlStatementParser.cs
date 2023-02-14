@@ -40,7 +40,6 @@ namespace Dibix.Sdk.CodeGeneration
             , ISqlStatementFormatter formatter
             , ITypeResolverFacade typeResolver
             , ISchemaRegistry schemaRegistry
-            , ISchemaDefinitionResolver schemaDefinitionResolver
             , ILogger logger
             , out SqlStatementDefinition definition
         )
@@ -50,12 +49,12 @@ namespace Dibix.Sdk.CodeGeneration
 
             TSqlFragment fragment = reader(content);
             TSqlFragmentAnalyzer fragmentAnalyzer = TSqlFragmentAnalyzer.Create(source, fragment, isScriptArtifact: false, isEmbedded, limitDdlStatements, analyzeAlways, model, logger);
-            return this.TryCollectStatementDescriptor(fragment, fragmentAnalyzer, source, definitionName, productName, areaName, formatter, typeResolver, schemaRegistry, schemaDefinitionResolver, logger, out definition);
+            return this.TryCollectStatementDescriptor(fragment, fragmentAnalyzer, source, definitionName, productName, areaName, formatter, typeResolver, schemaRegistry, logger, out definition);
         }
         #endregion
 
         #region Private Methods
-        private bool TryCollectStatementDescriptor(TSqlFragment fragment, TSqlFragmentAnalyzer fragmentAnalyzer, string source, string definitionName, string productName, string areaName, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger, out SqlStatementDefinition definition)
+        private bool TryCollectStatementDescriptor(TSqlFragment fragment, TSqlFragmentAnalyzer fragmentAnalyzer, string source, string definitionName, string productName, string areaName, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger, out SqlStatementDefinition definition)
         {
             ISqlMarkupDeclaration markup = SqlMarkupReader.ReadHeader(fragment, source, logger);
             bool hasMarkup = markup.HasElements;
@@ -77,7 +76,6 @@ namespace Dibix.Sdk.CodeGeneration
                 Formatter = formatter,
                 TypeResolver = typeResolver,
                 SchemaRegistry = schemaRegistry,
-                SchemaDefinitionResolver = schemaDefinitionResolver,
                 Logger = logger,
                 Markup = markup
             };

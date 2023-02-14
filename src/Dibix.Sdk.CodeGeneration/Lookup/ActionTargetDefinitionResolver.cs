@@ -7,22 +7,20 @@ namespace Dibix.Sdk.CodeGeneration
     internal abstract class ActionTargetDefinitionResolver
     {
         #region Properties
-        protected ISchemaDefinitionResolver SchemaDefinitionResolver { get; }
         protected ISchemaRegistry SchemaRegistry { get; }
         protected ILogger Logger { get; }
         #endregion
 
         #region Constructor
-        protected ActionTargetDefinitionResolver(ISchemaDefinitionResolver schemaDefinitionResolver, ISchemaRegistry schemaRegistry, ILogger logger)
+        protected ActionTargetDefinitionResolver(ISchemaRegistry schemaRegistry, ILogger logger)
         {
-            this.SchemaDefinitionResolver = schemaDefinitionResolver;
             this.SchemaRegistry = schemaRegistry;
             this.Logger = logger;
         }
         #endregion
 
         #region Abstract Methods
-        public abstract bool TryResolve<T>(string targetName, string filePath, int line, int column, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> readOnlyDictionary, ICollection<string> bodyParameters, out T actionTargetDefinition) where T : ActionTargetDefinition, new();
+        public abstract bool TryResolve<T>(string targetName, SourceLocation sourceLocation, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> readOnlyDictionary, ICollection<string> bodyParameters, out T actionTargetDefinition) where T : ActionTargetDefinition, new();
         #endregion
 
         #region Protected Methods
@@ -33,9 +31,7 @@ namespace Dibix.Sdk.CodeGeneration
           , ValueReference defaultValue
           , bool isOutParameter
           , string actionName
-          , string filePath
-          , int line
-          , int column
+          , SourceLocation sourceLocation
           , ActionParameterRegistry parameterRegistry
           , IReadOnlyDictionary<string, ExplicitParameter> explicitParameters
           , IReadOnlyDictionary<string, PathParameter> pathParameters
@@ -51,7 +47,7 @@ namespace Dibix.Sdk.CodeGeneration
                 return;
             }
 
-            ActionParameter actionParameter = this.CreateActionParameter(parameterName, parameterType, defaultValue, explicitParameters, pathParameters, bodyParameters, filePath, line, column);
+            ActionParameter actionParameter = this.CreateActionParameter(parameterName, parameterType, defaultValue, explicitParameters, pathParameters, bodyParameters, sourceLocation);
             parameterRegistry.Add(actionParameter);
         }
 
@@ -60,7 +56,7 @@ namespace Dibix.Sdk.CodeGeneration
             switch (location)
             {
                 case ActionParameterLocation.Query:
-                    return defaultValue == null && Equals(type?.IsUserDefinedType(this.SchemaDefinitionResolver), false);
+                    return defaultValue == null && Equals(type?.IsUserDefinedType(SchemaRegistry), false);
 
                 case ActionParameterLocation.Header:
                     return defaultValue == null;
@@ -113,7 +109,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private ActionParameter CreateActionParameter(string name, TypeReference type, ValueReference defaultValue, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, string filePath, int line, int column)
+        private ActionParameter CreateActionParameter(string name, TypeReference type, ValueReference defaultValue, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, SourceLocation sourceLocation)
         {
             ActionParameterLocation location = ActionParameterLocation.NonUser;
             string apiParameterName = name;
@@ -136,7 +132,7 @@ namespace Dibix.Sdk.CodeGeneration
                         // Use case sensitive comparison, because the runtime does not support case insensitive argument resolution
                         if (!pathParameters.TryGetValue(apiParameterName, out pathParameter) || pathParameter.Name != apiParameterName)
                         {
-                            Logger.LogError($"Property '{apiParameterName}' not found in path", propertySource.FilePath, propertySource.Line, propertySource.Column);
+                            Logger.LogError($"Property '{apiParameterName}' not found in path", propertySource.Location.Source, propertySource.Location.Line, propertySource.Location.Column);
                         }
 
                         if (pathParameter != null)
@@ -176,7 +172,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             bool isRequired = this.IsParameterRequired(type, location, defaultValue);
-            return new ActionParameter(apiParameterName, internalParameterName, type, location, isRequired, defaultValue, source, filePath, line, column);
+            return new ActionParameter(apiParameterName, internalParameterName, type, location, isRequired, defaultValue, source, sourceLocation);
         }
         #endregion
     }

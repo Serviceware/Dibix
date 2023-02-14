@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -7,15 +8,16 @@ namespace Dibix.Sdk.CodeGeneration
         private const string Source = "<internal>";
 
         public static SchemaDefinition FileEntitySchema { get; } = CollectFileEntitySchema();
-        public IEnumerable<SchemaDefinition> Schemas { get { yield return FileEntitySchema; } }
+
+        public IEnumerable<SchemaDefinition> Collect() { yield return FileEntitySchema; }
 
         private static SchemaDefinition CollectFileEntitySchema()
         {
-            ObjectSchema schema = new ObjectSchema("Dibix", "FileEntity", SchemaDefinitionSource.Internal, new[]
+            ObjectSchema schema = new ObjectSchema("Dibix", "FileEntity", SchemaDefinitionSource.Internal, new SourceLocation(Source, line: default, column: default), new[]
             {
-                new ObjectSchemaProperty(name: new Token<string>("Type", Source, line: default, column: default), new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: false, source: default, line: default, column: default))
-              , new ObjectSchemaProperty(name: new Token<string>("Data", Source, line: default, column: default), new PrimitiveTypeReference(PrimitiveType.Binary, isNullable: false, isEnumerable: false, source: default, line: default, column: default))
-              , new ObjectSchemaProperty(name: new Token<string>("FileName", Source, line: default, column: default), new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: false, source: default, line: default, column: default))
+                new ObjectSchemaProperty(name: new Token<string>("Type", new SourceLocation(Source, line: default, column: default)), new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: false, location: default))
+              , new ObjectSchemaProperty(name: new Token<string>("Data", new SourceLocation(Source, line: default, column: default)), new PrimitiveTypeReference(PrimitiveType.Binary, isNullable: false, isEnumerable: false, location: default))
+              , new ObjectSchemaProperty(name: new Token<string>("FileName", new SourceLocation(Source, line: default, column: default)), new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: false, location: default))
             });
             return schema;
         }

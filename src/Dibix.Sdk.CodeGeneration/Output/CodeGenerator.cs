@@ -19,29 +19,29 @@ namespace Dibix.Sdk.CodeGeneration
 // </auto-generated>
 //----------------------------------------------------------------------------*/";
         private readonly IList<ArtifactWriterBase> _writers;
-        private readonly ISchemaDefinitionResolver _schemaDefinitionResolver;
+        private readonly ISchemaRegistry _schemaRegistry;
         private readonly ILogger _logger;
         #endregion
 
         #region Constructor
-        protected CodeGenerator(CodeGenerationModel model, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
+        protected CodeGenerator(CodeGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger)
         {
-            this._schemaDefinitionResolver = schemaDefinitionResolver;
-            this._logger = logger;
-            this._writers = new Collection<ArtifactWriterBase>();
-            this._writers.AddRange(this.SelectWriters(model));
+            _schemaRegistry = schemaRegistry;
+            _logger = logger;
+            _writers = new Collection<ArtifactWriterBase>();
+            _writers.AddRange(SelectWriters(model));
         }
         #endregion
 
         #region Public Methods
         public string Generate(CodeGenerationModel model)
         {
-            if (this._logger.HasLoggedErrors)
+            if (_logger.HasLoggedErrors)
                 return "\"Please fix the errors first\"";
             
             StringWriter writer = new StringWriter();
             writer.WriteLine(Header);
-            this.Write(writer, model);
+            Write(writer, model);
             return writer.ToString().Trim();
         }
         #endregion
@@ -49,18 +49,18 @@ namespace Dibix.Sdk.CodeGeneration
         #region Protected Methods
         protected virtual void Write(StringWriter writer, CodeGenerationModel model)
         {
-            IList<ArtifactWriterBase> writers = this._writers.Where(x => x.HasContent(model)).ToArray();
+            IList<ArtifactWriterBase> writers = _writers.Where(x => x.HasContent(model)).ToArray();
             //if (!writers.Any())
             //    return;
 
             // Prepare writer
-            IEnumerable<CSharpAnnotation> globalAnnotations = this.CollectGlobalAnnotations(model)
+            IEnumerable<CSharpAnnotation> globalAnnotations = CollectGlobalAnnotations(model)
                                                                   .Concat(writers.SelectMany(x => x.GetGlobalAnnotations(model)));
             CSharpWriter csWriter = new CSharpWriter(writer, globalAnnotations);
             CSharpStatementScope output = csWriter.Root.Output;
 
-            CodeGenerationContext context = new CodeGenerationContext(csWriter.Root, model, this._schemaDefinitionResolver, this._logger);
-            this.OnContextCreated(context);
+            CodeGenerationContext context = new CodeGenerationContext(csWriter.Root, model, _schemaRegistry, _logger);
+            OnContextCreated(context);
 
             IList<IGrouping<string, ArtifactWriterBase>> childWriterGroups = writers.GroupBy(x => x.LayerName).ToArray();
             for (int i = 0; i < childWriterGroups.Count; i++)

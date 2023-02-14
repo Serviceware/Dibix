@@ -117,9 +117,9 @@ namespace Dibix.Sdk.CodeGeneration
 
             body(context, writer, actionTargetDefinition, variableName);
 
-            foreach (ActionParameter parameter in actionTargetDefinition.Parameters.Where(x => x.Source != null))
+            foreach (ActionParameter parameter in actionTargetDefinition.Parameters.Where(x => x.ParameterSource != null))
             {
-                WriteParameter(context, writer, parameter.InternalParameterName, parameter.Source, variableName);
+                WriteParameter(context, writer, parameter.InternalParameterName, parameter.ParameterSource, variableName);
             }
 
             writer.PopIndent()

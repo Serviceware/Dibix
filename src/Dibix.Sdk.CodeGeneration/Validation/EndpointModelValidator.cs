@@ -41,7 +41,7 @@ namespace Dibix.Sdk.CodeGeneration
                     foreach (ActionDefinition action in childRouteGroup)
                     {
                         string route = RouteBuilder.BuildRoute(model.AreaName, controller.Name, action.ChildRoute);
-                        this._logger.LogError($"Equivalent paths are not allowed: {action.Method.ToString().ToUpperInvariant()} {route}", action.ChildRoute.Source, action.ChildRoute.Line, action.ChildRoute.Column);
+                        this._logger.LogError($"Equivalent paths are not allowed: {action.Method.ToString().ToUpperInvariant()} {route}", action.ChildRoute.Location.Source, action.ChildRoute.Location.Line, action.ChildRoute.Location.Column);
                     }
                 }
             }
@@ -69,7 +69,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 if (HttpMethods.Contains(segment))
                 {
-                    this._logger.LogError($"The path segment '{segment}' is a known HTTP verb, which should be indicated by the action method and is therefore redundant: {action.ChildRoute.Value}", action.ChildRoute.Source, action.ChildRoute.Line, action.ChildRoute.Column + columnOffset);
+                    this._logger.LogError($"The path segment '{segment}' is a known HTTP verb, which should be indicated by the action method and is therefore redundant: {action.ChildRoute.Value}", action.ChildRoute.Location.Source, action.ChildRoute.Location.Line, action.ChildRoute.Location.Column + columnOffset);
                     result = false;
                 }
                 columnOffset += segment.Length + 1; // Skip segment and slash

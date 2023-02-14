@@ -6,32 +6,28 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class ActionParameterItemSourceBuilder
     {
-        private readonly ISchemaDefinitionResolver _schemaDefinitionResolver;
+        private readonly ISchemaRegistry _schemaRegistry;
         private readonly ILogger _logger;
 
         public string ParameterName { get; }
         public ActionParameterSourceBuilder SourceBuilder { get; }
-        public string FilePath { get; }
-        public int Line { get; }
-        public int Column { get; }
+        public SourceLocation Location { get; }
 
-        public ActionParameterItemSourceBuilder(string parameterName, ActionParameterSourceBuilder sourceBuilder, string filePath, int line, int column, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
+        public ActionParameterItemSourceBuilder(string parameterName, ActionParameterSourceBuilder sourceBuilder, SourceLocation sourceLocation, ISchemaRegistry schemaRegistry, ILogger logger)
         {
+            _schemaRegistry = schemaRegistry;
+            _logger = logger;
             ParameterName = parameterName;
             SourceBuilder = sourceBuilder;
-            FilePath = filePath;
-            Line = line;
-            Column = column;
-            _schemaDefinitionResolver = schemaDefinitionResolver;
-            _logger = logger;
+            Location = sourceLocation;
         }
 
         public ActionParameterItemSource Build(TypeReference type)
         {
             TypeReference currentType = type;
-            if (!type.IsUserDefinedType(_schemaDefinitionResolver, out UserDefinedTypeSchema userDefinedTypeSchema))
+            if (!type.IsUserDefinedType(_schemaRegistry, out UserDefinedTypeSchema userDefinedTypeSchema))
             {
-                _logger.LogError($"Unexpected parameter type '{type?.GetType()}'. The ITEM property source can only be used to map to an UDT parameter.", FilePath, Line, Column);
+                _logger.LogError($"Unexpected parameter type '{type?.GetType()}'. The ITEM property source can only be used to map to an UDT parameter.", Location.Source, Location.Line, Location.Column);
             }
             else
             {
@@ -42,12 +38,12 @@ namespace Dibix.Sdk.CodeGeneration
                 }
                 else
                 {
-                    this._logger.LogError($"Could not find column '{ParameterName}' on UDT '{userDefinedTypeSchema.UdtName}'", FilePath, Line, Column);
+                    this._logger.LogError($"Could not find column '{ParameterName}' on UDT '{userDefinedTypeSchema.UdtName}'", Location.Source, Location.Line, Location.Column);
                 }
             }
 
             ActionParameterSource source = SourceBuilder.Build(currentType);
-            ActionParameterItemSource itemSource = new ActionParameterItemSource(ParameterName, source, FilePath, Line, Column);
+            ActionParameterItemSource itemSource = new ActionParameterItemSource(ParameterName, source, Location);
             return itemSource;
         }
     }

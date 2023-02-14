@@ -120,7 +120,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (uriConstant.Contains('{'))
                 uriConstant = $"${uriConstant}";
 
-            ICollection<ActionParameter> queryParameters = distinctParameters.Where(x => x.Location == ActionParameterLocation.Query)
+            ICollection<ActionParameter> queryParameters = distinctParameters.Where(x => x.ParameterLocation == ActionParameterLocation.Query)
                                                                              .ToArray();
 
             if (queryParameters.Any())
@@ -130,7 +130,7 @@ namespace Dibix.Sdk.CodeGeneration
                 writer.WriteLine($"{nameof(Uri)} uri = UriBuilder.Create({uriConstant}, {nameof(UriKind)}.{nameof(UriKind.Relative)})")
                       .SetTemporaryIndent(20);
 
-                foreach (ActionParameter parameter in distinctParameters.Where(x => x.Location == ActionParameterLocation.Query))
+                foreach (ActionParameter parameter in distinctParameters.Where(x => x.ParameterLocation == ActionParameterLocation.Query))
                 {
                     writer.WriteLine($".AddQueryParam(nameof({parameter.ApiParameterName}), {parameter.ApiParameterName})");
                 }
@@ -162,7 +162,7 @@ namespace Dibix.Sdk.CodeGeneration
                     writer.PopIndent();
             }
 
-            foreach (ActionParameter parameter in distinctParameters.Where(x => x.Location == ActionParameterLocation.Header))
+            foreach (ActionParameter parameter in distinctParameters.Where(x => x.ParameterLocation == ActionParameterLocation.Header))
             {
                 // Will be handled by SecurityScheme/IHttpAuthorizationProvider
                 if (parameter.ApiParameterName == "Authorization" || action.SecuritySchemes.Requirements.Any(x => x.Scheme.Name == parameter.ApiParameterName))

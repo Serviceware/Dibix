@@ -1,15 +1,17 @@
 ﻿using System;
+using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
 {
+    // Resolve built in primitive types
     internal sealed class PrimitiveTypeResolver : TypeResolver
     {
-        public override TypeReference ResolveType(string input, string relativeNamespace, string source, int line, int column, bool isEnumerable)
+        public override TypeReference ResolveType(string input, string relativeNamespace, SourceLocation location, bool isEnumerable)
         {
             NullableTypeName typeName = input;
 
             if (Enum.TryParse(typeName.Name, ignoreCase: true /* JSON is camelCase while C# is PascalCase */, out PrimitiveType primitiveType))
-                return new PrimitiveTypeReference(primitiveType, typeName.IsNullable, isEnumerable, source, line, column);
+                return new PrimitiveTypeReference(primitiveType, typeName.IsNullable, isEnumerable, location);
 
             return null;
         }

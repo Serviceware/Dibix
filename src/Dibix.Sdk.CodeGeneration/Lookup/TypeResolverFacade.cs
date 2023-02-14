@@ -14,36 +14,31 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public TypeResolverFacade() => this._typeResolvers = new Collection<TypeResolver>();
-        public TypeResolverFacade(AssemblyResolver assemblyResolver, ISchemaRegistry schemaRegistry, ILogger logger)
+        public TypeResolverFacade() => _typeResolvers = new Collection<TypeResolver>();
+        public TypeResolverFacade(ILogger logger)
         {
-            this._logger = logger;
-            this._typeResolvers = new Collection<TypeResolver>
-            {
-                new PrimitiveTypeResolver()
-            //, new ReflectionTypeResolver(assemblyResolver, schemaRegistry, logger)
-            };
+            _logger = logger;
+            _typeResolvers = new Collection<TypeResolver> { new PrimitiveTypeResolver() };
         }
         #endregion
 
         #region ITypeResolverFacade Members
-        public void Register(TypeResolver typeResolver) => this.Register(typeResolver, this._typeResolvers.Count);
-        public void Register(TypeResolver typeResolver, int position) => this._typeResolvers.Insert(position, typeResolver);
+        public void Register(TypeResolver typeResolver) => Register(typeResolver, _typeResolvers.Count);
+        public void Register(TypeResolver typeResolver, int position) => _typeResolvers.Insert(position, typeResolver);
 
-        public TypeReference ResolveType(string input, string relativeNamespace, string source, int line, int column, bool isEnumerable) => this.ResolveType(TypeResolutionScope.All, input, relativeNamespace, source, line, column, isEnumerable);
-        public TypeReference ResolveType(TypeResolutionScope scope, string input, string relativeNamespace, string source, int line, int column, bool isEnumerable)
+        public TypeReference ResolveType(string input, string relativeNamespace, SourceLocation location, bool isEnumerable) => ResolveType(TypeResolutionScope.All, input, relativeNamespace, location, isEnumerable);
+        public TypeReference ResolveType(TypeResolutionScope scope, string input, string relativeNamespace, SourceLocation location, bool isEnumerable)
         {
             TypeReference type = null;
             if (!String.IsNullOrEmpty(input))
             {
-                type = this._typeResolvers
-                           .Where(x => x.Scope == scope)
-                           .Select(x => x.ResolveType(input, relativeNamespace, source, line, column, isEnumerable))
-                           .FirstOrDefault(x => x != null);
+                type = _typeResolvers.Where(x => x.Scope == scope)
+                                     .Select(x => x.ResolveType(input, relativeNamespace, location, isEnumerable))
+                                     .FirstOrDefault(x => x != null);
             }
 
             if (type == null)
-                this._logger.LogError($"Could not resolve type '{input}'", source, line, column);
+                _logger.LogError($"Could not resolve type '{input}'", location.Source, location.Line, location.Column);
 
             return type;
         }

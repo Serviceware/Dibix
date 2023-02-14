@@ -1,30 +1,28 @@
-﻿namespace Dibix.Sdk.CodeGeneration
+﻿using Dibix.Sdk.Abstractions;
+
+namespace Dibix.Sdk.CodeGeneration
 {
     public sealed class ActionParameter
     {
         public string ApiParameterName { get; }
         public string InternalParameterName { get; }
         public TypeReference Type { get; }
-        public ActionParameterLocation Location { get; }
+        public ActionParameterLocation ParameterLocation { get; }
         public ValueReference DefaultValue { get; }
-        public ActionParameterSource Source { get; }
+        public ActionParameterSource ParameterSource { get; }
         public bool IsRequired { get; }
-        public string FilePath { get; }
-        public int Line { get; }
-        public int Column { get; }
+        public SourceLocation SourceLocation { get; }
 
-        public ActionParameter(string apiParameterName, string internalParameterName, TypeReference type, ActionParameterLocation location, bool isRequired, ValueReference defaultValue, ActionParameterSource source, string filePath, int line, int column)
+        public ActionParameter(string apiParameterName, string internalParameterName, TypeReference type, ActionParameterLocation location, bool isRequired, ValueReference defaultValue, ActionParameterSource source, SourceLocation sourceLocation)
         {
-            this.ApiParameterName = apiParameterName;
-            this.InternalParameterName = internalParameterName;
-            this.Type = type;
-            this.Location = location;
-            this.IsRequired = isRequired;
-            this.DefaultValue = defaultValue;
-            this.Source = source;
-            this.FilePath = filePath;
-            this.Line = line;
-            this.Column = column;
+            ApiParameterName = apiParameterName;
+            InternalParameterName = internalParameterName;
+            Type = type;
+            ParameterLocation = location;
+            IsRequired = isRequired;
+            DefaultValue = defaultValue;
+            ParameterSource = source;
+            SourceLocation = sourceLocation;
         }
     }
 }

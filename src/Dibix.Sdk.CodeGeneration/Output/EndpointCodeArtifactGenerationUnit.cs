@@ -7,6 +7,6 @@ namespace Dibix.Sdk.CodeGeneration
     {
         public override bool ShouldGenerate(CodeGenerationModel model) => model.Controllers.Any();
         protected override string GetOutputName(CodeGenerationModel model) => model.AreaName;
-        protected override EndpointCodeGenerator CreateGenerator(CodeGenerationModel model, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger) => new EndpointCodeGenerator(model, schemaDefinitionResolver, logger);
+        protected override EndpointCodeGenerator CreateGenerator(CodeGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger) => new EndpointCodeGenerator(model, schemaRegistry, logger);
     }
 }

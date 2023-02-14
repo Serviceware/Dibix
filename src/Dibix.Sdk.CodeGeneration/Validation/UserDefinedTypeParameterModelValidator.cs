@@ -7,13 +7,13 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class UserDefinedTypeParameterModelValidator : ICodeGenerationModelValidator
     {
-        private readonly ISchemaDefinitionResolver _schemaDefinitionResolver;
+        private readonly ISchemaRegistry _schemaRegistry;
         private readonly ILogger _logger;
 
-        public UserDefinedTypeParameterModelValidator(ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
+        public UserDefinedTypeParameterModelValidator(ISchemaRegistry schemaRegistry, ILogger logger)
         {
-            this._schemaDefinitionResolver = schemaDefinitionResolver;
-            this._logger = logger;
+            _schemaRegistry = schemaRegistry;
+            _logger = logger;
         }
 
         public bool Validate(CodeGenerationModel model)
@@ -25,7 +25,7 @@ namespace Dibix.Sdk.CodeGeneration
                 {
                     foreach (ActionParameter parameter in action.Parameters)
                     {
-                        if (!this.ValidateParameter(parameter, action))
+                        if (!ValidateParameter(parameter, action))
                             result = false;
                     }
                 }
@@ -38,13 +38,13 @@ namespace Dibix.Sdk.CodeGeneration
             if (!(parameter.Type is SchemaTypeReference parameterSchemaTypeReference))
                 return true;
 
-            if (!(this._schemaDefinitionResolver.Resolve(parameterSchemaTypeReference) is UserDefinedTypeSchema userDefinedTypeSchema))
+            if (_schemaRegistry.GetSchema(parameterSchemaTypeReference) is not UserDefinedTypeSchema userDefinedTypeSchema)
                 return true;
 
             if (userDefinedTypeSchema.Properties.Count <= 1)
                 return true;
 
-            if (parameter.Source is ActionParameterBodySource bodySource && bodySource.ConverterName != null)
+            if (parameter.ParameterSource is ActionParameterBodySource { ConverterName: { } })
                 return true;
 
             if (action.RequestBody == null)
@@ -56,42 +56,42 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (!(bodyContract is SchemaTypeReference bodySchemaTypeReference))
             {
-                this._logger.LogError($"Unexpected request body contract '{bodyContract}'. Expected object schema when mapping complex UDT parameter: @{parameter.InternalParameterName} {userDefinedTypeSchema.UdtName}.", bodyContract.Source, bodyContract.Line, bodyContract.Column);
+                _logger.LogError($"Unexpected request body contract '{bodyContract}'. Expected object schema when mapping complex UDT parameter: @{parameter.InternalParameterName} {userDefinedTypeSchema.UdtName}.", bodyContract.Location.Source, bodyContract.Location.Line, bodyContract.Location.Column);
                 return false;
             }
 
-            SchemaDefinition bodySchema = this._schemaDefinitionResolver.Resolve(bodySchemaTypeReference);
-            if (!(bodySchema is ObjectSchema bodyObjectSchema))
+            SchemaDefinition bodySchema = _schemaRegistry.GetSchema(bodySchemaTypeReference);
+            if (bodySchema is not ObjectSchema bodyObjectSchema)
             {
-                this._logger.LogError($"Unexpected request body contract '{bodySchema}'. Expected object schema when mapping complex UDT parameter: @{parameter.InternalParameterName} {userDefinedTypeSchema.UdtName}.", bodyContract.Source, bodyContract.Line, bodyContract.Column);
+                _logger.LogError($"Unexpected request body contract '{bodySchema}'. Expected object schema when mapping complex UDT parameter: @{parameter.InternalParameterName} {userDefinedTypeSchema.UdtName}.", bodyContract.Location.Source, bodyContract.Location.Line, bodyContract.Location.Column);
                 return false;
             }
 
             ObjectSchemaProperty sourceProperty = bodyObjectSchema.Properties.SingleOrDefault(x => String.Equals(x.Name, parameter.InternalParameterName, StringComparison.OrdinalIgnoreCase));
-            ActionParameterPropertySource propertySource = parameter.Source as ActionParameterPropertySource;
+            ActionParameterPropertySource propertySource = parameter.ParameterSource as ActionParameterPropertySource;
             if (sourceProperty == null && propertySource != null) 
                 sourceProperty = bodyObjectSchema.Properties.SingleOrDefault(x => String.Equals(x.Name, propertySource.PropertyName, StringComparison.OrdinalIgnoreCase));
 
             ActionTarget target = action.Target;
             if (sourceProperty == null)
             {
-                this._logger.LogError($"Target parameter '@{parameter.InternalParameterName}' can not be mapped from body contract '{bodySchemaTypeReference.Key}' and no explicit parameter override exists", target.Source, target.Line, target.Column);
+                _logger.LogError($"Target parameter '@{parameter.InternalParameterName}' can not be mapped from body contract '{bodySchemaTypeReference.Key}' and no explicit parameter override exists", target.SourceLocation.Source, target.SourceLocation.Line, target.SourceLocation.Column);
                 return false;
             }
 
             if (!(sourceProperty.Type is SchemaTypeReference sourcePropertySchemaTypeReference))
             {
-                this._logger.LogError($"Unexpected contract '{sourceProperty.Type?.GetType()}' for source property '{bodySchemaTypeReference.Key}.{sourceProperty.Name.Value}'. Expected object schema when mapping complex UDT parameter: @{parameter.InternalParameterName} {userDefinedTypeSchema.UdtName}.", target.Source, target.Line, target.Column);
+                _logger.LogError($"Unexpected contract '{sourceProperty.Type?.GetType()}' for source property '{bodySchemaTypeReference.Key}.{sourceProperty.Name.Value}'. Expected object schema when mapping complex UDT parameter: @{parameter.InternalParameterName} {userDefinedTypeSchema.UdtName}.", target.SourceLocation.Source, target.SourceLocation.Line, target.SourceLocation.Column);
                 return false;
             }
 
-            SchemaDefinition sourcePropertySchema = this._schemaDefinitionResolver.Resolve(sourcePropertySchemaTypeReference);
+            SchemaDefinition sourcePropertySchema = _schemaRegistry.GetSchema(sourcePropertySchemaTypeReference);
             if (sourcePropertySchema == null) // Already logged at 'SchemaDefinitionResolver.Resolve'
                 return false;
 
             if (!(sourcePropertySchema is ObjectSchema sourcePropertyObjectSchema))
             {
-                this._logger.LogError($"Unexpected contract '{sourcePropertySchema?.GetType()}' for source property '{bodySchemaTypeReference.Key}.{sourceProperty.Name.Value}'. Expected object schema when mapping complex UDT parameter: @{parameter.InternalParameterName} {userDefinedTypeSchema.UdtName}.", target.Source, target.Line, target.Column);
+                _logger.LogError($"Unexpected contract '{sourcePropertySchema?.GetType()}' for source property '{bodySchemaTypeReference.Key}.{sourceProperty.Name.Value}'. Expected object schema when mapping complex UDT parameter: @{parameter.InternalParameterName} {userDefinedTypeSchema.UdtName}.", target.SourceLocation.Source, target.SourceLocation.Line, target.SourceLocation.Column);
                 return false;
             }
 
@@ -108,7 +108,7 @@ namespace Dibix.Sdk.CodeGeneration
                 if (sourceProperties.Contains(targetPropertyName))
                     continue;
 
-                this._logger.LogError($"UDT column '{userDefinedTypeSchema.UdtName}.[{targetPropertyName}]' can not be mapped. Create a property on source contract '{sourcePropertySchemaTypeReference.Key}' of the same name or create an explicit parameter mapping on the endpoint action.", target.Source, target.Line, target.Column);
+                _logger.LogError($"UDT column '{userDefinedTypeSchema.UdtName}.[{targetPropertyName}]' can not be mapped. Create a property on source contract '{sourcePropertySchemaTypeReference.Key}' of the same name or create an explicit parameter mapping on the endpoint action.", target.SourceLocation.Source, target.SourceLocation.Line, target.SourceLocation.Column);
                 result = false;
             }
 

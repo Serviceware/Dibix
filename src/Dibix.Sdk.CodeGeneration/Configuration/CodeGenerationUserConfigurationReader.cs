@@ -56,8 +56,8 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 if (_actionParameterSourceRegistry.TryGetDefinition(parameterSource.Name, out ActionParameterSourceDefinition _))
                 {
-                    JsonSourceInfo sourceInfo = parameterSource.GetSourceInfo();
-                    _logger.LogError($"Parameter source '{parameterSource.Name}' is already registered", sourceInfo.FilePath, sourceInfo.LineNumber, sourceInfo.LinePosition);
+                    SourceLocation sourceInfo = parameterSource.GetSourceInfo();
+                    _logger.LogError($"Parameter source '{parameterSource.Name}' is already registered", sourceInfo.Source, sourceInfo.Line, sourceInfo.Column);
                     continue;
                 }
 
@@ -96,8 +96,8 @@ namespace Dibix.Sdk.CodeGeneration
                 string converterName = (string)converter;
                 if (_actionParameterConverterRegistry.IsRegistered(converterName))
                 {
-                    JsonSourceInfo sourceInfo = converter.GetSourceInfo();
-                    _logger.LogError($"Parameter converter '{converterName}' is already registered", sourceInfo.FilePath, sourceInfo.LineNumber, sourceInfo.LinePosition);
+                    SourceLocation sourceInfo = converter.GetSourceInfo();
+                    _logger.LogError($"Parameter converter '{converterName}' is already registered", sourceInfo.Source, sourceInfo.Line, sourceInfo.Column);
                     continue;
                 }
 
@@ -118,8 +118,8 @@ namespace Dibix.Sdk.CodeGeneration
                 if (_securitySchemes.RegisterSecurityScheme(new SecurityScheme(customSecuritySchemeName, SecuritySchemeKind.ApiKey))) 
                     continue;
 
-                JsonSourceInfo sourceInfo = customSecurityScheme.GetSourceInfo();
-                _logger.LogError($"Security scheme '{customSecuritySchemeName}' is already registered", sourceInfo.FilePath, sourceInfo.LineNumber, sourceInfo.LinePosition);
+                SourceLocation sourceInfo = customSecurityScheme.GetSourceInfo();
+                _logger.LogError($"Security scheme '{customSecuritySchemeName}' is already registered", sourceInfo.Source, sourceInfo.Line, sourceInfo.Column);
             }
         }
 

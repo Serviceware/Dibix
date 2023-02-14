@@ -26,7 +26,7 @@ namespace Dibix.Sdk.CodeGeneration
         public void Add(ActionParameter actionParameter)
         {
             int index = _previousPathParameterIndex + 1;
-            if (actionParameter.Location == ActionParameterLocation.Path)
+            if (actionParameter.ParameterLocation == ActionParameterLocation.Path)
             {
                 // Restore original path parameter order from route template
                 if (!_pathSegmentIndexMap.TryGetValue(actionParameter.ApiParameterName, out int currentPathSegmentIndex))

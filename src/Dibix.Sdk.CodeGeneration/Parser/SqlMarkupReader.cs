@@ -222,12 +222,12 @@ namespace Dibix.Sdk.CodeGeneration
             switch (currentState)
             {
                 case ReaderState.Value:
-                    element.SetValue(propertyLeftValue, propertyColumn, valueColumn, source, logger);
+                    element.SetValue(propertyLeftValue, propertyColumn, valueColumn, logger);
                     break;
 
                 case ReaderState.Property:
                     string propertyRightValue = propertyRight.ToString().Trim();
-                    element.AddProperty(propertyLeftValue, propertyRightValue, propertyColumn, valueColumn, source, logger);
+                    element.AddProperty(propertyLeftValue, propertyRightValue, propertyColumn, valueColumn, logger);
                     break;
 
                 default:
@@ -308,30 +308,26 @@ namespace Dibix.Sdk.CodeGeneration
 
             public string Name { get; set; }
             public Token<string> Value { get; private set; }
-            public string Source { get; }
-            public int Line { get; }
-            public int Column { get; }
-            public IEnumerable<ISqlElementProperty> Properties => this._properties.Values;
+            public SourceLocation Location { get; }
+            public IEnumerable<ISqlElementProperty> Properties => _properties.Values;
 
             public SqlElement(string source, int line, int column)
             {
-                this._properties = new Dictionary<string, SqlMarkupProperty>();
-                this.Source = source;
-                this.Line = line;
-                this.Column = column;
+                Location = new SourceLocation(source, line, column);
+                _properties = new Dictionary<string, SqlMarkupProperty>();
             }
 
             public bool TryGetPropertyValue(string propertyName, bool isDefault, out Token<string> value)
             {
-                if (this._properties.TryGetValue(propertyName, out SqlMarkupProperty property))
+                if (_properties.TryGetValue(propertyName, out SqlMarkupProperty property))
                 {
                     value = property.Value;
                     return true;
                 }
 
-                if (isDefault && this.Value != null)
+                if (isDefault && Value != null)
                 {
-                    value = this.Value;
+                    value = Value;
                     return true;
                 }
 
@@ -339,35 +335,35 @@ namespace Dibix.Sdk.CodeGeneration
                 return false;
             }
 
-            public Token<string> GetPropertyValue(string name) => this._properties.TryGetValue(name, out SqlMarkupProperty property) ? property.Value : null;
+            public Token<string> GetPropertyValue(string name) => _properties.TryGetValue(name, out SqlMarkupProperty property) ? property.Value : null;
 
-            public void SetValue(string value, int propertyColumn, int valueColumn, string source, ILogger logger)
+            public void SetValue(string value, int propertyColumn, int valueColumn, ILogger logger)
             {
-                if (this.Value != null)
+                if (Value != null)
                 {
-                    logger.LogError($"Multiple default properties specified for @{this.Name}", source, this.Line, propertyColumn);
+                    logger.LogError($"Multiple default properties specified for @{Name}", Location.Source, Location.Line, propertyColumn);
                     return;
                 }
-                this.Value = new Token<string>(value, source, this.Line, valueColumn);
+                Value = new Token<string>(value, new SourceLocation(Location.Source, Location.Line, valueColumn));
             }
 
-            public void AddProperty(string name, string value, int propertyColumn, int valueColumn, string source, ILogger logger)
+            public void AddProperty(string name, string value, int propertyColumn, int valueColumn, ILogger logger)
             {
-                if (this._properties.ContainsKey(name))
+                if (_properties.ContainsKey(name))
                 {
-                    logger.LogError($"Duplicate property for @{this.Name}.{name}", source, this.Line, propertyColumn);
+                    logger.LogError($"Duplicate property for @{Name}.{name}", Location.Source, Location.Line, propertyColumn);
                     return;
                 }
 
                 if (value.Length == 0)
                 {
-                    logger.LogError($"Missing value for '{name}' property", source, this.Line, propertyColumn);
+                    logger.LogError($"Missing value for '{name}' property", Location.Source, Location.Line, propertyColumn);
                     return;
                 }
 
-                Token<string> propertyName = new Token<string>(name, source, this.Line, propertyColumn);
-                Token<string> propertyValue = new Token<string>(value, source, this.Line, valueColumn);
-                this._properties.Add(name, new SqlMarkupProperty(propertyName, propertyValue));
+                Token<string> propertyName = new Token<string>(name, new SourceLocation(Location.Source, Location.Line, propertyColumn));
+                Token<string> propertyValue = new Token<string>(value, new SourceLocation(Location.Source, Location.Line, valueColumn));
+                _properties.Add(name, new SqlMarkupProperty(propertyName, propertyValue));
             }
         }
 
@@ -378,8 +374,8 @@ namespace Dibix.Sdk.CodeGeneration
 
             public SqlMarkupProperty(Token<string> name, Token<string> value)
             {
-                this.Name = name;
-                this.Value = value;
+                Name = name;
+                Value = value;
             }
         }
 
@@ -387,12 +383,12 @@ namespace Dibix.Sdk.CodeGeneration
         {
             private readonly IDictionary<string, IList<SqlElement>> _elements = new Dictionary<string, IList<SqlElement>>();
 
-            public bool HasElements => this._elements.Any();
-            public ICollection<string> ElementNames => this._elements.Keys;
+            public bool HasElements => _elements.Any();
+            public ICollection<string> ElementNames => _elements.Keys;
 
             public bool TryGetSingleElement(string name, string source, ILogger logger, out ISqlElement element)
             {
-                if (!this.TryGetSingleElement(name, source, logger, out SqlElement internalElement))
+                if (!TryGetSingleElement(name, source, logger, out SqlElement internalElement))
                 {
                     element = null;
                     return false;
@@ -404,7 +400,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             public bool TryGetSingleElementValue(string name, string source, ILogger logger, out string value)
             {
-                if (!this.TryGetSingleElementValue(name, source, logger, out Token<string> elementValue))
+                if (!TryGetSingleElementValue(name, source, logger, out Token<string> elementValue))
                 {
                     value = null;
                     return false;
@@ -415,7 +411,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
             public bool TryGetSingleElementValue(string name, string source, ILogger logger, out Token<string> value)
             {
-                if (!this.TryGetSingleElement(name, source, logger, out SqlElement element))
+                if (!TryGetSingleElement(name, source, logger, out SqlElement element))
                 {
                     value = null;
                     return false;
@@ -423,7 +419,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                 if (element.Value == null)
                 {
-                    logger.LogError($"Element has no value: {name}", source, element.Line, element.Column);
+                    logger.LogError($"Element has no value: {name}", source, element.Location.Line, element.Location.Column);
                     value = null;
                     return false;
                 }
@@ -432,23 +428,23 @@ namespace Dibix.Sdk.CodeGeneration
                 return true;
             }
 
-            public bool HasSingleElement(string name, string source, ILogger logger) => this.TryGetSingleElement(name, source, logger, out ISqlElement _);
+            public bool HasSingleElement(string name, string source, ILogger logger) => TryGetSingleElement(name, source, logger, out ISqlElement _);
 
-            public IEnumerable<ISqlElement> GetElements(string name) => this._elements.TryGetValue(name, out IList<SqlElement> elements) ? elements : Enumerable.Empty<ISqlElement>();
+            public IEnumerable<ISqlElement> GetElements(string name) => _elements.TryGetValue(name, out IList<SqlElement> elements) ? elements : Enumerable.Empty<ISqlElement>();
             
             public void Add(SqlElement element)
             {
-                if (!this._elements.TryGetValue(element.Name, out IList<SqlElement> elements))
+                if (!_elements.TryGetValue(element.Name, out IList<SqlElement> elements))
                 {
                     elements = new Collection<SqlElement>();
-                    this._elements.Add(element.Name, elements);
+                    _elements.Add(element.Name, elements);
                 }
                 elements.Add(element);
             }
 
             private bool TryGetSingleElement(string name, string source, ILogger logger, out SqlElement element)
             {
-                if (!this._elements.TryGetValue(name, out IList<SqlElement> elements))
+                if (!_elements.TryGetValue(name, out IList<SqlElement> elements))
                 {
                     element = null;
                     return false;
@@ -459,7 +455,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                 if (elements.Count > 1)
                 {
-                    logger.LogError($"Found multiple elements with name: {name}", source, elements[1].Line, elements[1].Column);
+                    logger.LogError($"Found multiple elements with name: {name}", source, elements[1].Location.Line, elements[1].Location.Column);
                     element = null;
                     return false;
                 }

@@ -11,10 +11,7 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly string _productName;
         private readonly string _areaName;
         private readonly string _className;
-        private readonly ISqlStatementDefinitionProvider _sqlStatementDefinitionProvider;
-        private readonly ReferencedAssemblyInspector _referencedAssemblyInspector;
-        private readonly IExternalSchemaResolver _externalSchemaResolver;
-        private readonly IDictionary<string, SqlStatementDefinition> _externalDefinitions;
+        private readonly ISchemaRegistry _schemaRegistry;
         #endregion
 
         #region Constructor
@@ -23,39 +20,33 @@ namespace Dibix.Sdk.CodeGeneration
             string productName
           , string areaName
           , string className
-          , ISqlStatementDefinitionProvider sqlStatementDefinitionProvider
-          , IExternalSchemaResolver externalSchemaResolver
-          , ReferencedAssemblyInspector referencedAssemblyInspector
-          , ISchemaDefinitionResolver schemaDefinitionResolver
           , ISchemaRegistry schemaRegistry
           , ILogger logger
-        ) : base(schemaDefinitionResolver, schemaRegistry, logger)
+        ) : base(schemaRegistry, logger)
         {
             _productName = productName;
             _areaName = areaName;
             _className = className;
-            _sqlStatementDefinitionProvider = sqlStatementDefinitionProvider;
-            _externalSchemaResolver = externalSchemaResolver;
-            _referencedAssemblyInspector = referencedAssemblyInspector;
-            _externalDefinitions = new Dictionary<string, SqlStatementDefinition>();
+            _schemaRegistry = schemaRegistry;
         }
         #endregion
 
         #region Overrides
-        public override bool TryResolve<T>(string targetName, string filePath, int line, int column, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, out T actionTargetDefinition)
+        public override bool TryResolve<T>(string targetName, SourceLocation sourceLocation, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, out T actionTargetDefinition)
         {
-            if (!TryGetStatementDefinitionByProbing(targetName, out SqlStatementDefinition statementDefinition, out string accessorClassName))
+            if (!TryGetStatementDefinitionByProbing(targetName, out SqlStatementDefinition statementDefinition))
             {
                 actionTargetDefinition = null;
                 return false;
             }
 
+            string accessorClassName = statementDefinition.ExternalSchemaInfo?.Owner.DefaultClassName ?? _className;
             string localAccessorFullName = $"{statementDefinition.Namespace}.{_className}";
             string externalAccessorFullName = $"{statementDefinition.Namespace}.{accessorClassName}";
             string definitionName = statementDefinition.DefinitionName;
             bool isAsync = statementDefinition.Async;
             bool hasRefParameters = statementDefinition.Parameters.Any(x => x.IsOutput);
-            ActionTarget actionTarget = new LocalActionTarget(statementDefinition, localAccessorFullName, externalAccessorFullName, definitionName, isAsync, hasRefParameters, filePath, line, column);
+            ActionTarget actionTarget = new LocalActionTarget(statementDefinition, localAccessorFullName, externalAccessorFullName, definitionName, isAsync, hasRefParameters, sourceLocation);
             actionTargetDefinition = new T();
             actionTargetDefinition.Target = actionTarget;
             ActionParameterRegistry parameterRegistry = new ActionParameterRegistry(actionTargetDefinition, pathParameters);
@@ -68,9 +59,7 @@ namespace Dibix.Sdk.CodeGeneration
                   , parameter.DefaultValue
                   , parameter.IsOutput
                   , targetName
-                  , filePath
-                  , line
-                  , column
+                  , sourceLocation
                   , parameterRegistry
                   , explicitParameters
                   , pathParameters
@@ -87,60 +76,21 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private bool TryGetStatementDefinitionByProbing(string targetName, out SqlStatementDefinition statementDefinition, out string accessorClassName)
+        private bool TryGetStatementDefinitionByProbing(string targetName, out SqlStatementDefinition statementDefinition)
         {
             foreach (string candidate in SymbolNameProbing.EvaluateProbingCandidates(_productName, _areaName, LayerName.Data, relativeNamespace: null, targetName))
             {
-                // Try local definition
-                if (_sqlStatementDefinitionProvider.TryGetDefinition(candidate, out statementDefinition))
-                {
-                    accessorClassName = _className;
+                if (_schemaRegistry.TryGetSchema(candidate, out statementDefinition))
                     return true;
-                }
-
-                // Try external definition
-                if (_externalSchemaResolver.TryGetSchema(candidate, out ExternalSchemaDefinition externalSchemaDefinition))
-                {
-                    statementDefinition = externalSchemaDefinition.GetSchema<SqlStatementDefinition>();
-                    accessorClassName = externalSchemaDefinition.Owner.DefaultClassName;
-                    return true;
-                }
             }
-
             statementDefinition = null;
-            accessorClassName = null;
             return false;
-        }
-
-        private bool TryGetExternalStatementDefinitionLazy(string fullName, out SqlStatementDefinition statementDefinition)
-        {
-            if (_externalDefinitions.TryGetValue(fullName, out statementDefinition))
-                return true;
-
-            SqlStatementDefinition matchingDefinition = _referencedAssemblyInspector.Inspect(referencedAssemblies =>
-            {
-                var query = from assembly in referencedAssemblies
-                            let model = CodeGenerationModelSerializer.Read(assembly)
-                            from statement in model.SqlStatements
-                            where statement.FullName == fullName
-                            select statement;
-
-                return query.FirstOrDefault();
-            });
-
-            if (matchingDefinition == null) 
-                return false;
-
-            base.SchemaRegistry.Populate(matchingDefinition);
-            _externalDefinitions.Add(fullName, matchingDefinition);
-            statementDefinition = matchingDefinition;
-            return true;
         }
 
         private static void CollectResponse(ActionTargetDefinition actionTargetDefinition, SqlStatementDefinition definition)
         {
             if (definition.FileResult != null)
-                actionTargetDefinition.SetFileResponse(new ActionFileResponse(HttpMediaType.Binary), definition.FileResult.Source, definition.FileResult.Line, definition.FileResult.Column);
+                actionTargetDefinition.SetFileResponse(new ActionFileResponse(HttpMediaType.Binary), definition.FileResult.Location);
             else
                 actionTargetDefinition.DefaultResponseType = definition.ResultType;
         }

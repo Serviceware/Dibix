@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -8,20 +9,16 @@ namespace Dibix.Sdk.CodeGeneration
     {
         public ActionParameterSourceDefinition Definition { get; }
         public string PropertyName { get; }
-        public string FilePath { get; }
-        public int Line { get; }
-        public int Column { get; }
         public string Converter { get; set; }
         public IList<ActionParameterPropertySourceNode> Nodes { get; }
         public ICollection<ActionParameterItemSourceBuilder> ItemSources { get; }
+        public SourceLocation Location { get; }
 
-        public ActionParameterPropertySourceBuilder(ActionParameterSourceDefinition definition, string propertyName, string filePath, int line, int column)
+        public ActionParameterPropertySourceBuilder(ActionParameterSourceDefinition definition, string propertyName, SourceLocation location)
         {
             Definition = definition;
             PropertyName = propertyName;
-            FilePath = filePath;
-            Line = line;
-            Column = column;
+            Location = location;
             Nodes = new Collection<ActionParameterPropertySourceNode>();
             ItemSources = new Collection<ActionParameterItemSourceBuilder>();
         }
@@ -29,7 +26,7 @@ namespace Dibix.Sdk.CodeGeneration
         public override ActionParameterSource Build(TypeReference type)
         {
             IList<ActionParameterItemSource> itemSources = ItemSources.Select(x => x.Build(type)).ToArray();
-            ActionParameterPropertySource propertySource = new ActionParameterPropertySource(Definition, PropertyName, FilePath, Line, Column, Converter, Nodes, itemSources);
+            ActionParameterPropertySource propertySource = new ActionParameterPropertySource(Definition, PropertyName, Location, Converter, Nodes, itemSources);
             return propertySource;
         }
     }

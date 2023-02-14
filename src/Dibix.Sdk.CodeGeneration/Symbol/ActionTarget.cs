@@ -1,4 +1,6 @@
-﻿namespace Dibix.Sdk.CodeGeneration
+﻿using Dibix.Sdk.Abstractions;
+
+namespace Dibix.Sdk.CodeGeneration
 {
     public abstract class ActionTarget
     {
@@ -6,19 +8,15 @@
         public string OperationName { get; }
         public bool IsAsync { get; }
         public bool HasRefParameters { get; }
-        public string Source { get; }
-        public int Line { get; }
-        public int Column { get; }
+        public SourceLocation SourceLocation { get; }
 
-        protected ActionTarget(string accessorFullName, string operationName, bool isAsync, bool hasRefParameters, string source, int line, int column)
+        protected ActionTarget(string accessorFullName, string operationName, bool isAsync, bool hasRefParameters, SourceLocation sourceLocation)
         {
-            this.AccessorFullName = accessorFullName;
-            this.OperationName = operationName;
-            this.IsAsync = isAsync;
-            this.HasRefParameters = hasRefParameters;
-            this.Source = source;
-            this.Line = line;
-            this.Column = column;
+            AccessorFullName = accessorFullName;
+            OperationName = operationName;
+            IsAsync = isAsync;
+            HasRefParameters = hasRefParameters;
+            SourceLocation = sourceLocation;
         }
     }
 }

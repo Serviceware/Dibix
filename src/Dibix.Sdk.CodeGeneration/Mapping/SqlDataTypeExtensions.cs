@@ -41,7 +41,7 @@ DataType: {dataTypeReference.GetType()}", source, dataTypeReference.StartLine, d
                         // /* @ClrType RequestTypeEnum */ [requesttype] TINYINT -> RequestTypeEnum requesttype
                         if (typeImplementationName != null)
                         {
-                            TypeReference typeReference = typeResolver.ResolveType(typeImplementationName.Value, relativeNamespace, source, typeImplementationName.Line, typeImplementationName.Column, false);
+                            TypeReference typeReference = typeResolver.ResolveType(typeImplementationName.Value, relativeNamespace, typeImplementationName.Location, isEnumerable: false);
                             if (typeReference != null)
                                 typeReference.IsNullable = isNullable;
 
@@ -49,7 +49,7 @@ DataType: {dataTypeReference.GetType()}", source, dataTypeReference.StartLine, d
                         }
 
                         if (PrimitiveTypeMap.TryGetPrimitiveType(sqlDataTypeReference.SqlDataTypeOption, out PrimitiveType dataType))
-                            return new PrimitiveTypeReference(dataType, isNullable, false, source, dataTypeReference.StartLine, dataTypeReference.StartColumn);
+                            return new PrimitiveTypeReference(dataType, isNullable, false, new SourceLocation(source, dataTypeReference.StartLine, dataTypeReference.StartColumn));
 
                         logger.LogError($@"Unsupported sql data type
 Name: {name}
@@ -62,17 +62,17 @@ DataType: {sqlDataTypeReference.SqlDataTypeOption}", source, dataTypeReference.S
                         if (string.Equals(userDataTypeReference.Name.BaseIdentifier.Value, "SYSNAME", StringComparison.OrdinalIgnoreCase))
                         {
                             udtName = null;
-                            return new PrimitiveTypeReference(PrimitiveType.String, isNullable, false, source, dataTypeReference.StartLine, dataTypeReference.StartColumn);
+                            return new PrimitiveTypeReference(PrimitiveType.String, isNullable, false, new SourceLocation(source, dataTypeReference.StartLine, dataTypeReference.StartColumn));
                         }
 
                         udtName = userDataTypeReference.Name.ToFullName();
-                        TypeReference typeReference = typeResolver.ResolveType(TypeResolutionScope.UserDefinedType, udtName, relativeNamespace, source, dataTypeReference.StartLine, dataTypeReference.StartColumn, false);
+                        TypeReference typeReference = typeResolver.ResolveType(TypeResolutionScope.UserDefinedType, udtName, relativeNamespace, new SourceLocation(source, dataTypeReference.StartLine, dataTypeReference.StartColumn), false);
                         return typeReference;
                     }
 
                 case XmlDataTypeReference _:
                     udtName = null;
-                    return new PrimitiveTypeReference(PrimitiveType.Xml, false, false, source, dataTypeReference.StartLine, dataTypeReference.StartColumn);
+                    return new PrimitiveTypeReference(PrimitiveType.Xml, false, false, new SourceLocation(source, dataTypeReference.StartLine, dataTypeReference.StartColumn));
 
                 default:
                     throw new InvalidOperationException($@"Unexpected data type reference

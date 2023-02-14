@@ -67,7 +67,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             foreach (ActionParameter parameter in action.Parameters.DistinctBy(x => x.ApiParameterName))
             {
-                if (parameter.Location != ActionParameterLocation.Path)
+                if (parameter.ParameterLocation != ActionParameterLocation.Path)
                     continue;
 
                 AppendParameter(context, parameter, method);
@@ -78,12 +78,12 @@ namespace Dibix.Sdk.CodeGeneration
 
             foreach (ActionParameter parameter in action.Parameters.DistinctBy(x => x.ApiParameterName).OrderBy(x => x.DefaultValue != null))
             {
-                if (parameter.Location != ActionParameterLocation.Query
-                 && parameter.Location != ActionParameterLocation.Header)
+                if (parameter.ParameterLocation != ActionParameterLocation.Query
+                 && parameter.ParameterLocation != ActionParameterLocation.Header)
                     continue;
 
                 // Will be handled by SecurityScheme/IHttpAuthorizationProvider
-                if (parameter.Location == ActionParameterLocation.Header && (parameter.ApiParameterName == "Authorization" || action.SecuritySchemes.Requirements.Any(x => x.Scheme.Name == parameter.ApiParameterName)))
+                if (parameter.ParameterLocation == ActionParameterLocation.Header && (parameter.ApiParameterName == "Authorization" || action.SecuritySchemes.Requirements.Any(x => x.Scheme.Name == parameter.ApiParameterName)))
                     continue;
 
                 AppendParameter(context, parameter, method);
@@ -126,7 +126,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static string ResolveParameterTypeName(ActionParameter parameter, CodeGenerationContext context)
         {
-            if (parameter.Type.IsUserDefinedType(context.SchemaDefinitionResolver, out UserDefinedTypeSchema userDefinedTypeSchema))
+            if (parameter.Type.IsUserDefinedType(context.SchemaRegistry, out UserDefinedTypeSchema userDefinedTypeSchema))
             {
                 // Note: Deep object query parameters require a separate input class, which is not yet supported
                 // Therefore in this case we currently return object, which obviously will not work at runtime

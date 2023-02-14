@@ -5,106 +5,29 @@ using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
 {
+    // Resolve schema by their UDT name
     public sealed class UserDefinedTypeSchemaTypeResolver : TypeResolver
     {
         private readonly ISchemaRegistry _schemaRegistry;
-        private readonly IExternalSchemaResolver _externalSchemaResolver;
-        private readonly ReferencedAssemblyInspector _referencedAssemblyInspector;
-        private readonly ILogger _logger;
-        private readonly IDictionary<string, UserDefinedTypeSchema> _localSchemas;
-        private readonly IDictionary<string, UserDefinedTypeSchema> _externalSchemas;
-        private readonly IDictionary<string, Type> _externalTypes;
+        private readonly Lazy<IDictionary<string, UserDefinedTypeSchema>> _schemaAccessor;
 
         public override TypeResolutionScope Scope => TypeResolutionScope.UserDefinedType;
 
-        public UserDefinedTypeSchemaTypeResolver
-        (
-            ISchemaRegistry schemaRegistry
-          , IUserDefinedTypeProvider userDefinedTypeProvider
-          , IExternalSchemaResolver externalSchemaResolver
-          , ReferencedAssemblyInspector referencedAssemblyInspector
-          , ILogger logger
-        )
+        public UserDefinedTypeSchemaTypeResolver(ISchemaRegistry schemaRegistry)
         {
-            this._schemaRegistry = schemaRegistry;
-            this._externalSchemaResolver = externalSchemaResolver;
-            this._referencedAssemblyInspector = referencedAssemblyInspector;
-            this._logger = logger;
-            this._localSchemas = userDefinedTypeProvider.Types.ToDictionary(x => x.UdtName);
-            this._externalSchemas = externalSchemaResolver.Schemas
-                                                          .Select(x => x.SchemaDefinition)
-                                                          .OfType<UserDefinedTypeSchema>()
-                                                          .ToDictionary(x => x.UdtName);
-            this._externalTypes = new Dictionary<string, Type>();
+            _schemaRegistry = schemaRegistry;
+            _schemaAccessor = new Lazy<IDictionary<string, UserDefinedTypeSchema>>(CollectSchemas);
         }
 
-        public override TypeReference ResolveType(string input, string relativeNamespace, string source, int line, int column, bool isEnumerable)
+        public override TypeReference ResolveType(string input, string relativeNamespace, SourceLocation location, bool isEnumerable)
         {
-            if (this.TryGetLocalSchemaByUDTName(input, out UserDefinedTypeSchema schema)
-             || this.TryGetExternalSchemaByUDTName(input, out schema)/*
-             || this.TryGetExternalSchemaByAbsoluteTypePath(input, relativeNamespace, out schema)*/)
-            {
-                SchemaTypeReference schemaTypeReference = new SchemaTypeReference(schema.FullName, isNullable: false, isEnumerable: false, source, line, column);
-                return schemaTypeReference;
-            }
+            if (!_schemaAccessor.Value.TryGetValue(input, out UserDefinedTypeSchema schema)) 
+                return null;
 
-            //if (this.TryGetExternalType(input, out Type type))
-            //    return ReflectionTypeResolver.ResolveType(type, source, line, column, input, this._schemaRegistry, this._logger);
-
-            return null;
+            SchemaTypeReference schemaTypeReference = new SchemaTypeReference(schema.FullName, isNullable: false, isEnumerable: false, location);
+            return schemaTypeReference;
         }
 
-        // Based on SP parameter type
-        private bool TryGetLocalSchemaByUDTName(NullableTypeName typeName, out UserDefinedTypeSchema schema)
-        {
-            return this._localSchemas.TryGetValue(typeName.Name, out schema);
-        }
-
-        // Based on SP parameter type
-        private bool TryGetExternalSchemaByUDTName(string input, out UserDefinedTypeSchema schemaDefinition)
-        {
-            if (this._externalSchemas.TryGetValue(input, out schemaDefinition))
-            {
-                if (!this._schemaRegistry.IsRegistered(schemaDefinition.FullName))
-                    this._schemaRegistry.Populate(schemaDefinition);
-
-                return true;
-            }
-
-            return false;
-        }
-
-        private bool TryGetExternalSchemaByAbsoluteTypePath(string input, string relativeNamespace, out UserDefinedTypeSchema schemaDefinition)
-        {
-            if (this._externalSchemaResolver.TryGetSchema(input, out ExternalSchemaDefinition externalSchemaDefinition))
-            {
-                schemaDefinition = externalSchemaDefinition.GetSchema<UserDefinedTypeSchema>();
-                return true;
-            }
-
-            schemaDefinition = null;
-            return false;
-        }
-
-        private bool TryGetExternalType(string input, out Type externalType)
-        {
-            if (this._externalTypes.TryGetValue(input, out externalType))
-                return true;
-
-            Type matchingType = this._referencedAssemblyInspector.Inspect(x => x.Where(y => y.IsArtifactAssembly())
-                                                                                .SelectMany(y => y.GetTypes())
-                                                                                .FirstOrDefault(y => IsMatchingType(input, y)));
-
-            if (matchingType != null)
-            {
-                this._externalTypes.Add(input, matchingType);
-                externalType = matchingType;
-                return true;
-            }
-
-            return false;
-        }
-
-        private static bool IsMatchingType(string input, Type type) => type.GetUdtName() == input;
+        private IDictionary<string, UserDefinedTypeSchema> CollectSchemas() => _schemaRegistry.Schemas.OfType<UserDefinedTypeSchema>().ToDictionary(x => x.UdtName);
     }
 }

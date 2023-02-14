@@ -20,7 +20,7 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly ConfigurationTemplates _templates;
         private readonly IActionTargetDefinitionResolverFacade _actionTargetResolver;
         private readonly ITypeResolverFacade _typeResolver;
-        private readonly ISchemaDefinitionResolver _schemaDefinitionResolver;
+        private readonly ISchemaRegistry _schemaRegistry;
         private readonly IActionParameterSourceRegistry _actionParameterSourceRegistry;
         private readonly IActionParameterConverterRegistry _actionParameterConverterRegistry;
         private readonly ILockEntryManager _lockEntryManager;
@@ -40,7 +40,7 @@ namespace Dibix.Sdk.CodeGeneration
           , ConfigurationTemplates templates
           , IActionTargetDefinitionResolverFacade actionTargetResolver
           , ITypeResolverFacade typeResolver
-          , ISchemaDefinitionResolver schemaDefinitionResolver
+          , ISchemaRegistry schemaRegistry
           , IActionParameterSourceRegistry actionParameterSourceRegistry
           , IActionParameterConverterRegistry actionParameterConverterRegistry
           , ILockEntryManager lockEntryManager
@@ -53,7 +53,7 @@ namespace Dibix.Sdk.CodeGeneration
             _templates = templates;
             _actionTargetResolver = actionTargetResolver;
             _typeResolver = typeResolver;
-            _schemaDefinitionResolver = schemaDefinitionResolver;
+            _schemaRegistry = schemaRegistry;
             _actionParameterSourceRegistry = actionParameterSourceRegistry;
             _actionParameterConverterRegistry = actionParameterConverterRegistry;
             _lockEntryManager = lockEntryManager;
@@ -110,7 +110,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             // Collect body parameters
             ActionRequestBody requestBody = ReadBody(action);
-            ICollection<string> bodyParameters = GetBodyProperties(requestBody?.Contract, _schemaDefinitionResolver);
+            ICollection<string> bodyParameters = GetBodyProperties(requestBody?.Contract, _schemaRegistry);
 
             // Collect path parameters
             Token<string> childRoute = null;
@@ -119,8 +119,8 @@ namespace Dibix.Sdk.CodeGeneration
             if (childRouteProperty != null)
             {
                 string childRouteValue = (string)childRouteProperty.Value;
-                JsonSourceInfo childRoutePropertyLocation = childRouteProperty.GetSourceInfo();
-                childRoute = childRouteProperty?.Value.ToToken(childRouteValue, childRoutePropertyLocation.FilePath);
+                SourceLocation childRoutePropertyLocation = childRouteProperty.GetSourceInfo();
+                childRoute = childRouteProperty?.Value.ToToken(childRouteValue);
                 pathParameters = new ReadOnlyDictionary<string, PathParameter>(CollectPathParameters(childRouteProperty, childRouteValue).ToDictionary(x => x.Key, x => x.Value, StringComparer.OrdinalIgnoreCase));
             }
             else
@@ -142,13 +142,13 @@ namespace Dibix.Sdk.CodeGeneration
                 // Validate explicit parameters
                 foreach (ExplicitParameter explicitParameter in explicitParameters.Values.Where(x => !x.Visited))
                 {
-                    base.Logger.LogError($"Parameter '{explicitParameter.Name}' not found on action: {actionDefinition.Target.OperationName}", explicitParameter.FilePath, explicitParameter.Line, explicitParameter.Column);
+                    base.Logger.LogError($"Parameter '{explicitParameter.Name}' not found on action: {actionDefinition.Target.OperationName}", explicitParameter.Location.Source, explicitParameter.Location.Line, explicitParameter.Location.Column);
                 }
 
                 // Validate path parameters
                 foreach (PathParameter pathSegment in pathParameters.Values.Where(x => !x.Visited))
                 {
-                    base.Logger.LogError($"Undefined path parameter: {pathSegment.Name}", pathSegment.FilePath, pathSegment.Line, pathSegment.Column);
+                    base.Logger.LogError($"Undefined path parameter: {pathSegment.Name}", pathSegment.Location.Source, pathSegment.Location.Line, pathSegment.Location.Column);
                 }
             }
 
@@ -160,10 +160,10 @@ namespace Dibix.Sdk.CodeGeneration
             actionDefinition.RequestBody = requestBody;
             actionDefinition.ChildRoute = childRoute;
 
-            if (TryReadFileResponse(action, out ActionFileResponse fileResponse, out JsonSourceInfo fileResponseLocation))
-                actionDefinition.SetFileResponse(fileResponse, fileResponseLocation.FilePath, fileResponseLocation.LineNumber, fileResponseLocation.LinePosition);
+            if (TryReadFileResponse(action, out ActionFileResponse fileResponse, out SourceLocation fileResponseLocation))
+                actionDefinition.SetFileResponse(fileResponse, fileResponseLocation);
 
-            JsonSourceInfo actionLineInfo = action.GetSourceInfo();
+            SourceLocation actionLineInfo = action.GetSourceInfo();
             CollectActionResponses(action, actionDefinition);
             CollectSecuritySchemes(actionMerged, actionDefinition, actionLineInfo);
             CollectAuthorization(actionMerged, actionDefinition, actionLineInfo, pathParameters);
@@ -182,8 +182,8 @@ namespace Dibix.Sdk.CodeGeneration
             if (actionDefinition.ChildRoute != null)
                 sb.Append('/').Append(actionDefinition.ChildRoute);
 
-            JsonSourceInfo sourceInfo = action.GetSourceInfo();
-            base.Logger.LogError($"Duplicate action registration: {sb}", sourceInfo.FilePath, sourceInfo.LineNumber, sourceInfo.LinePosition);
+            SourceLocation sourceInfo = action.GetSourceInfo();
+            base.Logger.LogError($"Duplicate action registration: {sb}", sourceInfo.Source, sourceInfo.Line, sourceInfo.Column);
         }
 
         private ActionRequestBody ReadBody(JObject action)
@@ -218,14 +218,14 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (mediaTypeJson != null && mediaType != HttpMediaType.Json)
             {
-                JsonSourceInfo mediaTypeLocation = mediaTypeJson.GetSourceInfo();
-                return new ActionRequestBody(mediaType, ActionDefinitionUtility.CreateStreamTypeReference(mediaTypeLocation.FilePath, mediaTypeLocation.LineNumber, mediaTypeLocation.LinePosition));
+                SourceLocation mediaTypeLocation = mediaTypeJson.GetSourceInfo();
+                return new ActionRequestBody(mediaType, ActionDefinitionUtility.CreateStreamTypeReference(mediaTypeLocation));
             }
 
             if (contractName == null)
             {
-                JsonSourceInfo valueLocation = value.GetSourceInfo();
-                base.Logger.LogError("Body is missing 'contract' property", valueLocation.FilePath, valueLocation.LineNumber, valueLocation.LinePosition);
+                SourceLocation valueLocation = value.GetSourceInfo();
+                base.Logger.LogError("Body is missing 'contract' property", valueLocation.Source, valueLocation.Line, valueLocation.Column);
                 return null;
             }
 
@@ -238,12 +238,12 @@ namespace Dibix.Sdk.CodeGeneration
             return new ActionRequestBody(contract);
         }
 
-        private static ICollection<string> GetBodyProperties(TypeReference bodyContract, ISchemaDefinitionResolver schemaDefinitionResolver)
+        private static ICollection<string> GetBodyProperties(TypeReference bodyContract, ISchemaRegistry schemaRegistry)
         {
             HashSet<string> properties = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             if (bodyContract is SchemaTypeReference schemaTypeReference)
             {
-                SchemaDefinition schema = schemaDefinitionResolver.Resolve(schemaTypeReference);
+                SchemaDefinition schema = schemaRegistry.GetSchema(schemaTypeReference);
                 if (schema is ObjectSchema objectSchema)
                     properties.AddRange(objectSchema.Properties.Select(x => x.Name.Value));
             }
@@ -255,8 +255,8 @@ namespace Dibix.Sdk.CodeGeneration
             string typeName = (string)value;
             if (!_lockEntryManager.HasEntry(LockSectionName, typeName))
             {
-                JsonSourceInfo sourceInfo = value.GetSourceInfo();
-                base.Logger.LogError("Controller imports are not supported anymore", sourceInfo.FilePath, sourceInfo.LineNumber, sourceInfo.LinePosition);
+                SourceLocation sourceInfo = value.GetSourceInfo();
+                base.Logger.LogError("Controller imports are not supported anymore", sourceInfo.Source, sourceInfo.Line, sourceInfo.Column);
                 return;
             }
 
@@ -311,7 +311,7 @@ namespace Dibix.Sdk.CodeGeneration
                 case JTokenType.Boolean:
                 case JTokenType.Integer:
                 case JTokenType.Null:
-                    parameterSourceBuilder = new ActionParameterConstantSourceBuilder((JValue)property.Value, _schemaDefinitionResolver, Logger);
+                    parameterSourceBuilder = new ActionParameterConstantSourceBuilder((JValue)property.Value, _schemaRegistry, Logger);
                     return true;
 
                 case JTokenType.String:
@@ -322,7 +322,7 @@ namespace Dibix.Sdk.CodeGeneration
                     }
                     else
                     {
-                        parameterSourceBuilder = new ActionParameterConstantSourceBuilder((JValue)property.Value, _schemaDefinitionResolver, Logger);
+                        parameterSourceBuilder = new ActionParameterConstantSourceBuilder((JValue)property.Value, _schemaRegistry, Logger);
                     }
                     return true;
 
@@ -337,14 +337,14 @@ namespace Dibix.Sdk.CodeGeneration
             string[] parts = ((string)value.Value).Split(new[] { '.' }, 2);
             string sourceName = parts[0];
             string propertyName = parts[1];
-            JsonSourceInfo valueLocation = value.GetSourceInfo();
+            SourceLocation valueLocation = value.GetSourceInfo();
 
             if (!_actionParameterSourceRegistry.TryGetDefinition(sourceName, out ActionParameterSourceDefinition definition))
             {
-                base.Logger.LogError($"Unknown property source '{sourceName}'", valueLocation.FilePath, valueLocation.LineNumber, valueLocation.LinePosition);
+                base.Logger.LogError($"Unknown property source '{sourceName}'", valueLocation.Source, valueLocation.Line, valueLocation.Column);
             }
 
-            ActionParameterPropertySourceBuilder propertySourceBuilder = new ActionParameterPropertySourceBuilder(definition, propertyName, valueLocation.FilePath, valueLocation.LineNumber, valueLocation.LinePosition);
+            ActionParameterPropertySourceBuilder propertySourceBuilder = new ActionParameterPropertySourceBuilder(definition, propertyName, valueLocation);
             CollectPropertySourceNodes(propertySourceBuilder, requestBody, rootParameterSourceBuilder, pathParameters);
             return propertySourceBuilder;
         }
@@ -378,8 +378,8 @@ namespace Dibix.Sdk.CodeGeneration
                 {
                     if (TryReadSource(itemProperty, requestBody: requestBody, rootPropertySourceBuilder: propertySourceBuilder, pathParameters, parameterSourceBuilder: out ActionParameterSourceBuilder itemPropertySourceBuilder))
                     {
-                        JsonSourceInfo sourceInfo = itemProperty.GetSourceInfo();
-                        propertySourceBuilder.ItemSources.Add(new ActionParameterItemSourceBuilder(itemProperty.Name, itemPropertySourceBuilder, sourceInfo.FilePath, sourceInfo.LineNumber, sourceInfo.LinePosition, _schemaDefinitionResolver, Logger));
+                        SourceLocation sourceInfo = itemProperty.GetSourceInfo();
+                        propertySourceBuilder.ItemSources.Add(new ActionParameterItemSourceBuilder(itemProperty.Name, itemPropertySourceBuilder, sourceInfo, _schemaRegistry, Logger));
                     }
                 }
                 return propertySourceBuilder;
@@ -392,8 +392,8 @@ namespace Dibix.Sdk.CodeGeneration
                 string converterName = (string)converter;
                 if (!_actionParameterConverterRegistry.IsRegistered(converterName))
                 {
-                    JsonSourceInfo converterLocation = converter.GetSourceInfo();
-                    base.Logger.LogError($"Unknown property converter '{converterName}'", converterLocation.FilePath, converterLocation.LineNumber, converterLocation.LinePosition);
+                    SourceLocation converterLocation = converter.GetSourceInfo();
+                    base.Logger.LogError($"Unknown property converter '{converterName}'", converterLocation.Source, converterLocation.Line, converterLocation.Column);
                 }
                 propertySourceBuilder.Converter = converterName;
                 return propertySourceBuilder;
@@ -408,14 +408,14 @@ namespace Dibix.Sdk.CodeGeneration
             return new StaticActionParameterSourceBuilder(new ActionParameterBodySource(bodyConverterTypeName));
         }
 
-        private static bool TryReadFileResponse(JObject action, out ActionFileResponse fileResponse, out JsonSourceInfo location)
+        private static bool TryReadFileResponse(JObject action, out ActionFileResponse fileResponse, out SourceLocation location)
         {
             JProperty fileResponseProperty = action.Property("fileResponse");
             JObject fileResponseValue = (JObject)fileResponseProperty?.Value;
             if (fileResponseValue == null)
             {
                 fileResponse = null;
-                location = null;
+                location = default;
                 return false;
             }
 
@@ -438,8 +438,8 @@ namespace Dibix.Sdk.CodeGeneration
         private T CreateActionDefinition<T>(JObject action, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters) where T : ActionTargetDefinition, new()
         {
             JValue targetValue = (JValue)action.Property("target").Value;
-            JsonSourceInfo sourceInfo = targetValue.GetSourceInfo();
-            T actionDefinition = _actionTargetResolver.Resolve<T>(targetName: (string)targetValue, filePath: sourceInfo.FilePath, line: sourceInfo.LineNumber, column: sourceInfo.LinePosition, explicitParameters, pathParameters, bodyParameters);
+            SourceLocation sourceInfo = targetValue.GetSourceInfo();
+            T actionDefinition = _actionTargetResolver.Resolve<T>(targetName: (string)targetValue, sourceInfo, explicitParameters, pathParameters, bodyParameters);
             return actionDefinition;
         }
 
@@ -492,13 +492,13 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private void CollectSecuritySchemes(JObject actionJson, ActionDefinition actionDefinition, JsonSourceInfo actionLineInfo)
+        private void CollectSecuritySchemes(JObject actionJson, ActionDefinition actionDefinition, SourceLocation actionLineInfo)
         {
             const string propertyName = "securitySchemes";
             JProperty property = actionJson.Property(propertyName);
             if (property == null)
             {
-                base.Logger.LogError($"Missing required property '{propertyName}'", actionLineInfo.FilePath, actionLineInfo.LineNumber, actionLineInfo.LinePosition);
+                base.Logger.LogError($"Missing required property '{propertyName}'", actionLineInfo.Source, actionLineInfo.Line, actionLineInfo.Column);
                 return;
             }
 
@@ -537,9 +537,9 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 if (!_securitySchemes.TryFindSecurityScheme(name, out scheme))
                 {
-                    JsonSourceInfo sourceInfo = value.GetSourceInfo();
+                    SourceLocation sourceInfo = value.GetSourceInfo();
                     string possibleValues = String.Join(", ", _securitySchemes.Schemes.Select(x => x.Name));
-                    base.Logger.LogError($"Unknown authorization scheme '{name}'. Possible values are: {possibleValues}", sourceInfo.FilePath, sourceInfo.LineNumber, sourceInfo.LinePosition);
+                    base.Logger.LogError($"Unknown authorization scheme '{name}'. Possible values are: {possibleValues}", sourceInfo.Source, sourceInfo.Line, sourceInfo.Column);
                     yield break;
                 }
                 _usedSecuritySchemes.Add(name, scheme);
@@ -547,13 +547,13 @@ namespace Dibix.Sdk.CodeGeneration
             yield return scheme;
         }
 
-        private void CollectAuthorization(JObject actionJson, ActionDefinition actionDefinition, JsonSourceInfo actionLineInfo, IReadOnlyDictionary<string, PathParameter> pathParameters)
+        private void CollectAuthorization(JObject actionJson, ActionDefinition actionDefinition, SourceLocation actionLineInfo, IReadOnlyDictionary<string, PathParameter> pathParameters)
         {
             const string propertyName = "authorization";
             JProperty property = actionJson.Property(propertyName);
             if (property == null)
             {
-                base.Logger.LogError($"Missing required property '{propertyName}'", actionLineInfo.FilePath, actionLineInfo.LineNumber, actionLineInfo.LinePosition);
+                base.Logger.LogError($"Missing required property '{propertyName}'", actionLineInfo.Source, actionLineInfo.Line, actionLineInfo.Column);
                 return;
             }
 
@@ -598,8 +598,8 @@ namespace Dibix.Sdk.CodeGeneration
             string templateName = (string)templateNameProperty.Value;
             if (!_templates.Authorization.TryGetTemplate(templateName, out ConfigurationAuthorizationTemplate template))
             {
-                JsonSourceInfo templateNameLineInfo = templateNameProperty.Value.GetSourceInfo();
-                Logger.LogError($"Unknown authorization template '{templateName}'", templateNameLineInfo.FilePath, templateNameLineInfo.LineNumber, templateNameLineInfo.LinePosition);
+                SourceLocation templateNameLineInfo = templateNameProperty.Value.GetSourceInfo();
+                Logger.LogError($"Unknown authorization template '{templateName}'", templateNameLineInfo.Source, templateNameLineInfo.Line, templateNameLineInfo.Column);
                 return null;
             }
 
@@ -625,10 +625,10 @@ namespace Dibix.Sdk.CodeGeneration
         private TypeReference ResolveType(JValue typeNameValue)
         {
             string typeName = (string)typeNameValue;
-            JsonSourceInfo typeNameLocation = typeNameValue.GetSourceInfo();
+            SourceLocation typeNameLocation = typeNameValue.GetSourceInfo();
             bool isEnumerable = typeName.EndsWith("*", StringComparison.Ordinal);
             typeName = typeName.TrimEnd('*');
-            TypeReference type = _typeResolver.ResolveType(typeName, null, typeNameLocation.FilePath, typeNameLocation.LineNumber, typeNameLocation.LinePosition, isEnumerable);
+            TypeReference type = _typeResolver.ResolveType(typeName, null, typeNameLocation, isEnumerable);
             return type;
         }
 
@@ -653,16 +653,16 @@ namespace Dibix.Sdk.CodeGeneration
         {
             if (requestBody == null)
             {
-                base.Logger.LogError("Must specify a body contract on the endpoint action when using BODY property source", propertySourceBuilder.FilePath, propertySourceBuilder.Line, propertySourceBuilder.Column);
+                base.Logger.LogError("Must specify a body contract on the endpoint action when using BODY property source", propertySourceBuilder.Location.Source, propertySourceBuilder.Location.Line, propertySourceBuilder.Location.Column);
                 return;
             }
 
             // Only traverse, if the body is an object contract
             TypeReference type = requestBody.Contract;
-            if (!(type is SchemaTypeReference bodySchemaTypeReference))
+            if (type is not SchemaTypeReference bodySchemaTypeReference)
                 return;
 
-            if (!(_schemaDefinitionResolver.Resolve(bodySchemaTypeReference) is ObjectSchema objectSchema))
+            if (_schemaRegistry.GetSchema(bodySchemaTypeReference) is not ObjectSchema objectSchema)
                 return;
 
             IList<string> segments = propertySourceBuilder.PropertyName.Split('.');
@@ -682,16 +682,16 @@ namespace Dibix.Sdk.CodeGeneration
                 throw new InvalidOperationException($"Missing resolved source property node for item property mapping ({rootPropertySourceBuilder.PropertyName})");
 
             TypeReference type = lastNode.Property.Type;
-            if (!(type is SchemaTypeReference propertySchemaTypeReference))
+            if (type is not SchemaTypeReference propertySchemaTypeReference)
             {
-                base.Logger.LogError($"Unexpected type '{type?.GetType()}' for property '{rootPropertySourceBuilder.PropertyName}'. Only object schemas can be used for UDT item mappings.", rootPropertySourceBuilder.FilePath, rootPropertySourceBuilder.Line, rootPropertySourceBuilder.Column);
+                base.Logger.LogError($"Unexpected type '{type?.GetType()}' for property '{rootPropertySourceBuilder.PropertyName}'. Only object schemas can be used for UDT item mappings.", rootPropertySourceBuilder.Location.Source, rootPropertySourceBuilder.Location.Line, rootPropertySourceBuilder.Location.Column);
                 return;
             }
 
-            SchemaDefinition propertySchema = _schemaDefinitionResolver.Resolve(propertySchemaTypeReference);
-            if (!(propertySchema is ObjectSchema objectSchema))
+            SchemaDefinition propertySchema = _schemaRegistry.GetSchema(propertySchemaTypeReference);
+            if (propertySchema is not ObjectSchema objectSchema)
             {
-                base.Logger.LogError($"Unexpected type '{propertySchema?.GetType()}' for property '{rootPropertySourceBuilder.PropertyName}'. Only object schemas can be used for UDT item mappings.", rootPropertySourceBuilder.FilePath, rootPropertySourceBuilder.Line, rootPropertySourceBuilder.Column);
+                base.Logger.LogError($"Unexpected type '{propertySchema?.GetType()}' for property '{rootPropertySourceBuilder.PropertyName}'. Only object schemas can be used for UDT item mappings.", rootPropertySourceBuilder.Location.Source, rootPropertySourceBuilder.Location.Line, rootPropertySourceBuilder.Location.Column);
                 return;
             }
 
@@ -717,7 +717,7 @@ namespace Dibix.Sdk.CodeGeneration
                     return;
 
                 columnOffset += propertyName.Length + 1; // Skip property name + dot
-                objectSchema = type is SchemaTypeReference schemaTypeReference ? _schemaDefinitionResolver.Resolve(schemaTypeReference) as ObjectSchema : null;
+                objectSchema = type is SchemaTypeReference schemaTypeReference ? _schemaRegistry.GetSchema(schemaTypeReference) as ObjectSchema : null;
             }
         }
 
@@ -732,8 +732,8 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             int definitionNameOffset = propertySourceBuilder.Definition.Name.Length + 1; // Skip source name + dot
-            int column = propertySourceBuilder.Column + definitionNameOffset + columnOffset;
-            logger.LogError($"Property '{propertyName}' not found on contract '{type.DisplayName}'", propertySourceBuilder.FilePath, propertySourceBuilder.Line, column);
+            int column = propertySourceBuilder.Location.Column + definitionNameOffset + columnOffset;
+            logger.LogError($"Property '{propertyName}' not found on contract '{type.DisplayName}'", propertySourceBuilder.Location.Source, propertySourceBuilder.Location.Line, column);
             propertyType = null;
             return false;
         }

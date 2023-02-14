@@ -30,7 +30,6 @@ namespace Dibix.Sdk.CodeGeneration
             , ISqlStatementFormatter formatter
             , ITypeResolverFacade typeResolver
             , ISchemaRegistry schemaRegistry
-            , ISchemaDefinitionResolver schemaDefinitionResolver
             , ILogger logger
             , out SqlStatementDefinition definition
         )
@@ -38,7 +37,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (!SourceReaders.TryGetValue(sourceKind, out Func<object, string> reader))
                 throw new ArgumentOutOfRangeException(nameof(sourceKind), sourceKind, null);
 
-            definition = new SqlStatementDefinition(@namespace: null, definitionName, SchemaDefinitionSource.Defined) { Statement = new FormattedSqlStatement(reader(content), CommandType.Text) };
+            definition = new SqlStatementDefinition(@namespace: null, definitionName, SchemaDefinitionSource.Defined, new SourceLocation(source, line: 0, column: 0)) { Statement = new FormattedSqlStatement(reader(content), CommandType.Text) };
             return true;
         }
 

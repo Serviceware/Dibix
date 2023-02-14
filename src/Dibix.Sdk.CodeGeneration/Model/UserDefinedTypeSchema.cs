@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -6,7 +7,7 @@ namespace Dibix.Sdk.CodeGeneration
     {
         public string UdtName { get; }
 
-        public UserDefinedTypeSchema(string @namespace, string definitionName, SchemaDefinitionSource source, string udtName, IList<ObjectSchemaProperty> properties) : base(@namespace, definitionName, source, properties)
+        public UserDefinedTypeSchema(string @namespace, string definitionName, SchemaDefinitionSource source, SourceLocation location, string udtName, IList<ObjectSchemaProperty> properties) : base(@namespace, definitionName, source, location, properties)
         {
             this.UdtName = udtName;
         }

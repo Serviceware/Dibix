@@ -23,15 +23,11 @@ namespace Dibix.Sdk.CodeGeneration
 
             ISchemaRegistry schemaRegistry = new SchemaRegistry(logger);
             DefaultAssemblyResolver assemblyResolver = new DefaultAssemblyResolver(configuration.ProjectDirectory, configuration.ExternalAssemblyReferenceDirectory, configuration.References);
-            ExternalSchemaResolver externalSchemaResolver = new ExternalSchemaResolver(assemblyResolver, schemaRegistry);
-            SchemaDefinitionResolver schemaDefinitionResolver = new SchemaDefinitionResolver(schemaRegistry, externalSchemaResolver, logger);
             CodeGenerationModel model = CodeGenerationModelLoader.Load
             (
                 configuration
               , securitySchemes
               , schemaRegistry
-              , externalSchemaResolver
-              , schemaDefinitionResolver
               , assemblyResolver
               , actionParameterSourceRegistry
               , actionParameterConverterRegistry
@@ -43,10 +39,10 @@ namespace Dibix.Sdk.CodeGeneration
 
             ICodeGenerationModelValidator modelValidator = new CompositeCodeGenerationModelValidator
             (
-                new ActionParameterPropertySourceModelValidator(actionParameterSourceRegistry, schemaDefinitionResolver, logger)
-              , new ContractArtifactModelValidator(schemaDefinitionResolver, logger)
+                new ActionParameterPropertySourceModelValidator(actionParameterSourceRegistry, schemaRegistry, logger)
+              , new ContractArtifactModelValidator(schemaRegistry, logger)
               , new EndpointModelValidator(logger)
-              , new UserDefinedTypeParameterModelValidator(schemaDefinitionResolver, logger)
+              , new UserDefinedTypeParameterModelValidator(schemaRegistry, logger)
             );
 
             if (!modelValidator.Validate(model))
@@ -55,7 +51,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             ICodeArtifactsGenerator generator = new CodeArtifactsGenerator();
-            bool result = generator.Generate(model, schemaDefinitionResolver, logger);
+            bool result = generator.Generate(model, schemaRegistry, logger);
 
             additionalAssemblyReferences.AddRange(model.AdditionalAssemblyReferences);
             return result;

@@ -10,12 +10,12 @@ namespace Dibix.Sdk.CodeGeneration
         private const string LockSectionName = "ExternalReflectionTarget";
         private readonly ILockEntryManager _lockEntryManager;
 
-        public ExternalReflectionActionTargetDefinitionResolver(ISchemaDefinitionResolver schemaDefinitionResolver, ISchemaRegistry schemaRegistry, ILockEntryManager lockEntryManager, ILogger logger) : base(schemaDefinitionResolver, schemaRegistry, logger)
+        public ExternalReflectionActionTargetDefinitionResolver(ISchemaRegistry schemaRegistry, ILockEntryManager lockEntryManager, ILogger logger) : base(schemaRegistry, logger)
         {
             this._lockEntryManager = lockEntryManager;
         }
 
-        public override bool TryResolve<T>(string targetName, string filePath, int line, int column, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, out T actionTargetDefinition)
+        public override bool TryResolve<T>(string targetName, SourceLocation sourceLocation, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, out T actionTargetDefinition)
         {
             string[] parts = targetName.Split(',');
             if (parts.Length != 2)
@@ -26,7 +26,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (!this._lockEntryManager.HasEntry(LockSectionName, targetName))
             {
-                base.Logger.LogError("Reflection targets are not supported anymore", filePath, line, column);
+                base.Logger.LogError("Reflection targets are not supported anymore", sourceLocation.Source, sourceLocation.Line, sourceLocation.Column);
                 actionTargetDefinition = null;
                 return false;
             }
@@ -57,7 +57,7 @@ namespace Dibix.Sdk.CodeGeneration
             */
 
             actionTargetDefinition = new T();
-            actionTargetDefinition.Target = new ReflectionActionTarget(assemblyName, typeName, methodName, isAsync: false, hasRefParameters: false, filePath, line, column);
+            actionTargetDefinition.Target = new ReflectionActionTarget(assemblyName, typeName, methodName, isAsync: false, hasRefParameters: false, sourceLocation);
             ActionParameterRegistry parameterRegistry = new ActionParameterRegistry(actionTargetDefinition, pathParameters);
             foreach (ExplicitParameter parameter in explicitParameters.Values)
             {
@@ -73,21 +73,21 @@ namespace Dibix.Sdk.CodeGeneration
                 if (location == ActionParameterLocation.Header)
                 {
                     // Generate a null default value for header parameters
-                    PrimitiveTypeReference primitiveTypeReference = new PrimitiveTypeReference(PrimitiveType.String, isNullable: true, isEnumerable: false, filePath, parameter.Line, parameter.Column);
+                    PrimitiveTypeReference primitiveTypeReference = new PrimitiveTypeReference(PrimitiveType.String, isNullable: true, isEnumerable: false, new SourceLocation(sourceLocation.Source, parameter.Location.Line, parameter.Location.Column));
                     type = primitiveTypeReference;
-                    defaultValue = new NullValueReference(primitiveTypeReference, filePath, parameter.Line, parameter.Column);
+                    defaultValue = new NullValueReference(primitiveTypeReference, parameter.Location);
                 }
 
                 bool isRequired = base.IsParameterRequired(type, location, defaultValue);
-                parameterRegistry.Add(new ActionParameter(apiParameterName, internalParameterName, type, location, isRequired, defaultValue, source, filePath, parameter.Line, parameter.Column));
+                parameterRegistry.Add(new ActionParameter(apiParameterName, internalParameterName, type, location, isRequired, defaultValue, source, new SourceLocation(sourceLocation.Source, parameter.Location.Line, parameter.Location.Column)));
             }
 
             foreach (PathParameter pathParameter in pathParameters.Values)
             {
-                TypeReference typeReference = new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: false, filePath, pathParameter.Line, pathParameter.Column);
+                TypeReference typeReference = new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: false, new SourceLocation(sourceLocation.Source, pathParameter.Location.Line, pathParameter.Location.Column));
                 const ActionParameterLocation location = ActionParameterLocation.Path;
                 bool isRequired = base.IsParameterRequired(type: null, location, defaultValue: null);
-                ActionParameter parameter = new ActionParameter(pathParameter.Name, pathParameter.Name, typeReference, location, isRequired, defaultValue: null, source: null, filePath, pathParameter.Line, pathParameter.Column);
+                ActionParameter parameter = new ActionParameter(pathParameter.Name, pathParameter.Name, typeReference, location, isRequired, defaultValue: null, source: null, new SourceLocation(sourceLocation.Source, pathParameter.Location.Line, pathParameter.Location.Column));
                 actionTargetDefinition.Parameters.Add(parameter);
             }
 

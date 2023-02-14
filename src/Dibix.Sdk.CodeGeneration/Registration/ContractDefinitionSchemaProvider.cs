@@ -9,53 +9,42 @@ using Newtonsoft.Json.Linq;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class ContractDefinitionProvider : ValidatingJsonDefinitionReader, IContractDefinitionProvider
+    internal sealed class ContractDefinitionSchemaProvider : ValidatingJsonDefinitionReader, ISchemaProvider
     {
         #region Fields
         private const string RootFolderName = "Contracts";
         private readonly string _productName;
         private readonly string _areaName;
         private readonly ITypeResolverFacade _typeResolver;
-        private readonly ISchemaDefinitionResolver _schemaDefinitionResolver;
-        private readonly IDictionary<string, ContractDefinition> _contracts;
+        private readonly ISchemaRegistry _schemaRegistry;
+        private readonly IDictionary<string, SchemaDefinition> _schemas;
         #endregion
 
         #region Properties
-        public IEnumerable<ContractDefinition> Contracts => _contracts.Values;
         protected override string SchemaName => "dibix.contracts.schema";
-        IEnumerable<SchemaDefinition> ISchemaProvider.Schemas => _contracts.Values.Select(x => x.Schema);
         #endregion
 
         #region Constructor
-        public ContractDefinitionProvider(string productName, string areaName, IEnumerable<TaskItem> contracts, IFileSystemProvider fileSystemProvider, ITypeResolverFacade typeResolver, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger) : base(fileSystemProvider, logger)
+        public ContractDefinitionSchemaProvider(string productName, string areaName, IEnumerable<TaskItem> contracts, IFileSystemProvider fileSystemProvider, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger) : base(fileSystemProvider, logger)
         {
             _productName = productName;
             _areaName = areaName;
             _typeResolver = typeResolver;
-            _schemaDefinitionResolver = schemaDefinitionResolver;
-            _contracts = new Dictionary<string, ContractDefinition>();
+            _schemaRegistry = schemaRegistry;
+            _schemas = new Dictionary<string, SchemaDefinition>();
             base.Collect(contracts.Select(x => x.GetFullPath()));
         }
         #endregion
 
-        #region IContractDefinitionProvider Members
-        public bool TryGetSchema(string fullName, out SchemaDefinition schema)
-        {
-            if (!_contracts.TryGetValue(fullName, out ContractDefinition contract))
-            {
-                schema = null;
-                return false;
-            }
-            schema = contract.Schema;
-            return true;
-        }
+        #region ISchemaProvider Members
+        public IEnumerable<SchemaDefinition> Collect() => _schemas.Values;
         #endregion
 
         #region Overrides
         protected override void Read(JObject json)
         {
-            JsonSourceInfo sourceInfo = json.GetSourceInfo();
-            string relativePath = Path.GetDirectoryName(sourceInfo.FilePath).Substring(base.FileSystemProvider.CurrentDirectory.Length + 1);
+            SourceLocation sourceInfo = json.GetSourceInfo();
+            string relativePath = Path.GetDirectoryName(sourceInfo.Source).Substring(base.FileSystemProvider.CurrentDirectory.Length + 1);
             string[] parts = relativePath.Split(Path.DirectorySeparatorChar);
             if (parts[0] != RootFolderName)
                 throw new InvalidOperationException($"Expected contract root folder to be '{RootFolderName}' but got: {parts[0]}");
@@ -81,7 +70,7 @@ If this is not a project that has multiple areas, please make sure to define the
             }
         }
 
-        private void ReadContract(NamespacePath currentNamespace, string relativeNamespace, string definitionName, JToken value, JsonSourceInfo sourceInfo)
+        private void ReadContract(NamespacePath currentNamespace, string relativeNamespace, string definitionName, JToken value, SourceLocation sourceInfo)
         {
             switch (value.Type)
             {
@@ -98,7 +87,7 @@ If this is not a project that has multiple areas, please make sure to define the
             }
         }
 
-        private void ReadObjectContract(NamespacePath currentNamespace, string relativeNamespace, string definitionName, JToken value, JsonSourceInfo sourceInfo)
+        private void ReadObjectContract(NamespacePath currentNamespace, string relativeNamespace, string definitionName, JToken value, SourceLocation sourceInfo)
         {
             IList<ObjectSchemaProperty> properties = new Collection<ObjectSchemaProperty>();
             string wcfNamespace = null;
@@ -145,16 +134,16 @@ If this is not a project that has multiple areas, please make sure to define the
                             throw new ArgumentOutOfRangeException(nameof(property.Type), property.Type, null);
                     }
 
-                    JsonSourceInfo propertyLineInfo = property.GetSourceInfo();
-                    Token<string> propertyName = new Token<string>(property.Name, sourceInfo.FilePath, propertyLineInfo.LineNumber, propertyLineInfo.LinePosition);
+                    SourceLocation propertyLineInfo = property.GetSourceInfo();
+                    Token<string> propertyName = new Token<string>(property.Name, propertyLineInfo);
 
                     TypeReference ResolveType()
                     {
                         bool isEnumerable = typeName.EndsWith("*", StringComparison.Ordinal);
                         typeName = typeName.TrimEnd('*');
 
-                        JsonSourceInfo location = value.GetSourceInfo();
-                        TypeReference type = _typeResolver.ResolveType(typeName, relativeNamespace, sourceInfo.FilePath, location.LineNumber, location.LinePosition, isEnumerable);
+                        SourceLocation location = value.GetSourceInfo();
+                        TypeReference type = _typeResolver.ResolveType(typeName, relativeNamespace, location, isEnumerable);
                         return type;
                     }
 
@@ -163,7 +152,7 @@ If this is not a project that has multiple areas, please make sure to define the
                         ValueReference defaultValue = null;
                         if (defaultValueJson != null)
                         {
-                            defaultValue = JsonValueReferenceParser.Parse(typeReference, defaultValueJson, _schemaDefinitionResolver, Logger);
+                            defaultValue = JsonValueReferenceParser.Parse(typeReference, defaultValueJson, _schemaRegistry, Logger);
                         }
                         return defaultValue;
                     }
@@ -172,13 +161,13 @@ If this is not a project that has multiple areas, please make sure to define the
                     properties.Add(objectSchemaProperty);
                 }
             }
-            ObjectSchema contract = new ObjectSchema(currentNamespace.Path, definitionName, SchemaDefinitionSource.Defined, properties, wcfNamespace);
+            ObjectSchema contract = new ObjectSchema(currentNamespace.Path, definitionName, SchemaDefinitionSource.Defined, sourceInfo, properties, wcfNamespace);
             CollectContract(contract, sourceInfo);
         }
 
-        private void ReadEnumContract(NamespacePath currentNamespace, string definitionName, JToken definitionValue, JsonSourceInfo sourceInfo)
+        private void ReadEnumContract(NamespacePath currentNamespace, string definitionName, JToken definitionValue, SourceLocation sourceInfo)
         {
-            EnumSchema contract = new EnumSchema(currentNamespace.Path, definitionName, SchemaDefinitionSource.Defined, isFlaggable: false);
+            EnumSchema contract = new EnumSchema(currentNamespace.Path, definitionName, SchemaDefinitionSource.Defined, sourceInfo, isFlaggable: false);
 
             ICollection<EnumValue> values = ReadEnumValues(definitionValue).ToArray();
             IDictionary<string, int> actualValues = values.Where(x => x.ActualValue.HasValue).ToDictionary(x => x.Name, x => x.ActualValue.Value);
@@ -201,18 +190,17 @@ If this is not a project that has multiple areas, please make sure to define the
             CollectContract(contract, sourceInfo);
         }
 
-        private void CollectContract(SchemaDefinition definition, JsonSourceInfo sourceInfo)
+        private void CollectContract(SchemaDefinition definition, SourceLocation sourceInfo)
         {
             string name = definition.FullName;
-            if (_contracts.TryGetValue(name, out ContractDefinition otherContract))
+            if (_schemas.TryGetValue(name, out SchemaDefinition otherContract))
             {
-                Logger.LogError($"Ambiguous contract definition: {definition.FullName}", otherContract.FilePath, otherContract.Line, otherContract.Column);
-                Logger.LogError($"Ambiguous contract definition: {definition.FullName}", sourceInfo.FilePath, sourceInfo.LineNumber, sourceInfo.LinePosition);
+                Logger.LogError($"Ambiguous contract definition: {definition.FullName}", otherContract.Location.Source, otherContract.Location.Line, otherContract.Location.Column);
+                Logger.LogError($"Ambiguous contract definition: {definition.FullName}", sourceInfo.Source, sourceInfo.Line, sourceInfo.Column);
                 return;
             }
 
-            ContractDefinition contractDefinition = new ContractDefinition(definition, sourceInfo.FilePath, sourceInfo.LineNumber, sourceInfo.LinePosition);
-            _contracts.Add(name, contractDefinition);
+            _schemas.Add(name, definition);
         }
 
         private static IEnumerable<EnumValue> ReadEnumValues(JToken members)

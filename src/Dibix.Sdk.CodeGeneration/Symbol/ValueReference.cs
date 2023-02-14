@@ -1,10 +1,12 @@
-﻿namespace Dibix.Sdk.CodeGeneration
+﻿using Dibix.Sdk.Abstractions;
+
+namespace Dibix.Sdk.CodeGeneration
 {
     public abstract class ValueReference<TType> : ValueReference where TType : TypeReference
     {
         public new TType Type => (TType)base.Type;
 
-        protected ValueReference(TType type, string source, int line, int column) : base(type, source, line, column)
+        protected ValueReference(TType type, SourceLocation location) : base(type, location)
         {
         }
     }
@@ -12,16 +14,12 @@
     public abstract class ValueReference
     {
         public TypeReference Type { get; }
-        public string Source { get; }
-        public int Line { get; }
-        public int Column { get; }
+        public SourceLocation Location { get; }
 
-        protected ValueReference(TypeReference type, string source, int line, int column)
+        protected ValueReference(TypeReference type, SourceLocation location)
         {
-            this.Type = type;
-            this.Source = source;
-            this.Line = line;
-            this.Column = column;
+            Type = type;
+            Location = location;
         }
     }
 }

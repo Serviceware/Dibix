@@ -17,8 +17,6 @@ namespace Dibix.Sdk.CodeGeneration
         public CommandTextFormatting CommandTextFormatting { get; set; }
         public string BaseUrl { get; set; }
         public bool EnableExperimentalFeatures { get; set; }
-        public ICollection<SqlStatementDefinition> SqlStatements { get; }
-        public ICollection<ContractDefinition> Contracts { get; }
         public IList<ControllerDefinition> Controllers { get; }
         public IList<SecurityScheme> SecuritySchemes { get; }
         public ICollection<SchemaDefinition> Schemas { get; }
@@ -26,8 +24,6 @@ namespace Dibix.Sdk.CodeGeneration
 
         public CodeGenerationModel()
         {
-            SqlStatements = new Collection<SqlStatementDefinition>();
-            Contracts = new Collection<ContractDefinition>();
             Controllers = new Collection<ControllerDefinition>();
             SecuritySchemes = new Collection<SecurityScheme>();
             Schemas = new Collection<SchemaDefinition>();

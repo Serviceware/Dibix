@@ -39,16 +39,16 @@ namespace Dibix.Sdk.CodeGeneration
         private string _currentNamespace;
         
         public CodeGenerationModel Model { get; }
-        public ISchemaDefinitionResolver SchemaDefinitionResolver { get; }
+        public ISchemaRegistry SchemaRegistry { get; }
         public bool WriteGuardChecks { get; set; }
 
-        internal CodeGenerationContext(CSharpRoot root, CodeGenerationModel model, ISchemaDefinitionResolver schemaDefinitionResolver, ILogger logger)
+        internal CodeGenerationContext(CSharpRoot root, CodeGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             _root = root;
             _rootNamespace = model.RootNamespace;
             _currentNamespace = _rootNamespace;
             Model = model;
-            SchemaDefinitionResolver = schemaDefinitionResolver;
+            SchemaRegistry = schemaRegistry;
             _logger = logger;
         }
 
@@ -67,7 +67,7 @@ namespace Dibix.Sdk.CodeGeneration
         public CSharpStatementScope CreateOutputScope() => CreateOutputScope(_currentNamespace);
         public CSharpStatementScope CreateOutputScope(string @namespace) => _root.Output.BeginScope(@namespace);
 
-        public SchemaDefinition GetSchema(SchemaTypeReference reference) => SchemaDefinitionResolver.Resolve(reference);
+        public SchemaDefinition GetSchema(SchemaTypeReference reference) => SchemaRegistry.GetSchema(reference);
 
         public string ResolveTypeName(TypeReference reference, EnumerableBehavior enumerableBehavior = EnumerableBehavior.Enumerable)
         {
@@ -82,7 +82,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                 case SchemaTypeReference schemaTypeReference:
                     typeName = schemaTypeReference.Key;
-                    requiresNullabilityMarker = schemaTypeReference.IsEnum(SchemaDefinitionResolver);
+                    requiresNullabilityMarker = schemaTypeReference.IsEnum(SchemaRegistry);
                     break;
 
                 case null:
@@ -133,13 +133,13 @@ namespace Dibix.Sdk.CodeGeneration
 
                 case EnumMemberNumericReference enumMemberNumericReference:
                 {
-                    EnumSchemaMember member = enumMemberNumericReference.GetEnumMember(SchemaDefinitionResolver, _logger);
+                    EnumSchemaMember member = enumMemberNumericReference.GetEnumMember(SchemaRegistry, _logger);
                     return new CSharpValue($"{member.Enum.FullName}.{member.Name}");
                 }
 
                 case EnumMemberStringReference enumMemberStringReference:
                 {
-                    EnumSchemaMember member = enumMemberStringReference.GetEnumMember(SchemaDefinitionResolver, _logger);
+                    EnumSchemaMember member = enumMemberStringReference.GetEnumMember(SchemaRegistry, _logger);
                     return new CSharpValue($"{member.Enum.FullName}.{member.Name}");
                 }
 

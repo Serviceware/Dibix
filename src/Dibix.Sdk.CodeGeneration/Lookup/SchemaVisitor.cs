@@ -4,12 +4,12 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal abstract class SchemaVisitor
     {
-        private readonly ISchemaStore _schemaStore;
+        private readonly ISchemaRegistry _schemaRegistry;
 
         protected SchemaVisitor() { }
-        protected SchemaVisitor(ISchemaStore schemaStore)
+        protected SchemaVisitor(ISchemaRegistry schemaRegistry)
         {
-            this._schemaStore = schemaStore;
+            this._schemaRegistry = schemaRegistry;
         }
 
         public virtual void Accept(SchemaDefinition node) => this.VisitCore(node);
@@ -99,7 +99,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             this.Visit(node);
 
-            SchemaDefinition schema = this._schemaStore.GetSchema(node);
+            SchemaDefinition schema = this._schemaRegistry.GetSchema(node);
             if (schema != null)
                 this.VisitCore(schema);
         }
