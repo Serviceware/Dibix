@@ -163,7 +163,7 @@
     <Folder Include="Endpoints" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Contracts\Invalid.json" />
+    <None Include="Contracts\DuplicatePropertyName.json" />
     <None Include="Contracts\Extension\MultiMapContract.json" />
     <None Include="Contracts\AccessRights.json" />
     <None Include="Contracts\Direction.json" />
@@ -177,6 +177,8 @@
     <None Include="Contracts\Entry.json" />
     <None Include="Contracts\AnotherInputContract.json" />
     <None Include="Contracts\AnotherEntry.json" />
+    <None Include="Contracts\DuplicatePropertyNameCaseInsensitive.json" />
+    <None Include="Contracts\DuplicateContract.json" />
   </ItemGroup>
   <Import Condition="'$(NetCoreBuild)' == 'true'" Project="$(NETCoreTargetsPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
   <ItemGroup>

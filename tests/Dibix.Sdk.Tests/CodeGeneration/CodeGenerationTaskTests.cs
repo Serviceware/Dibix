@@ -565,13 +565,49 @@ Endpoints\GenericEndpointWithOutputParam.json(6,18,6,18):error:Output parameters
         }
 
         [TestMethod]
-        public void InvalidContractSchema_Error()
+        public void DuplicateContract_Error()
         {
             this.ExecuteTestAndExpectError
             (
-                contracts: new [] { @"Contracts\Invalid.json" }
+                contracts: new []
+                {
+                    @"Contracts\DuplicateContract.json"
+                  , @"Contracts\AccessRights.json"
+                }
               , expectedException: @"One or more errors occured during code generation:
-Contracts\Invalid.json(2,14,2,14):error:Could not resolve type 'x'"
+Contracts\DuplicateContract.json(5,12,5,12):error:Property with the name 'Invalid' already exists in the current JSON object. Path 'Invalid', line 5, position 12."
+            );
+        }
+
+        [TestMethod]
+        public void DuplicatePropertyName_Error()
+        {
+            this.ExecuteTestAndExpectError
+            (
+                contracts: new []
+                {
+                    @"Contracts\DuplicatePropertyName.json"
+                  , @"Contracts\AccessRights.json"
+                }
+              , expectedException: @"One or more errors occured during code generation:
+Contracts\DuplicatePropertyName.json(4,9,4,9):error:Property with the name 'AA' already exists in the current JSON object. Path 'Invalid.AA', line 4, position 9."
+            );
+        }
+
+        [TestMethod]
+        public void DuplicatePropertyNameCaseInsensitive_Error()
+        {
+            this.ExecuteTestAndExpectError
+            (
+                contracts: new []
+                {
+                    @"Contracts\DuplicatePropertyNameCaseInsensitive.json"
+                  , @"Contracts\AccessRights.json"
+                }
+              , expectedException: @"One or more errors occured during code generation:
+Contracts\DuplicatePropertyNameCaseInsensitive.json(3,6,3,6):error:Property with the name 'AAA' already exists in the current JSON object. Path 'Invalid.AAA', line 3, position 6.
+Contracts\DuplicatePropertyNameCaseInsensitive.json(4,6,4,6):error:Property with the name 'AAa' already exists in the current JSON object. Path 'Invalid.AAa', line 4, position 6.
+Contracts\DuplicatePropertyNameCaseInsensitive.json(5,6,5,6):error:Property with the name 'Aaa' already exists in the current JSON object. Path 'Invalid.Aaa', line 5, position 6."
             );
         }
     }

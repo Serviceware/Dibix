@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.IO;
 using System.Text;
 using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.Tests.CodeGeneration;
@@ -11,7 +12,7 @@ namespace Dibix.Sdk.Tests
 
         public TestLogger(TextWriter output, bool distinctErrorLogging) : base(output, distinctErrorLogging)
         {
-            this._errorOutput = new StringBuilder();
+            _errorOutput = new StringBuilder();
         }
 
         public override void LogError(string subCategory, string code, string text, string source, int? line, int? column)
@@ -23,13 +24,14 @@ namespace Dibix.Sdk.Tests
         protected override void LogError(string text)
         {
             base.LogError(text);
-            this._errorOutput.AppendLine(text);
+            _errorOutput.AppendLine(text);
+            Debug.WriteLine(text);
         }
 
         public void Verify()
         {
-            if (this.HasLoggedErrors)
-                throw new CodeGenerationException(this._errorOutput.ToString());
+            if (HasLoggedErrors)
+                throw new CodeGenerationException(_errorOutput.ToString());
         }
     }
 }

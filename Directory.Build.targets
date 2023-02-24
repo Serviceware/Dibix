@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <None Remove="*.dotsettings" />
+    <None Remove=".DS_Store" />
   </ItemGroup>
 
   <Target Name="PrepareNuspec" BeforeTargets="GenerateNuspec" DependsOnTargets="GetBuildVersion">
