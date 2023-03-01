@@ -20,18 +20,16 @@ namespace Dibix.Dapper
         #endregion
 
         #region Registration
-        public static void Adapt<T>() => Adapt(typeof(T));
-        public static void Adapt<TFirst, TSecond>() => Adapt(typeof(TFirst), typeof(TSecond));
-        public static void Adapt<TFirst, TSecond, TThird>() => Adapt(typeof(TFirst), typeof(TSecond), typeof(TThird));
-        public static void Adapt<TFirst, TSecond, TThird, TFourth>() => Adapt(typeof(TFirst), typeof(TSecond), typeof(TThird), typeof(TFourth));
-        public static void Adapt<TFirst, TSecond, TThird, TFourth, TFifth>() => Adapt(typeof(TFirst), typeof(TSecond), typeof(TThird), typeof(TFourth), typeof(TFifth));
-        public static void Adapt<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>() => Adapt(typeof(TFirst), typeof(TSecond), typeof(TThird), typeof(TFourth), typeof(TFifth), typeof(TSixth));
-        public static void Adapt<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>() => Adapt(typeof(TFirst), typeof(TSecond), typeof(TThird), typeof(TFourth), typeof(TFifth), typeof(TSixth), typeof(TSeventh));
-        public static void Adapt<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>() => Adapt(typeof(TFirst), typeof(TSecond), typeof(TThird), typeof(TFourth), typeof(TFifth), typeof(TSixth), typeof(TSeventh), typeof(TEighth));
-        public static void Adapt<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>() => Adapt(typeof(TFirst), typeof(TSecond), typeof(TThird), typeof(TFourth), typeof(TFifth), typeof(TSixth), typeof(TSeventh), typeof(TEighth), typeof(TNinth));
-        public static void Adapt<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth>() => Adapt(typeof(TFirst), typeof(TSecond), typeof(TThird), typeof(TFourth), typeof(TFifth), typeof(TSixth), typeof(TSeventh), typeof(TEighth), typeof(TNinth), typeof(TTenth));
-        public static void Adapt<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TEleventh>() => Adapt(typeof(TFirst), typeof(TSecond), typeof(TThird), typeof(TFourth), typeof(TFifth), typeof(TSixth), typeof(TSeventh), typeof(TEighth), typeof(TNinth), typeof(TTenth), typeof(TEleventh));
-        private static void Adapt(params Type[] types)
+        public static void Adapt<T>() => AdaptCore(typeof(T));
+        public static void Adapt<TFirst, TSecond>() => AdaptCore(typeof(TFirst), typeof(TSecond));
+        public static void Adapt<TFirst, TSecond, TThird>() => AdaptCore(typeof(TFirst), typeof(TSecond), typeof(TThird));
+        public static void Adapt<TFirst, TSecond, TThird, TFourth>() => AdaptCore(typeof(TFirst), typeof(TSecond), typeof(TThird), typeof(TFourth));
+        public static void Adapt<TFirst, TSecond, TThird, TFourth, TFifth>() => AdaptCore(typeof(TFirst), typeof(TSecond), typeof(TThird), typeof(TFourth), typeof(TFifth));
+        public static void Adapt<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>() => AdaptCore(typeof(TFirst), typeof(TSecond), typeof(TThird), typeof(TFourth), typeof(TFifth), typeof(TSixth));
+        public static void Adapt<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>() => AdaptCore(typeof(TFirst), typeof(TSecond), typeof(TThird), typeof(TFourth), typeof(TFifth), typeof(TSixth), typeof(TSeventh));
+        public static void Adapt<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>() => AdaptCore(typeof(TFirst), typeof(TSecond), typeof(TThird), typeof(TFourth), typeof(TFifth), typeof(TSixth), typeof(TSeventh), typeof(TEighth));
+        public static void Adapt(Type[] types) => AdaptCore(types);
+        private static void AdaptCore(params Type[] types)
         {
             foreach (Type type in types)
                 Register(type);

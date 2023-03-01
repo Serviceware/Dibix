@@ -97,18 +97,18 @@ namespace Dibix.Testing.Data
 
             // ExecuteNonQuery is optimized, and will not process any messages, so RAISERROR WITH NOWAIT will not work.
             // Here we override the underlying behavior, without the caller having to do it.
-            protected override int Execute(string commandText, CommandType commandType, int? commandTimeout, ParametersVisitor parameters)
+            protected override int Execute(string commandText, CommandType commandType, ParametersVisitor parameters, int? commandTimeout)
             {
                 if (_raiseErrorWithNoWaitBehavior != RaiseErrorWithNoWaitBehavior.ExecuteScalar)
-                    return base.Execute(commandText, commandType, commandTimeout, parameters);
+                    return base.Execute(commandText, commandType, parameters, commandTimeout);
 
                 _ = base.Connection.ExecuteScalar(commandText, CollectParameters(parameters), transaction: null, _defaultCommandTimeout ?? commandTimeout, commandType);
                 return default;
             }
-            protected override async Task<int> ExecuteAsync(string commandText, CommandType commandType, int? commandTimeout, ParametersVisitor parameters, CancellationToken cancellationToken)
+            protected override async Task<int> ExecuteAsync(string commandText, CommandType commandType, ParametersVisitor parameters, int? commandTimeout, CancellationToken cancellationToken)
             {
                 if (_raiseErrorWithNoWaitBehavior != RaiseErrorWithNoWaitBehavior.ExecuteScalar)
-                    return await base.ExecuteAsync(commandText, commandType, commandTimeout, parameters, cancellationToken).ConfigureAwait(false);
+                    return await base.ExecuteAsync(commandText, commandType, parameters, commandTimeout, cancellationToken).ConfigureAwait(false);
 
                 CommandDefinition command = new CommandDefinition(commandText, CollectParameters(parameters), transaction: null, _defaultCommandTimeout ?? commandTimeout, commandType, cancellationToken: cancellationToken);
                 _ = await base.Connection.ExecuteScalarAsync(command).ConfigureAwait(false);

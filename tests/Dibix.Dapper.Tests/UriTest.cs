@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -12,7 +13,7 @@ namespace Dibix.Dapper.Tests
         {
             const string commandText = @"SELECT [url] = N'https://localhost/FirstUrl'
 SELECT [url] = N'https://localhost/AnotherUrl'";
-            using (IMultipleResultReader reader = accessor.QueryMultiple(commandText))
+            using (IMultipleResultReader reader = accessor.QueryMultiple(commandText, CommandType.Text, ParametersVisitor.Empty))
             {
                 Assert.AreEqual("https://localhost/FirstUrl", reader.ReadSingle<Entity>().Url.ToString());
                 Assert.AreEqual("https://localhost/AnotherUrl", reader.ReadSingle<Uri>().ToString());
@@ -29,7 +30,7 @@ SELECT [url] = N'https://localhost/AnotherUrl'";
                                                     url = new Uri("https://localhost/SomeUrl")
                                                 })
                                                 .Build();
-            Assert.AreEqual("https://localhost/SomeUrl", accessor.QuerySingle<string>(commandText, @params));
+            Assert.AreEqual("https://localhost/SomeUrl", accessor.QuerySingle<string>(commandText, CommandType.Text, @params));
         });
 
         private sealed class Entity

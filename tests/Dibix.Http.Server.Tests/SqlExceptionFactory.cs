@@ -71,7 +71,7 @@ namespace Dibix.Http.Server.Tests
 
             Expression block = Expression.Block
             (
-                new []
+                new[]
                 {
                     errorVariable
                   , errorCollectionVariable

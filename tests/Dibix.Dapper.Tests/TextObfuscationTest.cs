@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -18,7 +19,7 @@ namespace Dibix.Dapper.Tests
                                                    .SetString("password1", "test1", true)
                                                    .SetFromTemplate(input)
                                                    .Build();
-            Entity entity = accessor.QuerySingle<Entity, Entity>(commandText, parameters, "id");
+            Entity entity = accessor.QuerySingle<Entity>(commandText, CommandType.Text, parameters, new[] { typeof(Entity), typeof(Entity) }, "id");
             Assert.AreEqual("test1", entity.Password);
             Assert.AreEqual("test2", entity.RelatedEntities.Single().Password);
         });

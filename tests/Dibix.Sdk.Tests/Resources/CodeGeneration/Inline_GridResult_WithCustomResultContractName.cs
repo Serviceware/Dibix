@@ -34,7 +34,7 @@ namespace Dibix.Sdk.Tests.Data.Grid
                 using (IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText, CommandType.Text, ParametersVisitor.Empty))
                 {
                     Dibix.Sdk.Tests.DomainModel.Grid.GridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GridResult();
-                    result.Item = reader.ReadSingle<Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract, Dibix.Sdk.Tests.DomainModel.Direction>("id,direction");
+                    result.Item = reader.ReadSingle<Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract>(new[] { typeof(Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract), typeof(Dibix.Sdk.Tests.DomainModel.GenericContract), typeof(Dibix.Sdk.Tests.DomainModel.Direction) }, "id,direction");
                     result.Directions.ReplaceWith(reader.ReadMany<Dibix.Sdk.Tests.DomainModel.Direction>());
                     return result;
                 }

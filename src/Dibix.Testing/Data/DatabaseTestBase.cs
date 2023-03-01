@@ -52,7 +52,7 @@ namespace Dibix.Testing.Data
             {
                 IParameterBuilder parameterBuilder = accessor.Parameters();
                 parameters?.Invoke(parameterBuilder);
-                await accessor.ExecuteAsync(storedProcedureName, CommandType.StoredProcedure, commandTimeout, parameterBuilder.Build(), CancellationToken.None).ConfigureAwait(false);
+                await accessor.ExecuteAsync(storedProcedureName, CommandType.StoredProcedure, parameterBuilder.Build(), commandTimeout, CancellationToken.None).ConfigureAwait(false);
             }
         }
 

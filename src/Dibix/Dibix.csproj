@@ -8,12 +8,6 @@
     <Compile Include="..\..\shared\Extensions\EnumerableExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Extensions\ReflectionExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
-    <Compile Update="Access\DatabaseAccessorExtensions.Execute.cs" DependentUpon="Access\DatabaseAccessorExtensions.cs" />
-    <Compile Update="Access\DatabaseAccessorExtensions.GridReader.cs" DependentUpon="Access\DatabaseAccessorExtensions.cs" />
-    <Compile Update="Access\DatabaseAccessorExtensions.QueryMany.cs" DependentUpon="Access\DatabaseAccessorExtensions.cs" />
-    <Compile Update="Access\DatabaseAccessorExtensions.QueryMultiple.cs" DependentUpon="Access\DatabaseAccessorExtensions.cs" />
-    <Compile Update="Access\DatabaseAccessorExtensions.QuerySingle.cs" DependentUpon="Access\DatabaseAccessorExtensions.cs" />
-    <Compile Update="Access\DatabaseAccessorExtensions.QuerySingleOrDefault.cs" DependentUpon="Access\DatabaseAccessorExtensions.cs" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' != 'net461'">

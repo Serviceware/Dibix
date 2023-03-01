@@ -27,12 +27,12 @@ namespace Dibix.Dapper
         #endregion
 
         #region Overrides
-        protected override int Execute(string commandText, CommandType commandType, int? commandTimeout, ParametersVisitor parameters)
+        protected override int Execute(string commandText, CommandType commandType, ParametersVisitor parameters, int? commandTimeout)
         {
             return base.Connection.Execute(commandText, CollectParameters(parameters), _defaultTransaction, commandTimeout ?? _defaultCommandTimeout, commandType);
         }
 
-        protected override Task<int> ExecuteAsync(string commandText, CommandType commandType, int? commandTimeout, ParametersVisitor parameters, CancellationToken cancellationToken)
+        protected override Task<int> ExecuteAsync(string commandText, CommandType commandType, ParametersVisitor parameters, int? commandTimeout, CancellationToken cancellationToken)
         {
             CommandDefinition command = new CommandDefinition(commandText, CollectParameters(parameters), _defaultTransaction, commandTimeout ?? _defaultCommandTimeout, commandType, cancellationToken: cancellationToken);
             return base.Connection.ExecuteAsync(command);
@@ -52,64 +52,10 @@ namespace Dibix.Dapper
             return base.Connection.QueryAsync<T>(command);
         }
 
-        protected override IEnumerable<TReturn> QueryMany<TFirst, TSecond, TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TReturn> map, string splitOn)
+        protected override IEnumerable<TReturn> QueryMany<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, Func<object[], TReturn> map, string splitOn)
         {
-            DecoratedTypeMap.Adapt<TFirst, TSecond>();
-            return base.Connection.Query(commandText, map, CollectParameters(parameters), _defaultTransaction, commandType: commandType, commandTimeout: _defaultCommandTimeout, splitOn: splitOn);
-        }
-
-        protected override IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TReturn> map, string splitOn)
-        {
-            DecoratedTypeMap.Adapt<TFirst, TSecond, TThird>();
-            return base.Connection.Query(commandText, map, CollectParameters(parameters), _defaultTransaction, commandType: commandType, commandTimeout: _defaultCommandTimeout, splitOn: splitOn);
-        }
-
-        protected override IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TReturn> map, string splitOn)
-        {
-            DecoratedTypeMap.Adapt<TFirst, TSecond, TThird, TFourth>();
-            return base.Connection.Query(commandText, map, CollectParameters(parameters), _defaultTransaction, commandType: commandType, commandTimeout: _defaultCommandTimeout, splitOn: splitOn);
-        }
-
-        protected override IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> map, string splitOn)
-        {
-            DecoratedTypeMap.Adapt<TFirst, TSecond, TThird, TFourth, TFifth>();
-            return base.Connection.Query(commandText, map, CollectParameters(parameters), _defaultTransaction, commandType: commandType, commandTimeout: _defaultCommandTimeout, splitOn: splitOn);
-        }
-
-        protected override IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> map, string splitOn)
-        {
-            DecoratedTypeMap.Adapt<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>();
-            return base.Connection.Query(commandText, map, CollectParameters(parameters), _defaultTransaction, commandType: commandType, commandTimeout: _defaultCommandTimeout, splitOn: splitOn);
-        }
-
-        protected override IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> map, string splitOn)
-        {
-            DecoratedTypeMap.Adapt<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>();
-            return base.Connection.Query(commandText, map, CollectParameters(parameters), _defaultTransaction, commandType: commandType, commandTimeout: _defaultCommandTimeout, splitOn: splitOn);
-        }
-
-        protected override IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TReturn> map, string splitOn)
-        {
-            DecoratedTypeMap.Adapt<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>();
-            Type[] types = { typeof(TFirst), typeof(TSecond), typeof(TThird), typeof(TFourth), typeof(TFifth), typeof(TSixth), typeof(TSeventh), typeof(TEighth) };
-            Func<object[], TReturn> mapWrapper = x => map((TFirst)x[0], (TSecond)x[1], (TThird)x[2], (TFourth)x[3], (TFifth)x[4], (TSixth)x[5], (TSeventh)x[6], (TEighth)x[7]);
-            return base.Connection.Query(commandText, types, mapWrapper, CollectParameters(parameters), _defaultTransaction, commandType: commandType, commandTimeout: _defaultCommandTimeout, splitOn: splitOn);
-        }
-
-        protected override IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TReturn> map, string splitOn)
-        {
-            DecoratedTypeMap.Adapt<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>();
-            Type[] types = { typeof(TFirst), typeof(TSecond), typeof(TThird), typeof(TFourth), typeof(TFifth), typeof(TSixth), typeof(TSeventh), typeof(TEighth), typeof(TNinth) };
-            Func<object[], TReturn> mapWrapper = x => map((TFirst)x[0], (TSecond)x[1], (TThird)x[2], (TFourth)x[3], (TFifth)x[4], (TSixth)x[5], (TSeventh)x[6], (TEighth)x[7], (TNinth)x[8]);
-            return base.Connection.Query(commandText, types, mapWrapper, CollectParameters(parameters), _defaultTransaction, commandType: commandType, commandTimeout: _defaultCommandTimeout, splitOn: splitOn);
-        }
-
-        protected override IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TEleventh, TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TEleventh, TReturn> map, string splitOn)
-        {
-            DecoratedTypeMap.Adapt<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TEleventh>();
-            Type[] types = { typeof(TFirst), typeof(TSecond), typeof(TThird), typeof(TFourth), typeof(TFifth), typeof(TSixth), typeof(TSeventh), typeof(TEighth), typeof(TNinth), typeof(TTenth), typeof(TEleventh) };
-            Func<object[], TReturn> mapWrapper = x => map((TFirst)x[0], (TSecond)x[1], (TThird)x[2], (TFourth)x[3], (TFifth)x[4], (TSixth)x[5], (TSeventh)x[6], (TEighth)x[7], (TNinth)x[8], (TTenth)x[9], (TEleventh)x[10]);
-            return base.Connection.Query(commandText, types, mapWrapper, CollectParameters(parameters), _defaultTransaction, commandType: commandType, commandTimeout: _defaultCommandTimeout, splitOn: splitOn);
+            DecoratedTypeMap.Adapt(types);
+            return base.Connection.Query(commandText, types, map, CollectParameters(parameters), _defaultTransaction, commandType: commandType, commandTimeout: _defaultCommandTimeout, splitOn: splitOn);
         }
 
         protected override T QuerySingle<T>(string commandText, CommandType commandType, ParametersVisitor parameters)

@@ -38,104 +38,33 @@ namespace Dibix
         #region IDatabaseAccessor Members
         public IParameterBuilder Parameters() => new ParameterBuilder();
 
-        int IDatabaseAccessor.Execute(string commandText, CommandType commandType, int? commandTimeout, ParametersVisitor parameters) => Execute(commandText, commandType, parameters, () => Execute(commandText, commandType, commandTimeout, parameters));
+        int IDatabaseAccessor.Execute(string commandText, CommandType commandType, ParametersVisitor parameters) => Execute(commandText, commandType, parameters, () => Execute(commandText, commandType, parameters, commandTimeout: null));
+        
+        int IDatabaseAccessor.Execute(string commandText, CommandType commandType, ParametersVisitor parameters, int? commandTimeout) => Execute(commandText, commandType, parameters, () => Execute(commandText, commandType, parameters, commandTimeout));
 
-        Task<int> IDatabaseAccessor.ExecuteAsync(string commandText, CommandType commandType, int? commandTimeout, ParametersVisitor parameters, CancellationToken cancellationToken) => Execute(commandText, commandType, parameters, () => ExecuteAsync(commandText, commandType, commandTimeout, parameters, cancellationToken));
+        Task<int> IDatabaseAccessor.ExecuteAsync(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken) => Execute(commandText, commandType, parameters, () => ExecuteAsync(commandText, commandType, parameters, commandTimeout: null, cancellationToken));
+        
+        Task<int> IDatabaseAccessor.ExecuteAsync(string commandText, CommandType commandType, ParametersVisitor parameters, int? commandTimeout, CancellationToken cancellationToken) => Execute(commandText, commandType, parameters, () => ExecuteAsync(commandText, commandType, parameters, commandTimeout, cancellationToken));
 
         IEnumerable<T> IDatabaseAccessor.QueryMany<T>(string commandText, CommandType commandType, ParametersVisitor parameters) => Execute(commandText, commandType, parameters, () => QueryMany<T>(commandText, commandType, parameters).PostProcess());
         
+        Task<IEnumerable<T>> IDatabaseAccessor.QueryManyAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken) => Execute(commandText, commandType, parameters, () => QueryManyAsync<T>(commandText, commandType, parameters, buffered: true, cancellationToken).PostProcess());
+        
         Task<IEnumerable<T>> IDatabaseAccessor.QueryManyAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, bool buffered, CancellationToken cancellationToken) => Execute(commandText, commandType, parameters, () => QueryManyAsync<T>(commandText, commandType, parameters, buffered, cancellationToken).PostProcess());
-
-        public IEnumerable<TReturn> QueryMany<TReturn, TSecond>(string commandText, CommandType commandType, ParametersVisitor parameters, string splitOn) where TReturn : new() => Execute(commandText, commandType, parameters, () =>
-        {
-            MultiMapper multiMapper = new MultiMapper();
-            return QueryMany<TReturn, TSecond, TReturn>(commandText, commandType, parameters, (a, b) => multiMapper.MapRow<TReturn>(useProjection: false, a, b), splitOn)
-                       .PostProcess(multiMapper);
-        });
-
-        IEnumerable<TReturn> IDatabaseAccessor.QueryMany<TFirst, TSecond, TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TReturn> map, string splitOn) => Execute(commandText, commandType, parameters, () => QueryMany(commandText, commandType, parameters, map, splitOn).PostProcess());
-
-        public IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird>(string commandText, CommandType commandType, ParametersVisitor parameters, string splitOn) where TReturn : new() => Execute(commandText, commandType, parameters, () =>
-        {
-            MultiMapper multiMapper = new MultiMapper();
-            return QueryMany<TReturn, TSecond, TThird, TReturn>(commandText, commandType, parameters, (a, b, c) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c), splitOn)
-                       .PostProcess(multiMapper);
-        });
-
-        IEnumerable<TReturn> IDatabaseAccessor.QueryMany<TFirst, TSecond, TThird, TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TReturn> map, string splitOn) => Execute(commandText, commandType, parameters, () => QueryMany(commandText, commandType, parameters, map, splitOn).PostProcess());
-
-        public IEnumerable<TReturn> QueryMany<TReturn, TSecond, TThird, TFourth>(string commandText, CommandType commandType, ParametersVisitor parameters, string splitOn) where TReturn : new() => Execute(commandText, commandType, parameters, () =>
-        {
-            MultiMapper multiMapper = new MultiMapper();
-            return QueryMany<TReturn, TSecond, TThird, TFourth, TReturn>(commandText, commandType, parameters, (a, b, c,d ) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c, d), splitOn)
-                       .PostProcess(multiMapper);
-        });
-
-        IEnumerable<TReturn> IDatabaseAccessor.QueryMany<TFirst, TSecond, TThird, TFourth, TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TReturn> map, string splitOn) => Execute(commandText, commandType, parameters, () => QueryMany(commandText, commandType, parameters, map, splitOn).PostProcess());
-
-        IEnumerable<TReturn> IDatabaseAccessor.QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> map, string splitOn) => Execute(commandText, commandType, parameters, () => QueryMany(commandText, commandType, parameters, map, splitOn).PostProcess());
-
-        IEnumerable<TReturn> IDatabaseAccessor.QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> map, string splitOn) => Execute(commandText, commandType, parameters, () => QueryMany(commandText, commandType, parameters, map, splitOn).PostProcess());
-
-        IEnumerable<TReturn> IDatabaseAccessor.QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TReturn> map, string splitOn) => Execute(commandText, commandType, parameters, () => QueryMany(commandText, commandType, parameters, map, splitOn).PostProcess());
-
-        IEnumerable<TReturn> IDatabaseAccessor.QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TEleventh, TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TEleventh, TReturn> map, string splitOn) => Execute(commandText, commandType, parameters, () => QueryMany(commandText, commandType, parameters, map, splitOn).PostProcess());
+        
+        public IEnumerable<TReturn> QueryMany<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, string splitOn) where TReturn : new() => Execute(commandText, commandType, parameters, () => QueryManyCore<TReturn>(commandText, commandType, parameters, types, splitOn));
 
         T IDatabaseAccessor.QuerySingle<T>(string commandText, CommandType commandType, ParametersVisitor parameters) => Execute(commandText, commandType, parameters, () => QuerySingle<T>(commandText, commandType, parameters).PostProcess());
 
         Task<T> IDatabaseAccessor.QuerySingleAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken) => Execute(commandText, commandType, parameters, () => QuerySingleAsync<T>(commandText, commandType, parameters, cancellationToken).PostProcess());
 
-        public TReturn QuerySingle<TReturn, TSecond>(string commandText, CommandType commandType, ParametersVisitor parameters, string splitOn) where TReturn : new() => Execute(commandText, commandType, parameters, () =>
-        {
-            MultiMapper multiMapper = new MultiMapper();
-            return QueryMany<TReturn, TSecond, TReturn>(commandText, commandType, parameters, (a, b) => multiMapper.MapRow<TReturn>(useProjection: false, a, b), splitOn)
-                       .PostProcess(multiMapper)
-                       .Single();
-        });
-
-        public TReturn QuerySingle<TReturn, TSecond, TThird>(string commandText, CommandType commandType, ParametersVisitor parameters, string splitOn) where TReturn : new() => Execute(commandText, commandType, parameters, () =>
-        {
-            MultiMapper multiMapper = new MultiMapper();
-            return QueryMany<TReturn, TSecond, TThird, TReturn>(commandText, commandType, parameters, (a, b, c) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c), splitOn)
-                       .PostProcess(multiMapper)
-                       .Single();
-        });
-
-        public TReturn QuerySingle<TReturn, TSecond, TThird, TFourth>(string commandText, CommandType commandType, ParametersVisitor parameters, string splitOn) where TReturn : new() => Execute(commandText, commandType, parameters, () =>
-        {
-            MultiMapper multiMapper = new MultiMapper();
-            return QueryMany<TReturn, TSecond, TThird, TFourth, TReturn>(commandText, commandType, parameters, (a, b, c, d) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c, d), splitOn)
-                       .PostProcess(multiMapper)
-                       .Single();
-        });
-
-        public TReturn QuerySingle<TReturn, TSecond, TThird, TFourth, TFifth>(string commandText, CommandType commandType, ParametersVisitor parameters, string splitOn) where TReturn : new() => Execute(commandText, commandType, parameters, () =>
-        {
-            MultiMapper multiMapper = new MultiMapper();
-            return QueryMany<TReturn, TSecond, TThird, TFourth, TFifth, TReturn>(commandText, commandType, parameters, (a, b, c, d, e) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c, d, e), splitOn)
-                       .PostProcess(multiMapper)
-                       .Single();
-        });
-
-        public TReturn QuerySingle<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(string commandText, CommandType commandType, ParametersVisitor parameters, string splitOn) where TReturn : new() => Execute(commandText, commandType, parameters, () =>
-        {
-            MultiMapper multiMapper = new MultiMapper();
-            return QueryMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(commandText, commandType, parameters, (a, b, c, d, e, f, g) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c, d, e, f, g), splitOn)
-                       .PostProcess(multiMapper)
-                       .Single();
-        });
-
-        public TReturn QuerySingle<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>(string commandText, CommandType commandType, ParametersVisitor parameters, string splitOn) where TReturn : new() => Execute(commandText, commandType, parameters, () =>
-        {
-            MultiMapper multiMapper = new MultiMapper();
-            return QueryMany<TReturn, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TReturn>(commandText, commandType, parameters, (a, b, c, d, e, f, g, h) => multiMapper.MapRow<TReturn>(useProjection: false, a, b, c, d, e, f, g, h), splitOn)
-                       .PostProcess(multiMapper)
-                       .Single();
-        });
+        public TReturn QuerySingle<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, string splitOn) where TReturn : new() => Execute(commandText, commandType, parameters, () => QueryManyCore<TReturn>(commandText, commandType, parameters, types, splitOn).Single());
 
         T IDatabaseAccessor.QuerySingleOrDefault<T>(string commandText, CommandType commandType, ParametersVisitor parameters) => Execute(commandText, commandType, parameters, () => QuerySingleOrDefault<T>(commandText, commandType, parameters).PostProcess());
 
         Task<T> IDatabaseAccessor.QuerySingleOrDefaultAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken) => Execute(commandText, commandType, parameters, () => QuerySingleOrDefaultAsync<T>(commandText, commandType, parameters, cancellationToken).PostProcess());
+
+        public TReturn QuerySingleOrDefault<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, string splitOn) where TReturn : new() => Execute(commandText, commandType, parameters, () => QueryManyCore<TReturn>(commandText, commandType, parameters, types, splitOn).SingleOrDefault());
 
         IMultipleResultReader IDatabaseAccessor.QueryMultiple(string commandText, CommandType commandType, ParametersVisitor parameters) => Execute(commandText, commandType, parameters, () => QueryMultiple(commandText, commandType, parameters));
         
@@ -143,31 +72,15 @@ namespace Dibix
         #endregion
 
         #region Abstract Methods
-        protected abstract int Execute(string commandText, CommandType commandType, int? commandTimeout, ParametersVisitor parameters);
+        protected abstract int Execute(string commandText, CommandType commandType, ParametersVisitor parameters, int? commandTimeout);
 
-        protected abstract Task<int> ExecuteAsync(string commandText, CommandType commandType, int? commandTimeout, ParametersVisitor parameters, CancellationToken cancellationToken);
+        protected abstract Task<int> ExecuteAsync(string commandText, CommandType commandType, ParametersVisitor parameters, int? commandTimeout, CancellationToken cancellationToken);
 
         protected abstract IEnumerable<T> QueryMany<T>(string commandText, CommandType commandType, ParametersVisitor parameters);
         
         protected abstract Task<IEnumerable<T>> QueryManyAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, bool buffered, CancellationToken cancellationToken);
 
-        protected abstract IEnumerable<TReturn> QueryMany<TFirst, TSecond, TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TReturn> map, string splitOn);
-        
-        protected abstract IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TReturn> map, string splitOn);
-        
-        protected abstract IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TReturn> map, string splitOn);
-
-        protected abstract IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> map, string splitOn);
-
-        protected abstract IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> map, string splitOn);
-        
-        protected abstract IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> map, string splitOn);
-        
-        protected abstract IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TReturn> map, string splitOn);
-
-        protected abstract IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TReturn> map, string splitOn);
-
-        protected abstract IEnumerable<TReturn> QueryMany<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TEleventh, TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TEleventh, TReturn> map, string splitOn);
+        protected abstract IEnumerable<TReturn> QueryMany<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, Func<object[], TReturn> map, string splitOn);
 
         protected abstract T QuerySingle<T>(string commandText, CommandType commandType, ParametersVisitor parameters);
 
@@ -187,6 +100,14 @@ namespace Dibix
         #endregion
 
         #region Private Methods
+        private IEnumerable<TReturn> QueryManyCore<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, string splitOn) where TReturn : new()
+        {
+            ValidateParameters(types, splitOn);
+            MultiMapper multiMapper = new MultiMapper();
+            bool useProjection = types[0] != typeof(TReturn);
+            return QueryMany(commandText, commandType, parameters, types, x => multiMapper.MapRow<TReturn>(useProjection, x), splitOn).PostProcess(multiMapper);
+        }
+
         private T Execute<T>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<T> action)
         {
             try { return action(); }
@@ -197,6 +118,11 @@ namespace Dibix
             try { return await action().ConfigureAwait(false); }
             catch (AggregateException exception) { throw DatabaseAccessException.Create(commandType, commandText, parameters, exception.InnerException ?? exception, _isSqlClient); }
             catch (Exception exception) { throw DatabaseAccessException.Create(commandType, commandText, parameters, exception, _isSqlClient); }
+        }
+
+        private static void ValidateParameters(IReadOnlyCollection<Type> types, string splitOn)
+        {
+            MultiMapUtility.ValidateParameters(types, splitOn);
         }
 
         private static void OnInfoMessage(object sender, SqlInfoMessageEventArgs e)

@@ -31,11 +31,10 @@ namespace Dibix.Tests
 
             connection.Protected().Setup(nameof(IDisposable.Dispose), exactParameterMatch: true, false);
             accessor.Protected()
-                    .As<IDatabaseAccessor>()
-                    .Setup(x => x.QueryMany("commandText", CommandType.Text, parametersVisitor.Object, It.IsAny<Func<Character, Name, string, Name, Character>>(), "splitOn"))
-                    .Returns<string, CommandType, ParametersVisitor, Func<Character, Name, string, Name, Character>, string>((commandText, commandType, parameters, map, splitOn) => rows.Select(x => map((Character)x[0], (Name)x[1], (string)x[2], (Name)x[3])));
+                    .Setup<IEnumerable<Character>>("QueryMany", new[] { typeof(Character) }, exactParameterMatch: true, "commandText", CommandType.Text, ItExpr.Is<ParametersVisitor>(x => x == parametersVisitor.Object), new[] { typeof(Character), typeof(Name), typeof(string), typeof(Name) }, ItExpr.IsAny<Func<object[], Character>>(), "x,x,x")
+                    .Returns<string, CommandType, ParametersVisitor, Type[], Func<object[], Character>, string>((_, _, _, _, map, _) => rows.Select(map));
 
-            Character result = accessor.Object.QuerySingle<Character, Name, string, Name>("commandText", parametersVisitor.Object, "splitOn");
+            Character result = accessor.Object.QuerySingle<Character>("commandText", CommandType.Text, parametersVisitor.Object, new[] { typeof(Character), typeof(Name), typeof(string), typeof(Name) }, "x,x,x");
             Assert.IsNotNull(result.Name);
             Assert.AreEqual("Luke", result.Name.FirstName);
             Assert.AreEqual("Skywalker", result.Name.LastName);
@@ -72,11 +71,10 @@ namespace Dibix.Tests
 
             connection.Protected().Setup(nameof(IDisposable.Dispose), exactParameterMatch: true, false);
             accessor.Protected()
-                    .As<IDatabaseAccessor>()
-                    .Setup(x => x.QueryMany("commandText", CommandType.Text, parametersVisitor.Object, It.IsAny<Func<Category, CategoryBlacklistEntry, Category>>(), "splitOn"))
-                    .Returns<string, CommandType, ParametersVisitor, Func<Category, CategoryBlacklistEntry, Category>, string>((commandText, commandType, parameters, map, splitOn) => rows.Select(x => map((Category)x[0], (CategoryBlacklistEntry)x[1])));
+                    .Setup<IEnumerable<Category>>("QueryMany", new[] { typeof(Category) }, exactParameterMatch: true, "commandText", CommandType.Text, ItExpr.Is<ParametersVisitor>(x => x == parametersVisitor.Object), new[] { typeof(Category), typeof(CategoryBlacklistEntry) }, ItExpr.IsAny<Func<object[], Category>>(), "x")
+                    .Returns<string, CommandType, ParametersVisitor, Type[], Func<object[], Category>, string>((_, _, _, _, map, _) => rows.Select(map));
 
-            IList<Category> categories = accessor.Object.QueryMany<Category, CategoryBlacklistEntry>("commandText", CommandType.Text, parametersVisitor.Object, "splitOn").ToArray();
+            IList<Category> categories = accessor.Object.QueryMany<Category>("commandText", CommandType.Text, parametersVisitor.Object, new[] { typeof(Category), typeof(CategoryBlacklistEntry) }, "x").ToArray();
             Assert.IsNotNull(categories);
             Assert.AreEqual(3, categories.Count);
 
@@ -142,18 +140,18 @@ namespace Dibix.Tests
             Mock<MultipleResultReader> multipleResultReader = new Mock<MultipleResultReader>(MockBehavior.Strict, null, null, null, false);
 
             connection.Protected().Setup(nameof(IDisposable.Dispose), exactParameterMatch: true, false);
-            accessor.As<IDatabaseAccessor>()
-                    .Setup(x => x.QueryMultiple("commandText", CommandType.Text, It.IsAny<ParametersVisitor>()))
+            accessor.Protected()
+                    .Setup<IMultipleResultReader>("QueryMultiple", exactParameterMatch: true, "commandText", CommandType.Text, ItExpr.Is<ParametersVisitor>(x => x == ParametersVisitor.Empty))
                     .Returns(multipleResultReader.Object);
             multipleResultReader.Setup(x => x.Dispose());
             multipleResultReader.Protected()
-                                .As<IMultipleResultReader>()
-                                .Setup(x => x.ReadMany(It.IsAny<Func<Name, Name, CharacterInfo>>(), "splitOn"))
-                                .Returns<Func<Name, Name, CharacterInfo>, string>((map, splitOn) => rows.Select(x => map((Name)x[0], (Name)x[1])));
+                                .Setup<IEnumerable<CharacterInfo>>("ReadMany", new[] { typeof(CharacterInfo) }, exactParameterMatch: true, new[] { typeof(Name), typeof(Name) }, ItExpr.IsAny<Func<object[], CharacterInfo>>(), "x")
+                                .Returns<Type[], Func<object[], CharacterInfo>, string>((_, map, _) => rows.Select(map));;
 
-            using (IMultipleResultReader reader = accessor.Object.QueryMultiple("commandText"))
+
+            using (IMultipleResultReader reader = ((IDatabaseAccessor)accessor.Object).QueryMultiple("commandText", CommandType.Text, ParametersVisitor.Empty))
             {
-                CharacterInfo result = reader.ReadManyProjection<Name, Name, CharacterInfo>("splitOn").Single();
+                CharacterInfo result = reader.ReadMany<CharacterInfo>(new[] { typeof(Name), typeof(Name) }, "x").Single();
                 Assert.IsNotNull(result.Name);
                 Assert.AreEqual("Darth", result.Name.FirstName);
                 Assert.AreEqual("Vader", result.Name.LastName);

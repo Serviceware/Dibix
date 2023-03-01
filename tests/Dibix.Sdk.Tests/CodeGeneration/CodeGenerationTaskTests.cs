@@ -22,7 +22,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         [TestMethod]
         public void External_Empty()
         {
-            this.ExecuteTest(sources: new [] { @"Tests\Syntax\dbx_tests_syntax_empty.sql" }, isEmbedded: false);
+            this.ExecuteTest(sources: new[] { @"Tests\Syntax\dbx_tests_syntax_empty.sql" }, isEmbedded: false);
         }
 
         [TestMethod]
@@ -32,7 +32,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             (
                 isEmbedded: false
               , contracts: new[] { @"Contracts\Direction.json" }
-              , sources: new []
+              , sources: new[]
                 {
                     @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
                   , @"Types\dbx_codeanalysis_udt_generic.sql"
@@ -103,8 +103,8 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
         {
             this.ExecuteTest
             (
-                sources: new [] { @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult.sql" }
-              , contracts: new [] { @"Contracts\GenericContract.json" }
+                sources: new[] { @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult.sql" }
+              , contracts: new[] { @"Contracts\GenericContract.json" }
               , expectedAdditionalAssemblyReferences: new[]
                 {
                     "Newtonsoft.Json.dll"
@@ -119,7 +119,7 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
             this.ExecuteTest
             (
                 sources: new[] { @"Tests\Syntax\dbx_tests_syntax_multiconcreteresult.sql" }
-              , contracts: new [] { @"Contracts\GenericContract.json" }
+              , contracts: new[] { @"Contracts\GenericContract.json" }
               , expectedAdditionalAssemblyReferences: new[]
                 {
                     "Newtonsoft.Json.dll"
@@ -134,7 +134,7 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
             this.ExecuteTest
             (
                 sources: new[] { @"Tests\Syntax\dbx_tests_syntax_singlemultimapresult.sql" }
-              , contracts: new []
+              , contracts: new[]
                 {
                     @"Contracts\Direction.json"
                   , @"Contracts\GenericContract.json"
@@ -154,8 +154,8 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
         {
             this.ExecuteTest
             (
-                sources: new [] { @"Tests\Syntax\dbx_tests_syntax_singlemultimapresult_projection.sql" }
-              , contracts: new []
+                sources: new[] { @"Tests\Syntax\dbx_tests_syntax_singlemultimapresult_projection.sql" }
+              , contracts: new[]
                 {
                     @"Contracts\AccessRights.json"
                   , @"Contracts\Direction.json"
@@ -175,8 +175,8 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
         {
             this.ExecuteTest
             (
-                sources: new [] { @"Tests\Syntax\dbx_tests_syntax_gridresult.sql" }
-              , contracts: new []
+                sources: new[] { @"Tests\Syntax\dbx_tests_syntax_gridresult.sql" }
+              , contracts: new[]
                 {
                     @"Contracts\Direction.json"
                   , @"Contracts\GenericContract.json"
@@ -195,8 +195,8 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
         {
             this.ExecuteTest
             (
-                sources: new [] { @"Tests\Syntax\dbx_tests_syntax_gridresult_async.sql" }
-              , contracts: new []
+                sources: new[] { @"Tests\Syntax\dbx_tests_syntax_gridresult_async.sql" }
+              , contracts: new[]
                 {
                     @"Contracts\Direction.json"
                   , @"Contracts\GenericContract.json"
@@ -215,7 +215,7 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
             this.ExecuteTest
             (
                 sources: new[] { @"Tests\Syntax\dbx_tests_syntax_gridresult_single.sql" }
-              , contracts: new []
+              , contracts: new[]
                 {
                     @"Contracts\Direction.json"
                   , @"Contracts\GenericContract.json"
@@ -235,7 +235,7 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
             this.ExecuteTest
             (
                 sources: new[] { @"Tests\Syntax\dbx_tests_syntax_gridresult_customname.sql" }
-              , contracts: new [] 
+              , contracts: new[] 
                 {
                     @"Contracts\Direction.json"
                   , @"Contracts\GenericContract.json"
@@ -255,7 +255,7 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
             this.ExecuteTest
             (
                 sources: new[] { @"Tests\Syntax\dbx_tests_syntax_gridresult_customname_single.sql" }
-              , contracts: new [] 
+              , contracts: new[] 
                 {
                     @"Contracts\Direction.json"
                   , @"Contracts\GenericContract.json"
@@ -275,7 +275,7 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
             this.ExecuteTest
             (
                 sources: new[] { @"Tests\Syntax\dbx_tests_syntax_gridresult_existingresultcontract.sql" }
-              , contracts: new [] 
+              , contracts: new[] 
                 {
                     @"Contracts\Direction.json"
                   , @"Contracts\GenericContract.json"
@@ -296,7 +296,7 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
             this.ExecuteTest
             (
                 sources: new[] { @"Tests\Syntax\dbx_tests_syntax_gridresult_merge.sql" }
-              , contracts: new [] 
+              , contracts: new[] 
                 {
                     @"Contracts\Direction.json"
                   , @"Contracts\GenericContract.json"
@@ -316,7 +316,7 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
             this.ExecuteTest
             (
                 sources: new[] { @"Tests\Syntax\dbx_tests_syntax_gridresult_projection.sql" }
-              , contracts: new [] 
+              , contracts: new[] 
                 {
                     @"Contracts\AccessRights.json"
                   , @"Contracts\Direction.json"
@@ -366,7 +366,7 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
         [TestMethod]
         public void Inline_FileResult()
         {
-            this.ExecuteTest(sources: new [] { @"Tests\Syntax\dbx_tests_syntax_fileresult.sql" });
+            this.ExecuteTest(sources: new[] { @"Tests\Syntax\dbx_tests_syntax_fileresult.sql" });
         }
 
         [TestMethod]
@@ -385,7 +385,7 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
                   , @"Types\dbx_codeanalysis_udt_generic.sql"
                   , @"Types\dbx_codeanalysis_udt_int.sql"
                 }
-              , contracts: new []
+              , contracts: new[]
                 {
                     @"Contracts\AnotherInputContract.json"
                   , @"Contracts\AnotherEntry.json"
@@ -413,7 +413,7 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
         {
             this.ExecuteTest
             (
-                sources: new []
+                sources: new[]
                 {
                     @"Tests\dbx_tests_authorization.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
@@ -424,7 +424,7 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
                   , @"Types\dbx_codeanalysis_udt_generic.sql"
                   , @"Types\dbx_codeanalysis_udt_int.sql"
                 }
-              , contracts: new []
+              , contracts: new[]
                 {
                     @"Contracts\AnotherInputContract.json"
                   , @"Contracts\AnotherEntry.json"
@@ -433,7 +433,7 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
                   , @"Contracts\GenericContract.json"
                   , @"Contracts\InputContract.json"
                 }
-              , endpoints: new [] { @"Endpoints\GenericEndpoint.json" }
+              , endpoints: new[] { @"Endpoints\GenericEndpoint.json" }
               , isEmbedded: false
               , enableExperimentalFeatures: true
               , outputKind: AssertOutputKind.Endpoint
@@ -451,7 +451,7 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
         {
             this.ExecuteTest
             (
-                sources: new []
+                sources: new[]
                 {
                     @"Tests\dbx_tests_authorization.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
@@ -462,7 +462,7 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
                   , @"Types\dbx_codeanalysis_udt_generic.sql"
                   , @"Types\dbx_codeanalysis_udt_int.sql"
                 }
-              , contracts: new []
+              , contracts: new[]
                 {
                     @"Contracts\AnotherInputContract.json"
                   , @"Contracts\AnotherEntry.json"
@@ -471,7 +471,7 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
                   , @"Contracts\GenericContract.json"
                   , @"Contracts\InputContract.json"
                 }
-              , endpoints: new [] { @"Endpoints\GenericEndpoint.json" }
+              , endpoints: new[] { @"Endpoints\GenericEndpoint.json" }
               , isEmbedded: false
               , enableExperimentalFeatures: true
               , outputKind: AssertOutputKind.Accessor
@@ -489,7 +489,7 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
         {
             this.ExecuteTest
             (
-                sources: new []
+                sources: new[]
                 {
                     @"Tests\dbx_tests_authorization.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
@@ -500,7 +500,7 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
                   , @"Types\dbx_codeanalysis_udt_generic.sql"
                   , @"Types\dbx_codeanalysis_udt_int.sql"
                 }
-              , contracts: new []
+              , contracts: new[]
                 {
                     @"Contracts\AnotherInputContract.json"
                   , @"Contracts\AnotherEntry.json"
@@ -509,7 +509,7 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
                   , @"Contracts\GenericContract.json"
                   , @"Contracts\InputContract.json"
                 }
-              , endpoints: new [] { @"Endpoints\GenericEndpoint.json" }
+              , endpoints: new[] { @"Endpoints\GenericEndpoint.json" }
               , isEmbedded: false
               , outputKind: AssertOutputKind.OpenApi
               , expectedAdditionalAssemblyReferences: new[]
@@ -531,13 +531,13 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
                     @"Types\dbx_codeanalysis_udt_generic.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
                 }
-              , contracts: new []
+              , contracts: new[]
                 {
                     @"Contracts\Direction.json"
                   , @"Contracts\Entry.json"
                   , @"Contracts\Request.json"
                 }
-              , endpoints: new [] { @"Endpoints\GenericEndpointWithErrors.json" }
+              , endpoints: new[] { @"Endpoints\GenericEndpointWithErrors.json" }
               , isEmbedded: false
               , expectedException: @"One or more errors occured during code generation:
 Endpoints\GenericEndpointWithErrors.json(8,15,8,15):error:Unknown property source 'WTF'
@@ -557,8 +557,8 @@ Endpoints\GenericEndpointWithErrors.json(40,22,40,22):error:Equivalent paths are
         {
             this.ExecuteTestAndExpectError
             (
-                sources: new [] { @"Tests\Syntax\dbx_tests_syntax_empty_params_out.sql" }
-              , endpoints: new [] { @"Endpoints\GenericEndpointWithOutputParam.json" }
+                sources: new[] { @"Tests\Syntax\dbx_tests_syntax_empty_params_out.sql" }
+              , endpoints: new[] { @"Endpoints\GenericEndpointWithOutputParam.json" }
               , expectedException: @"One or more errors occured during code generation:
 Endpoints\GenericEndpointWithOutputParam.json(6,18,6,18):error:Output parameters are not supported in endpoints: EmptyWithOutputParam"
             );
@@ -569,7 +569,7 @@ Endpoints\GenericEndpointWithOutputParam.json(6,18,6,18):error:Output parameters
         {
             this.ExecuteTestAndExpectError
             (
-                contracts: new []
+                contracts: new[]
                 {
                     @"Contracts\DuplicateContract.json"
                   , @"Contracts\AccessRights.json"
@@ -584,7 +584,7 @@ Contracts\DuplicateContract.json(5,12,5,12):error:Property with the name 'Invali
         {
             this.ExecuteTestAndExpectError
             (
-                contracts: new []
+                contracts: new[]
                 {
                     @"Contracts\DuplicatePropertyName.json"
                   , @"Contracts\AccessRights.json"
@@ -599,7 +599,7 @@ Contracts\DuplicatePropertyName.json(4,9,4,9):error:Property with the name 'AA' 
         {
             this.ExecuteTestAndExpectError
             (
-                contracts: new []
+                contracts: new[]
                 {
                     @"Contracts\DuplicatePropertyNameCaseInsensitive.json"
                   , @"Contracts\AccessRights.json"

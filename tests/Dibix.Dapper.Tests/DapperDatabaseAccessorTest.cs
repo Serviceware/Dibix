@@ -16,7 +16,7 @@ namespace Dibix.Dapper.Tests
         public Task QuerySingle_WithMultipleRows_ThrowsException() => base.ExecuteTest(accessor =>
         {
             const string commandText = "SELECT 1 UNION ALL SELECT 2";
-            DatabaseAccessException exception = AssertThrows<DatabaseAccessException>(() => accessor.QuerySingle<byte>(commandText));
+            DatabaseAccessException exception = AssertThrows<DatabaseAccessException>(() => accessor.QuerySingle<byte>(commandText, CommandType.Text, ParametersVisitor.Empty));
             Assert.AreEqual(@"Sequence contains more than one element
 CommandType: Text
 CommandText: <Inline>", exception.Message);
@@ -59,7 +59,7 @@ CommandText: <Inline>", exception.Message);
             const string commandText = "SELECT CAST(@binary AS NVARCHAR(MAX))";
             byte[] binary = Encoding.Unicode.GetBytes("Test");
             ParametersVisitor parameters = accessor.Parameters().SetFromTemplate(new { binary }).Build();
-            string result = accessor.QuerySingle<string>(commandText, parameters);
+            string result = accessor.QuerySingle<string>(commandText, CommandType.Text, parameters);
             Assert.AreEqual("Test", result);
         });
 
@@ -69,7 +69,7 @@ CommandText: <Inline>", exception.Message);
             const string commandText = "SELECT [x].[v].value('@value', 'INT') FROM @xml.nodes(N'root/item') AS [x]([v])";
             XElement xml = XElement.Parse("<root><item value=\"1\" /><item value=\"2\" /></root>");
             ParametersVisitor parameters = accessor.Parameters().SetFromTemplate(new { xml }).Build();
-            IList<byte> results = accessor.QueryMany<byte>(commandText, parameters).ToArray();
+            IList<byte> results = accessor.QueryMany<byte>(commandText, CommandType.Text, parameters).ToArray();
             Assert.AreEqual(2, results.Count);
             Assert.AreEqual((byte)1, results[0]);
             Assert.AreEqual((byte)2, results[1]);
@@ -81,7 +81,7 @@ CommandText: <Inline>", exception.Message);
             const string commandText = "SELECT [x].[v].value('@value', 'INT') FROM @xml.nodes(N'root/item') AS [x]([v])";
             XElement xml = XElement.Parse("<root><item value=\"1\" /><item value=\"2\" /></root>");
             ParametersVisitor parameters = accessor.Parameters().SetXml(nameof(xml), xml).Build();
-            IList<byte> results = accessor.QueryMany<byte>(commandText, parameters).ToArray();
+            IList<byte> results = accessor.QueryMany<byte>(commandText, CommandType.Text, parameters).ToArray();
             Assert.AreEqual(2, results.Count);
             Assert.AreEqual((byte)1, results[0]);
             Assert.AreEqual((byte)2, results[1]);
@@ -91,7 +91,7 @@ CommandText: <Inline>", exception.Message);
         public Task QueryMany_WithXElementResult_Success() => base.ExecuteTest(accessor =>
         {
             const string commandText = "SELECT N'<xml/>'";
-            XElement element = accessor.QuerySingle<XElement>(commandText);
+            XElement element = accessor.QuerySingle<XElement>(commandText, CommandType.Text, ParametersVisitor.Empty);
             Assert.AreEqual("<xml />", element.ToString());
         });
 
@@ -99,7 +99,7 @@ CommandText: <Inline>", exception.Message);
         public Task QuerySingle_MissingColumnName_ThrowsException() => base.ExecuteTest(accessor =>
         {
             const string commandText = "SELECT 1";
-            DatabaseAccessException exception = AssertThrows<DatabaseAccessException>(() => accessor.QuerySingle<Entity>(commandText));
+            DatabaseAccessException exception = AssertThrows<DatabaseAccessException>(() => accessor.QuerySingle<Entity>(commandText, CommandType.Text, ParametersVisitor.Empty));
             Assert.AreEqual(@"Column name was not specified, therefore it cannot be mapped to type 'Dibix.Dapper.Tests.Entity'
 CommandType: Text
 CommandText: <Inline>", exception.Message);
@@ -109,7 +109,7 @@ CommandText: <Inline>", exception.Message);
         public Task QuerySingle_InvalidColumnName_ThrowsException() => base.ExecuteTest(accessor =>
         {
             const string commandText = "SELECT 1 AS [idx]";
-            DatabaseAccessException exception = AssertThrows<DatabaseAccessException>(() => accessor.QuerySingle<Entity>(commandText));
+            DatabaseAccessException exception = AssertThrows<DatabaseAccessException>(() => accessor.QuerySingle<Entity>(commandText, CommandType.Text, ParametersVisitor.Empty));
             Assert.AreEqual(@"Column 'idx' does not match a property on type 'Dibix.Dapper.Tests.Entity'
 CommandType: Text
 CommandText: <Inline>", exception.Message);
@@ -119,7 +119,7 @@ CommandText: <Inline>", exception.Message);
         public Task QuerySingle_Success() => base.ExecuteTest(accessor =>
         {
             const string commandText = "SELECT 1 AS [id]";
-            Entity result = accessor.QuerySingle<Entity>(commandText);
+            Entity result = accessor.QuerySingle<Entity>(commandText, CommandType.Text, ParametersVisitor.Empty);
             Assert.AreEqual(1, result.Id);
             Assert.IsNull(result.Name);
         });
@@ -129,7 +129,7 @@ CommandText: <Inline>", exception.Message);
         {
             const string commandText = "SELECT @agentid AS [id], N'beef' AS [name]";
             ParametersVisitor parameters = accessor.Parameters().SetInt32("agentid", 6).Build();
-            Entity result = accessor.QuerySingle<Entity>(commandText, parameters);
+            Entity result = accessor.QuerySingle<Entity>(commandText, CommandType.Text, parameters);
             Assert.AreEqual(6, result.Id);
             Assert.AreEqual("beef", result.Name);
             Assert.AreEqual(default, result.Price);
@@ -140,7 +140,7 @@ CommandText: <Inline>", exception.Message);
         {
             const string commandText = "SELECT @agentid AS [id], N'beef' AS [name]";
             ParametersVisitor parameters = accessor.Parameters().SetFromTemplate(new { agentid = 6 }).Build();
-            Entity result = accessor.QuerySingle<Entity>(commandText, parameters);
+            Entity result = accessor.QuerySingle<Entity>(commandText, CommandType.Text, parameters);
             Assert.AreEqual(6, result.Id);
             Assert.AreEqual("beef", result.Name);
             Assert.AreEqual(default, result.Price);
@@ -153,7 +153,7 @@ CommandText: <Inline>", exception.Message);
             ParametersVisitor @params = accessor.Parameters()
                                                 .SetInt32("agentid", 6)
                                                 .Build();
-            Entity result = accessor.QuerySingle<Entity>(commandText, @params);
+            Entity result = accessor.QuerySingle<Entity>(commandText, CommandType.Text, @params);
             Assert.AreEqual(6, result.Id);
             Assert.AreEqual("beef", result.Name);
             Assert.AreEqual(default, result.Price);
@@ -169,7 +169,7 @@ CommandText: <Inline>", exception.Message);
                                                     agentid = 6, direction = (Direction?)Direction.Descending
                                                 })
                                                 .Build();
-            Entity result = accessor.QuerySingle<Entity>(commandText, @params);
+            Entity result = accessor.QuerySingle<Entity>(commandText, CommandType.Text, @params);
             Assert.AreEqual(6, result.Id);
             Assert.AreEqual("beef", result.Name);
             Assert.AreEqual(default, result.Price);
@@ -188,7 +188,7 @@ FROM @translations";
             };
 
             ParametersVisitor parameters = accessor.Parameters().SetStructured("translations", translationsParam).Build();
-            IList<Entity> result = accessor.QueryMany<Entity>(commandText, parameters).ToArray();
+            IList<Entity> result = accessor.QueryMany<Entity>(commandText, CommandType.Text, parameters).ToArray();
             Assert.AreEqual(2, result.Count);
             Assert.AreEqual(7, result[0].Id);
             Assert.AreEqual("de", result[0].Name);
@@ -217,7 +217,7 @@ FROM @ids";
                                                        ids = idsParam
                                                    })
                                                    .Build();
-            using (IMultipleResultReader reader = accessor.QueryMultiple(commandText, parameters))
+            using (IMultipleResultReader reader = accessor.QueryMultiple(commandText, CommandType.Text, parameters))
             {
                 Entity entity = reader.ReadSingle<Entity>();
                 IEnumerable<int> ids = reader.ReadMany<int>();
@@ -245,7 +245,7 @@ FROM @ids";
                                                    .SetStructured("values", valuesParam)
                                                    .SetStructured("ids", idsParam)
                                                    .Build();
-            using (IMultipleResultReader reader = accessor.QueryMultiple(commandText, parameters))
+            using (IMultipleResultReader reader = accessor.QueryMultiple(commandText, CommandType.Text, parameters))
             {
                 Entity entity = reader.ReadSingle<Entity>();
                 IEnumerable<int> ids = reader.ReadMany<int>();
@@ -258,78 +258,13 @@ FROM @ids";
         });
 
         [TestMethod]
-        public Task QuerySingle_WithMultiMap_Success() => base.ExecuteTest(accessor =>
-        {
-            const string commandText = @"SELECT [intvalue] AS [id], 1 AS [id], [stringvalue] AS [name], 0 AS [id], [decimalvalue] AS [price]
-FROM @values";
-
-            StructuredType_IntStringDecimal valuesParam = new StructuredType_IntStringDecimal { { 5, "cake", 3.975M } };
-            ParametersVisitor @params = accessor.Parameters()
-                                                .SetStructured("values", valuesParam)
-                                                .Build();
-
-            void MapEntity(Entity a, NameEntity b, PriceEntity c)
-            {
-                Assert.AreEqual(5, a.Id);
-                Assert.AreEqual(default, a.Name);
-                Assert.AreEqual(default, a.Price);
-
-                Assert.AreEqual("cake", b.Name);
-
-                Assert.AreEqual(3.98M, c.Price);
-
-                a.Name = b.Name;
-                a.Price = c.Price;
-            }
-
-            Entity result = accessor.QuerySingle<Entity, NameEntity, PriceEntity>(commandText, @params, MapEntity, "id,id");
-            Assert.AreEqual(5, result.Id);
-            Assert.AreEqual("cake", result.Name);
-            Assert.AreEqual(3.98M, result.Price);
-        });
-
-        [TestMethod]
-        public Task QueryMultiple_WithMultiMap_Success() => base.ExecuteTest(accessor =>
-        {
-            const string commandText = @"SELECT [intvalue] AS [id], 0 AS [id], [stringvalue] AS [name], 0 AS [id], [decimalvalue] AS [price]
-FROM @values";
-
-            StructuredType_IntStringDecimal valuesParam = new StructuredType_IntStringDecimal { { 5, "cake", 3.975M } };
-            ParametersVisitor @params = accessor.Parameters()
-                                                .SetStructured("values", valuesParam)
-                                                .Build();
-
-            void MapEntity(Entity a, NameEntity b, PriceEntity c)
-            {
-                Assert.AreEqual(5, a.Id);
-                Assert.AreEqual(default, a.Name);
-                Assert.AreEqual(default, a.Price);
-
-                Assert.AreEqual("cake", b.Name);
-
-                Assert.AreEqual(3.98M, c.Price);
-
-                a.Name = b.Name;
-                a.Price = c.Price;
-            }
-
-            using (IMultipleResultReader reader = accessor.QueryMultiple(commandText, @params))
-            {
-                Entity result = reader.ReadSingle<Entity, NameEntity, PriceEntity>(MapEntity, "id,id");
-                Assert.AreEqual(5, result.Id);
-                Assert.AreEqual("cake", result.Name);
-                Assert.AreEqual(3.98M, result.Price);
-            }
-        });
-
-        [TestMethod]
         public Task CustomSqlMetadata_MaxLength_TextIsTrimmed() => base.ExecuteTest(accessor =>
         {
             const string commandText = @"SELECT [stringvalue]
 FROM @values";
 
             ParametersVisitor parameters = accessor.Parameters().SetStructured("values", new StructuredType_String_Custom { "abc" }).Build();
-            string result = accessor.QuerySingle<string>(commandText, parameters);
+            string result = accessor.QuerySingle<string>(commandText, CommandType.Text, parameters);
             Assert.AreEqual("a", result);
         });
 
@@ -340,7 +275,7 @@ FROM @values";
 FROM @values";
 
             ParametersVisitor parameters = accessor.Parameters().SetStructured("values", new StructuredType_Decimal_Custom { 3.975M }).Build();
-            decimal result = accessor.QuerySingle<decimal>(commandText, parameters);
+            decimal result = accessor.QuerySingle<decimal>(commandText, CommandType.Text, parameters);
             Assert.AreEqual(4M, result);
         });
     }

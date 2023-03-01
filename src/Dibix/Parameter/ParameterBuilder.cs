@@ -106,7 +106,7 @@ namespace Dibix
 
         IParameterBuilder IParameterBuilder.SetXml(string parameterName, XElement parameterValue) => this.Set(parameterName, DbType.Xml, parameterValue);
 
-        IParameterBuilder IParameterBuilder.SetStructured(string name, StructuredType parameterValue) => this.Set(name, DbType.String, parameterValue);
+        IParameterBuilder IParameterBuilder.SetStructured(string name, StructuredType parameterValue) => this.Set(name, DbType.Object, parameterValue);
 
         IParameterBuilder IParameterBuilder.SetFromTemplate(object template)
         {

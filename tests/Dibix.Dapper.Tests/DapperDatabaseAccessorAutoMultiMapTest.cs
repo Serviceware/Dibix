@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -17,7 +19,7 @@ namespace Dibix.Dapper.Tests
 FROM (VALUES (N'desks')) AS [x]([identifier])
 INNER JOIN (VALUES (N'agentdesk', N'desks')
                  , (N'workingdesk', N'desks')) AS [y]([identifier], [identifier_parent]) ON [x].[identifier] = [y].[identifier_parent]";
-            RecursiveEntity result = accessor.QuerySingle<RecursiveEntity, RecursiveEntity>(commandText, accessor.Parameters().Build(), "identifier");
+            RecursiveEntity result = accessor.QuerySingle<RecursiveEntity>(commandText, CommandType.Text, accessor.Parameters().Build(), new[] { typeof(RecursiveEntity), typeof(RecursiveEntity) }, "identifier");
             Assert.AreEqual("desks", result.Identifier);
             Assert.AreEqual(2, result.Children.Count);
             Assert.AreEqual("agentdesk", result.Children[0].Identifier);
@@ -33,7 +35,7 @@ INNER JOIN (VALUES (N'black', N'feature1')
                  , (N'red', N'feature1')) AS [y]([name], [name_feature]) ON [x].[name] = [y].[name_feature]
 INNER JOIN (VALUES (N'dependentfeaturex', N'feature1')
                  , (N'dependentfeaturey', N'feature1')) AS [z]([name], [name_feature]) ON [x].[name] = [z].[name_feature]";
-            FeatureEntity result = accessor.QuerySingle<FeatureEntity, FeatureItemEntity, DependentFeatureEntity>(commandText, accessor.Parameters().Build(), "name,name");
+            FeatureEntity result = accessor.QuerySingle<FeatureEntity>(commandText, CommandType.Text, accessor.Parameters().Build(), new[] { typeof(FeatureEntity), typeof(FeatureItemEntity), typeof(DependentFeatureEntity) }, "name,name");
             Assert.AreEqual("feature1", result.Name);
             Assert.AreEqual(2, result.Items.Count);
             Assert.AreEqual("black", result.Items[0].Name);
@@ -51,7 +53,7 @@ FROM (VALUES (N'feature1')) AS [x]([name])
 INNER JOIN (VALUES (N'feature1_base', N'feature1')) AS [y]([name], [name_feature]) ON [x].[name] = [y].[name_feature]
 INNER JOIN (VALUES (N'black', N'feature1')
                  , (N'red', N'feature1')) AS [z]([name], [name_feature]) ON [x].[name] = [z].[name_feature]";
-            FeatureEntity result = accessor.QuerySingle<FeatureEntity, FeatureBaseEntity, FeatureItemEntity>(commandText, accessor.Parameters().Build(), "name,name");
+            FeatureEntity result = accessor.QuerySingle<FeatureEntity>(commandText, CommandType.Text, accessor.Parameters().Build(), new[] { typeof(FeatureEntity), typeof(FeatureBaseEntity), typeof(FeatureItemEntity) }, "name,name");
             Assert.AreEqual("feature1", result.Name);
             Assert.AreEqual(2, result.Items.Count);
             Assert.AreEqual("black", result.Items[0].Name);
@@ -73,7 +75,7 @@ INNER JOIN (VALUES (7, N'black_de', N'black')
                  , (9, N'black_en', N'black')
 				 , (7, N'red_de', N'red')
                  , (9, N'red_en', N'red')) AS [yt]([lcid], [value], [name_item]) ON [y].[name] = [yt].[name_item]";
-            FeatureEntity result = accessor.QuerySingle<FeatureEntity, TranslationEntity, FeatureItemEntity, TranslationEntity>(commandText, accessor.Parameters().Build(), "lcid,name,lcid");
+            FeatureEntity result = accessor.QuerySingle<FeatureEntity>(commandText, CommandType.Text, accessor.Parameters().Build(), new[] { typeof(FeatureEntity), typeof(TranslationEntity), typeof(FeatureItemEntity), typeof(TranslationEntity) }, "lcid,name,lcid");
             Assert.AreEqual("feature1", result.Name);
             Assert.AreEqual(2, result.Items.Count);
             Assert.AreEqual("black", result.Items[0].Name);
@@ -104,7 +106,7 @@ INNER JOIN (VALUES (N'black', N'feature1')
                  , (N'red', N'feature1')) AS [y]([name], [name_feature]) ON [x].[name] = [y].[name_feature]
 INNER JOIN (VALUES (0x1, N'feature1')
                  , (0x2, N'feature1')) AS [z]([data], [feature]) ON [x].[name] = [z].[feature]";
-            FeatureEntity result = accessor.QuerySingle<FeatureEntity, FeatureItemEntity, byte[]>(commandText, accessor.Parameters().Build(), "name,data");
+            FeatureEntity result = accessor.QuerySingle<FeatureEntity>(commandText, CommandType.Text, accessor.Parameters().Build(), new[] { typeof(FeatureEntity), typeof(FeatureItemEntity), typeof(byte[]) }, "name,data");
             Assert.AreEqual("feature1", result.Name);
             Assert.AreEqual(2, result.Items.Count);
             Assert.AreEqual("black", result.Items[0].Name);
@@ -123,7 +125,7 @@ INNER JOIN (VALUES (0x1, N'product1')
                  , (0x2, N'product1')) AS [y]([data], [product]) ON [x].[name] = [y].[product]
 INNER JOIN (VALUES (N'feature1', N'product1')
                  , (N'feature2', N'product1')) AS [z]([name], [name_product]) ON [x].[name] = [z].[name_product]";
-            ProductEntity result = accessor.QuerySingle<ProductEntity, byte[], FeatureEntity>(commandText, accessor.Parameters().Build(), "data,name");
+            ProductEntity result = accessor.QuerySingle<ProductEntity>(commandText, CommandType.Text, accessor.Parameters().Build(), new[] { typeof(ProductEntity), typeof(byte[]), typeof(FeatureEntity) }, "data,name");
             Assert.AreEqual("product1", result.Name);
             Assert.IsTrue(result.Picture.SequenceEqual(Enumerable.Repeat((byte)1, 1)));
             Assert.AreEqual(2, result.Features.Count);
@@ -140,7 +142,7 @@ INNER JOIN (VALUES (N'black', N'feature1')
                  , (N'red', N'feature1')) AS [y]([featureitem_name], [feature_name]) ON [x].[feature_name] = [y].[feature_name]
 INNER JOIN (VALUES (1, N'feature1')
                  , (2, N'feature1')) AS [z]([featureitem_id], [feature_name]) ON [x].[feature_name] = [z].[feature_name]";
-            FeatureEntity result = accessor.QuerySingle<FeatureEntity, FeatureItemEntity, int>(commandText, accessor.Parameters().Build(), "name,featureitem_id");
+            FeatureEntity result = accessor.QuerySingle<FeatureEntity>(commandText, CommandType.Text, accessor.Parameters().Build(), new[] { typeof(FeatureEntity), typeof(FeatureItemEntity), typeof(int) }, "name,featureitem_id");
             Assert.AreEqual("feature1", result.Name);
             Assert.AreEqual(2, result.Items.Count);
             Assert.AreEqual("black", result.Items[0].Name);
@@ -159,7 +161,7 @@ INNER JOIN (VALUES (1, N'product1')
                  , (2, N'product1')) AS [y]([feature_id], [product_name]) ON [x].[product_name] = [y].[product_name]
 INNER JOIN (VALUES (N'feature1', N'product1')
                  , (N'feature2', N'product1')) AS [z]([feature_name], [product_name]) ON [x].[product_name] = [z].[product_name]";
-            ProductEntity result = accessor.QuerySingle<ProductEntity, int, FeatureEntity>(commandText, accessor.Parameters().Build(), "feature_id,name");
+            ProductEntity result = accessor.QuerySingle<ProductEntity>(commandText, CommandType.Text, accessor.Parameters().Build(), new[] { typeof(ProductEntity), typeof(int), typeof(FeatureEntity) }, "feature_id,name");
             Assert.AreEqual("product1", result.Name);
             Assert.AreEqual(0, result.FirstFeatureId); // Setting a primitive property using multi map doesn't make sense and is therefore not supported
             Assert.AreEqual(2, result.Features.Count);

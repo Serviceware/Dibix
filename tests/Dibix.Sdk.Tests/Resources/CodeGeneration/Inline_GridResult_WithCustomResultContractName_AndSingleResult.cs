@@ -38,7 +38,7 @@ namespace Dibix.Sdk.Tests.Data.Grid
                                                     })
                                                     .Build();
                 Dibix.Sdk.Tests.DomainModel.Grid.GridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GridResult();
-                result.Item = accessor.QuerySingle<Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract, Dibix.Sdk.Tests.DomainModel.GenericContract, Dibix.Sdk.Tests.DomainModel.Direction>(GetGridCommandText, CommandType.Text, @params, "id,direction");
+                result.Item = accessor.QuerySingle<Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract>(GetGridCommandText, CommandType.Text, @params, new[] { typeof(Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract), typeof(Dibix.Sdk.Tests.DomainModel.GenericContract), typeof(Dibix.Sdk.Tests.DomainModel.Direction) }, "id,direction");
                 return result;
             }
         }

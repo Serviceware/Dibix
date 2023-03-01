@@ -449,9 +449,6 @@ namespace Dibix.Sdk.CodeGeneration
             writer.WriteRaw("reader.")
                   .WriteRaw(GetMultipleResultReaderMethodName(result.ResultMode));
 
-            if (result.ProjectToType != null)
-                writer.WriteRaw("Projection");
-
             if (definition.Async)
                 writer.WriteRaw("Async");
 
@@ -459,7 +456,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             ICollection<string> parameters = new Collection<string>();
 
-            AppendMultiMapParameters(result, parameters);
+            AppendMultiMapParameters(result, parameters, context);
 
             WriteMethodParameters(writer, parameters);
 
@@ -493,7 +490,7 @@ namespace Dibix.Sdk.CodeGeneration
             parameters.Add(definition.Parameters.Any() ? "@params" : "ParametersVisitor.Empty");
 
             if (singleResult != null)
-                AppendMultiMapParameters(singleResult, parameters);
+                AppendMultiMapParameters(singleResult, parameters, context);
 
             if (definition.Async)
                 parameters.Add("cancellationToken");
@@ -506,30 +503,19 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static void WriteGenericTypeArguments(StringWriter writer, SqlQueryResult result, CodeGenerationContext context)
         {
-            writer.WriteRaw('<');
-
-            for (int i = 0; i < result.Types.Count; i++)
-            {
-                string returnType = context.ResolveTypeName(result.Types[i], enumerableBehavior: EnumerableBehavior.None);
-                writer.WriteRaw(returnType);
-                if (i + 1 < result.Types.Count)
-                    writer.WriteRaw(", ");
-            }
-
-            if (result.ProjectToType != null)
-                writer.WriteRaw(", ")
-                      .WriteRaw(context.ResolveTypeName(result.ProjectToType, enumerableBehavior: EnumerableBehavior.None));
-
-            writer.WriteRaw('>');
+            writer.WriteRaw('<')
+                  .WriteRaw(context.ResolveTypeName(result.ReturnType, enumerableBehavior: EnumerableBehavior.None))
+                  .WriteRaw('>');
         }
 
-        private static void AppendMultiMapParameters(SqlQueryResult result, ICollection<string> parameters)
+        private static void AppendMultiMapParameters(SqlQueryResult result, ICollection<string> parameters, CodeGenerationContext context)
         {
             if (result.Types.Count > 1)
             {
                 if (!String.IsNullOrEmpty(result.Converter))
                     parameters.Add(result.Converter);
 
+                parameters.Add($"new[] {{ {String.Join(", ", result.Types.Select(x => $"typeof({context.ResolveTypeName(x, enumerableBehavior: EnumerableBehavior.None)})"))} }}");
                 parameters.Add($"\"{result.SplitOn}\"");
             }
         }
