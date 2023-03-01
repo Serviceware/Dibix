@@ -53,7 +53,7 @@ namespace Dibix.Sdk.Tests.Data
     {
         public GenericParameterSet() : base("[dbo].[dbx_codeanalysis_udt_generic]")
         {
-            base.ImportSqlMetadata(() => this.Add(default, default));
+            base.ImportSqlMetadata(() => Add(default, default));
         }
         public void Add(int id, string? name)
         {

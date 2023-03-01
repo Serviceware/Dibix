@@ -8,7 +8,7 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class DaoContractClassWriter : ContractClassWriter
     {
-        public DaoContractClassWriter(CodeGenerationModel model, SchemaDefinitionSource schemaFilter) : base(model, schemaFilter) { }
+        public DaoContractClassWriter(CodeGenerationModel model, CodeGenerationOutputFilter outputFilter) : base(model, outputFilter) { }
 
         protected override void BeginProcessClass(ObjectSchema schema, ICollection<CSharpAnnotation> classAnnotations, CodeGenerationContext context)
         {

@@ -10,6 +10,7 @@ namespace Dibix.Sdk.CodeGeneration
         public SourceLocation Location { get; }
         public ExternalSchemaInfo ExternalSchemaInfo { get; set; }
         public string FullName => $"{Namespace}.{DefinitionName}";
+        public int ReferenceCount { get; set; }
 
         protected SchemaDefinition(string @namespace, string definitionName, SchemaDefinitionSource source, SourceLocation location)
         {

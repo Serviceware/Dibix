@@ -19,29 +19,27 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public DaoExecutorInputClassWriter(CodeGenerationModel model, SchemaDefinitionSource schemaFilter)
+        public DaoExecutorInputClassWriter(CodeGenerationModel model, CodeGenerationOutputFilter outputFilter)
         {
-            this._schemas = model.Schemas
-                                 .OfType<SqlStatementDefinition>()
-                                 .Where(x => schemaFilter.HasFlag(x.Source) && RequiresInput(x))
-                                 .ToArray();
+            _schemas = model.GetSchemas(outputFilter)
+                            .OfType<SqlStatementDefinition>()
+                            .Where(RequiresInput)
+                            .ToArray();
         }
         #endregion
 
         #region Overrides
-        public override bool HasContent(CodeGenerationModel model) => this._schemas.Any();
+        public override bool HasContent(CodeGenerationModel model) => _schemas.Any();
 
         public override void Write(CodeGenerationContext context)
         {
-            var namespaceGroups = this._schemas
-                                      .GroupBy(x => x.Namespace)
-                                      .ToArray();
+            var namespaceGroups = _schemas.GroupBy(x => x.Namespace).OrderBy(x => x.Key).ToArray();
 
             for (int i = 0; i < namespaceGroups.Length; i++)
             {
                 IGrouping<string, SqlStatementDefinition> namespaceGroup = namespaceGroups[i];
                 CSharpStatementScope scope = /*namespaceGroup.Key != null ? */context.CreateOutputScope(namespaceGroup.Key)/* : context.Output*/;
-                IList<SqlStatementDefinition> statements = namespaceGroup.ToArray();
+                IList<SqlStatementDefinition> statements = namespaceGroup.OrderBy(x => x.DefinitionName).ToArray();
                 for (int j = 0; j < statements.Count; j++)
                 {
                     SqlStatementDefinition statement = statements[j];

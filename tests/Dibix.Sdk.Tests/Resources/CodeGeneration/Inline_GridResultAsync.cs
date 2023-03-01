@@ -97,8 +97,8 @@ namespace Dibix.Sdk.Tests.DomainModel.Grid
 
         public GetGridResult()
         {
-            this.Items = new Collection<Dibix.Sdk.Tests.DomainModel.GenericContract>();
-            this.Directions = new Collection<Dibix.Sdk.Tests.DomainModel.Direction>();
+            Items = new Collection<Dibix.Sdk.Tests.DomainModel.GenericContract>();
+            Directions = new Collection<Dibix.Sdk.Tests.DomainModel.Direction>();
         }
     }
 }

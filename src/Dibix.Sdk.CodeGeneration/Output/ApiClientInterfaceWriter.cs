@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Dibix.Sdk.CodeGeneration.CSharp;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -16,9 +17,9 @@ namespace Dibix.Sdk.CodeGeneration
             CSharpInterface @interface = output.AddInterface(interfaceName, CSharpModifiers.Public)
                                                .Implements("IHttpService");
 
-            foreach (ActionDefinition action in controller.Actions)
+            foreach (ActionDefinition action in controller.Actions.OrderBy(x => operationIdMap[x]))
             {
-                base.AddMethod(action, context, operationIdMap, (methodName, returnType) => @interface.AddMethod(methodName, returnType));
+                base.AddMethod(action, context, operationIdMap, @interface.AddMethod);
             }
         }
         #endregion

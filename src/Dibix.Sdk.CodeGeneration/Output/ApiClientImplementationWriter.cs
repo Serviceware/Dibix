@@ -51,13 +51,14 @@ namespace Dibix.Sdk.CodeGeneration
 
             @class.AddSeparator();
 
-            for (int i = 0; i < controller.Actions.Count; i++)
+            IList<ActionDefinition> actions = controller.Actions.OrderBy(x => operationIdMap[x]).ToArray();
+            for (int i = 0; i < actions.Count; i++)
             {
-                ActionDefinition action = controller.Actions[i];
-                string body = this.GenerateMethodBody(controller, action, context, securitySchemeMap);
+                ActionDefinition action = actions[i];
+                string body = GenerateMethodBody(controller, action, context, securitySchemeMap);
                 base.AddMethod(action, context, operationIdMap, (methodName, returnType) => @class.AddMethod(methodName, returnType, body, modifiers: CSharpModifiers.Public | CSharpModifiers.Async));
 
-                if (i + 1 < controller.Actions.Count)
+                if (i + 1 < actions.Count)
                     @class.AddSeparator();
             }
         }
@@ -66,16 +67,16 @@ namespace Dibix.Sdk.CodeGeneration
         #region Private Methods
         private static void AddPrimaryCtor(CSharpClass @class, bool requiresAuthorization)
         {
-            StringBuilder ctorBodySb = new StringBuilder("this._httpClientFactory = httpClientFactory;");
+            StringBuilder ctorBodySb = new StringBuilder("_httpClientFactory = httpClientFactory;");
 
             if (requiresAuthorization)
             {
                 ctorBodySb.AppendLine()
-                          .Append("this._httpAuthorizationProvider = httpAuthorizationProvider;");
+                          .Append("_httpAuthorizationProvider = httpAuthorizationProvider;");
             }
 
             ctorBodySb.AppendLine()
-                      .Append("this._httpClientName = httpClientName;");
+                      .Append("_httpClientName = httpClientName;");
 
             string ctorBody = ctorBodySb.ToString();
             CSharpConstructor ctor = @class.AddConstructor(ctorBody)
@@ -111,7 +112,7 @@ namespace Dibix.Sdk.CodeGeneration
                                                                     .ToArray();
 
             StringWriter writer = new StringWriter();
-            writer.WriteLine($"using ({nameof(HttpClient)} client = this._httpClientFactory.CreateClient(this._httpClientName, BaseAddress))")
+            writer.WriteLine($"using ({nameof(HttpClient)} client = _httpClientFactory.CreateClient(_httpClientName, BaseAddress))")
                   .WriteLine("{")
                   .PushIndent();
 
@@ -147,7 +148,7 @@ namespace Dibix.Sdk.CodeGeneration
             foreach (SecuritySchemeRequirement securitySchemeRequirement in action.SecuritySchemes.Requirements.Where(x => x.Scheme != SecuritySchemes.Anonymous))
             {
                 string securitySchemeName = securitySchemeRequirement.Scheme.Name;
-                string getAuthorizationValueCall = $"this._httpAuthorizationProvider.GetValue(\"{securitySchemeName}\")";
+                string getAuthorizationValueCall = $"_httpAuthorizationProvider.GetValue(\"{securitySchemeName}\")";
                 if (oneOf)
                 {
                     writer.WriteLine($"if ({getAuthorizationValueCall} != null)")

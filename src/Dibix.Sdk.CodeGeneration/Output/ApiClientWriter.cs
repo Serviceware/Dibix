@@ -26,6 +26,7 @@ namespace Dibix.Sdk.CodeGeneration
             IList<ControllerDefinition> controllers = context.Model
                                                              .Controllers
                                                              .Where(x => x.Actions.Any())
+                                                             .OrderBy(x => x.Name)
                                                              .ToArray();
 
             IDictionary<ActionDefinition, string> operationIdMap = controllers.SelectMany(x => x.Actions)
@@ -46,7 +47,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 ControllerDefinition controller = controllers[i];
                 string serviceName = $"{controller.Name}Service";
-                this.WriteController(context, output, controller, serviceName, operationIdMap, securitySchemeMap);
+                WriteController(context, output, controller, serviceName, operationIdMap, securitySchemeMap);
 
                 if (i + 1 < controllers.Count)
                     output.AddSeparator();

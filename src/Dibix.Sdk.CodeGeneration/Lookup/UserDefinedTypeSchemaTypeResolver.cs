@@ -24,6 +24,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (!_schemaAccessor.Value.TryGetValue(input, out UserDefinedTypeSchema schema)) 
                 return null;
 
+            schema.ReferenceCount++;
             SchemaTypeReference schemaTypeReference = new SchemaTypeReference(schema.FullName, isNullable: false, isEnumerable: false, location);
             return schemaTypeReference;
         }

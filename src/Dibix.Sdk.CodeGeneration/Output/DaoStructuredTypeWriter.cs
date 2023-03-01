@@ -17,17 +17,16 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public DaoStructuredTypeWriter(CodeGenerationModel model, SchemaDefinitionSource schemaFilter)
+        public DaoStructuredTypeWriter(CodeGenerationModel model, CodeGenerationOutputFilter outputFilter)
         {
-            this._schemas = model.Schemas
-                                 .OfType<UserDefinedTypeSchema>()
-                                 .Where(x => schemaFilter.HasFlag(x.Source))
-                                 .ToArray();
+            _schemas = model.GetSchemas(outputFilter)
+                            .OfType<UserDefinedTypeSchema>()
+                            .ToArray();
         }
         #endregion
 
         #region Overrides
-        public override bool HasContent(CodeGenerationModel model) => this._schemas.Any();
+        public override bool HasContent(CodeGenerationModel model) => _schemas.Any();
 
         public override IEnumerable<CSharpAnnotation> GetGlobalAnnotations(CodeGenerationModel model) { yield break; }
 
@@ -35,14 +34,12 @@ namespace Dibix.Sdk.CodeGeneration
         {
             context.AddUsing("Dibix");
 
-            var namespaceGroups = this._schemas
-                                      .GroupBy(x => x.Namespace)
-                                      .ToArray();
+            var namespaceGroups = _schemas.GroupBy(x => x.Namespace).OrderBy(x => x.Key).ToArray();
 
             for (int i = 0; i < namespaceGroups.Length; i++)
             {
                 IGrouping<string, UserDefinedTypeSchema> namespaceGroup = namespaceGroups[i];
-                IList<UserDefinedTypeSchema> userDefinedTypes = namespaceGroup.ToArray();
+                IList<UserDefinedTypeSchema> userDefinedTypes = namespaceGroup.OrderBy(x => x.DefinitionName).ToArray();
                 CSharpStatementScope scope = /*namespaceGroup.Key != null ? */context.CreateOutputScope(namespaceGroup.Key)/* : context.Output*/;
                 for (int j = 0; j < userDefinedTypes.Count; j++)
                 {
@@ -50,7 +47,7 @@ namespace Dibix.Sdk.CodeGeneration
                     CSharpClass @class = scope.AddClass(userDefinedType.DefinitionName, CSharpModifiers.Public | CSharpModifiers.Sealed, new CSharpAnnotation("StructuredType", new CSharpStringValue(userDefinedType.UdtName)))
                                               .Inherits($"StructuredType<{userDefinedType.DefinitionName}, {String.Join(", ", userDefinedType.Properties.Select(x => context.ResolveTypeName(x.Type)))}>");
 
-                    @class.AddConstructor(body: $"base.ImportSqlMetadata(() => this.Add({String.Join(", ", userDefinedType.Properties.Select(x => "default"))}));")
+                    @class.AddConstructor(body: $"base.ImportSqlMetadata(() => Add({String.Join(", ", userDefinedType.Properties.Select(x => "default"))}));")
                           .CallBase()
                           .AddParameter(new CSharpStringValue(userDefinedType.UdtName));
 

@@ -15,17 +15,22 @@ namespace Dibix.Sdk.CodeGeneration
         {
             const bool accessorOnly = false;
             const bool assumeEmbeddedActionTargets = true;
-            const SchemaDefinitionSource schemaFilter = SchemaDefinitionSource.Local | SchemaDefinitionSource.Foreign;
-            yield return new DaoExecutorWriter(model, schemaFilter, accessorOnly);
-            yield return new DaoExecutorInputClassWriter(model, schemaFilter);
-            yield return new DaoContractClassWriter(model, schemaFilter);
-            yield return new DaoStructuredTypeWriter(model, schemaFilter);
+            const CodeGenerationOutputFilter outputFilter = CodeGenerationOutputFilter.Referenced;
+            yield return new DaoExecutorWriter(model, outputFilter, accessorOnly);
+            yield return new DaoExecutorInputClassWriter(model, outputFilter);
+            yield return new DaoContractClassWriter(model, outputFilter);
+            yield return new DaoStructuredTypeWriter(model, outputFilter);
             yield return new ApiDescriptionWriter(assumeEmbeddedActionTargets);
         }
 
         protected override IEnumerable<CSharpAnnotation> CollectGlobalAnnotations(CodeGenerationModel model)
         {
             yield return new CSharpAnnotation("ArtifactAssembly");
+        }
+
+        protected override void OnContextCreated(CodeGenerationContext context)
+        {
+            context.AddUsing("Dibix");
         }
         #endregion
     }

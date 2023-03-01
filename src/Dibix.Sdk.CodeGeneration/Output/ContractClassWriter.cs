@@ -21,26 +21,27 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        protected ContractClassWriter(CodeGenerationModel model, SchemaDefinitionSource schemaFilter)
+        protected ContractClassWriter(CodeGenerationModel model, CodeGenerationOutputFilter outputFilter)
         {
-            this._schemas = model.Schemas.Where(x => IsValidSchema(x, schemaFilter)).ToArray();
+            _schemas = model.GetSchemas(outputFilter)
+                            .Where(x => x.GetType() == typeof(ObjectSchema) // Equal is important here, since we don't want UserDefinedTypeSchema which inherits from ObjectSchema
+                                     || x is EnumSchema)
+                            .ToArray();
         }
         #endregion
 
         #region Overrides
-        public override bool HasContent(CodeGenerationModel model) => this._schemas.Any();
+        public override bool HasContent(CodeGenerationModel model) => _schemas.Any();
 
         public override void Write(CodeGenerationContext context)
         {
-            var namespaceGroups = this._schemas
-                                      .GroupBy(x => x.Namespace)
-                                      .ToArray();
+            var namespaceGroups = _schemas.GroupBy(x => x.Namespace).OrderBy(x => x.Key).ToArray();
 
             for (int i = 0; i < namespaceGroups.Length; i++)
             {
                 IGrouping<string, SchemaDefinition> namespaceGroup = namespaceGroups[i];
                 CSharpStatementScope scope = /*namespaceGroup.Key != null ? */context.CreateOutputScope(namespaceGroup.Key)/* : context.Output*/;
-                IList<SchemaDefinition> schemas = namespaceGroup.ToArray();
+                IList<SchemaDefinition> schemas = namespaceGroup.OrderBy(x => x.DefinitionName).ToArray();
                 for (int j = 0; j < schemas.Count; j++)
                 {
                     SchemaDefinition schema = schemas[j];
@@ -83,14 +84,14 @@ namespace Dibix.Sdk.CodeGeneration
         private void ProcessObjectSchema(CodeGenerationContext context, CSharpStatementScope scope, ObjectSchema schema)
         {
             ICollection<CSharpAnnotation> classAnnotations = new Collection<CSharpAnnotation>();
-            this.BeginProcessClass(schema, classAnnotations, context);
+            BeginProcessClass(schema, classAnnotations, context);
 
             CSharpClass @class = scope.AddClass(schema.DefinitionName, CSharpModifiers.Public | CSharpModifiers.Sealed, classAnnotations);
             ICollection<string> ctorAssignments = new Collection<string>();
             foreach (ObjectSchemaProperty property in schema.Properties)
             {
                 ICollection<CSharpAnnotation> propertyAnnotations = new Collection<CSharpAnnotation>();
-                if (!this.ProcessProperty(schema, property, propertyAnnotations, context))
+                if (!ProcessProperty(schema, property, propertyAnnotations, context))
                     continue;
 
                 CSharpValue defaultValue = null;
@@ -109,7 +110,7 @@ namespace Dibix.Sdk.CodeGeneration
                       .Initializer(defaultValue);
 
                 if (propertyType.IsEnumerable)
-                    ctorAssignments.Add($"this.{property.Name.Value} = new {nameof(Collection<object>)}<{clrTypeName}>();");
+                    ctorAssignments.Add($"{property.Name.Value} = new {nameof(Collection<object>)}<{clrTypeName}>();");
             }
 
             if (ctorAssignments.Any())
@@ -121,7 +122,7 @@ namespace Dibix.Sdk.CodeGeneration
                       .AddConstructor(String.Join(Environment.NewLine, ctorAssignments));
             }
 
-            this.EndProcessClass(schema, @class, context);
+            EndProcessClass(schema, @class, context);
         }
 
         private static void ProcessEnumSchema(CodeGenerationContext context, CSharpStatementScope scope, EnumSchema schema)
@@ -139,17 +140,6 @@ namespace Dibix.Sdk.CodeGeneration
                 @enum.AddMember(member.Name, member.StringValue)
                      .Inherits("int");
             }
-        }
-
-        private static bool IsValidSchema(SchemaDefinition schema, SchemaDefinitionSource schemaFilter)
-        {
-            if (!schemaFilter.HasFlag(schema.Source))
-                return false;
-
-            if (schema.GetType() == typeof(ObjectSchema) || schema is EnumSchema)
-                return true;
-
-            return false;
         }
         #endregion
     }

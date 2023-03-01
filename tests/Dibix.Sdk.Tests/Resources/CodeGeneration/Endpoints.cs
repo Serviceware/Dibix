@@ -142,7 +142,7 @@ namespace Dibix.Sdk.Tests.Data
     {
         public GenericParameterSet() : base("[dbo].[dbx_codeanalysis_udt_generic]")
         {
-            base.ImportSqlMetadata(() => this.Add(default, default));
+            base.ImportSqlMetadata(() => Add(default, default));
         }
         public void Add(int id, string? name)
         {
@@ -155,7 +155,7 @@ namespace Dibix.Sdk.Tests.Data
     {
         public IntParameterSet() : base("[dbo].[dbx_codeanalysis_udt_int]")
         {
-            base.ImportSqlMetadata(() => this.Add(default));
+            base.ImportSqlMetadata(() => Add(default));
         }
         public void Add(int id)
         {
@@ -168,6 +168,12 @@ namespace Dibix.Sdk.Tests.Data
 #region Contracts
 namespace Dibix.Sdk.Tests.DomainModel
 {
+    public sealed class AnotherEntry
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+    }
+
     public sealed class AnotherInputContract
     {
         public string A { get; set; }
@@ -183,14 +189,8 @@ namespace Dibix.Sdk.Tests.DomainModel
 
         public AnotherInputContract()
         {
-            this.SomeIds = new Collection<Dibix.Sdk.Tests.DomainModel.AnotherEntry>();
+            SomeIds = new Collection<Dibix.Sdk.Tests.DomainModel.AnotherEntry>();
         }
-    }
-
-    public sealed class AnotherEntry
-    {
-        public int Id { get; set; }
-        public string Title { get; set; }
     }
 
     public enum Direction : int
@@ -230,13 +230,6 @@ namespace Dibix.Sdk.Tests.DomainModel
         public System.Uri ImageUrl { get; set; }
     }
 
-    public enum Role : int
-    {
-        None,
-        User,
-        Admin
-    }
-
     public sealed class InputContract
     {
         public string A { get; set; }
@@ -252,8 +245,15 @@ namespace Dibix.Sdk.Tests.DomainModel
 
         public InputContract()
         {
-            this.Ids = new Collection<Dibix.Sdk.Tests.DomainModel.Entry>();
+            Ids = new Collection<Dibix.Sdk.Tests.DomainModel.Entry>();
         }
+    }
+
+    public enum Role : int
+    {
+        None,
+        User,
+        Admin
     }
 }
 #endregion

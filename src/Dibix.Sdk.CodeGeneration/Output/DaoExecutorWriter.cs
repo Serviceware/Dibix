@@ -25,32 +25,29 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public DaoExecutorWriter(CodeGenerationModel model, SchemaDefinitionSource schemaFilter, bool accessorOnly)
+        public DaoExecutorWriter(CodeGenerationModel model, CodeGenerationOutputFilter outputFilter, bool accessorOnly)
         {
-            this._accessorOnly = accessorOnly;
-            this._schemas = model.Schemas
-                                 .OfType<SqlStatementDefinition>()
-                                 .Where(x => schemaFilter.HasFlag(x.Source))
-                                 .ToArray();
+            _accessorOnly = accessorOnly;
+            _schemas = model.GetSchemas(outputFilter)
+                            .OfType<SqlStatementDefinition>()
+                            .ToArray();
         }
         #endregion
 
         #region Overrides
-        public override bool HasContent(CodeGenerationModel model) => this._schemas.Any();
+        public override bool HasContent(CodeGenerationModel model) => _schemas.Any();
 
         public override void Write(CodeGenerationContext context)
         {
             context.AddUsing("Dibix");
 
-            var namespaceGroups = this._schemas
-                                      .GroupBy(x => x.Namespace)
-                                      .ToArray();
+            var namespaceGroups = _schemas.GroupBy(x => x.Namespace).OrderBy(x => x.Key).ToArray();
 
             for (int i = 0; i < namespaceGroups.Length; i++)
             {
                 IGrouping<string, SqlStatementDefinition> namespaceGroup = namespaceGroups[i];
                 CSharpStatementScope scope = /*namespaceGroup.Key != null ? */context.CreateOutputScope(namespaceGroup.Key) /* : context.Output*/;
-                IList<SqlStatementDefinition> statementDescriptors = namespaceGroup.ToArray();
+                IList<SqlStatementDefinition> statementDescriptors = namespaceGroup.OrderBy(x => x.DefinitionName).ToArray();
 
                 // Class
                 ICollection<CSharpAnnotation> annotations = new Collection<CSharpAnnotation> { new CSharpAnnotation("DatabaseAccessor") };
@@ -61,7 +58,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                 // Execution methods
                 @class.AddSeparator();
-                this.AddExecutionMethods(@class, context, statementDescriptors);
+                AddExecutionMethods(@class, context, statementDescriptors);
 
                 if (i + 1 < namespaceGroups.Length)
                     context.AddSeparator();
@@ -102,12 +99,12 @@ namespace Dibix.Sdk.CodeGeneration
 
                 IEnumerable<CSharpAnnotation> annotations = Enumerable.Empty<CSharpAnnotation>();
 
-                if (!this._accessorOnly && definition.ErrorResponses.Any())
+                if (!_accessorOnly && definition.ErrorResponses.Any())
                 {
                     annotations = definition.ErrorResponses
-                                                     .Select(x => new CSharpAnnotation("ErrorResponse").AddParameter("statusCode", new CSharpValue(x.StatusCode.ToString()))
-                                                                                                       .AddParameter("errorCode", new CSharpValue(x.ErrorCode.ToString()))
-                                                                                                       .AddParameter("errorDescription", new CSharpStringValue(x.ErrorDescription)));
+                                            .Select(x => new CSharpAnnotation("ErrorResponse").AddParameter("statusCode", new CSharpValue(x.StatusCode.ToString()))
+                                                                                              .AddParameter("errorCode", new CSharpValue(x.ErrorCode.ToString()))
+                                                                                              .AddParameter("errorDescription", new CSharpStringValue(x.ErrorDescription)));
                     context.AddDibixHttpServerReference();
                 }
 

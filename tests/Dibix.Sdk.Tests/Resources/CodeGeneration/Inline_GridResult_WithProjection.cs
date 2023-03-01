@@ -88,18 +88,18 @@ namespace Dibix.Sdk.Tests.DomainModel
         public System.Uri ImageUrl { get; set; }
     }
 
-    public enum Role : int
-    {
-        None,
-        User,
-        Admin
-    }
-
     public sealed class JointContract
     {
         public Dibix.Sdk.Tests.DomainModel.GenericContract A { get; set; }
         public Dibix.Sdk.Tests.DomainModel.Direction B { get; set; }
         public Dibix.Sdk.Tests.DomainModel.AccessRights C { get; set; }
+    }
+
+    public enum Role : int
+    {
+        None,
+        User,
+        Admin
     }
 }
 
@@ -112,7 +112,7 @@ namespace Dibix.Sdk.Tests.DomainModel.Grid
 
         public GetGridResult()
         {
-            this.Items = new Collection<Dibix.Sdk.Tests.DomainModel.JointContract>();
+            Items = new Collection<Dibix.Sdk.Tests.DomainModel.JointContract>();
         }
     }
 }

@@ -96,8 +96,8 @@ namespace Dibix.Sdk.Tests.DomainModel.Extension
 
         public MultiMapContract()
         {
-            this.Y = new Collection<Dibix.Sdk.Tests.DomainModel.GenericContract>();
-            this.Directions = new Collection<Dibix.Sdk.Tests.DomainModel.Direction>();
+            Y = new Collection<Dibix.Sdk.Tests.DomainModel.GenericContract>();
+            Directions = new Collection<Dibix.Sdk.Tests.DomainModel.Direction>();
         }
     }
 }

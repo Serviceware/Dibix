@@ -52,6 +52,7 @@ namespace Dibix.Sdk.CodeGeneration
                 return false;
             }
 
+            schemaDefinition.ReferenceCount++;
             schema = CastSchema<TSchema>(schemaDefinition);
             return true;
         }

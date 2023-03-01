@@ -5,7 +5,7 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class ClientContractClassWriter : ContractClassWriter
     {
-        public ClientContractClassWriter(CodeGenerationModel model) : base(model, schemaFilter: SchemaDefinitionSource.Local | SchemaDefinitionSource.Foreign) { }
+        public ClientContractClassWriter(CodeGenerationModel model) : base(model, outputFilter: CodeGenerationOutputFilter.Referenced) { }
 
         protected override bool ProcessProperty(ObjectSchema schema, ObjectSchemaProperty property, ICollection<CSharpAnnotation> propertyAnnotations, CodeGenerationContext context)
         {

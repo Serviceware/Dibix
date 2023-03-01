@@ -99,7 +99,8 @@ namespace Dibix.Sdk.CodeGeneration
         {
             private static readonly MemberInfo[] IgnoredMembers =
             {
-                typeof(SchemaDefinition).GetProperty(nameof(SchemaDefinition.ExternalSchemaInfo))
+                typeof(SchemaDefinition).GetProperty(nameof(SchemaDefinition.ExternalSchemaInfo)),
+                typeof(SchemaDefinition).GetProperty(nameof(SchemaDefinition.ReferenceCount))
             };
 
             // Preserve value type when serializing 'object'

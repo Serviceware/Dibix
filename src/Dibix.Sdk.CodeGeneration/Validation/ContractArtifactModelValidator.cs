@@ -59,7 +59,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private void ValidateStatementContracts(IPersistedCodeGenerationModel model, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
         {
-            foreach (SqlStatementDefinition statement in model.Schemas.OfType<SqlStatementDefinition>())
+            foreach (SqlStatementDefinition statement in model.Schemas.Where(x => x.Source == SchemaDefinitionSource.Defined).OfType<SqlStatementDefinition>())
             {
                 (ObjectSchema gridResultSchema, IDictionary<string, ObjectSchemaProperty> gridResultSchemaPropertyMap, ICollection<ObjectSchemaProperty> gridResultSchemaProperties) = CollectGridResultInfos(statement, schemaPropertyMap);
 

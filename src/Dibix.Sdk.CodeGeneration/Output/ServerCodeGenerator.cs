@@ -14,11 +14,11 @@ namespace Dibix.Sdk.CodeGeneration
         protected override IEnumerable<ArtifactWriterBase> SelectWriters(CodeGenerationModel model)
         {
             bool accessorOnly = model.EnableExperimentalFeatures;
-            const SchemaDefinitionSource schemaFilter = SchemaDefinitionSource.Local;
-            yield return new DaoExecutorWriter(model, schemaFilter, accessorOnly);
-            yield return new DaoExecutorInputClassWriter(model, schemaFilter);
-            yield return new DaoContractClassWriter(model, schemaFilter);
-            yield return new DaoStructuredTypeWriter(model, schemaFilter);
+            const CodeGenerationOutputFilter outputFilter = CodeGenerationOutputFilter.Local;
+            yield return new DaoExecutorWriter(model, outputFilter, accessorOnly);
+            yield return new DaoExecutorInputClassWriter(model, outputFilter);
+            yield return new DaoContractClassWriter(model, outputFilter);
+            yield return new DaoStructuredTypeWriter(model, outputFilter);
             
             if (!model.EnableExperimentalFeatures)
                 yield return new ApiDescriptionWriter(assumeEmbeddedActionTargets: false);
