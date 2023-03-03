@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using Dibix.Sdk.Abstractions;
+﻿using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.Dac.Model;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
@@ -11,45 +8,34 @@ namespace Dibix.Sdk.CodeGeneration
     public abstract class SqlStatementParser<TVisitor> : ISqlStatementParser where TVisitor : SqlParserVisitor, new()
     {
         #region Fields
-        private static readonly IDictionary<SqlParserSourceKind, Func<object, TSqlFragment>> SourceReaders = new Dictionary<SqlParserSourceKind, Func<object, TSqlFragment>>
-        {
-            { SqlParserSourceKind.String, ReadFromString },
-            { SqlParserSourceKind.Stream, ReadFromStream },
-            { SqlParserSourceKind.Ast, ReadFromAst },
-        };
         private readonly bool _requireExplicitMarkup;
         #endregion
 
         #region Constructor
-        protected SqlStatementParser(bool requireExplicitMarkup) => this._requireExplicitMarkup = requireExplicitMarkup;
+        protected SqlStatementParser(bool requireExplicitMarkup) => _requireExplicitMarkup = requireExplicitMarkup;
         #endregion
 
         #region ISqlStatementParser Members
         public bool Read
         (
-              SqlParserSourceKind sourceKind
-            , object content
-            , string source
-            , string definitionName
-            , TSqlModel model
-            , bool isEmbedded
-            , bool limitDdlStatements
-            , bool analyzeAlways
-            , string productName
-            , string areaName
-            , ISqlStatementFormatter formatter
-            , ITypeResolverFacade typeResolver
-            , ISchemaRegistry schemaRegistry
-            , ILogger logger
-            , out SqlStatementDefinition definition
+            string filePath
+          , string definitionName
+          , TSqlModel model
+          , bool isEmbedded
+          , bool limitDdlStatements
+          , bool analyzeAlways
+          , string productName
+          , string areaName
+          , ISqlStatementFormatter formatter
+          , ITypeResolverFacade typeResolver
+          , ISchemaRegistry schemaRegistry
+          , ILogger logger
+          , out SqlStatementDefinition definition
         )
         {
-            if (!SourceReaders.TryGetValue(sourceKind, out Func<object, TSqlFragment> reader))
-                throw new ArgumentOutOfRangeException(nameof(sourceKind), sourceKind, null);
-
-            TSqlFragment fragment = reader(content);
-            TSqlFragmentAnalyzer fragmentAnalyzer = TSqlFragmentAnalyzer.Create(source, fragment, isScriptArtifact: false, isEmbedded, limitDdlStatements, analyzeAlways, model, logger);
-            return this.TryCollectStatementDescriptor(fragment, fragmentAnalyzer, source, definitionName, productName, areaName, formatter, typeResolver, schemaRegistry, logger, out definition);
+            TSqlFragment fragment = ScriptDomFacade.Load(filePath);
+            TSqlFragmentAnalyzer fragmentAnalyzer = TSqlFragmentAnalyzer.Create(filePath, fragment, isScriptArtifact: false, isEmbedded, limitDdlStatements, analyzeAlways, model, logger);
+            return TryCollectStatementDescriptor(fragment, fragmentAnalyzer, filePath, definitionName, productName, areaName, formatter, typeResolver, schemaRegistry, logger, out definition);
         }
         #endregion
 
@@ -59,7 +45,7 @@ namespace Dibix.Sdk.CodeGeneration
             ISqlMarkupDeclaration markup = SqlMarkupReader.ReadHeader(fragment, source, logger);
             bool hasMarkup = markup.HasElements;
             bool hasNoCompileElement = markup.HasSingleElement(SqlMarkupKey.NoCompile, source, logger);
-            bool include = (!this._requireExplicitMarkup || hasMarkup) && !hasNoCompileElement;
+            bool include = (!_requireExplicitMarkup || hasMarkup) && !hasNoCompileElement;
             if (!include)
             {
                 definition = null;
@@ -101,14 +87,6 @@ namespace Dibix.Sdk.CodeGeneration
             definition = null;
             return false;
         }
-
-        private static TSqlFragment ReadFromString(object source) => ReadFromTextReader(new StringReader((string)source));
-
-        private static TSqlFragment ReadFromStream(object source) => ReadFromTextReader(new StreamReader((Stream)source));
-
-        private static TSqlFragment ReadFromAst(object source) => (TSqlFragment)source;
-
-        private static TSqlFragment ReadFromTextReader(TextReader reader) => ScriptDomFacade.Load(reader);
         #endregion
     }
 }

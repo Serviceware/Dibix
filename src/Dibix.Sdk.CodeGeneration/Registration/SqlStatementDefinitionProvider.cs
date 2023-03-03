@@ -75,9 +75,7 @@ namespace Dibix.Sdk.CodeGeneration
                 {
                     bool result = _parser.Read
                     (
-                        sourceKind: SqlParserSourceKind.Stream
-                      , content: File.OpenRead(file)
-                      , source: file
+                        filePath: file
                       , definitionName: Path.GetFileNameWithoutExtension(file)
                       , model: _model
                       , isEmbedded: _isEmbedded
