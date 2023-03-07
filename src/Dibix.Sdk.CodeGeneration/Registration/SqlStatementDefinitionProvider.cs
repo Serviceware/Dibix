@@ -15,7 +15,7 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly bool _analyzeAlways;
         private readonly string _productName;
         private readonly string _areaName;
-        private readonly IEnumerable<TaskItem> _files;
+        private readonly ICollection<TaskItem> _files;
         private readonly ISqlStatementParser _parser;
         private readonly ISqlStatementFormatter _formatter;
         private readonly ITypeResolverFacade _typeResolver;
@@ -33,7 +33,7 @@ namespace Dibix.Sdk.CodeGeneration
           , bool analyzeAlways
           , string productName
           , string areaName
-          , IEnumerable<TaskItem> source
+          , ICollection<TaskItem> source
           , ISqlStatementParser parser
           , ISqlStatementFormatter formatter
           , ITypeResolverFacade typeResolver
@@ -98,6 +98,7 @@ namespace Dibix.Sdk.CodeGeneration
                         _logger.LogError($"Ambiguous procedure definition name: {definition.FullName}", file, 0, 0);
                         continue;
                     }
+
                     _definitions.Add(definition.FullName, definition);
                 }
                 catch (Exception exception)

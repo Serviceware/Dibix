@@ -1,47 +1,44 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using Dibix.Sdk.Abstractions;
-using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeGeneration
 {
     public static class SqlMarkupReader
     {
-        public static ISqlMarkupDeclaration ReadHeader(TSqlFragment fragment, string source, ILogger logger)
-        {
-            SqlMarkupDeclaration map = new SqlMarkupDeclaration();
+        private static readonly ConcurrentDictionary<SqlMarkupCacheKey, ISqlMarkupDeclaration> HeaderCache = new ConcurrentDictionary<SqlMarkupCacheKey, ISqlMarkupDeclaration>();
 
-            foreach (TSqlParserToken token in fragment.AsEnumerable())
+        public static ISqlMarkupDeclaration Read(TSqlFragment fragment, SqlMarkupCommentKind commentKind, string source, ILogger logger) => HeaderCache.GetOrAdd(new SqlMarkupCacheKey(commentKind, fragment), x => ReadCore(x.Fragment, x.CommentKind, source, logger));
+        
+        private static ISqlMarkupDeclaration ReadCore(TSqlFragment fragment, SqlMarkupCommentKind commentKind, string source, ILogger logger)
+        {
+            TSqlTokenType expectedCommentTokenType = ToTokenType(commentKind);
+
+            Stack<TSqlParserToken> tokens = new Stack<TSqlParserToken>();
+            for (int i = fragment.FirstTokenIndex - 1; i >= 0; i--)
             {
+                TSqlParserToken token = fragment.ScriptTokenStream[i];
                 if (token.TokenType == TSqlTokenType.WhiteSpace)
                     continue;
 
-                // Since we are reading the header, stop processing, once any non-comment T-SQL token occurs
-                bool isComment = token.TokenType == TSqlTokenType.MultilineComment || TSqlTokenType.SingleLineComment == token.TokenType;
-                if (!isComment)
+                if (token.TokenType is not TSqlTokenType.SingleLineComment and not TSqlTokenType.MultilineComment) 
                     break;
 
+                if (token.TokenType == expectedCommentTokenType)
+                    tokens.Push(token);
+            }
+
+            SqlMarkupDeclaration map = new SqlMarkupDeclaration();
+            foreach (TSqlParserToken token in tokens)
+            {
                 Read(map, token, source, logger);
             }
 
-            return map;
-        }
-
-        public static ISqlMarkupDeclaration ReadFragment(TSqlFragment fragment, string source, ILogger logger)
-        {
-            int startIndex = fragment.FirstTokenIndex;
-            TSqlParserToken token;
-            do
-            {
-                token = fragment.ScriptTokenStream[--startIndex];
-            } while (token.TokenType == TSqlTokenType.WhiteSpace);
-
-            SqlMarkupDeclaration map = new SqlMarkupDeclaration();
-            Read(map, token, source, logger);
             return map;
         }
 
@@ -57,6 +54,9 @@ namespace Dibix.Sdk.CodeGeneration
                 case TSqlTokenType.MultilineComment:
                     text = SanitizeMultiLineComment(text);
                     break;
+
+                default:
+                    return;
             }
 
             string[] lines = text.Split('\n');
@@ -151,12 +151,12 @@ namespace Dibix.Sdk.CodeGeneration
 
                     // @a X 
                     case TokenType.Delimiter when currentState == ReaderState.Value:
-                        CollectValueOrProperty(element, currentState, currentPropertyColumn, currentPropertyValueColumn, source, logger, ref propertyLeft, ref propertyRight);
+                        CollectValueOrProperty(element, currentState, currentPropertyColumn, currentPropertyValueColumn, logger, ref propertyLeft, ref propertyRight);
                         break;
 
                     // @a a:X 
                     case TokenType.Delimiter when currentState == ReaderState.Property:
-                        CollectValueOrProperty(element, currentState, currentPropertyColumn, currentPropertyValueColumn, source, logger, ref propertyLeft, ref propertyRight);
+                        CollectValueOrProperty(element, currentState, currentPropertyColumn, currentPropertyValueColumn, logger, ref propertyLeft, ref propertyRight);
                         currentState = ReaderState.Value;
                         break;
 
@@ -207,13 +207,20 @@ namespace Dibix.Sdk.CodeGeneration
 
             element.Name = elementName.ToString().Trim();
 
+            // Only support PascalCase
+            if (!Char.IsUpper(element.Name[0]))
+                return;
+
+            if (!SqlMarkupKey.IsDefined(element.Name))
+                logger.LogError($"Unexpected markup element '{element.Name}'", element.Location.Source, element.Location.Line, element.Location.Column);
+
             // Finish collecting value/property before EOL
-            CollectValueOrProperty(element, currentState, currentPropertyColumn, currentPropertyValueColumn, source, logger, ref propertyLeft, ref propertyRight);
+            CollectValueOrProperty(element, currentState, currentPropertyColumn, currentPropertyValueColumn, logger, ref propertyLeft, ref propertyRight);
 
             target.Add(element);
         }
 
-        private static void CollectValueOrProperty(SqlElement element, ReaderState currentState, int propertyColumn, int valueColumn, string source, ILogger logger, ref StringBuilder propertyLeft, ref StringBuilder propertyRight)
+        private static void CollectValueOrProperty(SqlElement element, ReaderState currentState, int propertyColumn, int valueColumn, ILogger logger, ref StringBuilder propertyLeft, ref StringBuilder propertyRight)
         {
             if (propertyLeft.Length == 0 && propertyRight.Length == 0)
                 return;
@@ -284,6 +291,28 @@ namespace Dibix.Sdk.CodeGeneration
 
             string sanitized = sb.ToString();
             return sanitized;
+        }
+
+        private static TSqlTokenType ToTokenType(SqlMarkupCommentKind commentKind)
+        {
+            switch (commentKind)
+            {
+                case SqlMarkupCommentKind.SingleLine: return TSqlTokenType.SingleLineComment;
+                case SqlMarkupCommentKind.MultiLine: return TSqlTokenType.MultilineComment;
+                default: throw new ArgumentOutOfRangeException(nameof(commentKind), commentKind, null);
+            }
+        }
+
+        private readonly struct SqlMarkupCacheKey
+        {
+            public SqlMarkupCommentKind CommentKind { get; }
+            public TSqlFragment Fragment { get; }
+
+            public SqlMarkupCacheKey(SqlMarkupCommentKind commentKind, TSqlFragment fragment)
+            {
+                CommentKind = commentKind;
+                Fragment = fragment;
+            }
         }
 
         private enum TokenType

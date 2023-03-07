@@ -6,16 +6,24 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public abstract class SqlParserVisitor : TSqlFragmentVisitor
     {
-        internal string Source { get; set; }
-        internal string DefinitionName { get; set; }
-        internal string ProductName { get; set; }
-        internal string AreaName { get; set; }
-        internal SqlStatementDefinition Definition { get; set; }
-        internal TSqlFragmentAnalyzer FragmentAnalyzer { get; set; }
-        internal ISqlStatementFormatter Formatter { get; set; }
-        internal ITypeResolverFacade TypeResolver { get; set; }
-        internal ISchemaRegistry SchemaRegistry { get; set; }
-        internal ILogger Logger { get; set; }
-        internal ISqlMarkupDeclaration Markup { get; set; }
+        internal string Source { private protected get; set; }
+        internal string DefinitionName { private protected get; set; }
+        internal string ProductName { private protected get; set; }
+        internal string AreaName { private protected get; set; }
+        internal SqlStatementDefinition Definition { get; private set; }
+        internal TSqlFragmentAnalyzer FragmentAnalyzer { private protected get; set; }
+        internal ISqlStatementFormatter Formatter { private protected get; set; }
+        internal ITypeResolverFacade TypeResolver { private protected get; set; }
+        internal ISchemaRegistry SchemaRegistry { private protected get; set; }
+        internal ILogger Logger { private protected get; set; }
+        internal bool IsEmbedded { private protected get; set; }
+
+        private protected void SetDefinition(SqlStatementDefinition definition)
+        {
+            if (Definition != null)
+                Logger.LogError("Only one definition per file is supported", definition.Location);
+
+            Definition = definition;
+        }
     }
 }

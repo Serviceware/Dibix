@@ -8,11 +8,11 @@ namespace Dibix.Sdk.CodeGeneration
     public abstract class SqlStatementParser<TVisitor> : ISqlStatementParser where TVisitor : SqlParserVisitor, new()
     {
         #region Fields
-        private readonly bool _requireExplicitMarkup;
+        private readonly bool _isEmbedded;
         #endregion
 
         #region Constructor
-        protected SqlStatementParser(bool requireExplicitMarkup) => _requireExplicitMarkup = requireExplicitMarkup;
+        protected SqlStatementParser(bool isEmbedded) => _isEmbedded = isEmbedded;
         #endregion
 
         #region ISqlStatementParser Members
@@ -42,16 +42,6 @@ namespace Dibix.Sdk.CodeGeneration
         #region Private Methods
         private bool TryCollectStatementDescriptor(TSqlFragment fragment, TSqlFragmentAnalyzer fragmentAnalyzer, string source, string definitionName, string productName, string areaName, ISqlStatementFormatter formatter, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger, out SqlStatementDefinition definition)
         {
-            ISqlMarkupDeclaration markup = SqlMarkupReader.ReadHeader(fragment, source, logger);
-            bool hasMarkup = markup.HasElements;
-            bool hasNoCompileElement = markup.HasSingleElement(SqlMarkupKey.NoCompile, source, logger);
-            bool include = (!_requireExplicitMarkup || hasMarkup) && !hasNoCompileElement;
-            if (!include)
-            {
-                definition = null;
-                return false;
-            }
-
             TVisitor visitor = new TVisitor
             {
                 Source = source,
@@ -63,7 +53,7 @@ namespace Dibix.Sdk.CodeGeneration
                 TypeResolver = typeResolver,
                 SchemaRegistry = schemaRegistry,
                 Logger = logger,
-                Markup = markup
+                IsEmbedded = _isEmbedded
             };
 
             fragment.Accept(visitor);

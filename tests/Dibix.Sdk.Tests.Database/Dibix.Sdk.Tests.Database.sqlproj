@@ -149,6 +149,8 @@
     <Build Include="Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql" />
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_042.sql" />
     <Build Include="Tests\dbx_tests_authorization.sql" />
+    <Build Include="Tests\Syntax\dbx_tests_syntax_enum1.sql" />
+    <Build Include="Tests\Syntax\dbx_tests_syntax_enum2.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CodeAnalysis" />

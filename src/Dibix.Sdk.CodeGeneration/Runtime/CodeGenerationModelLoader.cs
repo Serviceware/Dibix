@@ -42,10 +42,7 @@ namespace Dibix.Sdk.CodeGeneration
             typeResolver.Register(new SchemaTypeResolver(configuration.ProductName, configuration.AreaName, schemaRegistry), 1);
             typeResolver.Register(new UserDefinedTypeSchemaTypeResolver(schemaRegistry), 2);
 
-            // Currently only DML statements are included automatically
-            // DDL statements however, need explicit markup, i.E. @Name at least
-            bool requireExplicitMarkup = !configuration.IsEmbedded;
-            ISqlStatementParser parser = new SqlStoredProcedureParser(requireExplicitMarkup);
+            ISqlStatementParser parser = new SqlStoredProcedureParser(configuration.IsEmbedded);
             ISqlStatementFormatter formatter = SelectSqlStatementFormatter(configuration.IsEmbedded);
             formatter.StripWhiteSpace = model.CommandTextFormatting == CommandTextFormatting.StripWhiteSpace;
 
@@ -55,6 +52,7 @@ namespace Dibix.Sdk.CodeGeneration
               , new ExternalSchemaProvider(assemblyResolver)
               , new ContractDefinitionSchemaProvider(configuration.ProductName, configuration.AreaName, configuration.Contracts, fileSystemProvider, typeResolver, schemaRegistry, logger)
               , new UserDefinedTypeSchemaProvider(configuration.ProductName, configuration.AreaName, configuration.Source, typeResolver, logger)
+              , new SqlStatementEnumSchemaProvider(configuration.ProductName, configuration.AreaName, configuration.Source, logger)
               , new SqlStatementDefinitionProvider(configuration.IsEmbedded, configuration.LimitDdlStatements, analyzeAlways: true, configuration.ProductName, configuration.AreaName, configuration.Source, parser, formatter, typeResolver, schemaRegistry, logger, sqlModel)
             );
 

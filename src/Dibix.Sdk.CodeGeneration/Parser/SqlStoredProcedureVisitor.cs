@@ -16,60 +16,67 @@ namespace Dibix.Sdk.CodeGeneration
         #region Overrides
         public override void ExplicitVisit(CreateProcedureStatement node)
         {
-            if (!ValidateMarkup(base.Markup, base.Logger))
+            ISqlMarkupDeclaration markup = SqlMarkupReader.Read(node, SqlMarkupCommentKind.SingleLine, Source, Logger);
+            bool hasMarkup = markup.HasElements;
+            bool hasNoCompileElement = markup.HasSingleElement(SqlMarkupKey.NoCompile, Source, Logger);
+            
+            // Currently only DML statements are included automatically
+            // DDL statements however, need explicit markup, i.E. @Name at least
+            bool requireExplicitMarkup = !base.IsEmbedded;
+            
+            bool include = (!requireExplicitMarkup || hasMarkup) && !hasNoCompileElement;
+            if (!include)
                 return;
 
-            _ = base.Markup.TryGetSingleElementValue(SqlMarkupKey.Namespace, base.Source, base.Logger, out string relativeNamespace);
+            _ = markup.TryGetSingleElementValue(SqlMarkupKey.Namespace, base.Source, base.Logger, out string relativeNamespace);
 
-            NamespacePath @namespace = this.ParseNamespace(relativeNamespace);
-            string definitionName = this.ParseName();
+            NamespacePath @namespace = ParseNamespace(relativeNamespace);
+            string definitionName = ParseName(markup);
 
             SqlStatementDefinition definition = new SqlStatementDefinition(@namespace.Path, definitionName, SchemaDefinitionSource.Defined, new SourceLocation(Source, node.StartLine, node.StartColumn));
             definition.ProcedureName = String.Join(".", node.ProcedureReference.Name.Identifiers.Select(x => Identifier.EncodeIdentifier(x.Value)));
-            definition.MergeGridResult = base.Markup.HasSingleElement(SqlMarkupKey.MergeGridResult, base.Source, base.Logger);
-            definition.GenerateInputClass = base.Markup.HasSingleElement(SqlMarkupKey.GenerateInputClass, base.Source, base.Logger);
-            definition.Async = base.Markup.HasSingleElement(SqlMarkupKey.Async, base.Source, base.Logger);
-            definition.FileResult = base.Markup.TryGetSingleElement(SqlMarkupKey.FileResult, base.Source, base.Logger, out ISqlElement fileResultElement) ? fileResultElement : null;
+            definition.MergeGridResult = markup.HasSingleElement(SqlMarkupKey.MergeGridResult, base.Source, base.Logger);
+            definition.GenerateInputClass = markup.HasSingleElement(SqlMarkupKey.GenerateInputClass, base.Source, base.Logger);
+            definition.Async = markup.HasSingleElement(SqlMarkupKey.Async, base.Source, base.Logger);
+            definition.FileResult = markup.TryGetSingleElement(SqlMarkupKey.FileResult, base.Source, base.Logger, out ISqlElement fileResultElement) ? fileResultElement : null;
 
             StatementList statements = node.StatementList ?? new StatementList();
             CollectParameters(node, definition, relativeNamespace);
-            CollectResults(node, base.Markup, definition, relativeNamespace);
-            CollectResultType(definition, relativeNamespace);
+            CollectResults(node, definition, markup, relativeNamespace);
+            CollectResultType(definition, relativeNamespace, markup);
             CollectErrorResponses(statements, definition);
             CollectBody(statements, definition);
 
-            base.Definition = definition;
-
-            base.ExplicitVisit(node);
+            SetDefinition(definition);
         }
         #endregion
 
         #region Private Methods
         private NamespacePath ParseNamespace(string relativeNamespace) => PathUtility.BuildAbsoluteNamespace(base.ProductName, base.AreaName, LayerName.Data, relativeNamespace);
 
-        private string ParseName() => base.Markup.TryGetSingleElementValue(SqlMarkupKey.Name, base.Source, base.Logger, out string name) ? name : base.DefinitionName;
+        private string ParseName(ISqlMarkupDeclaration markup) => markup.TryGetSingleElementValue(SqlMarkupKey.Name, base.Source, base.Logger, out string name) ? name : base.DefinitionName;
 
         private void CollectParameters(ProcedureStatementBodyBase node, SqlStatementDefinition definition, string relativeNamespace)
         {
             foreach (ProcedureParameter parameter in node.Parameters)
-                this.CollectParameter(parameter, definition, relativeNamespace);
+                CollectParameter(parameter, definition, relativeNamespace);
         }
 
         private void CollectParameter(ProcedureParameter node, SqlStatementDefinition definition, string relativeNamespace)
         {
             string parameterName = node.VariableName.Value.TrimStart('@');
 
-            ISqlMarkupDeclaration markup = SqlMarkupReader.ReadFragment(node, base.Source, base.Logger);
+            ISqlMarkupDeclaration markup = SqlMarkupReader.Read(node, SqlMarkupCommentKind.MultiLine, Source, Logger);
 
             SqlQueryParameter parameter = new SqlQueryParameter
             {
                 Name = parameterName,
-                Type = this.ParseParameterType(parameterName, node, markup, relativeNamespace),
+                Type = ParseParameterType(parameterName, node, markup, relativeNamespace),
                 IsOutput = node.Modifier == ParameterModifier.Output
             };
             
-            this.CollectParameterObfuscate(parameter, markup);
-            this.CollectParameterDefault(node, parameter);
+            CollectParameterObfuscate(parameter, markup);
+            CollectParameterDefault(node, parameter);
 
             definition.Parameters.Add(parameter);
         }
@@ -82,7 +89,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private void CollectParameterObfuscate(SqlQueryParameter target, ISqlMarkupDeclaration markup)
         {
-            target.Obfuscate = markup.TryGetSingleElement(SqlMarkupKey.Obfuscate, base.Source, base.Logger, out ISqlElement _);
+            target.Obfuscate = markup.HasSingleElement(SqlMarkupKey.Obfuscate, base.Source, base.Logger);
         }
 
         private void CollectParameterDefault(DeclareVariableElement parameter, SqlQueryParameter target)
@@ -93,10 +100,10 @@ namespace Dibix.Sdk.CodeGeneration
             target.DefaultValue = SqlValueReferenceParser.Parse(parameter.VariableName.Value, parameter.Value, target.Type, base.Source, base.Logger);
         }
 
-        private TypeReference DetermineResultType(SqlStatementDefinition definition, string relativeNamespace, ref bool generateResultClass)
+        private TypeReference DetermineResultType(SqlStatementDefinition definition, string relativeNamespace, ISqlMarkupDeclaration markup, ref bool generateResultClass)
         {
             // Explicit result type
-            if (base.Markup.TryGetSingleElementValue(SqlMarkupKey.ResultTypeName, base.Source, base.Logger, out Token<string> value))
+            if (markup.TryGetSingleElementValue(SqlMarkupKey.ResultTypeName, base.Source, base.Logger, out Token<string> value))
             {
                 TypeReference type = base.TypeResolver.ResolveType(value.Value, relativeNamespace, value.Location, false);
                 return type;
@@ -113,17 +120,17 @@ namespace Dibix.Sdk.CodeGeneration
             if (definition.IsGridResult())
             {
                 generateResultClass = true;
-                return this.GenerateGridResultType(definition, relativeNamespace);
+                return GenerateGridResultType(definition, relativeNamespace, markup);
             }
 
             return definition.Results[0].ReturnType;
         }
 
-        private TypeReference GenerateGridResultType(SqlStatementDefinition definition, string relativeNamespace)
+        private TypeReference GenerateGridResultType(SqlStatementDefinition definition, string relativeNamespace, ISqlMarkupDeclaration markup)
         {
             // Control grid result type name and namespace
             TargetPath targetPath;
-            if (base.Markup.TryGetSingleElementValue(SqlMarkupKey.GeneratedResultTypeName, base.Source, base.Logger, out Token<string> gridResultTypeNameHint))
+            if (markup.TryGetSingleElementValue(SqlMarkupKey.GeneratedResultTypeName, base.Source, base.Logger, out Token<string> gridResultTypeNameHint))
             {
                 targetPath = PathUtility.BuildAbsoluteTargetName(base.ProductName, base.AreaName, LayerName.DomainModel, relativeNamespace, targetNamePath: gridResultTypeNameHint);
             }
@@ -147,16 +154,16 @@ namespace Dibix.Sdk.CodeGeneration
             return typeReference;
         }
 
-        private void CollectResults(TSqlFragment node, ISqlMarkupDeclaration markup, SqlStatementDefinition definition, string relativeNamespace)
+        private void CollectResults(TSqlFragment node, SqlStatementDefinition definition, ISqlMarkupDeclaration markup, string relativeNamespace)
         {
             IEnumerable<SqlQueryResult> results = StatementOutputParser.Parse(definition, node, base.Source, base.FragmentAnalyzer, markup, relativeNamespace, base.TypeResolver, base.SchemaRegistry, base.Logger);
             definition.Results.AddRange(results);
         }
 
-        private void CollectResultType(SqlStatementDefinition definition, string relativeNamespace)
+        private void CollectResultType(SqlStatementDefinition definition, string relativeNamespace, ISqlMarkupDeclaration markup)
         {
             bool generateResultClass = false;
-            definition.ResultType = this.DetermineResultType(definition, relativeNamespace, ref generateResultClass);
+            definition.ResultType = DetermineResultType(definition, relativeNamespace, markup, ref generateResultClass);
             definition.GenerateResultClass = generateResultClass;
         }
 
@@ -176,22 +183,6 @@ namespace Dibix.Sdk.CodeGeneration
 
             definition.Statement = base.Formatter.Format(definition, statementList);
         }
-
-        private static bool ValidateMarkup(ISqlMarkupDeclaration markup, ILogger logger)
-        {
-            foreach (string elementName in markup.ElementNames)
-            {
-                if (SqlMarkupKey.IsDefined(elementName))
-                    continue;
-
-                foreach (ISqlElement element in markup.GetElements(elementName))
-                {
-                    logger.LogError($"Unexpected markup element '{elementName}'", element.Location.Source, element.Location.Line, element.Location.Column);
-                }
-            }
-
-            return true;
-        }
         #endregion
 
         #region Nested Types
@@ -199,7 +190,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             private readonly IDictionary<ErrorResponseKey, ErrorResponse> _errorResponses = new Dictionary<ErrorResponseKey, ErrorResponse>();
 
-            public ICollection<ErrorResponse> ErrorResponses => this._errorResponses.Values;
+            public ICollection<ErrorResponse> ErrorResponses => _errorResponses.Values;
 
             public override void Visit(ThrowStatement node)
             {
@@ -213,10 +204,10 @@ namespace Dibix.Sdk.CodeGeneration
                  && isClientError)
                 {
                     ErrorResponseKey errorResponseKey = new ErrorResponseKey(statusCode, errorCode);
-                    if (this._errorResponses.ContainsKey(errorResponseKey))
+                    if (_errorResponses.ContainsKey(errorResponseKey))
                         return;
 
-                    this._errorResponses.Add(errorResponseKey, new ErrorResponse(statusCode, errorCode, errorMessage));
+                    _errorResponses.Add(errorResponseKey, new ErrorResponse(statusCode, errorCode, errorMessage));
                 }
             }
         }
@@ -228,8 +219,8 @@ namespace Dibix.Sdk.CodeGeneration
 
             public ErrorResponseKey(int statusCode, int errorCode)
             {
-                this.StatusCode = statusCode;
-                this.ErrorCode = errorCode;
+                StatusCode = statusCode;
+                ErrorCode = errorCode;
             }
         }
         #endregion
