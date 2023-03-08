@@ -25,7 +25,7 @@ namespace Dibix.Testing
 
         void IDisposable.Dispose()
         {
-            AppDomain.CurrentDomain.FirstChanceException += OnFirstChanceException;
+            AppDomain.CurrentDomain.FirstChanceException -= OnFirstChanceException;
         }
 
         private void OnFirstChanceException(object sender, FirstChanceExceptionEventArgs e)
