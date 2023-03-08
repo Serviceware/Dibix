@@ -34,7 +34,7 @@ namespace Dibix.Testing
             this._useDedicatedTestResultsDirectory = useDedicatedTestResultsDirectory;
             this._defaultRunDirectory = testContext.TestRunResultsDirectory;
             this.RunDirectory = this._useDedicatedTestResultsDirectory ? TestRun.GetTestRunDirectory(testContext) : this._defaultRunDirectory;
-            this.TestRootDirectory = Path.Combine(this.RunDirectory, "TestResults");
+            this.TestRootDirectory = Path.Combine(this.RunDirectory, "Tests");
             this.TestDirectory = Path.Combine(this.TestRootDirectory, testContext.TestName);
             this._expectedDirectory = Path.Combine(this.RunDirectory, ExpectedDirectoryName);
             this._actualDirectory = Path.Combine(this.RunDirectory, ActualDirectoryName);
