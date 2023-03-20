@@ -751,8 +751,9 @@ Either create a mapping or make sure a property of the same name exists in the s
         {
             try
             {
+                bool valueIsNull = Equals(value, null);
                 object result = null;
-                //if (!Equals(value, null))
+                //if (valueIsNull)
                 {
                     TypeConverter typeConverter = TypeDescriptor.GetConverter(typeof(TTarget));
                     if (value is TTarget)
@@ -763,7 +764,7 @@ Either create a mapping or make sure a property of the same name exists in the s
                     {
                         result = typeConverter.ConvertFrom(value);
                     }
-                    else if (typeof(TTarget) == typeof(string) && !Equals(value, null))
+                    else if (typeof(TTarget) == typeof(string) && !valueIsNull)
                     {
                         result = value.ToString();
                     }
@@ -771,10 +772,12 @@ Either create a mapping or make sure a property of the same name exists in the s
                     {
                         Type targetType = typeof(TTarget);
                         Type nullableType = Nullable.GetUnderlyingType(targetType);
-                        if (nullableType != null && !Equals(value, null))
+                        bool isNullableValueType = nullableType != null;
+                        if (isNullableValueType)
                             targetType = nullableType;
 
-                        result = Convert.ChangeType(value, targetType);
+                        if (!isNullableValueType || !valueIsNull)
+                            result = Convert.ChangeType(value, targetType);
                     }
                 }
                 return (TTarget)result;
