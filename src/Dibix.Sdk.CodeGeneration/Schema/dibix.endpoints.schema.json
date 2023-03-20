@@ -117,21 +117,24 @@
         }
       ]
     },
+    "ParameterMapping": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/Source"
+        },
+        {
+          "$ref": "#/definitions/ItemsPropertySource"
+        },
+        {
+          "$ref": "#/definitions/BodySource"
+        }
+      ]
+    },
     "ParameterMappings": {
       "type": "object",
       "patternProperties": {
         "^[a-z]+$": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/Source"
-            },
-            {
-              "$ref": "#/definitions/ItemsPropertySource"
-            },
-            {
-              "$ref": "#/definitions/BodySource"
-            }
-          ]
+          "$ref": "#/definitions/ParameterMapping"
         }
       },
       "minProperties": 1,
@@ -174,18 +177,21 @@
         }
       ]
     },
+    "AuthorizationTemplateName": {
+      "type": "string",
+      "pattern": "^[A-Z]([A-Za-z]+)?$"
+    },
     "AuthorizationTemplateReference": {
       "anyOf": [
         {
-          "type": "object",
           "properties": {
             "name": {
-              "$ref": "#/definitions/NameIdentifier"
+              "$ref": "#/definitions/AuthorizationTemplateName"
             }
           },
           "patternProperties": {
-            "^[a-z]+$": {
-              "$ref": "#/definitions/ConstantSource"
+            "^(?!name$)[a-z]+$": {
+              "$ref": "#/definitions/ParameterMapping"
             }
           },
           "required": [
@@ -194,7 +200,7 @@
           "additionalProperties": false
         },
         {
-          "$ref": "#/definitions/NameIdentifier"
+          "$ref": "#/definitions/AuthorizationTemplateName"
         }
       ]
     },

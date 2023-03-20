@@ -119,7 +119,6 @@ namespace Dibix.Sdk.CodeGeneration
             if (childRouteProperty != null)
             {
                 string childRouteValue = (string)childRouteProperty.Value;
-                SourceLocation childRoutePropertyLocation = childRouteProperty.GetSourceInfo();
                 childRoute = childRouteProperty?.Value.ToToken(childRouteValue);
                 pathParameters = new ReadOnlyDictionary<string, PathParameter>(CollectPathParameters(childRouteProperty, childRouteValue).ToDictionary(x => x.Key, x => x.Value, StringComparer.OrdinalIgnoreCase));
             }

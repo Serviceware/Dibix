@@ -22,23 +22,6 @@
         }
       ]
     },
-    "ConstantSource": {
-      "anyOf": [
-        {
-          "type": "boolean"
-        },
-        {
-          "type": "number"
-        },
-        {
-          "type": "string",
-          "pattern": "^[^.]+$"
-        },
-        {
-          "type": "null"
-        }
-      ]
-    },
     "PropertySource": {
       "anyOf": [
         {
