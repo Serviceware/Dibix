@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
 
 namespace Dibix.Testing
 {
@@ -182,7 +183,10 @@ Value: {instance}");
         protected override Task OnTestInitialized()
         {
             Configuration = TestConfigurationLoader.Load<TConfiguration>(base.TestContext);
+            AddConfigurationToOutput(Configuration);
             return Task.CompletedTask;
         }
+
+        private void AddConfigurationToOutput(TConfiguration configuration) => _ = AddResultFile("appsettings.json", JsonConvert.SerializeObject(configuration, Formatting.Indented));
     }
 }
