@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
@@ -203,7 +204,8 @@ Debug statement:
         {
             null or DBNull => "NULL",
             StructuredType => throw new ArgumentOutOfRangeException(nameof(value), value, null),
-            byte[] binary => binary.Length <= 100 ? $"0x{String.Join(null, binary.Select(x => $"{x:x2}"))}" : $"<TRUNCATED> /* {binary.Length} bytes */",
+            byte[] binary => GetConstantLiteral(binary),
+            Stream stream => GetConstantLiteral(stream),
             string or char or Guid or Uri or XElement => $"N'{value}'",
             DateTime dateTime => $"CAST(N'{dateTime:s}.{dateTime:fff}' AS DATETIME)",
             DateTimeOffset dateTimeOffset => $"CAST(N'{dateTimeOffset:O}' AS DATETIMEOFFSET)",
@@ -212,6 +214,24 @@ Debug statement:
             IConvertible convertible => convertible.ToString(CultureInfo.InvariantCulture),
             _ => value.ToString()
         };
+        private static string GetConstantLiteral(Stream stream)
+        {
+            if (stream.CanSeek)
+                stream.Position = 0;
+
+            byte[] binary;
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                stream.CopyTo(memoryStream);
+                binary = memoryStream.ToArray();
+            }
+            return GetConstantLiteral(binary);
+        }
+        private static string GetConstantLiteral(IReadOnlyCollection<byte> binary)
+        {
+            string value = binary.Count <= 100 ? $"0x{String.Join(null, binary.Select(x => $"{x:x2}"))}" : $"<TRUNCATED> /* {binary.Count} bytes */";
+            return value;
+        }
 
         private static string ToDataTypeString(DbType dbType, object value, int? length)
         {
