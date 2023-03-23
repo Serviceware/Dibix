@@ -11,7 +11,6 @@ namespace Dibix.Testing
     internal sealed class TestOutputWriter : TextWriter, IDisposable
     {
         private const string OutputFileName = "output.log";
-        private readonly string _outputPath;
         private readonly StreamWriter _output;
         private readonly bool _outputToFile;
         private bool _collectingLine;
@@ -21,54 +20,55 @@ namespace Dibix.Testing
 
         public TestOutputWriter(TestContext testContext, TestResultComposer testResultComposer, bool outputToFile, bool tailOutput)
         {
-            this._outputToFile = outputToFile;
+            _outputToFile = outputToFile;
 
-            if (!this._outputToFile) 
+            if (!_outputToFile) 
                 return;
 
-            this._outputPath = testResultComposer.AddFile(OutputFileName);
-            this._output = new StreamWriter(this._outputPath);
+            string outputPath = testResultComposer.AddFile(OutputFileName);
+            _output = new StreamWriter(outputPath);
 
             if (!tailOutput) 
                 return;
 
-            this._tail = Process.Start(new ProcessStartInfo("powershell", $"-Command Write '{testContext.TestName}'; Get-Content '{this._outputPath}' -Wait") { UseShellExecute = true });
-            if (this._tail == null || this._tail.HasExited)
+            _tail = Process.Start(new ProcessStartInfo("powershell", $"-Command Write '{testContext.TestName}'; Get-Content '{outputPath}' -Wait") { UseShellExecute = true });
+            if (_tail == null || _tail.HasExited)
                 throw new InvalidOperationException("Could not tail output");
 
-            Process.GetCurrentProcess().Exited += (sender, e) => this.EndOutputTail();
+            Process.GetCurrentProcess().Exited += (_, _) => EndOutputTail();
+            Console.SetOut(this);
         }
 
         public TraceListener CreateTraceListener() => new TestOutputHelperTraceListener(this);
 
-        public override void Write(string message) => this.Write(message, appendLine: false);
+        public override void Write(string message) => Write(message, appendLine: false);
 
-        public override void WriteLine() => this.Write(message: String.Empty, appendLine: true);
+        public override void WriteLine() => Write(message: String.Empty, appendLine: true);
 
         public override Task WriteLineAsync()
         {
-            this.Write(message: String.Empty, appendLine: true);
+            Write(message: String.Empty, appendLine: true);
             return Task.CompletedTask;
         }
 
-        public override void WriteLine(string message) => this.Write(message, appendLine: true);
+        public override void WriteLine(string message) => Write(message, appendLine: true);
 
         protected override void Dispose(bool disposing)
         {
             if (!disposing)
                 return;
 
-            if (!this._outputToFile)
+            if (!_outputToFile)
                 return;
 
-            this._output.Dispose();
-            this.EndOutputTail();
+            _output.Dispose();
+            EndOutputTail();
         }
 
         private void EndOutputTail()
         {
-            if (this._tail != null && !this._tail.HasExited)
-                this._tail.Kill();
+            if (_tail is { HasExited: false })
+                _tail.Kill();
         }
 
         private void Write(string message, bool appendLine)
@@ -80,45 +80,41 @@ namespace Dibix.Testing
             for (int i = 0; i < lines.Length; i++)
             {
                 if (i > 0) 
-                    this.AppendLine();
+                    AppendLine();
 
                 string line = lines[i];
 
-                if (!this._collectingLine || i > 0)
+                if (!_collectingLine || i > 0)
                     line = $"[{DateTime.Now:O}] {line}";
                 
-                Console.Write(line);
-
-                if (this._outputToFile)
-                    this._output.Write(line);
+                if (_outputToFile)
+                    _output.Write(line);
             }
 
             if (appendLine)
-                this.AppendLine();
+                AppendLine();
 
-            this._collectingLine = !appendLine;
+            _collectingLine = !appendLine;
 
-            if (this._outputToFile)
-                this._output.Flush();
+            if (_outputToFile)
+                _output.Flush();
         }
 
         private void AppendLine()
         {
-            Console.WriteLine();
-
-            if (this._outputToFile)
-                this._output.WriteLine();
+            if (_outputToFile)
+                _output.WriteLine();
         }
 
         private sealed class TestOutputHelperTraceListener : TraceListener
         {
             private readonly TestOutputWriter _testOutputHelper;
 
-            public TestOutputHelperTraceListener(TestOutputWriter testOutputHelper) => this._testOutputHelper = testOutputHelper;
+            public TestOutputHelperTraceListener(TestOutputWriter testOutputHelper) => _testOutputHelper = testOutputHelper;
 
             public override void Write(string message) { } // Ignore trace category prefix stuff
 
-            public override void WriteLine(string message) => this._testOutputHelper.WriteLine(message);
+            public override void WriteLine(string message) => _testOutputHelper.WriteLine(message);
         }
     }
 }
