@@ -6,26 +6,18 @@ namespace Dibix.Http.Client
 {
     public class HttpRequestTracer
     {
-        public bool MaskSensitiveContent { get; } = true;
-
-        public HttpRequestTracer() { }
-        public HttpRequestTracer(bool maskSensitiveContent)
-        {
-            this.MaskSensitiveContent = maskSensitiveContent;
-        }
-
         internal async Task TraceRequestAsync(HttpRequestMessage requestMessage)
         {
             HttpRequestTrace requestTrace = CreateRequestTrace();
             requestMessage.SetHttpRequestTrace(requestTrace);
-            await this.TraceRequestAsync(requestMessage, requestTrace).ConfigureAwait(false);
+            await TraceRequestAsync(requestMessage, requestTrace).ConfigureAwait(false);
         }
 
         internal async Task TraceResponseAsync(HttpResponseMessage responseMessage, TimeSpan duration)
         {
             HttpRequestTrace requestTrace = responseMessage.RequestMessage.GetHttpRequestTrace();
             CompleteLastRequest(requestTrace, duration);
-            await this.TraceResponseAsync(responseMessage, requestTrace);
+            await TraceResponseAsync(responseMessage, requestTrace).ConfigureAwait(false);
         }
 
         protected virtual Task TraceRequestAsync(HttpRequestMessage requestMessage, HttpRequestTrace requestTrace) => Task.CompletedTask;
@@ -42,9 +34,9 @@ namespace Dibix.Http.Client
 
     public class HttpRequestTracer<T> : HttpRequestTracer where T : HttpRequestTrace, new()
     {
-        protected sealed override Task TraceRequestAsync(HttpRequestMessage requestMessage, HttpRequestTrace requestTrace) => this.TraceRequestAsync(requestMessage, (T)requestTrace);
+        protected sealed override Task TraceRequestAsync(HttpRequestMessage requestMessage, HttpRequestTrace requestTrace) => TraceRequestAsync(requestMessage, (T)requestTrace);
 
-        protected sealed override Task TraceResponseAsync(HttpResponseMessage responseMessage, HttpRequestTrace requestTrace) => this.TraceResponseAsync(responseMessage, (T)requestTrace);
+        protected sealed override Task TraceResponseAsync(HttpResponseMessage responseMessage, HttpRequestTrace requestTrace) => TraceResponseAsync(responseMessage, (T)requestTrace);
 
         private protected sealed override HttpRequestTrace CreateRequestTrace() => new T();
 

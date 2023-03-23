@@ -1,25 +1,9 @@
 ﻿using System;
-using System.Linq;
-using System.Net;
 
 namespace Dibix.Http
 {
     internal static class HttpErrorResponseParser
     {
-        private static readonly int[] ClientErrorHttpStatuses =
-        {
-            (int)HttpStatusCode.BadRequest                 // Client syntax error (malformed request)
-          , (int)HttpStatusCode.Unauthorized               // Either the request is missing credentials or the credentials were not accepted
-          , (int)HttpStatusCode.Forbidden                  // The authorized user is not allowed to access the current resource
-          , (int)HttpStatusCode.NotFound                   // Resource with given ID not found, Feature not available/configured
-          , (int)HttpStatusCode.Conflict                   // The resource is currently locked by another request (might resolve by retry)
-          , 422 //(int)HttpStatusCode.UnprocessableEntity  // The client content was not accepted because of a semantic error (i.E. schema validation)
-        };
-        private static readonly int[] ServerErrorHttpStatuses =
-        {
-            (int)HttpStatusCode.GatewayTimeout  // External service did not respond in time
-        };
-
         public static bool TryParseErrorResponse(int errorNumber, out int statusCode, out int errorCode, out bool isClientError)
         {
             statusCode = 0;
@@ -36,8 +20,8 @@ namespace Dibix.Http
             statusCode = errorNumber / 1000;
             errorCode = errorNumber % 1000;
 
-            bool isServerError = ServerErrorHttpStatuses.Contains(statusCode) && errorCode == 0;
-            isClientError = ClientErrorHttpStatuses.Contains(statusCode);
+            isClientError = statusCode % 400 < 100;
+            bool isServerError = statusCode % 500 < 100;
 
             return isServerError || isClientError;
         }
