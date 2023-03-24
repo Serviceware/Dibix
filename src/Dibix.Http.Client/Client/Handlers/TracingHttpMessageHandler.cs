@@ -18,6 +18,7 @@ namespace Dibix.Http.Client
         private readonly Stopwatch _requestDurationTracker = new Stopwatch();
         private readonly HttpRequestTracer _tracer;
         private readonly DibixHttpClientTraceSource _traceSource;
+        private readonly Random _random;
         #endregion
 
         #region Constructor
@@ -25,13 +26,15 @@ namespace Dibix.Http.Client
         {
             _tracer = tracer;
             _traceSource = new DibixHttpClientTraceSource("Dibix.Http.Client");
+            _random = new Random();
         }
         #endregion
 
         #region Overrides
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            await TraceRequest(request).ConfigureAwait(false);
+            int requestId = _random.Next(minValue: 1000, maxValue: 10000);
+            await TraceRequest(request, requestId).ConfigureAwait(false);
 
             try
             {
@@ -39,7 +42,7 @@ namespace Dibix.Http.Client
                 HttpResponseMessage responseMessage = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
                 FinishTracking();
 
-                await TraceResponse(responseMessage).ConfigureAwait(false);
+                await TraceResponse(responseMessage, requestId).ConfigureAwait(false);
 
                 return responseMessage;
             }
@@ -51,17 +54,17 @@ namespace Dibix.Http.Client
         #endregion
 
         #region Private Methods
-        private async Task TraceRequest(HttpRequestMessage request)
+        private async Task TraceRequest(HttpRequestMessage request, int requestId)
         {
-            await WriteRequestToTraceSource(request).ConfigureAwait(false);
+            await WriteRequestToTraceSource(request, requestId).ConfigureAwait(false);
             
             if (_tracer != null)
                 await _tracer.TraceRequestAsync(request).ConfigureAwait(false);
         }
 
-        private async Task TraceResponse(HttpResponseMessage response)
+        private async Task TraceResponse(HttpResponseMessage response, int requestId)
         {
-            await WriteResponseToTraceSource(response).ConfigureAwait(false);
+            await WriteResponseToTraceSource(response, requestId).ConfigureAwait(false);
             
             if (_tracer != null) 
                 await _tracer.TraceResponseAsync(response, _requestDurationTracker.Elapsed).ConfigureAwait(false);
@@ -71,29 +74,32 @@ namespace Dibix.Http.Client
 
         private void FinishTracking() => _requestDurationTracker.Stop();
 
-        private async Task WriteRequestToTraceSource(HttpRequestMessage request)
+        private async Task WriteRequestToTraceSource(HttpRequestMessage request, int requestId)
         {
-            if (!_traceSource.Switch.ShouldTrace(TraceEventType.Information))
-                return;
-
-            string requestContentText = await GetHttpContentText(request.Content).ConfigureAwait(false);
-            string requestText = request.GetFormattedText(requestContentText, _traceSource.MaxBodyLength, _traceSource.MaskSensitiveBody);
-            string message = $@"HTTP request
--
-{requestText}";
-            _traceSource.TraceInformation(message);
+            string GetRequestText(string requestContentText) => request.GetFormattedText(requestContentText, _traceSource.MaxBodyLength, _traceSource.MaskSensitiveBody);
+            await WriteToTraceSource("request", requestId, request.Content, GetRequestText).ConfigureAwait(false);
         }
 
-        private async Task WriteResponseToTraceSource(HttpResponseMessage response)
+        private async Task WriteResponseToTraceSource(HttpResponseMessage response, int requestId)
+        {
+            string GetResponseText(string responseContentText) => response.GetFormattedText(responseContentText, _traceSource.MaxBodyLength, _traceSource.MaskSensitiveBody);
+            await WriteToTraceSource("response", requestId, response.Content, GetResponseText).ConfigureAwait(false);
+        }
+
+        private async Task WriteToTraceSource(string kind, int requestId, HttpContent content, Func<string, string> textProvider)
         {
             if (!_traceSource.Switch.ShouldTrace(TraceEventType.Information))
                 return;
 
-            string responseContentText = await GetHttpContentText(response.Content).ConfigureAwait(false);
-            string responseText = response.GetFormattedText(responseContentText, _traceSource.MaxBodyLength, _traceSource.MaskSensitiveBody);
-            string message = $@"HTTP response
--
-{responseText}";
+            string contentText = await GetHttpContentText(content).ConfigureAwait(false);
+            string text = textProvider(contentText);
+            string header = $"HTTP {kind} [{requestId}]";
+            string line = $@"
+{new string('=', header.Length)}
+";
+            string message = $@"{header}
+{line}
+{text}";
             _traceSource.TraceInformation(message);
         }
 
