@@ -9,6 +9,8 @@ namespace Dibix.Http.Client
     /// <summary>
     /// - Capture request/response message including formatted content text
     /// - Measure request duration
+    /// - Write captured request/response to trace source
+    /// - Optionally delegate captured request/response to custom tracer which can act as an interceptor
     /// </summary>
     public sealed class TracingHttpMessageHandler : DelegatingHandler
     {
@@ -21,7 +23,6 @@ namespace Dibix.Http.Client
         #region Constructor
         public TracingHttpMessageHandler(HttpRequestTracer tracer)
         {
-            Guard.IsNotNull(tracer, nameof(tracer));
             _tracer = tracer;
             _traceSource = new DibixHttpClientTraceSource("Dibix.Http.Client");
         }
@@ -53,13 +54,17 @@ namespace Dibix.Http.Client
         private async Task TraceRequest(HttpRequestMessage request)
         {
             await WriteRequestToTraceSource(request).ConfigureAwait(false);
-            await _tracer.TraceRequestAsync(request).ConfigureAwait(false);
+            
+            if (_tracer != null)
+                await _tracer.TraceRequestAsync(request).ConfigureAwait(false);
         }
 
         private async Task TraceResponse(HttpResponseMessage response)
         {
             await WriteResponseToTraceSource(response).ConfigureAwait(false);
-            await _tracer.TraceResponseAsync(response, _requestDurationTracker.Elapsed).ConfigureAwait(false);
+            
+            if (_tracer != null) 
+                await _tracer.TraceResponseAsync(response, _requestDurationTracker.Elapsed).ConfigureAwait(false);
         }
 
         private void StartTracking() => _requestDurationTracker.Restart();

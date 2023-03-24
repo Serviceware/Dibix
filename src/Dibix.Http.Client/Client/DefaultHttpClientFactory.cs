@@ -57,30 +57,30 @@ namespace Dibix.Http.Client
         public DefaultHttpClientFactory(Action<IHttpClientBuilder> configuration) : this(new DefaultHttpClientConfiguration(configuration)) { }
         public DefaultHttpClientFactory(params HttpClientConfiguration[] configurations)
         {
-            this._configurations = CollectConfigurations(configurations).ToDictionary(x => x.Key, x => BuildConfiguration(x.Value));
-            this._activeHandlers = new ConcurrentDictionary<string, Lazy<ActiveHandlerTrackingEntry>>(StringComparer.Ordinal);
+            _configurations = CollectConfigurations(configurations).ToDictionary(x => x.Key, x => BuildConfiguration(x.Value));
+            _activeHandlers = new ConcurrentDictionary<string, Lazy<ActiveHandlerTrackingEntry>>(StringComparer.Ordinal);
 
-            this._expiredHandlers = new ConcurrentQueue<ExpiredHandlerTrackingEntry>();
-            this._expiryCallback = ExpiryTimer_Tick;
+            _expiredHandlers = new ConcurrentQueue<ExpiredHandlerTrackingEntry>();
+            _expiryCallback = ExpiryTimer_Tick;
 
-            this._cleanupTimerLock = new object();
-            this._cleanupActiveLock = new object();
+            _cleanupTimerLock = new object();
+            _cleanupActiveLock = new object();
         }
         #endregion
 
         #region IHttpClientFactory Members
-        public HttpClient CreateClient() => this.CreateClient(name: DefaultClientName, baseAddress: null);
-        public HttpClient CreateClient(string name) => this.CreateClient(name, baseAddress: null);
-        public HttpClient CreateClient(Uri baseAddress) => this.CreateClient(name: DefaultClientName, baseAddress);
+        public HttpClient CreateClient() => CreateClient(name: DefaultClientName, baseAddress: null);
+        public HttpClient CreateClient(string name) => CreateClient(name, baseAddress: null);
+        public HttpClient CreateClient(Uri baseAddress) => CreateClient(name: DefaultClientName, baseAddress);
         public HttpClient CreateClient(string name, Uri baseAddress)
         {
             Guard.IsNotNull(name, nameof(name));
 
-            if (!this._configurations.TryGetValue(name, out HttpClientBuilder clientBuilder))
+            if (!_configurations.TryGetValue(name, out HttpClientBuilder clientBuilder))
                 throw new InvalidOperationException($"No client with name '{name}' is registered. Please implement '{typeof(HttpClientConfiguration)}' and pass it to the constructor of '{typeof(DefaultHttpClientFactory)}'.");
 
             // Wrap the handler so we can ensure the inner handler outlives the outer handler.
-            HttpMessageHandler handler = this.CreateHandler(clientBuilder, name, out bool handlerAlreadyCreated);
+            HttpMessageHandler handler = CreateHandler(clientBuilder, name, out bool handlerAlreadyCreated);
 
             HttpClient client = new HttpClient(handler, disposeHandler: false);
             client.BaseAddress = baseAddress;
@@ -99,7 +99,7 @@ namespace Dibix.Http.Client
         {
             Lazy<ActiveHandlerTrackingEntry> CreateEntry(string key) => new Lazy<ActiveHandlerTrackingEntry>(() => CreateHandlerEntry(clientBuilder, key), LazyThreadSafetyMode.ExecutionAndPublication);
 
-            Lazy<ActiveHandlerTrackingEntry> entryAccessor = this._activeHandlers.GetOrAdd(name, CreateEntry);
+            Lazy<ActiveHandlerTrackingEntry> entryAccessor = _activeHandlers.GetOrAdd(name, CreateEntry);
             handlerAlreadyCreated = entryAccessor.IsValueCreated;
             ActiveHandlerTrackingEntry entry = entryAccessor.Value;
 
@@ -311,48 +311,47 @@ namespace Dibix.Http.Client
             public IHttpClientBuilder ConfigureClient(Action<HttpClient> configure)
             {
                 Guard.IsNotNull(configure, nameof(configure));
-                this.HttpClientActions.Add(configure);
+                HttpClientActions.Add(configure);
                 return this;
             }
 
-            public IHttpClientBuilder AddHttpMessageHandler<THandler>() where THandler : DelegatingHandler, new() => this.AddHttpMessageHandler(() => new THandler());
+            public IHttpClientBuilder AddHttpMessageHandler<THandler>() where THandler : DelegatingHandler, new() => AddHttpMessageHandler(() => new THandler());
             public IHttpClientBuilder AddHttpMessageHandler(Func<DelegatingHandler> handlerFactory)
             {
                 Guard.IsNotNull(handlerFactory, nameof(handlerFactory));
-                this.HttpMessageHandlerBuilderActions.Add(x => x.AdditionalHandlers.Add(handlerFactory()));
+                HttpMessageHandlerBuilderActions.Add(x => x.AdditionalHandlers.Add(handlerFactory()));
                 return this;
             }
 
             public IHttpClientBuilder ConfigurePrimaryHttpMessageHandler<THandler>() where THandler : HttpMessageHandler, new()
             {
-                this.ConfigurePrimaryHttpMessageHandler(() => new THandler());
+                ConfigurePrimaryHttpMessageHandler(() => new THandler());
                 return this;
             }
             public IHttpClientBuilder ConfigurePrimaryHttpMessageHandler<THandler>(Func<THandler> handlerFactory) where THandler : HttpMessageHandler
             {
-                this.HttpMessageHandlerBuilderActions.Add(x => x.PrimaryHandler = handlerFactory());
+                HttpMessageHandlerBuilderActions.Add(x => x.PrimaryHandler = handlerFactory());
                 return this;
             }
 
             public void ConfigureDefaults()
             {
-                if (this.FollowRedirectsGetRequests)
-                    this.AddHttpMessageHandler<FollowRedirectHttpMessageHandler>();
+                if (FollowRedirectsGetRequests)
+                    AddHttpMessageHandler<FollowRedirectHttpMessageHandler>();
 
-                if (this.TraceProxy)
-                    this.AddHttpMessageHandler<TraceProxyHttpMessageHandler>();
+                if (TraceProxy)
+                    AddHttpMessageHandler<TraceProxyHttpMessageHandler>();
 
                 // Add this before each handler, that needs to access the response, before an exception is thrown. (i.E. TracingHttpMessageHandler)
-                if (this.EnsureSuccessStatusCode)
-                    this.AddHttpMessageHandler<EnsureSuccessStatusCodeHttpMessageHandler>();
+                if (EnsureSuccessStatusCode)
+                    AddHttpMessageHandler<EnsureSuccessStatusCodeHttpMessageHandler>();
 
                 // Run tracing after all other handlers, that potentially modified the request, to ensure the trace includes the actual request that is sent.
-                if (this.Tracer != null)
-                    this.AddHttpMessageHandler(() => new TracingHttpMessageHandler(this.Tracer));
+                AddHttpMessageHandler(() => new TracingHttpMessageHandler(Tracer));
 
                 // This should be as close to the primary handler as possible to avoid timeouts caused by other handlers.
-                if (this.WrapTimeoutsInException)
-                    this.AddHttpMessageHandler<TimeoutHttpMessageHandler>();
+                if (WrapTimeoutsInException)
+                    AddHttpMessageHandler<TimeoutHttpMessageHandler>();
             }
         }
 
@@ -365,7 +364,7 @@ namespace Dibix.Http.Client
             {
                 if (PrimaryHandler == null)
                 {
-                    string message = $"The '{nameof(this.PrimaryHandler)}' must not be null.";
+                    string message = $"The '{nameof(PrimaryHandler)}' must not be null.";
                     throw new InvalidOperationException(message);
                 }
                 return CreateHandlerPipeline(PrimaryHandler, AdditionalHandlers);
