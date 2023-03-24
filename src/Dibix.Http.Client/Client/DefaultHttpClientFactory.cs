@@ -54,6 +54,7 @@ namespace Dibix.Http.Client
         #endregion
 
         #region Constructor
+        public DefaultHttpClientFactory(Action<IHttpClientBuilder> configuration) : this(new DefaultHttpClientConfiguration(configuration)) { }
         public DefaultHttpClientFactory(params HttpClientConfiguration[] configurations)
         {
             this._configurations = CollectConfigurations(configurations).ToDictionary(x => x.Key, x => BuildConfiguration(x.Value));
@@ -396,9 +397,13 @@ Handler: '{handler}'";
 
         private sealed class DefaultHttpClientConfiguration : HttpClientConfiguration
         {
-            public override string Name => "Dibix.Http.Client.DefaultHttpClient";
+            private readonly Action<IHttpClientBuilder> _configuration;
 
-            public override void Configure(IHttpClientBuilder builder) { }
+            public DefaultHttpClientConfiguration(Action<IHttpClientBuilder> configuration = null) => _configuration = configuration;
+
+            public override string Name => DefaultClientName;
+
+            public override void Configure(IHttpClientBuilder builder) => _configuration?.Invoke(builder);
         }
 
         // Thread-safety: We treat this class as immutable except for the timer. Creating a new object
