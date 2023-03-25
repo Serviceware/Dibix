@@ -7,7 +7,7 @@ namespace Dibix.Http.Server
     {
         public HttpStatusCode StatusCode { get; }
 
-        public HttpResponse(HttpStatusCode statusCode) => this.StatusCode = statusCode;
+        public HttpResponse(HttpStatusCode statusCode) => StatusCode = statusCode;
 
         public virtual HttpResponseMessage CreateResponse(HttpRequestMessage request) => request.CreateResponse(this.StatusCode);
     }

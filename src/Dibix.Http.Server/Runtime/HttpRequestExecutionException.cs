@@ -1,17 +1,21 @@
 ﻿using System;
-using System.Net.Http;
+using System.Net;
 
 namespace Dibix.Http.Server
 {
     public sealed class HttpRequestExecutionException : Exception
     {
-        public HttpResponseMessage ErrorResponse { get; }
+        public HttpStatusCode StatusCode { get; }
+        public int ErrorCode { get; }
+        public string ErrorMessage { get; }
         public bool IsClientError { get; }
 
-        public HttpRequestExecutionException(HttpResponseMessage errorResponse, bool isClientError, Exception innerException) : base($"{(int)errorResponse.StatusCode} {errorResponse.StatusCode}: {innerException.Message}", innerException)
+        internal HttpRequestExecutionException(HttpStatusCode statusCode, int errorCode, string errorMessage, bool isClientError, Exception innerException) : base($"{(int)statusCode} {statusCode}: {innerException.Message}", innerException)
         {
-            this.ErrorResponse = errorResponse;
-            this.IsClientError = isClientError;
+            StatusCode = statusCode;
+            ErrorCode = errorCode;
+            ErrorMessage = errorMessage;
+            IsClientError = isClientError;
         }
     }
 }

@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Net.Http;
 using System.Reflection;
 using System.Text;
 
@@ -20,7 +19,7 @@ namespace Dibix.Http.Server
         #endregion
 
         #region Delegates
-        private delegate void ResolveParameters(HttpRequestMessage request, IDictionary<string, object> arguments, IParameterDependencyResolver dependencyResolver, IHttpActionDescriptor action);
+        private delegate void ResolveParameters(IHttpRequestDescriptor request, IDictionary<string, object> arguments, IParameterDependencyResolver dependencyResolver, IHttpActionDescriptor action);
         #endregion
 
         #region Public Methods
@@ -29,8 +28,8 @@ namespace Dibix.Http.Server
             CompilationContext compilationContext = new CompilationContext();
             try
             {
-                // (HttpRequestMessage request, IDictionary<string, object> arguments, IParameterDependencyResolver dependencyResolver, IHttpActionDescriptor action) => 
-                ParameterExpression requestParameter = Expression.Parameter(typeof(HttpRequestMessage), "request");
+                // (HttpRequestDescriptor request, IDictionary<string, object> arguments, IParameterDependencyResolver dependencyResolver, IHttpActionDescriptor action) => 
+                ParameterExpression requestParameter = Expression.Parameter(typeof(IHttpRequestDescriptor), "request");
                 ParameterExpression argumentsParameter = Expression.Parameter(typeof(IDictionary<string, object>), "arguments");
                 ParameterExpression dependencyResolverParameter = Expression.Parameter(typeof(IParameterDependencyResolver), "dependencyResolver");
                 ParameterExpression actionParameter = Expression.Parameter(typeof(IHttpActionDescriptor), "action");
@@ -1079,7 +1078,7 @@ Either create a mapping or make sure a property of the same name exists in the s
 
             public void AddParameter(string name, Type type, HttpParameterLocation location, bool isOptional) => this.Parameters.Add(name, new HttpActionParameter(name, type, location, isOptional));
 
-            public void PrepareParameters(HttpRequestMessage request, IDictionary<string, object> arguments, IParameterDependencyResolver dependencyResolver)
+            public void PrepareParameters(IHttpRequestDescriptor request, IDictionary<string, object> arguments, IParameterDependencyResolver dependencyResolver)
             {
                 this._compiled(request, arguments, dependencyResolver, this._action);
             }

@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Net.Http;
 
 namespace Dibix.Http.Server
 {
@@ -19,6 +17,6 @@ namespace Dibix.Http.Server
             context.ResolveUsingValue(getHeaderCall);
         }
 
-        private static string GetHeader(HttpRequestMessage request, string key) => request.Headers.TryGetValues(key, out IEnumerable<string> values) ? values.First() : null;
+        private static string GetHeader(IHttpRequestDescriptor request, string key) => request.GetHeaderValues(key).FirstOrDefault();
     }
 }

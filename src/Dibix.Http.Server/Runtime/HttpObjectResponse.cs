@@ -7,8 +7,8 @@ namespace Dibix.Http.Server
     {
         public object Content { get; }
 
-        public HttpObjectResponse(HttpStatusCode statusCode, object content) : base(statusCode) => this.Content = content;
+        public HttpObjectResponse(HttpStatusCode statusCode, object content) : base(statusCode) => Content = content;
 
-        public override HttpResponseMessage CreateResponse(HttpRequestMessage request) => request.CreateResponse(base.StatusCode, this.Content);
+        public override HttpResponseMessage CreateResponse(HttpRequestMessage request) => request.CreateResponse(StatusCode, Content);
     }
 }

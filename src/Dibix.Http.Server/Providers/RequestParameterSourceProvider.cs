@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Net.Http;
 
 namespace Dibix.Http.Server
 {
@@ -32,8 +31,8 @@ namespace Dibix.Http.Server
             return getLanguageCall;
         }
 
-        private static string GetFirstLanguage(HttpRequestMessage request) => GetLanguages(request).FirstOrDefault();
+        private static string GetFirstLanguage(IHttpRequestDescriptor request) => GetLanguages(request).FirstOrDefault();
         
-        private static IEnumerable<string> GetLanguages(HttpRequestMessage request) => request.Headers.AcceptLanguage.Select(x => x.Value);
+        private static IEnumerable<string> GetLanguages(IHttpRequestDescriptor request) => request.GetAcceptLanguageValues();
     }
 }

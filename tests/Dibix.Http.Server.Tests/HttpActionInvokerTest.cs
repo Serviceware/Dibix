@@ -42,15 +42,16 @@ namespace Dibix.Http.Server.Tests
             }
             catch (HttpRequestExecutionException requestException)
             {
+                HttpResponseMessage response = requestException.CreateResponse(request);
                 Assert.AreEqual(@"504 GatewayTimeout: Too late
 CommandType: 0
 CommandText: <Inline>", requestException.Message);
                 AssertIsType<DatabaseAccessException>(requestException.InnerException);
                 Assert.IsFalse(requestException.IsClientError);
-                Assert.AreEqual(HttpStatusCode.GatewayTimeout, requestException.ErrorResponse.StatusCode);
-                Assert.IsFalse(requestException.ErrorResponse.Headers.Contains("X-Error-Code"));
-                Assert.IsFalse(requestException.ErrorResponse.Headers.Contains("X-Error-Description"));
-                Assert.AreEqual(request, requestException.ErrorResponse.RequestMessage);
+                Assert.AreEqual(HttpStatusCode.GatewayTimeout, response.StatusCode);
+                Assert.IsFalse(response.Headers.Contains("X-Error-Code"));
+                Assert.IsFalse(response.Headers.Contains("X-Error-Description"));
+                Assert.AreEqual(request, response.RequestMessage);
             }
         }
         private static void Invoke_DDL_WithHttpServerError_IsMappedToHttpStatusCode_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw CreateException(errorInfoNumber: 504000, errorMessage: "Too late");
@@ -66,15 +67,16 @@ CommandText: <Inline>", requestException.Message);
             }
             catch (HttpRequestExecutionException requestException)
             {
+                HttpResponseMessage response = requestException.CreateResponse(request);
                 Assert.AreEqual(@"403 Forbidden: Sorry
 CommandType: 0
 CommandText: <Inline>", requestException.Message);
                 AssertIsType<DatabaseAccessException>(requestException.InnerException);
                 Assert.IsTrue(requestException.IsClientError);
-                Assert.AreEqual(HttpStatusCode.Forbidden, requestException.ErrorResponse.StatusCode);
-                Assert.AreEqual("1", requestException.ErrorResponse.Headers.GetValues("X-Error-Code").Single());
-                Assert.AreEqual("Sorry", requestException.ErrorResponse.Headers.GetValues("X-Error-Description").Single());
-                Assert.AreEqual(request, requestException.ErrorResponse.RequestMessage);
+                Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
+                Assert.AreEqual("1", response.Headers.GetValues("X-Error-Code").Single());
+                Assert.AreEqual("Sorry", response.Headers.GetValues("X-Error-Description").Single());
+                Assert.AreEqual(request, response.RequestMessage);
             }
         }
         private static void Invoke_DDL_WithHttpClientError_IsMappedToHttpStatusCode_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw CreateException(errorInfoNumber: 403001, errorMessage: "Sorry");
@@ -90,15 +92,16 @@ CommandText: <Inline>", requestException.Message);
             }
             catch (HttpRequestExecutionException requestException)
             {
+                HttpResponseMessage response = requestException.CreateResponse(request);
                 Assert.AreEqual(@"403 Forbidden: Sorry
 CommandType: 0
 CommandText: <Inline>", requestException.Message);
                 AssertIsType<DatabaseAccessException>(requestException.InnerException);
                 Assert.IsTrue(requestException.IsClientError);
-                Assert.AreEqual(HttpStatusCode.Forbidden, requestException.ErrorResponse.StatusCode);
-                Assert.AreEqual("1", requestException.ErrorResponse.Headers.GetValues("X-Error-Code").Single());
-                Assert.AreEqual("Sorry", requestException.ErrorResponse.Headers.GetValues("X-Error-Description").Single());
-                Assert.AreEqual(request, requestException.ErrorResponse.RequestMessage);
+                Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
+                Assert.AreEqual("1", response.Headers.GetValues("X-Error-Code").Single());
+                Assert.AreEqual("Sorry", response.Headers.GetValues("X-Error-Description").Single());
+                Assert.AreEqual(request, response.RequestMessage);
             }
         }
         private static void Invoke_DDL_WithHttpClientError_ProducedByAuthorizationBehavior_IsMappedToHttpStatusCode_Target(IDatabaseAccessorFactory databaseAccessorFactory) { }

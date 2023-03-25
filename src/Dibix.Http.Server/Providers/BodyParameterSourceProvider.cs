@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq.Expressions;
-using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
@@ -22,9 +21,9 @@ namespace Dibix.Http.Server
             }
             else
             {
-                Expression contentProperty = Expression.Property(context.RequestParameter, nameof(HttpRequestMessage.Content));
-                Expression readAsStreamAsyncCall = Expression.Call(contentProperty, nameof(HttpContent.ReadAsStreamAsync), Type.EmptyTypes);
-                Expression getAwaiterCall = Expression.Call(readAsStreamAsyncCall, typeof(Task<Stream>).SafeGetMethod(nameof(Task<Stream>.GetAwaiter)));
+                // TODO: Can be null!
+                Expression getBodyCall = Expression.Call(context.RequestParameter, nameof(IHttpRequestDescriptor.GetBody), Type.EmptyTypes);
+                Expression getAwaiterCall = Expression.Call(getBodyCall, typeof(Task<Stream>).SafeGetMethod(nameof(Task<Stream>.GetAwaiter)));
                 Expression getResultCall = Expression.Call(getAwaiterCall, nameof(TaskAwaiter.GetResult), Type.EmptyTypes);
                 context.ResolveUsingValue(getResultCall);
             }

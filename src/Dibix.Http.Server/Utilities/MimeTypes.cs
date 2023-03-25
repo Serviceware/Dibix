@@ -8,7 +8,7 @@ namespace Dibix.Http.Server
     // combination of values from Windows 7 Registry and 
     // from C:\Windows\System32\inetsrv\config\applicationHost.config
     // some added, including .7z and .dat
-    internal static class MimeTypes
+    public static class MimeTypes
     {
         private const string DefaultMimeType = "application/octet-stream";
         private static readonly IDictionary<string, string> MimeTypeMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
