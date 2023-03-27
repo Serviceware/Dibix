@@ -23,6 +23,7 @@ steps:
       arguments: >
         --logger trx;LogFileName=${{ project }}.trx
         --configuration ${{ parameters.configuration }}
+        --no-build
         --no-restore
         --collect:"XPlat Code Coverage"
         ${{ parameters.arguments }}

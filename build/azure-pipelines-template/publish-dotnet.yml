@@ -1,0 +1,35 @@
+﻿parameters:
+- name: project
+  type: string
+- name: configuration
+  type: string
+  values:
+  - Debug
+  - Release
+- name: runtimeIdentifier
+  type: string
+  values:
+  - linux-x64
+  - osx-x64
+  - win-x64
+- name: publishSingleFile
+  type: boolean
+- name: publishReadyToRun
+  type: boolean
+ 
+steps:
+- template: publish-dotnet-no-self-contained.yml
+  parameters:
+    project: ${{ parameters.project }}
+    configuration: ${{ parameters.configuration }}
+    runtimeIdentifier: ${{ parameters.runtimeIdentifier }}
+    publishSingleFile: ${{ parameters.publishSingleFile }}
+    publishReadyToRun: ${{ parameters.publishReadyToRun }}
+
+- template: publish-dotnet-self-contained.yml
+  parameters:
+    project: ${{ parameters.project }}
+    configuration: ${{ parameters.configuration }}
+    runtimeIdentifier: ${{ parameters.runtimeIdentifier }}
+    publishSingleFile: ${{ parameters.publishSingleFile }}
+    publishReadyToRun: ${{ parameters.publishReadyToRun }}

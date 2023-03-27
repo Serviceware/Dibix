@@ -10,20 +10,36 @@
   values:
   - Debug
   - Release
+- name: runtimeIdentifier
+  type: string
+  values:
+  - linux-x64
+  - osx-x64
+  - win-x64
 - name: codeCoverageEngine
   type: string
   values:
   - Native
   - Cobertura
+- name: publishSingleFile
+  type: boolean
+  default: true
+- name: publishReadyToRun
+  type: boolean
+  default: true
 
 steps:
 - template: install-dotnet-sdk.yml
 
 - template: restore.yml
+  parameters:
+    publishReadyToRun: ${{ parameters.publishReadyToRun }}
+    runtimeIdentifier: ${{ parameters.runtimeIdentifier }}
 
 - template: build.yml
   parameters:
     configuration: ${{ parameters.configuration }}
+    publishSingleFile: ${{ parameters.publishSingleFile }}
 
 - template: test.yml
   parameters:
@@ -35,3 +51,15 @@ steps:
   - template: pack.yml
     parameters:
       configuration: ${{ parameters.configuration }}
+
+- template: publish.yml
+  parameters:
+    configuration: ${{ parameters.configuration }}
+    runtimeIdentifier: ${{ parameters.runtimeIdentifier }}
+    publishSingleFile: ${{ parameters.publishSingleFile }}
+    publishReadyToRun: ${{ parameters.publishReadyToRun }}
+
+- template: publish-artifact.yml
+  parameters:
+    artifact: Build output ($(operatingSystem))
+    folder: build

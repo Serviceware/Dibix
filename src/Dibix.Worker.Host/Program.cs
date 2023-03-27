@@ -32,7 +32,8 @@ namespace Dibix.Worker.Host
                     .AddScoped<IDatabaseAccessorFactory, ScopedDatabaseAccessorFactory>()
                     .AddScoped<IWorkerDependencyContext, ServiceProviderWorkerDependencyContext>()
                     .AddSingleton<IWorkerScopeFactory, ServiceScopeWorkerScopeFactory>()
-                    .AddSingleton<IHostedServiceRegistrar, DefaultHostedServiceRegistrar>();
+                    .AddSingleton<IHostedServiceRegistrar, DefaultHostedServiceRegistrar>()
+                    .AddHostedService<DatabaseOptionsMonitor>();
 
             services.Configure<DatabaseOptions>(builder.Configuration.GetSection(DatabaseOptions.ConfigurationSectionName));
             HostingOptions hostingOptions = builder.Configuration.Bind<HostingOptions>(HostingOptions.ConfigurationSectionName);
@@ -45,7 +46,9 @@ namespace Dibix.Worker.Host
             services.AddSingleton<IWorkerDependencyRegistry>(dependencyRegistry);
 
             IHost host = builder.Build();
-            hostExtensionRegistrar?.Configure(host);
+
+            if (hostExtensionRegistrar != null)
+                await hostExtensionRegistrar.Configure(host).ConfigureAwait(false);
 
             await host.RunAsync().ConfigureAwait(false);
         }

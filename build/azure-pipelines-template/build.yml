@@ -4,26 +4,41 @@
   values:
   - Debug
   - Release
+- name: publishSingleFile
+  type: boolean
 
 steps:
-- template: build-all.yml
+- template: build-multiple.yml
   parameters:
+    folder: src
     projects:
     - Dibix
     - Dibix.Dapper
+    - Dibix.Sdk.Abstractions
     - Dibix.Generators
     - Dibix.Http.Client
     - Dibix.Http.Server
-    - Dibix.Sdk
-    - Dibix.Sdk.Abstractions
-    - Dibix.Sdk.Cli
+    - Dibix.Sdk.Sql
     - Dibix.Sdk.CodeAnalysis
     - Dibix.Sdk.CodeGeneration
-    - Dibix.Sdk.Sql
+    - Dibix.Sdk
+    - Dibix.Sdk.Cli
     - Dibix.Testing
+    - Dibix.Worker.Abstractions
     configuration: ${{ parameters.configuration }}
+    runtimeIdentifier: none
+    publishSingleFile: False
 
-- template: publish-artifact.yml
+- template: build-multiple.yml
   parameters:
-    artifact: Build output ($(operatingSystem))
-    folder: build
+    folder: tests
+    projects:
+    - Dibix.Dapper.Tests
+    - Dibix.Generators.Tests
+    - Dibix.Http.Client.Tests
+    - Dibix.Http.Server.Tests
+    - Dibix.Sdk.Tests
+    - Dibix.Tests
+    configuration: ${{ parameters.configuration }}
+    runtimeIdentifier: none
+    publishSingleFile: False

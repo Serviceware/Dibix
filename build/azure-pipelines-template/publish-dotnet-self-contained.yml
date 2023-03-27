@@ -1,0 +1,53 @@
+﻿parameters:
+- name: project
+  type: string
+- name: configuration
+  type: string
+  values:
+  - Debug
+  - Release
+- name: runtimeIdentifier
+  type: string
+  values:
+  - linux-x64
+  - osx-x64
+  - win-x64
+- name: publishSingleFile
+  type: boolean
+- name: publishReadyToRun
+  type: boolean
+ 
+steps:
+- template: build-dotnet-self-contained.yml
+  parameters:
+    folder: src
+    project: ${{ parameters.project }}
+    configuration: ${{ parameters.configuration }}
+    runtimeIdentifier: ${{ parameters.runtimeIdentifier }}
+    publishSingleFile: ${{ parameters.publishSingleFile }}
+
+- task: DotNetCoreCLI@2
+  displayName: 🌐 Publish ${{ parameters.project }} (${{ parameters.configuration }}) [self-contained]
+  inputs:
+    command: publish
+    projects: src/${{ parameters.project }}
+    publishWebProjects: false
+    arguments: >
+      --configuration ${{ parameters.configuration }}
+      --no-build
+      --no-restore
+      --output $(Build.ArtifactStagingDirectory)/publish
+      --runtime ${{ parameters.runtimeIdentifier }}
+      --self-contained
+      --p:IgnoreProjectGuid=True
+      --p:PublishReadyToRun=${{ parameters.publishReadyToRun }}
+      --p:PublishSingleFile=${{ parameters.publishSingleFile }}
+      --p:IncludeNativeLibrariesForSelfExtract=True
+
+     # Currently causing some IL2026 errors (..which has 'RequiresUnreferencedCodeAttribute' can break functionality when trimming application code)
+     # See: https://github.com/dotnet/aspnetcore/issues/27384
+     #--p:PublishTrimmed=True
+     #--p:NoWarn=1144
+
+- pwsh: Rename-Item -Path $(Build.ArtifactStagingDirectory)/publish/src.zip -NewName $(Build.ArtifactStagingDirectory)/publish/${{ parameters.project }}.${{ parameters.runtimeIdentifier }}.self-contained.zip
+  displayName: 🎨 Rename src.zip -> ${{ parameters.project }}.${{ parameters.runtimeIdentifier }}.self-contained.zip

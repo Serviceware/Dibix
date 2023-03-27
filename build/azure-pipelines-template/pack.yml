@@ -15,6 +15,7 @@ steps:
     - Dibix.Http.Server
     - Dibix.Sdk.Cli
     - Dibix.Testing
+    - Dibix.Worker.Abstractions
     configuration: ${{ parameters.configuration }}
 
 - template: publish-artifact.yml

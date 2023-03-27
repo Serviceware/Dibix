@@ -25,6 +25,7 @@ steps:
         --results-directory $(Agent.TempDirectory)
         --logger trx;LogFileName=${{ project }}.trx
         --configuration ${{ parameters.configuration }}
+        --no-build
         --no-restore
         --collect:"Code Coverage"
         ${{ parameters.arguments }}

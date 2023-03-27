@@ -3,6 +3,7 @@ using System.IO;
 using System.Runtime.Loader;
 using System.Threading.Tasks;
 using Dibix.Hosting.Abstractions;
+using Dibix.Hosting.Abstractions.Data;
 using Dibix.Worker.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -58,6 +59,12 @@ namespace Dibix.Worker.Host
                 }
                 _services.AddScoped(CreateInstance);
                 _dependencyRegistry.Register(typeof(TInterface));
+                return this;
+            }
+
+            public IWorkerHostExtensionConfigurationBuilder ConfigureConnectionString(Func<string?, string?> configure)
+            {
+                _services.Configure<DatabaseOptions>(x => x.ConnectionString = configure(x.ConnectionString));
                 return this;
             }
 

@@ -35,6 +35,18 @@ jobs:
       nuGetFeedType: external
       publishFeedCredentials: NuGet.org
 
+  - download: CI
+    artifact: Publish output (Linux)
+    displayName: 📬 Download 'Publish output (Linux)' artifact
+
+  - download: CI
+    artifact: Publish output (Windows)
+    displayName: 📬 Download 'Publish output (Windows)' artifact
+
+  - download: CI
+    artifact: Publish output (macOS)
+    displayName: 📬 Download 'Publish output (macOS)' artifact
+
   - task: GitHubRelease@1
     displayName: 📝 Create GitHub release
     inputs:
@@ -45,7 +57,10 @@ jobs:
       tag: v$(resources.pipeline.CI.runName)
       title: v$(resources.pipeline.CI.runName)
       isPreRelease: $(IsPreRelease)
-      assets: $(Pipeline.Workspace)/CI/NuGet packages/*.nupkg
+      isDraft: $(IsPreview)
+      assets: |
+        $(Pipeline.Workspace)/CI/NuGet packages/*.nupkg
+        $(Pipeline.Workspace)/CI/Publish output*/*.zip
       changeLogCompareToRelease: lastNonDraftRelease
       changeLogType: commitBased
       changeLogLabels: |
@@ -53,4 +68,3 @@ jobs:
           { "label" : "bug", "displayName" : "Fixes", "state" : "closed" },
           { "label" : "enhancement", "displayName": "Enhancements", "state" : "closed" }
         ]
-    condition: and(succeeded(), eq(variables['IsPreview'], 'False'))

@@ -77,6 +77,7 @@ namespace Dibix.Worker.Host
 
             public IWorkerExtensionConfigurationBuilder RegisterHttpClient(string name) => RegisterHttpClientCore(name, configure: null);
             public IWorkerExtensionConfigurationBuilder RegisterHttpClient(string name, Action<IWorkerHttpClientConfigurationBuilder> configure) => RegisterHttpClientCore(name, configure);
+
             private IWorkerExtensionConfigurationBuilder RegisterHttpClientCore(string name, Action<IWorkerHttpClientConfigurationBuilder>? configure)
             {
                 IHttpClientBuilder httpClientBuilder = _services.AddHttpClient(name, ConfigureHttpClient);

@@ -1,0 +1,29 @@
+﻿parameters:
+- name: projects
+  type: object
+  default: { }
+- name: configuration
+  type: string
+  values:
+  - Debug
+  - Release
+- name: runtimeIdentifier
+  type: string
+  values:
+  - linux-x64
+  - osx-x64
+  - win-x64
+- name: publishSingleFile
+  type: boolean
+- name: publishReadyToRun
+  type: boolean
+ 
+steps:
+- ${{ each project in parameters.projects }}:
+  - template: publish-dotnet.yml
+    parameters:
+      project: ${{ project }}
+      configuration: ${{ parameters.configuration }}
+      runtimeIdentifier: ${{ parameters.runtimeIdentifier }}
+      publishSingleFile: ${{ parameters.publishSingleFile }}
+      publishReadyToRun: ${{ parameters.publishReadyToRun }}

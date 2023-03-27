@@ -28,6 +28,7 @@ stages:
     - template: azure-pipelines-template/run.yml
       parameters:
         operatingSystem: Linux
+        runtimeIdentifier: linux-x64
         configuration: ${{ parameters.buildConfiguration }}
         codeCoverageEngine: ${{ variables.codeCoverageEngine }}
   
@@ -38,6 +39,7 @@ stages:
     - template: azure-pipelines-template/run.yml
       parameters:
         operatingSystem: macOS
+        runtimeIdentifier: osx-x64
         configuration: ${{ parameters.buildConfiguration }}
         codeCoverageEngine: ${{ variables.codeCoverageEngine }}
   
@@ -48,6 +50,7 @@ stages:
     - template: azure-pipelines-template/run.yml
       parameters:
         operatingSystem: Windows
+        runtimeIdentifier: win-x64
         configuration: ${{ parameters.buildConfiguration }}
         codeCoverageEngine: ${{ variables.codeCoverageEngine }}
 
@@ -69,7 +72,7 @@ stages:
   # This will make the pipeline partially succeed.
   # Unfortunately, this will still trigger a release, because pipeline triggers only evaluate failed as non successful.
   # To ensure the build is failed, we throw after all steps have executed.
-- stage: Verify
+- stage: Evaluate
   condition: eq(dependencies.Run.result, 'SucceededWithIssues')
   jobs:
   - job: Linux
