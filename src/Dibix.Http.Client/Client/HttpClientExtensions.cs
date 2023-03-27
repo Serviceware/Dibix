@@ -64,7 +64,9 @@ namespace Dibix.Http.Client
                 this.UserAgent = new ProductInfoHeaderValue(userAgentProductName, productVersion);
             }
 
+#pragma warning disable IL3000 // Avoid accessing Assembly file path when publishing as a single file
             private void ResolveUserAgentFromAssembly(Assembly assembly, Func<string, string> productNameFormatter) => this.FromFile(assembly.Location, productNameFormatter);
+#pragma warning restore IL3000 // Avoid accessing Assembly file path when publishing as a single file
 
             private static Assembly ResolveEntryAssembly()
             {

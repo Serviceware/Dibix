@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\shared\Hosting\Data\DatabaseOptions.cs" Link="%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapper.StrongName" />
+    <PackageReference Include="IdentityModel" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Dibix\Dibix.csproj" />
+    <ProjectReference Include="..\Dibix.Http.Client\Dibix.Http.Client.csproj" />
+  </ItemGroup>
+
+</Project>

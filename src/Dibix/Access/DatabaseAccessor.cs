@@ -97,6 +97,8 @@ namespace Dibix
 
         #region Protected Methods
         protected virtual void DisposeConnection() => Connection?.Dispose();
+
+        protected virtual void OnInfoMessage(string message) { }
         #endregion
 
         #region Private Methods
@@ -125,9 +127,10 @@ namespace Dibix
             MultiMapUtility.ValidateParameters(types, splitOn);
         }
 
-        private static void OnInfoMessage(object sender, SqlInfoMessageEventArgs e)
+        private void OnInfoMessage(object sender, SqlInfoMessageEventArgs e)
         {
             TraceSource.TraceInformation(e.Message);
+            OnInfoMessage(e.Message);
         }
         #endregion
 
