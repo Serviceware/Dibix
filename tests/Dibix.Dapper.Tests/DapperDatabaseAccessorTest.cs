@@ -41,11 +41,13 @@ CommandText: <Inline>", exception.Message);
             InputClass input = new InputClass();
             ParametersVisitor parameters = accessor.Parameters()
                                                    .SetInt32("out1", out IOutParameter<int> out1)
+                                                   .SetString("out3", out IOutParameter<string> out3)
                                                    .SetFromTemplate(input)
                                                    .Build();
             accessor.Execute(commandText, CommandType.StoredProcedure, parameters);
             Assert.AreEqual(5, out1.Result);
             Assert.IsTrue(input.out2.Result);
+            Assert.AreEqual("x", out3.Result);
         });
 
         private sealed class InputClass

@@ -110,7 +110,14 @@ namespace Dibix.Dapper
         {
             Guard.IsNotNull(parametersVisitor, nameof(parametersVisitor));
             DynamicParameters @params = new DynamicParameters();
-            parametersVisitor.VisitInputParameters((name, dataType, value, isOutput, customInputType) => @params.Add(name: name, value: NormalizeParameterValue(value), dbType: NormalizeParameterDbType(dataType, customInputType), direction: isOutput ? ParameterDirection.Output : (ParameterDirection?)null));
+            parametersVisitor.VisitInputParameters((name, dataType, value, isOutput, customInputType) =>
+            {
+                object normalizedValue = NormalizeParameterValue(value);
+                DbType? dbType = NormalizeParameterDbType(dataType, customInputType);
+                ParameterDirection? direction = isOutput ? ParameterDirection.Output : null;
+                int? size = NormalizeParameterSize(size: null, dbType, isOutput);
+                @params.Add(name, value: normalizedValue, dbType, direction, size);
+            });
             return new DynamicParametersWrapper(@params, parametersVisitor);
         }
         #endregion
@@ -133,6 +140,24 @@ namespace Dibix.Dapper
                 return null; // Same weird logic like above. Dapper will only resolve the custom type handler, if the db type is null.
 
             return dbType;
+        }
+
+        private static int? NormalizeParameterSize(int? size, DbType? dbType, bool isOutput)
+        {
+            if (size.HasValue)
+                return size;
+
+            switch (dbType)
+            {
+                case DbType.String:
+                case DbType.StringFixedLength:
+                case DbType.AnsiString:
+                case DbType.AnsiStringFixedLength when isOutput:
+                    return -1;
+
+                default:
+                    return null;
+            }
         }
 
         private static void ConfigureDapper()

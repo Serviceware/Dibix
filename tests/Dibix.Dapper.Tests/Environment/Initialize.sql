@@ -9,7 +9,8 @@ BEGIN
 	)
 END
 GO
-CREATE OR ALTER PROCEDURE [dbo].[_dibix_tests_sp1] @out1 INT OUTPUT, @out2 BIT OUTPUT
+CREATE OR ALTER PROCEDURE [dbo].[_dibix_tests_sp1] @out1 INT OUTPUT, @out2 BIT OUTPUT, @out3 NVARCHAR(50) OUTPUT
 AS
     SET @out1 = 5
     SET @out2 = 1
+	SET @out3 = N'x'
