@@ -140,7 +140,10 @@ namespace Dibix.Testing
         private void RegisterFile(string path, bool scopeIsTestRun)
         {
             if (path.Length > 255)
-                throw new ArgumentException($"Test result file path too long: {path}", nameof(path));
+            {
+                throw new ArgumentException(@$"Test result file path too long: {path}
+Allowed path length 255: {path[..255]}", nameof(path));
+            }
 
             ICollection<string> files = scopeIsTestRun ? this._testRunFiles : this._testFiles;
             if (files.Contains(path))
