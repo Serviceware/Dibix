@@ -8,7 +8,7 @@ namespace Dibix.Testing
 {
     internal static class TestConfigurationLoader
     {
-        public static T Load<T>(TestContext testContext) where T : new()
+        public static T Load<T>(TestContext testContext, Action<T> initializationAction = null) where T : new()
         {
             IConfigurationRoot root = new ConfigurationBuilder().AddUserSecrets("dibix")
                                                                 .AddEnvironmentVariables()
@@ -20,6 +20,7 @@ namespace Dibix.Testing
             ConfigurationInitializationToken initializationToken = new ConfigurationInitializationToken();
             T instance = ConfigurationProxyBuilder.BuildProxyIfNeeded<T>(initializationToken);
             CollectConfigurationSections(root, testContext).Each(x => Microsoft.Extensions.Configuration.Dibix.ConfigurationBinder.Bind(x, instance));
+            initializationAction?.Invoke(instance);
             initializationToken.IsInitialized = true;
 
             return instance;

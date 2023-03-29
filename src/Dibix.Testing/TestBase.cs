@@ -182,8 +182,7 @@ Value: {instance}");
 
         protected override Task OnTestInitialized()
         {
-            Configuration = TestConfigurationLoader.Load<TConfiguration>(base.TestContext);
-            AddConfigurationToOutput(Configuration);
+            Configuration = TestConfigurationLoader.Load<TConfiguration>(base.TestContext, AddConfigurationToOutput);
             return Task.CompletedTask;
         }
 
