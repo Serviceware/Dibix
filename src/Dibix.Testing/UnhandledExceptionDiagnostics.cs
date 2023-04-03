@@ -14,12 +14,14 @@ namespace Dibix.Testing
         private readonly TextWriter _textLogger;
         private readonly Action<Exception> _exceptionLogger;
         private readonly TestResultComposer _testResultComposer;
+        private readonly DateTime _collectEventLogSince;
 
         public UnhandledExceptionDiagnostics(TextWriter textLogger, Action<Exception> exceptionLogger, TestResultComposer testResultComposer)
         {
             _textLogger = textLogger;
             _exceptionLogger = exceptionLogger;
             _testResultComposer = testResultComposer;
+            _collectEventLogSince = DateTime.Now.RemoveMilliseconds();
             AppDomain.CurrentDomain.FirstChanceException += OnFirstChanceException;
         }
 
@@ -37,7 +39,7 @@ namespace Dibix.Testing
 
             try
             {
-                _testResultComposer.AddLastEventLogEntries();
+                _testResultComposer.AddLastEventLogEntries(since: _collectEventLogSince);
             }
             catch (Exception exception)
             {

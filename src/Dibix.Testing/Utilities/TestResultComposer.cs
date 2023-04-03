@@ -73,7 +73,7 @@ namespace Dibix.Testing
 #if NETCOREAPP
         [System.Runtime.Versioning.SupportedOSPlatform("windows")]
 #endif
-        public void AddLastEventLogEntries(EventLogEntryType eventLogEntryType = EventLogEntryType.Error | EventLogEntryType.Warning, int count = 10)
+        public void AddLastEventLogEntries(EventLogEntryType eventLogEntryType = EventLogEntryType.Error | EventLogEntryType.Warning, DateTime? since = null, int count = 10)
         {
             string FormatContent(EventLogEntry entry)
             {
@@ -95,11 +95,28 @@ namespace Dibix.Testing
             Enumerable.Range(0, eventLog.Entries.Count)
                       .Reverse()
                       .Select(x => eventLog.Entries[x])
-                      .Where(x => x.EntryType != 0 /* ?? */ && ((System.Diagnostics.EventLogEntryType)eventLogEntryType).HasFlag(x.EntryType))
+                      .Where(x => MatchEventLogEntry(x, eventLogEntryType, since))
                       .Take(count)
                       .Each((x, i) => this.AddFile($"EventLogEntry_{i + 1}_{x.EntryType}.txt", FormatContent(x)));
         }
-        
+
+#if NETCOREAPP
+        [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+#endif
+        private static bool MatchEventLogEntry(EventLogEntry entry, EventLogEntryType filter, DateTime? since)
+        {
+            if (entry.EntryType == 0) // ??
+                return false;
+
+            if (!((System.Diagnostics.EventLogEntryType)filter).HasFlag(entry.EntryType))
+                return false;
+
+            if (since.HasValue && entry.TimeGenerated < since)
+                return false;
+
+            return true;
+        }
+
         private void EnsureFileComparisonContent(string path, string outputName, string extension, string content)
         {
             DirectoryInfo directory = new DirectoryInfo(path);
