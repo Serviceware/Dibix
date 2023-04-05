@@ -6,7 +6,7 @@ namespace Dibix.Http.Client
     public interface IHttpClientBuilder
     {
         bool EnsureSuccessStatusCode { get; set; }
-        bool FollowRedirectsGetRequests { get; set; }
+        bool FollowRedirectsForGetRequests { get; set; }
         bool WrapTimeoutsInException { get; set; }
         bool TraceProxy { get; set; }
         HttpRequestTracer Tracer { get; set; }

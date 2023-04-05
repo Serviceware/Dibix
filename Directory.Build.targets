@@ -8,6 +8,7 @@
   <ItemGroup>
     <None Remove="*.dotsettings" />
     <None Remove=".DS_Store" />
+    <Compile Update="*.Base.cs" DependentUpon="$([System.String]::Copy('%(FileName)').Replace('.Base', ''))%(Extension)" />
   </ItemGroup>
 
   <Target Name="PrepareNuspec" BeforeTargets="GenerateNuspec" DependsOnTargets="GetBuildVersion">

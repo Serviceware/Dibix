@@ -7,14 +7,15 @@ namespace Dibix.Http.Client
     {
         private const string PropertyKeyHttpRequestTrace = "Dibix.Http.Client.HttpRequestTrace";
 
-        public static bool TryGetHttpRequestTrace(this HttpRequestMessage requestMessage, out HttpRequestTrace requestTrace) => HttpRequestPropertyExtensions.TryGetPropertyValue(requestMessage, PropertyKeyHttpRequestTrace, out requestTrace);
+        public static bool TryGetHttpRequestTrace(this HttpRequestMessage requestMessage, out HttpRequestTrace requestTrace) => TryGetPropertyValue(requestMessage, PropertyKeyHttpRequestTrace, out requestTrace);
 
-        public static HttpRequestTrace GetHttpRequestTrace(this HttpRequestMessage requestMessage) => HttpRequestPropertyExtensions.GetRequestProperty<HttpRequestTrace>(requestMessage, PropertyKeyHttpRequestTrace);
+        public static HttpRequestTrace GetHttpRequestTrace(this HttpRequestMessage requestMessage) => GetRequestProperty<HttpRequestTrace>(requestMessage, PropertyKeyHttpRequestTrace);
 
-        public static void SetHttpRequestTrace(this HttpRequestMessage requestMessage, HttpRequestTrace requestTrace) => HttpRequestPropertyExtensions.SetRequestProperty(requestMessage, PropertyKeyHttpRequestTrace, requestTrace);
+        public static void SetHttpRequestTrace(this HttpRequestMessage requestMessage, HttpRequestTrace requestTrace) => SetRequestProperty(requestMessage, PropertyKeyHttpRequestTrace, requestTrace);
 
         private static T GetRequestProperty<T>(HttpRequestMessage requestMessage, string propertyName)
         {
+            Guard.IsNotNull(requestMessage, nameof(requestMessage));
             if (!TryGetPropertyValue(requestMessage, propertyName, out T value))
                 throw new InvalidOperationException(FormattableString.Invariant($"Missing property '{propertyName}' on HTTP request message"));
 

@@ -63,14 +63,15 @@ namespace Dibix.Testing.Data
         private static TraceSource GetDibixTraceSource()
         {
             const string fieldName = "TraceSource";
-            
-            FieldInfo field = typeof(DatabaseAccessor).GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Static);
+
+            Type type = typeof(DatabaseAccessor);
+            FieldInfo field = type.GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Static);
             if (field == null)
-                throw new InvalidOperationException($"Field '{fieldName}' is not defined for type '{typeof(TraceSource)}'");
+                throw new InvalidOperationException($"Could not find 'private static {fieldName}' field on type '{type}'");
 
             TraceSource traceSource = (TraceSource)field.GetValue(null);
             if (traceSource == null)
-                throw new InvalidOperationException("Could not resolve trace souce: Dibix.Sql");
+                throw new InvalidOperationException($"'private static {fieldName}' field on type '{type}' is null");
 
             traceSource.Switch.Level = SourceLevels.Information;
             return traceSource;

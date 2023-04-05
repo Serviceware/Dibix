@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Dibix.Http.Client
 {
-    public class HttpRequestTracer
+    public abstract class HttpRequestTracer
     {
         internal async Task TraceRequestAsync(HttpRequestMessage requestMessage)
         {
@@ -32,7 +32,7 @@ namespace Dibix.Http.Client
         }
     }
 
-    public class HttpRequestTracer<T> : HttpRequestTracer where T : HttpRequestTrace, new()
+    public abstract class HttpRequestTracer<T> : HttpRequestTracer where T : HttpRequestTrace, new()
     {
         protected sealed override Task TraceRequestAsync(HttpRequestMessage requestMessage, HttpRequestTrace requestTrace) => TraceRequestAsync(requestMessage, (T)requestTrace);
 

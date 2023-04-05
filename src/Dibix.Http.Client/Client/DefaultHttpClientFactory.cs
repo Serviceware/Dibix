@@ -301,7 +301,7 @@ namespace Dibix.Http.Client
         private sealed class HttpClientBuilder : IHttpClientBuilder
         {
             public bool EnsureSuccessStatusCode { get; set; } = true;
-            public bool FollowRedirectsGetRequests { get; set; } = true;
+            public bool FollowRedirectsForGetRequests { get; set; } = true;
             public bool WrapTimeoutsInException { get; set; } = true;
             public bool TraceProxy { get; set; } = true;
             public HttpRequestTracer Tracer { get; set; }
@@ -336,7 +336,7 @@ namespace Dibix.Http.Client
 
             public void ConfigureDefaults()
             {
-                if (FollowRedirectsGetRequests)
+                if (FollowRedirectsForGetRequests)
                     AddHttpMessageHandler<FollowRedirectHttpMessageHandler>();
 
                 if (TraceProxy)
