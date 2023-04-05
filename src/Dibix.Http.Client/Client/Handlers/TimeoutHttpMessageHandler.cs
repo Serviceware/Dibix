@@ -21,15 +21,16 @@ namespace Dibix.Http.Client
         #region Overrides
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            using (CancellationTokenSource cts = this.GetCancellationTokenSource(cancellationToken))
+            using (CancellationTokenSource cts = GetCancellationTokenSource(cancellationToken))
             {
                 try
                 {
+                    cts?.Token.ThrowIfCancellationRequested();
                     return await base.SendAsync(request, cts?.Token ?? cancellationToken).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
                 {
-                    throw new TimeoutException($"Timeout for HTTP request has been reached: {this.Timeout}");
+                    throw new TimeoutException($"Timeout for HTTP request has been reached: {Timeout}");
                 }
             }
         }
@@ -38,15 +39,16 @@ namespace Dibix.Http.Client
         #region Private Methods
         private CancellationTokenSource GetCancellationTokenSource(CancellationToken cancellationToken)
         {
-            if (this.Timeout == System.Threading.Timeout.InfiniteTimeSpan)
+            if (Timeout == System.Threading.Timeout.InfiniteTimeSpan)
             {
                 // No need to create a CTS if there's no timeout
                 return null;
             }
 
-            CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            cts.CancelAfter(this.Timeout);
-            return cts;
+            CancellationTokenSource timeoutTokenSource = new CancellationTokenSource();
+            CancellationTokenSource linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(timeoutTokenSource.Token, cancellationToken);
+            timeoutTokenSource.CancelAfter(Timeout);
+            return linkedTokenSource;
         }
         #endregion
     }
