@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq.Expressions;
 using System.Net;
 using System.Net.Http;
@@ -86,10 +87,11 @@ namespace Dibix.Http.Client.Tests
         }
 
         [TestMethod]
-        [DataRow(false, "System.Threading.Tasks.TaskCanceledException: The request was canceled due to the configured HttpClient.Timeout of 0,001 seconds elapsing.", DisplayName = "WrapTimeoutsInException = False")]
+        [DataRow(false, "System.Threading.Tasks.TaskCanceledException: The request was canceled due to the configured HttpClient.Timeout of 0.001 seconds elapsing.", DisplayName = "WrapTimeoutsInException = False")]
         [DataRow(true, "System.TimeoutException: Timeout for HTTP request has been reached: 00:00:00.0010000", DisplayName = "WrapTimeoutsInException = True")]
         public async Task TimeoutHandler(bool wrapTimeoutsInException, string expectedException)
         {
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
             void Configure(IHttpClientBuilder builder)
             {
                 if (!wrapTimeoutsInException) // Rely on the default
@@ -98,7 +100,7 @@ namespace Dibix.Http.Client.Tests
                 builder.ConfigureClient(x => x.Timeout = TimeSpan.FromMilliseconds(1d));
             }
 
-            (HttpClientHandler _, Func<Task> sendInvoker) = SetupFixture(configure: Configure, beforeSend: cancellationToken => Task.Delay(30, cancellationToken));
+            (HttpClientHandler _, Func<Task> sendInvoker) = SetupFixture(configure: Configure, beforeSend: cancellationToken => Task.Delay(500, cancellationToken));
             try
             {
                 await sendInvoker().ConfigureAwait(false);
