@@ -149,9 +149,9 @@ namespace Dibix.Dapper
 
             switch (dbType)
             {
-                case DbType.String:
-                case DbType.StringFixedLength:
-                case DbType.AnsiString:
+                case DbType.String when isOutput:
+                case DbType.StringFixedLength when isOutput:
+                case DbType.AnsiString when isOutput:
                 case DbType.AnsiStringFixedLength when isOutput:
                     return -1;
 
