@@ -60,10 +60,10 @@ namespace Dibix.Testing
 
 #if NETCOREAPP
             if (OperatingSystem.IsWindows())
-                _unhandledExceptionDiagnostics = new UnhandledExceptionDiagnostics(Out, LogException, TestResultComposer);
-#else
-            _unhandledExceptionDiagnostics = new UnhandledExceptionDiagnostics(Out, LogException, TestResultComposer);
 #endif
+            {
+                _unhandledExceptionDiagnostics = new UnhandledExceptionDiagnostics(TestResultComposer, Out, LogException, ConfigureEventLogDiagnostics);
+            }
 
             await this.OnTestInitialized().ConfigureAwait(false);
         }
@@ -96,6 +96,8 @@ namespace Dibix.Testing
 
         protected void LogException(Exception exception) => this.TestResultComposer.AddFile("AdditionalErrors.txt", $@"An error occured while collecting the last event log errors
 {exception}");
+
+        protected virtual void ConfigureEventLogDiagnostics(EventLogDiagnosticsOptions options) { }
 
         protected string AddResultFile(string fileName, string content) => this.TestResultComposer.AddFile(fileName, content);
 

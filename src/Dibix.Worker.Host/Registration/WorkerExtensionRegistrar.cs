@@ -121,13 +121,13 @@ namespace Dibix.Worker.Host
             public void AddTracer<T>() where T : HttpRequestTracer
             {
                 _httpClientBuilder.Services.AddScoped<T>();
-                _httpClientBuilder.Services.TryAddScoped(x => new TracingHttpMessageHandler(x.GetRequiredService<T>()));
+                _httpClientBuilder.Services.AddTransient(x => new TracingHttpMessageHandler(x.GetRequiredService<T>()));
                 _httpClientBuilder.AddHttpMessageHandler<TracingHttpMessageHandler>();
             }
 
             public void AddHttpMessageHandler<T>() where T : DelegatingHandler
             {
-                _httpClientBuilder.Services.AddScoped<T>();
+                _httpClientBuilder.Services.AddTransient<T>();
                 _httpClientBuilder.AddHttpMessageHandler<T>();
             }
         }

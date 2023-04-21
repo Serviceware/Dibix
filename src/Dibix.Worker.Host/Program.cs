@@ -15,7 +15,6 @@ namespace Dibix.Worker.Host
     {
         private static async Task Main(string[] args)
         {
-            IWorkerHostExtensionRegistrar? hostExtensionRegistrar = null;
             HostApplicationBuilder builder = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder(args);
             builder.Configuration.AddJsonFile($"appsettings.{Environment.MachineName}.json", optional: true, reloadOnChange: true);
 
@@ -41,7 +40,7 @@ namespace Dibix.Worker.Host
             services.AddWindowsService();
 
             WorkerDependencyRegistry dependencyRegistry = new WorkerDependencyRegistry();
-            hostExtensionRegistrar = WorkerHostExtensionRegistrar.Register(hostingOptions, services, dependencyRegistry);
+            IWorkerHostExtensionRegistrar? hostExtensionRegistrar = WorkerHostExtensionRegistrar.Register(hostingOptions, services, dependencyRegistry);
             WorkerExtensionRegistrar.Register(hostingOptions, services, dependencyRegistry);
             services.AddSingleton<IWorkerDependencyRegistry>(dependencyRegistry);
 

@@ -73,7 +73,7 @@ namespace Dibix.Testing
 #if NETCOREAPP
         [System.Runtime.Versioning.SupportedOSPlatform("windows")]
 #endif
-        public void AddLastEventLogEntries(EventLogEntryType eventLogEntryType = EventLogEntryType.Error | EventLogEntryType.Warning, DateTime? since = null, int count = 10)
+        public void AddLastEventLogEntries(EventLogDiagnosticsOptions options)
         {
             string FormatContent(EventLogEntry entry)
             {
@@ -90,25 +90,27 @@ namespace Dibix.Testing
 
             _eventLogCollected = true;
 
-            EventLog eventLog = new EventLog("Application");
+            AddFile("EventLogOptions.json", JsonConvert.SerializeObject(options, Formatting.Indented));
+
+            EventLog eventLog = new EventLog(options.LogName, options.MachineName, options.Source);
 
             Enumerable.Range(0, eventLog.Entries.Count)
                       .Reverse()
                       .Select(x => eventLog.Entries[x])
-                      .Where(x => MatchEventLogEntry(x, eventLogEntryType, since))
-                      .Take(count)
+                      .Where(x => MatchEventLogEntry(x, options.Type, options.Since))
+                      .Take(options.Count)
                       .Each((x, i) => this.AddFile($"EventLogEntry_{i + 1}_{x.EntryType}.txt", FormatContent(x)));
         }
 
 #if NETCOREAPP
         [System.Runtime.Versioning.SupportedOSPlatform("windows")]
 #endif
-        private static bool MatchEventLogEntry(EventLogEntry entry, EventLogEntryType filter, DateTime? since)
+        private static bool MatchEventLogEntry(EventLogEntry entry, EventLogDiagnosticsOptions.EventLogEntryType filter, DateTime? since)
         {
             if (entry.EntryType == 0) // ??
                 return false;
 
-            if (!((System.Diagnostics.EventLogEntryType)filter).HasFlag(entry.EntryType))
+            if (!((EventLogEntryType)filter).HasFlag(entry.EntryType))
                 return false;
 
             if (since.HasValue && entry.TimeGenerated < since)
@@ -244,17 +246,6 @@ start winmergeU ""{ExpectedDirectoryName}"" ""{ActualDirectoryName}""");
         {
             string directory = Path.GetDirectoryName(path);
             Directory.CreateDirectory(directory);
-        }
-
-        // Exposing the original enum System.Diagnostics.EventLogEntryType in the AddLastEventLogEntries method, causes the coverlet.collector to hang.
-        // Might be related to: https://github.com/coverlet-coverage/coverlet/issues/1044
-        public enum EventLogEntryType
-        {
-            Error = 1,
-            Warning = 2,
-            Information = 4,
-            SuccessAudit = 8,
-            FailureAudit = 16
         }
 
         private sealed class TestContextContractResolver : DefaultContractResolver, IContractResolver
