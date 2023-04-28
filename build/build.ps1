@@ -90,5 +90,4 @@ Exec "dotnet publish $hostSourcePath
                      --p:IgnoreProjectGuid=True
                      --p:PublishReadyToRun=$publishReadyToRun
                      --p:PublishSingleFile=$publishSingleFile
-                     --p:IncludeNativeLibrariesForSelfExtract=True
                      --p:IncludeNativeLibrariesForSelfExtract=True"
