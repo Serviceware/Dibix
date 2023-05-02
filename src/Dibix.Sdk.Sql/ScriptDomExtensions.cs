@@ -28,6 +28,26 @@ namespace Dibix.Sdk.Sql
             return ScriptDomFacade.Generate(fragment);
         }
 
+        public static BooleanExpression SkipParenthesis(this BooleanExpression booleanExpression)
+        {
+            BooleanExpression current = booleanExpression;
+            
+            while (current is BooleanParenthesisExpression booleanParenthesisExpression) 
+                current = booleanParenthesisExpression.Expression;
+
+            return current;
+        }
+
+        public static ScalarExpression SkipParenthesis(this ScalarExpression scalarExpression)
+        {
+            ScalarExpression current = scalarExpression;
+            
+            while (current is ParenthesisExpression parenthesisExpression) 
+                current = parenthesisExpression.Expression;
+
+            return current;
+        }
+
         public static IEnumerable<TSqlParserToken> AsEnumerable(this TSqlFragment fragment) => AsEnumerable(fragment, fragment.GetFirstTokenIndex());
         public static IEnumerable<TSqlParserToken> AsEnumerable(this TSqlFragment fragment, int startIndex)
         {

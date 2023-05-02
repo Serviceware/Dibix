@@ -17,7 +17,8 @@ namespace Dibix.Sdk.Tests.DomainModel.Policies
     {
         Feature1 = 101,
         Feature2 = 102,
-        Feature3 = 103
+        Feature3 = 103,
+        Feature4 = 104
     }
 }
 #endregion
