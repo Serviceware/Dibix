@@ -2,7 +2,7 @@
 
 namespace Dibix.Http
 {
-    internal static class HttpErrorResponseParser
+    internal static class HttpErrorResponseUtility
     {
         public static bool TryParseErrorResponse(int errorNumber, out int statusCode, out int errorCode, out bool isClientError)
         {
@@ -20,10 +20,12 @@ namespace Dibix.Http
             statusCode = errorNumber / 1000;
             errorCode = errorNumber % 1000;
 
-            isClientError = statusCode % 400 < 100;
+            isClientError = IsClientError(statusCode);
             bool isServerError = statusCode % 500 < 100;
 
             return isServerError || isClientError;
         }
+
+        public static bool IsClientError(int statusCode) => statusCode % 400 < 100;
     }
 }

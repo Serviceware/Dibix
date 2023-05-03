@@ -248,12 +248,57 @@ paths:
       responses:
         '204':
           description: NoContent
-  /Tests/GenericEndpoint/Array:
+  '/Tests/GenericEndpoint/User/{id}/{name}':
     get:
       tags:
         - GenericEndpoint
       summary: SingleConrecteResultWithParams
       operationId: SingleConrecteResultWithParams
+      parameters:
+        - name: id
+          in: path
+          required: true
+          style: simple
+          schema:
+            type: integer
+            format: int32
+        - name: name
+          in: path
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericContract'
+        '404':
+          description: "X-Error-Code|X-Error-Description\r\n-|-\r\n1|The user '{name}' with the id '{id}' could not be found"
+          headers:
+            X-Error-Code:
+              description: Additional error code to handle the error on the client
+              schema:
+                type: integer
+                format: int32
+            X-Error-Description:
+              description: A mesage describing the cause of the error
+              schema:
+                type: string
+          content:
+            text/plain:
+              schema:
+                type: string
+      security:
+        - DBXNS-SIT: [ ]
+  /Tests/GenericEndpoint/Array:
+    get:
+      tags:
+        - GenericEndpoint
+      summary: SingleConrecteResultWithArrayParam
+      operationId: SingleConrecteResultWithArrayParam
       parameters:
         - name: ids
           in: query

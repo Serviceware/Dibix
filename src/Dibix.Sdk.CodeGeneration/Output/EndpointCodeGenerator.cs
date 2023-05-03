@@ -13,10 +13,9 @@ namespace Dibix.Sdk.CodeGeneration
         #region Overrides
         protected override IEnumerable<ArtifactWriterBase> SelectWriters(CodeGenerationModel model)
         {
-            const bool accessorOnly = false;
             const bool assumeEmbeddedActionTargets = true;
             const CodeGenerationOutputFilter outputFilter = CodeGenerationOutputFilter.Referenced;
-            yield return new DaoExecutorWriter(model, outputFilter, accessorOnly);
+            yield return new DaoExecutorWriter(model, outputFilter);
             yield return new DaoExecutorInputClassWriter(model, outputFilter);
             yield return new DaoContractClassWriter(model, outputFilter);
             yield return new DaoStructuredTypeWriter(model, outputFilter);

@@ -39,6 +39,9 @@ namespace Dibix.Sdk.Tests.Data
         // MultiConcreteResult
         private const string MultiConcreteResultCommandText = "[dbo].[dbx_tests_syntax_multiconcreteresult]";
 
+        // SingleConrecteResultWithArrayParam
+        private const string SingleConrecteResultWithArrayParamCommandText = "[dbo].[dbx_tests_syntax_singleconcreteresult_params_array]";
+
         // SingleConrecteResultWithParams
         private const string SingleConrecteResultWithParamsCommandText = "[dbo].[dbx_tests_syntax_singleconcreteresult_params]";
 
@@ -114,7 +117,7 @@ namespace Dibix.Sdk.Tests.Data
             }
         }
 
-        public static Dibix.Sdk.Tests.DomainModel.GenericContract SingleConrecteResultWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, Dibix.Sdk.Tests.Data.IntParameterSet ids)
+        public static Dibix.Sdk.Tests.DomainModel.GenericContract SingleConrecteResultWithArrayParam(this IDatabaseAccessorFactory databaseAccessorFactory, Dibix.Sdk.Tests.Data.IntParameterSet ids)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
@@ -122,6 +125,21 @@ namespace Dibix.Sdk.Tests.Data
                                                     .SetFromTemplate(new
                                                     {
                                                         ids
+                                                    })
+                                                    .Build();
+                return accessor.QuerySingle<Dibix.Sdk.Tests.DomainModel.GenericContract>(SingleConrecteResultWithArrayParamCommandText, CommandType.StoredProcedure, @params);
+            }
+        }
+
+        public static Dibix.Sdk.Tests.DomainModel.GenericContract SingleConrecteResultWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, int id, string name)
+        {
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
+            {
+                ParametersVisitor @params = accessor.Parameters()
+                                                    .SetFromTemplate(new
+                                                    {
+                                                        id,
+                                                        name
                                                     })
                                                     .Build();
                 return accessor.QuerySingle<Dibix.Sdk.Tests.DomainModel.GenericContract>(SingleConrecteResultWithParamsCommandText, CommandType.StoredProcedure, @params);

@@ -473,9 +473,7 @@ namespace Dibix.Sdk.CodeGeneration
                 case JTokenType.Object:
                     JObject responseObject = (JObject)property.Value;
                     string description = (string)responseObject.Property("description")?.Value;
-
-                    if (description != null)
-                        response.Description = description;
+                    JProperty autoDetectProperty = responseObject.Property("autoDetect");
 
                     if (response.ResultType == null)
                     {
@@ -484,6 +482,38 @@ namespace Dibix.Sdk.CodeGeneration
                             response.ResultType = ResolveType(typeNameValue);
                     }
 
+                    if (description != null)
+                        response.Description = description;
+                    
+                    if (autoDetectProperty != null)
+                        CollectStatusCodeDetection(autoDetectProperty, autoDetectProperty.Value.Type, actionTargetDefinition, response);
+
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, property.Value.Path);
+            }
+        }
+
+        private static void CollectStatusCodeDetection(JProperty property, JTokenType type, ActionTargetDefinition actionTargetDefinition, ActionResponse response)
+        {
+            switch (type)
+            {
+                case JTokenType.Boolean:
+                    actionTargetDefinition.DisabledAutoDetectionStatusCodes.Add((int)response.StatusCode);
+
+                    if (property.Parent!.Count == 1)
+                        actionTargetDefinition.Responses.Remove(response.StatusCode);
+
+                    break;
+
+                case JTokenType.Object:
+                    JObject autoDetectObject = (JObject)property.Value;
+                    int errorCode = (int?)autoDetectObject.Property("errorCode")?.Value ?? default;
+                    string errorMessage = (string)autoDetectObject.Property("errorMessage")?.Value;
+                    ErrorDescription error = new ErrorDescription(errorCode, errorMessage);
+                    response.Errors[errorCode] = error;
+                    response.StatusCodeDetectionDetail = error;
                     break;
 
                 default:

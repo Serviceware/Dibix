@@ -200,7 +200,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                 if (node.ErrorNumber is Literal errorNumberLiteral
                  && Int32.TryParse(errorNumberLiteral.Value, out int errorNumber)
-                 && HttpErrorResponseParser.TryParseErrorResponse(errorNumber, out int statusCode, out int errorCode, out bool isClientError)
+                 && HttpErrorResponseUtility.TryParseErrorResponse(errorNumber, out int statusCode, out int errorCode, out bool isClientError)
                  && isClientError)
                 {
                     ErrorResponseKey errorResponseKey = new ErrorResponseKey(statusCode, errorCode);

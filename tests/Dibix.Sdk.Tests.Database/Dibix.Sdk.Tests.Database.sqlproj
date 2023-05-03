@@ -151,6 +151,7 @@
     <Build Include="Tests\dbx_tests_authorization.sql" />
     <Build Include="Tests\Syntax\dbx_tests_syntax_enum1.sql" />
     <Build Include="Tests\Syntax\dbx_tests_syntax_enum2.sql" />
+    <Build Include="Tests\Syntax\dbx_tests_syntax_singleconcreteresult_params_array.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CodeAnalysis" />

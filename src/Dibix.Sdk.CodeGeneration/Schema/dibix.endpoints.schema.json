@@ -218,6 +218,19 @@
       ],
       "additionalProperties": false
     },
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "errorCode": {
+          "type": "number"
+        },
+        "errorMessage": {
+          "type": "string"
+        }
+      },
+      "minProperties": 1,
+      "additionalProperties": false
+    },
     "Response": {
       "properties": {
         "type": {
@@ -225,6 +238,16 @@
         },
         "description": {
           "type": "string"
+        },
+        "autoDetect": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          ]
         }
       },
       "minProperties": 1,

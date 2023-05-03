@@ -213,11 +213,12 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                     if (sb.Length > 0)
                         sb.AppendLine();
 
+                    ICollection<ErrorDescription> errorDescriptions = actionResponse.Errors.Values;
                     sb.Append($@"{KnownHeaders.ClientErrorCodeHeaderName}|{KnownHeaders.ClientErrorDescriptionHeaderName}
 -|-
-{String.Join(Environment.NewLine, actionResponse.Errors.Select(x => $"{(x.ErrorCode != 0 ? x.ErrorCode.ToString() : "n/a")}|{x.Description}"))}");
+{String.Join(Environment.NewLine, errorDescriptions.Select(x => $"{(x.ErrorCode != 0 ? x.ErrorCode.ToString() : "n/a")}|{x.Description}"))}");
 
-                    if (actionResponse.Errors.Any(x => x.ErrorCode != 0))
+                    if (errorDescriptions.Any(x => x.ErrorCode != 0))
                     {
                         apiResponse.Headers.Add(KnownHeaders.ClientErrorCodeHeaderName, new OpenApiHeader
                         {
@@ -226,7 +227,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                         });
                     }
 
-                    if (actionResponse.Errors.Any(x => !String.IsNullOrEmpty(x.Description)))
+                    if (errorDescriptions.Any(x => !String.IsNullOrEmpty(x.Description)))
                     {
                         apiResponse.Headers.Add(KnownHeaders.ClientErrorDescriptionHeaderName, new OpenApiHeader
                         {

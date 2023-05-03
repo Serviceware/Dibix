@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -39,6 +40,7 @@ namespace Dibix.Http.Server.Tests
             try
             {
                 await Execute(request).ConfigureAwait(false);
+                Assert.Fail($"{nameof(HttpRequestExecutionException)} was expected but not thrown");
             }
             catch (HttpRequestExecutionException requestException)
             {
@@ -64,6 +66,7 @@ CommandText: <Inline>", requestException.Message);
             try
             {
                 await Execute(request).ConfigureAwait(false);
+                Assert.Fail($"{nameof(HttpRequestExecutionException)} was expected but not thrown");
             }
             catch (HttpRequestExecutionException requestException)
             {
@@ -89,6 +92,7 @@ CommandText: <Inline>", requestException.Message);
             try
             {
                 await Execute(request).ConfigureAwait(false);
+                Assert.Fail($"{nameof(HttpRequestExecutionException)} was expected but not thrown");
             }
             catch (HttpRequestExecutionException requestException)
             {
@@ -108,15 +112,48 @@ CommandText: <Inline>", requestException.Message);
         private static void Invoke_DDL_WithHttpClientError_ProducedByAuthorizationBehavior_IsMappedToHttpStatusCode_Authorization_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw CreateException(errorInfoNumber: 403001, errorMessage: "Sorry");
 
         [TestMethod]
+        public async Task Invoke_DDL_WithHttpClientError_AutoDetectedByDatabaseErrorCode_IsMappedToHttpStatusCode()
+        {
+            HttpRequestMessage request = new HttpRequestMessage();
+
+            try
+            {
+                await Execute
+                (
+                    request
+                  , x => x.SetStatusCodeDetectionResponse(404, 1, "The user '{name}' with the id '{id}' could not be found")
+                  , new KeyValuePair<string, object>("id", 666)
+                  , new KeyValuePair<string, object>("name", "Darth")
+                ).ConfigureAwait(false);
+                Assert.Fail($"{nameof(HttpRequestExecutionException)} was expected but not thrown");
+            }
+            catch (HttpRequestExecutionException requestException)
+            {
+                HttpResponseMessage response = requestException.CreateResponse(request);
+                Assert.AreEqual(@"404 NotFound: Sequence contains no elements
+CommandType: Text
+CommandText: <Inline>", requestException.Message);
+                AssertIsType<DatabaseAccessException>(requestException.InnerException);
+                Assert.IsTrue(requestException.IsClientError);
+                Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
+                Assert.AreEqual("1", response.Headers.GetValues("X-Error-Code").Single());
+                Assert.AreEqual("The user 'Darth' with the id '666' could not be found", response.Headers.GetValues("X-Error-Description").Single());
+                Assert.AreEqual(request, response.RequestMessage);
+            }
+        }
+        private static void Invoke_DDL_WithHttpClientError_AutoDetectedByDatabaseErrorCode_IsMappedToHttpStatusCode_Target(IDatabaseAccessorFactory databaseAccessorFactory, int id, string name) => throw CreateException(DatabaseAccessErrorCode.SequenceContainsNoElements, errorMessage: "Sequence contains no elements", CommandType.Text, commandText: "x");
+
+        [TestMethod]
         public async Task Invoke_DDL_WithSqlException_WrappedExceptionIsThrown()
         {
             try
             {
                 await Execute().ConfigureAwait(false);
-                Assert.IsTrue(false, "DatabaseAccessException was expected but not thrown");
+                Assert.Fail($"{nameof(DatabaseAccessException)} was expected but not thrown");
             }
             catch (DatabaseAccessException ex)
             {
+                Assert.AreEqual(DatabaseAccessErrorCode.None, ex.AdditionalErrorCode);
                 Assert.AreEqual(CommandType.StoredProcedure, ex.CommandType);
                 Assert.AreEqual("x", ex.CommandText);
                 Assert.AreEqual(@"Oops
@@ -166,10 +203,11 @@ EXEC x @a = @a
             try
             {
                 await Execute().ConfigureAwait(false);
-                Assert.IsTrue(false, "DatabaseAccessException was expected but not thrown");
+                Assert.Fail($"{nameof(DatabaseAccessException)} was expected but not thrown");
             }
             catch (DatabaseAccessException ex)
             {
+                Assert.AreEqual(DatabaseAccessErrorCode.None, ex.AdditionalErrorCode);
                 Assert.AreEqual(CommandType.Text, ex.CommandType);
                 Assert.AreEqual("x", ex.CommandText);
                 Assert.AreEqual(@"Oops

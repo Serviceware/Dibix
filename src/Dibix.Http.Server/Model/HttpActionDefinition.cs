@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Dibix.Http.Server
 {
@@ -15,9 +16,11 @@ namespace Dibix.Http.Server
         public HttpFileResponseDefinition FileResponse { get; set; }
         public string Description { get; set; }
         public HttpAuthorizationDefinition Authorization { get; set; }
+        public IDictionary<int, HttpErrorResponse> StatusCodeDetectionResponses { get; }
 
         internal HttpActionDefinition()
         {
+            StatusCodeDetectionResponses = new Dictionary<int, HttpErrorResponse>();
         }
     }
 }

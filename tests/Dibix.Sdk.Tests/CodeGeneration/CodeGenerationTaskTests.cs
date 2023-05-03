@@ -402,6 +402,7 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
                   , @"Tests\Syntax\dbx_tests_syntax_fileupload.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_multiconcreteresult.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_params.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_params_array.sql"
                   , @"Types\dbx_codeanalysis_udt_generic.sql"
                   , @"Types\dbx_codeanalysis_udt_int.sql"
                 }
@@ -441,6 +442,7 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
                   , @"Tests\Syntax\dbx_tests_syntax_fileupload.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_multiconcreteresult.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_params.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_params_array.sql"
                   , @"Types\dbx_codeanalysis_udt_generic.sql"
                   , @"Types\dbx_codeanalysis_udt_int.sql"
                 }
@@ -479,6 +481,7 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
                   , @"Tests\Syntax\dbx_tests_syntax_fileupload.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_multiconcreteresult.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_params.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_params_array.sql"
                   , @"Types\dbx_codeanalysis_udt_generic.sql"
                   , @"Types\dbx_codeanalysis_udt_int.sql"
                 }
@@ -517,6 +520,7 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
                   , @"Tests\Syntax\dbx_tests_syntax_fileupload.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_multiconcreteresult.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_params.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_params_array.sql"
                   , @"Types\dbx_codeanalysis_udt_generic.sql"
                   , @"Types\dbx_codeanalysis_udt_int.sql"
                 }

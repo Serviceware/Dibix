@@ -15,17 +15,20 @@ namespace Dibix.Http.Server.Tests
 {
     public partial class HttpActionInvokerTest : TestBase
     {
-        private async Task<object> Execute(HttpRequestMessage request = null)
+        private async Task<object> Execute(HttpRequestMessage request = null, Action<IHttpActionDefinitionBuilder> actionConfiguration = null, params KeyValuePair<string, object>[] parameters)
         {
             Mock<IParameterDependencyResolver> parameterDependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
 
             parameterDependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns<IDatabaseAccessorFactory>(null);
 
-            HttpApiRegistration registration = new HttpApiRegistration(base.TestContext.TestName);
+            HttpApiRegistration registration = new HttpApiRegistration(base.TestContext.TestName, actionConfiguration);
             registration.Configure(null);
             HttpActionDefinition action = registration.Controllers.Single().Actions.Single();
 
             IDictionary<string, object> arguments = new Dictionary<string, object> { ["databaseAccessorFactory"] = null };
+            foreach (KeyValuePair<string, object> parameter in parameters) 
+                arguments.Add(parameter);
+
             object result = await HttpActionInvoker.Invoke(action, request, arguments, parameterDependencyResolver.Object).ConfigureAwait(false);
             return result;
         }
@@ -44,6 +47,14 @@ namespace Dibix.Http.Server.Tests
             Exception exception = (Exception)createMethod.Invoke(null, new object[] { commandType, commandText, parametersVisitor.Object, sqlException, isSqlClient });
             return exception;
         }
+        private static Exception CreateException(DatabaseAccessErrorCode errorCode, string errorMessage, CommandType? commandType = null, string commandText = null)
+        {
+            ParametersVisitor parametersVisitor = ParametersVisitor.Empty;
+            const bool isSqlClient = true;
+            MethodInfo createMethod = typeof(DatabaseAccessException).SafeGetMethod("Create", BindingFlags.NonPublic | BindingFlags.Static, new[] { typeof(string), typeof(CommandType), typeof(string), typeof(ParametersVisitor), typeof(DatabaseAccessErrorCode), typeof(bool) });
+            Exception exception = (Exception)createMethod.Invoke(null, new object[] { errorMessage, commandType, commandText, parametersVisitor, errorCode, isSqlClient });
+            return exception;
+        }
 
         private static string GetExceptionTextWithoutCallStack(Exception exception)
         {
@@ -57,15 +68,17 @@ namespace Dibix.Http.Server.Tests
             private readonly string _methodName;
             private readonly Action<IHttpActionDefinitionBuilder> _actionConfiguration;
 
-            public HttpApiRegistration(string testName)
+            public HttpApiRegistration(string testName, Action<IHttpActionDefinitionBuilder> configure)
             {
                 _methodName = $"{testName}_Target";
-                
-                string authorizationMethodName = $"{testName}_Authorization_Target";
-                if (typeof(HttpActionInvokerTest).GetMethod(authorizationMethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static) != null)
-                    _actionConfiguration = x => x.WithAuthorization(ReflectionHttpActionTarget.Create(typeof(HttpActionInvokerTest), authorizationMethodName), _ => { });
-                else
-                    _actionConfiguration = _ => { };
+                _actionConfiguration = builder =>
+                {
+                    configure?.Invoke(builder);
+
+                    string authorizationMethodName = $"{testName}_Authorization_Target";
+                    if (typeof(HttpActionInvokerTest).GetMethod(authorizationMethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static) != null)
+                        builder.WithAuthorization(ReflectionHttpActionTarget.Create(typeof(HttpActionInvokerTest), authorizationMethodName), _ => { });
+                };
             }
 
             public override void Configure(IHttpApiDiscoveryContext context) => base.RegisterController("Test", x => x.AddAction(ReflectionHttpActionTarget.Create(typeof(HttpActionInvokerTest), _methodName), _actionConfiguration));

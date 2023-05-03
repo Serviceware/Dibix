@@ -10,7 +10,7 @@
     <Compile Include="..\..\shared\Extensions\ReflectionExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\ParameterSources\*.cs" Link="Providers\Sources\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\KnownHeaders.cs" Link="Runtime\%(Filename)%(Extension)" />
-    <Compile Include="..\..\shared\Http\HttpErrorResponseParser.cs" Link="Runtime\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Http\HttpErrorResponseUtility.cs" Link="Runtime\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\HttpParameterUtility.cs" Link="Runtime\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\HttpParameterName.cs" Link="Runtime\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\RouteBuilder.cs" Link="Utilities\%(Filename)%(Extension)" />

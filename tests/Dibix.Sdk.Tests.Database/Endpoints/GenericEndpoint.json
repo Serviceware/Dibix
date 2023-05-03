@@ -37,8 +37,27 @@
     {
       "method": "GET",
       "target": "SingleConrecteResultWithParams",
+      "childRoute": "User/{id}/{name}",
+      "authorization": "none",
+      "responses": {
+        "404": {
+          "autoDetect": {
+            "errorCode": 1,
+            "errorMessage": "The user '{name}' with the id '{id}' could not be found"
+          }
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "target": "SingleConrecteResultWithArrayParam",
       "childRoute": "Array",
-      "authorization": "none"
+      "authorization": "none",
+      "responses": {
+        "404": {
+          "autoDetect": false
+        }
+      }
     },
     {
       "method": "GET",

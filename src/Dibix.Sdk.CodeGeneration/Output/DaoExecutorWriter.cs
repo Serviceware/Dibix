@@ -15,7 +15,6 @@ namespace Dibix.Sdk.CodeGeneration
         #region Fields
         private const string ConstantSuffix = "CommandText";
         private const string MethodPrefix = "";//"Execute";
-        private readonly bool _accessorOnly;
         private readonly ICollection<SqlStatementDefinition> _schemas;
         #endregion
 
@@ -25,9 +24,8 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public DaoExecutorWriter(CodeGenerationModel model, CodeGenerationOutputFilter outputFilter, bool accessorOnly)
+        public DaoExecutorWriter(CodeGenerationModel model, CodeGenerationOutputFilter outputFilter)
         {
-            _accessorOnly = accessorOnly;
             _schemas = model.GetSchemas(outputFilter)
                             .OfType<SqlStatementDefinition>()
                             .ToArray();
@@ -84,7 +82,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private void AddExecutionMethods(CSharpClass @class, CodeGenerationContext context, IList<SqlStatementDefinition> definitions)
+        private static void AddExecutionMethods(CSharpClass @class, CodeGenerationContext context, IList<SqlStatementDefinition> definitions)
         {
             for (int i = 0; i < definitions.Count; i++)
             {
@@ -97,17 +95,6 @@ namespace Dibix.Sdk.CodeGeneration
                 string resultTypeName = ResolveTypeName(definition, context);
                 string returnTypeName = DetermineReturnTypeName(definition, resultTypeName, context);
 
-                IEnumerable<CSharpAnnotation> annotations = Enumerable.Empty<CSharpAnnotation>();
-
-                if (!_accessorOnly && definition.ErrorResponses.Any())
-                {
-                    annotations = definition.ErrorResponses
-                                            .Select(x => new CSharpAnnotation("ErrorResponse").AddParameter("statusCode", new CSharpValue(x.StatusCode.ToString()))
-                                                                                              .AddParameter("errorCode", new CSharpValue(x.ErrorCode.ToString()))
-                                                                                              .AddParameter("errorDescription", new CSharpStringValue(x.ErrorDescription)));
-                    context.AddDibixHttpServerReference();
-                }
-
                 CSharpModifiers modifiers = CSharpModifiers.Public | CSharpModifiers.Static;
                 if (definition.Async)
                     modifiers |= CSharpModifiers.Async;
@@ -115,7 +102,6 @@ namespace Dibix.Sdk.CodeGeneration
                 CSharpMethod method = @class.AddMethod(name: methodName
                                                      , returnType: returnTypeName
                                                      , body: GenerateMethodBody(definition, resultTypeName, context)
-                                                     , annotations: annotations
                                                      , isExtension: true
                                                      , modifiers: modifiers);
                 method.AddParameter("databaseAccessorFactory", "IDatabaseAccessorFactory");

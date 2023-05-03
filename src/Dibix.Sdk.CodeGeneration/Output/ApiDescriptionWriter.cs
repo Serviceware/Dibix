@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using Dibix.Sdk.CodeGeneration.CSharp;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -158,6 +159,25 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (action.FileResponse != null)
                 writer.WriteLine($"{variableName}.FileResponse = new HttpFileResponseDefinition(cache: {ComputeConstantLiteral(context, action.FileResponse.Cache)});");
+
+            foreach (int disabledAutoDetectionStatusCode in action.DisabledAutoDetectionStatusCodes)
+            {
+                writer.WriteLine($"{variableName}.DisableStatusCodeDetection({disabledAutoDetectionStatusCode});");
+            }
+
+            foreach (KeyValuePair<HttpStatusCode, ActionResponse> response in action.Responses)
+            {
+                int httpStatusCode = (int)response.Key;
+                ActionResponse actionResponse = response.Value;
+                ErrorDescription error = actionResponse.StatusCodeDetectionDetail;
+
+                if (error == null)
+                    continue;
+
+                int errorCode = error.ErrorCode;
+                string errorMessage = error.Description;
+                writer.WriteLine($"{variableName}.SetStatusCodeDetectionResponse({httpStatusCode}, {errorCode}, {(errorMessage != null ? $"\"{errorMessage}\"" : "errorMessage: null")});");
+            }
 
             if (action.Authorization != null)
             {

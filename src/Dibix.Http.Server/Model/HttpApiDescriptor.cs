@@ -115,13 +115,19 @@ namespace Dibix.Http.Server
             public bool IsAnonymous { get; set; }
             public HttpFileResponseDefinition FileResponse { get; set; }
             public string Description { get; set; }
+            public IDictionary<int, HttpErrorResponse> StatusCodeDetectionResponses { get; }
 
             public HttpActionDefinitionBuilder(string areaName, string controllerName, IHttpActionTarget target)
             {
                 _areaName = areaName;
                 _controllerName = controllerName;
                 Target = target.Build();
+                StatusCodeDetectionResponses = new Dictionary<int, HttpErrorResponse>(HttpStatusCodeDetectionMap.Defaults);
             }
+
+            public void DisableStatusCodeDetection(int statusCode) => StatusCodeDetectionResponses.Remove(statusCode);
+            
+            public void SetStatusCodeDetectionResponse(int statusCode, int errorCode, string errorMessage) => StatusCodeDetectionResponses[statusCode] = new HttpErrorResponse(statusCode, errorCode, errorMessage);
 
             public void WithAuthorization(IHttpActionTarget target, Action<IHttpAuthorizationBuilder> setupAction)
             {
@@ -150,6 +156,7 @@ namespace Dibix.Http.Server
                     Description = Description,
                     Authorization = _authorization?.Build()
                 };
+                action.StatusCodeDetectionResponses.AddRange(StatusCodeDetectionResponses);
                 return action;
             }
         }

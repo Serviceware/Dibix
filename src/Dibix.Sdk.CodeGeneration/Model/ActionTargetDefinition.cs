@@ -16,11 +16,13 @@ namespace Dibix.Sdk.CodeGeneration
             set => SetDefaultResponseType(value);
         }
         public ActionFileResponse FileResponse { get; private set; }
+        public ICollection<int> DisabledAutoDetectionStatusCodes { get; }
 
         protected ActionTargetDefinition()
         {
             Parameters = new Collection<ActionParameter>();
             Responses = new Dictionary<HttpStatusCode, ActionResponse>();
+            DisabledAutoDetectionStatusCodes = new HashSet<int>();
         }
 
         public void SetFileResponse(ActionFileResponse actionFileResponse, SourceLocation location)

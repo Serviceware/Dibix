@@ -15,7 +15,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             bool accessorOnly = model.EnableExperimentalFeatures;
             const CodeGenerationOutputFilter outputFilter = CodeGenerationOutputFilter.Local;
-            yield return new DaoExecutorWriter(model, outputFilter, accessorOnly);
+            yield return new DaoExecutorWriter(model, outputFilter);
             yield return new DaoExecutorInputClassWriter(model, outputFilter);
             yield return new DaoContractClassWriter(model, outputFilter);
             yield return new DaoStructuredTypeWriter(model, outputFilter);

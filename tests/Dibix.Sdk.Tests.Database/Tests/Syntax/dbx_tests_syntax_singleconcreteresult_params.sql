@@ -1,11 +1,10 @@
 ﻿-- @Name SingleConrecteResultWithParams
 -- @Return ClrTypes:GenericContract Mode:Single
-CREATE PROCEDURE [dbo].[dbx_tests_syntax_singleconcreteresult_params] @ids [dbo].[dbx_codeanalysis_udt_int] READONLY
+CREATE PROCEDURE [dbo].[dbx_tests_syntax_singleconcreteresult_params] @id INT, @name NVARCHAR(255)
 AS
-    SELECT [id]           = 1
-         , [name]         = NULL
+    SELECT [id]           = @id
+         , [name]         = @name
          , [parentid]     = NULL
          , [role]         = NULL
          , [creationtime] = NULL
          , [imageurl]     = NULL
-    FROM @ids

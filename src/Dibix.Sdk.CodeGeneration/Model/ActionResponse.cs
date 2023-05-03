@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Net;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -10,21 +9,21 @@ namespace Dibix.Sdk.CodeGeneration
         public string MediaType { get; } = HttpMediaType.Json;
         public TypeReference ResultType { get; set; }
         public string Description { get; set; }
-        public ICollection<ErrorDescription> Errors { get; }
+        public ErrorDescription StatusCodeDetectionDetail { get; set; }
+        public IDictionary<int, ErrorDescription> Errors { get; } = new Dictionary<int, ErrorDescription>();
 
         public ActionResponse(HttpStatusCode statusCode)
         {
-            this.Errors = new Collection<ErrorDescription>();
-            this.StatusCode = statusCode;
+            StatusCode = statusCode;
         }
         public ActionResponse(HttpStatusCode statusCode, TypeReference resultType) : this(statusCode)
         {
-            this.ResultType = resultType;
+            ResultType = resultType;
         }
         public ActionResponse(HttpStatusCode statusCode, string mediaType, TypeReference resultType) : this(statusCode)
         {
-            this.MediaType = mediaType;
-            this.ResultType = resultType;
+            MediaType = mediaType;
+            ResultType = resultType;
         }
     }
 }

@@ -12,6 +12,8 @@ namespace Dibix.Http.Server
         bool IsAnonymous { get; set; }
         HttpFileResponseDefinition FileResponse { get; set; }
 
+        void DisableStatusCodeDetection(int statusCode);
+        void SetStatusCodeDetectionResponse(int statusCode, int errorCode, string errorMessage);
         void WithAuthorization(IHttpActionTarget target, Action<IHttpAuthorizationBuilder> setupAction);
     }
 }

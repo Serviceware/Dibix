@@ -104,7 +104,7 @@ namespace Dibix.Sdk.CodeGeneration
                 response = new ActionResponse(httpStatusCode);
                 actionTargetDefinition.Responses.Add(httpStatusCode, response);
             }
-            response.Errors.Add(new ErrorDescription(errorCode, errorDescription));
+            response.Errors.Add(errorCode, new ErrorDescription(errorCode, errorDescription));
         }
         #endregion
 
