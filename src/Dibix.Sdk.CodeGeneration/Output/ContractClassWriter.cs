@@ -138,7 +138,7 @@ namespace Dibix.Sdk.CodeGeneration
             foreach (EnumSchemaMember member in schema.Members)
             {
                 @enum.AddMember(member.Name, member.StringValue)
-                     .Inherits("int");
+                     .BaseType(context.ResolveTypeName(schema.BaseType));
             }
         }
         #endregion

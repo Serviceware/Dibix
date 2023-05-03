@@ -6,12 +6,13 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public sealed class EnumSchema : SchemaDefinition
     {
+        public PrimitiveTypeReference BaseType { get; internal set; }
         public bool IsFlaggable { get; internal set; }
         public ICollection<EnumSchemaMember> Members { get; }
 
-        public EnumSchema(string @namespace, string definitionName, SchemaDefinitionSource source, SourceLocation location, bool isFlaggable) : base(@namespace, definitionName, source, location)
+        public EnumSchema(string @namespace, string definitionName, SchemaDefinitionSource source, SourceLocation location) : base(@namespace, definitionName, source, location)
         {
-            IsFlaggable = isFlaggable;
+            BaseType = new PrimitiveTypeReference(PrimitiveType.Int32, isNullable: false, isEnumerable: false, location);
             Members = new SortedSet<EnumSchemaMember>(Comparer<EnumSchemaMember>.Create(CompareEnumSchemaMember));
         }
 

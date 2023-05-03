@@ -13,7 +13,7 @@ using Dibix;
 #region Contracts
 namespace Dibix.Sdk.Tests.DomainModel.Policies
 {
-    public enum SecurityPolicy : int
+    public enum SecurityPolicy : short
     {
         Feature1 = 101,
         Feature2 = 102,

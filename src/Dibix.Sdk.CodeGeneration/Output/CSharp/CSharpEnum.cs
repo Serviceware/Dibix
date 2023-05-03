@@ -25,7 +25,7 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             return this;
         }
 
-        public CSharpEnum Inherits(string baseTypeName)
+        public CSharpEnum BaseType(string baseTypeName)
         {
             this._baseTypeName = baseTypeName;
             return this;

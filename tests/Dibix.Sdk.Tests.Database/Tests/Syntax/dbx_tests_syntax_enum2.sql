@@ -2,7 +2,7 @@
 -- @Namespace Policies
 CREATE TABLE [dbo].[dbx_tests_syntax_enum2]
 (
-    [id]   INT          NOT NULL
+    [id]   SMALLINT     NOT NULL
   , [name] NVARCHAR(50) NOT NULL
   , CONSTRAINT [PK_dbx_tests_syntax_enum2] PRIMARY KEY ([id])
   , CONSTRAINT [CK_dbx_tests_syntax_enum2_x] CHECK (([id]=(103)) -- Feature3
