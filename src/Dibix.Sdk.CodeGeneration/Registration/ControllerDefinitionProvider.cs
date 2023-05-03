@@ -717,12 +717,15 @@ namespace Dibix.Sdk.CodeGeneration
 
                 columnOffset += propertyName.Length + 1; // Skip property name + dot
                 objectSchema = type is SchemaTypeReference schemaTypeReference ? _schemaRegistry.GetSchema(schemaTypeReference) as ObjectSchema : null;
+
+                if (objectSchema == null)
+                    break;
             }
         }
 
         private static bool CollectPropertyNode(TypeReference type, ObjectSchema objectSchema, string propertyName, ActionParameterPropertySourceBuilder propertySourceBuilder, ILogger logger, int columnOffset, out TypeReference propertyType)
         {
-            ObjectSchemaProperty property = objectSchema?.Properties.SingleOrDefault(x => x.Name.Value == propertyName);
+            ObjectSchemaProperty property = objectSchema.Properties.SingleOrDefault(x => x.Name.Value == propertyName);
             if (property != null)
             {
                 propertySourceBuilder.Nodes.Add(new ActionParameterPropertySourceNode(objectSchema, property));
