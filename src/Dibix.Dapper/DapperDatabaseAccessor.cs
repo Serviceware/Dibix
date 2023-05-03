@@ -41,58 +41,64 @@ namespace Dibix.Dapper
         protected override IEnumerable<T> QueryMany<T>(string commandText, CommandType commandType, ParametersVisitor parameters)
         {
             DecoratedTypeMap.Adapt<T>();
-            return base.Connection.Query<T>(commandText, CollectParameters(parameters), _defaultTransaction, commandType: commandType, commandTimeout: _defaultCommandTimeout);
+            return base.Connection.Query<T>(commandText, CollectParameters(parameters), _defaultTransaction, commandTimeout: _defaultCommandTimeout, commandType: commandType);
+        }
+
+        protected override IEnumerable<T> QueryMany<T>(string commandText, CommandType commandType, ParametersVisitor parameters, bool buffered)
+        {
+            DecoratedTypeMap.Adapt<T>();
+            return base.Connection.Query<T>(commandText, CollectParameters(parameters), _defaultTransaction, buffered, _defaultCommandTimeout, commandType);
         }
 
         protected override Task<IEnumerable<T>> QueryManyAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, bool buffered, CancellationToken cancellationToken)
         {
             DecoratedTypeMap.Adapt<T>();
             CommandFlags flags = buffered ? CommandFlags.Buffered : CommandFlags.None;
-            CommandDefinition command = new CommandDefinition(commandText, CollectParameters(parameters), _defaultTransaction, commandType: commandType, commandTimeout: _defaultCommandTimeout, flags: flags, cancellationToken: cancellationToken);
+            CommandDefinition command = new CommandDefinition(commandText, CollectParameters(parameters), _defaultTransaction, _defaultCommandTimeout, commandType, flags, cancellationToken);
             return base.Connection.QueryAsync<T>(command);
         }
 
         protected override IEnumerable<TReturn> QueryMany<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, Func<object[], TReturn> map, string splitOn)
         {
             DecoratedTypeMap.Adapt(types);
-            return base.Connection.Query(commandText, types, map, CollectParameters(parameters), _defaultTransaction, commandType: commandType, commandTimeout: _defaultCommandTimeout, splitOn: splitOn);
+            return base.Connection.Query(commandText, types, map, CollectParameters(parameters), _defaultTransaction, splitOn: splitOn, commandTimeout: _defaultCommandTimeout, commandType: commandType);
         }
 
-        protected override T QuerySingle<T>(string commandText, CommandType commandType, ParametersVisitor parameters)
-        {
-            DecoratedTypeMap.Adapt<T>();
-            return base.Connection.QuerySingle<T>(commandText, CollectParameters(parameters), _defaultTransaction, commandType: commandType, commandTimeout: _defaultCommandTimeout);
-        }
+        //protected override T QuerySingle<T>(string commandText, CommandType commandType, ParametersVisitor parameters)
+        //{
+        //    DecoratedTypeMap.Adapt<T>();
+        //    return base.Connection.QuerySingle<T>(commandText, CollectParameters(parameters), _defaultTransaction, commandTimeout: _defaultCommandTimeout, commandType: commandType);
+        //}
 
-        protected override Task<T> QuerySingleAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken)
-        {
-            DecoratedTypeMap.Adapt<T>();
-            CommandDefinition command = new CommandDefinition(commandText, CollectParameters(parameters), _defaultTransaction, commandType: commandType, commandTimeout: _defaultCommandTimeout, cancellationToken: cancellationToken);
-            return base.Connection.QuerySingleAsync<T>(command);
-        }
+        //protected override Task<T> QuerySingleAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken)
+        //{
+        //    DecoratedTypeMap.Adapt<T>();
+        //    CommandDefinition command = new CommandDefinition(commandText, CollectParameters(parameters), _defaultTransaction, commandTimeout: _defaultCommandTimeout, commandType: commandType, cancellationToken: cancellationToken);
+        //    return base.Connection.QuerySingleAsync<T>(command);
+        //}
 
         protected override T QuerySingleOrDefault<T>(string commandText, CommandType commandType, ParametersVisitor parameters)
         {
             DecoratedTypeMap.Adapt<T>();
-            return base.Connection.QuerySingleOrDefault<T>(commandText, CollectParameters(parameters), _defaultTransaction, commandType: commandType, commandTimeout: _defaultCommandTimeout);
+            return base.Connection.QuerySingleOrDefault<T>(commandText, CollectParameters(parameters), _defaultTransaction, commandTimeout: _defaultCommandTimeout, commandType: commandType);
         }
 
         protected override Task<T> QuerySingleOrDefaultAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken)
         {
             DecoratedTypeMap.Adapt<T>();
-            CommandDefinition command = new CommandDefinition(commandText, CollectParameters(parameters), _defaultTransaction, commandType: commandType, commandTimeout: _defaultCommandTimeout, cancellationToken: cancellationToken);
+            CommandDefinition command = new CommandDefinition(commandText, CollectParameters(parameters), _defaultTransaction, commandTimeout: _defaultCommandTimeout, commandType: commandType, cancellationToken: cancellationToken);
             return base.Connection.QuerySingleOrDefaultAsync<T>(command);
         }
 
         protected override IMultipleResultReader QueryMultiple(string commandText, CommandType commandType, ParametersVisitor parameters)
         {
-            SqlMapper.GridReader reader = base.Connection.QueryMultiple(commandText, CollectParameters(parameters), _defaultTransaction, commandType: commandType, commandTimeout: _defaultCommandTimeout);
+            SqlMapper.GridReader reader = base.Connection.QueryMultiple(commandText, CollectParameters(parameters), _defaultTransaction, commandTimeout: _defaultCommandTimeout, commandType: commandType);
             return new DapperGridResultReader(reader, commandText, commandType, parameters);
         }
 
         protected override async Task<IMultipleResultReader> QueryMultipleAsync(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken)
         {
-            SqlMapper.GridReader reader = await base.Connection.QueryMultipleAsync(new CommandDefinition(commandText, CollectParameters(parameters), _defaultTransaction, commandTimeout: _defaultCommandTimeout, commandType, cancellationToken: cancellationToken)).ConfigureAwait(false);
+            SqlMapper.GridReader reader = await base.Connection.QueryMultipleAsync(new CommandDefinition(commandText, CollectParameters(parameters), _defaultTransaction, _defaultCommandTimeout, commandType, cancellationToken: cancellationToken)).ConfigureAwait(false);
             return new DapperGridResultReader(reader, commandText, commandType, parameters);
         }
 

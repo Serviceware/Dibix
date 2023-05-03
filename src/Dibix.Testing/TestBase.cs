@@ -113,13 +113,17 @@ Actual type: {instance?.GetType()}
 Value: {instance}");
         }
 
-        protected static TException AssertThrows<TException>(Action action) where TException : Exception
+        protected static TException AssertThrows<TException>(Action action) where TException : Exception => AssertThrows<TException>(() =>
+        {
+            action();
+            return Task.CompletedTask;
+        }).Result;
+        protected static async Task<TException> AssertThrows<TException>(Func<Task> action) where TException : Exception
         {
             Type expectedExceptionType = typeof(TException);
             try
             {
-                action();
-                throw new AssertFailedException($"Expected exception of type '{expectedExceptionType}' but none was thrown");
+                await action().ConfigureAwait(false);
             }
             catch (TException exception)
             {
@@ -130,6 +134,8 @@ Value: {instance}");
                 Type actualExceptionType = exception.GetType();
                 throw new AssertFailedException($"Expected exception of type '{expectedExceptionType}' but an exception of '{actualExceptionType}' was thrown instead");
             }
+            
+            throw new AssertFailedException($"Expected exception of type '{expectedExceptionType}' but none was thrown");
         }
 
         protected static Task Retry(Func<CancellationToken, Task<bool>> retryMethod, CancellationToken cancellationToken = default) => Retry(retryMethod, x => x, cancellationToken);

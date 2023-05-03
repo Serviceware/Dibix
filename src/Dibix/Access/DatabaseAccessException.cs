@@ -18,27 +18,16 @@ namespace Dibix
         public ParametersVisitor Parameters { get; }
         public string ParameterDump { get; }
         public string SqlDebugStatement { get; }
+        public DatabaseAccessErrorCode AdditionalErrorCode { get; }
 
-        private DatabaseAccessException(string message, CommandType commandType, string commandText, ParametersVisitor parameters, string parameterDump, string sqlDebugStatement, Exception innerException) : base(message, innerException)
+        private DatabaseAccessException(string message, CommandType commandType, string commandText, ParametersVisitor parameters, string parameterDump, string sqlDebugStatement, DatabaseAccessErrorCode additionalErrorCode, Exception innerException) : base(message, innerException)
         {
             CommandType = commandType;
             CommandText = commandText;
             Parameters = parameters;
             ParameterDump = parameterDump;
             SqlDebugStatement = sqlDebugStatement;
-        }
-
-        internal static DatabaseAccessException Create(CommandType commandType, string commandText, ParametersVisitor parameters, Exception innerException, bool isSqlClient)
-        {
-            string message = @$"{innerException.Message}
-CommandType: {commandType}
-CommandText: {(commandType == CommandType.StoredProcedure ? commandText : "<Inline>")}";
-
-            ICollection<ParameterDescriptor> parameterDescriptors = CollectParameters(parameters);
-            string parameterDump = parameterDescriptors.Any() ? CollectParameterDump(parameterDescriptors) : null;
-            string sqlDebugStatement = isSqlClient ? CollectSqlDebugStatement(commandType, commandText, parameterDescriptors) : null;
-
-            return new DatabaseAccessException(message, commandType, commandText, parameters, parameterDump, sqlDebugStatement, innerException);
+            AdditionalErrorCode = additionalErrorCode;
         }
 
         public override string ToString()
@@ -55,6 +44,27 @@ Debug statement:
 
             string text = $"{base.ToString()}{additionalInfo}";
             return text;
+        }
+
+        internal static DatabaseAccessException Create(CommandType commandType, string commandText, ParametersVisitor parameters, Exception innerException, bool isSqlClient)
+        {
+            return Create(innerException.Message, commandType, commandText, parameters, innerException, additionalErrorCode: DatabaseAccessErrorCode.None, isSqlClient);
+        }
+        internal static DatabaseAccessException Create(string message, CommandType commandType, string commandText, ParametersVisitor parameters, DatabaseAccessErrorCode additionalErrorCode, bool isSqlClient)
+        {
+            return Create(message, commandType, commandText, parameters, innerException: null, additionalErrorCode, isSqlClient);
+        }
+        private static DatabaseAccessException Create(string message, CommandType commandType, string commandText, ParametersVisitor parameters, Exception innerException, DatabaseAccessErrorCode additionalErrorCode, bool isSqlClient)
+        {
+            string newMessage = @$"{message}
+CommandType: {commandType}
+CommandText: {(commandType == CommandType.StoredProcedure ? commandText : "<Inline>")}";
+
+            ICollection<ParameterDescriptor> parameterDescriptors = CollectParameters(parameters);
+            string parameterDump = parameterDescriptors.Any() ? CollectParameterDump(parameterDescriptors) : null;
+            string sqlDebugStatement = isSqlClient ? CollectSqlDebugStatement(commandType, commandText, parameterDescriptors) : null;
+
+            return new DatabaseAccessException(newMessage, commandType, commandText, parameters, parameterDump, sqlDebugStatement, additionalErrorCode, innerException);
         }
 
         private static string CollectParameterDump(IEnumerable<ParameterDescriptor> parameters)

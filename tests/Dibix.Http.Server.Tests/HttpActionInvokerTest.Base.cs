@@ -40,7 +40,8 @@ namespace Dibix.Http.Server.Tests
             SqlException sqlException = SqlExceptionFactory.Create(serverVersion: default, infoNumber: errorInfoNumber, errorState: default, errorClass: default, server: default, errorMessage, procedure: default, lineNumber: default);
             const bool isSqlClient = true;
 
-            Exception exception = (Exception)typeof(DatabaseAccessException).SafeGetMethod("Create", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { commandType, commandText, parametersVisitor.Object, sqlException, isSqlClient });
+            MethodInfo createMethod = typeof(DatabaseAccessException).SafeGetMethod("Create", BindingFlags.NonPublic | BindingFlags.Static, new[] { typeof(CommandType), typeof(string), typeof(ParametersVisitor), typeof(Exception), typeof(bool) });
+            Exception exception = (Exception)createMethod.Invoke(null, new object[] { commandType, commandText, parametersVisitor.Object, sqlException, isSqlClient });
             return exception;
         }
 
