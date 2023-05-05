@@ -18,11 +18,9 @@ namespace Dibix.Hosting.Abstractions
             Type? implementationType = assembly.GetLoadableTypes().FirstOrDefault(contractType.IsAssignableFrom);
             if (implementationType == null)
             {
-#pragma warning disable IL3000 // Avoid accessing Assembly file path when publishing as a single file
                 throw new InvalidOperationException($@"{kind} does not contain an entrypoint. Please add an implementation for '{contractType}'.
 {assembly}
-{assembly.Location}");
-#pragma warning restore IL3000 // Avoid accessing Assembly file path when publishing as a single file
+{filePath}");
             }
 
             TExtensionInterface instance = (TExtensionInterface)Activator.CreateInstance(implementationType)!;
