@@ -21,6 +21,9 @@ namespace Dibix.Sdk.CodeGeneration
         {
             context.AddReference<HttpClient>();
 
+            if (context.Model.EnableExperimentalFeatures)
+                context.AddUsing("IHttpClientFactory = System.Net.Http.IHttpClientFactory");
+
             string className = $"{controller.Name}Service";
             string interfaceName = $"I{className}";
             CSharpAnnotation interfaceDescriptor = new CSharpAnnotation("HttpService", new CSharpValue($"typeof({interfaceName})"));
@@ -112,7 +115,12 @@ namespace Dibix.Sdk.CodeGeneration
                                                                     .ToArray();
 
             StringWriter writer = new StringWriter();
-            writer.WriteLine($"using ({nameof(HttpClient)} client = _httpClientFactory.CreateClient(_httpClientName, BaseAddress))")
+            writer.Write($"using ({nameof(HttpClient)} client = _httpClientFactory.CreateClient(_httpClientName");
+
+            if (!context.Model.EnableExperimentalFeatures)
+                writer.Write(", BaseAddress");
+
+            writer.WriteLine("))")
                   .WriteLine("{")
                   .PushIndent();
 
