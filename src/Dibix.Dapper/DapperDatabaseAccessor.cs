@@ -52,6 +52,11 @@ namespace Dibix.Dapper
 
         protected override Task<IEnumerable<T>> QueryManyAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, bool buffered, CancellationToken cancellationToken)
         {
+            // Currently buffering the result into memory, which is not optimal,
+            // but causes exceptions when the cell value type does not match the expected target type T.
+            // This is related to the following issue in the Dapper library: https://github.com/DapperLib/Dapper/issues/1901
+            //buffered = true;
+
             DecoratedTypeMap.Adapt<T>();
             CommandFlags flags = buffered ? CommandFlags.Buffered : CommandFlags.None;
             CommandDefinition command = new CommandDefinition(commandText, CollectParameters(parameters), _defaultTransaction, _defaultCommandTimeout, commandType, flags, cancellationToken);

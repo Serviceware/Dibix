@@ -130,7 +130,23 @@ CommandText: <Inline>", exception.Message);
         });
 
         [TestMethod]
-        public Task QuerySingle_Success() => base.ExecuteTest(accessor =>
+        public Task QuerySingle_PrimitiveResult_Success() => base.ExecuteTest(accessor =>
+        {
+            const string commandText = "SELECT 1";
+            bool result = accessor.QuerySingle<bool>(commandText, CommandType.Text, ParametersVisitor.Empty);
+            Assert.AreEqual(true, result);
+        });
+
+        [TestMethod]
+        public Task QuerySingle_PrimitiveResult_Async_Success() => base.ExecuteTest(async accessor =>
+        {
+            const string commandText = "SELECT 1";
+            bool result = await accessor.QuerySingleAsync<bool>(commandText, CommandType.Text, ParametersVisitor.Empty, default).ConfigureAwait(false);
+            Assert.AreEqual(true, result);
+        });
+
+        [TestMethod]
+        public Task QuerySingle_WithComplexResult_Success() => base.ExecuteTest(accessor =>
         {
             const string commandText = "SELECT 1 AS [id]";
             Entity result = accessor.QuerySingle<Entity>(commandText, CommandType.Text, ParametersVisitor.Empty);
