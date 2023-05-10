@@ -43,7 +43,7 @@ namespace Dibix.Worker.Abstractions
                 {
                     ICollection<TMessage> messages = await ReceiveMessageBatch(stoppingToken).ConfigureAwait(false);
                     if (messages.Any())
-                        ProcessMessages(messages);
+                        _ = ProcessMessages(messages);
                 }
                 catch (Exception exception) when (ExceptionUtility.IsCancellationException(exception, stoppingToken))
                 {
@@ -66,10 +66,19 @@ namespace Dibix.Worker.Abstractions
 
         protected abstract Task ProcessMessage(TMessage message);
 
-        private protected virtual void ProcessMessages(IEnumerable<TMessage> messages)
+        private protected virtual async Task ProcessMessages(IEnumerable<TMessage> messages)
         {
             foreach (TMessage message in messages)
-                Task.Run(() => ProcessMessage(message));
+            {
+                try
+                {
+                    await ProcessMessage(message).ConfigureAwait(false);
+                }
+                catch (Exception exception)
+                {
+                    Logger.LogError(exception, "An error occured while processing service broker message");
+                }
+            }
         }
         #endregion
 

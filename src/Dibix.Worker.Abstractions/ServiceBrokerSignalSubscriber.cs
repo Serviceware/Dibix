@@ -10,10 +10,10 @@ namespace Dibix.Worker.Abstractions
     {
         protected ServiceBrokerSignalSubscriber(IWorkerScopeFactory scopeFactory, IHostedServiceRegistrar hostedServiceRegistrar, ILogger logger) : base(scopeFactory, hostedServiceRegistrar, logger) { }
 
-        private protected sealed override void ProcessMessages(IEnumerable<object> messages) => OnMessage();
+        private protected sealed override Task ProcessMessages(IEnumerable<object> messages) => OnMessage();
 
         protected sealed override Task ProcessMessage(object message) => throw new NotSupportedException();
         
-        protected abstract void OnMessage();
+        protected abstract Task OnMessage();
     }
 }

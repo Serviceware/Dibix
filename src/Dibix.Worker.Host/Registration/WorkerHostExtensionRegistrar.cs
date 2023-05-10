@@ -44,6 +44,12 @@ namespace Dibix.Worker.Host
                 _dependencyRegistry = dependencyRegistry;
             }
 
+            public IWorkerHostExtensionConfigurationBuilder RegisterService<TService>() where TService : HostedService
+            {
+                _services.AddHostedService<TService>();
+                return this;
+            }
+
             IWorkerHostExtensionConfigurationBuilder IWorkerHostExtensionConfigurationBuilder.RegisterDependency<TInterface, TImplementation>()
             {
                 _services.AddScoped<TInterface, TImplementation>();
