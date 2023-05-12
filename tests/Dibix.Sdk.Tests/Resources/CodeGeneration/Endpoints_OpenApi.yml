@@ -488,21 +488,21 @@ components:
   schemas:
     GenericContract:
       required:
-        - Role
-        - CreationTime
-        - ImageUrl
+        - role
+        - creationTime
+        - imageUrl
       type: object
       properties:
-        Name:
+        name:
           type: string
           default: DefaultValue
-        Role:
+        role:
           $ref: '#/components/schemas/Role'
-        CreationTime:
+        creationTime:
           type: string
           format: date-time
           nullable: true
-        ImageUrl:
+        imageUrl:
           type: string
           format: uri
       additionalProperties: false
@@ -520,96 +520,96 @@ components:
         - Admin
     InputContract:
       required:
-        - A
-        - B
-        - Ids
-        - D
-        - Password
-        - E
-        - F
-        - G
+        - a
+        - b
+        - ids
+        - d
+        - password
+        - e
+        - f
+        - g
       type: object
       properties:
-        A:
+        a:
           type: string
-        B:
+        b:
           type: string
-        C:
+        c:
           type: string
-        Ids:
+        ids:
           type: array
           items:
             $ref: '#/components/schemas/Entry'
-        D:
+        d:
           type: string
           format: uuid
-        Password:
+        password:
           type: string
-        E:
+        e:
           type: boolean
-        F:
+        f:
           type: integer
           format: int32
-        G:
+        g:
           type: string
       additionalProperties: false
     Entry:
       required:
-        - Id
-        - Name
+        - id
+        - name
       type: object
       properties:
-        Id:
+        id:
           type: integer
           format: int32
-        Name:
+        name:
           type: string
       additionalProperties: false
     AnotherInputContract:
       required:
-        - A
-        - B
-        - SomeIds
-        - D
-        - Password
-        - E
-        - F
-        - G
+        - a
+        - b
+        - someIds
+        - d
+        - password
+        - e
+        - f
+        - g
       type: object
       properties:
-        A:
+        a:
           type: string
-        B:
+        b:
           type: string
-        C:
+        c:
           type: string
-        SomeIds:
+        someIds:
           type: array
           items:
             $ref: '#/components/schemas/AnotherEntry'
-        D:
+        d:
           type: string
           format: uuid
-        Password:
+        password:
           type: string
-        E:
+        e:
           type: boolean
-        F:
+        f:
           type: integer
           format: int32
-        G:
+        g:
           type: string
       additionalProperties: false
     AnotherEntry:
       required:
-        - Id
-        - Title
+        - id
+        - title
       type: object
       properties:
-        Id:
+        id:
           type: integer
           format: int32
-        Title:
+        title:
           type: string
       additionalProperties: false
     GenericParameterSet:

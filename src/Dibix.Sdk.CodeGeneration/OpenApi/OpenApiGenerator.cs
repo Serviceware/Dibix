@@ -453,11 +453,12 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                 if (property.SerializationBehavior == SerializationBehavior.Never)
                     continue;
 
+                string propertyName = ToCamelCase(property.Name);
                 OpenApiSchema propertySchema = CreateSchema(document, property.Type, rootNamespace, schemaRegistry, logger);
-                schema.Properties.Add(property.Name, propertySchema);
+                schema.Properties.Add(propertyName, propertySchema);
 
                 if (property.SerializationBehavior == SerializationBehavior.Always && !property.IsOptional)
-                    schema.Required.Add(property.Name);
+                    schema.Required.Add(propertyName);
 
                 if (property.DefaultValue == null) 
                     continue;
@@ -529,5 +530,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                 default:                           throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
         }
+
+        private static string ToCamelCase(string propertyName) => $"{Char.ToLowerInvariant(propertyName[0])}{propertyName.Substring(1)}";
     }
 }
