@@ -518,6 +518,10 @@ components:
         - None
         - User
         - Admin
+      x-enumNames:
+        - None
+        - User
+        - Admin
     InputContract:
       required:
         - a
@@ -633,6 +637,9 @@ components:
       description: 0 = Ascending<br/>1 = Descending
       format: int32
       x-enum-varnames:
+        - Ascending
+        - Descending
+      x-enumNames:
         - Ascending
         - Descending
   securitySchemes:

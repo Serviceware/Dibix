@@ -14,6 +14,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
     {
         private static readonly bool UseRelativeNamespaces = true;
         private static readonly string[] ReservedOpenApiHeaders = { "Accept", "Authorization", "Content-Type" };
+        private static readonly string[] SupportedEnumExtensions = { "x-enum-varnames", "x-enumNames" };
         private static readonly OpenApiSchema NullSchema = new OpenApiSchema { Type = "null" };
 
         public static OpenApiDocument Generate(CodeGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger)
@@ -473,7 +474,11 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             OpenApiArray enumNames = new OpenApiArray();
 
             schema.Description = String.Join("<br/>", enumContract.Members.Select(x => $"{x.ActualValue} = {x.Name}"));
-            schema.Extensions.Add("x-enum-varnames", enumNames);
+
+            foreach (string extensionName in SupportedEnumExtensions)
+            {
+                schema.Extensions.Add(extensionName, enumNames);
+            }
             
             foreach (EnumSchemaMember member in enumContract.Members)
             {
