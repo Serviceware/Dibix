@@ -31,7 +31,7 @@ namespace Dibix.Worker.Host
                     .AddScoped<IDatabaseAccessorFactory, ScopedDatabaseAccessorFactory>()
                     .AddScoped<IWorkerDependencyContext, ServiceProviderWorkerDependencyContext>()
                     .AddSingleton<IWorkerScopeFactory, ServiceScopeWorkerScopeFactory>()
-                    .AddSingleton<IHostedServiceRegistrar, DefaultHostedServiceRegistrar>()
+                    .AddSingleton<IHostedServiceEvents, HostedServiceEvents>()
                     .AddHostedService<DatabaseOptionsMonitor>();
 
             services.Configure<DatabaseOptions>(builder.Configuration.GetSection(DatabaseOptions.ConfigurationSectionName));

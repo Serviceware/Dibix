@@ -19,6 +19,7 @@ namespace Dibix.Worker.Abstractions
         private const int ReceiveTimeout    = CommandTimeout / 2 * 1000; // ms
         private const int RetryOnErrorDelay = 10000;                     // ms
         private readonly IWorkerScopeFactory _scopeFactory;
+        private readonly IHostedServiceEvents _hostedServiceEvents;
         #endregion
 
         #region Properties
@@ -26,9 +27,10 @@ namespace Dibix.Worker.Abstractions
         #endregion
 
         #region Constructor
-        protected ServiceBrokerSubscriber(IWorkerScopeFactory scopeFactory, IHostedServiceRegistrar hostedServiceRegistrar, ILogger logger) : base(hostedServiceRegistrar, logger)
+        protected ServiceBrokerSubscriber(IWorkerScopeFactory scopeFactory, IHostedServiceEvents hostedServiceEvents, ILogger logger) : base(hostedServiceEvents, logger)
         {
             _scopeFactory = scopeFactory;
+            _hostedServiceEvents = hostedServiceEvents;
         }
         #endregion
 
@@ -41,6 +43,7 @@ namespace Dibix.Worker.Abstractions
                 try
                 {
                     ICollection<TMessage> messages = await ReceiveMessageBatch(stoppingToken).ConfigureAwait(false);
+                    _ = _hostedServiceEvents.OnServiceBrokerIterationCompleted(GetType().FullName, stoppingToken);
                     if (messages.Any())
                         _ = ProcessMessages(messages);
                 }

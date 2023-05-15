@@ -11,7 +11,7 @@ namespace Dibix.Worker.Abstractions
         private Task? _executingTask;
         private CancellationTokenSource? _stoppingCts;
 
-        protected BackgroundService(IHostedServiceRegistrar hostedServiceRegistrar, ILogger logger) : base(hostedServiceRegistrar, logger) { }
+        protected BackgroundService(IHostedServiceEvents hostedServiceEvents, ILogger logger) : base(hostedServiceEvents, logger) { }
 
         protected sealed override Task StartListenerAsync(CancellationToken cancellationToken)
         {

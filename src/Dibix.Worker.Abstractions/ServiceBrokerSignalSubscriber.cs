@@ -8,7 +8,7 @@ namespace Dibix.Worker.Abstractions
 {
     public abstract class ServiceBrokerSignalSubscriber : ServiceBrokerSubscriber<object>, IHostedService
     {
-        protected ServiceBrokerSignalSubscriber(IWorkerScopeFactory scopeFactory, IHostedServiceRegistrar hostedServiceRegistrar, ILogger logger) : base(scopeFactory, hostedServiceRegistrar, logger) { }
+        protected ServiceBrokerSignalSubscriber(IWorkerScopeFactory scopeFactory, IHostedServiceEvents hostedServiceEvents, ILogger logger) : base(scopeFactory, hostedServiceEvents, logger) { }
 
         private protected sealed override Task ProcessMessages(IEnumerable<object> messages) => OnMessage();
 

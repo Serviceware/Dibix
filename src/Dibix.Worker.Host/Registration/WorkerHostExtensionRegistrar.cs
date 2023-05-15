@@ -86,9 +86,15 @@ namespace Dibix.Worker.Host
                 return this;
             }
 
-            IWorkerHostExtensionConfigurationBuilder IWorkerHostExtensionConfigurationBuilder.OnWorkerRegistered(OnWorkerRegistered handler)
+            IWorkerHostExtensionConfigurationBuilder IWorkerHostExtensionConfigurationBuilder.OnWorkerStarted(OnWorkerStarted handler)
             {
-                _services.Configure<HostedServiceRegistrarOptions>(x => x.Handler = handler);
+                _services.Configure<HostedServiceEventOptions>(x => x.OnWorkerStarted = handler);
+                return this;
+            }
+
+            IWorkerHostExtensionConfigurationBuilder IWorkerHostExtensionConfigurationBuilder.OnServiceBrokerIterationCompleted(OnServiceBrokerIterationCompleted handler)
+            {
+                _services.Configure<HostedServiceEventOptions>(x => x.OnServiceBrokerIterationCompleted = handler);
                 return this;
             }
 

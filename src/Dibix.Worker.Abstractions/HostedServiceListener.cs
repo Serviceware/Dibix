@@ -7,16 +7,16 @@ namespace Dibix.Worker.Abstractions
 {
     public abstract class HostedServiceListener : HostedService, IHostedService
     {
-        private readonly IHostedServiceRegistrar _hostedServiceRegistrar;
+        private readonly IHostedServiceEvents _hostedServiceEvents;
 
-        protected HostedServiceListener(IHostedServiceRegistrar hostedServiceRegistrar, ILogger logger) : base(logger)
+        protected HostedServiceListener(IHostedServiceEvents hostedServiceEvents, ILogger logger) : base(logger)
         {
-            _hostedServiceRegistrar = hostedServiceRegistrar;
+            _hostedServiceEvents = hostedServiceEvents;
         }
 
         protected sealed override async Task StartServiceAsync(CancellationToken cancellationToken)
         {
-            await _hostedServiceRegistrar.RegisterHostedService(GetType().FullName, cancellationToken).ConfigureAwait(false);
+            await _hostedServiceEvents.OnWorkerStarted(GetType().FullName, cancellationToken).ConfigureAwait(false);
             await StartListenerAsync(cancellationToken).ConfigureAwait(false);
         }
 
