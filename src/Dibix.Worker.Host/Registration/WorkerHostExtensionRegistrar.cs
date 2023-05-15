@@ -26,12 +26,12 @@ namespace Dibix.Worker.Host
 
             AssemblyLoadContext assemblyLoadContext = new ComponentAssemblyLoadContext(name: $"Dibix {kind}", extensionPath);
             IWorkerHostExtension instance = ExtensionRegistrationUtility.GetExtensionImplementation<IWorkerHostExtension>(extensionPath, kind, assemblyLoadContext);
-            WorkerHostExtensionConfigurationBuilder? builder = new WorkerHostExtensionConfigurationBuilder(services, dependencyRegistry);
+            WorkerHostExtensionConfigurationBuilder builder = new WorkerHostExtensionConfigurationBuilder(services, dependencyRegistry);
             instance.Register(builder);
             return builder;
         }
 
-        private class WorkerHostExtensionConfigurationBuilder : IWorkerHostExtensionConfigurationBuilder, IWorkerHostExtensionRegistrar
+        private sealed class WorkerHostExtensionConfigurationBuilder : IWorkerHostExtensionConfigurationBuilder, IWorkerHostExtensionRegistrar
         {
             private readonly IServiceCollection _services;
             private readonly WorkerDependencyRegistry _dependencyRegistry;

@@ -65,6 +65,11 @@ namespace Dibix.Worker.Abstractions
 
         protected abstract Task ProcessMessage(TMessage message);
 
+        protected virtual void CollectParameters(IParameterCollectionContext context)
+        {
+            context.AddParameter("timeout", DbType.Int32, ReceiveTimeout);
+        }
+
         private protected virtual async Task ProcessMessages(IEnumerable<TMessage> messages)
         {
             foreach (TMessage message in messages)
@@ -96,7 +101,9 @@ namespace Dibix.Worker.Abstractions
             command.CommandText = ReceiveProcedureName;
             command.CommandType = CommandType.StoredProcedure;
             command.CommandTimeout = CommandTimeout;
-            AddParameter(command, "timeout", DbType.Int32, ReceiveTimeout);
+            
+            IParameterCollectionContext parameterCollectionContext = new ParameterCollectionContext(command);
+            CollectParameters(parameterCollectionContext);
 
             using (EnterCancellationScope(cancellationToken, command))
             {
@@ -122,14 +129,31 @@ namespace Dibix.Worker.Abstractions
             Logger.LogDebug("Cancelling current service broker queue read operation");
             command?.Cancel(); // this method throws a SqlException => catch needed!
         }
+        #endregion
 
-        private static void AddParameter(IDbCommand command, string parameterName, DbType parameterType, object value)
+        #region Nested Types
+        private sealed class ParameterCollectionContext : IParameterCollectionContext
         {
-            IDbDataParameter param = command.CreateParameter();
-            param.ParameterName = parameterName;
-            param.DbType = parameterType;
-            param.Value = value;
-            command.Parameters.Add(param);
+            private readonly IDbCommand _command;
+
+            public ParameterCollectionContext(IDbCommand command)
+            {
+                _command = command;
+            }
+
+            public IParameterCollectionContext AddParameter(string parameterName, DbType parameterType, object value, int? size = null)
+            {
+                IDbDataParameter param = _command.CreateParameter();
+                param.ParameterName = parameterName;
+                param.DbType = parameterType;
+                param.Value = value;
+
+                if (size != null) 
+                    param.Size = size.Value;
+
+                _command.Parameters.Add(param);
+                return this;
+            }
         }
         #endregion
     }

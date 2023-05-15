@@ -8,15 +8,12 @@ using Dibix.Hosting.Abstractions;
 using Dibix.Http.Client;
 using Dibix.Worker.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using IHttpClientBuilder = Microsoft.Extensions.DependencyInjection.IHttpClientBuilder;
 
 namespace Dibix.Worker.Host
 {
     internal static class WorkerExtensionRegistrar
     {
-        private const string Kind = "Worker extension";
-
         public static void Register(HostingOptions options, IServiceCollection services, WorkerDependencyRegistry dependencyRegistry)
         {
             if (!options.Workers.Any())
@@ -34,13 +31,14 @@ namespace Dibix.Worker.Host
 
         private static void Register(string componentName, string filePath, IServiceCollection services, WorkerDependencyRegistry dependencyRegistry)
         {
-            AssemblyLoadContext assemblyLoadContext = new ComponentAssemblyLoadContext($"Dibix {Kind} '{componentName}'", filePath);
-            IWorkerExtension instance = ExtensionRegistrationUtility.GetExtensionImplementation<IWorkerExtension>(filePath, Kind, assemblyLoadContext);
+            const string kind = "Worker extension";
+            AssemblyLoadContext assemblyLoadContext = new ComponentAssemblyLoadContext($"Dibix {kind} '{componentName}'", filePath);
+            IWorkerExtension instance = ExtensionRegistrationUtility.GetExtensionImplementation<IWorkerExtension>(filePath, kind, assemblyLoadContext);
             WorkerExtensionConfigurationBuilder builder = new WorkerExtensionConfigurationBuilder(instance.GetType().Assembly, componentName, services, dependencyRegistry);
             instance.Register(builder);
         }
 
-        private class WorkerExtensionConfigurationBuilder : IWorkerExtensionConfigurationBuilder
+        private sealed class WorkerExtensionConfigurationBuilder : IWorkerExtensionConfigurationBuilder
         {
             private readonly Assembly _workerAssembly;
             private readonly string _workerComponentName;

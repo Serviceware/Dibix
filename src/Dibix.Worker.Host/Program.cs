@@ -35,7 +35,7 @@ namespace Dibix.Worker.Host
                     .AddHostedService<DatabaseOptionsMonitor>();
 
             services.Configure<DatabaseOptions>(builder.Configuration.GetSection(DatabaseOptions.ConfigurationSectionName));
-            HostingOptions hostingOptions = builder.Configuration.Bind<HostingOptions>(HostingOptions.ConfigurationSectionName);
+            HostingOptions hostingOptions = builder.Configuration.GetSection(HostingOptions.ConfigurationSectionName).Bind<HostingOptions>();
 
             services.AddWindowsService();
 
