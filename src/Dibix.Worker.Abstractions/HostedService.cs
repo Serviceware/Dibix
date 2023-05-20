@@ -24,9 +24,6 @@ namespace Dibix.Worker.Abstractions
 
             try
             {
-                if (!await ShouldStart().ConfigureAwait(false))
-                    return;
-
                 await StartServiceAsync(cancellationToken).ConfigureAwait(false);
                 _isRunning = true;
             }
@@ -52,8 +49,6 @@ namespace Dibix.Worker.Abstractions
                 Logger.LogError(exception, "Hosted service could not be stopped");
             }
         }
-
-        protected virtual Task<bool> ShouldStart() => Task.FromResult(true);
         
         protected abstract Task StartServiceAsync(CancellationToken cancellationToken);
 

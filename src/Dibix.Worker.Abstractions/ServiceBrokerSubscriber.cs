@@ -151,7 +151,7 @@ namespace Dibix.Worker.Abstractions
                 param.DbType = parameterType;
                 param.Value = value;
 
-                if (size != null) 
+                if (size != null)
                     param.Size = size.Value;
 
                 _command.Parameters.Add(param);

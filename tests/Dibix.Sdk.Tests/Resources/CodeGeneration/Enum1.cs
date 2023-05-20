@@ -11,9 +11,9 @@ using Dibix;
 [assembly: ArtifactAssembly]
 
 #region Contracts
-namespace Dibix.Sdk.Tests.DomainModel.Policies
+namespace Dibix.Sdk.Tests.DomainModel.Features
 {
-    public enum SecurityPolicy : byte
+    public enum Feature : byte
     {
         Feature1 = 101,
         Feature2 = 102,

@@ -59,7 +59,7 @@ namespace Dibix.Worker.Abstractions
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-        
+
         protected abstract Task ExecuteAsync(CancellationToken stoppingToken);
 
         protected virtual void Dispose(bool disposing)

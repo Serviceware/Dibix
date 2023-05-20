@@ -185,7 +185,7 @@ namespace Dibix.Sdk.CodeGeneration
                         continue;
 
                     case TSqlTokenType.SingleLineComment:
-                        Match match = Regex.Match(token.Text, @"^--[\s]+(?<name>[\w]+)");
+                        Match match = Regex.Match(token.Text, @"^-- (?<name>[^\d][\w]{0,})$");
                         name = match.Groups["name"].Value;
                         return !String.IsNullOrWhiteSpace(name);
 
