@@ -26,6 +26,16 @@ namespace Dibix.Sdk.CodeGeneration
                 if (token.TokenType == TSqlTokenType.WhiteSpace)
                     continue;
 
+                /*
+                 Support the following syntax:
+                 -- Constraint A
+                 CONSTRAINT a
+                 -- Constraint B
+               , CONSTRAINT b
+                */
+                if (token.TokenType == TSqlTokenType.Comma)
+                    continue;
+
                 if (token.TokenType is not TSqlTokenType.SingleLineComment and not TSqlTokenType.MultilineComment) 
                     break;
 

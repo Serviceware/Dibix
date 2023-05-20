@@ -36,18 +36,18 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 try
                 {
-                    bool result = Read(file, out EnumSchema definition);
+                    IEnumerable<EnumSchema> schemas = Read(file);
 
-                    if (!result)
-                        continue;
-
-                    if (_definitions.ContainsKey(definition.FullName))
+                    foreach (EnumSchema definition in schemas)
                     {
-                        _logger.LogError($"Ambiguous enum definition name: {definition.FullName}", definition.Location.Source, definition.Location.Line, definition.Location.Column);
-                        continue;
-                    }
+                        if (_definitions.ContainsKey(definition.FullName))
+                        {
+                            _logger.LogError($"Ambiguous enum definition name: {definition.FullName}", definition.Location.Source, definition.Location.Line, definition.Location.Column);
+                            continue;
+                        }
 
-                    _definitions.Add(definition.FullName, definition);
+                        _definitions.Add(definition.FullName, definition);
+                    }
                 }
                 catch (Exception exception)
                 {
@@ -58,21 +58,14 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private bool Read(string file, out EnumSchema definition)
+        private IEnumerable<EnumSchema> Read(string file)
         {
             TSqlFragment fragment = ScriptDomFacade.Load(file);
 
             EnumContractVisitor visitor = new EnumContractVisitor(file, _productName, _areaName, _logger);
             fragment.Accept(visitor);
 
-            if (visitor.Definition != null)
-            {
-                definition = visitor.Definition;
-                return true;
-            }
-
-            definition = null;
-            return false;
+            return visitor.Definitions;
         }
     }
 }

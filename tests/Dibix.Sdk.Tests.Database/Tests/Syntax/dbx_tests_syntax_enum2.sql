@@ -12,4 +12,9 @@ CREATE TABLE [dbo].[dbx_tests_syntax_enum2]
                                                  OR ([id]=(102)) -- Feature2
                                                  OR ([id]=(104) AND [name] = N'Feature4')
     )
+  , CONSTRAINT [CK_dbx_tests_syntax_enum2_z] CHECK (([id]=(203)) -- Feature3
+                                                 OR  [id]=(201)  -- Feature1
+                                                 OR ([id]=(202)) -- Feature2
+                                                 OR ([id]=(204) AND [name] = N'Feature4')
+    )
 )

@@ -16,8 +16,9 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly string _productName;
         private readonly string _areaName;
         private readonly ILogger _logger;
+        private readonly IDictionary<Token<string>, EnumSchema> _definitionMap;
 
-        public EnumSchema Definition { get; private set; }
+        public ICollection<EnumSchema> Definitions => _definitionMap.Values;
 
         public EnumContractVisitor(string file, string productName, string areaName, ILogger logger)
         {
@@ -25,6 +26,7 @@ namespace Dibix.Sdk.CodeGeneration
             _productName = productName;
             _areaName = areaName;
             _logger = logger;
+            _definitionMap = new Dictionary<Token<string>, EnumSchema>();
         }
 
         public override void ExplicitVisit(CreateTableStatement node)
@@ -33,21 +35,24 @@ namespace Dibix.Sdk.CodeGeneration
                 return;
 
             ISqlMarkupDeclaration markup = SqlMarkupReader.Read(node, SqlMarkupCommentKind.SingleLine, _file, _logger);
-            if (!markup.TryGetSingleElementValue(SqlMarkupKey.Enum, _file, _logger, out Token<string> enumContractName))
+            if (!markup.TryGetSingleElement(SqlMarkupKey.Enum, _file, _logger, out ISqlElement enumElement))
                 return;
 
+            _ = enumElement.TryGetPropertyValue(SqlEnumMarkupProperty.Name, isDefault: true, out Token<string> enumContractName);
             _ = markup.TryGetSingleElementValue(SqlMarkupKey.Namespace, _file, _logger, out string relativeNamespace);
-            EnumSchema definition = CollectEnumSchema(node, enumContractName, relativeNamespace);
 
-            if (definition == null)
+            CollectEnumSchemas(node, enumContractName, relativeNamespace);
+
+            if (Definitions.Any()) 
+                return;
+
+            if (enumContractName != null)
                 _logger.LogError($"Could not parse definition for enum '{enumContractName}'", enumContractName.Location);
-            else if (Definition != null)
-                _logger.LogError("Only one definition per file is supported", definition.Location);
             else
-                Definition = definition;
+                _logger.LogError("Could not detect any enum definition", enumElement.Location);
         }
 
-        private EnumSchema CollectEnumSchema(CreateTableStatement createTableStatement, Token<string> enumContractName, string relativeNamespace)
+        private void CollectEnumSchemas(CreateTableStatement createTableStatement, Token<string> rootEnumContractName, string relativeNamespace)
         {
             TableDefinition definition = createTableStatement.Definition;
             IEnumerable<CheckConstraintDefinition> checkConstraints = definition.TableConstraints
@@ -56,17 +61,37 @@ namespace Dibix.Sdk.CodeGeneration
             
             foreach (CheckConstraintDefinition checkConstraint in checkConstraints)
             {
-                if (TryCollectEnumSchema(enumContractName, relativeNamespace, definition, checkConstraint.CheckCondition.SkipParenthesis(), out EnumSchema enumSchema))
-                    return enumSchema;
+                CollectEnumSchema(definition, checkConstraint, rootEnumContractName, relativeNamespace);
             }
-
-            return null;
         }
 
-        private bool TryCollectEnumSchema(Token<string> enumContractName, string relativeNamespace, TableDefinition tableDefinition, BooleanExpression checkCondition, out EnumSchema enumSchema)
+        private void CollectEnumSchema(TableDefinition tableDefinition, CheckConstraintDefinition checkConstraint, Token<string> rootEnumContractName, string relativeNamespace)
         {
+            bool hasExplicitContractName = false;
+            ISqlMarkupDeclaration markup = SqlMarkupReader.Read(checkConstraint, SqlMarkupCommentKind.SingleLine, _file, _logger);
+            if (markup.TryGetSingleElementValue(SqlMarkupKey.Enum, _file, _logger, out Token<string> enumContractName))
+            {
+                if (rootEnumContractName != null)
+                {
+                    _logger.LogError("Ambiguous enum contract definition name. When declaring check constraints as enums, the root enum declaration should not define a name.", enumContractName.Location);
+                    return;
+                }
+                hasExplicitContractName = true;
+            }
+            else
+                enumContractName = rootEnumContractName;
+
+            if (enumContractName == null)
+                return;
+
+            // Do not collect multiple enum schemas for the same contract name
+            // This ensures that only the first check constraint is considered when the root enum contract name declaration is set
+            if (_definitionMap.ContainsKey(enumContractName))
+                return;
+
             TargetPath targetPath = PathUtility.BuildAbsoluteTargetName(_productName, _areaName, LayerName.DomainModel, relativeNamespace, targetNamePath: enumContractName);
             EnumSchema schema = new EnumSchema(targetPath.AbsoluteNamespace, enumContractName, SchemaDefinitionSource.AutoGenerated, enumContractName.Location);
+            BooleanExpression checkCondition = checkConstraint.CheckCondition.SkipParenthesis();
 
             switch (checkCondition)
             {
@@ -95,12 +120,13 @@ namespace Dibix.Sdk.CodeGeneration
                     break;
 
                 default:
-                    enumSchema = null;
-                    return false;
+                    if (hasExplicitContractName)
+                        _logger.LogError($"Could not parse definition for enum '{enumContractName}'", enumContractName.Location);
+
+                    return;
             }
 
-            enumSchema = schema;
-            return true;
+            _definitionMap.Add(enumContractName, schema);
         }
 
         private static bool TryCollectSchemaMembers(EnumSchema schema, BooleanComparisonExpression flagComparisonExpression, BooleanComparisonExpression nameComparisonExpression, TableDefinition tableDefinition)
@@ -191,6 +217,31 @@ namespace Dibix.Sdk.CodeGeneration
 
                     case TSqlTokenType.RightParenthesis:
                         continue;
+
+                    default:
+                        name = null;
+                        return false;
+                }
+            }
+
+            name = null;
+            return false;
+        }
+
+        private static bool TryParseContractNameFromComment(TSqlFragment node, out string name)
+        {
+            for (int i = node.FirstTokenIndex - 1; i >= 0; i--)
+            {
+                TSqlParserToken token = node.ScriptTokenStream[i];
+                switch (token.TokenType)
+                {
+                    case TSqlTokenType.WhiteSpace:
+                        continue;
+
+                    case TSqlTokenType.SingleLineComment:
+                        Match match = Regex.Match(token.Text, @"^-- (?<name>[^\d][\w]{0,})$");
+                        name = match.Groups["name"].Value;
+                        return !String.IsNullOrWhiteSpace(name);
 
                     default:
                         name = null;

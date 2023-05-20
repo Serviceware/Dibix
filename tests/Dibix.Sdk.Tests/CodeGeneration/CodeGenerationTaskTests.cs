@@ -390,6 +390,16 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
         }
 
         [TestMethod]
+        public void Enum3()
+        {
+            ExecuteTest
+            (
+                isEmbedded: false
+              , sources: new[] { @"Tests\Syntax\dbx_tests_syntax_enum3.sql" }
+            );
+        }
+
+        [TestMethod]
         public void Client()
         {
             ExecuteTest
