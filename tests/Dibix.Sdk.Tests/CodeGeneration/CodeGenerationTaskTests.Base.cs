@@ -83,6 +83,8 @@ PreventDmlReferences
   True
 EnableExperimentalFeatures
   {enableExperimentalFeatures /* TODO: Add test support for inspecting DBX file */}
+UseMicrosoftHttpClient
+  False
 SqlReferencePath");
             InputConfiguration inputConfiguration = InputConfiguration.Parse(inputConfigurationPath);
             SqlCoreTask task = new SqlCoreTask(logger, inputConfiguration);

@@ -13,7 +13,6 @@ namespace Dibix.Sdk.CodeGeneration
         #region Overrides
         protected override IEnumerable<ArtifactWriterBase> SelectWriters(CodeGenerationModel model)
         {
-            bool accessorOnly = model.EnableExperimentalFeatures;
             const CodeGenerationOutputFilter outputFilter = CodeGenerationOutputFilter.Local;
             yield return new DaoExecutorWriter(model, outputFilter);
             yield return new DaoExecutorInputClassWriter(model, outputFilter);

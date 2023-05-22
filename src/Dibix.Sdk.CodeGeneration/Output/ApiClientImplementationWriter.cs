@@ -21,7 +21,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             context.AddReference<HttpClient>();
 
-            if (context.Model.EnableExperimentalFeatures)
+            if (context.Model.UseMicrosoftHttpClient)
                 context.AddUsing("IHttpClientFactory = System.Net.Http.IHttpClientFactory");
 
             string className = $"{controller.Name}Service";
@@ -117,7 +117,7 @@ namespace Dibix.Sdk.CodeGeneration
             StringWriter writer = new StringWriter();
             writer.Write($"using ({nameof(HttpClient)} client = _httpClientFactory.CreateClient(_httpClientName");
 
-            if (!context.Model.EnableExperimentalFeatures)
+            if (!context.Model.UseMicrosoftHttpClient)
                 writer.Write(", BaseAddress");
 
             writer.WriteLine("))")

@@ -35,7 +35,8 @@ namespace Dibix.Sdk.CodeGeneration
                 DefaultOutputName = configuration.DefaultOutputName,
                 ClientOutputName = configuration.ClientOutputName,
                 BaseUrl = configuration.BaseUrl,
-                EnableExperimentalFeatures = configuration.EnableExperimentalFeatures
+                EnableExperimentalFeatures = configuration.EnableExperimentalFeatures,
+                UseMicrosoftHttpClient = configuration.UseMicrosoftHttpClient
             };
 
             ITypeResolverFacade typeResolver = new TypeResolverFacade(logger);
