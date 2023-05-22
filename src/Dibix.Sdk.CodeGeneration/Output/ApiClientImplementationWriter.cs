@@ -28,8 +28,10 @@ namespace Dibix.Sdk.CodeGeneration
             string interfaceName = $"I{className}";
             CSharpAnnotation interfaceDescriptor = new CSharpAnnotation("HttpService", new CSharpValue($"typeof({interfaceName})"));
             CSharpClass @class = output.AddClass(className, CSharpModifiers.Public | CSharpModifiers.Sealed, interfaceDescriptor)
-                                       .Implements(interfaceName)
-                                       .AddField("BaseAddress", nameof(Uri), new CSharpValue($"new {nameof(Uri)}(\"{context.Model.BaseUrl.TrimEnd('/')}/\")"), CSharpModifiers.Private | CSharpModifiers.Static | CSharpModifiers.ReadOnly);
+                                       .Implements(interfaceName);
+
+            if (!context.Model.UseMicrosoftHttpClient)
+                @class.AddField("BaseAddress", nameof(Uri), new CSharpValue($"new {nameof(Uri)}(\"{context.Model.BaseUrl.TrimEnd('/')}/\")"), CSharpModifiers.Private | CSharpModifiers.Static | CSharpModifiers.ReadOnly);
 
             bool hasBodyParameter = controller.Actions.Any(x => x.RequestBody != null);
             bool requiresAuthorization = controller.Actions.Any(x => x.SecuritySchemes.HasEffectiveRequirements);

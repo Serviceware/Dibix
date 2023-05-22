@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Dibix.Http.Client;
 using Dibix.Testing.Data;
+using IHttpClientFactory = System.Net.Http.IHttpClientFactory;
 
 namespace Dibix.Testing.Http
 {

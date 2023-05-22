@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Http;
 using Dibix.Http.Client;
+using IHttpClientFactory = System.Net.Http.IHttpClientFactory;
 
 namespace Dibix.Testing.Http
 {
@@ -10,7 +11,7 @@ namespace Dibix.Testing.Http
 
         public HttpTestContext(TService service, IHttpClientFactory httpClientFactory, IHttpAuthorizationProvider httpAuthorizationProvider) : base(httpClientFactory, httpAuthorizationProvider)
         {
-            this.Service = service;
+            Service = service;
         }
     }
 
@@ -21,13 +22,18 @@ namespace Dibix.Testing.Http
 
         public HttpTestContext(IHttpClientFactory httpClientFactory, IHttpAuthorizationProvider httpAuthorizationProvider)
         {
-            this.HttpClientFactory = httpClientFactory;
-            this.HttpAuthorizationProvider = httpAuthorizationProvider;
+            HttpClientFactory = httpClientFactory;
+            HttpAuthorizationProvider = httpAuthorizationProvider;
         }
 
-        public TService CreateService<TService>() => HttpServiceFactory.CreateServiceInstance<TService>(this.HttpClientFactory, this.HttpAuthorizationProvider);
+        public TService CreateService<TService>() => HttpServiceFactory.CreateServiceInstance<TService>(HttpClientFactory, HttpAuthorizationProvider);
 
-        public HttpClient CreateClient() => this.HttpClientFactory.CreateClient(TestHttpClientConfiguration.HttpClientName);
-        public HttpClient CreateClient(Uri baseAddress) => this.HttpClientFactory.CreateClient(TestHttpClientConfiguration.HttpClientName, baseAddress);
+        public HttpClient CreateClient() => HttpClientFactory.CreateClient(TestHttpClientFactoryBuilder.HttpClientName);
+        public HttpClient CreateClient(Uri baseAddress)
+        {
+            HttpClient client = CreateClient();
+            client.BaseAddress = baseAddress;
+            return client;
+        }
     }
 }

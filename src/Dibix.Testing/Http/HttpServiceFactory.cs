@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Dibix.Http.Client;
+using IHttpClientFactory = System.Net.Http.IHttpClientFactory;
 
 namespace Dibix.Testing.Http
 {
@@ -20,7 +21,7 @@ namespace Dibix.Testing.Http
 
         private static TService CreateServiceInstance<TService>(params KeyValuePair<Type, object>[] args)
         {
-            ICollection<KeyValuePair<Type, object>> normalizedArgs = args.Concat(EnumerableExtensions.Create(new KeyValuePair<Type, object>(typeof(string), TestHttpClientConfiguration.HttpClientName))).ToArray();
+            ICollection<KeyValuePair<Type, object>> normalizedArgs = args.Concat(EnumerableExtensions.Create(new KeyValuePair<Type, object>(typeof(string), TestHttpClientFactoryBuilder.HttpClientName))).ToArray();
             Type contractType = typeof(TService);
             Type implementationType = ResolveImplementationType(contractType);
             Type[] constructorSignature = normalizedArgs.Select(x => x.Key).ToArray();

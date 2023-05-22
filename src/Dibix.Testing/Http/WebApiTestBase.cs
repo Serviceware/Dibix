@@ -8,20 +8,23 @@ using Dibix.Testing.Data;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
+using IHttpClientBuilder = Microsoft.Extensions.DependencyInjection.IHttpClientBuilder;
+using IHttpClientFactory = System.Net.Http.IHttpClientFactory;
 
 namespace Dibix.Testing.Http
 {
     public abstract class WebApiTestBase<TConfiguration> : DatabaseTestBase<TConfiguration> where TConfiguration : DatabaseConfigurationBase, new()
     {
         #region Protected Methods
-        protected virtual Task ExecuteTest(Func<HttpTestContext, Task> testFlow) => this.ExecuteTest(testFlow, CreateTestContext);
+        protected virtual Task ExecuteTest(Func<HttpTestContext, Task> testFlow) => ExecuteTest(testFlow, CreateTestContext);
 
         private protected async Task ExecuteTest<TTestContext>(Func<TTestContext, Task> testFlow, Func<IHttpClientFactory, IHttpAuthorizationProvider, TTestContext> contextCreator) where TTestContext : HttpTestContext
         {
-            HttpClientConfiguration clientSetup = new TestHttpClientConfiguration(base.TestContext, base.Out, x => this.ConfigureClient(base.Configuration, x));
-            IHttpClientFactory httpClientFactory = new DefaultHttpClientFactory(clientSetup);
+            IHttpClientFactory httpClientFactory = TestHttpClientFactoryBuilder.Create(TestContext, Out)
+                                                                               .Configure(x => ConfigureClient(Configuration, x))
+                                                                               .Build();
             ITestAuthorizationContext authorizationContext = new TestAuthorizationContext(httpClientFactory);
-            IHttpAuthorizationProvider authorizationProvider = await this.Authorize(authorizationContext, base.Configuration).ConfigureAwait(false);
+            IHttpAuthorizationProvider authorizationProvider = await Authorize(authorizationContext, Configuration).ConfigureAwait(false);
             TTestContext testContext = contextCreator(httpClientFactory, authorizationProvider);
             await testFlow(testContext).ConfigureAwait(false);
         }
@@ -30,7 +33,7 @@ namespace Dibix.Testing.Http
         protected async Task<TContent> InvokeApi<TService, TContent>(TService service, Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector, string expectedText)
         {
             HttpResponse<TContent> response = await InvokeApi(service, methodSelector).ConfigureAwait(false);
-            this.Assert(response, expectedText);
+            Assert(response, expectedText);
             return response.ResponseContent;
         }
         protected Task InvokeApi<TService>(HttpTestContext context, Expression<Func<TService, Task<HttpResponseMessage>>> methodSelector) => InvokeApiCore<TService, HttpResponseMessage>(context, methodSelector);
@@ -42,7 +45,7 @@ namespace Dibix.Testing.Http
         protected async Task<TContent> InvokeApi<TService, TContent>(HttpTestContext context, Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector, string expectedText)
         {
             HttpResponse<TContent> response = await InvokeApiCore(context, methodSelector).ConfigureAwait(false);
-            this.Assert(response, expectedText);
+            Assert(response, expectedText);
             return response.ResponseContent;
         }
 
@@ -82,7 +85,7 @@ namespace Dibix.Testing.Http
 
                 return value.Value.ToString();
             });
-            base.AssertEqual(expectedTextReplaced, actualText, extension: "json");
+            AssertEqual(expectedTextReplaced, actualText, extension: "json");
         }
 
         private static HttpTestContext CreateTestContext(IHttpClientFactory httpClientFactory, IHttpAuthorizationProvider authorizationProvider)
@@ -96,10 +99,10 @@ namespace Dibix.Testing.Http
         {
             private readonly IHttpClientFactory _httpClientFactory;
 
-            public TestAuthorizationContext(IHttpClientFactory httpClientFactory) => this._httpClientFactory = httpClientFactory;
+            public TestAuthorizationContext(IHttpClientFactory httpClientFactory) => _httpClientFactory = httpClientFactory;
 
-            public TService CreateService<TService>() => HttpServiceFactory.CreateServiceInstance<TService>(this._httpClientFactory);
-            public TService CreateService<TService>(IHttpAuthorizationProvider authorizationProvider) => HttpServiceFactory.CreateServiceInstance<TService>(this._httpClientFactory, authorizationProvider);
+            public TService CreateService<TService>() => HttpServiceFactory.CreateServiceInstance<TService>(_httpClientFactory);
+            public TService CreateService<TService>(IHttpAuthorizationProvider authorizationProvider) => HttpServiceFactory.CreateServiceInstance<TService>(_httpClientFactory, authorizationProvider);
         }
         #endregion
     }
