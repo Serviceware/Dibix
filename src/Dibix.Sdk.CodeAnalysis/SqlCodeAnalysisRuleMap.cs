@@ -43,7 +43,7 @@ namespace Dibix.Sdk.CodeAnalysis
         private static Func<SqlCodeAnalysisContext, IEnumerable<SqlCodeAnalysisError>> CompileRuleInvoker(Type ruleType)
         {
             ParameterExpression contextParameter = Expression.Parameter(typeof(SqlCodeAnalysisContext), "context");
-            ConstructorInfo ctor = ruleType.GetConstructor(typeof(SqlCodeAnalysisContext));
+            ConstructorInfo ctor = ruleType.GetConstructorSafe(typeof(SqlCodeAnalysisContext));
             Expression ruleInstance = Expression.New(ctor, contextParameter);
             MethodInfo analyzeMethod = typeof(ISqlCodeAnalysisRule).SafeGetMethod(nameof(ISqlCodeAnalysisRule.Analyze));
             Expression fragment = Expression.Property(contextParameter, nameof(SqlCodeAnalysisContext.Fragment));

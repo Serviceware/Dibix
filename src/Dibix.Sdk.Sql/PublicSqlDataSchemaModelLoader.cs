@@ -122,7 +122,7 @@ namespace Dibix.Sdk.Sql
             // TaskLoggingHelper loggingHelper = new TaskLoggingHelper(task);
             Type loggingHelperType = typeof(TaskLoggingHelper);
             ParameterExpression loggingHelperVariable = Expression.Variable(loggingHelperType, "loggingHelper");
-            ConstructorInfo loggingHelperCtor = loggingHelperType.GetConstructor(new[] { typeof(ITask) });
+            ConstructorInfo loggingHelperCtor = loggingHelperType.GetConstructorSafe(typeof(ITask));
             Expression loggingHelperValue = Expression.New(loggingHelperCtor, taskParameter);
             Expression loggingHelperAssign = Expression.Assign(loggingHelperVariable, loggingHelperValue);
 
@@ -173,7 +173,7 @@ namespace Dibix.Sdk.Sql
             Expression loadedTaskHostProperty = Expression.Property(hostLoaderVariable, "LoadedTaskHost");
             MemberExpression modelProperty = Expression.Property(loadedTaskHostProperty, "Model");
             Type dataSchemaModelType = DacReflectionUtility.SchemaSqlAssembly.GetType("Microsoft.Data.Tools.Schema.SchemaModel.DataSchemaModel", true);
-            ConstructorInfo modelCtor = typeof(TSqlModel).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { dataSchemaModelType }, null);
+            ConstructorInfo modelCtor = typeof(TSqlModel).GetConstructorSafe(BindingFlags.NonPublic | BindingFlags.Instance, dataSchemaModelType);
             Expression modelValue = Expression.New(modelCtor, modelProperty);
 
 

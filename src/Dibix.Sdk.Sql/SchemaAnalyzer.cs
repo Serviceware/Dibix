@@ -75,7 +75,7 @@ namespace Dibix.Sdk.Sql
             Expression lazyExport = Expression.Field(null, typeof(SchemaAnalyzer), nameof(LazyExport));
             Type extensionDescriptorType = SchemaSqlAssembly.GetType("Microsoft.SqlServer.Dac.Extensibility.ExtensionDescriptor`2", true)
                                                             .MakeGenericType(typeof(SqlAnalysisRule), typeof(ISqlAnalysisRuleMetadata));
-            ConstructorInfo extensionDescriptorCtor = extensionDescriptorType.GetConstructor(new[] { lazyExport.Type });
+            ConstructorInfo extensionDescriptorCtor = extensionDescriptorType.GetConstructorSafe(lazyExport.Type);
             Guard.IsNotNull(extensionDescriptorCtor, nameof(extensionDescriptorCtor), "Could not find constructor on ExtensionDescriptor<,>");
             ParameterExpression extensionDescriptorVariable = Expression.Variable(extensionDescriptorType, "extensionDescriptor");
             Expression extensionDescriptorValue = Expression.New(extensionDescriptorCtor, lazyExport);
@@ -84,7 +84,7 @@ namespace Dibix.Sdk.Sql
             // RuleDescriptor ruleDescriptor = new RuleDescriptorImpl(extensionDescriptor);
             Type ruleDescriptorType = DacExtensionsAssembly.GetType("Microsoft.SqlServer.Dac.CodeAnalysis.RuleDescriptor", true);
             Type ruleDescriptorImplType = DacExtensionsAssembly.GetType("Microsoft.SqlServer.Dac.CodeAnalysis.Engine.RuleDescriptorImpl", true);
-            ConstructorInfo ruleDescriptorImplCtor = ruleDescriptorImplType.GetConstructor(new[] { extensionDescriptorType });
+            ConstructorInfo ruleDescriptorImplCtor = ruleDescriptorImplType.GetConstructorSafe(extensionDescriptorType);
             Guard.IsNotNull(ruleDescriptorImplCtor, nameof(ruleDescriptorImplCtor), "Could not find constructor on RuleDescriptorImpl");
             ParameterExpression ruleDescriptorVariable = Expression.Variable(ruleDescriptorType, "ruleDescriptor");
             Expression ruleDescriptorValue = Expression.New(ruleDescriptorImplCtor, extensionDescriptorVariable);
@@ -92,7 +92,7 @@ namespace Dibix.Sdk.Sql
 
             // NullableColumnSchemaAnalyzer nullableColumnSchemaAnalyzer = new NullableColumnSchemaAnalyzer(ruleDescriptor, dataSchemaModel, modelElement);
             Type nullableColumnSchemaAnalyzerType = DacExtensionsAssembly.GetType("Microsoft.SqlServer.Dac.CodeAnalysis.Rules.Performance.NullableColumnSchemaAnalyzer");
-            ConstructorInfo nullableColumnSchemaAnalyzerCtor = nullableColumnSchemaAnalyzerType.GetConstructor(new[] { ruleDescriptorType, TSqlModelType, TSqlObjectType });
+            ConstructorInfo nullableColumnSchemaAnalyzerCtor = nullableColumnSchemaAnalyzerType.GetConstructorSafe(ruleDescriptorType, TSqlModelType, TSqlObjectType);
             Guard.IsNotNull(nullableColumnSchemaAnalyzerCtor, nameof(nullableColumnSchemaAnalyzerCtor), "Could not find constructor on NullableColumnSchemaAnalyzer");
             ParameterExpression nullableColumnSchemaAnalyzerVariable = Expression.Variable(nullableColumnSchemaAnalyzerType, "nullableColumnSchemaAnalyzer");
             Expression nullableColumnSchemaAnalyzerValue = Expression.New(nullableColumnSchemaAnalyzerCtor, ruleDescriptorVariable, dataSchemaModelParameter, modelElementParameter);
@@ -208,7 +208,7 @@ namespace Dibix.Sdk.Sql
 
             // ElementLocation location = new ElementLocation(offset, elementDescriptor.Identifiers, elementAccessor);
             Type elementLocationType = typeof(ElementLocation);
-            ConstructorInfo elementLocationCtor = elementLocationType.GetConstructor(new[] { typeof(int), typeof(IEnumerable<string>), elementAccessorType });
+            ConstructorInfo elementLocationCtor = elementLocationType.GetConstructorSafe(typeof(int), typeof(IEnumerable<string>), elementAccessorType);
             Guard.IsNotNull(elementLocationCtor, nameof(elementLocationCtor), "Could not find constructor on ElementLocation");
             Expression identifiersProperty = Expression.Property(elementDescriptorVariable, "Identifiers");
             ParameterExpression locationVariable = Expression.Variable(elementLocationType, "location");

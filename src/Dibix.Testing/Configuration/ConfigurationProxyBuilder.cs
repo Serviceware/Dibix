@@ -9,7 +9,7 @@ namespace Dibix.Testing
     internal static class ConfigurationProxyBuilder
     {
         private static readonly Type PropertyInitializationTrackerType = typeof(ConfigurationPropertyInitializationTracker);
-        private static readonly ConstructorInfo PropertyInitializationTrackerCtor = PropertyInitializationTrackerType.GetConstructor(new[] { typeof(ConfigurationInitializationToken) });
+        private static readonly ConstructorInfo PropertyInitializationTrackerCtor = PropertyInitializationTrackerType.GetConstructorSafe(typeof(ConfigurationInitializationToken));
         private static readonly MethodInfo PropertyInitializationTrackerEnterSectionMethod = PropertyInitializationTrackerType.SafeGetMethod(nameof(ConfigurationPropertyInitializationTracker.EnterSection), new[] { typeof(string) });
         private static readonly MethodInfo PropertyInitializationTrackerVerifyMethod = PropertyInitializationTrackerType.SafeGetMethod(nameof(ConfigurationPropertyInitializationTracker.Verify));
         private static readonly MethodInfo PropertyInitializationTrackerInitializeMethod = PropertyInitializationTrackerType.SafeGetMethod(nameof(ConfigurationPropertyInitializationTracker.Initialize));
@@ -64,7 +64,7 @@ namespace Dibix.Testing
 
             // Call base ctor
             ctorIL.Emit(OpCodes.Ldarg_0); // this
-            ctorIL.Emit(OpCodes.Call, type.GetConstructor(Type.EmptyTypes)); // this
+            ctorIL.Emit(OpCodes.Call, type.GetConstructorSafe(Type.EmptyTypes)); // this
             ctorIL.Emit(OpCodes.Nop);
             
             ctorIL.Emit(OpCodes.Nop);
@@ -151,7 +151,7 @@ namespace Dibix.Testing
             // this.Property = new ConfigurationProxy(initializationToken);
             ctorIL.Emit(OpCodes.Ldarg_0); // this
             ctorIL.Emit(OpCodes.Ldarg_1); // 'initializationToken'
-            ctorIL.Emit(OpCodes.Newobj, proxyType.GetConstructor(new[] { typeof(ConfigurationInitializationToken) }));
+            ctorIL.Emit(OpCodes.Newobj, proxyType.GetConstructorSafe(typeof(ConfigurationInitializationToken)));
             ctorIL.Emit(OpCodes.Stfld, underlyingInstanceField);
 
             void GetterBody(ILGenerator getterIL)

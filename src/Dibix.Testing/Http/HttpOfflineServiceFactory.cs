@@ -59,14 +59,11 @@ namespace Dibix.Testing.Http
             foreach (ParameterInfo parameter in targetMethod.GetParameters())
                 parameters.Add(Expression.Parameter(parameter.ParameterType, parameter.Name));
 
-            ConstructorInfo httpClientFactoryConstructor = typeof(DefaultHttpClientFactory).GetConstructor(new[] { typeof(HttpClientConfiguration[]) });
-            if (httpClientFactoryConstructor == null)
-                throw new InvalidOperationException($"Could not find constructor {typeof(DefaultHttpClientFactory)}({typeof(HttpClientConfiguration)}[])");
-
+            ConstructorInfo httpClientFactoryConstructor = typeof(DefaultHttpClientFactory).GetConstructorSafe(typeof(HttpClientConfiguration[]));
             Expression offlineClientConfiguration = Expression.New(typeof(OfflineHttpClientConfiguration));
             Expression httpClientFactory = Expression.New(httpClientFactoryConstructor, Expression.NewArrayInit(typeof(HttpClientConfiguration), offlineClientConfiguration));
             Expression httpAuthorizationProvider = Expression.New(typeof(EmptyHttpAuthorizationProvider));
-            ConstructorInfo constructor = targetMethod.DeclaringType.GetConstructor(ConstructorSignature);
+            ConstructorInfo constructor = targetMethod.DeclaringType.GetConstructorSafe(ConstructorSignature);
             Expression instance = Expression.New(constructor, httpClientFactory, httpAuthorizationProvider);
             Expression call = Expression.Call(instance, targetMethod, parameters);
             LambdaExpression lambda = Expression.Lambda(call, parameters);
@@ -96,13 +93,10 @@ namespace Dibix.Testing.Http
 
         private static void BuildEmptyMethodImplementation(TypeBuilder typeBuilder, MethodInfo methodToImplement)
         {
-            BuildMethodImplementation(typeBuilder, methodToImplement, (parameterTypes, ilGenerator) =>
+            BuildMethodImplementation(typeBuilder, methodToImplement, (_, ilGenerator) =>
             {
                 Type exceptionType = typeof(NotImplementedException);
-                ConstructorInfo exceptionCtor = exceptionType.GetConstructor(Type.EmptyTypes);
-                if (exceptionCtor == null)
-                    throw new InvalidOperationException($"Could not find a parameterless constructor on type: '{exceptionType}'");
-
+                ConstructorInfo exceptionCtor = exceptionType.GetConstructorSafe(Type.EmptyTypes);
                 ilGenerator.Emit(OpCodes.Newobj, exceptionCtor);
                 ilGenerator.Emit(OpCodes.Throw);
             });

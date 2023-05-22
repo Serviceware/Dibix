@@ -24,7 +24,7 @@ namespace Dibix.Testing.Http
             Type contractType = typeof(TService);
             Type implementationType = ResolveImplementationType(contractType);
             Type[] constructorSignature = normalizedArgs.Select(x => x.Key).ToArray();
-            ConstructorInfo constructor = implementationType.GetConstructor(constructorSignature);
+            ConstructorInfo constructor = implementationType.GetConstructorSafe(constructorSignature);
             object[] ctorArgs = normalizedArgs.Select(x => x.Value).ToArray();
             TService service = (TService)constructor.Invoke(ctorArgs);
             return service;

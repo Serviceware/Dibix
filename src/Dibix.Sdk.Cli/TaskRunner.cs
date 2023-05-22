@@ -55,7 +55,7 @@ namespace Dibix.Sdk.Cli
                     throw new InvalidOperationException($"Type '{type}' is decorated with {nameof(TaskAttribute)}, but does not implement '{taskInterfaceType}'.");
 
                 bool supportsInputConfiguration = type.GetCustomAttributes<TaskPropertyAttribute>().Any(x => x.Source == TaskPropertySource.Core);
-                ConstructorInfo ctor = type.GetConstructor(ConstructorSignature);
+                ConstructorInfo ctor = type.GetConstructorSafe(ConstructorSignature);
                 
                 ParameterExpression loggerParameter = Expression.Parameter(typeof(ILogger), "logger");
                 ParameterExpression inputConfigurationParameter = Expression.Parameter(typeof(InputConfiguration), "inputConfiguration");
