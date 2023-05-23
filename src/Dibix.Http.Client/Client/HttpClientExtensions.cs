@@ -44,13 +44,14 @@ namespace Dibix.Http.Client
         {
             public ProductInfoHeaderValue UserAgent { get; private set; }
             
-            public void FromAssembly(Assembly assembly, Func<string, string> productNameFormatter = null) => this.ResolveUserAgentFromAssembly(assembly, productNameFormatter);
+            public void FromAssembly(Assembly assembly, Func<string, string> productNameFormatter = null) => ResolveUserAgentFromAssembly(assembly, productNameFormatter);
 
-            public void FromAssemblyContainingType<T>(Func<string, string> productNameFormatter = null) => this.ResolveUserAgentFromAssembly(typeof(T).Assembly, productNameFormatter);
+            public void FromAssemblyContainingType<T>(Func<string, string> productNameFormatter = null) => FromAssemblyContainingType(typeof(T), productNameFormatter);
+            public void FromAssemblyContainingType(Type type, Func<string, string> productNameFormatter = null) => ResolveUserAgentFromAssembly(type.Assembly, productNameFormatter);
 
-            public void FromEntryAssembly(Func<string, string> productNameFormatter = null) => this.ResolveUserAgentFromAssembly(ResolveEntryAssembly(), productNameFormatter);
+            public void FromEntryAssembly(Func<string, string> productNameFormatter = null) => ResolveUserAgentFromAssembly(ResolveEntryAssembly(), productNameFormatter);
             
-            public void FromCurrentProcess(Func<string, string> productNameFormatter = null) => this.FromFile(ResolveCurrentProcessPath(), productNameFormatter);
+            public void FromCurrentProcess(Func<string, string> productNameFormatter = null) => FromFile(ResolveCurrentProcessPath(), productNameFormatter);
 
             public void FromFile(string path, Func<string, string> productNameFormatter)
             {
@@ -64,11 +65,11 @@ namespace Dibix.Http.Client
                 if (productNameFormatter != null)
                     userAgentProductName = productNameFormatter(userAgentProductName);
 
-                this.UserAgent = new ProductInfoHeaderValue(userAgentProductName, productVersion);
+                UserAgent = new ProductInfoHeaderValue(userAgentProductName, productVersion);
             }
 
 #pragma warning disable IL3000 // Avoid accessing Assembly file path when publishing as a single file
-            private void ResolveUserAgentFromAssembly(Assembly assembly, Func<string, string> productNameFormatter) => this.FromFile(assembly.Location, productNameFormatter);
+            private void ResolveUserAgentFromAssembly(Assembly assembly, Func<string, string> productNameFormatter) => FromFile(assembly.Location, productNameFormatter);
 #pragma warning restore IL3000 // Avoid accessing Assembly file path when publishing as a single file
 
             private static Assembly ResolveEntryAssembly()
