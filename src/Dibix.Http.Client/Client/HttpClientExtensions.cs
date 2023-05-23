@@ -55,9 +55,10 @@ namespace Dibix.Http.Client
                 FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(path);
                 string productName = fileVersionInfo.ProductName;
                 string assemblyName = Path.GetFileNameWithoutExtension(path);
+                string normalizedAssemblyName = assemblyName.Replace(".", null);
                 string productVersion = fileVersionInfo.ProductVersion;
 
-                string userAgentProductName = $"{productName}{assemblyName}";
+                string userAgentProductName = $"{productName}{normalizedAssemblyName}";
                 if (productNameFormatter != null)
                     userAgentProductName = productNameFormatter(userAgentProductName);
 
