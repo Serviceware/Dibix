@@ -50,8 +50,20 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
         {
             public override int Compare(string x, string y)
             {
-                bool xIsSystem = x.StartsWith("System", StringComparison.OrdinalIgnoreCase);
-                bool yIsSystem = y.StartsWith("System", StringComparison.OrdinalIgnoreCase);
+                bool xIsAlias = x != null && x.Contains("=");
+                bool yIsAlias = y != null && y.Contains("=");
+
+                if (xIsAlias && yIsAlias)
+                    return Default.Compare(x, y);
+
+                if (xIsAlias)
+                    return 1;
+
+                if (yIsAlias)
+                    return -1;
+
+                bool xIsSystem = x != null && x.StartsWith("System", StringComparison.OrdinalIgnoreCase);
+                bool yIsSystem = y != null && y.StartsWith("System", StringComparison.OrdinalIgnoreCase);
 
                 if (xIsSystem && yIsSystem)
                     return Default.Compare(x, y);

@@ -200,7 +200,10 @@ SqlReferencePath");
                                                                  .AddSyntaxTrees(syntaxTree);
 
                 if (useMicrosoftHttpClient)
-                    compilation = compilation.AddReference<System.Net.Http.IHttpClientFactory>();
+                {
+                    compilation = compilation.AddReference<System.Net.Http.IHttpClientFactory>()
+                                             .AddReference<Microsoft.Extensions.Options.OptionsValidationException>();
+                }
 
                 RoslynUtility.VerifyCompilation(compilation);
             }

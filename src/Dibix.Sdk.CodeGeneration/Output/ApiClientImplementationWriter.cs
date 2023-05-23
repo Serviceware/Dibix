@@ -51,7 +51,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             @class.AddSeparator();
 
-            AddCtorWithoutClientName(@class, requiresAuthorization);
+            AddCtorWithoutClientName(context, @class, requiresAuthorization);
             AddPrimaryCtor(@class, requiresAuthorization);
 
             @class.AddSeparator();
@@ -93,7 +93,7 @@ namespace Dibix.Sdk.CodeGeneration
             ctor.AddParameter("httpClientName", "string");
         }
 
-        private static void AddCtorWithoutClientName(CSharpClass @class, bool requiresAuthorization)
+        private static void AddCtorWithoutClientName(CodeGenerationContext context, CSharpClass @class, bool requiresAuthorization)
         {
             CSharpConstructor ctor = @class.AddConstructor()
                                            .AddParameter("httpClientFactory", "IHttpClientFactory");
@@ -106,8 +106,16 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (requiresAuthorization)
                 constructorThisCall.AddParameter(new CSharpValue("httpAuthorizationProvider"));
-            
-            constructorThisCall.AddParameter(new CSharpValue("DefaultHttpClientFactory.DefaultClientName"));
+
+            string defaultClientNameValue = "DefaultHttpClientFactory.DefaultClientName";
+
+            if (context.Model.UseMicrosoftHttpClient)
+            {
+                defaultClientNameValue = "Options.DefaultName";
+                context.AddUsing("Microsoft.Extensions.Options");
+            }
+
+            constructorThisCall.AddParameter(new CSharpValue(defaultClientNameValue));
         }
 
         private string GenerateMethodBody(ControllerDefinition controller, ActionDefinition action, CodeGenerationContext context, IDictionary<string, SecurityScheme> securitySchemeMap)
