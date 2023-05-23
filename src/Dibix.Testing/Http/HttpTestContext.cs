@@ -29,11 +29,5 @@ namespace Dibix.Testing.Http
         public TService CreateService<TService>() => HttpServiceFactory.CreateServiceInstance<TService>(HttpClientFactory, HttpAuthorizationProvider);
 
         public HttpClient CreateClient() => HttpClientFactory.CreateClient(TestHttpClientFactoryBuilder.HttpClientName);
-        public HttpClient CreateClient(Uri baseAddress)
-        {
-            HttpClient client = CreateClient();
-            client.BaseAddress = baseAddress;
-            return client;
-        }
     }
 }
