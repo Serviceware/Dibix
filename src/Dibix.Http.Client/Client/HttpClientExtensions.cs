@@ -43,9 +43,11 @@ namespace Dibix.Http.Client
         private sealed class HttpUserAgentSelectorExpression : IHttpUserAgentSelectorExpression
         {
             public ProductInfoHeaderValue UserAgent { get; private set; }
-
-            public void FromAssembly(Assembly assembly, Func<string, string> productNameFormatter = null) => this.ResolveUserAgentFromAssembly(assembly, productNameFormatter);
             
+            public void FromAssembly(Assembly assembly, Func<string, string> productNameFormatter = null) => this.ResolveUserAgentFromAssembly(assembly, productNameFormatter);
+
+            public void FromAssemblyContainingType<T>(Func<string, string> productNameFormatter = null) => this.ResolveUserAgentFromAssembly(typeof(T).Assembly, productNameFormatter);
+
             public void FromEntryAssembly(Func<string, string> productNameFormatter = null) => this.ResolveUserAgentFromAssembly(ResolveEntryAssembly(), productNameFormatter);
             
             public void FromCurrentProcess(Func<string, string> productNameFormatter = null) => this.FromFile(ResolveCurrentProcessPath(), productNameFormatter);
