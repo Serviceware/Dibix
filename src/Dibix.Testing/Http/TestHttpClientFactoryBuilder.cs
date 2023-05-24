@@ -34,11 +34,7 @@ namespace Dibix.Testing.Http
         protected override void Configure(HttpClient client)
         {
             Assembly testAssembly = TestImplementationResolver.ResolveTestAssembly(_testContext);
-            client.AddUserAgent(y => y.FromAssembly(testAssembly, productName =>
-            {
-                string normalizedProductName = productName.Replace(".", null);
-                return normalizedProductName;
-            }));
+            client.AddUserAgent(y => y.FromAssembly(testAssembly));
         }
 
         private sealed class LoggingHttpMessageHandler : DelegatingHandler
