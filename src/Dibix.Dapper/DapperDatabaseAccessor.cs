@@ -196,7 +196,7 @@ namespace Dibix.Dapper
             
             void SqlMapper.IParameterCallbacks.OnCompleted()
             {
-                _parametersVisitor.VisitOutputParameters(name => _impl.Get<object>(name));
+                _parametersVisitor.VisitOutputParameters(_impl.Get<object>);
                 _parameterCallbacks.OnCompleted();
             }
         }

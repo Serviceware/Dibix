@@ -2,6 +2,7 @@
 {
     public interface IWorkerScopeFactory
     {
-        IWorkerScope Create();
+        IWorkerScope Create<TInitiator>();
+        IWorkerScope Create(string initiatorFullName);
     }
 }

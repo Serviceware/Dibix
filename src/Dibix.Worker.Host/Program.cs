@@ -6,6 +6,7 @@ using Dibix.Worker.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Logging.EventLog;
 
@@ -29,8 +30,14 @@ namespace Dibix.Worker.Host
                     .AddScoped<DbConnection>(x => x.GetRequiredService<IDatabaseConnectionFactory>().Create())
                     .AddScoped<IDatabaseConnectionResolver, DependencyInjectionDatabaseConnectionResolver>()
                     .AddScoped<IDatabaseAccessorFactory, ScopedDatabaseAccessorFactory>()
-                    .AddScoped<IWorkerDependencyContext, ServiceProviderWorkerDependencyContext>()
+                    .AddScoped<ServiceBrokerDapperDatabaseAccessorFactory>()
+                    .AddScoped<ServiceBrokerMessageReader>()
+                    .AddScoped<ServiceScopeWorkerScopeFactory>()
+                    .AddScoped<CreateDatabaseLogger>(x => () => x.GetRequiredService<ILoggerFactory>().CreateLogger(x.GetRequiredService<IWorkerDependencyContext>().InitiatorFullName))
+                    .AddScoped<IWorkerDependencyContext>(x => x.GetRequiredService<ServiceProviderWorkerDependencyContext>())
+                    .AddScoped<ServiceProviderWorkerDependencyContext>()
                     .AddSingleton<IWorkerScopeFactory, ServiceScopeWorkerScopeFactory>()
+                    .AddSingleton<IServiceBrokerMessageReader, ServiceBrokerMessageReader>()
                     .AddSingleton<IHostedServiceEvents, HostedServiceEvents>()
                     .AddHostedService<DatabaseOptionsMonitor>();
 

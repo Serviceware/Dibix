@@ -16,7 +16,7 @@ namespace Dibix.Worker.Abstractions
         IWorkerHostExtensionConfigurationBuilder OnServiceBrokerIterationCompleted(OnServiceBrokerIterationCompleted handler);
     }
 
-    public delegate Task OnWorkerStarted(string implementationName, IWorkerDependencyContext dependencyContext, CancellationToken cancellationToken);
+    public delegate Task OnWorkerStarted(IWorkerDependencyContext dependencyContext, CancellationToken cancellationToken);
     
-    public delegate Task OnServiceBrokerIterationCompleted(string implementationName, IWorkerDependencyContext dependencyContext, CancellationToken cancellationToken);
+    public delegate Task OnServiceBrokerIterationCompleted(IWorkerDependencyContext dependencyContext, CancellationToken cancellationToken);
 }

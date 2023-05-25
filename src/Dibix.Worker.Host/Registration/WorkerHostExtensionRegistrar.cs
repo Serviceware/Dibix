@@ -33,6 +33,7 @@ namespace Dibix.Worker.Host
 
         private sealed class WorkerHostExtensionConfigurationBuilder : IWorkerHostExtensionConfigurationBuilder, IWorkerHostExtensionRegistrar
         {
+            private const string HostFullName = "Dibix.Worker.Host";
             private readonly IServiceCollection _services;
             private readonly WorkerDependencyRegistry _dependencyRegistry;
             private Func<IWorkerScope, Task>? _onHostStartedExtension;
@@ -105,7 +106,7 @@ namespace Dibix.Worker.Host
 
                 SubscribeToShutdown(host.Services);
                 IWorkerScopeFactory workerScopeFactory = host.Services.GetRequiredService<IWorkerScopeFactory>();
-                using IWorkerScope scope = workerScopeFactory.Create();
+                using IWorkerScope scope = workerScopeFactory.Create(HostFullName);
                 await _onHostStartedExtension(scope).ConfigureAwait(false);
             }
 
@@ -114,7 +115,7 @@ namespace Dibix.Worker.Host
                 IWorkerScope CreateScope()
                 {
                     IWorkerScopeFactory workerScopeFactory = services.GetRequiredService<IWorkerScopeFactory>();
-                    IWorkerScope scope = workerScopeFactory.Create();
+                    IWorkerScope scope = workerScopeFactory.Create(HostFullName);
                     return scope;
                 }
                 IHostApplicationLifetime hostApplicationLifetime = services.GetRequiredService<IHostApplicationLifetime>();

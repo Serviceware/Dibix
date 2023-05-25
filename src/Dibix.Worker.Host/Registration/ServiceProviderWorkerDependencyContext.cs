@@ -13,9 +13,21 @@ namespace Dibix.Worker.Host
         private readonly IServiceProvider _serviceProvider;
         private readonly Lazy<DbConnection> _connectionAccessor;
         private readonly Lazy<IDatabaseAccessorFactory> _databaseAccessorFactoryAccessor;
+        private string? _initiatorFullName;
 
         public DbConnection Connection => _connectionAccessor.Value;
         public IDatabaseAccessorFactory DatabaseAccessorFactory => _databaseAccessorFactoryAccessor.Value;
+        public string InitiatorFullName
+        {
+            get
+            {
+                if (_initiatorFullName == null)
+                    throw new InvalidOperationException($"{nameof(InitiatorFullName)} property not initialized");
+
+                return _initiatorFullName;
+            }
+            set => _initiatorFullName = value;
+        }
 
         public ServiceProviderWorkerDependencyContext(IWorkerDependencyRegistry dependencyRegistry, ILoggerFactory loggerFactory, IServiceProvider serviceProvider)
         {
@@ -37,6 +49,8 @@ namespace Dibix.Worker.Host
             VerifyExtensionRegistered(implementationType);
             return (T)_serviceProvider.GetRequiredService(implementationType);
         }
+
+        public T GetService<T>() where T : notnull => _serviceProvider.GetRequiredService<T>();
 
         public ILogger CreateLogger(Type loggerType) => _loggerFactory.CreateLogger(loggerType);
 
