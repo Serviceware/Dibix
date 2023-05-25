@@ -51,7 +51,9 @@ namespace Dibix.Sdk.CodeGeneration
 
             @class.AddSeparator();
 
-            AddCtorWithoutClientName(context, @class, requiresAuthorization);
+            if (!context.Model.UseMicrosoftHttpClient)
+                AddCtorWithoutClientName(context, @class, requiresAuthorization);
+
             AddPrimaryCtor(@class, requiresAuthorization);
 
             @class.AddSeparator();

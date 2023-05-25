@@ -15,7 +15,6 @@ using System.Net.Http.Formatting;
 using System.Threading;
 using System.Threading.Tasks;
 using Dibix.Http.Client;
-using Microsoft.Extensions.Options;
 using IHttpClientFactory = System.Net.Http.IHttpClientFactory;
 using UriBuilder = Dibix.Http.Client.UriBuilder;
 
@@ -130,7 +129,6 @@ namespace Dibix.Sdk.Tests.Client
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IHttpAuthorizationProvider _httpAuthorizationProvider;
 
-        public GenericEndpointService(IHttpClientFactory httpClientFactory, IHttpAuthorizationProvider httpAuthorizationProvider) : this(httpClientFactory, httpAuthorizationProvider, Options.DefaultName) { }
         public GenericEndpointService(IHttpClientFactory httpClientFactory, IHttpAuthorizationProvider httpAuthorizationProvider, string httpClientName)
         {
             _httpClientFactory = httpClientFactory;
