@@ -7,18 +7,16 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using Dibix.Hosting.Abstractions.Data;
-using Dibix.Worker.Abstractions;
 using Microsoft.Extensions.Logging;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace Dibix.Worker.Host
 {
-    internal sealed class ServiceBrokerDapperDatabaseAccessorFactory : IDatabaseAccessorFactory
+    internal sealed class ServiceBrokerDatabaseAccessorFactory : IDatabaseAccessorFactory
     {
         private readonly IDatabaseConnectionResolver _connectionResolver;
         private readonly ILogger _logger;
 
-        public ServiceBrokerDapperDatabaseAccessorFactory(IDatabaseConnectionResolver connectionResolver, CreateDatabaseLogger loggerFactory)
+        public ServiceBrokerDatabaseAccessorFactory(IDatabaseConnectionResolver connectionResolver, CreateDatabaseLogger loggerFactory)
         {
             _connectionResolver = connectionResolver;
             _logger = loggerFactory();
@@ -27,15 +25,15 @@ namespace Dibix.Worker.Host
         public IDatabaseAccessor Create()
         {
             DbConnection connection = _connectionResolver.Resolve();
-            return new ServiceBrokerDapperDatabaseAccessor(connection, _logger);
+            return new ServiceBrokerDatabaseAccessor(connection, _logger);
         }
     }
 
-    internal sealed class ServiceBrokerDapperDatabaseAccessor : DatabaseAccessor
+    internal sealed class ServiceBrokerDatabaseAccessor : DatabaseAccessor
     {
         private readonly ILogger _logger;
 
-        public ServiceBrokerDapperDatabaseAccessor(DbConnection connection, ILogger logger) : base(connection)
+        public ServiceBrokerDatabaseAccessor(DbConnection connection, ILogger logger) : base(connection)
         {
             _logger = logger;
         }

@@ -21,7 +21,7 @@ namespace Dibix.Worker.Host
             using IServiceScope scope = _scopeFactory.CreateScope();
             ServiceProviderWorkerDependencyContext dependencyContext = scope.ServiceProvider.GetRequiredService<ServiceProviderWorkerDependencyContext>();
             dependencyContext.InitiatorFullName = fullSubscriberName;
-            IDatabaseAccessorFactory databaseAccessorFactory = dependencyContext.GetService<ServiceBrokerDapperDatabaseAccessorFactory>();
+            IDatabaseAccessorFactory databaseAccessorFactory = dependencyContext.GetService<ServiceBrokerDatabaseAccessorFactory>();
             return await handler(databaseAccessorFactory, ServiceBrokerDefaults.ReceiveTimeout, cancellationToken).ConfigureAwait(false);
         }
     }

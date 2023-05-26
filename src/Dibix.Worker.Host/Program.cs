@@ -30,7 +30,7 @@ namespace Dibix.Worker.Host
                     .AddScoped<DbConnection>(x => x.GetRequiredService<IDatabaseConnectionFactory>().Create())
                     .AddScoped<IDatabaseConnectionResolver, DependencyInjectionDatabaseConnectionResolver>()
                     .AddScoped<IDatabaseAccessorFactory, ScopedDatabaseAccessorFactory>()
-                    .AddScoped<ServiceBrokerDapperDatabaseAccessorFactory>()
+                    .AddScoped<ServiceBrokerDatabaseAccessorFactory>()
                     .AddScoped<ServiceBrokerMessageReader>()
                     .AddScoped<ServiceScopeWorkerScopeFactory>()
                     .AddScoped<CreateDatabaseLogger>(x => () => x.GetRequiredService<ILoggerFactory>().CreateLogger(x.GetRequiredService<IWorkerDependencyContext>().InitiatorFullName))
