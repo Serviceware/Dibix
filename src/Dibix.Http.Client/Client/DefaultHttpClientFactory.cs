@@ -347,7 +347,9 @@ namespace Dibix.Http.Client
                     AddHttpMessageHandler<EnsureSuccessStatusCodeHttpMessageHandler>();
 
                 // Run tracing after all other handlers, that potentially modified the request, to ensure the trace includes the actual request that is sent.
-                AddHttpMessageHandler(() => new TracingHttpMessageHandler(Tracer));
+                AddHttpMessageHandler<TraceSourceHttpMessageHandler>();
+                if (Tracer != null)
+                    AddHttpMessageHandler(() => new TracingHttpMessageHandler(Tracer));
 
                 // This should be as close to the primary handler as possible to avoid timeouts caused by other handlers.
                 if (WrapTimeoutsInException)

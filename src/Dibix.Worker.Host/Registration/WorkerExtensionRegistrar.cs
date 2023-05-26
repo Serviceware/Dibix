@@ -8,6 +8,7 @@ using Dibix.Hosting.Abstractions;
 using Dibix.Http.Client;
 using Dibix.Worker.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using IHttpClientBuilder = Microsoft.Extensions.DependencyInjection.IHttpClientBuilder;
 
 namespace Dibix.Worker.Host
@@ -61,14 +62,14 @@ namespace Dibix.Worker.Host
 
             public IWorkerExtensionConfigurationBuilder RegisterDependency<TInterface, TImplementation>() where TInterface : class where TImplementation : class, TInterface
             {
-                _services.AddScoped<TInterface, TImplementation>();
+                _services.AddScopedOnce<TInterface, TImplementation>();
                 _dependencyRegistry.Register(typeof(TInterface));
                 return this;
             }
 
             public IWorkerExtensionConfigurationBuilder RegisterDependency(Type implementationType)
             {
-                _services.AddScoped(implementationType);
+                _services.AddScopedOnce(implementationType);
                 _dependencyRegistry.Register(implementationType);
                 return this;
             }
@@ -99,6 +100,7 @@ namespace Dibix.Worker.Host
                 AddHttpMessageHandler<FollowRedirectHttpMessageHandler>(httpClientBuilder);
                 AddHttpMessageHandler<TraceProxyHttpMessageHandler>(httpClientBuilder);
                 AddHttpMessageHandler<EnsureSuccessStatusCodeHttpMessageHandler>(httpClientBuilder);
+                AddHttpMessageHandler<TraceSourceHttpMessageHandler>(httpClientBuilder);
             }
 
             private static void AddHttpMessageHandler<T>(IHttpClientBuilder httpClientBuilder) where T : DelegatingHandler, new()
@@ -118,14 +120,13 @@ namespace Dibix.Worker.Host
 
             public void AddTracer<T>() where T : HttpRequestTracer
             {
-                _httpClientBuilder.Services.AddScoped<T>();
-                _httpClientBuilder.Services.AddTransient(x => new TracingHttpMessageHandler(x.GetRequiredService<T>()));
-                _httpClientBuilder.AddHttpMessageHandler<TracingHttpMessageHandler>();
+                _httpClientBuilder.Services.TryAddScoped<T>();
+                _httpClientBuilder.AddHttpMessageHandler(x => new TracingHttpMessageHandler(x.GetRequiredService<T>()));
             }
 
             public void AddHttpMessageHandler<T>() where T : DelegatingHandler
             {
-                _httpClientBuilder.Services.AddTransient<T>();
+                _httpClientBuilder.Services.TryAddTransient<T>();
                 _httpClientBuilder.AddHttpMessageHandler<T>();
             }
         }

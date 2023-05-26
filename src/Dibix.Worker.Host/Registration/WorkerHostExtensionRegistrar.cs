@@ -53,7 +53,7 @@ namespace Dibix.Worker.Host
 
             IWorkerHostExtensionConfigurationBuilder IWorkerHostExtensionConfigurationBuilder.RegisterDependency<TInterface, TImplementation>()
             {
-                _services.AddScoped<TInterface, TImplementation>();
+                _services.AddScopedOnce<TInterface, TImplementation>();
                 return this;
             }
 
@@ -64,7 +64,7 @@ namespace Dibix.Worker.Host
                     IWorkerDependencyContext dependencyContext = serviceProvider.GetRequiredService<IWorkerDependencyContext>();
                     return factory(dependencyContext);
                 }
-                _services.AddScoped(CreateInstance);
+                _services.AddScopedOnce(CreateInstance);
                 _dependencyRegistry.Register(typeof(TInterface));
                 return this;
             }
