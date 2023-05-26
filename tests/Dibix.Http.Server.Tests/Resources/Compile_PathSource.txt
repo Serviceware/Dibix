@@ -1,0 +1,26 @@
+﻿.Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
+    Dibix.Http.Server.IHttpRequestDescriptor $request,
+    System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
+    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver,
+    Dibix.Http.Server.IHttpActionDescriptor $action) {
+    .Block(
+        Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
+        Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpUriParameterInput $input) {
+        $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
+        $arguments.Item["databaseAccessorFactory"] = (System.Object)$databaseaccessorfactorySource;
+        $input = .New Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpUriParameterInput();
+        $input.targetid = .Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
+            "targetid",
+            .Call Dibix.Http.Server.HttpParameterResolverUtility.ReadArgument(
+                $arguments,
+                "targetid"),
+            $action);
+        $input.targetname = .Call Dibix.Http.Server.Tests.HttpParameterResolverTest+EncryptionHttpParameterConverter.Convert(.Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
+                "targetname",
+                .Call Dibix.Http.Server.HttpParameterResolverUtility.ReadArgument(
+                    $arguments,
+                    "targetname_"),
+                $action));
+        $arguments.Item["input"] = (System.Object)$input
+    }
+}

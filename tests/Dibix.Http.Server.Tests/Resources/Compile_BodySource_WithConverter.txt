@@ -1,0 +1,31 @@
+﻿.Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
+    Dibix.Http.Server.IHttpRequestDescriptor $request,
+    System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
+    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver,
+    Dibix.Http.Server.IHttpActionDescriptor $action) {
+    .Block(
+        Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
+        Dibix.Http.Server.Tests.HttpParameterResolverTest+HttpBody $bodySource) {
+        $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
+        $bodySource = .Call Dibix.Http.Server.HttpParameterResolverUtility.ReadBody($arguments);
+        $arguments.Item["databaseAccessorFactory"] = (System.Object)$databaseaccessorfactorySource;
+        $arguments.Item["encryptedpassword"] = (System.Object).Call Dibix.Http.Server.Tests.HttpParameterResolverTest+EncryptionHttpParameterConverter.Convert($bodySource.Password)
+        ;
+        $arguments.Item["anotherencryptedpassword"] = (System.Object).Call Dibix.Http.Server.Tests.HttpParameterResolverTest+EncryptionHttpParameterConverter.Convert(.If ($bodySource.Detail !=
+            null) {
+                ($bodySource.Detail).Password
+            } .Else {
+                .Default(System.String)
+            });
+        $arguments.Item["items"] = (System.Object).Call Dibix.StructuredType`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+HttpBodyItemSet].From(
+            $bodySource.Items,
+            .Lambda #Lambda2<System.Action`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+HttpBodyItemSet,Dibix.Http.Server.Tests.HttpParameterResolverTest+HttpBodyItem]>)
+    }
+}
+
+.Lambda #Lambda2<System.Action`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+HttpBodyItemSet,Dibix.Http.Server.Tests.HttpParameterResolverTest+HttpBodyItem]>(
+    Dibix.Http.Server.Tests.HttpParameterResolverTest+HttpBodyItemSet $x,
+    Dibix.Http.Server.Tests.HttpParameterResolverTest+HttpBodyItem $y) {
+    .Call $x.Add(.Call Dibix.Http.Server.Tests.HttpParameterResolverTest+EncryptionHttpParameterConverter.Convert($y.Password)
+    )
+}

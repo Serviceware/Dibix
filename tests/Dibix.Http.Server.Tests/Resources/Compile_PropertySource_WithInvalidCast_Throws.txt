@@ -1,0 +1,17 @@
+﻿.Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
+    Dibix.Http.Server.IHttpRequestDescriptor $request,
+    System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
+    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver,
+    Dibix.Http.Server.IHttpActionDescriptor $action) {
+    .Block(
+        Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
+        Dibix.Http.Server.Tests.HttpParameterResolverTest+ApplicationHttpParameterSource $applicationSource) {
+        $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
+        $applicationSource = .New Dibix.Http.Server.Tests.HttpParameterResolverTest+ApplicationHttpParameterSource();
+        $arguments.Item["databaseAccessorFactory"] = (System.Object)$databaseaccessorfactorySource;
+        $arguments.Item["applicationid"] = (System.Object).Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
+            "applicationid",
+            $applicationSource.ApplicationId,
+            $action)
+    }
+}

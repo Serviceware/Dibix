@@ -1,0 +1,43 @@
+﻿.Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
+    Dibix.Http.Server.IHttpRequestDescriptor $request,
+    System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
+    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver,
+    Dibix.Http.Server.IHttpActionDescriptor $action) {
+    .Block(Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource) {
+        $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
+        $arguments.Item["databaseAccessorFactory"] = (System.Object)$databaseaccessorfactorySource;
+        $arguments.Item["primaryclientlanguage"] = (System.Object).Call Dibix.Http.Server.RequestParameterSourceProvider.GetFirstLanguage($request)
+        ;
+        $arguments.Item["clientlanguages"] = (System.Object).Block(
+            Dibix.Http.Server.Tests.HttpParameterResolverTest+StringSet $clientlanguages,
+            System.Collections.Generic.IEnumerator`1[System.String] $clientlanguagesEnumerator) {
+            $clientlanguages = .New Dibix.Http.Server.Tests.HttpParameterResolverTest+StringSet();
+            .Try {
+                .Block() {
+                    $clientlanguagesEnumerator = .Call (.Call Dibix.Http.Server.RequestParameterSourceProvider.GetLanguages($request)).GetEnumerator()
+                    ;
+                    .Loop  {
+                        .If (
+                            .IsTrue(.Call $clientlanguagesEnumerator.MoveNext())
+                        ) {
+                            .Block(System.String $clientlanguagesElement) {
+                                $clientlanguagesElement = $clientlanguagesEnumerator.Current;
+                                .Call $clientlanguages.Add($clientlanguagesElement)
+                            }
+                        } .Else {
+                            .Break BreakClientlanguagesEnumerator { }
+                        }
+                    }
+                    .LabelTarget BreakClientlanguagesEnumerator:
+                }
+            } .Finally {
+                .If ($clientlanguagesEnumerator != null) {
+                    .Call $clientlanguagesEnumerator.Dispose()
+                } .Else {
+                    .Default(System.Void)
+                }
+            };
+            $clientlanguages
+        }
+    }
+}

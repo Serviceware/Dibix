@@ -12,8 +12,6 @@ namespace Dibix.Http.Server.Tests
 {
     public partial class HttpParameterResolverTest : TestBase
     {
-        private void AssertEqual(string expected, string actual) => base.AssertEqual(expected, actual, extension: "txt");
-
         private IHttpParameterResolutionMethod Compile() => Compile(_ => { });
         private IHttpParameterResolutionMethod Compile(Action<IHttpActionDefinitionBuilder> actionConfiguration)
         {
@@ -22,6 +20,14 @@ namespace Dibix.Http.Server.Tests
             HttpActionDefinition action = registration.Controllers.Single().Actions.Single();
             IHttpParameterResolutionMethod result = action.ParameterResolver;
             return result;
+        }
+
+        private void Assert(string actualText)
+        {
+            const string extension = "txt";
+            string expectedKey = $"{TestContext.TestName}.{extension}";
+            string expectedText = GetEmbeddedResourceContent(expectedKey);
+            AssertEqual(expectedText, actualText, extension);
         }
 
         private sealed class HttpApiRegistration : HttpApiDescriptor

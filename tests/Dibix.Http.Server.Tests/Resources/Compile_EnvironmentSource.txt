@@ -1,0 +1,13 @@
+﻿.Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
+    Dibix.Http.Server.IHttpRequestDescriptor $request,
+    System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
+    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver,
+    Dibix.Http.Server.IHttpActionDescriptor $action) {
+    .Block(Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource) {
+        $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
+        $arguments.Item["databaseAccessorFactory"] = (System.Object)$databaseaccessorfactorySource;
+        $arguments.Item["machinename"] = (System.Object).Call Dibix.Http.Server.EnvironmentParameterSourceProvider.GetMachineName()
+        ;
+        $arguments.Item["pid"] = (System.Object).Call Dibix.Http.Server.EnvironmentParameterSourceProvider.GetCurrentProcessId()
+    }
+}

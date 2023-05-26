@@ -1,0 +1,68 @@
+﻿.Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
+    Dibix.Http.Server.IHttpRequestDescriptor $request,
+    System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
+    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver,
+    Dibix.Http.Server.IHttpActionDescriptor $action) {
+    .Block(
+        Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
+        System.Object $idDefaultValue,
+        System.Object $nameDefaultValue,
+        System.Object $trueDefaultValue,
+        Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpUriParameterInput $input) {
+        $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
+        $arguments.Item["databaseAccessorFactory"] = (System.Object)$databaseaccessorfactorySource;
+        .If (
+            .Call $arguments.TryGetValue(
+                "id",
+                $idDefaultValue) & $idDefaultValue == null
+        ) {
+            $arguments.Item["id"] = (System.Object)0
+        } .Else {
+            .Default(System.Void)
+        };
+        $arguments.Item["name"] = (System.Object).Call Dibix.Http.Server.HttpParameterResolverUtility.ReadArgument(
+            $arguments,
+            "name_");
+        .If (
+            .Call $arguments.TryGetValue(
+                "name",
+                $nameDefaultValue) & $nameDefaultValue == null
+        ) {
+            $arguments.Item["name"] = (System.Object)"Cake"
+        } .Else {
+            .Default(System.Void)
+        };
+        $arguments.Item["name"] = (System.Object).Call Dibix.Http.Server.Tests.HttpParameterResolverTest+EncryptionHttpParameterConverter.Convert(.Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
+                "name",
+                .Call Dibix.Http.Server.HttpParameterResolverUtility.ReadArgument(
+                    $arguments,
+                    "name"),
+                $action));
+        $arguments.Item["true"] = (System.Object).Call Dibix.Http.Server.HttpParameterResolverUtility.ReadArgument(
+            $arguments,
+            "true_");
+        .If (
+            .Call $arguments.TryGetValue(
+                "true",
+                $trueDefaultValue) & $trueDefaultValue == null
+        ) {
+            $arguments.Item["true"] = (System.Object)True
+        } .Else {
+            .Default(System.Void)
+        };
+        $input = .New Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpUriParameterInput();
+        $input.targetid = .Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
+            "targetid",
+            .Call Dibix.Http.Server.HttpParameterResolverUtility.ReadArgument(
+                $arguments,
+                "targetid"),
+            $action);
+        $input.targetname = .Call Dibix.Http.Server.Tests.HttpParameterResolverTest+EncryptionHttpParameterConverter.Convert(.Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
+                "targetname",
+                .Call Dibix.Http.Server.HttpParameterResolverUtility.ReadArgument(
+                    $arguments,
+                    "targetname_"),
+                $action));
+        $arguments.Item["input"] = (System.Object)$input
+    }
+}

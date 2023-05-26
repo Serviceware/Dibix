@@ -1,0 +1,52 @@
+﻿.Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
+    Dibix.Http.Server.IHttpRequestDescriptor $request,
+    System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
+    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver,
+    Dibix.Http.Server.IHttpActionDescriptor $action) {
+    .Block(
+        Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
+        Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBody $bodySource,
+        Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyParameterInput $input) {
+        $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
+        $bodySource = .Call Dibix.Http.Server.HttpParameterResolverUtility.ReadBody($arguments);
+        $arguments.Item["databaseAccessorFactory"] = (System.Object)$databaseaccessorfactorySource;
+        $arguments.Item["lcid"] = (System.Object)$bodySource.LocaleId;
+        $arguments.Item["agentid"] = (System.Object).If ($bodySource.Detail != null) {
+            ($bodySource.Detail).AgentId
+        } .Else {
+            .Default(System.Int32)
+        };
+        $arguments.Item["itemsa_"] = (System.Object).Call Dibix.StructuredType`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemSet].From(
+            $bodySource.ItemsA,
+            .Lambda #Lambda2<System.Action`3[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemSet,Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,System.Int32]>)
+        ;
+        $arguments.Item["skip"] = (System.Object).If (
+            $bodySource.OptionalDetail != null && ($bodySource.OptionalDetail).Nested != null
+        ) {
+            (($bodySource.OptionalDetail).Nested).Skip
+        } .Else {
+            5
+        };
+        $input = .New Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyParameterInput();
+        $input.targetid = .Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
+            "targetid",
+            $bodySource.SourceId,
+            $action);
+        $arguments.Item["input"] = (System.Object)$input
+    }
+}
+
+.Lambda #Lambda2<System.Action`3[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemSet,Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,System.Int32]>(
+    Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemSet $x,
+    Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem $y,
+    System.Int32 $i) {
+    .Call $x.Add(
+        .If ($bodySource.Detail != null) {
+            ($bodySource.Detail).AgentId
+        } .Else {
+            .Default(System.Int32)
+        },
+        $i,
+        5,
+        $y.Name)
+}

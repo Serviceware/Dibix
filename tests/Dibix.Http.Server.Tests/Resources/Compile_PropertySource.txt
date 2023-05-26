@@ -1,0 +1,15 @@
+﻿.Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
+    Dibix.Http.Server.IHttpRequestDescriptor $request,
+    System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
+    Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver,
+    Dibix.Http.Server.IHttpActionDescriptor $action) {
+    .Block(
+        Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
+        Dibix.Http.Server.Tests.HttpParameterResolverTest+LocaleHttpParameterSource $localeSource) {
+        $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
+        $localeSource = .New Dibix.Http.Server.Tests.HttpParameterResolverTest+LocaleHttpParameterSource();
+        $arguments.Item["databaseAccessorFactory"] = (System.Object)$databaseaccessorfactorySource;
+        $arguments.Item["lcid"] = (System.Object)$localeSource.LocaleId;
+        $arguments.Item["locale"] = (System.Object)$localeSource
+    }
+}
