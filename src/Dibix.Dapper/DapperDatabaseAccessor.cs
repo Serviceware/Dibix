@@ -77,18 +77,18 @@ namespace Dibix.Dapper
         //    return base.Connection.QuerySingleAsync<T>(command);
         //}
 
-        protected override T QuerySingleOrDefault<T>(string commandText, CommandType commandType, ParametersVisitor parameters)
-        {
-            DecoratedTypeMap.Adapt<T>();
-            return base.Connection.QuerySingleOrDefault<T>(commandText, CollectParameters(parameters), _defaultTransaction, commandTimeout: _defaultCommandTimeout, commandType: commandType);
-        }
+        //protected override T QuerySingleOrDefault<T>(string commandText, CommandType commandType, ParametersVisitor parameters)
+        //{
+        //    DecoratedTypeMap.Adapt<T>();
+        //    return base.Connection.QuerySingleOrDefault<T>(commandText, CollectParameters(parameters), _defaultTransaction, commandTimeout: _defaultCommandTimeout, commandType: commandType);
+        //}
 
-        protected override Task<T> QuerySingleOrDefaultAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken)
-        {
-            DecoratedTypeMap.Adapt<T>();
-            CommandDefinition command = new CommandDefinition(commandText, CollectParameters(parameters), _defaultTransaction, commandTimeout: _defaultCommandTimeout, commandType: commandType, cancellationToken: cancellationToken);
-            return base.Connection.QuerySingleOrDefaultAsync<T>(command);
-        }
+        //protected override Task<T> QuerySingleOrDefaultAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken)
+        //{
+        //    DecoratedTypeMap.Adapt<T>();
+        //    CommandDefinition command = new CommandDefinition(commandText, CollectParameters(parameters), _defaultTransaction, commandTimeout: _defaultCommandTimeout, commandType: commandType, cancellationToken: cancellationToken);
+        //    return base.Connection.QuerySingleOrDefaultAsync<T>(command);
+        //}
 
         protected override IMultipleResultReader QueryMultiple(string commandText, CommandType commandType, ParametersVisitor parameters)
         {
