@@ -54,15 +54,15 @@ namespace Dibix
         
         public IEnumerable<TReturn> QueryMany<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, string splitOn) where TReturn : new() => Execute(commandText, commandType, parameters, () => QueryManyCore<TReturn>(commandText, commandType, parameters, types, splitOn));
 
-        T IDatabaseAccessor.QuerySingle<T>(string commandText, CommandType commandType, ParametersVisitor parameters) => Execute(commandText, commandType, parameters, () => QuerySingle<T>(commandText, commandType, parameters).PostProcess());
+        T IDatabaseAccessor.QuerySingle<T>(string commandText, CommandType commandType, ParametersVisitor parameters) => Execute(commandText, commandType, parameters, () => QuerySingle<T>(commandText, commandType, parameters, defaultIfEmpty: false).PostProcess());
 
-        Task<T> IDatabaseAccessor.QuerySingleAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken) => Execute(commandText, commandType, parameters, () => QuerySingleAsync<T>(commandText, commandType, parameters, cancellationToken).PostProcess());
+        Task<T> IDatabaseAccessor.QuerySingleAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken) => Execute(commandText, commandType, parameters, () => QuerySingleAsync<T>(commandText, commandType, parameters, defaultIfEmpty: false, cancellationToken).PostProcess());
 
         public TReturn QuerySingle<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, string splitOn) where TReturn : new() => Execute(commandText, commandType, parameters, () => QueryManyCore<TReturn>(commandText, commandType, parameters, types, splitOn).Single());
 
-        T IDatabaseAccessor.QuerySingleOrDefault<T>(string commandText, CommandType commandType, ParametersVisitor parameters) => Execute(commandText, commandType, parameters, () => QuerySingleOrDefault<T>(commandText, commandType, parameters).PostProcess());
+        T IDatabaseAccessor.QuerySingleOrDefault<T>(string commandText, CommandType commandType, ParametersVisitor parameters) => Execute(commandText, commandType, parameters, () => QuerySingle<T>(commandText, commandType, parameters, defaultIfEmpty: true).PostProcess());
 
-        Task<T> IDatabaseAccessor.QuerySingleOrDefaultAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken) => Execute(commandText, commandType, parameters, () => QuerySingleOrDefaultAsync<T>(commandText, commandType, parameters, cancellationToken).PostProcess());
+        Task<T> IDatabaseAccessor.QuerySingleOrDefaultAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken) => Execute(commandText, commandType, parameters, () => QuerySingleAsync<T>(commandText, commandType, parameters, defaultIfEmpty: true, cancellationToken).PostProcess());
 
         public TReturn QuerySingleOrDefault<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, string splitOn) where TReturn : new() => Execute(commandText, commandType, parameters, () => QueryManyCore<TReturn>(commandText, commandType, parameters, types, splitOn).SingleOrDefault());
 
@@ -112,17 +112,17 @@ namespace Dibix
             return QueryMany(commandText, commandType, parameters, types, x => multiMapper.MapRow<TReturn>(useProjection, x), splitOn).PostProcess(multiMapper);
         }
 
-        private T QuerySingle<T>(string commandText, CommandType commandType, ParametersVisitor parameters)
+        private T QuerySingle<T>(string commandText, CommandType commandType, ParametersVisitor parameters, bool defaultIfEmpty)
         {
             IEnumerable<T> result = QueryMany<T>(commandText, commandType, parameters, buffered: false);
-            return QuerySingle(result, commandText, commandType, parameters);
+            return QuerySingle(result, commandText, commandType, parameters, defaultIfEmpty);
         }
-        private async Task<T> QuerySingleAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken)
+        private async Task<T> QuerySingleAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, bool defaultIfEmpty, CancellationToken cancellationToken)
         {
             IEnumerable<T> result = await QueryManyAsync<T>(commandText, commandType, parameters, buffered: false, cancellationToken).ConfigureAwait(false);
-            return QuerySingle(result, commandText, commandType, parameters);
+            return QuerySingle(result, commandText, commandType, parameters, defaultIfEmpty);
         }
-        private T QuerySingle<T>(IEnumerable<T> result, string commandText, CommandType commandType, ParametersVisitor parameters)
+        private T QuerySingle<T>(IEnumerable<T> result, string commandText, CommandType commandType, ParametersVisitor parameters, bool defaultIfEmpty)
         {
             using IEnumerator<T> enumerator = result.GetEnumerator();
 
@@ -133,6 +133,10 @@ namespace Dibix
                 current = enumerator.Current;
                 if (enumerator.MoveNext())
                     throw CreateException(DatabaseAccessErrorCode.SequenceContainsMoreThanOneElement, commandText, commandType, parameters);
+            }
+            else if (defaultIfEmpty)
+            {
+                return default;
             }
             else
             {

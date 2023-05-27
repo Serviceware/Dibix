@@ -13,7 +13,7 @@ namespace Dibix.Dapper.Tests
     public sealed class DapperDatabaseAccessorTest : DapperTestBase
     {
         [TestMethod]
-        public Task QuerySingle_WithMultipleRows_ThrowsException() => base.ExecuteTest(async accessor =>
+        public Task QuerySingleAsync_WithMultipleRows_ThrowsException() => base.ExecuteTest(async accessor =>
         {
             const string commandText = "SELECT 1 UNION ALL SELECT 2";
             DatabaseAccessException exception = await AssertThrows<DatabaseAccessException>(() => accessor.QuerySingleAsync<int>(commandText, CommandType.Text, ParametersVisitor.Empty, default)).ConfigureAwait(false);
@@ -32,6 +32,25 @@ CommandText: <Inline>", exception.Message);
             Assert.AreEqual(@"Sequence contains no elements
 CommandType: Text
 CommandText: <Inline>", exception.Message);
+        });
+
+        [TestMethod]
+        public Task QuerySingleOrDefaultAsync_WithMultipleRows_ThrowsException() => base.ExecuteTest(async accessor =>
+        {
+            const string commandText = "SELECT 1 UNION ALL SELECT 2";
+            DatabaseAccessException exception = await AssertThrows<DatabaseAccessException>(() => accessor.QuerySingleOrDefaultAsync<int>(commandText, CommandType.Text, ParametersVisitor.Empty, default)).ConfigureAwait(false);
+            Assert.AreEqual(DatabaseAccessErrorCode.SequenceContainsMoreThanOneElement, exception.AdditionalErrorCode);
+            Assert.AreEqual(@"Sequence contains more than one element
+CommandType: Text
+CommandText: <Inline>", exception.Message);
+        });
+
+        [TestMethod]
+        public Task QuerySingleOrDefault_WithNoRows_ReturnsDefault() => base.ExecuteTest(accessor =>
+        {
+            const string commandText = "SELECT 1 WHERE 1 = 2";
+            int result = accessor.QuerySingleOrDefault<int>(commandText, CommandType.Text, ParametersVisitor.Empty);
+            Assert.AreEqual(default, result);
         });
 
         [TestMethod]
