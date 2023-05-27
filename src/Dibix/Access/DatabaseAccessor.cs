@@ -101,6 +101,12 @@ namespace Dibix
         protected virtual void DisposeConnection() => Connection?.Dispose();
 
         protected virtual void OnInfoMessage(string message) { }
+
+        protected Exception CreateException(DatabaseAccessErrorCode errorCode, string commandText, CommandType commandType, ParametersVisitor parameters)
+        {
+            string message = CollectExceptionMessage(errorCode);
+            return DatabaseAccessException.Create(message, commandType, commandText, parameters, errorCode, _isSqlClient);
+        }
         #endregion
 
         #region Private Methods
@@ -165,12 +171,6 @@ namespace Dibix
         {
             TraceSource.TraceInformation(e.Message);
             OnInfoMessage(e.Message);
-        }
-
-        private Exception CreateException(DatabaseAccessErrorCode errorCode, string commandText, CommandType commandType, ParametersVisitor parameters)
-        {
-            string message = CollectExceptionMessage(errorCode);
-            return DatabaseAccessException.Create(message, commandType, commandText, parameters, errorCode, _isSqlClient);
         }
 
         private static void ValidateParameters(IReadOnlyCollection<Type> types, string splitOn)
