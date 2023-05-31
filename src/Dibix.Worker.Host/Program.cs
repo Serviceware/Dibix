@@ -32,11 +32,11 @@ namespace Dibix.Worker.Host
                     .AddScoped<IDatabaseAccessorFactory, ScopedDatabaseAccessorFactory>()
                     .AddScoped<ServiceBrokerDatabaseAccessorFactory>()
                     .AddScoped<ServiceBrokerMessageReader>()
-                    .AddScoped<ServiceScopeWorkerScopeFactory>()
                     .AddScoped<CreateDatabaseLogger>(x => () => x.GetRequiredService<ILoggerFactory>().CreateLogger(x.GetRequiredService<IWorkerDependencyContext>().InitiatorFullName))
                     .AddScoped<IWorkerDependencyContext>(x => x.GetRequiredService<ServiceProviderWorkerDependencyContext>())
                     .AddScoped<ServiceProviderWorkerDependencyContext>()
-                    .AddSingleton<IWorkerScopeFactory, ServiceScopeWorkerScopeFactory>()
+                    .AddSingleton<ServiceScopeWorkerScopeFactory>()
+                    .AddSingleton<IWorkerScopeFactory>(x => x.GetRequiredService<ServiceScopeWorkerScopeFactory>())
                     .AddSingleton<IServiceBrokerMessageReader, ServiceBrokerMessageReader>()
                     .AddSingleton<IHostedServiceEvents, HostedServiceEvents>()
                     .AddHostedService<DatabaseOptionsMonitor>();

@@ -3,26 +3,27 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Dibix.Worker.Abstractions;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Dibix.Worker.Host
 {
     internal sealed class ServiceBrokerMessageReader : IServiceBrokerMessageReader
     {
-        private readonly IServiceScopeFactory _scopeFactory;
+        private readonly ServiceScopeWorkerScopeFactory _workerScopeFactory;
+        private readonly IHostedServiceEvents _hostedServiceEvents;
 
-        public ServiceBrokerMessageReader(IServiceScopeFactory scopeFactory)
+        public ServiceBrokerMessageReader(ServiceScopeWorkerScopeFactory workerScopeFactory, IHostedServiceEvents hostedServiceEvents)
         {
-            _scopeFactory = scopeFactory;
+            _workerScopeFactory = workerScopeFactory;
+            _hostedServiceEvents = hostedServiceEvents;
         }
 
         public async Task<IEnumerable<TMessage>> ReadMessages<TMessage>(string fullSubscriberName, Func<IDatabaseAccessorFactory, int, CancellationToken, Task<IEnumerable<TMessage>>> handler, CancellationToken cancellationToken)
         {
-            using IServiceScope scope = _scopeFactory.CreateScope();
-            ServiceProviderWorkerDependencyContext dependencyContext = scope.ServiceProvider.GetRequiredService<ServiceProviderWorkerDependencyContext>();
-            dependencyContext.InitiatorFullName = fullSubscriberName;
-            IDatabaseAccessorFactory databaseAccessorFactory = dependencyContext.GetService<ServiceBrokerDatabaseAccessorFactory>();
-            return await handler(databaseAccessorFactory, ServiceBrokerDefaults.ReceiveTimeout, cancellationToken).ConfigureAwait(false);
+            using WorkerScope scope = _workerScopeFactory.Create(fullSubscriberName);
+            IDatabaseAccessorFactory databaseAccessorFactory = scope.GetService<ServiceBrokerDatabaseAccessorFactory>();
+            IEnumerable<TMessage> messages = await handler(databaseAccessorFactory, ServiceBrokerDefaults.ReceiveTimeout, cancellationToken).ConfigureAwait(false);
+            await _hostedServiceEvents.OnServiceBrokerIterationCompleted(scope, cancellationToken).ConfigureAwait(false);
+            return messages;
         }
     }
 }

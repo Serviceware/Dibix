@@ -13,7 +13,6 @@ namespace Dibix.Worker.Abstractions
         #region Fields
         private const int RetryOnErrorDelay = 10000; // ms
         private readonly IServiceBrokerMessageReader _serviceBrokerMessageReader;
-        private readonly IHostedServiceEvents _hostedServiceEvents;
         private readonly string _fullSubscriberName;
         #endregion
 
@@ -21,7 +20,6 @@ namespace Dibix.Worker.Abstractions
         protected ServiceBrokerSubscriber(IServiceBrokerMessageReader serviceBrokerMessageReader, IHostedServiceEvents hostedServiceEvents, ILogger logger) : base(hostedServiceEvents, logger)
         {
             _serviceBrokerMessageReader = serviceBrokerMessageReader;
-            _hostedServiceEvents = hostedServiceEvents;
             _fullSubscriberName = GetType().FullName;
         }
         #endregion
@@ -35,7 +33,6 @@ namespace Dibix.Worker.Abstractions
                 try
                 {
                     ICollection<TMessage> messages = await ReceiveMessageBatch(stoppingToken).ConfigureAwait(false);
-                    _ = _hostedServiceEvents.OnServiceBrokerIterationCompleted(GetType().FullName, stoppingToken);
                     if (messages.Any())
                         _ = ProcessMessages(messages);
                 }

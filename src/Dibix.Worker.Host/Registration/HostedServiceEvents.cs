@@ -25,12 +25,11 @@ namespace Dibix.Worker.Host
             await _options.Value.OnWorkerStarted(scope, cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task OnServiceBrokerIterationCompleted(string fullName, CancellationToken cancellationToken)
+        public async Task OnServiceBrokerIterationCompleted(IWorkerScope scope, CancellationToken cancellationToken)
         {
             if (_options.Value.OnServiceBrokerIterationCompleted == null)
                 return;
 
-            using IWorkerScope scope = _scopeFactory.Create(fullName);
             await _options.Value.OnServiceBrokerIterationCompleted(scope, cancellationToken).ConfigureAwait(false);
         }
     }

@@ -1,8 +1,5 @@
-﻿using System;
-using System.Data.Common;
-using Dibix.Worker.Abstractions;
+﻿using Dibix.Worker.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace Dibix.Worker.Host
 {
@@ -16,35 +13,14 @@ namespace Dibix.Worker.Host
         }
 
         public IWorkerScope Create<TInitiator>() => Create(typeof(TInitiator).FullName!);
-        public IWorkerScope Create(string initiatorFullName)
+        IWorkerScope IWorkerScopeFactory.Create(string initiatorFullName) => Create(initiatorFullName);
+
+        public WorkerScope Create(string initiatorFullName)
         {
             IServiceScope scope = _scopeFactory.CreateScope();
             ServiceProviderWorkerDependencyContext dependencyContext = scope.ServiceProvider.GetRequiredService<ServiceProviderWorkerDependencyContext>();
             dependencyContext.InitiatorFullName = initiatorFullName;
             return new WorkerScope(dependencyContext, scope.Dispose, initiatorFullName);
-        }
-
-        private sealed class WorkerScope : IWorkerScope
-        {
-            private readonly IWorkerDependencyContext _dependencyContext;
-            private readonly Action _onDispose;
-
-            DbConnection IWorkerDependencyContext.Connection => _dependencyContext.Connection;
-            IDatabaseAccessorFactory IWorkerDependencyContext.DatabaseAccessorFactory => _dependencyContext.DatabaseAccessorFactory;
-            public string InitiatorFullName { get; }
-
-            public WorkerScope(IWorkerDependencyContext dependencyContext, Action onDispose, string initiatorFullName)
-            {
-                InitiatorFullName = initiatorFullName;
-                _dependencyContext = dependencyContext;
-                _onDispose = onDispose;
-            }
-
-            T IWorkerDependencyContext.GetExtension<T>() => _dependencyContext.GetExtension<T>();
-            T IWorkerDependencyContext.GetExtension<T>(Type implementationType) => _dependencyContext.GetExtension<T>(implementationType);
-            ILogger IWorkerDependencyContext.CreateLogger(Type loggerType) => _dependencyContext.CreateLogger(loggerType);
-
-            void IDisposable.Dispose() => _onDispose.Invoke();
         }
     }
 }
