@@ -5,6 +5,6 @@ namespace Dibix
 {
     internal interface IPostProcessor
     {
-        IEnumerable<object> PostProcess(IEnumerable<object> source, Type type);
+        IEnumerable<T> PostProcess<T>(IEnumerable<T> source, Type type);
     }
 }

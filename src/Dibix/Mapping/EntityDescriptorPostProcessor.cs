@@ -6,7 +6,7 @@ namespace Dibix
 {
     internal sealed class EntityDescriptorPostProcessor : IPostProcessor
     {
-        public IEnumerable<object> PostProcess(IEnumerable<object> source, Type type)
+        public IEnumerable<T> PostProcess<T>(IEnumerable<T> source, Type type)
         {
             EntityDescriptor entityDescriptor = EntityDescriptorCache.GetDescriptor(type);
             return source.Select(x =>

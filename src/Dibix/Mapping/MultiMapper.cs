@@ -8,7 +8,7 @@ namespace Dibix
     internal sealed class MultiMapper : IPostProcessor
     {
         #region Fields
-        private readonly HashCollection<object> _entityCache = new HashCollection<object>(EntityEqualityComparer.Instance);
+        private readonly HashCollection<object> _entityCache = new HashCollection<object>(EntityEqualityComparer<object>.Instance);
         #endregion
 
         #region Public Methods
@@ -45,10 +45,10 @@ namespace Dibix
         #endregion
 
         #region IPostProcessor Members
-        public IEnumerable<object> PostProcess(IEnumerable<object> source, Type type)
+        public IEnumerable<T> PostProcess<T>(IEnumerable<T> source, Type type)
         {
             // Distinct because the root might be duplicated because of 1->n related rows
-            IEnumerable<object> results = source.Distinct(EntityEqualityComparer.Instance);
+            IEnumerable<T> results = source.Distinct(EntityEqualityComparer<T>.Instance);
             return results;
         }
         #endregion
@@ -77,7 +77,7 @@ namespace Dibix
             return currentValue == null;
         }
 
-        private static bool Contains(object collection, object item) => ((IEnumerable)collection).Cast<object>().Contains(item, EntityEqualityComparer.Instance);
+        private static bool Contains(object collection, object item) => ((IEnumerable)collection).Cast<object>().Contains(item, EntityEqualityComparer<object>.Instance);
 
         private static TReturn ProjectResult<TReturn>(params object[] args) where TReturn : new()
         {

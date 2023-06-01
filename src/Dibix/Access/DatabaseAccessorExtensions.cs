@@ -14,7 +14,7 @@ namespace Dibix
             return PostProcessor.PostProcess(Enumerable.Repeat(source, 1)).FirstOrDefault();
         }
         internal static Task<TReturn> PostProcess<TReturn>(this Task<TReturn> source) => source.ContinueWith(x => PostProcess(x.Result));
-        internal static object PostProcess(this object source) => PostProcessor.PostProcess(Enumerable.Repeat(source, 1), source.GetType()).FirstOrDefault();
+        internal static object PostProcess(this object source) => PostProcessor.PostProcess(EnumerableExtensions.Create(source), source.GetType()).FirstOrDefault();
 
         internal static IEnumerable<TReturn> PostProcess<TReturn>(this IEnumerable<TReturn> source) => PostProcessor.PostProcess(source);
         internal static IEnumerable<TReturn> PostProcess<TReturn>(this IEnumerable<TReturn> source, MultiMapper multiMapper) => PostProcessor.PostProcess(source, multiMapper);

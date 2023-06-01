@@ -6,7 +6,7 @@ namespace Dibix
 {
     internal sealed class RecursiveMapper : IPostProcessor
     {
-        public IEnumerable<object> PostProcess(IEnumerable<object> source, Type type)
+        public IEnumerable<T> PostProcess<T>(IEnumerable<T> source, Type type)
         {
             EntityDescriptor entityDescriptor = EntityDescriptorCache.GetDescriptor(type);
             if (entityDescriptor.Discriminator == null)
@@ -18,8 +18,8 @@ namespace Dibix
 
             // Map recursive relational model to a hierarchical tree model based on a 'ParentId' like discriminator
             EntityKey key = entityDescriptor.Keys.Single();
-            IDictionary<object, object> entityMap = resolved.ToDictionary(x => key.GetValue(x));
-            ILookup<object, object> childEntityMap = resolved.ToLookup(x => entityDescriptor.Discriminator.GetValue(x), x => entityMap[key.GetValue(x)]);
+            IDictionary<object, T> entityMap = resolved.ToDictionary(x => key.GetValue(x));
+            ILookup<object, T> childEntityMap = resolved.ToLookup(x => entityDescriptor.Discriminator.GetValue(x), x => entityMap[key.GetValue(x)]);
 
             foreach (object entity in entityMap.Values)
             {
