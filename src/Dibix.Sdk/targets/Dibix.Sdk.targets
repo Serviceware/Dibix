@@ -308,8 +308,6 @@ $(_ServerCompilationArtifactReference)" />
   $(PreventDmlReferences)" />
       <_SqlCoreInputItem Include="EnableExperimentalFeatures
   $(EnableExperimentalFeatures)" />
-      <_SqlCoreInputItem Include="UseMicrosoftHttpClient
-  $(UseMicrosoftHttpClient)" />
       <_SqlCoreInputItem Include="SqlReferencePath
 $(_SqlReferencePath)" />
     </ItemGroup>
@@ -662,9 +660,6 @@ $(_SqlReferencePath)" />
   <ItemGroup>
     <PackageReference Include="$(_DibixHttpClientName)" Version="$(DibixSdkVersion)" ExcludeAssets="runtime" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.9" ExcludeAssets="runtime" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(UseMicrosoftHttpClient)' == 'true'">
     <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" ExcludeAssets="runtime" />
   </ItemGroup>
 

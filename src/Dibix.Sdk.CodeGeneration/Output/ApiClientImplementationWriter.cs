@@ -21,17 +21,11 @@ namespace Dibix.Sdk.CodeGeneration
         {
             context.AddReference<HttpClient>();
 
-            if (context.Model.UseMicrosoftHttpClient)
-                context.AddUsing("IHttpClientFactory = System.Net.Http.IHttpClientFactory");
-
             string className = $"{controller.Name}Service";
             string interfaceName = $"I{className}";
             CSharpAnnotation interfaceDescriptor = new CSharpAnnotation("HttpService", new CSharpValue($"typeof({interfaceName})"));
             CSharpClass @class = output.AddClass(className, CSharpModifiers.Public | CSharpModifiers.Sealed, interfaceDescriptor)
                                        .Implements(interfaceName);
-
-            if (!context.Model.UseMicrosoftHttpClient)
-                @class.AddField("BaseAddress", nameof(Uri), new CSharpValue($"new {nameof(Uri)}(\"{context.Model.BaseUrl.TrimEnd('/')}/\")"), CSharpModifiers.Private | CSharpModifiers.Static | CSharpModifiers.ReadOnly);
 
             bool hasBodyParameter = controller.Actions.Any(x => x.RequestBody != null);
             bool requiresAuthorization = controller.Actions.Any(x => x.SecuritySchemes.HasEffectiveRequirements);
@@ -51,9 +45,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             @class.AddSeparator();
 
-            if (!context.Model.UseMicrosoftHttpClient)
-                AddCtorWithoutClientName(context, @class, requiresAuthorization);
-
+          //AddCtorWithoutClientName(context, @class, requiresAuthorization);
             AddPrimaryCtor(@class, requiresAuthorization);
 
             @class.AddSeparator();
@@ -109,14 +101,8 @@ namespace Dibix.Sdk.CodeGeneration
             if (requiresAuthorization)
                 constructorThisCall.AddParameter(new CSharpValue("httpAuthorizationProvider"));
 
-            string defaultClientNameValue = "DefaultHttpClientFactory.DefaultClientName";
-
-            if (context.Model.UseMicrosoftHttpClient)
-            {
-                defaultClientNameValue = "Options.DefaultName";
-                context.AddUsing("Microsoft.Extensions.Options");
-            }
-
+            context.AddUsing("Microsoft.Extensions.Options");
+            const string defaultClientNameValue = "Options.DefaultName";
             constructorThisCall.AddParameter(new CSharpValue(defaultClientNameValue));
         }
 
@@ -127,12 +113,7 @@ namespace Dibix.Sdk.CodeGeneration
                                                                     .ToArray();
 
             StringWriter writer = new StringWriter();
-            writer.Write($"using ({nameof(HttpClient)} client = _httpClientFactory.CreateClient(_httpClientName");
-
-            if (!context.Model.UseMicrosoftHttpClient)
-                writer.Write(", BaseAddress");
-
-            writer.WriteLine("))")
+            writer.WriteLine($"using ({nameof(HttpClient)} client = _httpClientFactory.CreateClient(_httpClientName))")
                   .WriteLine("{")
                   .PushIndent();
 

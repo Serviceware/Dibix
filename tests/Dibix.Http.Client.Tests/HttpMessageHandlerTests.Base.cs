@@ -11,31 +11,45 @@ using Moq.Protected;
 
 namespace Dibix.Http.Client.Tests
 {
-    public partial class HttpClientFactoryTests
+    public partial class HttpMessageHandlerTests
     {
-        private static (HttpClientHandler httpClientHandler, Func<Task> sendInvoker) SetupFixture(string httpMethod = "GET", HttpStatusCode statusCode = HttpStatusCode.OK, Action<IHttpClientBuilder>? configure = null, Func<CancellationToken, Task>? beforeSend = null)
+        private static (HttpClientHandler httpClientHandler, Func<Task> sendInvoker) SetupFixture<THandler>(bool useHandler, string httpMethod = "GET", HttpStatusCode statusCode = HttpStatusCode.OK, Action<HttpClient>? configureClient = null) where THandler : DelegatingHandler, new()
+        {
+            THandler CreateHandler() => new THandler();
+            return SetupFixture(useHandler, CreateHandler, httpMethod, statusCode, configureClient);
+        }
+        private static (HttpClientHandler httpClientHandler, Func<Task> sendInvoker) SetupFixture<THandler>(bool useHandler, Func<THandler> handlerFactory, string httpMethod = "GET", HttpStatusCode statusCode = HttpStatusCode.OK, Action<HttpClient>? configureClient = null) where THandler : DelegatingHandler
         {
             HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost");
-            HttpResponseMessage responseMessage = new HttpResponseMessage(statusCode) { RequestMessage = requestMessage };
+            HttpResponseMessage responseMessage = new HttpResponseMessage(statusCode) { RequestMessage = requestMessage, Content = new ByteArrayContent(Array.Empty<byte>()) };
 
             Mock<HttpClientHandler> httpClientHandler = new Mock<HttpClientHandler>(MockBehavior.Strict);
 
             httpClientHandler.Protected()
                              .Setup<Task<HttpResponseMessage>>("SendAsync", requestMessage, ItExpr.IsAny<CancellationToken>())
-                             .Returns(async (HttpRequestMessage _, CancellationToken cancellationToken) =>
-                             {
-                                 if (beforeSend != null)
-                                     await beforeSend(cancellationToken).ConfigureAwait(false);
+                             .Returns((HttpRequestMessage _, CancellationToken _) => Task.FromResult(responseMessage));
 
-                                 return responseMessage;
-                             });
+            HttpMessageHandler handler = httpClientHandler.Object;
 
-            IHttpClientFactory httpClientFactory = new DefaultHttpClientFactory(x =>
+            if (useHandler)
             {
-                x.ConfigurePrimaryHttpMessageHandler(() => httpClientHandler.Object);
-                configure?.Invoke(x);
-            });
-            HttpClient client = httpClientFactory.CreateClient();
+                THandler outerHandler = handlerFactory();
+
+                DelegatingHandler innerHandler = outerHandler;
+                while (true)
+                {
+                    if (innerHandler.InnerHandler is DelegatingHandler delegatingHandler)
+                        innerHandler = delegatingHandler;
+                    else
+                        break;
+                }
+
+                innerHandler.InnerHandler = handler;
+                handler = outerHandler;
+            }
+
+            HttpClient client = new HttpClient(handler);
+            configureClient?.Invoke(client);
 
             async Task SendAsync()
             {

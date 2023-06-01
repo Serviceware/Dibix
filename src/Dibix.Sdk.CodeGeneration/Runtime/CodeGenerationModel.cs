@@ -17,7 +17,6 @@ namespace Dibix.Sdk.CodeGeneration
         public CommandTextFormatting CommandTextFormatting { get; set; }
         public string BaseUrl { get; set; }
         public bool EnableExperimentalFeatures { get; set; }
-        public bool UseMicrosoftHttpClient { get; set; }
         public IList<ControllerDefinition> Controllers { get; }
         public IList<SecurityScheme> SecuritySchemes { get; }
         public ICollection<SchemaDefinition> Schemas { get; }

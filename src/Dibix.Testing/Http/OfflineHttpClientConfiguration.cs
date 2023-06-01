@@ -2,15 +2,15 @@
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Dibix.Http.Client;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Dibix.Testing.Http
 {
-    public sealed class OfflineHttpClientConfiguration : HttpClientConfiguration
+    public sealed class OfflineHttpClientConfiguration
     {
-        public override string Name => "Dibix.Testing.Http.OfflineHttpClient";
+        public string Name => "Dibix.Testing.Http.OfflineHttpClient";
 
-        public override void Configure(IHttpClientBuilder builder)
+        public void Configure(IHttpClientBuilder builder)
         {
             builder.ConfigurePrimaryHttpMessageHandler(() => new OfflineHttpMessageHandler());
         }

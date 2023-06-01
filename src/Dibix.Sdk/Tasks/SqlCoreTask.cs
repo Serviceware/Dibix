@@ -36,7 +36,6 @@ namespace Dibix.Sdk
     [TaskProperty("LimitDdlStatements", TaskPropertyType.Boolean, Category = GlobalCategory)]
     [TaskProperty("PreventDmlReferences", TaskPropertyType.Boolean, Category = GlobalCategory)]
     [TaskProperty("EnableExperimentalFeatures", TaskPropertyType.Boolean, Category = ArtifactGenerationCategory)]
-    [TaskProperty("UseMicrosoftHttpClient", TaskPropertyType.Boolean, Category = ArtifactGenerationCategory)]
     [TaskProperty("DatabaseSchemaProviderName", TaskPropertyType.String, Category = GlobalCategory)]
     [TaskProperty("ModelCollation", TaskPropertyType.String, Category = GlobalCategory)]
     [TaskProperty("SqlReferencePath", TaskPropertyType.Items, Category = GlobalCategory)]
@@ -77,8 +76,7 @@ namespace Dibix.Sdk
                 Title = _configuration.ArtifactGeneration.Title,
                 Version = _configuration.ArtifactGeneration.Version,
                 Description = _configuration.ArtifactGeneration.Description,
-                EnableExperimentalFeatures = _configuration.ArtifactGeneration.EnableExperimentalFeatures,
-                UseMicrosoftHttpClient = _configuration.ArtifactGeneration.UseMicrosoftHttpClient
+                EnableExperimentalFeatures = _configuration.ArtifactGeneration.EnableExperimentalFeatures
             };
             codeGenerationConfiguration.Source.AddRange(_configuration.SqlCore.Source);
             codeGenerationConfiguration.Contracts.AddRange(_configuration.ArtifactGeneration.Contracts);

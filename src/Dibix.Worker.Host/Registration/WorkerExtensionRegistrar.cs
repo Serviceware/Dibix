@@ -79,8 +79,9 @@ namespace Dibix.Worker.Host
 
             private IWorkerExtensionConfigurationBuilder RegisterHttpClientCore(string name, Action<IWorkerHttpClientConfigurationBuilder>? configure)
             {
-                IHttpClientBuilder httpClientBuilder = _services.AddHttpClient(name, ConfigureHttpClient);
-                ConfigureHttpClientDefaults(httpClientBuilder);
+                IHttpClientBuilder httpClientBuilder = _services.AddHttpClient(name, ConfigureHttpClient)
+                                                                .AddBuiltinHttpMessageHandlers();
+
                 if (configure != null)
                 {
                     WorkerHttpClientConfigurationBuilder httpClientConfigurationBuilder = new WorkerHttpClientConfigurationBuilder(httpClientBuilder);
@@ -93,19 +94,6 @@ namespace Dibix.Worker.Host
             {
                 const string processName = "DibixWorkerHost";
                 client.AddUserAgent(x => x.FromAssembly(_workerAssembly, _ => $"{processName}-{_workerComponentName}"));
-            }
-
-            private void ConfigureHttpClientDefaults(IHttpClientBuilder httpClientBuilder)
-            {
-                AddHttpMessageHandler<FollowRedirectHttpMessageHandler>(httpClientBuilder);
-                AddHttpMessageHandler<TraceProxyHttpMessageHandler>(httpClientBuilder);
-                AddHttpMessageHandler<EnsureSuccessStatusCodeHttpMessageHandler>(httpClientBuilder);
-                AddHttpMessageHandler<TraceSourceHttpMessageHandler>(httpClientBuilder);
-            }
-
-            private static void AddHttpMessageHandler<T>(IHttpClientBuilder httpClientBuilder) where T : DelegatingHandler, new()
-            {
-                httpClientBuilder.AddHttpMessageHandler(() => new T());
             }
         }
 

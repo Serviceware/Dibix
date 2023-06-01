@@ -7,8 +7,6 @@ namespace Dibix.Http.Client
     {
         private const string PropertyKeyHttpRequestTrace = "Dibix.Http.Client.HttpRequestTrace";
 
-        public static bool TryGetHttpRequestTrace(this HttpRequestMessage requestMessage, out HttpRequestTrace requestTrace) => TryGetPropertyValue(requestMessage, PropertyKeyHttpRequestTrace, out requestTrace);
-
         public static HttpRequestTrace GetHttpRequestTrace(this HttpRequestMessage requestMessage) => GetRequestProperty<HttpRequestTrace>(requestMessage, PropertyKeyHttpRequestTrace);
 
         public static void SetHttpRequestTrace(this HttpRequestMessage requestMessage, HttpRequestTrace requestTrace) => SetRequestProperty(requestMessage, PropertyKeyHttpRequestTrace, requestTrace);

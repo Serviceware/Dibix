@@ -5,19 +5,16 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using IdentityModel.Client;
 
-namespace Dibix.Worker.Abstractions
+namespace Dibix.Http.Client.OpenIdConnect
 {
     // Not using IdentityModel's builtin DiscoveryCache here, because it does not support adjusting the DiscoveryDocumentRequest.
-    public sealed class OpenIdConnectDiscoveryCache
+    public sealed class OpenIdConnectDiscoveryCache : IOpenIdConnectDiscoveryCache
     {
-        private static readonly ConcurrentDictionary<string, OpenIdConnectDiscoveryCache> WorkerInstanceCache = new ConcurrentDictionary<string, OpenIdConnectDiscoveryCache>();
         private readonly IDictionary<string, CacheItem> _responseCache = new ConcurrentDictionary<string, CacheItem>();
 
         public TimeSpan CacheDuration { get; set; } = TimeSpan.FromHours(24d);
 
-        public static OpenIdConnectDiscoveryCache Create<T>() where T : IWorkerExtension => WorkerInstanceCache.GetOrAdd(typeof(T).FullName, _ => new OpenIdConnectDiscoveryCache());
-
-        public async Task<DiscoveryDocumentResponse> GetDiscoveryDocumentAsync(string authority, Func<HttpMessageInvoker> httpClientFactory, Action<HttpRequestMessage>? requestMessageFormatter = null)
+        public async Task<DiscoveryDocumentResponse> GetDiscoveryDocumentAsync(string authority, Func<HttpMessageInvoker> httpClientFactory, Action<HttpRequestMessage> requestMessageFormatter = null)
         {
             if (!_responseCache.TryGetValue(authority, out CacheItem cacheItem) || cacheItem.NextReload <= DateTime.UtcNow)
             {
@@ -29,7 +26,7 @@ namespace Dibix.Worker.Abstractions
             return cacheItem.Response;
         }
 
-        private static async Task<DiscoveryDocumentResponse> GetDiscoveryDocument(string authority, Func<HttpMessageInvoker> httpClientFactory, Action<HttpRequestMessage>? requestMessageFormatter)
+        private static async Task<DiscoveryDocumentResponse> GetDiscoveryDocument(string authority, Func<HttpMessageInvoker> httpClientFactory, Action<HttpRequestMessage> requestMessageFormatter)
         {
             using HttpMessageInvoker client = httpClientFactory();
             DiscoveryDocumentRequest request = new DiscoveryDocumentRequest { Address = authority };

@@ -21,7 +21,6 @@ namespace Dibix.Sdk.Tests.CodeGeneration
           , IEnumerable<string> endpoints = null
           , bool isEmbedded = true
           , bool enableExperimentalFeatures = false
-          , bool useMicrosoftHttpClient = false
           , AssertOutputKind outputKind = AssertOutputKind.Accessor
           , IEnumerable<string> expectedAdditionalAssemblyReferences = null
         )
@@ -84,8 +83,6 @@ PreventDmlReferences
   True
 EnableExperimentalFeatures
   {enableExperimentalFeatures /* TODO: Add test support for inspecting DBX file */}
-UseMicrosoftHttpClient
-  {useMicrosoftHttpClient}
 SqlReferencePath");
             InputConfiguration inputConfiguration = InputConfiguration.Parse(inputConfigurationPath);
             SqlCoreTask task = new SqlCoreTask(logger, inputConfiguration);
@@ -107,16 +104,16 @@ SqlReferencePath");
 
                 case AssertOutputKind.Accessor:
                     string accessorOutputFilePath = Path.Combine(outputDirectory, $"{defaultOutputName}.Accessor.cs");
-                    this.AssertFile(accessorOutputFilePath, useMicrosoftHttpClient);
+                    this.AssertFile(accessorOutputFilePath);
                     break;
 
                 case AssertOutputKind.Endpoint:
-                    this.AssertFile(endpointOutputFilePath, useMicrosoftHttpClient);
+                    this.AssertFile(endpointOutputFilePath);
                     break;
 
                 case AssertOutputKind.Client:
                     string clientOutputFilePath = Path.Combine(outputDirectory, $"{clientOutputName}.cs");
-                    this.AssertFile(clientOutputFilePath, useMicrosoftHttpClient);
+                    this.AssertFile(clientOutputFilePath);
                     break;
 
                 case AssertOutputKind.OpenApi:
@@ -160,10 +157,10 @@ SqlReferencePath");
             }
         }
 
-        private void AssertFile(string generatedFilePath, bool useMicrosoftHttpClient)
+        private void AssertFile(string generatedFilePath)
         {
             this.AssertFileContent(generatedFilePath);
-            AssertFileCompilation(generatedFilePath, useMicrosoftHttpClient);
+            AssertFileCompilation(generatedFilePath);
         }
 
         private void AssertFileContent(string generatedFilePath, bool normalizeLineEndings = false) => this.AssertFileContent(base.TestContext.TestName, generatedFilePath, normalizeLineEndings);
@@ -178,7 +175,7 @@ SqlReferencePath");
             base.AssertEqual(expectedText, actualText, extension, normalizeLineEndings: normalizeLineEndings);
         }
 
-        private static void AssertFileCompilation(string generatedFilePath, bool useMicrosoftHttpClient)
+        private static void AssertFileCompilation(string generatedFilePath)
         {
             using (Stream inputStream = File.OpenRead(generatedFilePath))
             {
@@ -196,14 +193,10 @@ SqlReferencePath");
                                                                  .AddReference<System.Data.CommandType>()
                                                                  .AddReference<System.Linq.Expressions.Expression>()
                                                                  .AddReference<System.Net.Http.HttpClient>()
+                                                                 .AddReference<System.Net.Http.IHttpClientFactory>()
+                                                                 .AddReference<Microsoft.Extensions.Options.OptionsValidationException>()
                                                                  .AddReference<Uri>()
                                                                  .AddSyntaxTrees(syntaxTree);
-
-                if (useMicrosoftHttpClient)
-                {
-                    compilation = compilation.AddReference<System.Net.Http.IHttpClientFactory>()
-                                             .AddReference<Microsoft.Extensions.Options.OptionsValidationException>();
-                }
 
                 RoslynUtility.VerifyCompilation(compilation);
             }

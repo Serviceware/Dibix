@@ -12,7 +12,7 @@ namespace Dibix.Http.Client
     /// There is also a way to handle this using .NET 5.0: https://github.com/dotnet/runtime/pull/2281
     /// Note: The Timeout property on the HttpClient still has to be configured manually to a larger value, than the timeout on this handler.
     /// </summary>
-    public sealed class TimeoutHttpMessageHandler : DelegatingHandler
+    internal sealed class TimeoutHttpMessageHandler : DelegatingHandler
     {
         #region Properties
         public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(100d); // HttpClient.defaultTimeout

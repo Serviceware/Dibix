@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Net.Http;
 using System.Reflection;
 using System.Reflection.Emit;
 using Dibix.Http.Client;
@@ -59,9 +60,9 @@ namespace Dibix.Testing.Http
             foreach (ParameterInfo parameter in targetMethod.GetParameters())
                 parameters.Add(Expression.Parameter(parameter.ParameterType, parameter.Name));
 
-            ConstructorInfo httpClientFactoryConstructor = typeof(DefaultHttpClientFactory).GetConstructorSafe(typeof(HttpClientConfiguration[]));
+            ConstructorInfo httpClientFactoryConstructor = Type.GetType("Microsoft.Extensions.Http.DefaultHttpClientFactory,Microsoft.Extensions.Http").GetConstructorSafe();
             Expression offlineClientConfiguration = Expression.New(typeof(OfflineHttpClientConfiguration));
-            Expression httpClientFactory = Expression.New(httpClientFactoryConstructor, Expression.NewArrayInit(typeof(HttpClientConfiguration), offlineClientConfiguration));
+            Expression httpClientFactory = Expression.New(httpClientFactoryConstructor, offlineClientConfiguration);
             Expression httpAuthorizationProvider = Expression.New(typeof(EmptyHttpAuthorizationProvider));
             ConstructorInfo constructor = targetMethod.DeclaringType.GetConstructorSafe(ConstructorSignature);
             Expression instance = Expression.New(constructor, httpClientFactory, httpAuthorizationProvider);
