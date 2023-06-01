@@ -12,7 +12,7 @@ namespace Dibix
             if (entityDescriptor.Discriminator == null)
                 return source;
 
-            ICollection<object> resolved = source.ToArray();
+            ICollection<T> resolved = source.ToArray();
             if (!new PropertyMatcher().TryMatchProperty(entityDescriptor, type, out EntityProperty property))
                 return resolved;
 
