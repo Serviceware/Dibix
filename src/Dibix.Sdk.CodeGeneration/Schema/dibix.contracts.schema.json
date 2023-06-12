@@ -118,6 +118,9 @@
                   "enum": [
                     "utc"
                   ]
+                },
+                "serialize": {
+                  "$ref": "#/definitions/SerializationBehavior"
                 }
               },
               "required": [
