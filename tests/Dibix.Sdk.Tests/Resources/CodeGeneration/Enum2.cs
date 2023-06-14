@@ -15,6 +15,7 @@ namespace Dibix.Sdk.Tests.DomainModel.Features
 {
     public enum Feature : short
     {
+        None = 0,
         Feature1 = 101,
         Feature2 = 102,
         Feature3 = 103,

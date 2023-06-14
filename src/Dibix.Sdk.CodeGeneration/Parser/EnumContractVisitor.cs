@@ -116,7 +116,7 @@ namespace Dibix.Sdk.CodeGeneration
                     break;
 
                 // [id]=(101)
-                case BooleanComparisonExpression booleanComparisonExpression when TryCollectSchemaMembers(schema, booleanComparisonExpression, nameComparisonExpression: null, tableDefinition):
+                case BooleanComparisonExpression booleanComparisonExpression when TryCollectSchemaMember(schema, booleanComparisonExpression, nameComparisonExpression: null, tableDefinition):
                     break;
 
                 default:
@@ -126,10 +126,11 @@ namespace Dibix.Sdk.CodeGeneration
                     return;
             }
 
+            schema.AddDefaultIfMissing();
             _definitionMap.Add(enumContractName, schema);
         }
 
-        private static bool TryCollectSchemaMembers(EnumSchema schema, BooleanComparisonExpression flagComparisonExpression, BooleanComparisonExpression nameComparisonExpression, TableDefinition tableDefinition)
+        private static bool TryCollectSchemaMember(EnumSchema schema, BooleanComparisonExpression flagComparisonExpression, BooleanComparisonExpression nameComparisonExpression, TableDefinition tableDefinition)
         {
             // [id]
             if (flagComparisonExpression.FirstExpression is not ColumnReferenceExpression columnReferenceExpression)
@@ -159,7 +160,7 @@ namespace Dibix.Sdk.CodeGeneration
             // "[id]=(104)" "[name] = N'Feature4'"
             // ...
             ICollection<BooleanBinaryRecord> records = Flatten(booleanBinaryExpression).ToArray();
-            return records.Any() && records.All(x => TryCollectSchemaMembers(schema, x.FlagComparison, x.NameComparison, tableDefinition));
+            return records.Any() && records.All(x => TryCollectSchemaMember(schema, x.FlagComparison, x.NameComparison, tableDefinition));
         }
 
         private static void CollectSchemaMembers(EnumSchema schema, InPredicate inPredicate, TableDefinition tableDefinition, ColumnReferenceExpression columnReferenceExpression)
