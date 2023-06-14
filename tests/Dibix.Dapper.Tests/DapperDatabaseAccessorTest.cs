@@ -156,6 +156,23 @@ CommandText: <Inline>", exception.Message);
             Assert.AreEqual(1, result.Id);
             Assert.IsNull(result.Name);
         });
+        
+        [TestMethod]
+        public Task QuerySingle_PrimitiveResult_Success() => base.ExecuteTest(accessor =>
+        {
+            const string commandText = "SELECT 1";
+            bool result = accessor.QuerySingle<bool>(commandText, CommandType.Text, ParametersVisitor.Empty);
+            Assert.AreEqual(true, result);
+        });
+
+        [TestMethod]
+        [Ignore("https://github.com/DapperLib/Dapper/issues/1901")]
+        public Task QuerySingle_PrimitiveResult_Async_Success() => base.ExecuteTest(async accessor =>
+        {
+            const string commandText = "SELECT 1";
+            bool result = await accessor.QuerySingleAsync<bool>(commandText, CommandType.Text, ParametersVisitor.Empty, default).ConfigureAwait(false);
+            Assert.AreEqual(true, result);
+        });
 
         [TestMethod]
         public Task QuerySingle_WithPrimitiveParameter_UsingLambdaSyntax_Success() => base.ExecuteTest(accessor =>

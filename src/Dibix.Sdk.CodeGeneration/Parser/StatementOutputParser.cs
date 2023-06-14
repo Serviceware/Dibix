@@ -93,7 +93,7 @@ namespace Dibix.Sdk.CodeGeneration
                 return false;
 
             int columnCount = results[0].Columns.Count;
-            if (columnCount < 2 || columnCount > 3) 
+            if (columnCount is < 2 or > 3)
                 return false;
 
             ICollection<OutputColumnResult> columns = results[0].Columns;
