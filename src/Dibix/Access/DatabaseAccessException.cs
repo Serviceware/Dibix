@@ -11,6 +11,7 @@ using Microsoft.SqlServer.Server;
 
 namespace Dibix
 {
+    [Serializable]
     public sealed class DatabaseAccessException : Exception
     {
         public CommandType CommandType { get; }
