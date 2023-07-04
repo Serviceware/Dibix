@@ -9,14 +9,16 @@ namespace Dibix.Testing.Http
 {
     internal static class HttpServiceFactory
     {
-        public static TService CreateServiceInstance<TService>(IHttpClientFactory httpClientFactory, IHttpAuthorizationProvider authorizationProvider) => CreateServiceInstance<TService>
+        public static TService CreateServiceInstance<TService>(IHttpClientFactory httpClientFactory, HttpClientOptions httpClientOptions, IHttpAuthorizationProvider authorizationProvider) => CreateServiceInstance<TService>
         (
             new KeyValuePair<Type, object>(typeof(IHttpClientFactory), httpClientFactory)
+          , new KeyValuePair<Type, object>(typeof(HttpClientOptions), httpClientOptions)
           , new KeyValuePair<Type, object>(typeof(IHttpAuthorizationProvider), authorizationProvider)
         );
-        public static TService CreateServiceInstance<TService>(IHttpClientFactory httpClientFactory) => CreateServiceInstance<TService>
+        public static TService CreateServiceInstance<TService>(IHttpClientFactory httpClientFactory, HttpClientOptions httpClientOptions) => CreateServiceInstance<TService>
         (
             new KeyValuePair<Type, object>(typeof(IHttpClientFactory), httpClientFactory)
+          , new KeyValuePair<Type, object>(typeof(HttpClientOptions), httpClientOptions)
         );
 
         private static TService CreateServiceInstance<TService>(params KeyValuePair<Type, object>[] args)

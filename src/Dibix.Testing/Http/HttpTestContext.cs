@@ -5,11 +5,11 @@ using IHttpClientFactory = System.Net.Http.IHttpClientFactory;
 
 namespace Dibix.Testing.Http
 {
-    public class HttpTestContext<TService> : HttpTestContext where TService : IHttpService
+    public sealed class HttpTestContext<TService> : HttpTestContext where TService : IHttpService
     {
         public TService Service { get; }
 
-        public HttpTestContext(TService service, IHttpClientFactory httpClientFactory, IHttpAuthorizationProvider httpAuthorizationProvider) : base(httpClientFactory, httpAuthorizationProvider)
+        internal HttpTestContext(TService service, IHttpClientFactory httpClientFactory, HttpClientOptions httpClientOptions, IHttpAuthorizationProvider httpAuthorizationProvider) : base(httpClientFactory, httpClientOptions, httpAuthorizationProvider)
         {
             Service = service;
         }
@@ -18,16 +18,20 @@ namespace Dibix.Testing.Http
     public class HttpTestContext
     {
         internal IHttpClientFactory HttpClientFactory { get; }
+        internal HttpClientOptions HttpClientOptions { get; }
         public IHttpAuthorizationProvider HttpAuthorizationProvider { get; }
 
-        public HttpTestContext(IHttpClientFactory httpClientFactory, IHttpAuthorizationProvider httpAuthorizationProvider)
+        internal HttpTestContext(IHttpClientFactory httpClientFactory, HttpClientOptions httpClientOptions, IHttpAuthorizationProvider httpAuthorizationProvider)
         {
             HttpClientFactory = httpClientFactory;
+            HttpClientOptions = httpClientOptions;
             HttpAuthorizationProvider = httpAuthorizationProvider;
         }
 
-        public TService CreateService<TService>() => HttpServiceFactory.CreateServiceInstance<TService>(HttpClientFactory, HttpAuthorizationProvider);
+        public TService CreateService<TService>() => HttpServiceFactory.CreateServiceInstance<TService>(HttpClientFactory, HttpClientOptions, HttpAuthorizationProvider);
 
         public HttpClient CreateClient() => HttpClientFactory.CreateClient(TestHttpClientFactoryBuilder.HttpClientName);
+
+        public void ConfigureClient(Action<HttpClientOptions> configure) => configure(HttpClientOptions);
     }
 }

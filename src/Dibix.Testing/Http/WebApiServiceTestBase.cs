@@ -16,10 +16,10 @@ namespace Dibix.Testing.Http
         #endregion
 
         #region Private Methods
-        private static HttpTestContext<TService> CreateTestContext(IHttpClientFactory httpClientFactory, IHttpAuthorizationProvider authorizationProvider)
+        private static HttpTestContext<TService> CreateTestContext(IHttpClientFactory httpClientFactory, HttpClientOptions httpClientOptions, IHttpAuthorizationProvider authorizationProvider)
         {
-            TService service = HttpServiceFactory.CreateServiceInstance<TService>(httpClientFactory, authorizationProvider);
-            return new HttpTestContext<TService>(service, httpClientFactory, authorizationProvider);
+            TService service = HttpServiceFactory.CreateServiceInstance<TService>(httpClientFactory, httpClientOptions, authorizationProvider);
+            return new HttpTestContext<TService>(service, httpClientFactory, httpClientOptions, authorizationProvider);
         }
 
         private Task<TContent> InvokeApi<TContent>(TService service, Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector)

@@ -39,13 +39,14 @@ namespace Dibix.Sdk.CodeGeneration
 
             @class.AddField("_httpClientName", "string", modifiers: CSharpModifiers.Private | CSharpModifiers.ReadOnly);
             @class.AddField("_httpClientFactory", "IHttpClientFactory", modifiers: CSharpModifiers.Private | CSharpModifiers.ReadOnly);
+            @class.AddField("_httpClientOptions", "HttpClientOptions", modifiers: CSharpModifiers.Private | CSharpModifiers.ReadOnly);
 
             if (requiresAuthorization)
                 @class.AddField("_httpAuthorizationProvider", "IHttpAuthorizationProvider", modifiers: CSharpModifiers.Private | CSharpModifiers.ReadOnly);
 
             @class.AddSeparator();
 
-          //AddCtorWithoutClientName(context, @class, requiresAuthorization);
+            AddCtorWithoutClientOptions(@class, requiresAuthorization);
             AddPrimaryCtor(@class, requiresAuthorization);
 
             @class.AddSeparator();
@@ -66,7 +67,9 @@ namespace Dibix.Sdk.CodeGeneration
         #region Private Methods
         private static void AddPrimaryCtor(CSharpClass @class, bool requiresAuthorization)
         {
-            StringBuilder ctorBodySb = new StringBuilder("_httpClientFactory = httpClientFactory;");
+            StringBuilder ctorBodySb = new StringBuilder();
+            ctorBodySb.AppendLine("_httpClientFactory = httpClientFactory;")
+                      .Append("_httpClientOptions = httpClientOptions;");
 
             if (requiresAuthorization)
             {
@@ -79,7 +82,8 @@ namespace Dibix.Sdk.CodeGeneration
 
             string ctorBody = ctorBodySb.ToString();
             CSharpConstructor ctor = @class.AddConstructor(ctorBody)
-                                           .AddParameter("httpClientFactory", "IHttpClientFactory");
+                                           .AddParameter("httpClientFactory", "IHttpClientFactory")
+                                           .AddParameter("httpClientOptions", "HttpClientOptions");
 
             if (requiresAuthorization)
                 ctor.AddParameter("httpAuthorizationProvider", "IHttpAuthorizationProvider");
@@ -87,7 +91,7 @@ namespace Dibix.Sdk.CodeGeneration
             ctor.AddParameter("httpClientName", "string");
         }
 
-        private static void AddCtorWithoutClientName(CodeGenerationContext context, CSharpClass @class, bool requiresAuthorization)
+        private static void AddCtorWithoutClientOptions(CSharpClass @class, bool requiresAuthorization)
         {
             CSharpConstructor ctor = @class.AddConstructor()
                                            .AddParameter("httpClientFactory", "IHttpClientFactory");
@@ -95,15 +99,16 @@ namespace Dibix.Sdk.CodeGeneration
             if (requiresAuthorization)
                 ctor.AddParameter("httpAuthorizationProvider", "IHttpAuthorizationProvider");
 
+            ctor.AddParameter("httpClientName", "string");
+
             ICSharpConstructorInvocationExpression constructorThisCall = ctor.CallThis()
-                                                                             .AddParameter(new CSharpValue("httpClientFactory"));
+                                                                             .AddParameter(new CSharpValue("httpClientFactory"))
+                                                                             .AddParameter(new CSharpValue("HttpClientOptions.Default"));
 
             if (requiresAuthorization)
                 constructorThisCall.AddParameter(new CSharpValue("httpAuthorizationProvider"));
 
-            context.AddUsing("Microsoft.Extensions.Options");
-            const string defaultClientNameValue = "Options.DefaultName";
-            constructorThisCall.AddParameter(new CSharpValue(defaultClientNameValue));
+            constructorThisCall.AddParameter(new CSharpValue("httpClientName"));
         }
 
         private string GenerateMethodBody(ControllerDefinition controller, ActionDefinition action, CodeGenerationContext context, IDictionary<string, SecurityScheme> securitySchemeMap)
@@ -214,7 +219,7 @@ namespace Dibix.Sdk.CodeGeneration
                 else
                 {
                     //context.AddReference<MediaTypeFormatter>();
-                    writer.WriteRaw($"ReadAsAsync<{responseContentType}>(MediaTypeFormattersFactory.Create(client), cancellationToken)");
+                    writer.WriteRaw($"ReadAsAsync<{responseContentType}>(MediaTypeFormattersFactory.Create(_httpClientOptions, client), cancellationToken)");
                 }
 
                 writer.WriteLineRaw($".{nameof(Task.ConfigureAwait)}(false);");
