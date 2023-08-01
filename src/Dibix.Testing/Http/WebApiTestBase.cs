@@ -5,11 +5,10 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Dibix.Http.Client;
 using Dibix.Testing.Data;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
-using IHttpClientBuilder = Microsoft.Extensions.DependencyInjection.IHttpClientBuilder;
-using IHttpClientFactory = System.Net.Http.IHttpClientFactory;
 
 namespace Dibix.Testing.Http
 {
@@ -114,8 +113,12 @@ namespace Dibix.Testing.Http
                 _httpClientOptions = httpClientOptions;
             }
 
-            public TService CreateService<TService>() => HttpServiceFactory.CreateServiceInstance<TService>(_httpClientFactory, _httpClientOptions);
-            public TService CreateService<TService>(IHttpAuthorizationProvider authorizationProvider) => HttpServiceFactory.CreateServiceInstance<TService>(_httpClientFactory, _httpClientOptions, authorizationProvider);
+            public TService CreateService<TService>() => HttpServiceFactory.CreateServiceInstance<TService>(_httpClientFactory, _httpClientOptions, new EmptyHttpAuthorizationProvider());
+        }
+
+        private sealed class EmptyHttpAuthorizationProvider : IHttpAuthorizationProvider
+        {
+            public string GetValue(string headerName) => null;
         }
         #endregion
     }

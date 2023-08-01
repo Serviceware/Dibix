@@ -2,8 +2,6 @@
 using System.Net.Http;
 using Dibix.Http.Client;
 using Microsoft.Extensions.DependencyInjection;
-using IHttpClientBuilder = Microsoft.Extensions.DependencyInjection.IHttpClientBuilder;
-using IHttpClientFactory = System.Net.Http.IHttpClientFactory;
 
 namespace Dibix.Testing.Http
 {

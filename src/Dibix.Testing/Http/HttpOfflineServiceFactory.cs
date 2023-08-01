@@ -140,5 +140,12 @@ namespace Dibix.Testing.Http
             return moduleBuilder;
         }
         #endregion
+
+        #region Nested Types
+        private sealed class EmptyHttpAuthorizationProvider : IHttpAuthorizationProvider
+        {
+            public string GetValue(string headerName) => null;
+        }
+        #endregion
     }
 }
