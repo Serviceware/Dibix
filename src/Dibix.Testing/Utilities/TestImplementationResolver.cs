@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -8,7 +9,13 @@ namespace Dibix.Testing
 {
     internal static class TestImplementationResolver
     {
-        public static Assembly ResolveTestAssembly(TestContext testContext)
+        private static readonly ConcurrentDictionary<TestContext, Assembly> TestAssemblyCache = new ConcurrentDictionary<TestContext, Assembly>();
+
+        public static Assembly ResolveTestAssembly(TestContext testContext) => TestAssemblyCache.GetOrAdd(testContext, ResolveTestAssemblyCore);
+
+        public static MethodInfo ResolveTestMethod(TestContext testContext) => ResolveTestMethodFromTestContext(testContext);
+
+        private static Assembly ResolveTestAssemblyCore(TestContext testContext)
         {
             Assembly assembly = TryResolveTestAssemblyFromTestContext(testContext);
 
@@ -23,8 +30,6 @@ namespace Dibix.Testing
 
             return assembly;
         }
-
-        public static MethodInfo ResolveTestMethod(TestContext testContext) => ResolveTestMethodFromTestContext(testContext);
 
         // Not stable, because it uses reflection and expects a specific test host implementation
         private static Assembly TryResolveTestAssemblyFromTestContextImplementation(TestContext testContext)

@@ -26,7 +26,7 @@ namespace Dibix.Testing.Http
 
         public static TestHttpClientFactoryBuilder Create(TestContext testContext, TextWriter logger) => new TestHttpClientFactoryBuilder(testContext, logger);
 
-        protected override void Configure(Microsoft.Extensions.DependencyInjection.IHttpClientBuilder builder)
+        protected override void Configure(IHttpClientBuilder builder)
         {
             builder.AddHttpMessageHandler(() => new LoggingHttpMessageHandler(_logger));
         }

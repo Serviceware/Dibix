@@ -10,10 +10,10 @@ namespace Dibix.Testing
     {
         public static T Load<T>(TestContext testContext, Action<T> initializationAction = null) where T : new()
         {
-            IConfigurationRoot root = new ConfigurationBuilder().AddUserSecrets("dibix")
+            IConfigurationRoot root = new ConfigurationBuilder().AddUserSecrets(TestImplementationResolver.ResolveTestAssembly(testContext))
                                                                 .AddEnvironmentVariables()
                                                                 .AddJsonFile("appsettings.json", optional: true)
-                                                                .AddJsonFile($"appsettings.{System.Environment.MachineName}.json", optional: true)
+                                                                .AddJsonFile($"appsettings.{Environment.MachineName}.json", optional: true)
                                                                 .AddRunSettings(testContext)
                                                                 .Build();
 
