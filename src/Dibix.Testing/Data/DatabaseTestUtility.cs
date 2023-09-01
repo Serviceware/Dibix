@@ -7,15 +7,16 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
+using Dibix.Testing.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dibix.Testing.Data
 {
     public static class DatabaseTestUtility
     {
-        public static IDatabaseAccessorFactory CreateDatabaseAccessorFactory<TConfiguration>(TestContext testContext) where TConfiguration : DatabaseConfigurationBase, new()
+        public static IDatabaseAccessorFactory CreateDatabaseAccessorFactory<TConfiguration>(TestContext testContext, TestConfigurationValidationBehavior configurationValidationBehavior = TestDefaults.ValidationBehavior) where TConfiguration : DatabaseConfigurationBase, new()
         {
-            TConfiguration configuration = TestConfigurationLoader.Load<TConfiguration>(testContext);
+            TConfiguration configuration = TestConfigurationLoader.Load<TConfiguration>(testContext, configurationValidationBehavior);
             return CreateDatabaseAccessorFactory(configuration);
         }
         public static IDatabaseAccessorFactory CreateDatabaseAccessorFactory<TConfiguration>(TConfiguration configuration, int? defaultCommandTimeout = null) where TConfiguration : DatabaseConfigurationBase, new()

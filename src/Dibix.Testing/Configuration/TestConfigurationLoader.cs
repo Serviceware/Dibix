@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Dibix.Testing.Configuration;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dibix.Testing
 {
     internal static class TestConfigurationLoader
     {
-        public static T Load<T>(TestContext testContext, Action<T> initializationAction = null) where T : new()
+        public static T Load<T>(TestContext testContext, TestConfigurationValidationBehavior validationBehavior, Action<T> initializationAction = null) where T : class, new()
         {
             IConfigurationRoot root = new ConfigurationBuilder().AddUserSecrets(TestImplementationResolver.ResolveTestAssembly(testContext))
                                                                 .AddEnvironmentVariables()
@@ -17,13 +20,50 @@ namespace Dibix.Testing
                                                                 .AddRunSettings(testContext)
                                                                 .Build();
 
-            ConfigurationInitializationToken initializationToken = new ConfigurationInitializationToken();
-            T instance = ConfigurationProxyBuilder.BuildProxyIfNeeded<T>(initializationToken);
-            CollectConfigurationSections(root, testContext).Each(x => Microsoft.Extensions.Configuration.Dibix.ConfigurationBinder.Bind(x, instance));
-            initializationAction?.Invoke(instance);
-            initializationToken.IsInitialized = true;
+            T instance = BindConfigurationInstance(root, testContext, validationBehavior, initializationAction);
 
             return instance;
+        }
+
+        private static T BindConfigurationInstance<T>(IConfiguration configuration, TestContext testContext, TestConfigurationValidationBehavior validationBehavior, Action<T> initializationAction) where T : class, new()
+        {
+            switch (validationBehavior)
+            {
+                case TestConfigurationValidationBehavior.None: return BindConfigurationInstanceWithNoValidation<T>(configuration);
+                case TestConfigurationValidationBehavior.Lazy: return BindConfigurationInstanceWithLazyValidation(configuration, testContext, initializationAction);
+                case TestConfigurationValidationBehavior.DataAnnotations: return BindConfigurationInstanceWithDataAnnotationsValidation<T>(configuration);
+                default: throw new ArgumentOutOfRangeException(nameof(validationBehavior), validationBehavior, null);
+            }
+        }
+
+        private static T BindConfigurationInstanceWithNoValidation<T>(IConfiguration configuration) where T : new()
+        {
+            T instance = new T();
+            configuration.Bind(instance);
+            return instance;
+        }
+
+        private static T BindConfigurationInstanceWithLazyValidation<T>(IConfiguration configuration, TestContext testContext, Action<T> initializationAction) where T : new()
+        {
+            ConfigurationInitializationToken initializationToken = new ConfigurationInitializationToken();
+            T instance = ConfigurationProxyBuilder.BuildProxyIfNeeded<T>(initializationToken);
+            CollectConfigurationSections(configuration, testContext).Each(x => Microsoft.Extensions.Configuration.Dibix.ConfigurationBinder.Bind(x, instance));
+            initializationAction?.Invoke(instance);
+            initializationToken.IsInitialized = true;
+            return instance;
+        }
+
+        private static T BindConfigurationInstanceWithDataAnnotationsValidation<T>(IConfiguration configuration) where T : class
+        {
+            ServiceCollection services = new ServiceCollection();
+            services.AddOptions<T>()
+                    .Bind(configuration)
+                    .ValidateDataAnnotations();
+
+            ServiceProvider serviceProvider = services.BuildServiceProvider();
+
+            IOptions<T> testOptions = serviceProvider.GetRequiredService<IOptions<T>>();
+            return testOptions.Value;
         }
 
         private static IEnumerable<IConfiguration> CollectConfigurationSections(IConfiguration root, TestContext testContext)

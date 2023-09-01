@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Dibix.Testing.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 
@@ -33,6 +34,7 @@ namespace Dibix.Testing
             private set => this._testOutputHelper = value;
         }
         protected virtual bool AttachOutputObserver => false;
+        protected virtual TestConfigurationValidationBehavior ConfigurationValidationBehavior => TestDefaults.ValidationBehavior;
         protected virtual TextWriter Out => this.TestOutputHelper;
         protected string RunDirectory => this.TestResultComposer.RunDirectory;
         protected string TestDirectory => this.TestResultComposer.TestDirectory;
@@ -190,7 +192,7 @@ Value: {instance}");
 
         protected override Task OnTestInitialized()
         {
-            Configuration = TestConfigurationLoader.Load<TConfiguration>(base.TestContext, AddConfigurationToOutput);
+            Configuration = TestConfigurationLoader.Load<TConfiguration>(base.TestContext, ConfigurationValidationBehavior, AddConfigurationToOutput);
             return Task.CompletedTask;
         }
 

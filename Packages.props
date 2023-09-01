@@ -20,6 +20,8 @@
     <PackageReference Update="Microsoft.Extensions.Hosting"                            Version="7.0.1"      />
     <PackageReference Update="Microsoft.Extensions.Hosting.WindowsServices"            Version="7.0.0"      />
     <PackageReference Update="Microsoft.Extensions.Options"                            Version="7.0.1"      />
+    <PackageReference Update="Microsoft.Extensions.Options.ConfigurationExtensions"    Version="6.0.0"      />
+    <PackageReference Update="Microsoft.Extensions.Options.DataAnnotations"            Version="6.0.0"      />
     <PackageReference Update="Microsoft.NET.Test.Sdk"                                  Version="17.3.2"     />
     <PackageReference Update="Microsoft.OpenApi"                                       Version="1.4.2"      />
     <PackageReference Update="Microsoft.SqlServer.DacFx"                               Version="150.5282.3" />
