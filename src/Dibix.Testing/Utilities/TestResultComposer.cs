@@ -19,6 +19,7 @@ namespace Dibix.Testing
         private readonly bool _useDedicatedTestResultsDirectory;
         private readonly string _defaultRunDirectory;
         private readonly string _expectedDirectory;
+        private readonly string _normalizedTestName;
         private readonly string _actualDirectory;
         private readonly ICollection<string> _testRunFiles;
         private readonly ICollection<string> _testFiles;
@@ -33,9 +34,10 @@ namespace Dibix.Testing
             this._testContext = testContext;
             this._useDedicatedTestResultsDirectory = useDedicatedTestResultsDirectory;
             this._defaultRunDirectory = testContext.TestRunResultsDirectory;
-            this.RunDirectory = this._useDedicatedTestResultsDirectory ? TestRun.GetTestRunDirectory(testContext) : this._defaultRunDirectory;
+            this.RunDirectory = this._useDedicatedTestResultsDirectory ? TestContextUtility.GetTestRunDirectory(testContext) : this._defaultRunDirectory;
             this.TestRootDirectory = Path.Combine(this.RunDirectory, "Tests");
-            this.TestDirectory = Path.Combine(this.TestRootDirectory, testContext.TestName);
+            this._normalizedTestName = String.Join("_", TestContextUtility.GetTestName(testContext).Split(Path.GetInvalidFileNameChars()));
+            this.TestDirectory = Path.Combine(this.TestRootDirectory, _normalizedTestName);
             this._expectedDirectory = Path.Combine(this.RunDirectory, ExpectedDirectoryName);
             this._actualDirectory = Path.Combine(this.RunDirectory, ActualDirectoryName);
             this._testRunFiles = new HashSet<string>();
@@ -206,7 +208,7 @@ start winmergeU ""{ExpectedDirectoryName}"" ""{ActualDirectoryName}""");
             if (!files.Any())
                 return;
 
-            string path = Path.Combine(this.TestRootDirectory, $"{this._testContext.TestName}.zip");
+            string path = Path.Combine(this.TestRootDirectory, $"{this._normalizedTestName}.zip");
             using (ZipArchive archive = ZipFile.Open(path, ZipArchiveMode.Create))
             {
                 foreach (string file in files)
