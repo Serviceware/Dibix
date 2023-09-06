@@ -1,6 +1,16 @@
 trigger: none # We only want to trigger manually or based on resources
 pr: none
 
+parameters:
+- name: publishNuGetPackages
+  displayName: Publish NuGet packages
+  type: boolean
+  default: true
+- name: createGitHubRelease
+  displayName: Create GitHub release
+  type: boolean
+  default: true
+
 resources:
   pipelines:
   - pipeline: CI
@@ -34,6 +44,7 @@ jobs:
       packagesToPush: "$(Pipeline.Workspace)/CI/NuGet packages/*.nupkg"
       nuGetFeedType: external
       publishFeedCredentials: NuGet.org
+    condition: and(succeeded(), eq(${{ parameters.publishNuGetPackages }}, true))
 
   - download: CI
     artifact: Publish output (Linux)
@@ -68,3 +79,4 @@ jobs:
           { "label" : "bug", "displayName" : "Fixes", "state" : "closed" },
           { "label" : "enhancement", "displayName": "Enhancements", "state" : "closed" }
         ]
+    condition: and(succeeded(), eq(${{ parameters.createGitHubRelease }}, true))
