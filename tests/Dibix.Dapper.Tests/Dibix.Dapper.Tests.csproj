@@ -2,6 +2,7 @@
   
   <PropertyGroup>    
     <TargetFramework>net6.0</TargetFramework>
+    <UserSecretsId>dibix-dapper-tests</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

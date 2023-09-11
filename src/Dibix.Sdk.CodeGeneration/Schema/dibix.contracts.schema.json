@@ -146,6 +146,9 @@
                 "isRelativeHttpsUrl": {
                   "type": "boolean",
                   "const": true
+                },
+                "serialize": {
+                  "$ref": "#/definitions/SerializationBehavior"
                 }
               },
               "required": [
