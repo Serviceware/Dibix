@@ -22,7 +22,7 @@ namespace Dibix.Http.Server.Tests
             return result;
         }
 
-        private void Assert(string actualText)
+        private void AssertGeneratedText(string actualText)
         {
             const string extension = "txt";
             string expectedKey = $"{TestContext.TestName}.{extension}";
