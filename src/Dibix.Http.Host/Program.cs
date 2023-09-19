@@ -2,7 +2,6 @@
 using System.Data.Common;
 using System.Threading.Tasks;
 using Dibix.Hosting.Abstractions.Data;
-using Dibix.Http.Host.Runtime;
 using Dibix.Http.Server;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -11,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Configuration;
 
 namespace Dibix.Http.Host
 {
@@ -38,6 +38,8 @@ namespace Dibix.Http.Host
                     .AddSingleton<IEndpointImplementationProvider, DefaultEndpointImplementationProvider>()
                     .AddSingleton<IEndpointRegistrar, DefaultEndpointRegistrar>()
                     .AddScoped<IParameterDependencyResolver, ParameterDependencyResolver>();
+
+            services.AddEventLogOptions();
 
             IConfigurationSection hostingConfigurationSection = builder.Configuration.GetSection(HostingOptions.ConfigurationSectionName);
             HostingOptions hostingOptions = hostingConfigurationSection.Bind<HostingOptions>();

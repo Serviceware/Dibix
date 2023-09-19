@@ -8,14 +8,15 @@
 
   <ItemGroup>
     <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
-    <Compile Include="..\..\shared\Hosting\Data\*" Link="Data\%(Filename)%(Extension)" />
-    <Compile Remove="..\..\shared\Hosting\Data\DatabaseOptions.cs" />
     <Compile Include="..\..\shared\Extensions\BindConfigurationExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Extensions\EnumerableExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Extensions\ReflectionExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Extensions\ServiceCollectionServiceExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Hosting\ComponentAssemblyLoadContext.cs" Link="Hosting\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Hosting\ExtensionRegistrationUtility.cs" Link="Hosting\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Hosting\EventLogLoggerExtensions.cs" Link="Hosting\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Hosting\Data\*" Link="Data\%(Filename)%(Extension)" />
+    <Compile Remove="..\..\shared\Hosting\Data\DatabaseOptions.cs" />
   </ItemGroup>
 
   <ItemGroup>

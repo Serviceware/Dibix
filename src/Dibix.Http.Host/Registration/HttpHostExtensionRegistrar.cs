@@ -2,6 +2,7 @@
 using System.IO;
 using System.Runtime.Loader;
 using Dibix.Hosting.Abstractions;
+using Dibix.Hosting.Abstractions.Data;
 using Dibix.Http.Host.Runtime;
 using Dibix.Http.Server;
 using Microsoft.AspNetCore.Authentication;
@@ -59,6 +60,12 @@ namespace Dibix.Http.Host
             public IHttpHostExtensionConfigurationBuilder RegisterDependency<TInterface, TImplementation>() where TInterface : class where TImplementation : class, TInterface
             {
                 _services.AddScoped<TInterface, TImplementation>();
+                return this;
+            }
+
+            public IHttpHostExtensionConfigurationBuilder ConfigureConnectionString(Func<string?, string?> configure)
+            {
+                _services.Configure<DatabaseOptions>(x => x.ConnectionString = configure(x.ConnectionString));
                 return this;
             }
         }

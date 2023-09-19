@@ -9,6 +9,7 @@
   <ItemGroup>
     <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Hosting\ComponentAssemblyLoadContext.cs" Link="Hosting\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Hosting\EventLogLoggerExtensions.cs" Link="Hosting\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Hosting\ExtensionRegistrationUtility.cs" Link="Hosting\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Hosting\Data\*" Link="Data\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Extensions\BindConfigurationExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />

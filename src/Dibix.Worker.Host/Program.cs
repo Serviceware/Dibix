@@ -8,7 +8,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
-using Microsoft.Extensions.Logging.EventLog;
 
 namespace Dibix.Worker.Host
 {
@@ -19,11 +18,6 @@ namespace Dibix.Worker.Host
             HostApplicationBuilder builder = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder(args);
             builder.Configuration.AddJsonFile($"appsettings.{Environment.MachineName}.json", optional: true, reloadOnChange: true);
             IServiceCollection services = builder.Services;
-
-            // EventLog settings are not automatically read from appsettings.json
-            // See: https://github.com/dotnet/runtime/issues/47303
-            if (OperatingSystem.IsWindows())
-                LoggerProviderOptions.RegisterProviderOptions<EventLogSettings, EventLogLoggerProvider>(services);
 
             services.AddSingleton<IDatabaseConnectionFactory, DefaultDatabaseConnectionFactory>()
                     .AddScoped<DbConnection>(x => x.GetRequiredService<IDatabaseConnectionFactory>().Create())
@@ -39,6 +33,8 @@ namespace Dibix.Worker.Host
                     .AddSingleton<IServiceBrokerMessageReader, ServiceBrokerMessageReader>()
                     .AddSingleton<IHostedServiceEvents, HostedServiceEvents>()
                     .AddHostedService<DatabaseOptionsMonitor>();
+
+            services.AddEventLogOptions();
 
             services.Configure<DatabaseOptions>(builder.Configuration.GetSection(DatabaseOptions.ConfigurationSectionName));
             HostingOptions hostingOptions = builder.Configuration.GetSection(HostingOptions.ConfigurationSectionName).Bind<HostingOptions>();
