@@ -32,6 +32,10 @@ jobs:
       Write-Host "##vso[task.setvariable variable=IsPreRelease]$('$(resources.pipeline.CI.runName)'.Contains('-'))"
       Write-Host "##vso[task.setvariable variable=IsPreview]$('$(resources.pipeline.CI.runName)'.Contains('+'))"
     displayName: 🖌️ Update pipeline instance name
+  - powershell: |
+      Write-Host "IsPreRelease = $(IsPreRelease)"
+      Write-Host "IsPreview = $(IsPreview)"
+    displayName: 📖 Print configuration
 
   - download: CI
     artifact: NuGet packages
