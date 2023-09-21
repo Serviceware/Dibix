@@ -397,6 +397,17 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                 }
             };
 
+            // https://stackoverflow.com/questions/40920441/how-to-specify-a-property-can-be-null-or-a-reference-with-swagger/48114924#48114924
+            // OpenAPI 3.0
+            if (typeReference.IsNullable)
+            {
+                openApiSchema = new OpenApiSchema
+                {
+                    Nullable = true,
+                    AllOf = { openApiSchema }
+                };
+            }
+
             // OpenAPI 3.1
             /*
             if (typeReference.IsNullable)

@@ -129,7 +129,9 @@ paths:
           in: query
           style: form
           schema:
-            $ref: '#/components/schemas/Direction'
+            allOf:
+              - $ref: '#/components/schemas/Direction'
+            nullable: true
         - name: g
           in: query
           style: form
@@ -237,7 +239,9 @@ paths:
           in: query
           style: form
           schema:
-            $ref: '#/components/schemas/Direction'
+            allOf:
+              - $ref: '#/components/schemas/Direction'
+            nullable: true
         - name: g
           in: query
           style: form
@@ -401,7 +405,9 @@ paths:
           in: query
           style: form
           schema:
-            $ref: '#/components/schemas/Direction'
+            allOf:
+              - $ref: '#/components/schemas/Direction'
+            nullable: true
         - name: g
           in: query
           style: form
@@ -471,7 +477,9 @@ paths:
           in: query
           style: form
           schema:
-            $ref: '#/components/schemas/Direction'
+            allOf:
+              - $ref: '#/components/schemas/Direction'
+            nullable: true
         - name: g
           in: query
           style: form
