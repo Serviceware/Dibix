@@ -101,6 +101,7 @@ namespace Dibix.Testing
 
         protected virtual void ConfigureEventLogDiagnostics(EventLogDiagnosticsOptions options) { }
 
+        protected string AddResultFile(string filePath) => this.TestResultComposer.AddFile(filePath);
         protected string AddResultFile(string fileName, string content) => this.TestResultComposer.AddFile(fileName, content);
 
         protected static void AssertAreEqual<T>(IEnumerable<T> expected, IEnumerable<T> actual) => Assert.IsTrue(expected.SequenceEqual(actual), "expected.SequenceEqual(actual)");
