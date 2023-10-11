@@ -34,7 +34,7 @@ namespace Dibix.Http.Host
                 IEndpointConventionBuilder endpointBuilder = builder.MapMethods(route, EnumerableExtensions.Create(endpoint.Method), _endpointImplementationProvider.GetImplementation(endpoint));
                 
                 if (!endpoint.Definition.IsAnonymous)
-                    endpointBuilder.RequireAuthorization(AuthorizationOptions.SchemeName);
+                    endpointBuilder.RequireAuthorization(AuthenticationOptions.SchemeName);
             }
         }
     }

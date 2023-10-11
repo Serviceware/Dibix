@@ -46,10 +46,10 @@ namespace Dibix.Http.Host
 
             services.Configure<DatabaseOptions>(builder.Configuration.GetSection(DatabaseOptions.ConfigurationSectionName))
                     .Configure<HostingOptions>(hostingConfigurationSection)
-                    .Configure<AuthorizationOptions>(builder.Configuration.GetSection(AuthorizationOptions.ConfigurationSectionName))
+                    .Configure<AuthenticationOptions>(builder.Configuration.GetSection(AuthenticationOptions.ConfigurationSectionName))
                     .Configure<CorsOptions>(builder.Configuration.GetSection(CorsOptions.ConfigurationSectionName))
-                    .ConfigureTarget<JwtBearerOptions>(builder.Configuration)
-                    .MapFrom<AuthorizationOptions>(AuthorizationOptions.ConfigurationSectionName, (from, to) =>
+                    .ConfigureTarget<JwtBearerOptions>(builder.Configuration, AuthenticationOptions.SchemeName)
+                    .MapFrom<AuthenticationOptions>(AuthenticationOptions.ConfigurationSectionName, (from, to) =>
                     {
                         to.Authority = from.Authority;
                         to.TokenValidationParameters.ValidAudience = from.Audience;
@@ -59,12 +59,12 @@ namespace Dibix.Http.Host
             services.AddLogging(x => x.AddSimpleConsole(y => y.TimestampFormat = "\x1B[1'm'\x1B[37'm'[yyyy-MM-dd HH:mm:ss.fff\x1B[39'm'\x1B[22'm'] "));
 
             services.AddAuthentication()
-                    .AddJwtBearer(AuthorizationOptions.SchemeName, x =>
+                    .AddJwtBearer(AuthenticationOptions.SchemeName, x =>
                     {
                     });
             services.AddAuthorization(x =>
             {
-                x.AddPolicy(AuthorizationOptions.SchemeName, y => y.AddAuthenticationSchemes(AuthorizationOptions.SchemeName)
+                x.AddPolicy(AuthenticationOptions.SchemeName, y => y.AddAuthenticationSchemes(AuthenticationOptions.SchemeName)
                                                                    .RequireAuthenticatedUser()
                                                                    .Build());
             });

@@ -1,8 +1,4 @@
 <Project>
-  <PropertyGroup>
-    <DefaultItemExcludes Condition="'$(IsTestProject)' == 'true'">$(DefaultItemExcludes);TestResults\**</DefaultItemExcludes>
-  </PropertyGroup>
-
   <ItemGroup>
     <None Remove="*.dotsettings" />
     <None Remove=".DS_Store" />

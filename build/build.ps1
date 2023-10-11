@@ -37,13 +37,15 @@ function Exec
     }
 }
 
+Write-Warning -WarningAction Inquire "Please ensure, that none of the projects are currently opened in Visual Studio, before running this script. Otherwise it will automatically restore these projects after clean using the wrong runtimes."
+
 Exec $cleanPath
 
 Exec "dotnet restore --runtime $runtimeIdentifier
                      --p:PublishReadyToRun=$publishReadyToRun
                      $rootPath"
 
-$projects = @(
+$projectsToBuild = @(
     'Dibix'
     'Dibix.Dapper'
     'Dibix.Sdk.Abstractions'
@@ -59,35 +61,45 @@ $projects = @(
     'Dibix.Worker.Abstractions'
 )
 
-foreach ($project in $projects)
+foreach ($projectToBuild in $projectsToBuild)
 {
-    $projectSourcePath = Join-Path $sourcePath $project
+    $projectSourcePath = Join-Path $sourcePath $projectToBuild
     Exec "dotnet build $projectSourcePath
                        --configuration $Configuration
                        --no-restore
                        --no-dependencies
-                       --bl:$LoggingDirectory/$Configuration/$project.binlog
+                       --bl:$LoggingDirectory/$Configuration/$projectToBuild.binlog
                        --p:PublishSingleFile=False
                        --no-self-contained"
 }
 
-$hostSourcePath = Join-Path $sourcePath 'Dibix.Worker.Host'
-Exec "dotnet build $hostSourcePath
-                   --configuration $Configuration
-                   --runtime $runtimeIdentifier
-                   --no-restore
-                   --no-dependencies
-                   --bl:$LoggingDirectory/$Configuration/$project.binlog
-                   --p:PublishSingleFile=$publishSingleFile
-                   --no-self-contained"
+$projectsToPublish = @(
+    'Dibix.Http.Host'
+    'Dibix.Worker.Host'
+)
 
-Exec "dotnet publish $hostSourcePath
-                     --configuration $Configuration
-                     --runtime $runtimeIdentifier
-                     --no-self-contained
-                     --no-restore
-                     --no-build
-                     --p:IgnoreProjectGuid=True
-                     --p:PublishReadyToRun=$publishReadyToRun
-                     --p:PublishSingleFile=$publishSingleFile
-                     --p:IncludeNativeLibrariesForSelfExtract=True"
+foreach ($projectToPublish in $projectsToPublish)
+{
+    $projectSourcePath = Join-Path $sourcePath $projectToPublish
+    
+    # Build again for specific runtime
+    Exec "dotnet build $projectSourcePath
+                       --configuration $Configuration
+                       --runtime $runtimeIdentifier
+                       --no-restore
+                       --no-dependencies
+                       --bl:$LoggingDirectory/$Configuration/$projectToBuild.binlog
+                       --p:PublishSingleFile=$publishSingleFile
+                       --no-self-contained"
+
+    Exec "dotnet publish $projectSourcePath
+                         --configuration $Configuration
+                         --runtime $runtimeIdentifier
+                         --no-self-contained
+                         --no-restore
+                         --no-build
+                         --p:IgnoreProjectGuid=True
+                         --p:PublishReadyToRun=$publishReadyToRun
+                         --p:PublishSingleFile=$publishSingleFile
+                         --p:IncludeNativeLibrariesForSelfExtract=True"
+}

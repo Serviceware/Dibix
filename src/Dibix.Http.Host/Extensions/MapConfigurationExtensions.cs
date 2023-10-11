@@ -7,7 +7,8 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     internal static class MapConfigurationExtensions
     {
-        public static IConfigurationMappingExpression<TOptions> ConfigureTarget<TOptions>(this IServiceCollection services, IConfiguration configuration) where TOptions : class
+        public static IConfigurationMappingExpression<TOptions> ConfigureTarget<TOptions>(this IServiceCollection services, IConfiguration configuration) where TOptions : class => ConfigureTarget<TOptions>(services, configuration, Options.Options.DefaultName);
+        public static IConfigurationMappingExpression<TOptions> ConfigureTarget<TOptions>(this IServiceCollection services, IConfiguration configuration, string name) where TOptions : class
         {
             if (services == null)
                 throw new ArgumentNullException(nameof(services));
@@ -16,7 +17,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(configuration));
 
             services.AddOptions();
-            return ConfigurationMappingExpression<TOptions>.Create(name: Options.Options.DefaultName, services, configuration);
+            return ConfigurationMappingExpression<TOptions>.Create(name, services, configuration);
         }
 
         private sealed class ConfigurationMappingExpression<TToOptions> : IConfigurationMappingExpression<TToOptions> where TToOptions : class
