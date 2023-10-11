@@ -1,5 +1,4 @@
 <Project>
-
   <PropertyGroup>
     <Product>Dibix</Product>
     <Company>Serviceware SE</Company>
@@ -10,14 +9,16 @@
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)build\signing-key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <LangVersion>latest</LangVersion>
-
     <DebugType>embedded</DebugType>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <ContinuousIntegrationBuild Condition="'$(TF_BUILD)' == 'true'">true</ContinuousIntegrationBuild>
-    <DefineConstants Condition="'$(ContinuousIntegrationBuild)' == 'true'">$(DefineConstants);CI_BUILD</DefineConstants>
+    <ManagePackageVersionsCentrally>True</ManagePackageVersionsCentrally>
+    <CentralPackageVersionOverrideEnabled>True</CentralPackageVersionOverrideEnabled>
 
     <RootDirectory>$(MSBuildThisFileDirectory)</RootDirectory>
     <GitVersionBaseDirectory>$(MSBuildThisFileDirectory)</GitVersionBaseDirectory>
+
+    <ContinuousIntegrationBuild Condition="'$(TF_BUILD)' == 'true'">true</ContinuousIntegrationBuild>
+    <DefineConstants Condition="'$(ContinuousIntegrationBuild)' == 'true'">$(DefineConstants);CI_BUILD</DefineConstants>
 
     <PackageProjectUrl>https://github.com/Serviceware/Dibix</PackageProjectUrl>
     <RepositoryType>Git</RepositoryType>
@@ -31,5 +32,4 @@
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="" Visible="False" />
   </ItemGroup>
-
 </Project>
