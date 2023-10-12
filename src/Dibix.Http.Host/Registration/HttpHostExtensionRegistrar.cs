@@ -5,7 +5,6 @@ using Dibix.Hosting.Abstractions;
 using Dibix.Hosting.Abstractions.Data;
 using Dibix.Http.Host.Runtime;
 using Dibix.Http.Server;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -53,7 +52,7 @@ namespace Dibix.Http.Host
 
             public IHttpHostExtensionConfigurationBuilder OverrideAuthenticationHandler<T>()// where T : AuthenticationHandler<AuthenticationSchemeOptions>
             {
-                _services.Configure<AuthenticationOptions>(x => x.SchemeMap["Dibix"].HandlerType = typeof(T));
+                _services.Configure<Microsoft.AspNetCore.Authentication.AuthenticationOptions>(x => x.SchemeMap["Dibix"].HandlerType = typeof(T));
                 return this;
             }
 
