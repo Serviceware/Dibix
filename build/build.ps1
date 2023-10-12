@@ -39,67 +39,79 @@ function Exec
 
 Write-Warning -WarningAction Inquire "Please ensure, that none of the projects are currently opened in Visual Studio, before running this script. Otherwise it will automatically restore these projects after clean using the wrong runtimes."
 
-Exec $cleanPath
+# The dotnet CLI picks up the global.json, which selects the SDK, only from the current working directory
+# See: https://github.com/dotnet/sdk/issues/7465
+Push-Location $rootPath
 
-Exec "dotnet restore --runtime $runtimeIdentifier
-                     --p:PublishReadyToRun=$publishReadyToRun
-                     $rootPath"
-
-$projectsToBuild = @(
-    'Dibix'
-    'Dibix.Dapper'
-    'Dibix.Sdk.Abstractions'
-    'Dibix.Generators'
-    'Dibix.Http.Client'
-    'Dibix.Http.Server'
-    'Dibix.Sdk.Sql'
-    'Dibix.Sdk.CodeAnalysis'
-    'Dibix.Sdk.CodeGeneration'
-    'Dibix.Sdk'
-    'Dibix.Sdk.Cli'
-    'Dibix.Testing'
-    'Dibix.Worker.Abstractions'
-)
-
-foreach ($projectToBuild in $projectsToBuild)
+try
 {
-    $projectSourcePath = Join-Path $sourcePath $projectToBuild
-    Exec "dotnet build $projectSourcePath
-                       --configuration $Configuration
-                       --no-restore
-                       --no-dependencies
-                       --bl:$LoggingDirectory/$Configuration/$projectToBuild.binlog
-                       --p:PublishSingleFile=False
-                       --no-self-contained"
-}
+    Exec $cleanPath
 
-$projectsToPublish = @(
-    'Dibix.Http.Host'
-    'Dibix.Worker.Host'
-)
-
-foreach ($projectToPublish in $projectsToPublish)
-{
-    $projectSourcePath = Join-Path $sourcePath $projectToPublish
-    
-    # Build again for specific runtime
-    Exec "dotnet build $projectSourcePath
-                       --configuration $Configuration
-                       --runtime $runtimeIdentifier
-                       --no-restore
-                       --no-dependencies
-                       --bl:$LoggingDirectory/$Configuration/$projectToBuild.binlog
-                       --p:PublishSingleFile=$publishSingleFile
-                       --no-self-contained"
-
-    Exec "dotnet publish $projectSourcePath
-                         --configuration $Configuration
-                         --runtime $runtimeIdentifier
-                         --no-self-contained
-                         --no-restore
-                         --no-build
-                         --p:IgnoreProjectGuid=True
+    Exec "dotnet restore --runtime $runtimeIdentifier
                          --p:PublishReadyToRun=$publishReadyToRun
-                         --p:PublishSingleFile=$publishSingleFile
-                         --p:IncludeNativeLibrariesForSelfExtract=True"
+                         $rootPath"
+
+    $projectsToBuild = @(
+        'Dibix'
+        'Dibix.Dapper'
+        'Dibix.Sdk.Abstractions'
+        'Dibix.Generators'
+        'Dibix.Http.Client'
+        'Dibix.Http.Server'
+        'Dibix.Sdk.Sql'
+        'Dibix.Sdk.CodeAnalysis'
+        'Dibix.Sdk.CodeGeneration'
+        'Dibix.Sdk'
+        'Dibix.Sdk.Cli'
+        'Dibix.Testing'
+        'Dibix.Worker.Abstractions'
+    )
+    
+    foreach ($projectToBuild in $projectsToBuild)
+    {
+        $projectSourcePath = Join-Path $sourcePath $projectToBuild
+        Exec "dotnet build $projectSourcePath
+                           --configuration $Configuration
+                           --no-restore
+                           --no-dependencies
+                           --bl:$LoggingDirectory/$Configuration/$projectToBuild.binlog
+                           --p:PublishSingleFile=False
+                           --no-self-contained"
+    }
+    
+    $projectsToPublish = @(
+        'Dibix.Http.Host'
+        'Dibix.Worker.Host'
+    )
+    
+    foreach ($projectToPublish in $projectsToPublish)
+    {
+        $projectSourcePath = Join-Path $sourcePath $projectToPublish
+        
+        # Build again for specific runtime
+        Exec "dotnet build $projectSourcePath
+                           --configuration $Configuration
+                           --runtime $runtimeIdentifier
+                           --no-restore
+                           --no-dependencies
+                           --bl:$LoggingDirectory/$Configuration/$projectToBuild.binlog
+                           --p:PublishSingleFile=$publishSingleFile
+                           --no-self-contained"
+    
+        Exec "dotnet publish $projectSourcePath
+                             --configuration $Configuration
+                             --runtime $runtimeIdentifier
+                             --no-self-contained
+                             --no-restore
+                             --no-build
+                             --p:IgnoreProjectGuid=True
+                             --p:PublishReadyToRun=$publishReadyToRun
+                             --p:PublishSingleFile=$publishSingleFile
+                             --p:IncludeNativeLibrariesForSelfExtract=True"
+    }
+    
+}
+finally
+{
+    Pop-Location
 }
