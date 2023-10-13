@@ -183,7 +183,7 @@
       "properties": {
         "BaseUrl": {
           "type": "string",
-          "pattern": "^(http|https)://([A-Za-z._\\-= #%&?\\d]+/?){1,}$"
+          "pattern": "^(((http|https)://)|\/)([A-Za-z._\\-= #%&?\\d]+/?){1,}$"
         },
         "ParameterSources": {
           "$ref": "#/definitions/HttpParameterSourceConfiguration"
