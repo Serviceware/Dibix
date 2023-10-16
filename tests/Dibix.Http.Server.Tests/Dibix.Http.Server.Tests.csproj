@@ -13,6 +13,7 @@
   <ItemGroup>
     <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Extensions\ReflectionExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Utilities\HostNameUtility.cs" Link="Utilities\%(Filename)%(Extension)" />
     <EmbeddedResource Include="Resources\*" LogicalName="%(EmbeddedResource.Filename)%(EmbeddedResource.Extension)" />
   </ItemGroup>
 

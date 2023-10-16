@@ -15,6 +15,7 @@
     <Compile Include="..\..\shared\Http\HttpParameterName.cs" Link="Runtime\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\RouteBuilder.cs" Link="Utilities\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Utilities\ExpressionUtility.cs" Link="Utilities\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Utilities\HostNameUtility.cs" Link="Utilities\%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' != 'net461'">

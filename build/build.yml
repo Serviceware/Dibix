@@ -36,6 +36,18 @@ stages:
     pool:
       vmImage: macOS-latest
     steps:
+    # Long term investigation for sporadically failing test 'Dibix.Http.Server.Tests.HttpParameterResolverTest.Compile_EnvironmentSource'
+    # due to DNS resolution issues: 'nodename nor servname provided, or not known'
+    - task: PowerShell@2
+      displayName: 🧐 Collect DNS resolution issue diagnostics
+      inputs:
+        targetType: inline
+        script: |
+          cat /etc/hosts
+          Write-Output "Dns.GetHostName(): $([System.Net.Dns]::GetHostName())"
+          try { Write-Output "Dns.GetHostEntry(Dns.GetHostName()): $([System.Net.Dns]::GetHostEntry([System.Net.Dns]::GetHostName()).HostName)" } catch { Write-Output $_.Exception.Message }
+          try { Write-Output "Dns.GetHostEntry(''): $([System.Net.Dns]::GetHostEntry("""").HostName)" } catch { Write-Output $_.Exception.Message }
+        continueOnError: true
     - template: azure-pipelines-template/run.yml
       parameters:
         operatingSystem: macOS

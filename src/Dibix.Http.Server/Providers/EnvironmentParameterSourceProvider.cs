@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq.Expressions;
-using System.Net;
 
 namespace Dibix.Http.Server
 {
@@ -25,7 +24,7 @@ namespace Dibix.Http.Server
             }
         }
 
-        public static string GetMachineName() => Dns.GetHostEntry(String.Empty).HostName;
+        public static string GetMachineName() => HostNameUtility.GetFullyQualifiedDomainName();
 
         public static int GetCurrentProcessId() => Process.GetCurrentProcess().Id;
 

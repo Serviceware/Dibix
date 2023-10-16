@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Xml.Linq;
@@ -665,7 +664,7 @@ en                ", clientLanguages.Dump());
 
             Assert.AreEqual(3, arguments.Count);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
-            Assert.AreEqual(Dns.GetHostEntry(String.Empty).HostName, arguments["machinename"]);
+            Assert.AreEqual(HostNameUtility.GetFullyQualifiedDomainName(), arguments["machinename"]);
             Assert.AreEqual(Process.GetCurrentProcess().Id, arguments["pid"]);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
