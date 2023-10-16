@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Dibix.Sdk.CodeGeneration.CSharp;
@@ -95,20 +93,6 @@ namespace Dibix.Sdk.CodeGeneration
         }
 
         protected bool IsStream(TypeReference typeReference) => typeReference is PrimitiveTypeReference primitiveTypeReference && primitiveTypeReference.Type == PrimitiveType.Stream;
-
-        protected static string NormalizeApiParameterName(string name)
-        {
-            string normalized = Regex.Replace(name, "[-]", String.Empty);
-            StringBuilder sb = new StringBuilder();
-            if (normalized.Length > 0)
-                sb.Append(normalized[0].ToString().ToLowerInvariant());
-
-            if (normalized.Length > 1)
-                sb.Append(normalized.Substring(1));
-
-            string result = sb.ToString();
-            return result;
-        }
         #endregion
 
         #region Private Methods
@@ -120,7 +104,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static void AppendParameter(CodeGenerationContext context, ActionParameter parameter, CSharpMethod method)
         {
-            string normalizedApiParameterName = NormalizeApiParameterName(parameter.ApiParameterName);
+            string normalizedApiParameterName = context.NormalizeApiParameterName(parameter.ApiParameterName);
             CSharpValue defaultValue = parameter.DefaultValue != null ? context.BuildDefaultValueLiteral(parameter.DefaultValue) : null;
             method.AddParameter(normalizedApiParameterName, ResolveParameterTypeName(parameter, context), defaultValue);
         }

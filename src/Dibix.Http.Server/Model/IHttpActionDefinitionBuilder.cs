@@ -15,5 +15,6 @@ namespace Dibix.Http.Server
         void DisableStatusCodeDetection(int statusCode);
         void SetStatusCodeDetectionResponse(int statusCode, int errorCode, string errorMessage);
         void WithAuthorization(IHttpActionTarget target, Action<IHttpAuthorizationBuilder> setupAction);
+        void RegisterDelegate(Delegate @delegate);
     }
 }

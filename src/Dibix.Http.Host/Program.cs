@@ -37,7 +37,8 @@ namespace Dibix.Http.Host
                     .AddSingleton<IEndpointMetadataProvider, AssemblyEndpointMetadataProvider>()
                     .AddSingleton<IEndpointImplementationProvider, DefaultEndpointImplementationProvider>()
                     .AddSingleton<IEndpointRegistrar, DefaultEndpointRegistrar>()
-                    .AddScoped<IParameterDependencyResolver, ParameterDependencyResolver>();
+                    .AddScoped<IParameterDependencyResolver, ParameterDependencyResolver>()
+                    .AddScoped<IHttpActionDelegator, HttpActionDelegator>();
 
             services.AddEventLogOptions();
 

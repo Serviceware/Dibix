@@ -465,7 +465,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                 if (property.SerializationBehavior == SerializationBehavior.Never)
                     continue;
 
-                string propertyName = ToCamelCase(property.Name);
+                string propertyName = StringExtensions.ToCamelCase(property.Name);
                 OpenApiSchema propertySchema = CreateSchema(document, property.Type, rootNamespace, schemaRegistry, logger);
                 schema.Properties.Add(propertyName, propertySchema);
 
@@ -546,7 +546,5 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                 default:                           throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
         }
-
-        private static string ToCamelCase(string propertyName) => $"{Char.ToLowerInvariant(propertyName[0])}{propertyName.Substring(1)}";
     }
 }

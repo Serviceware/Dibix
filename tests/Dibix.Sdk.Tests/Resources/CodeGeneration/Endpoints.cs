@@ -287,11 +287,20 @@ namespace Dibix.Sdk.Tests.Business
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.MultiConcreteResult)), action =>
                 {
                     action.Method = HttpApiMethod.Get;
+                    action.RegisterDelegate((IHttpActionDelegator actionDelegator) => actionDelegator.Delegate(new Dictionary<string, object>()));
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
                     action.Method = HttpApiMethod.Get;
                     action.ChildRoute = "{password}/Fixed";
+                    action.RegisterDelegate((IHttpActionDelegator actionDelegator, string password, string userAgent, string authorization, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? acceptLanguage) => actionDelegator.Delegate(new Dictionary<string, object>
+                    {
+                        { "password", password },
+                        { "a", userAgent },
+                        { "b", authorization },
+                        { "ids", ids },
+                        { "d", acceptLanguage }
+                    }));
                     action.ResolveParameterFromNull<string>("password");
                     action.ResolveParameterFromSource("a", "HEADER", "User-Agent");
                     action.ResolveParameterFromSource("b", "HEADER", "Authorization.Parameter");
@@ -306,18 +315,39 @@ namespace Dibix.Sdk.Tests.Business
                     action.Method = HttpApiMethod.Get;
                     action.ChildRoute = "{password}/User";
                     action.IsAnonymous = true;
+                    action.RegisterDelegate((IHttpActionDelegator actionDelegator, string password, string a, string b, System.Guid? c, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? d, bool e, Dibix.Sdk.Tests.DomainModel.Direction? f, string? g) => actionDelegator.Delegate(new Dictionary<string, object>
+                    {
+                        { "password", password },
+                        { "a", a },
+                        { "b", b },
+                        { "c", c },
+                        { "ids", ids },
+                        { "d", d },
+                        { "e", e },
+                        { "f", f },
+                        { "g", g }
+                    }));
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.SingleConrecteResultWithParams)), action =>
                 {
                     action.Method = HttpApiMethod.Get;
                     action.ChildRoute = "User/{id}/{name}";
                     action.SetStatusCodeDetectionResponse(404, 1, "The user '{name}' with the id '{id}' could not be found");
+                    action.RegisterDelegate((IHttpActionDelegator actionDelegator, int id, string name) => actionDelegator.Delegate(new Dictionary<string, object>
+                    {
+                        { "id", id },
+                        { "name", name }
+                    }));
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.SingleConrecteResultWithArrayParam)), action =>
                 {
                     action.Method = HttpApiMethod.Get;
                     action.ChildRoute = "Array";
                     action.DisableStatusCodeDetection(404);
+                    action.RegisterDelegate((IHttpActionDelegator actionDelegator, Dibix.Sdk.Tests.Data.IntParameterSet ids) => actionDelegator.Delegate(new Dictionary<string, object>
+                    {
+                        { "ids", ids }
+                    }));
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.FileResult)), action =>
                 {
@@ -325,23 +355,39 @@ namespace Dibix.Sdk.Tests.Business
                     action.ChildRoute = "{id}";
                     action.IsAnonymous = true;
                     action.FileResponse = new HttpFileResponseDefinition(cache: false);
+                    action.RegisterDelegate((IHttpActionDelegator actionDelegator, int id) => actionDelegator.Delegate(new Dictionary<string, object>
+                    {
+                        { "id", id }
+                    }));
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.FileUpload)), action =>
                 {
                     action.Method = HttpApiMethod.Put;
                     action.BodyContract = typeof(System.IO.Stream);
+                    action.RegisterDelegate((IHttpActionDelegator actionDelegator, System.IO.Stream body) => actionDelegator.Delegate(new Dictionary<string, object>
+                    {
+                        { "body", body }
+                    }));
                     action.ResolveParameterFromSource("data", "BODY", "$RAW");
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
                     action.Method = HttpApiMethod.Post;
                     action.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.InputContract);
+                    action.RegisterDelegate((IHttpActionDelegator actionDelegator, Dibix.Sdk.Tests.DomainModel.InputContract body) => actionDelegator.Delegate(new Dictionary<string, object>
+                    {
+                        { "body", body }
+                    }));
                     action.ResolveParameterFromBody("ids", "Dibix.GenericContractIdsInputConverter");
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
                     action.Method = HttpApiMethod.Patch;
                     action.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.AnotherInputContract);
+                    action.RegisterDelegate((IHttpActionDelegator actionDelegator, Dibix.Sdk.Tests.DomainModel.AnotherInputContract body) => actionDelegator.Delegate(new Dictionary<string, object>
+                    {
+                        { "body", body }
+                    }));
                     action.ResolveParameterFromSource("ids", "BODY", "SomeIds", items =>
                     {
                         items.ResolveParameterFromConstant("id", 1);
@@ -355,6 +401,18 @@ namespace Dibix.Sdk.Tests.Business
                     {
                         authorization.ResolveParameterFromConstant("right", (byte)1);
                     });
+                    action.RegisterDelegate((IHttpActionDelegator actionDelegator, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? d, bool e, Dibix.Sdk.Tests.DomainModel.Direction? f, string? g) => actionDelegator.Delegate(new Dictionary<string, object>
+                    {
+                        { "a", a },
+                        { "b", b },
+                        { "c", c },
+                        { "password", password },
+                        { "ids", ids },
+                        { "d", d },
+                        { "e", e },
+                        { "f", f },
+                        { "g", g }
+                    }));
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
@@ -364,6 +422,18 @@ namespace Dibix.Sdk.Tests.Business
                     {
                         authorization.ResolveParameterFromConstant("right", (byte)1);
                     });
+                    action.RegisterDelegate((IHttpActionDelegator actionDelegator, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? d, bool e, Dibix.Sdk.Tests.DomainModel.Direction? f, string? g) => actionDelegator.Delegate(new Dictionary<string, object>
+                    {
+                        { "a", a },
+                        { "b", b },
+                        { "c", c },
+                        { "password", password },
+                        { "ids", ids },
+                        { "d", d },
+                        { "e", e },
+                        { "f", f },
+                        { "g", g }
+                    }));
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
@@ -373,6 +443,18 @@ namespace Dibix.Sdk.Tests.Business
                     {
                         authorization.ResolveParameterFromConstant("right", (byte)1);
                     });
+                    action.RegisterDelegate((IHttpActionDelegator actionDelegator, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? d, bool e, Dibix.Sdk.Tests.DomainModel.Direction? f, string? g) => actionDelegator.Delegate(new Dictionary<string, object>
+                    {
+                        { "a", a },
+                        { "b", b },
+                        { "c", c },
+                        { "password", password },
+                        { "ids", ids },
+                        { "d", d },
+                        { "e", e },
+                        { "f", f },
+                        { "g", g }
+                    }));
                 });
             });
         }

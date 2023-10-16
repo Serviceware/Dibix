@@ -175,7 +175,7 @@ namespace Dibix.Sdk.CodeGeneration
                 if (parameter.ApiParameterName == "Authorization" || action.SecuritySchemes.Requirements.Any(x => x.Scheme.Name == parameter.ApiParameterName))
                     continue;
 
-                string normalizedApiParameterName = NormalizeApiParameterName(parameter.ApiParameterName);
+                string normalizedApiParameterName = context.NormalizeApiParameterName(parameter.ApiParameterName);
                 if (!parameter.IsRequired)
                 {
                     writer.WriteLine($"if ({normalizedApiParameterName} != null)")

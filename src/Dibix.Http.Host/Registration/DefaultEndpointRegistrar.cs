@@ -32,8 +32,10 @@ namespace Dibix.Http.Host
                 _logger.LogDebug("Registering route: {route}", route);
 
                 IEndpointConventionBuilder endpointBuilder = builder.MapMethods(route, EnumerableExtensions.Create(endpoint.Method), _endpointImplementationProvider.GetImplementation(endpoint));
+
+                endpointBuilder.WithMetadata(endpoint);
                 
-                if (!endpoint.Definition.IsAnonymous)
+                if (!endpoint.ActionDefinition.IsAnonymous)
                     endpointBuilder.RequireAuthorization(AuthenticationOptions.SchemeName);
             }
         }

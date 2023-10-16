@@ -116,6 +116,7 @@ namespace Dibix.Http.Server
             public HttpFileResponseDefinition FileResponse { get; set; }
             public string Description { get; set; }
             public IDictionary<int, HttpErrorResponse> StatusCodeDetectionResponses { get; }
+            public Delegate Delegate { get; set; }
 
             public HttpActionDefinitionBuilder(string areaName, string controllerName, IHttpActionTarget target)
             {
@@ -137,6 +138,8 @@ namespace Dibix.Http.Server
                 _authorization = builder;
             }
 
+            public void RegisterDelegate(Delegate @delegate) => Delegate = @delegate;
+
             bool IHttpActionDescriptor.TryGetParameter(string parameterName, out HttpParameterSource value) => ParameterSources.TryGetValue(parameterName, out value);
 
             public HttpActionDefinition Build()
@@ -154,7 +157,8 @@ namespace Dibix.Http.Server
                     IsAnonymous = IsAnonymous,
                     FileResponse = FileResponse,
                     Description = Description,
-                    Authorization = _authorization?.Build()
+                    Authorization = _authorization?.Build(),
+                    Delegate = Delegate
                 };
                 action.StatusCodeDetectionResponses.AddRange(StatusCodeDetectionResponses);
                 return action;

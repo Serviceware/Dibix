@@ -7,13 +7,13 @@ namespace Dibix.Http.Host
     {
         public string Method { get; }
         public Uri Url { get; }
-        public HttpActionDefinition Definition { get; }
+        public HttpActionDefinition ActionDefinition { get; }
 
-        public EndpointDefinition(string method, Uri url, HttpActionDefinition definition)
+        public EndpointDefinition(string method, Uri url, HttpActionDefinition actionDefinition)
         {
             Method = method;
             Url = url;
-            Definition = definition;
+            ActionDefinition = actionDefinition;
         }
     }
 }

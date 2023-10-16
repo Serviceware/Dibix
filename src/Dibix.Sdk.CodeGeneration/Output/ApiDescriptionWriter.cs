@@ -184,6 +184,57 @@ namespace Dibix.Sdk.CodeGeneration
                 writer.Write($"{variableName}.WithAuthorization(");
                 WriteActionTarget(context, writer, action.Authorization, "authorization", WriteAuthorizationBehavior);
             }
+
+            WriteDelegate(context, action, writer, variableName);
+        }
+
+        private static void WriteDelegate(CodeGenerationContext context, ActionDefinition action, StringWriter writer, string variableName)
+        {
+            var distinctParameters = action.Parameters
+                                           .Where(x => x.ParameterLocation is not ActionParameterLocation.NonUser and not ActionParameterLocation.Body)
+                                           .DistinctBy(x => x.ApiParameterName)
+                                           .Select(x => (externalName: context.NormalizeApiParameterName(x.ApiParameterName), internalName: x.InternalParameterName, type: x.Type))
+                                           .ToList();
+
+            TypeReference bodyType = action.RequestBody?.Contract;
+            if (bodyType != null)
+                distinctParameters.Add((externalName: "body", internalName: "body", bodyType));
+            
+            writer.Write($"{variableName}.RegisterDelegate((IHttpActionDelegator actionDelegator");
+
+            foreach ((string externalName, _, TypeReference type) in distinctParameters)
+            {
+                writer.WriteRaw($", {context.ResolveTypeName(type)} {externalName}");
+            }
+
+            context.AddUsing<Dictionary<string, object>>();
+            writer.WriteRaw(") => actionDelegator.Delegate(new Dictionary<string, object>");
+
+            if (!distinctParameters.Any())
+                writer.WriteRaw("()");
+            else
+            {
+                writer.WriteLine()
+                      .WriteLine("{")
+                      .PushIndent();
+
+                for (var i = 0; i < distinctParameters.Count; i++)
+                {
+                    (string externalName, string internalName, TypeReference _) = distinctParameters[i];
+
+                    writer.Write($"{{ \"{internalName}\", {externalName} }}");
+
+                    if (i + 1 < distinctParameters.Count)
+                        writer.WriteRaw(",");
+
+                    writer.WriteLine();
+                }
+
+                writer.PopIndent()
+                      .Write("}");
+            }
+
+            writer.WriteLineRaw("));");
         }
 
         private static void WriteAuthorizationBehavior(CodeGenerationContext context, StringWriter writer, AuthorizationBehavior authorization, string variableName) { }

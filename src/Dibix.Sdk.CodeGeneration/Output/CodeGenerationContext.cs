@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.CodeGeneration.CSharp;
 
@@ -119,6 +120,14 @@ namespace Dibix.Sdk.CodeGeneration
                 default:
                     throw new ArgumentOutOfRangeException(nameof(enumerableBehavior), enumerableBehavior, null);
             }
+        }
+
+        public string NormalizeApiParameterName(string apiParameterName)
+        {
+            // Headers like 'Accept-Language'
+            string normalized = Regex.Replace(apiParameterName, "[-]", String.Empty);
+            normalized = StringExtensions.ToCamelCase(normalized);
+            return normalized;
         }
 
         public CSharpValue BuildDefaultValueLiteral(ValueReference defaultValue)
