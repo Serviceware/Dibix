@@ -95,6 +95,7 @@ namespace Dibix.Http.Server.Tests
         private sealed class ExplicitHttpBodyOptionalDetailNested
         {
             public int Skip { get; set; }
+            public int? Take { get; set; }
         }
 
         private sealed class ExplicitHttpBodyItem

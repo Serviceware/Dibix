@@ -20,6 +20,13 @@
             $bodySource.ItemsA,
             .Lambda #Lambda2<System.Action`3[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemSet,Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,System.Int32]>)
         ;
+        $arguments.Item["take"] = (System.Object).If (
+            $bodySource.OptionalDetail != null && ($bodySource.OptionalDetail).Nested != null
+        ) {
+            (($bodySource.OptionalDetail).Nested).Take
+        } .Else {
+            .Default(System.Nullable`1[System.Int32])
+        };
         $arguments.Item["skip"] = (System.Object).If (
             $bodySource.OptionalDetail != null && ($bodySource.OptionalDetail).Nested != null
         ) {

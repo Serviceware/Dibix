@@ -116,6 +116,7 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
                 x.ResolveParameterFromSource("lcid", "BODY", "LocaleId");
                 x.ResolveParameterFromSource("agentid", "BODY", "Detail.AgentId");
                 x.ResolveParameterFromSource("skip", "BODY", "OptionalDetail.Nested.Skip");
+                x.ResolveParameterFromSource("take", "BODY", "OptionalDetail.Nested.Take");
                 x.ResolveParameterFromSource("itemsa_", "BODY", "ItemsA", action =>
                 {
                     action.ResolveParameterFromSource("id_", "BODY", "Detail.AgentId");
@@ -151,7 +152,7 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
 
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
-            Assert.AreEqual(7, arguments.Count);
+            Assert.AreEqual(8, arguments.Count);
             Assert.AreEqual(body, arguments["$body"]);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             ExplicitHttpBodyParameterInput input = AssertIsType<ExplicitHttpBodyParameterInput>(arguments["input"]);
@@ -164,9 +165,10 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
 710         1           5            X                  
 710         2           5            Y                  ", itemsa_.Dump());
             Assert.AreEqual(5, arguments["skip"]);
+            Assert.AreEqual(null, arguments["take"]);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
-        private static void Compile_ExplicitBodySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpBodyParameterInput input, int lcid, int agentid, ExplicitHttpBodyItemSet itemsa_, int skip = 5) { }
+        private static void Compile_ExplicitBodySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpBodyParameterInput input, int lcid, int agentid, ExplicitHttpBodyItemSet itemsa_, int? take, int skip = 5) { }
 
         [TestMethod]
         public void Compile_ImplicitBodySource()
