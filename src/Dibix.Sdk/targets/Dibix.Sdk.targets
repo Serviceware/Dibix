@@ -308,6 +308,8 @@ $(_ServerCompilationArtifactReference)" />
   $(PreventDmlReferences)" />
       <_SqlCoreInputItem Include="EnableExperimentalFeatures
   $(EnableExperimentalFeatures)" />
+      <_SqlCoreInputItem Include="SupportOpenApiNullableReferenceTypes
+  $(SupportOpenApiNullableReferenceTypes)" />
       <_SqlCoreInputItem Include="SqlReferencePath
 $(_SqlReferencePath)" />
     </ItemGroup>

@@ -12,6 +12,7 @@
     <IsEmbedded>$(MSBuildProjectName.EndsWith('.DML'))</IsEmbedded>
     <LimitDdlStatements>True</LimitDdlStatements>
     <PreventDmlReferences>True</PreventDmlReferences>
+    <SupportOpenApiNullableReferenceTypes>True</SupportOpenApiNullableReferenceTypes>
   </PropertyGroup>
 
   <ItemGroup>
