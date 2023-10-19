@@ -30,6 +30,12 @@ namespace Dibix.Sdk
 
             this.HasLoggedErrors = true;
         }
+        
+        public void LogWarning(string subCategory, string code, string text, string source, int? line, int? column)
+        {
+            string message = CanonicalLogFormat.ToWarningString(subCategory, code, text, source, line, column);
+            this._output.WriteLine(message);
+        }
 
         protected virtual void LogError(string text) => this._output.WriteLine(text);
     }

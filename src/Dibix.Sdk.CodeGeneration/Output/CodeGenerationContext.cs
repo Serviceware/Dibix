@@ -157,6 +157,8 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
+        public void LogWarning(string message, string source, int line, int column) => _logger.LogWarning(subCategory: null, code: null, text: message, source, line, column);
+
         internal void SetScopeName(string name)
         {
             Guard.IsNotNullOrEmpty(name, nameof(name));

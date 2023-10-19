@@ -5,7 +5,9 @@ namespace Dibix.Http.Server
     public interface IHttpHostExtensionConfigurationBuilder
     {
         IHttpHostExtensionConfigurationBuilder EnableRequestIdentityProvider();
-        IHttpHostExtensionConfigurationBuilder OverrideAuthenticationHandler<T>();
+#if NET
+        IHttpHostExtensionConfigurationBuilder EnableCustomAuthentication<T>(Func<HttpActionDefinition, bool> endpointFilter = null) where T : Microsoft.AspNetCore.Authentication.AuthenticationHandler<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions>;
+#endif
         IHttpHostExtensionConfigurationBuilder RegisterDependency<TInterface, TImplementation>() where TInterface : class where TImplementation : class, TInterface;
         IHttpHostExtensionConfigurationBuilder ConfigureConnectionString(Func<string, string> configure);
     }

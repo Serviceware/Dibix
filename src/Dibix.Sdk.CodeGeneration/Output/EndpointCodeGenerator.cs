@@ -15,11 +15,21 @@ namespace Dibix.Sdk.CodeGeneration
         {
             const bool assumeEmbeddedActionTargets = true;
             const CodeGenerationOutputFilter outputFilter = CodeGenerationOutputFilter.Referenced;
+
+            // External assemblies are not supported by Dibix.Http.Host
+            bool includeReflectionTargets = !model.EnableExperimentalFeatures;
+
+            // Targets with ref parameters require proxy method generation using LambdaExpression.CompileToMethod which is not supported in Dibix.Http.Host
+            bool includeTargetsWithRefParameters = !model.EnableExperimentalFeatures;
+
+            // Action delegates are explicitly generated for Dibix.Http.Host and require ASP.NET Core
+            bool generateActionDelegates = model.EnableExperimentalFeatures;
+
             yield return new DaoExecutorWriter(model, outputFilter);
             yield return new DaoExecutorInputClassWriter(model, outputFilter);
             yield return new DaoContractClassWriter(model, outputFilter);
             yield return new DaoStructuredTypeWriter(model, outputFilter);
-            yield return new ApiDescriptionWriter(assumeEmbeddedActionTargets);
+            yield return new ApiDescriptionWriter(assumeEmbeddedActionTargets, includeReflectionTargets, includeTargetsWithRefParameters, generateActionDelegates);
         }
 
         protected override IEnumerable<CSharpAnnotation> CollectGlobalAnnotations(CodeGenerationModel model)

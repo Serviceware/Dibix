@@ -467,7 +467,7 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
                 }
               , endpoints: new[] { @"Endpoints\GenericEndpoint.json" }
               , isEmbedded: false
-              , enableExperimentalFeatures: true
+              , enableExperimentalFeatures: false
               , outputKind: AssertOutputKind.Endpoint
               , expectedAdditionalAssemblyReferences: new[]
                 {

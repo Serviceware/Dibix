@@ -20,7 +20,7 @@ namespace Dibix.Sdk.CodeGeneration
             yield return new DaoStructuredTypeWriter(model, outputFilter);
             
             if (!model.EnableExperimentalFeatures)
-                yield return new ApiDescriptionWriter(assumeEmbeddedActionTargets: false);
+                yield return new ApiDescriptionWriter(assumeEmbeddedActionTargets: false, includeReflectionTargets: true, includeTargetsWithRefParameters: true, generateActionDelegates: false);
         }
 
         protected override IEnumerable<CSharpAnnotation> CollectGlobalAnnotations(CodeGenerationModel model)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using Dibix.Http;
 using Dibix.Sdk.CodeGeneration.CSharp;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -10,6 +11,9 @@ namespace Dibix.Sdk.CodeGeneration
     {
         #region Fields
         private readonly bool _assumeEmbeddedActionTargets;
+        private readonly bool _includeReflectionTargets;
+        private readonly bool _includeTargetsWithRefParameters;
+        private readonly bool _generateActionDelegates;
         #endregion
 
         #region Properties
@@ -18,9 +22,12 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public ApiDescriptionWriter(bool assumeEmbeddedActionTargets)
+        public ApiDescriptionWriter(bool assumeEmbeddedActionTargets, bool includeReflectionTargets, bool includeTargetsWithRefParameters, bool generateActionDelegates)
         {
-            this._assumeEmbeddedActionTargets = assumeEmbeddedActionTargets;
+            _assumeEmbeddedActionTargets = assumeEmbeddedActionTargets;
+            _includeReflectionTargets = includeReflectionTargets;
+            _includeTargetsWithRefParameters = includeTargetsWithRefParameters;
+            _generateActionDelegates = generateActionDelegates;
         }
         #endregion
 
@@ -57,11 +64,15 @@ namespace Dibix.Sdk.CodeGeneration
             for (int i = 0; i < controllers.Count; i++)
             {
                 ControllerDefinition controller = controllers[i];
+                IList<ActionDefinition> actions = CollectActionsToInclude(context, controller).ToArray();
+                if (!actions.Any())
+                    continue;
+
                 writer.WriteLine($"base.RegisterController(\"{controller.Name}\", controller =>")
                       .WriteLine("{")
                       .PushIndent();
 
-                foreach (ActionDefinition action in controller.Actions)
+                foreach (ActionDefinition action in actions)
                 {
                     WriteAddAction(context, writer, action);
                 }
@@ -77,6 +88,33 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             return writer.ToString();
+        }
+
+        private IEnumerable<ActionDefinition> CollectActionsToInclude(CodeGenerationContext context, ControllerDefinition controller)
+        {
+            void LogNotSupportedWarning(ActionDefinition action, string message)
+            {
+                context.LogWarning($"{action.Method.ToString().ToUpperInvariant()} {RouteBuilder.BuildRoute(context.Model.AreaName, controller.Name, action.ChildRoute)} {message}, which is not supported in Dibix.Http.Host", action.Target.SourceLocation.Source, action.Target.SourceLocation.Line, action.Target.SourceLocation.Column);
+            }
+
+            foreach (ActionDefinition action in controller.Actions)
+            {
+                bool includeAction = true;
+                if (!_includeReflectionTargets && action.Target is ReflectionActionTarget)
+                {
+                    LogNotSupportedWarning(action, "points to a reflection target");
+                    includeAction = false;
+                }
+
+                if (!_includeTargetsWithRefParameters && action.Target.HasRefParameters)
+                {
+                    LogNotSupportedWarning(action, "contains ref parameters");
+                    includeAction = false;
+                }
+
+                if (includeAction)
+                    yield return action;
+            }
         }
 
         private void WriteAddAction(CodeGenerationContext context, StringWriter writer, ActionDefinition action)
@@ -185,7 +223,8 @@ namespace Dibix.Sdk.CodeGeneration
                 WriteActionTarget(context, writer, action.Authorization, "authorization", WriteAuthorizationBehavior);
             }
 
-            WriteDelegate(context, action, writer, variableName);
+            if (_generateActionDelegates)
+                WriteDelegate(context, action, writer, variableName);
         }
 
         private static void WriteDelegate(CodeGenerationContext context, ActionDefinition action, StringWriter writer, string variableName)
@@ -193,18 +232,32 @@ namespace Dibix.Sdk.CodeGeneration
             var distinctParameters = action.Parameters
                                            .Where(x => x.ParameterLocation is not ActionParameterLocation.NonUser and not ActionParameterLocation.Body)
                                            .DistinctBy(x => x.ApiParameterName)
-                                           .Select(x => (externalName: context.NormalizeApiParameterName(x.ApiParameterName), internalName: x.InternalParameterName, type: x.Type))
+                                           .Select(x => (
+                                                 externalName: context.NormalizeApiParameterName(x.ApiParameterName)
+                                               , internalName: x.InternalParameterName
+                                               , type: x.Type
+                                               , location: x.ParameterLocation
+                                               , hasExplicitMapping: x.ParameterSource != null
+                                            ))
                                            .ToList();
 
             TypeReference bodyType = action.RequestBody?.Contract;
             if (bodyType != null)
-                distinctParameters.Add((externalName: "body", internalName: "body", bodyType));
+                distinctParameters.Add((externalName: "body", internalName: "body", bodyType, location: ActionParameterLocation.Body, hasExplicitMapping: false));
             
             writer.Write($"{variableName}.RegisterDelegate((IHttpActionDelegator actionDelegator");
 
-            foreach ((string externalName, _, TypeReference type) in distinctParameters)
+            foreach ((string externalName, _, TypeReference type, ActionParameterLocation location, _) in distinctParameters)
             {
-                writer.WriteRaw($", {context.ResolveTypeName(type)} {externalName}");
+                string annotation = null;
+
+                if (location == ActionParameterLocation.Header)
+                {
+                    context.AddUsing("Microsoft.AspNetCore.Mvc");
+                    annotation = "[FromHeader] ";
+                }
+
+                writer.WriteRaw($", {annotation}{context.ResolveTypeName(type)} {externalName}");
             }
 
             context.AddUsing<Dictionary<string, object>>();
@@ -220,9 +273,10 @@ namespace Dibix.Sdk.CodeGeneration
 
                 for (var i = 0; i < distinctParameters.Count; i++)
                 {
-                    (string externalName, string internalName, TypeReference _) = distinctParameters[i];
+                    (string externalName, string internalName, TypeReference _, ActionParameterLocation _, bool hasExplicitMapping) = distinctParameters[i];
 
-                    writer.Write($"{{ \"{internalName}\", {externalName} }}");
+                    string argumentName = hasExplicitMapping ? externalName : internalName;
+                    writer.Write($"{{ \"{argumentName}\", {externalName} }}");
 
                     if (i + 1 < distinctParameters.Count)
                         writer.WriteRaw(",");

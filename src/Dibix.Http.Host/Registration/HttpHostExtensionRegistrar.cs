@@ -5,6 +5,7 @@ using Dibix.Hosting.Abstractions;
 using Dibix.Hosting.Abstractions.Data;
 using Dibix.Http.Host.Runtime;
 using Dibix.Http.Server;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -50,9 +51,16 @@ namespace Dibix.Http.Host
                 return this;
             }
 
-            public IHttpHostExtensionConfigurationBuilder OverrideAuthenticationHandler<T>()// where T : AuthenticationHandler<AuthenticationSchemeOptions>
+            public IHttpHostExtensionConfigurationBuilder EnableCustomAuthentication<T>(Func<HttpActionDefinition, bool>? endpointFilter = null) where T : AuthenticationHandler<AuthenticationSchemeOptions>
             {
-                _services.Configure<Microsoft.AspNetCore.Authentication.AuthenticationOptions>(x => x.SchemeMap["Dibix"].HandlerType = typeof(T));
+                _services.AddAuthentication().AddScheme<AuthenticationSchemeOptions, T>(CustomAuthenticationOptions.SchemeName, configureOptions: _ => { });
+                _services.AddOptions<CustomAuthenticationOptions>().Configure(x => x.EndpointFilter = endpointFilter ?? (_ => true));
+                _services.AddAuthorization(x =>
+                {
+                    x.AddPolicy(CustomAuthenticationOptions.SchemeName, y => y.AddAuthenticationSchemes(CustomAuthenticationOptions.SchemeName)
+                                                                              .RequireAuthenticatedUser()
+                                                                              .Build());
+                });
                 return this;
             }
 

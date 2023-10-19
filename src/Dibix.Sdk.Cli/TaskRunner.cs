@@ -107,6 +107,12 @@ namespace Dibix.Sdk.Cli
                 this._logger.LogError(subCategory, code, text, source, line, column);
             }
 
+            public void LogWarning(string subCategory, string code, string text, string source, int? line, int? column)
+            {
+                this.AdjustParameters(ref code, ref text);
+                this._logger.LogWarning(subCategory, code, text, source, line, column);
+            }
+
             private void AdjustParameters(ref string code, ref string text)
             {
                 if (!this.BuildingInsideVisualStudio) 
