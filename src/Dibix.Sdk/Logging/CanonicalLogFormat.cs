@@ -3,11 +3,9 @@ using System.Linq;
 
 namespace Dibix.Sdk
 {
-    public static class CanonicalLogFormat
+    internal static class CanonicalLogFormat
     {
-        public static string ToWarningString(string subCategory, string code, string text, string source, int? line, int? column) => ToString(category: "warning", subCategory, code, text, source, line, column, endLine: null, endColumn: null);
-        public static string ToErrorString(string subCategory, string code, string text, string source, int? line, int? column) => ToString(category: "error", subCategory, code, text, source, line, column, endLine: null, endColumn: null);
-        private static string ToString(string category, string subCategory, string code, string text, string source, int? startLine, int? startColumn, int? endLine, int? endColumn)
+        public static string ToString(string category, string subCategory, string code, string text, string source, int? startLine, int? startColumn, int? endLine, int? endColumn)
         {
             if (!endLine.HasValue)
                 endLine = startLine;

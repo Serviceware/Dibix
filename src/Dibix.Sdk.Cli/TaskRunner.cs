@@ -88,34 +88,21 @@ namespace Dibix.Sdk.Cli
         {
             private readonly ILogger _logger;
 
-            public bool HasLoggedErrors => this._logger.HasLoggedErrors;
+            public bool HasLoggedErrors => _logger.HasLoggedErrors;
             public bool BuildingInsideVisualStudio { get; set; }
 
-            public VisualStudioAwareLogger(ILogger logger) => this._logger = logger;
+            public VisualStudioAwareLogger(ILogger logger) => _logger = logger;
 
-            public void LogMessage(string text) => this._logger.LogMessage(text);
-
-            public void LogError(string text, string source, int? line, int? column) => LogError(code: null, text, source, line, column);
-            public void LogError(string code, string text, string source, int? line, int? column)
+            public void LogMessage(string text) => _logger.LogMessage(text);
+            public void LogMessage(LogCategory category, string subCategory, string code, string text, string source, int? line, int? column)
             {
-                this.AdjustParameters(ref code, ref text);
-                this._logger.LogError(code, text, source, line, column);
-            }
-            public void LogError(string subCategory, string code, string text, string source, int? line, int? column)
-            {
-                this.AdjustParameters(ref code, ref text);
-                this._logger.LogError(subCategory, code, text, source, line, column);
-            }
-
-            public void LogWarning(string subCategory, string code, string text, string source, int? line, int? column)
-            {
-                this.AdjustParameters(ref code, ref text);
-                this._logger.LogWarning(subCategory, code, text, source, line, column);
+                AdjustParameters(ref code, ref text);
+                _logger.LogMessage(category, subCategory, code, text, source, line, column);
             }
 
             private void AdjustParameters(ref string code, ref string text)
             {
-                if (!this.BuildingInsideVisualStudio) 
+                if (!BuildingInsideVisualStudio) 
                     return;
 
                 if (!String.IsNullOrEmpty(code))

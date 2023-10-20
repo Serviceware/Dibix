@@ -30,7 +30,7 @@ AS
     ;";
             Mock<ILogger> logger = new Mock<ILogger>(MockBehavior.Strict);
 
-            logger.Setup(x => x.LogError("Unexpected markup element 'Cake'", "source", 5, 4)).Verifiable();
+            logger.Setup(x => x.LogMessage(LogCategory.Error, null, null, "Unexpected markup element 'Cake'", "source", 5, 4)).Verifiable();
 
             TSqlFragment fragment = ParseAndExtractProcedureStatement(sql);
             ISqlMarkupDeclaration map = SqlMarkupReader.Read(fragment, SqlMarkupCommentKind.SingleLine, source: "source", logger.Object);
@@ -84,7 +84,7 @@ AS
             
             Mock<ILogger> logger = new Mock<ILogger>(MockBehavior.Strict);
 
-            logger.Setup(x => x.LogError("Missing value for 'Name' property", String.Empty, 1, 12)).Verifiable();
+            logger.Setup(x => x.LogMessage(LogCategory.Error, null, null, "Missing value for 'Name' property", String.Empty, 1, 12)).Verifiable();
 
             TSqlFragment fragment = ParseAndExtractProcedureStatement(sql);
             _ = SqlMarkupReader.Read(fragment, SqlMarkupCommentKind.SingleLine, source: String.Empty, logger.Object);
@@ -102,7 +102,7 @@ AS
             
             Mock<ILogger> logger = new Mock<ILogger>(MockBehavior.Strict);
 
-            logger.Setup(x => x.LogError("Duplicate property for @Return.ClrTypes", String.Empty, 1, 23)).Verifiable();
+            logger.Setup(x => x.LogMessage(LogCategory.Error, null, null, "Duplicate property for @Return.ClrTypes", String.Empty, 1, 23)).Verifiable();
 
             TSqlFragment fragment = ParseAndExtractProcedureStatement(sql);
             _ = SqlMarkupReader.Read(fragment, SqlMarkupCommentKind.SingleLine, source: String.Empty, logger.Object);
@@ -120,7 +120,7 @@ AS
 
             Mock<ILogger> logger = new Mock<ILogger>(MockBehavior.Strict);
 
-            logger.Setup(x => x.LogError("Multiple default properties specified for @Return", String.Empty, 1, 14)).Verifiable();
+            logger.Setup(x => x.LogMessage(LogCategory.Error, null, null, "Multiple default properties specified for @Return", String.Empty, 1, 14)).Verifiable();
 
             TSqlFragment fragment = ParseAndExtractProcedureStatement(sql);
             _ = SqlMarkupReader.Read(fragment, SqlMarkupCommentKind.SingleLine, source: String.Empty, logger.Object);

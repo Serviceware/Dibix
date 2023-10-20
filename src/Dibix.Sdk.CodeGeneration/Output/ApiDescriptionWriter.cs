@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using Dibix.Http;
+using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.CodeGeneration.CSharp;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -94,7 +95,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             void LogNotSupportedWarning(ActionDefinition action, string message)
             {
-                context.LogWarning($"{action.Method.ToString().ToUpperInvariant()} {RouteBuilder.BuildRoute(context.Model.AreaName, controller.Name, action.ChildRoute)} {message}, which is not supported in Dibix.Http.Host", action.Target.SourceLocation.Source, action.Target.SourceLocation.Line, action.Target.SourceLocation.Column);
+                context.Logger.LogWarning($"{action.Method.ToString().ToUpperInvariant()} {RouteBuilder.BuildRoute(context.Model.AreaName, controller.Name, action.ChildRoute)} {message}, which is not supported in Dibix.Http.Host", action.Target.SourceLocation);
             }
 
             foreach (ActionDefinition action in controller.Actions)

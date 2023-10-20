@@ -15,15 +15,15 @@ namespace Dibix.Sdk.Tests
             _errorOutput = new StringBuilder();
         }
 
-        public override void LogError(string subCategory, string code, string text, string source, int? line, int? column)
+        public override void LogMessage(LogCategory category, string subCategory, string code, string text, string source, int? line, int? column)
         {
             string relativeSource = source.Substring(DatabaseTestUtility.DatabaseProjectDirectory.Length + 1);
-            base.LogError(subCategory, code, text, relativeSource, line, column);
+            base.LogMessage(category, subCategory, code, text, relativeSource, line, column);
         }
 
-        protected override void LogError(string text)
+        protected override void LogErrorMessage(string text)
         {
-            base.LogError(text);
+            base.LogErrorMessage(text);
             _errorOutput.AppendLine(text);
             Debug.WriteLine(text);
         }

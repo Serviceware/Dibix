@@ -35,12 +35,12 @@ namespace Dibix.Sdk.CodeGeneration
           , PrimitiveType.Xml
         };
         private readonly CSharpRoot _root;
-        private readonly ILogger _logger;
         private readonly string _rootNamespace;
         private string _currentNamespace;
-        
+
         public CodeGenerationModel Model { get; }
         public ISchemaRegistry SchemaRegistry { get; }
+        public ILogger Logger { get; }
         public bool WriteGuardChecks { get; set; }
 
         internal CodeGenerationContext(CSharpRoot root, CodeGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger)
@@ -50,7 +50,7 @@ namespace Dibix.Sdk.CodeGeneration
             _currentNamespace = _rootNamespace;
             Model = model;
             SchemaRegistry = schemaRegistry;
-            _logger = logger;
+            Logger = logger;
         }
 
         public CodeGenerationContext AddUsing(string @using)
@@ -142,13 +142,13 @@ namespace Dibix.Sdk.CodeGeneration
 
                 case EnumMemberNumericReference enumMemberNumericReference:
                 {
-                    EnumSchemaMember member = enumMemberNumericReference.GetEnumMember(SchemaRegistry, _logger);
+                    EnumSchemaMember member = enumMemberNumericReference.GetEnumMember(SchemaRegistry, Logger);
                     return new CSharpValue($"{member.Enum.FullName}.{member.Name}");
                 }
 
                 case EnumMemberStringReference enumMemberStringReference:
                 {
-                    EnumSchemaMember member = enumMemberStringReference.GetEnumMember(SchemaRegistry, _logger);
+                    EnumSchemaMember member = enumMemberStringReference.GetEnumMember(SchemaRegistry, Logger);
                     return new CSharpValue($"{member.Enum.FullName}.{member.Name}");
                 }
 
@@ -156,8 +156,6 @@ namespace Dibix.Sdk.CodeGeneration
                     throw new ArgumentOutOfRangeException(nameof(defaultValue), defaultValue, $"Unexpected default value reference: {defaultValue?.GetType()}");
             }
         }
-
-        public void LogWarning(string message, string source, int line, int column) => _logger.LogWarning(subCategory: null, code: null, text: message, source, line, column);
 
         internal void SetScopeName(string name)
         {

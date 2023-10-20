@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Dibix.Sdk.Abstractions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Data.Tools.Schema.Tasks.Sql;
@@ -13,6 +14,7 @@ using Microsoft.Data.Tools.Schema.Utilities.Sql.Common;
 using Microsoft.SqlServer.Dac.Model;
 using Assembly = System.Reflection.Assembly;
 using ILogger = Dibix.Sdk.Abstractions.ILogger;
+using ITask = Microsoft.Build.Framework.ITask;
 using TaskItem = Dibix.Sdk.Abstractions.TaskItem;
 
 namespace Dibix.Sdk.Sql
@@ -213,12 +215,13 @@ namespace Dibix.Sdk.Sql
 
         private static void CompileErrorIterator(IForeachBodyBuilder builder, Expression loggerParameter)
         {
-            // logger.LogError(error.ErrorCode.ToString(), error.Message, error.Document, error.Line, error.Column);
+            // PublicSqlDataSchemaModelLoader.LogError(logger, error.ErrorCode.ToString(), error.Message, error.Document, error.Line, error.Column);
             Expression logErrorCall = Expression.Call
             (
-                loggerParameter
-              , nameof(ILogger.LogError)
+                typeof(PublicSqlDataSchemaModelLoader)
+              , nameof(LogError)
               , Type.EmptyTypes
+              , loggerParameter
               , Expression.Call(Expression.Property(builder.Element, "ErrorCode"), "ToString", Type.EmptyTypes)
               , Expression.Property(builder.Element, "Message")
               , Expression.Property(builder.Element, "Document")
@@ -242,6 +245,8 @@ namespace Dibix.Sdk.Sql
         private static ITaskItem[] ToMSBuildTaskItems(this IEnumerable<TaskItem> source) => source.Select(ToMSBuildTaskItem).ToArray();
 
         private static ITaskItem ToMSBuildTaskItem(TaskItem source) => new TaskItemWrapper(source);
+
+        private static void LogError(ILogger logger, string errorCode, string message, string document, int? line, int? column) => logger.LogError(errorCode, message, document, line ?? default, column ?? default); 
         #endregion
 
         #region Delegates
