@@ -58,10 +58,10 @@ namespace Dibix.Dapper
             return base.Connection.QueryAsync<T>(command);
         }
 
-        protected override IEnumerable<TReturn> QueryMany<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, Func<object[], TReturn> map, string splitOn)
+        protected override IEnumerable<TReturn> QueryMany<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, Func<object[], TReturn> map, string splitOn, bool buffered)
         {
             DecoratedTypeMap.Adapt(types);
-            return base.Connection.Query(commandText, types, map, CollectParameters(parameters), _defaultTransaction, splitOn: splitOn, commandTimeout: _defaultCommandTimeout, commandType: commandType);
+            return base.Connection.Query(commandText, types, map, CollectParameters(parameters), _defaultTransaction, splitOn: splitOn, commandTimeout: _defaultCommandTimeout, commandType: commandType, buffered: buffered);
         }
 
         //protected override T QuerySingle<T>(string commandText, CommandType commandType, ParametersVisitor parameters)

@@ -72,7 +72,7 @@ namespace Dibix.Worker.Host
             }
         }
 
-        protected override IEnumerable<TReturn> QueryMany<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, Func<object[], TReturn> map, string splitOn) => throw new NotImplementedException();
+        protected override IEnumerable<TReturn> QueryMany<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, Func<object[], TReturn> map, string splitOn, bool buffered) => throw new NotImplementedException();
 
         protected override IMultipleResultReader QueryMultiple(string commandText, CommandType commandType, ParametersVisitor parameters) => throw new NotImplementedException();
 
