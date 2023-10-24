@@ -1,5 +1,4 @@
 ﻿using System.Net.Http;
-using System.Text;
 
 namespace Dibix.Http.Server
 {
@@ -20,5 +19,21 @@ namespace Dibix.Http.Server
 
             return response;
         }
+
+#if NET
+        public static void AppendToResponse(this HttpRequestExecutionException exception, Microsoft.AspNetCore.Http.HttpResponse response)
+        {
+            response.StatusCode = (int)exception.StatusCode;
+
+            if (!exception.IsClientError) 
+                return;
+
+            if (exception.ErrorCode != 0)
+                response.Headers.Add(KnownHeaders.ClientErrorCodeHeaderName, exception.ErrorCode.ToString());
+
+            response.Headers.Add(KnownHeaders.ClientErrorDescriptionHeaderName, exception.ErrorMessage);
+            Microsoft.AspNetCore.Http.HttpResponseWritingExtensions.WriteAsync(response, exception.ErrorMessage);
+        }
+#endif
     }
 }

@@ -230,6 +230,8 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static void WriteDelegate(CodeGenerationContext context, ActionDefinition action, StringWriter writer, string variableName)
         {
+            context.AddUsing("Microsoft.AspNetCore.Http"); // HttpContext
+
             var distinctParameters = action.Parameters
                                            .Where(x => x.ParameterLocation is not ActionParameterLocation.NonUser and not ActionParameterLocation.Body)
                                            .DistinctBy(x => x.ApiParameterName)
@@ -246,7 +248,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (bodyType != null)
                 distinctParameters.Add((externalName: "body", internalName: "body", bodyType, location: ActionParameterLocation.Body, hasExplicitMapping: false));
             
-            writer.Write($"{variableName}.RegisterDelegate((IHttpActionDelegator actionDelegator");
+            writer.Write($"{variableName}.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator");
 
             foreach ((string externalName, _, TypeReference type, ActionParameterLocation location, _) in distinctParameters)
             {
@@ -262,7 +264,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             context.AddUsing<Dictionary<string, object>>();
-            writer.WriteRaw(") => actionDelegator.Delegate(new Dictionary<string, object>");
+            writer.WriteRaw(") => actionDelegator.Delegate(httpContext, new Dictionary<string, object>");
 
             if (!distinctParameters.Any())
                 writer.WriteRaw("()");

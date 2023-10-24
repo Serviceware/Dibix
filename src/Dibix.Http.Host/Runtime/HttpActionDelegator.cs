@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dibix.Http.Server;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 namespace Dibix.Http.Host
 {
@@ -10,18 +11,18 @@ namespace Dibix.Http.Host
     {
         private readonly DatabaseScope _databaseScope;
         private readonly IParameterDependencyResolver _parameterDependencyResolver;
-        private readonly HttpContext _httpContext;
+        private readonly ILogger<HttpActionDelegator> _logger;
 
-        public HttpActionDelegator(DatabaseScope databaseScope, IParameterDependencyResolver parameterDependencyResolver, IHttpContextAccessor httpContextAccessor)
+        public HttpActionDelegator(DatabaseScope databaseScope, IParameterDependencyResolver parameterDependencyResolver, ILogger<HttpActionDelegator> logger)
         {
             _databaseScope = databaseScope;
             _parameterDependencyResolver = parameterDependencyResolver;
-            _httpContext = httpContextAccessor.HttpContext ?? throw new InvalidOperationException("HttpContext not set");
+            _logger = logger;
         }
 
-        public async Task Delegate(IDictionary<string, object> arguments)
+        public async Task Delegate(HttpContext httpContext, IDictionary<string, object> arguments)
         {
-            Endpoint? endpoint = _httpContext.GetEndpoint();
+            Endpoint? endpoint = httpContext.GetEndpoint();
             if (endpoint == null)
                 throw new InvalidOperationException("Could not retrieve endpoint from http context");
 
@@ -31,8 +32,18 @@ namespace Dibix.Http.Host
 
             HttpActionDefinition actionDefinition = endpointDefinition.ActionDefinition;
             _databaseScope.InitiatorFullName = actionDefinition.Executor.Method.Name;
-            IHttpResponseFormatter<HttpRequestDescriptor> responseFormatter = new HttpResponseFormatter(_httpContext.Response);
-            _ = await HttpActionInvoker.Invoke(actionDefinition, new HttpRequestDescriptor(_httpContext.Request), responseFormatter, arguments, _parameterDependencyResolver).ConfigureAwait(false);
+            IHttpResponseFormatter<HttpRequestDescriptor> responseFormatter = new HttpResponseFormatter(httpContext.Response);
+            try
+            {
+                _ = await HttpActionInvoker.Invoke(actionDefinition, new HttpRequestDescriptor(httpContext.Request), responseFormatter, arguments, _parameterDependencyResolver).ConfigureAwait(false);
+            }
+            catch (HttpRequestExecutionException httpRequestExecutionException)
+            {
+                if (!httpRequestExecutionException.IsClientError)
+                    _logger.LogError(httpRequestExecutionException, httpRequestExecutionException.ErrorMessage);
+
+                httpRequestExecutionException.AppendToResponse(httpContext.Response);
+            }
         }
     }
 }
