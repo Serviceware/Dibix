@@ -55,6 +55,7 @@ namespace Dibix.Http.Host
                         to.Authority = from.Authority;
                         to.TokenValidationParameters.ValidAudience = from.Audience;
                         to.RequireHttpsMetadata = !isDevelopment || from.Authority?.StartsWith("http:", StringComparison.OrdinalIgnoreCase) is null or false;
+                        to.TokenValidationParameters.ValidateAudience = from.ValidateAudience;
                     });
 
             services.AddLogging(x => x.AddSimpleConsole(y => y.TimestampFormat = "\x1B[1'm'\x1B[37'm'[yyyy-MM-dd HH:mm:ss.fff\x1B[39'm'\x1B[22'm'] "));
