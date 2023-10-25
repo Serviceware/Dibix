@@ -151,14 +151,22 @@ namespace Dibix.Sdk.CodeGeneration
             writer.WriteLine($"{nameof(HttpRequestMessage)} requestMessage = new {nameof(HttpRequestMessage)}(new {nameof(HttpMethod)}(\"{action.Method.ToString().ToUpperInvariant()}\"), {uriConstant});");
 
             bool oneOf = action.SecuritySchemes.Operator == SecuritySchemeOperator.Or && action.SecuritySchemes.Requirements.Count > 1;
+            bool multipleOneOf = false;
             foreach (SecuritySchemeRequirement securitySchemeRequirement in action.SecuritySchemes.Requirements.Where(x => x.Scheme != SecuritySchemes.Anonymous))
             {
                 string securitySchemeName = securitySchemeRequirement.Scheme.Name;
                 string getAuthorizationValueCall = $"_httpAuthorizationProvider.GetValue(\"{securitySchemeName}\")";
                 if (oneOf)
                 {
-                    writer.WriteLine($"if ({getAuthorizationValueCall} != null)")
+                    writer.WriteIndent();
+
+                    if (multipleOneOf)
+                        writer.WriteRaw("else ");
+
+                    writer.WriteLineRaw($"if ({getAuthorizationValueCall} != null)")
                           .PushIndent();
+
+                    multipleOneOf = true;
                 }
 
                 SecurityScheme securityScheme = securitySchemeMap[securitySchemeName];

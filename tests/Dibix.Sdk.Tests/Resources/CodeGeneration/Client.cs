@@ -174,7 +174,7 @@ namespace Dibix.Sdk.Tests.Client
                 HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("PATCH"), "Tests/GenericEndpoint");
                 if (_httpAuthorizationProvider.GetValue("DBXNS-ClientId") != null)
                     requestMessage.Headers.Add("DBXNS-ClientId", _httpAuthorizationProvider.GetValue("DBXNS-ClientId"));
-                if (_httpAuthorizationProvider.GetValue("DBXNS-SIT") != null)
+                else if (_httpAuthorizationProvider.GetValue("DBXNS-SIT") != null)
                     requestMessage.Headers.Add("DBXNS-SIT", _httpAuthorizationProvider.GetValue("DBXNS-SIT"));
                 requestMessage.Content = new ObjectContent<Dibix.Sdk.Tests.DomainModel.AnotherInputContract>(body, Formatter);
                 HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
