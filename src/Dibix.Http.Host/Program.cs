@@ -31,6 +31,7 @@ namespace Dibix.Http.Host
                     .AddScoped<IDatabaseAccessorFactory, ScopedDatabaseAccessorFactory>()
                     .AddScoped<DatabaseScope>()
                     .AddScoped<CreateDatabaseLogger>(x => () => x.GetRequiredService<ILoggerFactory>().CreateLogger(x.GetRequiredService<DatabaseScope>().InitiatorFullName))
+                    .AddSingleton<IDatabaseScopeFactory, DatabaseScopeFactory>()
                     .AddSingleton<HttpApiRegistryFactory>()
                     .AddSingleton<IHttpApiRegistry>(z => z.GetRequiredService<HttpApiRegistryFactory>().Create())
                     .AddSingleton<IEndpointUrlBuilder, AssemblyEndpointConfigurationUrlBuilder>()
