@@ -1,16 +1,14 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using Dibix.Http;
 
 namespace Dibix.Sdk.CodeGeneration
 {
     public sealed class SecuritySchemes
     {
-        private static readonly SecurityScheme AnonymousScheme = new SecurityScheme("Anonymous", SecuritySchemeKind.None);
-        private static readonly SecurityScheme BearerScheme = new SecurityScheme("Bearer", SecuritySchemeKind.Bearer);
-        private readonly IDictionary<string, SecurityScheme> _map = new Dictionary<string, SecurityScheme>
-        {
-            { "Anonymous", AnonymousScheme }
-          , { "Bearer",    BearerScheme }
-        };
+        private static readonly SecurityScheme AnonymousScheme = new SecurityScheme(SecuritySchemeNames.Anonymous, SecuritySchemeKind.None);
+        private static readonly SecurityScheme BearerScheme = new SecurityScheme(SecuritySchemeNames.Bearer, SecuritySchemeKind.Bearer);
+        private readonly IDictionary<string, SecurityScheme> _map = new[] { AnonymousScheme, BearerScheme }.ToDictionary(x => x.Name);
 
         public static SecurityScheme Anonymous => AnonymousScheme;
         public static SecurityScheme Bearer => BearerScheme;

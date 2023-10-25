@@ -13,6 +13,7 @@
     <Compile Include="..\..\shared\Http\HttpParameterUtility.cs" Link="Model\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\HttpErrorResponseUtility.cs" Link="Parser\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\RouteBuilder.cs" Link="OpenApi\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Http\SecuritySchemeNames.cs" Link="Model\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Json\JsonExtensions.cs" Link="Json\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Json\JsonSchemaDefinition.cs" Link="Json\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Json\JsonSchemaExtensions.cs" Link="Json\%(Filename)%(Extension)" />

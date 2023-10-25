@@ -49,7 +49,7 @@ namespace Dibix.Http.Host
                     .Configure<HostingOptions>(hostingConfigurationSection)
                     .Configure<AuthenticationOptions>(builder.Configuration.GetSection(AuthenticationOptions.ConfigurationSectionName))
                     .Configure<CorsOptions>(builder.Configuration.GetSection(CorsOptions.ConfigurationSectionName))
-                    .ConfigureTarget<JwtBearerOptions>(builder.Configuration, AuthenticationOptions.SchemeName)
+                    .ConfigureTarget<JwtBearerOptions>(builder.Configuration, JwtBearerDefaults.AuthenticationScheme)
                     .MapFrom<AuthenticationOptions>(AuthenticationOptions.ConfigurationSectionName, (from, to) =>
                     {
                         to.Authority = from.Authority;
@@ -60,14 +60,13 @@ namespace Dibix.Http.Host
             services.AddLogging(x => x.AddSimpleConsole(y => y.TimestampFormat = "\x1B[1'm'\x1B[37'm'[yyyy-MM-dd HH:mm:ss.fff\x1B[39'm'\x1B[22'm'] "));
 
             services.AddAuthentication()
-                    .AddJwtBearer(AuthenticationOptions.SchemeName, x =>
-                    {
-                    });
+                    .AddJwtBearer();
+
             services.AddAuthorization(x =>
             {
-                x.AddPolicy(AuthenticationOptions.SchemeName, y => y.AddAuthenticationSchemes(AuthenticationOptions.SchemeName)
-                                                                   .RequireAuthenticatedUser()
-                                                                   .Build());
+                x.AddPolicy(JwtBearerDefaults.AuthenticationScheme, y => y.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+                                                                          .RequireAuthenticatedUser()
+                                                                          .Build());
             });
 
             services.AddTransient<ICorsPolicyProvider, CorsPolicyProvider>();

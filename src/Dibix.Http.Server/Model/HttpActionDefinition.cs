@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace Dibix.Http.Server
 {
@@ -12,10 +13,10 @@ namespace Dibix.Http.Server
         public HttpApiMethod Method { get; set; }
         public string ChildRoute { get; set; }
         public HttpRequestBody Body { get; set; }
-        public bool IsAnonymous { get; set; }
         public HttpFileResponseDefinition FileResponse { get; set; }
         public string Description { get; set; }
         public HttpAuthorizationDefinition Authorization { get; set; }
+        public ICollection<string> SecuritySchemes { get; } = new Collection<string>();
         public IDictionary<int, HttpErrorResponse> StatusCodeDetectionResponses { get; }
         public Delegate Delegate { get; set; }
 

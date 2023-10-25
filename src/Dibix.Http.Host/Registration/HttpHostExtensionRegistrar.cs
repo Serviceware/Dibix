@@ -51,13 +51,12 @@ namespace Dibix.Http.Host
                 return this;
             }
 
-            public IHttpHostExtensionConfigurationBuilder EnableCustomAuthentication<T>(Func<HttpActionDefinition, bool>? endpointFilter = null) where T : AuthenticationHandler<AuthenticationSchemeOptions>
+            public IHttpHostExtensionConfigurationBuilder EnableCustomAuthentication<T>(string schemeName) where T : AuthenticationHandler<AuthenticationSchemeOptions>
             {
-                _services.AddAuthentication().AddScheme<AuthenticationSchemeOptions, T>(CustomAuthenticationOptions.SchemeName, configureOptions: _ => { });
-                _services.AddOptions<CustomAuthenticationOptions>().Configure(x => x.EndpointFilter = endpointFilter ?? (_ => true));
+                _services.AddAuthentication().AddScheme<AuthenticationSchemeOptions, T>(schemeName, configureOptions: _ => { });
                 _services.AddAuthorization(x =>
                 {
-                    x.AddPolicy(CustomAuthenticationOptions.SchemeName, y => y.AddAuthenticationSchemes(CustomAuthenticationOptions.SchemeName)
+                    x.AddPolicy(schemeName, y => y.AddAuthenticationSchemes(schemeName)
                                                                               .RequireAuthenticatedUser()
                                                                               .Build());
                 });

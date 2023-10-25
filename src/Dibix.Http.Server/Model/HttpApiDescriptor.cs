@@ -112,7 +112,7 @@ namespace Dibix.Http.Server
             public string ChildRoute { get; set; }
             public Type BodyContract { get; set; }
             public Type BodyBinder { get; set; }
-            public bool IsAnonymous { get; set; }
+            public ICollection<string> SecuritySchemes { get; } = new Collection<string>();
             public HttpFileResponseDefinition FileResponse { get; set; }
             public string Description { get; set; }
             public IDictionary<int, HttpErrorResponse> StatusCodeDetectionResponses { get; }
@@ -154,12 +154,12 @@ namespace Dibix.Http.Server
                     Method = Method,
                     ChildRoute = ChildRoute,
                     Body = BodyContract != null ? new HttpRequestBody(BodyContract, BodyBinder) : null,
-                    IsAnonymous = IsAnonymous,
                     FileResponse = FileResponse,
                     Description = Description,
                     Authorization = _authorization?.Build(),
                     Delegate = Delegate
                 };
+                action.SecuritySchemes.AddRange(SecuritySchemes);
                 action.StatusCodeDetectionResponses.AddRange(StatusCodeDetectionResponses);
                 return action;
             }

@@ -10,15 +10,13 @@ namespace Dibix.Http.Host
         private readonly IEndpointMetadataProvider _endpointMetadataProvider;
         private readonly IEndpointImplementationProvider _endpointImplementationProvider;
         private readonly IOptions<HostingOptions> _hostingOptions;
-        private readonly IOptions<CustomAuthenticationOptions> _customAuthenticationOptions;
         private readonly ILogger<DefaultEndpointRegistrar> _logger;
 
-        public DefaultEndpointRegistrar(IEndpointMetadataProvider endpointMetadataProvider, IEndpointImplementationProvider endpointImplementationProvider, IOptions<HostingOptions> hostingOptions, IOptions<CustomAuthenticationOptions> customAuthenticationOptions, ILogger<DefaultEndpointRegistrar> logger)
+        public DefaultEndpointRegistrar(IEndpointMetadataProvider endpointMetadataProvider, IEndpointImplementationProvider endpointImplementationProvider, IOptions<HostingOptions> hostingOptions, ILogger<DefaultEndpointRegistrar> logger)
         {
             _endpointMetadataProvider = endpointMetadataProvider;
             _endpointImplementationProvider = endpointImplementationProvider;
             _hostingOptions = hostingOptions;
-            _customAuthenticationOptions = customAuthenticationOptions;
             _logger = logger;
         }
 
@@ -35,14 +33,10 @@ namespace Dibix.Http.Host
 
                 IEndpointConventionBuilder endpointBuilder = builder.MapMethods(route, EnumerableExtensions.Create(endpoint.Method), _endpointImplementationProvider.GetImplementation(endpoint));
 
-                endpointBuilder.WithMetadata(endpoint);
-                
-                if (!endpoint.ActionDefinition.IsAnonymous)
-                {
-                    CustomAuthenticationOptions customAuthenticationOptions = _customAuthenticationOptions.Value;
-                    string policyName = customAuthenticationOptions.EndpointFilter(endpoint.ActionDefinition) ? CustomAuthenticationOptions.SchemeName : AuthenticationOptions.SchemeName;
-                    endpointBuilder.RequireAuthorization(policyName);
-                }
+                _ = endpointBuilder.WithMetadata(endpoint);
+
+                foreach (string securityScheme in endpoint.ActionDefinition.SecuritySchemes) 
+                    _ = securityScheme == SecuritySchemeNames.Anonymous ? endpointBuilder.AllowAnonymous() : endpointBuilder.RequireAuthorization(securityScheme);
             }
         }
     }
