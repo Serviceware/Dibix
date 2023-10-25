@@ -31,8 +31,8 @@ namespace Dibix.Tests
 
             connection.Protected().Setup(nameof(IDisposable.Dispose), exactParameterMatch: true, false);
             accessor.Protected()
-                    .Setup<IEnumerable<Character>>("QueryMany", new[] { typeof(Character) }, exactParameterMatch: true, "commandText", CommandType.Text, ItExpr.Is<ParametersVisitor>(x => x == parametersVisitor.Object), new[] { typeof(Character), typeof(Name), typeof(string), typeof(Name) }, ItExpr.IsAny<Func<object[], Character>>(), "x,x,x")
-                    .Returns<string, CommandType, ParametersVisitor, Type[], Func<object[], Character>, string>((_, _, _, _, map, _) => rows.Select(map));
+                    .Setup<IEnumerable<Character>>("QueryMany", new[] { typeof(Character) }, exactParameterMatch: true, "commandText", CommandType.Text, ItExpr.Is<ParametersVisitor>(x => x == parametersVisitor.Object), new[] { typeof(Character), typeof(Name), typeof(string), typeof(Name) }, ItExpr.IsAny<Func<object[], Character>>(), "x,x,x", false)
+                    .Returns<string, CommandType, ParametersVisitor, Type[], Func<object[], Character>, string, bool>((_, _, _, _, map, _, _) => rows.Select(map));
 
             Character result = accessor.Object.QuerySingle<Character>("commandText", CommandType.Text, parametersVisitor.Object, new[] { typeof(Character), typeof(Name), typeof(string), typeof(Name) }, "x,x,x");
             Assert.IsNotNull(result.Name);
@@ -71,8 +71,8 @@ namespace Dibix.Tests
 
             connection.Protected().Setup(nameof(IDisposable.Dispose), exactParameterMatch: true, false);
             accessor.Protected()
-                    .Setup<IEnumerable<Category>>("QueryMany", new[] { typeof(Category) }, exactParameterMatch: true, "commandText", CommandType.Text, ItExpr.Is<ParametersVisitor>(x => x == parametersVisitor.Object), new[] { typeof(Category), typeof(CategoryBlacklistEntry) }, ItExpr.IsAny<Func<object[], Category>>(), "x")
-                    .Returns<string, CommandType, ParametersVisitor, Type[], Func<object[], Category>, string>((_, _, _, _, map, _) => rows.Select(map));
+                    .Setup<IEnumerable<Category>>("QueryMany", new[] { typeof(Category) }, exactParameterMatch: true, "commandText", CommandType.Text, ItExpr.Is<ParametersVisitor>(x => x == parametersVisitor.Object), new[] { typeof(Category), typeof(CategoryBlacklistEntry) }, ItExpr.IsAny<Func<object[], Category>>(), "x", true)
+                    .Returns<string, CommandType, ParametersVisitor, Type[], Func<object[], Category>, string, bool>((_, _, _, _, map, _, _) => rows.Select(map));
 
             IList<Category> categories = accessor.Object.QueryMany<Category>("commandText", CommandType.Text, parametersVisitor.Object, new[] { typeof(Category), typeof(CategoryBlacklistEntry) }, "x").ToArray();
             Assert.IsNotNull(categories);
