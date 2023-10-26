@@ -248,7 +248,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             TypeReference bodyType = action.RequestBody?.Contract;
             if (bodyType != null)
-                distinctParameters.Add((externalName: "body", internalName: "body", bodyType, location: ActionParameterLocation.Body, hasExplicitMapping: false));
+                distinctParameters.Add((externalName: "body", internalName: HttpParameterName.Body, bodyType, location: ActionParameterLocation.Body, hasExplicitMapping: false));
             
             writer.Write($"{variableName}.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator");
 
