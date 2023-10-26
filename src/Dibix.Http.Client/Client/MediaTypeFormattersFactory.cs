@@ -16,7 +16,7 @@ namespace Dibix.Http.Client
             MediaTypeFormatterCollection mediaTypeFormatterCollection = new MediaTypeFormatterCollection();
             JsonMediaTypeFormatter jsonMediaTypeFormatter = mediaTypeFormatterCollection.JsonFormatter;
             jsonMediaTypeFormatter.SerializerSettings.DateTimeZoneHandling = options.ResponseContent.DateTimeZoneHandling;
-            jsonMediaTypeFormatter.SerializerSettings.ContractResolver = new HttpClientJsonContractResolver(client.BaseAddress.Host, jsonMediaTypeFormatter);
+            jsonMediaTypeFormatter.SerializerSettings.ContractResolver = new HttpClientJsonContractResolver(client.BaseAddress.Host, jsonMediaTypeFormatter, options.ResponseContent.MakeRelativeUrisAbsolute);
             return mediaTypeFormatterCollection;
         }
     }

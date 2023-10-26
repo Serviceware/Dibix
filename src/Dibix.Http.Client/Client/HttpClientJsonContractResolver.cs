@@ -8,18 +8,20 @@ namespace Dibix.Http.Client
     internal sealed class HttpClientJsonContractResolver : JsonContractResolver
     {
         private readonly string _hostName;
+        private readonly bool _responseContentMakeRelativeUrisAbsolute;
 
-        public HttpClientJsonContractResolver(string hostName, MediaTypeFormatter formatter) : base(formatter)
+        public HttpClientJsonContractResolver(string hostName, MediaTypeFormatter formatter, bool responseContentMakeRelativeUrisAbsolute) : base(formatter)
         {
-            this._hostName = hostName;
+            _hostName = hostName;
+            _responseContentMakeRelativeUrisAbsolute = responseContentMakeRelativeUrisAbsolute;
         }
 
         protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
         {
             JsonProperty property = base.CreateProperty(member, memberSerialization);
 
-            if (member.IsDefined(typeof(RelativeHttpsUrlAttribute)))
-                property.Converter = new RelativeUriConverter(this._hostName);
+            if (_responseContentMakeRelativeUrisAbsolute && member.IsDefined(typeof(RelativeHttpsUrlAttribute)))
+                property.Converter = new RelativeUriConverter(_hostName);
 
             return property;
         }
