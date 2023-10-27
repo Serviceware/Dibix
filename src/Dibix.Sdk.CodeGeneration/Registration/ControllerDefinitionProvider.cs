@@ -106,7 +106,8 @@ namespace Dibix.Sdk.CodeGeneration
 
         private void ReadControllerAction(ControllerDefinition controller, JObject action)
         {
-            JObject actionMerged = action.Merge<JObject>(_templates.Default.Action);
+            JObject actionMerged = (JObject)_templates.Default.Action.DeepClone();
+            actionMerged.Merge(action, new JsonMergeSettings { MergeArrayHandling = MergeArrayHandling.Replace });
 
             // Collect body parameters
             ActionRequestBody requestBody = ReadBody(action);
@@ -646,8 +647,9 @@ namespace Dibix.Sdk.CodeGeneration
                     @params.Add(authorizationParameterProperty);
                 }
             }
-
-            JObject mergedAuthorization = resolvedAuthorization.Merge<JObject>(template.Content);
+            
+            JObject mergedAuthorization = (JObject)template.Content.DeepClone();
+            mergedAuthorization.Merge(resolvedAuthorization);
             return mergedAuthorization;
         }
 
