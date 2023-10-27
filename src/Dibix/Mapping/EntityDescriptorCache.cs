@@ -25,7 +25,7 @@ namespace Dibix
         {
             bool isPrimitive = type.IsPrimitive();
             EntityDescriptor descriptor = new EntityDescriptor(isPrimitive);
-            if (isPrimitive || type == typeof(byte[]) || type == typeof(XElement))
+            if (isPrimitive || type == typeof(byte[]) || type == typeof(XElement) || type == typeof(Uri))
                 return descriptor;
 
             IDictionary<PropertyInfo, ICollection<IEntityPropertyFormatter>> formattableProperties = new Dictionary<PropertyInfo, ICollection<IEntityPropertyFormatter>>();
