@@ -1,30 +1,111 @@
+param
+(
+    [Parameter()]
+    [ValidateNotNullOrEmpty()]
+    [string]
+    $ServiceName = 'Dibix Worker Host',
+
+    [Parameter()]
+    [ValidateNotNullOrEmpty()]
+    [string]
+    $ConnectionString,
+
+    [Parameter()]
+    [ValidateNotNullOrEmpty()]
+    [string]
+    $Extension,
+
+    [Parameter()]
+    [ValidateNotNullOrEmpty()]
+    [string[]]
+    $Workers,
+
+    [Parameter()]
+    [switch]$Development
+)
+
 $ErrorActionPreference = 'Stop'
 
-$serviceName       = 'Dibix Worker Host'
+
 $runtimeIdentifier = 'win-x64'
-$configuration     = 'Release'
+$configuration     = if ($Development) { 'Debug' } else { 'Release' }
 $publishReadyToRun = 'True'
 $publishSingleFile = 'True'
 $sourcePath        = Resolve-Path (Join-Path $PSScriptRoot '../src/Dibix.Worker.Host')
-$exePath           = Join-Path $sourcePath "bin/$configuration/net6.0/$runtimeIdentifier/publish/Dibix.Worker.Host.exe"
+$binaryFolder      = "bin/$configuration/net6.0/"
 
-dotnet publish --configuration $configuration                `
-               --runtime $runtimeIdentifier                  `
-               --self-contained                              `
-               --p:IgnoreProjectGuid=True                    `
-               --p:PublishReadyToRun=$publishReadyToRun      `
-               --p:PublishSingleFile=$publishSingleFile      `
-               --p:IncludeNativeLibrariesForSelfExtract=True `
-               --p:IncludeNativeLibrariesForSelfExtract=True `
-               $sourcePath
+if (!$Development)
+{
+    $binaryFolder = "$binaryFolder$runtimeIdentifier/publish/"
+}
 
-Write-Output $exePath
+$exePath = Join-Path $sourcePath "$($binaryFolder)Dibix.Worker.Host.exe"
 
-<#
 
-sc.exe delete $serviceName # Remove-Service was only introduced in PS 6
-New-Service -Name $serviceName -BinaryPathName "$exePath --environment Development"
+function Exec
+{
+    param (
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string]$Cmd
+    )
 
-net start """$serviceName"""
+    $normalizedCmd = $Cmd.Replace("`r`n", '') -replace '\s+', ' '
+    Write-Host $normalizedCmd -ForegroundColor Cyan
+    Invoke-Expression "& $normalizedCmd"
+    if ($LASTEXITCODE -ne 0)
+    {
+        exit $LASTEXITCODE
+    }
+}
 
-#>
+function Set-ServiceEnvironmentVariables
+{
+    [string[]]$env = @(
+        "Database:ConnectionString=$ConnectionString",
+        "Hosting:Extension=$Extension"
+    )
+    for ($i = 0; $i -lt $Workers.Count; $i++) {
+        $worker = $Workers[$i]
+        $env += "Hosting:Workers:$i=$worker"
+    }
+
+    $key = "HKLM:\SYSTEM\CurrentControlSet\Services\$ServiceName"
+    $name = 'Environment'
+    New-ItemProperty $key -Name $name -Value $env -PropertyType MultiString -Force
+}
+
+
+$serviceExists = Get-Service $ServiceName -ErrorAction SilentlyContinue
+
+if ($serviceExists)
+{
+    Exec "Stop-Service ""$ServiceName"""
+}
+
+if ($Development)
+{
+    Exec "dotnet build --configuration $configuration $sourcePath"
+}
+else
+{
+    Exec "dotnet publish --configuration $configuration
+                         --runtime $runtimeIdentifier
+                         --self-contained
+                         --p:IgnoreProjectGuid=True
+                         --p:PublishReadyToRun=$publishReadyToRun
+                         --p:PublishSingleFile=$publishSingleFile
+                         --p:IncludeNativeLibrariesForSelfExtract=True
+                         --p:IncludeNativeLibrariesForSelfExtract=True
+                         $sourcePath"
+}
+
+if ($ServiceExists)
+{
+    Exec "sc.exe delete ""$ServiceName""" # Remove-Service was only introduced in PS 6
+}
+
+Exec "New-Service -Name ""$ServiceName"" -BinaryPathName ""$exePath --environment Development"""
+Write-Host 'Setting service environment variables' -ForegroundColor Cyan
+Set-ServiceEnvironmentVariables
+Exec "net start ""$ServiceName"""
