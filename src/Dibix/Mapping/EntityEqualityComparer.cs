@@ -10,6 +10,9 @@ namespace Dibix
 
         public static bool Equal(T x, T y)
         {
+            if (object.Equals(x, y))
+                return true;
+            
             if (ReferenceEquals(x, y))
                 return true;
 
