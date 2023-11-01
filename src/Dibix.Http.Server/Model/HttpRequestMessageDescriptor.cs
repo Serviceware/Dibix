@@ -27,6 +27,30 @@ namespace Dibix.Http.Server
         
         public ClaimsPrincipal GetUser() => throw new NotSupportedException();
 
+        public HttpActionDefinition GetActionDefinition() => throw new NotSupportedException();
+
+        public string GetRemoteAddress()
+        {
+#if NETFRAMEWORK
+            System.Web.HttpContextBase context = RequestMessage.Properties["MS_HttpContext"] as System.Web.HttpContextBase;
+            return context?.Request.UserHostAddress;
+#else
+            throw new NotSupportedException();
+#endif
+        }
+
+        public string GetRemoteName()
+        {
+#if NETFRAMEWORK
+            System.Web.HttpContextBase context = RequestMessage.Properties["MS_HttpContext"] as System.Web.HttpContextBase;
+            return context?.Request.UserHostName;
+#else
+            throw new NotSupportedException();
+#endif
+        }
+
+        public string GetBearerToken() => throw new NotSupportedException();
+
         public object CreateResponse(HttpStatusCode statusCode) => RequestMessage.CreateResponse(statusCode);
 
         public object CreateFileResponse(string contentType, byte[] data, string fileName, bool cache)

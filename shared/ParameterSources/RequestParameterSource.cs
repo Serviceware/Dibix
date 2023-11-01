@@ -9,7 +9,10 @@ namespace Dibix
         public ICollection<string> Properties { get; } = new Collection<string>
         {
             "Language",
-            "Languages"
+            "Languages",
+            "RemoteName",
+            "RemoteAddress",
+            "BearerToken"
         };
     }
 }

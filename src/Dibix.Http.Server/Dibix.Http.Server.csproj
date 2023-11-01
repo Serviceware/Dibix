@@ -49,6 +49,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
+    <Reference Include="System.Web" />
     <Reference Include="WindowsBase" /> <!-- System.IO.Packaging -->
   </ItemGroup>
 

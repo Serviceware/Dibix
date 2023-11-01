@@ -19,20 +19,29 @@ namespace Dibix.Http.Server
         {
             switch (propertyName)
             {
-                case "Language": return BuildExpression(requestParameter, nameof(GetFirstLanguage));
-                case "Languages": return BuildExpression(requestParameter, nameof(GetLanguages));
+                case "Language": return BuildCallExpression(nameof(GetFirstLanguage), requestParameter);
+                case "Languages": return BuildCallExpression(nameof(GetLanguages), requestParameter);
+                case "RemoteName": return BuildCallExpression(nameof(GetRemoteName), requestParameter);
+                case "RemoteAddress": return BuildCallExpression(nameof(GetRemoteAddress), requestParameter);
+                case "BearerToken": return BuildCallExpression(nameof(GetBearerToken), requestParameter);
                 default: throw new ArgumentOutOfRangeException(nameof(propertyName), propertyName, null);
             }
         }
 
-        private static Expression BuildExpression(Expression requestParameter, string methodName)
+        private static Expression BuildCallExpression(string methodName, Expression requestParameter)
         {
-            Expression getLanguageCall = Expression.Call(typeof(RequestParameterSourceProvider), methodName, Type.EmptyTypes, requestParameter);
-            return getLanguageCall;
+            Expression call = Expression.Call(typeof(RequestParameterSourceProvider), methodName, Type.EmptyTypes, requestParameter);
+            return call;
         }
 
         private static string GetFirstLanguage(IHttpRequestDescriptor request) => GetLanguages(request).FirstOrDefault();
-        
+
         private static IEnumerable<string> GetLanguages(IHttpRequestDescriptor request) => request.GetAcceptLanguageValues();
+
+        private static string GetRemoteName(IHttpRequestDescriptor request) => request.GetRemoteName();
+
+        private static string GetRemoteAddress(IHttpRequestDescriptor request) => request.GetRemoteAddress();
+
+        private static string GetBearerToken(IHttpRequestDescriptor request) => request.GetBearerToken();
     }
 }

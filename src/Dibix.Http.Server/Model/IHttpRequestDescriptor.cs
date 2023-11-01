@@ -11,5 +11,9 @@ namespace Dibix.Http.Server
         IEnumerable<string> GetHeaderValues(string name);
         IEnumerable<string> GetAcceptLanguageValues();
         ClaimsPrincipal GetUser();
+        HttpActionDefinition GetActionDefinition();
+        string GetRemoteAddress();
+        string GetRemoteName();
+        string GetBearerToken();
     }
 }

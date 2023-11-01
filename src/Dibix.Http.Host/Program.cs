@@ -3,6 +3,7 @@ using System.Data.Common;
 using System.Threading.Tasks;
 using Dibix.Hosting.Abstractions.Data;
 using Dibix.Http.Server;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -41,7 +42,9 @@ namespace Dibix.Http.Host
                     .AddSingleton<IEndpointRegistrar, DefaultEndpointRegistrar>()
                     .AddSingleton<IAuthorizationHandlerContextFactory, EndpointAuthorizationHandlerContextFactory>()
                     .AddScoped<IParameterDependencyResolver, ParameterDependencyResolver>()
-                    .AddScoped<IHttpActionDelegator, HttpActionDelegator>();
+                    .AddScoped<IHttpActionDelegator, HttpActionDelegator>()
+                    .AddTransient<IClaimsTransformation, ComposableClaimsTransformation>()
+                    .AddTransient<IClaimsTransformer, JwtBearerClaimsTransformer>();
 
             services.AddEventLogOptions();
 

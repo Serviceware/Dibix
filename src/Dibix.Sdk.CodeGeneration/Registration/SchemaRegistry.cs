@@ -27,7 +27,13 @@ namespace Dibix.Sdk.CodeGeneration
         #region ISchemaRegistry Members
         public bool IsRegistered(string fullName) => _schemas.ContainsKey(fullName);
 
-        public void Populate(SchemaDefinition schema) => _schemas.Add(schema.FullName, schema);
+        public void Populate(SchemaDefinition schema)
+        {
+            if (_schemas.ContainsKey(schema.FullName))
+                throw new InvalidOperationException($"Schema already registered: {schema.FullName}");
+
+            _schemas.Add(schema.FullName, schema);
+        }
 
         public SchemaDefinition GetSchema(SchemaTypeReference schemaTypeReference)
         {
