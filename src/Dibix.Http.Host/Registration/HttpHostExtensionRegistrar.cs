@@ -1,22 +1,24 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.Loader;
+using System.Threading.Tasks;
 using Dibix.Hosting.Abstractions;
 using Dibix.Hosting.Abstractions.Data;
 using Dibix.Http.Host.Runtime;
 using Dibix.Http.Server;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Dibix.Http.Host
 {
     internal static class HttpHostExtensionRegistrar
     {
-        public static void Register(HostingOptions options, IServiceCollection services, ILoggerFactory loggerFactory)
+        public static IHttpHostExtensionRegistrar? Register(HostingOptions options, IServiceCollection services, ILoggerFactory loggerFactory)
         {
             if (String.IsNullOrEmpty(options.Extension))
-                return;
+                return null;
 
             const string kind = "Http host extension";
             string currentDirectory = AppContext.BaseDirectory;
@@ -32,18 +34,22 @@ namespace Dibix.Http.Host
             IHttpHostExtension instance = ExtensionRegistrationUtility.GetExtensionImplementation<IHttpHostExtension>(extensionPath, kind, assemblyLoadContext);
             HttpHostExtensionConfigurationBuilder builder = new HttpHostExtensionConfigurationBuilder(services);
             instance.Register(builder);
+            return builder;
         }
 
-        private sealed class HttpHostExtensionConfigurationBuilder : IHttpHostExtensionConfigurationBuilder
+        private sealed class HttpHostExtensionConfigurationBuilder : IHttpHostExtensionConfigurationBuilder, IHttpHostExtensionRegistrar
         {
+            private const string HostFullName = "Dibix.Http.Host";
             private readonly IServiceCollection _services;
+            private Func<IHttpHostExtensionScope, Task>? _onHostStartedExtension;
+            private Func<IHttpHostExtensionScope, Task>? _onHostStoppedExtension;
 
             public HttpHostExtensionConfigurationBuilder(IServiceCollection services)
             {
                 _services = services;
             }
 
-            public IHttpHostExtensionConfigurationBuilder EnableRequestIdentityProvider()
+            IHttpHostExtensionConfigurationBuilder IHttpHostExtensionConfigurationBuilder.EnableRequestIdentityProvider()
             {
                 _services.AddHttpContextAccessor()
                          .AddScoped<IRequestIdentityProvider, RequestIdentityProvider>();
@@ -51,7 +57,7 @@ namespace Dibix.Http.Host
                 return this;
             }
 
-            public IHttpHostExtensionConfigurationBuilder EnableCustomAuthentication<T>(string schemeName) where T : AuthenticationHandler<AuthenticationSchemeOptions>
+            IHttpHostExtensionConfigurationBuilder IHttpHostExtensionConfigurationBuilder.EnableCustomAuthentication<T>(string schemeName)
             {
                 _services.AddAuthentication().AddScheme<AuthenticationSchemeOptions, T>(schemeName, configureOptions: _ => { });
                 _services.AddAuthorization(x =>
@@ -63,17 +69,84 @@ namespace Dibix.Http.Host
                 return this;
             }
 
-            public IHttpHostExtensionConfigurationBuilder RegisterDependency<TInterface, TImplementation>() where TInterface : class where TImplementation : class, TInterface
+            IHttpHostExtensionConfigurationBuilder IHttpHostExtensionConfigurationBuilder.RegisterDependency<TInterface, TImplementation>()
             {
                 _services.AddScoped<TInterface, TImplementation>();
                 return this;
             }
 
-            public IHttpHostExtensionConfigurationBuilder ConfigureConnectionString(Func<string?, string?> configure)
+            IHttpHostExtensionConfigurationBuilder IHttpHostExtensionConfigurationBuilder.ConfigureConnectionString(Func<string?, string?> configure)
             {
                 _services.Configure<DatabaseOptions>(x => x.ConnectionString = configure(x.ConnectionString));
                 return this;
             }
+
+            IHttpHostExtensionConfigurationBuilder IHttpHostExtensionConfigurationBuilder.OnHostStarted(Func<IHttpHostExtensionScope, Task> handler)
+            {
+                _onHostStartedExtension = handler;
+                return this;
+            }
+
+            IHttpHostExtensionConfigurationBuilder IHttpHostExtensionConfigurationBuilder.OnHostStopped(Func<IHttpHostExtensionScope, Task> handler)
+            {
+                _onHostStoppedExtension = handler;
+                return this;
+            }
+
+            async Task IHttpHostExtensionRegistrar.Configure(IHost host)
+            {
+                if (_onHostStartedExtension == null)
+                    return;
+
+                SubscribeToShutdown(host.Services);
+                using HttpHostExtensionScope scope = CreateScope(host.Services);
+                await _onHostStartedExtension(scope).ConfigureAwait(false);
+            }
+
+            private void SubscribeToShutdown(IServiceProvider services)
+            {
+                IHostApplicationLifetime hostApplicationLifetime = services.GetRequiredService<IHostApplicationLifetime>();
+                hostApplicationLifetime.ApplicationStopped.Register(() => OnHostStopped(services));
+            }
+
+            private static HttpHostExtensionScope CreateScope(IServiceProvider serviceProvider)
+            {
+                IServiceScope scope = serviceProvider.CreateScope();
+                DatabaseScope databaseScope = scope.ServiceProvider.GetRequiredService<DatabaseScope>();
+                databaseScope.InitiatorFullName = HostFullName;
+                HttpHostExtensionScope extensionScope = new HttpHostExtensionScope(scope);
+                return extensionScope;
+            }
+
+            private void OnHostStopped(IServiceProvider serviceProvider)
+            {
+                using HttpHostExtensionScope scope = CreateScope(serviceProvider);
+                _onHostStoppedExtension?.Invoke(scope);
+            }
         }
+
+        private sealed class HttpHostExtensionScope : IHttpHostExtensionScope, IDisposable
+        {
+            private readonly IServiceScope _scope;
+            private readonly ILoggerFactory _loggerFactory;
+            private IDatabaseAccessorFactory? _databaseAccessorFactory;
+
+            public IDatabaseAccessorFactory DatabaseAccessorFactory => _databaseAccessorFactory ??= _scope.ServiceProvider.GetRequiredService<IDatabaseAccessorFactory>();
+
+            public HttpHostExtensionScope(IServiceScope scope)
+            {
+                _scope = scope;
+                _loggerFactory = scope.ServiceProvider.GetRequiredService<ILoggerFactory>();
+            }
+
+            public ILogger CreateLogger(Type loggerType) => _loggerFactory.CreateLogger(loggerType);
+
+            public void Dispose() => _scope.Dispose();
+        }
+    }
+
+    internal interface IHttpHostExtensionRegistrar
+    {
+        Task Configure(IHost host);
     }
 }

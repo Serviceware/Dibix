@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace Dibix.Http.Server
 {
@@ -10,5 +11,7 @@ namespace Dibix.Http.Server
 #endif
         IHttpHostExtensionConfigurationBuilder RegisterDependency<TInterface, TImplementation>() where TInterface : class where TImplementation : class, TInterface;
         IHttpHostExtensionConfigurationBuilder ConfigureConnectionString(Func<string, string> configure);
+        IHttpHostExtensionConfigurationBuilder OnHostStarted(Func<IHttpHostExtensionScope, Task> handler);
+        IHttpHostExtensionConfigurationBuilder OnHostStopped(Func<IHttpHostExtensionScope, Task> handler);
     }
 }

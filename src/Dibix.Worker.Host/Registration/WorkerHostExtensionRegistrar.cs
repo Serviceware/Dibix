@@ -45,7 +45,7 @@ namespace Dibix.Worker.Host
                 _dependencyRegistry = dependencyRegistry;
             }
 
-            public IWorkerHostExtensionConfigurationBuilder RegisterService<TService>() where TService : HostedService
+            IWorkerHostExtensionConfigurationBuilder IWorkerHostExtensionConfigurationBuilder.RegisterService<TService>()
             {
                 _services.AddHostedService<TService>();
                 return this;
@@ -57,7 +57,7 @@ namespace Dibix.Worker.Host
                 return this;
             }
 
-            public IWorkerHostExtensionConfigurationBuilder RegisterDependency<TInterface>(Func<IWorkerDependencyContext, TInterface> factory) where TInterface : class
+            IWorkerHostExtensionConfigurationBuilder IWorkerHostExtensionConfigurationBuilder.RegisterDependency<TInterface>(Func<IWorkerDependencyContext, TInterface> factory)
             {
                 TInterface CreateInstance(IServiceProvider serviceProvider)
                 {
@@ -69,7 +69,7 @@ namespace Dibix.Worker.Host
                 return this;
             }
 
-            public IWorkerHostExtensionConfigurationBuilder ConfigureConnectionString(Func<string?, string?> configure)
+            IWorkerHostExtensionConfigurationBuilder IWorkerHostExtensionConfigurationBuilder.ConfigureConnectionString(Func<string?, string?> configure)
             {
                 _services.Configure<DatabaseOptions>(x => x.ConnectionString = configure(x.ConnectionString));
                 return this;
