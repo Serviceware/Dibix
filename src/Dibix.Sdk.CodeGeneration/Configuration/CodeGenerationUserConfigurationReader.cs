@@ -54,18 +54,26 @@ namespace Dibix.Sdk.CodeGeneration
 
             foreach (JProperty parameterSource in parameterSources.Properties())
             {
-                if (_actionParameterSourceRegistry.TryGetDefinition(parameterSource.Name, out ActionParameterSourceDefinition _))
+                IActionParameterExtensibleFixedPropertySourceDefinition extensiblePropertyDefinition = null;
+                if (_actionParameterSourceRegistry.TryGetDefinition(parameterSource.Name, out ActionParameterSourceDefinition sourceDefinition))
                 {
-                    SourceLocation sourceInfo = parameterSource.GetSourceInfo();
-                    _logger.LogError($"Parameter source '{parameterSource.Name}' is already registered", sourceInfo.Source, sourceInfo.Line, sourceInfo.Column);
-                    continue;
+                    if (sourceDefinition is IActionParameterExtensibleFixedPropertySourceDefinition extensiblePropertySourceDefinition)
+                    {
+                        extensiblePropertyDefinition = extensiblePropertySourceDefinition;
+                    }
+                    else
+                    {
+                        SourceLocation sourceInfo = parameterSource.GetSourceInfo();
+                        _logger.LogError($"Parameter source '{parameterSource.Name}' is already registered", sourceInfo.Source, sourceInfo.Line, sourceInfo.Column);
+                        continue;
+                    }
                 }
 
-                CollectParameterSource(parameterSource.Name, parameterSource.Value.Type, parameterSource.Value, _actionParameterSourceRegistry);
+                CollectParameterSource(parameterSource.Name, parameterSource.Value.Type, parameterSource.Value, _actionParameterSourceRegistry, extensiblePropertyDefinition);
             }
         }
 
-        private static void CollectParameterSource(string sourceName, JTokenType valueType, JToken value, IActionParameterSourceRegistry registry)
+        private static void CollectParameterSource(string sourceName, JTokenType valueType, JToken value, IActionParameterSourceRegistry registry, IActionParameterExtensibleFixedPropertySourceDefinition extensiblePropertyDefinition)
         {
             switch (valueType)
             {
@@ -76,7 +84,14 @@ namespace Dibix.Sdk.CodeGeneration
                 case JTokenType.Array:
                     JArray parameterSourceProperties = (JArray)value;
                     string[] propertyNames = parameterSourceProperties.Select(x => (string)x).ToArray();
-                    registry.Register(new DynamicPropertyParameterSource(sourceName, propertyNames), x => new DynamicPropertyParameterSourceValidator(x));
+                    if (extensiblePropertyDefinition != null)
+                    {
+                        extensiblePropertyDefinition.AddProperties(propertyNames);
+                    }
+                    else
+                    {
+                        registry.Register(new DynamicPropertyParameterSource(sourceName, propertyNames), x => new DynamicPropertyParameterSourceValidator(x));
+                    }
                     break;
 
                 default:

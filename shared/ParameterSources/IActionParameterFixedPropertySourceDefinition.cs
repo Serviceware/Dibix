@@ -1,7 +1,9 @@
-﻿namespace Dibix
+﻿using System.Collections.Generic;
+
+namespace Dibix
 {
     internal interface IActionParameterFixedPropertySourceDefinition
     {
-        string[] Properties { get; }
+        ICollection<string> Properties { get; }
     }
 }

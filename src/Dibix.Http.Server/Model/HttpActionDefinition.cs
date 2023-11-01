@@ -17,6 +17,7 @@ namespace Dibix.Http.Server
         public string Description { get; set; }
         public HttpAuthorizationDefinition Authorization { get; set; }
         public ICollection<string> SecuritySchemes { get; } = new Collection<string>();
+        public ICollection<string> RequiredClaims { get; } = new Collection<string>();
         public IDictionary<int, HttpErrorResponse> StatusCodeDetectionResponses { get; }
         public Delegate Delegate { get; set; }
 

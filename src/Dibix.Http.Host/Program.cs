@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Dibix.Hosting.Abstractions.Data;
 using Dibix.Http.Server;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.Extensions.Configuration;
@@ -38,6 +39,7 @@ namespace Dibix.Http.Host
                     .AddSingleton<IEndpointMetadataProvider, AssemblyEndpointMetadataProvider>()
                     .AddSingleton<IEndpointImplementationProvider, DefaultEndpointImplementationProvider>()
                     .AddSingleton<IEndpointRegistrar, DefaultEndpointRegistrar>()
+                    .AddSingleton<IAuthorizationHandlerContextFactory, EndpointAuthorizationHandlerContextFactory>()
                     .AddScoped<IParameterDependencyResolver, ParameterDependencyResolver>()
                     .AddScoped<IHttpActionDelegator, HttpActionDelegator>();
 

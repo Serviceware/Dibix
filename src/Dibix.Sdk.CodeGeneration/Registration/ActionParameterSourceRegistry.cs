@@ -17,6 +17,7 @@ namespace Dibix.Sdk.CodeGeneration
             Register<PathParameterSource, PathPropertySourceValidator>();
             Register<QueryParameterSource, QueryPropertySourceValidator>();
             Register<RequestParameterSource, RequestPropertySourceValidator>();
+            Register<ClaimParameterSource, ClaimPropertySourceValidator>();
         }
 
         void IActionParameterSourceRegistry.Register<TSource>(TSource source, Func<TSource, IActionParameterPropertySourceValidator> validatorFactory)

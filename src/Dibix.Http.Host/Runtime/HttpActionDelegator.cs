@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Dibix.Http.Host.Extensions;
 using Dibix.Http.Server;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -22,14 +22,7 @@ namespace Dibix.Http.Host
 
         public async Task Delegate(HttpContext httpContext, IDictionary<string, object> arguments)
         {
-            Endpoint? endpoint = httpContext.GetEndpoint();
-            if (endpoint == null)
-                throw new InvalidOperationException("Could not retrieve endpoint from http context");
-
-            EndpointDefinition? endpointDefinition = endpoint.Metadata.GetMetadata<EndpointDefinition>();
-            if (endpointDefinition == null)
-                throw new InvalidOperationException("Could not retrieve endpoint definition from endpoint metadata");
-
+            EndpointDefinition endpointDefinition = httpContext.GetEndpointDefinition();
             HttpActionDefinition actionDefinition = endpointDefinition.ActionDefinition;
             _databaseScope.InitiatorFullName = actionDefinition.Executor.Method.Name;
             IHttpResponseFormatter<HttpRequestDescriptor> responseFormatter = new HttpResponseFormatter(httpContext.Response);

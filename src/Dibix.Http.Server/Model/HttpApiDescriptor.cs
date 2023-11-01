@@ -160,6 +160,10 @@ namespace Dibix.Http.Server
                     Delegate = Delegate
                 };
                 action.SecuritySchemes.AddRange(SecuritySchemes);
+                action.RequiredClaims.AddRange(ParameterSources.Values
+                                                               .OfType<HttpParameterPropertySource>()
+                                                               .Where(x => x.SourceName == ClaimParameterSource.SourceName)
+                                                               .Select(x => x.PropertyPath));
                 action.StatusCodeDetectionResponses.AddRange(StatusCodeDetectionResponses);
                 return action;
             }

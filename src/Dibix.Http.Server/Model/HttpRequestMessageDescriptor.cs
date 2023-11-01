@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Dibix.Http.Server
@@ -23,6 +24,8 @@ namespace Dibix.Http.Server
         public IEnumerable<string> GetHeaderValues(string name) => RequestMessage.Headers.TryGetValues(name, out IEnumerable<string> values) ? values : Enumerable.Empty<string>();
 
         public IEnumerable<string> GetAcceptLanguageValues() => RequestMessage.Headers.AcceptLanguage.Select(x => x.Value);
+        
+        public ClaimsPrincipal GetUser() => throw new NotSupportedException();
 
         public object CreateResponse(HttpStatusCode statusCode) => RequestMessage.CreateResponse(statusCode);
 

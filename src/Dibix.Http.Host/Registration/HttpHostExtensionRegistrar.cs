@@ -57,8 +57,8 @@ namespace Dibix.Http.Host
                 _services.AddAuthorization(x =>
                 {
                     x.AddPolicy(schemeName, y => y.AddAuthenticationSchemes(schemeName)
-                                                                              .RequireAuthenticatedUser()
-                                                                              .Build());
+                                                  .RequireAuthenticatedUser()
+                                                  .Build());
                 });
                 return this;
             }
