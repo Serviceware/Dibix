@@ -114,6 +114,8 @@ namespace Dibix.Testing.Http
             }
 
             public TService CreateService<TService>() => HttpServiceFactory.CreateServiceInstance<TService>(_httpClientFactory, _httpClientOptions, new EmptyHttpAuthorizationProvider());
+
+            public HttpClient CreateClient() => _httpClientFactory.CreateClient(TestHttpClientFactoryBuilder.HttpClientName);
         }
 
         private sealed class EmptyHttpAuthorizationProvider : IHttpAuthorizationProvider
