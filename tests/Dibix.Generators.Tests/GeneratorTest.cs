@@ -80,7 +80,6 @@ namespace Dibix.Generators.Tests.Tasks
     [Task(""core"")]
     [TaskProperty(""ProjectName"", TaskPropertyType.String)]
     [TaskProperty(""AreaName"", TaskPropertyType.String, Source = TaskPropertySource.UserDefined)]
-    [TaskProperty(""EnableExperimentalFeatures"", TaskPropertyType.Boolean, Category = ""Endpoint"")]
     [TaskProperty(""SqlReferencePath"", TaskPropertyType.Items)]
     [TaskProperty(""NamingConventionPrefix"", TaskPropertyType.String, DefaultValue = """")]
     [TaskProperty(""BaseUrl"", TaskPropertyType.String, Category = ""Endpoint"", DefaultValue = ""http://localhost"")]

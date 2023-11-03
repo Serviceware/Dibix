@@ -19,7 +19,6 @@ namespace Dibix.Sdk.CodeGeneration
         public string Version { get; set; }
         public string BaseUrl { get; set; }
         public string Description { get; set; }
-        public bool EnableExperimentalFeatures { get; set; }
         public bool SupportOpenApiNullableReferenceTypes { get; set; }
         public ConfigurationTemplates ConfigurationTemplates { get; } = new ConfigurationTemplates();
         public ICollection<TaskItem> Source { get; } = new Collection<TaskItem>();

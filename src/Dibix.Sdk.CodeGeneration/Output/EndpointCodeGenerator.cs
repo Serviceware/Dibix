@@ -17,13 +17,13 @@ namespace Dibix.Sdk.CodeGeneration
             const CodeGenerationOutputFilter outputFilter = CodeGenerationOutputFilter.Referenced;
 
             // External assemblies are not supported by Dibix.Http.Host
-            bool includeReflectionTargets = !model.EnableExperimentalFeatures;
+            const bool includeReflectionTargets = false;
 
             // Targets with ref parameters require proxy method generation using LambdaExpression.CompileToMethod which is not supported in Dibix.Http.Host
-            bool includeTargetsWithRefParameters = !model.EnableExperimentalFeatures;
+            const bool includeTargetsWithRefParameters = false;
 
             // Action delegates are explicitly generated for Dibix.Http.Host and require ASP.NET Core
-            bool generateActionDelegates = model.EnableExperimentalFeatures;
+            const bool generateActionDelegates = true;
 
             yield return new DaoExecutorWriter(model, outputFilter);
             yield return new DaoExecutorInputClassWriter(model, outputFilter);

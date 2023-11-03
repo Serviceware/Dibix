@@ -35,7 +35,6 @@ namespace Dibix.Sdk
     [TaskProperty("IsEmbedded", TaskPropertyType.Boolean, Category = GlobalCategory)]
     [TaskProperty("LimitDdlStatements", TaskPropertyType.Boolean, Category = GlobalCategory)]
     [TaskProperty("PreventDmlReferences", TaskPropertyType.Boolean, Category = GlobalCategory)]
-    [TaskProperty("EnableExperimentalFeatures", TaskPropertyType.Boolean, Category = ArtifactGenerationCategory)]
     [TaskProperty("SupportOpenApiNullableReferenceTypes", TaskPropertyType.Boolean, Category = ArtifactGenerationCategory)]
     [TaskProperty("DatabaseSchemaProviderName", TaskPropertyType.String, Category = GlobalCategory)]
     [TaskProperty("ModelCollation", TaskPropertyType.String, Category = GlobalCategory)]
@@ -77,7 +76,6 @@ namespace Dibix.Sdk
                 Title = _configuration.ArtifactGeneration.Title,
                 Version = _configuration.ArtifactGeneration.Version,
                 Description = _configuration.ArtifactGeneration.Description,
-                EnableExperimentalFeatures = _configuration.ArtifactGeneration.EnableExperimentalFeatures,
                 SupportOpenApiNullableReferenceTypes = _configuration.ArtifactGeneration.SupportOpenApiNullableReferenceTypes
             };
             codeGenerationConfiguration.Source.AddRange(_configuration.SqlCore.Source);

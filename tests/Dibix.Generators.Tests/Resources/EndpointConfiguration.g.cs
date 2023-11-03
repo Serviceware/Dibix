@@ -14,7 +14,6 @@ namespace Dibix.Generators.Tests.Tasks
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     public sealed class EndpointConfiguration
     {
-        public bool EnableExperimentalFeatures { get; set; }
         public string BaseUrl { get; set; } = "http://localhost";
     }
 }

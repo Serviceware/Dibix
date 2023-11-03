@@ -35,7 +35,6 @@ namespace Dibix.Sdk.CodeGeneration
                 DefaultOutputName = configuration.DefaultOutputName,
                 ClientOutputName = configuration.ClientOutputName,
                 BaseUrl = configuration.BaseUrl,
-                EnableExperimentalFeatures = configuration.EnableExperimentalFeatures,
                 SupportOpenApiNullableReferenceTypes = configuration.SupportOpenApiNullableReferenceTypes
             };
 

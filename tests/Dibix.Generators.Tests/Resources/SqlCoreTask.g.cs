@@ -29,7 +29,6 @@ namespace Dibix.Generators.Tests.Tasks
                 NamingConventionPrefix = configuration.GetSingleValue<string>("NamingConventionPrefix"),
                 Endpoint =
                 {
-                    EnableExperimentalFeatures = configuration.GetSingleValue<bool>("EnableExperimentalFeatures"),
                     BaseUrl = configuration.GetSingleValue<string>("BaseUrl")
                 }
             };

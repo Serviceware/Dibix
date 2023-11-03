@@ -306,8 +306,6 @@ $(_ServerCompilationArtifactReference)" />
   $(LimitDdlStatements)" />
       <_SqlCoreInputItem Include="PreventDmlReferences
   $(PreventDmlReferences)" />
-      <_SqlCoreInputItem Include="EnableExperimentalFeatures
-  $(EnableExperimentalFeatures)" />
       <_SqlCoreInputItem Include="SupportOpenApiNullableReferenceTypes
   $(SupportOpenApiNullableReferenceTypes)" />
       <_SqlCoreInputItem Include="SqlReferencePath
@@ -392,8 +390,7 @@ $(_SqlReferencePath)" />
       <_ServerCompilationEmbeddedResource Include="&lt;EmbeddedResource Include=&quot;$(_ArtifactModelFileName)&quot; LogicalName=&quot;Model&quot; /&gt;"
                                           Condition="'$(_HasEndpoints)' != 'true'" />
       <_ServerCompilationReferenceItem Include="@(ServerCompilationReference->'&lt;Reference Include=&quot;%(Filename)&quot; HintPath=&quot;%(FullPath)&quot; Private=&quot;False&quot; /&gt;')" />
-      <_ServerCompilationReferenceItem Include="&lt;PackageReference Include=&quot;$(_DibixHttpServerName)&quot; Version=&quot;$(DibixSdkVersion)&quot; ExcludeAssets=&quot;runtime&quot; /&gt;"
-                                       Condition="'$(EnableExperimentalFeatures)' != 'true'" />
+      <_ServerCompilationReferenceItem Include="&lt;PackageReference Include=&quot;$(_DibixHttpServerName)&quot; Version=&quot;$(DibixSdkVersion)&quot; ExcludeAssets=&quot;runtime&quot; /&gt;" />
     </ItemGroup>
 
     <PropertyGroup>

@@ -20,7 +20,6 @@ namespace Dibix.Sdk.Tests.CodeGeneration
           , IEnumerable<string> contracts = null
           , IEnumerable<string> endpoints = null
           , bool isEmbedded = true
-          , bool enableExperimentalFeatures = false
           , AssertOutputKind outputKind = AssertOutputKind.Accessor
           , IEnumerable<string> expectedAdditionalAssemblyReferences = null
         )
@@ -81,8 +80,6 @@ LimitDdlStatements
   True
 PreventDmlReferences
   True
-EnableExperimentalFeatures
-  {enableExperimentalFeatures /* TODO: Add test support for inspecting DBX file */}
 SupportOpenApiNullableReferenceTypes
   True
 SqlReferencePath");
@@ -106,16 +103,16 @@ SqlReferencePath");
 
                 case AssertOutputKind.Accessor:
                     string accessorOutputFilePath = Path.Combine(outputDirectory, $"{defaultOutputName}.Accessor.cs");
-                    this.AssertFile(accessorOutputFilePath);
+                    this.AssertFile(accessorOutputFilePath, CollectAccessorReferences());
                     break;
 
                 case AssertOutputKind.Endpoint:
-                    this.AssertFile(endpointOutputFilePath);
+                    this.AssertFile(endpointOutputFilePath, CollectEndpointReferences());
                     break;
 
                 case AssertOutputKind.Client:
                     string clientOutputFilePath = Path.Combine(outputDirectory, $"{clientOutputName}.cs");
-                    this.AssertFile(clientOutputFilePath);
+                    this.AssertFile(clientOutputFilePath, CollectClientReferences());
                     break;
 
                 case AssertOutputKind.OpenApi:
@@ -159,10 +156,10 @@ SqlReferencePath");
             }
         }
 
-        private void AssertFile(string generatedFilePath)
+        private void AssertFile(string generatedFilePath, IEnumerable<MetadataReference> references)
         {
             this.AssertFileContent(generatedFilePath);
-            AssertFileCompilation(generatedFilePath);
+            AssertFileCompilation(generatedFilePath, references);
         }
 
         private void AssertFileContent(string generatedFilePath, bool normalizeLineEndings = false) => this.AssertFileContent(base.TestContext.TestName, generatedFilePath, normalizeLineEndings);
@@ -177,31 +174,88 @@ SqlReferencePath");
             base.AssertEqual(expectedText, actualText, extension, normalizeLineEndings: normalizeLineEndings);
         }
 
-        private static void AssertFileCompilation(string generatedFilePath)
+        private static void AssertFileCompilation(string generatedFilePath, IEnumerable<MetadataReference> references)
         {
             using (Stream inputStream = File.OpenRead(generatedFilePath))
             {
                 SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(SourceText.From(inputStream), path: generatedFilePath);
                 CSharpCompilation compilation = CSharpCompilation.Create(null)
                                                                  .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
-                                                                 .AddReferences(MetadataReference.CreateFromFile("Dibix.dll"))
-                                                                 .AddReferences(MetadataReference.CreateFromFile("Dibix.Http.Client.dll"))
-                                                                 .AddReferences(MetadataReference.CreateFromFile("Dibix.Http.Server.dll"))
-                                                                 .AddReferences(MetadataReference.CreateFromFile("Newtonsoft.Json.dll"))
-                                                                 .AddReferences(MetadataReference.CreateFromFile("System.Net.Http.Formatting.dll"))
-                                                                 .AddReference<Object>()
-                                                                 .AddReference<System.Runtime.Serialization.DataContractAttribute>()
-                                                                 .AddReference<System.ComponentModel.DataAnnotations.KeyAttribute>()
-                                                                 .AddReference<System.Data.CommandType>()
-                                                                 .AddReference<System.Linq.Expressions.Expression>()
-                                                                 .AddReference<System.Net.Http.HttpClient>()
-                                                                 .AddReference<System.Net.Http.IHttpClientFactory>()
-                                                                 .AddReference<Microsoft.Extensions.Options.OptionsValidationException>()
-                                                                 .AddReference<Uri>()
+                                                                 .AddReferences(references)
                                                                  .AddSyntaxTrees(syntaxTree);
 
                 RoslynUtility.VerifyCompilation(compilation);
             }
+        }
+
+        private static IEnumerable<MetadataReference> CollectAccessorReferences()
+        {
+            yield return MetadataReferenceFactory.FromType<Object>();
+            yield return MetadataReferenceFactory.FromType<System.ComponentModel.DataAnnotations.KeyAttribute>();
+            yield return MetadataReferenceFactory.FromType<System.Data.CommandType>();
+            yield return MetadataReferenceFactory.FromType<System.Linq.Expressions.Expression>();
+            yield return MetadataReferenceFactory.FromType<System.Runtime.Serialization.DataContractAttribute>();
+            yield return MetadataReferenceFactory.FromType<System.Uri>();
+            yield return MetadataReference.CreateFromFile("Newtonsoft.Json.dll");
+            yield return MetadataReference.CreateFromFile("Dibix.dll");
+            yield return MetadataReference.CreateFromFile("Dibix.Http.Server.dll");
+        }
+
+        private static IEnumerable<MetadataReference> CollectEndpointReferences()
+        {
+            // This whole section is rather meh, but it's just test code ¯\_(ツ)_/¯
+            const string netCoreVersion = "6.0";
+            string netCorePath = LocateNetCoreReferenceAssemblyDirectory(netCoreVersion);
+            string aspNetCorePath = LocateAspNetCoreReferenceAssemblyDirectory(netCoreVersion);
+            string configuration = new DirectoryInfo(Environment.CurrentDirectory).Parent.Name;
+            string dibixHttpServerPath = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "..", "..", "..", "..", "..", "src", "Dibix.Http.Server", "bin", configuration, $"net{netCoreVersion}", "Dibix.Http.Server.dll"));
+
+            yield return MetadataReference.CreateFromFile(Path.Combine(netCorePath, "mscorlib.dll"));
+            yield return MetadataReference.CreateFromFile(Path.Combine(netCorePath, "netstandard.dll"));
+            yield return MetadataReference.CreateFromFile(Path.Combine(netCorePath, "System.Collections.dll"));
+            yield return MetadataReference.CreateFromFile(Path.Combine(netCorePath, "System.Core.dll"));
+            yield return MetadataReference.CreateFromFile(Path.Combine(netCorePath, "System.Runtime.dll"));
+            yield return MetadataReference.CreateFromFile(Path.Combine(aspNetCorePath, "Microsoft.AspNetCore.Http.Abstractions.dll"));
+            yield return MetadataReference.CreateFromFile(Path.Combine(aspNetCorePath, "Microsoft.AspNetCore.Mvc.Core.dll"));
+            yield return MetadataReferenceFactory.FromType<System.ComponentModel.DataAnnotations.KeyAttribute>();
+            yield return MetadataReferenceFactory.FromType<System.Data.CommandType>();
+            yield return MetadataReferenceFactory.FromType<System.Linq.Expressions.Expression>();
+            yield return MetadataReferenceFactory.FromType<System.Runtime.Serialization.DataContractAttribute>();
+            yield return MetadataReference.CreateFromFile("Newtonsoft.Json.dll");
+            yield return MetadataReference.CreateFromFile("Dibix.dll");
+            yield return MetadataReference.CreateFromFile(dibixHttpServerPath);
+        }
+
+        private static IEnumerable<MetadataReference> CollectClientReferences()
+        {
+            yield return MetadataReferenceFactory.FromType<Object>();
+            yield return MetadataReferenceFactory.FromType<System.ComponentModel.DataAnnotations.KeyAttribute>();
+            yield return MetadataReferenceFactory.FromType<System.Net.Http.HttpClient>();
+            yield return MetadataReferenceFactory.FromType<System.Net.Http.IHttpClientFactory>();
+            yield return MetadataReferenceFactory.FromType<System.Uri>();
+            yield return MetadataReference.CreateFromFile("System.Net.Http.Formatting.dll");
+            yield return MetadataReference.CreateFromFile("Dibix.Http.Client.dll");
+        }
+
+        private static string LocateNetCoreReferenceAssemblyDirectory(string netCoreVersion) => LocateReferenceAssemblyDirectory("Microsoft.NETCore.App.Ref", netCoreVersion);
+        
+        private static string LocateAspNetCoreReferenceAssemblyDirectory(string netCoreVersion) => LocateReferenceAssemblyDirectory("Microsoft.AspNetCore.App.Ref", netCoreVersion);
+
+        private static string LocateReferenceAssemblyDirectory(string packageName, string netCoreVersion)
+        {
+            DirectoryInfo rootDirectory = new DirectoryInfo($@"C:\Program Files\dotnet\packs\{packageName}");
+            if (!rootDirectory.Exists)
+                throw new InvalidOperationException($".NET reference assembly directory not found: {rootDirectory.FullName}");
+
+            DirectoryInfo latestVersion = rootDirectory.EnumerateDirectories($"{netCoreVersion}.*").OrderByDescending(x => x.Name).FirstOrDefault();
+            if (latestVersion == null)
+                throw new InvalidOperationException($"No .NET reference assembly directory found within: {rootDirectory.FullName}");
+
+            string referenceAssemblyDirectory = Path.Combine(latestVersion.FullName, "ref", $"net{netCoreVersion}");
+            if (!Directory.Exists(referenceAssemblyDirectory))
+                throw new InvalidOperationException($".NET reference assembly directory not found: {referenceAssemblyDirectory}");
+
+            return referenceAssemblyDirectory;
         }
 
         private static TaskItem ToTaskItem(string relativePath) => new TaskItem(relativePath) { ["FullPath"] = Path.Combine(DatabaseTestUtility.DatabaseProjectDirectory, relativePath) };

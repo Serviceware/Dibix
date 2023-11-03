@@ -12,6 +12,7 @@
   
   <ItemGroup>
     <Compile Include="..\..\shared\Extensions\EnumerableExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Utilities\MetadataReferenceFactory.cs" Link="Utilities\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Utilities\RoslynUtility.cs" Link="Utilities\%(Filename)%(Extension)" />
   </ItemGroup>
 

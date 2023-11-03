@@ -14,9 +14,11 @@ using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Runtime.Serialization;
 using Dibix;
+using Dibix.Http.Server;
 using Newtonsoft.Json;
 
 [assembly: ArtifactAssembly]
+[assembly: AreaRegistration("Tests")]
 
 #region Accessor
 namespace Dibix.Sdk.Tests.Data
@@ -269,6 +271,123 @@ namespace Dibix.Sdk.Tests.DomainModel
         None,
         User,
         Admin
+    }
+}
+#endregion
+
+#region Endpoints
+namespace Dibix.Sdk.Tests.Business
+{
+    public sealed class ApiConfiguration : HttpApiDescriptor
+    {
+        public override void Configure(IHttpApiDiscoveryContext context)
+        {
+            base.RegisterController("GenericEndpoint", controller =>
+            {
+                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.MultiConcreteResult)), action =>
+                {
+                    action.Method = HttpApiMethod.Get;
+                    action.SecuritySchemes.Add("DBXNS-SIT");
+                });
+                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
+                {
+                    action.Method = HttpApiMethod.Get;
+                    action.ChildRoute = "{password}/Fixed";
+                    action.SecuritySchemes.Add("DBXNS-SIT");
+                    action.ResolveParameterFromNull<string>("password");
+                    action.ResolveParameterFromSource("a", "HEADER", "User-Agent");
+                    action.ResolveParameterFromSource("b", "HEADER", "Authorization.Parameter");
+                    action.ResolveParameterFromSource("c", "DBX", "X", "DBX");
+                    action.ResolveParameterFromSource("d", "REQUEST", "Language");
+                    action.ResolveParameterFromConstant("e", true);
+                    action.ResolveParameterFromConstant("f", Dibix.Sdk.Tests.DomainModel.Direction.Descending);
+                    action.ResolveParameterFromConstant("g", "cake");
+                });
+                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
+                {
+                    action.Method = HttpApiMethod.Get;
+                    action.ChildRoute = "{password}/User";
+                    action.SecuritySchemes.Add("Anonymous");
+                });
+                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.SingleConrecteResultWithParams)), action =>
+                {
+                    action.Method = HttpApiMethod.Get;
+                    action.ChildRoute = "User/{id}/{name}";
+                    action.SecuritySchemes.Add("DBXNS-SIT");
+                    action.SetStatusCodeDetectionResponse(404, 1, "The user '{name}' with the id '{id}' could not be found");
+                });
+                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.SingleConrecteResultWithArrayParam)), action =>
+                {
+                    action.Method = HttpApiMethod.Get;
+                    action.ChildRoute = "Array";
+                    action.SecuritySchemes.Add("DBXNS-SIT");
+                    action.DisableStatusCodeDetection(404);
+                });
+                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.FileResult)), action =>
+                {
+                    action.Method = HttpApiMethod.Get;
+                    action.ChildRoute = "{id}";
+                    action.SecuritySchemes.Add("Anonymous");
+                    action.SecuritySchemes.Add("Bearer");
+                    action.FileResponse = new HttpFileResponseDefinition(cache: false);
+                });
+                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.FileUpload)), action =>
+                {
+                    action.Method = HttpApiMethod.Put;
+                    action.BodyContract = typeof(System.IO.Stream);
+                    action.SecuritySchemes.Add("DBXNS-SIT");
+                    action.ResolveParameterFromSource("data", "BODY", "$RAW");
+                });
+                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
+                {
+                    action.Method = HttpApiMethod.Post;
+                    action.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.InputContract);
+                    action.SecuritySchemes.Add("DBXNS-SIT");
+                    action.ResolveParameterFromBody("ids", "Dibix.GenericContractIdsInputConverter");
+                });
+                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
+                {
+                    action.Method = HttpApiMethod.Patch;
+                    action.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.AnotherInputContract);
+                    action.SecuritySchemes.Add("DBXNS-ClientId");
+                    action.SecuritySchemes.Add("DBXNS-SIT");
+                    action.ResolveParameterFromSource("ids", "BODY", "SomeIds", items =>
+                    {
+                        items.ResolveParameterFromConstant("id", 1);
+                        items.ResolveParameterFromSource("name", "ITEM", "Title");
+                    });
+                });
+                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
+                {
+                    action.Method = HttpApiMethod.Delete;
+                    action.SecuritySchemes.Add("DBXNS-SIT");
+                    action.WithAuthorization(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.AssertAuthorized)), authorization =>
+                    {
+                        authorization.ResolveParameterFromConstant("right", (byte)1);
+                    });
+                });
+                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
+                {
+                    action.Method = HttpApiMethod.Delete;
+                    action.ChildRoute = "Alternative";
+                    action.SecuritySchemes.Add("DBXNS-SIT");
+                    action.WithAuthorization(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.AssertAuthorized)), authorization =>
+                    {
+                        authorization.ResolveParameterFromConstant("right", (byte)1);
+                    });
+                });
+                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
+                {
+                    action.Method = HttpApiMethod.Delete;
+                    action.ChildRoute = "AnotherAlternative";
+                    action.SecuritySchemes.Add("DBXNS-SIT");
+                    action.WithAuthorization(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.AssertAuthorized)), authorization =>
+                    {
+                        authorization.ResolveParameterFromConstant("right", (byte)1);
+                    });
+                });
+            });
+        }
     }
 }
 #endregion
