@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -25,7 +26,7 @@ namespace Dibix.Http.Host
             foreach (EndpointDefinition endpoint in _endpointMetadataProvider.GetEndpoints())
             {
                 string baseAddress = "";
-                if (_hostingOptions.Value.BaseAddress != null)
+                if (!String.IsNullOrEmpty(_hostingOptions.Value.BaseAddress))
                     baseAddress = $"/{_hostingOptions.Value.BaseAddress.Trim('/')}";
 
                 string route = $"{baseAddress}{endpoint.Url}";
