@@ -12,8 +12,11 @@ namespace Dibix.Sdk.CodeGeneration
         public string Version { get; set; }
         public string Description { get; set; }
         public string OutputDirectory { get; set; }
-        public string DefaultOutputName { get; set; }
-        public string ClientOutputName { get; set; }
+        public string AccessorTargetFileName { get; set; }
+        public string EndpointTargetFileName { get; set; }
+        public string ClientTargetFileName { get; set; }
+        public string ModelTargetFileName { get; set; }
+        public string DocumentationTargetName { get; set; }
         public CommandTextFormatting CommandTextFormatting { get; set; }
         public string BaseUrl { get; set; }
         public bool SupportOpenApiNullableReferenceTypes { get; set; }

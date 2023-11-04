@@ -27,8 +27,12 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             string outputDirectory = Path.Combine(base.TestContext.TestRunResultsDirectory, "Output", base.TestContext.TestName);
             Directory.CreateDirectory(outputDirectory);
             const string areaName = "Tests";
-            const string defaultOutputName = "TestAccessor";
-            const string clientOutputName = "TestAccessor.Client";
+            const string accessorTargetName = "TestAccessor";
+            const string accessorTargetFileName = $"{accessorTargetName}.cs";
+            const string endpointTargetFileName = $"{areaName}.Endpoints.cs";
+            const string clientTargetFileName = $"{areaName}.Client.cs";
+            const string modelTargetFileName = $"{accessorTargetName}.model.json";
+            const string documentationTargetName = areaName;
 
             ICollection<TaskItem> endpointItems = (endpoints ?? Enumerable.Empty<string>()).Select(ToTaskItem).ToArray();
             TestLogger logger = new TestLogger(base.Out, distinctErrorLogging: true);
@@ -55,10 +59,18 @@ Description
   Dibix.Sdk.Tests API description
 OutputDirectory
   {outputDirectory}
-DefaultOutputName
-  {defaultOutputName}
-ClientOutputName
-  {(outputKind == AssertOutputKind.Client ? clientOutputName : null)}
+AccessorTargetName
+  {accessorTargetName}
+AccessorTargetFileName
+  {accessorTargetFileName}
+EndpointTargetFileName
+  {(outputKind == AssertOutputKind.Endpoint ? endpointTargetFileName : null)}
+ClientTargetFileName
+  {(outputKind == AssertOutputKind.Client ? clientTargetFileName : null)}
+ModelTargetFileName
+  {(outputKind == AssertOutputKind.Model ? modelTargetFileName : null)}
+DocumentationTargetName
+  {(outputKind == AssertOutputKind.OpenApi ? documentationTargetName : null)}
 ExternalAssemblyReferenceDirectory
   {Environment.CurrentDirectory}
 BuildingInsideVisualStudio
@@ -92,40 +104,71 @@ SqlReferencePath");
             Assert.IsTrue(result, "MSBuild task result was false");
             AssertAreEqual(expectedAdditionalAssemblyReferences ?? Enumerable.Empty<string>(), task.AdditionalReferences);
 
-            bool hasEndpoints = endpointItems.Any();
-            string endpointOutputFilePath = Path.Combine(outputDirectory, $"{areaName}.cs");
-            Assert.AreEqual(hasEndpoints, File.Exists(endpointOutputFilePath), "hasEndpoints == File.Exists(endpointOutputFilePath)");
+            string accessorOutputFilePath = Path.Combine(outputDirectory, accessorTargetFileName);
+            string endpointOutputFilePath = Path.Combine(outputDirectory, endpointTargetFileName);
+            string clientOutputFilePath = Path.Combine(outputDirectory, clientTargetFileName);
+            string modelOutputFilePath = Path.Combine(outputDirectory, modelTargetFileName);
+            string openApiDocumentFilePath = Path.Combine(outputDirectory, "Tests.yml");
 
             switch (outputKind)
             {
-                case AssertOutputKind.None:
+                case AssertOutputKind.Accessor:
+                    this.AssertFile(accessorOutputFilePath, CollectAccessorReferences());
+                    Assert.IsFalse(File.Exists(endpointOutputFilePath), "File.Exists(endpointOutputFilePath)");
+                    Assert.IsFalse(File.Exists(clientOutputFilePath), "File.Exists(clientOutputFilePath)");
+                    Assert.IsFalse(File.Exists(modelOutputFilePath), "File.Exists(modelOutputFilePath)");
+                    Assert.IsFalse(File.Exists(openApiDocumentFilePath), "File.Exists(openApiDocumentFilePath)");
                     break;
 
-                case AssertOutputKind.Accessor:
-                    string accessorOutputFilePath = Path.Combine(outputDirectory, $"{defaultOutputName}.Accessor.cs");
-                    this.AssertFile(accessorOutputFilePath, CollectAccessorReferences());
+                case AssertOutputKind.Model:
+                    AssertFileContent(modelOutputFilePath, actualTextNormalizer: NormalizeModelContent);
+                    Assert.IsTrue(File.Exists(accessorOutputFilePath), "File.Exists(accessorOutputFilePath)");
+                    Assert.IsFalse(File.Exists(endpointOutputFilePath), "File.Exists(endpointOutputFilePath)");
+                    Assert.IsFalse(File.Exists(clientOutputFilePath), "File.Exists(clientOutputFilePath)");
+                    Assert.IsFalse(File.Exists(openApiDocumentFilePath), "File.Exists(openApiDocumentFilePath)");
                     break;
 
                 case AssertOutputKind.Endpoint:
                     this.AssertFile(endpointOutputFilePath, CollectEndpointReferences());
+                    Assert.IsTrue(File.Exists(accessorOutputFilePath), "File.Exists(accessorOutputFilePath)");
+                    Assert.IsFalse(File.Exists(clientOutputFilePath), "File.Exists(clientOutputFilePath)");
+                    Assert.IsFalse(File.Exists(modelOutputFilePath), "File.Exists(modelOutputFilePath)");
+                    Assert.IsFalse(File.Exists(openApiDocumentFilePath), "File.Exists(openApiDocumentFilePath)");
                     break;
 
                 case AssertOutputKind.Client:
-                    string clientOutputFilePath = Path.Combine(outputDirectory, $"{clientOutputName}.cs");
                     this.AssertFile(clientOutputFilePath, CollectClientReferences());
+                    Assert.IsTrue(File.Exists(accessorOutputFilePath), "File.Exists(accessorOutputFilePath)");
+                    Assert.IsFalse(File.Exists(endpointOutputFilePath), "File.Exists(endpointOutputFilePath)");
+                    Assert.IsFalse(File.Exists(modelOutputFilePath), "File.Exists(modelOutputFilePath)");
+                    Assert.IsFalse(File.Exists(openApiDocumentFilePath), "File.Exists(openApiDocumentFilePath)");
                     break;
 
                 case AssertOutputKind.OpenApi:
-                    string openApiDocumentFilePath = Path.Combine(outputDirectory, "Tests.yml");
-
                     // The OpenAPI SDK uses LF but even if we would use LF in the expected file, Git's autocrlf feature would mess it up again
                     const bool normalizeLineEndings = true;
                     this.AssertFileContent(openApiDocumentFilePath, normalizeLineEndings);
+                    Assert.IsTrue(File.Exists(accessorOutputFilePath), "File.Exists(accessorOutputFilePath)");
+                    Assert.IsFalse(File.Exists(endpointOutputFilePath), "File.Exists(endpointOutputFilePath)");
+                    Assert.IsFalse(File.Exists(clientOutputFilePath), "File.Exists(clientOutputFilePath)");
+                    Assert.IsFalse(File.Exists(modelOutputFilePath), "File.Exists(modelOutputFilePath)");
                     break;
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(outputKind), outputKind, null);
             }
+        }
+
+        private static string NormalizeModelContent(string text)
+        {
+            string jsonEscapedDatabaseProjectDirectory = $@"{DatabaseTestUtility.DatabaseProjectDirectory.Replace(@"\", @"\\")}\\";
+            string regex = $"{Regex.Escape($"\"Source\": \"{jsonEscapedDatabaseProjectDirectory}")}(?<RelativeFilePath>[^\"]+)\"";
+            string replaced = Regex.Replace(text, regex, x =>
+            {
+                string relativeFilePath = x.Groups["RelativeFilePath"].Value;
+                return $"\"Source\": \"{relativeFilePath.Replace(@"\\", @"/")}\"";
+            });
+            return replaced;
         }
 
         private static string CollectInputItems(IEnumerable<string> items)
@@ -162,12 +205,16 @@ SqlReferencePath");
             AssertFileCompilation(generatedFilePath, references);
         }
 
-        private void AssertFileContent(string generatedFilePath, bool normalizeLineEndings = false) => this.AssertFileContent(base.TestContext.TestName, generatedFilePath, normalizeLineEndings);
-        private void AssertFileContent(string expectedTextKey, string generatedFilePath, bool normalizeLineEndings = false)
+        private void AssertFileContent(string generatedFilePath, bool normalizeLineEndings = false, Func<string, string> actualTextNormalizer = null) => this.AssertFileContent(base.TestContext.TestName, generatedFilePath, normalizeLineEndings, actualTextNormalizer);
+        private void AssertFileContent(string expectedTextKey, string generatedFilePath, bool normalizeLineEndings = false, Func<string, string> actualTextNormalizer = null)
         {
             string actualText = Regex.Replace(File.ReadAllText(generatedFilePath)
                                             , @"This code was generated by Dibix SDK [\d]+\.[\d]+\.[\d]+\.[\d]+\."
                                             , "This code was generated by Dibix SDK 1.0.0.0.");
+
+            if (actualTextNormalizer != null)
+                actualText = actualTextNormalizer(actualText);
+
             string extension = Path.GetExtension(generatedFilePath).TrimStart('.');
             string resourceKey = ResourceUtility.BuildResourceKey($"CodeGeneration.{expectedTextKey}.{extension}");
             string expectedText = base.GetEmbeddedResourceContent(resourceKey);
@@ -264,6 +311,7 @@ SqlReferencePath");
         {
             None,
             Accessor,
+            Model,
             Endpoint,
             Client,
             OpenApi

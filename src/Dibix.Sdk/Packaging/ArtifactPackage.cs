@@ -8,7 +8,7 @@ namespace Dibix.Sdk.Packaging
     {
         public static void Create(CreatePackageTaskConfiguration configuration)
         {
-            string outputPath = Path.Combine(configuration.OutputDirectory, $"{configuration.ArtifactName}.dbx");
+            string outputPath = Path.Combine(configuration.OutputDirectory, configuration.ArtifactTargetFileName);
             using (Package package = Package.Open(outputPath, FileMode.Create))
             {
                 Uri contentUri = PackUriHelper.CreatePartUri(new Uri("Content", UriKind.Relative));

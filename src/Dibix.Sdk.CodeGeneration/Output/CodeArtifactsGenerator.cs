@@ -7,7 +7,7 @@ namespace Dibix.Sdk.CodeGeneration
     {
         private static readonly Type[] Units =
         {
-            typeof(ServerCodeArtifactGenerationUnit)
+            typeof(AccessorCodeArtifactGenerationUnit)
           , typeof(EndpointCodeArtifactGenerationUnit)
           , typeof(ClientCodeArtifactGenerationUnit)
           , typeof(OpenApiArtifactsGenerationUnit)

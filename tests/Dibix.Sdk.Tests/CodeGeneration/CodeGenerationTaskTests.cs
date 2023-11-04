@@ -516,6 +516,44 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
         }
 
         [TestMethod]
+        public void Endpoints_Accessor_Model()
+        {
+            ExecuteTest
+            (
+                sources: new[]
+                {
+                    @"Tests\dbx_tests_authorization.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_fileresult.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_fileupload.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_multiconcreteresult.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_params.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_params_array.sql"
+                  , @"Types\dbx_codeanalysis_udt_generic.sql"
+                  , @"Types\dbx_codeanalysis_udt_int.sql"
+                }
+              , contracts: new[]
+                {
+                    @"Contracts\AnotherInputContract.json"
+                  , @"Contracts\AnotherEntry.json"
+                  , @"Contracts\Direction.json"
+                  , @"Contracts\Entry.json"
+                  , @"Contracts\GenericContract.json"
+                  , @"Contracts\InputContract.json"
+                }
+              , endpoints: new[] { @"Endpoints\GenericEndpoint.json" }
+              , isEmbedded: false
+              , outputKind: AssertOutputKind.Model
+              , expectedAdditionalAssemblyReferences: new[]
+                {
+                    "Dibix.Http.Server.dll"
+                  , "Newtonsoft.Json.dll"
+                  , "System.ComponentModel.DataAnnotations.dll"
+                }
+            );
+        }
+
+        [TestMethod]
         public void Endpoints_OpenApi()
         {
             ExecuteTest

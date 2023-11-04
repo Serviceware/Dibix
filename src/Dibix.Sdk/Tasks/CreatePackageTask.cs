@@ -4,7 +4,7 @@ using Dibix.Sdk.Packaging;
 namespace Dibix.Sdk
 {
     [Task("pack")]
-    [TaskProperty("ArtifactName", TaskPropertyType.String)]
+    [TaskProperty("ArtifactTargetFileName", TaskPropertyType.String)]
     [TaskProperty("OutputDirectory", TaskPropertyType.String)]
     [TaskProperty("CompiledArtifactPath", TaskPropertyType.String)]
     public sealed partial class CreatePackageTask

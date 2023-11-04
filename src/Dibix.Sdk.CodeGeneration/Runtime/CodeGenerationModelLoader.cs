@@ -21,7 +21,7 @@ namespace Dibix.Sdk.CodeGeneration
         )
         {
             string rootNamespace = PathUtility.BuildRootNamespace(configuration.ProductName, configuration.AreaName);
-            string defaultClassName = configuration.DefaultOutputName.Replace(".", String.Empty);
+            string defaultClassName = configuration.AccessorTargetName.Replace(".", String.Empty);
 
             CodeGenerationModel model = new CodeGenerationModel
             {
@@ -32,8 +32,11 @@ namespace Dibix.Sdk.CodeGeneration
                 Version = configuration.Version,
                 Description = configuration.Description,
                 OutputDirectory = configuration.OutputDirectory,
-                DefaultOutputName = configuration.DefaultOutputName,
-                ClientOutputName = configuration.ClientOutputName,
+                AccessorTargetFileName = configuration.AccessorTargetFileName,
+                EndpointTargetFileName = configuration.EndpointTargetFileName,
+                ClientTargetFileName = configuration.ClientTargetFileName,
+                ModelTargetFileName = configuration.ModelTargetFileName,
+                DocumentationTargetName = configuration.DocumentationTargetName,
                 BaseUrl = configuration.BaseUrl,
                 SupportOpenApiNullableReferenceTypes = configuration.SupportOpenApiNullableReferenceTypes
             };

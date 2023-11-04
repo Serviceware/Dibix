@@ -4,10 +4,10 @@ using Dibix.Sdk.CodeGeneration.CSharp;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    public sealed class ServerCodeGenerator : CodeGenerator
+    public sealed class AccessorCodeGenerator : CodeGenerator
     {
         #region Constructor
-        public ServerCodeGenerator(CodeGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger) : base(model, schemaRegistry, logger) { }
+        public AccessorCodeGenerator(CodeGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger) : base(model, schemaRegistry, logger) { }
         #endregion
 
         #region Overrides

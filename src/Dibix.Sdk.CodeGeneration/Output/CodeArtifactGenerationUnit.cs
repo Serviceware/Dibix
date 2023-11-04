@@ -19,7 +19,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (!logger.HasLoggedErrors)
             {
-                string outputFilePath = Path.Combine(model.OutputDirectory, $"{GetOutputName(model)}.cs");
+                string outputFilePath = Path.Combine(model.OutputDirectory, GetOutputName(model));
                 File.WriteAllText(outputFilePath, generated);
                 return true;
             }
