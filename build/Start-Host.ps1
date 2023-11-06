@@ -48,7 +48,7 @@ function Exec
 }
 
 
-if ($Development)
+if ($Configuration -eq 'Debug')
 {
     Exec "dotnet build --configuration $Configuration $sourcePath"
 }

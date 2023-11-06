@@ -9,13 +9,11 @@ namespace Dibix.Http.Host
 {
     internal sealed class HttpActionDelegator : IHttpActionDelegator
     {
-        private readonly DatabaseScope _databaseScope;
         private readonly IParameterDependencyResolver _parameterDependencyResolver;
         private readonly ILogger<HttpActionDelegator> _logger;
 
-        public HttpActionDelegator(DatabaseScope databaseScope, IParameterDependencyResolver parameterDependencyResolver, ILogger<HttpActionDelegator> logger)
+        public HttpActionDelegator(IParameterDependencyResolver parameterDependencyResolver, ILogger<HttpActionDelegator> logger)
         {
-            _databaseScope = databaseScope;
             _parameterDependencyResolver = parameterDependencyResolver;
             _logger = logger;
         }
@@ -24,7 +22,6 @@ namespace Dibix.Http.Host
         {
             EndpointDefinition endpointDefinition = httpContext.GetEndpointDefinition();
             HttpActionDefinition actionDefinition = endpointDefinition.ActionDefinition;
-            _databaseScope.InitiatorFullName = actionDefinition.Executor.Method.Name;
             IHttpResponseFormatter<HttpRequestDescriptor> responseFormatter = new HttpResponseFormatter(httpContext.Response);
             try
             {
