@@ -17,5 +17,12 @@ namespace Dibix.Http.Host.Extensions
 
             return endpointDefinition;
         }
+
+        public static EndpointDefinition? TryGetEndpointDefinition(this HttpContext httpContext)
+        {
+            Endpoint? endpoint = httpContext.GetEndpoint();
+            EndpointDefinition? endpointDefinition = endpoint?.Metadata.GetMetadata<EndpointDefinition>();
+            return endpointDefinition ?? null;
+        }
     }
 }

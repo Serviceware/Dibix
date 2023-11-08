@@ -17,9 +17,12 @@ namespace Dibix.Http.Host
             IEnumerable<IAuthorizationRequirement> resolvedRequirements = requirements;
             if (resource is HttpContext httpContext)
             {
-                EndpointDefinition endpoint = httpContext.GetEndpointDefinition();
-                resolvedRequirements = resolvedRequirements.Concat(endpoint.ActionDefinition.RequiredClaims.Select(x => new ClaimsAuthorizationRequirement(x, allowedValues: null)))
-                                                           .ToArray();
+                EndpointDefinition? endpointDefinition = httpContext.TryGetEndpointDefinition();
+                if (endpointDefinition != null)
+                {
+                    resolvedRequirements = resolvedRequirements.Concat(endpointDefinition.ActionDefinition.RequiredClaims.Select(x => new ClaimsAuthorizationRequirement(x, allowedValues: null)))
+                                                               .ToArray();
+                }
             }
 
             return _implementation.CreateContext(resolvedRequirements, user, resource);

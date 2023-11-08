@@ -14,10 +14,15 @@ namespace Dibix.Http.Host
 
         public async Task Invoke(HttpContext context)
         {
-            DatabaseScope databaseScope = context.RequestServices.GetRequiredService<DatabaseScope>();
-            EndpointDefinition endpointDefinition = context.GetEndpointDefinition();
-            HttpActionDefinition actionDefinition = endpointDefinition.ActionDefinition;
-            databaseScope.InitiatorFullName = actionDefinition.Executor.Method.Name;
+            EndpointDefinition? endpointDefinition = context.TryGetEndpointDefinition();
+
+            // Other APIs, i.E. /configuration
+            if (endpointDefinition != null)
+            {
+                DatabaseScope databaseScope = context.RequestServices.GetRequiredService<DatabaseScope>();
+                HttpActionDefinition actionDefinition = endpointDefinition.ActionDefinition;
+                databaseScope.InitiatorFullName = actionDefinition.Executor.Method.Name;
+            }
 
             await _next(context).ConfigureAwait(false);
         }
