@@ -17,10 +17,10 @@ namespace Dibix.Testing
 
         public void Verify([CallerMemberName] string propertyName = null)
         {
-            this.EnsurePath();
             if (!this._initializationToken.IsInitialized)
                 return;
 
+            this.EnsurePath();
             if (!this._initializedProperties.Contains(propertyName))
                 throw new InvalidOperationException($"Property not configured: {this.BuildPath(propertyName)}");
         }
