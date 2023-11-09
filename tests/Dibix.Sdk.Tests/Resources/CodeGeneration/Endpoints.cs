@@ -70,16 +70,16 @@ namespace Dibix.Sdk.Tests.Data
                 ParametersVisitor @params = accessor.Parameters()
                                                     .SetFromTemplate(new
                                                     {
-                                                        a,
-                                                        b,
                                                         c,
                                                         ids,
-                                                        d,
                                                         e,
                                                         f,
-                                                        g
                                                     })
-                                                    .SetString(nameof(password), password, true)
+                                                    .SetString(nameof(a), a, size: 50)
+                                                    .SetString(nameof(b), b, size: 50)
+                                                    .SetString(nameof(password), password, size: 128, obfuscate: true)
+                                                    .SetString(nameof(d), d, size: 50)
+                                                    .SetString(nameof(g), g, size: 50)
                                                     .Build();
                 accessor.Execute(EmptyWithParamsCommandText, CommandType.StoredProcedure, @params);
             }
@@ -143,8 +143,8 @@ namespace Dibix.Sdk.Tests.Data
                                                     .SetFromTemplate(new
                                                     {
                                                         id,
-                                                        name
                                                     })
+                                                    .SetString(nameof(name), name, size: 255)
                                                     .Build();
                 return accessor.QuerySingle<Dibix.Sdk.Tests.DomainModel.GenericContract>(SingleConrecteResultWithParamsCommandText, CommandType.StoredProcedure, @params);
             }

@@ -33,9 +33,9 @@ namespace Dibix.Sdk.CodeGeneration
         {
             switch (type)
             {
-                case JTokenType.Integer: return new PrimitiveValueReference(new PrimitiveTypeReference(PrimitiveType.Int32, isNullable: false, isEnumerable: false, location), (int)_value, location);
-                case JTokenType.String: return new PrimitiveValueReference(new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: false, location), (string)_value, location);
-                case JTokenType.Boolean: return new PrimitiveValueReference(new PrimitiveTypeReference(PrimitiveType.Boolean, isNullable: false, isEnumerable: false, location), (bool)_value, location);
+                case JTokenType.Integer: return new PrimitiveValueReference(new PrimitiveTypeReference(PrimitiveType.Int32, isNullable: false, isEnumerable: false, size: null, location: location), (int)_value, location);
+                case JTokenType.String: return new PrimitiveValueReference(new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: false, size: null, location: location), (string)_value, location);
+                case JTokenType.Boolean: return new PrimitiveValueReference(new PrimitiveTypeReference(PrimitiveType.Boolean, isNullable: false, isEnumerable: false, size: null, location: location), (bool)_value, location);
                 case JTokenType.Null: return new NullValueReference(type: null, location);
                 default: throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }

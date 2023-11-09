@@ -33,6 +33,7 @@ namespace Dibix.Tests
             accessor.Protected()
                     .Setup<IEnumerable<Character>>("QueryMany", new[] { typeof(Character) }, exactParameterMatch: true, "commandText", CommandType.Text, ItExpr.Is<ParametersVisitor>(x => x == parametersVisitor.Object), new[] { typeof(Character), typeof(Name), typeof(string), typeof(Name) }, ItExpr.IsAny<Func<object[], Character>>(), "x,x,x", false)
                     .Returns<string, CommandType, ParametersVisitor, Type[], Func<object[], Character>, string, bool>((_, _, _, _, map, _, _) => rows.Select(map));
+            parametersVisitor.Setup(x => x.VisitInputParameters(It.IsAny<InputParameterVisitor>()));
 
             Character result = accessor.Object.QuerySingle<Character>("commandText", CommandType.Text, parametersVisitor.Object, new[] { typeof(Character), typeof(Name), typeof(string), typeof(Name) }, "x,x,x");
             Assert.IsNotNull(result.Name);
@@ -73,6 +74,7 @@ namespace Dibix.Tests
             accessor.Protected()
                     .Setup<IEnumerable<Category>>("QueryMany", new[] { typeof(Category) }, exactParameterMatch: true, "commandText", CommandType.Text, ItExpr.Is<ParametersVisitor>(x => x == parametersVisitor.Object), new[] { typeof(Category), typeof(CategoryBlacklistEntry) }, ItExpr.IsAny<Func<object[], Category>>(), "x", true)
                     .Returns<string, CommandType, ParametersVisitor, Type[], Func<object[], Category>, string, bool>((_, _, _, _, map, _, _) => rows.Select(map));
+            parametersVisitor.Setup(x => x.VisitInputParameters(It.IsAny<InputParameterVisitor>()));
 
             IList<Category> categories = accessor.Object.QueryMany<Category>("commandText", CommandType.Text, parametersVisitor.Object, new[] { typeof(Category), typeof(CategoryBlacklistEntry) }, "x").ToArray();
             Assert.IsNotNull(categories);

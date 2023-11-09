@@ -159,42 +159,48 @@ CommandText: <Inline>", requestException.Message);
                 Assert.AreEqual(@"Oops
 CommandType: StoredProcedure
 CommandText: x", ex.Message);
-                Assert.AreEqual(@"Parameter a(Binary): System.Byte[]
-Parameter b(x):
+                Assert.AreEqual(@"Parameter a Binary: System.Byte[]
+Parameter b x:
 intValue INT(4)  stringValue NVARCHAR(MAX)
 ---------------  -------------------------
 1                I                        
-2                II                       ", ex.ParameterDump);
+2                II                       
+Parameter c String(5): value", ex.ParameterDump);
                 Assert.AreEqual(@"DECLARE @a VARBINARY(MAX) = 0x01
 DECLARE @b [x]
+DECLARE @c NVARCHAR(5)    = N'value'
 INSERT INTO @b ([intValue], [stringValue])
         VALUES (1         , N'I'         )
              , (2         , N'II'        )
 
 EXEC x @a = @a
-     , @b = @b", ex.SqlDebugStatement);
+     , @b = @b
+     , @c = @c", ex.SqlDebugStatement);
                 Assert.AreEqual(@"Dibix.DatabaseAccessException: Oops
 CommandType: StoredProcedure
 CommandText: x
 
 DECLARE @a VARBINARY(MAX) = 0x01
 DECLARE @b [x]
+DECLARE @c NVARCHAR(5)    = N'value'
 INSERT INTO @b ([intValue], [stringValue])
         VALUES (1         , N'I'         )
              , (2         , N'II'        )
 
 EXEC x @a = @a
-     , @b = @b", GetExceptionTextWithoutCallStack(ex));
+     , @b = @b
+     , @c = @c", GetExceptionTextWithoutCallStack(ex));
             }
         }
         private static void Invoke_DDL_WithSqlException_WrappedExceptionIsThrown_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw CreateException(errorInfoNumber: 50000, errorMessage: "Oops", CommandType.StoredProcedure, commandText: "x", visitParameter =>
         {
-            visitParameter("a", DbType.Binary, new byte[] { 1 }, false, CustomInputType.None);
+            visitParameter("a", DbType.Binary, new byte[] { 1 }, size: null, isOutput: false, CustomInputType.None);
             visitParameter("b", DbType.Object, new X
             {
                 { 1, "I" },
                 { 2, "II" }
-            }, false, CustomInputType.None);
+            }, size: null, isOutput: false, CustomInputType.None);
+            visitParameter("c", DbType.String, "value", size: 5, isOutput: false, CustomInputType.None);
         });
 
         [TestMethod]
@@ -213,14 +219,16 @@ EXEC x @a = @a
                 Assert.AreEqual(@"Oops
 CommandType: Text
 CommandText: <Inline>", ex.Message);
-                Assert.AreEqual(@"Parameter a(Binary): System.Byte[]
-Parameter b(x):
+                Assert.AreEqual(@"Parameter a Binary: System.Byte[]
+Parameter b x:
 intValue INT(4)  stringValue NVARCHAR(MAX)
 ---------------  -------------------------
 1                I                        
-2                II                       ", ex.ParameterDump);
+2                II                       
+Parameter c String(5): value", ex.ParameterDump);
                 Assert.AreEqual(@"DECLARE @a VARBINARY(MAX) = 0x01
 DECLARE @b [x]
+DECLARE @c NVARCHAR(5)    = N'value'
 INSERT INTO @b ([intValue], [stringValue])
         VALUES (1         , N'I'         )
              , (2         , N'II'        )", ex.SqlDebugStatement);
@@ -230,6 +238,7 @@ CommandText: <Inline>
 
 DECLARE @a VARBINARY(MAX) = 0x01
 DECLARE @b [x]
+DECLARE @c NVARCHAR(5)    = N'value'
 INSERT INTO @b ([intValue], [stringValue])
         VALUES (1         , N'I'         )
              , (2         , N'II'        )", GetExceptionTextWithoutCallStack(ex));
@@ -237,12 +246,13 @@ INSERT INTO @b ([intValue], [stringValue])
         }
         private static void Invoke_DML_WithSqlException_WrappedExceptionIsThrown_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw CreateException(errorInfoNumber: default, errorMessage: "Oops", CommandType.Text, commandText: "x", (InputParameterVisitor visitParameter) =>
         {
-            visitParameter("a", DbType.Binary, new byte[] { 1 }, false, CustomInputType.None);
+            visitParameter("a", DbType.Binary, new byte[] { 1 }, size: null, isOutput: false, CustomInputType.None);
             visitParameter("b", DbType.Object, new X
             {
                 { 1, "I" },
                 { 2, "II" }
-            }, false, CustomInputType.None);
+            }, size: null, isOutput: false, CustomInputType.None);
+            visitParameter("c", DbType.String, "value", size: 5, isOutput: false, CustomInputType.None);
         });
     }
 }

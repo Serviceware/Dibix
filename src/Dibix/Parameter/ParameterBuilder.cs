@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
-using System.Linq;
 using System.Xml.Linq;
 
 namespace Dibix
@@ -91,15 +90,17 @@ namespace Dibix
         IParameterBuilder IParameterBuilder.SetGuid(string parameterName, out IOutParameter<Guid> parameterValue) => this.Set(parameterName, DbType.Guid, out parameterValue);
         IParameterBuilder IParameterBuilder.SetGuid(string parameterName, out IOutParameter<Guid?> parameterValue) => this.Set(parameterName, DbType.Guid, out parameterValue);
 
-        IParameterBuilder IParameterBuilder.SetString(string parameterName, string parameterValue) => this.SetStringCore(parameterName, parameterValue, obfuscate: false);
+        IParameterBuilder IParameterBuilder.SetString(string parameterName, string parameterValue) => this.SetStringCore(parameterName, parameterValue, size: null, obfuscate: false);
+        IParameterBuilder IParameterBuilder.SetString(string parameterName, string parameterValue, int size) => SetStringCore(parameterName, parameterValue, size, obfuscate: false);
         IParameterBuilder IParameterBuilder.SetString(string parameterName, out IOutParameter<string> parameterValue) => this.Set(parameterName, DbType.String, out parameterValue);
-        IParameterBuilder IParameterBuilder.SetString(string parameterName, string parameterValue, bool obfuscate) => this.SetStringCore(parameterName, parameterValue, obfuscate);
-        private IParameterBuilder SetStringCore(string parameterName, string parameterValue, bool obfuscate)
+        IParameterBuilder IParameterBuilder.SetString(string parameterName, string parameterValue, bool obfuscate) => this.SetStringCore(parameterName, parameterValue, size: null, obfuscate);
+        IParameterBuilder IParameterBuilder.SetString(string parameterName, string parameterValue, int size, bool obfuscate) => SetStringCore(parameterName, parameterValue, size: null, obfuscate);
+        private IParameterBuilder SetStringCore(string parameterName, string parameterValue, int? size, bool obfuscate)
         {
             if (parameterValue != null && obfuscate)
                 parameterValue = TextObfuscator.Obfuscate(parameterValue);
 
-            return this.Set(parameterName, DbType.String, parameterValue);
+            return Set(parameterName, DbType.String, parameterValue, size);
         }
 
         IParameterBuilder IParameterBuilder.SetBytes(string parameterName, byte[] parameterValue) => this.Set(parameterName, DbType.Binary, parameterValue);
@@ -120,7 +121,7 @@ namespace Dibix
                 bool isObfuscated = property.IsDefined<ObfuscatedAttribute>();
                 if (isObfuscated)
                 {
-                    this.SetStringCore(property.Name, (string)value, true);
+                    SetStringCore(property.Name, (string)value, size: null, true);
                 }
                 else if (outParameterType == null)
                 {
@@ -143,17 +144,17 @@ namespace Dibix
         {
             OutParameter<T> outParameter = new OutParameter<T>();
             parameterValue = outParameter;
-            return this.Set(name, type, null, outParameter);
+            return this.Set(name, type, value: null, outParameter: outParameter);
         }
         private IParameterBuilder Set(string name, DbType dbType, Type clrType, out OutParameter parameterValue)
         {
             OutParameter outParameter = (OutParameter)Activator.CreateInstance(typeof(OutParameter<>).MakeGenericType(clrType));
             parameterValue = outParameter;
-            return this.Set(name, dbType, null, outParameter);
+            return this.Set(name, dbType, value: null, outParameter: outParameter);
         }
-        private IParameterBuilder Set(string name, DbType type, object value, OutParameter outParameter = null, CustomInputType customInputType = default)
+        private IParameterBuilder Set(string name, DbType type, object value, int? size = null, OutParameter outParameter = null, CustomInputType customInputType = default)
         {
-            this._parameters[name] = new Parameter(name, type, value, outParameter, customInputType);
+            _parameters[name] = new Parameter(name, type, value, size, outParameter, customInputType);
             return this;
         }
 
@@ -196,14 +197,19 @@ namespace Dibix
 
             public override void VisitInputParameters(InputParameterVisitor visitParameter)
             {
-                this._parameters.Each(x => visitParameter(x.Name, x.Type, x.Value, x.OutputParameter != null, x.CustomInputType));
+                _parameters.Each(x => visitParameter(x.Name, x.Type, x.Value, x.Size, x.OutputParameter != null, x.CustomInputType));
             }
 
             public override void VisitOutputParameters(OutputParameterVisitor visitParameter)
             {
-                this._parameters
-                    .Where(x => x.OutputParameter != null)
-                    .Each(x => x.OutputParameter.ResolveValue(visitParameter(x.Name)));
+                foreach (Parameter parameter in _parameters)
+                {
+                    if (parameter.OutputParameter == null) 
+                        continue;
+
+                    object value = visitParameter(parameter.Name);
+                    parameter.OutputParameter.ResolveValue(value);
+                }
             }
         }
 
@@ -212,16 +218,18 @@ namespace Dibix
             public string Name { get; }
             public DbType Type { get; }
             public object Value { get; }
+            public int? Size { get; }
             public OutParameter OutputParameter { get; }
             public CustomInputType CustomInputType { get; }
 
-            public Parameter(string name, DbType type, object value, OutParameter outParameter, CustomInputType customInputType)
+            public Parameter(string name, DbType type, object value, int? size, OutParameter outParameter, CustomInputType customInputType)
             {
-                this.Name = name;
-                this.Type = type;
-                this.Value = value;
-                this.OutputParameter = outParameter;
-                this.CustomInputType = customInputType;
+                Name = name;
+                Type = type;
+                Value = value;
+                Size = size;
+                OutputParameter = outParameter;
+                CustomInputType = customInputType;
             }
         }
 

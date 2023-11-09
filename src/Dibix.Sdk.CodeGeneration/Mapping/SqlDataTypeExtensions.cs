@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
@@ -49,7 +50,10 @@ DataType: {dataTypeReference.GetType()}", source, dataTypeReference.StartLine, d
                         }
 
                         if (PrimitiveTypeMap.TryGetPrimitiveType(sqlDataTypeReference.SqlDataTypeOption, out PrimitiveType dataType))
-                            return new PrimitiveTypeReference(dataType, isNullable, false, new SourceLocation(source, dataTypeReference.StartLine, dataTypeReference.StartColumn));
+                        {
+                            int? size = CollectSize(dataType, sqlDataTypeReference.Parameters);
+                            return new PrimitiveTypeReference(dataType, isNullable, isEnumerable: false, size, new SourceLocation(source, dataTypeReference.StartLine, dataTypeReference.StartColumn));
+                        }
 
                         logger.LogError($@"Unsupported sql data type
 Name: {name}
@@ -62,7 +66,7 @@ DataType: {sqlDataTypeReference.SqlDataTypeOption}", source, dataTypeReference.S
                         if (string.Equals(userDataTypeReference.Name.BaseIdentifier.Value, "SYSNAME", StringComparison.OrdinalIgnoreCase))
                         {
                             udtName = null;
-                            return new PrimitiveTypeReference(PrimitiveType.String, isNullable, false, new SourceLocation(source, dataTypeReference.StartLine, dataTypeReference.StartColumn));
+                            return new PrimitiveTypeReference(PrimitiveType.String, isNullable, isEnumerable: false, size: 128, new SourceLocation(source, dataTypeReference.StartLine, dataTypeReference.StartColumn)){};
                         }
 
                         udtName = userDataTypeReference.Name.ToFullName();
@@ -72,7 +76,7 @@ DataType: {sqlDataTypeReference.SqlDataTypeOption}", source, dataTypeReference.S
 
                 case XmlDataTypeReference _:
                     udtName = null;
-                    return new PrimitiveTypeReference(PrimitiveType.Xml, false, false, new SourceLocation(source, dataTypeReference.StartLine, dataTypeReference.StartColumn));
+                    return new PrimitiveTypeReference(PrimitiveType.Xml, isNullable: false, isEnumerable: false, size: null, new SourceLocation(source, dataTypeReference.StartLine, dataTypeReference.StartColumn));
 
                 default:
                     throw new InvalidOperationException($@"Unexpected data type reference
@@ -80,5 +84,11 @@ Name: {name}
 DataType: {dataTypeReference.GetType()}");
             }
         }
+
+        private static int? CollectSize(PrimitiveType type, IList<Literal> parameters) => type switch
+        {
+            PrimitiveType.String when parameters.Count == 1 && parameters[0] is IntegerLiteral sizeLiteral && Int32.TryParse(sizeLiteral.Value, out int size) => size,
+            _ => null
+        };
     }
 }

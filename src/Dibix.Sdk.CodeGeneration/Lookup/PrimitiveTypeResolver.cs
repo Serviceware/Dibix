@@ -11,7 +11,7 @@ namespace Dibix.Sdk.CodeGeneration
             NullableTypeName typeName = input;
 
             if (Enum.TryParse(typeName.Name, ignoreCase: true /* JSON is camelCase while C# is PascalCase */, out PrimitiveType primitiveType))
-                return new PrimitiveTypeReference(primitiveType, typeName.IsNullable, isEnumerable, location);
+                return new PrimitiveTypeReference(primitiveType, typeName.IsNullable, isEnumerable, size: null, location);
 
             return null;
         }

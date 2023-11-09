@@ -53,7 +53,7 @@ namespace Dibix.Worker.Host
             command.CommandType = commandType;
             command.CommandTimeout = ServiceBrokerDefaults.CommandTimeout;
 
-            parameters.VisitInputParameters((name, type, value, isOutput, customInputType) => CollectInputParameter(command, name, type, value, isOutput, customInputType));
+            parameters.VisitInputParameters((name, type, value, size, isOutput, customInputType) => CollectInputParameter(command, name, type, value, size, isOutput, customInputType));
 
             using (EnterCancellationScope(cancellationToken, command))
             {
@@ -97,13 +97,17 @@ namespace Dibix.Worker.Host
             command?.Cancel(); // this method throws a SqlException => catch needed!
         }
 
-        private static void CollectInputParameter(DbCommand command, string name, DbType type, object value, bool isOutput, CustomInputType customInputType)
+        private static void CollectInputParameter(DbCommand command, string name, DbType type, object value, int? size, bool isOutput, CustomInputType customInputType)
         {
             DbParameter parameter = command.CreateParameter();
             parameter.ParameterName = name;
             parameter.DbType = type;
             parameter.Value = value;
             parameter.Direction = isOutput ? ParameterDirection.Output : ParameterDirection.Input;
+
+            if (size != null)
+                parameter.Size = size.Value;
+
             command.Parameters.Add(parameter);
         }
 

@@ -215,7 +215,7 @@ namespace Dibix.Sdk.CodeGeneration
             writer.WriteLine("ParametersVisitor @params = accessor.Parameters()")
                   .SetTemporaryIndent(36);
 
-            bool hasImplicitParameters = definition.GenerateInputClass || definition.Parameters.Any(x => !x.IsOutput && !x.Obfuscate);
+            bool hasImplicitParameters = definition.GenerateInputClass || definition.Parameters.Any(x => !x.HasParameterOptions());
 
             if (hasImplicitParameters)
             {
@@ -232,7 +232,7 @@ namespace Dibix.Sdk.CodeGeneration
                     for (int i = 0; i < definition.Parameters.Count; i++)
                     {
                         SqlQueryParameter parameter = definition.Parameters[i];
-                        if (parameter.Obfuscate || parameter.IsOutput)
+                        if (parameter.HasParameterOptions())
                             continue;
 
                         writer.Write(parameter.Name);
@@ -254,15 +254,30 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 foreach (SqlQueryParameter parameter in definition.Parameters)
                 {
+                    if (!parameter.HasParameterOptions())
+                        continue;
+
+                    string methodName = GetSetParameterMethodName(parameter.Type);
+                    writer.Write($".{methodName}(nameof({parameter.Name}), ");
+
+                    int? stringSize = parameter.Type.GetStringSize();
                     if (parameter.IsOutput)
                     {
-                        string methodName = GetSetParameterMethodName(parameter.Type);
                         string clrTypeName = context.ResolveTypeName(parameter.Type);
-                        writer.WriteLine($".{methodName}(nameof({parameter.Name}), out IOutParameter<{clrTypeName}> {parameter.Name}Output)");
+                        writer.WriteRaw($"out IOutParameter<{clrTypeName}> {parameter.Name}Output");
+                    }
+                    else
+                    {
+                        writer.WriteRaw($"{parameter.Name}");
+
+                        if (stringSize != null)
+                            writer.WriteRaw($", size: {stringSize}");
+
+                        if (parameter.Obfuscate)
+                            writer.WriteRaw(", obfuscate: true");
                     }
 
-                    if (parameter.Obfuscate)
-                        writer.WriteLine($".SetString(nameof({parameter.Name}), {parameter.Name}, true)");
+                    writer.WriteLineRaw(")");
                 }
             }
 

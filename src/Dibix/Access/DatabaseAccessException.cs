@@ -89,9 +89,11 @@ CommandText: {(commandType == CommandType.StoredProcedure ? commandText : "<Inli
 
                 if (parameterType != null)
                 {
-                    sb.Append('(')
-                      .Append(parameterType)
-                      .Append(')');
+                    sb.Append(' ')
+                      .Append(parameterType);
+
+                    if (parameter.Size != null)
+                        sb.AppendFormat($"({parameter.Size})");
                 }
 
                 sb.Append(":");
@@ -160,7 +162,7 @@ CommandText: {(commandType == CommandType.StoredProcedure ? commandText : "<Inli
             }
 
             int maxParameterLength = filteredParameters.Max(x => x.Name.Length);
-            var parameterDeclarations = filteredParameters.Select(x => new { Declaration = $"DECLARE @{x.Name.PadRight(maxParameterLength)} {ToDataTypeString(x.Type, x.Value, length: null)}", Parameter = x }).ToArray();
+            var parameterDeclarations = filteredParameters.Select(x => new { Declaration = $"DECLARE @{x.Name.PadRight(maxParameterLength)} {ToDataTypeString(x.Type, x.Value, x.Size)}", Parameter = x }).ToArray();
             int maxDeclarationLength = parameterDeclarations.Max(x => x.Declaration.Length);
             string udtInitializers = CollectUdtInitializers(filteredParameters);
             string debugStatements = String.Join(Environment.NewLine, parameterDeclarations.Select(x => FormatParameterDeclaration(x.Declaration, maxDeclarationLength, x.Parameter)));
@@ -244,13 +246,13 @@ CommandText: {(commandType == CommandType.StoredProcedure ? commandText : "<Inli
             return value;
         }
 
-        private static string ToDataTypeString(DbType dbType, object value, int? length)
+        private static string ToDataTypeString(DbType dbType, object value, int? size)
         {
-            string lengthStr = $"{length?.ToString() ?? "MAX"}";
+            string sizeStr = $"{size?.ToString() ?? "MAX"}";
             switch (dbType)
             {
-                case DbType.AnsiString: return $"VARCHAR({lengthStr})";
-                case DbType.Binary: return $"VARBINARY({lengthStr})";
+                case DbType.AnsiString: return $"VARCHAR({sizeStr})";
+                case DbType.Binary: return $"VARBINARY({sizeStr})";
                 case DbType.Byte: return "TINYINT";
                 case DbType.Boolean: return "BIT";
                 case DbType.Currency: return "MONEY";
@@ -265,14 +267,14 @@ CommandText: {(commandType == CommandType.StoredProcedure ? commandText : "<Inli
                 case DbType.Object when value is StructuredType structuredType: return NormalizeIdentifier(structuredType.TypeName);
                 case DbType.SByte: return "TINYINT";
                 case DbType.Single: return "FLOAT";
-                case DbType.String: return $"NVARCHAR({lengthStr})";
+                case DbType.String: return $"NVARCHAR({sizeStr})";
                 case DbType.Time: return "TIME";
                 case DbType.UInt16: return "SMALLINT";
                 case DbType.UInt32: return "INT";
                 case DbType.UInt64: return "BIGINT";
                 case DbType.VarNumeric: return "INT";
-                case DbType.AnsiStringFixedLength: return $"CHAR({length})";
-                case DbType.StringFixedLength: return $"NCHAR({length})";
+                case DbType.AnsiStringFixedLength: return $"CHAR({size})";
+                case DbType.StringFixedLength: return $"NCHAR({size})";
                 case DbType.Xml: return "XML";
                 case DbType.DateTime2: return "DATETIME2";
                 case DbType.DateTimeOffset: return "DATETIMEOFFSET";
@@ -283,7 +285,7 @@ CommandText: {(commandType == CommandType.StoredProcedure ? commandText : "<Inli
         private static ICollection<ParameterDescriptor> CollectParameters(ParametersVisitor parameters)
         {
             ICollection<ParameterDescriptor> statements = new Collection<ParameterDescriptor>();
-            parameters.VisitInputParameters((name, type, value, _, _) => statements.Add(new ParameterDescriptor(name, type, value)));
+            parameters.VisitInputParameters((name, type, value, size, _, _) => statements.Add(new ParameterDescriptor(name, type, value, size)));
             return statements;
         }
 
@@ -292,12 +294,14 @@ CommandText: {(commandType == CommandType.StoredProcedure ? commandText : "<Inli
             public string Name { get; }
             public DbType Type { get; }
             public object Value { get; }
+            public int? Size { get; }
 
-            public ParameterDescriptor(string name, DbType type, object value)
+            public ParameterDescriptor(string name, DbType type, object value, int? size)
             {
                 Name = name;
                 Type = type;
                 Value = value;
+                Size = size;
             }
         }
     }

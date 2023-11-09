@@ -12,7 +12,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public EnumSchema(string @namespace, string definitionName, SchemaDefinitionSource source, SourceLocation location) : base(@namespace, definitionName, source, location)
         {
-            BaseType = new PrimitiveTypeReference(PrimitiveType.Int32, isNullable: false, isEnumerable: false, location);
+            BaseType = new PrimitiveTypeReference(PrimitiveType.Int32, isNullable: false, isEnumerable: false, size: null, location: location);
             Members = new SortedSet<EnumSchemaMember>(Comparer<EnumSchemaMember>.Create(CompareEnumSchemaMember));
         }
 

@@ -73,7 +73,7 @@ namespace Dibix.Sdk.CodeGeneration
                 if (location == ActionParameterLocation.Header)
                 {
                     // Generate a null default value for header parameters
-                    PrimitiveTypeReference primitiveTypeReference = new PrimitiveTypeReference(PrimitiveType.String, isNullable: true, isEnumerable: false, new SourceLocation(sourceLocation.Source, parameter.Location.Line, parameter.Location.Column));
+                    PrimitiveTypeReference primitiveTypeReference = new PrimitiveTypeReference(PrimitiveType.String, isNullable: true, isEnumerable: false, size: null, new SourceLocation(sourceLocation.Source, parameter.Location.Line, parameter.Location.Column));
                     type = primitiveTypeReference;
                     defaultValue = new NullValueReference(primitiveTypeReference, parameter.Location);
                 }
@@ -84,7 +84,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             foreach (PathParameter pathParameter in pathParameters.Values)
             {
-                TypeReference typeReference = new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: false, new SourceLocation(sourceLocation.Source, pathParameter.Location.Line, pathParameter.Location.Column));
+                TypeReference typeReference = new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: false, size: null, location: new SourceLocation(sourceLocation.Source, pathParameter.Location.Line, pathParameter.Location.Column));
                 const ActionParameterLocation location = ActionParameterLocation.Path;
                 bool isRequired = base.IsParameterRequired(type: null, location, defaultValue: null);
                 ActionParameter parameter = new ActionParameter(pathParameter.Name, pathParameter.Name, typeReference, location, isRequired, defaultValue: null, source: null, new SourceLocation(sourceLocation.Source, pathParameter.Location.Line, pathParameter.Location.Column));

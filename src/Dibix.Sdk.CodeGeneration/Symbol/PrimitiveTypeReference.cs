@@ -5,11 +5,13 @@ namespace Dibix.Sdk.CodeGeneration
     public sealed class PrimitiveTypeReference : TypeReference
     {
         public PrimitiveType Type { get; }
-        public override string DisplayName => $"{this.Type}";
+        public int? Size { get; }
+        public override string DisplayName => $"{Type}";
 
-        public PrimitiveTypeReference(PrimitiveType type, bool isNullable, bool isEnumerable, SourceLocation location) : base(isNullable, isEnumerable, location)
+        public PrimitiveTypeReference(PrimitiveType type, bool isNullable, bool isEnumerable, int? size, SourceLocation location) : base(isNullable, isEnumerable, location)
         {
-            this.Type = type;
+            Type = type;
+            Size = size;
         }
     }
 }

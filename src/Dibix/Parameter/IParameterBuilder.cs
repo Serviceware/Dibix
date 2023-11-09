@@ -46,8 +46,10 @@ namespace Dibix
         IParameterBuilder SetGuid(string parameterName, out IOutParameter<Guid?> parameterValue);
 
         IParameterBuilder SetString(string parameterName, string parameterValue);
+        IParameterBuilder SetString(string parameterName, string parameterValue, int size);
         IParameterBuilder SetString(string parameterName, out IOutParameter<string> parameterValue);
         IParameterBuilder SetString(string parameterName, string parameterValue, bool obfuscate);
+        IParameterBuilder SetString(string parameterName, string parameterValue, int size, bool obfuscate);
 
         IParameterBuilder SetBytes(string parameterName, byte[] parameterValue);
         IParameterBuilder SetXml(string parameterName, XElement parameterValue);

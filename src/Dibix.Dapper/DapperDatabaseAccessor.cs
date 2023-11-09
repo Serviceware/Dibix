@@ -116,13 +116,13 @@ namespace Dibix.Dapper
         {
             Guard.IsNotNull(parametersVisitor, nameof(parametersVisitor));
             DynamicParameters @params = new DynamicParameters();
-            parametersVisitor.VisitInputParameters((name, dataType, value, isOutput, customInputType) =>
+            parametersVisitor.VisitInputParameters((name, dataType, value, size, isOutput, customInputType) =>
             {
                 object normalizedValue = NormalizeParameterValue(value);
                 DbType? dbType = NormalizeParameterDbType(dataType, customInputType);
                 ParameterDirection? direction = isOutput ? ParameterDirection.Output : null;
-                int? size = NormalizeParameterSize(size: null, dbType, isOutput);
-                @params.Add(name, value: normalizedValue, dbType, direction, size);
+                int? normalizedSize = NormalizeParameterSize(size, dbType, isOutput);
+                @params.Add(name, value: normalizedValue, dbType, direction, normalizedSize);
             });
             return new DynamicParametersWrapper(@params, parametersVisitor);
         }

@@ -10,6 +10,8 @@
         public static bool IsEnum(this SchemaTypeReference schemaTypeReference, ISchemaRegistry schemaRegistry) => schemaTypeReference.IsSchema(schemaRegistry, out EnumSchema _);
         public static bool IsEnum(this SchemaTypeReference schemaTypeReference, ISchemaRegistry schemaRegistry, out EnumSchema enumSchema) => schemaTypeReference.IsSchema(schemaRegistry, out enumSchema);
 
+        public static int? GetStringSize(this TypeReference typeReference) => typeReference is PrimitiveTypeReference { Type: PrimitiveType.String } primitiveTypeReference ? primitiveTypeReference.Size : null;
+
         public static bool IsSchema<TSchema>(this TypeReference typeReference, ISchemaRegistry schemaRegistry, out TSchema schema) where TSchema : SchemaDefinition
         {
             if (typeReference is SchemaTypeReference schemaTypeReference)

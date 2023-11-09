@@ -100,12 +100,6 @@ namespace Dibix
         protected virtual void DisposeConnection() => Connection?.Dispose();
 
         protected virtual void OnInfoMessage(string message) { }
-
-        protected Exception CreateException(DatabaseAccessErrorCode errorCode, string commandText, CommandType commandType, ParametersVisitor parameters)
-        {
-            string message = CollectExceptionMessage(errorCode);
-            return DatabaseAccessException.Create(message, commandType, commandText, parameters, errorCode, _isSqlClient);
-        }
         #endregion
 
         #region Private Methods
@@ -158,18 +152,58 @@ namespace Dibix
 
         private T Execute<T>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<T> action)
         {
-            try { return action(); }
+            try 
+            {
+                ValidateParameters(commandText, commandType, parameters);
+                return action();
+            }
             catch (DatabaseAccessException exception) when (exception.AdditionalErrorCode != DatabaseAccessErrorCode.None) { throw; }
             catch (Exception exception) { throw DatabaseAccessException.Create(commandType, commandText, parameters, exception, _isSqlClient); }
         }
         private async Task<T> Execute<T>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<Task<T>> action)
         {
-            try { return await action().ConfigureAwait(false); }
+            try
+            {
+                ValidateParameters(commandText, commandType, parameters);
+                return await action().ConfigureAwait(false);
+            }
             catch (DatabaseAccessException exception) when (exception.AdditionalErrorCode != DatabaseAccessErrorCode.None) { throw; }
             catch (AggregateException exception) when (exception.InnerException is DatabaseAccessException databaseAccessException && databaseAccessException.AdditionalErrorCode != DatabaseAccessErrorCode.None) { throw databaseAccessException; }
             catch (AggregateException exception) { throw DatabaseAccessException.Create(commandType, commandText, parameters, exception.InnerException ?? exception, _isSqlClient); }
             catch (Exception exception) { throw DatabaseAccessException.Create(commandType, commandText, parameters, exception, _isSqlClient); }
         }
+
+        private void ValidateParameters(string commandText, CommandType commandType, ParametersVisitor parameters)
+        {
+            parameters.VisitInputParameters((name, type, value, size, _, _) =>
+            {
+                ValidateSize(name, type, value, size, commandText, commandType, parameters);
+            });
+        }
+
+        private void ValidateSize(string name, DbType type, object value, int? size, string commandText, CommandType commandType, ParametersVisitor parameters)
+        {
+            if (size == null)
+                return;
+
+            switch (type)
+            {
+                case DbType.String:
+                case DbType.AnsiString:
+                case DbType.StringFixedLength:
+                case DbType.AnsiStringFixedLength:
+                    if (value is string str && str.Length > size)
+                        throw CreateException(DatabaseAccessErrorCode.ParameterSizeExceeded, $"Length of parameter '{name}' is '{str.Length}', which exceeds the supported size '{size}'", commandText, commandType, parameters);
+
+                    return;
+
+                default:
+                    return;
+            }
+        }
+
+        private Exception CreateException(DatabaseAccessErrorCode errorCode, string commandText, CommandType commandType, ParametersVisitor parameters) => CreateException(errorCode, CollectExceptionMessage(errorCode), commandText, commandType, parameters);
+        private Exception CreateException(DatabaseAccessErrorCode errorCode, string message, string commandText, CommandType commandType, ParametersVisitor parameters) => DatabaseAccessException.Create(message, commandType, commandText, parameters, errorCode, _isSqlClient);
 
         private void OnInfoMessage(object sender, SqlInfoMessageEventArgs e)
         {

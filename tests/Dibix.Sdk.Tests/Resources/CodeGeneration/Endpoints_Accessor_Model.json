@@ -21,6 +21,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
+            "Size": null,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -55,6 +56,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
+            "Size": null,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -89,6 +91,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
+            "Size": null,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -157,6 +160,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "UUID",
+            "Size": null,
             "DisplayName": "UUID",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -191,6 +195,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
+            "Size": null,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -225,6 +230,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Boolean",
+            "Size": null,
             "DisplayName": "Boolean",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -259,6 +265,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Int32",
+            "Size": null,
             "DisplayName": "Int32",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -293,6 +300,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
+            "Size": null,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -343,6 +351,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Int32",
+            "Size": null,
             "DisplayName": "Int32",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -377,6 +386,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
+            "Size": null,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -413,6 +423,7 @@
       "BaseType": {
         "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
         "Type": "Int32",
+        "Size": null,
         "DisplayName": "Int32",
         "IsNullable": false,
         "IsEnumerable": false,
@@ -468,6 +479,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Int32",
+            "Size": null,
             "DisplayName": "Int32",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -502,6 +514,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
+            "Size": null,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -552,6 +565,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Int32",
+            "Size": null,
             "DisplayName": "Int32",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -586,6 +600,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
+            "Size": null,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -605,6 +620,7 @@
             "Type": {
               "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
               "Type": "String",
+              "Size": null,
               "DisplayName": "String",
               "IsNullable": false,
               "IsEnumerable": false,
@@ -645,6 +661,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Int32",
+            "Size": null,
             "DisplayName": "Int32",
             "IsNullable": true,
             "IsEnumerable": false,
@@ -735,6 +752,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "DateTime",
+            "Size": null,
             "DisplayName": "DateTime",
             "IsNullable": true,
             "IsEnumerable": false,
@@ -769,6 +787,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Uri",
+            "Size": null,
             "DisplayName": "Uri",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -805,6 +824,7 @@
       "BaseType": {
         "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
         "Type": "Int32",
+        "Size": null,
         "DisplayName": "Int32",
         "IsNullable": false,
         "IsEnumerable": false,
@@ -866,6 +886,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
+            "Size": null,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -900,6 +921,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
+            "Size": null,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -934,6 +956,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
+            "Size": null,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -1002,6 +1025,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "UUID",
+            "Size": null,
             "DisplayName": "UUID",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -1036,6 +1060,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
+            "Size": null,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -1070,6 +1095,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Boolean",
+            "Size": null,
             "DisplayName": "Boolean",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -1104,6 +1130,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Int32",
+            "Size": null,
             "DisplayName": "Int32",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -1138,6 +1165,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
+            "Size": null,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -1189,6 +1217,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Int32",
+            "Size": null,
             "DisplayName": "Int32",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -1223,6 +1252,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
+            "Size": 50,
             "DisplayName": "String",
             "IsNullable": true,
             "IsEnumerable": false,
@@ -1274,6 +1304,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Int32",
+            "Size": null,
             "DisplayName": "Int32",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -1326,6 +1357,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Byte",
+            "Size": null,
             "DisplayName": "Byte",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -1383,6 +1415,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
+            "Size": 50,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -1404,6 +1437,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
+            "Size": 50,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -1425,6 +1459,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "UUID",
+            "Size": null,
             "DisplayName": "UUID",
             "IsNullable": true,
             "IsEnumerable": false,
@@ -1446,6 +1481,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
+            "Size": 128,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -1488,6 +1524,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
+            "Size": 50,
             "DisplayName": "String",
             "IsNullable": true,
             "IsEnumerable": false,
@@ -1504,6 +1541,7 @@
             "Type": {
               "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
               "Type": "String",
+              "Size": 50,
               "DisplayName": "String",
               "IsNullable": true,
               "IsEnumerable": false,
@@ -1530,6 +1568,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Boolean",
+            "Size": null,
             "DisplayName": "Boolean",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -1550,6 +1589,7 @@
             "Type": {
               "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
               "Type": "Boolean",
+              "Size": null,
               "DisplayName": "Boolean",
               "IsNullable": false,
               "IsEnumerable": false,
@@ -1618,6 +1658,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
+            "Size": 50,
             "DisplayName": "String",
             "IsNullable": true,
             "IsEnumerable": false,
@@ -1638,6 +1679,7 @@
             "Type": {
               "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
               "Type": "String",
+              "Size": 50,
               "DisplayName": "String",
               "IsNullable": true,
               "IsEnumerable": false,
@@ -1716,6 +1758,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Int32",
+            "Size": null,
             "DisplayName": "Int32",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -1804,6 +1847,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Stream",
+            "Size": null,
             "DisplayName": "Stream",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -1951,6 +1995,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Int32",
+            "Size": null,
             "DisplayName": "Int32",
             "IsNullable": false,
             "IsEnumerable": false,
@@ -1972,6 +2017,7 @@
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
+            "Size": 255,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,

@@ -180,7 +180,7 @@ namespace Dibix.Sdk.CodeGeneration
                 return;
 
             SourceLocation location = new SourceLocation(schema.Location.Source, sqlDataTypeReference.StartLine, sqlDataTypeReference.StartColumn);
-            schema.BaseType = new PrimitiveTypeReference(dataType, isNullable: false, isEnumerable: false, location);
+            schema.BaseType = new PrimitiveTypeReference(dataType, isNullable: false, isEnumerable: false, size: null, location: location);
         }
 
         private static bool TryCollectSchemaMember(EnumSchema schema, TSqlFragment container, Literal flagLiteral, Literal nameLiteral)
