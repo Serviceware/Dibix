@@ -90,10 +90,11 @@ namespace Dibix.Testing
                 actualNormalized = actual.NormalizeLineEndings();
             }
 
-            if (!Equals(expectedNormalized, actualNormalized))
-                this.TestResultComposer.AddFileComparison(expectedNormalized, actualNormalized, outputName, extension);
+            if (Equals(expectedNormalized, actualNormalized)) 
+                return;
 
-            Assert.AreEqual(expectedNormalized, actualNormalized, message);
+            TestResultComposer.AddFileComparison(expectedNormalized, actualNormalized, outputName, extension);
+            throw new AssertTextFailedException(expectedNormalized, actualNormalized, message);
         }
 
         protected void LogException(Exception exception) => this.TestResultComposer.AddFile("AdditionalErrors.txt", $@"An error occured while collecting the last event log errors
