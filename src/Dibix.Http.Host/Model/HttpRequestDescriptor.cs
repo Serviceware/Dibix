@@ -7,7 +7,6 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Dibix.Http.Host.Extensions;
 using Dibix.Http.Server;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 
 namespace Dibix.Http.Host
@@ -36,7 +35,17 @@ namespace Dibix.Http.Host
         public string? GetRemoteName()
         {
             string? remoteAddress = GetRemoteAddress();
-            return remoteAddress != null ? Dns.GetHostEntry(remoteAddress).HostName : null;
+            if (remoteAddress == null) 
+                return null;
+
+            try
+            {
+                return Dns.GetHostEntry(remoteAddress).HostName;
+            }
+            catch (Exception)
+            {
+                return remoteAddress;
+            }
         }
 
         public string? GetBearerToken()
