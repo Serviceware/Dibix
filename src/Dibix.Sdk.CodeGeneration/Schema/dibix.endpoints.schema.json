@@ -288,7 +288,8 @@
       "properties": {
         "childRoute": {
           "type": "string",
-          "pattern": "^[A-Za-z_\\-/\\{\\}]+(.[a-z]+)?$"
+          "pattern": "^[A-Za-z_\\-/\\{\\}]+(.[a-z]+)?$",
+          "maxLength": 200
         },
         "method": {
           "type": "string",
