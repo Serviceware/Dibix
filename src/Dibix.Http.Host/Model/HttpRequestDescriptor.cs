@@ -7,6 +7,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Dibix.Http.Host.Extensions;
 using Dibix.Http.Server;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 
 namespace Dibix.Http.Host
@@ -60,6 +61,12 @@ namespace Dibix.Http.Host
                 token = authorization[bearerPrefix.Length..].Trim();
 
             return token;
+        }
+
+        public DateTime? GetBearerTokenExpiresIn()
+        {
+            IAuthenticateResultFeature? authenticateResultFeature = _request.HttpContext.Features.Get<IAuthenticateResultFeature>();
+            return authenticateResultFeature?.AuthenticateResult?.Properties?.ExpiresUtc?.UtcDateTime;
         }
     }
 }

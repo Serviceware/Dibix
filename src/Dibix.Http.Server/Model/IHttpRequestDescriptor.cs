@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -15,5 +16,6 @@ namespace Dibix.Http.Server
         string GetRemoteAddress();
         string GetRemoteName();
         string GetBearerToken();
+        DateTime? GetBearerTokenExpiresIn();
     }
 }

@@ -12,7 +12,8 @@ namespace Dibix
             "Languages",
             "RemoteName",
             "RemoteAddress",
-            "BearerToken"
+            "BearerToken",
+            "BearerTokenExpiresIn"
         };
     }
 }
