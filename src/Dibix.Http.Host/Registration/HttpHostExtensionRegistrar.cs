@@ -69,9 +69,9 @@ namespace Dibix.Http.Host
                 return this;
             }
 
-            IHttpHostExtensionConfigurationBuilder IHttpHostExtensionConfigurationBuilder.RegisterDependency<TInterface, TImplementation>()
+            IHttpHostExtensionConfigurationBuilder IHttpHostExtensionConfigurationBuilder.RegisterClaimsTransformer<T>()
             {
-                _services.AddScoped<TInterface, TImplementation>();
+                _services.AddScoped<IClaimsTransformer, T>();
                 return this;
             }
 
