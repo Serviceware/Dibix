@@ -18,7 +18,7 @@ namespace Dibix.Http.Host
             _response = response;
         }
 
-        public async Task<object?> Format(object result, HttpRequestDescriptor request, HttpActionDefinition action)
+        public async Task<object?> Format(object? result, HttpRequestDescriptor request, HttpActionDefinition action)
         {
             if (action.FileResponse != null)
             {
@@ -32,7 +32,7 @@ namespace Dibix.Http.Host
             return null;
         }
 
-        private async Task WriteFileResponse(object result, HttpActionDefinition action)
+        private async Task WriteFileResponse(object? result, HttpActionDefinition action)
         {
             FileEntity? file = (FileEntity?)result;
             if (file == null)
@@ -60,8 +60,14 @@ namespace Dibix.Http.Host
             }
         }
 
-        private async Task WriteJsonResponse(object result)
+        private async Task WriteJsonResponse(object? result)
         {
+            if (result == null)
+            {
+                _response.StatusCode = StatusCodes.Status204NoContent;
+                return;
+            }
+
             await _response.WriteAsJsonAsync(result).ConfigureAwait(false);
         }
     }

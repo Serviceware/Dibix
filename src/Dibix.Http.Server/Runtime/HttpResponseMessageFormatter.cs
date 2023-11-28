@@ -47,22 +47,5 @@ namespace Dibix.Http.Server
 
             return response;
         }
-
-        private static object UnwrapResponse(HttpRequestMessage request, HttpResponse response)
-        {
-            switch (response)
-            {
-#if NET461
-                case HttpObjectResponse httpObjectResponse:
-                    return request.CreateResponse(response.StatusCode, httpObjectResponse.Content);
-
-#endif
-                case not null:
-                    return request.CreateResponse(response.StatusCode);
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(response));
-            }
-        }
     }
 }
