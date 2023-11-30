@@ -51,7 +51,7 @@ namespace Dibix.Http.Server
 
         public string GetBearerToken() => throw new NotSupportedException();
 
-        public DateTime? GetBearerTokenExpiresIn() => throw new NotSupportedException();
+        public DateTime? GetBearerTokenExpiresAt() => throw new NotSupportedException();
 
         public object CreateResponse(HttpStatusCode statusCode) => RequestMessage.CreateResponse(statusCode);
 

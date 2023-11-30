@@ -13,7 +13,7 @@ namespace Dibix
             "RemoteName",
             "RemoteAddress",
             "BearerToken",
-            "BearerTokenExpiresIn"
+            "BearerTokenExpiresAt"
         };
     }
 }

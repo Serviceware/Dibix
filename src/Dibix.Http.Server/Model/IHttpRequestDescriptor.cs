@@ -16,6 +16,6 @@ namespace Dibix.Http.Server
         string GetRemoteAddress();
         string GetRemoteName();
         string GetBearerToken();
-        DateTime? GetBearerTokenExpiresIn();
+        DateTime? GetBearerTokenExpiresAt();
     }
 }

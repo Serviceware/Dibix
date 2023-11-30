@@ -63,7 +63,7 @@ namespace Dibix.Http.Host
             return token;
         }
 
-        public DateTime? GetBearerTokenExpiresIn()
+        public DateTime? GetBearerTokenExpiresAt()
         {
             IAuthenticateResultFeature? authenticateResultFeature = _request.HttpContext.Features.Get<IAuthenticateResultFeature>();
             return authenticateResultFeature?.AuthenticateResult?.Properties?.ExpiresUtc?.UtcDateTime;
