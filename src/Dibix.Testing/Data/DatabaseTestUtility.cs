@@ -103,7 +103,7 @@ namespace Dibix.Testing.Data
                 if (_raiseErrorWithNoWaitBehavior != RaiseErrorWithNoWaitBehavior.ExecuteScalar)
                     return base.Execute(commandText, commandType, parameters, commandTimeout);
 
-                _ = base.Connection.ExecuteScalar(commandText, CollectParameters(parameters), transaction: null, _defaultCommandTimeout ?? commandTimeout, commandType);
+                _ = base.Connection.ExecuteScalar(commandText, CollectParameters(parameters), transaction: null, commandTimeout ?? _defaultCommandTimeout, commandType);
                 return default;
             }
             protected override async Task<int> ExecuteAsync(string commandText, CommandType commandType, ParametersVisitor parameters, int? commandTimeout, CancellationToken cancellationToken)
@@ -111,7 +111,7 @@ namespace Dibix.Testing.Data
                 if (_raiseErrorWithNoWaitBehavior != RaiseErrorWithNoWaitBehavior.ExecuteScalar)
                     return await base.ExecuteAsync(commandText, commandType, parameters, commandTimeout, cancellationToken).ConfigureAwait(false);
 
-                CommandDefinition command = new CommandDefinition(commandText, CollectParameters(parameters), transaction: null, _defaultCommandTimeout ?? commandTimeout, commandType, cancellationToken: cancellationToken);
+                CommandDefinition command = new CommandDefinition(commandText, CollectParameters(parameters), transaction: null, commandTimeout ?? _defaultCommandTimeout, commandType, cancellationToken: cancellationToken);
                 _ = await base.Connection.ExecuteScalarAsync(command).ConfigureAwait(false);
                 return default;
             }
