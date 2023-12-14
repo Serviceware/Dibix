@@ -66,7 +66,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 ControllerDefinition controller = controllers[i];
                 IList<ActionDefinition> actions = CollectActionsToInclude(context, controller).ToArray();
-                if (!actions.Any())
+                if (!actions.Any() && !controller.ControllerImports.Any())
                     continue;
 
                 writer.WriteLine($"base.RegisterController(\"{controller.Name}\", controller =>")
