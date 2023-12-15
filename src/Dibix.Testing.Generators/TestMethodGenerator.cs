@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
+using Dibix.Generators;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Dibix.Generators
+namespace Dibix.Testing.Generators
 {
     [Generator]
     public sealed class TestMethodGenerator : IIncrementalGenerator
@@ -36,7 +37,7 @@ namespace Dibix.Generators
 
         private static CodeGenerationTask? CollectCodeGenerationTask(GeneratorSyntaxContext context, AttributeSyntax attribute)
         {
-            if (context.SemanticModel.GetSymbolInfo(attribute).Symbol is not IMethodSymbol attributeSymbol)
+            if (ModelExtensions.GetSymbolInfo(context.SemanticModel, attribute).Symbol is not IMethodSymbol attributeSymbol)
                 return null;
 
             string displayString = attributeSymbol.ContainingType.ToDisplayString();
@@ -51,7 +52,7 @@ namespace Dibix.Generators
             if (typeSyntax == null)
                 return null;
 
-            if (context.SemanticModel.GetSymbolInfo(typeSyntax).Symbol is not ITypeSymbol baseTypeSymbol)
+            if (ModelExtensions.GetSymbolInfo(context.SemanticModel, typeSyntax).Symbol is not ITypeSymbol baseTypeSymbol)
                 return null;
 
             string? configuredNamespace = CollectNamespaceFromAttribute(context, arguments);
@@ -100,7 +101,7 @@ namespace Dibix.Generators
 
             string testMethods = String.Join($"{Environment.NewLine}{Environment.NewLine}", task.TypeNames.Select(TestMethodTemplate));
             string @namespace = task.Namespace ?? rootNamespace ?? task.AssemblyName ?? $"{task.BaseTypeNamespace}.Tests";
-            string source = @$"{GenerationUtility.GeneratedCodeHeader}
+            string source = @$"{SourceGeneratorUtility.GeneratedCodeHeader}
 
 namespace {@namespace}
 {{

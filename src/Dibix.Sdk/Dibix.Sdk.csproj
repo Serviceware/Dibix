@@ -17,6 +17,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Dibix.Sdk.CodeAnalysis\Dibix.Sdk.CodeAnalysis.csproj" />
     <ProjectReference Include="..\Dibix.Sdk.CodeGeneration\Dibix.Sdk.CodeGeneration.csproj" />
-    <ProjectReference Include="..\Dibix.Generators\Dibix.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\Dibix.Sdk.Generators\Dibix.Sdk.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 </Project>

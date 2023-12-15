@@ -4,11 +4,12 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using Dibix.Generators;
 using Dibix.Sdk.Abstractions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Dibix.Generators
+namespace Dibix.Sdk.Generators
 {
     [Generator]
     public sealed class TaskGenerator : IIncrementalGenerator
@@ -26,7 +27,6 @@ namespace Dibix.Generators
             var all = tasks.Combine(context.CompilationProvider)
                            .Combine(rootNamespace);
             context.RegisterSourceOutput(all, (sourceProductionContext, source) => GenerateSource(sourceProductionContext, source.Left.Left, source.Right));
-            context.RegisterPostInitializationOutput(x => x.CollectEmbeddedSources(nameof(TaskGenerator)));
         }
 
         private static bool IsClassWithAttribute(SyntaxNode node, CancellationToken cancellationToken)
@@ -96,7 +96,7 @@ namespace Dibix.Generators
         {
             string configurationName = $"global::{@namespace}.{task.ClassName}Configuration";
             string propertyInitializersText = CollectTaskPropertyInitializersText(CollectTaskPropertyInitializers(propertyCategoryMap));
-            string content = @$"{GenerationUtility.GeneratedCodeHeader}
+            string content = @$"{SourceGeneratorUtility.GeneratedCodeHeader}
 
 namespace {@namespace}
 {{
@@ -136,7 +136,7 @@ namespace {@namespace}
                 propertiesText = $@"
 {propertiesText}";
             }
-            string content = @$"{GenerationUtility.GeneratedCodeHeader}
+            string content = @$"{SourceGeneratorUtility.GeneratedCodeHeader}
 
 namespace {@namespace}
 {{
@@ -181,7 +181,7 @@ namespace {@namespace}
                 propertiesText = $@"
 {propertiesText}";
             }
-            string content = @$"{GenerationUtility.GeneratedCodeHeader}
+            string content = @$"{SourceGeneratorUtility.GeneratedCodeHeader}
 
 namespace {@namespace}
 {{

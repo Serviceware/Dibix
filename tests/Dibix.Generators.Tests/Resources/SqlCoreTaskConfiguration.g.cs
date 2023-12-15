@@ -9,7 +9,7 @@
 
 namespace Dibix.Generators.Tests.Tasks
 {
-    [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+    [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Sdk.Generators", "%GENERATORVERSION%")]
     [global::System.Diagnostics.DebuggerNonUserCode]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     public sealed class SqlCoreTaskConfiguration

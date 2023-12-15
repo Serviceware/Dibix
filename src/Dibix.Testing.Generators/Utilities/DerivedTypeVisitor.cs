@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 
-namespace Dibix.Generators
+namespace Dibix.Testing.Generators
 {
     internal sealed class DerivedTypeVisitor : SymbolVisitor
     {
@@ -29,7 +29,7 @@ namespace Dibix.Generators
             {
                 member.Accept(this);
             }
-            
+
             bool baseTypeMatches = SymbolEqualityComparer.Default.Equals(symbol.BaseType, this._baseType);
             if (baseTypeMatches)
                 this.TypeNames.Add(symbol.Name);

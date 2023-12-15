@@ -3,26 +3,20 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Nullable>enable</Nullable>
-    <IncludeBuildOutput>False</IncludeBuildOutput>
+    <IsGeneratorProject>True</IsGeneratorProject>
+    <AnalyzerLanguage>cs</AnalyzerLanguage>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
-    <Compile Include="..\..\shared\Extensions\CollectionExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Extensions\EnumerableExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\SourceGenerator\Annotation.cs" Link="Utilities\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\SourceGenerator\SourceGeneratorUtility.cs" Link="Utilities\%(Filename)%(Extension)" />
     <EmbeddedResource Include="EmbeddedSources\**" Link="%(Identity)" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <!--
-      OutputItemType="Analyzer" seems rather weird, but the Code Lens keeps on crashing with FileNotFoundException.
-      See: https://github.com/dotnet/roslyn/discussions/47517#discussioncomment-580567
-    -->
-    <ProjectReference Include="..\Dibix.Sdk.Abstractions\Dibix.Sdk.Abstractions.csproj" PrivateAssets="all" OutputItemType="Analyzer" />
   </ItemGroup>
 </Project>

@@ -1,6 +1,6 @@
 ﻿using Dibix.Sdk.Abstractions;
 
-namespace Dibix.Generators
+namespace Dibix.Sdk.Generators
 {
     internal static class TypeNames
     {

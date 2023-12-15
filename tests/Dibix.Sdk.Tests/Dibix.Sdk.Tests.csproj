@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <AssemblyAttribute Include="Dibix.Generators.TestMethodGeneration">
+    <AssemblyAttribute Include="Dibix.Testing.Generators.TestMethodGeneration">
       <_Parameter1>typeof(Dibix.Sdk.CodeAnalysis.SqlCodeAnalysisRule)</_Parameter1>
       <_Parameter1_IsLiteral>true</_Parameter1_IsLiteral>
       <_Parameter2>Dibix.Sdk.Tests.CodeAnalysis</_Parameter2>
@@ -31,11 +31,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Dibix\Dibix.csproj" />
-    <ProjectReference Include="..\..\src\Dibix.Generators\Dibix.Generators.csproj" PrivateAssets="all" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\..\src\Dibix.Http.Client\Dibix.Http.Client.csproj" />
     <ProjectReference Include="..\..\src\Dibix.Http.Server\Dibix.Http.Server.csproj" />
     <ProjectReference Include="..\..\src\Dibix.Sdk\Dibix.Sdk.csproj" />
     <ProjectReference Include="..\..\src\Dibix.Testing\Dibix.Testing.csproj" />
+    <ProjectReference Include="..\..\src\Dibix.Testing.Generators\Dibix.Testing.Generators.csproj" PrivateAssets="all" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 </Project>

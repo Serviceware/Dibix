@@ -12,253 +12,253 @@ namespace Dibix.Generators.Tests
     [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestClass]
     public sealed partial class SqlCodeAnalysisRuleTests
     {
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void AliasSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void AmbiguousCheckConstraintSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void ConsistentlyQuotedIdentifierSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void DateTimeSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void EmptyReturnSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void ExplicitProcedureArgumentSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void ImplicitDefaultSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void ImplicitSyntaxSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void IndexSizeSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void InlineFunctionSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void InsertWithoutColumnSpecificationSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void InvalidFunctionUsageSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void IsNullSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void KeywordCasingSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void LanguageDependentConstantSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void LooseConstraintsSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void MissingPrimaryKeySqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void MisusedTopRowFilterSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void NamingConventionSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void NoCursorSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void PrimaryKeyDataTypeSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void PrimaryKeyUpdateSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void PrimitiveDataTypeIdentifierSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void RedundantAliasSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void RedundantIndexSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void RedundantSymbolSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void SchemaSpecificationSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void SecurityAlgorithmSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void SetStatementSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void SurrogateKeySqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void TableConstraintSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void TemporaryTableSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void TruncateTableSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void UnfilteredDataModificationSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void UnicodeConstantSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void UnicodeDataTypeSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void UnintentionalBooleanComparisonSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void UniqueIndexSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void UnnamedConstraintSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void UnspecifiedDataTypeLengthSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void UnsupportedDataTypeSqlCodeAnalysisRule() => this.Execute();
 
-        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Generators", "%GENERATORVERSION%")]
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]

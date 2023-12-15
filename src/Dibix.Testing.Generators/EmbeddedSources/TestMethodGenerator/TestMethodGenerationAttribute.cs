@@ -1,4 +1,4 @@
-﻿namespace Dibix.Generators
+﻿namespace Dibix.Testing.Generators
 {
     [global::System.AttributeUsage(global::System.AttributeTargets.Assembly)]
     internal sealed class TestMethodGenerationAttribute : global::System.Attribute

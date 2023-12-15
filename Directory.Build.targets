@@ -1,4 +1,5 @@
 <Project>
+
   <ItemGroup>
     <None Remove="*.dotsettings" />
     <None Remove=".DS_Store" />
@@ -11,4 +12,29 @@
       <PackageReleaseNotes>$(PackageProjectUrl)/releases/tag/v$(PackageVersion)</PackageReleaseNotes>
     </PropertyGroup>
   </Target>
+
+  <!-- Call a target in the analyzer project to get all the files it would normally place in a package.
+       These will be returned as items with identity pointing to the built file, and PackagePath metadata
+       set to their location in the package. IsSymbol metadata will be set to distinguish symbols. -->
+  <Target Name="IncludeAnalyzersInPackage"
+          Condition="'@(ProjectReference)' != '' and @(ProjectReference->AnyHaveMetadataValue('PackAsAnalyzer', 'true'))"
+          BeforeTargets="_GetPackageFiles">
+    <MSBuild Projects="@(ProjectReference->WithMetadataValue('PackAsAnalyzer', 'true'))"
+             Targets="GetAnalyzerPackFiles"
+             RemoveProperties="SetTargetFramework">
+      <Output TaskParameter="TargetOutputs" ItemName="_AnalyzerFile" />
+    </MSBuild>
+
+    <ItemGroup>
+      <Content Include="@(_AnalyzerFile)" Pack="True" Condition="!%(_AnalyzerFile.IsSymbol)" />
+      <!-- Symbols don't honor PackagePath.  By default they are placed in lib/%(TargetFramework).
+           Pack does honor TargetPath and does Path.Combine("lib/%(TargetFramework)", "%(TargetPath)"),
+           so a rooted path value for TargetPath will override lib.
+           https://github.com/NuGet/Home/issues/10860 -->
+      <_TargetPathsToSymbols Include="@(_AnalyzerFile)" TargetPath="/%(_AnalyzerFile.PackagePath)" Condition="%(_AnalyzerFile.IsSymbol)" />
+    </ItemGroup>
+  </Target>
+
+  <Import Project="$(MSBuildThisFileDirectory)build/msbuild-targets/Generator.targets" Condition="'$(IsGeneratorProject)' == 'true'" />
+
 </Project>

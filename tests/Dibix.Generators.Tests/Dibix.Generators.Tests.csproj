@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
   </PropertyGroup>
   
@@ -26,10 +26,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Dibix.Generators\Dibix.Generators.csproj" />
     <ProjectReference Include="..\..\src\Dibix.Sdk\Dibix.Sdk.csproj" />
     <ProjectReference Include="..\..\src\Dibix.Sdk.Abstractions\Dibix.Sdk.Abstractions.csproj" />
+    <ProjectReference Include="..\..\src\Dibix.Sdk.Generators\Dibix.Sdk.Generators.csproj" />
     <ProjectReference Include="..\..\src\Dibix.Testing\Dibix.Testing.csproj" />
+    <ProjectReference Include="..\..\src\Dibix.Testing.Generators\Dibix.Testing.Generators.csproj" />
   </ItemGroup>
 
 </Project>

@@ -15,15 +15,16 @@ steps:
     - Dibix
     - Dibix.Dapper
     - Dibix.Sdk.Abstractions
-    - Dibix.Generators
     - Dibix.Http.Client
     - Dibix.Http.Server
     - Dibix.Sdk.Sql
     - Dibix.Sdk.CodeAnalysis
+    - Dibix.Sdk.Generators
     - Dibix.Sdk.CodeGeneration
     - Dibix.Sdk
     - Dibix.Sdk.Cli
     - Dibix.Testing
+    - Dibix.Testing.Generators
     - Dibix.Worker.Abstractions
     configuration: ${{ parameters.configuration }}
     runtimeIdentifier: none
