@@ -163,7 +163,7 @@ namespace Dibix.Http.Server
                 action.RequiredClaims.AddRange(ParameterSources.Values
                                                                .OfType<HttpParameterPropertySource>()
                                                                .Where(x => x.SourceName == ClaimParameterSource.SourceName)
-                                                               .Select(x => x.PropertyPath));
+                                                               .Select(x => ClaimParameterSource.GetBuiltInClaimTypeOrDefault(x.PropertyPath)));
                 action.StatusCodeDetectionResponses.AddRange(StatusCodeDetectionResponses);
                 return action;
             }

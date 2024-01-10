@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Security.Claims;
 using System.Xml.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -669,5 +670,40 @@ en                ", clientLanguages.Dump());
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
         private static void Compile_EnvironmentSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, string machinename, int pid) { }
+
+        [TestMethod]
+        public void Compile_ClaimSource()
+        {
+            IHttpParameterResolutionMethod method = Compile(x =>
+            {
+                x.ResolveParameterFromSource("audiences", "CLAIM", "Audiences");
+            });
+            AssertGeneratedText(method.Source);
+            Assert.IsFalse(method.Parameters.Any());
+
+            Mock<IHttpRequestDescriptor> request = new Mock<IHttpRequestDescriptor>(MockBehavior.Strict);
+            IDictionary<string, object> arguments = new Dictionary<string, object>();
+            Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
+            Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
+
+            request.Setup(x => x.GetUser()).Returns(new ClaimsPrincipal(new ClaimsIdentity(new[]
+            {
+                new Claim("aud", "Audience1"),
+                new Claim("aud", "Audience2")
+            })));
+            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
+
+            method.PrepareParameters(request.Object, arguments, dependencyResolver.Object);
+
+            Assert.AreEqual(2, arguments.Count);
+            Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
+            StructuredType audiences = AssertIsType<StringSet>(arguments["audiences"]);
+            Assert.AreEqual(@"name NVARCHAR(MAX)
+------------------
+Audience1         
+Audience2         ", audiences.Dump());
+            dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
+        }
+        private static void Compile_ClaimSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, StringSet audiences) { }
     }
 }

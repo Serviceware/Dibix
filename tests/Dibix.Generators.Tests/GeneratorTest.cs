@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
 using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.CodeAnalysis;
 using Dibix.Sdk.Generators;
@@ -13,7 +13,6 @@ using Dibix.Testing.Generators;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
-using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
@@ -62,7 +61,7 @@ namespace Dibix.Generators.Tests
                 string actualCode = outputSyntaxTree.ToString();
                 this.AddResultFile(outputFile.Name, actualCode);
                 Assert.AreEqual(expectedFiles[i - 1], outputFile.Name);
-                string expectedCode = this.GetEmbeddedResourceContent(outputFile.Name).Replace("%GENERATORVERSION%", ThisAssembly.AssemblyFileVersion);
+                string expectedCode = this.GetEmbeddedResourceContent(outputFile.Name).Replace("%GENERATORVERSION%", GetGeneratorVersion(typeof(TestMethodGenerator)));
                 this.AssertEqual(expectedCode, actualCode, outputName: Path.GetFileNameWithoutExtension(outputFile.Name), extension: outputFile.Extension.TrimStart('.'));
             }
 
@@ -169,7 +168,7 @@ namespace Dibix.Generators.Tests
                 string actualCode = outputSyntaxTree.ToString();
                 AddResultFile(outputFile.Name, actualCode);
                 Assert.AreEqual(expectedFiles[i], outputFile.Name);
-                string expectedCode = GetEmbeddedResourceContent(outputFile.Name).Replace("%GENERATORVERSION%", ThisAssembly.AssemblyFileVersion);
+                string expectedCode = GetEmbeddedResourceContent(outputFile.Name).Replace("%GENERATORVERSION%", GetGeneratorVersion(typeof(EmbeddedResourceAccessorGenerator)));
                 AssertEqual(expectedCode, actualCode, outputName: Path.GetFileNameWithoutExtension(outputFile.Name), extension: outputFile.Extension.TrimStart('.'));
             }
 
@@ -251,7 +250,7 @@ namespace Dibix.Generators.Tests.Tasks
                 string actualCode = outputSyntaxTree.ToString();
                 this.AddResultFile(outputFile.Name, actualCode);
                 Assert.AreEqual(expectedFiles[i - 1], outputFile.Name);
-                string expectedCode = this.GetEmbeddedResourceContent(outputFile.Name).Replace("%GENERATORVERSION%", ThisAssembly.AssemblyFileVersion);
+                string expectedCode = this.GetEmbeddedResourceContent(outputFile.Name).Replace("%GENERATORVERSION%", GetGeneratorVersion(typeof(TaskGenerator)));
                 this.AssertEqual(expectedCode, actualCode, outputName: Path.GetFileNameWithoutExtension(outputFile.Name), extension: outputFile.Extension.TrimStart('.'));
             }
 
@@ -261,6 +260,13 @@ namespace Dibix.Generators.Tests.Tasks
             Assert.AreEqual(expectedFiles.Length, runResult!.GeneratedTrees.Length);
             Assert.AreEqual(expectedFiles.Length, runResult!.Results[0].GeneratedSources.Length);
             Assert.AreEqual(expectedFiles.Length + 1, syntaxTrees.Count);
+        }
+
+        private static string? GetGeneratorVersion(Type generatorType)
+        {
+            // We could use ThisAssembly.AssemblyFileVersion here, but during development, the tests might already use a newer version than the generator compilation.
+            // This happens, if a new git commit is created locally, but the generator has not been rebuilt incrementally, because it hasn't changed its source.
+            return FileVersionInfo.GetVersionInfo(generatorType.Assembly.Location).FileVersion;
         }
     }
 }

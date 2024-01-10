@@ -7,7 +7,7 @@ namespace Dibix.Generators
         public string Name { get; }
         public string? Arguments { get; }
 
-        public static Annotation GeneratedCode = new Annotation("global::System.CodeDom.Compiler.GeneratedCode", $"(\"{(ThisAssembly.AssemblyTitle)}\", \"{(ThisAssembly.AssemblyFileVersion)}\")");
+        public static Annotation GeneratedCode = new Annotation("global::System.CodeDom.Compiler.GeneratedCode", $"(\"{ThisAssembly.AssemblyTitle}\", \"{ThisAssembly.AssemblyFileVersion}\")");
         public static Annotation DebuggerNonUserCode = new Annotation("global::System.Diagnostics.DebuggerNonUserCode");
         public static Annotation ExcludeFromCodeCoverage = new Annotation("global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage");
         public static IEnumerable<Annotation> All
