@@ -371,7 +371,7 @@ namespace Dibix.Http.Server
             if (parameter.Converter != null)
             {
                 Expression value = HttpParameterResolverUtility.BuildReadableArgumentAccessorExpression(argumentsParameter, parameter.InternalParameterName);
-                value = CollectConverterStatement(parameter, value, actionParameter, dependencyResolverParameter);
+                value = CollectConverterStatement(parameter, value, action, requestParameter, dependencyResolverParameter, actionParameter);
                 CollectParameterAssignment(compilationContext, parameter.InternalParameterName, argumentsParameter, value);
             }
         }
@@ -479,7 +479,7 @@ namespace Dibix.Http.Server
             }
 
             if (generateConverterStatement) 
-                value = CollectConverterStatement(parameter, value, actionParameter, dependencyResolverParameter);
+                value = CollectConverterStatement(parameter, value, action, requestParameter, dependencyResolverParameter, actionParameter);
 
             // ResolveParameterFromNull
             if (parameter.SourceKind == HttpParameterSourceKind.ConstantValue && parameter.Value == null) 
@@ -606,13 +606,14 @@ Either create a mapping or make sure a property of the same name exists in the s
             return value;
         }
 
-        private static Expression CollectConverterStatement(HttpParameterInfo parameter, Expression value, Expression actionParameter, Expression dependencyResolverParameter)
+        private static Expression CollectConverterStatement(HttpParameterInfo parameter, Expression value, IHttpActionDescriptor action, Expression requestParameter, Expression dependencyResolverParameter, Expression actionParameter)
         {
             if (parameter.Converter == null)
                 return value;
 
             value = EnsureCorrectType(parameter.InternalParameterName, value, parameter.Converter.ExpectedInputType, actionParameter);
-            value = parameter.Converter.ConvertValue(value, dependencyResolverParameter);
+            HttpParameterConversionContext context = new HttpParameterConversionContext(action, requestParameter, dependencyResolverParameter, actionParameter);
+            value = parameter.Converter.ConvertValue(value, context);
             return value;
         }
 
@@ -1042,6 +1043,22 @@ Either create a mapping or make sure a property of the same name exists in the s
             public void ResolveUsingValue(Expression value) => this.Value = value;
 
             public void CollectSourceInstance() => this._sourceProvider.Resolve(this);
+        }
+
+        private sealed class HttpParameterConversionContext : IHttpParameterConversionContext
+        {
+            public IHttpActionDescriptor Action { get; }
+            public Expression RequestParameter { get; }
+            public Expression DependencyResolverParameter { get; }
+            public Expression ActionParameter { get; }
+
+            public HttpParameterConversionContext(IHttpActionDescriptor action, Expression requestParameter, Expression dependencyResolverParameter, Expression actionParameter)
+            {
+                Action = action;
+                RequestParameter = requestParameter;
+                DependencyResolverParameter = dependencyResolverParameter;
+                ActionParameter = actionParameter;
+            }
         }
 
         private sealed class HttpItemsParameterInfo

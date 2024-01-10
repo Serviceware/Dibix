@@ -159,7 +159,7 @@ namespace Dibix.Http.Server.Tests
         {
             public Type ExpectedInputType => typeof(string);
 
-            public Expression ConvertValue(Expression value, Expression dependencyResolverParameter) => Expression.Call(typeof(EncryptionHttpParameterConverter), nameof(Convert), Type.EmptyTypes, value);
+            public Expression ConvertValue(Expression value, IHttpParameterConversionContext context) => Expression.Call(typeof(EncryptionHttpParameterConverter), nameof(Convert), Type.EmptyTypes, value);
 
             private static string Convert(string input) => $"ENCRYPTED({input})";
         }

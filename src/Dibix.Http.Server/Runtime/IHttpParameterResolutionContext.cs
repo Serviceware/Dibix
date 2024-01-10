@@ -9,6 +9,7 @@ namespace Dibix.Http.Server
         Expression RequestParameter { get; }
         Expression ArgumentsParameter { get; }
         Expression DependencyResolverParameter { get; }
+        Expression ActionParameter { get; }
         string PropertyPath { get; }
 
         void ResolveUsingInstanceProperty(Type instanceType, Expression instanceValue, bool ensureNullPropagation);
