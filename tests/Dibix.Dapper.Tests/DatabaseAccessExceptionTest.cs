@@ -17,7 +17,7 @@ namespace Dibix.Dapper.Tests
             const string commandText = "THROW 50000, N'Oops', 1";
             DatabaseAccessException exception = await AssertThrows<DatabaseAccessException>(() => accessor.ExecuteAsync(commandText, CommandType.Text, ParametersVisitor.Empty, default)).ConfigureAwait(false);
             BinaryFormatter binaryFormatter = new BinaryFormatter();
-            using Stream stream = new MemoryStream();
+            await using Stream stream = new MemoryStream();
             binaryFormatter.Serialize(stream, exception);
         });
     }

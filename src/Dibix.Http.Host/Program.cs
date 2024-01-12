@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Dibix.Http.Host
 {
@@ -42,7 +43,9 @@ namespace Dibix.Http.Host
                     .AddSingleton<IAuthorizationHandlerContextFactory, EndpointAuthorizationHandlerContextFactory>()
                     .AddScoped<IParameterDependencyResolver, ParameterDependencyResolver>()
                     .AddScoped<IHttpActionDelegator, HttpActionDelegator>()
-                    .AddTransient<IClaimsTransformation, ComposableClaimsTransformation>();
+                    .AddTransient<IClaimsTransformation, ComposableClaimsTransformation>()
+                    .AddScoped<IJwtAudienceProvider, EndpointJwtAudienceProvider>()
+                    .AddScoped<EndpointMetadataContext>();
 
             services.AddEventLogOptions();
 
@@ -57,10 +60,18 @@ namespace Dibix.Http.Host
                     .MapFrom<AuthenticationOptions>(AuthenticationOptions.ConfigurationSectionName, (from, to) =>
                     {
                         to.Authority = from.Authority;
-                        to.TokenValidationParameters.ValidAudience = from.Audience;
+                        to.Audience = from.Audience;
                         to.RequireHttpsMetadata = !isDevelopment || from.Authority?.StartsWith("http:", StringComparison.OrdinalIgnoreCase) is null or false;
                         to.TokenValidationParameters.ValidateAudience = from.ValidateAudience;
                     });
+
+            // PoC: Set audience based on request
+            /*
+            services.AddScoped<IOptionsMonitor<JwtBearerOptions>, OptionsMonitor<JwtBearerOptions>>()
+                    .AddScoped<IOptionsMonitorCache<JwtBearerOptions>, OptionsCache<JwtBearerOptions>>()
+                    .AddSingleton<IPostConfigureOptions<JwtBearerOptions>, ScopedJwtBearerPostConfigureOptions>()
+                    .AddScoped<IOptionsFactory<JwtBearerOptions>, ScopedJwtBearerOptionsFactory>();
+            */
 
             services.AddLogging(x => x.AddSimpleConsole(y => y.TimestampFormat = "\x1B[1'm'\x1B[37'm'[yyyy-MM-dd HH:mm:ss.fff\x1B[39'm'\x1B[22'm'] "));
 
@@ -96,6 +107,7 @@ namespace Dibix.Http.Host
 
             app.UseRouting();
             app.UseMiddleware<DatabaseScopeMiddleware>();
+            app.UseMiddleware<EndpointMetadataMiddleware>();
             app.UseCors();
             app.UseAuthentication();
             app.UseAuthorization();

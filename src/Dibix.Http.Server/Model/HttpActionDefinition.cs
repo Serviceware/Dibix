@@ -20,6 +20,7 @@ namespace Dibix.Http.Server
         public ICollection<string> RequiredClaims { get; } = new Collection<string>();
         public IDictionary<int, HttpErrorResponse> StatusCodeDetectionResponses { get; }
         public Delegate Delegate { get; set; }
+        public string[] ValidAudiences { get; set; }
 
         internal HttpActionDefinition()
         {
