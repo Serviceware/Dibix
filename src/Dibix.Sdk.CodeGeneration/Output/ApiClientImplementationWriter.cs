@@ -152,7 +152,12 @@ namespace Dibix.Sdk.CodeGeneration
 
             bool oneOf = action.SecuritySchemes.Operator == SecuritySchemeOperator.Or && action.SecuritySchemes.Requirements.Count > 1;
             bool multipleOneOf = false;
-            foreach (SecuritySchemeRequirement securitySchemeRequirement in action.SecuritySchemes.Requirements.Where(x => x.Scheme != SecuritySchemes.Anonymous))
+            ICollection<SecuritySchemeRequirement> securitySchemeRequirements = action.SecuritySchemes
+                                                                                      .Requirements
+                                                                                      .Where(x => x.Scheme != SecuritySchemes.Anonymous)
+                                                                                      .ToArray();
+
+            foreach (SecuritySchemeRequirement securitySchemeRequirement in securitySchemeRequirements)
             {
                 string securitySchemeName = securitySchemeRequirement.Scheme.Name;
                 string getAuthorizationValueCall = $"_httpAuthorizationProvider.GetValue(\"{securitySchemeName}\")";
@@ -173,8 +178,16 @@ namespace Dibix.Sdk.CodeGeneration
                 (string authorizationHeaderName, string authorizationHeaderValue) = ResolveSecuritySchemeHeaderValues(securitySchemeName, getAuthorizationValueCall, securityScheme.Kind);
                 writer.WriteLine($"requestMessage.{nameof(HttpRequestMessage.Headers)}.{nameof(HttpRequestMessage.Headers.Add)}(\"{authorizationHeaderName}\", {authorizationHeaderValue});");
 
-                if (oneOf)
+                if (oneOf) 
                     writer.PopIndent();
+            }
+
+            if (oneOf && action.SecuritySchemes.Requirements.All(x => x.Scheme != SecuritySchemes.Anonymous))
+            {
+                writer.WriteLine("else")
+                      .PushIndent()
+                      .WriteLine($"throw new InvalidOperationException(\"None of the security scheme requirements were met:{String.Join("", securitySchemeRequirements.Select(x => $"{Environment.NewLine.Replace("\n", "\\n").Replace("\r", "\\r")}- {x.Scheme.Name} [{x.Scheme.Kind}]"))}\");")
+                      .PopIndent();
             }
 
             foreach (ActionParameter parameter in distinctParameters.Where(x => x.ParameterLocation == ActionParameterLocation.Header))

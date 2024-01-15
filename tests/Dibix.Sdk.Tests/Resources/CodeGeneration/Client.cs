@@ -176,6 +176,8 @@ namespace Dibix.Sdk.Tests.Client
                     requestMessage.Headers.Add("DBXNS-ClientId", _httpAuthorizationProvider.GetValue("DBXNS-ClientId"));
                 else if (_httpAuthorizationProvider.GetValue("DBXNS-SIT") != null)
                     requestMessage.Headers.Add("DBXNS-SIT", _httpAuthorizationProvider.GetValue("DBXNS-SIT"));
+                else
+                    throw new InvalidOperationException("None of the security scheme requirements were met:\r\n- DBXNS-ClientId [ApiKey]\r\n- DBXNS-SIT [ApiKey]");
                 requestMessage.Content = new ObjectContent<Dibix.Sdk.Tests.DomainModel.AnotherInputContract>(body, Formatter);
                 HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
                 return responseMessage;
