@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
     <OutputType>Exe</OutputType>
 
     <!-- Since this is a tool package, disable some package generation defaults -->
@@ -55,6 +55,7 @@
       <_ToolDependency Include="Dibix.Sdk.Sql.dll" />
       <_ToolDependency Include="Microsoft.Build.Framework.dll" />
       <_ToolDependency Include="Microsoft.Build.Utilities.Core.dll" />
+      <_ToolDependency Include="Microsoft.Data.SqlClient.dll" />
       <_ToolDependency Include="Microsoft.Data.Tools.Components.dll" />
       <_ToolDependency Include="Microsoft.Data.Tools.Contracts.dll" />
       <_ToolDependency Include="Microsoft.Data.Tools.Schema.Sql.dll" />
@@ -69,6 +70,11 @@
       <_ToolDependency Include="Newtonsoft.Json.dll" />
       <_ToolDependency Include="Newtonsoft.Json.Schema.dll" />
       <_ToolDependency Include="System.IO.Packaging.dll" />
+      <_ToolDependency Include="System.Memory.dll" />
+      <_ToolDependency Include="System.Numerics.Vectors.dll" />
+      <_ToolDependency Include="System.Resources.Extensions.dll" />
+      <_ToolDependency Include="System.Runtime.CompilerServices.Unsafe.dll" />
+      <_ToolDependency Include="System.ValueTuple.dll" />
     </ItemGroup>
 
     <!-- Merge Dibix SDK + CLI into a single EXE -->

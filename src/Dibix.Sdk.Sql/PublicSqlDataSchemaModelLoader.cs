@@ -8,7 +8,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Dibix.Sdk.Abstractions;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Data.Tools.Schema.Tasks.Sql;
 using Microsoft.Data.Tools.Schema.Utilities.Sql.Common;
 using Microsoft.SqlServer.Dac.Model;
@@ -115,21 +114,22 @@ namespace Dibix.Sdk.Sql
             // Improve logging
             // SqlExceptionUtils._disableFiltering = true;
             // SqlExceptionUtils._initialized = true;
-            Type sqlExceptionUtilsType = UtilitiesAssembly.GetType("Microsoft.Data.Tools.Schema.Utilities.Sql.Common.Exceptions.SqlExceptionUtils", true);
+            Type sqlExceptionUtilsType = UtilitiesAssembly.GetType("Microsoft.Data.Tools.Schema.Utilities.Sql.Common.Exceptions.SqlExceptionUtils", throwOnError: true);
             FieldInfo disableFilteringField = TryGetStaticField(sqlExceptionUtilsType, "_disableFiltering");
             FieldInfo initializedField = TryGetStaticField(sqlExceptionUtilsType, "_initialized");
             Expression disableFilteringAssign = Expression.Assign(Expression.Field(null, disableFilteringField), Expression.Constant(true));
             Expression initializedAssign = Expression.Assign(Expression.Field(null, initializedField), Expression.Constant(true));
 
             // TaskLoggingHelper loggingHelper = new TaskLoggingHelper(task);
-            Type loggingHelperType = typeof(TaskLoggingHelper);
+            Assembly buildUtilitiesAssembly = Assembly.Load("Microsoft.Build.Utilities.v4.0, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
+            Type loggingHelperType = buildUtilitiesAssembly.GetType("Microsoft.Build.Utilities.TaskLoggingHelper", throwOnError: true);
             ParameterExpression loggingHelperVariable = Expression.Variable(loggingHelperType, "loggingHelper");
             ConstructorInfo loggingHelperCtor = loggingHelperType.GetConstructorSafe(typeof(ITask));
             Expression loggingHelperValue = Expression.New(loggingHelperCtor, taskParameter);
             Expression loggingHelperAssign = Expression.Assign(loggingHelperVariable, loggingHelperValue);
 
             // TaskHostLoader hostLoader = new TaskHostLoader();
-            Type hostLoaderType = TasksAssembly.GetType("Microsoft.Data.Tools.Schema.Tasks.Sql.TaskHostLoader", true);
+            Type hostLoaderType = TasksAssembly.GetType("Microsoft.Data.Tools.Schema.Tasks.Sql.TaskHostLoader", throwOnError: true);
             ParameterExpression hostLoaderVariable = Expression.Variable(hostLoaderType, "hostLoader");
             Expression hostLoaderValue = Expression.New(hostLoaderType);
             Expression hostLoaderAssign = Expression.Assign(hostLoaderVariable, hostLoaderValue);
@@ -160,7 +160,7 @@ namespace Dibix.Sdk.Sql
             // }
             Expression errorManagerProperty = Expression.Property(hostLoaderVariable, "LoadedErrorManager");
             Expression errorsCall = Expression.Call(errorManagerProperty, "GetAllErrors", Type.EmptyTypes);
-            Type dataSchemaErrorType = DacReflectionUtility.SchemaSqlAssembly.GetType("Microsoft.Data.Tools.Schema.DataSchemaError", true);
+            Type dataSchemaErrorType = DacReflectionUtility.SchemaSqlAssembly.GetType("Microsoft.Data.Tools.Schema.DataSchemaError", throwOnError: true);
             ExpressionUtility.Foreach
             (
                 name: "error"
@@ -174,7 +174,7 @@ namespace Dibix.Sdk.Sql
             // new TSqlModel(hostLoader.LoadedTaskHost.Model);
             Expression loadedTaskHostProperty = Expression.Property(hostLoaderVariable, "LoadedTaskHost");
             MemberExpression modelProperty = Expression.Property(loadedTaskHostProperty, "Model");
-            Type dataSchemaModelType = DacReflectionUtility.SchemaSqlAssembly.GetType("Microsoft.Data.Tools.Schema.SchemaModel.DataSchemaModel", true);
+            Type dataSchemaModelType = DacReflectionUtility.SchemaSqlAssembly.GetType("Microsoft.Data.Tools.Schema.SchemaModel.DataSchemaModel", throwOnError: true);
             ConstructorInfo modelCtor = typeof(TSqlModel).GetConstructorSafe(BindingFlags.NonPublic | BindingFlags.Instance, dataSchemaModelType);
             Expression modelValue = Expression.New(modelCtor, modelProperty);
 

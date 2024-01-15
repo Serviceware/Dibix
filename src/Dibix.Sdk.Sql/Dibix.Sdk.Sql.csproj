@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
@@ -20,6 +20,10 @@
   <ItemGroup>
     <Reference Include="Microsoft.Data.Tools.Schema.Tasks.Sql" HintPath="$(RootDirectory)lib\Microsoft.Data.Tools.Schema.Tasks.Sql.dll" />
     <Reference Include="Microsoft.Data.Tools.Schema.Utilities.Sql" HintPath="$(RootDirectory)lib\Microsoft.Data.Tools.Schema.Utilities.Sql.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.ComponentModel.Composition" />
   </ItemGroup>
 
   <ItemGroup>
