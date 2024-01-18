@@ -61,7 +61,6 @@ else
                          --p:PublishReadyToRun=$publishReadyToRun
                          --p:PublishSingleFile=$publishSingleFile
                          --p:IncludeNativeLibrariesForSelfExtract=True
-                         --p:IncludeNativeLibrariesForSelfExtract=True
                          $sourcePath"
 }
 

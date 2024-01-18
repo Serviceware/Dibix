@@ -13,7 +13,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
-using Microsoft.Extensions.Options;
 
 namespace Dibix.Http.Host
 {
@@ -22,7 +21,6 @@ namespace Dibix.Http.Host
         private static async Task Main(string[] args)
         {
             WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
-            builder.Configuration.AddJsonFile($"appsettings.{Environment.MachineName}.json", optional: true, reloadOnChange: true);
             bool isDevelopment = builder.Environment.IsDevelopment();
 
             ILoggerFactory loggerFactory = LoggerFactory.Create(x => x.AddConfiguration(builder.Configuration));

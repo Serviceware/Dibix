@@ -16,7 +16,6 @@ namespace Dibix.Worker.Host
         private static async Task Main(string[] args)
         {
             HostApplicationBuilder builder = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder(args);
-            builder.Configuration.AddJsonFile($"appsettings.{Environment.MachineName}.json", optional: true, reloadOnChange: true);
             IServiceCollection services = builder.Services;
 
             services.AddSingleton<IDatabaseConnectionFactory, DefaultDatabaseConnectionFactory>()
