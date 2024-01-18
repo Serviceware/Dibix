@@ -531,7 +531,7 @@ $(_SqlReferencePath)" />
   <ItemGroup>
     <PackageReference Include="$(_DibixName)" Version="$(DibixSdkVersion)" ExcludeAssets="runtime" />
     <PackageReference Include="$(_DibixHttpServerName)" Version="$(DibixSdkVersion)" ExcludeAssets="runtime" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" ExcludeAssets="runtime" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" ExcludeAssets="runtime" />
   </ItemGroup>
 
 </Project>
