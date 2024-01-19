@@ -5,9 +5,13 @@ using System.Threading.Tasks;
 
 namespace Dibix.Testing
 {
-    internal static class TaskExtensions
+    public static class TaskUtility
     {
-        public static async Task<TResult> Retry<TResult>(this Func<CancellationToken, Task<TResult>> taskMethod, Func<TResult, bool> condition, int millisecondsDelay, int millisecondsTimeout, CancellationToken cancellationToken = default)
+        public static Task Retry(this Func<CancellationToken, Task<bool>> retryMethod, CancellationToken cancellationToken = default) => Retry(retryMethod, x => x, cancellationToken);
+        public static Task Retry(this Func<CancellationToken, Task<bool>> retryMethod, TimeSpan timeout, CancellationToken cancellationToken = default) => Retry(retryMethod, x => x, timeout, cancellationToken);
+        public static Task<TResult> Retry<TResult>(this Func<CancellationToken, Task<TResult>> retryMethod, Func<TResult, bool> condition, CancellationToken cancellationToken = default) => Retry(retryMethod, condition, TimeSpan.FromMinutes(30), cancellationToken);
+        public static Task<TResult> Retry<TResult>(this Func<CancellationToken, Task<TResult>> retryMethod, Func<TResult, bool> condition, TimeSpan timeout, CancellationToken cancellationToken = default) => Retry(retryMethod, condition, (int)TimeSpan.FromSeconds(1).TotalMilliseconds, (int)timeout.TotalMilliseconds, cancellationToken: cancellationToken);
+        private static async Task<TResult> Retry<TResult>(this Func<CancellationToken, Task<TResult>> taskMethod, Func<TResult, bool> condition, int millisecondsDelay, int millisecondsTimeout, CancellationToken cancellationToken = default)
         {
             using (CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken))
             {

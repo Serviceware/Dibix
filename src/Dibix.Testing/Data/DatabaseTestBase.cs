@@ -40,7 +40,7 @@ namespace Dibix.Testing.Data
 
         protected async Task<TResult> ExecuteDatabaseAction<TResult>(Func<IDatabaseAccessor, Task<TResult>> action)
         {
-            using (IDatabaseAccessor accessor = this._databaseAccessorFactoryAccessor.Value.Create())
+            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
             {
                 return await action(accessor).ConfigureAwait(false);
             }
@@ -48,7 +48,7 @@ namespace Dibix.Testing.Data
 
         protected async Task ExecuteStoredProcedure(string storedProcedureName, Action<IParameterBuilder> parameters = null, int commandTimeout = 30)
         {
-            using (IDatabaseAccessor accessor = this._databaseAccessorFactoryAccessor.Value.Create())
+            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
             {
                 IParameterBuilder parameterBuilder = accessor.Parameters();
                 parameters?.Invoke(parameterBuilder);

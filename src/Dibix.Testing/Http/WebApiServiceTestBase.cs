@@ -12,7 +12,13 @@ namespace Dibix.Testing.Http
         #region Protected Methods
         protected virtual Task ExecuteTest(Func<HttpTestContext<TService>, Task> testFlow) => base.ExecuteTest(testFlow, CreateTestContext);
 
-        protected Task ExecuteTest<TContent>(Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector) => this.ExecuteTest(x => this.InvokeApi(x.Service, methodSelector));
+        protected Task ExecuteTest<TContent>(Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector) => ExecuteTest(x => InvokeApiAndAssertResponse(x.Service, methodSelector));
+
+        protected Task InvokeApiAndAssertResponse<TContent>(TService service, Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector)
+        {
+            string expectedText = ResolveExpectedTextFromEmbeddedResource();
+            return InvokeApi(service, methodSelector, expectedText);
+        }
         #endregion
 
         #region Private Methods
@@ -20,12 +26,6 @@ namespace Dibix.Testing.Http
         {
             TService service = HttpServiceFactory.CreateServiceInstance<TService>(httpClientFactory, httpClientOptions, authorizationProvider);
             return new HttpTestContext<TService>(service, httpClientFactory, httpClientOptions, authorizationProvider);
-        }
-
-        private Task<TContent> InvokeApi<TContent>(TService service, Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector)
-        {
-            string expectedText = this.ResolveExpectedTextFromEmbeddedResource();
-            return this.InvokeApi(service, methodSelector, expectedText);
         }
 
         private string ResolveExpectedTextFromEmbeddedResource()
