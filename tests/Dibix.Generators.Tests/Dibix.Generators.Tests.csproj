@@ -3,6 +3,9 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
+
+    <!-- SDK references are .NET 4.8 -->
+    <NoWarn>$(NoWarn);NU1702</NoWarn>
   </PropertyGroup>
   
   <ItemGroup>
