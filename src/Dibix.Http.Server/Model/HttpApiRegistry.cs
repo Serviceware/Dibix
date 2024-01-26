@@ -23,8 +23,7 @@ namespace Dibix.Http.Server
         #endregion
 
         #region Factory Methods
-        public static IHttpApiRegistry Discover(string directory) => Discover(directory, Enumerable.Empty<Assembly>());
-        public static IHttpApiRegistry Discover(string directory, IEnumerable<Assembly> additionalAssemblies) => Discover(CollectDiscoveryStrategies(directory, additionalAssemblies));
+        public static IHttpApiRegistry Discover(IEnumerable<Assembly> additionalAssemblies) => Discover(CollectDiscoveryStrategies(additionalAssemblies));
         public static IHttpApiRegistry Discover(IHttpApiDiscoveryStrategy strategy) => Discover(EnumerableExtensions.Create(strategy));
         #endregion
 
@@ -49,9 +48,8 @@ namespace Dibix.Http.Server
             return new HttpApiRegistry(apis);
         }
 
-        private static IEnumerable<IHttpApiDiscoveryStrategy> CollectDiscoveryStrategies(string directory, IEnumerable<Assembly> additionalAssemblies)
+        private static IEnumerable<IHttpApiDiscoveryStrategy> CollectDiscoveryStrategies(IEnumerable<Assembly> additionalAssemblies)
         {
-            yield return new DirectoryArtifactPackageHttpApiDiscoveryStrategy(directory);
             yield return new AssemblyHttpApiDiscoveryStrategy(additionalAssemblies);
         }
 
