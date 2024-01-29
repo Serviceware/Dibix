@@ -30,42 +30,52 @@ namespace Dibix.Dapper
             DecoratedTypeMap.Adapt<T>();
             return _reader.Read<T>();
         }
+        protected override IEnumerable<T> ReadMany<T>(bool buffered)
+        {
+            DecoratedTypeMap.Adapt<T>();
+            return _reader.Read<T>(buffered);
+        }
 
         protected override Task<IEnumerable<T>> ReadManyAsync<T>()
         {
             DecoratedTypeMap.Adapt<T>();
             return _reader.ReadAsync<T>();
         }
+        protected override Task<IEnumerable<T>> ReadManyAsync<T>(bool buffered)
+        {
+            DecoratedTypeMap.Adapt<T>();
+            return _reader.ReadAsync<T>(buffered);
+        }
 
-        protected override IEnumerable<TReturn> ReadMany<TReturn>(Type[] types, Func<object[], TReturn> map, string splitOn)
+        protected override IEnumerable<TReturn> ReadMany<TReturn>(Type[] types, Func<object[], TReturn> map, string splitOn, bool buffered)
         {
             DecoratedTypeMap.Adapt(types);
-            return _reader.Read(types, map, splitOn);
+            return _reader.Read(types, map, splitOn, buffered);
         }
 
-        protected override T ReadSingle<T>()
-        {
-            DecoratedTypeMap.Adapt<T>();
-            return _reader.ReadSingle<T>();
-        }
+        //protected override T ReadSingle<T>()
+        //{
+        //    DecoratedTypeMap.Adapt<T>();
+        //    return _reader.ReadSingle<T>();
+        //}
 
-        protected override Task<T> ReadSingleAsync<T>()
-        {
-            DecoratedTypeMap.Adapt<T>();
-            return _reader.ReadSingleAsync<T>();
-        }
+        //protected override Task<T> ReadSingleAsync<T>()
+        //{
+        //    DecoratedTypeMap.Adapt<T>();
+        //    return _reader.ReadSingleAsync<T>();
+        //}
 
-        protected override T ReadSingleOrDefault<T>()
-        {
-            DecoratedTypeMap.Adapt<T>();
-            return _reader.ReadSingleOrDefault<T>();
-        }
+        //protected override T ReadSingleOrDefault<T>()
+        //{
+        //    DecoratedTypeMap.Adapt<T>();
+        //    return _reader.ReadSingleOrDefault<T>();
+        //}
 
-        protected override Task<T> ReadSingleOrDefaultAsync<T>()
-        {
-            DecoratedTypeMap.Adapt<T>();
-            return _reader.ReadSingleOrDefaultAsync<T>();
-        }
+        //protected override Task<T> ReadSingleOrDefaultAsync<T>()
+        //{
+        //    DecoratedTypeMap.Adapt<T>();
+        //    return _reader.ReadSingleOrDefaultAsync<T>();
+        //}
         #endregion
 
         #region IDisposable Members

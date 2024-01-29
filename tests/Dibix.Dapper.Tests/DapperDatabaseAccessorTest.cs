@@ -46,6 +46,45 @@ CommandText: <Inline>", exception.Message);
         });
 
         [TestMethod]
+        public Task ReadSingleAsync_WithMultipleRows_ThrowsException() => base.ExecuteTest(async accessor =>
+        {
+            const string commandText = "SELECT 1 SELECT 1 UNION ALL SELECT 2";
+            using IMultipleResultReader reader = await accessor.QueryMultipleAsync(commandText, CommandType.Text, ParametersVisitor.Empty, default).ConfigureAwait(false);
+            _ = await reader.ReadSingleAsync<int>().ConfigureAwait(false);
+            DatabaseAccessException exception = await AssertThrows<DatabaseAccessException>(async () => await reader.ReadSingleAsync<int>().ConfigureAwait(false)).ConfigureAwait(false);
+            Assert.AreEqual(DatabaseAccessErrorCode.SequenceContainsMoreThanOneElement, exception.AdditionalErrorCode);
+            Assert.AreEqual(@"Sequence contains more than one element
+CommandType: Text
+CommandText: <Inline>", exception.Message);
+        });
+
+        [TestMethod]
+        public Task ReadSingle_WithNoRows_ThrowsException() => base.ExecuteTest(accessor =>
+        {
+            const string commandText = "SELECT 1 SELECT 1 WHERE 1 = 2";
+            using IMultipleResultReader reader = accessor.QueryMultiple(commandText, CommandType.Text, ParametersVisitor.Empty);
+            _ = reader.ReadSingle<int>();
+            DatabaseAccessException exception = AssertThrows<DatabaseAccessException>(() => reader.ReadSingle<int>());
+            Assert.AreEqual(DatabaseAccessErrorCode.SequenceContainsNoElements, exception.AdditionalErrorCode);
+            Assert.AreEqual(@"Sequence contains no elements
+CommandType: Text
+CommandText: <Inline>", exception.Message);
+        });
+
+        [TestMethod]
+        public Task ReadSingleOrDefaultAsync_WithMultipleRows_ThrowsException() => base.ExecuteTest(async accessor =>
+        {
+            const string commandText = "SELECT 1 SELECT 1 UNION ALL SELECT 2";
+            using IMultipleResultReader reader = accessor.QueryMultiple(commandText, CommandType.Text, ParametersVisitor.Empty);
+            _ = reader.ReadSingle<int>();
+            DatabaseAccessException exception = await AssertThrows<DatabaseAccessException>(() => reader.ReadSingleOrDefaultAsync<int>()).ConfigureAwait(false);
+            Assert.AreEqual(DatabaseAccessErrorCode.SequenceContainsMoreThanOneElement, exception.AdditionalErrorCode);
+            Assert.AreEqual(@"Sequence contains more than one element
+CommandType: Text
+CommandText: <Inline>", exception.Message);
+        });
+
+        [TestMethod]
         public Task QuerySingleOrDefault_WithNoRows_ReturnsDefault() => base.ExecuteTest(accessor =>
         {
             const string commandText = "SELECT 1 WHERE 1 = 2";

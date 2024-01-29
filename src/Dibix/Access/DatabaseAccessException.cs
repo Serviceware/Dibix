@@ -55,6 +55,11 @@ Debug statement:
         {
             return Create(message, commandType, commandText, parameters, innerException: null, additionalErrorCode, isSqlClient);
         }
+        internal static DatabaseAccessException Create(DatabaseAccessErrorCode errorCode, string commandText, CommandType commandType, ParametersVisitor parameters, bool isSqlClient, params object[] args)
+        {
+            string message = String.Format(CultureInfo.InvariantCulture, GetExceptionMessageTemplate(errorCode), args);
+            return Create(message, commandType, commandText, parameters, errorCode, isSqlClient);
+        }
         private static DatabaseAccessException Create(string message, CommandType commandType, string commandText, ParametersVisitor parameters, Exception innerException, DatabaseAccessErrorCode additionalErrorCode, bool isSqlClient)
         {
             string newMessage = @$"{message}
@@ -67,6 +72,14 @@ CommandText: {(commandType == CommandType.StoredProcedure ? commandText : "<Inli
 
             return new DatabaseAccessException(newMessage, commandType, commandText, parameters, parameterDump, sqlDebugStatement, additionalErrorCode, innerException);
         }
+
+        private static string GetExceptionMessageTemplate(DatabaseAccessErrorCode errorCode) => errorCode switch
+        {
+            DatabaseAccessErrorCode.SequenceContainsNoElements => "Sequence contains no elements",
+            DatabaseAccessErrorCode.SequenceContainsMoreThanOneElement => "Sequence contains more than one element",
+            DatabaseAccessErrorCode.ParameterSizeExceeded => "Length of parameter '{0}' is '{1}', which exceeds the supported size '{2}'",
+            _ => throw new ArgumentOutOfRangeException(nameof(errorCode), errorCode, null)
+        };
 
         private static string CollectParameterDump(IEnumerable<ParameterDescriptor> parameters)
         {

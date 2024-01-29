@@ -114,40 +114,17 @@ namespace Dibix
         private T QuerySingle<T>(string commandText, CommandType commandType, ParametersVisitor parameters, bool defaultIfEmpty)
         {
             IEnumerable<T> result = QueryMany<T>(commandText, commandType, parameters, buffered: false);
-            return QuerySingle(result, commandText, commandType, parameters, defaultIfEmpty);
+            return result.Single(commandText, commandType, parameters, defaultIfEmpty, _isSqlClient);
         }
         private T QuerySingle<T>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, string splitOn, bool defaultIfEmpty) where T : new()
         {
             IEnumerable<T> result = QueryManyCore<T>(commandText, commandType, parameters, types, splitOn, buffered: false);
-            return QuerySingle(result, commandText, commandType, parameters, defaultIfEmpty);
+            return result.Single(commandText, commandType, parameters, defaultIfEmpty, _isSqlClient);
         }
         private async Task<T> QuerySingleAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, bool defaultIfEmpty, CancellationToken cancellationToken)
         {
             IEnumerable<T> result = await QueryManyAsync<T>(commandText, commandType, parameters, buffered: false, cancellationToken).ConfigureAwait(false);
-            return QuerySingle(result, commandText, commandType, parameters, defaultIfEmpty);
-        }
-        private T QuerySingle<T>(IEnumerable<T> result, string commandText, CommandType commandType, ParametersVisitor parameters, bool defaultIfEmpty)
-        {
-            using IEnumerator<T> enumerator = result.GetEnumerator();
-
-            T current;
-
-            if (enumerator.MoveNext())
-            {
-                current = enumerator.Current;
-                if (enumerator.MoveNext())
-                    throw CreateException(DatabaseAccessErrorCode.SequenceContainsMoreThanOneElement, commandText, commandType, parameters);
-            }
-            else if (defaultIfEmpty)
-            {
-                return default;
-            }
-            else
-            {
-                throw CreateException(DatabaseAccessErrorCode.SequenceContainsNoElements, commandText, commandType, parameters);
-            }
-
-            return current;
+            return result.Single(commandText, commandType, parameters, defaultIfEmpty, _isSqlClient);
         }
 
         private T Execute<T>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<T> action)
@@ -193,7 +170,7 @@ namespace Dibix
                 case DbType.StringFixedLength:
                 case DbType.AnsiStringFixedLength:
                     if (value is string str && str.Length > size)
-                        throw CreateException(DatabaseAccessErrorCode.ParameterSizeExceeded, $"Length of parameter '{name}' is '{str.Length}', which exceeds the supported size '{size}'", commandText, commandType, parameters);
+                        throw DatabaseAccessException.Create(DatabaseAccessErrorCode.ParameterSizeExceeded, commandText, commandType, parameters, _isSqlClient, name, str.Length, size);
 
                     return;
 
@@ -201,9 +178,6 @@ namespace Dibix
                     return;
             }
         }
-
-        private Exception CreateException(DatabaseAccessErrorCode errorCode, string commandText, CommandType commandType, ParametersVisitor parameters) => CreateException(errorCode, CollectExceptionMessage(errorCode), commandText, commandType, parameters);
-        private Exception CreateException(DatabaseAccessErrorCode errorCode, string message, string commandText, CommandType commandType, ParametersVisitor parameters) => DatabaseAccessException.Create(message, commandType, commandText, parameters, errorCode, _isSqlClient);
 
         private void OnInfoMessage(object sender, SqlInfoMessageEventArgs e)
         {
@@ -215,13 +189,6 @@ namespace Dibix
         {
             MultiMapUtility.ValidateParameters(types, splitOn);
         }
-
-        private static string CollectExceptionMessage(DatabaseAccessErrorCode errorCode) => errorCode switch
-        {
-            DatabaseAccessErrorCode.SequenceContainsNoElements => "Sequence contains no elements",
-            DatabaseAccessErrorCode.SequenceContainsMoreThanOneElement => "Sequence contains more than one element",
-            _ => throw new ArgumentOutOfRangeException(nameof(errorCode), errorCode, null)
-        };
         #endregion
 
         #region IDisposable Members

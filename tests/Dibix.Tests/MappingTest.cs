@@ -147,8 +147,8 @@ namespace Dibix.Tests
                     .Returns(multipleResultReader.Object);
             multipleResultReader.Setup(x => x.Dispose());
             multipleResultReader.Protected()
-                                .Setup<IEnumerable<CharacterInfo>>("ReadMany", new[] { typeof(CharacterInfo) }, exactParameterMatch: true, new[] { typeof(Name), typeof(Name) }, ItExpr.IsAny<Func<object[], CharacterInfo>>(), "x")
-                                .Returns<Type[], Func<object[], CharacterInfo>, string>((_, map, _) => rows.Select(map));
+                                .Setup<IEnumerable<CharacterInfo>>("ReadMany", new[] { typeof(CharacterInfo) }, exactParameterMatch: true, new[] { typeof(Name), typeof(Name) }, ItExpr.IsAny<Func<object[], CharacterInfo>>(), "x", true)
+                                .Returns<Type[], Func<object[], CharacterInfo>, string, bool>((_, map, _, _) => rows.Select(map));
 
 
             using (IMultipleResultReader reader = ((IDatabaseAccessor)accessor.Object).QueryMultiple("commandText", CommandType.Text, ParametersVisitor.Empty))

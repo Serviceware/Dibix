@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Dibix
 {
@@ -15,9 +16,12 @@ namespace Dibix
             Register<EntityDescriptorPostProcessor>();
             Register<RecursiveMapper>();
         }
-
-        public static IEnumerable<TReturn> PostProcess<TReturn>(IEnumerable<TReturn> source, params IPostProcessor[] prePostProcessors) => PostProcess(source, typeof(TReturn), prePostProcessors);
-        public static IEnumerable<object> PostProcess(IEnumerable<object> source, Type type, params IPostProcessor[] prePostProcessors) => PostProcess<object>(source, type, prePostProcessors);
+        
+        public static IEnumerable<TReturn> PostProcess<TReturn>(this IEnumerable<TReturn> source, params IPostProcessor[] prePostProcessors) => PostProcess(source, typeof(TReturn), prePostProcessors);
+        public static Task<IEnumerable<TReturn>> PostProcess<TReturn>(this Task<IEnumerable<TReturn>> source) => source.ContinueWith(x => PostProcess(x.Result, typeof(TReturn), Enumerable.Empty<IPostProcessor>()));
+        public static TReturn PostProcess<TReturn>(this TReturn source) => Equals(source, default(TReturn)) ? default : PostProcess(EnumerableExtensions.Create(source), typeof(TReturn), Enumerable.Empty<IPostProcessor>()).FirstOrDefault();
+        public static Task<TReturn> PostProcess<TReturn>(this Task<TReturn> source) => source.ContinueWith(x => PostProcess(x.Result));
+        public static object PostProcess(this object source) => PostProcess(EnumerableExtensions.Create(source), source.GetType(), Enumerable.Empty<IPostProcessor>()).FirstOrDefault();
 
         private static IEnumerable<T> PostProcess<T>(IEnumerable<T> source, Type type, IEnumerable<IPostProcessor> prePostProcessors)
         {
