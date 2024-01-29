@@ -21,7 +21,6 @@ namespace Dibix.Sdk.Tests.CodeGeneration
           , IEnumerable<string> endpoints = null
           , bool isEmbedded = true
           , AssertOutputKind outputKind = AssertOutputKind.Accessor
-          , IEnumerable<string> expectedAdditionalAssemblyReferences = null
         )
         {
             string outputDirectory = Path.Combine(base.TestContext.TestRunResultsDirectory, "Output", base.TestContext.TestName);
@@ -102,7 +101,6 @@ SqlReferencePath");
             logger.Verify();
 
             Assert.IsTrue(result, "MSBuild task result was false");
-            AssertAreEqual(expectedAdditionalAssemblyReferences ?? Enumerable.Empty<string>(), task.AdditionalReferences);
 
             string accessorOutputFilePath = Path.Combine(outputDirectory, accessorTargetFileName);
             string endpointOutputFilePath = Path.Combine(outputDirectory, endpointTargetFileName);
@@ -268,7 +266,7 @@ SqlReferencePath");
             yield return MetadataReferenceFactory.FromType<System.Data.CommandType>();
             yield return MetadataReferenceFactory.FromType<System.Linq.Expressions.Expression>();
             yield return MetadataReferenceFactory.FromType<System.Runtime.Serialization.DataContractAttribute>();
-            yield return MetadataReference.CreateFromFile("Newtonsoft.Json.dll");
+            yield return MetadataReferenceFactory.FromType<System.Text.Json.Serialization.JsonIncludeAttribute>();
             yield return MetadataReference.CreateFromFile("Dibix.dll");
             yield return MetadataReference.CreateFromFile(dibixHttpServerPath);
         }

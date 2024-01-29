@@ -8,7 +8,12 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class DaoContractClassWriter : ContractClassWriter
     {
-        public DaoContractClassWriter(CodeGenerationModel model, CodeGenerationOutputFilter outputFilter) : base(model, outputFilter) { }
+        private readonly JsonSerializerFlavor _serializerFlavor;
+
+        public DaoContractClassWriter(CodeGenerationModel model, CodeGenerationOutputFilter outputFilter, JsonSerializerFlavor serializerFlavor) : base(model, outputFilter)
+        {
+            _serializerFlavor = serializerFlavor;
+        }
 
         protected override void BeginProcessClass(ObjectSchema schema, ICollection<CSharpAnnotation> classAnnotations, CodeGenerationContext context)
         {
@@ -37,7 +42,6 @@ namespace Dibix.Sdk.CodeGeneration
             if (property.IsPartOfKey)
             {
                 context.AddUsing("System.ComponentModel.DataAnnotations");
-                context.Model.AdditionalAssemblyReferences.Add("System.ComponentModel.DataAnnotations.dll");
                 propertyAnnotations.Add(new CSharpAnnotation("Key")); // Dibix runtime
             }
 
@@ -55,6 +59,12 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (property.IsObfuscated)
                 propertyAnnotations.Add(new CSharpAnnotation("Obfuscated"));
+
+            if (_serializerFlavor == JsonSerializerFlavor.SystemTextJson && property.Type.IsEnumerable)
+            {
+                AddJsonSerializerReference(context);
+                propertyAnnotations.Add(new CSharpAnnotation("JsonInclude"));
+            }
 
             return true;
         }
@@ -78,7 +88,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static void HandleSerializationBehavior(ObjectSchemaProperty property, SerializationBehavior serializationBehavior, ICollection<CSharpAnnotation> propertyAnnotations, CodeGenerationContext context)
+        private void HandleSerializationBehavior(ObjectSchemaProperty property, SerializationBehavior serializationBehavior, ICollection<CSharpAnnotation> propertyAnnotations, CodeGenerationContext context)
         {
             switch (serializationBehavior)
             {
@@ -88,13 +98,13 @@ namespace Dibix.Sdk.CodeGeneration
                 case SerializationBehavior.IfNotEmpty:
                     if (!property.Type.IsEnumerable)
                     {
-                        AddJsonReference(context);
-                        propertyAnnotations.Add(new CSharpAnnotation("JsonProperty").AddProperty("NullValueHandling", new CSharpValue("NullValueHandling.Ignore"))); // Serialization
+                        AddJsonSerializerReference(context);
+                        propertyAnnotations.Add(CollectJsonIgnoreNullAnnotation()); // Serialization
                     }
                     break;
 
                 case SerializationBehavior.Never:
-                    AddJsonReference(context);
+                    AddJsonSerializerReference(context);
                     propertyAnnotations.Add(new CSharpAnnotation("JsonIgnore")); // Serialization
                     break;
 
@@ -102,5 +112,28 @@ namespace Dibix.Sdk.CodeGeneration
                     throw new ArgumentOutOfRangeException(nameof(serializationBehavior), serializationBehavior, null);
             }
         }
+
+        private CSharpAnnotation CollectJsonIgnoreNullAnnotation() => CollectJsonIgnoreNullAnnotation(_serializerFlavor);
+
+        private static CSharpAnnotation CollectJsonIgnoreNullAnnotation(JsonSerializerFlavor flavor) => flavor switch
+        {
+            JsonSerializerFlavor.NewtonsoftJson => new CSharpAnnotation("JsonProperty").AddProperty("NullValueHandling", new CSharpValue("NullValueHandling.Ignore")),
+            JsonSerializerFlavor.SystemTextJson => new CSharpAnnotation("JsonIgnore").AddProperty("Condition", new CSharpValue("JsonIgnoreCondition.WhenWritingNull")),
+            _ => throw new ArgumentOutOfRangeException(nameof(flavor), flavor, null)
+        };
+
+        private void AddJsonSerializerReference(CodeGenerationContext context) => AddJsonSerializerReference(context, _serializerFlavor);
+        private static void AddJsonSerializerReference(CodeGenerationContext context, JsonSerializerFlavor flavor)
+        {
+            string @namespace = GetJsonSerializerNamespace(flavor);
+            context.AddUsing(@namespace);
+        }
+
+        private static string GetJsonSerializerNamespace(JsonSerializerFlavor flavor) => flavor switch
+        {
+            JsonSerializerFlavor.NewtonsoftJson => "Newtonsoft.Json",
+            JsonSerializerFlavor.SystemTextJson => "System.Text.Json.Serialization",
+            _ => throw new ArgumentOutOfRangeException(nameof(flavor), flavor, null)
+        };
     }
 }

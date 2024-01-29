@@ -16,7 +16,7 @@ namespace Dibix.Sdk.CodeGeneration
             const CodeGenerationOutputFilter outputFilter = CodeGenerationOutputFilter.Local;
             yield return new DaoExecutorWriter(model, outputFilter);
             yield return new DaoExecutorInputClassWriter(model, outputFilter);
-            yield return new DaoContractClassWriter(model, outputFilter);
+            yield return new DaoContractClassWriter(model, outputFilter, JsonSerializerFlavor.NewtonsoftJson);
             yield return new DaoStructuredTypeWriter(model, outputFilter);
             yield return new ApiDescriptionWriter(assumeEmbeddedActionTargets: false, includeReflectionTargets: true, includeTargetsWithRefParameters: true, generateActionDelegates: false);
         }

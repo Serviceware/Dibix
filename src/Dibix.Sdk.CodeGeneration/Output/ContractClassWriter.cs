@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
 using Dibix.Sdk.CodeGeneration.CSharp;
-using Newtonsoft.Json;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -72,12 +70,6 @@ namespace Dibix.Sdk.CodeGeneration
         protected virtual bool ProcessProperty(ObjectSchema schema, ObjectSchemaProperty property, ICollection<CSharpAnnotation> propertyAnnotations, CodeGenerationContext context) => true;
 
         protected virtual void EndProcessClass(ObjectSchema schema, CSharpClass @class, CodeGenerationContext context) { }
-
-        protected static void AddJsonReference(CodeGenerationContext context)
-        {
-            context.AddUsing<JsonPropertyAttribute>();
-            context.Model.AdditionalAssemblyReferences.Add(Path.GetFileName(typeof(JsonPropertyAttribute).Assembly.Location));
-        }
         #endregion
 
         #region Private Methods

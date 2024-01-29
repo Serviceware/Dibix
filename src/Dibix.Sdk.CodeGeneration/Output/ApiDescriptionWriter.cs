@@ -43,7 +43,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public override void Write(CodeGenerationContext context)
         {
-            context.AddDibixHttpServerReference();
+            context.AddUsing("Dibix.Http.Server");
 
             if (context.Model.Controllers.Any(x => x.ControllerImports.Any()))
                 context.AddUsing<Type>();

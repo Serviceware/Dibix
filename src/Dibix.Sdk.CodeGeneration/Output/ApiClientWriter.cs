@@ -18,7 +18,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public override void Write(CodeGenerationContext context)
         {
-            context.AddDibixHttpClientReference();
+            context.AddUsing("Dibix.Http.Client");
             context.AddUsing<Uri>();
 
             IList<ControllerDefinition> controllers = context.Model

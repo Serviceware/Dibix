@@ -19,7 +19,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Overrides
         protected override void WriteController(CodeGenerationContext context, CSharpStatementScope output, ControllerDefinition controller, string serviceName, IDictionary<ActionDefinition, string> operationIdMap, IDictionary<string, SecurityScheme> securitySchemeMap)
         {
-            context.AddReference<HttpClient>();
+            context.AddUsing<HttpClient>();
 
             string className = $"{controller.Name}Service";
             string interfaceName = $"I{className}";

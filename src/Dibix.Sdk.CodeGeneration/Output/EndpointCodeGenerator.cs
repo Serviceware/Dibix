@@ -27,7 +27,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             yield return new DaoExecutorWriter(model, outputFilter);
             yield return new DaoExecutorInputClassWriter(model, outputFilter);
-            yield return new DaoContractClassWriter(model, outputFilter);
+            yield return new DaoContractClassWriter(model, outputFilter, JsonSerializerFlavor.SystemTextJson);
             yield return new DaoStructuredTypeWriter(model, outputFilter);
             yield return new ApiDescriptionWriter(assumeEmbeddedActionTargets, includeReflectionTargets, includeTargetsWithRefParameters, generateActionDelegates);
         }

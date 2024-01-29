@@ -23,14 +23,12 @@ namespace Dibix.Sdk.CodeGeneration
         public IList<ControllerDefinition> Controllers { get; }
         public IList<SecurityScheme> SecuritySchemes { get; }
         public ICollection<SchemaDefinition> Schemas { get; }
-        public ICollection<string> AdditionalAssemblyReferences { get; }
 
         public CodeGenerationModel()
         {
             Controllers = new Collection<ControllerDefinition>();
             SecuritySchemes = new Collection<SecurityScheme>();
             Schemas = new Collection<SchemaDefinition>();
-            AdditionalAssemblyReferences = new SortedSet<string>();
         }
     }
 }

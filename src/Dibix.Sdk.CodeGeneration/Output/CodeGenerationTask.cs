@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Dibix.Sdk.Abstractions;
+﻿using Dibix.Sdk.Abstractions;
 using Microsoft.SqlServer.Dac.Model;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -16,7 +15,6 @@ namespace Dibix.Sdk.CodeGeneration
           , IFileSystemProvider fileSystemProvider
           , ILogger logger
           , TSqlModel sqlModel
-          , ICollection<string> additionalAssemblyReferences
         )
         {
             logger.LogMessage("Generating code artifacts...");
@@ -52,8 +50,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             ICodeArtifactsGenerator generator = new CodeArtifactsGenerator();
             bool result = generator.Generate(model, schemaRegistry, logger);
-
-            additionalAssemblyReferences.AddRange(model.AdditionalAssemblyReferences);
+            
             return result;
         }
     }

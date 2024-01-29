@@ -51,8 +51,6 @@ namespace Dibix.Sdk
         private const string SqlCodeAnalysisCategory = "SqlCodeAnalysis";
         private const string ArtifactGenerationCategory = "ArtifactGeneration";
 
-        public ICollection<string> AdditionalReferences { get; } = new Collection<string>();
-
         private partial bool Execute()
         {
             CodeAnalysis.SqlCodeAnalysisConfiguration sqlCodeAnalysisConfiguration = new CodeAnalysis.SqlCodeAnalysisConfiguration
@@ -138,9 +136,7 @@ namespace Dibix.Sdk
                   , lockEntryManager
                   , fileSystemProvider
                   , _logger
-                  , sqlModel
-                  , AdditionalReferences
-                );
+                  , sqlModel);
 
                 return codeGenerationResult;
             }

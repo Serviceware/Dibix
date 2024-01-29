@@ -105,11 +105,6 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
             (
                 sources: new[] { @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult.sql" }
               , contracts: new[] { @"Contracts\GenericContract.json" }
-              , expectedAdditionalAssemblyReferences: new[]
-                {
-                    "Newtonsoft.Json.dll"
-                  , "System.ComponentModel.DataAnnotations.dll"
-                }
             );
         }
 
@@ -120,11 +115,6 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
             (
                 sources: new[] { @"Tests\Syntax\dbx_tests_syntax_multiconcreteresult.sql" }
               , contracts: new[] { @"Contracts\GenericContract.json" }
-              , expectedAdditionalAssemblyReferences: new[]
-                {
-                    "Newtonsoft.Json.dll"
-                  , "System.ComponentModel.DataAnnotations.dll"
-                }
             );
         }
 
@@ -139,11 +129,6 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
                     @"Contracts\Direction.json"
                   , @"Contracts\GenericContract.json"
                   , @"Contracts\Extension\MultiMapContract.json"
-                }
-              , expectedAdditionalAssemblyReferences: new[]
-                {
-                    "Newtonsoft.Json.dll"
-                  , "System.ComponentModel.DataAnnotations.dll"
                 }
             );
         }
@@ -162,11 +147,6 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
                   , @"Contracts\GenericContract.json"
                   , @"Contracts\JointContract.json"
                 }
-              , expectedAdditionalAssemblyReferences: new[]
-                {
-                    "Newtonsoft.Json.dll"
-                  , "System.ComponentModel.DataAnnotations.dll"
-                }
             );
         }
 
@@ -182,11 +162,6 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
                   , @"Contracts\GenericContract.json"
                   , @"Contracts\Extension\MultiMapContract.json"
                 }
-              , expectedAdditionalAssemblyReferences: new[]
-                {
-                    "Newtonsoft.Json.dll"
-                  , "System.ComponentModel.DataAnnotations.dll"
-                }
             );
         }
 
@@ -200,11 +175,6 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
                 {
                     @"Contracts\Direction.json"
                   , @"Contracts\GenericContract.json"
-                }
-              , expectedAdditionalAssemblyReferences: new[]
-                {
-                    "Newtonsoft.Json.dll"
-                  , "System.ComponentModel.DataAnnotations.dll"
                 }
             );
         }
@@ -221,11 +191,6 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
                   , @"Contracts\GenericContract.json"
                   , @"Contracts\Extension\MultiMapContract.json"
                 }
-              , expectedAdditionalAssemblyReferences: new[]
-                {
-                    "Newtonsoft.Json.dll"
-                  , "System.ComponentModel.DataAnnotations.dll"
-                }
             );
         }
 
@@ -241,11 +206,6 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
                   , @"Contracts\GenericContract.json"
                   , @"Contracts\Extension\MultiMapContract.json"
                 }
-              , expectedAdditionalAssemblyReferences: new[]
-                {
-                    "Newtonsoft.Json.dll"
-                  , "System.ComponentModel.DataAnnotations.dll"
-                }
             );
         }
 
@@ -260,11 +220,6 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
                     @"Contracts\Direction.json"
                   , @"Contracts\GenericContract.json"
                   , @"Contracts\Extension\MultiMapContract.json"
-                }
-              , expectedAdditionalAssemblyReferences: new[]
-                {
-                    "Newtonsoft.Json.dll"
-                  , "System.ComponentModel.DataAnnotations.dll"
                 }
             );
         }
@@ -282,11 +237,6 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
                   , @"Contracts\Extension\MultiMapContract.json"
                   , @"Contracts\Grid\GridResult.json"
                 }
-              , expectedAdditionalAssemblyReferences: new[]
-                {
-                    "Newtonsoft.Json.dll"
-                  , "System.ComponentModel.DataAnnotations.dll"
-                }
             );
         }
 
@@ -301,11 +251,6 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
                     @"Contracts\Direction.json"
                   , @"Contracts\GenericContract.json"
                   , @"Contracts\Extension\MultiMapContract.json"
-                }
-              , expectedAdditionalAssemblyReferences: new[]
-                {
-                    "Newtonsoft.Json.dll"
-                  , "System.ComponentModel.DataAnnotations.dll"
                 }
             );
         }
@@ -322,11 +267,6 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
                   , @"Contracts\Direction.json"
                   , @"Contracts\GenericContract.json"
                   , @"Contracts\JointContract.json"
-                }
-              , expectedAdditionalAssemblyReferences: new[]
-                {
-                    "Newtonsoft.Json.dll"
-                  , "System.ComponentModel.DataAnnotations.dll"
                 }
             );
         }
@@ -428,14 +368,6 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
               , endpoints: new[] { @"Endpoints\GenericEndpoint.json" }
               , isEmbedded: false
               , outputKind: AssertOutputKind.Client
-              , expectedAdditionalAssemblyReferences: new[]
-                {
-                    "Dibix.Http.Client.dll"
-                  , "Dibix.Http.Server.dll"
-                  , "Newtonsoft.Json.dll"
-                  , "System.ComponentModel.DataAnnotations.dll"
-                  , "System.Net.Http.dll"
-                }
             );
         }
 
@@ -468,12 +400,6 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
               , endpoints: new[] { @"Endpoints\GenericEndpoint.json" }
               , isEmbedded: false
               , outputKind: AssertOutputKind.Endpoint
-              , expectedAdditionalAssemblyReferences: new[]
-                {
-                    "Dibix.Http.Server.dll"
-                  , "Newtonsoft.Json.dll"
-                  , "System.ComponentModel.DataAnnotations.dll"
-                }
             );
         }
 
@@ -506,12 +432,6 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
               , endpoints: new[] { @"Endpoints\GenericEndpoint.json" }
               , isEmbedded: false
               , outputKind: AssertOutputKind.Accessor
-              , expectedAdditionalAssemblyReferences: new[]
-                {
-                    "Dibix.Http.Server.dll"
-                  , "Newtonsoft.Json.dll"
-                  , "System.ComponentModel.DataAnnotations.dll"
-                }
             );
         }
 
@@ -544,12 +464,6 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
               , endpoints: new[] { @"Endpoints\GenericEndpoint.json" }
               , isEmbedded: false
               , outputKind: AssertOutputKind.Model
-              , expectedAdditionalAssemblyReferences: new[]
-                {
-                    "Dibix.Http.Server.dll"
-                  , "Newtonsoft.Json.dll"
-                  , "System.ComponentModel.DataAnnotations.dll"
-                }
             );
         }
 
@@ -582,12 +496,6 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
               , endpoints: new[] { @"Endpoints\GenericEndpoint.json" }
               , isEmbedded: false
               , outputKind: AssertOutputKind.OpenApi
-              , expectedAdditionalAssemblyReferences: new[]
-                {
-                    "Dibix.Http.Server.dll"
-                  , "Newtonsoft.Json.dll"
-                  , "System.ComponentModel.DataAnnotations.dll"
-                }
             );
         }
 

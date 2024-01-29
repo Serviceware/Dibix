@@ -13,11 +13,11 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 using Dibix;
 using Dibix.Http.Server;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 
 [assembly: ArtifactAssembly]
 [assembly: AreaRegistration("Tests")]
@@ -199,6 +199,7 @@ namespace Dibix.Sdk.Tests.DomainModel
         public string B { get; set; }
         [Optional]
         public string C { get; set; }
+        [JsonInclude]
         public IList<Dibix.Sdk.Tests.DomainModel.AnotherEntry> SomeIds { get; private set; }
         public System.Guid D { get; set; }
         public string Password { get; set; }
@@ -233,7 +234,7 @@ namespace Dibix.Sdk.Tests.DomainModel
         public int Id { get; set; }
         [DataMember]
         [DefaultValue("DefaultValue")]
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string Name { get; set; } = "DefaultValue";
         [DataMember]
         [JsonIgnore]
@@ -255,6 +256,7 @@ namespace Dibix.Sdk.Tests.DomainModel
         public string B { get; set; }
         [Optional]
         public string C { get; set; }
+        [JsonInclude]
         public IList<Dibix.Sdk.Tests.DomainModel.Entry> Ids { get; private set; }
         public System.Guid D { get; set; }
         public string Password { get; set; }
