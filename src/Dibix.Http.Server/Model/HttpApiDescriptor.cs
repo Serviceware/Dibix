@@ -160,7 +160,8 @@ namespace Dibix.Http.Server
                     Delegate = Delegate
                 };
                 action.SecuritySchemes.AddRange(SecuritySchemes);
-                action.RequiredClaims.AddRange(ParameterSources.Values
+                action.RequiredClaims.AddRange(ParameterSources.Concat(_authorization?.ParameterSources ?? Enumerable.Empty<KeyValuePair<string, HttpParameterSource>>())
+                                                               .Select(x => x.Value)
                                                                .OfType<HttpParameterPropertySource>()
                                                                .Where(x => x.SourceName == ClaimParameterSource.SourceName)
                                                                .Select(x => ClaimParameterSource.GetBuiltInClaimTypeOrDefault(x.PropertyPath)));

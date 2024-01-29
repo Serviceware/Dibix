@@ -1,10 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Data;
+using System.IO;
+using System.IO.Pipelines;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Claims;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 
 namespace Dibix.Http.Server.Tests
 {
@@ -14,7 +20,7 @@ namespace Dibix.Http.Server.Tests
         [TestMethod]
         public async Task Invoke_WithResult()
         {
-            object result = await Execute().ConfigureAwait(false);
+            object result = await CompileAndExecute().ConfigureAwait(false);
             Assert.AreEqual(1, result);
         }
         private static int Invoke_WithResult_Target(IDatabaseAccessorFactory databaseAccessorFactory) => 1;
@@ -24,7 +30,7 @@ namespace Dibix.Http.Server.Tests
         {
             HttpRequestMessage request = new HttpRequestMessage();
 
-            object result = await Execute(request).ConfigureAwait(false);
+            object result = await CompileAndExecute(request).ConfigureAwait(false);
             
             HttpResponseMessage response = AssertIsType<HttpResponseMessage>(result);
             Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
@@ -39,7 +45,7 @@ namespace Dibix.Http.Server.Tests
 
             try
             {
-                await Execute(request).ConfigureAwait(false);
+                await CompileAndExecute(request).ConfigureAwait(false);
                 Assert.Fail($"{nameof(HttpRequestExecutionException)} was expected but not thrown");
             }
             catch (HttpRequestExecutionException requestException)
@@ -65,7 +71,7 @@ CommandText: <Inline>", requestException.Message);
 
             try
             {
-                await Execute(request).ConfigureAwait(false);
+                await CompileAndExecute(request).ConfigureAwait(false);
                 Assert.Fail($"{nameof(HttpRequestExecutionException)} was expected but not thrown");
             }
             catch (HttpRequestExecutionException requestException)
@@ -87,29 +93,42 @@ CommandText: <Inline>", requestException.Message);
         [TestMethod]
         public async Task Invoke_DDL_WithHttpClientError_ProducedByAuthorizationBehavior_IsMappedToHttpStatusCode()
         {
-            HttpRequestMessage request = new HttpRequestMessage();
+            Mock<IHttpRequestDescriptor> request = new Mock<IHttpRequestDescriptor>(MockBehavior.Strict);
+            Mock<IHttpResponseFormatter<IHttpRequestDescriptor>> responseFormatter = new Mock<IHttpResponseFormatter<IHttpRequestDescriptor>>(MockBehavior.Strict);
+            Mock<Microsoft.AspNetCore.Http.HttpResponse> response = new Mock<Microsoft.AspNetCore.Http.HttpResponse>(MockBehavior.Strict);
+            int statusCode = 0;
+
+            request.Setup(x => x.GetUser()).Returns(new ClaimsPrincipal(new ClaimsIdentity(EnumerableExtensions.Create(new Claim(ClaimTypes.NameIdentifier, "user")))));
+            response.SetupGet(x => x.BodyWriter).Returns(PipeWriter.Create(Stream.Null));
+            response.SetupGet(x => x.HasStarted).Returns(false);
+            response.SetupSet(x => x.StatusCode = 403).Callback((int x) => statusCode = x);
+            response.Setup(x => x.Headers).Returns(new HeaderDictionary());
+            response.Setup(x => x.StartAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+
+            HttpActionDefinition action = Compile(authorizationConfiguration: x => x.ResolveParameterFromSource("userid", "CLAIM", "UserId"));
+            Assert.AreEqual(1, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            Assert.AreEqual(ClaimTypes.NameIdentifier, action.RequiredClaims[0], "action.RequiredClaims[0]");
 
             try
             {
-                await Execute(request).ConfigureAwait(false);
+                await Execute(action, request.Object, responseFormatter.Object).ConfigureAwait(false);
                 Assert.Fail($"{nameof(HttpRequestExecutionException)} was expected but not thrown");
             }
             catch (HttpRequestExecutionException requestException)
             {
-                HttpResponseMessage response = requestException.CreateResponse(request);
+                requestException.AppendToResponse(response.Object);
                 Assert.AreEqual(@"403 Forbidden: Sorry
 CommandType: 0
 CommandText: <Inline>", requestException.Message);
                 AssertIsType<DatabaseAccessException>(requestException.InnerException);
                 Assert.IsTrue(requestException.IsClientError);
-                Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
-                Assert.AreEqual("1", response.Headers.GetValues("X-Error-Code").Single());
-                Assert.AreEqual("Sorry", response.Headers.GetValues("X-Error-Description").Single());
-                Assert.AreEqual(request, response.RequestMessage);
+                Assert.AreEqual((int)HttpStatusCode.Forbidden, statusCode);
+                Assert.AreEqual("1", (string)response.Object.Headers["X-Error-Code"]);
+                Assert.AreEqual("Sorry", (string)response.Object.Headers["X-Error-Description"].Single());
             }
         }
         private static void Invoke_DDL_WithHttpClientError_ProducedByAuthorizationBehavior_IsMappedToHttpStatusCode_Target(IDatabaseAccessorFactory databaseAccessorFactory) { }
-        private static void Invoke_DDL_WithHttpClientError_ProducedByAuthorizationBehavior_IsMappedToHttpStatusCode_Authorization_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw CreateException(errorInfoNumber: 403001, errorMessage: "Sorry");
+        private static void Invoke_DDL_WithHttpClientError_ProducedByAuthorizationBehavior_IsMappedToHttpStatusCode_Authorization_Target(IDatabaseAccessorFactory databaseAccessorFactory, string userid) => throw CreateException(errorInfoNumber: 403001, errorMessage: "Sorry");
 
         [TestMethod]
         public async Task Invoke_DDL_WithHttpClientError_AutoDetectedByDatabaseErrorCode_IsMappedToHttpStatusCode()
@@ -118,10 +137,11 @@ CommandText: <Inline>", requestException.Message);
 
             try
             {
-                await Execute
+                await CompileAndExecute
                 (
                     request
                   , x => x.SetStatusCodeDetectionResponse(404, 1, "The user '{name}' with the id '{id}' could not be found")
+                  , _ => { }
                   , new KeyValuePair<string, object>("id", 666)
                   , new KeyValuePair<string, object>("name", "Darth")
                 ).ConfigureAwait(false);
@@ -148,7 +168,7 @@ CommandText: <Inline>", requestException.Message);
         {
             try
             {
-                await Execute().ConfigureAwait(false);
+                await CompileAndExecute().ConfigureAwait(false);
                 Assert.Fail($"{nameof(DatabaseAccessException)} was expected but not thrown");
             }
             catch (DatabaseAccessException ex)
@@ -208,7 +228,7 @@ EXEC x @a = @a
         {
             try
             {
-                await Execute().ConfigureAwait(false);
+                await CompileAndExecute().ConfigureAwait(false);
                 Assert.Fail($"{nameof(DatabaseAccessException)} was expected but not thrown");
             }
             catch (DatabaseAccessException ex)

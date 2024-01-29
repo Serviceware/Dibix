@@ -19,7 +19,9 @@ namespace Dibix.Http.Server.Tests
         [TestMethod]
         public void Compile_Default()
         {
-            IHttpParameterResolutionMethod method = Compile();
+            HttpActionDefinition action = Compile();
+            Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
             Assert.IsFalse(method.Parameters.Any());
 
@@ -42,11 +44,13 @@ namespace Dibix.Http.Server.Tests
         public void Compile_PropertySource()
         {
             HttpParameterSourceProviderRegistry.Register<LocaleParameterHttpSourceProvider>("LOCALE");
-            IHttpParameterResolutionMethod method = Compile(x =>
+            HttpActionDefinition action = Compile(x =>
             {
                 x.ResolveParameterFromSource("lcid", "LOCALE", "LocaleId");
                 x.ResolveParameterFromSource("locale", "LOCALE", "$SELF");
             });
+            Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
             Assert.IsFalse(method.Parameters.Any());
 
@@ -72,7 +76,9 @@ namespace Dibix.Http.Server.Tests
         public void Compile_PropertySource_WithInvalidCast_Throws()
         {
             HttpParameterSourceProviderRegistry.Register<ApplicationHttpParameterSourceProvider>("APPLICATION");
-            IHttpParameterResolutionMethod method = Compile(x => x.ResolveParameterFromSource("applicationid", "APPLICATION", "ApplicationId"));
+            HttpActionDefinition action = Compile(x => x.ResolveParameterFromSource("applicationid", "APPLICATION", "ApplicationId"));
+            Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
             Assert.IsFalse(method.Parameters.Any());
 
@@ -109,7 +115,7 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
         [TestMethod]
         public void Compile_ExplicitBodySource()
         {
-            IHttpParameterResolutionMethod method = Compile(x =>
+            HttpActionDefinition action = Compile(x =>
             {
                 x.BodyContract = typeof(ExplicitHttpBody);
                 x.ResolveParameterFromSource("targetid", "BODY", "SourceId");
@@ -125,6 +131,8 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
                     action.ResolveParameterFromSource("name_", "ITEM", "Name");
                 });
             });
+            Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            IHttpParameterResolutionMethod method = action.ParameterResolver; 
             AssertGeneratedText(method.Source);
             Assert.AreEqual(1, method.Parameters.Count);
             Assert.AreEqual("$body", method.Parameters["$body"].Name);
@@ -173,7 +181,9 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
         [TestMethod]
         public void Compile_ImplicitBodySource()
         {
-            IHttpParameterResolutionMethod method = Compile(x => x.BodyContract = typeof(ImplicitHttpBody));
+            HttpActionDefinition action = Compile(x => x.BodyContract = typeof(ImplicitHttpBody));
+            Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
             Assert.AreEqual(3, method.Parameters.Count);
             Assert.AreEqual("$body", method.Parameters["$body"].Name);
@@ -241,7 +251,7 @@ TextValue         ", itemsb.Dump());
         public void Compile_BodySource_WithConverter()
         {
             HttpParameterConverterRegistry.Register<EncryptionHttpParameterConverter>("CRYPT1");
-            IHttpParameterResolutionMethod method = Compile(x =>
+            HttpActionDefinition action = Compile(x =>
             {
                 x.BodyContract = typeof(HttpBody);
                 x.ResolveParameterFromSource("encryptedpassword", "BODY", "Password", "CRYPT1");
@@ -251,6 +261,8 @@ TextValue         ", itemsb.Dump());
                     action.ResolveParameterFromSource("encryptedpassword", "ITEM", "Password", "CRYPT1");
                 });
             });
+            Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
             Assert.AreEqual(1, method.Parameters.Count);
             Assert.AreEqual("$body", method.Parameters["$body"].Name);
@@ -294,11 +306,13 @@ ENCRYPTED(Item2)               ", items.Dump());
         [TestMethod]
         public void Compile_BodySource_Raw()
         {
-            IHttpParameterResolutionMethod method = Compile(x =>
+            HttpActionDefinition action = Compile(x =>
             {
                 x.BodyContract = typeof(Stream);
                 x.ResolveParameterFromSource("data", "BODY", "$RAW");
             });
+            Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
             Assert.IsFalse(method.Parameters.Any());
 
@@ -322,12 +336,14 @@ ENCRYPTED(Item2)               ", items.Dump());
         [TestMethod]
         public void Compile_BodyConverter()
         {
-            IHttpParameterResolutionMethod method = Compile(x =>
+            HttpActionDefinition action = Compile(x =>
             {
                 x.BodyContract = typeof(JObject);
                 x.ResolveParameterFromBody("data", typeof(JsonToXmlConverter).AssemblyQualifiedName);
                 x.ResolveParameterFromBody("value", typeof(JsonToXmlConverter).AssemblyQualifiedName);
             });
+            Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
             Assert.AreEqual(1, method.Parameters.Count);
             Assert.AreEqual("$body", method.Parameters["$body"].Name);
@@ -358,11 +374,13 @@ ENCRYPTED(Item2)               ", items.Dump());
         [TestMethod]
         public void Compile_BodyBinder()
         {
-            IHttpParameterResolutionMethod method = Compile(x =>
+            HttpActionDefinition action = Compile(x =>
             {
                 x.BodyContract = typeof(ExplicitHttpBody);
                 x.BodyBinder = typeof(FormattedInputBinder);
             });
+            Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
             Assert.AreEqual(1, method.Parameters.Count);
             Assert.AreEqual("$body", method.Parameters["$body"].Name);
@@ -408,12 +426,14 @@ Parameter: input", exception.Message);
         [TestMethod]
         public void Compile_ConstantSource()
         {
-            IHttpParameterResolutionMethod method = Compile(x =>
+            HttpActionDefinition action = Compile(x =>
             {
                 x.ResolveParameterFromConstant("boolValue", true);
                 x.ResolveParameterFromConstant("intValue", 2);
                 x.ResolveParameterFromNull<object>("nullValue");
             });
+            Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
             Assert.IsFalse(method.Parameters.Any());
 
@@ -439,13 +459,15 @@ Parameter: input", exception.Message);
         public void Compile_QuerySource()
         {
             HttpParameterConverterRegistry.Register<EncryptionHttpParameterConverter>("CRYPT2");
-            IHttpParameterResolutionMethod method = Compile(x =>
+            HttpActionDefinition action = Compile(x =>
             {
                 x.ChildRoute = "{cake}/{fart}";
                 x.ResolveParameterFromSource("true", "QUERY", "true_");
                 x.ResolveParameterFromSource("name", "QUERY", "name_", "CRYPT2");
                 x.ResolveParameterFromSource("targetname", "QUERY", "targetname_", "CRYPT2");
             });
+            Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
             Assert.AreEqual(8, method.Parameters.Count);
             Assert.AreEqual("targetid", method.Parameters["targetid"].Name);
@@ -521,11 +543,13 @@ Parameter: input", exception.Message);
         public void Compile_PathSource()
         {
             HttpParameterConverterRegistry.Register<EncryptionHttpParameterConverter>("CRYPT3");
-            IHttpParameterResolutionMethod method = Compile(x =>
+            HttpActionDefinition action = Compile(x =>
             {
                 x.ChildRoute = "{targetid}/{targetname_}/{anotherid}";
                 x.ResolveParameterFromSource("targetname", "PATH", "targetname_", "CRYPT3");
             });
+            Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
             Assert.AreEqual(3, method.Parameters.Count);
             Assert.AreEqual("targetid", method.Parameters["targetid"].Name);
@@ -569,11 +593,13 @@ Parameter: input", exception.Message);
         [TestMethod]
         public void Compile_HeaderSource()
         {
-            IHttpParameterResolutionMethod method = Compile(x =>
+            HttpActionDefinition action = Compile(x =>
             {
                 x.ResolveParameterFromSource("authorization", "HEADER", "Authorization");
                 x.ResolveParameterFromSource("tenantid", "HEADER", "X-Tenant-Id");
             });
+            Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
             Assert.AreEqual(2, method.Parameters.Count);
             Assert.AreEqual("authorization", method.Parameters["authorization"].Name);
@@ -614,11 +640,13 @@ Parameter: input", exception.Message);
         [TestMethod]
         public void Compile_RequestSource()
         {
-            IHttpParameterResolutionMethod method = Compile(x =>
+            HttpActionDefinition action = Compile(x =>
             {
                 x.ResolveParameterFromSource("primaryclientlanguage", "REQUEST", "Language");
                 x.ResolveParameterFromSource("clientlanguages", "REQUEST", "Languages");
             });
+            Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
             Assert.IsFalse(method.Parameters.Any());
 
@@ -646,11 +674,13 @@ en                ", clientLanguages.Dump());
         [TestMethod]
         public void Compile_EnvironmentSource()
         {
-            IHttpParameterResolutionMethod method = Compile(x =>
+            HttpActionDefinition action = Compile(x =>
             {
                 x.ResolveParameterFromSource("machinename", "ENV", "MachineName");
                 x.ResolveParameterFromSource("pid", "ENV", "CurrentProcessId");
             });
+            Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
             Assert.IsFalse(method.Parameters.Any());
 
@@ -674,10 +704,13 @@ en                ", clientLanguages.Dump());
         [TestMethod]
         public void Compile_ClaimSource()
         {
-            IHttpParameterResolutionMethod method = Compile(x =>
+            HttpActionDefinition action = Compile(x =>
             {
                 x.ResolveParameterFromSource("audiences", "CLAIM", "Audiences");
             });
+            Assert.AreEqual(1, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            Assert.AreEqual("aud", action.RequiredClaims[0], "action.RequiredClaims[0]");
+            IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
             Assert.IsFalse(method.Parameters.Any());
 

@@ -15,21 +15,45 @@ namespace Dibix.Http.Server.Tests
 {
     public partial class HttpActionInvokerTest : TestBase
     {
-        private async Task<object> Execute(HttpRequestMessage request = null, Action<IHttpActionDefinitionBuilder> actionConfiguration = null, params KeyValuePair<string, object>[] parameters)
+        private async Task<object> CompileAndExecute(HttpRequestMessage request = null, Action<IHttpActionDefinitionBuilder> actionConfiguration = null, Action<IHttpAuthorizationBuilder> authorizationConfiguration = null, params KeyValuePair<string, object>[] parameters)
+        {
+            HttpActionDefinition action = Compile(actionConfiguration, authorizationConfiguration);
+            return await Execute(action, request, parameters).ConfigureAwait(false);
+        }
+
+        private HttpActionDefinition Compile(Action<IHttpActionDefinitionBuilder> actionConfiguration = null, Action<IHttpAuthorizationBuilder> authorizationConfiguration = null)
+        {
+            HttpApiRegistration registration = new HttpApiRegistration(base.TestContext.TestName, actionConfiguration, authorizationConfiguration);
+            registration.Configure(null);
+            HttpActionDefinition action = registration.Controllers.Single().Actions.Single();
+            return action;
+        }
+
+        private static async Task<object> Execute(HttpActionDefinition action, HttpRequestMessage request = null, params KeyValuePair<string, object>[] parameters)
         {
             Mock<IParameterDependencyResolver> parameterDependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
 
             parameterDependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns<IDatabaseAccessorFactory>(null);
 
-            HttpApiRegistration registration = new HttpApiRegistration(base.TestContext.TestName, actionConfiguration);
-            registration.Configure(null);
-            HttpActionDefinition action = registration.Controllers.Single().Actions.Single();
-
             IDictionary<string, object> arguments = new Dictionary<string, object> { ["databaseAccessorFactory"] = null };
-            foreach (KeyValuePair<string, object> parameter in parameters) 
+            foreach (KeyValuePair<string, object> parameter in parameters)
                 arguments.Add(parameter);
 
             object result = await HttpActionInvoker.Invoke(action, request, arguments, parameterDependencyResolver.Object).ConfigureAwait(false);
+            return result;
+        }
+
+        private static async Task<object> Execute<TRequest>(HttpActionDefinition action, TRequest request, IHttpResponseFormatter<TRequest> responseFormatter, params KeyValuePair<string, object>[] parameters) where TRequest : IHttpRequestDescriptor
+        {
+            Mock<IParameterDependencyResolver> parameterDependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
+
+            parameterDependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns<IDatabaseAccessorFactory>(null);
+
+            IDictionary<string, object> arguments = new Dictionary<string, object> { ["databaseAccessorFactory"] = null };
+            foreach (KeyValuePair<string, object> parameter in parameters)
+                arguments.Add(parameter);
+            
+            object result = await HttpActionInvoker.Invoke(action, request, responseFormatter, arguments, parameterDependencyResolver.Object).ConfigureAwait(false);
             return result;
         }
 
@@ -68,16 +92,16 @@ namespace Dibix.Http.Server.Tests
             private readonly string _methodName;
             private readonly Action<IHttpActionDefinitionBuilder> _actionConfiguration;
 
-            public HttpApiRegistration(string testName, Action<IHttpActionDefinitionBuilder> configure)
+            public HttpApiRegistration(string testName, Action<IHttpActionDefinitionBuilder> configureActions, Action<IHttpAuthorizationBuilder> configureAuthorization)
             {
                 _methodName = $"{testName}_Target";
                 _actionConfiguration = builder =>
                 {
-                    configure?.Invoke(builder);
+                    configureActions?.Invoke(builder);
 
                     string authorizationMethodName = $"{testName}_Authorization_Target";
                     if (typeof(HttpActionInvokerTest).GetMethod(authorizationMethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static) != null)
-                        builder.WithAuthorization(ReflectionHttpActionTarget.Create(typeof(HttpActionInvokerTest), authorizationMethodName), _ => { });
+                        builder.WithAuthorization(ReflectionHttpActionTarget.Create(typeof(HttpActionInvokerTest), authorizationMethodName), configureAuthorization ?? (_ => { }));
                 };
             }
 

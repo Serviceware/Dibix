@@ -12,14 +12,13 @@ namespace Dibix.Http.Server.Tests
 {
     public partial class HttpParameterResolverTest : TestBase
     {
-        private IHttpParameterResolutionMethod Compile() => Compile(_ => { });
-        private IHttpParameterResolutionMethod Compile(Action<IHttpActionDefinitionBuilder> actionConfiguration)
+        private HttpActionDefinition Compile() => Compile(_ => { });
+        private HttpActionDefinition Compile(Action<IHttpActionDefinitionBuilder> actionConfiguration)
         {
             HttpApiRegistration registration = new HttpApiRegistration(base.TestContext.TestName, actionConfiguration);
             registration.Configure(null);
             HttpActionDefinition action = registration.Controllers.Single().Actions.Single();
-            IHttpParameterResolutionMethod result = action.ParameterResolver;
-            return result;
+            return action;
         }
 
         private void AssertGeneratedText(string actualText)
