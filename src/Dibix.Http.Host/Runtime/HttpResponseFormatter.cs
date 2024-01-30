@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Dibix.Http.Server;
 using Microsoft.AspNetCore.Http;
@@ -18,21 +19,21 @@ namespace Dibix.Http.Host
             _response = response;
         }
 
-        public async Task<object?> Format(object? result, HttpRequestDescriptor request, HttpActionDefinition action)
+        public async Task<object?> Format(object? result, HttpRequestDescriptor request, HttpActionDefinition action, CancellationToken cancellationToken)
         {
             if (action.FileResponse != null)
             {
-                await WriteFileResponse(result, action).ConfigureAwait(false);
+                await WriteFileResponse(result, action, cancellationToken).ConfigureAwait(false);
             }
             else
             {
-                await WriteJsonResponse(result).ConfigureAwait(false);
+                await WriteJsonResponse(result, cancellationToken).ConfigureAwait(false);
             }
 
             return null;
         }
 
-        private async Task WriteFileResponse(object? result, HttpActionDefinition action)
+        private async Task WriteFileResponse(object? result, HttpActionDefinition action, CancellationToken cancellationToken)
         {
             FileEntity? file = (FileEntity?)result;
             if (file == null)
@@ -56,11 +57,11 @@ namespace Dibix.Http.Host
 
             using (MemoryStream memoryStream = new MemoryStream(file.Data))
             {
-                await memoryStream.CopyToAsync(_response.Body).ConfigureAwait(false);
+                await memoryStream.CopyToAsync(_response.Body, cancellationToken).ConfigureAwait(false);
             }
         }
 
-        private async Task WriteJsonResponse(object? result)
+        private async Task WriteJsonResponse(object? result, CancellationToken cancellationToken)
         {
             if (result == null)
             {
@@ -68,7 +69,7 @@ namespace Dibix.Http.Host
                 return;
             }
 
-            await _response.WriteAsJsonAsync(result).ConfigureAwait(false);
+            await _response.WriteAsJsonAsync(result, cancellationToken: cancellationToken).ConfigureAwait(false);
         }
     }
 }

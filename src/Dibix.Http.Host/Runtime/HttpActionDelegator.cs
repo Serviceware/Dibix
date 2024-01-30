@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Dibix.Http.Host.Extensions;
 using Dibix.Http.Server;
@@ -18,14 +19,14 @@ namespace Dibix.Http.Host
             _logger = logger;
         }
 
-        public async Task Delegate(HttpContext httpContext, IDictionary<string, object> arguments)
+        public async Task Delegate(HttpContext httpContext, IDictionary<string, object> arguments, CancellationToken cancellationToken)
         {
             EndpointDefinition endpointDefinition = httpContext.GetEndpointDefinition();
             HttpActionDefinition actionDefinition = endpointDefinition.ActionDefinition;
             IHttpResponseFormatter<HttpRequestDescriptor> responseFormatter = new HttpResponseFormatter(httpContext.Response);
             try
             {
-                _ = await HttpActionInvoker.Invoke(actionDefinition, new HttpRequestDescriptor(httpContext.Request), responseFormatter, arguments, _parameterDependencyResolver).ConfigureAwait(false);
+                _ = await HttpActionInvoker.Invoke(actionDefinition, new HttpRequestDescriptor(httpContext.Request), responseFormatter, arguments, _parameterDependencyResolver, cancellationToken).ConfigureAwait(false);
             }
             catch (HttpRequestExecutionException httpRequestExecutionException)
             {

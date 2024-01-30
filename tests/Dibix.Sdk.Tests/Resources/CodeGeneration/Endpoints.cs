@@ -14,6 +14,8 @@ using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 using Dibix;
 using Dibix.Http.Server;
 using Microsoft.AspNetCore.Http;
@@ -135,7 +137,7 @@ namespace Dibix.Sdk.Tests.Data
             }
         }
 
-        public static Dibix.Sdk.Tests.DomainModel.GenericContract SingleConrecteResultWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, int id, string name)
+        public static async Task<Dibix.Sdk.Tests.DomainModel.GenericContract> SingleConrecteResultWithParamsAsync(this IDatabaseAccessorFactory databaseAccessorFactory, int id, string name, CancellationToken cancellationToken = default)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
@@ -146,7 +148,7 @@ namespace Dibix.Sdk.Tests.Data
                                                     })
                                                     .SetString(nameof(name), name, size: 255)
                                                     .Build();
-                return accessor.QuerySingle<Dibix.Sdk.Tests.DomainModel.GenericContract>(SingleConrecteResultWithParamsCommandText, CommandType.StoredProcedure, @params);
+                return await accessor.QuerySingleAsync<Dibix.Sdk.Tests.DomainModel.GenericContract>(SingleConrecteResultWithParamsCommandText, CommandType.StoredProcedure, @params, cancellationToken).ConfigureAwait(false);
             }
         }
     }
@@ -292,21 +294,21 @@ namespace Dibix.Sdk.Tests.Business
                 {
                     action.Method = HttpApiMethod.Get;
                     action.SecuritySchemes.Add("DBXNS-SIT");
-                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>()));
+                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>(), cancellationToken));
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
                     action.Method = HttpApiMethod.Get;
                     action.ChildRoute = "{password}/Fixed";
                     action.SecuritySchemes.Add("DBXNS-SIT");
-                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string password, [FromHeader] string userAgent, [FromHeader] string authorization, Dibix.Sdk.Tests.Data.GenericParameterSet ids, [FromHeader] string? acceptLanguage) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
+                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string password, [FromHeader] string userAgent, [FromHeader] string authorization, Dibix.Sdk.Tests.Data.GenericParameterSet ids, [FromHeader] string? acceptLanguage, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "password", password },
                         { "userAgent", userAgent },
                         { "authorization", authorization },
                         { "ids", ids },
                         { "acceptLanguage", acceptLanguage }
-                    }));
+                    }, cancellationToken));
                     action.ResolveParameterFromNull<string>("password");
                     action.ResolveParameterFromSource("a", "HEADER", "User-Agent");
                     action.ResolveParameterFromSource("b", "HEADER", "Authorization.Parameter");
@@ -321,7 +323,7 @@ namespace Dibix.Sdk.Tests.Business
                     action.Method = HttpApiMethod.Get;
                     action.ChildRoute = "{password}/User";
                     action.SecuritySchemes.Add("Anonymous");
-                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string password, string a, string b, System.Guid? c, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? d, bool e, Dibix.Sdk.Tests.DomainModel.Direction? f, string? g) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
+                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string password, string a, string b, System.Guid? c, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? d, bool e, Dibix.Sdk.Tests.DomainModel.Direction? f, string? g, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "password", password },
                         { "a", a },
@@ -332,19 +334,20 @@ namespace Dibix.Sdk.Tests.Business
                         { "e", e },
                         { "f", f },
                         { "g", g }
-                    }));
+                    }, cancellationToken));
                 });
-                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.SingleConrecteResultWithParams)), action =>
+                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.SingleConrecteResultWithParamsAsync)), action =>
                 {
                     action.Method = HttpApiMethod.Get;
                     action.ChildRoute = "User/{id}/{name}";
                     action.SecuritySchemes.Add("DBXNS-SIT");
                     action.SetStatusCodeDetectionResponse(404, 1, "The user '{name}' with the id '{id}' could not be found");
-                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, int id, string name) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
+                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, int id, string name, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "id", id },
-                        { "name", name }
-                    }));
+                        { "name", name },
+                        { "cancellationToken", cancellationToken }
+                    }, cancellationToken));
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.SingleConrecteResultWithArrayParam)), action =>
                 {
@@ -352,10 +355,10 @@ namespace Dibix.Sdk.Tests.Business
                     action.ChildRoute = "Array";
                     action.SecuritySchemes.Add("DBXNS-SIT");
                     action.DisableStatusCodeDetection(404);
-                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, Dibix.Sdk.Tests.Data.IntParameterSet ids) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
+                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, Dibix.Sdk.Tests.Data.IntParameterSet ids, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "ids", ids }
-                    }));
+                    }, cancellationToken));
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.FileResult)), action =>
                 {
@@ -364,20 +367,20 @@ namespace Dibix.Sdk.Tests.Business
                     action.SecuritySchemes.Add("Anonymous");
                     action.SecuritySchemes.Add("Bearer");
                     action.FileResponse = new HttpFileResponseDefinition(cache: false);
-                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, int id) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
+                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, int id, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "id", id }
-                    }));
+                    }, cancellationToken));
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.FileUpload)), action =>
                 {
                     action.Method = HttpApiMethod.Put;
                     action.BodyContract = typeof(System.IO.Stream);
                     action.SecuritySchemes.Add("DBXNS-SIT");
-                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, System.IO.Stream body) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
+                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, System.IO.Stream body, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "$body", body }
-                    }));
+                    }, cancellationToken));
                     action.ResolveParameterFromSource("data", "BODY", "$RAW");
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
@@ -385,10 +388,10 @@ namespace Dibix.Sdk.Tests.Business
                     action.Method = HttpApiMethod.Post;
                     action.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.InputContract);
                     action.SecuritySchemes.Add("DBXNS-SIT");
-                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, Dibix.Sdk.Tests.DomainModel.InputContract body) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
+                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, Dibix.Sdk.Tests.DomainModel.InputContract body, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "$body", body }
-                    }));
+                    }, cancellationToken));
                     action.ResolveParameterFromBody("ids", "Dibix.GenericContractIdsInputConverter");
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
@@ -397,10 +400,10 @@ namespace Dibix.Sdk.Tests.Business
                     action.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.AnotherInputContract);
                     action.SecuritySchemes.Add("DBXNS-ClientId");
                     action.SecuritySchemes.Add("DBXNS-SIT");
-                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, Dibix.Sdk.Tests.DomainModel.AnotherInputContract body) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
+                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, Dibix.Sdk.Tests.DomainModel.AnotherInputContract body, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "$body", body }
-                    }));
+                    }, cancellationToken));
                     action.ResolveParameterFromSource("ids", "BODY", "SomeIds", items =>
                     {
                         items.ResolveParameterFromConstant("id", 1);
@@ -415,7 +418,7 @@ namespace Dibix.Sdk.Tests.Business
                     {
                         authorization.ResolveParameterFromConstant("right", (byte)1);
                     });
-                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? d, bool e, Dibix.Sdk.Tests.DomainModel.Direction? f, string? g) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
+                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? d, bool e, Dibix.Sdk.Tests.DomainModel.Direction? f, string? g, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "a", a },
                         { "b", b },
@@ -426,7 +429,7 @@ namespace Dibix.Sdk.Tests.Business
                         { "e", e },
                         { "f", f },
                         { "g", g }
-                    }));
+                    }, cancellationToken));
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
@@ -437,7 +440,7 @@ namespace Dibix.Sdk.Tests.Business
                     {
                         authorization.ResolveParameterFromConstant("right", (byte)1);
                     });
-                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? d, bool e, Dibix.Sdk.Tests.DomainModel.Direction? f, string? g) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
+                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? d, bool e, Dibix.Sdk.Tests.DomainModel.Direction? f, string? g, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "a", a },
                         { "b", b },
@@ -448,7 +451,7 @@ namespace Dibix.Sdk.Tests.Business
                         { "e", e },
                         { "f", f },
                         { "g", g }
-                    }));
+                    }, cancellationToken));
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
@@ -459,7 +462,7 @@ namespace Dibix.Sdk.Tests.Business
                     {
                         authorization.ResolveParameterFromConstant("right", (byte)1);
                     });
-                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? d, bool e, Dibix.Sdk.Tests.DomainModel.Direction? f, string? g) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
+                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? d, bool e, Dibix.Sdk.Tests.DomainModel.Direction? f, string? g, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "a", a },
                         { "b", b },
@@ -470,7 +473,7 @@ namespace Dibix.Sdk.Tests.Business
                         { "e", e },
                         { "f", f },
                         { "g", g }
-                    }));
+                    }, cancellationToken));
                 });
             });
         }

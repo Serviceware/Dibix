@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Dibix.Http.Server
@@ -123,7 +124,7 @@ namespace Dibix.Http.Server
                 this.Source = source;
             }
 
-            public async Task<object> Execute(IDictionary<string, object> arguments)
+            public async Task<object> Execute(IDictionary<string, object> arguments, CancellationToken cancellationToken)
             {
                 object result = await this._compiled(arguments).ConfigureAwait(false);
                 return result;

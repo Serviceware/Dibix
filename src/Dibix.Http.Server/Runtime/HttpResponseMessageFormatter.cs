@@ -2,13 +2,14 @@
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Dibix.Http.Server
 {
     internal sealed class HttpResponseMessageFormatter : IHttpResponseFormatter<HttpRequestMessageDescriptor>
     {
-        public Task<object> Format(object result, HttpRequestMessageDescriptor request, HttpActionDefinition action) => Task.FromResult(FormatSync(result, request, action));
+        public Task<object> Format(object result, HttpRequestMessageDescriptor request, HttpActionDefinition action, CancellationToken cancellationToken) => Task.FromResult(FormatSync(result, request, action));
 
         private static object FormatSync(object result, HttpRequestMessageDescriptor request, HttpActionDefinition action)
         {

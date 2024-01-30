@@ -33,7 +33,7 @@ namespace Dibix.Http.Server.Tests
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
             IDictionary<string, object> arguments = new Dictionary<string, object> { ["databaseAccessorFactory"] = databaseAccessorFactory.Object };
-            object result = await method.Execute(arguments).ConfigureAwait(false);
+            object result = await method.Execute(arguments, default).ConfigureAwait(false);
 
             Assert.IsNull(result);
             Assert.AreEqual(2, arguments.Count);
@@ -56,7 +56,7 @@ namespace Dibix.Http.Server.Tests
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
             IDictionary<string, object> arguments = new Dictionary<string, object> { ["databaseAccessorFactory"] = databaseAccessorFactory.Object };
-            object result = await method.Execute(arguments).ConfigureAwait(false);
+            object result = await method.Execute(arguments, default).ConfigureAwait(false);
 
             Assert.AreEqual(3, result);
             Assert.AreEqual(1, arguments.Count);
@@ -78,7 +78,7 @@ namespace Dibix.Http.Server.Tests
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
             IDictionary<string, object> arguments = new Dictionary<string, object> { ["databaseAccessorFactory"] = databaseAccessorFactory.Object };
-            object result = await method.Execute(arguments).ConfigureAwait(false);
+            object result = await method.Execute(arguments, default).ConfigureAwait(false);
 
             Assert.IsNull(result);
             Assert.AreEqual(1, arguments.Count);
@@ -100,7 +100,7 @@ namespace Dibix.Http.Server.Tests
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
             IDictionary<string, object> arguments = new Dictionary<string, object> { ["databaseAccessorFactory"] = databaseAccessorFactory.Object };
-            object result = await method.Execute(arguments).ConfigureAwait(false);
+            object result = await method.Execute(arguments, default).ConfigureAwait(false);
 
             Assert.AreEqual(4, result);
             Assert.AreEqual(1, arguments.Count);

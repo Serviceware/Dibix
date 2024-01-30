@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Dibix.Http.Server
@@ -9,6 +10,6 @@ namespace Dibix.Http.Server
         MethodInfo Method { get; }
         string Source { get; }
 
-        Task<object> Execute(IDictionary<string, object> arguments);
+        Task<object> Execute(IDictionary<string, object> arguments, CancellationToken cancellationToken);
     }
 }

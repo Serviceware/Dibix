@@ -13,6 +13,8 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Runtime.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 using Dibix;
 using Dibix.Http.Server;
 using Newtonsoft.Json;
@@ -133,7 +135,7 @@ namespace Dibix.Sdk.Tests.Data
             }
         }
 
-        public static Dibix.Sdk.Tests.DomainModel.GenericContract SingleConrecteResultWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, int id, string name)
+        public static async Task<Dibix.Sdk.Tests.DomainModel.GenericContract> SingleConrecteResultWithParamsAsync(this IDatabaseAccessorFactory databaseAccessorFactory, int id, string name, CancellationToken cancellationToken = default)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
@@ -144,7 +146,7 @@ namespace Dibix.Sdk.Tests.Data
                                                     })
                                                     .SetString(nameof(name), name, size: 255)
                                                     .Build();
-                return accessor.QuerySingle<Dibix.Sdk.Tests.DomainModel.GenericContract>(SingleConrecteResultWithParamsCommandText, CommandType.StoredProcedure, @params);
+                return await accessor.QuerySingleAsync<Dibix.Sdk.Tests.DomainModel.GenericContract>(SingleConrecteResultWithParamsCommandText, CommandType.StoredProcedure, @params, cancellationToken).ConfigureAwait(false);
             }
         }
     }
@@ -309,7 +311,7 @@ namespace Dibix.Sdk.Tests.Business
                     action.ChildRoute = "{password}/User";
                     action.SecuritySchemes.Add("Anonymous");
                 });
-                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.SingleConrecteResultWithParams)), action =>
+                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.SingleConrecteResultWithParamsAsync)), action =>
                 {
                     action.Method = HttpApiMethod.Get;
                     action.ChildRoute = "User/{id}/{name}";

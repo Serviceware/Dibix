@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using Dibix.Http;
 using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.CodeGeneration.CSharp;
@@ -265,8 +267,10 @@ namespace Dibix.Sdk.CodeGeneration
                 writer.WriteRaw($", {annotation}{context.ResolveTypeName(type)} {externalName}");
             }
 
-            context.AddUsing<Dictionary<string, object>>();
-            writer.WriteRaw(") => actionDelegator.Delegate(httpContext, new Dictionary<string, object>");
+            context.AddUsing<Dictionary<string, object>>()
+                   .AddUsing<CancellationToken>();
+
+            writer.WriteRaw(", CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>");
 
             if (!distinctParameters.Any())
                 writer.WriteRaw("()");
@@ -276,14 +280,22 @@ namespace Dibix.Sdk.CodeGeneration
                       .WriteLine("{")
                       .PushIndent();
 
-                for (var i = 0; i < distinctParameters.Count; i++)
+                IList<(string argumentName, string externalName)> arguments = distinctParameters.Select(x =>
                 {
-                    (string externalName, string internalName, TypeReference _, ActionParameterLocation _, bool hasExplicitMapping) = distinctParameters[i];
-
+                    (string externalName, string internalName, TypeReference _, ActionParameterLocation _, bool hasExplicitMapping) = x;
                     string argumentName = hasExplicitMapping ? externalName : internalName;
+                    return (argumentName, externalName);
+                }).ToList();
+
+                if (action.Target.IsAsync)
+                    arguments.Add(("cancellationToken", "cancellationToken"));
+
+                for (var i = 0; i < arguments.Count; i++)
+                {
+                    (string argumentName, string externalName) = arguments[i];
                     writer.Write($"{{ \"{argumentName}\", {externalName} }}");
 
-                    if (i + 1 < distinctParameters.Count)
+                    if (i + 1 < arguments.Count)
                         writer.WriteRaw(",");
 
                     writer.WriteLine();
@@ -293,7 +305,7 @@ namespace Dibix.Sdk.CodeGeneration
                       .Write("}");
             }
 
-            writer.WriteLineRaw("));");
+            writer.WriteLineRaw(", cancellationToken));");
         }
 
         private static void WriteAuthorizationBehavior(CodeGenerationContext context, StringWriter writer, AuthorizationBehavior authorization, string variableName) { }
