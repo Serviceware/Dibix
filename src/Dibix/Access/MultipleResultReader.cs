@@ -33,15 +33,15 @@ namespace Dibix
 
         public IEnumerable<TReturn> ReadMany<TReturn>(Type[] types, string splitOn) where TReturn : new() => Execute(() => ReadManyCore<TReturn>(types, splitOn));
 
-        T IMultipleResultReader.ReadSingle<T>() => Execute(() => ReadSingle<T>(defaultIfEmpty: false).PostProcess());
+        T IMultipleResultReader.ReadSingle<T>() => Execute(() => ReadSingle<T>(defaultIfEmpty: false));
 
-        Task<T> IMultipleResultReader.ReadSingleAsync<T>() => Execute(() => ReadSingleAsync<T>(defaultIfEmpty: false).PostProcess());
+        Task<T> IMultipleResultReader.ReadSingleAsync<T>() => Execute(() => ReadSingleAsync<T>(defaultIfEmpty: false));
 
         public TReturn ReadSingle<TReturn>(Type[] types, string splitOn) where TReturn : new() => Execute(() => ReadSingle<TReturn>(types, splitOn, defaultIfEmpty: false));
 
-        T IMultipleResultReader.ReadSingleOrDefault<T>() => Execute(() => ReadSingle<T>(defaultIfEmpty: true).PostProcess());
+        T IMultipleResultReader.ReadSingleOrDefault<T>() => Execute(() => ReadSingle<T>(defaultIfEmpty: true));
 
-        Task<T> IMultipleResultReader.ReadSingleOrDefaultAsync<T>() => Execute(() => ReadSingleAsync<T>(defaultIfEmpty: true).PostProcess());
+        Task<T> IMultipleResultReader.ReadSingleOrDefaultAsync<T>() => Execute(() => ReadSingleAsync<T>(defaultIfEmpty: true));
 
         public TReturn ReadSingleOrDefault<TReturn>(Type[] types, string splitOn) where TReturn : new() => Execute(() => ReadSingle<TReturn>(types, splitOn, defaultIfEmpty: true));
         #endregion
@@ -75,17 +75,17 @@ namespace Dibix
 
         private T ReadSingle<T>(bool defaultIfEmpty)
         {
-            IEnumerable<T> result = ReadMany<T>(buffered: false);
+            IEnumerable<T> result = ReadMany<T>(buffered: false).PostProcess();
             return result.Single(_commandText, _commandType, _parameters, defaultIfEmpty, _isSqlClient);
         }
         private T ReadSingle<T>(Type[] types, string splitOn, bool defaultIfEmpty) where T : new()
         {
-            IEnumerable<T> result = ReadManyCore<T>(types, splitOn, buffered: false);
+            IEnumerable<T> result = ReadManyCore<T>(types, splitOn, buffered: false).PostProcess();
             return result.Single(_commandText, _commandType, _parameters, defaultIfEmpty, _isSqlClient);
         }
         private async Task<T> ReadSingleAsync<T>(bool defaultIfEmpty)
         {
-            IEnumerable<T> result = await ReadManyAsync<T>(buffered: false).ConfigureAwait(false);
+            IEnumerable<T> result = await ReadManyAsync<T>(buffered: false).PostProcess().ConfigureAwait(false);
             return result.Single(_commandText, _commandType, _parameters, defaultIfEmpty, _isSqlClient);
         }
 
