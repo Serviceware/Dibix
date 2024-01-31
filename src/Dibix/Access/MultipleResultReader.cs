@@ -31,7 +31,10 @@ namespace Dibix
 
         Task<IEnumerable<T>> IMultipleResultReader.ReadManyAsync<T>() => Execute(() => ReadManyAsync<T>().PostProcess());
 
-        public IEnumerable<TReturn> ReadMany<TReturn>(Type[] types, string splitOn) where TReturn : new() => Execute(() => ReadManyCore<TReturn>(types, splitOn));
+        public IEnumerable<TReturn> ReadMany<TReturn>(Type[] types, string splitOn) where TReturn : new() => Execute(() => ReadManyAutoMultiMap<TReturn>(types, splitOn));
+
+        // NOTE: Apparently there is no async overload in Dapper using multimap
+        //public Task<IEnumerable<TReturn>> ReadManyAsync<TReturn>(Type[] types, string splitOn) where TReturn : new() => Execute(() => ReadManyAutoMultiMapAsync<TReturn>(types, splitOn));
 
         T IMultipleResultReader.ReadSingle<T>() => Execute(() => ReadSingle<T>(defaultIfEmpty: false));
 
@@ -54,24 +57,27 @@ namespace Dibix
         protected abstract Task<IEnumerable<T>> ReadManyAsync<T>(bool buffered);
 
         protected abstract IEnumerable<TReturn> ReadMany<TReturn>(Type[] types, Func<object[], TReturn> map, string splitOn, bool buffered);
-
-        //protected abstract T ReadSingle<T>();
-
-        //protected abstract Task<T> ReadSingleAsync<T>();
-
-        //protected abstract T ReadSingleOrDefault<T>();
-
-        //protected abstract Task<T> ReadSingleOrDefaultAsync<T>();
+        
+        // NOTE: Apparently there is no async overload in Dapper using multimap
+        //protected abstract Task<IEnumerable<TReturn>> ReadManyAsync<TReturn>(Type[] types, Func<object[], TReturn> map, string splitOn, bool buffered);
         #endregion
 
         #region Private Methods
-        private IEnumerable<TReturn> ReadManyCore<TReturn>(Type[] types, string splitOn, bool buffered = true) where TReturn : new()
+        private IEnumerable<TReturn> ReadManyAutoMultiMap<TReturn>(Type[] types, string splitOn, bool buffered = true) where TReturn : new()
         {
             ValidateParameters(types, splitOn);
             MultiMapper multiMapper = new MultiMapper();
             bool useProjection = types[0] != typeof(TReturn);
             return ReadMany(types, x => multiMapper.MapRow<TReturn>(useProjection, x), splitOn, buffered).PostProcess(multiMapper);
         }
+        // NOTE: Apparently there is no async overload in Dapper using multimap
+        //private Task<IEnumerable<TReturn>> ReadManyAutoMultiMapAsync<TReturn>(Type[] types, string splitOn, bool buffered = true) where TReturn : new()
+        //{
+        //    ValidateParameters(types, splitOn);
+        //    MultiMapper multiMapper = new MultiMapper();
+        //    bool useProjection = types[0] != typeof(TReturn);
+        //    return ReadManyAsync(types, x => multiMapper.MapRow<TReturn>(useProjection, x), splitOn, buffered).PostProcess(multiMapper);
+        //}
 
         private T ReadSingle<T>(bool defaultIfEmpty)
         {
@@ -80,7 +86,7 @@ namespace Dibix
         }
         private T ReadSingle<T>(Type[] types, string splitOn, bool defaultIfEmpty) where T : new()
         {
-            IEnumerable<T> result = ReadManyCore<T>(types, splitOn, buffered: false).PostProcess();
+            IEnumerable<T> result = ReadManyAutoMultiMap<T>(types, splitOn, buffered: false).PostProcess();
             return result.Single(_commandText, _commandType, _parameters, defaultIfEmpty, _isSqlClient);
         }
         private async Task<T> ReadSingleAsync<T>(bool defaultIfEmpty)

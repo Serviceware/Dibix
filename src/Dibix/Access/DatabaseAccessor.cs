@@ -51,19 +51,25 @@ namespace Dibix
         
         Task<IEnumerable<T>> IDatabaseAccessor.QueryManyAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, bool buffered, CancellationToken cancellationToken) => Execute(commandText, commandType, parameters, () => QueryManyAsync<T>(commandText, commandType, parameters, buffered, cancellationToken).PostProcess());
         
-        public IEnumerable<TReturn> QueryMany<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, string splitOn) where TReturn : new() => Execute(commandText, commandType, parameters, () => QueryManyCore<TReturn>(commandText, commandType, parameters, types, splitOn));
+        public IEnumerable<TReturn> QueryMany<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, string splitOn) where TReturn : new() => Execute(commandText, commandType, parameters, () => QueryManyAutoMultiMap<TReturn>(commandText, commandType, parameters, types, splitOn));
+        
+        public Task<IEnumerable<TReturn>> QueryManyAsync<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, string splitOn, CancellationToken cancellationToken) where TReturn : new() => Execute(commandText, commandType, parameters, () => QueryManyAutoMultiMapAsync<TReturn>(commandText, commandType, parameters, types, splitOn, cancellationToken));
 
         T IDatabaseAccessor.QuerySingle<T>(string commandText, CommandType commandType, ParametersVisitor parameters) => Execute(commandText, commandType, parameters, () => QuerySingle<T>(commandText, commandType, parameters, defaultIfEmpty: false));
 
         Task<T> IDatabaseAccessor.QuerySingleAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken) => Execute(commandText, commandType, parameters, () => QuerySingleAsync<T>(commandText, commandType, parameters, defaultIfEmpty: false, cancellationToken));
 
         public TReturn QuerySingle<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, string splitOn) where TReturn : new() => Execute(commandText, commandType, parameters, () => QuerySingle<TReturn>(commandText, commandType, parameters, types, splitOn, defaultIfEmpty: false));
+        
+        public Task<TReturn> QuerySingleAsync<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, string splitOn, CancellationToken cancellationToken) where TReturn : new() => Execute(commandText, commandType, parameters, () => QuerySingleAsync<TReturn>(commandText, commandType, parameters, types, splitOn, defaultIfEmpty: false, cancellationToken));
 
         T IDatabaseAccessor.QuerySingleOrDefault<T>(string commandText, CommandType commandType, ParametersVisitor parameters) => Execute(commandText, commandType, parameters, () => QuerySingle<T>(commandText, commandType, parameters, defaultIfEmpty: true));
 
         Task<T> IDatabaseAccessor.QuerySingleOrDefaultAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken) => Execute(commandText, commandType, parameters, () => QuerySingleAsync<T>(commandText, commandType, parameters, defaultIfEmpty: true, cancellationToken));
 
         public TReturn QuerySingleOrDefault<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, string splitOn) where TReturn : new() => Execute(commandText, commandType, parameters, () => QuerySingle<TReturn>(commandText, commandType, parameters, types, splitOn, defaultIfEmpty: true));
+        
+        public Task<TReturn> QuerySingleOrDefaultAsync<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, string splitOn, CancellationToken cancellationToken) where TReturn : new() => Execute(commandText, commandType, parameters, () => QuerySingleAsync<TReturn>(commandText, commandType, parameters, types, splitOn, defaultIfEmpty: true, cancellationToken));
 
         IMultipleResultReader IDatabaseAccessor.QueryMultiple(string commandText, CommandType commandType, ParametersVisitor parameters) => Execute(commandText, commandType, parameters, () => QueryMultiple(commandText, commandType, parameters));
         
@@ -82,14 +88,8 @@ namespace Dibix
         protected abstract Task<IEnumerable<T>> QueryManyAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, bool buffered, CancellationToken cancellationToken);
 
         protected abstract IEnumerable<TReturn> QueryMany<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, Func<object[], TReturn> map, string splitOn, bool buffered);
-
-      //protected abstract T QuerySingle<T>(string commandText, CommandType commandType, ParametersVisitor parameters);
-
-      //protected abstract Task<T> QuerySingleAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken);
-
-      //protected abstract T QuerySingleOrDefault<T>(string commandText, CommandType commandType, ParametersVisitor parameters);
         
-      //protected abstract Task<T> QuerySingleOrDefaultAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken);
+        protected abstract Task<IEnumerable<TReturn>> QueryManyAsync<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, Func<object[], TReturn> map, string splitOn, bool buffered, CancellationToken cancellationToken);
 
         protected abstract IMultipleResultReader QueryMultiple(string commandText, CommandType commandType, ParametersVisitor parameters);
         
@@ -103,12 +103,19 @@ namespace Dibix
         #endregion
 
         #region Private Methods
-        private IEnumerable<TReturn> QueryManyCore<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, string splitOn, bool buffered = true) where TReturn : new()
+        private IEnumerable<TReturn> QueryManyAutoMultiMap<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, string splitOn, bool buffered = true) where TReturn : new()
         {
             ValidateParameters(types, splitOn);
             MultiMapper multiMapper = new MultiMapper();
             bool useProjection = types[0] != typeof(TReturn);
             return QueryMany(commandText, commandType, parameters, types, x => multiMapper.MapRow<TReturn>(useProjection, x), splitOn, buffered).PostProcess(multiMapper);
+        }
+        private Task<IEnumerable<TReturn>> QueryManyAutoMultiMapAsync<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, string splitOn, CancellationToken cancellationToken, bool buffered = true) where TReturn : new()
+        {
+            ValidateParameters(types, splitOn);
+            MultiMapper multiMapper = new MultiMapper();
+            bool useProjection = types[0] != typeof(TReturn);
+            return QueryManyAsync(commandText, commandType, parameters, types, x => multiMapper.MapRow<TReturn>(useProjection, x), splitOn, buffered, cancellationToken).PostProcess(multiMapper);
         }
 
         private T QuerySingle<T>(string commandText, CommandType commandType, ParametersVisitor parameters, bool defaultIfEmpty)
@@ -118,7 +125,12 @@ namespace Dibix
         }
         private T QuerySingle<T>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, string splitOn, bool defaultIfEmpty) where T : new()
         {
-            IEnumerable<T> result = QueryManyCore<T>(commandText, commandType, parameters, types, splitOn, buffered: false);
+            IEnumerable<T> result = QueryManyAutoMultiMap<T>(commandText, commandType, parameters, types, splitOn, buffered: false);
+            return result.Single(commandText, commandType, parameters, defaultIfEmpty, _isSqlClient);
+        }
+        private async Task<T> QuerySingleAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, string splitOn, bool defaultIfEmpty, CancellationToken cancellationToken) where T : new()
+        {
+            IEnumerable<T> result = await QueryManyAutoMultiMapAsync<T>(commandText, commandType, parameters, types, splitOn, cancellationToken, buffered: false).ConfigureAwait(false);
             return result.Single(commandText, commandType, parameters, defaultIfEmpty, _isSqlClient);
         }
         private async Task<T> QuerySingleAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, bool defaultIfEmpty, CancellationToken cancellationToken)

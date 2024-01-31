@@ -64,31 +64,12 @@ namespace Dibix.Dapper
             return base.Connection.Query(commandText, types, map, CollectParameters(parameters), _defaultTransaction, splitOn: splitOn, commandTimeout: _defaultCommandTimeout, commandType: commandType, buffered: buffered);
         }
 
-        //protected override T QuerySingle<T>(string commandText, CommandType commandType, ParametersVisitor parameters)
-        //{
-        //    DecoratedTypeMap.Adapt<T>();
-        //    return base.Connection.QuerySingle<T>(commandText, CollectParameters(parameters), _defaultTransaction, commandTimeout: _defaultCommandTimeout, commandType: commandType);
-        //}
-
-        //protected override Task<T> QuerySingleAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken)
-        //{
-        //    DecoratedTypeMap.Adapt<T>();
-        //    CommandDefinition command = new CommandDefinition(commandText, CollectParameters(parameters), _defaultTransaction, commandTimeout: _defaultCommandTimeout, commandType: commandType, cancellationToken: cancellationToken);
-        //    return base.Connection.QuerySingleAsync<T>(command);
-        //}
-
-        //protected override T QuerySingleOrDefault<T>(string commandText, CommandType commandType, ParametersVisitor parameters)
-        //{
-        //    DecoratedTypeMap.Adapt<T>();
-        //    return base.Connection.QuerySingleOrDefault<T>(commandText, CollectParameters(parameters), _defaultTransaction, commandTimeout: _defaultCommandTimeout, commandType: commandType);
-        //}
-
-        //protected override Task<T> QuerySingleOrDefaultAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken)
-        //{
-        //    DecoratedTypeMap.Adapt<T>();
-        //    CommandDefinition command = new CommandDefinition(commandText, CollectParameters(parameters), _defaultTransaction, commandTimeout: _defaultCommandTimeout, commandType: commandType, cancellationToken: cancellationToken);
-        //    return base.Connection.QuerySingleOrDefaultAsync<T>(command);
-        //}
+        protected override Task<IEnumerable<TReturn>> QueryManyAsync<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, Func<object[], TReturn> map, string splitOn, bool buffered, CancellationToken cancellationToken)
+        {
+            DecoratedTypeMap.Adapt(types);
+            // NOTE: Apparently there is no overload in Dapper that either accepts CancellationToken or CommandDefinition and Type[]
+            return Connection.QueryAsync(commandText, types, map, CollectParameters(parameters), _defaultTransaction, splitOn: splitOn, commandTimeout: _defaultCommandTimeout, commandType: commandType, buffered: buffered);
+        }
 
         protected override IMultipleResultReader QueryMultiple(string commandText, CommandType commandType, ParametersVisitor parameters)
         {

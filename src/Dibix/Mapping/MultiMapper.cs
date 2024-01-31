@@ -20,7 +20,7 @@ namespace Dibix
             PropertyMatcher propertyMatcher = new PropertyMatcher();
             for (int i = relevantArgs.Length - 1; i > 0; i--)
             {
-                object item = relevantArgs[i].PostProcess();
+                object item = PostProcessor.PostProcess(relevantArgs[i]);
                 for (int j = i - 1; j >= 0; j--)
                 {
                     object previousItem = this.GetCachedEntity(relevantArgs[j]);

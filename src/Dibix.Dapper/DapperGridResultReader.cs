@@ -53,28 +53,11 @@ namespace Dibix.Dapper
             return _reader.Read(types, map, splitOn, buffered);
         }
 
-        //protected override T ReadSingle<T>()
+        // NOTE: Apparently there is no async overload in Dapper using multimap
+        //protected override Task<IEnumerable<TReturn>> ReadManyAsync<TReturn>(Type[] types, Func<object[], TReturn> map, string splitOn, bool buffered)
         //{
-        //    DecoratedTypeMap.Adapt<T>();
-        //    return _reader.ReadSingle<T>();
-        //}
-
-        //protected override Task<T> ReadSingleAsync<T>()
-        //{
-        //    DecoratedTypeMap.Adapt<T>();
-        //    return _reader.ReadSingleAsync<T>();
-        //}
-
-        //protected override T ReadSingleOrDefault<T>()
-        //{
-        //    DecoratedTypeMap.Adapt<T>();
-        //    return _reader.ReadSingleOrDefault<T>();
-        //}
-
-        //protected override Task<T> ReadSingleOrDefaultAsync<T>()
-        //{
-        //    DecoratedTypeMap.Adapt<T>();
-        //    return _reader.ReadSingleOrDefaultAsync<T>();
+        //    DecoratedTypeMap.Adapt(types);
+        //    return _reader.ReadAsync(types, map, splitOn, buffered);
         //}
         #endregion
 

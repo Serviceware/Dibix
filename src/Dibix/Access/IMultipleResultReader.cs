@@ -11,6 +11,8 @@ namespace Dibix
         IEnumerable<T> ReadMany<T>();
         Task<IEnumerable<T>> ReadManyAsync<T>();
         IEnumerable<TReturn> ReadMany<TReturn>(Type[] types, string splitOn) where TReturn : new();
+        // NOTE: Apparently there is no async overload in Dapper using multimap
+        //Task<IEnumerable<TReturn>> ReadManyAsync<TReturn>(Type[] types, string splitOn) where TReturn : new();
         T ReadSingle<T>();
         Task<T> ReadSingleAsync<T>();
         TReturn ReadSingle<TReturn>(Type[] types, string splitOn) where TReturn : new();
