@@ -9,9 +9,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dibix.Testing
 {
-    internal static class TestConfigurationLoader
+    public static class TestConfigurationLoader
     {
-        public static T Load<T>(TestContext testContext, TestConfigurationValidationBehavior validationBehavior, Action<T> initializationAction = null) where T : class, new()
+        public static T Load<T>(TestContext testContext, TestConfigurationValidationBehavior validationBehavior = TestDefaults.ValidationBehavior, Action<T> initializationAction = null) where T : class, new()
         {
             IConfigurationRoot root = new ConfigurationBuilder().AddUserSecrets(TestImplementationResolver.ResolveTestAssembly(testContext))
                                                                 .AddEnvironmentVariables()
