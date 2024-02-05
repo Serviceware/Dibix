@@ -9,6 +9,7 @@ namespace Dibix
         private static readonly IDictionary<string, string> BuiltInClaimNameMap = new Dictionary<string, string>
         {
             ["UserId"] = ClaimTypes.NameIdentifier,
+            ["UserName"] = "preferred_username",
             ["ClientId"] = "azp", // See Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames
             ["Audiences"] = "aud"
         };
