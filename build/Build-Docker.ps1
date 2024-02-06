@@ -6,6 +6,7 @@ param
 )
 
 $ErrorActionPreference = 'Stop'
+. $PSScriptRoot\shared.ps1
 
 
 $runtimeIdentifier = 'linux-musl-x64'
@@ -13,24 +14,6 @@ $configuration     = 'Release'
 $publishReadyToRun = 'True'
 $publishSingleFile = 'True'
 $sourcePath        = Resolve-Path (Join-Path $PSScriptRoot "../src/$AppName")
-
-
-function Exec
-{
-    param (
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
-        [string]$Cmd
-    )
-
-    $normalizedCmd = $Cmd.Replace("`r`n", '') -replace '\s+', ' '
-    Write-Host $normalizedCmd -ForegroundColor Cyan
-    Invoke-Expression "& $normalizedCmd"
-    if ($LASTEXITCODE -ne 0)
-    {
-        exit $LASTEXITCODE
-    }
-}
 
 
 Exec "dotnet publish --configuration $Configuration

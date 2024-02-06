@@ -11,6 +11,7 @@ param (
 )
 
 $ErrorActionPreference = 'Stop'
+. $PSScriptRoot\shared.ps1
 
 $runtimeIdentifier = 'win-x64'
 $Configuration = 'Release'
@@ -20,22 +21,6 @@ $publishReadyToRun = 'True'
 $rootPath = Resolve-Path (Join-Path $PSScriptRoot '..')
 $sourcePath = Join-Path $rootPath 'src'
 $cleanPath = Join-Path $PSScriptRoot 'clean.bat'
-
-function Exec
-{
-    param (
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
-        [string]$Cmd
-    )
-    $normalizedCmd = $Cmd.Replace("`r`n", '') -replace '\s+', ' '
-    Write-Host $normalizedCmd -ForegroundColor Cyan
-    Invoke-Expression "& $normalizedCmd"
-    if ($LASTEXITCODE -ne 0)
-    {
-        exit $LASTEXITCODE
-    }
-}
 
 Write-Warning -WarningAction Inquire "Please ensure, that none of the projects are currently opened in Visual Studio, before running this script. Otherwise it will automatically restore these projects after clean using the wrong runtimes."
 

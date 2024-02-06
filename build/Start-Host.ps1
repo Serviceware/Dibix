@@ -13,6 +13,7 @@ param
 )
 
 $ErrorActionPreference = 'Stop'
+. $PSScriptRoot\shared.ps1
 
 
 $runtimeIdentifier = 'win-x64'
@@ -26,43 +27,11 @@ if ($Configuration -eq 'Release')
     $binaryFolder = "$binaryFolder$runtimeIdentifier/publish/"
 }
 
-$exePath = Join-Path $sourcePath "$($binaryFolder)$AppName.exe"
-$environment = if ($Configuration -eq 'Debug') { 'Development' } else { 'Production' }
+$exePath         = Join-Path $sourcePath "$($binaryFolder)$AppName.exe"
+$environment     = if ($Configuration -eq 'Debug') { 'Development' } else { 'Production' }
+$buildScriptPath = Join-Path $PSScriptRoot 'Build-Host.ps1'
 
-
-function Exec
-{
-    param (
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
-        [string]$Cmd
-    )
-
-    $normalizedCmd = $Cmd.Replace("`r`n", '') -replace '\s+', ' '
-    Write-Host $normalizedCmd -ForegroundColor Cyan
-    Invoke-Expression "& $normalizedCmd"
-    if ($LASTEXITCODE -ne 0)
-    {
-        exit $LASTEXITCODE
-    }
-}
-
-
-if ($Configuration -eq 'Debug')
-{
-    Exec "dotnet build --configuration $Configuration $sourcePath"
-}
-else
-{
-    Exec "dotnet publish --configuration $Configuration
-                         --runtime $runtimeIdentifier
-                         --self-contained
-                         --p:IgnoreProjectGuid=True
-                         --p:PublishReadyToRun=$publishReadyToRun
-                         --p:PublishSingleFile=$publishSingleFile
-                         --p:IncludeNativeLibrariesForSelfExtract=True
-                         $sourcePath"
-}
+& $buildScriptPath -AppName 'Dibix.Http.Host' -Configuration $Configuration
 
 $commandArgs = ''
 if ($Arguments)
