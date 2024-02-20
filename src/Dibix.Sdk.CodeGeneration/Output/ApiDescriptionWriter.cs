@@ -272,23 +272,23 @@ namespace Dibix.Sdk.CodeGeneration
 
             writer.WriteRaw(", CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>");
 
-            if (!distinctParameters.Any())
+            IList<(string argumentName, string externalName)> arguments = distinctParameters.Select(x =>
+            {
+                (string externalName, string internalName, TypeReference _, ActionParameterLocation _, bool hasExplicitMapping) = x;
+                string argumentName = hasExplicitMapping ? externalName : internalName;
+                return (argumentName, externalName);
+            }).ToList();
+
+            if (action.Target.IsAsync)
+                arguments.Add(("cancellationToken", "cancellationToken"));
+
+            if (!arguments.Any())
                 writer.WriteRaw("()");
             else
             {
                 writer.WriteLine()
                       .WriteLine("{")
                       .PushIndent();
-
-                IList<(string argumentName, string externalName)> arguments = distinctParameters.Select(x =>
-                {
-                    (string externalName, string internalName, TypeReference _, ActionParameterLocation _, bool hasExplicitMapping) = x;
-                    string argumentName = hasExplicitMapping ? externalName : internalName;
-                    return (argumentName, externalName);
-                }).ToList();
-
-                if (action.Target.IsAsync)
-                    arguments.Add(("cancellationToken", "cancellationToken"));
 
                 for (var i = 0; i < arguments.Count; i++)
                 {
