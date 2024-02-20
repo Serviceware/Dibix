@@ -36,11 +36,11 @@ namespace Dibix.Worker.Host
 
         private void OnDatabaseOptionsChanged(DatabaseOptions options, string? name)
         {
-            const string message = "Database connection string changed";
+            const string message = "Database connection string reloaded";
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"{message}: {{connectionString}}", options.ConnectionString);
             else
-                _logger.LogInformation("Database connection string changed");
+                _logger.LogInformation(message);
         }
     }
 }
