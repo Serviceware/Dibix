@@ -76,6 +76,8 @@ namespace Dibix.Worker.Abstractions
             {
                 await ExecuteAsync(stoppingToken).ConfigureAwait(false);
             }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { }
+            catch (TaskCanceledException) when (stoppingToken.IsCancellationRequested) { }
             catch (Exception exception)
             {
                 Logger.LogError(exception, "Hosted service execution failed");
