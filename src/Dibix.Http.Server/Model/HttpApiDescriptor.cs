@@ -9,20 +9,19 @@ namespace Dibix.Http.Server
     public abstract class HttpApiDescriptor
     {
         #region Fields
-        private readonly Lazy<string> _areaNameAccessor;
+        private string _areaName;
         #endregion
 
         #region Properties
-        public string AreaName => _areaNameAccessor.Value;
-        public ICollection<HttpControllerDefinition> Controllers { get; }
-        #endregion
-
-        #region Constructor
-        protected HttpApiDescriptor()
+        // Lazy, because it is not supported on all platforms
+        // See HttpControllerDefinition.get_ProductName
+        public string ProductName { get; set; }
+        public string AreaName
         {
-            Controllers = new Collection<HttpControllerDefinition>();
-            _areaNameAccessor = new Lazy<string>(ResolveAreaName);
+            get => _areaName ?? throw new InvalidOperationException($"{nameof(AreaName)} is not initialized");
+            set => _areaName = value;
         }
+        public ICollection<HttpControllerDefinition> Controllers { get; } = new Collection<HttpControllerDefinition>();
         #endregion
 
         #region Abstract Methods
@@ -30,47 +29,28 @@ namespace Dibix.Http.Server
         #endregion
 
         #region Protected Methods
-        protected virtual string ResolveAreaName(Assembly assembly)
-        {
-            AreaRegistrationAttribute attribute = assembly.GetCustomAttribute<AreaRegistrationAttribute>();
-            if (attribute == null)
-                throw new InvalidOperationException($"Assembly {assembly.GetName().Name} is not marked with {typeof(AreaRegistrationAttribute)}");
-
-            if (String.IsNullOrEmpty(attribute.AreaName))
-                throw new InvalidOperationException($@"Area name cannot be empty
-{assembly.GetName().Name} -> {GetType()}");
-
-            return attribute.AreaName;
-        }
-
         protected void RegisterController(string controllerName, Action<IHttpControllerDefinitionBuilder> setupAction)
         {
             Guard.IsNotNullOrEmpty(controllerName, nameof(controllerName));
-            HttpControllerDefinitionBuilder builder = new HttpControllerDefinitionBuilder(AreaName, controllerName);
+            HttpControllerDefinitionBuilder builder = new HttpControllerDefinitionBuilder(ProductName, AreaName, controllerName);
             setupAction(builder);
             HttpControllerDefinition controller = builder.Build();
             Controllers.Add(controller);
         }
         #endregion
 
-        #region Private Methods
-        private string ResolveAreaName()
-        {
-            Assembly assembly = GetType().Assembly;
-            return ResolveAreaName(assembly);
-        }
-        #endregion
-
         #region Nested Types
         private sealed class HttpControllerDefinitionBuilder : IHttpControllerDefinitionBuilder
         {
+            private readonly string _productName;
             private readonly string _areaName;
             private readonly string _controllerName;
             private readonly IList<HttpActionDefinitionBuilder> _actions;
             private readonly IList<string> _controllerImports;
 
-            internal HttpControllerDefinitionBuilder(string areaName, string controllerName)
+            internal HttpControllerDefinitionBuilder(string productName, string areaName, string controllerName)
             {
+                _productName = productName;
                 _areaName = areaName;
                 _controllerName = controllerName;
                 _actions = new Collection<HttpActionDefinitionBuilder>();
@@ -90,7 +70,7 @@ namespace Dibix.Http.Server
             public HttpControllerDefinition Build()
             {
                 IList<HttpActionDefinition> actions = _actions.Select(x => x.Build()).ToArray();
-                HttpControllerDefinition controller = new HttpControllerDefinition(_areaName, _controllerName, actions, _controllerImports);
+                HttpControllerDefinition controller = new HttpControllerDefinition(_productName, _areaName, _controllerName, actions, _controllerImports);
                 foreach (HttpActionDefinition action in actions)
                 {
                     action.Controller = controller;

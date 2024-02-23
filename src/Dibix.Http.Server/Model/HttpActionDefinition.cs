@@ -6,7 +6,15 @@ namespace Dibix.Http.Server
 {
     public sealed class HttpActionDefinition : IHttpActionExecutionDefinition
     {
-        public HttpControllerDefinition Controller { get; internal set; }
+        private HttpControllerDefinition _controller;
+        private string _fullName;
+
+        public HttpControllerDefinition Controller
+        {
+            get => _controller ?? throw new InvalidOperationException("Controller not initialized");
+            internal set => _controller = value;
+        }
+        public string FullName => _fullName ??= $"{Controller.FullName}.{Executor.Method.Name}";
         public Uri Uri { get; set; }
         public IHttpActionExecutionMethod Executor { get; set; }
         public IHttpParameterResolutionMethod ParameterResolver { get; set; }

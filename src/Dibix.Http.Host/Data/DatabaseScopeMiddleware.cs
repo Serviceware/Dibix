@@ -21,7 +21,7 @@ namespace Dibix.Http.Host
             {
                 DatabaseScope databaseScope = context.RequestServices.GetRequiredService<DatabaseScope>();
                 HttpActionDefinition actionDefinition = endpointDefinition.ActionDefinition;
-                databaseScope.InitiatorFullName = actionDefinition.Executor.Method.Name;
+                databaseScope.InitiatorFullName = actionDefinition.FullName;
             }
 
             await _next(context).ConfigureAwait(false);

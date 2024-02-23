@@ -11,6 +11,8 @@ namespace Dibix.Sdk.Packaging
             string outputPath = Path.Combine(configuration.OutputDirectory, configuration.ArtifactTargetFileName);
             using (Package package = Package.Open(outputPath, FileMode.Create))
             {
+                package.PackageProperties.Title = configuration.ProductName;
+                package.PackageProperties.Subject = configuration.AreaName;
                 Uri contentUri = PackUriHelper.CreatePartUri(new Uri("Content", UriKind.Relative));
                 PackagePart contentPart = package.CreatePart(contentUri, "application/octet-stream");
                 using (Stream contentInput = File.OpenRead(configuration.CompiledArtifactPath))

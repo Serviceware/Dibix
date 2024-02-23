@@ -572,6 +572,10 @@ $(_SqlReferencePath)" />
     </PropertyGroup>
 
     <ItemGroup>
+      <_CreatePackageInputItem Include="ProductName
+  $(ProductName)" />
+      <_CreatePackageInputItem Include="AreaName
+  $(AreaName)" />
       <_CreatePackageInputItem Include="ArtifactTargetFileName
   $(_EndpointTargetFileName)" />
       <_CreatePackageInputItem Include="OutputDirectory

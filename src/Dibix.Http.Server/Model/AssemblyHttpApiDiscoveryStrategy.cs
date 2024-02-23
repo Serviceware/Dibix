@@ -5,39 +5,29 @@ using System.Reflection;
 
 namespace Dibix.Http.Server
 {
-    internal sealed class AssemblyHttpApiDiscoveryStrategy : IHttpApiDiscoveryStrategy
+    public abstract class AssemblyHttpApiDiscoveryStrategy : IHttpApiDiscoveryStrategy
     {
-        #region Fields
-        private readonly IEnumerable<Assembly> _assemblies;
-        #endregion
-
-        #region Constructor
-        public AssemblyHttpApiDiscoveryStrategy(IEnumerable<Assembly> assemblies)
+        IEnumerable<HttpApiDescriptor> IHttpApiDiscoveryStrategy.Collect(IHttpApiDiscoveryContext context)
         {
-            this._assemblies = assemblies;
-        }
-        #endregion
-
-        #region IHttpApiDiscoveryStrategy Members
-        public IEnumerable<HttpApiDescriptor> Collect(IHttpApiDiscoveryContext context)
-        {
-            foreach (Assembly assembly in this._assemblies)
+            foreach (HttpApiDescriptor descriptor in CollectApiDescriptors())
             {
-                AreaRegistrationAttribute attribute = assembly.GetCustomAttribute<AreaRegistrationAttribute>();
-                if (attribute == null)
-                    continue;
-
-                if (String.IsNullOrEmpty(attribute.AreaName))
-                    throw new InvalidOperationException($"Area name in api registration cannot be empty: {assembly.GetName().Name}");
-
-                ICollection<Type> types = assembly.GetLoadableTypes().ToArray();
-
-                Type apiDescriptorType = types.FirstOrDefault(typeof(HttpApiDescriptor).IsAssignableFrom);
-                HttpApiDescriptor descriptor = apiDescriptorType != null ? (HttpApiDescriptor)Activator.CreateInstance(apiDescriptorType) : new HttpApiRegistration(assembly);
                 descriptor.Configure(context);
                 yield return descriptor;
             }
         }
-        #endregion
+
+        protected abstract IEnumerable<HttpApiDescriptor> CollectApiDescriptors();
+
+        protected static HttpApiDescriptor CollectApiDescriptor(Assembly assembly)
+        {
+            Type baseType = typeof(HttpApiDescriptor);
+            Type apiDescriptorType = assembly.GetLoadableTypes().FirstOrDefault(baseType.IsAssignableFrom);
+
+            if (apiDescriptorType == null)
+                throw new InvalidOperationException($"Could not find entry point inheriting from '{baseType}' in assembly: {assembly}");
+
+            HttpApiDescriptor descriptor = (HttpApiDescriptor)Activator.CreateInstance(apiDescriptorType);
+            return descriptor;
+        }
     }
 }

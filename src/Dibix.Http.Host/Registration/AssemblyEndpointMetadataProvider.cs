@@ -23,7 +23,7 @@ namespace Dibix.Http.Host
 
         private IEnumerable<EndpointDefinition> GetEndpointsCore()
         {
-            return from area in _apiRegistry.GetCustomApis()
+            return from area in _apiRegistry.GetApis()
                    from controller in area.Controllers
                    from action in controller.Actions
                    let method = action.Method.ToString().ToUpperInvariant()

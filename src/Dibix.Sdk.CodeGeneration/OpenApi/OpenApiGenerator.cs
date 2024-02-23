@@ -37,16 +37,16 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
 
         private static void AppendPaths(OpenApiDocument document, string areaName, ICollection<ControllerDefinition> controllers, string rootNamespace, bool supportOpenApiNullableReferenceTypes, ISchemaRegistry schemaRegistry, ILogger logger)
         {
-            IDictionary<ActionDefinition, string> operationIds = controllers.SelectMany(x => x.Actions)
-                                                                            .GroupBy(x => x.OperationId)
-                                                                            .SelectMany(x => x.Select((y, i) => new
-                                                                            {
-                                                                                Position = i + 1,
-                                                                                Name = x.Key,
-                                                                                Action = y,
-                                                                                IsAmbiguous = x.Count() > 1
-                                                                            }))
-                                                                            .ToDictionary(x => x.Action, x => x.IsAmbiguous ? $"{x.Name}{x.Position}" : x.Name);
+            IDictionary<ActionDefinition, string> uniqueOperationIds = controllers.SelectMany(x => x.Actions)
+                                                                                  .GroupBy(x => x.OperationId)
+                                                                                  .SelectMany(x => x.Select((y, i) => new
+                                                                                  {
+                                                                                      Position = i + 1,
+                                                                                      Name = x.Key,
+                                                                                      Action = y,
+                                                                                      IsAmbiguous = x.Count() > 1
+                                                                                  }))
+                                                                                  .ToDictionary(x => x.Action, x => x.IsAmbiguous ? $"{x.Name}{x.Position}" : x.Name);
 
             foreach (ControllerDefinition controller in controllers)
             {
@@ -57,12 +57,12 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                     foreach (ActionDefinition action in path)
                     {
                         OperationType operationType = (OperationType)Enum.Parse(typeof(OperationType), action.Method.ToString());
-                        string operationId = operationIds[action];
+                        string uniqueOperationId = uniqueOperationIds[action];
 
                         OpenApiOperation operation = new OpenApiOperation();
                         operation.Tags.Add(new OpenApiTag { Name = controller.Name });
-                        operation.Summary = action.Description ?? operationId;
-                        operation.OperationId = operationId;
+                        operation.Summary = action.Description ?? uniqueOperationId;
+                        operation.OperationId = uniqueOperationId;
 
                         AppendParameters(document, operation, action, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
                         AppendBody(document, operation, action, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
