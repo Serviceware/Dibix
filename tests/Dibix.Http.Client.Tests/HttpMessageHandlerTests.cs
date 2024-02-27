@@ -47,12 +47,14 @@ namespace Dibix.Http.Client.Tests
         }
 
         [TestMethod]
-        [DataRow(false, HttpStatusCode.NotFound, false, DisplayName = "UseHandler = False")]
-        [DataRow(true, HttpStatusCode.NotFound, true, DisplayName = "HttpStatusCode.NotFound")]
-        [DataRow(true, HttpStatusCode.Created, false, DisplayName = "HttpStatusCode.Created")]
-        public async Task EnsureSuccessStatusCodeHandler(bool useHandler, HttpStatusCode statusCode, bool expectException)
+        [DataRow(false, false, HttpStatusCode.NotFound, false, DisplayName = "UseHandler = False")]
+        [DataRow(true,  false, HttpStatusCode.NotFound, true,  DisplayName = "HttpStatusCode.NotFound")]
+        [DataRow(true,  false, HttpStatusCode.Created,  false, DisplayName = "HttpStatusCode.Created")]
+        [DataRow(true,  false, HttpStatusCode.Found,    true,  DisplayName = "HttpStatusCode.Found with AllowAutoRedirect = True")]
+        [DataRow(true,  true,  HttpStatusCode.Found,    false, DisplayName = "HttpStatusCode.Found with AllowAutoRedirect = False")]
+        public async Task EnsureSuccessStatusCodeHandler(bool useHandler, bool disableAutoRedirect, HttpStatusCode statusCode, bool expectException)
         {
-            (HttpClientHandler _, Func<Task> sendInvoker) = SetupFixture<EnsureSuccessStatusCodeHttpMessageHandler>(useHandler, statusCode: statusCode);
+            (HttpClientHandler _, Func<Task> sendInvoker) = SetupFixture<EnsureSuccessStatusCodeHttpMessageHandler>(useHandler, statusCode: statusCode, disableAutoRedirect: disableAutoRedirect);
             try
             {
                 await sendInvoker().ConfigureAwait(false);

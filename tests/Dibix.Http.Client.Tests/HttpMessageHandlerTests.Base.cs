@@ -13,12 +13,12 @@ namespace Dibix.Http.Client.Tests
 {
     public partial class HttpMessageHandlerTests
     {
-        private static (HttpClientHandler httpClientHandler, Func<Task> sendInvoker) SetupFixture<THandler>(bool useHandler, string httpMethod = "GET", HttpStatusCode statusCode = HttpStatusCode.OK, Action<HttpClient>? configureClient = null) where THandler : DelegatingHandler, new()
+        private static (HttpClientHandler httpClientHandler, Func<Task> sendInvoker) SetupFixture<THandler>(bool useHandler, string httpMethod = "GET", HttpStatusCode statusCode = HttpStatusCode.OK, bool disableAutoRedirect = false, Action<HttpClient>? configureClient = null) where THandler : DelegatingHandler, new()
         {
             THandler CreateHandler() => new THandler();
-            return SetupFixture(useHandler, CreateHandler, httpMethod, statusCode, configureClient);
+            return SetupFixture(useHandler, CreateHandler, httpMethod, statusCode, disableAutoRedirect, configureClient);
         }
-        private static (HttpClientHandler httpClientHandler, Func<Task> sendInvoker) SetupFixture<THandler>(bool useHandler, Func<THandler> handlerFactory, string httpMethod = "GET", HttpStatusCode statusCode = HttpStatusCode.OK, Action<HttpClient>? configureClient = null) where THandler : DelegatingHandler
+        private static (HttpClientHandler httpClientHandler, Func<Task> sendInvoker) SetupFixture<THandler>(bool useHandler, Func<THandler> handlerFactory, string httpMethod = "GET", HttpStatusCode statusCode = HttpStatusCode.OK, bool disableAutoRedirect = false, Action<HttpClient>? configureClient = null) where THandler : DelegatingHandler
         {
             HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost");
             HttpResponseMessage responseMessage = new HttpResponseMessage(statusCode) { RequestMessage = requestMessage, Content = new ByteArrayContent(Array.Empty<byte>()) };
@@ -28,6 +28,9 @@ namespace Dibix.Http.Client.Tests
             httpClientHandler.Protected()
                              .Setup<Task<HttpResponseMessage>>("SendAsync", requestMessage, ItExpr.IsAny<CancellationToken>())
                              .Returns((HttpRequestMessage _, CancellationToken _) => Task.FromResult(responseMessage));
+
+            if (disableAutoRedirect)
+                httpClientHandler.Object.AllowAutoRedirect = false;
 
             HttpMessageHandler handler = httpClientHandler.Object;
 
