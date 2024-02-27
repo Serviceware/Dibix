@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Globalization;
 using System.Linq.Expressions;
 using System.Net;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -15,21 +13,6 @@ namespace Dibix.Http.Client.Tests
     [TestClass]
     public partial class HttpMessageHandlerTests
     {
-        [TestMethod]
-        [DataRow(true, "GET", true, DisplayName = "GET")]
-        [DataRow(true, "POST", false, DisplayName = "POST")]
-        [DataRow(false, "UNKNOWN", false, DisplayName = "UseHandler = False")]
-        public async Task FollowRedirectHandler(bool useHandler, string httpMethod, bool expectedAllowAutoRedirect)
-        {
-            (HttpClientHandler httpClientHandler, Func<Task> sendInvoker) = SetupFixture<FollowRedirectHttpMessageHandler>(useHandler, httpMethod);
-
-            httpClientHandler.AllowAutoRedirect = false;
-            Assert.IsFalse(httpClientHandler.AllowAutoRedirect, "httpClientHandler.AllowAutoRedirect");
-
-            await sendInvoker().ConfigureAwait(false);
-            Assert.AreEqual(expectedAllowAutoRedirect, httpClientHandler.AllowAutoRedirect, "httpClientHandler.AllowAutoRedirect");
-        }
-
         [TestMethod]
         [DataRow(true, false, DisplayName = "IWebProxy.IsBypassed = False")]
         [DataRow(true, true, DisplayName = "IWebProxy.IsBypassed = True")]

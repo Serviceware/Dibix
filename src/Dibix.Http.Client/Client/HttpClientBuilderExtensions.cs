@@ -7,7 +7,6 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IHttpClientBuilder AddBuiltinHttpMessageHandlers(this IHttpClientBuilder builder)
         {
-            AddHttpMessageHandler<FollowRedirectHttpMessageHandler>(builder);
             AddHttpMessageHandler<TraceProxyHttpMessageHandler>(builder);
             AddHttpMessageHandler<EnsureSuccessStatusCodeHttpMessageHandler>(builder);
             AddHttpMessageHandler<TraceSourceHttpMessageHandler>(builder);
