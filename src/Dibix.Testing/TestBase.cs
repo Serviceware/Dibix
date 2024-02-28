@@ -198,6 +198,12 @@ Value: {instance}");
             return Task.CompletedTask;
         }
 
-        private void AddConfigurationToOutput(TConfiguration configuration) => _ = AddResultFile("appsettings.json", JsonConvert.SerializeObject(configuration, Formatting.Indented));
+        protected virtual void OnConfigurationLoaded(TConfiguration configuration) { }
+
+        private void AddConfigurationToOutput(TConfiguration configuration)
+        {
+            OnConfigurationLoaded(configuration);
+            _ = AddResultFile("appsettings.json", JsonConvert.SerializeObject(configuration, Formatting.Indented));
+        }
     }
 }
