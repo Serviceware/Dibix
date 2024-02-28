@@ -13,7 +13,8 @@ namespace Dibix.Http.Client
         public HttpResponseMessage Response { get; }
         public string ResponseContentText { get; }
 
-        private protected HttpException(HttpRequestMessage request, string requestContentText, HttpResponseMessage response, string responseContentText) : base(CreateMessage(response))
+        private HttpException(HttpRequestMessage request, string requestContentText, HttpResponseMessage response, string responseContentText) : this(request, requestContentText, response, responseContentText, CreateMessage(response)) { }
+        private protected HttpException(HttpRequestMessage request, string requestContentText, HttpResponseMessage response, string responseContentText, string message) : base(message)
         {
             this.Request = request;
             this.RequestContentText = requestContentText;
@@ -40,10 +41,11 @@ namespace Dibix.Http.Client
             return new HttpValidationException(request, requestContentText, response, responseContentText, errorCode, errorMessage);
         }
 
-        private static string CreateMessage(HttpResponseMessage response)
+        private protected static string CreateMessage(HttpResponseMessage response)
         {
             Guard.IsNotNull(response, nameof(response));
-            return $"Response status code does not indicate success: {(int)response.StatusCode} ({response.ReasonPhrase}).";
+            string message = $"Response status code does not indicate success: {(int)response.StatusCode} ({response.ReasonPhrase}).";
+            return message;
         }
     }
 }

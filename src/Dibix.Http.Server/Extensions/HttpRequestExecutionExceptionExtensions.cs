@@ -10,9 +10,7 @@ namespace Dibix.Http.Server
 
             if (exception.IsClientError)
             {
-                if (exception.ErrorCode != 0)
-                    response.Headers.Add(KnownHeaders.ClientErrorCodeHeaderName, exception.ErrorCode.ToString());
-
+                response.Headers.Add(KnownHeaders.ClientErrorCodeHeaderName, exception.ErrorCode.ToString());
                 response.Headers.Add(KnownHeaders.ClientErrorDescriptionHeaderName, exception.ErrorMessage);
                 response.Content = new StringContent(exception.ErrorMessage);
             }
@@ -28,9 +26,7 @@ namespace Dibix.Http.Server
             if (!exception.IsClientError) 
                 return;
 
-            if (exception.ErrorCode != 0)
-                response.Headers.Add(KnownHeaders.ClientErrorCodeHeaderName, exception.ErrorCode.ToString());
-
+            response.Headers.Add(KnownHeaders.ClientErrorCodeHeaderName, exception.ErrorCode.ToString());
             response.Headers.Add(KnownHeaders.ClientErrorDescriptionHeaderName, exception.ErrorMessage);
             Microsoft.AspNetCore.Http.HttpResponseWritingExtensions.WriteAsync(response, exception.ErrorMessage);
         }
