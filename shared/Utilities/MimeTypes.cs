@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace Dibix.Http.Server
+namespace Dibix
 {
     // List of MIME types
     // combination of values from Windows 7 Registry and 

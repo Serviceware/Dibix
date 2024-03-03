@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Security.Claims;
 using System.Text;
 
 namespace Dibix.Http.Server
@@ -15,6 +16,7 @@ namespace Dibix.Http.Server
         private static readonly Type[] KnownDependencies = { typeof(IDatabaseAccessorFactory) };
         private static readonly Lazy<PropertyAccessor> DebugViewAccessor = new Lazy<PropertyAccessor>(BuildDebugViewAccessor);
         private static readonly string ItemSourceName = ItemParameterSource.SourceName;
+        private static readonly string[] MultipleClaimTypes = { "aud" }; // Return IEnumerable<string> rather than string
         private const string SelfPropertyName = "$SELF";
         #endregion
 
@@ -162,6 +164,9 @@ namespace Dibix.Http.Server
                 case HttpParameterBodySource bodySource:
                     Type inputConverter = Type.GetType(bodySource.ConverterName, true);
                     return HttpParameterInfo.Body(contractParameter, parameterType, parameterName, inputConverter);
+
+                case HttpParameterClaimSource claimSource:
+                    return HttpParameterInfo.Claim(contractParameter, parameterType, parameterName, claimSource.ClaimType);
 
                 case HttpParameterConstantSource constantSource:
                     return HttpParameterInfo.ConstantValue(contractParameter, parameterType, parameterName, constantSource.Value);
@@ -449,6 +454,10 @@ namespace Dibix.Http.Server
                     value = Expression.Constant(parameter.Value);
                     break;
 
+                case HttpParameterSourceKind.Claim:
+                    value = CollectClaimParameterValue(requestParameter, parameter.ClaimType);
+                    break;
+
                 case HttpParameterSourceKind.Query:
                 case HttpParameterSourceKind.Path:
                     value = HttpParameterResolverUtility.BuildReadableArgumentAccessorExpression(argumentsParameter, parameter.InternalParameterName);
@@ -606,6 +615,14 @@ Either create a mapping or make sure a property of the same name exists in the s
             return value;
         }
 
+        private static Expression CollectClaimParameterValue(Expression requestParameter, string claimType)
+        {
+            bool isMultipleClaimType = MultipleClaimTypes.Contains(claimType);
+            Expression user = Expression.Call(requestParameter, nameof(IHttpRequestDescriptor.GetUser), Type.EmptyTypes);
+            Expression value = Expression.Call(typeof(HttpParameterResolver), isMultipleClaimType ? nameof(GetClaimValues) : nameof(GetClaimValue), Type.EmptyTypes, user, Expression.Constant(claimType));
+            return value;
+        }
+
         private static Expression CollectConverterStatement(HttpParameterInfo parameter, Expression value, IHttpActionDescriptor action, Expression requestParameter, Expression dependencyResolverParameter, Expression actionParameter)
         {
             if (parameter.Converter == null)
@@ -747,6 +764,21 @@ Either create a mapping or make sure a property of the same name exists in the s
             return target;
         }
 
+        private static IEnumerable<string> GetClaimValues(ClaimsPrincipal principal, string claimType)
+        {
+            IEnumerable<string> values = principal.Claims
+                                                  .Where(x => x.Type == claimType)
+                                                  .Select(x => x.Value);
+            return values;
+        }
+
+        private static string GetClaimValue(ClaimsPrincipal principal, string claimType)
+        {
+            IEnumerable<string> values = GetClaimValues(principal, claimType);
+            string value = values.FirstOrDefault();
+            return value;
+        }
+
         private static TTarget ConvertValue<TSource, TTarget>(string parameterName, TSource value, IHttpActionDescriptor action)
         {
             try
@@ -788,7 +820,7 @@ Either create a mapping or make sure a property of the same name exists in the s
             }
         }
 
-        private static bool IsUri(HttpParameterLocation location) => location == HttpParameterLocation.Query || location == HttpParameterLocation.Path;
+        private static bool IsUri(HttpParameterLocation location) => location is HttpParameterLocation.Query or HttpParameterLocation.Path;
 
         private static Exception CreateException(string message, Exception innerException, IHttpActionDescriptor action, string parameterName)
         {
@@ -876,6 +908,7 @@ Either create a mapping or make sure a property of the same name exists in the s
             public bool IsOptional { get; set; }
             public object DefaultValue { get; private set; }
             public Type InputConverter { get; private set; }                // IFormattedInputConverter<TSource, TTarget>
+            public string ClaimType { get; private set; }                   // IHttpRequestDescriptor.GetClaimValues
             public IHttpParameterConverter Converter { get; private set; }  // CONVERT(value)
             public HttpParameterSourceInfo Source { get; private set; }     // DBX.LocaleId / databaseAccessorFactory
             public HttpItemsParameterInfo Items { get; private set; }       // udt_columnname = ITEM.SomePropertyName
@@ -974,6 +1007,15 @@ Either create a mapping or make sure a property of the same name exists in the s
                 };
                 return parameter;
             }
+            public static HttpParameterInfo Claim(ParameterInfo contractParameter, Type parameterType, string parameterName, string claimType)
+            {
+                HttpParameterInfo parameter = new HttpParameterInfo(HttpParameterLocation.NonUser, HttpParameterSourceKind.Claim, parameterType, parameterName, isOptional: false)
+                {
+                    ContractParameter = contractParameter,
+                    ClaimType = claimType
+                };
+                return parameter;
+            }
         }
 
         private enum HttpParameterSourceKind
@@ -984,7 +1026,8 @@ Either create a mapping or make sure a property of the same name exists in the s
             SourceInstance,
             SourceProperty,
             ConstantValue,
-            Body
+            Body,
+            Claim
         }
 
         private sealed class HttpParameterSourceInfo : IHttpParameterResolutionContext

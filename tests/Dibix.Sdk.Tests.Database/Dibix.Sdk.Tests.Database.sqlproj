@@ -183,6 +183,7 @@
     <None Include="Contracts\AnotherEntry.json" />
     <None Include="Contracts\DuplicatePropertyNameCaseInsensitive.json" />
     <None Include="Contracts\DuplicateContract.json" />
+    <None Include="dibix.json" />
   </ItemGroup>
   <Import Condition="'$(NetCoreBuild)' == 'true'" Project="$(NETCoreTargetsPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
   <ItemGroup>

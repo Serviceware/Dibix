@@ -57,15 +57,20 @@ namespace Dibix.Sdk.CodeGeneration
                 IActionParameterExtensibleFixedPropertySourceDefinition extensiblePropertyDefinition = null;
                 if (_actionParameterSourceRegistry.TryGetDefinition(parameterSource.Name, out ActionParameterSourceDefinition sourceDefinition))
                 {
-                    if (sourceDefinition is IActionParameterExtensibleFixedPropertySourceDefinition extensiblePropertySourceDefinition)
+                    switch (sourceDefinition)
                     {
-                        extensiblePropertyDefinition = extensiblePropertySourceDefinition;
-                    }
-                    else
-                    {
-                        SourceLocation sourceInfo = parameterSource.GetSourceInfo();
-                        _logger.LogError($"Parameter source '{parameterSource.Name}' is already registered", sourceInfo.Source, sourceInfo.Line, sourceInfo.Column);
-                        continue;
+                        case ClaimParameterSource claimParameterSource:
+                            CollectClaimMapping((JObject)parameterSource.Value, claimParameterSource);
+                            return;
+                        
+                        case IActionParameterExtensibleFixedPropertySourceDefinition extensiblePropertySourceDefinition:
+                            extensiblePropertyDefinition = extensiblePropertySourceDefinition;
+                            break;
+
+                        default:
+                            SourceLocation sourceInfo = parameterSource.GetSourceInfo();
+                            _logger.LogError($"Parameter source '{parameterSource.Name}' is already registered", sourceInfo.Source, sourceInfo.Line, sourceInfo.Column);
+                            continue;
                     }
                 }
 
@@ -96,6 +101,29 @@ namespace Dibix.Sdk.CodeGeneration
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(valueType), valueType, null);
+            }
+        }
+
+        private void CollectClaimMapping(JObject claimMappings, ClaimParameterSource claimParameterSource)
+        {
+            foreach (JProperty claimMapping in claimMappings.Properties())
+            {
+                string claimPropertyName = claimMapping.Name;
+                SourceLocation sourceInfo = claimMapping.GetSourceInfo();
+                if (claimParameterSource.TryGetClaimTypeName(claimPropertyName, out string existingClaimTypeName))
+                {
+                    _logger.LogError($"Claim property '{claimPropertyName}' is already registered using claim type '{existingClaimTypeName}'", sourceInfo.Source, sourceInfo.Line, sourceInfo.Column);
+                    continue;
+                }
+
+                string claimTypeName = (string)claimMapping.Value;
+                if (claimParameterSource.TryGetPropertyName(claimTypeName, out string existingClaimPropertyName))
+                {
+                    _logger.LogError($"Claim type '{existingClaimPropertyName}' is already registered using property '{existingClaimPropertyName}'", sourceInfo.Source, sourceInfo.Line, sourceInfo.Column);
+                    continue;
+                }
+
+                claimParameterSource.Register(claimPropertyName, claimTypeName);
             }
         }
 

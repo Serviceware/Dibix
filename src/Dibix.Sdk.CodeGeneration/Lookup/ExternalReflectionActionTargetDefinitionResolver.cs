@@ -101,6 +101,8 @@ namespace Dibix.Sdk.CodeGeneration
                 case ActionParameterBodySource _: return ActionParameterLocation.Body;
 
                 case ActionParameterConstantSource _: return ActionParameterLocation.NonUser;
+                
+                case ActionParameterClaimSource _: return ActionParameterLocation.NonUser;
 
                 case ActionParameterPropertySource actionParameterPropertySource:
                     ActionParameterLocation location = ActionParameterLocation.NonUser;

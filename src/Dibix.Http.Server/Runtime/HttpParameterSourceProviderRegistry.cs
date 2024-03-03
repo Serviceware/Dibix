@@ -15,7 +15,6 @@ namespace Dibix.Http.Server
             Register<HeaderParameterSourceProvider>(HeaderParameterSourceProvider.SourceName);
             Register<RequestParameterSourceProvider>(RequestParameterSourceProvider.SourceName);
             Register<EnvironmentParameterSourceProvider>(EnvironmentParameterSourceProvider.SourceName);
-            Register<ClaimParameterSourceProvider>(ClaimParameterSourceProvider.SourceName);
         }
 
         public static void Register<T>(string name) where T : IHttpParameterSourceProvider, new() => Map.Add(name, new Lazy<IHttpParameterSourceProvider>(() => new T()));

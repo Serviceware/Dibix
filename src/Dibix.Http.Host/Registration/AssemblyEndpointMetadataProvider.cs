@@ -27,7 +27,7 @@ namespace Dibix.Http.Host
                    from controller in area.Controllers
                    from action in controller.Actions
                    let method = action.Method.ToString().ToUpperInvariant()
-                   let url = _endpointUrlBuilder.BuildUrl(controller.AreaName, controller.ControllerName, action.ChildRoute)
+                   let url = _endpointUrlBuilder.BuildUrl(area.Metadata.AreaName, controller.ControllerName, action.ChildRoute)
                    select new EndpointDefinition(method, url, action);
         }
     }

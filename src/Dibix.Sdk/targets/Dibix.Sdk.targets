@@ -190,6 +190,7 @@
     <PropertyGroup Condition="'$(_ProduceEndpoints)' == 'true'">
       <EndpointOutputName>$(AreaName)</EndpointOutputName>
       <_EndpointTargetFileName>$(EndpointOutputName).dbx</_EndpointTargetFileName>
+      <_PackageMetadataFileName>$(EndpointOutputName).PackageMetadata.json</_PackageMetadataFileName>
       <_EndpointIntermediatePackagePath>$(IntermediateOutputPath)$(_EndpointTargetFileName)</_EndpointIntermediatePackagePath>
       <_EndpointSourceName>$(EndpointOutputName).Endpoints</_EndpointSourceName>
       <_EndpointSourceFileName>$(_EndpointSourceName).cs</_EndpointSourceFileName>
@@ -299,6 +300,8 @@
   $(_AccessorSourceFileName)" />
       <_SqlCoreInputItem Include="EndpointTargetFileName
   $(_EndpointSourceFileName)" />
+      <_SqlCoreInputItem Include="PackageMetadataTargetFileName
+  $(_PackageMetadataFileName)" />
       <_SqlCoreInputItem Include="ClientTargetFileName
   $(_ClientSourceFileName)" />
       <_SqlCoreInputItem Include="ModelTargetFileName
@@ -353,6 +356,7 @@ $(_SqlReferencePath)" />
       <_FileWrites Include="$(_EndpointSourceFileName)" />
       <_FileWrites Include="$(_ClientSourceFileName)" />
       <_FileWrites Include="$(_ModelFileName)" />
+      <_FileWrites Include="$(_PackageMetadataFileName)" />
       <_FileWrites Include="@(_DocsFiles)" />
 
       <FileWrites Include="@(_FileWrites->'$(IntermediateOutputPath)%(Identity)')" />
@@ -496,7 +500,8 @@ $(_SqlReferencePath)" />
     <!-- Endpoint assembly & package generation -->
     <PropertyGroup Condition="'$(_ProduceEndpoints)' == 'true'">
       <_EndpointBinaryExt>.dbxc</_EndpointBinaryExt>
-      <_EndpointIntermediateBinaryPath>$(IntermediateOutputPath)$(_EndpointSourceName)$(_EndpointBinaryExt)</_EndpointIntermediateBinaryPath>
+      <_EndpointBinaryFileName>$(_EndpointSourceName)$(_EndpointBinaryExt)</_EndpointBinaryFileName>
+      <_EndpointIntermediateBinaryPath>$(IntermediateOutputPath)$(_EndpointBinaryFileName)</_EndpointIntermediateBinaryPath>
       <_EndpointTargetFrameworkNetFx>net6.0</_EndpointTargetFrameworkNetFx>
       <_EndpointIntermediateProjectFilePath>$(IntermediateOutputPath)$(_EndpointSourceName).csproj</_EndpointIntermediateProjectFilePath>
       <_EndpointIntermediateProjectFileContent>
@@ -578,10 +583,12 @@ $(_SqlReferencePath)" />
   $(AreaName)" />
       <_CreatePackageInputItem Include="ArtifactTargetFileName
   $(_EndpointTargetFileName)" />
+      <_CreatePackageInputItem Include="PackageMetadataFileName
+  $(_PackageMetadataFileName)" />
+      <_CreatePackageInputItem Include="CompiledArtifactFileName
+  $(_EndpointBinaryFileName)" />
       <_CreatePackageInputItem Include="OutputDirectory
   $(IntermediateOutputPath)" />
-      <_CreatePackageInputItem Include="CompiledArtifactPath
-  $(_EndpointIntermediateBinaryPath)" />
     </ItemGroup>
 
     <WriteLinesToFile File="$(_CreatePackageInputFile)"

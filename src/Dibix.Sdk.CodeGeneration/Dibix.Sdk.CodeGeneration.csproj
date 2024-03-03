@@ -19,6 +19,8 @@
     <Compile Include="..\..\shared\Json\JsonSchemaDefinition.cs" Link="Json\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Json\JsonSchemaExtensions.cs" Link="Json\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Json\ValidatingJsonDefinitionReader.cs" Link="Json\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Packaging\ArtifactPackageMetadata.cs" Link="Packaging\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Utilities\MimeTypes.cs" Link="Utilities\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\KnownHeaders.cs" Link="OpenApi\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\ParameterSources\*.cs" Link="Model\%(Filename)%(Extension)" />
   </ItemGroup>

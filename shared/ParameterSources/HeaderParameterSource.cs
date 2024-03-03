@@ -1,7 +1,7 @@
 ﻿namespace Dibix
 {
+    [ActionParameterSource("HEADER")]
     internal sealed class HeaderParameterSource : ActionParameterSourceDefinition<HeaderParameterSource>
     {
-        public override string Name => "HEADER";
     }
 }

@@ -12,9 +12,9 @@
             $audiences = .New Dibix.Http.Server.Tests.HttpParameterResolverTest+StringSet();
             .Try {
                 .Block() {
-                    $audiencesEnumerator = .Call (.Call Dibix.Http.Server.ClaimParameterSourceProvider.GetMultipleClaimValue(
-                        $request,
-                        "Audiences")).GetEnumerator();
+                    $audiencesEnumerator = .Call (.Call Dibix.Http.Server.HttpParameterResolver.GetClaimValues(
+                        .Call $request.GetUser(),
+                        "aud")).GetEnumerator();
                     .Loop  {
                         .If (
                             .IsTrue(.Call $audiencesEnumerator.MoveNext())

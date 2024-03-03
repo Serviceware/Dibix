@@ -105,7 +105,7 @@ CommandText: <Inline>", requestException.Message);
             response.Setup(x => x.Headers).Returns(new HeaderDictionary());
             response.Setup(x => x.StartAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
-            HttpActionDefinition action = Compile(authorizationConfiguration: x => x.ResolveParameterFromSource("userid", "CLAIM", "UserId"));
+            HttpActionDefinition action = Compile(authorizationConfiguration: x => x.ResolveParameterFromClaim("userid", ClaimTypes.NameIdentifier));
             Assert.AreEqual(1, action.RequiredClaims.Count, "action.RequiredClaims.Count");
             Assert.AreEqual(ClaimTypes.NameIdentifier, action.RequiredClaims[0], "action.RequiredClaims[0]");
 

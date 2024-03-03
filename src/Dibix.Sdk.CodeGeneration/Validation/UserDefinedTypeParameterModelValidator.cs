@@ -35,7 +35,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private bool ValidateParameter(ActionParameter parameter, ActionDefinition action)
         {
-            if (!(parameter.Type is SchemaTypeReference parameterSchemaTypeReference))
+            if (parameter.Type is not SchemaTypeReference parameterSchemaTypeReference)
                 return true;
 
             if (_schemaRegistry.GetSchema(parameterSchemaTypeReference) is not UserDefinedTypeSchema userDefinedTypeSchema)
@@ -54,7 +54,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (bodyContract == null) // Already logged at 'TypeResolverFacade.ResolveType'
                 return false;
 
-            if (!(bodyContract is SchemaTypeReference bodySchemaTypeReference))
+            if (bodyContract is not SchemaTypeReference bodySchemaTypeReference)
             {
                 _logger.LogError($"Unexpected request body contract '{bodyContract}'. Expected object schema when mapping complex UDT parameter: @{parameter.InternalParameterName} {userDefinedTypeSchema.UdtName}.", bodyContract.Location.Source, bodyContract.Location.Line, bodyContract.Location.Column);
                 return false;
@@ -79,7 +79,7 @@ namespace Dibix.Sdk.CodeGeneration
                 return false;
             }
 
-            if (!(sourceProperty.Type is SchemaTypeReference sourcePropertySchemaTypeReference))
+            if (sourceProperty.Type is not SchemaTypeReference sourcePropertySchemaTypeReference)
             {
                 _logger.LogError($"Unexpected contract '{sourceProperty.Type?.GetType()}' for source property '{bodySchemaTypeReference.Key}.{sourceProperty.Name.Value}'. Expected object schema when mapping complex UDT parameter: @{parameter.InternalParameterName} {userDefinedTypeSchema.UdtName}.", target.SourceLocation.Source, target.SourceLocation.Line, target.SourceLocation.Column);
                 return false;
@@ -89,7 +89,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (sourcePropertySchema == null) // Already logged at 'SchemaDefinitionResolver.Resolve'
                 return false;
 
-            if (!(sourcePropertySchema is ObjectSchema sourcePropertyObjectSchema))
+            if (sourcePropertySchema is not ObjectSchema sourcePropertyObjectSchema)
             {
                 _logger.LogError($"Unexpected contract '{sourcePropertySchema?.GetType()}' for source property '{bodySchemaTypeReference.Key}.{sourceProperty.Name.Value}'. Expected object schema when mapping complex UDT parameter: @{parameter.InternalParameterName} {userDefinedTypeSchema.UdtName}.", target.SourceLocation.Source, target.SourceLocation.Line, target.SourceLocation.Column);
                 return false;

@@ -322,6 +322,10 @@ namespace Dibix.Sdk.CodeGeneration
                     writer.WriteLine($"{variableName}.ResolveParameterFromBody(\"{parameterName}\", \"{body.ConverterName}\");");
                     break;
 
+                case ActionParameterClaimSource claim:
+                    writer.WriteLine($"{variableName}.ResolveParameterFromClaim(\"{parameterName}\", \"{claim.ClaimType}\");");
+                    break;
+
                 case ActionParameterPropertySource property:
                     writer.Write($"{variableName}.ResolveParameterFromSource(\"{parameterName}\", \"{property.Definition.Name}\", \"{property.PropertyName}\"");
 

@@ -16,10 +16,12 @@
     <Compile Include="..\..\shared\Http\RouteBuilder.cs" Link="Utilities\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Utilities\ExpressionUtility.cs" Link="Utilities\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Utilities\HostNameUtility.cs" Link="Utilities\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Utilities\MimeTypes.cs" Link="Utilities\%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' != 'net48'">
     <Compile Remove="Runtime\HttpObjectResponse.cs" />
+    <Compile Remove="Runtime\HttpRequestMessageExtensions.cs" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' != 'net6.0'">

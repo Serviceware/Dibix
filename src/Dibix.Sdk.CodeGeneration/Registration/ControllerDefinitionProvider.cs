@@ -332,7 +332,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private ActionParameterPropertySourceBuilder ReadPropertySource(JValue value, ActionRequestBody requestBody, ActionParameterPropertySourceBuilder rootParameterSourceBuilder, IReadOnlyDictionary<string, PathParameter> pathParameters)
+        private ActionParameterSourceBuilder ReadPropertySource(JValue value, ActionRequestBody requestBody, ActionParameterPropertySourceBuilder rootParameterSourceBuilder, IReadOnlyDictionary<string, PathParameter> pathParameters)
         {
             string[] parts = ((string)value.Value).Split(new[] { '.' }, 2);
             string sourceName = parts[0];
@@ -343,6 +343,9 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 base.Logger.LogError($"Unknown property source '{sourceName}'", valueLocation.Source, valueLocation.Line, valueLocation.Column);
             }
+
+            if (definition is ClaimParameterSource claimParameterSource)
+                return new StaticActionParameterSourceBuilder(new ActionParameterClaimSource(claimParameterSource.GetClaimTypeName(propertyName)));
 
             ActionParameterPropertySourceBuilder propertySourceBuilder = new ActionParameterPropertySourceBuilder(definition, propertyName, valueLocation);
             CollectPropertySourceNodes(propertySourceBuilder, requestBody, rootParameterSourceBuilder, pathParameters);
@@ -368,7 +371,9 @@ namespace Dibix.Sdk.CodeGeneration
 
         private ActionParameterSourceBuilder ReadPropertyActionParameter(string parameterName, JObject container, JProperty sourceProperty, ActionRequestBody requestBody, IReadOnlyDictionary<string, PathParameter> pathParameters)
         {
-            ActionParameterPropertySourceBuilder propertySourceBuilder = ReadPropertySource((JValue)sourceProperty.Value, requestBody, rootParameterSourceBuilder: null, pathParameters);
+            ActionParameterSourceBuilder sourceBuilder = ReadPropertySource((JValue)sourceProperty.Value, requestBody, rootParameterSourceBuilder: null, pathParameters);
+            if (sourceBuilder is not ActionParameterPropertySourceBuilder propertySourceBuilder)
+                return sourceBuilder;
 
             JProperty itemsProperty = container.Property("items");
             if (itemsProperty != null)

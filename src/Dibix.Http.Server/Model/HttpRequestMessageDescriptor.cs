@@ -24,8 +24,15 @@ namespace Dibix.Http.Server
         public IEnumerable<string> GetHeaderValues(string name) => RequestMessage.Headers.TryGetValues(name, out IEnumerable<string> values) ? values : Enumerable.Empty<string>();
 
         public IEnumerable<string> GetAcceptLanguageValues() => RequestMessage.Headers.AcceptLanguage.Select(x => x.Value);
-        
-        public ClaimsPrincipal GetUser() => throw new NotSupportedException();
+
+        public ClaimsPrincipal GetUser()
+        {
+#if NETFRAMEWORK
+            return RequestMessage.GetUser();
+#else
+            throw new NotSupportedException();
+#endif
+        }
 
         public HttpActionDefinition GetActionDefinition() => throw new NotSupportedException();
 

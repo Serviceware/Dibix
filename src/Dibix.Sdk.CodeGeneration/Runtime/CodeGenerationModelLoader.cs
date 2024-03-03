@@ -25,6 +25,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             CodeGenerationModel model = new CodeGenerationModel
             {
+                ProductName = configuration.ProductName,
                 AreaName = configuration.AreaName,
                 RootNamespace = rootNamespace,
                 DefaultClassName = defaultClassName,
@@ -34,6 +35,7 @@ namespace Dibix.Sdk.CodeGeneration
                 OutputDirectory = configuration.OutputDirectory,
                 AccessorTargetFileName = configuration.AccessorTargetFileName,
                 EndpointTargetFileName = configuration.EndpointTargetFileName,
+                PackageMetadataTargetFileName = configuration.PackageMetadataTargetFileName,
                 ClientTargetFileName = configuration.ClientTargetFileName,
                 ModelTargetFileName = configuration.ModelTargetFileName,
                 DocumentationTargetName = configuration.DocumentationTargetName,

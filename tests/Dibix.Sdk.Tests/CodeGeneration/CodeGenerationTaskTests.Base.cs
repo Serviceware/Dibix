@@ -29,11 +29,11 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             const string accessorTargetName = "TestAccessor";
             const string accessorTargetFileName = $"{accessorTargetName}.cs";
             const string endpointTargetFileName = $"{areaName}.Endpoints.cs";
+            const string packageMetadataTargetFileName = $"{areaName}.PackageMetadata.json";
             const string clientTargetFileName = $"{areaName}.Client.cs";
             const string modelTargetFileName = $"{accessorTargetName}.model.json";
             const string documentationTargetName = areaName;
 
-            ICollection<TaskItem> endpointItems = (endpoints ?? Enumerable.Empty<string>()).Select(ToTaskItem).ToArray();
             TestLogger logger = new TestLogger(base.Out, distinctErrorLogging: true);
 
             string inputConfigurationPath = base.AddResultFile("core.input", $@"ProjectName
@@ -64,6 +64,8 @@ AccessorTargetFileName
   {accessorTargetFileName}
 EndpointTargetFileName
   {(outputKind == AssertOutputKind.Endpoint ? endpointTargetFileName : null)}
+PackageMetadataTargetFileName
+  {(outputKind == AssertOutputKind.Endpoint ? packageMetadataTargetFileName : null)}
 ClientTargetFileName
   {(outputKind == AssertOutputKind.Client ? clientTargetFileName : null)}
 ModelTargetFileName

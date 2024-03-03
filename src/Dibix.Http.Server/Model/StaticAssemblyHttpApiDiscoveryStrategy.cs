@@ -15,7 +15,7 @@ namespace Dibix.Http.Server
             foreach (Assembly assembly in _assemblies)
             {
                 HttpApiDescriptor descriptor = CollectApiDescriptor(assembly);
-                descriptor.AreaName = ResolveAreaName(assembly);
+                descriptor.Metadata.AreaName = ResolveAreaName(assembly);
                 yield return descriptor;
             }
         }

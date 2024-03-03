@@ -10,14 +10,14 @@ namespace Dibix.Sdk.CodeGeneration
 
         public ActionParameterSourceRegistry()
         {
-            Register<EnvironmentParameterSource, EnvironmentPropertySourceValidator>();
-            Register<BodyParameterSource, BodyPropertySourceValidator>();
-            Register<ItemParameterSource, ItemPropertySourceValidator>();
-            Register<HeaderParameterSource, HeaderPropertySourceValidator>();
-            Register<PathParameterSource, PathPropertySourceValidator>();
-            Register<QueryParameterSource, QueryPropertySourceValidator>();
-            Register<RequestParameterSource, RequestPropertySourceValidator>();
-            Register<ClaimParameterSource, ClaimPropertySourceValidator>();
+            Register<EnvironmentParameterSource, EnvironmentPropertySourceValidator>(x => new EnvironmentPropertySourceValidator(x));
+            Register<BodyParameterSource, BodyPropertySourceValidator>(x => new BodyPropertySourceValidator(x));
+            Register<ItemParameterSource, ItemPropertySourceValidator>(x => new ItemPropertySourceValidator(x));
+            Register<HeaderParameterSource, HeaderPropertySourceValidator>(x => new HeaderPropertySourceValidator(x));
+            Register<PathParameterSource, PathPropertySourceValidator>(x => new PathPropertySourceValidator(x));
+            Register<QueryParameterSource, QueryPropertySourceValidator>(x => new QueryPropertySourceValidator(x));
+            Register<RequestParameterSource, RequestPropertySourceValidator>(x => new RequestPropertySourceValidator(x));
+            Register<ClaimParameterSource, ClaimPropertySourceValidator>(x => new ClaimPropertySourceValidator(x));
         }
 
         void IActionParameterSourceRegistry.Register<TSource>(TSource source, Func<TSource, IActionParameterPropertySourceValidator> validatorFactory)
@@ -30,11 +30,11 @@ namespace Dibix.Sdk.CodeGeneration
 
         bool IActionParameterSourceRegistry.TryGetValidator<TSource>(TSource source, out IActionParameterPropertySourceValidator validator) => this._validatorMap.TryGetValue(source, out validator);
 
-        private void Register<TSource, TValidator>() where TSource : ActionParameterSourceDefinition<TSource>, new() where TValidator : ActionParameterPropertySourceValidator<TSource>, new()
+        private void Register<TSource, TValidator>(Func<TSource, TValidator> validatorFactory) where TSource : ActionParameterSourceDefinition<TSource>, new() where TValidator : ActionParameterPropertySourceValidator<TSource>
         {
-            TSource source = ActionParameterSourceDefinition<TSource>.Instance;
+            TSource source = new TSource();
             RegisterSource(source);
-            RegisterValidator(source, new TValidator());
+            RegisterValidator(source, validatorFactory(source));
         }
 
         private void RegisterSource(ActionParameterSourceDefinition source)

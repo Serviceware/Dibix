@@ -1,7 +1,7 @@
 ﻿namespace Dibix
 {
+    [ActionParameterSource("BODY")]
     internal sealed class BodyParameterSource : ActionParameterSourceDefinition<BodyParameterSource>
     {
-        public override string Name => "BODY";
     }
 }

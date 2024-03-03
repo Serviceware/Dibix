@@ -5,6 +5,7 @@ namespace Dibix.Http.Server
 {
     public interface IHttpActionDescriptor
     {
+        EndpointMetadata Metadata { get; }
         MethodInfo Target { get; }
         HttpApiMethod Method { get; }
         Uri Uri { get; }

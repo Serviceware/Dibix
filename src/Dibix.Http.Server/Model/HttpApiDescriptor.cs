@@ -8,20 +8,9 @@ namespace Dibix.Http.Server
 {
     public abstract class HttpApiDescriptor
     {
-        #region Fields
-        private string _areaName;
-        #endregion
-
         #region Properties
-        // Lazy, because it is not supported on all platforms
-        // See HttpControllerDefinition.get_ProductName
-        public string ProductName { get; set; }
-        public string AreaName
-        {
-            get => _areaName ?? throw new InvalidOperationException($"{nameof(AreaName)} is not initialized");
-            set => _areaName = value;
-        }
         public ICollection<HttpControllerDefinition> Controllers { get; } = new Collection<HttpControllerDefinition>();
+        public EndpointMetadata Metadata { get; } = new EndpointMetadata();
         #endregion
 
         #region Abstract Methods
@@ -32,7 +21,7 @@ namespace Dibix.Http.Server
         protected void RegisterController(string controllerName, Action<IHttpControllerDefinitionBuilder> setupAction)
         {
             Guard.IsNotNullOrEmpty(controllerName, nameof(controllerName));
-            HttpControllerDefinitionBuilder builder = new HttpControllerDefinitionBuilder(ProductName, AreaName, controllerName);
+            HttpControllerDefinitionBuilder builder = new HttpControllerDefinitionBuilder(Metadata, controllerName);
             setupAction(builder);
             HttpControllerDefinition controller = builder.Build();
             Controllers.Add(controller);
@@ -42,16 +31,14 @@ namespace Dibix.Http.Server
         #region Nested Types
         private sealed class HttpControllerDefinitionBuilder : IHttpControllerDefinitionBuilder
         {
-            private readonly string _productName;
-            private readonly string _areaName;
+            private readonly EndpointMetadata _endpointMetadata;
             private readonly string _controllerName;
             private readonly IList<HttpActionDefinitionBuilder> _actions;
             private readonly IList<string> _controllerImports;
 
-            internal HttpControllerDefinitionBuilder(string productName, string areaName, string controllerName)
+            internal HttpControllerDefinitionBuilder(EndpointMetadata endpointMetadata, string controllerName)
             {
-                _productName = productName;
-                _areaName = areaName;
+                _endpointMetadata = endpointMetadata;
                 _controllerName = controllerName;
                 _actions = new Collection<HttpActionDefinitionBuilder>();
                 _controllerImports = new Collection<string>();
@@ -60,7 +47,7 @@ namespace Dibix.Http.Server
             public void AddAction(IHttpActionTarget target, Action<IHttpActionDefinitionBuilder> setupAction)
             {
                 Guard.IsNotNull(setupAction, nameof(setupAction));
-                HttpActionDefinitionBuilder builder = new HttpActionDefinitionBuilder(_areaName, _controllerName, target);
+                HttpActionDefinitionBuilder builder = new HttpActionDefinitionBuilder(_endpointMetadata, _controllerName, target);
                 setupAction(builder);
                 _actions.Add(builder);
             }
@@ -70,7 +57,7 @@ namespace Dibix.Http.Server
             public HttpControllerDefinition Build()
             {
                 IList<HttpActionDefinition> actions = _actions.Select(x => x.Build()).ToArray();
-                HttpControllerDefinition controller = new HttpControllerDefinition(_productName, _areaName, _controllerName, actions, _controllerImports);
+                HttpControllerDefinition controller = new HttpControllerDefinition(_endpointMetadata, _controllerName, actions, _controllerImports);
                 foreach (HttpActionDefinition action in actions)
                 {
                     action.Controller = controller;
@@ -81,14 +68,14 @@ namespace Dibix.Http.Server
 
         private sealed class HttpActionDefinitionBuilder : HttpActionBuilderBase, IHttpActionDefinitionBuilder, IHttpActionBuilderBase, IHttpParameterSourceSelector, IHttpActionDescriptor
         {
-            private readonly string _areaName;
             private readonly string _controllerName;
             private HttpAuthorizationBuilder _authorization;
             private Uri _uri;
 
+            public EndpointMetadata Metadata { get; }
             public MethodInfo Target { get; }
             public HttpApiMethod Method { get; set; }
-            public Uri Uri => _uri ??= new Uri(RouteBuilder.BuildRoute(_areaName, _controllerName, ChildRoute), UriKind.Relative);
+            public Uri Uri => _uri ??= new Uri(RouteBuilder.BuildRoute(Metadata.AreaName, _controllerName, ChildRoute), UriKind.Relative);
             public string ChildRoute { get; set; }
             public Type BodyContract { get; set; }
             public Type BodyBinder { get; set; }
@@ -98,9 +85,9 @@ namespace Dibix.Http.Server
             public IDictionary<int, HttpErrorResponse> StatusCodeDetectionResponses { get; }
             public Delegate Delegate { get; set; }
 
-            public HttpActionDefinitionBuilder(string areaName, string controllerName, IHttpActionTarget target)
+            public HttpActionDefinitionBuilder(EndpointMetadata endpointMetadata, string controllerName, IHttpActionTarget target)
             {
-                _areaName = areaName;
+                Metadata = endpointMetadata;
                 _controllerName = controllerName;
                 Target = target.Build();
                 StatusCodeDetectionResponses = new Dictionary<int, HttpErrorResponse>(HttpStatusCodeDetectionMap.Defaults);
@@ -140,11 +127,7 @@ namespace Dibix.Http.Server
                     Delegate = Delegate
                 };
                 action.SecuritySchemes.AddRange(SecuritySchemes);
-                action.RequiredClaims.AddRange(ParameterSources.Concat(_authorization?.ParameterSources ?? Enumerable.Empty<KeyValuePair<string, HttpParameterSource>>())
-                                                               .Select(x => x.Value)
-                                                               .OfType<HttpParameterPropertySource>()
-                                                               .Where(x => x.SourceName == ClaimParameterSource.SourceName)
-                                                               .Select(x => ClaimParameterSource.GetBuiltInClaimTypeOrDefault(x.PropertyPath)));
+                action.RequiredClaims.AddRange(RequiredClaims);
                 action.StatusCodeDetectionResponses.AddRange(StatusCodeDetectionResponses);
                 return action;
             }
@@ -152,16 +135,18 @@ namespace Dibix.Http.Server
 
         private sealed class HttpAuthorizationBuilder : HttpActionBuilderBase, IHttpAuthorizationBuilder, IHttpActionDescriptor, IHttpActionBuilderBase, IHttpParameterSourceSelector
         {
-            private readonly IHttpActionDescriptor _parent;
+            private readonly HttpActionDefinitionBuilder _parent;
 
+            public EndpointMetadata Metadata => _parent.Metadata;
             public MethodInfo Target { get; }
             public HttpApiMethod Method => _parent.Method;
             public Uri Uri => _parent.Uri;
             public string ChildRoute => _parent.ChildRoute;
             public Type BodyContract => _parent.BodyContract;
             public Type BodyBinder => _parent.BodyBinder;
+            protected internal override ICollection<string> RequiredClaims => _parent.RequiredClaims;
 
-            public HttpAuthorizationBuilder(IHttpActionDescriptor parent, IHttpActionTarget target)
+            public HttpAuthorizationBuilder(HttpActionDefinitionBuilder parent, IHttpActionTarget target)
             {
                 _parent = parent;
                 Target = target.Build();
@@ -184,9 +169,17 @@ namespace Dibix.Http.Server
 
         private abstract class HttpActionBuilderBase : HttpParameterSourceSelector, IHttpActionBuilderBase, IHttpParameterSourceSelector
         {
+            protected internal virtual ICollection<string> RequiredClaims { get; } = new HashSet<string>();
+
             public void ResolveParameterFromBody(string targetParameterName, string bodyConverterName)
             {
                 base.ResolveParameter(targetParameterName, new HttpParameterBodySource(bodyConverterName));
+            }
+
+            public void ResolveParameterFromClaim(string targetParameterName, string claimType)
+            {
+                ResolveParameter(targetParameterName, new HttpParameterClaimSource(claimType));
+                RequiredClaims.Add(claimType);
             }
 
             public void ResolveParameterFromSource(string targetParameterName, string sourceName, string sourcePropertyName, Action<IHttpParameterSourceSelector> itemSources)

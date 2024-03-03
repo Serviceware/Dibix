@@ -219,24 +219,31 @@
       "additionalProperties": false,
       "minProperties": 1
     },
+    "ClaimParameterSourceConfiguration": {
+      "type": "object",
+      "patternProperties": {
+        "^[A-Z]([A-Za-z]+)?$": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 1
+    },
     "HttpParameterSourceConfiguration": {
       "type": "object",
       "patternProperties": {
-        "^[A-Z]+$": {
-          "anyOf": [
-            {
-              "type": "array",
-              "minItems": 1,
-              "uniqueItems": true,
-              "items": {
-                "type": "string",
-                "pattern": "^([A-Za-z-]+)|\\$SELF$$"
-              }
-            },
-            {
-              "type": "null"
-            }
-          ]
+        "^CLAIM$": {
+          "$ref": "#/definitions/ClaimParameterSourceConfiguration"
+        },
+        "^(?!CLAIM$)[A-Z]+$": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^(([A-Za-z-]+)|\\$SELF)$"
+          }
         }
       },
       "additionalProperties": false,

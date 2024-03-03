@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Dibix.Sdk.Abstractions;
+﻿using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
 {

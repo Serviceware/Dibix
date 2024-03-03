@@ -3,9 +3,9 @@ using System.Collections.ObjectModel;
 
 namespace Dibix
 {
+    [ActionParameterSource("ENV")]
     internal sealed class EnvironmentParameterSource : ActionParameterSourceDefinition<EnvironmentParameterSource>, IActionParameterFixedPropertySourceDefinition
     {
-        public override string Name => "ENV";
         public ICollection<string> Properties { get; } = new Collection<string>
         {
             "CurrentProcessId",

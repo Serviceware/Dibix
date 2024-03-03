@@ -26,13 +26,13 @@ namespace Dibix.Http.Host
         public IEnumerable<string> GetHeaderValues(string name) => _request.Headers[name];
         
         public IEnumerable<string> GetAcceptLanguageValues() => _request.GetTypedHeaders().AcceptLanguage.Select(x => x.Value.Value).Where(x => x != null).Select(x => x!);
-        
+
         public ClaimsPrincipal GetUser() => _request.HttpContext.User;
-        
+
         public HttpActionDefinition GetActionDefinition() => _request.HttpContext.GetEndpointDefinition().ActionDefinition;
 
         public string? GetRemoteAddress() => _request.HttpContext.Connection.RemoteIpAddress?.ToString();
-        
+
         public string? GetRemoteName()
         {
             string? remoteAddress = GetRemoteAddress();

@@ -702,11 +702,41 @@ en                ", clientLanguages.Dump());
         private static void Compile_EnvironmentSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, string machinename, int pid) { }
 
         [TestMethod]
-        public void Compile_ClaimSource()
+        public void Compile_ClaimSource_Single()
         {
             HttpActionDefinition action = Compile(x =>
             {
-                x.ResolveParameterFromSource("audiences", "CLAIM", "Audiences");
+                x.ResolveParameterFromClaim("userid", ClaimTypes.NameIdentifier);
+            });
+            Assert.AreEqual(1, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            Assert.AreEqual(ClaimTypes.NameIdentifier, action.RequiredClaims[0], "action.RequiredClaims[0]");
+            IHttpParameterResolutionMethod method = action.ParameterResolver;
+            AssertGeneratedText(method.Source);
+            Assert.IsFalse(method.Parameters.Any());
+
+            Mock<IHttpRequestDescriptor> request = new Mock<IHttpRequestDescriptor>(MockBehavior.Strict);
+            IDictionary<string, object> arguments = new Dictionary<string, object>();
+            Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
+            Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
+
+            request.Setup(x => x.GetUser()).Returns(new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, "User1") })));
+            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
+
+            method.PrepareParameters(request.Object, arguments, dependencyResolver.Object);
+
+            Assert.AreEqual(2, arguments.Count);
+            Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
+            Assert.AreEqual("User1", arguments["userid"]);
+            dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
+        }
+        private static void Compile_ClaimSource_Single_Target(IDatabaseAccessorFactory databaseAccessorFactory, string userid) { }
+
+        [TestMethod]
+        public void Compile_ClaimSource_Multiple()
+        {
+            HttpActionDefinition action = Compile(x =>
+            {
+                x.ResolveParameterFromClaim("audiences", "aud");
             });
             Assert.AreEqual(1, action.RequiredClaims.Count, "action.RequiredClaims.Count");
             Assert.AreEqual("aud", action.RequiredClaims[0], "action.RequiredClaims[0]");
@@ -737,6 +767,6 @@ Audience1
 Audience2         ", audiences.Dump());
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
-        private static void Compile_ClaimSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, StringSet audiences) { }
+        private static void Compile_ClaimSource_Multiple_Target(IDatabaseAccessorFactory databaseAccessorFactory, StringSet audiences) { }
     }
 }

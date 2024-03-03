@@ -23,7 +23,7 @@ namespace Dibix.Http.Server.Tests
 
         private HttpActionDefinition Compile(Action<IHttpActionDefinitionBuilder> actionConfiguration = null, Action<IHttpAuthorizationBuilder> authorizationConfiguration = null)
         {
-            HttpApiRegistration registration = new HttpApiRegistration(base.TestContext.TestName, actionConfiguration, authorizationConfiguration) { AreaName = "Dibix" };
+            HttpApiRegistration registration = new HttpApiRegistration(base.TestContext.TestName, actionConfiguration, authorizationConfiguration) { Metadata = { AreaName = "Dibix" } };
             registration.Configure(null);
             HttpActionDefinition action = registration.Controllers.Single().Actions.Single();
             return action;

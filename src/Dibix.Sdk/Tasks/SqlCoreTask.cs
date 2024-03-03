@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
+﻿using System.IO;
 using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.CodeAnalysis;
 using Dibix.Sdk.CodeGeneration;
@@ -27,6 +25,7 @@ namespace Dibix.Sdk
     [TaskProperty("AccessorTargetName", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
     [TaskProperty("AccessorTargetFileName", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
     [TaskProperty("EndpointTargetFileName", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
+    [TaskProperty("PackageMetadataTargetFileName", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
     [TaskProperty("ClientTargetFileName", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
     [TaskProperty("ModelTargetFileName", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
     [TaskProperty("DocumentationTargetName", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
@@ -76,6 +75,7 @@ namespace Dibix.Sdk
                 AccessorTargetName = _configuration.ArtifactGeneration.AccessorTargetName,
                 AccessorTargetFileName = _configuration.ArtifactGeneration.AccessorTargetFileName,
                 EndpointTargetFileName = _configuration.ArtifactGeneration.EndpointTargetFileName,
+                PackageMetadataTargetFileName = _configuration.ArtifactGeneration.PackageMetadataTargetFileName,
                 ClientTargetFileName = _configuration.ArtifactGeneration.ClientTargetFileName,
                 ModelTargetFileName = _configuration.ArtifactGeneration.ModelTargetFileName,
                 DocumentationTargetName = _configuration.ArtifactGeneration.DocumentationTargetName,

@@ -4,7 +4,10 @@
     "ParameterSources": {
       "DBX": [
         "X"
-      ]
+      ],
+      "CLAIM": {
+        "Id": "sub"
+      }
     },
     "Converters": [
       "DBX"

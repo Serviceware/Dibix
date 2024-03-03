@@ -16,6 +16,7 @@ namespace Dibix.Sdk.CodeGeneration
         public string AccessorTargetName { get; set; }
         public string AccessorTargetFileName { get; set; }
         public string EndpointTargetFileName { get; set; }
+        public string PackageMetadataTargetFileName { get; set; }
         public string ClientTargetFileName { get; set; }
         public string ModelTargetFileName { get; set; }
         public string DocumentationTargetName { get; set; }
