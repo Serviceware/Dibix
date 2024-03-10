@@ -1,6 +1,9 @@
 ﻿{
   "GridResult": {
     "Item": "Extension.MultiMapContract",
-    "Directions": "Direction*"
+    "Directions": {
+      "type": "Direction*",
+      "serialize": "IfNotEmpty"
+    }
   }
 }

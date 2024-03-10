@@ -12,6 +12,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
+using System.Linq;
 using System.Runtime.Serialization;
 using Dibix;
 using Newtonsoft.Json;
@@ -112,6 +113,11 @@ namespace Dibix.Sdk.Tests.DomainModel.Grid
         public GridResult()
         {
             Directions = new Collection<Dibix.Sdk.Tests.DomainModel.Direction>();
+        }
+
+        public bool ShouldSerializeDirections()
+        {
+            return Directions.Any();
         }
     }
 }

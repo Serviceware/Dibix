@@ -71,20 +71,34 @@ namespace Dibix.Sdk.CodeGeneration
 
         protected override void EndProcessClass(ObjectSchema schema, CSharpClass @class, CodeGenerationContext context)
         {
-            ICollection<string> shouldSerializeMethods = schema.Properties
-                                                               .Where(x => x.SerializationBehavior == SerializationBehavior.IfNotEmpty && x.Type.IsEnumerable)
-                                                               .Select(x => x.Name.Value)
-                                                               .ToArray();
-            if (!shouldSerializeMethods.Any()) 
+            HandleEmptyCollectionProperties(schema, @class, context, _serializerFlavor);
+        }
+
+        private static void HandleEmptyCollectionProperties(ObjectSchema schema, CSharpClass @class, CodeGenerationContext context, JsonSerializerFlavor serializerFlavor)
+        {
+            if (serializerFlavor != JsonSerializerFlavor.NewtonsoftJson)
                 return;
 
+            ICollection<string> properties = schema.Properties
+                                                   .Where(x => x.SerializationBehavior == SerializationBehavior.IfNotEmpty && x.Type.IsEnumerable)
+                                                   .Select(x => x.Name.Value)
+                                                   .ToArray();
+
+            if (!properties.Any())
+                return;
+
+            AppendShouldSerializeMethods(schema, @class, context, properties);
+        }
+
+        private static void AppendShouldSerializeMethods(ObjectSchema schema, CSharpClass @class, CodeGenerationContext context, IEnumerable<string> properties)
+        {
             context.AddUsing(typeof(Enumerable).Namespace); // Enumerable.Any();
 
             @class.AddSeparator();
 
-            foreach (string shouldSerializeMethod in shouldSerializeMethods)
+            foreach (string property in properties)
             {
-                @class.AddMethod($"ShouldSerialize{shouldSerializeMethod}", "bool", $"return {shouldSerializeMethod}.Any();"); // Serialization
+                @class.AddMethod($"ShouldSerialize{property}", "bool", $"return {property}.Any();"); // Serialization
             }
         }
 
@@ -96,7 +110,12 @@ namespace Dibix.Sdk.CodeGeneration
                     break;
 
                 case SerializationBehavior.IfNotEmpty:
-                    if (!property.Type.IsEnumerable)
+                    if (property.Type.IsEnumerable)
+                    {
+                        if (_serializerFlavor == JsonSerializerFlavor.SystemTextJson)
+                            propertyAnnotations.Add(new CSharpAnnotation("IgnoreSerializationIfEmptyAttribute"));
+                    }
+                    else
                     {
                         AddJsonSerializerReference(context);
                         propertyAnnotations.Add(CollectJsonIgnoreNullAnnotation()); // Serialization

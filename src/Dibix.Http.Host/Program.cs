@@ -8,11 +8,13 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors.Infrastructure;
+using Microsoft.AspNetCore.Http.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Dibix.Http.Host
 {
@@ -43,7 +45,8 @@ namespace Dibix.Http.Host
                     .AddScoped<IHttpActionDelegator, HttpActionDelegator>()
                     .AddTransient<IClaimsTransformation, ComposableClaimsTransformation>()
                     .AddScoped<IJwtAudienceProvider, EndpointJwtAudienceProvider>()
-                    .AddScoped<EndpointMetadataContext>();
+                    .AddScoped<EndpointMetadataContext>()
+                    .AddTransient<IPostConfigureOptions<JsonOptions>, JsonPostConfigureOptions>();
 
             services.AddEventLogOptions();
 
