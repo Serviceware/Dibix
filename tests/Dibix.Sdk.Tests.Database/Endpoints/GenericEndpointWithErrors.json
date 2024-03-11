@@ -6,7 +6,8 @@
       "target": "EmptyWithParams",
       "params": {
         "a": "WTF.Is.This",
-        "b": "ENV.MachinePassword"
+        "b": "ENV.MachinePassword",
+        "c": "CLAIM.None"
       },
       "authorization": "none"
     },

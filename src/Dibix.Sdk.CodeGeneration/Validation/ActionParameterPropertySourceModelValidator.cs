@@ -33,23 +33,27 @@ namespace Dibix.Sdk.CodeGeneration
             return result;
         }
 
-        private bool ValidateSource(ActionParameter rootParameter, ActionParameterInfo currentParameter, ActionParameterSource currentValue, ActionParameterPropertySource parentValue, ActionDefinition action)
+        private bool ValidateSource(ActionParameter rootParameter, ActionParameterInfo currentParameter, ActionParameterSource currentValue, IActionParameterPropertySource parentValue, ActionDefinition action)
         {
-            if (currentValue is not ActionParameterPropertySource propertySource) 
+            if (currentValue is not IActionParameterPropertySource propertySource) 
                 return true;
 
             bool result = ValidatePropertySource(rootParameter, currentParameter, propertySource, parentValue, action);
 
-            foreach (ActionParameterItemSource itemPropertySource in propertySource.ItemSources)
+            if (propertySource is IActionParameterNestedPropertySource nestedPropertySource)
             {
-                if (!ValidateSource(rootParameter, new ActionParameterInfo(itemPropertySource.ParameterName, itemPropertySource.Location), itemPropertySource.Source, propertySource, action))
-                    result = false;
+                foreach (ActionParameterItemSource itemPropertySource in nestedPropertySource.ItemSources)
+                {
+                    if (!ValidateSource(rootParameter, new ActionParameterInfo(itemPropertySource.ParameterName, itemPropertySource.Location), itemPropertySource.Source, propertySource, action))
+                        result = false;
+                }
             }
 
             return result;
+
         }
 
-        private bool ValidatePropertySource(ActionParameter rootParameter, ActionParameterInfo currentParameter, ActionParameterPropertySource currentValue, ActionParameterPropertySource parentValue, ActionDefinition action)
+        private bool ValidatePropertySource(ActionParameter rootParameter, ActionParameterInfo currentParameter, IActionParameterPropertySource currentValue, IActionParameterPropertySource parentValue, ActionDefinition action)
         {
             if (currentValue.Definition == null) // Unknown source is logged at ControllerDefinitionProvider.ReadPropertySource
                 return false;

@@ -7,7 +7,7 @@ namespace Dibix.Sdk.CodeGeneration
     {
         public ItemPropertySourceValidator(ItemParameterSource definition) : base(definition) { }
 
-        public override bool Validate(ActionParameter rootParameter, ActionParameterInfo currentParameter, ActionParameterPropertySource currentValue, ActionParameterPropertySource parentValue, ActionDefinition actionDefinition, ISchemaRegistry schemaRegistry, ILogger logger)
+        public override bool Validate(ActionParameter rootParameter, ActionParameterInfo currentParameter, IActionParameterPropertySource currentValue, IActionParameterPropertySource parentValue, ActionDefinition actionDefinition, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             if (parentValue == null)
                 throw new ArgumentNullException(nameof(parentValue), "Item property source must map from a parent property source");

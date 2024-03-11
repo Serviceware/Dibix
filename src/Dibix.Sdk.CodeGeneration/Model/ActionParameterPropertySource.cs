@@ -4,7 +4,7 @@ using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class ActionParameterPropertySource : ActionParameterSource
+    internal sealed class ActionParameterPropertySource : ActionParameterSource, IActionParameterPropertySource, IActionParameterNestedPropertySource
     {
         public ActionParameterSourceDefinition Definition { get; }
         public string PropertyName { get; }

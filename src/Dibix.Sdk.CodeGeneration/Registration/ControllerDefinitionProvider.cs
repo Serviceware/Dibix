@@ -345,7 +345,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             if (definition is ClaimParameterSource claimParameterSource)
-                return new StaticActionParameterSourceBuilder(new ActionParameterClaimSource(claimParameterSource.GetClaimTypeName(propertyName)));
+                return new StaticActionParameterSourceBuilder(new ActionParameterClaimSource(claimParameterSource, propertyName, valueLocation));
 
             ActionParameterPropertySourceBuilder propertySourceBuilder = new ActionParameterPropertySourceBuilder(definition, propertyName, valueLocation);
             CollectPropertySourceNodes(propertySourceBuilder, requestBody, rootParameterSourceBuilder, pathParameters);
