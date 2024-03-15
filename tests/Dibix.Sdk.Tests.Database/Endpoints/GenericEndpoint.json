@@ -36,6 +36,18 @@
     },
     {
       "method": "GET",
+      "target": "EmptyWithParamsAndComplexUdt",
+      "childRoute": "UDT",
+      "authorization": "none"
+    },
+    {
+      "method": "GET",
+      "target": "EmptyWithOutputParam",
+      "childRoute": "Out",
+      "authorization": "none"
+    },
+    {
+      "method": "GET",
       "target": "SingleConrecteResultWithParams",
       "childRoute": "User/{id}/{name}",
       "authorization": "none",
@@ -97,7 +109,7 @@
     },
     {
       "method": "PATCH",
-      "target": "EmptyWithParams",
+      "target": "EmptyWithParamsAndComplexUdt",
       "body": "AnotherInputContract",
       "params": {
         "ids": {

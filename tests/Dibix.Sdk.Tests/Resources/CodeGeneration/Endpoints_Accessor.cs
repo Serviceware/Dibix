@@ -31,8 +31,14 @@ namespace Dibix.Sdk.Tests.Data
         // AssertAuthorized
         private const string AssertAuthorizedCommandText = "[dbo].[dbx_tests_authorization]";
 
+        // EmptyWithOutputParam
+        private const string EmptyWithOutputParamCommandText = "[dbo].[dbx_tests_syntax_empty_params_out]";
+
         // EmptyWithParams
         private const string EmptyWithParamsCommandText = "[dbo].[dbx_tests_syntax_empty_params]";
+
+        // EmptyWithParamsAndComplexUdt
+        private const string EmptyWithParamsAndComplexUdtCommandText = "[dbo].[dbx_tests_syntax_empty_params_udt]";
 
         // FileResult
         private const string FileResultCommandText = "[dbo].[dbx_tests_syntax_fileresult]";
@@ -63,7 +69,20 @@ namespace Dibix.Sdk.Tests.Data
             }
         }
 
-        public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake")
+        public static short EmptyWithOutputParam(this IDatabaseAccessorFactory databaseAccessorFactory, out short a)
+        {
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
+            {
+                ParametersVisitor @params = accessor.Parameters()
+                                                    .SetInt16(nameof(a), out IOutParameter<short> aOutput)
+                                                    .Build();
+                short result = accessor.QuerySingle<short>(EmptyWithOutputParamCommandText, CommandType.StoredProcedure, @params);
+                a = aOutput.Result;
+                return result;
+            }
+        }
+
+        public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.IntParameterSet ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake")
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
@@ -82,6 +101,28 @@ namespace Dibix.Sdk.Tests.Data
                                                     .SetString(nameof(g), g, size: 50)
                                                     .Build();
                 accessor.Execute(EmptyWithParamsCommandText, CommandType.StoredProcedure, @params);
+            }
+        }
+
+        public static void EmptyWithParamsAndComplexUdt(this IDatabaseAccessorFactory databaseAccessorFactory, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake")
+        {
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
+            {
+                ParametersVisitor @params = accessor.Parameters()
+                                                    .SetFromTemplate(new
+                                                    {
+                                                        c,
+                                                        ids,
+                                                        e,
+                                                        f,
+                                                    })
+                                                    .SetString(nameof(a), a, size: 50)
+                                                    .SetString(nameof(b), b, size: 50)
+                                                    .SetString(nameof(password), password, size: 128, obfuscate: true)
+                                                    .SetString(nameof(d), d, size: 50)
+                                                    .SetString(nameof(g), g, size: 50)
+                                                    .Build();
+                accessor.Execute(EmptyWithParamsAndComplexUdtCommandText, CommandType.StoredProcedure, @params);
             }
         }
 
@@ -311,6 +352,18 @@ namespace Dibix.Sdk.Tests.Business
                     action.ChildRoute = "{password}/User";
                     action.SecuritySchemes.Add("Anonymous");
                 });
+                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParamsAndComplexUdt)), action =>
+                {
+                    action.Method = HttpApiMethod.Get;
+                    action.ChildRoute = "UDT";
+                    action.SecuritySchemes.Add("DBXNS-SIT");
+                });
+                controller.AddAction(ReflectionHttpActionTarget.Create(context, typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithOutputParam)), action =>
+                {
+                    action.Method = HttpApiMethod.Get;
+                    action.ChildRoute = "Out";
+                    action.SecuritySchemes.Add("DBXNS-SIT");
+                });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.SingleConrecteResultWithParamsAsync)), action =>
                 {
                     action.Method = HttpApiMethod.Get;
@@ -347,7 +400,7 @@ namespace Dibix.Sdk.Tests.Business
                     action.SecuritySchemes.Add("DBXNS-SIT");
                     action.ResolveParameterFromBody("ids", "Dibix.GenericContractIdsInputConverter");
                 });
-                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
+                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParamsAndComplexUdt)), action =>
                 {
                     action.Method = HttpApiMethod.Patch;
                     action.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.AnotherInputContract);

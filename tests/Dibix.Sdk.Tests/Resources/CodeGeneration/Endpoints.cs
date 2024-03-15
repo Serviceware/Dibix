@@ -33,8 +33,14 @@ namespace Dibix.Sdk.Tests.Data
         // AssertAuthorized
         private const string AssertAuthorizedCommandText = "[dbo].[dbx_tests_authorization]";
 
+        // EmptyWithOutputParam
+        private const string EmptyWithOutputParamCommandText = "[dbo].[dbx_tests_syntax_empty_params_out]";
+
         // EmptyWithParams
         private const string EmptyWithParamsCommandText = "[dbo].[dbx_tests_syntax_empty_params]";
+
+        // EmptyWithParamsAndComplexUdt
+        private const string EmptyWithParamsAndComplexUdtCommandText = "[dbo].[dbx_tests_syntax_empty_params_udt]";
 
         // FileResult
         private const string FileResultCommandText = "[dbo].[dbx_tests_syntax_fileresult]";
@@ -65,7 +71,20 @@ namespace Dibix.Sdk.Tests.Data
             }
         }
 
-        public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake")
+        public static short EmptyWithOutputParam(this IDatabaseAccessorFactory databaseAccessorFactory, out short a)
+        {
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
+            {
+                ParametersVisitor @params = accessor.Parameters()
+                                                    .SetInt16(nameof(a), out IOutParameter<short> aOutput)
+                                                    .Build();
+                short result = accessor.QuerySingle<short>(EmptyWithOutputParamCommandText, CommandType.StoredProcedure, @params);
+                a = aOutput.Result;
+                return result;
+            }
+        }
+
+        public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.IntParameterSet ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake")
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
@@ -84,6 +103,28 @@ namespace Dibix.Sdk.Tests.Data
                                                     .SetString(nameof(g), g, size: 50)
                                                     .Build();
                 accessor.Execute(EmptyWithParamsCommandText, CommandType.StoredProcedure, @params);
+            }
+        }
+
+        public static void EmptyWithParamsAndComplexUdt(this IDatabaseAccessorFactory databaseAccessorFactory, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake")
+        {
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
+            {
+                ParametersVisitor @params = accessor.Parameters()
+                                                    .SetFromTemplate(new
+                                                    {
+                                                        c,
+                                                        ids,
+                                                        e,
+                                                        f,
+                                                    })
+                                                    .SetString(nameof(a), a, size: 50)
+                                                    .SetString(nameof(b), b, size: 50)
+                                                    .SetString(nameof(password), password, size: 128, obfuscate: true)
+                                                    .SetString(nameof(d), d, size: 50)
+                                                    .SetString(nameof(g), g, size: 50)
+                                                    .Build();
+                accessor.Execute(EmptyWithParamsAndComplexUdtCommandText, CommandType.StoredProcedure, @params);
             }
         }
 
@@ -301,7 +342,7 @@ namespace Dibix.Sdk.Tests.Business
                     action.Method = HttpApiMethod.Get;
                     action.ChildRoute = "{password}/Fixed";
                     action.SecuritySchemes.Add("DBXNS-SIT");
-                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string password, [FromHeader] string userAgent, [FromHeader] string authorization, Dibix.Sdk.Tests.Data.GenericParameterSet ids, [FromHeader] string? acceptLanguage, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
+                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string password, [FromHeader] string userAgent, [FromHeader] string authorization, Dibix.Sdk.Tests.Data.IntParameterSet ids, [FromHeader] string? acceptLanguage, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "password", password },
                         { "userAgent", userAgent },
@@ -323,12 +364,30 @@ namespace Dibix.Sdk.Tests.Business
                     action.Method = HttpApiMethod.Get;
                     action.ChildRoute = "{password}/User";
                     action.SecuritySchemes.Add("Anonymous");
-                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string password, string a, string b, System.Guid? c, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? d, bool e, Dibix.Sdk.Tests.DomainModel.Direction? f, string? g, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
+                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string password, string a, string b, System.Guid? c, Dibix.Sdk.Tests.Data.IntParameterSet ids, string? d, bool e, Dibix.Sdk.Tests.DomainModel.Direction? f, string? g, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "password", password },
                         { "a", a },
                         { "b", b },
                         { "c", c },
+                        { "ids", ids },
+                        { "d", d },
+                        { "e", e },
+                        { "f", f },
+                        { "g", g }
+                    }, cancellationToken));
+                });
+                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParamsAndComplexUdt)), action =>
+                {
+                    action.Method = HttpApiMethod.Get;
+                    action.ChildRoute = "UDT";
+                    action.SecuritySchemes.Add("DBXNS-SIT");
+                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? d, bool e, Dibix.Sdk.Tests.DomainModel.Direction? f, string? g, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
+                    {
+                        { "a", a },
+                        { "b", b },
+                        { "c", c },
+                        { "password", password },
                         { "ids", ids },
                         { "d", d },
                         { "e", e },
@@ -394,7 +453,7 @@ namespace Dibix.Sdk.Tests.Business
                     }, cancellationToken));
                     action.ResolveParameterFromBody("ids", "Dibix.GenericContractIdsInputConverter");
                 });
-                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
+                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParamsAndComplexUdt)), action =>
                 {
                     action.Method = HttpApiMethod.Patch;
                     action.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.AnotherInputContract);
@@ -418,7 +477,7 @@ namespace Dibix.Sdk.Tests.Business
                     {
                         authorization.ResolveParameterFromConstant("right", (byte)1);
                     });
-                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? d, bool e, Dibix.Sdk.Tests.DomainModel.Direction? f, string? g, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
+                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.IntParameterSet ids, string? d, bool e, Dibix.Sdk.Tests.DomainModel.Direction? f, string? g, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "a", a },
                         { "b", b },
@@ -440,7 +499,7 @@ namespace Dibix.Sdk.Tests.Business
                     {
                         authorization.ResolveParameterFromConstant("right", (byte)1);
                     });
-                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? d, bool e, Dibix.Sdk.Tests.DomainModel.Direction? f, string? g, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
+                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.IntParameterSet ids, string? d, bool e, Dibix.Sdk.Tests.DomainModel.Direction? f, string? g, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "a", a },
                         { "b", b },
@@ -462,7 +521,7 @@ namespace Dibix.Sdk.Tests.Business
                     {
                         authorization.ResolveParameterFromConstant("right", (byte)1);
                     });
-                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? d, bool e, Dibix.Sdk.Tests.DomainModel.Direction? f, string? g, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
+                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.IntParameterSet ids, string? d, bool e, Dibix.Sdk.Tests.DomainModel.Direction? f, string? g, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "a", a },
                         { "b", b },

@@ -3,7 +3,7 @@
   "GenericEndpoint": [
     {
       "method": "GET",
-      "target": "EmptyWithParams",
+      "target": "EmptyWithParamsAndComplexUdt",
       "params": {
         "a": "WTF.Is.This",
         "b": "ENV.MachinePassword",
@@ -13,7 +13,7 @@
     },
     {
       "method": "POST",
-      "target": "EmptyWithParams",
+      "target": "EmptyWithParamsAndComplexUdt",
       "body": "Request",
       "childRoute": "this/get/is/wrong",
       "params": {
@@ -31,13 +31,13 @@
     },
     {
       "method": "GET",
-      "target": "EmptyWithParams",
+      "target": "EmptyWithParamsAndComplexUdt",
       "childRoute": "ambiguous/child/route/{a}",
       "authorization": "none"
     },
     {
       "method": "GET",
-      "target": "EmptyWithParams",
+      "target": "EmptyWithParamsAndComplexUdt",
       "childRoute": "ambiguous/child/route/{b}",
       "authorization": "none"
     }

@@ -1502,8 +1502,8 @@
           "Name": "ids",
           "Type": {
             "$type": "Dibix.Sdk.CodeGeneration.SchemaTypeReference, Dibix.Sdk.CodeGeneration",
-            "Key": "Dibix.Sdk.Tests.Data.GenericParameterSet",
-            "DisplayName": "Dibix.Sdk.Tests.Data.GenericParameterSet",
+            "Key": "Dibix.Sdk.Tests.Data.IntParameterSet",
+            "DisplayName": "Dibix.Sdk.Tests.Data.IntParameterSet",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
@@ -1713,6 +1713,432 @@
         "Column": 1
       },
       "FullName": "Dibix.Sdk.Tests.Data.EmptyWithParams"
+    },
+    {
+      "$type": "Dibix.Sdk.CodeGeneration.SqlStatementDefinition, Dibix.Sdk.CodeGeneration",
+      "Statement": {
+        "$type": "Dibix.Sdk.CodeGeneration.FormattedSqlStatement, Dibix.Sdk.CodeGeneration",
+        "Content": "[dbo].[dbx_tests_syntax_empty_params_out]",
+        "CommandType": "StoredProcedure"
+      },
+      "ProcedureName": "[dbo].[dbx_tests_syntax_empty_params_out]",
+      "MergeGridResult": false,
+      "GenerateResultClass": false,
+      "GenerateInputClass": false,
+      "Async": false,
+      "FileResult": null,
+      "ResultType": {
+        "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+        "Type": "Int16",
+        "Size": null,
+        "DisplayName": "Int16",
+        "IsNullable": false,
+        "IsEnumerable": false,
+        "Location": {
+          "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+          "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_out.sql",
+          "Line": 2,
+          "Column": 21
+        }
+      },
+      "Parameters": [
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
+          "Name": "a",
+          "Type": {
+            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "Type": "Int16",
+            "Size": null,
+            "DisplayName": "Int16",
+            "IsNullable": false,
+            "IsEnumerable": false,
+            "Location": {
+              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_out.sql",
+              "Line": 3,
+              "Column": 63
+            }
+          },
+          "Check": "None",
+          "DefaultValue": null,
+          "IsOutput": true,
+          "Obfuscate": false
+        }
+      ],
+      "Results": [
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.SqlQueryResult, Dibix.Sdk.CodeGeneration",
+          "ResultMode": "Single",
+          "Name": null,
+          "Types": [
+            {
+              "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+              "Type": "Int16",
+              "Size": null,
+              "DisplayName": "Int16",
+              "IsNullable": false,
+              "IsEnumerable": false,
+              "Location": {
+                "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+                "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_out.sql",
+                "Line": 2,
+                "Column": 21
+              }
+            }
+          ],
+          "Columns": [
+            null
+          ],
+          "Converter": null,
+          "SplitOn": null,
+          "ProjectToType": null,
+          "ReturnType": {
+            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "Type": "Int16",
+            "Size": null,
+            "DisplayName": "Int16",
+            "IsNullable": false,
+            "IsEnumerable": false,
+            "Location": {
+              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_out.sql",
+              "Line": 2,
+              "Column": 21
+            }
+          }
+        }
+      ],
+      "ErrorResponses": [],
+      "Namespace": "Dibix.Sdk.Tests.Data",
+      "DefinitionName": "EmptyWithOutputParam",
+      "Source": "Defined",
+      "Location": {
+        "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+        "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_out.sql",
+        "Line": 3,
+        "Column": 1
+      },
+      "FullName": "Dibix.Sdk.Tests.Data.EmptyWithOutputParam"
+    },
+    {
+      "$type": "Dibix.Sdk.CodeGeneration.SqlStatementDefinition, Dibix.Sdk.CodeGeneration",
+      "Statement": {
+        "$type": "Dibix.Sdk.CodeGeneration.FormattedSqlStatement, Dibix.Sdk.CodeGeneration",
+        "Content": "[dbo].[dbx_tests_syntax_empty_params_udt]",
+        "CommandType": "StoredProcedure"
+      },
+      "ProcedureName": "[dbo].[dbx_tests_syntax_empty_params_udt]",
+      "MergeGridResult": false,
+      "GenerateResultClass": false,
+      "GenerateInputClass": false,
+      "Async": false,
+      "FileResult": null,
+      "ResultType": null,
+      "Parameters": [
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
+          "Name": "a",
+          "Type": {
+            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "Type": "String",
+            "Size": 50,
+            "DisplayName": "String",
+            "IsNullable": false,
+            "IsEnumerable": false,
+            "Location": {
+              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
+              "Line": 3,
+              "Column": 8
+            }
+          },
+          "Check": "None",
+          "DefaultValue": null,
+          "IsOutput": false,
+          "Obfuscate": false
+        },
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
+          "Name": "b",
+          "Type": {
+            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "Type": "String",
+            "Size": 50,
+            "DisplayName": "String",
+            "IsNullable": false,
+            "IsEnumerable": false,
+            "Location": {
+              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
+              "Line": 4,
+              "Column": 8
+            }
+          },
+          "Check": "None",
+          "DefaultValue": null,
+          "IsOutput": false,
+          "Obfuscate": false
+        },
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
+          "Name": "c",
+          "Type": {
+            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "Type": "UUID",
+            "Size": null,
+            "DisplayName": "UUID",
+            "IsNullable": true,
+            "IsEnumerable": false,
+            "Location": {
+              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
+              "Line": 5,
+              "Column": 8
+            }
+          },
+          "Check": "None",
+          "DefaultValue": null,
+          "IsOutput": false,
+          "Obfuscate": false
+        },
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
+          "Name": "password",
+          "Type": {
+            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "Type": "String",
+            "Size": 128,
+            "DisplayName": "String",
+            "IsNullable": false,
+            "IsEnumerable": false,
+            "Location": {
+              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
+              "Line": 6,
+              "Column": 32
+            }
+          },
+          "Check": "None",
+          "DefaultValue": null,
+          "IsOutput": false,
+          "Obfuscate": true
+        },
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
+          "Name": "ids",
+          "Type": {
+            "$type": "Dibix.Sdk.CodeGeneration.SchemaTypeReference, Dibix.Sdk.CodeGeneration",
+            "Key": "Dibix.Sdk.Tests.Data.GenericParameterSet",
+            "DisplayName": "Dibix.Sdk.Tests.Data.GenericParameterSet",
+            "IsNullable": false,
+            "IsEnumerable": false,
+            "Location": {
+              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
+              "Line": 7,
+              "Column": 10
+            }
+          },
+          "Check": "None",
+          "DefaultValue": null,
+          "IsOutput": false,
+          "Obfuscate": false
+        },
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
+          "Name": "d",
+          "Type": {
+            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "Type": "String",
+            "Size": 50,
+            "DisplayName": "String",
+            "IsNullable": true,
+            "IsEnumerable": false,
+            "Location": {
+              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
+              "Line": 8,
+              "Column": 8
+            }
+          },
+          "Check": "None",
+          "DefaultValue": {
+            "$type": "Dibix.Sdk.CodeGeneration.NullValueReference, Dibix.Sdk.CodeGeneration",
+            "Type": {
+              "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+              "Type": "String",
+              "Size": 50,
+              "DisplayName": "String",
+              "IsNullable": true,
+              "IsEnumerable": false,
+              "Location": {
+                "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+                "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
+                "Line": 8,
+                "Column": 8
+              }
+            },
+            "Location": {
+              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
+              "Line": 8,
+              "Column": 28
+            }
+          },
+          "IsOutput": false,
+          "Obfuscate": false
+        },
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
+          "Name": "e",
+          "Type": {
+            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "Type": "Boolean",
+            "Size": null,
+            "DisplayName": "Boolean",
+            "IsNullable": false,
+            "IsEnumerable": false,
+            "Location": {
+              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
+              "Line": 9,
+              "Column": 8
+            }
+          },
+          "Check": "None",
+          "DefaultValue": {
+            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveValueReference, Dibix.Sdk.CodeGeneration",
+            "Value": {
+              "$type": "System.Boolean",
+              "$value": true
+            },
+            "Type": {
+              "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+              "Type": "Boolean",
+              "Size": null,
+              "DisplayName": "Boolean",
+              "IsNullable": false,
+              "IsEnumerable": false,
+              "Location": {
+                "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+                "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
+                "Line": 9,
+                "Column": 8
+              }
+            },
+            "Location": {
+              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
+              "Line": 9,
+              "Column": 14
+            }
+          },
+          "IsOutput": false,
+          "Obfuscate": false
+        },
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
+          "Name": "f",
+          "Type": {
+            "$type": "Dibix.Sdk.CodeGeneration.SchemaTypeReference, Dibix.Sdk.CodeGeneration",
+            "Key": "Dibix.Sdk.Tests.DomainModel.Direction",
+            "DisplayName": "Dibix.Sdk.Tests.DomainModel.Direction",
+            "IsNullable": true,
+            "IsEnumerable": false,
+            "Location": {
+              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
+              "Line": 10,
+              "Column": 17
+            }
+          },
+          "Check": "None",
+          "DefaultValue": {
+            "$type": "Dibix.Sdk.CodeGeneration.NullValueReference, Dibix.Sdk.CodeGeneration",
+            "Type": {
+              "$type": "Dibix.Sdk.CodeGeneration.SchemaTypeReference, Dibix.Sdk.CodeGeneration",
+              "Key": "Dibix.Sdk.Tests.DomainModel.Direction",
+              "DisplayName": "Dibix.Sdk.Tests.DomainModel.Direction",
+              "IsNullable": true,
+              "IsEnumerable": false,
+              "Location": {
+                "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+                "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
+                "Line": 10,
+                "Column": 17
+              }
+            },
+            "Location": {
+              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
+              "Line": 10,
+              "Column": 44
+            }
+          },
+          "IsOutput": false,
+          "Obfuscate": false
+        },
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
+          "Name": "g",
+          "Type": {
+            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "Type": "String",
+            "Size": 50,
+            "DisplayName": "String",
+            "IsNullable": true,
+            "IsEnumerable": false,
+            "Location": {
+              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
+              "Line": 11,
+              "Column": 8
+            }
+          },
+          "Check": "None",
+          "DefaultValue": {
+            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveValueReference, Dibix.Sdk.CodeGeneration",
+            "Value": {
+              "$type": "System.String",
+              "$value": "Cake"
+            },
+            "Type": {
+              "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+              "Type": "String",
+              "Size": 50,
+              "DisplayName": "String",
+              "IsNullable": true,
+              "IsEnumerable": false,
+              "Location": {
+                "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+                "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
+                "Line": 11,
+                "Column": 8
+              }
+            },
+            "Location": {
+              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
+              "Line": 11,
+              "Column": 28
+            }
+          },
+          "IsOutput": false,
+          "Obfuscate": false
+        }
+      ],
+      "Results": [],
+      "ErrorResponses": [],
+      "Namespace": "Dibix.Sdk.Tests.Data",
+      "DefinitionName": "EmptyWithParamsAndComplexUdt",
+      "Source": "Defined",
+      "Location": {
+        "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+        "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
+        "Line": 2,
+        "Column": 1
+      },
+      "FullName": "Dibix.Sdk.Tests.Data.EmptyWithParamsAndComplexUdt"
     },
     {
       "$type": "Dibix.Sdk.CodeGeneration.SqlStatementDefinition, Dibix.Sdk.CodeGeneration",

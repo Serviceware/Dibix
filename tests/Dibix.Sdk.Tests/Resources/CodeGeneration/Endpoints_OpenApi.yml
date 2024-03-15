@@ -59,8 +59,8 @@ paths:
     patch:
       tags:
         - GenericEndpoint
-      summary: EmptyWithParams3
-      operationId: EmptyWithParams3
+      summary: EmptyWithParamsAndComplexUdt2
+      operationId: EmptyWithParamsAndComplexUdt2
       requestBody:
         content:
           application/json:
@@ -76,8 +76,8 @@ paths:
     delete:
       tags:
         - GenericEndpoint
-      summary: EmptyWithParams4
-      operationId: EmptyWithParams4
+      summary: EmptyWithParams3
+      operationId: EmptyWithParams3
       parameters:
         - name: a
           in: query
@@ -111,7 +111,8 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/GenericParameterSet'
+              type: integer
+              format: int32
         - name: d
           in: query
           style: form
@@ -169,7 +170,8 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/GenericParameterSet'
+              type: integer
+              format: int32
         - name: Accept-Language
           in: header
           style: simple
@@ -221,6 +223,77 @@ paths:
           schema:
             type: array
             items:
+              type: integer
+              format: int32
+        - name: d
+          in: query
+          style: form
+          schema:
+            type: string
+            default: 
+            nullable: true
+        - name: e
+          in: query
+          style: form
+          schema:
+            type: boolean
+            default: true
+        - name: f
+          in: query
+          style: form
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Direction'
+            nullable: true
+        - name: g
+          in: query
+          style: form
+          schema:
+            type: string
+            default: Cake
+            nullable: true
+      responses:
+        '204':
+          description: NoContent
+  /Tests/GenericEndpoint/UDT:
+    get:
+      tags:
+        - GenericEndpoint
+      summary: EmptyWithParamsAndComplexUdt1
+      operationId: EmptyWithParamsAndComplexUdt1
+      parameters:
+        - name: a
+          in: query
+          required: true
+          style: form
+          schema:
+            type: string
+        - name: b
+          in: query
+          required: true
+          style: form
+          schema:
+            type: string
+        - name: c
+          in: query
+          required: true
+          style: form
+          schema:
+            type: string
+            format: uuid
+            nullable: true
+        - name: password
+          in: query
+          required: true
+          style: form
+          schema:
+            type: string
+        - name: ids
+          in: query
+          style: form
+          schema:
+            type: array
+            items:
               $ref: '#/components/schemas/GenericParameterSet'
         - name: d
           in: query
@@ -252,6 +325,24 @@ paths:
       responses:
         '204':
           description: NoContent
+      security:
+        - DBXNS-SIT: [ ]
+  /Tests/GenericEndpoint/Out:
+    get:
+      tags:
+        - GenericEndpoint
+      summary: EmptyWithOutputParam
+      operationId: EmptyWithOutputParam
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int32
+      security:
+        - DBXNS-SIT: [ ]
   '/Tests/GenericEndpoint/User/{id}/{name}':
     get:
       tags:
@@ -352,8 +443,8 @@ paths:
     delete:
       tags:
         - GenericEndpoint
-      summary: EmptyWithParams5
-      operationId: EmptyWithParams5
+      summary: EmptyWithParams4
+      operationId: EmptyWithParams4
       parameters:
         - name: a
           in: query
@@ -387,7 +478,8 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/GenericParameterSet'
+              type: integer
+              format: int32
         - name: d
           in: query
           style: form
@@ -424,8 +516,8 @@ paths:
     delete:
       tags:
         - GenericEndpoint
-      summary: EmptyWithParams6
-      operationId: EmptyWithParams6
+      summary: EmptyWithParams5
+      operationId: EmptyWithParams5
       parameters:
         - name: a
           in: query
@@ -459,7 +551,8 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/GenericParameterSet'
+              type: integer
+              format: int32
         - name: d
           in: query
           style: form
@@ -624,19 +717,6 @@ components:
         title:
           type: string
       additionalProperties: false
-    GenericParameterSet:
-      required:
-        - id
-        - name
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int32
-        name:
-          type: string
-          nullable: true
-      additionalProperties: false
     Direction:
       enum:
         - 0
@@ -650,6 +730,19 @@ components:
       x-enumNames:
         - Ascending
         - Descending
+    GenericParameterSet:
+      required:
+        - id
+        - name
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+          nullable: true
+      additionalProperties: false
   securitySchemes:
     Bearer:
       type: http

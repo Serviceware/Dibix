@@ -35,7 +35,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
               , sources: new[]
                 {
                     @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
-                  , @"Types\dbx_codeanalysis_udt_generic.sql"
+                  , @"Types\dbx_codeanalysis_udt_int.sql"
                 }
             );
         }
@@ -348,6 +348,8 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
                 {
                     @"Tests\dbx_tests_authorization.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_empty_params_out.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_empty_params_udt.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_fileresult.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_fileupload.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_multiconcreteresult.sql"
@@ -380,6 +382,8 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
                 {
                     @"Tests\dbx_tests_authorization.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_empty_params_out.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_empty_params_udt.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_fileresult.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_fileupload.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_multiconcreteresult.sql"
@@ -412,6 +416,8 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
                 {
                     @"Tests\dbx_tests_authorization.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_empty_params_out.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_empty_params_udt.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_fileresult.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_fileupload.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_multiconcreteresult.sql"
@@ -444,6 +450,8 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
                 {
                     @"Tests\dbx_tests_authorization.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_empty_params_out.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_empty_params_udt.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_fileresult.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_fileupload.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_multiconcreteresult.sql"
@@ -476,6 +484,8 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
                 {
                     @"Tests\dbx_tests_authorization.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_empty_params_out.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_empty_params_udt.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_fileresult.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_fileupload.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_multiconcreteresult.sql"
@@ -507,7 +517,7 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
                 sources: new[]
                 {
                     @"Types\dbx_codeanalysis_udt_generic.sql"
-                  , @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_empty_params_udt.sql"
                 }
               , contracts: new[]
                 {
