@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -16,6 +15,7 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly bool _assumeEmbeddedActionTargets;
         private readonly bool _includeReflectionTargets;
         private readonly bool _includeTargetsWithRefParameters;
+        private readonly bool _includeTargetsWithDeepObjectQueryParameters;
         private readonly bool _generateActionDelegates;
         #endregion
 
@@ -25,11 +25,12 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public ApiDescriptionWriter(bool assumeEmbeddedActionTargets, bool includeReflectionTargets, bool includeTargetsWithRefParameters, bool generateActionDelegates)
+        public ApiDescriptionWriter(bool assumeEmbeddedActionTargets, bool includeReflectionTargets, bool includeTargetsWithRefParameters, bool includeTargetsWithDeepObjectQueryParameters, bool generateActionDelegates)
         {
             _assumeEmbeddedActionTargets = assumeEmbeddedActionTargets;
             _includeReflectionTargets = includeReflectionTargets;
             _includeTargetsWithRefParameters = includeTargetsWithRefParameters;
+            _includeTargetsWithDeepObjectQueryParameters = includeTargetsWithDeepObjectQueryParameters;
             _generateActionDelegates = generateActionDelegates;
         }
         #endregion
@@ -95,9 +96,9 @@ namespace Dibix.Sdk.CodeGeneration
 
         private IEnumerable<ActionDefinition> CollectActionsToInclude(CodeGenerationContext context, ControllerDefinition controller)
         {
-            void LogNotSupportedWarning(ActionDefinition action, string message)
+            static void LogNotSupportedInHttpHostWarning(string message, CodeGenerationContext context, SourceLocation sourceLocation)
             {
-                context.Logger.LogWarning($"{action.Method.ToString().ToUpperInvariant()} {RouteBuilder.BuildRoute(context.Model.AreaName, controller.Name, action.ChildRoute)} {message}, which is not supported in Dibix.Http.Host", action.Target.SourceLocation);
+                context.Logger.LogWarning($"{message}, which is not supported in Dibix.Http.Host", sourceLocation);
             }
 
             foreach (ActionDefinition action in controller.Actions)
@@ -105,14 +106,26 @@ namespace Dibix.Sdk.CodeGeneration
                 bool includeAction = true;
                 if (!_includeReflectionTargets && action.Target is ReflectionActionTarget)
                 {
-                    LogNotSupportedWarning(action, "points to a reflection target");
+                    LogNotSupportedInHttpHostWarning($"Action target method '{action.Target.OperationName}' is defined within an external assembly", context, action.Target.SourceLocation);
                     includeAction = false;
                 }
 
-                if (!_includeTargetsWithRefParameters && action.Target.HasRefParameters)
+                foreach (ActionParameter actionParameter in action.Parameters)
                 {
-                    LogNotSupportedWarning(action, "contains ref parameters");
-                    includeAction = false;
+                    if (!_includeTargetsWithRefParameters && actionParameter.IsOutput)
+                    {
+                        LogNotSupportedInHttpHostWarning($"Parameter '{actionParameter.InternalParameterName}' is an output parameter", context, actionParameter.SourceLocation);
+                        includeAction = false;
+                    }
+
+                    if (!_includeTargetsWithDeepObjectQueryParameters
+                     && actionParameter.ParameterLocation == ActionParameterLocation.Query
+                     && actionParameter.Type.IsUserDefinedType(context.SchemaRegistry, out UserDefinedTypeSchema userDefinedTypeSchema)
+                     && userDefinedTypeSchema.Properties.Count > 1)
+                    {
+                        LogNotSupportedInHttpHostWarning($"Parameter '{actionParameter.InternalParameterName}' is a deep object query parameter", context, actionParameter.SourceLocation);
+                        includeAction = false;
+                    }
                 }
 
                 if (includeAction)
@@ -130,7 +143,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             writer.WriteRaw("ReflectionHttpActionTarget.Create(");
 
-            if (actionTargetDefinition.Target.HasRefParameters)
+            if (actionTargetDefinition.Parameters.Any(x => x.IsOutput))
                 writer.WriteRaw("context, ");
 
             if (actionTargetDefinition.Target is ReflectionActionTarget reflectionActionTarget)
@@ -264,7 +277,7 @@ namespace Dibix.Sdk.CodeGeneration
                     annotation = "[FromHeader] ";
                 }
 
-                writer.WriteRaw($", {annotation}{context.ResolveTypeName(type)} {externalName}");
+                writer.WriteRaw($", {annotation}{ResolveDelegateParameterTypeName(context, type)} {externalName}");
             }
 
             context.AddUsing<Dictionary<string, object>>()
@@ -272,11 +285,12 @@ namespace Dibix.Sdk.CodeGeneration
 
             writer.WriteRaw(", CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>");
 
-            IList<(string argumentName, string externalName)> arguments = distinctParameters.Select(x =>
+            IList<(string argumentName, string value)> arguments = distinctParameters.Select(x =>
             {
-                (string externalName, string internalName, TypeReference _, ActionParameterLocation _, bool hasExplicitMapping) = x;
+                (string externalName, string internalName, TypeReference type, ActionParameterLocation _, bool hasExplicitMapping) = x;
                 string argumentName = hasExplicitMapping ? externalName : internalName;
-                return (argumentName, externalName);
+                string value = CollectDelegateParameterValue(context, externalName, type);
+                return (argumentName, value);
             }).ToList();
 
             if (action.Target.IsAsync)
@@ -292,8 +306,8 @@ namespace Dibix.Sdk.CodeGeneration
 
                 for (var i = 0; i < arguments.Count; i++)
                 {
-                    (string argumentName, string externalName) = arguments[i];
-                    writer.Write($"{{ \"{argumentName}\", {externalName} }}");
+                    (string argumentName, string value) = arguments[i];
+                    writer.Write($"{{ \"{argumentName}\", {value} }}");
 
                     if (i + 1 < arguments.Count)
                         writer.WriteRaw(",");
@@ -306,6 +320,24 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             writer.WriteLineRaw(", cancellationToken));");
+        }
+
+        private static string CollectDelegateParameterValue(CodeGenerationContext context, string externalName, TypeReference type)
+        {
+            if (!type.IsUserDefinedType(context.SchemaRegistry, out UserDefinedTypeSchema userDefinedTypeSchema))
+                return externalName;
+
+            string udtFactory = $"{userDefinedTypeSchema.FullName}.From({externalName}, (set, item) => set.Add(item))";
+            return udtFactory;
+        }
+
+        private static string ResolveDelegateParameterTypeName(CodeGenerationContext context, TypeReference type)
+        {
+            if (!type.IsUserDefinedType(context.SchemaRegistry, out UserDefinedTypeSchema userDefinedTypeSchema)) 
+                return context.ResolveTypeName(type);
+
+            string arrayTypeName = context.ResolveTypeName(userDefinedTypeSchema.Properties[0].Type);
+            return $"{arrayTypeName}[]";
         }
 
         private static void WriteAuthorizationBehavior(CodeGenerationContext context, StringWriter writer, AuthorizationBehavior authorization, string variableName) { }

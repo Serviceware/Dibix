@@ -79,7 +79,8 @@ namespace Dibix.Sdk.CodeGeneration
                 }
 
                 bool isRequired = base.IsParameterRequired(type, location, defaultValue);
-                parameterRegistry.Add(new ActionParameter(apiParameterName, internalParameterName, type, location, isRequired, defaultValue, source, new SourceLocation(sourceLocation.Source, parameter.Location.Line, parameter.Location.Column)));
+                bool isOutput = false; // Not supported
+                parameterRegistry.Add(new ActionParameter(apiParameterName, internalParameterName, type, location, isRequired, isOutput, defaultValue, source, new SourceLocation(sourceLocation.Source, parameter.Location.Line, parameter.Location.Column)));
             }
 
             foreach (PathParameter pathParameter in pathParameters.Values)
@@ -87,7 +88,8 @@ namespace Dibix.Sdk.CodeGeneration
                 TypeReference typeReference = new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: false, size: null, location: new SourceLocation(sourceLocation.Source, pathParameter.Location.Line, pathParameter.Location.Column));
                 const ActionParameterLocation location = ActionParameterLocation.Path;
                 bool isRequired = base.IsParameterRequired(type: null, location, defaultValue: null);
-                ActionParameter parameter = new ActionParameter(pathParameter.Name, pathParameter.Name, typeReference, location, isRequired, defaultValue: null, source: null, new SourceLocation(sourceLocation.Source, pathParameter.Location.Line, pathParameter.Location.Column));
+                bool isOutput = false; // Not supported
+                ActionParameter parameter = new ActionParameter(pathParameter.Name, pathParameter.Name, typeReference, location, isRequired, isOutput, defaultValue: null, source: null, new SourceLocation(sourceLocation.Source, pathParameter.Location.Line, pathParameter.Location.Column));
                 actionTargetDefinition.Parameters.Add(parameter);
             }
 

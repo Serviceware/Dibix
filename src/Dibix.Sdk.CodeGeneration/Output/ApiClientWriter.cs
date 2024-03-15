@@ -56,7 +56,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Protected Methods
         protected abstract void WriteController(CodeGenerationContext context, CSharpStatementScope output, ControllerDefinition controller, string serviceName, IDictionary<ActionDefinition, string> operationIdMap, IDictionary<string, SecurityScheme> securitySchemeMap);
 
-        protected void AddMethod(ActionDefinition action, CodeGenerationContext context, IDictionary<ActionDefinition, string> operationIdMap, Func<string, string, CSharpMethod> methodTarget)
+        protected static void AddMethod(ActionDefinition action, CodeGenerationContext context, IDictionary<ActionDefinition, string> operationIdMap, Func<string, string, CSharpMethod> methodTarget)
         {
             context.AddUsing<Task<object>>();
 
@@ -79,6 +79,11 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 if (parameter.ParameterLocation != ActionParameterLocation.Query
                  && parameter.ParameterLocation != ActionParameterLocation.Header)
+                    continue;
+
+                // We don't support out parameters in REST APIs, but this accessor could still be used directly within the backend
+                // Therefore we discard this parameter
+                if (parameter.IsOutput)
                     continue;
 
                 // Will be handled by SecurityScheme/IHttpAuthorizationProvider

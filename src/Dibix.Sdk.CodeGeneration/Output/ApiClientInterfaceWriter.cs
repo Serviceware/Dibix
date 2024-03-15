@@ -19,7 +19,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             foreach (ActionDefinition action in controller.Actions.OrderBy(x => operationIdMap[x]))
             {
-                base.AddMethod(action, context, operationIdMap, @interface.AddMethod);
+                AddMethod(action, context, operationIdMap, @interface.AddMethod);
             }
         }
         #endregion

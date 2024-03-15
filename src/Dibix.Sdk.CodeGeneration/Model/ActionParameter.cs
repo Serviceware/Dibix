@@ -11,15 +11,17 @@ namespace Dibix.Sdk.CodeGeneration
         public ValueReference DefaultValue { get; }
         public ActionParameterSource ParameterSource { get; }
         public bool IsRequired { get; }
+        public bool IsOutput { get; }
         public SourceLocation SourceLocation { get; }
 
-        public ActionParameter(string apiParameterName, string internalParameterName, TypeReference type, ActionParameterLocation location, bool isRequired, ValueReference defaultValue, ActionParameterSource source, SourceLocation sourceLocation)
+        public ActionParameter(string apiParameterName, string internalParameterName, TypeReference type, ActionParameterLocation location, bool isRequired, bool isOutput, ValueReference defaultValue, ActionParameterSource source, SourceLocation sourceLocation)
         {
             ApiParameterName = apiParameterName;
             InternalParameterName = internalParameterName;
             Type = type;
             ParameterLocation = location;
             IsRequired = isRequired;
+            IsOutput = isOutput;
             DefaultValue = defaultValue;
             ParameterSource = source;
             SourceLocation = sourceLocation;

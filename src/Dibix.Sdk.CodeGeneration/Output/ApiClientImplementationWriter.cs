@@ -56,7 +56,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 ActionDefinition action = actions[i];
                 string body = GenerateMethodBody(controller, action, context, securitySchemeMap);
-                base.AddMethod(action, context, operationIdMap, (methodName, returnType) => @class.AddMethod(methodName, returnType, body, modifiers: CSharpModifiers.Public | CSharpModifiers.Async));
+                AddMethod(action, context, operationIdMap, (methodName, returnType) => @class.AddMethod(methodName, returnType, body, modifiers: CSharpModifiers.Public | CSharpModifiers.Async));
 
                 if (i + 1 < actions.Count)
                     @class.AddSeparator();
@@ -113,7 +113,18 @@ namespace Dibix.Sdk.CodeGeneration
 
         private string GenerateMethodBody(ControllerDefinition controller, ActionDefinition action, CodeGenerationContext context, IDictionary<string, SecurityScheme> securitySchemeMap)
         {
+            bool CollectParameter(ActionParameter parameter)
+            {
+                // We don't support out parameters in REST APIs, but this accessor could still be used directly within the backend
+                // Therefore we discard this parameter
+                if (parameter.IsOutput) 
+                    return false;
+
+                return true;
+            }
+
             ICollection<ActionParameter> distinctParameters = action.Parameters
+                                                                    .Where(CollectParameter)
                                                                     .DistinctBy(x => x.ApiParameterName)
                                                                     .ToArray();
 

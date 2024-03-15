@@ -38,16 +38,7 @@ namespace Dibix.Sdk.CodeGeneration
           , ICollection<string> bodyParameters
         )
         {
-            if (isOutParameter)
-            {
-                //base.Logger.LogError(null, $"Output parameters are not supported in endpoints: {actionName}", filePath, line, column);
-
-                // We don't support out parameters in REST APIs, so we assume that this method is used as both backend accessor and REST API.
-                // Therefore we just skip it
-                return;
-            }
-
-            ActionParameter actionParameter = this.CreateActionParameter(parameterName, parameterType, defaultValue, explicitParameters, pathParameters, bodyParameters, sourceLocation);
+            ActionParameter actionParameter = this.CreateActionParameter(parameterName, parameterType, isOutParameter, defaultValue, explicitParameters, pathParameters, bodyParameters, sourceLocation);
             parameterRegistry.Add(actionParameter);
         }
 
@@ -109,7 +100,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private ActionParameter CreateActionParameter(string name, TypeReference type, ValueReference defaultValue, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, SourceLocation sourceLocation)
+        private ActionParameter CreateActionParameter(string name, TypeReference type, bool isOutput, ValueReference defaultValue, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, SourceLocation sourceLocation)
         {
             ActionParameterLocation location = ActionParameterLocation.NonUser;
             string apiParameterName = name;
@@ -172,7 +163,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             bool isRequired = this.IsParameterRequired(type, location, defaultValue);
-            return new ActionParameter(apiParameterName, internalParameterName, type, location, isRequired, defaultValue, source, sourceLocation);
+            return new ActionParameter(apiParameterName, internalParameterName, type, location, isRequired, isOutput, defaultValue, source, sourceLocation);
         }
         #endregion
     }

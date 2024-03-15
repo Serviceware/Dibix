@@ -86,7 +86,12 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             {
                 if (parameter.ParameterLocation != ActionParameterLocation.Query
                  && parameter.ParameterLocation != ActionParameterLocation.Path
-                 && parameter.ParameterLocation != ActionParameterLocation.Header) 
+                 && parameter.ParameterLocation != ActionParameterLocation.Header)
+                    continue;
+
+                // We don't support out parameters in REST APIs, but this accessor could still be used directly within the backend
+                // Therefore we discard this parameter
+                if (parameter.IsOutput)
                     continue;
 
                 AppendUserParameter(document, operation, action, parameter, parameter.ParameterLocation, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
