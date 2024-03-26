@@ -31,7 +31,10 @@ namespace Dibix.Sdk.Tests
         public void Verify()
         {
             if (HasLoggedErrors)
-                throw new CodeGenerationException(_errorOutput.ToString());
+            {
+                string errorMessages = _errorOutput.ToString();
+                throw new CodeGenerationException(errorMessages);
+            }
         }
     }
 }

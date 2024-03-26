@@ -6,13 +6,13 @@ namespace Dibix.Sdk.CodeGeneration
     public sealed class ControllerDefinition
     {
         public string Name { get; }
-        public ActionDefinitionCollection Actions { get; }
+        public ICollection<ActionDefinition> Actions { get; }
         public ICollection<string> ControllerImports { get; }
 
         public ControllerDefinition(string name)
         {
             Name = name;
-            Actions = new ActionDefinitionCollection();
+            Actions = new Collection<ActionDefinition>();
             ControllerImports = new Collection<string>();
         }
     }

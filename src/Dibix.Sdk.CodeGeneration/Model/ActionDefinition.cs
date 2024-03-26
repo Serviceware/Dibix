@@ -1,7 +1,10 @@
-﻿namespace Dibix.Sdk.CodeGeneration
+﻿using Dibix.Sdk.Abstractions;
+
+namespace Dibix.Sdk.CodeGeneration
 {
     public sealed class ActionDefinition : ActionTargetDefinition
     {
+        public SourceLocation Location { get; set; }
         public ActionMethod Method { get; set; }
         public string OperationId { get; set; }
         public string Description { get; set; }

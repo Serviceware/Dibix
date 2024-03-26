@@ -31,14 +31,32 @@
     },
     {
       "method": "GET",
-      "target": "EmptyWithParamsAndComplexUdt",
-      "childRoute": "ambiguous/child/route/{a}",
+      "target": "EmptyWithParams",
+      "childRoute": "ambiguous/route/{a}",
+      "authorization": "none"
+    },
+    {
+      "method": "POST",
+      "target": "EmptyWithParams",
+      "childRoute": "ambiguous/route/{b}",
       "authorization": "none"
     },
     {
       "method": "GET",
       "target": "EmptyWithParamsAndComplexUdt",
-      "childRoute": "ambiguous/child/route/{b}",
+      "childRoute": "ambiguous/route/{a}",
+      "authorization": "none"
+    },
+    {
+      "method": "GET",
+      "target": "EmptyWithParams",
+      "childRoute": "this/first/route/is/ok",
+      "authorization": "none"
+    },
+    {
+      "method": "GET",
+      "target": "EmptyWithParams",
+      "childRoute": "this/second/route/is/ok",
       "authorization": "none"
     }
   ]

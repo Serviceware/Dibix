@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
 using Dibix.Http;
 using Dibix.Sdk.Abstractions;
@@ -154,6 +153,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             Enum.TryParse((string)action.Property("method")?.Value, true, out ActionMethod method);
 
+            actionDefinition.Location = action.GetSourceInfo();
             actionDefinition.Method = method;
             actionDefinition.OperationId = (string)action.Property("operationId")?.Value ?? actionDefinition.Target.OperationName;
             actionDefinition.Description = (string)action.Property("description")?.Value;
@@ -171,19 +171,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (!actionDefinition.Responses.Any())
                 actionDefinition.DefaultResponseType = null;
 
-            if (controller.Actions.TryAdd(actionDefinition))
-                return;
-
-            StringBuilder sb = new StringBuilder();
-            sb.Append(actionDefinition.Method.ToString().ToUpperInvariant())
-              .Append(' ')
-              .Append(controller.Name);
-
-            if (actionDefinition.ChildRoute != null)
-                sb.Append('/').Append(actionDefinition.ChildRoute);
-
-            SourceLocation sourceInfo = action.GetSourceInfo();
-            base.Logger.LogError($"Duplicate action registration: {sb}", sourceInfo.Source, sourceInfo.Line, sourceInfo.Column);
+            controller.Actions.Add(actionDefinition);
         }
 
         private ActionRequestBody ReadBody(JObject action)

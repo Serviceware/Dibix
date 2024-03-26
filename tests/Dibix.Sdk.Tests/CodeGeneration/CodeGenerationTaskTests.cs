@@ -517,6 +517,8 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
                 sources: new[]
                 {
                     @"Types\dbx_codeanalysis_udt_generic.sql"
+                  , @"Types\dbx_codeanalysis_udt_int.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_empty_params_udt.sql"
                 }
               , contracts: new[]
@@ -535,8 +537,10 @@ Endpoints\GenericEndpointWithErrors.json(26,27,26,27):error:Property 'Nm' not fo
 Endpoints\GenericEndpointWithErrors.json(9,19,9,19):error:Source 'ENV' does not support property 'MachinePassword'
 Endpoints\GenericEndpointWithErrors.json(10,21,10,21):error:Source 'CLAIM' does not support property 'None'
 Endpoints\GenericEndpointWithErrors.json(18,27,18,27):error:The path segment 'get' is a known HTTP verb, which should be indicated by the action method and is therefore redundant: this/get/is/wrong
-Endpoints\GenericEndpointWithErrors.json(35,22,35,22):error:Equivalent paths are not allowed: GET Tests/GenericEndpoint/ambiguous/child/route/{a}
-Endpoints\GenericEndpointWithErrors.json(41,22,41,22):error:Equivalent paths are not allowed: GET Tests/GenericEndpoint/ambiguous/child/route/{b}"
+Endpoints\GenericEndpointWithErrors.json(32,5,32,5):error:Equivalent path defined: GET Tests/GenericEndpoint/ambiguous/route/{a}
+Endpoints\GenericEndpointWithErrors.json(38,5,38,5):error:Equivalent path defined: POST Tests/GenericEndpoint/ambiguous/route/{b}
+Endpoints\GenericEndpointWithErrors.json(32,5,32,5):error:Duplicate method defined within path: GET Tests/GenericEndpoint/ambiguous/route/{a}
+Endpoints\GenericEndpointWithErrors.json(44,5,44,5):error:Duplicate method defined within path: GET Tests/GenericEndpoint/ambiguous/route/{a}"
             );
         }
 
