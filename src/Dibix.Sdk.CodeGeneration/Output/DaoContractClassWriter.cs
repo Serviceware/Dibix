@@ -118,7 +118,7 @@ namespace Dibix.Sdk.CodeGeneration
                     else
                     {
                         AddJsonSerializerReference(context);
-                        propertyAnnotations.Add(CollectJsonIgnoreNullAnnotation()); // Serialization
+                        propertyAnnotations.Add(CollectJsonIgnoreAnnotation(property.Type.IsNullable)); // Serialization
                     }
                     break;
 
@@ -132,12 +132,12 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private CSharpAnnotation CollectJsonIgnoreNullAnnotation() => CollectJsonIgnoreNullAnnotation(_serializerFlavor);
+        private CSharpAnnotation CollectJsonIgnoreAnnotation(bool isNullable) => CollectJsonIgnoreAnnotation(_serializerFlavor, isNullable);
 
-        private static CSharpAnnotation CollectJsonIgnoreNullAnnotation(JsonSerializerFlavor flavor) => flavor switch
+        private static CSharpAnnotation CollectJsonIgnoreAnnotation(JsonSerializerFlavor flavor, bool isNullable) => flavor switch
         {
-            JsonSerializerFlavor.NewtonsoftJson => new CSharpAnnotation("JsonProperty").AddProperty("NullValueHandling", new CSharpValue("NullValueHandling.Ignore")),
-            JsonSerializerFlavor.SystemTextJson => new CSharpAnnotation("JsonIgnore").AddProperty("Condition", new CSharpValue("JsonIgnoreCondition.WhenWritingNull")),
+            JsonSerializerFlavor.NewtonsoftJson => new CSharpAnnotation("JsonProperty").AddProperty(isNullable ? "NullValueHandling" : "DefaultValueHandling", new CSharpValue($"{(isNullable ? "NullValueHandling" : "DefaultValueHandling")}.Ignore")),
+            JsonSerializerFlavor.SystemTextJson => new CSharpAnnotation("JsonIgnore").AddProperty("Condition", new CSharpValue($"JsonIgnoreCondition.{(isNullable ? "WhenWritingNull" : "WhenWritingDefault")}")),
             _ => throw new ArgumentOutOfRangeException(nameof(flavor), flavor, null)
         };
 

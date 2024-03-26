@@ -33,7 +33,7 @@ $configuration     = if ($Development) { 'Debug' } else { 'Release' }
 $publishReadyToRun = 'True'
 $publishSingleFile = 'True'
 $sourcePath        = Resolve-Path (Join-Path $PSScriptRoot '../src/Dibix.Worker.Host')
-$binaryFolder      = "bin/$configuration/net6.0/"
+$binaryFolder      = "bin/$configuration/net8.0/"
 
 if (!$Development)
 {

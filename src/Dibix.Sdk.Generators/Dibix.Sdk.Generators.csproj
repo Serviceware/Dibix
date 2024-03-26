@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <IsGeneratorProject>True</IsGeneratorProject>
     <AnalyzerLanguage>cs</AnalyzerLanguage>
+    <EnforceExtendedAnalyzerRules>True</EnforceExtendedAnalyzerRules>
   </PropertyGroup>
 
   <ItemGroup>

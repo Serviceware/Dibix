@@ -251,7 +251,7 @@ SqlReferencePath");
         private static IEnumerable<MetadataReference> CollectEndpointReferences()
         {
             // This whole section is rather meh, but it's just test code ¯\_(ツ)_/¯
-            const string netCoreVersion = "6.0";
+            const string netCoreVersion = "8.0";
             string netCorePath = LocateNetCoreReferenceAssemblyDirectory(netCoreVersion);
             string aspNetCorePath = LocateAspNetCoreReferenceAssemblyDirectory(netCoreVersion);
             string configuration = new DirectoryInfo(Environment.CurrentDirectory).Parent.Name;

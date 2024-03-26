@@ -274,7 +274,7 @@ namespace Dibix.Sdk.Tests.DomainModel
         public int Id { get; set; }
         [DataMember]
         [DefaultValue("DefaultValue")]
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string Name { get; set; } = "DefaultValue";
         [DataMember]
         [JsonIgnore]
@@ -285,6 +285,7 @@ namespace Dibix.Sdk.Tests.DomainModel
         public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
         [DataMember]
         [DateTimeKind(DateTimeKind.Utc)]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public System.DateTime? CreationTime { get; set; }
         [DataMember]
         public System.Uri ImageUrl { get; set; }

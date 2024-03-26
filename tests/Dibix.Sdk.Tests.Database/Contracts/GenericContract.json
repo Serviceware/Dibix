@@ -21,7 +21,8 @@
     },
     "CreationTime": {
       "type": "datetime?",
-      "kind": "utc"
+      "kind": "utc",
+      "serialize": "IfNotEmpty"
     },
     "ImageUrl": {
       "type": "uri",

@@ -765,7 +765,7 @@
           },
           "DefaultValue": null,
           "DateTimeKind": "Utc",
-          "SerializationBehavior": "Always",
+          "SerializationBehavior": "IfNotEmpty",
           "IsPartOfKey": false,
           "IsOptional": false,
           "IsDiscriminator": false,
@@ -780,7 +780,7 @@
             "Location": {
               "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/GenericContract.json",
-              "Line": 26,
+              "Line": 27,
               "Column": 6
             }
           },
@@ -831,7 +831,7 @@
         "Location": {
           "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
           "Source": "Contracts/GenericContract.json",
-          "Line": 31,
+          "Line": 32,
           "Column": 4
         }
       },
@@ -862,7 +862,7 @@
       "Location": {
         "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
         "Source": "Contracts/GenericContract.json",
-        "Line": 31,
+        "Line": 32,
         "Column": 4
       },
       "FullName": "Dibix.Sdk.Tests.DomainModel.Role"

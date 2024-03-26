@@ -26,8 +26,8 @@ namespace Dibix.Http.Server
             if (!exception.IsClientError) 
                 return;
 
-            response.Headers.Add(KnownHeaders.ClientErrorCodeHeaderName, exception.ErrorCode.ToString());
-            response.Headers.Add(KnownHeaders.ClientErrorDescriptionHeaderName, exception.ErrorMessage);
+            Microsoft.AspNetCore.Http.HeaderDictionaryExtensions.Append(response.Headers, KnownHeaders.ClientErrorCodeHeaderName, exception.ErrorCode.ToString());
+            Microsoft.AspNetCore.Http.HeaderDictionaryExtensions.Append(response.Headers, KnownHeaders.ClientErrorDescriptionHeaderName, exception.ErrorMessage);
             Microsoft.AspNetCore.Http.HttpResponseWritingExtensions.WriteAsync(response, exception.ErrorMessage);
         }
 #endif

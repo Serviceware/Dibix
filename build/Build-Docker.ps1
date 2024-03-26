@@ -25,7 +25,7 @@ Exec "dotnet publish --configuration $Configuration
                      --p:IncludeNativeLibrariesForSelfExtract=True
                      $sourcePath"
 
-$binaryFolder       = Resolve-Path (Join-Path $sourcePath "bin/$configuration/net6.0/$runtimeIdentifier/publish/")
+$binaryFolder       = Resolve-Path (Join-Path $sourcePath "bin/$configuration/net8.0/$runtimeIdentifier/publish/")
 $dockerBuildContext = $binaryFolder
 $dockerFilePath     = Join-Path $sourcePath 'Dockerfile'
 $dockerTagName      = $AppName.ToLowerInvariant().Replace('.', '-')
