@@ -24,11 +24,16 @@ steps:
     -reporttypes:Cobertura
   displayName: 🔗 Merge code coverage results (*.xml)
 
-- task: PublishCodeCoverageResults@1
+# Can't seem to make  PublishCodeCoverageResults@2 accept spaces in the path for summaryFileLocation
+- task: CopyFiles@2
+  displayName: 🪂 Prepare Cobertura.xml
+  inputs:
+    SourceFolder: $(Pipeline.Workspace)\Test output (Windows)
+    TargetFolder: $(Agent.TempDirectory)
+    Contents: Cobertura.xml
+- task: PublishCodeCoverageResults@2
   displayName: ☑️ Publish code coverage
   inputs:
-    codeCoverageTool: Cobertura
-    summaryFileLocation: $(Pipeline.Workspace)/Test output (Windows)/Cobertura.xml
-    reportDirectory: $(Pipeline.Workspace)/Test output (Windows)/Report
+    summaryFileLocation: $(Agent.TempDirectory)/Cobertura.xml
     pathToSources: $(Build.SourcesDirectory)
     failIfCoverageEmpty: true
