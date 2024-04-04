@@ -17,12 +17,6 @@ $runtimeIdentifier = 'win-x64'
 $publishReadyToRun = 'True'
 $publishSingleFile = 'True'
 $sourcePath        = Resolve-Path (Join-Path $PSScriptRoot "../src/$AppName")
-$binaryFolder      = "bin/$Configuration/net8.0/"
-
-if ($Configuration -eq 'Release')
-{
-    $binaryFolder = "$binaryFolder$runtimeIdentifier/publish/"
-}
 
 
 if ($Configuration -eq 'Debug')
