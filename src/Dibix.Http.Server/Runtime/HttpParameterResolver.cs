@@ -1032,11 +1032,12 @@ Either create a mapping or make sure a property of the same name exists in the s
 
         private sealed class HttpParameterSourceInfo : IHttpParameterResolutionContext
         {
+            private readonly IHttpActionDescriptor _action;
             private readonly CompilationContext _compilationContext;
             private readonly IDictionary<string, Expression> _sourceMap;
             private readonly IHttpParameterSourceProvider _sourceProvider;
 
-            public IHttpActionDescriptor Action { get; }
+            public IHttpActionMetadata ActionMetadata => _action;
             public Expression RequestParameter { get; }
             public Expression ArgumentsParameter { get; }
             public Expression DependencyResolverParameter { get; }
@@ -1049,16 +1050,16 @@ Either create a mapping or make sure a property of the same name exists in the s
 
             public HttpParameterSourceInfo(IHttpActionDescriptor action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, Expression actionParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, string sourceName, IHttpParameterSourceProvider sourceProvider, string propertyPath)
             {
-                this._compilationContext = compilationContext;
-                this._sourceMap = sourceMap;
-                this._sourceProvider = sourceProvider;
-                this.Action = action;
-                this.RequestParameter = requestParameter;
-                this.ArgumentsParameter = argumentsParameter;
-                this.DependencyResolverParameter = dependencyResolverParameter;
-                this.ActionParameter = actionParameter;
-                this.SourceName = sourceName;
-                this.PropertyPath = propertyPath;
+                _action = action;
+                _compilationContext = compilationContext;
+                _sourceMap = sourceMap;
+                _sourceProvider = sourceProvider;
+                RequestParameter = requestParameter;
+                ArgumentsParameter = argumentsParameter;
+                DependencyResolverParameter = dependencyResolverParameter;
+                ActionParameter = actionParameter;
+                SourceName = sourceName;
+                PropertyPath = propertyPath;
             }
 
             public void ResolveUsingInstanceProperty(Type instanceType, Expression instanceValue, bool ensureNullPropagation) => this.ResolveUsingInstanceProperty(instanceType, instanceValue, ensureNullPropagation, this.PropertyPath);
@@ -1080,10 +1081,12 @@ Either create a mapping or make sure a property of the same name exists in the s
                 if (this.PropertyPath == null)
                     return;
 
-                this.Value = CollectSourcePropertyValue(this.Action, this.RequestParameter, this.ArgumentsParameter, this.DependencyResolverParameter, this.ActionParameter, this._compilationContext, this._sourceMap, this.Parent, this.Value, ensureNullPropagation, propertyPath);
+                this.Value = CollectSourcePropertyValue(_action, this.RequestParameter, this.ArgumentsParameter, this.DependencyResolverParameter, this.ActionParameter, this._compilationContext, this._sourceMap, this.Parent, this.Value, ensureNullPropagation, propertyPath);
             }
 
             public void ResolveUsingValue(Expression value) => this.Value = value;
+
+            public void AppendRequiredClaim(string claimType) => _action.AppendRequiredClaim(claimType);
 
             public void CollectSourceInstance() => this._sourceProvider.Resolve(this);
         }

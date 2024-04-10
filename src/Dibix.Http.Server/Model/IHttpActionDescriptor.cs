@@ -3,16 +3,13 @@ using System.Reflection;
 
 namespace Dibix.Http.Server
 {
-    public interface IHttpActionDescriptor
+    internal interface IHttpActionDescriptor : IHttpActionMetadata
     {
-        EndpointMetadata Metadata { get; }
         MethodInfo Target { get; }
-        HttpApiMethod Method { get; }
-        Uri Uri { get; }
         string ChildRoute { get; }
-        Type BodyContract { get; }
         Type BodyBinder { get; }
 
         bool TryGetParameter(string parameterName, out HttpParameterSource value);
+        void AppendRequiredClaim(string claimType);
     }
 }

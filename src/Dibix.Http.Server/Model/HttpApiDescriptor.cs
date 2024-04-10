@@ -66,7 +66,7 @@ namespace Dibix.Http.Server
             }
         }
 
-        private sealed class HttpActionDefinitionBuilder : HttpActionBuilderBase, IHttpActionDefinitionBuilder, IHttpActionBuilderBase, IHttpParameterSourceSelector, IHttpActionDescriptor
+        private sealed class HttpActionDefinitionBuilder : HttpActionBuilderBase, IHttpActionDefinitionBuilder, IHttpActionBuilderBase, IHttpParameterSourceSelector, IHttpActionDescriptor, IHttpActionMetadata
         {
             private readonly string _controllerName;
             private HttpAuthorizationBuilder _authorization;
@@ -192,6 +192,8 @@ namespace Dibix.Http.Server
                 itemSources.Invoke(sourceSelector);
                 source.ItemSources.AddRange(sourceSelector.ParameterSources);
             }
+
+            public void AppendRequiredClaim(string claimType) => RequiredClaims.Add(claimType);
         }
 
         private class HttpParameterSourceSelector : IHttpParameterSourceSelector
