@@ -142,7 +142,7 @@ namespace Dibix.Sdk.Tests.Data
             }
         }
 
-        public static void FileUpload(this IDatabaseAccessorFactory databaseAccessorFactory, System.IO.Stream data)
+        public static async Task FileUploadAsync(this IDatabaseAccessorFactory databaseAccessorFactory, System.IO.Stream data, CancellationToken cancellationToken = default)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
@@ -152,7 +152,7 @@ namespace Dibix.Sdk.Tests.Data
                                                         data
                                                     })
                                                     .Build();
-                accessor.Execute(FileUploadCommandText, CommandType.StoredProcedure, @params);
+                await accessor.ExecuteAsync(FileUploadCommandText, CommandType.StoredProcedure, @params, cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -414,14 +414,15 @@ namespace Dibix.Sdk.Tests.Business
                         { "id", id }
                     }, cancellationToken));
                 });
-                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.FileUpload)), action =>
+                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.FileUploadAsync)), action =>
                 {
                     action.Method = HttpApiMethod.Put;
                     action.BodyContract = typeof(System.IO.Stream);
                     action.SecuritySchemes.Add("DBXNS-SIT");
                     action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, System.IO.Stream body, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
-                        { "$body", body }
+                        { "$body", body },
+                        { "cancellationToken", cancellationToken }
                     }, cancellationToken));
                     action.ResolveParameterFromSource("data", "BODY", "$RAW");
                 });

@@ -108,8 +108,8 @@ namespace Dibix.Sdk.CodeGeneration
 
         private bool ValidateAction(ActionDefinition action)
         {
-            bool result = ValidateReservedPathSegments(action);
-            return result;
+            bool isValid = ValidateReservedPathSegments(action) && ValidateAsyncFileUpload(action);
+            return isValid;
         }
 
         private bool ValidateReservedPathSegments(ActionDefinition action)
@@ -117,7 +117,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (action.ChildRoute == null)
                 return true;
 
-            bool result = true;
+            bool isValid = true;
 
             string[] segments = action.ChildRoute.Value.Split('/');
 
@@ -127,12 +127,35 @@ namespace Dibix.Sdk.CodeGeneration
                 if (HttpMethods.Contains(segment))
                 {
                     _logger.LogError($"The path segment '{segment}' is a known HTTP verb, which should be indicated by the action method and is therefore redundant: {action.ChildRoute.Value}", action.ChildRoute.Location.Source, action.ChildRoute.Location.Line, action.ChildRoute.Location.Column + columnOffset);
-                    result = false;
+                    isValid = false;
                 }
                 columnOffset += segment.Length + 1; // Skip segment and slash
             }
 
-            return result;
+            return isValid;
+        }
+
+        // When using the BODY.$RAW property source, the raw body will be passed to as a stream to an SqlParameter.
+        // The stream will be only access asynchronously if one of the async ADO.NET methods is used.
+        // Otherwise, it will cause this exception in the ASP.NET core host:
+        //   Synchronous operations are disallowed. Call ReadAsync or set AllowSynchronousIO to true instead
+        // Therefore, we need to ensure that accessor methods used within endpoints that accept stream parameters are marked as async.
+        // See: https://github.com/dotnet/aspnetcore/issues/7644
+        private bool ValidateAsyncFileUpload(ActionDefinition action)
+        {
+            if (action.Target.IsAsync)
+                return true;
+
+            bool isValid = true;
+            foreach (ActionParameter parameter in action.Parameters)
+            {
+                if (parameter.ParameterSource is not ActionParameterPropertySource { Definition: BodyParameterSource, PropertyName: BodyParameterSource.RawPropertyName } propertySource) 
+                    continue;
+
+                _logger.LogError($"The parameter '{parameter.InternalParameterName}' accepts a stream, therefore the accessor must be marked with @Async", propertySource.Location);
+                isValid = false;
+            }
+            return isValid;
         }
 
         private static string NormalizeChildRoute(string childRoute)

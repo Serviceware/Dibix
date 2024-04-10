@@ -9,11 +9,10 @@ namespace Dibix.Http.Server
     internal sealed class BodyParameterSourceProvider : NonUserParameterSourceProvider, IHttpParameterSourceProvider
     {
         public static readonly string SourceName = BodyParameterSource.SourceName;
-        public const string RawPropertyName = "$RAW";
 
         public override void Resolve(IHttpParameterResolutionContext context)
         {
-            if (context.PropertyPath != RawPropertyName)
+            if (context.PropertyPath != BodyParameterSource.RawPropertyName)
             {
                 Type instanceType = context.Action.SafeGetBodyContract();
                 Expression instanceValue = Expression.Call(typeof(HttpParameterResolverUtility), nameof(HttpParameterResolverUtility.ReadBody), new[] { instanceType }, context.ArgumentsParameter);

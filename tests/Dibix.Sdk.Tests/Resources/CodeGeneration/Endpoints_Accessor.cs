@@ -140,7 +140,7 @@ namespace Dibix.Sdk.Tests.Data
             }
         }
 
-        public static void FileUpload(this IDatabaseAccessorFactory databaseAccessorFactory, System.IO.Stream data)
+        public static async Task FileUploadAsync(this IDatabaseAccessorFactory databaseAccessorFactory, System.IO.Stream data, CancellationToken cancellationToken = default)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
@@ -150,7 +150,7 @@ namespace Dibix.Sdk.Tests.Data
                                                         data
                                                     })
                                                     .Build();
-                accessor.Execute(FileUploadCommandText, CommandType.StoredProcedure, @params);
+                await accessor.ExecuteAsync(FileUploadCommandText, CommandType.StoredProcedure, @params, cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -387,7 +387,7 @@ namespace Dibix.Sdk.Tests.Business
                     action.SecuritySchemes.Add("Bearer");
                     action.FileResponse = new HttpFileResponseDefinition(cache: false);
                 });
-                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.FileUpload)), action =>
+                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.FileUploadAsync)), action =>
                 {
                     action.Method = HttpApiMethod.Put;
                     action.BodyContract = typeof(System.IO.Stream);

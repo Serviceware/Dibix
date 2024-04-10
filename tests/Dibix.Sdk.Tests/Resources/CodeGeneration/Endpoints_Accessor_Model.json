@@ -2263,7 +2263,7 @@
       "MergeGridResult": false,
       "GenerateResultClass": false,
       "GenerateInputClass": false,
-      "Async": false,
+      "Async": true,
       "FileResult": null,
       "ResultType": null,
       "Parameters": [
@@ -2280,7 +2280,7 @@
             "Location": {
               "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_fileupload.sql",
-              "Line": 2,
+              "Line": 3,
               "Column": 66
             }
           },
@@ -2298,7 +2298,7 @@
       "Location": {
         "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
         "Source": "Tests/Syntax/dbx_tests_syntax_fileupload.sql",
-        "Line": 2,
+        "Line": 3,
         "Column": 1
       },
       "FullName": "Dibix.Sdk.Tests.Data.FileUpload"
