@@ -397,8 +397,10 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static ActionParameterSourceBuilder ReadBodyActionParameter(JProperty bodyConverterProperty)
         {
-            string bodyConverterTypeName = (string)((JValue)bodyConverterProperty.Value).Value;
-            return new StaticActionParameterSourceBuilder(new ActionParameterBodySource(bodyConverterTypeName));
+            JValue bodyConverterValue = (JValue)bodyConverterProperty.Value;
+            SourceLocation sourceLocation = bodyConverterValue.GetSourceInfo();
+            string bodyConverterTypeName = (string)bodyConverterValue.Value;
+            return new StaticActionParameterSourceBuilder(new ActionParameterBodySource(new Token<string>(bodyConverterTypeName, sourceLocation)));
         }
 
         private static bool TryReadFileResponse(JObject action, out ActionFileResponse fileResponse, out SourceLocation location)

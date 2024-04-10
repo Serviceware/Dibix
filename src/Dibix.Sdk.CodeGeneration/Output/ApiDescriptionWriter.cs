@@ -16,6 +16,7 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly bool _includeReflectionTargets;
         private readonly bool _includeTargetsWithRefParameters;
         private readonly bool _includeTargetsWithDeepObjectQueryParameters;
+        private readonly bool _includeTargetsWithBodyConverter;
         private readonly bool _generateActionDelegates;
         #endregion
 
@@ -25,12 +26,13 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public ApiDescriptionWriter(bool assumeEmbeddedActionTargets, bool includeReflectionTargets, bool includeTargetsWithRefParameters, bool includeTargetsWithDeepObjectQueryParameters, bool generateActionDelegates)
+        public ApiDescriptionWriter(bool assumeEmbeddedActionTargets, bool includeReflectionTargets, bool includeTargetsWithRefParameters, bool includeTargetsWithDeepObjectQueryParameters, bool includeTargetsWithBodyConverter, bool generateActionDelegates)
         {
             _assumeEmbeddedActionTargets = assumeEmbeddedActionTargets;
             _includeReflectionTargets = includeReflectionTargets;
             _includeTargetsWithRefParameters = includeTargetsWithRefParameters;
             _includeTargetsWithDeepObjectQueryParameters = includeTargetsWithDeepObjectQueryParameters;
+            _includeTargetsWithBodyConverter = includeTargetsWithBodyConverter;
             _generateActionDelegates = generateActionDelegates;
         }
         #endregion
@@ -124,6 +126,12 @@ namespace Dibix.Sdk.CodeGeneration
                      && userDefinedTypeSchema.Properties.Count > 1)
                     {
                         LogNotSupportedInHttpHostWarning($"Parameter '{actionParameter.InternalParameterName}' is a deep object query parameter", context, actionParameter.SourceLocation);
+                        includeAction = false;
+                    }
+
+                    if (!_includeTargetsWithBodyConverter && actionParameter.ParameterSource is ActionParameterBodySource { ConverterName: not null } bodySource)
+                    {
+                        LogNotSupportedInHttpHostWarning($"Parameter '{actionParameter.InternalParameterName}' uses a converter", context, bodySource.ConverterName.Location);
                         includeAction = false;
                     }
                 }

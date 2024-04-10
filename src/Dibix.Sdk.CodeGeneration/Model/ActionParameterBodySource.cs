@@ -2,8 +2,8 @@
 {
     internal sealed class ActionParameterBodySource : ActionParameterSource
     {
-        public string ConverterName { get; }
+        public Token<string> ConverterName { get; }
 
-        public ActionParameterBodySource(string converterName) => this.ConverterName = converterName;
+        public ActionParameterBodySource(Token<string> converterName) => ConverterName = converterName;
     }
 }

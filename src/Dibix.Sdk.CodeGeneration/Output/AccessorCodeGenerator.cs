@@ -18,7 +18,7 @@ namespace Dibix.Sdk.CodeGeneration
             yield return new DaoExecutorInputClassWriter(model, outputFilter);
             yield return new DaoContractClassWriter(model, outputFilter, JsonSerializerFlavor.NewtonsoftJson);
             yield return new DaoStructuredTypeWriter(model, outputFilter);
-            yield return new ApiDescriptionWriter(assumeEmbeddedActionTargets: false, includeReflectionTargets: true, includeTargetsWithRefParameters: true, includeTargetsWithDeepObjectQueryParameters: true, generateActionDelegates: false);
+            yield return new ApiDescriptionWriter(assumeEmbeddedActionTargets: false, includeReflectionTargets: true, includeTargetsWithRefParameters: true, includeTargetsWithDeepObjectQueryParameters: true, includeTargetsWithBodyConverter: true, generateActionDelegates: false);
         }
 
         protected override IEnumerable<CSharpAnnotation> CollectGlobalAnnotations(CodeGenerationModel model)

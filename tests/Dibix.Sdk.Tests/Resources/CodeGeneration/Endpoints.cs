@@ -426,17 +426,6 @@ namespace Dibix.Sdk.Tests.Business
                     }, cancellationToken));
                     action.ResolveParameterFromSource("data", "BODY", "$RAW");
                 });
-                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
-                {
-                    action.Method = HttpApiMethod.Post;
-                    action.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.InputContract);
-                    action.SecuritySchemes.Add("DBXNS-SIT");
-                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, Dibix.Sdk.Tests.DomainModel.InputContract body, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
-                    {
-                        { "$body", body }
-                    }, cancellationToken));
-                    action.ResolveParameterFromBody("ids", "Dibix.GenericContractIdsInputConverter");
-                });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParamsAndComplexUdt)), action =>
                 {
                     action.Method = HttpApiMethod.Patch;
