@@ -43,6 +43,7 @@ namespace Dibix.Http.Host
                     .AddSingleton<IAuthorizationHandlerContextFactory, EndpointAuthorizationHandlerContextFactory>()
                     .AddScoped<IParameterDependencyResolver, ParameterDependencyResolver>()
                     .AddScoped<IHttpActionDelegator, HttpActionDelegator>()
+                    .AddScoped<IHttpEndpointMetadataProvider, HttpEndpointMetadataProvider>()
                     .AddTransient<IClaimsTransformation, ComposableClaimsTransformation>()
                     .AddScoped<IJwtAudienceProvider, EndpointJwtAudienceProvider>()
                     .AddScoped<EndpointMetadataContext>()

@@ -13,10 +13,10 @@ namespace Dibix.Http.Server
     internal static class HttpParameterResolver
     {
         #region Fields
-        private static readonly Type[] KnownDependencies = { typeof(IDatabaseAccessorFactory) };
+        private static readonly Type[] KnownDependencies = [typeof(IDatabaseAccessorFactory)];
         private static readonly Lazy<PropertyAccessor> DebugViewAccessor = new Lazy<PropertyAccessor>(BuildDebugViewAccessor);
         private static readonly string ItemSourceName = ItemParameterSource.SourceName;
-        private static readonly string[] MultipleClaimTypes = { "aud" }; // Return IEnumerable<string> rather than string
+        private static readonly string[] MultipleClaimTypes = ["aud"]; // Return IEnumerable<string> rather than string
         private const string SelfPropertyName = "$SELF";
         #endregion
 
