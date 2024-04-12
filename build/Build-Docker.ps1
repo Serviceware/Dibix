@@ -1,6 +1,6 @@
 param
 (
-    [Parameter()]
+    [Parameter(Mandatory)]
     [ValidateSet('Dibix.Http.Host', 'Dibix.Worker.Host')]
     [string]$AppName
 )
