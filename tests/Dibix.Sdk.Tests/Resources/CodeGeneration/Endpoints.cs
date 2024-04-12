@@ -343,7 +343,7 @@ namespace Dibix.Sdk.Tests.Business
                     action.Method = HttpApiMethod.Get;
                     action.ChildRoute = "{password}/Fixed";
                     action.SecuritySchemes.Add("DBXNS-SIT");
-                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string password, [FromHeader] string userAgent, [FromHeader] string authorization, int[] ids, [FromHeader] string? acceptLanguage, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
+                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string password, [FromHeader] string userAgent, [FromHeader] string authorization, int[] ids, CancellationToken cancellationToken, [FromHeader] string? acceptLanguage = null) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "password", password },
                         { "userAgent", userAgent },
@@ -365,7 +365,7 @@ namespace Dibix.Sdk.Tests.Business
                     action.Method = HttpApiMethod.Get;
                     action.ChildRoute = "{password}/User";
                     action.SecuritySchemes.Add("Anonymous");
-                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string password, string a, string b, System.Guid? c, int[] ids, string? d, bool e, Dibix.Sdk.Tests.DomainModel.Direction? f, string? g, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
+                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string password, string a, string b, System.Guid? c, int[] ids, CancellationToken cancellationToken, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake") => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "password", password },
                         { "a", a },
@@ -450,7 +450,7 @@ namespace Dibix.Sdk.Tests.Business
                     {
                         authorization.ResolveParameterFromConstant("right", (byte)1);
                     });
-                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string a, string b, System.Guid? c, string password, int[] ids, string? d, bool e, Dibix.Sdk.Tests.DomainModel.Direction? f, string? g, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
+                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string a, string b, System.Guid? c, string password, int[] ids, CancellationToken cancellationToken, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake") => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "a", a },
                         { "b", b },
@@ -472,7 +472,7 @@ namespace Dibix.Sdk.Tests.Business
                     {
                         authorization.ResolveParameterFromConstant("right", (byte)1);
                     });
-                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string a, string b, System.Guid? c, string password, int[] ids, string? d, bool e, Dibix.Sdk.Tests.DomainModel.Direction? f, string? g, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
+                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string a, string b, System.Guid? c, string password, int[] ids, CancellationToken cancellationToken, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake") => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "a", a },
                         { "b", b },
@@ -494,7 +494,7 @@ namespace Dibix.Sdk.Tests.Business
                     {
                         authorization.ResolveParameterFromConstant("right", (byte)1);
                     });
-                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string a, string b, System.Guid? c, string password, int[] ids, string? d, bool e, Dibix.Sdk.Tests.DomainModel.Direction? f, string? g, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
+                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string a, string b, System.Guid? c, string password, int[] ids, CancellationToken cancellationToken, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake") => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "a", a },
                         { "b", b },

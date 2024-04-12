@@ -263,19 +263,25 @@ namespace Dibix.Sdk.CodeGeneration
                                            .Select(x => (
                                                  externalName: context.NormalizeApiParameterName(x.ApiParameterName)
                                                , internalName: x.InternalParameterName
-                                               , type: x.Type
+                                               , typeName: ResolveDelegateParameterTypeName(context, x.Type)
                                                , location: x.ParameterLocation
                                                , hasExplicitMapping: x.ParameterSource != null
+                                               , defaultValue: x.DefaultValue
+                                               , udtSchema: x.Type.IsUserDefinedType(context.SchemaRegistry, out UserDefinedTypeSchema userDefinedTypeSchema) ? userDefinedTypeSchema : null
                                             ))
                                            .ToList();
 
+            context.AddUsing<CancellationToken>();
+            (string externalName, string internalName, string typeName, ActionParameterLocation location, bool hasExplicitMapping, ValueReference defaultValue, UserDefinedTypeSchema udtSchema) cancellationToken = (externalName: "cancellationToken", internalName: "cancellationToken", "CancellationToken", location: ActionParameterLocation.NonUser, hasExplicitMapping: false, defaultValue: null, udtSchema: null);
+            distinctParameters.Add(cancellationToken);
+
             TypeReference bodyType = action.RequestBody?.Contract;
             if (bodyType != null)
-                distinctParameters.Add((externalName: "body", internalName: HttpParameterName.Body, bodyType, location: ActionParameterLocation.Body, hasExplicitMapping: false));
+                distinctParameters.Insert(0, (externalName: "body", internalName: HttpParameterName.Body, ResolveDelegateParameterTypeName(context, bodyType), location: ActionParameterLocation.Body, hasExplicitMapping: false, defaultValue: null, udtSchema: null));
             
             writer.Write($"{variableName}.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator");
 
-            foreach ((string externalName, _, TypeReference type, ActionParameterLocation location, _) in distinctParameters)
+            foreach ((string externalName, _, string typeName, ActionParameterLocation location, _, ValueReference defaultValue, UserDefinedTypeSchema _) in distinctParameters.OrderBy(x => x.defaultValue != null))
             {
                 string annotation = null;
 
@@ -285,24 +291,22 @@ namespace Dibix.Sdk.CodeGeneration
                     annotation = "[FromHeader] ";
                 }
 
-                writer.WriteRaw($", {annotation}{ResolveDelegateParameterTypeName(context, type)} {externalName}");
+                string defaultValueSuffix = defaultValue != null ? $" = {context.BuildDefaultValueLiteral(defaultValue).AsString()}" : null;
+                writer.WriteRaw($", {annotation}{typeName} {externalName}{defaultValueSuffix}");
             }
 
-            context.AddUsing<Dictionary<string, object>>()
-                   .AddUsing<CancellationToken>();
+            context.AddUsing<Dictionary<string, object>>();
+            writer.WriteRaw(") => actionDelegator.Delegate(httpContext, new Dictionary<string, object>");
 
-            writer.WriteRaw(", CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>");
-
-            IList<(string argumentName, string value)> arguments = distinctParameters.Select(x =>
-            {
-                (string externalName, string internalName, TypeReference type, ActionParameterLocation _, bool hasExplicitMapping) = x;
-                string argumentName = hasExplicitMapping ? externalName : internalName;
-                string value = CollectDelegateParameterValue(context, externalName, type);
-                return (argumentName, value);
-            }).ToList();
-
-            if (action.Target.IsAsync)
-                arguments.Add(("cancellationToken", "cancellationToken"));
+            var arguments = distinctParameters.Where(x => x != cancellationToken || action.Target.IsAsync)
+                                              .Select(x =>
+                                              {
+                                                  (string externalName, string internalName, _, _, bool hasExplicitMapping, _, UserDefinedTypeSchema udtSchema) = x;
+                                                  string argumentName = hasExplicitMapping ? externalName : internalName;
+                                                  string value = CollectDelegateParameterValue(context, externalName, udtSchema);
+                                                  return (argumentName, value);
+                                              })
+                                              .ToList();
 
             if (!arguments.Any())
                 writer.WriteRaw("()");
@@ -330,9 +334,9 @@ namespace Dibix.Sdk.CodeGeneration
             writer.WriteLineRaw(", cancellationToken));");
         }
 
-        private static string CollectDelegateParameterValue(CodeGenerationContext context, string externalName, TypeReference type)
+        private static string CollectDelegateParameterValue(CodeGenerationContext context, string externalName, UserDefinedTypeSchema userDefinedTypeSchema)
         {
-            if (!type.IsUserDefinedType(context.SchemaRegistry, out UserDefinedTypeSchema userDefinedTypeSchema))
+            if (userDefinedTypeSchema == null)
                 return externalName;
 
             string udtFactory = $"{userDefinedTypeSchema.FullName}.From({externalName}, (set, item) => set.Add(item))";
