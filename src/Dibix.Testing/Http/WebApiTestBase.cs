@@ -27,7 +27,10 @@ namespace Dibix.Testing.Http
                 ResponseContent =
                 {
                     // Do not convert to local time, to ensure timezone agnostic response assertions in tests
-                    DateTimeZoneHandling = DateTimeZoneHandling.RoundtripKind
+                    DateTimeZoneHandling = DateTimeZoneHandling.RoundtripKind,
+
+                    // We don't want host names in our expected response text used for asserts
+                    MakeRelativeUrisAbsolute = false
                 }
             };
             ITestAuthorizationContext authorizationContext = new TestAuthorizationContext(httpClientFactory, httpClientOptions);

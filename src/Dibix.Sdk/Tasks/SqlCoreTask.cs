@@ -136,7 +136,8 @@ namespace Dibix.Sdk
                   , lockEntryManager
                   , fileSystemProvider
                   , _logger
-                  , sqlModel);
+                  , sqlModel
+                );
 
                 return codeGenerationResult;
             }
