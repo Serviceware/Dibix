@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Dibix.Http.Client;
 using Dibix.Testing.Data;
+using Newtonsoft.Json;
 
 namespace Dibix.Testing.Http
 {
@@ -12,12 +13,12 @@ namespace Dibix.Testing.Http
         #region Protected Methods
         protected virtual Task ExecuteTest(Func<HttpTestContext<TService>, Task> testFlow) => base.ExecuteTest(testFlow, CreateTestContext);
 
-        protected Task ExecuteTest<TContent>(Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector) => ExecuteTest(x => InvokeApiAndAssertResponse(x.Service, methodSelector));
+        protected Task ExecuteTest<TContent>(Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector, Action<JsonSerializerSettings> configureSerializer = null) => ExecuteTest(x => InvokeApiAndAssertResponse(x.Service, methodSelector, configureSerializer));
 
-        protected Task InvokeApiAndAssertResponse<TContent>(TService service, Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector)
+        protected Task InvokeApiAndAssertResponse<TContent>(TService service, Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector, Action<JsonSerializerSettings> configureSerializer = null)
         {
             string expectedText = ResolveExpectedTextFromEmbeddedResource();
-            return InvokeApi(service, methodSelector, expectedText);
+            return InvokeApi(service, methodSelector, expectedText, configureSerializer);
         }
         #endregion
 

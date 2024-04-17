@@ -22,28 +22,28 @@ namespace Dibix.Testing.Http
             IHttpClientFactory httpClientFactory = TestHttpClientFactoryBuilder.Create(TestContext, Out)
                                                                                .Configure(x => ConfigureClient(Configuration, x))
                                                                                .Build();
-            HttpClientOptions httpClientOptions = new HttpClientOptions
-            {
-                ResponseContent =
-                {
-                    // Do not convert to local time, to ensure timezone agnostic response assertions in tests
-                    DateTimeZoneHandling = DateTimeZoneHandling.RoundtripKind,
-
-                    // We don't want host names in our expected response text used for asserts
-                    MakeRelativeUrisAbsolute = false
-                }
-            };
+            HttpClientOptions httpClientOptions = new HttpClientOptions();
+            ConfigureOptions(httpClientOptions);
             ITestAuthorizationContext authorizationContext = new TestAuthorizationContext(httpClientFactory, httpClientOptions);
             IHttpAuthorizationProvider authorizationProvider = await Authorize(authorizationContext, Configuration).ConfigureAwait(false);
             TTestContext testContext = contextCreator(httpClientFactory, httpClientOptions, authorizationProvider);
             await testFlow(testContext).ConfigureAwait(false);
         }
 
+        protected virtual void ConfigureOptions(HttpClientOptions options)
+        {
+            // Do not convert to local time, to ensure timezone agnostic response assertions in tests
+            options.ResponseContent.DateTimeZoneHandling = DateTimeZoneHandling.RoundtripKind;
+            
+            // We don't want host names in our expected response text used for asserts
+            options.ResponseContent.MakeRelativeUrisAbsolute = false;
+        }
+
         protected Task InvokeApi<TService>(TService service, Expression<Func<TService, Task<HttpResponseMessage>>> methodSelector) => InvokeApi<TService, HttpResponseMessage>(service, methodSelector);
-        protected async Task<TContent> InvokeApi<TService, TContent>(TService service, Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector, string expectedText)
+        protected async Task<TContent> InvokeApi<TService, TContent>(TService service, Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector, string expectedText, Action<JsonSerializerSettings> configureSerializer = null)
         {
             HttpResponse<TContent> response = await InvokeApi(service, methodSelector).ConfigureAwait(false);
-            Assert(response, expectedText);
+            Assert(response, expectedText, configureSerializer);
             return response.ResponseContent;
         }
         protected Task InvokeApi<TService>(HttpTestContext context, Expression<Func<TService, Task<HttpResponseMessage>>> methodSelector) => InvokeApiCore<TService, HttpResponseMessage>(context, methodSelector);
@@ -52,10 +52,10 @@ namespace Dibix.Testing.Http
             HttpResponse<TContent> response = await InvokeApiCore(context, methodSelector).ConfigureAwait(false);
             return response.ResponseContent;
         }
-        protected async Task<TContent> InvokeApi<TService, TContent>(HttpTestContext context, Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector, string expectedText)
+        protected async Task<TContent> InvokeApi<TService, TContent>(HttpTestContext context, Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector, string expectedText, Action<JsonSerializerSettings> configureSerializer = null)
         {
             HttpResponse<TContent> response = await InvokeApiCore(context, methodSelector).ConfigureAwait(false);
-            Assert(response, expectedText);
+            Assert(response, expectedText, configureSerializer);
             return response.ResponseContent;
         }
 
@@ -78,14 +78,17 @@ namespace Dibix.Testing.Http
             return response;
         }
 
-        private void Assert<TContent>(HttpResponse<TContent> response, string expectedText)
+        private void Assert<TContent>(HttpResponse<TContent> response, string expectedText, Action<JsonSerializerSettings> configureSerializer)
         {
-            string actualText = JsonConvert.SerializeObject(response.ResponseContent, new JsonSerializerSettings
+            JsonSerializerSettings settings = new JsonSerializerSettings
             {
                 ContractResolver = new DefaultContractResolver { NamingStrategy = new CamelCaseNamingStrategy() },
                 Formatting = Formatting.Indented,
                 DateTimeZoneHandling = DateTimeZoneHandling.Unspecified
-            });
+            };
+            configureSerializer?.Invoke(settings);
+
+            string actualText = JsonConvert.SerializeObject(response.ResponseContent, settings);
             JToken actualTextDom = JToken.Parse(actualText);
             string expectedTextReplaced = Regex.Replace(expectedText, @"\{(?<path>[A-Za-z.]+)\}", x =>
             {
