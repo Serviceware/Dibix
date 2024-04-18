@@ -8,7 +8,7 @@ namespace Dibix
     internal sealed class MultiMapper : IPostProcessor
     {
         #region Fields
-        private readonly HashCollection<object> _entityCache = new HashCollection<object>(EntityEqualityComparer<object>.Instance);
+        private readonly HashCollection<CachedEntity> _entityCache = new HashCollection<CachedEntity>();
         #endregion
 
         #region Public Methods
@@ -23,7 +23,7 @@ namespace Dibix
                 object item = PostProcessor.PostProcess(relevantArgs[i]);
                 for (int j = i - 1; j >= 0; j--)
                 {
-                    object previousItem = this.GetCachedEntity(relevantArgs[j]);
+                    object previousItem = GetCachedEntity(relevantArgs, j);
                     EntityDescriptor descriptor = EntityDescriptorCache.GetDescriptor(previousItem.GetType());
 
                     if (!propertyMatcher.TryMatchProperty(descriptor, item.GetType(), out EntityProperty property))
@@ -54,14 +54,16 @@ namespace Dibix
         #endregion
 
         #region Private Methods
-        private object GetCachedEntity(object item)
+        private object GetCachedEntity(IReadOnlyList<object> items, int index)
         {
-            if (!this._entityCache.TryGetValue(item, out object existingValue))
+            object item = items[index];
+            CachedEntity cachedEntity = new CachedEntity(index, item);
+            if (!_entityCache.TryGetValue(cachedEntity, out CachedEntity existingCachedEntity))
             {
-                existingValue = item;
-                this._entityCache.Add(item);
+                existingCachedEntity = cachedEntity;
+                _entityCache.Add(cachedEntity);
             }
-            return existingValue;
+            return existingCachedEntity.Item;
         }
 
         private static bool ShouldCollectValue(EntityProperty property, object instance, object newValue)
@@ -92,6 +94,26 @@ namespace Dibix
                 property.SetValue(result, arg);
             }
             return result;
+        }
+        #endregion
+
+        #region Nested Types
+        private readonly struct CachedEntity(int index, object item)
+        {
+            public int Index { get; } = index;
+            public object Item { get; } = item;
+
+            public override bool Equals(object obj) => obj is CachedEntity other && Equals(other);
+
+            public override int GetHashCode()
+            {
+                unchecked
+                {
+                    return (Index * 397) ^ (Item != null ? EntityEqualityComparer<object>.Instance.GetHashCode() : 0);
+                }
+            }
+
+            private bool Equals(CachedEntity other) => Index == other.Index && EntityEqualityComparer<object>.Instance.Equals(Item, other.Item);
         }
         #endregion
     }
