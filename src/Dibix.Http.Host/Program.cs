@@ -49,6 +49,9 @@ namespace Dibix.Http.Host
                     .AddScoped<EndpointMetadataContext>()
                     .AddTransient<IPostConfigureOptions<JsonOptions>, JsonPostConfigureOptions>();
 
+            services.AddExceptionHandler<DatabaseAccessExceptionHandler>();
+            services.AddProblemDetails();
+
             services.AddEventLogOptions();
 
             IConfigurationSection hostingConfigurationSection = builder.Configuration.GetSection(HostingOptions.ConfigurationSectionName);
@@ -107,6 +110,7 @@ namespace Dibix.Http.Host
 
             WebApplication app = builder.Build();
 
+            app.UseExceptionHandler();
             app.UseRouting();
             app.UseMiddleware<DatabaseScopeMiddleware>();
             app.UseMiddleware<EndpointMetadataMiddleware>();
@@ -123,7 +127,7 @@ namespace Dibix.Http.Host
             app.Services.GetRequiredService<IEndpointRegistrar>().Register(app);
 
             // DbConnection is registered as a scoped service, because it should stay open for the entire HTTP request and then be disposed.
-            // To use a scoped service outside of the request, a scope must be created manually.
+            // To use a scoped service outside the request, a scope must be created manually.
             // This is a sample for future use.
             /*
             using (IServiceScope serviceScope = app.Services.CreateScope())

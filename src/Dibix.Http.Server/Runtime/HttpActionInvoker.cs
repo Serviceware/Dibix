@@ -1,8 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Net;
 using System.Net.Http;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,9 +10,9 @@ namespace Dibix.Http.Server
         public static Task<object> Invoke(HttpActionDefinition action, HttpRequestMessage request, IDictionary<string, object> arguments, IParameterDependencyResolver parameterDependencyResolver, CancellationToken cancellationToken)
         {
             IHttpResponseFormatter<HttpRequestMessageDescriptor> responseFormatter = new HttpResponseMessageFormatter();
-            return Invoke(action, new HttpRequestMessageDescriptor(request), responseFormatter, arguments, parameterDependencyResolver, cancellationToken);
+            return Invoke(action, new HttpRequestMessageDescriptor(request), responseFormatter, arguments, parameterDependencyResolver, parseSqlHttpStatusCodeExceptions: true, cancellationToken);
         }
-        public static async Task<object> Invoke<TRequest>(HttpActionDefinition action, TRequest request, IHttpResponseFormatter<TRequest> responseFormatter, IDictionary<string, object> arguments, IParameterDependencyResolver parameterDependencyResolver, CancellationToken cancellationToken) where TRequest : IHttpRequestDescriptor
+        public static async Task<object> Invoke<TRequest>(HttpActionDefinition action, TRequest request, IHttpResponseFormatter<TRequest> responseFormatter, IDictionary<string, object> arguments, IParameterDependencyResolver parameterDependencyResolver, bool parseSqlHttpStatusCodeExceptions, CancellationToken cancellationToken) where TRequest : IHttpRequestDescriptor
         {
             try
             {
@@ -28,7 +25,7 @@ namespace Dibix.Http.Server
                 object formattedResult = await responseFormatter.Format(result, request, action, cancellationToken).ConfigureAwait(false);
                 return formattedResult;
             }
-            catch (DatabaseAccessException exception)
+            catch (DatabaseAccessException exception) when (parseSqlHttpStatusCodeExceptions)
             {
                 // Sample:
                 // THROW 404017, N'Feature not configured', 1
@@ -36,7 +33,7 @@ namespace Dibix.Http.Server
                 // 
                 // HTTP/1.1 404 NotFound
                 // X-Result-Code: 17
-                if (TryParseHttpError(action, arguments, exception, exception.InnerException as SqlException, out HttpRequestExecutionException httpException))
+                if (SqlHttpStatusCodeParser.TryParse(exception, action, arguments, out HttpRequestExecutionException httpException))
                     throw httpException;
 
                 throw;
@@ -48,31 +45,6 @@ namespace Dibix.Http.Server
             definition.ParameterResolver.PrepareParameters(request, arguments, parameterDependencyResolver);
             object result = await definition.Executor.Execute(arguments, cancellationToken).ConfigureAwait(false);
             return result;
-        }
-
-        private static bool TryParseHttpError(HttpActionDefinition action, IDictionary<string, object> arguments, DatabaseAccessException originalException, SqlException rootException, out HttpRequestExecutionException httpException)
-        {
-            if (rootException != null && HttpErrorResponseUtility.TryParseErrorResponse(rootException.Number, out int statusCode, out int errorCode, out bool isClientError))
-            {
-                httpException = new HttpRequestExecutionException((HttpStatusCode)statusCode, errorCode, rootException.Message, isClientError, originalException);
-                return true;
-            }
-
-            if (HttpStatusCodeDetectionMap.TryGetStatusCode(originalException.AdditionalErrorCode, out HttpErrorResponse defaultResponse) && action.StatusCodeDetectionResponses.TryGetValue(defaultResponse.StatusCode, out HttpErrorResponse userResponse))
-            {
-                isClientError = HttpErrorResponseUtility.IsClientError(defaultResponse.StatusCode);
-                string errorMessage = userResponse.ErrorMessage ?? defaultResponse.ErrorMessage;
-                string formattedErrorMessage = Regex.Replace(errorMessage, "{(?<ParameterName>[^}]+)}", x =>
-                {
-                    string parameterName = x.Groups["ParameterName"].Value;
-                    return arguments.TryGetValue(parameterName, out object value) ? value?.ToString() : x.Value;
-                });
-                httpException = new HttpRequestExecutionException((HttpStatusCode)defaultResponse.StatusCode, userResponse.ErrorCode, formattedErrorMessage, isClientError, originalException);
-                return true;
-            }
-
-            httpException = default;
-            return false;
         }
     }
 }
