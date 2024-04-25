@@ -10,9 +10,9 @@ namespace Dibix.Http.Server
         public static Task<object> Invoke(HttpActionDefinition action, HttpRequestMessage request, IDictionary<string, object> arguments, IParameterDependencyResolver parameterDependencyResolver, CancellationToken cancellationToken)
         {
             IHttpResponseFormatter<HttpRequestMessageDescriptor> responseFormatter = new HttpResponseMessageFormatter();
-            return Invoke(action, new HttpRequestMessageDescriptor(request), responseFormatter, arguments, parameterDependencyResolver, parseSqlHttpStatusCodeExceptions: true, cancellationToken);
+            return Invoke(action, new HttpRequestMessageDescriptor(request), responseFormatter, arguments, parameterDependencyResolver, cancellationToken);
         }
-        public static async Task<object> Invoke<TRequest>(HttpActionDefinition action, TRequest request, IHttpResponseFormatter<TRequest> responseFormatter, IDictionary<string, object> arguments, IParameterDependencyResolver parameterDependencyResolver, bool parseSqlHttpStatusCodeExceptions, CancellationToken cancellationToken) where TRequest : IHttpRequestDescriptor
+        public static async Task<object> Invoke<TRequest>(HttpActionDefinition action, TRequest request, IHttpResponseFormatter<TRequest> responseFormatter, IDictionary<string, object> arguments, IParameterDependencyResolver parameterDependencyResolver, CancellationToken cancellationToken) where TRequest : IHttpRequestDescriptor
         {
             try
             {
@@ -25,7 +25,7 @@ namespace Dibix.Http.Server
                 object formattedResult = await responseFormatter.Format(result, request, action, cancellationToken).ConfigureAwait(false);
                 return formattedResult;
             }
-            catch (DatabaseAccessException exception) when (parseSqlHttpStatusCodeExceptions)
+            catch (DatabaseAccessException exception)
             {
                 // Sample:
                 // THROW 404017, N'Feature not configured', 1

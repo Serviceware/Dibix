@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 
@@ -30,10 +32,11 @@ namespace Dibix.Http.Server
                     error = userResponse;
 
                 isClientError = HttpErrorResponseUtility.IsClientError(error.StatusCode);
+                IDictionary<string, object> caseInsensitiveArguments = new Dictionary<string, object>(arguments, StringComparer.OrdinalIgnoreCase);
                 string formattedErrorMessage = Regex.Replace(error.ErrorMessage, "{(?<ParameterName>[^}]+)}", x =>
                 {
                     string parameterName = x.Groups["ParameterName"].Value;
-                    return arguments.TryGetValue(parameterName, out object value) ? value?.ToString() : x.Value;
+                    return caseInsensitiveArguments.TryGetValue(parameterName, out object value) ? value?.ToString() : x.Value;
                 });
                 httpException = new HttpRequestExecutionException((HttpStatusCode)error.StatusCode, error.ErrorCode, formattedErrorMessage, isClientError, originalException);
                 return true;

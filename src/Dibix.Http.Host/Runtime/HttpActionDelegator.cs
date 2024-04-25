@@ -26,7 +26,7 @@ namespace Dibix.Http.Host
             IHttpResponseFormatter<HttpRequestDescriptor> responseFormatter = new HttpResponseFormatter(httpContext.Response);
             try
             {
-                _ = await HttpActionInvoker.Invoke(actionDefinition, new HttpRequestDescriptor(httpContext.Request), responseFormatter, arguments, _parameterDependencyResolver, parseSqlHttpStatusCodeExceptions: false, cancellationToken).ConfigureAwait(false);
+                _ = await HttpActionInvoker.Invoke(actionDefinition, new HttpRequestDescriptor(httpContext.Request), responseFormatter, arguments, _parameterDependencyResolver, cancellationToken).ConfigureAwait(false);
             }
             catch (HttpRequestExecutionException httpRequestExecutionException)
             {

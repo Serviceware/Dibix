@@ -53,7 +53,7 @@ namespace Dibix.Http.Server.Tests
             foreach (KeyValuePair<string, object> parameter in parameters)
                 arguments.Add(parameter);
             
-            object result = await HttpActionInvoker.Invoke(action, request, responseFormatter, arguments, parameterDependencyResolver.Object, parseSqlHttpStatusCodeExceptions: true, default).ConfigureAwait(false);
+            object result = await HttpActionInvoker.Invoke(action, request, responseFormatter, arguments, parameterDependencyResolver.Object, default).ConfigureAwait(false);
             return result;
         }
 
