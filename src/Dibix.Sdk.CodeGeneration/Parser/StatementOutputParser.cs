@@ -335,6 +335,16 @@ namespace Dibix.Sdk.CodeGeneration
                 if (!(schema is ObjectSchema objectSchema))
                     throw new NotSupportedException($"Unsupported return type for result validation: {returnType.GetType()}");
 
+                foreach (IGrouping<string, OutputColumnResult> duplicateGroups in columnGroup.GroupBy(x => x.ColumnName).Where(x => x.Count() > 1))
+                {
+                    foreach (OutputColumnResult duplicateColumn in duplicateGroups.Skip(1))
+                    {
+                        logger.LogError($"Duplicate column name in SELECT '{duplicateColumn.ColumnName}'", duplicateColumn.ColumnNameSource, returnType.Location.Source);
+                    }
+                }
+
+                ICollection<ObjectSchemaProperty> visitedProperties = [.. objectSchema.Properties.Where(x => IsPrimitiveType(x.Type, schemaRegistry) && !x.Type.IsEnumerable)];
+
                 foreach (OutputColumnResult columnResult in columnGroup)
                 {
                     // Validate alias
@@ -354,6 +364,8 @@ namespace Dibix.Sdk.CodeGeneration
                         continue;
                     }
 
+                    visitedProperties.Remove(property);
+
                     if (!IsPrimitiveType(property.Type, schemaRegistry))
                     {
                         logger.LogError($"Column '{columnResult.ColumnName}' cannot be mapped. Only primitive types are supported.", returnElement.Location.Source, columnResult.ColumnNameSource.StartLine, columnResult.ColumnNameSource.StartColumn);
@@ -364,6 +376,11 @@ namespace Dibix.Sdk.CodeGeneration
                     // Validate nullability
                     //if (columnResult.IsNullable.HasValue && columnResult.IsNullable.Value != property.Type.IsNullable)
                     //    logger.LogError(null, $"Nullability of column '{columnResult.ColumnName}' should match the target property", target.Source, columnResult.ColumnNameSource.StartLine, columnResult.ColumnNameSource.StartColumn);
+                }
+
+                foreach (ObjectSchemaProperty property in visitedProperties)
+                {
+                    logger.LogError($"Property '{property.Name}' on type '{schema.FullName}' not mapped", columnGroup[0].PrimarySource, returnType.Location.Source);
                 }
             }
         }

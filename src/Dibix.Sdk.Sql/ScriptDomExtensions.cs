@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using Dibix.Sdk.Abstractions;
 using Microsoft.SqlServer.Dac;
 using Microsoft.SqlServer.Dac.Model;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
@@ -11,6 +12,8 @@ namespace Dibix.Sdk.Sql
 {
     public static class ScriptDomExtensions
     {
+        public static void LogError(this ILogger logger, string text, TSqlFragment fragment, string source) => logger.LogMessage(LogCategory.Error, subCategory: null, code: null, text, source, fragment.StartLine, fragment.StartColumn);
+
         public static string Dump(this TSqlFragment fragment)
         {
             StringBuilder sb = new StringBuilder();

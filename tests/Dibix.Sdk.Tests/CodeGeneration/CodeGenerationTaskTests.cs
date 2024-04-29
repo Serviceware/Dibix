@@ -520,16 +520,20 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
                   , @"Types\dbx_codeanalysis_udt_int.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_empty_params_udt.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_missingcolumn.sql"
                 }
               , contracts: new[]
                 {
                     @"Contracts\Direction.json"
+                  , @"Contracts\GenericContract.json"
                   , @"Contracts\Entry.json"
                   , @"Contracts\Request.json"
                 }
               , endpoints: new[] { @"Endpoints\GenericEndpointWithErrors.json" }
               , isEmbedded: false
               , expectedException: @"One or more errors occured during code generation:
+Tests\Syntax\dbx_tests_syntax_singleconcreteresult_missingcolumn.sql(4,12,4,12):error:Property 'ImageUrl' on type 'Dibix.Sdk.Tests.DomainModel.GenericContract' not mapped
 Endpoints\GenericEndpointWithErrors.json(8,15,8,15):error:Unknown property source 'WTF'
 Endpoints\GenericEndpointWithErrors.json(20,20,20,20):error:Property 'X' not found on contract 'Dibix.Sdk.Tests.DomainModel.Request'
 Endpoints\GenericEndpointWithErrors.json(21,23,21,23):error:Property 'Nm' not found on contract 'Dibix.Sdk.Tests.DomainModel.Entry'
