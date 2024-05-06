@@ -173,13 +173,20 @@
     <PropertyGroup>
       <_HasEndpoints Condition="@(Endpoint->Count()) > 0">True</_HasEndpoints>
       <_ProduceEndpoints Condition="'$(AreaName)' != '' and '$(_HasEndpoints)' == 'true'">True</_ProduceEndpoints>
-      <_ProduceClient Condition="'$(AreaName)' != '' and '$(_HasEndpoints)' == 'true'">True</_ProduceClient>
+      <_ProduceClient>$(_ProduceEndpoints)</_ProduceClient>
+      <ProduceAccessor Condition="'$(ProduceAccessor)' == '' and '$(_ProduceEndpoints)' != 'true'">True</ProduceAccessor>
+      <ProduceAccessor Condition="'$(ProduceAccessor)' == '' and '$(_ProduceEndpoints)' == 'true'">False</ProduceAccessor>
       <AccessorOutputName>$(AssemblyName)</AccessorOutputName>
+      <_ModelFileName Condition="'$(_HasEndpoints)' != 'true'">$(AccessorOutputName).model.json</_ModelFileName> <!-- Only for non-leaf projects -->
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(ProduceAccessor)' == 'true'">
       <_AccessorIntermediateAssemblyPath>$(IntermediateOutputPath)$(AccessorOutputName).dll</_AccessorIntermediateAssemblyPath>
       <_AccessorSourceName>$(AccessorOutputName)</_AccessorSourceName>
       <_AccessorSourceFileName>$(_AccessorSourceName).cs</_AccessorSourceFileName>
-      <_ModelFileName Condition="'$(_HasEndpoints)' != 'true'">$(AccessorOutputName).model.json</_ModelFileName> <!-- Only for non-leaf projects -->
     </PropertyGroup>
+    <ItemGroup Condition="'$(ProduceAccessor)' == 'False'">
+      <IntermediateAssembly Remove="@(IntermediateAssembly)" />
+    </ItemGroup>
     <PropertyGroup Condition="'$(_ProduceClient)' == 'true'">
       <ClientOutputName>$(AreaName).Client</ClientOutputName>
       <_ClientIntermediatePathNoExt>$(IntermediateOutputPath)$(ClientOutputName)</_ClientIntermediatePathNoExt>
@@ -387,7 +394,7 @@ $(_SqlReferencePath)" />
 
 
     <!-- Accessor assembly info & DLL generation -->
-    <PropertyGroup>
+    <PropertyGroup Condition="'$(ProduceAccessor)' == 'true'">
       <_AccessorIntermediatePathNoExt>$(IntermediateOutputPath)$(AccessorOutputName)</_AccessorIntermediatePathNoExt>
       <_AccessorFileVersion>$(FileVersion)</_AccessorFileVersion>
       <_AccessorTargetFrameworkNetFx>$(DibixTargetFramework)</_AccessorTargetFrameworkNetFx>
@@ -396,18 +403,16 @@ $(_SqlReferencePath)" />
       <_AccessorTargetFramework Condition="'$(CompileArtifactsNetStandard)' == 'true'">$(_AccessorTargetFrameworkNetStandard)</_AccessorTargetFramework>
     </PropertyGroup>
 
-    <ItemGroup>
+    <ItemGroup Condition="'$(ProduceAccessor)' == 'true'">
       <AccessorCompilationReference Include="@(AccessorCompilationArtifactReference)" />
-    </ItemGroup>
 
-    <ItemGroup>
       <_AccessorCompilationEmbeddedResource Include="&lt;EmbeddedResource Include=&quot;$(_ModelFileName)&quot; LogicalName=&quot;Model&quot; /&gt;"
                                             Condition="'$(_HasEndpoints)' != 'true'" />
       <_AccessorCompilationReferenceItem Include="@(AccessorCompilationReference->'&lt;Reference Include=&quot;%(Filename)&quot; HintPath=&quot;%(FullPath)&quot; Private=&quot;False&quot; /&gt;')" />
       <_AccessorCompilationReferenceItem Include="&lt;PackageReference Include=&quot;$(_DibixHttpServerName)&quot; Version=&quot;$(DibixSdkVersion)&quot; ExcludeAssets=&quot;runtime&quot; /&gt;" />
     </ItemGroup>
 
-    <PropertyGroup>
+    <PropertyGroup Condition="'$(ProduceAccessor)' == 'true'">
       <_AccessorIntermediateProjectFilePath>$(_AccessorIntermediatePathNoExt).csproj</_AccessorIntermediateProjectFilePath>
       <_AccessorIntermediateProjectFileContent>
         <![CDATA[
@@ -473,7 +478,8 @@ $(_SqlReferencePath)" />
 
     <WriteLinesToFile File="$(_AccessorIntermediateProjectFilePath)"
                       Lines="$(_AccessorIntermediateProjectFileContent)"
-                      Overwrite="True" />
+                      Overwrite="True"
+                      Condition="'$(ProduceAccessor)' == 'true'" />
 
     <ItemGroup>
       <FileWrites Include="$(_AccessorIntermediateProjectFilePath)" />
@@ -481,15 +487,16 @@ $(_SqlReferencePath)" />
 
     <!-- Override Directory.Build props/targets to ensure the project configuration is isolated -->
     <!-- For example, a central package reference of Dibix runtime might interfere here -->
-    <WriteLinesToFile File="$(IntermediateOutputPath)Directory.Build.props" Lines="&lt;Project /&gt;" Overwrite="True" />
-    <WriteLinesToFile File="$(IntermediateOutputPath)Directory.Build.targets" Lines="&lt;Project /&gt;" Overwrite="True" />
+    <WriteLinesToFile File="$(IntermediateOutputPath)Directory.Build.props" Lines="&lt;Project /&gt;" Overwrite="True" Condition="'$(ProduceAccessor)' == 'true'" />
+    <WriteLinesToFile File="$(IntermediateOutputPath)Directory.Build.targets" Lines="&lt;Project /&gt;" Overwrite="True" Condition="'$(ProduceAccessor)' == 'true'" />
 
     <ItemGroup>
       <FileWrites Include="$(IntermediateOutputPath)Directory.Build.props" />
       <FileWrites Include="$(IntermediateOutputPath)Directory.Build.targets" />
     </ItemGroup>
 
-    <Exec Command="&quot;$(_MSBuildBinPath)&quot; &quot;$(_AccessorIntermediateProjectFilePath)&quot; -restore -p:Configuration=$(Configuration) -verbosity:minimal" />
+    <Exec Command="&quot;$(_MSBuildBinPath)&quot; &quot;$(_AccessorIntermediateProjectFilePath)&quot; -restore -p:Configuration=$(Configuration) -verbosity:minimal"
+          Condition="'$(ProduceAccessor)' == 'true'"/>
 
     <ItemGroup>
       <FileWrites Include="$(IntermediateOutputPath)nuget.output" />
