@@ -112,7 +112,7 @@ paths:
           in: query
           schema:
             type: string
-            default: 
+            default: null
             nullable: true
         - name: e
           in: query
@@ -164,7 +164,7 @@ paths:
           in: header
           schema:
             type: string
-            default: 
+            default: null
             nullable: true
       responses:
         '204':
@@ -211,7 +211,7 @@ paths:
           in: query
           schema:
             type: string
-            default: 
+            default: null
             nullable: true
         - name: e
           in: query
@@ -272,7 +272,7 @@ paths:
           in: query
           schema:
             type: string
-            default: 
+            default: null
             nullable: true
         - name: e
           in: query
@@ -444,7 +444,7 @@ paths:
           in: query
           schema:
             type: string
-            default: 
+            default: null
             nullable: true
         - name: e
           in: query
@@ -508,7 +508,7 @@ paths:
           in: query
           schema:
             type: string
-            default: 
+            default: null
             nullable: true
         - name: e
           in: query
