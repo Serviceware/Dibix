@@ -1,0 +1,67 @@
+openapi: 3.0.1
+info:
+  title: Dibix.Sdk.Tests API title
+  description: Dibix.Sdk.Tests API description
+  version: 1.0.1
+servers:
+  - url: https://localhost/api
+paths:
+  /Tests/GenericEndpointLegacy:
+    get:
+      tags:
+        - GenericEndpointLegacy
+      summary: MultiConcreteResultLegacy
+      operationId: MultiConcreteResultLegacy
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GenericContractLegacy'
+      security:
+        - DBXNS-SIT: [ ]
+components:
+  schemas:
+    GenericContractLegacy:
+      required:
+        - role
+        - imageUrl
+      type: object
+      properties:
+        name:
+          type: string
+          default: DefaultValue
+        role:
+          $ref: '#/components/schemas/Role'
+        creationTime:
+          type: string
+          format: date-time
+          nullable: true
+        imageUrl:
+          type: string
+          format: uri
+      additionalProperties: false
+    Role:
+      enum:
+        - 0
+        - 1
+        - 2
+      type: integer
+      description: 0 = None<br/>1 = User<br/>2 = Admin
+      format: int32
+      x-enum-varnames:
+        - None
+        - User
+        - Admin
+      x-enumNames:
+        - None
+        - User
+        - Admin
+  securitySchemes:
+    DBXNS-SIT:
+      type: apiKey
+      name: DBXNS-SIT
+      in: header

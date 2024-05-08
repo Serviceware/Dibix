@@ -39,6 +39,7 @@ namespace Dibix.Sdk.CodeGeneration
                 ClientTargetFileName = configuration.ClientTargetFileName,
                 ModelTargetFileName = configuration.ModelTargetFileName,
                 DocumentationTargetName = configuration.DocumentationTargetName,
+                DocumentationSourcePath = configuration.DocumentationSourcePath,
                 BaseUrl = configuration.BaseUrl,
                 SupportOpenApiNullableReferenceTypes = configuration.SupportOpenApiNullableReferenceTypes
             };

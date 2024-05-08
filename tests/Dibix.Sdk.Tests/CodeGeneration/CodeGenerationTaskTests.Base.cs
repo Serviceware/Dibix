@@ -33,6 +33,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             const string clientTargetFileName = $"{areaName}.Client.cs";
             const string modelTargetFileName = $"{accessorTargetName}.model.json";
             const string documentationTargetName = areaName;
+            string documentationSourcePath = Path.Combine(DatabaseTestUtility.DatabaseProjectDirectory, $"{documentationTargetName}.yml");
 
             TestLogger logger = new TestLogger(base.Out, distinctErrorLogging: true);
 
@@ -72,6 +73,8 @@ ModelTargetFileName
   {(outputKind == AssertOutputKind.Model ? modelTargetFileName : null)}
 DocumentationTargetName
   {(outputKind == AssertOutputKind.OpenApi ? documentationTargetName : null)}
+DocumentationSourcePath
+  {documentationSourcePath}
 ExternalAssemblyReferenceDirectory
   {Environment.CurrentDirectory}
 BuildingInsideVisualStudio
@@ -108,7 +111,7 @@ SqlReferencePath");
             string endpointOutputFilePath = Path.Combine(outputDirectory, endpointTargetFileName);
             string clientOutputFilePath = Path.Combine(outputDirectory, clientTargetFileName);
             string modelOutputFilePath = Path.Combine(outputDirectory, modelTargetFileName);
-            string openApiDocumentFilePath = Path.Combine(outputDirectory, "Tests.yml");
+            string generatedOpenApiDocumentFilePath = Path.Combine(outputDirectory, "Tests.yml");
 
             switch (outputKind)
             {
@@ -117,7 +120,7 @@ SqlReferencePath");
                     Assert.IsFalse(File.Exists(endpointOutputFilePath), "File.Exists(endpointOutputFilePath)");
                     Assert.IsFalse(File.Exists(clientOutputFilePath), "File.Exists(clientOutputFilePath)");
                     Assert.IsFalse(File.Exists(modelOutputFilePath), "File.Exists(modelOutputFilePath)");
-                    Assert.IsFalse(File.Exists(openApiDocumentFilePath), "File.Exists(openApiDocumentFilePath)");
+                    Assert.IsFalse(File.Exists(generatedOpenApiDocumentFilePath), "File.Exists(openApiDocumentFilePath)");
                     break;
 
                 case AssertOutputKind.Model:
@@ -125,7 +128,7 @@ SqlReferencePath");
                     Assert.IsTrue(File.Exists(accessorOutputFilePath), "File.Exists(accessorOutputFilePath)");
                     Assert.IsFalse(File.Exists(endpointOutputFilePath), "File.Exists(endpointOutputFilePath)");
                     Assert.IsFalse(File.Exists(clientOutputFilePath), "File.Exists(clientOutputFilePath)");
-                    Assert.IsFalse(File.Exists(openApiDocumentFilePath), "File.Exists(openApiDocumentFilePath)");
+                    Assert.IsFalse(File.Exists(generatedOpenApiDocumentFilePath), "File.Exists(openApiDocumentFilePath)");
                     break;
 
                 case AssertOutputKind.Endpoint:
@@ -133,7 +136,7 @@ SqlReferencePath");
                     Assert.IsTrue(File.Exists(accessorOutputFilePath), "File.Exists(accessorOutputFilePath)");
                     Assert.IsFalse(File.Exists(clientOutputFilePath), "File.Exists(clientOutputFilePath)");
                     Assert.IsFalse(File.Exists(modelOutputFilePath), "File.Exists(modelOutputFilePath)");
-                    Assert.IsFalse(File.Exists(openApiDocumentFilePath), "File.Exists(openApiDocumentFilePath)");
+                    Assert.IsFalse(File.Exists(generatedOpenApiDocumentFilePath), "File.Exists(openApiDocumentFilePath)");
                     break;
 
                 case AssertOutputKind.Client:
@@ -141,13 +144,13 @@ SqlReferencePath");
                     Assert.IsTrue(File.Exists(accessorOutputFilePath), "File.Exists(accessorOutputFilePath)");
                     Assert.IsFalse(File.Exists(endpointOutputFilePath), "File.Exists(endpointOutputFilePath)");
                     Assert.IsFalse(File.Exists(modelOutputFilePath), "File.Exists(modelOutputFilePath)");
-                    Assert.IsFalse(File.Exists(openApiDocumentFilePath), "File.Exists(openApiDocumentFilePath)");
+                    Assert.IsFalse(File.Exists(generatedOpenApiDocumentFilePath), "File.Exists(openApiDocumentFilePath)");
                     break;
 
                 case AssertOutputKind.OpenApi:
                     // The OpenAPI SDK uses LF but even if we would use LF in the expected file, Git's autocrlf feature would mess it up again
                     const bool normalizeLineEndings = true;
-                    this.AssertFileContent(openApiDocumentFilePath, normalizeLineEndings);
+                    this.AssertFileContent(generatedOpenApiDocumentFilePath, normalizeLineEndings);
                     Assert.IsTrue(File.Exists(accessorOutputFilePath), "File.Exists(accessorOutputFilePath)");
                     Assert.IsFalse(File.Exists(endpointOutputFilePath), "File.Exists(endpointOutputFilePath)");
                     Assert.IsFalse(File.Exists(clientOutputFilePath), "File.Exists(clientOutputFilePath)");

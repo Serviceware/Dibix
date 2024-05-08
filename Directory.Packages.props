@@ -26,6 +26,7 @@
     <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations"            Version="8.0.0"     />
     <PackageVersion Include="Microsoft.NET.Test.Sdk"                                  Version="17.9.0"    />
     <PackageVersion Include="Microsoft.OpenApi"                                       Version="1.6.14"    />
+    <PackageVersion Include="Microsoft.OpenApi.Readers"                               Version="1.6.14"    />
     <PackageVersion Include="Microsoft.SqlServer.DacFx"                               Version="162.2.111" />
     <PackageVersion Include="Moq"                                                     Version="4.20.70"   />
     <PackageVersion Include="MSTest.TestAdapter"                                      Version="3.2.2"     />

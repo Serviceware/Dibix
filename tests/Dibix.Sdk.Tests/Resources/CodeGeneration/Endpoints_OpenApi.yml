@@ -532,6 +532,23 @@ paths:
           description: NoContent
       security:
         - DBXNS-SIT: [ ]
+  /Tests/GenericEndpointLegacy:
+    get:
+      tags:
+        - GenericEndpointLegacy
+      summary: MultiConcreteResultLegacy
+      operationId: MultiConcreteResultLegacy
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GenericContractLegacy'
+      security:
+        - DBXNS-SIT: [ ]
 components:
   schemas:
     GenericContract:
@@ -688,6 +705,25 @@ components:
         name:
           type: string
           nullable: true
+      additionalProperties: false
+    GenericContractLegacy:
+      required:
+        - role
+        - imageUrl
+      type: object
+      properties:
+        name:
+          type: string
+          default: DefaultValue
+        role:
+          $ref: '#/components/schemas/Role'
+        creationTime:
+          type: string
+          format: date-time
+          nullable: true
+        imageUrl:
+          type: string
+          format: uri
       additionalProperties: false
   securitySchemes:
     Bearer:

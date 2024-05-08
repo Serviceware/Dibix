@@ -202,6 +202,7 @@
       <_EndpointSourceName>$(EndpointOutputName).Endpoints</_EndpointSourceName>
       <_EndpointSourceFileName>$(_EndpointSourceName).cs</_EndpointSourceFileName>
       <_DocumentationSourceName>$(AreaName)</_DocumentationSourceName>
+      <_DocumentationSourcePath>$(MSBuildProjectDirectory)\$(_DocumentationSourceName).yml</_DocumentationSourcePath>
     </PropertyGroup>
     <ItemGroup Condition="'$(_ProduceEndpoints)' == 'true'">
       <_DocsFiles Include="$(AreaName).yml" />
@@ -315,6 +316,8 @@
   $(_ModelFileName)" />
       <_SqlCoreInputItem Include="DocumentationTargetName
   $(_DocumentationSourceName)" />
+      <_SqlCoreInputItem Include="DocumentationSourcePath
+  $(_DocumentationSourcePath)" />
       <_SqlCoreInputItem Include="ExternalAssemblyReferenceDirectory
   $(ExternalAssemblyReferenceDirectory)" />
       <_SqlCoreInputItem Include="BuildingInsideVisualStudio

@@ -11,6 +11,7 @@ namespace Dibix.Sdk.CodeGeneration
           , typeof(EndpointCodeArtifactGenerationUnit)
           , typeof(ClientCodeArtifactGenerationUnit)
           , typeof(OpenApiArtifactsGenerationUnit)
+          , typeof(MergeOpenApiArtifactsGenerationUnit)
           , typeof(PersistArtifactModelUnit)
           , typeof(PackageMetadataUnit)
         };

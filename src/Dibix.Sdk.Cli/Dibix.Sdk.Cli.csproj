@@ -63,12 +63,14 @@
       <_ToolDependency Include="Microsoft.Data.Tools.Schema.Utilities.Sql.dll" />
       <_ToolDependency Include="Microsoft.Data.Tools.Utilities.dll" />
       <_ToolDependency Include="Microsoft.OpenApi.dll" />
+      <_ToolDependency Include="Microsoft.OpenApi.Readers.dll" />
       <_ToolDependency Include="Microsoft.SqlServer.ConnectionInfo.dll" />
       <_ToolDependency Include="Microsoft.SqlServer.Dac.dll" />
       <_ToolDependency Include="Microsoft.SqlServer.Dac.Extensions.dll" />
       <_ToolDependency Include="Microsoft.SqlServer.TransactSql.ScriptDom.dll" />
       <_ToolDependency Include="Newtonsoft.Json.dll" />
       <_ToolDependency Include="Newtonsoft.Json.Schema.dll" />
+      <_ToolDependency Include="SharpYaml.dll" />
       <_ToolDependency Include="System.IO.Packaging.dll" />
       <_ToolDependency Include="System.Memory.dll" />
       <_ToolDependency Include="System.Numerics.Vectors.dll" />

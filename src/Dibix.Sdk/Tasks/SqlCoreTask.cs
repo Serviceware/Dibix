@@ -29,6 +29,7 @@ namespace Dibix.Sdk
     [TaskProperty("ClientTargetFileName", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
     [TaskProperty("ModelTargetFileName", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
     [TaskProperty("DocumentationTargetName", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
+    [TaskProperty("DocumentationSourcePath", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
     [TaskProperty("ExternalAssemblyReferenceDirectory", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
     [TaskProperty("Source", TaskPropertyType.Items, Category = GlobalCategory)]
     [TaskProperty("ScriptSource", TaskPropertyType.Items, Category = SqlCodeAnalysisCategory)]
@@ -79,6 +80,7 @@ namespace Dibix.Sdk
                 ClientTargetFileName = _configuration.ArtifactGeneration.ClientTargetFileName,
                 ModelTargetFileName = _configuration.ArtifactGeneration.ModelTargetFileName,
                 DocumentationTargetName = _configuration.ArtifactGeneration.DocumentationTargetName,
+                DocumentationSourcePath = _configuration.ArtifactGeneration.DocumentationSourcePath,
                 Title = _configuration.ArtifactGeneration.Title,
                 Version = _configuration.ArtifactGeneration.Version,
                 Description = _configuration.ArtifactGeneration.Description,

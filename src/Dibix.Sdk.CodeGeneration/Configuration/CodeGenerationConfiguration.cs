@@ -20,6 +20,7 @@ namespace Dibix.Sdk.CodeGeneration
         public string ClientTargetFileName { get; set; }
         public string ModelTargetFileName { get; set; }
         public string DocumentationTargetName { get; set; }
+        public string DocumentationSourcePath { get; set; }
         public string Title { get; set; }
         public string Version { get; set; }
         public string BaseUrl { get; set; }
