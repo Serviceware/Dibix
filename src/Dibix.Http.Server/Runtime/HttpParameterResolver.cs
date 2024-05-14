@@ -722,6 +722,15 @@ Either create a mapping or make sure a property of the same name exists in the s
 
         private static ResolveParameters Compile(CompilationContext compilationContext, out string source)
         {
+            // Nothing to do
+            // This happens, if none of the parameters have a source,
+            // which is the case for describing parameters to reflection targets.
+            if (!compilationContext.Statements.Any())
+            {
+                source = null;
+                return (_, _, _, _) => { };
+            }
+
             Expression block = Expression.Block(compilationContext.Variables, compilationContext.Statements);
             Expression<ResolveParameters> lambda = Expression.Lambda<ResolveParameters>(block, compilationContext.Parameters);
             ResolveParameters compiled = lambda.Compile();
@@ -909,7 +918,7 @@ Either create a mapping or make sure a property of the same name exists in the s
             public object DefaultValue { get; private set; }
             public Type InputConverter { get; private set; }                // IFormattedInputConverter<TSource, TTarget>
             public string ClaimType { get; private set; }                   // IHttpRequestDescriptor.GetClaimValues
-            public IHttpParameterConverter Converter { get; private set; }  // CONVERT(value)
+            public IHttpParameterConverter Converter { get; private set; }  // IHttpParameterConverter
             public HttpParameterSourceInfo Source { get; private set; }     // DBX.LocaleId / databaseAccessorFactory
             public HttpItemsParameterInfo Items { get; private set; }       // udt_columnname = ITEM.SomePropertyName
 

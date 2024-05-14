@@ -61,26 +61,23 @@ namespace Dibix.Sdk.CodeGeneration
             ActionParameterRegistry parameterRegistry = new ActionParameterRegistry(actionTargetDefinition, pathParameters);
             foreach (ExplicitParameter parameter in explicitParameters.Values)
             {
+                if (parameter is not ParameterDescriptor parameterDescriptor)
+                {
+                    Logger.LogError($"Metadata of parameter '{parameter.Name}' cannot be automatically detected for this action target and therefore must be specified explicitly", parameter.SourceLocation);
+                    continue;
+                }
+
                 string apiParameterName = parameter.Name;
                 string internalParameterName = apiParameterName;
-                ActionParameterSource source = parameter.SourceBuilder.Build(type: null);
-                ActionParameterLocation location = ResolveParameterLocationFromSource(source, ref apiParameterName);
-                if (location == ActionParameterLocation.Path && pathParameters.TryGetValue(apiParameterName, out PathParameter pathParameter))
-                    pathParameter.Visited = true;
+                ActionParameterSource source = parameterDescriptor.SourceBuilder?.Build(type: null);
+                ActionParameterLocation location = ResolveParameterLocationFromSource(source, parameterDescriptor.ParameterLocation, ref apiParameterName);
 
-                TypeReference type = null;
-                ValueReference defaultValue = null;
-                if (location == ActionParameterLocation.Header)
-                {
-                    // Generate a null default value for header parameters
-                    PrimitiveTypeReference primitiveTypeReference = new PrimitiveTypeReference(PrimitiveType.String, isNullable: true, isEnumerable: false, size: null, new SourceLocation(sourceLocation.Source, parameter.Location.Line, parameter.Location.Column));
-                    type = primitiveTypeReference;
-                    defaultValue = new NullValueReference(primitiveTypeReference, parameter.Location);
-                }
+                TypeReference type = parameterDescriptor.Type;
+                ValueReference defaultValue = parameterDescriptor.DefaultValue;
 
                 bool isRequired = base.IsParameterRequired(type, location, defaultValue);
                 bool isOutput = false; // Not supported
-                parameterRegistry.Add(new ActionParameter(apiParameterName, internalParameterName, type, location, isRequired, isOutput, defaultValue, source, new SourceLocation(sourceLocation.Source, parameter.Location.Line, parameter.Location.Column)));
+                parameterRegistry.Add(new ActionParameter(apiParameterName, internalParameterName, type, location, isRequired, isOutput, defaultValue, source, new SourceLocation(sourceLocation.Source, parameter.SourceLocation.Line, parameter.SourceLocation.Column)));
             }
 
             foreach (PathParameter pathParameter in pathParameters.Values)
@@ -96,7 +93,7 @@ namespace Dibix.Sdk.CodeGeneration
             return true;
         }
 
-        private static ActionParameterLocation ResolveParameterLocationFromSource(ActionParameterSource parameterSource, ref string apiParameterName)
+        private static ActionParameterLocation ResolveParameterLocationFromSource(ActionParameterSource parameterSource, ActionParameterLocation? explicitLocation, ref string apiParameterName)
         {
             switch (parameterSource)
             {
@@ -111,6 +108,10 @@ namespace Dibix.Sdk.CodeGeneration
                     apiParameterName = actionParameterPropertySource.PropertyName.Split('.')[0];
                     IsUserParameter(actionParameterPropertySource.Definition, actionParameterPropertySource.PropertyName, ref location, ref apiParameterName);
                     return location;
+
+                case null when explicitLocation is not null: return explicitLocation.Value;
+                
+                case null: return ActionParameterLocation.Query;
 
                 default: throw new ArgumentOutOfRangeException(nameof(parameterSource), parameterSource, null);
             }

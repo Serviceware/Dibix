@@ -1483,7 +1483,7 @@
             "Type": "String",
             "Size": 128,
             "DisplayName": "String",
-            "IsNullable": false,
+            "IsNullable": true,
             "IsEnumerable": false,
             "Location": {
               "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",

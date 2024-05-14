@@ -20,7 +20,7 @@ namespace Dibix.Sdk.Tests.Data
         // EmptyWithParams
         private const string EmptyWithParamsCommandText = "[dbo].[dbx_tests_syntax_empty_params]";
 
-        public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.IntParameterSet ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake")
+        public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string a, string b, System.Guid? c, string? password, Dibix.Sdk.Tests.Data.IntParameterSet ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake")
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {

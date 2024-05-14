@@ -214,7 +214,11 @@ namespace Dibix.Sdk.CodeGeneration
                           .SetTemporaryIndent(4);
                 }
 
-                writer.WriteLine($"requestMessage.{nameof(HttpRequestMessage.Headers)}.{nameof(HttpRequestMessage.Headers.Add)}(\"{parameter.ApiParameterName}\", {normalizedApiParameterName});");
+                string headerValue = normalizedApiParameterName;
+                if (parameter.Type is not PrimitiveTypeReference { Type: PrimitiveType.String })
+                    headerValue = $"{headerValue}.ToString()";
+
+                writer.WriteLine($"requestMessage.{nameof(HttpRequestMessage.Headers)}.{nameof(HttpRequestMessage.Headers.Add)}(\"{parameter.ApiParameterName}\", {headerValue});");
                 
                 if (!parameter.IsRequired)
                     writer.ResetTemporaryIndent();

@@ -7,9 +7,9 @@
     },
     "SchemaTypeReference": {
       "type": "string",
-      "pattern": "^([\\w]+)(.([\\w]+))*\\??\\*?$"
+      "pattern": "^([A-Z]([\\w]+)(\\.[\\w]+){0,})\\??\\*?$"
     },
-    "PropertyType": {
+    "TypeReference": {
       "anyOf": [
         {
           "$ref": "#/definitions/PrimitiveTypeReference"
@@ -52,14 +52,14 @@
         "^[A-Z]([\\w]+)?$": {
           "anyOf": [
             {
-              "$ref": "#/definitions/PropertyType"
+              "$ref": "#/definitions/TypeReference"
             },
             {
               "type": "object",
               "minProperties": 2,
               "properties": {
                 "type": {
-                  "$ref": "#/definitions/PropertyType"
+                  "$ref": "#/definitions/TypeReference"
                 },
                 "isPartOfKey": {
                   "type": "boolean"
@@ -87,7 +87,7 @@
               "minProperties": 2,
               "properties": {
                 "type": {
-                  "$ref": "#/definitions/PropertyType"
+                  "$ref": "#/definitions/TypeReference"
                 },
                 "isDiscriminator": {
                   "type": "boolean"

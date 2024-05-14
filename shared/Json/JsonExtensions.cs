@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text;
 using Dibix.Sdk.Abstractions;
 using Newtonsoft.Json;
@@ -8,6 +9,15 @@ namespace Dibix.Sdk
 {
     internal static class JsonExtensions
     {
+        public static JProperty GetPropertySafe(this JObject @object, string propertyName)
+        {
+            JProperty property = @object.Property(propertyName);
+            if (property == null)
+                throw new InvalidOperationException($"Missing property '{propertyName}' at {@object.Path}");
+
+            return property;
+        }
+
         public static void SetFileSource(this JToken json, string filePath)
         {
             json.AddAnnotation(new JsonFileSourceAnnotation(filePath));

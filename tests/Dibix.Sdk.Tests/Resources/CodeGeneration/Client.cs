@@ -102,14 +102,14 @@ namespace Dibix.Sdk.Tests.Client
     public interface IGenericEndpointService : IHttpService
     {
         Task<HttpResponse<short>> EmptyWithOutputParamAsync(CancellationToken cancellationToken = default);
-        Task<HttpResponseMessage> EmptyWithParams1Async(string password, string userAgent, IEnumerable<int> ids, string? acceptLanguage = null, CancellationToken cancellationToken = default);
+        Task<HttpResponseMessage> EmptyWithParams1Async(string? password, string userAgent, IEnumerable<int> ids, string? acceptLanguage = null, CancellationToken cancellationToken = default);
         Task<HttpResponseMessage> EmptyWithParams2Async(Dibix.Sdk.Tests.DomainModel.InputContract body, CancellationToken cancellationToken = default);
-        Task<HttpResponseMessage> EmptyWithParams3Async(string a, string b, System.Guid? c, string password, IEnumerable<int> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", CancellationToken cancellationToken = default);
-        Task<HttpResponseMessage> EmptyWithParams4Async(string a, string b, System.Guid? c, string password, IEnumerable<int> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", CancellationToken cancellationToken = default);
-        Task<HttpResponseMessage> EmptyWithParams5Async(string a, string b, System.Guid? c, string password, IEnumerable<int> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", CancellationToken cancellationToken = default);
+        Task<HttpResponseMessage> EmptyWithParams3Async(string a, string b, System.Guid? c, string? password, IEnumerable<int> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", CancellationToken cancellationToken = default);
+        Task<HttpResponseMessage> EmptyWithParams4Async(string a, string b, System.Guid? c, string? password, IEnumerable<int> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", CancellationToken cancellationToken = default);
+        Task<HttpResponseMessage> EmptyWithParams5Async(string a, string b, System.Guid? c, string? password, IEnumerable<int> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", CancellationToken cancellationToken = default);
         Task<HttpResponseMessage> EmptyWithParamsAndComplexUdt1Async(string a, string b, System.Guid? c, string password, IEnumerable<object> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", CancellationToken cancellationToken = default);
         Task<HttpResponseMessage> EmptyWithParamsAndComplexUdt2Async(Dibix.Sdk.Tests.DomainModel.AnotherInputContract body, CancellationToken cancellationToken = default);
-        Task<HttpResponseMessage> EmptyWithParamsAnonymousAsync(string password, string a, string b, System.Guid? c, IEnumerable<int> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", CancellationToken cancellationToken = default);
+        Task<HttpResponseMessage> EmptyWithParamsAnonymousAsync(string? password, string a, string b, System.Guid? c, IEnumerable<int> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", CancellationToken cancellationToken = default);
         Task<HttpResponse<System.IO.Stream>> FileResultAsync(int id, CancellationToken cancellationToken = default);
         Task<HttpResponseMessage> FileUploadAsync(System.IO.Stream body, CancellationToken cancellationToken = default);
         Task<HttpResponse<IReadOnlyList<Dibix.Sdk.Tests.DomainModel.GenericContract>>> MultiConcreteResultAsync(CancellationToken cancellationToken = default);
@@ -152,7 +152,7 @@ namespace Dibix.Sdk.Tests.Client
             }
         }
 
-        public async Task<HttpResponseMessage> EmptyWithParams1Async(string password, string userAgent, IEnumerable<int> ids, string? acceptLanguage = null, CancellationToken cancellationToken = default)
+        public async Task<HttpResponseMessage> EmptyWithParams1Async(string? password, string userAgent, IEnumerable<int> ids, string? acceptLanguage = null, CancellationToken cancellationToken = default)
         {
             using (HttpClient client = _httpClientFactory.CreateClient(_httpClientName))
             {
@@ -181,7 +181,7 @@ namespace Dibix.Sdk.Tests.Client
             }
         }
 
-        public async Task<HttpResponseMessage> EmptyWithParams3Async(string a, string b, System.Guid? c, string password, IEnumerable<int> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", CancellationToken cancellationToken = default)
+        public async Task<HttpResponseMessage> EmptyWithParams3Async(string a, string b, System.Guid? c, string? password, IEnumerable<int> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", CancellationToken cancellationToken = default)
         {
             using (HttpClient client = _httpClientFactory.CreateClient(_httpClientName))
             {
@@ -203,7 +203,7 @@ namespace Dibix.Sdk.Tests.Client
             }
         }
 
-        public async Task<HttpResponseMessage> EmptyWithParams4Async(string a, string b, System.Guid? c, string password, IEnumerable<int> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", CancellationToken cancellationToken = default)
+        public async Task<HttpResponseMessage> EmptyWithParams4Async(string a, string b, System.Guid? c, string? password, IEnumerable<int> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", CancellationToken cancellationToken = default)
         {
             using (HttpClient client = _httpClientFactory.CreateClient(_httpClientName))
             {
@@ -225,7 +225,7 @@ namespace Dibix.Sdk.Tests.Client
             }
         }
 
-        public async Task<HttpResponseMessage> EmptyWithParams5Async(string a, string b, System.Guid? c, string password, IEnumerable<int> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", CancellationToken cancellationToken = default)
+        public async Task<HttpResponseMessage> EmptyWithParams5Async(string a, string b, System.Guid? c, string? password, IEnumerable<int> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", CancellationToken cancellationToken = default)
         {
             using (HttpClient client = _httpClientFactory.CreateClient(_httpClientName))
             {
@@ -286,7 +286,7 @@ namespace Dibix.Sdk.Tests.Client
             }
         }
 
-        public async Task<HttpResponseMessage> EmptyWithParamsAnonymousAsync(string password, string a, string b, System.Guid? c, IEnumerable<int> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", CancellationToken cancellationToken = default)
+        public async Task<HttpResponseMessage> EmptyWithParamsAnonymousAsync(string? password, string a, string b, System.Guid? c, IEnumerable<int> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", CancellationToken cancellationToken = default)
         {
             using (HttpClient client = _httpClientFactory.CreateClient(_httpClientName))
             {

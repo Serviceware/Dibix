@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using Dibix.Sdk.Abstractions;
 
@@ -39,7 +40,8 @@ namespace Dibix.Sdk.CodeGeneration
         )
         {
             ActionParameter actionParameter = this.CreateActionParameter(parameterName, parameterType, isOutParameter, defaultValue, explicitParameters, pathParameters, bodyParameters, sourceLocation);
-            parameterRegistry.Add(actionParameter);
+            if (actionParameter != null)
+                parameterRegistry.Add(actionParameter);
         }
 
         protected bool IsParameterRequired(TypeReference type, ActionParameterLocation location, ValueReference defaultValue)
@@ -110,7 +112,15 @@ namespace Dibix.Sdk.CodeGeneration
             if (explicitParameters.TryGetValue(name, out ExplicitParameter explicitParameter))
             {
                 explicitParameter.Visited = true;
-                source = explicitParameter.SourceBuilder.Build(type);
+
+                if (explicitParameter is not ParameterMapping parameterMapping)
+                {
+                    throw new InvalidOperationException(@$"Unexpected explicit parameter kind for parameter '{name}'
+Expected: {typeof(ParameterMapping)}
+Got: {explicitParameter?.GetType()}");
+                }
+
+                source = parameterMapping.SourceBuilder.Build(type);
 
                 PathParameter pathParameter;
                 if (source is ActionParameterPropertySource propertySource)

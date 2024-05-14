@@ -3,18 +3,16 @@ using Newtonsoft.Json.Linq;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class ExplicitParameter
+    internal abstract class ExplicitParameter
     {
         public string Name { get; }
-        public ActionParameterSourceBuilder SourceBuilder { get; }
         public bool Visited { get; set; }
-        public SourceLocation Location { get; }
+        public SourceLocation SourceLocation { get; }
 
-        public ExplicitParameter(JProperty property, ActionParameterSourceBuilder sourceBuilder)
+        protected ExplicitParameter(JProperty property)
         {
-            SourceBuilder = sourceBuilder;
             Name = property.Name;
-            Location = property.GetSourceInfo();
+            SourceLocation = property.GetSourceInfo();
         }
     }
 }

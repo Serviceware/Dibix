@@ -101,6 +101,7 @@ paths:
           required: true
           schema:
             type: string
+            nullable: true
         - name: ids
           in: query
           schema:
@@ -148,6 +149,7 @@ paths:
           required: true
           schema:
             type: string
+            nullable: true
         - name: User-Agent
           in: header
           required: true
@@ -183,6 +185,7 @@ paths:
           required: true
           schema:
             type: string
+            nullable: true
         - name: a
           in: query
           required: true
@@ -433,6 +436,7 @@ paths:
           required: true
           schema:
             type: string
+            nullable: true
         - name: ids
           in: query
           schema:
@@ -497,6 +501,7 @@ paths:
           required: true
           schema:
             type: string
+            nullable: true
         - name: ids
           in: query
           schema:

@@ -1,9 +1,51 @@
 {
   "$schema": "http://json-schema.org/draft-05/schema#",
   "definitions": {
+    "PrimitiveTypeReference": {
+      "type": "string",
+      "pattern": "^(binary|boolean|byte|datetime|datetimeoffset|decimal|double|float|int16|int32|int64|string|uri|uuid|xml)\\??\\*?$"
+    },
+    "SchemaTypeReference": {
+      "type": "string",
+      "pattern": "^([A-Z]([\\w]+)(\\.[\\w]+){0,})\\??\\*?$"
+    },
+    "TypeReference": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/PrimitiveTypeReference"
+        },
+        {
+          "$ref": "#/definitions/SchemaTypeReference"
+        }
+      ]
+    },
     "NameIdentifier": {
       "type": "string",
       "pattern": "^[A-Z]([A-Za-z.]+)?(,[A-Z]([A-Za-z.]+)?)?$"
+    },
+    "ParameterLocation": {
+      "type": "string",
+      "enum": [
+        "Query",
+        "Body",
+        "Header"
+      ]
+    },
+    "DefaultValue": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "MediaType": {
       "type": "string",
@@ -13,7 +55,7 @@
       "type": "object",
       "properties": {
         "contract": {
-          "$ref": "#/definitions/NameIdentifier"
+          "$ref": "#/definitions/SchemaTypeReference"
         },
         "mediaType": {
           "$ref": "#/definitions/MediaType"
@@ -25,7 +67,7 @@
       "minProperties": 1,
       "additionalProperties": false
     },
-    "ConstantSource": {
+    "ConstantParameterSource": {
       "anyOf": [
         {
           "type": "boolean"
@@ -42,24 +84,21 @@
         }
       ]
     },
-    "PropertySource": {
-      "anyOf": [
-        {
-          "type": "string",
-          "pattern": "^[A-Z]+((\\.[A-Za-z-]+)|((\\.[A-Z][A-Za-z]+?){1,})|(\\.\\$[A-Z]+))$"
-        },
-        {
-          "$ref": "#/definitions/ComplexPropertySource"
-        }
-      ]
+    "PropertySourcePath": {
+      "type": "string",
+      "pattern": "^[A-Z]+((\\.[A-Za-z-]+)|((\\.[A-Z][A-Za-z]+?){1,})|(\\.\\$[A-Z]+))$"
     },
-    "ComplexPropertySource": {
+    "ParameterSourceWithConverter": {
       "type": "object",
       "minProperties": 2,
       "additionalProperties": false,
       "properties": {
         "source": {
-          "$ref": "#/definitions/PropertySource"
+          "anyOf": [
+            {
+              "$ref": "#/definitions/PropertySourcePath"
+            }
+          ]
         },
         "converter": {
           "type": "string",
@@ -71,13 +110,13 @@
         "converter"
       ]
     },
-    "ItemsPropertySource": {
+    "ItemsParameterSource": {
       "type": "object",
       "minProperties": 2,
       "additionalProperties": false,
       "properties": {
         "source": {
-          "$ref": "#/definitions/PropertySource"
+          "$ref": "#/definitions/PropertySourcePath"
         },
         "items": {
           "type": "object",
@@ -85,7 +124,13 @@
             "^[a-z]+$": {
               "anyOf": [
                 {
-                  "$ref": "#/definitions/Source"
+                  "$ref": "#/definitions/ConstantParameterSource"
+                },
+                {
+                  "$ref": "#/definitions/PropertySourcePath"
+                },
+                {
+                  "$ref": "#/definitions/ParameterSourceWithConverter"
                 }
               ]
             }
@@ -97,7 +142,7 @@
         "items"
       ]
     },
-    "BodySource": {
+    "BodyConverterParameterSource": {
       "type": "object",
       "minProperties": 1,
       "additionalProperties": false,
@@ -107,34 +152,86 @@
         }
       }
     },
-    "Source": {
+    "RootParameterSource": {
       "anyOf": [
         {
-          "$ref": "#/definitions/ConstantSource"
+          "$ref": "#/definitions/ConstantParameterSource"
         },
         {
-          "$ref": "#/definitions/PropertySource"
+          "$ref": "#/definitions/PropertySourcePath"
+        },
+        {
+          "$ref": "#/definitions/ParameterSourceWithConverter"
+        },
+        {
+          "$ref": "#/definitions/ItemsParameterSource"
+        },
+        {
+          "$ref": "#/definitions/BodyConverterParameterSource"
         }
       ]
     },
-    "ParameterMapping": {
+    "ActionTargetParameterDescription": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "$ref": "#/definitions/TypeReference"
+        },
+        "location": {
+          "$ref": "#/definitions/ParameterLocation"
+        },
+        "default": {
+          "$ref": "#/definitions/DefaultValue"
+        }
+      },
+      "required": [
+        "type"
+      ]
+    },
+    "ActionTargetParameterDescriptionWithSource": {
+      "type": "object",
+      "minProperties": 2,
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "$ref": "#/definitions/TypeReference"
+        },
+        "source": {
+          "$ref": "#/definitions/RootParameterSource"
+        },
+        "converter": {
+          "type": "string",
+          "pattern": "^[A-Z]+$"
+        },
+        "default": {
+          "$ref": "#/definitions/DefaultValue"
+        }
+      },
+      "required": [
+        "type",
+        "source"
+      ]
+    },
+    "ActionTargetParameter": {
       "anyOf": [
         {
-          "$ref": "#/definitions/Source"
+          "$ref": "#/definitions/RootParameterSource"
         },
         {
-          "$ref": "#/definitions/ItemsPropertySource"
+          "$ref": "#/definitions/ActionTargetParameterDescription"
         },
         {
-          "$ref": "#/definitions/BodySource"
+          "$ref": "#/definitions/ActionTargetParameterDescriptionWithSource"
         }
       ]
     },
-    "ParameterMappings": {
+    "ActionTargetParameters": {
       "type": "object",
       "patternProperties": {
-        "^[a-z]+$": {
-          "$ref": "#/definitions/ParameterMapping"
+        "^[a-z]([A-Za-z]+)?$": {
+          "$ref": "#/definitions/ActionTargetParameter"
         }
       },
       "minProperties": 1,
@@ -155,6 +252,23 @@
         }
       ]
     },
+    "AuthorizationParameterMappings": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-z]+$": {
+          "$ref": "#/definitions/AuthorizationParameterMapping"
+        }
+      },
+      "minProperties": 1,
+      "additionalProperties": false
+    },
+    "AuthorizationParameterMapping": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/RootParameterSource"
+        }
+      ]
+    },
     "AuthorizationTarget": {
       "anyOf": [
         {
@@ -167,7 +281,7 @@
               "$ref": "#/definitions/NameIdentifier"
             },
             "params": {
-              "$ref": "#/definitions/ParameterMappings"
+              "$ref": "#/definitions/AuthorizationParameterMappings"
             }
           },
           "required": [
@@ -191,7 +305,7 @@
           },
           "patternProperties": {
             "^(?!name$)[a-z]+$": {
-              "$ref": "#/definitions/ParameterMapping"
+              "$ref": "#/definitions/AuthorizationParameterMapping"
             }
           },
           "required": [
@@ -232,9 +346,10 @@
       "additionalProperties": false
     },
     "Response": {
+      "type": "object",
       "properties": {
         "type": {
-          "$ref": "#/definitions/NameIdentifier"
+          "$ref": "#/definitions/TypeReference"
         },
         "description": {
           "type": "string"
@@ -246,6 +361,26 @@
             },
             {
               "$ref": "#/definitions/ErrorResponse"
+            }
+          ]
+        }
+      },
+      "minProperties": 1,
+      "additionalProperties": false
+    },
+    "Responses": {
+      "type": "object",
+      "patternProperties": {
+        "^\\d{3}$": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/TypeReference"
+            },
+            {
+              "$ref": "#/definitions/Response"
             }
           ]
         }
@@ -313,7 +448,7 @@
         "body": {
           "anyOf": [
             {
-              "$ref": "#/definitions/NameIdentifier"
+              "$ref": "#/definitions/SchemaTypeReference"
             },
             {
               "$ref": "#/definitions/Body"
@@ -321,7 +456,7 @@
           ]
         },
         "params": {
-          "$ref": "#/definitions/ParameterMappings"
+          "$ref": "#/definitions/ActionTargetParameters"
         },
         "securitySchemes": {
           "$ref": "#/definitions/SecuritySchemes"
@@ -339,25 +474,18 @@
         "fileResponse": {
           "$ref": "#/definitions/FileResponse"
         },
-        "responses": {
-          "type": "object",
-          "patternProperties": {
-            "^\\d{3}$": {
-              "anyOf": [
-                {
-                  "type": "null"
-                },
-                {
-                  "$ref": "#/definitions/NameIdentifier"
-                },
-                {
-                  "$ref": "#/definitions/Response"
-                }
-              ]
+        "response": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Responses"
+            },
+            {
+              "$ref": "#/definitions/Response"
+            },
+            {
+              "$ref": "#/definitions/TypeReference"
             }
-          },
-          "minProperties": 1,
-          "additionalProperties": false
+          ]
         }
       },
       "required": [

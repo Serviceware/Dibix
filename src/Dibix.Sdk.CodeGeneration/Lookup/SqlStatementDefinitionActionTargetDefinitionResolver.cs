@@ -67,6 +67,15 @@ namespace Dibix.Sdk.CodeGeneration
                 );
             }
 
+            foreach (ExplicitParameter explicitParameter in explicitParameters.Values.Where(x => !x.Visited).ToArray())
+            {
+                if (explicitParameter is not ParameterDescriptor)
+                    continue;
+
+                Logger.LogError($"Metadata of parameter '{explicitParameter.Name}' is automatically detected for this action target and therefore should not be specified explicitly", explicitParameter.SourceLocation);
+                explicitParameter.Visited = true;
+            }
+
             foreach (ErrorResponse errorResponse in statementDefinition.ErrorResponses)
                 RegisterErrorResponse(actionTargetDefinition, errorResponse.StatusCode, errorResponse.ErrorCode, errorResponse.ErrorDescription);
 

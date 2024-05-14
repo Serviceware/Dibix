@@ -11,7 +11,12 @@ namespace Dibix.Sdk.CodeGeneration
             SourceLocation sourceInfo = value.GetSourceInfo();
 
             if (value.Type == JTokenType.Null)
+            {
+                if (!targetType.IsNullable) 
+                    logger.LogError($"Non-nullable type '{targetType.DisplayName}' cannot be initialized with a null value", sourceInfo);
+
                 return new NullValueReference(targetType, sourceInfo);
+            }
 
             switch (targetType)
             {

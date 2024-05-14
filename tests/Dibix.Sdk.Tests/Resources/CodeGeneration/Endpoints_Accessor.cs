@@ -82,7 +82,7 @@ namespace Dibix.Sdk.Tests.Data
             }
         }
 
-        public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.IntParameterSet ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake")
+        public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string a, string b, System.Guid? c, string? password, Dibix.Sdk.Tests.Data.IntParameterSet ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake")
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
@@ -338,7 +338,7 @@ namespace Dibix.Sdk.Tests.Business
                     action.Method = HttpApiMethod.Get;
                     action.ChildRoute = "{password}/Fixed";
                     action.SecuritySchemes.Add("DBXNS-SIT");
-                    action.ResolveParameterFromNull<string>("password");
+                    action.ResolveParameterFromNull<string?>("password");
                     action.ResolveParameterFromSource("a", "HEADER", "User-Agent");
                     action.ResolveParameterFromSource("b", "HEADER", "Authorization.Parameter");
                     action.ResolveParameterFromSource("c", "DBX", "X", "DBX");
