@@ -15,6 +15,7 @@ namespace Dibix.Http.Server
 
         public static IHttpActionExecutionMethod Compile(IHttpActionDescriptor action)
         {
+            ParameterExpression controllerActivatorParameter = Expression.Parameter(typeof(IControllerActivator), "controllerActivator");
             ParameterExpression argumentsParameter = Expression.Parameter(typeof(IDictionary<string, object>), "arguments");
 
             ICollection<Expression> parameters = new Collection<Expression>();
@@ -34,7 +35,17 @@ namespace Dibix.Http.Server
                 }
             }
 
-            Expression result = Expression.Call(action.Target, parameters);
+            Expression result;
+            if (action.Target.IsStatic)
+            {
+                result = Expression.Call(action.Target, parameters);
+            }
+            else
+            {
+                Expression instance = Expression.Call(controllerActivatorParameter, nameof(IControllerActivator.CreateInstance), [action.Target.DeclaringType]);
+                result = Expression.Call(instance, action.Target, parameters);
+            }
+
             if (result.Type == typeof(Task))
             {
                 result = Expression.Call(typeof(HttpActionExecutorResolver), nameof(Convert), Type.EmptyTypes, result);
@@ -60,7 +71,7 @@ namespace Dibix.Http.Server
                 result = Expression.Block(variables, CollectBlockStatements(resultVariable, result, argumentsParameter, outVariables));
             }
 
-            Expression<ExecuteHttpAction> lambda = Expression.Lambda<ExecuteHttpAction>(result, argumentsParameter);
+            Expression<ExecuteHttpAction> lambda = Expression.Lambda<ExecuteHttpAction>(result, controllerActivatorParameter, argumentsParameter);
             ExecuteHttpAction compiled = lambda.Compile();
             string source = (string)DebugViewAccessor.Value.GetValue(lambda);
             return new HttpActionExecutionMethod(action, source, compiled);
@@ -107,7 +118,7 @@ namespace Dibix.Http.Server
             return PropertyAccessor.Create(property);
         }
 
-        private delegate Task<object> ExecuteHttpAction(IDictionary<string, object> arguments);
+        private delegate Task<object> ExecuteHttpAction(IControllerActivator controllerActivator, IDictionary<string, object> arguments);
 
         private sealed class HttpActionExecutionMethod : IHttpActionExecutionMethod
         {
@@ -124,9 +135,9 @@ namespace Dibix.Http.Server
                 this.Source = source;
             }
 
-            public async Task<object> Execute(IDictionary<string, object> arguments, CancellationToken cancellationToken)
+            public async Task<object> Execute(IControllerActivator controllerActivator, IDictionary<string, object> arguments, CancellationToken cancellationToken)
             {
-                object result = await this._compiled(arguments).ConfigureAwait(false);
+                object result = await this._compiled(controllerActivator, arguments).ConfigureAwait(false);
                 return result;
             }
         }

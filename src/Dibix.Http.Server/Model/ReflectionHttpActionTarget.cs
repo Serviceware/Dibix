@@ -44,7 +44,7 @@ namespace Dibix.Http.Server
 
         private static IHttpActionTarget Create(IHttpApiDiscoveryContext context, Type type, string methodName, bool isExternal)
         {
-            MethodInfo method = type.SafeGetMethod(methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo method = type.SafeGetMethod(methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
             ReflectionHttpActionTarget target = new ReflectionHttpActionTarget(method, isExternal);
             context?.RegisterProxyHandler(method, target.UpdateMethod);
             return target;

@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Linq;
-using Dibix.Testing;
 
 namespace Dibix.Http.Server.Tests
 {
-    public partial class HttpActionExecutorTest : TestBase
+    public partial class HttpActionExecutorTest : HttpTestBase
     {
-        private void AssertEqual(string expected, string actual) => base.AssertEqual(expected, actual, extension: "txt");
-
         private IHttpActionExecutionMethod Compile() => Compile(_ => { });
         private IHttpActionExecutionMethod Compile(Action<IHttpActionDefinitionBuilder> actionConfiguration)
         {

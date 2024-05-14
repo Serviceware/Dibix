@@ -10,11 +10,13 @@ namespace Dibix.Http.Host
 {
     internal sealed class HttpActionDelegator : IHttpActionDelegator
     {
+        private readonly IControllerActivator _controllerActivator;
         private readonly IParameterDependencyResolver _parameterDependencyResolver;
         private readonly ILogger<HttpActionDelegator> _logger;
 
-        public HttpActionDelegator(IParameterDependencyResolver parameterDependencyResolver, ILogger<HttpActionDelegator> logger)
+        public HttpActionDelegator(IControllerActivator controllerActivator, IParameterDependencyResolver parameterDependencyResolver, ILogger<HttpActionDelegator> logger)
         {
+            _controllerActivator = controllerActivator;
             _parameterDependencyResolver = parameterDependencyResolver;
             _logger = logger;
         }
@@ -26,7 +28,7 @@ namespace Dibix.Http.Host
             IHttpResponseFormatter<HttpRequestDescriptor> responseFormatter = new HttpResponseFormatter(httpContext.Response);
             try
             {
-                _ = await HttpActionInvoker.Invoke(actionDefinition, new HttpRequestDescriptor(httpContext.Request), responseFormatter, arguments, _parameterDependencyResolver, cancellationToken).ConfigureAwait(false);
+                _ = await HttpActionInvoker.Invoke(actionDefinition, new HttpRequestDescriptor(httpContext.Request), responseFormatter, arguments, _controllerActivator, _parameterDependencyResolver, cancellationToken).ConfigureAwait(false);
             }
             catch (HttpRequestExecutionException httpRequestExecutionException)
             {

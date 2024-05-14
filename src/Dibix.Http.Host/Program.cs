@@ -47,7 +47,8 @@ namespace Dibix.Http.Host
                     .AddTransient<IClaimsTransformation, ComposableClaimsTransformation>()
                     .AddScoped<IJwtAudienceProvider, EndpointJwtAudienceProvider>()
                     .AddScoped<EndpointMetadataContext>()
-                    .AddTransient<IPostConfigureOptions<JsonOptions>, JsonPostConfigureOptions>();
+                    .AddTransient<IPostConfigureOptions<JsonOptions>, JsonPostConfigureOptions>()
+                    .AddSingleton<IControllerActivator, NotSupportedControllerActivator>();
 
             services.AddExceptionHandler<DatabaseAccessExceptionHandler>();
             services.AddProblemDetails();

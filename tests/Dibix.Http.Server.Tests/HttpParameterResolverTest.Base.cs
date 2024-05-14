@@ -4,13 +4,12 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Xml.Linq;
-using Dibix.Testing;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Dibix.Http.Server.Tests
 {
-    public partial class HttpParameterResolverTest : TestBase
+    public partial class HttpParameterResolverTest : HttpTestBase
     {
         private HttpActionDefinition Compile() => Compile(_ => { });
         private HttpActionDefinition Compile(Action<IHttpActionDefinitionBuilder> actionConfiguration)
@@ -19,14 +18,6 @@ namespace Dibix.Http.Server.Tests
             registration.Configure(null);
             HttpActionDefinition action = registration.Controllers.Single().Actions.Single();
             return action;
-        }
-
-        private void AssertGeneratedText(string actualText)
-        {
-            const string extension = "txt";
-            string expectedKey = $"{TestContext.TestName}.{extension}";
-            string expectedText = GetEmbeddedResourceContent(expectedKey);
-            AssertEqual(expectedText, actualText, extension);
         }
 
         private sealed class HttpApiRegistration : HttpApiDescriptor

@@ -7,13 +7,12 @@ using System.Net.Http;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Dibix.Testing;
 using Moq;
 using Moq.Language.Flow;
 
 namespace Dibix.Http.Server.Tests
 {
-    public partial class HttpActionInvokerTest : TestBase
+    public partial class HttpActionInvokerTest : HttpTestBase
     {
         private async Task<object> CompileAndExecute(HttpRequestMessage request = null, Action<IHttpActionDefinitionBuilder> actionConfiguration = null, Action<IHttpAuthorizationBuilder> authorizationConfiguration = null, params KeyValuePair<string, object>[] parameters)
         {
@@ -39,7 +38,7 @@ namespace Dibix.Http.Server.Tests
             foreach (KeyValuePair<string, object> parameter in parameters)
                 arguments.Add(parameter);
 
-            object result = await HttpActionInvoker.Invoke(action, request, arguments, parameterDependencyResolver.Object, default).ConfigureAwait(false);
+            object result = await HttpActionInvoker.Invoke(action, request, arguments, ControllerActivator.NotImplemented, parameterDependencyResolver.Object, default).ConfigureAwait(false);
             return result;
         }
 
@@ -53,7 +52,7 @@ namespace Dibix.Http.Server.Tests
             foreach (KeyValuePair<string, object> parameter in parameters)
                 arguments.Add(parameter);
             
-            object result = await HttpActionInvoker.Invoke(action, request, responseFormatter, arguments, parameterDependencyResolver.Object, default).ConfigureAwait(false);
+            object result = await HttpActionInvoker.Invoke(action, request, responseFormatter, arguments, ControllerActivator.NotImplemented, parameterDependencyResolver.Object, default).ConfigureAwait(false);
             return result;
         }
 

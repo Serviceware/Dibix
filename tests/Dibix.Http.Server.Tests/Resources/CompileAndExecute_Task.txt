@@ -1,0 +1,7 @@
+.Lambda #Lambda1<Dibix.Http.Server.HttpActionExecutorResolver+ExecuteHttpAction>(
+    Dibix.Http.Server.IControllerActivator $controllerActivator,
+    System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments) {
+    .Call Dibix.Http.Server.HttpActionExecutorResolver.Convert(.Call Dibix.Http.Server.Tests.HttpActionExecutorTest.CompileAndExecute_Task_Target(.Call Dibix.Http.Server.HttpActionExecutorResolver.CollectParameter(
+                $arguments,
+                "databaseAccessorFactory")))
+}

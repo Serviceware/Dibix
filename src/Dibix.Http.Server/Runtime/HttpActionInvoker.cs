@@ -7,21 +7,21 @@ namespace Dibix.Http.Server
 {
     public static class HttpActionInvoker
     {
-        public static Task<object> Invoke(HttpActionDefinition action, HttpRequestMessage request, IDictionary<string, object> arguments, IParameterDependencyResolver parameterDependencyResolver, CancellationToken cancellationToken)
+        public static Task<object> Invoke(HttpActionDefinition action, HttpRequestMessage request, IDictionary<string, object> arguments, IControllerActivator controllerActivator, IParameterDependencyResolver parameterDependencyResolver, CancellationToken cancellationToken)
         {
             IHttpResponseFormatter<HttpRequestMessageDescriptor> responseFormatter = new HttpResponseMessageFormatter();
-            return Invoke(action, new HttpRequestMessageDescriptor(request), responseFormatter, arguments, parameterDependencyResolver, cancellationToken);
+            return Invoke(action, new HttpRequestMessageDescriptor(request), responseFormatter, arguments, controllerActivator, parameterDependencyResolver, cancellationToken);
         }
-        public static async Task<object> Invoke<TRequest>(HttpActionDefinition action, TRequest request, IHttpResponseFormatter<TRequest> responseFormatter, IDictionary<string, object> arguments, IParameterDependencyResolver parameterDependencyResolver, CancellationToken cancellationToken) where TRequest : IHttpRequestDescriptor
+        public static async Task<object> Invoke<TRequest>(HttpActionDefinition action, TRequest request, IHttpResponseFormatter<TRequest> responseFormatter, IDictionary<string, object> arguments, IControllerActivator controllerActivator, IParameterDependencyResolver parameterDependencyResolver, CancellationToken cancellationToken) where TRequest : IHttpRequestDescriptor
         {
             try
             {
                 if (action.Authorization != null)
                 {
-                    _ = await Execute(action.Authorization, request, arguments, parameterDependencyResolver, cancellationToken).ConfigureAwait(false);
+                    _ = await Execute(action.Authorization, request, arguments, controllerActivator, parameterDependencyResolver, cancellationToken).ConfigureAwait(false);
                 }
 
-                object result = await Execute(action, request, arguments, parameterDependencyResolver, cancellationToken).ConfigureAwait(false);
+                object result = await Execute(action, request, arguments, controllerActivator, parameterDependencyResolver, cancellationToken).ConfigureAwait(false);
                 object formattedResult = await responseFormatter.Format(result, request, action, cancellationToken).ConfigureAwait(false);
                 return formattedResult;
             }
@@ -40,10 +40,10 @@ namespace Dibix.Http.Server
             }
         }
 
-        private static async Task<object> Execute(IHttpActionExecutionDefinition definition, IHttpRequestDescriptor request, IDictionary<string, object> arguments, IParameterDependencyResolver parameterDependencyResolver, CancellationToken cancellationToken)
+        private static async Task<object> Execute(IHttpActionExecutionDefinition definition, IHttpRequestDescriptor request, IDictionary<string, object> arguments, IControllerActivator controllerActivator, IParameterDependencyResolver parameterDependencyResolver, CancellationToken cancellationToken)
         {
             definition.ParameterResolver.PrepareParameters(request, arguments, parameterDependencyResolver);
-            object result = await definition.Executor.Execute(arguments, cancellationToken).ConfigureAwait(false);
+            object result = await definition.Executor.Execute(controllerActivator, arguments, cancellationToken).ConfigureAwait(false);
             return result;
         }
     }

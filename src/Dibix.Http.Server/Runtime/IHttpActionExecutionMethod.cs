@@ -10,6 +10,6 @@ namespace Dibix.Http.Server
         MethodInfo Method { get; }
         string Source { get; }
 
-        Task<object> Execute(IDictionary<string, object> arguments, CancellationToken cancellationToken);
+        Task<object> Execute(IControllerActivator controllerActivator, IDictionary<string, object> arguments, CancellationToken cancellationToken);
     }
 }

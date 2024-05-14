@@ -1,0 +1,18 @@
+.Lambda #Lambda1<Dibix.Http.Server.HttpActionExecutorResolver+ExecuteHttpAction>(
+    Dibix.Http.Server.IControllerActivator $controllerActivator,
+    System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments) {
+    .Block(
+        System.Int32 $x,
+        System.Threading.Tasks.Task`1[System.Object] $result) {
+        $result = .Block() {
+            .Call Dibix.Http.Server.Tests.HttpActionExecutorTest.CompileAndExecute_Void_AndOutParam_Target(
+                .Call Dibix.Http.Server.HttpActionExecutorResolver.CollectParameter(
+                    $arguments,
+                    "databaseAccessorFactory"),
+                $x);
+            .Call System.Threading.Tasks.Task.FromResult(null)
+        };
+        $arguments.Item["x"] = (System.Object)$x;
+        $result
+    }
+}
