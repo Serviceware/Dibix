@@ -320,8 +320,8 @@ namespace Dibix.Sdk.CodeGeneration
             if (defaultValue != null)
                 defaultValueReference = JsonValueReferenceParser.Parse(type, defaultValue, _schemaRegistry, Logger);
 
-            JProperty sourceProperty = properties.GetPropertySafe("source");
-            ActionParameterSourceBuilder parameterSourceBuilder = CollectRootParameterSource(sourceProperty, requestBody, pathParameters);
+            JProperty sourceProperty = properties.Property("source");
+            ActionParameterSourceBuilder parameterSourceBuilder = sourceProperty != null ? CollectRootParameterSource(sourceProperty, requestBody, pathParameters) : null;
             return new ParameterDescriptor(property, type, parameterLocation, defaultValueReference, parameterSourceBuilder) { Visited = isPathParameter };
         }
 
