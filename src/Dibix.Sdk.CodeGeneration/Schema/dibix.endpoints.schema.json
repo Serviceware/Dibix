@@ -408,14 +408,7 @@
       "minItems": 1,
       "uniqueItems": true,
       "items": {
-        "anyOf": [
-          {
-            "$ref": "#/definitions/Action"
-          },
-          {
-            "$ref": "#/definitions/ControllerImport"
-          }
-        ]
+        "$ref": "#/definitions/Action"
       }
     },
     "Action": {
@@ -493,9 +486,6 @@
         "target"
       ],
       "additionalProperties": false
-    },
-    "ControllerImport": {
-      "$ref": "#/definitions/NameIdentifier"
     }
   },
   "$ref": "#/definitions/Api"

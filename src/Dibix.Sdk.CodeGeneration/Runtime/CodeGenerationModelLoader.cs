@@ -62,7 +62,7 @@ namespace Dibix.Sdk.CodeGeneration
             );
 
             IActionTargetDefinitionResolverFacade actionTargetResolver = new ActionTargetDefinitionResolverFacade(configuration.ProductName, configuration.AreaName, defaultClassName, lockEntryManager, schemaRegistry, logger);
-            IControllerDefinitionProvider controllerDefinitionProvider = new ControllerDefinitionProvider(configuration.Endpoints, securitySchemes, configuration.ConfigurationTemplates, actionTargetResolver, typeResolver, schemaRegistry, actionParameterSourceRegistry, actionParameterConverterRegistry, lockEntryManager, fileSystemProvider, logger);
+            IControllerDefinitionProvider controllerDefinitionProvider = new ControllerDefinitionProvider(configuration.Endpoints, securitySchemes, configuration.ConfigurationTemplates, actionTargetResolver, typeResolver, schemaRegistry, actionParameterSourceRegistry, actionParameterConverterRegistry, fileSystemProvider, logger);
 
             model.Controllers.AddRange(controllerDefinitionProvider.Controllers);
             model.SecuritySchemes.AddRange(controllerDefinitionProvider.SecuritySchemes);

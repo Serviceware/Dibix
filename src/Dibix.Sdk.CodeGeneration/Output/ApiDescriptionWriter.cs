@@ -50,9 +50,6 @@ namespace Dibix.Sdk.CodeGeneration
         {
             context.AddUsing("Dibix.Http.Server");
 
-            if (context.Model.Controllers.Any(x => x.ControllerImports.Any()))
-                context.AddUsing<Type>();
-
             string body = this.WriteBody(context, context.Model.Controllers);
 
             context.CreateOutputScope()
@@ -71,7 +68,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 ControllerDefinition controller = controllers[i];
                 IList<ActionDefinition> actions = CollectActionsToInclude(context, controller).ToArray();
-                if (!actions.Any() && !controller.ControllerImports.Any())
+                if (!actions.Any())
                     continue;
 
                 writer.WriteLine($"base.RegisterController(\"{controller.Name}\", controller =>")
@@ -82,9 +79,6 @@ namespace Dibix.Sdk.CodeGeneration
                 {
                     WriteAddAction(context, writer, action);
                 }
-
-                foreach (string controllerImport in controller.ControllerImports)
-                    writer.WriteLine($"controller.Import(\"{controllerImport}\");");
 
                 writer.PopIndent()
                       .Write("});");

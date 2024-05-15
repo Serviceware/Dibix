@@ -34,14 +34,12 @@ namespace Dibix.Http.Server
             private readonly EndpointMetadata _endpointMetadata;
             private readonly string _controllerName;
             private readonly IList<HttpActionDefinitionBuilder> _actions;
-            private readonly IList<string> _controllerImports;
 
             internal HttpControllerDefinitionBuilder(EndpointMetadata endpointMetadata, string controllerName)
             {
                 _endpointMetadata = endpointMetadata;
                 _controllerName = controllerName;
                 _actions = new Collection<HttpActionDefinitionBuilder>();
-                _controllerImports = new Collection<string>();
             }
 
             public void AddAction(IHttpActionTarget target, Action<IHttpActionDefinitionBuilder> setupAction)
@@ -52,12 +50,10 @@ namespace Dibix.Http.Server
                 _actions.Add(builder);
             }
 
-            public void Import(string fullControllerTypeName) => _controllerImports.Add(fullControllerTypeName);
-
             public HttpControllerDefinition Build()
             {
                 IList<HttpActionDefinition> actions = _actions.Select(x => x.Build()).ToArray();
-                HttpControllerDefinition controller = new HttpControllerDefinition(_endpointMetadata, _controllerName, actions, _controllerImports);
+                HttpControllerDefinition controller = new HttpControllerDefinition(_endpointMetadata, _controllerName, actions);
                 foreach (HttpActionDefinition action in actions)
                 {
                     action.Controller = controller;

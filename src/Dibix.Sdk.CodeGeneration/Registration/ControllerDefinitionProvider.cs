@@ -13,14 +13,12 @@ namespace Dibix.Sdk.CodeGeneration
     internal sealed class ControllerDefinitionProvider : ValidatingJsonDefinitionReader, IControllerDefinitionProvider
     {
         #region Fields
-        private const string LockSectionName = "ControllerImport";
         private readonly IDictionary<string, SecurityScheme> _usedSecuritySchemes;
         private readonly SecuritySchemes _securitySchemes;
         private readonly ConfigurationTemplates _templates;
         private readonly IActionTargetDefinitionResolverFacade _actionTargetResolver;
         private readonly ITypeResolverFacade _typeResolver;
         private readonly ISchemaRegistry _schemaRegistry;
-        private readonly ILockEntryManager _lockEntryManager;
         private readonly RootParameterSourceReader _parameterSourceReader;
         #endregion
 
@@ -40,9 +38,7 @@ namespace Dibix.Sdk.CodeGeneration
           , ITypeResolverFacade typeResolver
           , ISchemaRegistry schemaRegistry
           , IActionParameterSourceRegistry actionParameterSourceRegistry
-          , IActionParameterConverterRegistry actionParameterConverterRegistry
-          , ILockEntryManager lockEntryManager
-          , IFileSystemProvider fileSystemProvider
+          , IActionParameterConverterRegistry actionParameterConverterRegistry, IFileSystemProvider fileSystemProvider
           , ILogger logger
         ) : base(fileSystemProvider, logger)
         {
@@ -52,7 +48,6 @@ namespace Dibix.Sdk.CodeGeneration
             _actionTargetResolver = actionTargetResolver;
             _typeResolver = typeResolver;
             _schemaRegistry = schemaRegistry;
-            _lockEntryManager = lockEntryManager;
             _parameterSourceReader = new RootParameterSourceReader(schemaRegistry, logger, actionParameterSourceRegistry, actionParameterConverterRegistry);
             Controllers = new Collection<ControllerDefinition>();
             Collect(endpoints.Select(x => x.GetFullPath()));
@@ -90,10 +85,6 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 case JTokenType.Object:
                     ReadControllerAction(controller, (JObject)action);
-                    break;
-
-                case JTokenType.String:
-                    ReadControllerImport(controller, action);
                     break;
 
                 default:
@@ -234,19 +225,6 @@ namespace Dibix.Sdk.CodeGeneration
                     properties.AddRange(objectSchema.Properties.Select(x => x.Name.Value));
             }
             return properties;
-        }
-
-        private void ReadControllerImport(ControllerDefinition controller, JToken value)
-        {
-            string typeName = (string)value;
-            if (!_lockEntryManager.HasEntry(LockSectionName, typeName))
-            {
-                SourceLocation sourceInfo = value.GetSourceInfo();
-                base.Logger.LogError("Controller imports are not supported anymore", sourceInfo.Source, sourceInfo.Line, sourceInfo.Column);
-                return;
-            }
-
-            controller.ControllerImports.Add(typeName);
         }
 
         private IReadOnlyDictionary<string, ExplicitParameter> CollectExplicitParameters(JObject action, ActionRequestBody requestBody, IReadOnlyDictionary<string, PathParameter> pathParameters)
