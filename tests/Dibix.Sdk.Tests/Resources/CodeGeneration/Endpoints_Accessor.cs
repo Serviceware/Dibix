@@ -387,6 +387,13 @@ namespace Dibix.Sdk.Tests.Business
                     action.SecuritySchemes.Add("Bearer");
                     action.FileResponse = new HttpFileResponseDefinition(cache: false);
                 });
+                controller.AddAction(ReflectionHttpActionTarget.Create("Dibix.Sdk.Tests.CodeGeneration.CodeGenerationTaskTests.ReflectionTarget,Dibix.Sdk.Tests"), action =>
+                {
+                    action.Method = HttpApiMethod.Get;
+                    action.ChildRoute = "Reflection/{id}";
+                    action.SecuritySchemes.Add("DBXNS-SIT");
+                    action.ResolveParameterFromSource("identifier", "DBX", "X");
+                });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.FileUploadAsync)), action =>
                 {
                     action.Method = HttpApiMethod.Put;
@@ -409,7 +416,7 @@ namespace Dibix.Sdk.Tests.Business
                     action.SecuritySchemes.Add("DBXNS-SIT");
                     action.ResolveParameterFromSource("ids", "BODY", "SomeIds", items =>
                     {
-                        items.ResolveParameterFromConstant("id", 1);
+                        items.ResolveParameterFromSource("id", "ITEM", "$INDEX");
                         items.ResolveParameterFromSource("name", "ITEM", "Title");
                     });
                 });

@@ -1,0 +1,19 @@
+One or more errors occured during code generation:
+Tests\Syntax\dbx_tests_syntax_singleconcreteresult_missingcolumn.sql(4,12,4,12):error:Property 'ImageUrl' on type 'Dibix.Sdk.Tests.DomainModel.GenericContract' not mapped
+Endpoints\GenericEndpointWithErrors.json(9,15,9,15):error:Unknown property source 'WTF'
+Endpoints\GenericEndpointWithErrors.json(12,10,12,10):error:Metadata of parameter 'd' is automatically detected for this action target and therefore should not be specified explicitly
+Endpoints\GenericEndpointWithErrors.json(15,10,15,10):error:Parameter 'unknown' not found on action: EmptyWithParamsAndComplexUdt
+Endpoints\GenericEndpointWithErrors.json(7,22,7,22):error:Undefined path parameter: wtf
+Endpoints\GenericEndpointWithErrors.json(17,27,17,27):error:Unknown authorization scheme 'FreeToUse'. Possible values are: Anonymous, Bearer, DBXNS-ClientId, DBXNS-SIT
+Endpoints\GenericEndpointWithErrors.json(25,10,25,10):error:Metadata of parameter 'source' cannot be automatically detected for this action target and therefore must be specified explicitly
+Endpoints\GenericEndpointWithErrors.json(20,5,20,5):error:Missing required property 'authorization'
+Endpoints\GenericEndpointWithErrors.json(34,20,34,20):error:Property 'X' not found on contract 'Dibix.Sdk.Tests.DomainModel.Request'
+Endpoints\GenericEndpointWithErrors.json(35,23,35,23):error:Property 'Nm' not found on contract 'Dibix.Sdk.Tests.DomainModel.Entry'
+Endpoints\GenericEndpointWithErrors.json(40,27,40,27):error:Property 'Nm' not found on contract 'Dibix.Sdk.Tests.DomainModel.Entry'
+Endpoints\GenericEndpointWithErrors.json(10,19,10,19):error:Source 'ENV' does not support property 'MachinePassword'
+Endpoints\GenericEndpointWithErrors.json(11,21,11,21):error:Source 'CLAIM' does not support property 'None'
+Endpoints\GenericEndpointWithErrors.json(32,27,32,27):error:The path segment 'get' is a known HTTP verb, which should be indicated by the action method and is therefore redundant: this/get/is/wrong
+Endpoints\GenericEndpointWithErrors.json(46,5,46,5):error:Equivalent path defined: GET Tests/GenericEndpoint/ambiguous/route/{a}
+Endpoints\GenericEndpointWithErrors.json(52,5,52,5):error:Equivalent path defined: POST Tests/GenericEndpoint/ambiguous/route/{b}
+Endpoints\GenericEndpointWithErrors.json(46,5,46,5):error:Duplicate method defined within path: GET Tests/GenericEndpoint/ambiguous/route/{a}
+Endpoints\GenericEndpointWithErrors.json(58,5,58,5):error:Duplicate method defined within path: GET Tests/GenericEndpoint/ambiguous/route/{a}

@@ -1,0 +1,2 @@
+One or more errors occured during code generation:
+Endpoints\GenericEndpointWithOutputParam.json(6,18,6,18):error:Output parameters are not supported in endpoints: EmptyWithOutputParam

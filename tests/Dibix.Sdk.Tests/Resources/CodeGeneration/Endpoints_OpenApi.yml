@@ -407,6 +407,40 @@ paths:
       security:
         - { }
         - Bearer: [ ]
+  '/Tests/GenericEndpoint/Reflection/{id}':
+    get:
+      tags:
+        - GenericEndpoint
+      summary: ReflectionTarget
+      operationId: ReflectionTarget
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: name
+          in: header
+          schema:
+            type: string
+            default: null
+            nullable: true
+        - name: age
+          in: query
+          schema:
+            type: integer
+            format: int32
+            default: 18
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+      security:
+        - DBXNS-SIT: [ ]
   /Tests/GenericEndpoint/Alternative:
     delete:
       tags:

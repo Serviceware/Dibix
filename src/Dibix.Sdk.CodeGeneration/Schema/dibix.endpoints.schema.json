@@ -27,7 +27,6 @@
       "type": "string",
       "enum": [
         "Query",
-        "Body",
         "Header"
       ]
     },

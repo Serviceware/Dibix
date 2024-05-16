@@ -1,0 +1,3 @@
+One or more errors occured during code generation:
+Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(4,4,4,4):error:Unexpected markup element 'Wtf'
+Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38):error:Unexpected @Return property 'Wtf'

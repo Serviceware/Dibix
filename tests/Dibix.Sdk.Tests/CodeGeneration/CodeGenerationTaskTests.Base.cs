@@ -43,7 +43,9 @@ ProjectDirectory
 ConfigurationFilePath
   {Path.Combine(DatabaseTestUtility.DatabaseProjectDirectory, "dibix.json")}
 LockFile
+  {Path.Combine(outputDirectory, "dibix.lock")}
 ResetLockFile
+  True
 StaticCodeAnalysisSucceededFile
 ResultsFile
 ProductName
@@ -159,6 +161,8 @@ SqlReferencePath");
             }
         }
 
+        private string ReflectionTarget(int id, Guid identifier, int age = 18, string name = null) => throw new NotImplementedException();
+
         private static string NormalizeModelContent(string text)
         {
             string jsonEscapedDatabaseProjectDirectory = $@"{DatabaseTestUtility.DatabaseProjectDirectory.Replace(@"\", @"\\")}\\";
@@ -181,8 +185,7 @@ SqlReferencePath");
 
         private void ExecuteTestAndExpectError
         (
-            string expectedException
-          , IEnumerable<string> sources = null
+            IEnumerable<string> sources = null
           , IEnumerable<string> contracts = null
           , IEnumerable<string> endpoints = null
           , bool isEmbedded = true
@@ -193,9 +196,11 @@ SqlReferencePath");
                 this.ExecuteTest(sources, contracts, endpoints, isEmbedded);
                 Assert.IsTrue(false, "CodeGenerationException was expected but not thrown");
             }
-            catch (CodeGenerationException ex)
+            catch (CodeGenerationException exception)
             {
-                Assert.AreEqual(expectedException, ex.Message);
+                const string extension = "txt";
+                string expectedText = GetExpectedText(extension);
+                AssertEqual(expectedText, exception.Message, extension);
             }
         }
 
@@ -216,9 +221,16 @@ SqlReferencePath");
                 actualText = actualTextNormalizer(actualText);
 
             string extension = Path.GetExtension(generatedFilePath).TrimStart('.');
-            string resourceKey = ResourceUtility.BuildResourceKey($"CodeGeneration.{expectedTextKey}.{extension}");
-            string expectedText = base.GetEmbeddedResourceContent(resourceKey);
+            string expectedText = GetExpectedText(expectedTextKey, extension);
             base.AssertEqual(expectedText, actualText, extension, normalizeLineEndings: normalizeLineEndings);
+        }
+
+        private string GetExpectedText(string extension) => GetExpectedText(TestContext.TestName, extension);
+        private string GetExpectedText(string expectedTextKey, string extension)
+        {
+            string resourceKey = ResourceUtility.BuildResourceKey($"{nameof(CodeGeneration)}.{expectedTextKey}.{extension}");
+            string expectedText = GetEmbeddedResourceContent(resourceKey);
+            return expectedText;
         }
 
         private static void AssertFileCompilation(string generatedFilePath, IEnumerable<MetadataReference> references)

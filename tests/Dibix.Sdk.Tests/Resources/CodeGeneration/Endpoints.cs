@@ -438,7 +438,7 @@ namespace Dibix.Sdk.Tests.Business
                     }, cancellationToken));
                     action.ResolveParameterFromSource("ids", "BODY", "SomeIds", items =>
                     {
-                        items.ResolveParameterFromConstant("id", 1);
+                        items.ResolveParameterFromSource("id", "ITEM", "$INDEX");
                         items.ResolveParameterFromSource("name", "ITEM", "Title");
                     });
                 });

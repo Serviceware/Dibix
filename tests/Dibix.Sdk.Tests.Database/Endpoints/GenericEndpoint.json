@@ -86,6 +86,34 @@
       "authorization": "none"
     },
     {
+      "method": "GET",
+      "target": "Dibix.Sdk.Tests.CodeGeneration.CodeGenerationTaskTests.ReflectionTarget,Dibix.Sdk.Tests",
+      "childRoute": "Reflection/{id}",
+      "params": {
+        "id": {
+          "type": "int32"
+        },
+        "name": {
+          "type": "string?",
+          "location": "Header",
+          "default": null
+        },
+        "age": {
+          "type": "int32",
+          "default": 18
+        },
+        "identifier": {
+          "type": "uuid",
+          "source": "DBX.X",
+          "converter": "DBX"
+        }
+      },
+      "authorization": "none",
+      "response": {
+        "type": "string"
+      }
+    },
+    {
       "method": "PUT",
       "target": "FileUpload",
       "body": {
@@ -115,7 +143,7 @@
         "ids": {
           "source": "BODY.SomeIds",
           "items": {
-            "id": 1,
+            "id": "ITEM.$INDEX",
             "name": "ITEM.Title"
           }
         }

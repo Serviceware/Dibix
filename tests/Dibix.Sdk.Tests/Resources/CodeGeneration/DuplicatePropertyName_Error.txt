@@ -1,0 +1,2 @@
+One or more errors occured during code generation:
+Contracts\DuplicatePropertyName.json(4,9,4,9):error:Property with the name 'AA' already exists in the current JSON object. Path 'Invalid.AA', line 4, position 9.

@@ -1,0 +1,4 @@
+One or more errors occured during code generation:
+Contracts\DuplicatePropertyNameCaseInsensitive.json(3,6,3,6):error:Property with the name 'AAA' already exists in the current JSON object. Path 'Invalid.AAA', line 3, position 6.
+Contracts\DuplicatePropertyNameCaseInsensitive.json(4,6,4,6):error:Property with the name 'AAa' already exists in the current JSON object. Path 'Invalid.AAa', line 4, position 6.
+Contracts\DuplicatePropertyNameCaseInsensitive.json(5,6,5,6):error:Property with the name 'Aaa' already exists in the current JSON object. Path 'Invalid.Aaa', line 5, position 6.

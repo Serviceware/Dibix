@@ -4,12 +4,26 @@
     {
       "method": "GET",
       "target": "EmptyWithParamsAndComplexUdt",
+      "childRoute": "{wtf}",
       "params": {
         "a": "WTF.Is.This",
         "b": "ENV.MachinePassword",
-        "c": "CLAIM.None"
+        "c": "CLAIM.None",
+        "d": {
+          "type": "string"
+        },
+        "unknown": 0
       },
+      "securitySchemes": "FreeToUse",
       "authorization": "none"
+    },
+    {
+      "method": "GET",
+      "target": "Dibix.Sdk.Tests.CodeGeneration.CodeGenerationTaskTests.ReflectionTarget,Dibix.Sdk.Tests",
+      "childRoute": "Reflection/{id}",
+      "params": {
+        "source": "DBX.X"
+      }
     },
     {
       "method": "POST",

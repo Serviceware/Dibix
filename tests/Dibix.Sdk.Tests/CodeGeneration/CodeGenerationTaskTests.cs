@@ -82,8 +82,6 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             ExecuteTestAndExpectError
             (
                 sources: new[] { @"Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql" }
-              , expectedException: @"One or more errors occured during code generation:
-Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(5,2,5,2):error:Missing return declaration for output. Please decorate the statement with the following hint to describe the output: -- @Return <ContractName>"
             );
         }
 
@@ -93,8 +91,6 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql(5,2,5
             ExecuteTestAndExpectError
             (
                 sources: new[] { @"Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql" }
-              , expectedException: @"One or more errors occured during code generation:
-Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,21,1,21):error:When using the result mode option 'SingleOrDefault', the primitive return type must be nullable: int32"
             );
         }
 
@@ -277,8 +273,6 @@ Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql(1,2
             ExecuteTestAndExpectError
             (
                 sources: new[] { @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontract.sql" }
-              , expectedException: @"One or more errors occured during code generation:
-Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontract.sql(1,21,1,21):error:Could not resolve type 'X'"
             );
         }
 
@@ -288,8 +282,7 @@ Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontract.sql(1,2
             ExecuteTestAndExpectError
             (
                 sources: new[] { @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly.sql" }
-              , expectedException: @"One or more errors occured during code generation:
-Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly.sql(1,21,1,21):error:Could not resolve type 'X,A'");
+            );
         }
 
         [TestMethod]
@@ -298,9 +291,7 @@ Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly
             ExecuteTestAndExpectError
             (
                 sources: new[] { @"Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql" }
-              , expectedException: @"One or more errors occured during code generation:
-Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(4,4,4,4):error:Unexpected markup element 'Wtf'
-Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38):error:Unexpected @Return property 'Wtf'");
+            );
         }
 
         [TestMethod]
@@ -532,19 +523,6 @@ Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql(3,38,3,38)
                 }
               , endpoints: new[] { @"Endpoints\GenericEndpointWithErrors.json" }
               , isEmbedded: false
-              , expectedException: @"One or more errors occured during code generation:
-Tests\Syntax\dbx_tests_syntax_singleconcreteresult_missingcolumn.sql(4,12,4,12):error:Property 'ImageUrl' on type 'Dibix.Sdk.Tests.DomainModel.GenericContract' not mapped
-Endpoints\GenericEndpointWithErrors.json(8,15,8,15):error:Unknown property source 'WTF'
-Endpoints\GenericEndpointWithErrors.json(20,20,20,20):error:Property 'X' not found on contract 'Dibix.Sdk.Tests.DomainModel.Request'
-Endpoints\GenericEndpointWithErrors.json(21,23,21,23):error:Property 'Nm' not found on contract 'Dibix.Sdk.Tests.DomainModel.Entry'
-Endpoints\GenericEndpointWithErrors.json(26,27,26,27):error:Property 'Nm' not found on contract 'Dibix.Sdk.Tests.DomainModel.Entry'
-Endpoints\GenericEndpointWithErrors.json(9,19,9,19):error:Source 'ENV' does not support property 'MachinePassword'
-Endpoints\GenericEndpointWithErrors.json(10,21,10,21):error:Source 'CLAIM' does not support property 'None'
-Endpoints\GenericEndpointWithErrors.json(18,27,18,27):error:The path segment 'get' is a known HTTP verb, which should be indicated by the action method and is therefore redundant: this/get/is/wrong
-Endpoints\GenericEndpointWithErrors.json(32,5,32,5):error:Equivalent path defined: GET Tests/GenericEndpoint/ambiguous/route/{a}
-Endpoints\GenericEndpointWithErrors.json(38,5,38,5):error:Equivalent path defined: POST Tests/GenericEndpoint/ambiguous/route/{b}
-Endpoints\GenericEndpointWithErrors.json(32,5,32,5):error:Duplicate method defined within path: GET Tests/GenericEndpoint/ambiguous/route/{a}
-Endpoints\GenericEndpointWithErrors.json(44,5,44,5):error:Duplicate method defined within path: GET Tests/GenericEndpoint/ambiguous/route/{a}"
             );
         }
 
@@ -556,8 +534,6 @@ Endpoints\GenericEndpointWithErrors.json(44,5,44,5):error:Duplicate method defin
             (
                 sources: new[] { @"Tests\Syntax\dbx_tests_syntax_empty_params_out.sql" }
               , endpoints: new[] { @"Endpoints\GenericEndpointWithOutputParam.json" }
-              , expectedException: @"One or more errors occured during code generation:
-Endpoints\GenericEndpointWithOutputParam.json(6,18,6,18):error:Output parameters are not supported in endpoints: EmptyWithOutputParam"
             );
         }
 
@@ -571,8 +547,6 @@ Endpoints\GenericEndpointWithOutputParam.json(6,18,6,18):error:Output parameters
                     @"Contracts\DuplicateContract.json"
                   , @"Contracts\AccessRights.json"
                 }
-              , expectedException: @"One or more errors occured during code generation:
-Contracts\DuplicateContract.json(5,12,5,12):error:Property with the name 'Invalid' already exists in the current JSON object. Path 'Invalid', line 5, position 12."
             );
         }
 
@@ -586,8 +560,6 @@ Contracts\DuplicateContract.json(5,12,5,12):error:Property with the name 'Invali
                     @"Contracts\DuplicatePropertyName.json"
                   , @"Contracts\AccessRights.json"
                 }
-              , expectedException: @"One or more errors occured during code generation:
-Contracts\DuplicatePropertyName.json(4,9,4,9):error:Property with the name 'AA' already exists in the current JSON object. Path 'Invalid.AA', line 4, position 9."
             );
         }
 
@@ -601,10 +573,6 @@ Contracts\DuplicatePropertyName.json(4,9,4,9):error:Property with the name 'AA' 
                     @"Contracts\DuplicatePropertyNameCaseInsensitive.json"
                   , @"Contracts\AccessRights.json"
                 }
-              , expectedException: @"One or more errors occured during code generation:
-Contracts\DuplicatePropertyNameCaseInsensitive.json(3,6,3,6):error:Property with the name 'AAA' already exists in the current JSON object. Path 'Invalid.AAA', line 3, position 6.
-Contracts\DuplicatePropertyNameCaseInsensitive.json(4,6,4,6):error:Property with the name 'AAa' already exists in the current JSON object. Path 'Invalid.AAa', line 4, position 6.
-Contracts\DuplicatePropertyNameCaseInsensitive.json(5,6,5,6):error:Property with the name 'Aaa' already exists in the current JSON object. Path 'Invalid.Aaa', line 5, position 6."
             );
         }
     }

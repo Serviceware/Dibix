@@ -1,0 +1,2 @@
+One or more errors occured during code generation:
+Contracts\DuplicateContract.json(5,12,5,12):error:Property with the name 'Invalid' already exists in the current JSON object. Path 'Invalid', line 5, position 12.
