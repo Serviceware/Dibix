@@ -17,7 +17,7 @@
     <None Include="..\Dibix.Sdk\targets\**" Link="build\%(Filename)%(Extension)" Pack="true" PackagePath="build" />
     <None Include="..\Dibix.Sdk\Schema\*.json" Link="content\%(Filename)%(Extension)" Pack="true" PackagePath="content" />
     <None Include="..\Dibix.Sdk.CodeGeneration\Schema\*.json" Link="content\%(Filename)%(Extension)" Pack="true" PackagePath="content" />
-    <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Diagnostics\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Extensions\ReflectionExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
   </ItemGroup>
 

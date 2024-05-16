@@ -1,12 +1,11 @@
 ﻿using System;
-using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
 {
     // Resolve built in primitive types
-    internal sealed class PrimitiveTypeResolver : TypeResolver
+    internal sealed class PrimitiveTypeResolver : TypeResolver<PrimitiveTypeReference>
     {
-        public override TypeReference ResolveType(string input, string relativeNamespace, SourceLocation location, bool isEnumerable)
+        public override PrimitiveTypeReference ResolveType(string input, string relativeNamespace, SourceLocation location, bool isEnumerable)
         {
             NullableTypeName typeName = input;
 

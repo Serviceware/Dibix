@@ -7,31 +7,41 @@ namespace Dibix
     [ActionParameterSource("CLAIM")]
     internal sealed class ClaimParameterSource : ActionParameterSourceDefinition<ClaimParameterSource>, IActionParameterFixedPropertySourceDefinition
     {
-        private readonly IDictionary<string, string> _propertyClaimTypeMap = new Dictionary<string, string>
+        private readonly IDictionary<string, PropertyParameterSourceDescriptor> _claimTypePropertyMap = new Dictionary<string, PropertyParameterSourceDescriptor>
         {
-            ["UserId"]    = ClaimTypes.NameIdentifier,
-            ["UserName"]  = "preferred_username",
-            ["ClientId"]  = "azp", // See Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames
-            ["Audiences"] = "aud"
+             { ClaimTypes.NameIdentifier , new PropertyParameterSourceDescriptor("UserId", new PrimitiveTypeReference(PrimitiveType.String, isNullable: true, isEnumerable: false)) }
+           , { "preferred_username"      , new PropertyParameterSourceDescriptor("UserName", new PrimitiveTypeReference(PrimitiveType.String, isNullable: true, isEnumerable: false)) }
+             // See Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames
+           , { "azp"                     , new PropertyParameterSourceDescriptor("ClientId", new PrimitiveTypeReference(PrimitiveType.String, isNullable: true, isEnumerable: false)) }
+           , { "aud"                     , new PropertyParameterSourceDescriptor("Audiences", new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: true)) }
         };
-        private readonly IDictionary<string, string> _claimTypePropertyMap;
-
-        public ICollection<string> Properties => _propertyClaimTypeMap.Keys;
+        private readonly IDictionary<string, string> _propertyClaimTypeMap;
 
         public ClaimParameterSource()
         {
-            _claimTypePropertyMap = _propertyClaimTypeMap.ToDictionary(x => x.Value, x => x.Key);
+            _propertyClaimTypeMap = _claimTypePropertyMap.ToDictionary(x => x.Value.Name, x => x.Key);
         }
 
-        public void Register(string claimPropertyName, string claimTypeName)
+        public ICollection<PropertyParameterSourceDescriptor> Properties => _claimTypePropertyMap.Values;
+
+        public void Register(PropertyParameterSourceDescriptor property, string claimTypeName)
         {
-            _propertyClaimTypeMap.Add(claimPropertyName, claimTypeName);
-            _claimTypePropertyMap.Add(claimTypeName, claimPropertyName);
+            _propertyClaimTypeMap.Add(property.Name, claimTypeName);
+            _claimTypePropertyMap.Add(claimTypeName, property);
         }
 
         public bool TryGetClaimTypeName(string propertyName, out string claimTypeName) => _propertyClaimTypeMap.TryGetValue(propertyName, out claimTypeName);
 
-        public bool TryGetPropertyName(string claimType, out string propertyName) => _claimTypePropertyMap.TryGetValue(claimType, out propertyName);
+        public bool TryGetPropertyName(string claimType, out string propertyName)
+        {
+            if (_claimTypePropertyMap.TryGetValue(claimType, out PropertyParameterSourceDescriptor property))
+            {
+                propertyName = property.Name;
+                return true;
+            }
+            propertyName = null;
+            return false;
+        }
 
         public string GetClaimTypeName(string propertyName) => _propertyClaimTypeMap[propertyName];
     }

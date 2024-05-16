@@ -4,6 +4,6 @@ namespace Dibix
 {
     internal interface IActionParameterFixedPropertySourceDefinition
     {
-        ICollection<string> Properties { get; }
+        ICollection<PropertyParameterSourceDescriptor> Properties { get; }
     }
 }

@@ -5,15 +5,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Diagnostics\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Diagnostics\SourceLocation.cs" Link="Diagnostics\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Extensions\EnumerableExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Extensions\ReflectionExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
-    <Compile Include="..\..\shared\ParameterSources\*.cs" Link="Providers\Sources\%(Filename)%(Extension)" />
-    <Compile Include="..\..\shared\KnownHeaders.cs" Link="Runtime\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\HttpErrorResponseUtility.cs" Link="Runtime\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\HttpParameterUtility.cs" Link="Runtime\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\HttpParameterName.cs" Link="Runtime\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Http\KnownHeaders.cs" Link="Runtime\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\RouteBuilder.cs" Link="Utilities\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Metadata\PrimitiveType.cs" Link="Model\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Metadata\PrimitiveTypeReference.cs" Link="Model\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Metadata\TypeReference.cs" Link="Model\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\ParameterSources\*.cs" Link="Providers\Sources\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Utilities\ExpressionUtility.cs" Link="Utilities\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Utilities\HostNameUtility.cs" Link="Utilities\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Utilities\MimeTypes.cs" Link="Utilities\%(Filename)%(Extension)" />

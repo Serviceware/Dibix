@@ -1,11 +1,18 @@
-﻿using Dibix.Sdk.Abstractions;
-
-namespace Dibix.Sdk.CodeGeneration
+﻿namespace Dibix.Sdk.CodeGeneration
 {
-    public abstract class TypeResolver
+    public abstract class TypeResolver<TTypeReference> : ITypeResolver where TTypeReference : TypeReference
     {
         public virtual TypeResolutionScope Scope => TypeResolutionScope.All;
 
-        public abstract TypeReference ResolveType(string input, string relativeNamespace, SourceLocation location, bool isEnumerable);
+        TypeReference ITypeResolver.ResolveType(string input, string relativeNamespace, SourceLocation location, bool isEnumerable) => ResolveType(input, relativeNamespace, location, isEnumerable);
+
+        public abstract TTypeReference ResolveType(string input, string relativeNamespace, SourceLocation location, bool isEnumerable);
+    }
+
+    public interface ITypeResolver
+    {
+        TypeResolutionScope Scope { get; }
+
+        TypeReference ResolveType(string input, string relativeNamespace, SourceLocation location, bool isEnumerable);
     }
 }

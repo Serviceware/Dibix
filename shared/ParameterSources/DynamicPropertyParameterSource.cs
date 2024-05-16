@@ -1,17 +1,16 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace Dibix
 {
     internal sealed class DynamicPropertyParameterSource : ActionParameterSourceDefinition, IActionParameterFixedPropertySourceDefinition
     {
         public override string Name { get; }
-        public ICollection<string> Properties { get; }
+        public ICollection<PropertyParameterSourceDescriptor> Properties { get; }
 
-        public DynamicPropertyParameterSource(string name, IEnumerable<string> properties)
+        public DynamicPropertyParameterSource(string name, ICollection<PropertyParameterSourceDescriptor> properties)
         {
-            this.Name = name;
-            this.Properties = properties.ToArray();
+            Name = name;
+            Properties = properties;
         }
     }
 }

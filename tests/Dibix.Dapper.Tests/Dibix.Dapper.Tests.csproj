@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <None Remove="*.vspscc" />
-    <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Diagnostics\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>

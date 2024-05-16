@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Dibix.Http;
-using Dibix.Sdk.Abstractions;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeGeneration

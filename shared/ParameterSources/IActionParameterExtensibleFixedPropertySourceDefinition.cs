@@ -2,6 +2,6 @@
 {
     internal interface IActionParameterExtensibleFixedPropertySourceDefinition
     {
-        void AddProperties(params string[] properties);
+        void AddProperties(params PropertyParameterSourceDescriptor[] properties);
     }
 }

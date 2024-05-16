@@ -1,6 +1,4 @@
-﻿using Dibix.Sdk.Abstractions;
-
-namespace Dibix.Sdk.CodeGeneration
+﻿namespace Dibix.Sdk.CodeGeneration
 {
     internal static class ActionDefinitionUtility
     {

@@ -2,11 +2,15 @@
   "Endpoints": {
     "BaseUrl": "https://localhost/api",
     "ParameterSources": {
-      "DBX": [
-        "X"
-      ],
+      "DBX": {
+        "X": "uuid"
+      },
       "CLAIM": {
-        "Id": "sub"
+        "Id": {
+          "type": "string",
+          "claimName": "sub"
+        },
+        "Name": "string"
       }
     },
     "Converters": [

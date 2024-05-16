@@ -1,4 +1,4 @@
-﻿namespace Dibix.Sdk.Abstractions
+﻿namespace Dibix
 {
     public readonly struct SourceLocation
     {

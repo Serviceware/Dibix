@@ -1,9 +1,7 @@
-﻿using Dibix.Sdk.Abstractions;
-
-namespace Dibix.Sdk.CodeGeneration
+﻿namespace Dibix.Sdk.CodeGeneration
 {
     // Resolve schema by probing the registry
-    internal sealed class SchemaTypeResolver : TypeResolver
+    internal sealed class SchemaTypeResolver : TypeResolver<SchemaTypeReference>
     {
         #region Fields
         private readonly string _productName;
@@ -21,7 +19,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Overrides
-        public override TypeReference ResolveType(string input, string relativeNamespace, SourceLocation location, bool isEnumerable)
+        public override SchemaTypeReference ResolveType(string input, string relativeNamespace, SourceLocation location, bool isEnumerable)
         {
             NullableTypeName typeName = input;
             if (!TryGetSchemaByProbing(typeName, relativeNamespace, out SchemaDefinition schema)) 

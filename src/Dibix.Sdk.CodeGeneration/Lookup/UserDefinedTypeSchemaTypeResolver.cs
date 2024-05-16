@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
 {
     // Resolve schema by their UDT name
-    public sealed class UserDefinedTypeSchemaTypeResolver : TypeResolver
+    public sealed class UserDefinedTypeSchemaTypeResolver : TypeResolver<SchemaTypeReference>
     {
         private readonly ISchemaRegistry _schemaRegistry;
         private readonly Lazy<IDictionary<string, UserDefinedTypeSchema>> _schemaAccessor;
@@ -19,7 +18,7 @@ namespace Dibix.Sdk.CodeGeneration
             _schemaAccessor = new Lazy<IDictionary<string, UserDefinedTypeSchema>>(CollectSchemas);
         }
 
-        public override TypeReference ResolveType(string input, string relativeNamespace, SourceLocation location, bool isEnumerable)
+        public override SchemaTypeReference ResolveType(string input, string relativeNamespace, SourceLocation location, bool isEnumerable)
         {
             if (!_schemaAccessor.Value.TryGetValue(input, out UserDefinedTypeSchema schema)) 
                 return null;

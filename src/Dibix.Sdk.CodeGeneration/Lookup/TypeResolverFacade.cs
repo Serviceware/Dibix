@@ -10,21 +10,21 @@ namespace Dibix.Sdk.CodeGeneration
     {
         #region Fields
         private readonly ILogger _logger;
-        private readonly IList<TypeResolver> _typeResolvers;
+        private readonly IList<ITypeResolver> _typeResolvers;
         #endregion
 
         #region Constructor
-        public TypeResolverFacade() => _typeResolvers = new Collection<TypeResolver>();
+        public TypeResolverFacade() => _typeResolvers = new Collection<ITypeResolver>();
         public TypeResolverFacade(ILogger logger)
         {
             _logger = logger;
-            _typeResolvers = new Collection<TypeResolver> { new PrimitiveTypeResolver() };
+            _typeResolvers = new Collection<ITypeResolver> { new PrimitiveTypeResolver() };
         }
         #endregion
 
         #region ITypeResolverFacade Members
-        public void Register(TypeResolver typeResolver) => Register(typeResolver, _typeResolvers.Count);
-        public void Register(TypeResolver typeResolver, int position) => _typeResolvers.Insert(position, typeResolver);
+        public void Register(ITypeResolver typeResolver) => Register(typeResolver, _typeResolvers.Count);
+        public void Register(ITypeResolver typeResolver, int position) => _typeResolvers.Insert(position, typeResolver);
 
         public TypeReference ResolveType(string input, string relativeNamespace, SourceLocation location, bool isEnumerable) => ResolveType(TypeResolutionScope.All, input, relativeNamespace, location, isEnumerable);
         public TypeReference ResolveType(TypeResolutionScope scope, string input, string relativeNamespace, SourceLocation location, bool isEnumerable)

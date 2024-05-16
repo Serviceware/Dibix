@@ -1,6 +1,4 @@
-﻿using Dibix.Sdk.Abstractions;
-
-namespace Dibix.Sdk.CodeGeneration
+﻿namespace Dibix
 {
     public sealed class PrimitiveTypeReference : TypeReference
     {
@@ -8,7 +6,7 @@ namespace Dibix.Sdk.CodeGeneration
         public int? Size { get; }
         public override string DisplayName => $"{Type}";
 
-        public PrimitiveTypeReference(PrimitiveType type, bool isNullable, bool isEnumerable, int? size, SourceLocation location) : base(isNullable, isEnumerable, location)
+        public PrimitiveTypeReference(PrimitiveType type, bool isNullable, bool isEnumerable, int? size = null, SourceLocation location = default) : base(isNullable, isEnumerable, location)
         {
             Type = type;
             Size = size;

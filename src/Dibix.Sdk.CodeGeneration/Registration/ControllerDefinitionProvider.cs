@@ -206,12 +206,12 @@ namespace Dibix.Sdk.CodeGeneration
                 return null;
             }
 
-            TypeReference contract = ResolveType(contractName);
+            TypeReference contract = contractName.ResolveType(_typeResolver);
             return new ActionRequestBody(mediaType, contract, binder);
         }
         private ActionRequestBody ReadBodyValue(JValue value)
         {
-            TypeReference contract = ResolveType(value);
+            TypeReference contract = value.ResolveType(_typeResolver);
             return new ActionRequestBody(contract);
         }
 
@@ -274,7 +274,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private ExplicitParameter CollectExplicitParameterDescriptor(JProperty property, JObject properties, JValue typeValue, ActionRequestBody requestBody, IReadOnlyDictionary<string, PathParameter> pathParameters)
         {
-            TypeReference type = ResolveType(typeValue);
+            TypeReference type = typeValue.ResolveType(_typeResolver);
             JProperty locationProperty = properties.Property("location");
             string parameterLocationValue = (string)locationProperty?.Value;
             ActionParameterLocation? parameterLocation = null;
@@ -392,7 +392,7 @@ namespace Dibix.Sdk.CodeGeneration
                 case JTokenType.Null: return;
 
                 case JTokenType.String when response.ResultType == null:
-                    response.ResultType = ResolveType((JValue)value);
+                    response.ResultType = ((JValue)value).ResolveType(_typeResolver);
                     break;
 
                 case JTokenType.Object:
@@ -413,7 +413,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 JValue typeNameValue = (JValue)responseObject.Property("type")?.Value;
                 if (typeNameValue != null)
-                    response.ResultType = ResolveType(typeNameValue);
+                    response.ResultType = typeNameValue.ResolveType(_typeResolver);
             }
 
             if (description != null)
@@ -586,17 +586,6 @@ namespace Dibix.Sdk.CodeGeneration
             SourceLocation sourceInfo = targetValue.GetSourceInfo();
             T actionDefinition = _actionTargetResolver.Resolve<T>(targetName: (string)targetValue, sourceInfo, explicitParameters, pathParameters, bodyParameters);
             return actionDefinition;
-        }
-
-        private TypeReference ResolveType(JValue typeNameValue) => ResolveType(typeNameValue, (string)typeNameValue);
-        private TypeReference ResolveType(JValue typeNameValue, string typeName)
-        {
-            Guard.IsNotNull(typeNameValue, nameof(typeNameValue));
-            SourceLocation typeNameLocation = typeNameValue.GetSourceInfo();
-            bool isEnumerable = typeName.EndsWith("*", StringComparison.Ordinal);
-            typeName = typeName.TrimEnd('*');
-            TypeReference type = _typeResolver.ResolveType(typeName, null, typeNameLocation, isEnumerable);
-            return type;
         }
         #endregion
     }

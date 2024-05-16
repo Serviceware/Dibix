@@ -12,21 +12,21 @@
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
             "Value": "A",
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherInputContract.json",
               "Line": 3,
               "Column": 6
             }
           },
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
             "Size": null,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherInputContract.json",
               "Line": 2,
               "Column": 27
@@ -47,21 +47,21 @@
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
             "Value": "B",
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherInputContract.json",
               "Line": 4,
               "Column": 6
             }
           },
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
             "Size": null,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherInputContract.json",
               "Line": 2,
               "Column": 27
@@ -82,21 +82,21 @@
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
             "Value": "C",
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherInputContract.json",
               "Line": 5,
               "Column": 6
             }
           },
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
             "Size": null,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherInputContract.json",
               "Line": 2,
               "Column": 27
@@ -117,7 +117,7 @@
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
             "Value": "SomeIds",
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherInputContract.json",
               "Line": 9,
               "Column": 6
@@ -130,7 +130,7 @@
             "IsNullable": false,
             "IsEnumerable": true,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherInputContract.json",
               "Line": 2,
               "Column": 27
@@ -151,21 +151,21 @@
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
             "Value": "D",
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherInputContract.json",
               "Line": 10,
               "Column": 6
             }
           },
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "UUID",
             "Size": null,
             "DisplayName": "UUID",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherInputContract.json",
               "Line": 2,
               "Column": 27
@@ -186,21 +186,21 @@
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
             "Value": "Password",
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherInputContract.json",
               "Line": 11,
               "Column": 6
             }
           },
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
             "Size": null,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherInputContract.json",
               "Line": 2,
               "Column": 27
@@ -221,21 +221,21 @@
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
             "Value": "E",
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherInputContract.json",
               "Line": 12,
               "Column": 6
             }
           },
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Boolean",
             "Size": null,
             "DisplayName": "Boolean",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherInputContract.json",
               "Line": 2,
               "Column": 27
@@ -256,21 +256,21 @@
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
             "Value": "F",
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherInputContract.json",
               "Line": 13,
               "Column": 6
             }
           },
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Int32",
             "Size": null,
             "DisplayName": "Int32",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherInputContract.json",
               "Line": 2,
               "Column": 27
@@ -291,21 +291,21 @@
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
             "Value": "G",
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherInputContract.json",
               "Line": 14,
               "Column": 6
             }
           },
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
             "Size": null,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherInputContract.json",
               "Line": 2,
               "Column": 27
@@ -325,7 +325,7 @@
       "DefinitionName": "AnotherInputContract",
       "Source": "Defined",
       "Location": {
-        "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+        "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
         "Source": "Contracts/AnotherInputContract.json",
         "Line": 2,
         "Column": 4
@@ -342,21 +342,21 @@
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
             "Value": "Id",
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherEntry.json",
               "Line": 3,
               "Column": 6
             }
           },
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Int32",
             "Size": null,
             "DisplayName": "Int32",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherEntry.json",
               "Line": 2,
               "Column": 19
@@ -377,21 +377,21 @@
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
             "Value": "Title",
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherEntry.json",
               "Line": 4,
               "Column": 6
             }
           },
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
             "Size": null,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherEntry.json",
               "Line": 2,
               "Column": 19
@@ -411,7 +411,7 @@
       "DefinitionName": "AnotherEntry",
       "Source": "Defined",
       "Location": {
-        "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+        "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
         "Source": "Contracts/AnotherEntry.json",
         "Line": 2,
         "Column": 4
@@ -421,14 +421,14 @@
     {
       "$type": "Dibix.Sdk.CodeGeneration.EnumSchema, Dibix.Sdk.CodeGeneration",
       "BaseType": {
-        "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+        "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
         "Type": "Int32",
         "Size": null,
         "DisplayName": "Int32",
         "IsNullable": false,
         "IsEnumerable": false,
         "Location": {
-          "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+          "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
           "Source": "Contracts/Direction.json",
           "Line": 2,
           "Column": 4
@@ -453,7 +453,7 @@
       "DefinitionName": "Direction",
       "Source": "Defined",
       "Location": {
-        "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+        "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
         "Source": "Contracts/Direction.json",
         "Line": 2,
         "Column": 4
@@ -470,21 +470,21 @@
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
             "Value": "Id",
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/Entry.json",
               "Line": 3,
               "Column": 6
             }
           },
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Int32",
             "Size": null,
             "DisplayName": "Int32",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/Entry.json",
               "Line": 2,
               "Column": 12
@@ -505,21 +505,21 @@
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
             "Value": "Name",
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/Entry.json",
               "Line": 4,
               "Column": 6
             }
           },
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
             "Size": null,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/Entry.json",
               "Line": 2,
               "Column": 12
@@ -539,7 +539,7 @@
       "DefinitionName": "Entry",
       "Source": "Defined",
       "Location": {
-        "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+        "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
         "Source": "Contracts/Entry.json",
         "Line": 2,
         "Column": 4
@@ -556,21 +556,21 @@
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
             "Value": "Id",
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/GenericContract.json",
               "Line": 4,
               "Column": 6
             }
           },
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Int32",
             "Size": null,
             "DisplayName": "Int32",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/GenericContract.json",
               "Line": 2,
               "Column": 22
@@ -591,21 +591,21 @@
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
             "Value": "Name",
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/GenericContract.json",
               "Line": 9,
               "Column": 6
             }
           },
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
             "Size": null,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/GenericContract.json",
               "Line": 2,
               "Column": 22
@@ -618,21 +618,21 @@
               "$value": "DefaultValue"
             },
             "Type": {
-              "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+              "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
               "Type": "String",
               "Size": null,
               "DisplayName": "String",
               "IsNullable": false,
               "IsEnumerable": false,
               "Location": {
-                "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+                "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
                 "Source": "Contracts/GenericContract.json",
                 "Line": 2,
                 "Column": 22
               }
             },
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/GenericContract.json",
               "Line": 12,
               "Column": 19
@@ -652,21 +652,21 @@
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
             "Value": "ParentId",
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/GenericContract.json",
               "Line": 14,
               "Column": 6
             }
           },
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Int32",
             "Size": null,
             "DisplayName": "Int32",
             "IsNullable": true,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/GenericContract.json",
               "Line": 2,
               "Column": 22
@@ -687,7 +687,7 @@
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
             "Value": "Role",
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/GenericContract.json",
               "Line": 18,
               "Column": 6
@@ -700,7 +700,7 @@
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/GenericContract.json",
               "Line": 2,
               "Column": 22
@@ -716,14 +716,14 @@
               "IsNullable": false,
               "IsEnumerable": false,
               "Location": {
-                "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+                "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
                 "Source": "Contracts/GenericContract.json",
                 "Line": 2,
                 "Column": 22
               }
             },
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/GenericContract.json",
               "Line": 20,
               "Column": 19
@@ -743,21 +743,21 @@
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
             "Value": "CreationTime",
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/GenericContract.json",
               "Line": 22,
               "Column": 6
             }
           },
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "DateTime",
             "Size": null,
             "DisplayName": "DateTime",
             "IsNullable": true,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/GenericContract.json",
               "Line": 2,
               "Column": 22
@@ -778,21 +778,21 @@
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
             "Value": "ImageUrl",
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/GenericContract.json",
               "Line": 27,
               "Column": 6
             }
           },
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Uri",
             "Size": null,
             "DisplayName": "Uri",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/GenericContract.json",
               "Line": 2,
               "Column": 22
@@ -812,7 +812,7 @@
       "DefinitionName": "GenericContract",
       "Source": "Defined",
       "Location": {
-        "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+        "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
         "Source": "Contracts/GenericContract.json",
         "Line": 2,
         "Column": 4
@@ -822,14 +822,14 @@
     {
       "$type": "Dibix.Sdk.CodeGeneration.EnumSchema, Dibix.Sdk.CodeGeneration",
       "BaseType": {
-        "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+        "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
         "Type": "Int32",
         "Size": null,
         "DisplayName": "Int32",
         "IsNullable": false,
         "IsEnumerable": false,
         "Location": {
-          "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+          "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
           "Source": "Contracts/GenericContract.json",
           "Line": 32,
           "Column": 4
@@ -860,7 +860,7 @@
       "DefinitionName": "Role",
       "Source": "Defined",
       "Location": {
-        "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+        "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
         "Source": "Contracts/GenericContract.json",
         "Line": 32,
         "Column": 4
@@ -877,21 +877,21 @@
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
             "Value": "A",
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/InputContract.json",
               "Line": 3,
               "Column": 6
             }
           },
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
             "Size": null,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/InputContract.json",
               "Line": 2,
               "Column": 20
@@ -912,21 +912,21 @@
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
             "Value": "B",
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/InputContract.json",
               "Line": 4,
               "Column": 6
             }
           },
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
             "Size": null,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/InputContract.json",
               "Line": 2,
               "Column": 20
@@ -947,21 +947,21 @@
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
             "Value": "C",
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/InputContract.json",
               "Line": 5,
               "Column": 6
             }
           },
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
             "Size": null,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/InputContract.json",
               "Line": 2,
               "Column": 20
@@ -982,7 +982,7 @@
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
             "Value": "Ids",
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/InputContract.json",
               "Line": 9,
               "Column": 6
@@ -995,7 +995,7 @@
             "IsNullable": false,
             "IsEnumerable": true,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/InputContract.json",
               "Line": 2,
               "Column": 20
@@ -1016,21 +1016,21 @@
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
             "Value": "D",
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/InputContract.json",
               "Line": 10,
               "Column": 6
             }
           },
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "UUID",
             "Size": null,
             "DisplayName": "UUID",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/InputContract.json",
               "Line": 2,
               "Column": 20
@@ -1051,21 +1051,21 @@
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
             "Value": "Password",
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/InputContract.json",
               "Line": 11,
               "Column": 6
             }
           },
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
             "Size": null,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/InputContract.json",
               "Line": 2,
               "Column": 20
@@ -1086,21 +1086,21 @@
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
             "Value": "E",
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/InputContract.json",
               "Line": 12,
               "Column": 6
             }
           },
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Boolean",
             "Size": null,
             "DisplayName": "Boolean",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/InputContract.json",
               "Line": 2,
               "Column": 20
@@ -1121,21 +1121,21 @@
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
             "Value": "F",
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/InputContract.json",
               "Line": 13,
               "Column": 6
             }
           },
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Int32",
             "Size": null,
             "DisplayName": "Int32",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/InputContract.json",
               "Line": 2,
               "Column": 20
@@ -1156,21 +1156,21 @@
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
             "Value": "G",
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/InputContract.json",
               "Line": 14,
               "Column": 6
             }
           },
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
             "Size": null,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/InputContract.json",
               "Line": 2,
               "Column": 20
@@ -1190,7 +1190,7 @@
       "DefinitionName": "InputContract",
       "Source": "Defined",
       "Location": {
-        "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+        "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
         "Source": "Contracts/InputContract.json",
         "Line": 2,
         "Column": 4
@@ -1208,21 +1208,21 @@
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
             "Value": "id",
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Types/dbx_codeanalysis_udt_generic.sql",
               "Line": 4,
               "Column": 2
             }
           },
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Int32",
             "Size": null,
             "DisplayName": "Int32",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Types/dbx_codeanalysis_udt_generic.sql",
               "Line": 4,
               "Column": 9
@@ -1243,21 +1243,21 @@
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
             "Value": "name",
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Types/dbx_codeanalysis_udt_generic.sql",
               "Line": 5,
               "Column": 5
             }
           },
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
             "Size": 50,
             "DisplayName": "String",
             "IsNullable": true,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Types/dbx_codeanalysis_udt_generic.sql",
               "Line": 5,
               "Column": 12
@@ -1277,7 +1277,7 @@
       "DefinitionName": "GenericParameterSet",
       "Source": "AutoGenerated",
       "Location": {
-        "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+        "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
         "Source": "Types/dbx_codeanalysis_udt_generic.sql",
         "Line": 2,
         "Column": 1
@@ -1295,21 +1295,21 @@
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
             "Value": "id",
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Types/dbx_codeanalysis_udt_int.sql",
               "Line": 4,
               "Column": 2
             }
           },
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Int32",
             "Size": null,
             "DisplayName": "Int32",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Types/dbx_codeanalysis_udt_int.sql",
               "Line": 4,
               "Column": 7
@@ -1329,7 +1329,7 @@
       "DefinitionName": "IntParameterSet",
       "Source": "AutoGenerated",
       "Location": {
-        "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+        "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
         "Source": "Types/dbx_codeanalysis_udt_int.sql",
         "Line": 2,
         "Column": 1
@@ -1355,14 +1355,14 @@
           "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
           "Name": "right",
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Byte",
             "Size": null,
             "DisplayName": "Byte",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/dbx_tests_authorization.sql",
               "Line": 2,
               "Column": 57
@@ -1387,7 +1387,7 @@
       "DefinitionName": "AssertAuthorized",
       "Source": "Defined",
       "Location": {
-        "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+        "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
         "Source": "Tests/dbx_tests_authorization.sql",
         "Line": 2,
         "Column": 1
@@ -1413,14 +1413,14 @@
           "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
           "Name": "a",
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
             "Size": 50,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params.sql",
               "Line": 3,
               "Column": 8
@@ -1435,14 +1435,14 @@
           "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
           "Name": "b",
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
             "Size": 50,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params.sql",
               "Line": 4,
               "Column": 8
@@ -1457,14 +1457,14 @@
           "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
           "Name": "c",
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "UUID",
             "Size": null,
             "DisplayName": "UUID",
             "IsNullable": true,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params.sql",
               "Line": 5,
               "Column": 8
@@ -1479,14 +1479,14 @@
           "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
           "Name": "password",
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
             "Size": 128,
             "DisplayName": "String",
             "IsNullable": true,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params.sql",
               "Line": 6,
               "Column": 32
@@ -1507,7 +1507,7 @@
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params.sql",
               "Line": 7,
               "Column": 10
@@ -1522,14 +1522,14 @@
           "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
           "Name": "d",
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
             "Size": 50,
             "DisplayName": "String",
             "IsNullable": true,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params.sql",
               "Line": 8,
               "Column": 8
@@ -1539,21 +1539,21 @@
           "DefaultValue": {
             "$type": "Dibix.Sdk.CodeGeneration.NullValueReference, Dibix.Sdk.CodeGeneration",
             "Type": {
-              "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+              "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
               "Type": "String",
               "Size": 50,
               "DisplayName": "String",
               "IsNullable": true,
               "IsEnumerable": false,
               "Location": {
-                "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+                "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
                 "Source": "Tests/Syntax/dbx_tests_syntax_empty_params.sql",
                 "Line": 8,
                 "Column": 8
               }
             },
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params.sql",
               "Line": 8,
               "Column": 28
@@ -1566,14 +1566,14 @@
           "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
           "Name": "e",
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Boolean",
             "Size": null,
             "DisplayName": "Boolean",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params.sql",
               "Line": 9,
               "Column": 8
@@ -1587,21 +1587,21 @@
               "$value": true
             },
             "Type": {
-              "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+              "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
               "Type": "Boolean",
               "Size": null,
               "DisplayName": "Boolean",
               "IsNullable": false,
               "IsEnumerable": false,
               "Location": {
-                "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+                "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
                 "Source": "Tests/Syntax/dbx_tests_syntax_empty_params.sql",
                 "Line": 9,
                 "Column": 8
               }
             },
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params.sql",
               "Line": 9,
               "Column": 14
@@ -1620,7 +1620,7 @@
             "IsNullable": true,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params.sql",
               "Line": 10,
               "Column": 17
@@ -1636,14 +1636,14 @@
               "IsNullable": true,
               "IsEnumerable": false,
               "Location": {
-                "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+                "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
                 "Source": "Tests/Syntax/dbx_tests_syntax_empty_params.sql",
                 "Line": 10,
                 "Column": 17
               }
             },
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params.sql",
               "Line": 10,
               "Column": 44
@@ -1656,14 +1656,14 @@
           "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
           "Name": "g",
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
             "Size": 50,
             "DisplayName": "String",
             "IsNullable": true,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params.sql",
               "Line": 11,
               "Column": 8
@@ -1677,21 +1677,21 @@
               "$value": "Cake"
             },
             "Type": {
-              "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+              "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
               "Type": "String",
               "Size": 50,
               "DisplayName": "String",
               "IsNullable": true,
               "IsEnumerable": false,
               "Location": {
-                "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+                "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
                 "Source": "Tests/Syntax/dbx_tests_syntax_empty_params.sql",
                 "Line": 11,
                 "Column": 8
               }
             },
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params.sql",
               "Line": 11,
               "Column": 28
@@ -1707,7 +1707,7 @@
       "DefinitionName": "EmptyWithParams",
       "Source": "Defined",
       "Location": {
-        "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+        "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
         "Source": "Tests/Syntax/dbx_tests_syntax_empty_params.sql",
         "Line": 2,
         "Column": 1
@@ -1728,14 +1728,14 @@
       "Async": false,
       "FileResult": null,
       "ResultType": {
-        "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+        "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
         "Type": "Int16",
         "Size": null,
         "DisplayName": "Int16",
         "IsNullable": false,
         "IsEnumerable": false,
         "Location": {
-          "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+          "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
           "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_out.sql",
           "Line": 2,
           "Column": 21
@@ -1746,14 +1746,14 @@
           "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
           "Name": "a",
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Int16",
             "Size": null,
             "DisplayName": "Int16",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_out.sql",
               "Line": 3,
               "Column": 63
@@ -1772,14 +1772,14 @@
           "Name": null,
           "Types": [
             {
-              "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+              "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
               "Type": "Int16",
               "Size": null,
               "DisplayName": "Int16",
               "IsNullable": false,
               "IsEnumerable": false,
               "Location": {
-                "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+                "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
                 "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_out.sql",
                 "Line": 2,
                 "Column": 21
@@ -1793,14 +1793,14 @@
           "SplitOn": null,
           "ProjectToType": null,
           "ReturnType": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Int16",
             "Size": null,
             "DisplayName": "Int16",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_out.sql",
               "Line": 2,
               "Column": 21
@@ -1813,7 +1813,7 @@
       "DefinitionName": "EmptyWithOutputParam",
       "Source": "Defined",
       "Location": {
-        "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+        "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
         "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_out.sql",
         "Line": 3,
         "Column": 1
@@ -1839,14 +1839,14 @@
           "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
           "Name": "a",
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
             "Size": 50,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
               "Line": 3,
               "Column": 8
@@ -1861,14 +1861,14 @@
           "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
           "Name": "b",
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
             "Size": 50,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
               "Line": 4,
               "Column": 8
@@ -1883,14 +1883,14 @@
           "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
           "Name": "c",
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "UUID",
             "Size": null,
             "DisplayName": "UUID",
             "IsNullable": true,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
               "Line": 5,
               "Column": 8
@@ -1905,14 +1905,14 @@
           "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
           "Name": "password",
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
             "Size": 128,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
               "Line": 6,
               "Column": 32
@@ -1933,7 +1933,7 @@
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
               "Line": 7,
               "Column": 10
@@ -1948,14 +1948,14 @@
           "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
           "Name": "d",
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
             "Size": 50,
             "DisplayName": "String",
             "IsNullable": true,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
               "Line": 8,
               "Column": 8
@@ -1965,21 +1965,21 @@
           "DefaultValue": {
             "$type": "Dibix.Sdk.CodeGeneration.NullValueReference, Dibix.Sdk.CodeGeneration",
             "Type": {
-              "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+              "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
               "Type": "String",
               "Size": 50,
               "DisplayName": "String",
               "IsNullable": true,
               "IsEnumerable": false,
               "Location": {
-                "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+                "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
                 "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
                 "Line": 8,
                 "Column": 8
               }
             },
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
               "Line": 8,
               "Column": 28
@@ -1992,14 +1992,14 @@
           "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
           "Name": "e",
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Boolean",
             "Size": null,
             "DisplayName": "Boolean",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
               "Line": 9,
               "Column": 8
@@ -2013,21 +2013,21 @@
               "$value": true
             },
             "Type": {
-              "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+              "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
               "Type": "Boolean",
               "Size": null,
               "DisplayName": "Boolean",
               "IsNullable": false,
               "IsEnumerable": false,
               "Location": {
-                "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+                "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
                 "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
                 "Line": 9,
                 "Column": 8
               }
             },
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
               "Line": 9,
               "Column": 14
@@ -2046,7 +2046,7 @@
             "IsNullable": true,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
               "Line": 10,
               "Column": 17
@@ -2062,14 +2062,14 @@
               "IsNullable": true,
               "IsEnumerable": false,
               "Location": {
-                "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+                "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
                 "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
                 "Line": 10,
                 "Column": 17
               }
             },
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
               "Line": 10,
               "Column": 44
@@ -2082,14 +2082,14 @@
           "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
           "Name": "g",
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
             "Size": 50,
             "DisplayName": "String",
             "IsNullable": true,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
               "Line": 11,
               "Column": 8
@@ -2103,21 +2103,21 @@
               "$value": "Cake"
             },
             "Type": {
-              "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+              "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
               "Type": "String",
               "Size": 50,
               "DisplayName": "String",
               "IsNullable": true,
               "IsEnumerable": false,
               "Location": {
-                "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+                "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
                 "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
                 "Line": 11,
                 "Column": 8
               }
             },
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
               "Line": 11,
               "Column": 28
@@ -2133,7 +2133,7 @@
       "DefinitionName": "EmptyWithParamsAndComplexUdt",
       "Source": "Defined",
       "Location": {
-        "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+        "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
         "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
         "Line": 2,
         "Column": 1
@@ -2157,7 +2157,7 @@
         "Name": "FileResult",
         "Value": null,
         "Location": {
-          "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+          "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
           "Source": "Tests/Syntax/dbx_tests_syntax_fileresult.sql",
           "Line": 2,
           "Column": 4
@@ -2171,7 +2171,7 @@
         "IsNullable": false,
         "IsEnumerable": false,
         "Location": {
-          "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+          "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
           "Source": "Tests/Syntax/dbx_tests_syntax_fileresult.sql",
           "Line": 2,
           "Column": 4
@@ -2182,14 +2182,14 @@
           "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
           "Name": "id",
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Int32",
             "Size": null,
             "DisplayName": "Int32",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_fileresult.sql",
               "Line": 3,
               "Column": 58
@@ -2214,7 +2214,7 @@
               "IsNullable": false,
               "IsEnumerable": false,
               "Location": {
-                "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+                "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
                 "Source": "Tests/Syntax/dbx_tests_syntax_fileresult.sql",
                 "Line": 2,
                 "Column": 4
@@ -2232,7 +2232,7 @@
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_fileresult.sql",
               "Line": 2,
               "Column": 4
@@ -2245,7 +2245,7 @@
       "DefinitionName": "FileResult",
       "Source": "Defined",
       "Location": {
-        "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+        "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
         "Source": "Tests/Syntax/dbx_tests_syntax_fileresult.sql",
         "Line": 3,
         "Column": 1
@@ -2271,14 +2271,14 @@
           "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
           "Name": "data",
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Stream",
             "Size": null,
             "DisplayName": "Stream",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_fileupload.sql",
               "Line": 3,
               "Column": 66
@@ -2296,7 +2296,7 @@
       "DefinitionName": "FileUpload",
       "Source": "Defined",
       "Location": {
-        "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+        "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
         "Source": "Tests/Syntax/dbx_tests_syntax_fileupload.sql",
         "Line": 3,
         "Column": 1
@@ -2323,7 +2323,7 @@
         "IsNullable": false,
         "IsEnumerable": true,
         "Location": {
-          "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+          "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
           "Source": "Tests/Syntax/dbx_tests_syntax_multiconcreteresult.sql",
           "Line": 2,
           "Column": 12
@@ -2343,7 +2343,7 @@
               "IsNullable": false,
               "IsEnumerable": true,
               "Location": {
-                "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+                "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
                 "Source": "Tests/Syntax/dbx_tests_syntax_multiconcreteresult.sql",
                 "Line": 2,
                 "Column": 12
@@ -2368,7 +2368,7 @@
             "IsNullable": false,
             "IsEnumerable": true,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_multiconcreteresult.sql",
               "Line": 2,
               "Column": 12
@@ -2381,7 +2381,7 @@
       "DefinitionName": "MultiConcreteResult",
       "Source": "Defined",
       "Location": {
-        "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+        "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
         "Source": "Tests/Syntax/dbx_tests_syntax_multiconcreteresult.sql",
         "Line": 3,
         "Column": 1
@@ -2408,7 +2408,7 @@
         "IsNullable": false,
         "IsEnumerable": false,
         "Location": {
-          "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+          "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
           "Source": "Tests/Syntax/dbx_tests_syntax_singleconcreteresult_params.sql",
           "Line": 2,
           "Column": 21
@@ -2419,14 +2419,14 @@
           "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
           "Name": "id",
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Int32",
             "Size": null,
             "DisplayName": "Int32",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_singleconcreteresult_params.sql",
               "Line": 4,
               "Column": 75
@@ -2441,14 +2441,14 @@
           "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
           "Name": "name",
           "Type": {
-            "$type": "Dibix.Sdk.CodeGeneration.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "String",
             "Size": 255,
             "DisplayName": "String",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_singleconcreteresult_params.sql",
               "Line": 4,
               "Column": 86
@@ -2473,7 +2473,7 @@
               "IsNullable": false,
               "IsEnumerable": false,
               "Location": {
-                "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+                "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
                 "Source": "Tests/Syntax/dbx_tests_syntax_singleconcreteresult_params.sql",
                 "Line": 2,
                 "Column": 21
@@ -2498,7 +2498,7 @@
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_singleconcreteresult_params.sql",
               "Line": 2,
               "Column": 21
@@ -2511,7 +2511,7 @@
       "DefinitionName": "SingleConrecteResultWithParams",
       "Source": "Defined",
       "Location": {
-        "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+        "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
         "Source": "Tests/Syntax/dbx_tests_syntax_singleconcreteresult_params.sql",
         "Line": 4,
         "Column": 1
@@ -2538,7 +2538,7 @@
         "IsNullable": false,
         "IsEnumerable": false,
         "Location": {
-          "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+          "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
           "Source": "Tests/Syntax/dbx_tests_syntax_singleconcreteresult_params_array.sql",
           "Line": 2,
           "Column": 21
@@ -2555,7 +2555,7 @@
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_singleconcreteresult_params_array.sql",
               "Line": 3,
               "Column": 82
@@ -2580,7 +2580,7 @@
               "IsNullable": false,
               "IsEnumerable": false,
               "Location": {
-                "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+                "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
                 "Source": "Tests/Syntax/dbx_tests_syntax_singleconcreteresult_params_array.sql",
                 "Line": 2,
                 "Column": 21
@@ -2605,7 +2605,7 @@
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
-              "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_singleconcreteresult_params_array.sql",
               "Line": 2,
               "Column": 21
@@ -2618,7 +2618,7 @@
       "DefinitionName": "SingleConrecteResultWithArrayParam",
       "Source": "Defined",
       "Location": {
-        "$type": "Dibix.Sdk.Abstractions.SourceLocation, Dibix.Sdk.Abstractions",
+        "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
         "Source": "Tests/Syntax/dbx_tests_syntax_singleconcreteresult_params_array.sql",
         "Line": 3,
         "Column": 1

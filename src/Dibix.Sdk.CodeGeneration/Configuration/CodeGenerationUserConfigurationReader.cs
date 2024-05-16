@@ -74,34 +74,49 @@ namespace Dibix.Sdk.CodeGeneration
                     }
                 }
 
-                CollectParameterSource(parameterSource.Name, parameterSource.Value.Type, parameterSource.Value, _actionParameterSourceRegistry, extensiblePropertyDefinition);
+                CollectParameterSource(parameterSource.Name, parameterSource.Value.Type, parameterSource.Value, extensiblePropertyDefinition);
             }
         }
 
-        private static void CollectParameterSource(string sourceName, JTokenType valueType, JToken value, IActionParameterSourceRegistry registry, IActionParameterExtensibleFixedPropertySourceDefinition extensiblePropertyDefinition)
+        private void CollectParameterSource(string sourceName, JTokenType valueType, JToken value, IActionParameterExtensibleFixedPropertySourceDefinition extensiblePropertyDefinition)
         {
             switch (valueType)
             {
                 case JTokenType.Null:
-                    registry.Register(new DynamicParameterSource(sourceName), x => new DynamicParameterSourceValidator(x));
+                    _actionParameterSourceRegistry.Register(new DynamicParameterSource(sourceName), x => new DynamicParameterSourceValidator(x));
                     break;
 
-                case JTokenType.Array:
-                    JArray parameterSourceProperties = (JArray)value;
-                    string[] propertyNames = parameterSourceProperties.Select(x => (string)x).ToArray();
+                case JTokenType.Object:
+                    JObject @object = (JObject)value;
+                    PropertyParameterSourceDescriptor[] propertyNames = @object.Properties()
+                                                                               .Select(x => new PropertyParameterSourceDescriptor(x.Name, ResolveParameterSourceType((JValue)x.Value)))
+                                                                               .ToArray();
+
                     if (extensiblePropertyDefinition != null)
                     {
                         extensiblePropertyDefinition.AddProperties(propertyNames);
                     }
                     else
                     {
-                        registry.Register(new DynamicPropertyParameterSource(sourceName, propertyNames), x => new DynamicPropertyParameterSourceValidator(x));
+                        _actionParameterSourceRegistry.Register(new DynamicPropertyParameterSource(sourceName, propertyNames), x => new DynamicPropertyParameterSourceValidator(x));
                     }
                     break;
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(valueType), valueType, null);
             }
+        }
+
+        private static PrimitiveTypeReference ResolveParameterSourceType(JValue typeNameValue) => ResolveParameterSourceType(typeNameValue, (string)typeNameValue);
+        private static PrimitiveTypeReference ResolveParameterSourceType(JValue typeNameValue, string typeName)
+        {
+            Guard.IsNotNull(typeNameValue, nameof(typeNameValue));
+            SourceLocation typeNameLocation = typeNameValue.GetSourceInfo();
+            bool isEnumerable = typeName.EndsWith("*", StringComparison.Ordinal);
+            NullableTypeName normalizedTypeName = typeName.TrimEnd('*');
+            PrimitiveType primitiveType = (PrimitiveType)Enum.Parse(typeof(PrimitiveType), normalizedTypeName.Name, ignoreCase: true);
+            PrimitiveTypeReference type = new PrimitiveTypeReference(primitiveType, normalizedTypeName.IsNullable, isEnumerable, size: null, typeNameLocation);
+            return type;
         }
 
         private void CollectClaimMapping(JObject claimMappings, ClaimParameterSource claimParameterSource)
@@ -116,15 +131,49 @@ namespace Dibix.Sdk.CodeGeneration
                     continue;
                 }
 
-                string claimTypeName = (string)claimMapping.Value;
-                if (claimParameterSource.TryGetPropertyName(claimTypeName, out string existingClaimPropertyName))
-                {
-                    _logger.LogError($"Claim type '{existingClaimPropertyName}' is already registered using property '{existingClaimPropertyName}'", sourceInfo.Source, sourceInfo.Line, sourceInfo.Column);
-                    continue;
-                }
-
-                claimParameterSource.Register(claimPropertyName, claimTypeName);
+                CollectClaimMapping(claimMapping, claimMapping.Value, claimMapping.Value.Type, claimParameterSource);
             }
+        }
+        private void CollectClaimMapping(JProperty claimProperty, JToken value, JTokenType type, ClaimParameterSource claimParameterSource)
+        {
+            switch (type)
+            {
+                case JTokenType.Object:
+                    CollectClaimMappingFromObject(claimProperty.Name, (JObject)value, claimParameterSource);
+                    break;
+
+                case JTokenType.String:
+                    CollectClaimMappingFromString(claimProperty, claimParameterSource);
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
+            }
+        }
+        private void CollectClaimMapping(ClaimParameterSource claimParameterSource, string claimPropertyName, string claimTypeName, SourceLocation claimTypeNameLocation, JProperty typeProperty)
+        {
+            if (claimParameterSource.TryGetPropertyName(claimTypeName, out string existingClaimPropertyName))
+            {
+                _logger.LogError($"Claim type '{existingClaimPropertyName}' is already registered using property '{existingClaimPropertyName}'", claimTypeNameLocation);
+                return;
+            }
+
+            PrimitiveTypeReference type = ((JValue)typeProperty.Value).ResolveType(new PrimitiveTypeResolver());
+            PropertyParameterSourceDescriptor propertyDescriptor = new PropertyParameterSourceDescriptor(claimPropertyName, type);
+            claimParameterSource.Register(propertyDescriptor, claimTypeName);
+        }
+
+        private void CollectClaimMappingFromObject(string claimPropertyName, JObject value, ClaimParameterSource claimParameterSource)
+        {
+            JProperty typeProperty = value.GetPropertySafe("type");
+            JProperty claimNameProperty = value.GetPropertySafe("claimName");
+            CollectClaimMapping(claimParameterSource, claimPropertyName, claimTypeName: (string)claimNameProperty.Value, claimTypeNameLocation: claimNameProperty.Value.GetSourceInfo(), typeProperty);
+        }
+
+        private void CollectClaimMappingFromString(JProperty claimProperty, ClaimParameterSource claimParameterSource)
+        {
+            string claimPropertyName = claimProperty.Name;
+            CollectClaimMapping(claimParameterSource, claimPropertyName, claimTypeName: claimPropertyName, claimTypeNameLocation: claimProperty.GetSourceInfo(), claimProperty);
         }
 
         private void CollectConverters(JObject endpointConfiguration)

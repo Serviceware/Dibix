@@ -1,5 +1,4 @@
-﻿using System;
-using System.Data.Common;
+﻿using System.Data.Common;
 using System.Threading.Tasks;
 using Dibix.Hosting.Abstractions.Data;
 using Dibix.Worker.Abstractions;

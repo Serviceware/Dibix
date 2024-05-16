@@ -6,8 +6,8 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Schema\*" LogicalName="%(EmbeddedResource.Filename)%(EmbeddedResource.Extension)" />
+    <Compile Include="..\..\shared\Diagnostics\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Extensions\CollectionExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
-    <Compile Include="..\..\shared\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Json\JsonExtensions.cs" Link="Json\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Json\JsonSchemaDefinition.cs" Link="Json\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Json\JsonSchemaExtensions.cs" Link="Json\%(Filename)%(Extension)" />

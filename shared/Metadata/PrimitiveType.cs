@@ -1,4 +1,4 @@
-﻿namespace Dibix.Sdk.CodeGeneration
+﻿namespace Dibix
 {
     public enum PrimitiveType
     {

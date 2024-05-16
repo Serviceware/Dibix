@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Dibix.Sdk.Abstractions;
 using Newtonsoft.Json.Linq;
 
 namespace Dibix.Sdk.CodeGeneration

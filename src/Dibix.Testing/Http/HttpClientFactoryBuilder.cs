@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Net.Http;
-using Dibix.Http.Client;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Dibix.Testing.Http

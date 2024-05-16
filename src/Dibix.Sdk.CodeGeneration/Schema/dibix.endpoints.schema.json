@@ -85,7 +85,7 @@
     },
     "PropertySourcePath": {
       "type": "string",
-      "pattern": "^[A-Z]+((\\.[A-Za-z-]+)|((\\.[A-Z][A-Za-z]+?){1,})|(\\.\\$[A-Z]+))$"
+      "pattern": "^[A-Z]+(\\.[A-Za-z$]([A-Za-z\\d-]+)?){1,}$"
     },
     "ParameterSourceWithConverter": {
       "type": "object",
