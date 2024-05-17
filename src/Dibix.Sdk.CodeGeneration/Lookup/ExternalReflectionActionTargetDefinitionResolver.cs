@@ -61,19 +61,17 @@ namespace Dibix.Sdk.CodeGeneration
             ActionParameterRegistry parameterRegistry = new ActionParameterRegistry(actionTargetDefinition, pathParameters);
             foreach (ExplicitParameter parameter in explicitParameters.Values)
             {
-                if (parameter is not ParameterDescriptor parameterDescriptor)
-                {
-                    Logger.LogError($"Metadata of parameter '{parameter.Name}' cannot be automatically detected for this action target and therefore must be specified explicitly", parameter.SourceLocation);
-                    continue;
-                }
-
                 string apiParameterName = parameter.Name;
                 string internalParameterName = apiParameterName;
-                ActionParameterSource source = parameterDescriptor.SourceBuilder?.Build(type: null);
-                ActionParameterLocation location = ResolveParameterLocationFromSource(source, parameterDescriptor.ParameterLocation, ref apiParameterName);
-
-                TypeReference type = parameterDescriptor.Type;
-                ValueReference defaultValue = parameterDescriptor.DefaultValue;
+                ActionParameterSource source = parameter.SourceBuilder?.Build(type: null);
+                ActionParameterLocation location = ResolveParameterLocation(source, parameter.ParameterLocation, parameter, pathParameters, ref apiParameterName);
+                TypeReference type = parameter.Type ?? source?.Type;
+                if (type == null)
+                {
+                    Logger.LogError($"Unknown type for parameter '{parameter.Name}'. Either specify a 'source' or 'type' property.", parameter.SourceLocation);
+                    continue;
+                }
+                ValueReference defaultValue = parameter.DefaultValueBuilder?.Invoke(type);
 
                 bool isRequired = base.IsParameterRequired(type, location, defaultValue);
                 bool isOutput = false; // Not supported
@@ -93,7 +91,7 @@ namespace Dibix.Sdk.CodeGeneration
             return true;
         }
 
-        private static ActionParameterLocation ResolveParameterLocationFromSource(ActionParameterSource parameterSource, ActionParameterLocation? explicitLocation, ref string apiParameterName)
+        private static ActionParameterLocation ResolveParameterLocation(ActionParameterSource parameterSource, ActionParameterLocation? explicitLocation, ExplicitParameter parameter, IReadOnlyDictionary<string, PathParameter> pathParameters, ref string apiParameterName)
         {
             switch (parameterSource)
             {
@@ -110,6 +108,8 @@ namespace Dibix.Sdk.CodeGeneration
                     return location;
 
                 case null when explicitLocation is not null: return explicitLocation.Value;
+                
+                case null when pathParameters.ContainsKey(parameter.Name): return ActionParameterLocation.Path;
                 
                 case null: return ActionParameterLocation.Query;
 

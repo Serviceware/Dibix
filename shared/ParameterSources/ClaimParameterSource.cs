@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 
@@ -15,10 +16,12 @@ namespace Dibix
            , { "azp"                     , new PropertyParameterSourceDescriptor("ClientId", new PrimitiveTypeReference(PrimitiveType.String, isNullable: true, isEnumerable: false)) }
            , { "aud"                     , new PropertyParameterSourceDescriptor("Audiences", new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: true)) }
         };
+        private readonly IDictionary<string, PropertyParameterSourceDescriptor> _propertyDescriptorMap;
         private readonly IDictionary<string, string> _propertyClaimTypeMap;
 
         public ClaimParameterSource()
         {
+            _propertyDescriptorMap = _claimTypePropertyMap.Values.ToDictionary(x => x.Name);
             _propertyClaimTypeMap = _claimTypePropertyMap.ToDictionary(x => x.Value.Name, x => x.Key);
         }
 
@@ -26,6 +29,7 @@ namespace Dibix
 
         public void Register(PropertyParameterSourceDescriptor property, string claimTypeName)
         {
+            _propertyDescriptorMap.Add(property.Name, property);
             _propertyClaimTypeMap.Add(property.Name, claimTypeName);
             _claimTypePropertyMap.Add(claimTypeName, property);
         }
@@ -42,6 +46,8 @@ namespace Dibix
             propertyName = null;
             return false;
         }
+
+        public TypeReference TryGetType(string propertyName) => !_propertyDescriptorMap.TryGetValue(propertyName, out PropertyParameterSourceDescriptor property) ? null : property.Type;
 
         public string GetClaimTypeName(string propertyName) => _propertyClaimTypeMap[propertyName];
     }

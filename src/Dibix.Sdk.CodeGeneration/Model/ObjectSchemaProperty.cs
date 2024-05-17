@@ -2,7 +2,7 @@
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    public sealed class ObjectSchemaProperty
+    public sealed class ObjectSchemaProperty : IPropertyDescriptor
     {
         private readonly Lazy<TypeReference> _typeResolver;
         private readonly Lazy<ValueReference> _defaultValueResolver;
@@ -17,6 +17,7 @@ namespace Dibix.Sdk.CodeGeneration
         public bool IsDiscriminator { get; }
         public bool IsObfuscated { get; }
         public bool IsRelativeHttpsUrl { get; }
+        string IPropertyDescriptor.Name => Name;
 
         public ObjectSchemaProperty(Token<string> name, TypeReference type, ValueReference defaultValue = default, SerializationBehavior serializationBehavior = default, DateTimeKind dateTimeKind = default, bool isPartOfKey = default, bool isOptional = default, bool isDiscriminator = default, bool isObfuscated = default, bool isRelativeHttpsUrl = default) : this(name, () => type, _ => defaultValue, serializationBehavior, dateTimeKind, isPartOfKey, isOptional, isDiscriminator, isObfuscated, isRelativeHttpsUrl) { }
         internal ObjectSchemaProperty(Token<string> name, Func<TypeReference> typeResolver, Func<TypeReference, ValueReference> defaultValueResolver, SerializationBehavior serializationBehavior, DateTimeKind dateTimeKind, bool isPartOfKey, bool isOptional, bool isDiscriminator, bool isObfuscated, bool isRelativeHttpsUrl)

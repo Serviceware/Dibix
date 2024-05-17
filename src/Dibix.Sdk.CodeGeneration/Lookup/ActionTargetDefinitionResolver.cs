@@ -58,16 +58,12 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        protected bool TryReadParameterMapping(ExplicitParameter explicitParameter, out ParameterMapping parameterMapping)
+        protected bool ValidateImplicitParameterMetadata(ExplicitParameter explicitParameter)
         {
-            if (explicitParameter is ParameterMapping parameterMappingValue)
-            {
-                parameterMapping = parameterMappingValue;
+            if (explicitParameter.Type == null && explicitParameter.ParameterLocation == null && explicitParameter.DefaultValueBuilder == null)
                 return true;
-            }
 
             Logger.LogError($"Metadata of parameter '{explicitParameter.Name}' is automatically detected for this action target and therefore should not be specified explicitly", explicitParameter.SourceLocation);
-            parameterMapping = null;
             return false;
         }
 
@@ -125,10 +121,10 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 explicitParameter.Visited = true;
 
-                if (!TryReadParameterMapping(explicitParameter, out ParameterMapping parameterMapping))
+                if (!ValidateImplicitParameterMetadata(explicitParameter))
                     return null;
 
-                source = parameterMapping.SourceBuilder.Build(type);
+                source = explicitParameter.SourceBuilder.Build(type);
 
                 PathParameter pathParameter;
                 if (source is ActionParameterPropertySource propertySource)

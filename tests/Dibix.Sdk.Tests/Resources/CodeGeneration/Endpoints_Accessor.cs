@@ -392,7 +392,7 @@ namespace Dibix.Sdk.Tests.Business
                     action.Method = HttpApiMethod.Get;
                     action.ChildRoute = "Reflection/{id}";
                     action.SecuritySchemes.Add("DBXNS-SIT");
-                    action.ResolveParameterFromSource("identifier", "DBX", "X");
+                    action.ResolveParameterFromSource("identifier", "DBX", "X", "DBX");
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.FileUploadAsync)), action =>
                 {

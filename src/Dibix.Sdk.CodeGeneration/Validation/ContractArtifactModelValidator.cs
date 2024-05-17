@@ -246,10 +246,14 @@ namespace Dibix.Sdk.CodeGeneration
         {
             foreach (ActionParameterPropertySourceNode node in propertySource.Nodes)
             {
+                // Probably a non-user property parameter source
+                if (node.Schema == null || node.Property is not ObjectSchemaProperty objectSchemaProperty)
+                    continue;
+
                 if (!schemaPropertyMap.TryGetValue(node.Schema, out ObjectContractDefinition objectContractDefinition))
                     continue;
 
-                VisitProperty(objectContractDefinition.Properties, node.Property);
+                VisitProperty(objectContractDefinition.Properties, objectSchemaProperty);
             }
 
             foreach (ActionParameterItemSource itemSource in propertySource.ItemSources)

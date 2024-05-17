@@ -10,8 +10,8 @@ namespace Dibix.Sdk.CodeGeneration
         {
             yield return new ConstantParameterSourceReader(schemaRegistry, logger);
             yield return new PropertyPathParameterSourceReader(schemaRegistry, logger, actionParameterSourceRegistry);
-            yield return new ParameterSourceWithConverterReader(schemaRegistry, logger, actionParameterSourceRegistry, actionParameterConverterRegistry);
             yield return new ItemsParameterSourceReader(schemaRegistry, logger, actionParameterSourceRegistry, actionParameterConverterRegistry);
+            yield return new ParameterSourceDescriptorReader(schemaRegistry, logger, actionParameterSourceRegistry, actionParameterConverterRegistry);
             yield return new BodyConverterParameterSourceReader();
         }
     }

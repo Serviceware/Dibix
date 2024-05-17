@@ -103,7 +103,6 @@
           "default": 18
         },
         "identifier": {
-          "type": "uuid",
           "source": "DBX.X",
           "converter": "DBX"
         }

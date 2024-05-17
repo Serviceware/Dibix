@@ -3,9 +3,9 @@
     internal sealed class ActionParameterPropertySourceNode
     {
         public ObjectSchema Schema { get; }
-        public ObjectSchemaProperty Property { get; }
+        public IPropertyDescriptor Property { get; }
 
-        public ActionParameterPropertySourceNode(ObjectSchema schema, ObjectSchemaProperty property)
+        public ActionParameterPropertySourceNode(ObjectSchema schema, IPropertyDescriptor property)
         {
             this.Schema = schema;
             this.Property = property;

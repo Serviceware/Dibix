@@ -53,7 +53,7 @@ Actual: {source?.GetType()}");
         {
             yield return new ConstantParameterSourceReader(schemaRegistry, logger);
             yield return new PropertyPathParameterSourceReader(schemaRegistry, logger, actionParameterSourceRegistry);
-            yield return new ParameterSourceWithConverterReader(schemaRegistry, logger, actionParameterSourceRegistry, actionParameterConverterRegistry);
+            yield return new ParameterSourceDescriptorReader(schemaRegistry, logger, actionParameterSourceRegistry, actionParameterConverterRegistry);
         }
 
         public override ActionParameterSourceBuilder Read(JProperty property, ActionRequestBody requestBody, IReadOnlyDictionary<string, PathParameter> pathParameters, ActionParameterPropertySourceBuilder rootParameterSourceBuilder)

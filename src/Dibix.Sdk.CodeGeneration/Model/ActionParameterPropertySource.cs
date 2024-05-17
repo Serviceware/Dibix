@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Dibix.Sdk.CodeGeneration
 {
@@ -11,6 +12,7 @@ namespace Dibix.Sdk.CodeGeneration
         public IReadOnlyCollection<ActionParameterPropertySourceNode> Nodes { get; }
         public IReadOnlyCollection<ActionParameterItemSource> ItemSources { get; }
         public SourceLocation Location { get; }
+        public override TypeReference Type => Nodes.LastOrDefault()?.Property?.Type;
 
         public ActionParameterPropertySource(ActionParameterSourceDefinition definition, string propertyName, SourceLocation location, string converter, IList<ActionParameterPropertySourceNode> nodes, IList<ActionParameterItemSource> itemSources)
         {

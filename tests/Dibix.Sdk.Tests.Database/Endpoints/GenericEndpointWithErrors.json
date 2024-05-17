@@ -22,7 +22,9 @@
       "target": "Dibix.Sdk.Tests.CodeGeneration.CodeGenerationTaskTests.ReflectionTarget,Dibix.Sdk.Tests",
       "childRoute": "Reflection/{id}",
       "params": {
-        "source": "DBX.X"
+        "source": {
+          "convertFromBody": "X"
+        }
       }
     },
     {

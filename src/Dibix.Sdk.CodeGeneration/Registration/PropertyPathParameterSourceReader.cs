@@ -39,13 +39,13 @@ namespace Dibix.Sdk.CodeGeneration
                 return new StaticActionParameterSourceBuilder(new ActionParameterClaimSource(claimParameterSource, propertyName, valueLocation));
 
             ActionParameterPropertySourceBuilder propertySourceBuilder = new ActionParameterPropertySourceBuilder(definition, propertyName, valueLocation);
-            CollectPropertySourceNodes(propertySourceBuilder, requestBody, rootParameterSourceBuilder);
+            CollectPropertySourceNodes(propertySourceBuilder, propertySourceBuilder.Definition, requestBody, rootParameterSourceBuilder);
             return propertySourceBuilder;
         }
 
-        private void CollectPropertySourceNodes(ActionParameterPropertySourceBuilder propertySourceBuilder, ActionRequestBody requestBody, ActionParameterPropertySourceBuilder rootPropertySourceBuilder)
+        private void CollectPropertySourceNodes(ActionParameterPropertySourceBuilder propertySourceBuilder, ActionParameterSourceDefinition definition, ActionRequestBody requestBody, ActionParameterPropertySourceBuilder rootPropertySourceBuilder)
         {
-            switch (propertySourceBuilder.Definition)
+            switch (definition)
             {
                 case BodyParameterSource:
                     CollectBodyPropertySourceNodes(propertySourceBuilder, requestBody);
@@ -55,8 +55,22 @@ namespace Dibix.Sdk.CodeGeneration
                     CollectItemPropertySourceNodes(propertySourceBuilder, rootPropertySourceBuilder);
                     break;
 
+                case DynamicParameterSource:
+                case HeaderParameterSource:
+                case QueryParameterSource:
+                case PathParameterSource:
+                    break;
+
+                case IActionParameterFixedPropertySourceDefinition dynamicPropertyParameterSource:
+                    CollectNonUserPropertyNode(dynamicPropertyParameterSource, propertySourceBuilder);
+                    break;
+
+                // Validation errors already logged previously for unknown source
+                case null:
+                    break;
+
                 default:
-                    return;
+                    throw new ArgumentOutOfRangeException(nameof(definition), definition, null);
             }
         }
 
@@ -150,6 +164,18 @@ namespace Dibix.Sdk.CodeGeneration
             logger.LogError($"Property '{propertyName}' not found on contract '{type.DisplayName}'", propertySourceBuilder.Location.Source, propertySourceBuilder.Location.Line, column);
             propertyType = null;
             return false;
+        }
+
+        private static void CollectNonUserPropertyNode(IActionParameterFixedPropertySourceDefinition source, ActionParameterPropertySourceBuilder propertySourceBuilder)
+        {
+            string propertyName = propertySourceBuilder.PropertyName;
+            PropertyParameterSourceDescriptor property = source.Properties.SingleOrDefault(x => x.Name == propertyName);
+            if (property == null)
+            {
+                // Validation errors already logged previously for unknown property
+                return;
+            }
+            propertySourceBuilder.Nodes.Add(new ActionParameterPropertySourceNode(schema: null, property));
         }
     }
 }

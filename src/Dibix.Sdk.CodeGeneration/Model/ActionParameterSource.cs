@@ -1,7 +1,7 @@
 ﻿namespace Dibix.Sdk.CodeGeneration
 {
-    public class ActionParameterSource
+    public abstract class ActionParameterSource
     {
-        protected ActionParameterSource() { }
+        public abstract TypeReference Type { get; }
     }
 }

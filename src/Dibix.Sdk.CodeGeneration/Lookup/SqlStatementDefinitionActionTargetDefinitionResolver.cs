@@ -69,7 +69,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             foreach (ExplicitParameter explicitParameter in explicitParameters.Values.Where(x => !x.Visited).ToArray())
             {
-                if (TryReadParameterMapping(explicitParameter, out _))
+                if (ValidateImplicitParameterMetadata(explicitParameter))
                     continue;
 
                 explicitParameter.Visited = true;

@@ -20,6 +20,7 @@
     <Compile Include="..\..\shared\Json\JsonSchemaDefinition.cs" Link="Json\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Json\JsonSchemaExtensions.cs" Link="Json\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Json\ValidatingJsonDefinitionReader.cs" Link="Json\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Metadata\IPropertyDescriptor.cs" Link="Model\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Metadata\PrimitiveType.cs" Link="Model\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Metadata\PrimitiveTypeReference.cs" Link="Symbol\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Metadata\TypeReference.cs" Link="Symbol\%(Filename)%(Extension)" />

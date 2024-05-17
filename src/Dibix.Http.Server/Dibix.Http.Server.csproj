@@ -14,6 +14,7 @@
     <Compile Include="..\..\shared\Http\HttpParameterName.cs" Link="Runtime\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\KnownHeaders.cs" Link="Runtime\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\RouteBuilder.cs" Link="Utilities\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Metadata\IPropertyDescriptor.cs" Link="Model\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Metadata\PrimitiveType.cs" Link="Model\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Metadata\PrimitiveTypeReference.cs" Link="Model\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Metadata\TypeReference.cs" Link="Model\%(Filename)%(Extension)" />

@@ -209,7 +209,6 @@
         }
       },
       "required": [
-        "type",
         "source"
       ]
     },

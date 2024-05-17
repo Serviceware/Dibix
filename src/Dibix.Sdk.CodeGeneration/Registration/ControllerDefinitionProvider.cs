@@ -252,55 +252,35 @@ namespace Dibix.Sdk.CodeGeneration
 
         private ExplicitParameter CollectExplicitParameter(JProperty property, ActionRequestBody requestBody, IReadOnlyDictionary<string, PathParameter> pathParameters)
         {
+            TypeReference type = null;
+            ActionParameterLocation? parameterLocation = null;
+            Func<TypeReference, ValueReference> defaultValueResolver = null;
+            bool isPathParameter = pathParameters.ContainsKey(property.Name);
             if (property.Value.Type == JTokenType.Object)
             {
-                JObject value = (JObject)property.Value;
-                JValue typeValue = (JValue)value.Property("type")?.Value;
+                JObject properties = (JObject)property.Value;
+                JValue typeValue = (JValue)properties.Property("type")?.Value;
                 if (typeValue != null)
-                    return CollectExplicitParameterDescriptor(property, value, typeValue, requestBody, pathParameters);
-            }
-            return CollectExplicitParameterMapping(property, requestBody, pathParameters);
-        }
+                    type = typeValue.ResolveType(_typeResolver);
 
-        private ExplicitParameter CollectExplicitParameterMapping(JProperty property, ActionRequestBody requestBody, IReadOnlyDictionary<string, PathParameter> pathParameters)
-        {
+                JProperty locationProperty = properties.Property("location");
+                string parameterLocationValue = (string)locationProperty?.Value;
+
+                if (parameterLocationValue != null)
+                {
+                    if (isPathParameter)
+                        Logger.LogError($"Parameter '{property.Name}' is resolved from path and therefore must not have an explicit location property", locationProperty.GetSourceInfo());
+
+                    parameterLocation = (ActionParameterLocation)Enum.Parse(typeof(ActionParameterLocation), parameterLocationValue);
+                }
+
+                JValue defaultValue = (JValue)properties.Property("default")?.Value;
+                if (defaultValue != null)
+                    defaultValueResolver = x => JsonValueReferenceParser.Parse(x, defaultValue, _schemaRegistry, Logger);
+            }
+
             ActionParameterSourceBuilder parameterSourceBuilder = CollectRootParameterSource(property, requestBody, pathParameters);
-
-            if (parameterSourceBuilder == null)
-                throw new InvalidOperationException("Could not resolve parameter source from parameter mapping");
-
-            return new ParameterMapping(property, parameterSourceBuilder);
-        }
-
-        private ExplicitParameter CollectExplicitParameterDescriptor(JProperty property, JObject properties, JValue typeValue, ActionRequestBody requestBody, IReadOnlyDictionary<string, PathParameter> pathParameters)
-        {
-            TypeReference type = typeValue.ResolveType(_typeResolver);
-            JProperty locationProperty = properties.Property("location");
-            string parameterLocationValue = (string)locationProperty?.Value;
-            ActionParameterLocation? parameterLocation = null;
-            bool isPathParameter = pathParameters.ContainsKey(property.Name);
-            
-            if (parameterLocationValue != null)
-            {
-                if (isPathParameter)
-                    Logger.LogError($"Parameter '{property.Name}' is resolved from path and therefore must not have an explicit location property", locationProperty.GetSourceInfo());
-
-                parameterLocation = (ActionParameterLocation)Enum.Parse(typeof(ActionParameterLocation), parameterLocationValue);
-            }
-            else
-            {
-                if (isPathParameter) 
-                    parameterLocation = ActionParameterLocation.Path;
-            }
-
-            JValue defaultValue = (JValue)properties.Property("default")?.Value;
-            ValueReference defaultValueReference = null;
-            if (defaultValue != null)
-                defaultValueReference = JsonValueReferenceParser.Parse(type, defaultValue, _schemaRegistry, Logger);
-
-            JProperty sourceProperty = properties.Property("source");
-            ActionParameterSourceBuilder parameterSourceBuilder = sourceProperty != null ? CollectRootParameterSource(sourceProperty, requestBody, pathParameters) : null;
-            return new ParameterDescriptor(property, type, parameterLocation, defaultValueReference, parameterSourceBuilder) { Visited = isPathParameter };
+            return new ExplicitParameter(property, type, parameterLocation, defaultValueResolver, parameterSourceBuilder) { Visited = isPathParameter };
         }
 
         private static IEnumerable<KeyValuePair<string, PathParameter>> CollectPathParameters(JProperty childRouteProperty, string childRouteValue)
