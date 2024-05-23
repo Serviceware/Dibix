@@ -24,6 +24,14 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Protected Methods
+        protected T CreateActionTargetDefinition<T>(ActionTarget actionTarget, IReadOnlyDictionary<string, PathParameter> pathParameters) where T : ActionTargetDefinition, new()
+        {
+            T actionTargetDefinition = new T();
+            actionTargetDefinition.Target = actionTarget;
+            actionTargetDefinition.PathParameters.AddRange(pathParameters);
+            return actionTargetDefinition;
+        }
+
         protected void CollectActionParameter
         (
             string parameterName

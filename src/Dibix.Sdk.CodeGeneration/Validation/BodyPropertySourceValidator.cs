@@ -8,8 +8,9 @@ namespace Dibix.Sdk.CodeGeneration
 
         public override bool Validate(ActionParameter rootParameter, ActionParameterInfo currentParameter, IActionParameterPropertySource currentValue, IActionParameterPropertySource parentValue, ActionDefinition actionDefinition, ISchemaRegistry schemaRegistry, ILogger logger)
         {
-            // Already validated at Dibix.Sdk.CodeGeneration.ControllerDefinitionProvider.CollectBodyPropertySourceNodes
-            return true;
+            // Additional validation at Dibix.Sdk.CodeGeneration.ControllerDefinitionProvider.CollectBodyPropertySourceNodes
+            bool notInPath = ValidationUtility.VerifyPathParameterNotUsedInSource(currentValue, actionDefinition, Definition, logger);
+            return notInPath;
         }
     }
 }

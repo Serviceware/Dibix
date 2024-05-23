@@ -47,8 +47,7 @@ namespace Dibix.Sdk.CodeGeneration
             bool isAsync = statementDefinition.Async;
             bool hasRefParameters = statementDefinition.Parameters.Any(x => x.IsOutput);
             ActionTarget actionTarget = new LocalActionTarget(statementDefinition, localAccessorFullName, externalAccessorFullName, definitionName, isAsync, hasRefParameters, sourceLocation);
-            actionTargetDefinition = new T();
-            actionTargetDefinition.Target = actionTarget;
+            actionTargetDefinition = CreateActionTargetDefinition<T>(actionTarget, pathParameters);
             ActionParameterRegistry parameterRegistry = new ActionParameterRegistry(actionTargetDefinition, pathParameters);
             foreach (SqlQueryParameter parameter in statementDefinition.Parameters)
             {

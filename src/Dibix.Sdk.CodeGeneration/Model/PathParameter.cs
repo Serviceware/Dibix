@@ -3,7 +3,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal sealed class PathParameter
+    public sealed class PathParameter
     {
         public string Name { get; }
         public int Index { get; }

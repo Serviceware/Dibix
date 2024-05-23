@@ -16,6 +16,7 @@ namespace Dibix.Sdk.CodeGeneration
         }
         public ActionFileResponse FileResponse { get; private set; }
         public ICollection<int> DisabledAutoDetectionStatusCodes { get; }
+        public IDictionary<string, PathParameter> PathParameters { get; } = new Dictionary<string, PathParameter>();
 
         protected ActionTargetDefinition()
         {

@@ -12,6 +12,7 @@
         "d": {
           "type": "string"
         },
+        "e": "QUERY.wtf",
         "unknown": 0
       },
       "securitySchemes": "FreeToUse",

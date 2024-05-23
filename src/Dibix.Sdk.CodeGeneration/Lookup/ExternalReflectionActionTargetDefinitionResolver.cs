@@ -56,8 +56,8 @@ namespace Dibix.Sdk.CodeGeneration
             actionDefinition = ReflectionOnlyTypeInspector.Inspect(() => this.CreateActionDefinition(targetName, assemblyName, method, filePath, line, column, explicitParameters, pathParameters, bodyParameters));
             */
 
-            actionTargetDefinition = new T();
-            actionTargetDefinition.Target = new ReflectionActionTarget(assemblyName, typeName, methodName, isAsync: false, hasRefParameters: false, sourceLocation);
+            ActionTarget actionTarget = new ReflectionActionTarget(assemblyName, typeName, methodName, isAsync: false, hasRefParameters: false, sourceLocation);
+            actionTargetDefinition = CreateActionTargetDefinition<T>(actionTarget, pathParameters);
             ActionParameterRegistry parameterRegistry = new ActionParameterRegistry(actionTargetDefinition, pathParameters);
             foreach (ExplicitParameter parameter in explicitParameters.Values)
             {
