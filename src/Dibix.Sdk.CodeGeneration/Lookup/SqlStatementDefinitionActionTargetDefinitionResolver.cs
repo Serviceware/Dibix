@@ -32,7 +32,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Overrides
-        public override bool TryResolve<T>(string targetName, SourceLocation sourceLocation, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, out T actionTargetDefinition)
+        public override bool TryResolve<T>(string targetName, SourceLocation sourceLocation, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, ActionRequestBody requestBody, out T actionTargetDefinition)
         {
             if (!TryGetStatementDefinitionByProbing(targetName, out SqlStatementDefinition statementDefinition))
             {
@@ -47,7 +47,7 @@ namespace Dibix.Sdk.CodeGeneration
             bool isAsync = statementDefinition.Async;
             bool hasRefParameters = statementDefinition.Parameters.Any(x => x.IsOutput);
             ActionTarget actionTarget = new LocalActionTarget(statementDefinition, localAccessorFullName, externalAccessorFullName, definitionName, isAsync, hasRefParameters, sourceLocation);
-            actionTargetDefinition = CreateActionTargetDefinition<T>(actionTarget, pathParameters);
+            actionTargetDefinition = CreateActionTargetDefinition<T>(actionTarget, pathParameters, requestBody);
             ActionParameterRegistry parameterRegistry = new ActionParameterRegistry(actionTargetDefinition, pathParameters);
             foreach (SqlQueryParameter parameter in statementDefinition.Parameters)
             {

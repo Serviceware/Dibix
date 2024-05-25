@@ -120,7 +120,7 @@ namespace Dibix.Sdk.CodeGeneration
             IReadOnlyDictionary<string, ExplicitParameter> explicitParameters = CollectExplicitParameters(action, requestBody, pathParameters);
 
             // Resolve action target, parameters and create action definition
-            ActionDefinition actionDefinition = CreateActionDefinition<ActionDefinition>(action, explicitParameters, pathParameters, bodyParameters);
+            ActionDefinition actionDefinition = CreateActionDefinition<ActionDefinition>(action, explicitParameters, pathParameters, bodyParameters, requestBody);
             if (actionDefinition == null)
                 return;
 
@@ -531,7 +531,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             IReadOnlyDictionary<string, ExplicitParameter> explicitParameters = CollectExplicitParameters(authorization, requestBody: null, pathParameters);
             ICollection<string> bodyParameters = new Collection<string>();
-            actionDefinition.Authorization = CreateActionDefinition<AuthorizationBehavior>(authorization, explicitParameters, pathParameters, bodyParameters);
+            actionDefinition.Authorization = CreateActionDefinition<AuthorizationBehavior>(authorization, explicitParameters, pathParameters, bodyParameters, requestBody: null);
         }
 
         private JObject ApplyAuthorizationTemplate(JProperty templateNameProperty, JObject authorizationTemplateReference)
@@ -564,11 +564,11 @@ namespace Dibix.Sdk.CodeGeneration
             return mergedAuthorization;
         }
 
-        private T CreateActionDefinition<T>(JObject action, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters) where T : ActionTargetDefinition, new()
+        private T CreateActionDefinition<T>(JObject action, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, ActionRequestBody requestBody) where T : ActionTargetDefinition, new()
         {
             JValue targetValue = (JValue)action.Property("target").Value;
             SourceLocation sourceInfo = targetValue.GetSourceInfo();
-            T actionDefinition = _actionTargetResolver.Resolve<T>(targetName: (string)targetValue, sourceInfo, explicitParameters, pathParameters, bodyParameters);
+            T actionDefinition = _actionTargetResolver.Resolve<T>(targetName: (string)targetValue, sourceInfo, explicitParameters, pathParameters, bodyParameters, requestBody);
             return actionDefinition;
         }
         #endregion

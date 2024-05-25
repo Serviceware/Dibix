@@ -64,7 +64,7 @@ namespace Dibix.Sdk.CodeGeneration
                 CSharpMethod method;
                 if (isImplementation)
                 {
-                    ICollection<string> parameterNames = parameters.Select(x => x.InternalParameterName).ToList();
+                    IList<string> parameterNames = parameters.Select(x => x.InternalParameterName).ToList();
                     parameterNames.Add("cancellationToken");
                     string body = $"return {methodImplementationName}({String.Join(", ", parameterNames)});";
                     method = @class.AddMethod(name: methodName, returnType: returnTypeName, body);

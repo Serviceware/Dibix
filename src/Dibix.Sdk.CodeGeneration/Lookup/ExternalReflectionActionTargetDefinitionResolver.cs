@@ -15,7 +15,7 @@ namespace Dibix.Sdk.CodeGeneration
             this._lockEntryManager = lockEntryManager;
         }
 
-        public override bool TryResolve<T>(string targetName, SourceLocation sourceLocation, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, out T actionTargetDefinition)
+        public override bool TryResolve<T>(string targetName, SourceLocation sourceLocation, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, ActionRequestBody requestBody, out T actionTargetDefinition)
         {
             string[] parts = targetName.Split(',');
             if (parts.Length != 2)
@@ -57,7 +57,7 @@ namespace Dibix.Sdk.CodeGeneration
             */
 
             ActionTarget actionTarget = new ReflectionActionTarget(assemblyName, typeName, methodName, isAsync: false, hasRefParameters: false, sourceLocation);
-            actionTargetDefinition = CreateActionTargetDefinition<T>(actionTarget, pathParameters);
+            actionTargetDefinition = CreateActionTargetDefinition<T>(actionTarget, pathParameters, requestBody);
             ActionParameterRegistry parameterRegistry = new ActionParameterRegistry(actionTargetDefinition, pathParameters);
             foreach (ExplicitParameter parameter in explicitParameters.Values)
             {

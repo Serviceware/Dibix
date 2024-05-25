@@ -20,15 +20,18 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Abstract Methods
-        public abstract bool TryResolve<T>(string targetName, SourceLocation sourceLocation, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> readOnlyDictionary, ICollection<string> bodyParameters, out T actionTargetDefinition) where T : ActionTargetDefinition, new();
+        public abstract bool TryResolve<T>(string targetName, SourceLocation sourceLocation, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> readOnlyDictionary, ICollection<string> bodyParameters, ActionRequestBody requestBody, out T actionTargetDefinition) where T : ActionTargetDefinition, new();
         #endregion
 
         #region Protected Methods
-        protected T CreateActionTargetDefinition<T>(ActionTarget actionTarget, IReadOnlyDictionary<string, PathParameter> pathParameters) where T : ActionTargetDefinition, new()
+        protected T CreateActionTargetDefinition<T>(ActionTarget actionTarget, IReadOnlyDictionary<string, PathParameter> pathParameters, ActionRequestBody requestBody) where T : ActionTargetDefinition, new()
         {
             T actionTargetDefinition = new T();
             actionTargetDefinition.Target = actionTarget;
             actionTargetDefinition.PathParameters.AddRange(pathParameters);
+            if (requestBody?.Contract != null)
+                actionTargetDefinition.Parameters.Add(new ActionParameter("body", "body", requestBody.Contract, ActionParameterLocation.Body, isRequired: true, isOutput: false, defaultValue: null, sourceLocation: requestBody.Contract.Location, source: null));
+
             return actionTargetDefinition;
         }
 
