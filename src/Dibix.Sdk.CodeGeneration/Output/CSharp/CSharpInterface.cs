@@ -26,6 +26,12 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             return method;
         }
 
+        public CSharpInterface AddSeparator()
+        {
+            _members.Add(new CSharpSeparator());
+            return this;
+        }
+
         public CSharpInterface Implements(string interfaceName)
         {
             this._implementedInterfaces.Add(interfaceName);

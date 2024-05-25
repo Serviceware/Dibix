@@ -454,3 +454,18 @@ namespace Dibix.Sdk.Tests.Business
     }
 }
 #endregion
+
+#region Controller Abstractions
+namespace Dibix.Sdk.Tests.Business
+{
+    public abstract class CodeGenerationTaskTestsBase
+    {
+        public Task<string> ReflectionTarget(int id, System.Guid identifier, string? name = null, int age = 18, CancellationToken cancellationToken = default)
+        {
+            return ReflectionTargetImplementation(id, identifier, name, age, cancellationToken);
+        }
+
+        protected abstract Task<string> ReflectionTargetImplementation(int id, System.Guid identifier, string? name, int age, CancellationToken cancellationToken);
+    }
+}
+#endregion

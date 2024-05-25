@@ -11,10 +11,11 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
         Protected = 4,
         Private = 8,
         Static = 16,
-        Sealed = 32,
-        Const = 64,
-        ReadOnly = 128,
-        Override = 256,
-        Async = 512
+        Abstract = 32,
+        Sealed = 64,
+        Const = 128,
+        ReadOnly = 256,
+        Override = 512,
+        Async = 1024
     }
 }
