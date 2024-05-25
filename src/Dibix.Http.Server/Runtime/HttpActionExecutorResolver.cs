@@ -42,7 +42,19 @@ namespace Dibix.Http.Server
             }
             else
             {
-                Expression instance = Expression.Call(controllerActivatorParameter, nameof(IControllerActivator.CreateInstance), [action.Target.DeclaringType]);
+                Type targetClassType = action.Target.ReflectedType;
+                Type endpointDescriptorType = action.Metadata.EndpointDescriptorType;
+                string baseClassTypeName = $"{endpointDescriptorType.Namespace}.{targetClassType.Name}Base";
+                Type baseClassType = endpointDescriptorType.Assembly.GetType(baseClassTypeName, throwOnError: true);
+                if (targetClassType.BaseType != baseClassType)
+                {
+                    throw new InvalidOperationException($"""
+                                                         Controller '{targetClassType.AssemblyQualifiedName}' does not implement base class '{endpointDescriptorType.AssemblyQualifiedName}'
+                                                         at {action.Method.ToString().ToUpperInvariant()} {action.Uri}
+                                                         """);
+                }
+
+                Expression instance = Expression.Call(controllerActivatorParameter, nameof(IControllerActivator.CreateInstance), [targetClassType]);
                 result = Expression.Call(instance, action.Target, parameters);
             }
 

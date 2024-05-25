@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Dibix.Http.Server.Tests
 {
-    public partial class HttpActionExecutorTest : HttpTestBase
+    public partial class HttpActionExecutorTest : HttpActionExecutorTestBase
     {
         private IHttpActionExecutionMethod Compile() => Compile(_ => { });
         private IHttpActionExecutionMethod Compile(Action<IHttpActionDefinitionBuilder> actionConfiguration)
@@ -28,5 +28,9 @@ namespace Dibix.Http.Server.Tests
 
             public override void Configure(IHttpApiDiscoveryContext context) => base.RegisterController("Test", x => x.AddAction(ReflectionHttpActionTarget.Create(typeof(HttpActionExecutorTest), _methodName), _actionConfiguration));
         }
+    }
+
+    public abstract class HttpActionExecutorTestBase : HttpTestBase
+    {
     }
 }

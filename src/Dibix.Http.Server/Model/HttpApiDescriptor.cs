@@ -10,7 +10,14 @@ namespace Dibix.Http.Server
     {
         #region Properties
         public ICollection<HttpControllerDefinition> Controllers { get; } = new Collection<HttpControllerDefinition>();
-        public EndpointMetadata Metadata { get; } = new EndpointMetadata();
+        public EndpointMetadata Metadata { get; }
+        #endregion
+
+        #region Constructor
+        protected HttpApiDescriptor()
+        {
+            Metadata = new EndpointMetadata(GetType());
+        }
         #endregion
 
         #region Abstract Methods
