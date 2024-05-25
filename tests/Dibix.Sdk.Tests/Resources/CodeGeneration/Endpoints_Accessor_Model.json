@@ -289,7 +289,7 @@
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
-            "Value": "G",
+            "Value": "Data",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherInputContract.json",
@@ -298,10 +298,9 @@
             }
           },
           "Type": {
-            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
-            "Type": "String",
-            "Size": null,
-            "DisplayName": "String",
+            "$type": "Dibix.Sdk.CodeGeneration.SchemaTypeReference, Dibix.Sdk.CodeGeneration",
+            "Key": "Dibix.Sdk.Tests.DomainModel.AnotherInputContractData",
+            "DisplayName": "Dibix.Sdk.Tests.DomainModel.AnotherInputContractData",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
@@ -331,6 +330,57 @@
         "Column": 4
       },
       "FullName": "Dibix.Sdk.Tests.DomainModel.AnotherInputContract"
+    },
+    {
+      "$type": "Dibix.Sdk.CodeGeneration.ObjectSchema, Dibix.Sdk.CodeGeneration",
+      "WcfNamespace": null,
+      "Properties": [
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
+          "Name": {
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "Value": "Name",
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Contracts/AnotherInputContractData.json",
+              "Line": 3,
+              "Column": 6
+            }
+          },
+          "Type": {
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "Type": "String",
+            "Size": null,
+            "DisplayName": "String",
+            "IsNullable": false,
+            "IsEnumerable": false,
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Contracts/AnotherInputContractData.json",
+              "Line": 2,
+              "Column": 31
+            }
+          },
+          "DefaultValue": null,
+          "DateTimeKind": "Unspecified",
+          "SerializationBehavior": "Always",
+          "IsPartOfKey": false,
+          "IsOptional": false,
+          "IsDiscriminator": false,
+          "IsObfuscated": false,
+          "IsRelativeHttpsUrl": false
+        }
+      ],
+      "Namespace": "Dibix.Sdk.Tests.DomainModel",
+      "DefinitionName": "AnotherInputContractData",
+      "Source": "Defined",
+      "Location": {
+        "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+        "Source": "Contracts/AnotherInputContractData.json",
+        "Line": 2,
+        "Column": 4
+      },
+      "FullName": "Dibix.Sdk.Tests.DomainModel.AnotherInputContractData"
     },
     {
       "$type": "Dibix.Sdk.CodeGeneration.ObjectSchema, Dibix.Sdk.CodeGeneration",

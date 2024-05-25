@@ -11,6 +11,6 @@
     "Password": "string",
     "E": "boolean",
     "F": "int32",
-    "G": "string"
+    "Data": "AnotherInputContractData"
   }
 }

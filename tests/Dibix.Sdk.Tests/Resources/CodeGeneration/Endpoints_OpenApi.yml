@@ -664,7 +664,7 @@ components:
         - password
         - e
         - f
-        - g
+        - data
       type: object
       properties:
         a:
@@ -687,8 +687,8 @@ components:
         f:
           type: integer
           format: int32
-        g:
-          type: string
+        data:
+          $ref: '#/components/schemas/AnotherInputContractData'
       additionalProperties: false
     AnotherEntry:
       required:
@@ -700,6 +700,14 @@ components:
           type: integer
           format: int32
         title:
+          type: string
+      additionalProperties: false
+    AnotherInputContractData:
+      required:
+        - name
+      type: object
+      properties:
+        name:
           type: string
       additionalProperties: false
     Direction:

@@ -145,7 +145,8 @@
             "id": "ITEM.$INDEX",
             "name": "ITEM.Title"
           }
-        }
+        },
+        "g": "BODY.Data.Name"
       },
       "securitySchemes": [
         "DBXNS-ClientId",

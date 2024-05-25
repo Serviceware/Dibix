@@ -186,6 +186,7 @@
     <None Include="Contracts\DuplicatePropertyNameCaseInsensitive.json" />
     <None Include="Contracts\DuplicateContract.json" />
     <None Include="dibix.json" />
+    <None Include="Contracts\AnotherInputContractData.json" />
   </ItemGroup>
   <Import Condition="'$(NetCoreBuild)' == 'true'" Project="$(NETCoreTargetsPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
   <ItemGroup>

@@ -248,12 +248,17 @@ namespace Dibix.Sdk.Tests.DomainModel
         public string Password { get; set; }
         public bool E { get; set; }
         public int F { get; set; }
-        public string G { get; set; }
+        public Dibix.Sdk.Tests.DomainModel.AnotherInputContractData Data { get; set; }
 
         public AnotherInputContract()
         {
             SomeIds = new Collection<Dibix.Sdk.Tests.DomainModel.AnotherEntry>();
         }
+    }
+
+    public sealed class AnotherInputContractData
+    {
+        public string Name { get; set; }
     }
 
     public enum Direction : int
@@ -441,6 +446,7 @@ namespace Dibix.Sdk.Tests.Business
                         items.ResolveParameterFromSource("id", "ITEM", "$INDEX");
                         items.ResolveParameterFromSource("name", "ITEM", "Title");
                     });
+                    action.ResolveParameterFromSource("g", "BODY", "Data.Name");
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {

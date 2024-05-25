@@ -38,12 +38,17 @@ namespace Dibix.Sdk.Tests.DomainModel
         public string Password { get; set; }
         public bool E { get; set; }
         public int F { get; set; }
-        public string G { get; set; }
+        public Dibix.Sdk.Tests.DomainModel.AnotherInputContractData Data { get; set; }
 
         public AnotherInputContract()
         {
             SomeIds = new Collection<Dibix.Sdk.Tests.DomainModel.AnotherEntry>();
         }
+    }
+
+    public sealed class AnotherInputContractData
+    {
+        public string Name { get; set; }
     }
 
     public enum Direction : int
