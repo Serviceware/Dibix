@@ -80,12 +80,10 @@ namespace Dibix.Sdk.CodeGeneration
 
             foreach (PathParameter pathParameter in pathParameters.Values)
             {
-                TypeReference typeReference = new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: false, size: null, location: new SourceLocation(sourceLocation.Source, pathParameter.Location.Line, pathParameter.Location.Column));
-                const ActionParameterLocation location = ActionParameterLocation.Path;
-                bool isRequired = base.IsParameterRequired(type: null, location, defaultValue: null);
-                bool isOutput = false; // Not supported
-                ActionParameter parameter = new ActionParameter(pathParameter.Name, pathParameter.Name, typeReference, location, isRequired, isOutput, defaultValue: null, source: null, new SourceLocation(sourceLocation.Source, pathParameter.Location.Line, pathParameter.Location.Column));
-                actionTargetDefinition.Parameters.Add(parameter);
+                if (pathParameter.Visited)
+                    continue;
+
+                Logger.LogError($"Metadata of parameter '{pathParameter.Name}' cannot be automatically detected for this action target and therefore must be specified explicitly", pathParameter.Location);
             }
 
             return true;

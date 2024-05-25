@@ -255,7 +255,11 @@ namespace Dibix.Sdk.CodeGeneration
             TypeReference type = null;
             ActionParameterLocation? parameterLocation = null;
             Func<TypeReference, ValueReference> defaultValueResolver = null;
-            bool isPathParameter = pathParameters.ContainsKey(property.Name);
+            bool isPathParameter = pathParameters.TryGetValue(property.Name, out PathParameter pathParameter);
+
+            if (isPathParameter)
+                pathParameter.Visited = true;
+
             if (property.Value.Type == JTokenType.Object)
             {
                 JObject properties = (JObject)property.Value;
