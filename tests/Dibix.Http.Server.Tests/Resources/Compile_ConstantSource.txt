@@ -1,4 +1,4 @@
-﻿.Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
+.Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
     Dibix.Http.Server.IHttpRequestDescriptor $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
     Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver,
@@ -8,6 +8,10 @@
         $arguments.Item["databaseAccessorFactory"] = (System.Object)$databaseaccessorfactorySource;
         $arguments.Item["boolValue"] = (System.Object)True;
         $arguments.Item["intValue"] = (System.Object)2;
+        $arguments.Item["stringValue"] = (System.Object).Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
+            "stringValue",
+            "class",
+            $action);
         $arguments.Item["nullValue"] = (System.Object)null
     }
 }

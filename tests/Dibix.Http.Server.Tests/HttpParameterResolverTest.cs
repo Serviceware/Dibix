@@ -430,6 +430,7 @@ Parameter: input", exception.Message);
             {
                 x.ResolveParameterFromConstant("boolValue", true);
                 x.ResolveParameterFromConstant("intValue", 2);
+                x.ResolveParameterFromConstant("stringValue", "class");
                 x.ResolveParameterFromNull<object>("nullValue");
             });
             Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
@@ -446,14 +447,15 @@ Parameter: input", exception.Message);
 
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
-            Assert.AreEqual(4, arguments.Count);
+            Assert.AreEqual(5, arguments.Count);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             Assert.AreEqual(true, arguments["boolValue"]);
             Assert.AreEqual(2, arguments["intValue"]);
+            Assert.AreEqual(arguments["stringValue"], AttributeTargets.Class);
             Assert.IsNull(arguments["nullValue"]);
             dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
         }
-        private static void Compile_ConstantSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, bool boolValue, int intValue, Guid? nullValue) { }
+        private static void Compile_ConstantSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, bool boolValue, int intValue, AttributeTargets stringValue, Guid? nullValue) { }
 
         [TestMethod]
         public void Compile_QuerySource()
