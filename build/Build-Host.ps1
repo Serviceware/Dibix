@@ -6,7 +6,10 @@ param
 
     [Parameter()]
     [ValidateSet('Debug', 'Release')]
-    [string]$Configuration = 'Debug'
+    [string]$Configuration = 'Debug',
+
+    [Parameter()]
+    [boolean]$SelfContained = $true
 )
 
 $ErrorActionPreference = 'Stop'
@@ -27,7 +30,7 @@ else
 {
     Exec "dotnet publish --configuration $Configuration
                          --runtime $runtimeIdentifier
-                         --self-contained
+                         $(if ($SelfContained) { "--self-contained" } else { "--no-self-contained" })
                          --p:IgnoreProjectGuid=True
                          --p:PublishReadyToRun=$publishReadyToRun
                          --p:PublishSingleFile=$publishSingleFile

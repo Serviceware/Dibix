@@ -2,7 +2,10 @@ param
 (
     [Parameter()]
     [ValidateSet('Debug', 'Release')]
-    [string]$Configuration = 'Debug'
+    [string]$Configuration = 'Debug',
+
+    [Parameter()]
+    [boolean]$SelfContained = $true
 )
 
 $ErrorActionPreference = 'Stop'
@@ -10,4 +13,4 @@ $ErrorActionPreference = 'Stop'
 $currentDirectory = $PSScriptRoot
 $scriptPath       = Join-Path $currentDirectory 'Build-Host.ps1'
 
-& $scriptPath -AppName 'Dibix.Http.Host' -Configuration $Configuration
+& $scriptPath -AppName 'Dibix.Http.Host' -Configuration $Configuration -SelfContained $SelfContained
