@@ -21,6 +21,8 @@ namespace Dibix.Http.Host
             _request = request;
         }
 
+        public string GetPath() => $"{_request.PathBase}{_request.Path}";
+
         public Task<Stream> GetBody() => Task.FromResult(_request.Body);
 
         public IEnumerable<string> GetHeaderValues(string name) => _request.Headers[name];

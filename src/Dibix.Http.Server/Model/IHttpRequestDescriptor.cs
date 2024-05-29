@@ -8,6 +8,7 @@ namespace Dibix.Http.Server
 {
     public interface IHttpRequestDescriptor
     {
+        string GetPath();
         Task<Stream> GetBody();
         IEnumerable<string> GetHeaderValues(string name);
         IEnumerable<string> GetAcceptLanguageValues();

@@ -19,6 +19,7 @@ namespace Dibix.Http.Server
         {
             switch (propertyName)
             {
+                case "Path": return BuildCallExpression(nameof(GetPath), requestParameter);
                 case "Language": return BuildCallExpression(nameof(GetFirstLanguage), requestParameter);
                 case "Languages": return BuildCallExpression(nameof(GetLanguages), requestParameter);
                 case "RemoteName": return BuildCallExpression(nameof(GetRemoteName), requestParameter);
@@ -35,6 +36,8 @@ namespace Dibix.Http.Server
             return call;
         }
 
+        private static string GetPath(IHttpRequestDescriptor request) => request.GetPath();
+        
         private static string GetFirstLanguage(IHttpRequestDescriptor request) => GetLanguages(request).FirstOrDefault();
 
         private static IEnumerable<string> GetLanguages(IHttpRequestDescriptor request) => request.GetAcceptLanguageValues();

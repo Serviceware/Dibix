@@ -8,6 +8,7 @@ namespace Dibix
     {
         public ICollection<PropertyParameterSourceDescriptor> Properties { get; } = new Collection<PropertyParameterSourceDescriptor>
         {
+            new PropertyParameterSourceDescriptor("Path", new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: false)),
             new PropertyParameterSourceDescriptor("Language", new PrimitiveTypeReference(PrimitiveType.String, isNullable: true, isEnumerable: false)),
             new PropertyParameterSourceDescriptor("Languages", new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: true)),
             new PropertyParameterSourceDescriptor("RemoteName", new PrimitiveTypeReference(PrimitiveType.String, isNullable: true, isEnumerable: false)),

@@ -19,6 +19,8 @@ namespace Dibix.Http.Server
             RequestMessage = request;
         }
 
+        public string GetPath() => RequestMessage.RequestUri!.AbsolutePath;
+
         public async Task<Stream> GetBody() => RequestMessage.Content != null ? await RequestMessage.Content.ReadAsStreamAsync().ConfigureAwait(false) : null;
         
         public IEnumerable<string> GetHeaderValues(string name) => RequestMessage.Headers.TryGetValues(name, out IEnumerable<string> values) ? values : Enumerable.Empty<string>();
