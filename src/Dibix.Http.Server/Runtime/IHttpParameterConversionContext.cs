@@ -7,5 +7,7 @@ namespace Dibix.Http.Server
         Expression RequestParameter { get; }
         Expression DependencyResolverParameter { get; }
         Expression ActionParameter { get; }
+        
+        void AppendRequiredClaim(string claimType);
     }
 }

@@ -1114,6 +1114,8 @@ Either create a mapping or make sure a property of the same name exists in the s
                 DependencyResolverParameter = dependencyResolverParameter;
                 ActionParameter = actionParameter;
             }
+
+            public void AppendRequiredClaim(string claimType) => Action.AppendRequiredClaim(claimType);
         }
 
         private sealed class HttpItemsParameterInfo
