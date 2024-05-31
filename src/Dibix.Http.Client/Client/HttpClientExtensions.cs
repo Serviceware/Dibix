@@ -44,53 +44,37 @@ namespace Dibix.Http.Client
         {
             public ProductInfoHeaderValue UserAgent { get; private set; }
             
-            public void FromAssembly(Assembly assembly, Func<string, string> productNameFormatter = null) => ResolveUserAgentFromAssembly(assembly, productNameFormatter);
+            public void FromAssembly(Assembly assembly, Func<string, string> productNameFormatter = null)
+            {
+                UserAgent = UserAgentFactory.FromAssembly(assembly, productNameFormatter);
+            }
 
-            public void FromAssemblyContainingType<T>(Func<string, string> productNameFormatter = null) => FromAssemblyContainingType(typeof(T), productNameFormatter);
-            public void FromAssemblyContainingType(Type type, Func<string, string> productNameFormatter = null) => ResolveUserAgentFromAssembly(type.Assembly, productNameFormatter);
+            public void FromAssemblyContainingType<T>(Func<string, string> productNameFormatter = null)
+            {
+                UserAgent = UserAgentFactory.FromAssemblyContainingType<T>(productNameFormatter);
+            }
 
-            public void FromEntryAssembly(Func<string, string> productNameFormatter = null) => ResolveUserAgentFromAssembly(ResolveEntryAssembly(), productNameFormatter);
-            
-            public void FromCurrentProcess(Func<string, string> productNameFormatter = null) => FromFile(ResolveCurrentProcessPath(), productNameFormatter);
+            public void FromAssemblyContainingType(Type type, Func<string, string> productNameFormatter = null)
+            {
+                UserAgent = UserAgentFactory.FromAssemblyContainingType(type, productNameFormatter);
+            }
+
+            public void FromEntryAssembly(Func<string, string> productNameFormatter = null)
+            {
+                UserAgent = UserAgentFactory.FromEntryAssembly(productNameFormatter);
+            }
+
+            public void FromCurrentProcess(Func<string, string> productNameFormatter = null)
+            {
+                UserAgent = UserAgentFactory.FromCurrentProcess(productNameFormatter);
+            }
 
             public void FromFile(string path, Func<string, string> productNameFormatter)
             {
-                FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(path);
-                string productName = fileVersionInfo.ProductName;
-                string assemblyName = Path.GetFileNameWithoutExtension(path);
-                string normalizedAssemblyName = assemblyName.Replace(".", null);
-                string productVersion = fileVersionInfo.ProductVersion;
-
-                string userAgentProductName = $"{productName}{normalizedAssemblyName}";
-                if (productNameFormatter != null)
-                    userAgentProductName = productNameFormatter(userAgentProductName);
-
-                UserAgent = new ProductInfoHeaderValue(userAgentProductName, productVersion);
+                UserAgent = UserAgentFactory.FromFile(path, productNameFormatter);
             }
 
-#pragma warning disable IL3000 // Avoid accessing Assembly file path when publishing as a single file
-            private void ResolveUserAgentFromAssembly(Assembly assembly, Func<string, string> productNameFormatter) => FromFile(assembly.Location, productNameFormatter);
-#pragma warning restore IL3000 // Avoid accessing Assembly file path when publishing as a single file
-
-            private static Assembly ResolveEntryAssembly()
-            {
-                Assembly assembly = Assembly.GetEntryAssembly();
-
-                if (assembly == null)
-                    throw new InvalidOperationException("Could not determine entry assembly");
-
-                return assembly;
-            }
-
-            private static string ResolveCurrentProcessPath()
-            {
-                ProcessModule processModule = Process.GetCurrentProcess().MainModule;
-                if (processModule == null)
-                    throw new InvalidOperationException("Could not determine main module from current process");
-                
-                string filePath = processModule.FileName;
-                return filePath;
-            }
+            public void FromCachedValue(ProductInfoHeaderValue value) => UserAgent = value;
         }
     }
 }

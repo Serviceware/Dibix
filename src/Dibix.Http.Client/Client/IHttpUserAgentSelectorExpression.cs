@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.Http.Headers;
 using System.Reflection;
 
 namespace Dibix.Http.Client
@@ -11,5 +12,6 @@ namespace Dibix.Http.Client
         void FromEntryAssembly(Func<string, string> productNameFormatter = null);
         void FromCurrentProcess(Func<string, string> productNameFormatter = null);
         void FromFile(string path, Func<string, string> productNameFormatter = null);
+        void FromCachedValue(ProductInfoHeaderValue value);
     }
 }
