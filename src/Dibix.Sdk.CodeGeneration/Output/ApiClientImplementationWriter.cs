@@ -148,9 +148,17 @@ namespace Dibix.Sdk.CodeGeneration
                 writer.WriteLine($"{nameof(Uri)} uri = UriBuilder.Create({uriConstant}, {nameof(UriKind)}.{nameof(UriKind.Relative)})")
                       .SetTemporaryIndent(20);
 
-                foreach (ActionParameter parameter in distinctParameters.Where(x => x.ParameterLocation == ActionParameterLocation.Query))
+                foreach (ActionParameter parameter in queryParameters)
                 {
-                    writer.WriteLine($".AddQueryParam(nameof({parameter.ApiParameterName}), {parameter.ApiParameterName})");
+                    writer.Write($".AddQueryParam(nameof({parameter.ApiParameterName}), {parameter.ApiParameterName}");
+
+                    if (parameter.DefaultValue != null)
+                    {
+                        string defaultValue = context.BuildDefaultValueLiteral(parameter.DefaultValue).AsString();
+                        writer.WriteRaw($", {defaultValue}");
+                    }
+
+                    writer.WriteLineRaw(")");
                 }
 
                 writer.WriteLine(".Build();")

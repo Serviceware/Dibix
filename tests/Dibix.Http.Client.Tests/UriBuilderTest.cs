@@ -12,6 +12,8 @@ namespace Dibix.Http.Client.Tests
             Uri uri = UriBuilder.Create("some/kind/{of}/uri", UriKind.Relative)
                                 .AddQueryParam("name", "luke")
                                 .AddQueryParam("id", (int?)null)
+                                .AddQueryParam("omitnull", (int?)null, null)
+                                .AddQueryParam("omitprimitive", 3, 3)
                                 .AddQueryParam("bool", true)
                                 .AddQueryParam("array", "first")
                                 .AddQueryParam("array", "second")

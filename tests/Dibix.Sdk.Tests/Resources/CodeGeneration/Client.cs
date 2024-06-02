@@ -197,10 +197,10 @@ namespace Dibix.Sdk.Tests.Client
                                     .AddQueryParam(nameof(c), c)
                                     .AddQueryParam(nameof(password), password)
                                     .AddQueryParam(nameof(ids), ids)
-                                    .AddQueryParam(nameof(d), d)
-                                    .AddQueryParam(nameof(e), e)
-                                    .AddQueryParam(nameof(f), f)
-                                    .AddQueryParam(nameof(g), g)
+                                    .AddQueryParam(nameof(d), d, null)
+                                    .AddQueryParam(nameof(e), e, true)
+                                    .AddQueryParam(nameof(f), f, null)
+                                    .AddQueryParam(nameof(g), g, "Cake")
                                     .Build();
                 HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("DELETE"), uri);
                 requestMessage.Headers.Add("DBXNS-SIT", _httpAuthorizationProvider.GetValue("DBXNS-SIT"));
@@ -219,10 +219,10 @@ namespace Dibix.Sdk.Tests.Client
                                     .AddQueryParam(nameof(c), c)
                                     .AddQueryParam(nameof(password), password)
                                     .AddQueryParam(nameof(ids), ids)
-                                    .AddQueryParam(nameof(d), d)
-                                    .AddQueryParam(nameof(e), e)
-                                    .AddQueryParam(nameof(f), f)
-                                    .AddQueryParam(nameof(g), g)
+                                    .AddQueryParam(nameof(d), d, null)
+                                    .AddQueryParam(nameof(e), e, true)
+                                    .AddQueryParam(nameof(f), f, null)
+                                    .AddQueryParam(nameof(g), g, "Cake")
                                     .Build();
                 HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("DELETE"), uri);
                 requestMessage.Headers.Add("DBXNS-SIT", _httpAuthorizationProvider.GetValue("DBXNS-SIT"));
@@ -241,10 +241,10 @@ namespace Dibix.Sdk.Tests.Client
                                     .AddQueryParam(nameof(c), c)
                                     .AddQueryParam(nameof(password), password)
                                     .AddQueryParam(nameof(ids), ids)
-                                    .AddQueryParam(nameof(d), d)
-                                    .AddQueryParam(nameof(e), e)
-                                    .AddQueryParam(nameof(f), f)
-                                    .AddQueryParam(nameof(g), g)
+                                    .AddQueryParam(nameof(d), d, null)
+                                    .AddQueryParam(nameof(e), e, true)
+                                    .AddQueryParam(nameof(f), f, null)
+                                    .AddQueryParam(nameof(g), g, "Cake")
                                     .Build();
                 HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("DELETE"), uri);
                 requestMessage.Headers.Add("DBXNS-SIT", _httpAuthorizationProvider.GetValue("DBXNS-SIT"));
@@ -263,10 +263,10 @@ namespace Dibix.Sdk.Tests.Client
                                     .AddQueryParam(nameof(c), c)
                                     .AddQueryParam(nameof(password), password)
                                     .AddQueryParam(nameof(ids), ids)
-                                    .AddQueryParam(nameof(d), d)
-                                    .AddQueryParam(nameof(e), e)
-                                    .AddQueryParam(nameof(f), f)
-                                    .AddQueryParam(nameof(g), g)
+                                    .AddQueryParam(nameof(d), d, null)
+                                    .AddQueryParam(nameof(e), e, true)
+                                    .AddQueryParam(nameof(f), f, null)
+                                    .AddQueryParam(nameof(g), g, "Cake")
                                     .Build();
                 HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("GET"), uri);
                 requestMessage.Headers.Add("DBXNS-SIT", _httpAuthorizationProvider.GetValue("DBXNS-SIT"));
@@ -301,10 +301,10 @@ namespace Dibix.Sdk.Tests.Client
                                     .AddQueryParam(nameof(b), b)
                                     .AddQueryParam(nameof(c), c)
                                     .AddQueryParam(nameof(ids), ids)
-                                    .AddQueryParam(nameof(d), d)
-                                    .AddQueryParam(nameof(e), e)
-                                    .AddQueryParam(nameof(f), f)
-                                    .AddQueryParam(nameof(g), g)
+                                    .AddQueryParam(nameof(d), d, null)
+                                    .AddQueryParam(nameof(e), e, true)
+                                    .AddQueryParam(nameof(f), f, null)
+                                    .AddQueryParam(nameof(g), g, "Cake")
                                     .Build();
                 HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("GET"), uri);
                 HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
@@ -354,7 +354,7 @@ namespace Dibix.Sdk.Tests.Client
             using (HttpClient client = _httpClientFactory.CreateClient(_httpClientName))
             {
                 Uri uri = UriBuilder.Create($"Tests/GenericEndpoint/Reflection/{id}", UriKind.Relative)
-                                    .AddQueryParam(nameof(age), age)
+                                    .AddQueryParam(nameof(age), age, 18)
                                     .Build();
                 HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("GET"), uri);
                 requestMessage.Headers.Add("DBXNS-SIT", _httpAuthorizationProvider.GetValue("DBXNS-SIT"));
