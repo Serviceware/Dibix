@@ -23,7 +23,7 @@ namespace Dibix.Http.Client
 
         public UriBuilder AddQueryParam<T>(string name, T value) where T : struct => this.AddQueryParam(name, ToString(value));
         public UriBuilder AddQueryParam<T>(string name, T value, T defaultValue) where T : struct => !Equals(value, defaultValue) ? AddQueryParam(name, ToString(value)) : this;
-        public UriBuilder AddQueryParam<T>(string name, T? value) where T : struct => this.AddQueryParam(name, ToString(value));
+        public UriBuilder AddQueryParam<T>(string name, T? value) where T : struct => value != null ? AddQueryParam(name, ToString(value)) : this;
         public UriBuilder AddQueryParam<T>(string name, T? value, T? defaultValue) where T : struct => !Equals(value, defaultValue) ? AddQueryParam(name, ToString(value)) : this;
         public UriBuilder AddQueryParam(string name, string value)
         {
