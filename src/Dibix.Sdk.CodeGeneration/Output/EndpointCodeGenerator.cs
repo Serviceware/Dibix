@@ -21,9 +21,6 @@ namespace Dibix.Sdk.CodeGeneration
 
             // Targets with ref parameters require proxy method generation using LambdaExpression.CompileToMethod which is not supported in Dibix.Http.Host
             const bool includeTargetsWithRefParameters = false;
-            
-            // Deep object query parameters require a custom model binder, which is not supported in Dibix.Http.Host
-            const bool includeTargetsWithDeepObjectQueryParameters = false;
 
             // Endpoints that use a body converter require a reflection target, which is not supported in Dibix.Http.Host
             const bool includeTargetsWithBodyConverter = false;
@@ -35,7 +32,7 @@ namespace Dibix.Sdk.CodeGeneration
             yield return new DaoExecutorInputClassWriter(model, outputFilter);
             yield return new DaoContractClassWriter(model, outputFilter, JsonSerializerFlavor.SystemTextJson);
             yield return new DaoStructuredTypeWriter(model, outputFilter);
-            yield return new ApiDescriptionWriter(assumeEmbeddedActionTargets, includeReflectionTargets, includeTargetsWithRefParameters, includeTargetsWithDeepObjectQueryParameters, includeTargetsWithBodyConverter, generateActionDelegates);
+            yield return new ApiDescriptionWriter(assumeEmbeddedActionTargets, includeReflectionTargets, includeTargetsWithRefParameters, includeTargetsWithBodyConverter, generateActionDelegates);
         }
 
         protected override IEnumerable<CSharpAnnotation> CollectGlobalAnnotations(CodeGenerationModel model)

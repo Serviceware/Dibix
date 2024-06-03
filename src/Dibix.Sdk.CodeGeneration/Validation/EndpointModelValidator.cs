@@ -10,10 +10,12 @@ namespace Dibix.Sdk.CodeGeneration
     internal sealed class EndpointModelValidator : ICodeGenerationModelValidator
     {
         private static readonly ICollection<string> HttpMethods = new HashSet<string>(Enum.GetNames(typeof(ActionMethod)), StringComparer.OrdinalIgnoreCase);
+        private readonly ISchemaRegistry _schemaRegistry;
         private readonly ILogger _logger;
 
-        public EndpointModelValidator(ILogger logger)
+        public EndpointModelValidator(ISchemaRegistry schemaRegistry, ILogger logger)
         {
+            _schemaRegistry = schemaRegistry;
             _logger = logger;
         }
 
@@ -108,7 +110,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private bool ValidateAction(ActionDefinition action)
         {
-            bool isValid = ValidateReservedPathSegments(action) && ValidateAsyncFileUpload(action);
+            bool isValid = ValidateReservedPathSegments(action) && ValidateAsyncFileUpload(action) && ValidateComplexQueryParameters(action);
             return isValid;
         }
 
@@ -155,6 +157,28 @@ namespace Dibix.Sdk.CodeGeneration
                 _logger.LogError($"The parameter '{parameter.InternalParameterName}' accepts a stream, therefore the accessor must be marked with @Async", propertySource.Location);
                 isValid = false;
             }
+            return isValid;
+        }
+
+        private bool ValidateComplexQueryParameters(ActionDefinition action)
+        {
+            bool isValid = true;
+            
+            foreach (ActionParameter parameter in action.Parameters)
+            {
+                if (parameter.ParameterLocation != ActionParameterLocation.Query)
+                    continue;
+
+                if (!parameter.Type.IsUserDefinedType(_schemaRegistry, out UserDefinedTypeSchema userDefinedTypeSchema))
+                    continue;
+
+                if (userDefinedTypeSchema.Properties.Count <= 1)
+                    continue;
+
+                _logger.LogError($"Deep object query parameters are not supported: {parameter.InternalParameterName}", parameter.SourceLocation);
+                isValid = false;
+            }
+
             return isValid;
         }
 

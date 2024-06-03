@@ -358,12 +358,6 @@ namespace Dibix.Sdk.Tests.Business
                     action.ChildRoute = "{password}/User";
                     action.SecuritySchemes.Add("Anonymous");
                 });
-                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParamsAndComplexUdt)), action =>
-                {
-                    action.Method = HttpApiMethod.Get;
-                    action.ChildRoute = "UDT";
-                    action.SecuritySchemes.Add("DBXNS-SIT");
-                });
                 controller.AddAction(ReflectionHttpActionTarget.Create(context, typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithOutputParam)), action =>
                 {
                     action.Method = HttpApiMethod.Get;

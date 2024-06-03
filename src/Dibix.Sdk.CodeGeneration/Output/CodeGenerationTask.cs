@@ -39,7 +39,7 @@ namespace Dibix.Sdk.CodeGeneration
             (
                 new ActionParameterPropertySourceModelValidator(actionParameterSourceRegistry, schemaRegistry, logger)
               , new ContractArtifactModelValidator(schemaRegistry, logger)
-              , new EndpointModelValidator(logger)
+              , new EndpointModelValidator(schemaRegistry, logger)
               , new UserDefinedTypeParameterModelValidator(schemaRegistry, logger)
             );
 

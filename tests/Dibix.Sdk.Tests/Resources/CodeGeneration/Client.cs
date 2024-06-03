@@ -112,8 +112,7 @@ namespace Dibix.Sdk.Tests.Client
         Task<HttpResponseMessage> EmptyWithParams3Async(string a, string b, System.Guid? c, string? password, IEnumerable<int> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", CancellationToken cancellationToken = default);
         Task<HttpResponseMessage> EmptyWithParams4Async(string a, string b, System.Guid? c, string? password, IEnumerable<int> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", CancellationToken cancellationToken = default);
         Task<HttpResponseMessage> EmptyWithParams5Async(string a, string b, System.Guid? c, string? password, IEnumerable<int> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", CancellationToken cancellationToken = default);
-        Task<HttpResponseMessage> EmptyWithParamsAndComplexUdt1Async(string a, string b, System.Guid? c, string password, IEnumerable<object> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", CancellationToken cancellationToken = default);
-        Task<HttpResponseMessage> EmptyWithParamsAndComplexUdt2Async(Dibix.Sdk.Tests.DomainModel.AnotherInputContract body, CancellationToken cancellationToken = default);
+        Task<HttpResponseMessage> EmptyWithParamsAndComplexUdtAsync(Dibix.Sdk.Tests.DomainModel.AnotherInputContract body, CancellationToken cancellationToken = default);
         Task<HttpResponseMessage> EmptyWithParamsAnonymousAsync(string? password, string a, string b, System.Guid? c, IEnumerable<int> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", CancellationToken cancellationToken = default);
         Task<HttpResponse<System.IO.Stream>> FileResultAsync(int id, CancellationToken cancellationToken = default);
         Task<HttpResponseMessage> FileUploadAsync(System.IO.Stream body, CancellationToken cancellationToken = default);
@@ -253,29 +252,7 @@ namespace Dibix.Sdk.Tests.Client
             }
         }
 
-        public async Task<HttpResponseMessage> EmptyWithParamsAndComplexUdt1Async(string a, string b, System.Guid? c, string password, IEnumerable<object> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", CancellationToken cancellationToken = default)
-        {
-            using (HttpClient client = _httpClientFactory.CreateClient(_httpClientName))
-            {
-                Uri uri = UriBuilder.Create("Tests/GenericEndpoint/UDT", UriKind.Relative)
-                                    .AddQueryParam(nameof(a), a)
-                                    .AddQueryParam(nameof(b), b)
-                                    .AddQueryParam(nameof(c), c)
-                                    .AddQueryParam(nameof(password), password)
-                                    .AddQueryParam(nameof(ids), ids)
-                                    .AddQueryParam(nameof(d), d, null)
-                                    .AddQueryParam(nameof(e), e, true)
-                                    .AddQueryParam(nameof(f), f, null)
-                                    .AddQueryParam(nameof(g), g, "Cake")
-                                    .Build();
-                HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("GET"), uri);
-                requestMessage.Headers.Add("DBXNS-SIT", _httpAuthorizationProvider.GetValue("DBXNS-SIT"));
-                HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
-                return responseMessage;
-            }
-        }
-
-        public async Task<HttpResponseMessage> EmptyWithParamsAndComplexUdt2Async(Dibix.Sdk.Tests.DomainModel.AnotherInputContract body, CancellationToken cancellationToken = default)
+        public async Task<HttpResponseMessage> EmptyWithParamsAndComplexUdtAsync(Dibix.Sdk.Tests.DomainModel.AnotherInputContract body, CancellationToken cancellationToken = default)
         {
             using (HttpClient client = _httpClientFactory.CreateClient(_httpClientName))
             {

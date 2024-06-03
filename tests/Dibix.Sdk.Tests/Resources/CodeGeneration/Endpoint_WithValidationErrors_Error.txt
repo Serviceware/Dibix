@@ -14,7 +14,9 @@ Endpoints\GenericEndpointWithErrors.json(43,27,43,27):error:Property 'Nm' not fo
 Endpoints\GenericEndpointWithErrors.json(10,19,10,19):error:Source 'ENV' does not support property 'MachinePassword'
 Endpoints\GenericEndpointWithErrors.json(11,21,11,21):error:Source 'CLAIM' does not support property 'None'
 Endpoints\GenericEndpointWithErrors.json(15,21,15,21):error:The parameter 'wtf' is a path parameter, therefore cannot be read using the 'QUERY' source
+Endpoints\GenericEndpointWithErrors.json(6,18,6,18):error:Deep object query parameters are not supported: ids
 Endpoints\GenericEndpointWithErrors.json(35,27,35,27):error:The path segment 'get' is a known HTTP verb, which should be indicated by the action method and is therefore redundant: this/get/is/wrong
+Endpoints\GenericEndpointWithErrors.json(63,18,63,18):error:Deep object query parameters are not supported: ids
 Endpoints\GenericEndpointWithErrors.json(49,5,49,5):error:Equivalent path defined: GET Tests/GenericEndpoint/ambiguous/route/{a}
 Endpoints\GenericEndpointWithErrors.json(55,5,55,5):error:Equivalent path defined: POST Tests/GenericEndpoint/ambiguous/route/{b}
 Endpoints\GenericEndpointWithErrors.json(49,5,49,5):error:Duplicate method defined within path: GET Tests/GenericEndpoint/ambiguous/route/{a}

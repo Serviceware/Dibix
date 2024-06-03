@@ -36,12 +36,6 @@
     },
     {
       "method": "GET",
-      "target": "EmptyWithParamsAndComplexUdt",
-      "childRoute": "UDT",
-      "authorization": "none"
-    },
-    {
-      "method": "GET",
       "target": "EmptyWithOutputParam",
       "childRoute": "Out",
       "authorization": "none"

@@ -15,7 +15,6 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly bool _assumeEmbeddedActionTargets;
         private readonly bool _includeReflectionTargets;
         private readonly bool _includeTargetsWithRefParameters;
-        private readonly bool _includeTargetsWithDeepObjectQueryParameters;
         private readonly bool _includeTargetsWithBodyConverter;
         private readonly bool _generateActionDelegates;
         #endregion
@@ -26,12 +25,11 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public ApiDescriptionWriter(bool assumeEmbeddedActionTargets, bool includeReflectionTargets, bool includeTargetsWithRefParameters, bool includeTargetsWithDeepObjectQueryParameters, bool includeTargetsWithBodyConverter, bool generateActionDelegates)
+        public ApiDescriptionWriter(bool assumeEmbeddedActionTargets, bool includeReflectionTargets, bool includeTargetsWithRefParameters, bool includeTargetsWithBodyConverter, bool generateActionDelegates)
         {
             _assumeEmbeddedActionTargets = assumeEmbeddedActionTargets;
             _includeReflectionTargets = includeReflectionTargets;
             _includeTargetsWithRefParameters = includeTargetsWithRefParameters;
-            _includeTargetsWithDeepObjectQueryParameters = includeTargetsWithDeepObjectQueryParameters;
             _includeTargetsWithBodyConverter = includeTargetsWithBodyConverter;
             _generateActionDelegates = generateActionDelegates;
         }
@@ -111,15 +109,6 @@ namespace Dibix.Sdk.CodeGeneration
                     if (!_includeTargetsWithRefParameters && actionParameter.IsOutput)
                     {
                         LogNotSupportedInHttpHostWarning($"Parameter '{actionParameter.InternalParameterName}' is an output parameter", context, actionParameter.SourceLocation);
-                        includeAction = false;
-                    }
-
-                    if (!_includeTargetsWithDeepObjectQueryParameters
-                     && actionParameter.ParameterLocation == ActionParameterLocation.Query
-                     && actionParameter.Type.IsUserDefinedType(context.SchemaRegistry, out UserDefinedTypeSchema userDefinedTypeSchema)
-                     && userDefinedTypeSchema.Properties.Count > 1)
-                    {
-                        LogNotSupportedInHttpHostWarning($"Parameter '{actionParameter.InternalParameterName}' is a deep object query parameter", context, actionParameter.SourceLocation);
                         includeAction = false;
                     }
 

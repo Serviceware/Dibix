@@ -59,8 +59,8 @@ paths:
     patch:
       tags:
         - GenericEndpoint
-      summary: EmptyWithParamsAndComplexUdt2
-      operationId: EmptyWithParamsAndComplexUdt2
+      summary: EmptyWithParamsAndComplexUdt
+      operationId: EmptyWithParamsAndComplexUdt
       requestBody:
         content:
           application/json:
@@ -236,69 +236,6 @@ paths:
       responses:
         '204':
           description: NoContent
-  /Tests/GenericEndpoint/UDT:
-    get:
-      tags:
-        - GenericEndpoint
-      summary: EmptyWithParamsAndComplexUdt1
-      operationId: EmptyWithParamsAndComplexUdt1
-      parameters:
-        - name: a
-          in: query
-          required: true
-          schema:
-            type: string
-        - name: b
-          in: query
-          required: true
-          schema:
-            type: string
-        - name: c
-          in: query
-          required: true
-          schema:
-            type: string
-            format: uuid
-            nullable: true
-        - name: password
-          in: query
-          required: true
-          schema:
-            type: string
-        - name: ids
-          in: query
-          schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/GenericParameterSet'
-        - name: d
-          in: query
-          schema:
-            type: string
-            default: null
-            nullable: true
-        - name: e
-          in: query
-          schema:
-            type: boolean
-            default: true
-        - name: f
-          in: query
-          schema:
-            allOf:
-              - $ref: '#/components/schemas/Direction'
-            nullable: true
-        - name: g
-          in: query
-          schema:
-            type: string
-            default: Cake
-            nullable: true
-      responses:
-        '204':
-          description: NoContent
-      security:
-        - DBXNS-SIT: [ ]
   /Tests/GenericEndpoint/Out:
     get:
       tags:
@@ -723,19 +660,6 @@ components:
       x-enumNames:
         - Ascending
         - Descending
-    GenericParameterSet:
-      required:
-        - id
-        - name
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int32
-        name:
-          type: string
-          nullable: true
-      additionalProperties: false
   securitySchemes:
     Bearer:
       type: http
