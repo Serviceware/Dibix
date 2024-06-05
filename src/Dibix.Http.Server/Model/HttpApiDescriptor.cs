@@ -60,7 +60,7 @@ namespace Dibix.Http.Server
             public HttpControllerDefinition Build()
             {
                 IList<HttpActionDefinition> actions = _actions.Select(x => x.Build()).ToArray();
-                HttpControllerDefinition controller = new HttpControllerDefinition(_endpointMetadata, _controllerName, actions);
+                HttpControllerDefinition controller = new HttpControllerDefinition(_controllerName, actions);
                 foreach (HttpActionDefinition action in actions)
                 {
                     action.Controller = controller;
@@ -77,6 +77,8 @@ namespace Dibix.Http.Server
 
             public EndpointMetadata Metadata { get; }
             public MethodInfo Target { get; }
+            public string ActionName { get; set; }
+            public string RelativeNamespace { get; set; }
             public HttpApiMethod Method { get; set; }
             public Uri Uri => _uri ??= new Uri(RouteBuilder.BuildRoute(Metadata.AreaName, _controllerName, ChildRoute), UriKind.Relative);
             public string ChildRoute { get; set; }
@@ -116,8 +118,10 @@ namespace Dibix.Http.Server
             {
                 IHttpActionExecutionMethod executor = HttpActionExecutorResolver.Compile(this);
                 IHttpParameterResolutionMethod parameterResolver = HttpParameterResolver.Compile(this);
-                HttpActionDefinition action = new HttpActionDefinition
+                HttpActionDefinition action = new HttpActionDefinition(Metadata)
                 {
+                    ActionName = ActionName,
+                    RelativeNamespace = RelativeNamespace,
                     Uri = Uri,
                     Executor = executor,
                     ParameterResolver = parameterResolver,
@@ -142,6 +146,8 @@ namespace Dibix.Http.Server
 
             public EndpointMetadata Metadata => _parent.Metadata;
             public MethodInfo Target { get; }
+            public string ActionName => _parent.ActionName;
+            public string RelativeNamespace => _parent.RelativeNamespace;
             public HttpApiMethod Method => _parent.Method;
             public Uri Uri => _parent.Uri;
             public string ChildRoute => _parent.ChildRoute;

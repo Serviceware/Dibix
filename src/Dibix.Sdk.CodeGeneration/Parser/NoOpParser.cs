@@ -25,7 +25,7 @@ namespace Dibix.Sdk.CodeGeneration
         )
         {
             string content = File.ReadAllText(filePath);
-            definition = new SqlStatementDefinition(@namespace: null, definitionName, SchemaDefinitionSource.Defined, new SourceLocation(filePath, line: 0, column: 0)) { Statement = new FormattedSqlStatement(content, CommandType.Text) };
+            definition = new SqlStatementDefinition(@namespace: null, relativeNamespace: null, definitionName, SchemaDefinitionSource.Defined, new SourceLocation(filePath, line: 0, column: 0)) { Statement = new FormattedSqlStatement(content, CommandType.Text) };
             return true;
         }
     }

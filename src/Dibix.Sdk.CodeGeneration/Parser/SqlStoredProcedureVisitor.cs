@@ -32,7 +32,7 @@ namespace Dibix.Sdk.CodeGeneration
             NamespacePath @namespace = ParseNamespace(relativeNamespace);
             string definitionName = ParseName(markup);
 
-            SqlStatementDefinition definition = new SqlStatementDefinition(@namespace.Path, definitionName, SchemaDefinitionSource.Defined, new SourceLocation(Source, node.StartLine, node.StartColumn));
+            SqlStatementDefinition definition = new SqlStatementDefinition(@namespace.Path, @namespace.RelativeNamespace, definitionName, SchemaDefinitionSource.Defined, new SourceLocation(Source, node.StartLine, node.StartColumn));
             definition.ProcedureName = String.Join(".", node.ProcedureReference.Name.Identifiers.Select(x => Identifier.EncodeIdentifier(x.Value)));
             definition.MergeGridResult = markup.HasSingleElement(SqlMarkupKey.MergeGridResult, base.Source, base.Logger);
             definition.GenerateInputClass = markup.HasSingleElement(SqlMarkupKey.GenerateInputClass, base.Source, base.Logger);

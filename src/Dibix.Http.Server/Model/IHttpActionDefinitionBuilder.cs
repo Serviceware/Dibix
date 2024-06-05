@@ -5,6 +5,8 @@ namespace Dibix.Http.Server
 {
     public interface IHttpActionDefinitionBuilder : IHttpActionBuilderBase
     {
+        string ActionName { get; set; }
+        string RelativeNamespace { get; set; }
         HttpApiMethod Method { get; set; }
         string Description { get; set; }
         string ChildRoute { get; set; }

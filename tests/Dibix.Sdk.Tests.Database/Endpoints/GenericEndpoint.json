@@ -108,7 +108,7 @@
     },
     {
       "method": "PUT",
-      "target": "FileUpload",
+      "target": "File.FileUpload",
       "body": {
         "mediaType": "image/png"
       },

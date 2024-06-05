@@ -1388,6 +1388,7 @@
     },
     {
       "$type": "Dibix.Sdk.CodeGeneration.SqlStatementDefinition, Dibix.Sdk.CodeGeneration",
+      "RelativeNamespace": "",
       "Statement": {
         "$type": "Dibix.Sdk.CodeGeneration.FormattedSqlStatement, Dibix.Sdk.CodeGeneration",
         "Content": "[dbo].[dbx_tests_authorization]",
@@ -1446,6 +1447,7 @@
     },
     {
       "$type": "Dibix.Sdk.CodeGeneration.SqlStatementDefinition, Dibix.Sdk.CodeGeneration",
+      "RelativeNamespace": "",
       "Statement": {
         "$type": "Dibix.Sdk.CodeGeneration.FormattedSqlStatement, Dibix.Sdk.CodeGeneration",
         "Content": "[dbo].[dbx_tests_syntax_empty_params]",
@@ -1766,6 +1768,7 @@
     },
     {
       "$type": "Dibix.Sdk.CodeGeneration.SqlStatementDefinition, Dibix.Sdk.CodeGeneration",
+      "RelativeNamespace": "",
       "Statement": {
         "$type": "Dibix.Sdk.CodeGeneration.FormattedSqlStatement, Dibix.Sdk.CodeGeneration",
         "Content": "[dbo].[dbx_tests_syntax_empty_params_out]",
@@ -1872,6 +1875,7 @@
     },
     {
       "$type": "Dibix.Sdk.CodeGeneration.SqlStatementDefinition, Dibix.Sdk.CodeGeneration",
+      "RelativeNamespace": "",
       "Statement": {
         "$type": "Dibix.Sdk.CodeGeneration.FormattedSqlStatement, Dibix.Sdk.CodeGeneration",
         "Content": "[dbo].[dbx_tests_syntax_empty_params_udt]",
@@ -2192,6 +2196,7 @@
     },
     {
       "$type": "Dibix.Sdk.CodeGeneration.SqlStatementDefinition, Dibix.Sdk.CodeGeneration",
+      "RelativeNamespace": "",
       "Statement": {
         "$type": "Dibix.Sdk.CodeGeneration.FormattedSqlStatement, Dibix.Sdk.CodeGeneration",
         "Content": "[dbo].[dbx_tests_syntax_fileresult]",
@@ -2304,6 +2309,7 @@
     },
     {
       "$type": "Dibix.Sdk.CodeGeneration.SqlStatementDefinition, Dibix.Sdk.CodeGeneration",
+      "RelativeNamespace": "File",
       "Statement": {
         "$type": "Dibix.Sdk.CodeGeneration.FormattedSqlStatement, Dibix.Sdk.CodeGeneration",
         "Content": "[dbo].[dbx_tests_syntax_fileupload]",
@@ -2330,7 +2336,7 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_fileupload.sql",
-              "Line": 3,
+              "Line": 4,
               "Column": 66
             }
           },
@@ -2342,19 +2348,20 @@
       ],
       "Results": [],
       "ErrorResponses": [],
-      "Namespace": "Dibix.Sdk.Tests.Data",
+      "Namespace": "Dibix.Sdk.Tests.Data.File",
       "DefinitionName": "FileUpload",
       "Source": "Defined",
       "Location": {
         "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
         "Source": "Tests/Syntax/dbx_tests_syntax_fileupload.sql",
-        "Line": 3,
+        "Line": 4,
         "Column": 1
       },
-      "FullName": "Dibix.Sdk.Tests.Data.FileUpload"
+      "FullName": "Dibix.Sdk.Tests.Data.File.FileUpload"
     },
     {
       "$type": "Dibix.Sdk.CodeGeneration.SqlStatementDefinition, Dibix.Sdk.CodeGeneration",
+      "RelativeNamespace": "",
       "Statement": {
         "$type": "Dibix.Sdk.CodeGeneration.FormattedSqlStatement, Dibix.Sdk.CodeGeneration",
         "Content": "[dbo].[dbx_tests_syntax_multiconcreteresult]",
@@ -2440,6 +2447,7 @@
     },
     {
       "$type": "Dibix.Sdk.CodeGeneration.SqlStatementDefinition, Dibix.Sdk.CodeGeneration",
+      "RelativeNamespace": "",
       "Statement": {
         "$type": "Dibix.Sdk.CodeGeneration.FormattedSqlStatement, Dibix.Sdk.CodeGeneration",
         "Content": "[dbo].[dbx_tests_syntax_singleconcreteresult_params]",
@@ -2570,6 +2578,7 @@
     },
     {
       "$type": "Dibix.Sdk.CodeGeneration.SqlStatementDefinition, Dibix.Sdk.CodeGeneration",
+      "RelativeNamespace": "",
       "Statement": {
         "$type": "Dibix.Sdk.CodeGeneration.FormattedSqlStatement, Dibix.Sdk.CodeGeneration",
         "Content": "[dbo].[dbx_tests_syntax_singleconcreteresult_params_array]",

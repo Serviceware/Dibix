@@ -45,9 +45,6 @@ namespace Dibix.Sdk.Tests.Data
         // FileResult
         private const string FileResultCommandText = "[dbo].[dbx_tests_syntax_fileresult]";
 
-        // FileUpload
-        private const string FileUploadCommandText = "[dbo].[dbx_tests_syntax_fileupload]";
-
         // MultiConcreteResult
         private const string MultiConcreteResultCommandText = "[dbo].[dbx_tests_syntax_multiconcreteresult]";
 
@@ -142,20 +139,6 @@ namespace Dibix.Sdk.Tests.Data
             }
         }
 
-        public static async Task FileUploadAsync(this IDatabaseAccessorFactory databaseAccessorFactory, System.IO.Stream data, CancellationToken cancellationToken = default)
-        {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
-            {
-                ParametersVisitor @params = accessor.Parameters()
-                                                    .SetFromTemplate(new
-                                                    {
-                                                        data
-                                                    })
-                                                    .Build();
-                await accessor.ExecuteAsync(FileUploadCommandText, CommandType.StoredProcedure, @params, cancellationToken).ConfigureAwait(false);
-            }
-        }
-
         public static IEnumerable<Dibix.Sdk.Tests.DomainModel.GenericContract> MultiConcreteResult(this IDatabaseAccessorFactory databaseAccessorFactory)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
@@ -190,6 +173,30 @@ namespace Dibix.Sdk.Tests.Data
                                                     .SetString(nameof(name), name, size: 255)
                                                     .Build();
                 return await accessor.QuerySingleAsync<Dibix.Sdk.Tests.DomainModel.GenericContract>(SingleConrecteResultWithParamsCommandText, CommandType.StoredProcedure, @params, cancellationToken).ConfigureAwait(false);
+            }
+        }
+    }
+}
+
+namespace Dibix.Sdk.Tests.Data.File
+{
+    [DatabaseAccessor]
+    public static class TestAccessor
+    {
+        // FileUpload
+        private const string FileUploadCommandText = "[dbo].[dbx_tests_syntax_fileupload]";
+
+        public static async Task FileUploadAsync(this IDatabaseAccessorFactory databaseAccessorFactory, System.IO.Stream data, CancellationToken cancellationToken = default)
+        {
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
+            {
+                ParametersVisitor @params = accessor.Parameters()
+                                                    .SetFromTemplate(new
+                                                    {
+                                                        data
+                                                    })
+                                                    .Build();
+                await accessor.ExecuteAsync(FileUploadCommandText, CommandType.StoredProcedure, @params, cancellationToken).ConfigureAwait(false);
             }
         }
     }
@@ -339,12 +346,14 @@ namespace Dibix.Sdk.Tests.Business
             {
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.MultiConcreteResult)), action =>
                 {
+                    action.ActionName = "MultiConcreteResult";
                     action.Method = HttpApiMethod.Get;
                     action.SecuritySchemes.Add("DBXNS-SIT");
                     action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>(), cancellationToken));
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
+                    action.ActionName = "EmptyWithParams";
                     action.Method = HttpApiMethod.Get;
                     action.ChildRoute = "{password}/Fixed";
                     action.SecuritySchemes.Add("DBXNS-SIT");
@@ -367,6 +376,7 @@ namespace Dibix.Sdk.Tests.Business
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
+                    action.ActionName = "EmptyWithParamsAnonymous";
                     action.Method = HttpApiMethod.Get;
                     action.ChildRoute = "{password}/User";
                     action.SecuritySchemes.Add("Anonymous");
@@ -385,6 +395,7 @@ namespace Dibix.Sdk.Tests.Business
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.SingleConrecteResultWithParamsAsync)), action =>
                 {
+                    action.ActionName = "SingleConrecteResultWithParams";
                     action.Method = HttpApiMethod.Get;
                     action.ChildRoute = "User/{id}/{name}";
                     action.SecuritySchemes.Add("DBXNS-SIT");
@@ -398,6 +409,7 @@ namespace Dibix.Sdk.Tests.Business
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.SingleConrecteResultWithArrayParam)), action =>
                 {
+                    action.ActionName = "SingleConrecteResultWithArrayParam";
                     action.Method = HttpApiMethod.Get;
                     action.ChildRoute = "Array";
                     action.SecuritySchemes.Add("DBXNS-SIT");
@@ -409,6 +421,7 @@ namespace Dibix.Sdk.Tests.Business
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.FileResult)), action =>
                 {
+                    action.ActionName = "FileResult";
                     action.Method = HttpApiMethod.Get;
                     action.ChildRoute = "{id}";
                     action.SecuritySchemes.Add("Anonymous");
@@ -419,8 +432,10 @@ namespace Dibix.Sdk.Tests.Business
                         { "id", id }
                     }, cancellationToken));
                 });
-                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.FileUploadAsync)), action =>
+                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.File.TestAccessor), nameof(Dibix.Sdk.Tests.Data.File.TestAccessor.FileUploadAsync)), action =>
                 {
+                    action.ActionName = "FileUpload";
+                    action.RelativeNamespace = "File";
                     action.Method = HttpApiMethod.Put;
                     action.BodyContract = typeof(System.IO.Stream);
                     action.SecuritySchemes.Add("DBXNS-SIT");
@@ -433,6 +448,7 @@ namespace Dibix.Sdk.Tests.Business
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParamsAndComplexUdt)), action =>
                 {
+                    action.ActionName = "EmptyWithParamsAndComplexUdt";
                     action.Method = HttpApiMethod.Patch;
                     action.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.AnotherInputContract);
                     action.SecuritySchemes.Add("DBXNS-ClientId");
@@ -450,6 +466,7 @@ namespace Dibix.Sdk.Tests.Business
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
+                    action.ActionName = "EmptyWithParams";
                     action.Method = HttpApiMethod.Delete;
                     action.SecuritySchemes.Add("DBXNS-SIT");
                     action.WithAuthorization(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.AssertAuthorized)), authorization =>
@@ -471,6 +488,7 @@ namespace Dibix.Sdk.Tests.Business
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
+                    action.ActionName = "EmptyWithParams";
                     action.Method = HttpApiMethod.Delete;
                     action.ChildRoute = "Alternative";
                     action.SecuritySchemes.Add("DBXNS-SIT");
@@ -493,6 +511,7 @@ namespace Dibix.Sdk.Tests.Business
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
+                    action.ActionName = "EmptyWithParams";
                     action.Method = HttpApiMethod.Delete;
                     action.ChildRoute = "AnotherAlternative";
                     action.SecuritySchemes.Add("DBXNS-SIT");

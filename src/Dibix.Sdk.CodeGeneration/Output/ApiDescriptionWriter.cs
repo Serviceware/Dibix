@@ -174,6 +174,11 @@ namespace Dibix.Sdk.CodeGeneration
 
         private void WriteActionConfiguration(CodeGenerationContext context, StringWriter writer, ActionDefinition action, string variableName)
         {
+            writer.WriteLine($"{variableName}.ActionName = \"{action.OperationId}\";");
+            
+            if (!String.IsNullOrEmpty(action.Target.RelativeNamespace))
+                writer.WriteLine($"{variableName}.RelativeNamespace = \"{action.Target.RelativeNamespace}\";");
+
             writer.WriteLine($"{variableName}.Method = HttpApiMethod.{action.Method};");
 
             if (!String.IsNullOrEmpty(action.Description))

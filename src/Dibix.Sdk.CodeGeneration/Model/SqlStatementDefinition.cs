@@ -5,6 +5,7 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public sealed class SqlStatementDefinition : SchemaDefinition
     {
+        public string RelativeNamespace { get; }
         public FormattedSqlStatement Statement { get; set; }
         public string ProcedureName { get; set; }
         public bool MergeGridResult { get; set; }
@@ -17,11 +18,12 @@ namespace Dibix.Sdk.CodeGeneration
         public IList<SqlQueryResult> Results { get; }
         public ICollection<ErrorResponse> ErrorResponses { get; }
 
-        public SqlStatementDefinition(string @namespace, string definitionName, SchemaDefinitionSource source, SourceLocation location) : base(@namespace, definitionName, source, location)
+        public SqlStatementDefinition(string @namespace, string relativeNamespace, string definitionName, SchemaDefinitionSource source, SourceLocation location) : base(@namespace, definitionName, source, location)
         {
-            this.Parameters = new Collection<SqlQueryParameter>();
-            this.Results = new Collection<SqlQueryResult>();
-            this.ErrorResponses = new Collection<ErrorResponse>();
+            RelativeNamespace = relativeNamespace;
+            Parameters = new Collection<SqlQueryParameter>();
+            Results = new Collection<SqlQueryResult>();
+            ErrorResponses = new Collection<ErrorResponse>();
         }
     }
 }
