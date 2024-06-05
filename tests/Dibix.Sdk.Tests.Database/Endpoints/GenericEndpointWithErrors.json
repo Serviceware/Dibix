@@ -49,31 +49,38 @@
     {
       "method": "GET",
       "target": "EmptyWithParams",
-      "childRoute": "ambiguous/route/{a}",
+      "childRoute": "ambiguous/route/{a}/{c}/{password}",
       "authorization": "none"
     },
     {
       "method": "POST",
       "target": "EmptyWithParams",
-      "childRoute": "ambiguous/route/{b}",
+      "childRoute": "ambiguous/route/{b}/{c}/{password}",
       "authorization": "none"
     },
     {
       "method": "GET",
       "target": "EmptyWithParamsAndComplexUdt",
-      "childRoute": "ambiguous/route/{a}",
+      "childRoute": "ambiguous/route/{a}/{c}/{password}",
       "authorization": "none"
     },
     {
       "method": "GET",
       "target": "EmptyWithParams",
       "childRoute": "this/first/route/is/ok",
+      "params": {
+        "password": null
+      },
       "authorization": "none"
     },
     {
       "method": "GET",
       "target": "EmptyWithParams",
       "childRoute": "this/second/route/is/ok",
+      "params": {
+        "c": null,
+        "password": null
+      },
       "authorization": "none"
     }
   ]

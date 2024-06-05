@@ -110,7 +110,19 @@ namespace Dibix.Sdk.CodeGeneration
 
         private bool ValidateAction(ActionDefinition action)
         {
-            bool isValid = ValidateReservedPathSegments(action) && ValidateAsyncFileUpload(action) && ValidateComplexQueryParameters(action);
+            bool isValid = ValidateReservedPathSegments(action) && ValidateParameters(action);
+            return isValid;
+        }
+
+        private bool ValidateParameters(ActionDefinition action)
+        {
+            bool isValid = true;
+            foreach (ActionParameter parameter in action.Parameters)
+            {
+                bool isParameterValid = ValidateAsyncFileUpload(action, parameter) && ValidateComplexQueryParameter(parameter) && ValidateRequiredNullableQueryParameter(parameter);
+                if (!isParameterValid)
+                    isValid = false;
+            }
             return isValid;
         }
 
@@ -143,43 +155,49 @@ namespace Dibix.Sdk.CodeGeneration
         //   Synchronous operations are disallowed. Call ReadAsync or set AllowSynchronousIO to true instead
         // Therefore, we need to ensure that accessor methods used within endpoints that accept stream parameters are marked as async.
         // See: https://github.com/dotnet/aspnetcore/issues/7644
-        private bool ValidateAsyncFileUpload(ActionDefinition action)
+        private bool ValidateAsyncFileUpload(ActionDefinition action, ActionParameter parameter)
         {
             if (action.Target.IsAsync)
                 return true;
 
-            bool isValid = true;
-            foreach (ActionParameter parameter in action.Parameters)
-            {
-                if (parameter.ParameterSource is not ActionParameterPropertySource { Definition: BodyParameterSource, PropertyName: BodyParameterSource.RawPropertyName } propertySource) 
-                    continue;
+            if (parameter.ParameterSource is not ActionParameterPropertySource { Definition: BodyParameterSource, PropertyName: BodyParameterSource.RawPropertyName } propertySource)
+                return true;
 
-                _logger.LogError($"The parameter '{parameter.InternalParameterName}' accepts a stream, therefore the accessor must be marked with @Async", propertySource.Location);
-                isValid = false;
-            }
-            return isValid;
+            _logger.LogError($"The parameter '{parameter.InternalParameterName}' accepts a stream, therefore the accessor must be marked with @Async", propertySource.Location);
+            return false;
         }
 
-        private bool ValidateComplexQueryParameters(ActionDefinition action)
+        private bool ValidateComplexQueryParameter(ActionParameter parameter)
         {
-            bool isValid = true;
-            
-            foreach (ActionParameter parameter in action.Parameters)
-            {
-                if (parameter.ParameterLocation != ActionParameterLocation.Query)
-                    continue;
+            if (parameter.ParameterLocation != ActionParameterLocation.Query)
+                return true;
 
-                if (!parameter.Type.IsUserDefinedType(_schemaRegistry, out UserDefinedTypeSchema userDefinedTypeSchema))
-                    continue;
+            if (!parameter.Type.IsUserDefinedType(_schemaRegistry, out UserDefinedTypeSchema userDefinedTypeSchema))
+                return true;
 
-                if (userDefinedTypeSchema.Properties.Count <= 1)
-                    continue;
+            if (userDefinedTypeSchema.Properties.Count <= 1)
+                return true;
 
-                _logger.LogError($"Deep object query parameters are not supported: {parameter.InternalParameterName}", parameter.SourceLocation);
-                isValid = false;
-            }
+            _logger.LogError($"Deep object query parameters are not supported: {parameter.InternalParameterName}", parameter.SourceLocation);
+            return false;
+        }
 
-            return isValid;
+        private bool ValidateRequiredNullableQueryParameter(ActionParameter parameter)
+        {
+            if (parameter.ParameterLocation != ActionParameterLocation.Query)
+                return true;
+
+            if (!parameter.IsRequired)
+                return true;
+
+            if (!parameter.Type.IsNullable)
+                return true;
+
+            // See:
+            // https://github.com/dotnet/aspnetcore/issues/45500
+            // https://github.com/domaindrivendev/Swashbuckle.AspNetCore/issues/2009
+            _logger.LogError($"Required nullable query parameters are not supported: '{parameter.InternalParameterName}'. Either make the parameter optional by providing a default value, add it to the path/body or make it non-nullable.", parameter.SourceLocation);
+            return false;
         }
 
         private static string NormalizeChildRoute(string childRoute)

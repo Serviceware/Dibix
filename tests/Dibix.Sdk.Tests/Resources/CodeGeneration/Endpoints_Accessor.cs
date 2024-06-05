@@ -367,6 +367,7 @@ namespace Dibix.Sdk.Tests.Business
                     action.Method = HttpApiMethod.Get;
                     action.ChildRoute = "{password}/User";
                     action.SecuritySchemes.Add("Anonymous");
+                    action.ResolveParameterFromNull<System.Guid?>("c");
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(context, typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithOutputParam)), action =>
                 {
@@ -448,6 +449,8 @@ namespace Dibix.Sdk.Tests.Business
                     {
                         authorization.ResolveParameterFromConstant("right", (byte)1);
                     });
+                    action.ResolveParameterFromNull<System.Guid?>("c");
+                    action.ResolveParameterFromNull<string?>("password");
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
@@ -459,6 +462,8 @@ namespace Dibix.Sdk.Tests.Business
                     {
                         authorization.ResolveParameterFromConstant("right", (byte)1);
                     });
+                    action.ResolveParameterFromNull<System.Guid?>("c");
+                    action.ResolveParameterFromNull<string?>("password");
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
@@ -470,6 +475,8 @@ namespace Dibix.Sdk.Tests.Business
                     {
                         authorization.ResolveParameterFromConstant("right", (byte)1);
                     });
+                    action.ResolveParameterFromNull<System.Guid?>("c");
+                    action.ResolveParameterFromNull<string?>("password");
                 });
             });
         }

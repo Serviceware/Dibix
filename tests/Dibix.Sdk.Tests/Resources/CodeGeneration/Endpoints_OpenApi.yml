@@ -89,19 +89,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: c
-          in: query
-          required: true
-          schema:
-            type: string
-            format: uuid
-            nullable: true
-        - name: password
-          in: query
-          required: true
-          schema:
-            type: string
-            nullable: true
         - name: ids
           in: query
           schema:
@@ -196,13 +183,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: c
-          in: query
-          required: true
-          schema:
-            type: string
-            format: uuid
-            nullable: true
         - name: ids
           in: query
           schema:
@@ -395,19 +375,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: c
-          in: query
-          required: true
-          schema:
-            type: string
-            format: uuid
-            nullable: true
-        - name: password
-          in: query
-          required: true
-          schema:
-            type: string
-            nullable: true
         - name: ids
           in: query
           schema:
@@ -460,19 +427,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: c
-          in: query
-          required: true
-          schema:
-            type: string
-            format: uuid
-            nullable: true
-        - name: password
-          in: query
-          required: true
-          schema:
-            type: string
-            nullable: true
         - name: ids
           in: query
           schema:

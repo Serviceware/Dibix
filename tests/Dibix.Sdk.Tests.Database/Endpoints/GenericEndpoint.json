@@ -32,6 +32,9 @@
       "childRoute": "{password}/User",
       "securitySchemes": "Anonymous",
       "operationId": "EmptyWithParamsAnonymous",
+      "params": {
+        "c": null
+      },
       "authorization": "none"
     },
     {
@@ -151,6 +154,10 @@
     {
       "method": "DELETE",
       "target": "EmptyWithParams",
+      "params": {
+        "c": null,
+        "password": null
+      },
       "authorization": {
         "target": "AssertAuthorized",
         "params": {
@@ -162,6 +169,10 @@
       "method": "DELETE",
       "childRoute": "Alternative",
       "target": "EmptyWithParams",
+      "params": {
+        "c": null,
+        "password": null
+      },
       "authorization": {
         "name": "AssertAuthorized",
         "right": 1
@@ -171,6 +182,10 @@
       "method": "DELETE",
       "childRoute": "AnotherAlternative",
       "target": "EmptyWithParams",
+      "params": {
+        "c": null,
+        "password": null
+      },
       "authorization": "AssertAuthorizedOne"
     }
   ]
