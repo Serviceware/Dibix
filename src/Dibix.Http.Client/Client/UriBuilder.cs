@@ -25,6 +25,7 @@ namespace Dibix.Http.Client
         public UriBuilder AddQueryParam<T>(string name, T value, T defaultValue) where T : struct => !Equals(value, defaultValue) ? AddQueryParam(name, ToString(value)) : this;
         public UriBuilder AddQueryParam<T>(string name, T? value) where T : struct => value != null ? AddQueryParam(name, ToString(value)) : this;
         public UriBuilder AddQueryParam<T>(string name, T? value, T? defaultValue) where T : struct => !Equals(value, defaultValue) ? AddQueryParam(name, ToString(value)) : this;
+        public UriBuilder AddQueryParam(string name, string value, string defaultValue) => !Equals(value, defaultValue) ? AddQueryParam(name, ToString(value)) : this;
         public UriBuilder AddQueryParam(string name, string value)
         {
             if (!this._params.TryGetValue(name, out ICollection<string> values))
@@ -33,13 +34,6 @@ namespace Dibix.Http.Client
                 this._params.Add(name, values);
             }
             values.Add(value);
-            return this;
-        }
-        public UriBuilder AddQueryParam(string name, params string[] values)
-        {
-            foreach (string value in values) 
-                this.AddQueryParam(name, value);
-
             return this;
         }
         public UriBuilder AddQueryParam<T>(string name, IEnumerable<T> values)

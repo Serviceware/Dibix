@@ -13,12 +13,13 @@ namespace Dibix.Http.Client.Tests
                                 .AddQueryParam("name", "luke")
                                 .AddQueryParam("id", "")
                                 .AddQueryParam("omitnull", (int?)null)
-                                .AddQueryParam("omitdefaultnull", (int?)null, null)
+                                .AddQueryParam("omitdefaultnullint", (int?)null, null)
+                                .AddQueryParam("omitdefaultnullstring", (string?)null, null)
                                 .AddQueryParam("omitdefaultprimitive", 3, 3)
                                 .AddQueryParam("bool", true)
                                 .AddQueryParam("array", "first")
                                 .AddQueryParam("array", "second")
-                                .AddQueryParam("anotherarray", "one", "two")
+                                .AddQueryParam("anotherarray", new[] { "one", "two" })
                                 .AddQueryParam("andanotherone", new int?[] { 1, null, 3 })
                                 .Build();
             Assert.AreEqual("some/kind/{of}/uri?name=luke&id=&bool=true&array[]=first&array[]=second&anotherarray[]=one&anotherarray[]=two&andanotherone[]=1&andanotherone[]=&andanotherone[]=3", uri.ToString());
