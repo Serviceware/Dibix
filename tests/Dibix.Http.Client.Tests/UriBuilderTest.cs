@@ -11,8 +11,7 @@ namespace Dibix.Http.Client.Tests
         {
             Uri uri = UriBuilder.Create("some/kind/{of}/uri", UriKind.Relative)
                                 .AddQueryParam("name", "luke")
-                                .AddQueryParam("id", "")
-                                .AddQueryParam("omitnull", (int?)null)
+                                .AddQueryParam("id", (int?)null)
                                 .AddQueryParam("omitdefaultnullint", (int?)null, null)
                                 .AddQueryParam("omitdefaultnullstring", (string?)null, null)
                                 .AddQueryParam("omitdefaultprimitive", 3, 3)
