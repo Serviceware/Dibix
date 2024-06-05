@@ -200,7 +200,7 @@ SqlReferencePath");
             {
                 const string extension = "txt";
                 string expectedText = GetExpectedText(extension);
-                AssertEqual(expectedText, exception.Message, extension);
+                AssertEqual(expectedText, exception.Message, extension: extension);
             }
         }
 

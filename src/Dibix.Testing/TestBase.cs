@@ -78,6 +78,13 @@ namespace Dibix.Testing
 
         protected string GetEmbeddedResourceContent(string key) => ResourceUtility.GetEmbeddedResourceContent(this._assembly, key);
 
+        protected void AssertEqual(string actual, string extension, string message = null, bool normalizeEndings = false)
+        {
+            string outputName = TestContext.TestName;
+            string expectedKey = $"{outputName}.{extension}";
+            string expected = GetEmbeddedResourceContent(expectedKey);
+            AssertEqual(expected, actual, outputName, extension, message, normalizeEndings);
+        }
         protected void AssertEqual(string expected, string actual, string extension, string message = null, bool normalizeLineEndings = false) => this.AssertEqual(expected, actual, this.TestContext.TestName, extension, message, normalizeLineEndings);
         protected void AssertEqual(string expected, string actual, string outputName, string extension, string message = null, bool normalizeLineEndings = false)
         {

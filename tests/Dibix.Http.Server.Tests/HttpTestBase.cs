@@ -5,13 +5,7 @@ namespace Dibix.Http.Server.Tests
 {
     public abstract class HttpTestBase : TestBase
     {
-        protected void AssertGeneratedText(string actualText)
-        {
-            const string extension = "txt";
-            string expectedKey = $"{TestContext.TestName}.{extension}";
-            string expectedText = GetEmbeddedResourceContent(expectedKey);
-            AssertEqual(expectedText, actualText, extension);
-        }
+        protected void AssertGeneratedText(string actualText) => AssertEqual(actualText, extension: "txt");
 
         protected sealed class ControllerActivator : IControllerActivator
         {
