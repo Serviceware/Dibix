@@ -1,5 +1,4 @@
-﻿using System.Net;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,11 +19,11 @@ namespace Dibix.Http.Client
             //responseMessage.EnsureSuccessStatusCode();
             if (!response.IsSuccessStatusCode)
             {
-                if (response.StatusCode == HttpStatusCode.Found)
+                if (IsRedirectStatusCode(response))
                 {
                     HttpClientHandler httpClientHandler = FindClientHandler(this);
 
-                    // If automatic redirects are disabled, we don't want to throw for 302, because it might be expected
+                    // If automatic redirects are disabled, it is intended to return the status code to the application without throwing
                     if (httpClientHandler is { AllowAutoRedirect: false })
                         return response;
                 }
@@ -36,6 +35,12 @@ namespace Dibix.Http.Client
         #endregion
 
         #region Private Methods
+        private static bool IsRedirectStatusCode(HttpResponseMessage response)
+        {
+            int statusCode = (int)response.StatusCode;
+            return statusCode >= 300 && statusCode < 400;
+        }
+
         private static HttpClientHandler FindClientHandler(HttpMessageHandler handler) => handler switch
         {
             HttpClientHandler clientHandler => clientHandler,
