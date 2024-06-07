@@ -71,6 +71,21 @@
       PostBuildEvent;
       AfterBuild;
     </BuildDependsOn>
+
+    <!-- 
+      CPM is now enabled by the presence of Directory.Packages.props.
+      So the workaround to override the inheritance by placing an empty file no longer works.
+      See: https://github.com/dotnet/sdk/issues/40445#issuecomment-2085774502
+    -->
+    <_DirectoryBuildPropsContent>
+      <![CDATA[
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+</Project>
+]]>
+    </_DirectoryBuildPropsContent>
   </PropertyGroup>
 
   <!-- 
@@ -487,7 +502,7 @@ $(_SqlReferencePath)" />
 
     <!-- Override Directory.Build props/targets to ensure the project configuration is isolated -->
     <!-- For example, a central package reference of Dibix runtime might interfere here -->
-    <WriteLinesToFile File="$(IntermediateOutputPath)Directory.Build.props" Lines="&lt;Project /&gt;" Overwrite="True" Condition="'$(ProduceAccessor)' == 'true'" />
+    <WriteLinesToFile File="$(IntermediateOutputPath)Directory.Build.props" Lines="$(_DirectoryBuildPropsContent)" Overwrite="True" Condition="'$(ProduceAccessor)' == 'true'" />
     <WriteLinesToFile File="$(IntermediateOutputPath)Directory.Build.targets" Lines="&lt;Project /&gt;" Overwrite="True" Condition="'$(ProduceAccessor)' == 'true'" />
 
     <ItemGroup>
@@ -561,7 +576,7 @@ $(_SqlReferencePath)" />
 
     <!-- Override Directory.Build props/targets to ensure the project configuration is isolated -->
     <!-- For example, a central package reference of Dibix runtime might interfere here -->
-    <WriteLinesToFile File="$(IntermediateOutputPath)Directory.Build.props" Lines="&lt;Project /&gt;" Overwrite="True" Condition="'$(_ProduceEndpoints)' == 'true'" />
+    <WriteLinesToFile File="$(IntermediateOutputPath)Directory.Build.props" Lines="$(_DirectoryBuildPropsContent)" Overwrite="True" Condition="'$(_ProduceEndpoints)' == 'true'" />
     <WriteLinesToFile File="$(IntermediateOutputPath)Directory.Build.targets" Lines="&lt;Project /&gt;" Overwrite="True" Condition="'$(_ProduceEndpoints)' == 'true'" />
 
     <ItemGroup>
@@ -698,7 +713,7 @@ $(_SqlReferencePath)" />
 
     <!-- Override Directory.Build props/targets to ensure the project configuration is isolated -->
     <!-- For example, a central package reference of Dibix runtime might interfere here -->
-    <WriteLinesToFile File="$(IntermediateOutputPath)Directory.Build.props" Lines="&lt;Project /&gt;" Overwrite="True" Condition="'$(_ProduceClient)' == 'true'" />
+    <WriteLinesToFile File="$(IntermediateOutputPath)Directory.Build.props" Lines="$(_DirectoryBuildPropsContent)" Overwrite="True" Condition="'$(_ProduceClient)' == 'true'" />
     <WriteLinesToFile File="$(IntermediateOutputPath)Directory.Build.targets" Lines="&lt;Project /&gt;" Overwrite="True" Condition="'$(_ProduceClient)' == 'true'" />
 
     <ItemGroup>
