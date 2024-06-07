@@ -23,8 +23,8 @@ namespace Dibix.Http.Client.Tests
 
             Mock<TraceListener> traceListener = new Mock<TraceListener>(MockBehavior.Strict);
 
-            Expression<Action<TraceListener>> expression = x => x.TraceEvent(It.IsAny<TraceEventCache>(), "System.Net", TraceEventType.Information, 0, $"[Proxy] IsBypassed http://localhost/: {isByPassed}", null);
-            traceListener.Setup(expression);
+            traceListener.Setup(x => x.TraceEvent(It.IsAny<TraceEventCache>(), "System.Net", TraceEventType.Information, 0, $"[Proxy] IsBypassed http://localhost/: {isByPassed}", null))
+                         .Verifiable(useHandler ? Times.Once : Times.Never);
 
             TraceSource traceSource = GetProxyTraceSource();
             traceSource.Listeners.Add(traceListener.Object);
@@ -38,7 +38,7 @@ namespace Dibix.Http.Client.Tests
                 WebRequest.DefaultWebProxy = proxy.Object;
 
                 await sendInvoker().ConfigureAwait(false);
-                traceListener.Verify(expression, useHandler ? Times.Once : Times.Never);
+                traceListener.VerifyAll();
             }
             finally
             {

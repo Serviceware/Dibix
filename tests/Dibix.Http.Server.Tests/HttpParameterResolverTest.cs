@@ -30,13 +30,13 @@ namespace Dibix.Http.Server.Tests
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
-            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
+            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object).Verifiable(Times.Once);
 
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
             Assert.AreEqual(1, arguments.Count);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
-            dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
+            dependencyResolver.VerifyAll();
         }
         private static void Compile_Default_Target(IDatabaseAccessorFactory databaseAccessorFactory, out int x) => x = default;
 
@@ -59,7 +59,7 @@ namespace Dibix.Http.Server.Tests
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
-            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
+            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object).Verifiable(Times.Once);
 
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
@@ -68,7 +68,7 @@ namespace Dibix.Http.Server.Tests
             Assert.AreEqual(1033, arguments["lcid"]);
             LocaleHttpParameterSource locale = AssertIsType<LocaleHttpParameterSource>(arguments["locale"]);
             Assert.AreEqual(1033, locale.LocaleId);
-            dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
+            dependencyResolver.VerifyAll();
         }
         private static void Compile_PropertySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, int lcid, LocaleHttpParameterSource locale) { }
 
@@ -87,7 +87,7 @@ namespace Dibix.Http.Server.Tests
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
-            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
+            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object).Verifiable(Times.Once);
 
             Exception exception = AssertThrows<InvalidOperationException>(() => method.PrepareParameters(request, arguments, dependencyResolver.Object));
             Assert.AreEqual(@"Parameter mapping failed
@@ -156,7 +156,7 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
-            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
+            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object).Verifiable(Times.Once);
 
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
@@ -174,7 +174,7 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
 710         2           5            Y                  ", itemsa_.Dump());
             Assert.AreEqual(5, arguments["skip"]);
             Assert.AreEqual(null, arguments["take"]);
-            dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
+            dependencyResolver.VerifyAll();
         }
         private static void Compile_ExplicitBodySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpBodyParameterInput input, int lcid, int agentid, ExplicitHttpBodyItemSet itemsa_, int? take, int skip = 5) { }
 
@@ -221,7 +221,7 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
-            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
+            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object).Verifiable(Times.Once);
 
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
@@ -234,7 +234,7 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
             ImplicitBodyHttpParameterInput input = AssertIsType<ImplicitBodyHttpParameterInput>(arguments["input"]);
             Assert.AreEqual(7, input.sourceid);
             Assert.AreEqual(1033, input.localeid);
-            dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
+            dependencyResolver.VerifyAll();
             StructuredType itemsa = AssertIsType<ImplicitHttpBodyItemSet>(arguments["itemsa"]);
             Assert.AreEqual(@"type SMALLINT(2)  name NVARCHAR(MAX)
 ----------------  ------------------
@@ -285,7 +285,7 @@ TextValue         ", itemsb.Dump());
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
-            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
+            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object).Verifiable(Times.Once);
 
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
@@ -299,7 +299,7 @@ TextValue         ", itemsb.Dump());
 -------------------------------
 ENCRYPTED(Item1)               
 ENCRYPTED(Item2)               ", items.Dump());
-            dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
+            dependencyResolver.VerifyAll();
         }
         private static void Compile_BodySource_WithConverter_Target(IDatabaseAccessorFactory databaseAccessorFactory, string encryptedpassword, string anotherencryptedpassword, HttpBodyItemSet items) { }
 
@@ -322,7 +322,7 @@ ENCRYPTED(Item2)               ", items.Dump());
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
-            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
+            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object).Verifiable(Times.Once);
 
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
@@ -357,7 +357,7 @@ ENCRYPTED(Item2)               ", items.Dump());
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
-            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
+            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object).Verifiable(Times.Once);
 
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
@@ -367,7 +367,7 @@ ENCRYPTED(Item2)               ", items.Dump());
             Assert.AreEqual("<id>5</id>", arguments["value"].ToString());
             XmlHttpParameterInput input = AssertIsType<XmlHttpParameterInput>(arguments["input"]);
             Assert.AreEqual("<id>5</id>", input.data.ToString());
-            dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
+            dependencyResolver.VerifyAll();
         }
         private static void Compile_BodyConverter_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] XmlHttpParameterInput input, XElement value) { }
 
@@ -394,7 +394,7 @@ ENCRYPTED(Item2)               ", items.Dump());
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
-            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
+            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object).Verifiable(Times.Once);
 
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
@@ -403,7 +403,7 @@ ENCRYPTED(Item2)               ", items.Dump());
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             ExplicitHttpBodyParameterInput input = AssertIsType<ExplicitHttpBodyParameterInput>(arguments["input"]);
             Assert.AreEqual(7, input.targetid);
-            dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
+            dependencyResolver.VerifyAll();
         }
         private static void Compile_BodyBinder_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpBodyParameterInput input) { }
 
@@ -443,7 +443,7 @@ Parameter: input", exception.Message);
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
-            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
+            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object).Verifiable(Times.Once);
 
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
@@ -453,7 +453,7 @@ Parameter: input", exception.Message);
             Assert.AreEqual(2, arguments["intValue"]);
             Assert.AreEqual(arguments["stringValue"], AttributeTargets.Class);
             Assert.IsNull(arguments["nullValue"]);
-            dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
+            dependencyResolver.VerifyAll();
         }
         private static void Compile_ConstantSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, bool boolValue, int intValue, AttributeTargets stringValue, Guid? nullValue) { }
 
@@ -519,7 +519,7 @@ Parameter: input", exception.Message);
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
-            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
+            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object).Verifiable(Times.Once);
 
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
@@ -537,7 +537,7 @@ Parameter: input", exception.Message);
             ExplicitHttpUriParameterInput input = AssertIsType<ExplicitHttpUriParameterInput>(arguments["input"]);
             Assert.AreEqual(9, input.targetid);
             Assert.AreEqual("ENCRYPTED(Muffin)", input.targetname);
-            dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
+            dependencyResolver.VerifyAll();
         }
         private static void Compile_QuerySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpUriParameterInput input, StringSet items, int anotherid, int id = 0, string name = "Cake", bool? @true = true, bool? empty = null) { }
 
@@ -577,7 +577,7 @@ Parameter: input", exception.Message);
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
-            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
+            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object).Verifiable(Times.Once);
 
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
@@ -588,7 +588,7 @@ Parameter: input", exception.Message);
             ExplicitHttpUriParameterInput input = AssertIsType<ExplicitHttpUriParameterInput>(arguments["input"]);
             Assert.AreEqual(9, input.targetid);
             Assert.AreEqual("ENCRYPTED(Muffin)", input.targetname);
-            dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
+            dependencyResolver.VerifyAll();
         }
         private static void Compile_PathSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpUriParameterInput input, int anotherid) { }
 
@@ -625,7 +625,7 @@ Parameter: input", exception.Message);
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
-            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
+            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object).Verifiable(Times.Once);
 
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
@@ -635,7 +635,7 @@ Parameter: input", exception.Message);
             Assert.AreEqual("Bearer", authorization.Scheme);
             Assert.AreEqual("token", authorization.Parameter);
             Assert.AreEqual(2, arguments["tenantid"]);
-            dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
+            dependencyResolver.VerifyAll();
         }
         private static void Compile_HeaderSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, string authorization, int tenantid) { }
 
@@ -657,7 +657,7 @@ Parameter: input", exception.Message);
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
-            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
+            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object).Verifiable(Times.Once);
 
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
@@ -669,7 +669,7 @@ Parameter: input", exception.Message);
 ------------------
 en-US             
 en                ", clientLanguages.Dump());
-            dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
+            dependencyResolver.VerifyAll();
         }
         private static void Compile_RequestSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, string primaryclientlanguage, StringSet clientlanguages) { }
 
@@ -691,7 +691,7 @@ en                ", clientLanguages.Dump());
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
-            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
+            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object).Verifiable(Times.Once);
 
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
@@ -699,7 +699,7 @@ en                ", clientLanguages.Dump());
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             Assert.AreEqual(HostNameUtility.GetFullyQualifiedDomainName(), arguments["machinename"]);
             Assert.AreEqual(Process.GetCurrentProcess().Id, arguments["pid"]);
-            dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
+            dependencyResolver.VerifyAll();
         }
         private static void Compile_EnvironmentSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, string machinename, int pid) { }
 
@@ -722,14 +722,14 @@ en                ", clientLanguages.Dump());
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
             request.Setup(x => x.GetUser()).Returns(new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, "User1") })));
-            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
+            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object).Verifiable(Times.Once);
 
             method.PrepareParameters(request.Object, arguments, dependencyResolver.Object);
 
             Assert.AreEqual(2, arguments.Count);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             Assert.AreEqual("User1", arguments["userid"]);
-            dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
+            dependencyResolver.VerifyAll();
         }
         private static void Compile_ClaimSource_Single_Target(IDatabaseAccessorFactory databaseAccessorFactory, string userid) { }
 
@@ -756,7 +756,7 @@ en                ", clientLanguages.Dump());
                 new Claim("aud", "Audience1"),
                 new Claim("aud", "Audience2")
             })));
-            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
+            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object).Verifiable(Times.Once);
 
             method.PrepareParameters(request.Object, arguments, dependencyResolver.Object);
 
@@ -767,7 +767,7 @@ en                ", clientLanguages.Dump());
 ------------------
 Audience1         
 Audience2         ", audiences.Dump());
-            dependencyResolver.Verify(x => x.Resolve<IDatabaseAccessorFactory>(), Times.Once);
+            dependencyResolver.VerifyAll();
         }
         private static void Compile_ClaimSource_Multiple_Target(IDatabaseAccessorFactory databaseAccessorFactory, StringSet audiences) { }
     }
