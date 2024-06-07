@@ -123,14 +123,16 @@ namespace Dibix.Sdk.CodeGeneration
             ActionDefinition actionDefinition = CreateActionDefinition<ActionDefinition>(action, explicitParameters, pathParameters, bodyParameters, requestBody);
             if (actionDefinition == null)
                 return;
+            
+            ActionTarget actionTarget = actionDefinition.Target;
 
             // Unfortunately we do not have any metadata on reflection targets
-            if (actionDefinition.Target is not ReflectionActionTarget)
+            if (actionTarget is not ReflectionActionTarget)
             {
                 // Validate explicit parameters
                 foreach (ExplicitParameter explicitParameter in explicitParameters.Values.Where(x => !x.Visited))
                 {
-                    base.Logger.LogError($"Parameter '{explicitParameter.Name}' not found on action: {actionDefinition.Target.OperationName}", explicitParameter.SourceLocation.Source, explicitParameter.SourceLocation.Line, explicitParameter.SourceLocation.Column);
+                    base.Logger.LogError($"Parameter '{explicitParameter.Name}' not found on action: {actionTarget.OperationName}", explicitParameter.SourceLocation.Source, explicitParameter.SourceLocation.Line, explicitParameter.SourceLocation.Column);
                 }
 
                 // Validate path parameters
@@ -144,7 +146,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             actionDefinition.Location = action.GetSourceInfo();
             actionDefinition.Method = method;
-            actionDefinition.OperationId = (string)action.Property("operationId")?.Value ?? actionDefinition.Target.OperationName;
+            actionDefinition.OperationId = (string)action.Property("operationId")?.Value ?? actionTarget.OperationName;
             actionDefinition.Description = (string)action.Property("description")?.Value;
             actionDefinition.RequestBody = requestBody;
             actionDefinition.ChildRoute = childRoute;
@@ -160,8 +162,31 @@ namespace Dibix.Sdk.CodeGeneration
             if (!actionDefinition.Responses.Any())
                 actionDefinition.DefaultResponseType = null;
 
+            if (actionTarget is ReflectionActionTarget)
+            {
+                LogNotSupportedInHttpHostWarning($"Action target method '{actionTarget.OperationName}' is defined within an external assembly", actionTarget.SourceLocation);
+                actionDefinition.CompatibilityLevel = ActionCompatibilityLevel.Reflection;
+            }
+
+            foreach (ActionParameter actionParameter in actionDefinition.Parameters)
+            {
+                if (actionParameter.IsOutput)
+                {
+                    LogNotSupportedInHttpHostWarning($"Parameter '{actionParameter.InternalParameterName}' is an output parameter", actionParameter.SourceLocation);
+                    actionDefinition.CompatibilityLevel = ActionCompatibilityLevel.Reflection;
+                }
+
+                if (actionParameter.ParameterSource is ActionParameterBodySource { ConverterName: not null } bodySource)
+                {
+                    LogNotSupportedInHttpHostWarning($"Parameter '{actionParameter.InternalParameterName}' uses a converter", bodySource.ConverterName.Location);
+                    actionDefinition.CompatibilityLevel = ActionCompatibilityLevel.Reflection;
+                }
+            }
+
             controller.Actions.Add(actionDefinition);
         }
+
+        private void LogNotSupportedInHttpHostWarning(string message, SourceLocation sourceLocation) => Logger.LogWarning($"{message}, which is not supported in Dibix.Http.Host", sourceLocation);
 
         private ActionRequestBody ReadBody(JObject action)
         {

@@ -10,5 +10,6 @@
         public ActionRequestBody RequestBody { get; set; }
         public SecuritySchemeRequirements SecuritySchemes { get; } = new SecuritySchemeRequirements(SecuritySchemeOperator.Or);
         public AuthorizationBehavior Authorization { get; set; }
+        public ActionCompatibilityLevel CompatibilityLevel { get; set; } = ActionCompatibilityLevel.Native;
     }
 }

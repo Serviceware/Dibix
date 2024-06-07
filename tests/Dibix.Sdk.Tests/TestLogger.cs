@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.IO;
+﻿using System.IO;
 using System.Text;
 using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.Tests.CodeGeneration;
@@ -25,7 +24,6 @@ namespace Dibix.Sdk.Tests
         {
             base.LogErrorMessage(text);
             _errorOutput.AppendLine(text);
-            Debug.WriteLine(text);
         }
 
         public void Verify()

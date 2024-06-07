@@ -4,7 +4,6 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using Dibix.Http;
-using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.CodeGeneration.CSharp;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -12,11 +11,8 @@ namespace Dibix.Sdk.CodeGeneration
     internal sealed class ApiDescriptionWriter : ArtifactWriterBase
     {
         #region Fields
-        private readonly bool _assumeEmbeddedActionTargets;
-        private readonly bool _includeReflectionTargets;
-        private readonly bool _includeTargetsWithRefParameters;
-        private readonly bool _includeTargetsWithBodyConverter;
-        private readonly bool _generateActionDelegates;
+        private readonly ActionCompatibilityLevel _compatibilityLevel;
+        private readonly IList<ControllerEntry> _controllers;
         #endregion
 
         #region Properties
@@ -25,18 +21,24 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public ApiDescriptionWriter(bool assumeEmbeddedActionTargets, bool includeReflectionTargets, bool includeTargetsWithRefParameters, bool includeTargetsWithBodyConverter, bool generateActionDelegates)
+        public ApiDescriptionWriter(CodeGenerationModel model, ActionCompatibilityLevel compatibilityLevel)
         {
-            _assumeEmbeddedActionTargets = assumeEmbeddedActionTargets;
-            _includeReflectionTargets = includeReflectionTargets;
-            _includeTargetsWithRefParameters = includeTargetsWithRefParameters;
-            _includeTargetsWithBodyConverter = includeTargetsWithBodyConverter;
-            _generateActionDelegates = generateActionDelegates;
+            _compatibilityLevel = compatibilityLevel;
+            _controllers = model.Controllers
+                                .SelectMany(x => x.Actions, (x, y) => new
+                                {
+                                    Controller = x,
+                                    Action = y
+                                })
+                                .Where(x => x.Action.CompatibilityLevel == compatibilityLevel)
+                                .GroupBy(x => x.Controller)
+                                .Select(x => new ControllerEntry(x.Key, x.Select(y => y.Action).ToArray()))
+                                .ToArray();
         }
         #endregion
 
         #region Overrides
-        public override bool HasContent(CodeGenerationModel model) => model.Controllers.Any();
+        public override bool HasContent(CodeGenerationModel model) => _controllers.Any();
 
         public override IEnumerable<CSharpAnnotation> GetGlobalAnnotations(CodeGenerationModel model)
         {
@@ -48,7 +50,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             context.AddUsing("Dibix.Http.Server");
 
-            string body = this.WriteBody(context, context.Model.Controllers);
+            string body = this.WriteBody(context);
 
             context.CreateOutputScope()
                    .AddClass("ApiConfiguration", CSharpModifiers.Public | CSharpModifiers.Sealed)
@@ -59,13 +61,14 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Private Methods
-        private string WriteBody(CodeGenerationContext context, IList<ControllerDefinition> controllers)
+        private string WriteBody(CodeGenerationContext context)
         {
             StringWriter writer = new StringWriter();
-            for (int i = 0; i < controllers.Count; i++)
+            for (int i = 0; i < _controllers.Count; i++)
             {
-                ControllerDefinition controller = controllers[i];
-                IList<ActionDefinition> actions = CollectActionsToInclude(context, controller).ToArray();
+                ControllerEntry controllerEntry = _controllers[i];
+                ControllerDefinition controller = controllerEntry.Controller;
+                IList<ActionDefinition> actions = controllerEntry.Actions;
                 if (!actions.Any())
                     continue;
 
@@ -81,47 +84,11 @@ namespace Dibix.Sdk.CodeGeneration
                 writer.PopIndent()
                       .Write("});");
 
-                if (i + 1 < controllers.Count)
+                if (i + 1 < _controllers.Count)
                     writer.WriteLine();
             }
 
             return writer.ToString();
-        }
-
-        private IEnumerable<ActionDefinition> CollectActionsToInclude(CodeGenerationContext context, ControllerDefinition controller)
-        {
-            static void LogNotSupportedInHttpHostWarning(string message, CodeGenerationContext context, SourceLocation sourceLocation)
-            {
-                context.Logger.LogWarning($"{message}, which is not supported in Dibix.Http.Host", sourceLocation);
-            }
-
-            foreach (ActionDefinition action in controller.Actions)
-            {
-                bool includeAction = true;
-                if (!_includeReflectionTargets && action.Target is ReflectionActionTarget)
-                {
-                    LogNotSupportedInHttpHostWarning($"Action target method '{action.Target.OperationName}' is defined within an external assembly", context, action.Target.SourceLocation);
-                    includeAction = false;
-                }
-
-                foreach (ActionParameter actionParameter in action.Parameters)
-                {
-                    if (!_includeTargetsWithRefParameters && actionParameter.IsOutput)
-                    {
-                        LogNotSupportedInHttpHostWarning($"Parameter '{actionParameter.InternalParameterName}' is an output parameter", context, actionParameter.SourceLocation);
-                        includeAction = false;
-                    }
-
-                    if (!_includeTargetsWithBodyConverter && actionParameter.ParameterSource is ActionParameterBodySource { ConverterName: not null } bodySource)
-                    {
-                        LogNotSupportedInHttpHostWarning($"Parameter '{actionParameter.InternalParameterName}' uses a converter", context, bodySource.ConverterName.Location);
-                        includeAction = false;
-                    }
-                }
-
-                if (includeAction)
-                    yield return action;
-            }
         }
 
         private void WriteAddAction(CodeGenerationContext context, StringWriter writer, ActionDefinition action)
@@ -145,7 +112,8 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 string accessorFullName = actionTargetDefinition.Target.AccessorFullName;
 
-                if (!this._assumeEmbeddedActionTargets && actionTargetDefinition.Target is LocalActionTarget localActionTarget)
+                // Native endpoints have all dependencies embedded, whereas legacy endpoints reference them via external assembly
+                if (_compatibilityLevel != ActionCompatibilityLevel.Native && actionTargetDefinition.Target is LocalActionTarget localActionTarget)
                     accessorFullName = localActionTarget.ExternalAccessorFullName;
 
                 writer.WriteRaw($"typeof({accessorFullName}), nameof({accessorFullName}.")
@@ -237,7 +205,7 @@ namespace Dibix.Sdk.CodeGeneration
                 WriteActionTarget(context, writer, action.Authorization, "authorization", WriteAuthorizationBehavior);
             }
 
-            if (_generateActionDelegates)
+            if (_compatibilityLevel == ActionCompatibilityLevel.Native)
                 WriteDelegate(context, action, writer, variableName);
         }
 
@@ -415,16 +383,18 @@ namespace Dibix.Sdk.CodeGeneration
                     throw new ArgumentOutOfRangeException(nameof(value));
             }
         }
+
         private static void WriteConstantParameter(CodeGenerationContext context, StringWriter writer, string parameterName, string variableName, object value)
         {
             string constantLiteral = ComputeConstantLiteral(context, value);
             WriteConstantParameter(writer, parameterName,variableName, constantLiteral);
         }
+
         private static void WriteConstantParameter(StringWriter writer, string parameterName, string variableName, string value)
         {
             writer.WriteLine($"{variableName}.ResolveParameterFromConstant(\"{parameterName}\", {value});");
         }
-        
+
         private static string ComputeConstantLiteral(CodeGenerationContext context, object value)
         {
             switch (value)
@@ -472,6 +442,34 @@ namespace Dibix.Sdk.CodeGeneration
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(value), value, null);
+            }
+        }
+
+        private static IEnumerable<KeyValuePair<ControllerDefinition, ActionDefinition>> CollectActionsToInclude(CodeGenerationModel model)
+        {
+            foreach (ControllerDefinition controller in model.Controllers)
+            {
+                foreach (ActionDefinition action in controller.Actions)
+                {
+                    if (action.CompatibilityLevel != ActionCompatibilityLevel.Native) 
+                        continue;
+
+                    yield return new KeyValuePair<ControllerDefinition, ActionDefinition>(controller, action);
+                }
+            }
+        }
+        #endregion
+
+        #region Nested Types
+        private readonly struct ControllerEntry
+        {
+            public ControllerDefinition Controller { get; }
+            public IList<ActionDefinition> Actions { get; }
+
+            public ControllerEntry(ControllerDefinition controller, IList<ActionDefinition> actions)
+            {
+                Controller = controller;
+                Actions = actions;
             }
         }
         #endregion
