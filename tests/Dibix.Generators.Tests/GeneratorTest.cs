@@ -85,19 +85,23 @@ namespace Dibix.Generators.Tests
             Mock<AdditionalText> additionalText1 = new Mock<AdditionalText>(MockBehavior.Strict);
             Mock<AdditionalText> additionalText2 = new Mock<AdditionalText>(MockBehavior.Strict);
             Mock<AdditionalText> additionalText3 = new Mock<AdditionalText>(MockBehavior.Strict);
-            additionalText1.SetupGet(x => x.Path).Returns(Path.Combine(Path.GetDirectoryName(GetType().Assembly.Location)!, "EmbeddedResource.yml"));
+            Mock<AdditionalText> additionalText4 = new Mock<AdditionalText>(MockBehavior.Strict);
+            additionalText1.SetupGet(x => x.Path).Returns(Path.Combine(Path.GetDirectoryName(GetType().Assembly.Location)!, "SomeText.yml"));
             additionalText2.SetupGet(x => x.Path).Returns("");
             additionalText3.SetupGet(x => x.Path).Returns("");
+            additionalText4.SetupGet(x => x.Path).Returns(Path.Combine(Path.GetDirectoryName(GetType().Assembly.Location)!, "AnotherText.json"));
 
             Mock<AnalyzerConfigOptions> globalAnalyzerConfigOptions = new Mock<AnalyzerConfigOptions>(MockBehavior.Strict);
             Mock<AnalyzerConfigOptionsProvider> analyzerConfigOptionsProvider = new Mock<AnalyzerConfigOptionsProvider>(MockBehavior.Strict);
             Mock<AnalyzerConfigOptions> fileAnalyzerConfigOptions1 = new Mock<AnalyzerConfigOptions>(MockBehavior.Strict);
             Mock<AnalyzerConfigOptions> fileAnalyzerConfigOptions2 = new Mock<AnalyzerConfigOptions>(MockBehavior.Strict);
             Mock<AnalyzerConfigOptions> fileAnalyzerConfigOptions3 = new Mock<AnalyzerConfigOptions>(MockBehavior.Strict);
+            Mock<AnalyzerConfigOptions> fileAnalyzerConfigOptions4 = new Mock<AnalyzerConfigOptions>(MockBehavior.Strict);
             analyzerConfigOptionsProvider.SetupGet(x => x.GlobalOptions).Returns(globalAnalyzerConfigOptions.Object);
             analyzerConfigOptionsProvider.Setup(x => x.GetOptions(additionalText1.Object)).Returns(fileAnalyzerConfigOptions1.Object);
             analyzerConfigOptionsProvider.Setup(x => x.GetOptions(additionalText2.Object)).Returns(fileAnalyzerConfigOptions2.Object);
             analyzerConfigOptionsProvider.Setup(x => x.GetOptions(additionalText3.Object)).Returns(fileAnalyzerConfigOptions3.Object);
+            analyzerConfigOptionsProvider.Setup(x => x.GetOptions(additionalText4.Object)).Returns(fileAnalyzerConfigOptions4.Object);
             globalAnalyzerConfigOptions.Setup(x => x.TryGetValue("build_property.rootnamespace", out It.Ref<string?>.IsAny))
                                        .Returns((string _, out string? value) =>
                                        {
@@ -113,7 +117,13 @@ namespace Dibix.Generators.Tests
             fileAnalyzerConfigOptions1.Setup(x => x.TryGetValue("build_metadata.embeddedresource.logicalname", out It.Ref<string?>.IsAny))
                                       .Returns((string _, out string? value) =>
                                       {
-                                          value = "EmbeddedResourcePath";
+                                          value = "SomeText";
+                                          return true;
+                                      });
+            fileAnalyzerConfigOptions1.Setup(x => x.TryGetValue("build_metadata.embeddedresource.classname", out It.Ref<string?>.IsAny))
+                                      .Returns((string _, out string? value) =>
+                                      {
+                                          value = null;
                                           return true;
                                       });
             fileAnalyzerConfigOptions2.Setup(x => x.TryGetValue("build_metadata.embeddedresource.generateaccessor", out It.Ref<string?>.IsAny))
@@ -123,6 +133,12 @@ namespace Dibix.Generators.Tests
                                           return true;
                                       });
             fileAnalyzerConfigOptions2.Setup(x => x.TryGetValue("build_metadata.embeddedresource.logicalname", out It.Ref<string?>.IsAny))
+                                      .Returns((string _, out string? value) =>
+                                      {
+                                          value = null;
+                                          return true;
+                                      });
+            fileAnalyzerConfigOptions2.Setup(x => x.TryGetValue("build_metadata.embeddedresource.classname", out It.Ref<string?>.IsAny))
                                       .Returns((string _, out string? value) =>
                                       {
                                           value = null;
@@ -140,12 +156,36 @@ namespace Dibix.Generators.Tests
                                           value = null;
                                           return true;
                                       });
+            fileAnalyzerConfigOptions3.Setup(x => x.TryGetValue("build_metadata.embeddedresource.classname", out It.Ref<string?>.IsAny))
+                                      .Returns((string _, out string? value) =>
+                                      {
+                                          value = "";
+                                          return true;
+                                      });
+            fileAnalyzerConfigOptions4.Setup(x => x.TryGetValue("build_metadata.embeddedresource.generateaccessor", out It.Ref<string?>.IsAny))
+                                      .Returns((string _, out string? value) =>
+                                      {
+                                          value = "True";
+                                          return true;
+                                      });
+            fileAnalyzerConfigOptions4.Setup(x => x.TryGetValue("build_metadata.embeddedresource.logicalname", out It.Ref<string?>.IsAny))
+                                      .Returns((string _, out string? value) =>
+                                      {
+                                          value = "Dibix.Generators.Tests.Resources.AnotherText.json";
+                                          return true;
+                                      });
+            fileAnalyzerConfigOptions4.Setup(x => x.TryGetValue("build_metadata.embeddedresource.classname", out It.Ref<string?>.IsAny))
+                                      .Returns((string _, out string? value) =>
+                                      {
+                                          value = "AnotherResource";
+                                          return true;
+                                      });
 
             IIncrementalGenerator generator = new EmbeddedResourceAccessorGenerator();
             GeneratorDriver driver = CSharpGeneratorDriver.Create
             (
                 generators: EnumerableExtensions.Create(generator.AsSourceGenerator())
-              , additionalTexts: EnumerableExtensions.Create(additionalText1.Object, additionalText2.Object, additionalText3.Object)
+              , additionalTexts: EnumerableExtensions.Create(additionalText1.Object, additionalText2.Object, additionalText3.Object, additionalText4.Object)
               , optionsProvider: analyzerConfigOptionsProvider.Object
             );
 
@@ -158,9 +198,10 @@ namespace Dibix.Generators.Tests
             IList<SyntaxTree> syntaxTrees = outputCompilation.SyntaxTrees.ToArray();
 
             string[] expectedFiles =
-            {
-                "Resource.g.cs"
-            };
+            [
+                "Resource.g.cs",
+                "AnotherResource.g.cs"
+            ];
             for (int i = 0; i < syntaxTrees.Count; i++)
             {
                 SyntaxTree outputSyntaxTree = syntaxTrees[i];

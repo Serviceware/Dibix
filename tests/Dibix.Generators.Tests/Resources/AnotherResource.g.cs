@@ -9,13 +9,13 @@
 
 namespace Dibix.Generators.Tests
 {
-    internal static class Resource
+    internal static class AnotherResource
     {
-        public static string SomeText => Cache.SomeText.Value;
+        public static string AnotherText => Cache.AnotherText.Value;
 
         private static class Cache
         {
-            public static readonly global::System.Lazy<string> SomeText = new global::System.Lazy<string>(() => ResourceUtility.GetEmbeddedResourceContent("SomeText"));
+            public static readonly global::System.Lazy<string> AnotherText = new global::System.Lazy<string>(() => ResourceUtility.GetEmbeddedResourceContent("Dibix.Generators.Tests.Resources.AnotherText.json"));
         }
 
         private static class ResourceUtility

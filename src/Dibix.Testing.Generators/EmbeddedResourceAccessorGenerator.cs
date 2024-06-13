@@ -31,7 +31,10 @@ namespace Dibix.Testing.Generators
                 return;
 
             //CollectResourceUtility(sourceProductionContext, rootNamespace);
-            CollectResourceAccessor(sourceProductionContext, items, rootNamespace);
+            foreach (IGrouping<string, EmbeddedResourceItem> @class in items.GroupBy(x => x.ClassName))
+            {
+                CollectResourceAccessor(sourceProductionContext, @class.ToArray(), rootNamespace, className: @class.Key);
+            }
         }
 
         private static EmbeddedResourceItem CreateItem(AdditionalText file, AnalyzerConfigOptionsProvider analyzerConfigOptionsProvider)
@@ -39,49 +42,53 @@ namespace Dibix.Testing.Generators
             AnalyzerConfigOptions options = analyzerConfigOptionsProvider.GetOptions(file);
             string name = Path.GetFileNameWithoutExtension(file.Path);
             string resourcePath = GetRequiredMetadataProperty<string>(options, "build_metadata.embeddedresource.logicalname");
-            EmbeddedResourceItem item = new EmbeddedResourceItem(name, resourcePath);
+            string className = GetOptionalMetadataProperty<string>(options, "build_metadata.embeddedresource.classname") ?? "Resource";
+            EmbeddedResourceItem item = new EmbeddedResourceItem(name, resourcePath, className);
             return item;
         }
 
-        private static void CollectResourceAccessor(SourceProductionContext sourceProductionContext, ICollection<EmbeddedResourceItem> items, string rootNamespace)
+        private static void CollectResourceAccessor(SourceProductionContext sourceProductionContext, ICollection<EmbeddedResourceItem> items, string rootNamespace, string className)
         {
             string fieldsStr = String.Join(Environment.NewLine, items.Select(x => $"            public static readonly global::System.Lazy<string> {x.Name} = new global::System.Lazy<string>(() => ResourceUtility.GetEmbeddedResourceContent(\"{x.ResourcePath}\"));"));
             string propertiesStr = String.Join(Environment.NewLine, items.Select(x => $"        public static string {x.Name} => Cache.{x.Name}.Value;"));
-            CollectSource(sourceProductionContext, "Resource", $@"{SourceGeneratorUtility.GeneratedCodeHeader}
+            string template = $$"""
+                               {{SourceGeneratorUtility.GeneratedCodeHeader}}
 
-namespace {rootNamespace}
-{{
-    internal static class Resource
-    {{
-{propertiesStr}
-
-        private static class Cache
-        {{
-{fieldsStr}
-        }}
-
-        private static class ResourceUtility
-        {{
-            private static readonly global::System.Reflection.Assembly ThisAssembly = typeof(ResourceUtility).Assembly;
-
-            public static string GetEmbeddedResourceContent(string resourceKey)
-            {{
-                using (global::System.IO.Stream stream = ThisAssembly.GetManifestResourceStream(resourceKey))
-                {{
-                    if (stream == null)
-                        throw new global::System.InvalidOperationException($@""Resource not found: {{resourceKey}}
-    {{ThisAssembly.Location}}"");
-
-                    using (global::System.IO.TextReader reader = new global::System.IO.StreamReader(stream))
-                    {{
-                        string content = reader.ReadToEnd();
-                        return content;
-                    }}
-                }}
-            }}
-        }}
-    }}
-}}");
+                               namespace {{rootNamespace}}
+                               {
+                                   internal static class {{className}}
+                                   {
+                               {{propertiesStr}}
+                               
+                                       private static class Cache
+                                       {
+                               {{fieldsStr}}
+                                       }
+                               
+                                       private static class ResourceUtility
+                                       {
+                                           private static readonly global::System.Reflection.Assembly ThisAssembly = typeof(ResourceUtility).Assembly;
+                               
+                                           public static string GetEmbeddedResourceContent(string resourceKey)
+                                           {
+                                               using (global::System.IO.Stream stream = ThisAssembly.GetManifestResourceStream(resourceKey))
+                                               {
+                                                   if (stream == null)
+                                                       throw new global::System.InvalidOperationException($@"Resource not found: {resourceKey}
+                                   {ThisAssembly.Location}");
+                               
+                                                   using (global::System.IO.TextReader reader = new global::System.IO.StreamReader(stream))
+                                                   {
+                                                       string content = reader.ReadToEnd();
+                                                       return content;
+                                                   }
+                                               }
+                                           }
+                                       }
+                                   }
+                               }
+                               """;
+            CollectSource(sourceProductionContext, className, template);
         }
 
         private static void CollectSource(SourceProductionContext sourceProductionContext, string name, string content)
@@ -116,11 +123,13 @@ namespace {rootNamespace}
         {
             public string Name { get; }
             public string ResourcePath { get; }
+            public string ClassName { get; }
 
-            public EmbeddedResourceItem(string name, string resourcePath)
+            public EmbeddedResourceItem(string name, string resourcePath, string className)
             {
                 Name = name;
                 ResourcePath = resourcePath;
+                ClassName = className;
             }
         }
     }
