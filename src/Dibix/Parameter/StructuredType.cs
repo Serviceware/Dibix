@@ -27,9 +27,9 @@ namespace Dibix
         #endregion
 
         #region Public Methods
-        public string Dump()
+        public string Dump(bool truncate = false)
         {
-            return SqlDataRecordDiagnostics.Dump(this._metadata, this._records);
+            return SqlDataRecordDiagnostics.Dump(this._metadata, this._records, truncate);
         }
         
         public IEnumerable<SqlDataRecord> GetRecords()

@@ -8,14 +8,14 @@ namespace Dibix
 {
     internal static class SqlDataRecordDiagnostics
     {
-        public static string Dump(IEnumerable<SqlMetaData> metadata, IEnumerable<SqlDataRecord> records)
+        public static string Dump(IEnumerable<SqlMetaData> metadata, IEnumerable<SqlDataRecord> records, bool truncate)
         {
             string[] columns = metadata.Select(DumpMetadata).ToArray();
             string[][] rows = records.Select(x =>
             {
                 object[] values = new object[x.FieldCount];
                 x.GetValues(values);
-                return values.Select(y => y != DBNull.Value ? y.ToString() : "NULL").ToArray();
+                return values.Select(y => y != DBNull.Value ? DbParameterFormatter.TrimIfNecessary(y, truncate) : "NULL").ToArray();
             }).ToArray();
             string dump = ToTable(columns, rows);
             return dump;
