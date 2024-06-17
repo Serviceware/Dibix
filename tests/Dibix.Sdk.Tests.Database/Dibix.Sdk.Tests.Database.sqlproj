@@ -156,6 +156,8 @@
     <Build Include="Tests\Syntax\dbx_tests_syntax_empty_params_udt.sql" />
     <Build Include="Tests\Syntax\dbx_tests_syntax_singleconcreteresult_missingcolumn.sql" />
     <None Include="Scripts\PostDeployB.sql" />
+    <None Include="Scripts\PostDeploy\PostDeployC.sql" />
+    <None Include="Scripts\PostDeploy\PostDeployD.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CodeAnalysis" />
@@ -169,6 +171,7 @@
     <Folder Include="Contracts\Grid" />
     <Folder Include="Endpoints" />
     <Folder Include="Scripts" />
+    <Folder Include="Scripts\PostDeploy" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Contracts\DuplicatePropertyName.json" />

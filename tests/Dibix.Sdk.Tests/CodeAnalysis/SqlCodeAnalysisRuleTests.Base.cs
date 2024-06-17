@@ -34,9 +34,7 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
             IEnumerable<SqlCodeAnalysisError> Analyze(ISqlCodeAnalysisRuleEngine engine)
             {
                 string scriptFilePath = Path.Combine(DatabaseTestUtility.DatabaseProjectDirectory, "Scripts", $"{scriptName}.sql");
-                string directoryName = Path.GetDirectoryName(scriptFilePath);
-                string scriptContent = File.ReadAllText(scriptFilePath);
-                string normalizedScriptContent = SqlCmdParser.ProcessSqlCmdScript(directoryName, scriptContent);
+                string normalizedScriptContent = SqlCmdParser.ProcessSqlCmdScript(scriptFilePath);
                 return engine.AnalyzeScript(scriptFilePath, normalizedScriptContent);
             }
             Execute(Analyze);
