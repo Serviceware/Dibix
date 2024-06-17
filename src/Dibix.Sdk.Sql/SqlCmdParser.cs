@@ -1,23 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.IO;
 using System.Text.RegularExpressions;
 
 namespace Dibix.Sdk.Sql
 {
     public static class SqlCmdParser
     {
-        public static string ProcessSqlCmdScript(string script, out ICollection<string> includes)
+        public static string ProcessSqlCmdScript(string directory, string script)
         {
-            IList<string> _includes = new Collection<string>();
             string normalizedScript = Regex.Replace(script, @"^:r (?<include>[^\r\n]+)", x =>
             {
-                _includes.Add(x.Groups["include"].Value);
-                return null;
+                string path = Path.Combine(directory, x.Groups["include"].Value);
+                string content = File.ReadAllText(path);
+                return content;
             }, RegexOptions.Multiline);
-            includes = new Collection<string>(_includes);
-            
-            return !String.IsNullOrWhiteSpace(normalizedScript) ? normalizedScript : null;
+            return normalizedScript;
         }
     }
 }

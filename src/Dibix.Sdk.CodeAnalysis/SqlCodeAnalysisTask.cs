@@ -90,12 +90,9 @@ namespace Dibix.Sdk.CodeAnalysis
             foreach (string scriptFile in scriptFiles)
             {
                 string scriptFilePath = Path.IsPathRooted(scriptFile) ? scriptFile : Path.GetFullPath(Path.Combine(Path.GetDirectoryName(parentFile), scriptFile));
-                string scriptContent = SqlCmdParser.ProcessSqlCmdScript(File.ReadAllText(scriptFilePath), out ICollection<string> includes);
-
-                if (scriptContent != null)
-                    AnalyzeItem(scriptFilePath, scriptContent, codeAnalysisEngine, logger);
-
-                AnalyzeScripts(scriptFilePath, includes, codeAnalysisEngine, logger);
+                string directory = Path.GetDirectoryName(scriptFilePath)!;
+                string scriptContent = SqlCmdParser.ProcessSqlCmdScript(directory, File.ReadAllText(scriptFilePath));
+                AnalyzeItem(scriptFilePath, scriptContent, codeAnalysisEngine, logger);
             }
         }
 
