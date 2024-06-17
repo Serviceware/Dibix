@@ -120,7 +120,7 @@ namespace Dibix.Generators.Tests
                                           value = "SomeText";
                                           return true;
                                       });
-            fileAnalyzerConfigOptions1.Setup(x => x.TryGetValue("build_metadata.embeddedresource.classname", out It.Ref<string?>.IsAny))
+            fileAnalyzerConfigOptions1.Setup(x => x.TryGetValue("build_metadata.embeddedresource.accessorname", out It.Ref<string?>.IsAny))
                                       .Returns((string _, out string? value) =>
                                       {
                                           value = null;
@@ -138,7 +138,7 @@ namespace Dibix.Generators.Tests
                                           value = null;
                                           return true;
                                       });
-            fileAnalyzerConfigOptions2.Setup(x => x.TryGetValue("build_metadata.embeddedresource.classname", out It.Ref<string?>.IsAny))
+            fileAnalyzerConfigOptions2.Setup(x => x.TryGetValue("build_metadata.embeddedresource.accessorname", out It.Ref<string?>.IsAny))
                                       .Returns((string _, out string? value) =>
                                       {
                                           value = null;
@@ -156,7 +156,7 @@ namespace Dibix.Generators.Tests
                                           value = null;
                                           return true;
                                       });
-            fileAnalyzerConfigOptions3.Setup(x => x.TryGetValue("build_metadata.embeddedresource.classname", out It.Ref<string?>.IsAny))
+            fileAnalyzerConfigOptions3.Setup(x => x.TryGetValue("build_metadata.embeddedresource.accessorname", out It.Ref<string?>.IsAny))
                                       .Returns((string _, out string? value) =>
                                       {
                                           value = "";
@@ -174,7 +174,7 @@ namespace Dibix.Generators.Tests
                                           value = "Dibix.Generators.Tests.Resources.AnotherText.json";
                                           return true;
                                       });
-            fileAnalyzerConfigOptions4.Setup(x => x.TryGetValue("build_metadata.embeddedresource.classname", out It.Ref<string?>.IsAny))
+            fileAnalyzerConfigOptions4.Setup(x => x.TryGetValue("build_metadata.embeddedresource.accessorname", out It.Ref<string?>.IsAny))
                                       .Returns((string _, out string? value) =>
                                       {
                                           value = "AnotherResource";

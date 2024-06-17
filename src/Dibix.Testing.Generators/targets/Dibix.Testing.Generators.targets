@@ -5,7 +5,7 @@
       <AdditionalFiles Include="@(EmbeddedResource)" Condition="'%(EmbeddedResource.GenerateAccessor)' == 'true'" />
       <CompilerVisibleItemMetadata Include="EmbeddedResource" MetadataName="GenerateAccessor" />
       <CompilerVisibleItemMetadata Include="EmbeddedResource" MetadataName="LogicalName" />
-      <CompilerVisibleItemMetadata Include="EmbeddedResource" MetadataName="ClassName" />
+      <CompilerVisibleItemMetadata Include="EmbeddedResource" MetadataName="AccessorName" />
     </ItemGroup>
   </Target>
 

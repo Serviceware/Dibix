@@ -42,7 +42,7 @@ namespace Dibix.Testing.Generators
             AnalyzerConfigOptions options = analyzerConfigOptionsProvider.GetOptions(file);
             string name = Path.GetFileNameWithoutExtension(file.Path);
             string resourcePath = GetRequiredMetadataProperty<string>(options, "build_metadata.embeddedresource.logicalname");
-            string className = GetOptionalMetadataProperty<string>(options, "build_metadata.embeddedresource.classname") ?? "Resource";
+            string className = GetOptionalMetadataProperty<string>(options, "build_metadata.embeddedresource.accessorname") ?? "Resource";
             EmbeddedResourceItem item = new EmbeddedResourceItem(name, resourcePath, className);
             return item;
         }
