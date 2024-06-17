@@ -63,15 +63,15 @@ namespace Dibix.Sdk.Sql
             SchemaAnalyzerResult schemaAnalyzerResult = SchemaAnalyzer.Analyze(_model, this._sqlFragment);
 
             // Loading the model of a PreDeploy/PostDeploy script is not officially supported, that's why these scripts aren't analyzed in the SQL projects.
-            // We still wan't to be able to ensure our guidelines/patterns and apply our analysis rules to these artifacts aswell.
-            // Therefore we have to implement a couple of workarounds.
+            // We still want to be able to ensure our guidelines/patterns and apply our analysis rules to these artifacts as well.
+            // Therefore, we have to implement a couple of workarounds.
             if (this._isScriptArtifact)
             {
                 // 'The statement cannot be a top-level statement' for DeclareTableVariableStatement
                 // Just wrap the whole script in an SP, to make it a DDL statement
                 if (schemaAnalyzerResult.Errors.Any(x => x.ErrorCode == 70501))
                 {
-                    if (!(this._sqlFragment is TSqlScript script) || script.Batches.Count != 1)
+                    if (_sqlFragment is not TSqlScript script)
                         throw new InvalidOperationException("Unable to determine DML statement from script artifact");
 
                     CreateProcedureStatement proc = new CreateProcedureStatement
@@ -79,7 +79,7 @@ namespace Dibix.Sdk.Sql
                         ProcedureReference = new ProcedureReference { Name = new SchemaObjectName { Identifiers = { new Identifier { Value = "<dbx_scriptwrapper>" } } } },
                         StatementList = new StatementList()
                     };
-                    proc.StatementList.Statements.AddRange(script.Batches[0].Statements);
+                    proc.StatementList.Statements.AddRange(script.Batches.SelectMany(x => x.Statements));
 
                     schemaAnalyzerResult = SchemaAnalyzer.Analyze(_model, proc);
                 }

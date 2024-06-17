@@ -155,6 +155,7 @@
     <Build Include="Tests\Syntax\dbx_tests_syntax_enum3.sql" />
     <Build Include="Tests\Syntax\dbx_tests_syntax_empty_params_udt.sql" />
     <Build Include="Tests\Syntax\dbx_tests_syntax_singleconcreteresult_missingcolumn.sql" />
+    <None Include="Scripts\PostDeployB.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CodeAnalysis" />
@@ -167,6 +168,7 @@
     <Folder Include="Contracts\Extension" />
     <Folder Include="Contracts\Grid" />
     <Folder Include="Endpoints" />
+    <Folder Include="Scripts" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Contracts\DuplicatePropertyName.json" />
@@ -187,6 +189,7 @@
     <None Include="Contracts\DuplicateContract.json" />
     <None Include="dibix.json" />
     <None Include="Contracts\AnotherInputContractData.json" />
+    <None Include="Scripts\PostDeployA.sql" />
   </ItemGroup>
   <Import Condition="'$(NetCoreBuild)' == 'true'" Project="$(NETCoreTargetsPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
   <ItemGroup>
@@ -204,5 +207,8 @@
       <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
       <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
     </ArtifactReference>
+  </ItemGroup>
+  <ItemGroup>
+    <PostDeploy Include="Scripts\PostDeploy.sql" />
   </ItemGroup>
 </Project>

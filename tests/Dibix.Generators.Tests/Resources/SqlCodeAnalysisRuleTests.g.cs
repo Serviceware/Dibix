@@ -264,6 +264,6 @@ namespace Dibix.Generators.Tests
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void UnsupportedEmbeddedSymbolReferenceSqlCodeAnalysisRule() => this.Execute();
 
-        partial void Execute([global::System.Runtime.CompilerServices.CallerMemberName] string testName = null);
+        partial void Execute();
     }
 }

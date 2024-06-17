@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using System.Xml.Linq;
@@ -29,6 +30,6 @@ namespace Dibix.Sdk.Tests
             ModelCollation = (string)DatabaseProject.XPathEvaluate("string(x:Project/x:PropertyGroup/x:ModelCollation)", DatabaseProjectNamespaceManager);
         }
 
-        public static object QueryProject(string expression) => DatabaseProject.XPathEvaluate(expression, DatabaseProjectNamespaceManager);
+        public static IEnumerable<XElement> QueryProject(string expression) => DatabaseProject.XPathSelectElements(expression, DatabaseProjectNamespaceManager);
     }
 }

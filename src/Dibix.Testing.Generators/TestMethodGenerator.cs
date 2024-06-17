@@ -110,7 +110,7 @@ namespace {@namespace}
     {{
 {testMethods}
 
-        partial void Execute([global::System.Runtime.CompilerServices.CallerMemberName] string testName = null);
+        partial void Execute();
     }}
 }}";
             context.AddSource($"{className}.g.cs", source);
