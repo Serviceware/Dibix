@@ -6,10 +6,10 @@ param
 
     [Parameter()]
     [ValidateSet('Debug', 'Release')]
-    [string]$Configuration = 'Debug',
+    [string]$Configuration = 'Release',
 
     [Parameter()]
-    [boolean]$SelfContained = $true
+    [boolean]$SelfContained = $false
 )
 
 $ErrorActionPreference = 'Stop'
