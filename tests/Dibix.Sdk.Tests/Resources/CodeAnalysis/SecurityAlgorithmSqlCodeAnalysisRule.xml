@@ -2,7 +2,7 @@
 <errors>
   <error
     ruleid="30"
-    message="Found use of old security algorithm 'SHA1'. Please use any of these algorithms: SHA2_512"
+    message="Found use of old security algorithm 'SHA1'. Please use any of these algorithms: SHA2_256, SHA2_512"
     line="3"
     column="10" />
 </errors>

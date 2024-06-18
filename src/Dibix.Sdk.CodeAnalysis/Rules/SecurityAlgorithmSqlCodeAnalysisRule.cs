@@ -7,10 +7,12 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     [SqlCodeAnalysisRule(id: 30)]
     public sealed class SecurityAlgorithmSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
+        // https://learn.microsoft.com/en-us/sql/t-sql/functions/hashbytes-transact-sql?view=sql-server-2016#arguments
         private static readonly string[] SupportedAlgorithms =
-        {
+        [
+            "SHA2_256",
             "SHA2_512"
-        };
+        ];
         private static readonly string SupportedAlgorithmsCombined = String.Join(", ", SupportedAlgorithms);
 
         protected override string ErrorMessageTemplate => "Found use of old security algorithm '{0}'. Please use any of these algorithms: {1}";
