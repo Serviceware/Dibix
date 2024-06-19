@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeAnalysis.Rules
@@ -29,6 +30,11 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         public override void Visit(VariableReference node) => this._variables.Remove(node.Name);
 
+        public override void Visit(StringLiteral node)
+        {
+            VisitXQuerySqlVariable(node);
+        }
+
         protected override void EndBatch(TSqlBatch node)
         {
             foreach (DeclareVariableElement unusedVariable in this._variables.Values)
@@ -40,6 +46,19 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                 }
                 else
                     base.Fail(unusedVariable, "variable", unusedVariable.VariableName.Value);
+            }
+        }
+
+        // https://learn.microsoft.com/en-us/sql/xquery/xquery-extension-functions-sql-variable
+        private void VisitXQuerySqlVariable(StringLiteral node)
+        {
+            MatchCollection matches = Regex.Matches(node.Value, """sql:variable\(["'](?<VariableName>[^"']+)["']""");
+            foreach (Match match in matches)
+            {
+                if (!match.Success) 
+                    continue;
+
+                _variables.Remove(match.Groups["VariableName"].Value);
             }
         }
 
