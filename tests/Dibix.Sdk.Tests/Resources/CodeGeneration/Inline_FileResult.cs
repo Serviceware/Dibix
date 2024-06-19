@@ -18,7 +18,7 @@ namespace Dibix.Sdk.Tests.Data
     public static class TestAccessor
     {
         // FileResult
-        private const string FileResultCommandText = "SELECT [type] = N'png'\r\n     , [data] = 0x0\r\nWHERE @id = 1";
+        private const string FileResultCommandText = "DECLARE @table TABLE([id] INT NOT NULL, [thumbnail] VARBINARY(MAX) NOT NULL, PRIMARY KEY ([id]))\r\n\r\nDECLARE @extension NCHAR(3) = N'png'\r\n\r\nDECLARE @fallbackimageid INT = 666\r\n\r\nDECLARE @fallbackimagedata VARBINARY(MAX) = 0x1\r\n\r\nIF @id = @fallbackimageid\r\nBEGIN\r\n    SELECT [type] = CAST(@extension AS NVARCHAR(3))\r\n         , [data] = CAST(@fallbackimagedata AS VARBINARY(MAX))\r\nEND\r\nELSE\r\nBEGIN\r\n    SELECT [type] = @extension\r\n         , [data] = [thumbnail]\r\n    FROM @table\r\n    WHERE [id] = @id\r\nEND";
 
         public static Dibix.FileEntity FileResult(this IDatabaseAccessorFactory databaseAccessorFactory, int id)
         {
