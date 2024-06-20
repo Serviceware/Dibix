@@ -18,7 +18,7 @@ namespace Dibix.Testing.Http
         protected Task InvokeApiAndAssertResponse<TContent>(TService service, Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector, Action<JsonSerializerSettings> configureSerializer = null)
         {
             string expectedText = ResolveExpectedTextFromEmbeddedResource();
-            return InvokeApi(service, methodSelector, expectedText, configureSerializer);
+            return InvokeApi(service, methodSelector, expectedText, configureSerializer: configureSerializer);
         }
         #endregion
 
