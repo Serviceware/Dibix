@@ -389,29 +389,10 @@ $(_SqlReferencePath)" />
       <Product Condition="'$(Product)' == ''">$(ProductName)</Product>
     </PropertyGroup>
 
-    <ItemGroup>
-      <AssemblyAttribute Include="AssemblyCompany" Condition="'$(Company)' != ''">
-        <_Parameter1>$(Company)</_Parameter1>
-      </AssemblyAttribute>
-      <AssemblyAttribute Include="AssemblyProduct" Condition="'$(Product)' != ''">
-        <_Parameter1>$(Product)</_Parameter1>
-      </AssemblyAttribute>
-      <AssemblyAttribute Include="AssemblyCopyright" Condition="'$(Copyright)' != ''">
-        <_Parameter1>$(Copyright)</_Parameter1>
-      </AssemblyAttribute>
-      <AssemblyAttribute Include="AssemblyInformationalVersion" Condition="'$(InformationalVersion)' != ''">
-        <_Parameter1>$(InformationalVersion)</_Parameter1>
-      </AssemblyAttribute>
-      <AssemblyAttribute Include="AssemblyConfiguration">
-        <_Parameter1>$(Configuration)</_Parameter1>
-      </AssemblyAttribute>
-    </ItemGroup>
-
 
     <!-- Accessor assembly info & DLL generation -->
     <PropertyGroup Condition="'$(ProduceAccessor)' == 'true'">
       <_AccessorIntermediatePathNoExt>$(IntermediateOutputPath)$(AccessorOutputName)</_AccessorIntermediatePathNoExt>
-      <_AccessorFileVersion>$(FileVersion)</_AccessorFileVersion>
       <_AccessorTargetFrameworkNetFx>$(DibixTargetFramework)</_AccessorTargetFrameworkNetFx>
       <_AccessorTargetFrameworkNetStandard>netstandard2.0</_AccessorTargetFrameworkNetStandard>
       <_AccessorTargetFramework>$(_AccessorTargetFrameworkNetFx)</_AccessorTargetFramework>
@@ -428,7 +409,6 @@ $(_SqlReferencePath)" />
     </ItemGroup>
 
     <PropertyGroup Condition="'$(ProduceAccessor)' == 'true'">
-      <_AccessorIntermediateProjectFilePath>$(_AccessorIntermediatePathNoExt).csproj</_AccessorIntermediateProjectFilePath>
       <_AccessorIntermediateProjectFileContent>
         <![CDATA[
 <Project Sdk="Microsoft.NET.Sdk">
@@ -439,17 +419,22 @@ $(_SqlReferencePath)" />
     <OutDir>.</OutDir>
     <TargetName>$(AccessorOutputName)</TargetName>
     <EnableDefaultItems>false</EnableDefaultItems>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <AssemblyOriginatorKeyFile>$(AssemblyOriginatorKeyFile)</AssemblyOriginatorKeyFile>
     <SignAssembly>$(_SignAssembly)</SignAssembly>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <NoWarn>nullable</NoWarn>
 
-    <Product>$(Product)</Product>
     <Company>$(Company)</Company>
     <Copyright>$(Copyright)</Copyright>
-    <FileVersion>$(_AccessorFileVersion)</FileVersion>
+    <Description>$(Description)</Description>
+    <FileVersion>$(FileVersion)</FileVersion>
     <InformationalVersion>$(InformationalVersion)</InformationalVersion>
+    <Product>$(Product)</Product>
+    <Trademark>$(Trademark)</Trademark>
+    <AssemblyTitle>$(AssemblyTitle)</AssemblyTitle>
+    <AssemblyVersion>$(AssemblyVersion)</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -489,6 +474,7 @@ $(_SqlReferencePath)" />
 </Project>
 ]]>
       </_AccessorIntermediateProjectFileContent>
+      <_AccessorIntermediateProjectFilePath>$(_AccessorIntermediatePathNoExt).csproj</_AccessorIntermediateProjectFilePath>
     </PropertyGroup>
 
     <WriteLinesToFile File="$(_AccessorIntermediateProjectFilePath)"
@@ -536,6 +522,7 @@ $(_SqlReferencePath)" />
     <OutDir>.</OutDir>
     <TargetExt>$(_EndpointBinaryExt)</TargetExt>
     <EnableDefaultItems>false</EnableDefaultItems>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <AssemblyOriginatorKeyFile>$(AssemblyOriginatorKeyFile)</AssemblyOriginatorKeyFile>
     <SignAssembly>$(_SignAssembly)</SignAssembly>
     <LangVersion>latest</LangVersion>
@@ -543,12 +530,16 @@ $(_SqlReferencePath)" />
     <NoWarn>nullable</NoWarn>
     <EmbedAllSources>true</EmbedAllSources>
     <DebugType>embedded</DebugType>
-    
-    <Product>$(Product)</Product>
+
     <Company>$(Company)</Company>
     <Copyright>$(Copyright)</Copyright>
-    <FileVersion>$(_AccessorFileVersion)</FileVersion>
+    <Description>$(Description)</Description>
+    <FileVersion>$(FileVersion)</FileVersion>
     <InformationalVersion>$(InformationalVersion)</InformationalVersion>
+    <Product>$(Product)</Product>
+    <Trademark>$(Trademark)</Trademark>
+    <AssemblyTitle>$(AssemblyTitle)</AssemblyTitle>
+    <AssemblyVersion>$(AssemblyVersion)</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -633,23 +624,11 @@ $(_SqlReferencePath)" />
     <!-- Client assembly info & DLL generation -->
     <PropertyGroup Condition="'$(_ProduceClient)' == 'true'">
       <_ClientIntermediateSymbolsPath>$(IntermediateOutputPath)$(ClientOutputName).pdb</_ClientIntermediateSymbolsPath>
-      <_ClientFileVersion Condition="'$(ClientFileVersion)' != ''">$(ClientFileVersion)</_ClientFileVersion>
-      <_ClientFileVersion Condition="'$(ClientFileVersion)' == ''" >$(FileVersion)</_ClientFileVersion>
       <_ClientTargetFrameworkNetFx>$(DibixTargetFramework)</_ClientTargetFrameworkNetFx>
       <_ClientTargetFrameworkNetStandard>netstandard2.0</_ClientTargetFrameworkNetStandard>
       <_ClientTargetFramework>$(_ClientTargetFrameworkNetFx)</_ClientTargetFramework>
       <_ClientTargetFramework Condition="'$(CompileArtifactsNetStandard)' == 'true'">$(_ClientTargetFrameworkNetStandard)</_ClientTargetFramework>
     </PropertyGroup>
-
-    <ItemGroup Condition="'$(_ProduceClient)' == 'true'">
-      <ClientAssemblyAttribute Include="@(AssemblyAttribute)" />
-      <ClientAssemblyAttribute Include="AssemblyTitle">
-        <_Parameter1>$(ClientOutputName)</_Parameter1>
-      </ClientAssemblyAttribute>
-      <ClientAssemblyAttribute Include="AssemblyFileVersion" Condition="'$(_ClientFileVersion)' != ''">
-        <_Parameter1>$(_ClientFileVersion)</_Parameter1>
-      </ClientAssemblyAttribute>
-    </ItemGroup>
 
     <ItemGroup Condition="'$(_ProduceClient)' == 'true'">
       <_ClientCompilationReferenceItem Include="@(ClientCompilationReference->'&lt;Reference Include=&quot;%(Filename)&quot; HintPath=&quot;%(FullPath)&quot; Private=&quot;False&quot; /&gt;')" />
@@ -666,17 +645,22 @@ $(_SqlReferencePath)" />
     
     <OutDir>.</OutDir>
     <EnableDefaultItems>false</EnableDefaultItems>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <AssemblyOriginatorKeyFile>$(AssemblyOriginatorKeyFile)</AssemblyOriginatorKeyFile>
     <SignAssembly>$(_SignAssembly)</SignAssembly>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <NoWarn>nullable</NoWarn>
-    
-    <Product>$(Product)</Product>
+
     <Company>$(Company)</Company>
     <Copyright>$(Copyright)</Copyright>
-    <FileVersion>$(_ClientFileVersion)</FileVersion>
+    <Description>$(Description)</Description>
+    <FileVersion>$(FileVersion)</FileVersion>
     <InformationalVersion>$(InformationalVersion)</InformationalVersion>
+    <Product>$(Product)</Product>
+    <Trademark>$(Trademark)</Trademark>
+    <AssemblyTitle>$(AssemblyTitle)</AssemblyTitle>
+    <AssemblyVersion>$(AssemblyVersion)</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
