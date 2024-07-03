@@ -57,17 +57,8 @@ namespace Dibix.Http.Host
                 return this;
             }
 
-            IHttpHostExtensionConfigurationBuilder IHttpHostExtensionConfigurationBuilder.EnableCustomAuthentication<T>(string schemeName)
-            {
-                _services.AddAuthentication().AddScheme<AuthenticationSchemeOptions, T>(schemeName, configureOptions: _ => { });
-                _services.AddAuthorization(x =>
-                {
-                    x.AddPolicy(schemeName, y => y.AddAuthenticationSchemes(schemeName)
-                                                  .RequireAuthenticatedUser()
-                                                  .Build());
-                });
-                return this;
-            }
+            IHttpHostExtensionConfigurationBuilder IHttpHostExtensionConfigurationBuilder.EnableCustomAuthentication<THandler, TOptions>(string schemeName) => EnableCustomAuthentication<THandler, TOptions>(schemeName, configureOptions: null);
+            IHttpHostExtensionConfigurationBuilder IHttpHostExtensionConfigurationBuilder.EnableCustomAuthentication<THandler, TOptions>(string schemeName, Action<TOptions>? configureOptions) => EnableCustomAuthentication<THandler, TOptions>(schemeName, configureOptions);
 
             IHttpHostExtensionConfigurationBuilder IHttpHostExtensionConfigurationBuilder.RegisterClaimsTransformer<T>()
             {
@@ -101,6 +92,18 @@ namespace Dibix.Http.Host
                 SubscribeToShutdown(host.Services);
                 using HttpHostExtensionScope scope = CreateScope(host.Services);
                 await _onHostStartedExtension(scope).ConfigureAwait(false);
+            }
+
+            IHttpHostExtensionConfigurationBuilder EnableCustomAuthentication<THandler, TOptions>(string schemeName, Action<TOptions>? configureOptions) where THandler : AuthenticationHandler<TOptions> where TOptions : AuthenticationSchemeOptions, new()
+            {
+                _services.AddAuthentication().AddScheme<TOptions, THandler>(schemeName, configureOptions);
+                _services.AddAuthorization(x =>
+                {
+                    x.AddPolicy(schemeName, y => y.AddAuthenticationSchemes(schemeName)
+                                                  .RequireAuthenticatedUser()
+                                                  .Build());
+                });
+                return this;
             }
 
             private void SubscribeToShutdown(IServiceProvider services)
