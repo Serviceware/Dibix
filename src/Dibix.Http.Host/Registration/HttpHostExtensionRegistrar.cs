@@ -7,6 +7,7 @@ using Dibix.Hosting.Abstractions.Data;
 using Dibix.Http.Host.Runtime;
 using Dibix.Http.Server;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -15,7 +16,7 @@ namespace Dibix.Http.Host
 {
     internal static class HttpHostExtensionRegistrar
     {
-        public static IHttpHostExtensionRegistrar? Register(HostingOptions options, IServiceCollection services, ILoggerFactory loggerFactory)
+        public static IHttpHostExtensionRegistrar? Register(HostingOptions options, IServiceCollection services, ILoggerFactory loggerFactory, IConfigurationRoot configuration)
         {
             if (String.IsNullOrEmpty(options.Extension))
                 return null;
@@ -32,7 +33,7 @@ namespace Dibix.Http.Host
 
             AssemblyLoadContext assemblyLoadContext = new ComponentAssemblyLoadContext(name: $"Dibix {kind}", extensionPath);
             IHttpHostExtension instance = ExtensionRegistrationUtility.GetExtensionImplementation<IHttpHostExtension>(extensionPath, kind, assemblyLoadContext);
-            HttpHostExtensionConfigurationBuilder builder = new HttpHostExtensionConfigurationBuilder(services);
+            HttpHostExtensionConfigurationBuilder builder = new HttpHostExtensionConfigurationBuilder(services, configuration);
             instance.Register(builder);
             return builder;
         }
@@ -44,9 +45,12 @@ namespace Dibix.Http.Host
             private Func<IHttpHostExtensionScope, Task>? _onHostStartedExtension;
             private Func<IHttpHostExtensionScope, Task>? _onHostStoppedExtension;
 
-            public HttpHostExtensionConfigurationBuilder(IServiceCollection services)
+            public IConfigurationRoot Configuration { get; }
+
+            public HttpHostExtensionConfigurationBuilder(IServiceCollection services, IConfigurationRoot configuration)
             {
                 _services = services;
+                Configuration = configuration;
             }
 
             IHttpHostExtensionConfigurationBuilder IHttpHostExtensionConfigurationBuilder.EnableRequestIdentityProvider()

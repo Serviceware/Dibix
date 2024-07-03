@@ -109,7 +109,7 @@ namespace Dibix.Http.Host
                 x.MaxAge = TimeSpan.FromDays(730); // 2 years => https://hstspreload.org/
             });
 
-            var hostExtensionRegistrar = HttpHostExtensionRegistrar.Register(hostingOptions, services, loggerFactory);
+            var hostExtensionRegistrar = HttpHostExtensionRegistrar.Register(hostingOptions, services, loggerFactory, builder.Configuration);
 
             WebApplication app = builder.Build();
 

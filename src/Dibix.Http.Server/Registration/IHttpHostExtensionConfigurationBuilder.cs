@@ -5,6 +5,10 @@ namespace Dibix.Http.Server
 {
     public interface IHttpHostExtensionConfigurationBuilder
     {
+#if NET
+        Microsoft.Extensions.Configuration.IConfigurationRoot Configuration { get; }
+#endif
+
         IHttpHostExtensionConfigurationBuilder EnableRequestIdentityProvider();
 #if NET
         IHttpHostExtensionConfigurationBuilder EnableCustomAuthentication<THandler, TOptions>(string schemeName) where THandler : Microsoft.AspNetCore.Authentication.AuthenticationHandler<TOptions> where TOptions : Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, new();
