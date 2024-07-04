@@ -7,6 +7,7 @@ using Dibix.Hosting.Abstractions.Data;
 using Dibix.Http.Host.Runtime;
 using Dibix.Http.Server;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -58,6 +59,12 @@ namespace Dibix.Http.Host
                 _services.AddHttpContextAccessor()
                          .AddScoped<IRequestIdentityProvider, RequestIdentityProvider>();
                 
+                return this;
+            }
+
+            IHttpHostExtensionConfigurationBuilder IHttpHostExtensionConfigurationBuilder.ConfigureJwtBearer(Action<JwtBearerOptions> configure)
+            {
+                _services.PostConfigure(JwtBearerDefaults.AuthenticationScheme, configure);
                 return this;
             }
 
