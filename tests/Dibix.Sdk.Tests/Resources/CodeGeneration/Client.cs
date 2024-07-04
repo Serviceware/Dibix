@@ -150,7 +150,7 @@ namespace Dibix.Sdk.Tests.Client
             using (HttpClient client = _httpClientFactory.CreateClient(_httpClientName))
             {
                 HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("GET"), "Tests/GenericEndpoint/Out");
-                requestMessage.Headers.Add("DBXNS-SIT", _httpAuthorizationProvider.GetValue("DBXNS-SIT"));
+                requestMessage.Headers.Add("Authorization", $"Bearer {_httpAuthorizationProvider.GetValue("DibixBearer")}");
                 HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
                 short responseContent = await responseMessage.Content.ReadAsAsync<short>(MediaTypeFormattersFactory.Create(_httpClientOptions, client), cancellationToken).ConfigureAwait(false);
                 return new HttpResponse<short>(responseMessage, responseContent);
@@ -165,7 +165,7 @@ namespace Dibix.Sdk.Tests.Client
                                     .AddQueryParam(nameof(ids), ids)
                                     .Build();
                 HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("GET"), uri);
-                requestMessage.Headers.Add("DBXNS-SIT", _httpAuthorizationProvider.GetValue("DBXNS-SIT"));
+                requestMessage.Headers.Add("Authorization", $"Bearer {_httpAuthorizationProvider.GetValue("DibixBearer")}");
                 requestMessage.Headers.Add("User-Agent", userAgent);
                 if (acceptLanguage != null)
                     requestMessage.Headers.Add("Accept-Language", acceptLanguage);
@@ -179,7 +179,7 @@ namespace Dibix.Sdk.Tests.Client
             using (HttpClient client = _httpClientFactory.CreateClient(_httpClientName))
             {
                 HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("POST"), "Tests/GenericEndpoint");
-                requestMessage.Headers.Add("DBXNS-SIT", _httpAuthorizationProvider.GetValue("DBXNS-SIT"));
+                requestMessage.Headers.Add("Authorization", $"Bearer {_httpAuthorizationProvider.GetValue("DibixBearer")}");
                 requestMessage.Content = new ObjectContent<Dibix.Sdk.Tests.DomainModel.InputContract>(body, Formatter);
                 HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
                 return responseMessage;
@@ -200,7 +200,7 @@ namespace Dibix.Sdk.Tests.Client
                                     .AddQueryParam(nameof(g), g, "Cake")
                                     .Build();
                 HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("DELETE"), uri);
-                requestMessage.Headers.Add("DBXNS-SIT", _httpAuthorizationProvider.GetValue("DBXNS-SIT"));
+                requestMessage.Headers.Add("Authorization", $"Bearer {_httpAuthorizationProvider.GetValue("DibixBearer")}");
                 HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
                 return responseMessage;
             }
@@ -220,7 +220,7 @@ namespace Dibix.Sdk.Tests.Client
                                     .AddQueryParam(nameof(g), g, "Cake")
                                     .Build();
                 HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("DELETE"), uri);
-                requestMessage.Headers.Add("DBXNS-SIT", _httpAuthorizationProvider.GetValue("DBXNS-SIT"));
+                requestMessage.Headers.Add("Authorization", $"Bearer {_httpAuthorizationProvider.GetValue("DibixBearer")}");
                 HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
                 return responseMessage;
             }
@@ -240,7 +240,7 @@ namespace Dibix.Sdk.Tests.Client
                                     .AddQueryParam(nameof(g), g, "Cake")
                                     .Build();
                 HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("DELETE"), uri);
-                requestMessage.Headers.Add("DBXNS-SIT", _httpAuthorizationProvider.GetValue("DBXNS-SIT"));
+                requestMessage.Headers.Add("Authorization", $"Bearer {_httpAuthorizationProvider.GetValue("DibixBearer")}");
                 HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
                 return responseMessage;
             }
@@ -251,12 +251,12 @@ namespace Dibix.Sdk.Tests.Client
             using (HttpClient client = _httpClientFactory.CreateClient(_httpClientName))
             {
                 HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("PATCH"), "Tests/GenericEndpoint");
-                if (_httpAuthorizationProvider.GetValue("DBXNS-ClientId") != null)
-                    requestMessage.Headers.Add("DBXNS-ClientId", _httpAuthorizationProvider.GetValue("DBXNS-ClientId"));
-                else if (_httpAuthorizationProvider.GetValue("DBXNS-SIT") != null)
-                    requestMessage.Headers.Add("DBXNS-SIT", _httpAuthorizationProvider.GetValue("DBXNS-SIT"));
+                if (_httpAuthorizationProvider.GetValue("DibixClientId") != null)
+                    requestMessage.Headers.Add("DBXNS-ClientId", _httpAuthorizationProvider.GetValue("DibixClientId"));
+                else if (_httpAuthorizationProvider.GetValue("DibixBearer") != null)
+                    requestMessage.Headers.Add("Authorization", $"Bearer {_httpAuthorizationProvider.GetValue("DibixBearer")}");
                 else
-                    throw new InvalidOperationException("None of the security scheme requirements were met:\r\n- DBXNS-ClientId [ApiKey]\r\n- DBXNS-SIT [ApiKey]");
+                    throw new InvalidOperationException("None of the security scheme requirements were met:\r\n- DibixClientId\r\n- DibixBearer");
                 requestMessage.Content = new ObjectContent<Dibix.Sdk.Tests.DomainModel.AnotherInputContract>(body, Formatter);
                 HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
                 return responseMessage;
@@ -300,7 +300,7 @@ namespace Dibix.Sdk.Tests.Client
             using (HttpClient client = _httpClientFactory.CreateClient(_httpClientName))
             {
                 HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("PUT"), "Tests/GenericEndpoint");
-                requestMessage.Headers.Add("DBXNS-SIT", _httpAuthorizationProvider.GetValue("DBXNS-SIT"));
+                requestMessage.Headers.Add("Authorization", $"Bearer {_httpAuthorizationProvider.GetValue("DibixBearer")}");
                 requestMessage.Content = new StreamContent(body);
                 HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
                 return responseMessage;
@@ -312,7 +312,7 @@ namespace Dibix.Sdk.Tests.Client
             using (HttpClient client = _httpClientFactory.CreateClient(_httpClientName))
             {
                 HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("GET"), "Tests/GenericEndpoint");
-                requestMessage.Headers.Add("DBXNS-SIT", _httpAuthorizationProvider.GetValue("DBXNS-SIT"));
+                requestMessage.Headers.Add("Authorization", $"Bearer {_httpAuthorizationProvider.GetValue("DibixBearer")}");
                 HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
                 IReadOnlyList<Dibix.Sdk.Tests.DomainModel.GenericContract> responseContent = await responseMessage.Content.ReadAsAsync<IReadOnlyList<Dibix.Sdk.Tests.DomainModel.GenericContract>>(MediaTypeFormattersFactory.Create(_httpClientOptions, client), cancellationToken).ConfigureAwait(false);
                 return new HttpResponse<IReadOnlyList<Dibix.Sdk.Tests.DomainModel.GenericContract>>(responseMessage, responseContent);
@@ -327,7 +327,7 @@ namespace Dibix.Sdk.Tests.Client
                                     .AddQueryParam(nameof(age), age, 18)
                                     .Build();
                 HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("GET"), uri);
-                requestMessage.Headers.Add("DBXNS-SIT", _httpAuthorizationProvider.GetValue("DBXNS-SIT"));
+                requestMessage.Headers.Add("Authorization", $"Bearer {_httpAuthorizationProvider.GetValue("DibixBearer")}");
                 if (name != null)
                     requestMessage.Headers.Add("name", name);
                 HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
@@ -344,7 +344,7 @@ namespace Dibix.Sdk.Tests.Client
                                     .AddQueryParam(nameof(ids), ids)
                                     .Build();
                 HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("GET"), uri);
-                requestMessage.Headers.Add("DBXNS-SIT", _httpAuthorizationProvider.GetValue("DBXNS-SIT"));
+                requestMessage.Headers.Add("Authorization", $"Bearer {_httpAuthorizationProvider.GetValue("DibixBearer")}");
                 HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
                 Dibix.Sdk.Tests.DomainModel.GenericContract responseContent = await responseMessage.Content.ReadAsAsync<Dibix.Sdk.Tests.DomainModel.GenericContract>(MediaTypeFormattersFactory.Create(_httpClientOptions, client), cancellationToken).ConfigureAwait(false);
                 return new HttpResponse<Dibix.Sdk.Tests.DomainModel.GenericContract>(responseMessage, responseContent);
@@ -356,7 +356,7 @@ namespace Dibix.Sdk.Tests.Client
             using (HttpClient client = _httpClientFactory.CreateClient(_httpClientName))
             {
                 HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("GET"), $"Tests/GenericEndpoint/User/{id}/{name}");
-                requestMessage.Headers.Add("DBXNS-SIT", _httpAuthorizationProvider.GetValue("DBXNS-SIT"));
+                requestMessage.Headers.Add("Authorization", $"Bearer {_httpAuthorizationProvider.GetValue("DibixBearer")}");
                 HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
                 Dibix.Sdk.Tests.DomainModel.GenericContract responseContent = await responseMessage.Content.ReadAsAsync<Dibix.Sdk.Tests.DomainModel.GenericContract>(MediaTypeFormattersFactory.Create(_httpClientOptions, client), cancellationToken).ConfigureAwait(false);
                 return new HttpResponse<Dibix.Sdk.Tests.DomainModel.GenericContract>(responseMessage, responseContent);

@@ -178,7 +178,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             foreach (SecuritySchemeRequirement securitySchemeRequirement in securitySchemeRequirements)
             {
-                string securitySchemeName = securitySchemeRequirement.Scheme.Name;
+                string securitySchemeName = securitySchemeRequirement.Scheme.SchemeName;
                 string getAuthorizationValueCall = $"_httpAuthorizationProvider.GetValue(\"{securitySchemeName}\")";
                 if (oneOf)
                 {
@@ -194,7 +194,7 @@ namespace Dibix.Sdk.CodeGeneration
                 }
 
                 SecurityScheme securityScheme = securitySchemeMap[securitySchemeName];
-                (string authorizationHeaderName, string authorizationHeaderValue) = ResolveSecuritySchemeHeaderValues(securitySchemeName, getAuthorizationValueCall, securityScheme.Kind);
+                (string authorizationHeaderName, string authorizationHeaderValue) = ResolveSecuritySchemeHeaderValues(securityScheme.Value, getAuthorizationValueCall);
                 writer.WriteLine($"requestMessage.{nameof(HttpRequestMessage.Headers)}.{nameof(HttpRequestMessage.Headers.Add)}(\"{authorizationHeaderName}\", {authorizationHeaderValue});");
 
                 if (oneOf) 
@@ -205,14 +205,14 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 writer.WriteLine("else")
                       .PushIndent()
-                      .WriteLine($"throw new InvalidOperationException(\"None of the security scheme requirements were met:{String.Join("", securitySchemeRequirements.Select(x => $"{Environment.NewLine.Replace("\n", "\\n").Replace("\r", "\\r")}- {x.Scheme.Name} [{x.Scheme.Kind}]"))}\");")
+                      .WriteLine($"throw new InvalidOperationException(\"None of the security scheme requirements were met:{String.Join("", securitySchemeRequirements.Select(x => $"{Environment.NewLine.Replace("\n", "\\n").Replace("\r", "\\r")}- {x.Scheme.SchemeName}"))}\");")
                       .PopIndent();
             }
 
             foreach (ActionParameter parameter in distinctParameters.Where(x => x.ParameterLocation == ActionParameterLocation.Header))
             {
                 // Will be handled by SecurityScheme/IHttpAuthorizationProvider
-                if (parameter.ApiParameterName == "Authorization" || action.SecuritySchemes.Requirements.Any(x => x.Scheme.Name == parameter.ApiParameterName))
+                if (parameter.ApiParameterName == "Authorization" || action.SecuritySchemes.Requirements.Any(x => x.Scheme.SchemeName == parameter.ApiParameterName))
                     continue;
 
                 string normalizedApiParameterName = context.NormalizeApiParameterName(parameter.ApiParameterName);
@@ -286,15 +286,12 @@ namespace Dibix.Sdk.CodeGeneration
             return body;
         }
 
-        private static (string name, string value) ResolveSecuritySchemeHeaderValues(string name, string value, SecuritySchemeKind kind)
+        private static (string name, string value) ResolveSecuritySchemeHeaderValues(SecuritySchemeValue securitySchemeValue, string credential) => securitySchemeValue switch
         {
-            switch (kind)
-            {
-                case SecuritySchemeKind.Bearer: return (name: nameof(HttpRequestHeaders.Authorization), value: $"$\"Bearer {{{value}}}\"");
-                case SecuritySchemeKind.ApiKey: return (name: name, value: value);
-                default: throw new ArgumentOutOfRangeException(nameof(kind), kind, null);
-            }
-        }
+            AuthorizationHeaderSecuritySchemeValue authorizationHeaderSecuritySchemeValue => (name: nameof(HttpRequestHeaders.Authorization), value: $"$\"{authorizationHeaderSecuritySchemeValue.Scheme} {{{credential}}}\""),
+            HeaderSecuritySchemeValue headerSecuritySchemeValue => (name: headerSecuritySchemeValue.HeaderName, value: credential),
+            _ => throw new ArgumentOutOfRangeException(nameof(securitySchemeValue), securitySchemeValue, null)
+        };
         #endregion
     }
 }

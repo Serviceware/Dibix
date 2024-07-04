@@ -16,14 +16,17 @@
     "Converters": [
       "DBX"
     ],
-    "CustomSecuritySchemes": [
-      "DBXNS-ClientId",
-      "DBXNS-SIT"
-    ],
+    "CustomSecuritySchemes": {
+      "DibixClientId": {
+        "type": "Header",
+        "headerName": "DBXNS-ClientId"
+      },
+      "DibixBearer": "Bearer"
+    },
     "Templates": {
       "Default": {
         "Action": {
-          "securitySchemes": "DBXNS-SIT"
+          "securitySchemes": "DibixBearer"
         }
       },
       "Authorization": {

@@ -146,8 +146,8 @@
         "g": "BODY.Data.Name"
       },
       "securitySchemes": [
-        "DBXNS-ClientId",
-        "DBXNS-SIT"
+        "DibixClientId",
+        "DibixBearer"
       ],
       "authorization": "none"
     },

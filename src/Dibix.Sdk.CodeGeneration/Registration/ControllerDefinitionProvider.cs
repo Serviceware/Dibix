@@ -504,7 +504,7 @@ namespace Dibix.Sdk.CodeGeneration
                 if (!_securitySchemes.TryFindSecurityScheme(name, out scheme))
                 {
                     SourceLocation sourceInfo = value.GetSourceInfo();
-                    string possibleValues = String.Join(", ", _securitySchemes.Schemes.Select(x => x.Name));
+                    string possibleValues = String.Join(", ", _securitySchemes.Schemes.Select(x => x.SchemeName));
                     base.Logger.LogError($"Unknown authorization scheme '{name}'. Possible values are: {possibleValues}", sourceInfo.Source, sourceInfo.Line, sourceInfo.Column);
                     yield break;
                 }

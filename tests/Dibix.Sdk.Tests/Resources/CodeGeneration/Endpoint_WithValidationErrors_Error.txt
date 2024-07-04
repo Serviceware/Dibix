@@ -4,7 +4,7 @@ Endpoints\GenericEndpointWithErrors.json(9,15,9,15):error:Unknown property sourc
 Endpoints\GenericEndpointWithErrors.json(12,10,12,10):error:Metadata of parameter 'd' is automatically detected for this action target and therefore should not be specified explicitly
 Endpoints\GenericEndpointWithErrors.json(16,10,16,10):error:Parameter 'unknown' not found on action: EmptyWithParamsAndComplexUdt
 Endpoints\GenericEndpointWithErrors.json(7,22,7,22):error:Undefined path parameter: wtf
-Endpoints\GenericEndpointWithErrors.json(18,27,18,27):error:Unknown authorization scheme 'FreeToUse'. Possible values are: Anonymous, Bearer, DBXNS-ClientId, DBXNS-SIT
+Endpoints\GenericEndpointWithErrors.json(18,27,18,27):error:Unknown authorization scheme 'FreeToUse'. Possible values are: Anonymous, Bearer, DibixClientId, DibixBearer
 Endpoints\GenericEndpointWithErrors.json(26,10,26,10):error:Unknown type for parameter 'source'. Either specify a 'source' or 'type' property.
 Endpoints\GenericEndpointWithErrors.json(24,33,24,33):error:Metadata of parameter 'id' cannot be automatically detected for this action target and therefore must be specified explicitly
 Endpoints\GenericEndpointWithErrors.json(21,5,21,5):error:Missing required property 'authorization'

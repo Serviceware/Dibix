@@ -174,7 +174,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             foreach (SecuritySchemeRequirement securitySchemeRequirement in action.SecuritySchemes.Requirements)
             {
-                writer.WriteLine($"{variableName}.SecuritySchemes.Add(\"{securitySchemeRequirement.Scheme.Name}\");");
+                writer.WriteLine($"{variableName}.SecuritySchemes.Add(\"{securitySchemeRequirement.Scheme.SchemeName}\");");
             }
 
             if (action.FileResponse != null)

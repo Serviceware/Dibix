@@ -2,13 +2,13 @@
 {
     public sealed class SecurityScheme
     {
-        public string Name { get; }
-        public SecuritySchemeKind Kind { get; }
+        public string SchemeName { get; }
+        public SecuritySchemeValue Value { get; }
 
-        public SecurityScheme(string name, SecuritySchemeKind kind)
+        public SecurityScheme(string schemeName, SecuritySchemeValue value)
         {
-            this.Name = name;
-            this.Kind = kind;
+            SchemeName = schemeName;
+            Value = value;
         }
     }
 }

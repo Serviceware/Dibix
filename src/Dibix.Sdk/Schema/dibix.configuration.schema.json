@@ -1,5 +1,5 @@
 {
-  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$schema": "http://json-schema.org/draft-05/schema#",
   "definitions": {
     "NameIdentifier": {
       "type": "string",
@@ -121,7 +121,65 @@
       "minProperties": 1,
       "additionalProperties": false
     },
-    "SecuritySchemes": {
+    "CustomSecuritySchemeKind": {
+      "type": "string",
+      "enum": [
+        "Bearer",
+        "Header"
+      ]
+    },
+    "CustomSecuritySchemeBearer": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "Bearer"
+        }
+      },
+      "minProperties": 1,
+      "additionalProperties": false,
+      "required": [
+        "type"
+      ]
+    },
+    "CustomSecuritySchemeHeader": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "Header"
+        },
+        "headerName": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "minProperties": 2,
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "headerName"
+      ]
+    },
+    "CustomSecuritySchemes": {
+      "type": "object",
+      "patternProperties": {
+        "^[A-Z]([A-Za-z_\\d]+)?$": {
+          "anyOf": [
+            {
+              "const": "Bearer"
+            },
+            {
+              "$ref": "#/definitions/CustomSecuritySchemeBearer"
+            },
+            {
+              "$ref": "#/definitions/CustomSecuritySchemeHeader"
+            }
+          ]
+        }
+      },
+      "minProperties": 1,
+      "additionalProperties": false
+    },
+    "SecuritySchemeReference": {
       "anyOf": [
         {
           "type": "string"
@@ -202,19 +260,7 @@
           }
         },
         "CustomSecuritySchemes": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "array",
-              "minItems": 1,
-              "uniqueItems": true,
-              "items": {
-                "type": "string"
-              }
-            }
-          ]
+          "$ref": "#/definitions/CustomSecuritySchemes"
         },
         "Templates": {
           "$ref": "#/definitions/Templates"
@@ -282,7 +328,7 @@
       "type": "object",
       "properties": {
         "securitySchemes": {
-          "$ref": "#/definitions/SecuritySchemes"
+          "$ref": "#/definitions/SecuritySchemeReference"
         }
       },
       "additionalProperties": false,

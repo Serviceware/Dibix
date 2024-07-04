@@ -345,14 +345,14 @@ namespace Dibix.Sdk.Tests.Business
                     action.ActionName = "EmptyWithOutputParam";
                     action.Method = HttpApiMethod.Get;
                     action.ChildRoute = "Out";
-                    action.SecuritySchemes.Add("DBXNS-SIT");
+                    action.SecuritySchemes.Add("DibixBearer");
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create("Dibix.Sdk.Tests.CodeGeneration.CodeGenerationTaskTests.ReflectionTarget,Dibix.Sdk.Tests"), action =>
                 {
                     action.ActionName = "ReflectionTarget";
                     action.Method = HttpApiMethod.Get;
                     action.ChildRoute = "Reflection/{id}";
-                    action.SecuritySchemes.Add("DBXNS-SIT");
+                    action.SecuritySchemes.Add("DibixBearer");
                     action.ResolveParameterFromSource("identifier", "DBX", "X", "DBX");
                 });
                 controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
@@ -360,7 +360,7 @@ namespace Dibix.Sdk.Tests.Business
                     action.ActionName = "EmptyWithParams";
                     action.Method = HttpApiMethod.Post;
                     action.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.InputContract);
-                    action.SecuritySchemes.Add("DBXNS-SIT");
+                    action.SecuritySchemes.Add("DibixBearer");
                     action.ResolveParameterFromBody("ids", "Dibix.GenericContractIdsInputConverter");
                 });
             });

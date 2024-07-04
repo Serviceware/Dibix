@@ -2,6 +2,6 @@
 {
     public interface IHttpAuthorizationProvider
     {
-        string GetValue(string headerName);
+        string GetValue(string schemeName);
     }
 }

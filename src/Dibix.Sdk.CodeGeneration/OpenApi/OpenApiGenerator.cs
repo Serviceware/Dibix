@@ -146,7 +146,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
         {
             // Header parameters named Accept, Content-Type and Authorization are not allowed. To describe these headers, use the corresponding OpenAPI keywords
             // See: https://swagger.io/docs/specification/describing-parameters/#header-parameters
-            if (ReservedOpenApiHeaders.Contains(parameter.ApiParameterName) || action.SecuritySchemes.Requirements.Any(x => x.Scheme.Name == parameter.ApiParameterName))
+            if (ReservedOpenApiHeaders.Contains(parameter.ApiParameterName) || action.SecuritySchemes.Requirements.Any(x => x.Scheme.SchemeName == parameter.ApiParameterName))
             {
                 return;
             }
@@ -270,20 +270,27 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                     operation.Security.Add(requirement);
                 }
 
-                if (securitySchemeRequirement.Scheme == SecuritySchemes.Anonymous) 
+                if (securitySchemeRequirement.Scheme == SecuritySchemes.Anonymous)
                     continue;
 
-                OpenApiSecurityScheme scheme = document.Components.SecuritySchemes[securitySchemeRequirement.Scheme.Name];
+                OpenApiSecurityScheme scheme = new OpenApiSecurityScheme()
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Id = securitySchemeRequirement.Scheme.SchemeName,
+                        Type = ReferenceType.SecurityScheme
+                    }
+                };
                 requirement.Add(scheme, new Collection<string>());
             }
         }
 
         private static void AppendSecuritySchemes(OpenApiDocument document, IEnumerable<SecurityScheme> securitySchemes)
         {
-            foreach (SecurityScheme modelSecurityScheme in securitySchemes.OrderBy(x => x.Name))
+            foreach (SecurityScheme modelSecurityScheme in securitySchemes.Where(x => x.SchemeName != SecuritySchemeNames.Anonymous).OrderBy(x => x.SchemeName))
             {
-                string name = modelSecurityScheme.Name;
-                OpenApiSecurityScheme openApiSecurityScheme = CreateSecurityScheme(name, modelSecurityScheme.Kind);
+                string name = modelSecurityScheme.SchemeName;
+                OpenApiSecurityScheme openApiSecurityScheme = CreateSecurityScheme(modelSecurityScheme.Value);
 
                 if (openApiSecurityScheme == null)
                     continue;
@@ -295,45 +302,23 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             }
         }
 
-        private static OpenApiSecurityScheme CreateSecurityScheme(string name, SecuritySchemeKind kind)
+        private static OpenApiSecurityScheme CreateSecurityScheme(SecuritySchemeValue value) => value switch
         {
-            switch (kind)
+            BearerSecuritySchemeValue => new OpenApiSecurityScheme
             {
-                case SecuritySchemeKind.None: 
-                    return null;
-
-                case SecuritySchemeKind.Bearer:
-                    return new OpenApiSecurityScheme
-                    {
-                        Name = name,
-                        Type = SecuritySchemeType.Http,
-                        In = ParameterLocation.Header,
-                        Reference = new OpenApiReference
-                        {
-                            Id = name,
-                            Type = ReferenceType.SecurityScheme
-                        },
-                        Scheme = "bearer",
-                        BearerFormat = "JWT"
-                    };
-
-                case SecuritySchemeKind.ApiKey:
-                    return new OpenApiSecurityScheme
-                    {
-                        Name = name,
-                        Type = SecuritySchemeType.ApiKey,
-                        In = ParameterLocation.Header,
-                        Reference = new OpenApiReference
-                        {
-                            Id = name,
-                            Type = ReferenceType.SecurityScheme
-                        }
-                    };
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(kind), kind, null);
-            }
-        }
+                Type = SecuritySchemeType.Http,
+                In = ParameterLocation.Header,
+                Scheme = "bearer",
+                BearerFormat = "JWT"
+            },
+            HeaderSecuritySchemeValue headerSecuritySchemeValue => new OpenApiSecurityScheme
+            {
+                Name = headerSecuritySchemeValue.HeaderName,
+                Type = SecuritySchemeType.ApiKey,
+                In = ParameterLocation.Header
+            },
+            _ => throw new ArgumentOutOfRangeException(nameof(value), value, null)
+        };
 
         private static OpenApiSchema CreateSchema(OpenApiDocument document, TypeReference typeReference, string rootNamespace, bool supportOpenApiNullableReferenceTypes, ISchemaRegistry schemaRegistry, ILogger logger) => CreateSchema(document, typeReference, typeReference.IsEnumerable, defaultValue: null, rootNamespace: rootNamespace, supportOpenApiNullableReferenceTypes: supportOpenApiNullableReferenceTypes, schemaRegistry: schemaRegistry, logger: logger);
         private static OpenApiSchema CreateSchema(OpenApiDocument document, TypeReference typeReference, bool isEnumerable, ValueReference defaultValue, string rootNamespace, bool supportOpenApiNullableReferenceTypes, ISchemaRegistry schemaRegistry, ILogger logger)

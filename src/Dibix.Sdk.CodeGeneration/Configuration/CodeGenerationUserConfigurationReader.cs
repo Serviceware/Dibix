@@ -200,20 +200,42 @@ namespace Dibix.Sdk.CodeGeneration
         private void CollectCustomSecuritySchemes(JObject endpointConfiguration)
         {
             const string propertyName = "CustomSecuritySchemes";
-            JArray customSecuritySchemes = (JArray)endpointConfiguration.Property(propertyName)?.Value;
+            JObject customSecuritySchemes = (JObject)endpointConfiguration.Property(propertyName)?.Value;
             if (customSecuritySchemes == null) 
                 return;
 
-            foreach (JToken customSecurityScheme in customSecuritySchemes)
+            foreach (JProperty customSecurityScheme in customSecuritySchemes.Properties())
             {
-                string customSecuritySchemeName = (string)customSecurityScheme;
-                if (_securitySchemes.RegisterSecurityScheme(new SecurityScheme(customSecuritySchemeName, SecuritySchemeKind.ApiKey))) 
+                string schemeName = customSecurityScheme.Name;
+                if (CollectCustomSecurityScheme(schemeName, customSecurityScheme.Value, customSecurityScheme.Value.Type)) 
                     continue;
 
                 SourceLocation sourceInfo = customSecurityScheme.GetSourceInfo();
-                _logger.LogError($"Security scheme '{customSecuritySchemeName}' is already registered", sourceInfo.Source, sourceInfo.Line, sourceInfo.Column);
+                _logger.LogError($"Security scheme '{schemeName}' is already registered", sourceInfo.Source, sourceInfo.Line, sourceInfo.Column);
             }
         }
+
+        private bool CollectCustomSecurityScheme(string schemeName, JToken value, JTokenType valueKind)
+        {
+            switch (valueKind)
+            {
+                case JTokenType.Object:
+                    JObject jObject = (JObject)value;
+                    JToken headerName = jObject.GetPropertySafe("headerName").Value;
+                    return CollectCustomSecuritySchemeHeader(schemeName, headerName: (string)headerName);
+
+                case JTokenType.String:
+                    return CollectCustomSecuritySchemeBearer(schemeName);
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(valueKind), valueKind, null);
+            }
+        }
+        private bool CollectCustomSecurityScheme(string schemeName, SecuritySchemeValue value) => _securitySchemes.RegisterSecurityScheme(new SecurityScheme(schemeName, value));
+
+        private bool CollectCustomSecuritySchemeBearer(string schemeName) => CollectCustomSecurityScheme(schemeName, new BearerSecuritySchemeValue());
+
+        private bool CollectCustomSecuritySchemeHeader(string schemeName, string headerName) => CollectCustomSecurityScheme(schemeName, new HeaderSecuritySchemeValue(headerName));
 
         private void CollectTemplates(JObject endpointConfiguration)
         {

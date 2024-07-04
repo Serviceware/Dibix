@@ -127,7 +127,7 @@ namespace Dibix.Testing.Http
 
         private sealed class EmptyHttpAuthorizationProvider : IHttpAuthorizationProvider
         {
-            public string GetValue(string headerName) => null;
+            public string GetValue(string schemeName) => null;
         }
         #endregion
     }

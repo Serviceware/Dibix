@@ -38,7 +38,7 @@ namespace Dibix.Sdk.CodeGeneration
                                                                               }))
                                                                               .ToDictionary(x => x.Action, x => x.IsAmbiguous ? $"{x.Name}{x.Position}" : x.Name);
 
-            IDictionary<string, SecurityScheme> securitySchemeMap = context.Model.SecuritySchemes.ToDictionary(x => x.Name);
+            IDictionary<string, SecurityScheme> securitySchemeMap = context.Model.SecuritySchemes.ToDictionary(x => x.SchemeName);
 
             CSharpStatementScope output = context.CreateOutputScope();
             for (int i = 0; i < controllers.Count; i++)
@@ -87,7 +87,7 @@ namespace Dibix.Sdk.CodeGeneration
                     continue;
 
                 // Will be handled by SecurityScheme/IHttpAuthorizationProvider
-                if (parameter.ParameterLocation == ActionParameterLocation.Header && (parameter.ApiParameterName == "Authorization" || action.SecuritySchemes.Requirements.Any(x => x.Scheme.Name == parameter.ApiParameterName)))
+                if (parameter.ParameterLocation == ActionParameterLocation.Header && (parameter.ApiParameterName == "Authorization" || action.SecuritySchemes.Requirements.Any(x => x.Scheme.SchemeName == parameter.ApiParameterName)))
                     continue;
 
                 AppendParameter(context, parameter, method);
