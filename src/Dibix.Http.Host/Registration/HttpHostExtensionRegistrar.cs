@@ -41,7 +41,6 @@ namespace Dibix.Http.Host
 
         private sealed class HttpHostExtensionConfigurationBuilder : IHttpHostExtensionConfigurationBuilder, IHttpHostExtensionRegistrar
         {
-            private const string HostFullName = "Dibix.Http.Host";
             private readonly IServiceCollection _services;
             private Func<IHttpHostExtensionScope, Task>? _onHostStartedExtension;
             private Func<IHttpHostExtensionScope, Task>? _onHostStoppedExtension;
@@ -126,8 +125,6 @@ namespace Dibix.Http.Host
             private static HttpHostExtensionScope CreateScope(IServiceProvider serviceProvider)
             {
                 IServiceScope scope = serviceProvider.CreateScope();
-                DatabaseScope databaseScope = scope.ServiceProvider.GetRequiredService<DatabaseScope>();
-                databaseScope.InitiatorFullName = HostFullName;
                 HttpHostExtensionScope extensionScope = new HttpHostExtensionScope(scope);
                 return extensionScope;
             }
