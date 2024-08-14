@@ -17,6 +17,9 @@ namespace Dibix.Http.Server
 #endif
         IHttpHostExtensionConfigurationBuilder RegisterClaimsTransformer<T>() where T : class, IClaimsTransformer;
         IHttpHostExtensionConfigurationBuilder ConfigureConnectionString(Func<string, string> configure);
+#if NET
+        IHttpHostExtensionConfigurationBuilder ConfigureDiagnosticScopeProvider<TProvider>() where TProvider : IDiagnosticScopeProvider, new();
+#endif
         IHttpHostExtensionConfigurationBuilder OnHostStarted(Func<IHttpHostExtensionScope, Task> handler);
         IHttpHostExtensionConfigurationBuilder OnHostStopped(Func<IHttpHostExtensionScope, Task> handler);
     }

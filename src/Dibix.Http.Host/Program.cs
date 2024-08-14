@@ -71,7 +71,11 @@ namespace Dibix.Http.Host
                     .AddScoped<IOptionsFactory<JwtBearerOptions>, ScopedJwtBearerOptionsFactory>();
             */
 
-            services.AddLogging(x => x.AddSimpleConsole(y => y.TimestampFormat = "\x1B[1'm'\x1B[37'm'[yyyy-MM-dd HH:mm:ss.fff\x1B[39'm'\x1B[22'm'] "));
+            services.AddLogging(x =>
+            {
+                x.AddSimpleConsole(y => y.TimestampFormat = "\x1B[1'm'\x1B[37'm'[yyyy-MM-dd HH:mm:ss.fff\x1B[39'm'\x1B[22'm'] ");
+                x.Configure(y => y.ActivityTrackingOptions = ActivityTrackingOptions.None);
+            });
 
             services.AddAuthentication()
                     .AddJwtBearer(x =>
@@ -113,6 +117,7 @@ namespace Dibix.Http.Host
 
             WebApplication app = builder.Build();
 
+            app.UseMiddleware<DiagnosticsMiddleware>();
             app.UseExceptionHandler();
             app.UseRouting();
             app.UseMiddleware<DatabaseScopeMiddleware>();

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Dibix.Http.Server;
 
 namespace Dibix.Http.Host
 {

@@ -82,6 +82,12 @@ namespace Dibix.Http.Host
                 return this;
             }
 
+            public IHttpHostExtensionConfigurationBuilder ConfigureDiagnosticScopeProvider<TProvider>() where TProvider : IDiagnosticScopeProvider, new()
+            {
+                _services.Configure<DiagnosticsOptions>(x => x.Provider = new TProvider());
+                return this;
+            }
+
             IHttpHostExtensionConfigurationBuilder IHttpHostExtensionConfigurationBuilder.OnHostStarted(Func<IHttpHostExtensionScope, Task> handler)
             {
                 _onHostStartedExtension = handler;

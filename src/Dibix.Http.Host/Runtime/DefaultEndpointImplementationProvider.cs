@@ -1,4 +1,5 @@
 ﻿using System;
+using Dibix.Http.Server;
 
 namespace Dibix.Http.Host
 {

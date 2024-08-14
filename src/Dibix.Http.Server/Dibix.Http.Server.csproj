@@ -29,6 +29,9 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' != 'net8.0'">
+    <Compile Remove="Diagnostics\DefaultDiagnosticScope.cs" />
+    <Compile Remove="Diagnostics\IDiagnosticScopeProvider.cs" />
+    <Compile Remove="Registration\HttpContextExtensions.cs" />
     <Compile Remove="Runtime\IHttpActionDelegator.cs" />
   </ItemGroup>
 

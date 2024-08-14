@@ -1,7 +1,6 @@
 ﻿using System;
-using Dibix.Http.Server;
 
-namespace Dibix.Http.Host
+namespace Dibix.Http.Server
 {
     public sealed class EndpointDefinition
     {
