@@ -1,23 +1,15 @@
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project>
 
   <PropertyGroup>
-    <DibixToolsDirectory>$(MSBuildThisFileDirectory)..\tools\net48\</DibixToolsDirectory>
-    <DibixCliPath Condition="'$(DibixCliPath)' == ''">$(DibixToolsDirectory)Dibix.exe</DibixCliPath>
-    <DibixSdkPath>$(DibixToolsDirectory)Dibix.Sdk.dll</DibixSdkPath>
-    <DibixRuntimeDirectory>$(DibixToolsDirectory)</DibixRuntimeDirectory>
-    <DibixConfigurationDirectory Condition="'$(DibixConfigurationDirectory)' == ''">$(MSBuildProjectDirectory)</DibixConfigurationDirectory>
-    <DibixTargetFramework Condition="'$(DibixTargetFramework)' == ''">net48</DibixTargetFramework>
-    <DibixSdkVersion>$([System.IO.Path]::GetFileName($([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..))))</DibixSdkVersion>
-
-    <IsEmbedded>$(MSBuildProjectName.EndsWith('.DML'))</IsEmbedded>
-    <LimitDdlStatements>True</LimitDdlStatements>
-    <PreventDmlReferences>True</PreventDmlReferences>
-    <SupportOpenApiNullableReferenceTypes>True</SupportOpenApiNullableReferenceTypes>
+    <UsingDibixSdk>true</UsingDibixSdk>
   </PropertyGroup>
 
+  <Import Project="Sdk.props" Sdk="Microsoft.Build.Sql" />
+  <Import Project="$(MSBuildThisFileDirectory)..\build\Dibix.Sdk.props" />
+
   <ItemGroup>
-    <Clean Include="$(ClientAssemblyTargetPath)" />
-    <Clean Include="$(ClientSymbolsTargetPath)" />
+    <None Include="Contracts\**\*.json" />
+    <None Include="Endpoints\**\*.json" />
   </ItemGroup>
 
 </Project>

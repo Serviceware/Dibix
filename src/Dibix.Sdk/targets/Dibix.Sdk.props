@@ -1,0 +1,29 @@
+<Project>
+
+  <PropertyGroup>
+    <DibixToolsDirectory>$(MSBuildThisFileDirectory)..\tools\net48\</DibixToolsDirectory>
+    <DibixCliPath>$(DibixToolsDirectory)Dibix.exe</DibixCliPath>
+    <DibixSdkPath>$(DibixToolsDirectory)Dibix.Sdk.dll</DibixSdkPath>
+    <DibixRuntimeDirectory>$(DibixToolsDirectory)</DibixRuntimeDirectory>
+    <DibixSdkVersion>$([System.IO.Path]::GetFileName($([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..))))</DibixSdkVersion>
+  </PropertyGroup>
+
+  <!--
+    Microsoft.Build.Sql imports Microsoft.Common.props, which imports the consumer's Directory.Build.props, that might be used to set initial Dibix configuration.
+    Therefore it's important to use Condition here to avoid overwriting the values.
+  -->
+  <PropertyGroup>
+    <DibixConfigurationDirectory Condition="'$(DibixConfigurationDirectory)' == ''">$(MSBuildProjectDirectory)</DibixConfigurationDirectory>
+    <DibixTargetFramework Condition="'$(DibixTargetFramework)' == ''">net48</DibixTargetFramework>
+    <IsEmbedded Condition="'$(IsEmbedded)' == ''">$(MSBuildProjectName.EndsWith('.DML'))</IsEmbedded>
+    <LimitDdlStatements Condition="'$(LimitDdlStatements)' == ''">True</LimitDdlStatements>
+    <PreventDmlReferences Condition="'$(PreventDmlReferences)' == ''">True</PreventDmlReferences>
+    <SupportOpenApiNullableReferenceTypes Condition="'$(SupportOpenApiNullableReferenceTypes)' == ''">True</SupportOpenApiNullableReferenceTypes>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Clean Include="$(ClientAssemblyTargetPath)" />
+    <Clean Include="$(ClientSymbolsTargetPath)" />
+  </ItemGroup>
+
+</Project>
