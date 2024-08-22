@@ -133,7 +133,8 @@ namespace Dibix.Sdk.Sql
             //     instance._columnOffsetToDescriptorMap[fragment.StartOffset] = sqlElementDescriptor;
             // }
 
-            // this.TryGetModelElementFromPossibilities(possibilities, this.SchemaModel, out TSqlObject _, out elementDescriptor, out relevance)
+            // RuleSchemaAnalyzer.TryGetModelElementFromPossibilities(possibilities, this.SchemaModel, out TSqlObject _, out elementDescriptor, out relevance)
+            Type ruleSchemaAnalyzerType = DacExtensionsAssembly.GetType("Microsoft.SqlServer.Dac.CodeAnalysis.RuleSchemaAnalyzer", true);
             Type elementDescriptorRelevanceType = DacExtensionsAssembly.GetType("Microsoft.SqlServer.Dac.Model.ElementDescriptorRelevance", true);
             ParameterExpression elementVariable = Expression.Variable(typeof(TSqlObject), "_");
             ParameterExpression elementDescriptorVariable = Expression.Variable(ElementDescriptorType, "elementDescriptor");
@@ -141,7 +142,7 @@ namespace Dibix.Sdk.Sql
             Expression schemaModelProperty = Expression.Property(instanceParameter, "SchemaModel");
             Expression tryGetModelElementFromPossibilitiesCall = Expression.Call
             (
-                instanceParameter
+                ruleSchemaAnalyzerType
               , "TryGetModelElementFromPossibilities"
               , Type.EmptyTypes
               , possibilitiesParameter
