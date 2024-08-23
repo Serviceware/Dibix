@@ -10,7 +10,9 @@ namespace Dibix.Http.Server
 #endif
 
         IHttpHostExtensionConfigurationBuilder EnableRequestIdentityProvider();
+        IHttpHostExtensionConfigurationBuilder ConfigureOptions<TOptions>(string sectionName, Action<TOptions, string> optionsMonitorSubscriber = null) where TOptions : class;
 #if NET
+        IHttpHostExtensionConfigurationBuilder ConfigureOptions<TOptions>(Microsoft.Extensions.Configuration.IConfiguration configuration, Action<TOptions, string> optionsMonitorSubscriber = null) where TOptions : class;
         IHttpHostExtensionConfigurationBuilder ConfigureJwtBearer(Action<Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerOptions> configure);
         IHttpHostExtensionConfigurationBuilder EnableCustomAuthentication<THandler, TOptions>(string schemeName) where THandler : Microsoft.AspNetCore.Authentication.AuthenticationHandler<TOptions> where TOptions : Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, new();
         IHttpHostExtensionConfigurationBuilder EnableCustomAuthentication<THandler, TOptions>(string schemeName, Action<TOptions> configureOptions) where THandler : Microsoft.AspNetCore.Authentication.AuthenticationHandler<TOptions> where TOptions : Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, new();

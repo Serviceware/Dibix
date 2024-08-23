@@ -12,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Dibix.Http.Host
 {
@@ -60,6 +61,9 @@ namespace Dibix.Http.Host
                 
                 return this;
             }
+
+            IHttpHostExtensionConfigurationBuilder IHttpHostExtensionConfigurationBuilder.ConfigureOptions<TOptions>(string sectionName, Action<TOptions, string?>? optionsMonitorSubscriber) where TOptions : class => Configure(Configuration.GetSection(sectionName), optionsMonitorSubscriber);
+            IHttpHostExtensionConfigurationBuilder IHttpHostExtensionConfigurationBuilder.ConfigureOptions<TOptions>(IConfiguration configuration, Action<TOptions, string?>? optionsMonitorSubscriber) where TOptions : class => Configure(configuration, optionsMonitorSubscriber);
 
             IHttpHostExtensionConfigurationBuilder IHttpHostExtensionConfigurationBuilder.ConfigureJwtBearer(Action<JwtBearerOptions> configure)
             {
@@ -119,6 +123,18 @@ namespace Dibix.Http.Host
                                                   .RequireAuthenticatedUser()
                                                   .Build());
                 });
+                return this;
+            }
+
+            private IHttpHostExtensionConfigurationBuilder Configure<TOptions>(IConfiguration configuration, Action<TOptions, string?>? optionsMonitorSubscriber) where TOptions : class
+            {
+                _services.Configure<TOptions>(configuration);
+                if (optionsMonitorSubscriber != null)
+                {
+                    Func<IServiceProvider, IDisposable?> subscribeToOptionsMonitor = x => x.GetRequiredService<IOptionsMonitor<TOptions>>().OnChange(optionsMonitorSubscriber);
+                    _services.Configure<OptionsMonitorSubscriberOptions>(x => x.Subscribers.Add(subscribeToOptionsMonitor));
+                    _services.AddHostedService<OptionsMonitorSubscriberService>();
+                }
                 return this;
             }
 
