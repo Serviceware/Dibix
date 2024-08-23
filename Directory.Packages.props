@@ -11,7 +11,16 @@
     <PackageVersion Include="Microsoft.AspNet.WebApi.Core"                            Version="5.3.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer"           Version="8.0.8" />
     <PackageVersion Include="Microsoft.Build.Utilities.Core"                          Version="17.11.4" />
+
+    <!--
+      Be careful to update this package, because it might require a newer version of the compiler:
+      The analyzer assembly 'Dibix.Testing.Generators.dll' references version '4.11.0.0' of the compiler, which is newer than the currently running version '4.8.0.0'. 
+      Therefore, the .NET SDK version needs to be updated in the global.json, this also requires the build machines to have this version installed.
+      The UseDotNet@2 task can help here, but it might also require a newer version of MSBuild, therefore requiring a VS update:
+      Version 8.0.400 of the .NET SDK requires at least version 17.9.5 of MSBuild. The current available version of MSBuild is 17.8.3.51904. Change the .NET SDK specified in global.json to an older version that requires the MSBuild version currently available.
+    -->
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp"                           Version="4.11.0" />
+
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers"                        Version="3.3.4" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions"         Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Binder"               Version="8.0.2" />
