@@ -29,5 +29,7 @@ $binaryFolder       = Resolve-Path (Join-Path $sourcePath "bin/$configuration/ne
 $dockerBuildContext = $binaryFolder
 $dockerFilePath     = Join-Path $sourcePath 'Dockerfile'
 $dockerTagName      = $AppName.ToLowerInvariant().Replace('.', '-')
+$dockerRepository   = 'tommylohsesw'
 
 Exec "docker build --tag $($dockerTagName):latest --file ""$dockerFilePath"" ""$dockerBuildContext"""
+Exec "docker tag $($dockerTagName):latest $dockerRepository/$($dockerTagName):latest"

@@ -8,6 +8,6 @@ param
 $ErrorActionPreference = 'Stop'
 
 $currentDirectory = $PSScriptRoot
-$scriptPath       = Join-Path $currentDirectory 'Build-Docker.ps1'
+$scriptPath       = Join-Path $currentDirectory 'Docker-Build.ps1'
 
 & $scriptPath -AppName 'Dibix.Http.Host'
