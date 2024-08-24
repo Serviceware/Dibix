@@ -24,9 +24,23 @@ namespace Dibix.Http.Host
         {
             WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
             bool isDevelopment = builder.Environment.IsDevelopment();
-
-            ILoggerFactory loggerFactory = LoggerFactory.Create(x => x.AddConfiguration(builder.Configuration));
             IServiceCollection services = builder.Services;
+
+            void ConfigureLogging(ILoggingBuilder logging)
+            {
+                logging.AddSimpleConsole(y => y.TimestampFormat = "\x1B[1'm'\x1B[37'm'[yyyy-MM-dd HH:mm:ss.fff\x1B[39'm'\x1B[22'm'] ");
+                logging.Configure(y => y.ActivityTrackingOptions = ActivityTrackingOptions.None);
+                logging.AddEventLogOptions();
+            }
+
+            // Prepare logging, that can be used to log during bootstrapping before the host is built
+            using ILoggerFactory loggerFactory = LoggerFactory.Create(logging =>
+            {
+                logging.AddDefaults(builder.Configuration);
+                ConfigureLogging(logging);
+            });
+
+            services.AddLogging(ConfigureLogging);
 
             services.AddSingleton<IDatabaseConnectionFactory, DefaultDatabaseConnectionFactory>()
                     .AddScoped<DbConnection>(x => x.GetRequiredService<IDatabaseConnectionFactory>().Create())
@@ -53,8 +67,6 @@ namespace Dibix.Http.Host
             services.AddExceptionHandler<DatabaseAccessExceptionHandler>();
             services.AddProblemDetails();
 
-            services.AddEventLogOptions();
-
             IConfigurationSection hostingConfigurationSection = builder.Configuration.GetSection(HostingOptions.ConfigurationSectionName);
             HostingOptions hostingOptions = hostingConfigurationSection.Bind<HostingOptions>();
 
@@ -70,12 +82,6 @@ namespace Dibix.Http.Host
                     .AddSingleton<IPostConfigureOptions<JwtBearerOptions>, ScopedJwtBearerPostConfigureOptions>()
                     .AddScoped<IOptionsFactory<JwtBearerOptions>, ScopedJwtBearerOptionsFactory>();
             */
-
-            services.AddLogging(x =>
-            {
-                x.AddSimpleConsole(y => y.TimestampFormat = "\x1B[1'm'\x1B[37'm'[yyyy-MM-dd HH:mm:ss.fff\x1B[39'm'\x1B[22'm'] ");
-                x.Configure(y => y.ActivityTrackingOptions = ActivityTrackingOptions.None);
-            });
 
             services.AddAuthentication()
                     .AddJwtBearer(x =>

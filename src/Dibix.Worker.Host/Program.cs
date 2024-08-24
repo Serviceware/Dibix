@@ -17,6 +17,22 @@ namespace Dibix.Worker.Host
             HostApplicationBuilder builder = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder(args);
             IServiceCollection services = builder.Services;
 
+            void ConfigureLogging(ILoggingBuilder logging)
+            {
+                logging.AddSimpleConsole(y => y.TimestampFormat = "\x1B[1'm'\x1B[37'm'[yyyy-MM-dd HH:mm:ss.fff\x1B[39'm'\x1B[22'm'] ");
+                logging.Configure(y => y.ActivityTrackingOptions = ActivityTrackingOptions.None);
+                logging.AddEventLogOptions();
+            }
+
+            // Prepare logging, that can be used to log during bootstrapping before the host is built
+            using ILoggerFactory loggerFactory = LoggerFactory.Create(logging =>
+            {
+                logging.AddDefaults(builder.Configuration);
+                ConfigureLogging(logging);
+            });
+
+            services.AddLogging(ConfigureLogging);
+
             services.AddSingleton<IDatabaseConnectionFactory, DefaultDatabaseConnectionFactory>()
                     .AddScoped<DbConnection>(x => x.GetRequiredService<IDatabaseConnectionFactory>().Create())
                     .AddScoped<IDatabaseConnectionResolver, DependencyInjectionDatabaseConnectionResolver>()
@@ -31,8 +47,6 @@ namespace Dibix.Worker.Host
                     .AddSingleton<IServiceBrokerMessageReader, ServiceBrokerMessageReader>()
                     .AddSingleton<IHostedServiceEvents, HostedServiceEvents>()
                     .AddHostedService<DatabaseOptionsMonitor>();
-
-            services.AddEventLogOptions();
 
             services.Configure<DatabaseOptions>(builder.Configuration.GetSection(DatabaseOptions.ConfigurationSectionName));
             HostingOptions hostingOptions = builder.Configuration.GetSection(HostingOptions.ConfigurationSectionName).Bind<HostingOptions>();
