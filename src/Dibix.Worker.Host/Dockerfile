@@ -1,9 +1,10 @@
 FROM alpine
 
 # Install depdencies
-RUN apk upgrade --no-cache &&    \
-    apk add --no-cache libgcc    \
-                       libstdc++ \
+RUN apk upgrade --no-cache &&          \
+    apk add --no-cache ca-certificates \
+                       libgcc          \
+                       libstdc++       \
                        icu-libs
 
 # Copy application
