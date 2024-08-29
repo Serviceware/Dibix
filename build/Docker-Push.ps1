@@ -11,7 +11,8 @@ $ErrorActionPreference = 'Stop'
 
 $dockerTagName    = $AppName.ToLowerInvariant().Replace('.', '-')
 $dockerRepository = 'tommylohsesw'
+$version          = nbgv get-version --variable NuGetPackageVersion
 
 
-Exec "docker tag $($dockerTagName):latest $dockerRepository/$($dockerTagName):latest"
 Exec "docker push $dockerRepository/$($dockerTagName):latest"
+Exec "docker push $dockerRepository/$($dockerTagName):$version"

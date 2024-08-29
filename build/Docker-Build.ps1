@@ -30,6 +30,10 @@ $dockerBuildContext = $binaryFolder
 $dockerFilePath     = Join-Path $sourcePath 'Dockerfile'
 $dockerTagName      = $AppName.ToLowerInvariant().Replace('.', '-')
 $dockerRepository   = 'tommylohsesw'
+$dockerImageName    = "$dockerRepository/$dockerTagName"
+$version            = nbgv get-version --variable NuGetPackageVersion
 
-Exec "docker build --tag $($dockerTagName):latest --file ""$dockerFilePath"" ""$dockerBuildContext"""
-Exec "docker tag $($dockerTagName):latest $dockerRepository/$($dockerTagName):latest"
+Exec "docker build --tag $($dockerImageName):latest
+                   --tag $($dockerImageName):$version
+                   --file ""$dockerFilePath""
+                   ""$dockerBuildContext"""
