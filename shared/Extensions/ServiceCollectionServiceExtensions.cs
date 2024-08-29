@@ -20,10 +20,41 @@ namespace Microsoft.Extensions.DependencyInjection
             VerifyServiceUnregistered<TService>(services);
             return services.AddScoped(implementationFactory);
         }
+        public static IServiceCollection AddScopedOnce<TService>(this IServiceCollection services, Type implementationType)
+        {
+            VerifyServiceUnregistered(services, typeof(TService));
+            return services.AddScoped(typeof(TService), implementationType);
+        }
         public static IServiceCollection AddScopedOnce(this IServiceCollection services, Type serviceType)
         {
             VerifyServiceUnregistered(services, serviceType);
             return services.AddScoped(serviceType, serviceType);
+        }
+
+        public static IServiceCollection AddSingletonOnce<TService, TImplementation>(this IServiceCollection services) where TService : class where TImplementation : class, TService
+        {
+            VerifyServiceUnregistered<TService>(services);
+            return services.AddSingleton<TService, TImplementation>();
+        }
+        public static IServiceCollection AddSingletonOnce<TService>(this IServiceCollection services) where TService : class
+        {
+            VerifyServiceUnregistered<TService>(services);
+            return services.AddSingleton<TService>();
+        }
+        public static IServiceCollection AddSingletonOnce<TService>(this IServiceCollection services, Func<IServiceProvider, TService> implementationFactory) where TService : class
+        {
+            VerifyServiceUnregistered<TService>(services);
+            return services.AddSingleton(implementationFactory);
+        }
+        public static IServiceCollection AddSingletonOnce<TService>(this IServiceCollection services, Type implementationType)
+        {
+            VerifyServiceUnregistered(services, typeof(TService));
+            return services.AddSingleton(typeof(TService), implementationType);
+        }
+        public static IServiceCollection AddSingletonOnce(this IServiceCollection services, Type serviceType)
+        {
+            VerifyServiceUnregistered(services, serviceType);
+            return services.AddSingleton(serviceType, serviceType);
         }
 
         private static void VerifyServiceUnregistered<TService>(IServiceCollection services) => VerifyServiceUnregistered(services, typeof(TService));

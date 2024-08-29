@@ -60,16 +60,40 @@ namespace Dibix.Worker.Host
                 return this;
             }
 
-            public IWorkerExtensionConfigurationBuilder RegisterDependency<TInterface, TImplementation>() where TInterface : class where TImplementation : class, TInterface
+            public IWorkerExtensionConfigurationBuilder RegisterScopedDependency<TInterface, TImplementation>() where TInterface : class where TImplementation : class, TInterface
             {
                 _services.AddScopedOnce<TInterface, TImplementation>();
                 _dependencyRegistry.Register(typeof(TInterface));
                 return this;
             }
-
-            public IWorkerExtensionConfigurationBuilder RegisterDependency(Type implementationType)
+            public IWorkerExtensionConfigurationBuilder RegisterScopedDependency<TInterface>(Type implementationType)
+            {
+                _services.AddScopedOnce<TInterface>(implementationType);
+                _dependencyRegistry.Register(typeof(TInterface));
+                return this;
+            }
+            public IWorkerExtensionConfigurationBuilder RegisterScopedDependency(Type implementationType)
             {
                 _services.AddScopedOnce(implementationType);
+                _dependencyRegistry.Register(implementationType);
+                return this;
+            }
+
+            public IWorkerExtensionConfigurationBuilder RegisterSingletonDependency<TInterface, TImplementation>() where TInterface : class where TImplementation : class, TInterface
+            {
+                _services.AddSingletonOnce<TInterface, TImplementation>();
+                _dependencyRegistry.Register(typeof(TInterface));
+                return this;
+            }
+            public IWorkerExtensionConfigurationBuilder RegisterSingletonDependency<TInterface>(Type implementationType)
+            {
+                _services.AddSingletonOnce<TInterface>(implementationType);
+                _dependencyRegistry.Register(typeof(TInterface));
+                return this;
+            }
+            public IWorkerExtensionConfigurationBuilder RegisterSingletonDependency(Type implementationType)
+            {
+                _services.AddSingletonOnce(implementationType);
                 _dependencyRegistry.Register(implementationType);
                 return this;
             }
