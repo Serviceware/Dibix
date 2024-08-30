@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -43,6 +45,7 @@ namespace Dibix.Testing
             this._testRunFiles = new HashSet<string>();
             this._testFiles = new HashSet<string>();
             this.EnsureTestContextDump();
+            this.EnsureEnvironmentDump();
         }
 
         public string AddFile(string fileName)
@@ -176,11 +179,32 @@ Allowed path length 255: {path.Substring(0, 255)}", nameof(path));
 
         private void EnsureWinMergeStarter() => AddTestRunFile("winmerge.bat", $@"@echo off
 start winmergeU ""{ExpectedDirectoryName}"" ""{ActualDirectoryName}""");
+
         private void EnsureTestContextDump() => AddTestRunFile("TestContext.json", JsonConvert.SerializeObject(this._testContext, new JsonSerializerSettings
         {
             Formatting = Formatting.Indented,
             ContractResolver = new TestContextContractResolver()
         }));
+
+        private void EnsureEnvironmentDump()
+        {
+            IDictionary<string, object> environmentVariables = Environment.GetEnvironmentVariables()
+                                                                          .Cast<DictionaryEntry>()
+                                                                          .ToDictionary(x => (string)x.Key, x => x.Value);
+            int maxKeyLength = environmentVariables.Keys.Max(x => x.Length);
+
+            StringBuilder sb = new StringBuilder();
+            foreach (KeyValuePair<string, object> environmentVariable in environmentVariables.OrderBy(x => x.Key))
+            {
+                sb.Append(environmentVariable.Key.PadRight(maxKeyLength));
+                sb.Append(" = ");
+                sb.Append(environmentVariable.Value);
+                sb.AppendLine();
+            }
+
+            string environment = sb.ToString();
+            AddTestRunFile("Environment.txt", environment);
+        }
 
         private void AddTestRunFile(string fileName, string content)
         {
