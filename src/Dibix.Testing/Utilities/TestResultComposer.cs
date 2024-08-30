@@ -62,6 +62,28 @@ namespace Dibix.Testing
             return path;
         }
 
+        public string AddTestRunFile(string fileName)
+        {
+            string path = Path.Combine(RunDirectory, fileName);
+
+            if (!ShouldRegisterTestRunFile(path))
+                return path;
+
+            RegisterFile(path, scopeIsTestRun: true);
+            return path;
+        }
+        public string AddTestRunFile(string fileName, string content)
+        {
+            string path = Path.Combine(RunDirectory, fileName);
+
+            if (!ShouldRegisterTestRunFile(path))
+                return path;
+
+            WriteContentToFile(path, content);
+            RegisterFile(path, scopeIsTestRun: true);
+            return path;
+        }
+
         public void AddFileComparison(string expectedContent, string actualContent, string outputName, string extension)
         {
             this.EnsureFileComparisonContent(this._expectedDirectory, outputName, extension, expectedContent);
@@ -204,17 +226,6 @@ start winmergeU ""{ExpectedDirectoryName}"" ""{ActualDirectoryName}""");
 
             string environment = sb.ToString();
             AddTestRunFile("Environment.txt", environment);
-        }
-
-        private void AddTestRunFile(string fileName, string content)
-        {
-            string path = Path.Combine(this.RunDirectory, fileName);
-
-            if (!this.ShouldRegisterTestRunFile(path))
-                return;
-
-            WriteContentToFile(path, content);
-            this.RegisterFile(path, scopeIsTestRun: true);
         }
 
         private static void WriteContentToFile(string path, string content)
