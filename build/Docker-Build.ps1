@@ -13,7 +13,8 @@ $runtimeIdentifier = 'linux-musl-x64'
 $configuration     = 'Release'
 $publishReadyToRun = 'True'
 $publishSingleFile = 'True'
-$sourcePath        = Resolve-Path (Join-Path $PSScriptRoot "../src/$AppName")
+$repositoryRoot    = Resolve-Path (Join-Path $PSScriptRoot '..')
+$sourcePath        = Join-Path $repositoryRoot "src/$AppName"
 
 
 Exec "dotnet publish --configuration $Configuration
@@ -31,7 +32,7 @@ $dockerFilePath     = Join-Path $sourcePath 'Dockerfile'
 $dockerTagName      = $AppName.ToLowerInvariant().Replace('.', '-')
 $dockerRepository   = 'tommylohsesw'
 $dockerImageName    = "$dockerRepository/$dockerTagName"
-$version            = nbgv get-version --variable NuGetPackageVersion
+$version            = nbgv get-version --variable NuGetPackageVersion --project $repositoryRoot
 
 Exec "docker build --tag $($dockerImageName):latest
                    --tag $($dockerImageName):$version
