@@ -33,68 +33,74 @@ namespace Dibix.Testing
 
         public TestResultComposer(TestContext testContext, bool useDedicatedTestResultsDirectory)
         {
-            this._testContext = testContext;
-            this._useDedicatedTestResultsDirectory = useDedicatedTestResultsDirectory;
-            this._defaultRunDirectory = testContext.TestRunResultsDirectory;
-            this.RunDirectory = this._useDedicatedTestResultsDirectory ? TestContextUtility.GetTestRunDirectory(testContext) : this._defaultRunDirectory;
-            this.TestRootDirectory = Path.Combine(this.RunDirectory, "Tests");
-            this._normalizedTestName = String.Join("_", TestContextUtility.GetTestName(testContext).Split(Path.GetInvalidFileNameChars()));
-            this.TestDirectory = Path.Combine(this.TestRootDirectory, _normalizedTestName);
-            this._expectedDirectory = Path.Combine(this.RunDirectory, ExpectedDirectoryName);
-            this._actualDirectory = Path.Combine(this.RunDirectory, ActualDirectoryName);
-            this._testRunFiles = new HashSet<string>();
-            this._testFiles = new HashSet<string>();
-            this.EnsureTestContextDump();
-            this.EnsureEnvironmentDump();
+            _testContext = testContext;
+            _useDedicatedTestResultsDirectory = useDedicatedTestResultsDirectory;
+            _defaultRunDirectory = testContext.TestRunResultsDirectory;
+            RunDirectory = _useDedicatedTestResultsDirectory ? TestContextUtility.GetTestRunDirectory(testContext) : _defaultRunDirectory;
+            TestRootDirectory = Path.Combine(RunDirectory, "Tests");
+            _normalizedTestName = String.Join("_", TestContextUtility.GetTestName(testContext).Split(Path.GetInvalidFileNameChars()));
+            TestDirectory = Path.Combine(TestRootDirectory, _normalizedTestName);
+            _expectedDirectory = Path.Combine(RunDirectory, ExpectedDirectoryName);
+            _actualDirectory = Path.Combine(RunDirectory, ActualDirectoryName);
+            _testRunFiles = new HashSet<string>();
+            _testFiles = new HashSet<string>();
+            EnsureTestContextDump();
+            EnsureEnvironmentDump();
         }
 
-        public string AddFile(string fileName)
+        public string AddTestFile(string fileName)
         {
-            string path = Path.Combine(this.TestDirectory, fileName);
+            string path = Path.Combine(TestDirectory, fileName);
             EnsureDirectory(path);
-            this.RegisterFile(path, scopeIsTestRun: false);
+            RegisterFile(path, scopeIsTestRun: false);
             return path;
         }
-        public string AddFile(string fileName, string content)
+        public string AddTestFile(string fileName, string content)
         {
-            string path = this.AddFile(fileName);
+            string path = AddTestFile(fileName);
             WriteContentToFile(path, content);
             return path;
         }
 
-        public string AddTestRunFile(string fileName)
+        public string ImportTestFile(string filePath)
         {
-            string path = Path.Combine(RunDirectory, fileName);
-
-            if (!ShouldRegisterTestRunFile(path))
-                return path;
-
-            RegisterFile(path, scopeIsTestRun: true);
-            return path;
+            string fileName = Path.GetFileName(filePath);
+            string targetPath = AddTestFile(fileName);
+            File.Copy(filePath, targetPath);
+            return targetPath;
         }
+
+        public string AddTestRunFile(string fileName) => AddTestRunFile(fileName, out _);
         public string AddTestRunFile(string fileName, string content)
         {
-            string path = Path.Combine(RunDirectory, fileName);
+            string path = AddTestRunFile(fileName, out bool result);
+            if (result)
+                WriteContentToFile(path, content);
 
-            if (!ShouldRegisterTestRunFile(path))
-                return path;
-
-            WriteContentToFile(path, content);
-            RegisterFile(path, scopeIsTestRun: true);
             return path;
+        }
+
+        public string ImportTestRunFile(string filePath)
+        {
+            string fileName = Path.GetFileName(filePath);
+            string targetPath = AddTestRunFile(fileName, out bool result);
+            if (result)
+                File.Copy(filePath, targetPath);
+
+            return targetPath;
         }
 
         public void AddFileComparison(string expectedContent, string actualContent, string outputName, string extension)
         {
-            this.EnsureFileComparisonContent(this._expectedDirectory, outputName, extension, expectedContent);
-            this.EnsureFileComparisonContent(this._actualDirectory, outputName, extension, actualContent);
-            this.EnsureWinMergeStarter();
+            EnsureFileComparisonContent(_expectedDirectory, outputName, extension, expectedContent);
+            EnsureFileComparisonContent(_actualDirectory, outputName, extension, actualContent);
+            EnsureWinMergeStarter();
         }
 
         public void Complete()
         {
-            this.ZipTestOutput();
-            this.CopyTestOutput();
+            ZipTestOutput();
+            CopyTestOutput();
         }
 
 #if NETCOREAPP
@@ -117,7 +123,7 @@ namespace Dibix.Testing
 
             _eventLogCollected = true;
 
-            AddFile("EventLogOptions.json", JsonConvert.SerializeObject(options, Formatting.Indented));
+            AddTestFile("EventLogOptions.json", JsonConvert.SerializeObject(options, Formatting.Indented));
 
             EventLog eventLog = new EventLog(options.LogName, options.MachineName, options.Source);
 
@@ -126,7 +132,7 @@ namespace Dibix.Testing
                       .Select(x => eventLog.Entries[x])
                       .Where(x => MatchEventLogEntry(x, options.Type, options.Since))
                       .Take(options.Count)
-                      .Each((x, i) => this.AddFile($"EventLogEntry_{i + 1}_{x.EntryType}.txt", FormatContent(x)));
+                      .Each((x, i) => AddTestFile($"EventLogEntry_{i + 1}_{x.EntryType}.txt", FormatContent(x)));
         }
 
 #if NETCOREAPP
@@ -158,13 +164,13 @@ namespace Dibix.Testing
                 alternativeFileName = $"{alternativeFileName}.{extension}";
             }
 
-            this.EnsureFileComparisonContent(Path.Combine(path, fileName), content);
-            this.EnsureFileComparisonContent(Path.Combine(this.TestDirectory, alternativeFileName), content);
+            EnsureFileComparisonContent(Path.Combine(path, fileName), content);
+            EnsureFileComparisonContent(Path.Combine(TestDirectory, alternativeFileName), content);
         }
         private void EnsureFileComparisonContent(string path, string content)
         {
             WriteContentToFile(path, content);
-            this.RegisterFile(path, scopeIsTestRun: false);
+            RegisterFile(path, scopeIsTestRun: false);
         }
 
         private bool ShouldRegisterTestRunFile(string path)
@@ -175,8 +181,8 @@ namespace Dibix.Testing
                 // Unfortunately, there is no easy way for us to execute code at this level apart from AssemblyCleanup.
                 // However the AssemblyCleanup method doesn't accept a TestContext and is also not inheritable.
                 // Therefore this step is executed after each test and involves to skip these files in subsequent tests of the current run.
-                this._testRunFiles.Add(path);
-                this._testContext.AddResultFile(path);
+                _testRunFiles.Add(path);
+                _testContext.AddResultFile(path);
                 return false;
             }
 
@@ -191,18 +197,18 @@ namespace Dibix.Testing
 Allowed path length 255: {path.Substring(0, 255)}", nameof(path));
             }
 
-            ICollection<string> files = scopeIsTestRun ? this._testRunFiles : this._testFiles;
+            ICollection<string> files = scopeIsTestRun ? _testRunFiles : _testFiles;
             if (files.Contains(path))
                 throw new InvalidOperationException($"Test result file already registered: {path}");
 
-            this._testContext.AddResultFile(path);
+            _testContext.AddResultFile(path);
             files.Add(path);
         }
 
         private void EnsureWinMergeStarter() => AddTestRunFile("winmerge.bat", $@"@echo off
 start winmergeU ""{ExpectedDirectoryName}"" ""{ActualDirectoryName}""");
 
-        private void EnsureTestContextDump() => AddTestRunFile("TestContext.json", JsonConvert.SerializeObject(this._testContext, new JsonSerializerSettings
+        private void EnsureTestContextDump() => AddTestRunFile("TestContext.json", JsonConvert.SerializeObject(_testContext, new JsonSerializerSettings
         {
             Formatting = Formatting.Indented,
             ContractResolver = new TestContextContractResolver()
@@ -228,6 +234,18 @@ start winmergeU ""{ExpectedDirectoryName}"" ""{ActualDirectoryName}""");
             AddTestRunFile("Environment.txt", environment);
         }
 
+        private string AddTestRunFile(string fileName, out bool result)
+        {
+            string path = Path.Combine(RunDirectory, fileName);
+
+            result = ShouldRegisterTestRunFile(path);
+            if (!result)
+                return path;
+
+            RegisterFile(path, scopeIsTestRun: true);
+            return path;
+        }
+
         private static void WriteContentToFile(string path, string content)
         {
             if (File.Exists(path))
@@ -239,38 +257,38 @@ start winmergeU ""{ExpectedDirectoryName}"" ""{ActualDirectoryName}""");
 
         private void ZipTestOutput()
         {
-            ICollection<string> files = this._testRunFiles.Concat(this._testFiles).ToArray();
+            ICollection<string> files = _testRunFiles.Concat(_testFiles).ToArray();
             if (!files.Any())
                 return;
 
-            string path = Path.Combine(this.TestRootDirectory, $"{this._normalizedTestName}.zip");
+            string path = Path.Combine(TestRootDirectory, $"{_normalizedTestName}.zip");
             using (ZipArchive archive = ZipFile.Open(path, ZipArchiveMode.Create))
             {
                 foreach (string file in files)
                 {
-                    int relativePathIndex = this.RunDirectory.Length + 1;
+                    int relativePathIndex = RunDirectory.Length + 1;
                     string relativePath = file.Substring(relativePathIndex, file.Length - relativePathIndex);
                     archive.CreateEntryFromFile(file, relativePath);
                 }
             }
 
-            this.RegisterFile(path, scopeIsTestRun: false);
+            RegisterFile(path, scopeIsTestRun: false);
         }
 
         private void CopyTestOutput()
         {
-            if (!this._useDedicatedTestResultsDirectory)
+            if (!_useDedicatedTestResultsDirectory)
                 return;
 
-            this.CopyFiles(this._testRunFiles, this._defaultRunDirectory, ignoreIfExists: true);
-            this.CopyFiles(this._testFiles, this._defaultRunDirectory);
+            CopyFiles(_testRunFiles, _defaultRunDirectory, ignoreIfExists: true);
+            CopyFiles(_testFiles, _defaultRunDirectory);
         }
 
         private void CopyFiles(IEnumerable<string> files, string targetDirectory, bool ignoreIfExists = false)
         {
             foreach (string file in files)
             {
-                string relativeFilePath = file.Substring(this.RunDirectory.Length + 1);
+                string relativeFilePath = file.Substring(RunDirectory.Length + 1);
                 string targetFilePath = Path.Combine(targetDirectory, relativeFilePath);
                 EnsureDirectory(targetFilePath);
 

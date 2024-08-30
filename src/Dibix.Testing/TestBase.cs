@@ -104,16 +104,20 @@ namespace Dibix.Testing
             throw new AssertTextFailedException(expectedNormalized, actualNormalized, message);
         }
 
-        protected void LogException(Exception exception) => this.TestResultComposer.AddFile("AdditionalErrors.txt", $@"An error occured while collecting the last event log errors
+        protected void LogException(Exception exception) => this.TestResultComposer.AddTestFile("AdditionalErrors.txt", $@"An error occured while collecting the last event log errors
 {exception}");
 
         protected virtual void ConfigureEventLogDiagnostics(EventLogDiagnosticsOptions options) { }
 
-        protected string AddResultFile(string fileName) => this.TestResultComposer.AddFile(fileName);
-        protected string AddResultFile(string fileName, string content) => this.TestResultComposer.AddFile(fileName, content);
+        protected string AddTestFile(string fileName) => TestResultComposer.AddTestFile(fileName);
+        protected string AddTestFile(string fileName, string content) => TestResultComposer.AddTestFile(fileName, content);
+
+        protected string ImportTestFile(string filePath) => TestResultComposer.ImportTestFile(filePath);
 
         protected string AddTestRunFile(string fileName) => TestResultComposer.AddTestRunFile(fileName);
         protected string AddTestRunFile(string fileName, string content) => TestResultComposer.AddTestRunFile(fileName, content);
+        
+        protected string ImportTestRunFile(string filePath) => TestResultComposer.ImportTestRunFile(filePath);
 
         protected static void AssertAreEqual<T>(IEnumerable<T> expected, IEnumerable<T> actual) => Assert.IsTrue(expected.SequenceEqual(actual), "expected.SequenceEqual(actual)");
 
@@ -213,7 +217,7 @@ Value: {instance}");
         private void AddConfigurationToOutput(TConfiguration configuration)
         {
             OnConfigurationLoaded(configuration);
-            _ = AddResultFile("appsettings.json", JsonConvert.SerializeObject(configuration, Formatting.Indented));
+            _ = AddTestFile("appsettings.json", JsonConvert.SerializeObject(configuration, Formatting.Indented));
         }
     }
 }

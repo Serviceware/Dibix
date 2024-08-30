@@ -25,7 +25,7 @@ namespace Dibix.Testing
             if (!_outputToFile) 
                 return;
 
-            string outputPath = testResultComposer.AddFile(OutputFileName);
+            string outputPath = testResultComposer.AddTestFile(OutputFileName);
             _output = new StreamWriter(outputPath);
 
             if (!tailOutput) 

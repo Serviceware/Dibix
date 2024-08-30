@@ -36,7 +36,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
 
             TestLogger logger = new TestLogger(base.Out, distinctErrorLogging: true);
 
-            string inputConfigurationPath = base.AddResultFile("core.input", $@"ProjectName
+            string inputConfigurationPath = base.AddTestFile("core.input", $@"ProjectName
   {DatabaseTestUtility.ProjectName}
 ProjectDirectory
   {DatabaseTestUtility.DatabaseProjectDirectory}

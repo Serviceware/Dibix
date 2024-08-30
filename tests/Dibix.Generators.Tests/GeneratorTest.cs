@@ -59,7 +59,7 @@ namespace Dibix.Generators.Tests
                 SyntaxTree outputSyntaxTree = syntaxTrees[i];
                 FileInfo outputFile = new FileInfo(outputSyntaxTree.FilePath);
                 string actualCode = outputSyntaxTree.ToString();
-                this.AddResultFile(outputFile.Name, actualCode);
+                this.AddTestFile(outputFile.Name, actualCode);
                 Assert.AreEqual(expectedFiles[i - 1], outputFile.Name);
                 string expectedCode = this.GetEmbeddedResourceContent(outputFile.Name).Replace("%GENERATORVERSION%", GetGeneratorVersion(typeof(TestMethodGenerator)));
                 this.AssertEqual(expectedCode, actualCode, outputName: Path.GetFileNameWithoutExtension(outputFile.Name), extension: outputFile.Extension.TrimStart('.'));
@@ -207,7 +207,7 @@ namespace Dibix.Generators.Tests
                 SyntaxTree outputSyntaxTree = syntaxTrees[i];
                 FileInfo outputFile = new FileInfo(outputSyntaxTree.FilePath);
                 string actualCode = outputSyntaxTree.ToString();
-                AddResultFile(outputFile.Name, actualCode);
+                AddTestFile(outputFile.Name, actualCode);
                 Assert.AreEqual(expectedFiles[i], outputFile.Name);
                 string expectedCode = GetEmbeddedResourceContent(outputFile.Name).Replace("%GENERATORVERSION%", GetGeneratorVersion(typeof(EmbeddedResourceAccessorGenerator)));
                 AssertEqual(expectedCode, actualCode, outputName: Path.GetFileNameWithoutExtension(outputFile.Name), extension: outputFile.Extension.TrimStart('.'));
@@ -289,7 +289,7 @@ namespace Dibix.Generators.Tests.Tasks
                 SyntaxTree outputSyntaxTree = syntaxTrees[i];
                 FileInfo outputFile = new FileInfo(outputSyntaxTree.FilePath);
                 string actualCode = outputSyntaxTree.ToString();
-                this.AddResultFile(outputFile.Name, actualCode);
+                this.AddTestFile(outputFile.Name, actualCode);
                 Assert.AreEqual(expectedFiles[i - 1], outputFile.Name);
                 string expectedCode = this.GetEmbeddedResourceContent(outputFile.Name).Replace("%GENERATORVERSION%", GetGeneratorVersion(typeof(TaskGenerator)));
                 this.AssertEqual(expectedCode, actualCode, outputName: Path.GetFileNameWithoutExtension(outputFile.Name), extension: outputFile.Extension.TrimStart('.'));
