@@ -31,42 +31,18 @@ namespace Dibix.Worker.Host
             return builder;
         }
 
-        private sealed class WorkerHostExtensionConfigurationBuilder : IWorkerHostExtensionConfigurationBuilder, IWorkerHostExtensionRegistrar
+        private sealed class WorkerHostExtensionConfigurationBuilder : WorkerConfigurationBuilder<IWorkerHostExtensionConfigurationBuilder>, IWorkerHostExtensionConfigurationBuilder, IWorkerHostExtensionRegistrar
         {
             private const string HostFullName = "Dibix.Worker.Host";
             private readonly IServiceCollection _services;
-            private readonly WorkerDependencyRegistry _dependencyRegistry;
             private Func<IWorkerScope, Task>? _onHostStartedExtension;
             private Func<IWorkerScope, Task>? _onHostStoppedExtension;
 
-            public WorkerHostExtensionConfigurationBuilder(IServiceCollection services, WorkerDependencyRegistry dependencyRegistry)
+            protected override IWorkerHostExtensionConfigurationBuilder This => this;
+
+            public WorkerHostExtensionConfigurationBuilder(IServiceCollection services, WorkerDependencyRegistry dependencyRegistry) : base(services, dependencyRegistry)
             {
                 _services = services;
-                _dependencyRegistry = dependencyRegistry;
-            }
-
-            IWorkerHostExtensionConfigurationBuilder IWorkerHostExtensionConfigurationBuilder.RegisterService<TService>()
-            {
-                _services.AddHostedService<TService>();
-                return this;
-            }
-
-            IWorkerHostExtensionConfigurationBuilder IWorkerHostExtensionConfigurationBuilder.RegisterDependency<TInterface, TImplementation>()
-            {
-                _services.AddScopedOnce<TInterface, TImplementation>();
-                return this;
-            }
-
-            IWorkerHostExtensionConfigurationBuilder IWorkerHostExtensionConfigurationBuilder.RegisterDependency<TInterface>(Func<IWorkerDependencyContext, TInterface> factory)
-            {
-                TInterface CreateInstance(IServiceProvider serviceProvider)
-                {
-                    IWorkerDependencyContext dependencyContext = serviceProvider.GetRequiredService<IWorkerDependencyContext>();
-                    return factory(dependencyContext);
-                }
-                _services.AddScopedOnce(CreateInstance);
-                _dependencyRegistry.Register(typeof(TInterface));
-                return this;
             }
 
             IWorkerHostExtensionConfigurationBuilder IWorkerHostExtensionConfigurationBuilder.ConfigureConnectionString(Func<string?, string?> configure)

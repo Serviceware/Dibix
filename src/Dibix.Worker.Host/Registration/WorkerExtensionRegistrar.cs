@@ -39,63 +39,19 @@ namespace Dibix.Worker.Host
             instance.Register(builder);
         }
 
-        private sealed class WorkerExtensionConfigurationBuilder : IWorkerExtensionConfigurationBuilder
+        private sealed class WorkerExtensionConfigurationBuilder : WorkerConfigurationBuilder<IWorkerExtensionConfigurationBuilder>, IWorkerExtensionConfigurationBuilder
         {
             private readonly Assembly _workerAssembly;
             private readonly string _workerComponentName;
             private readonly IServiceCollection _services;
-            private readonly WorkerDependencyRegistry _dependencyRegistry;
 
-            public WorkerExtensionConfigurationBuilder(Assembly workerAssembly, string workerComponentName, IServiceCollection services, WorkerDependencyRegistry dependencyRegistry)
+            protected override IWorkerExtensionConfigurationBuilder This => this;
+
+            public WorkerExtensionConfigurationBuilder(Assembly workerAssembly, string workerComponentName, IServiceCollection services, WorkerDependencyRegistry dependencyRegistry) : base(services, dependencyRegistry)
             {
                 _workerAssembly = workerAssembly;
                 _workerComponentName = workerComponentName;
                 _services = services;
-                _dependencyRegistry = dependencyRegistry;
-            }
-
-            public IWorkerExtensionConfigurationBuilder RegisterService<TService>() where TService : HostedService
-            {
-                _services.AddHostedService<TService>();
-                return this;
-            }
-
-            public IWorkerExtensionConfigurationBuilder RegisterScopedDependency<TInterface, TImplementation>() where TInterface : class where TImplementation : class, TInterface
-            {
-                _services.AddScopedOnce<TInterface, TImplementation>();
-                _dependencyRegistry.Register(typeof(TInterface));
-                return this;
-            }
-            public IWorkerExtensionConfigurationBuilder RegisterScopedDependency<TInterface>(Type implementationType)
-            {
-                _services.AddScopedOnce<TInterface>(implementationType);
-                _dependencyRegistry.Register(typeof(TInterface));
-                return this;
-            }
-            public IWorkerExtensionConfigurationBuilder RegisterScopedDependency(Type implementationType)
-            {
-                _services.AddScopedOnce(implementationType);
-                _dependencyRegistry.Register(implementationType);
-                return this;
-            }
-
-            public IWorkerExtensionConfigurationBuilder RegisterSingletonDependency<TInterface, TImplementation>() where TInterface : class where TImplementation : class, TInterface
-            {
-                _services.AddSingletonOnce<TInterface, TImplementation>();
-                _dependencyRegistry.Register(typeof(TInterface));
-                return this;
-            }
-            public IWorkerExtensionConfigurationBuilder RegisterSingletonDependency<TInterface>(Type implementationType)
-            {
-                _services.AddSingletonOnce<TInterface>(implementationType);
-                _dependencyRegistry.Register(typeof(TInterface));
-                return this;
-            }
-            public IWorkerExtensionConfigurationBuilder RegisterSingletonDependency(Type implementationType)
-            {
-                _services.AddSingletonOnce(implementationType);
-                _dependencyRegistry.Register(implementationType);
-                return this;
             }
 
             public IWorkerExtensionConfigurationBuilder RegisterHttpClient(string name) => RegisterHttpClientCore(name, configure: null);
