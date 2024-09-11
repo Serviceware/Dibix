@@ -83,9 +83,19 @@ namespace Dibix.Testing
         public string ImportTestRunFile(string filePath)
         {
             string fileName = Path.GetFileName(filePath);
-            string targetPath = AddTestRunFile(fileName, out bool result);
-            if (result)
+            string targetPath = AddTestRunFile(fileName, out bool fileIsNew);
+
+            if (fileIsNew)
+            {
                 File.Copy(filePath, targetPath);
+            }
+            else
+            {
+                if (new FileInfo(filePath).Length != new FileInfo(targetPath).Length)
+                {
+                    File.Copy(filePath, targetPath, overwrite: true);
+                }
+            }
 
             return targetPath;
         }
