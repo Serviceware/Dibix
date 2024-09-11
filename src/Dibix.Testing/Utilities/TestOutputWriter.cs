@@ -10,7 +10,6 @@ namespace Dibix.Testing
 {
     internal sealed class TestOutputWriter : TextWriter, IDisposable
     {
-        private const string OutputFileName = "output.log";
         private readonly StreamWriter _output;
         private readonly bool _outputToFile;
         private bool _collectingLine;
@@ -18,14 +17,14 @@ namespace Dibix.Testing
 
         public override Encoding Encoding => Encoding.UTF8;
 
-        public TestOutputWriter(TestContext testContext, TestResultComposer testResultComposer, bool outputToFile, bool tailOutput)
+        public TestOutputWriter(TestContext testContext, TestResultComposer testResultComposer, bool outputToFile, string fileName, bool isAssemblyInitialize, bool tailOutput)
         {
             _outputToFile = outputToFile;
 
             if (!_outputToFile) 
                 return;
 
-            string outputPath = testResultComposer.AddTestFile(OutputFileName);
+            string outputPath = isAssemblyInitialize ? testResultComposer.AddTestRunFile(fileName) : testResultComposer.AddTestFile(fileName);
             _output = new StreamWriter(outputPath);
 
             if (!tailOutput) 

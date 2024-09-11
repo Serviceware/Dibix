@@ -19,6 +19,7 @@ namespace Dibix.Testing
         private const string ActualDirectoryName = "actual";
         private readonly TestContext _testContext;
         private readonly bool _useDedicatedTestResultsDirectory;
+        private readonly bool _isAssemblyInitialize;
         private readonly string _defaultRunDirectory;
         private readonly string _expectedDirectory;
         private readonly string _normalizedTestName;
@@ -31,10 +32,11 @@ namespace Dibix.Testing
         public string TestRootDirectory { get; }
         public string TestDirectory { get; }
 
-        public TestResultComposer(TestContext testContext, bool useDedicatedTestResultsDirectory)
+        public TestResultComposer(TestContext testContext, bool useDedicatedTestResultsDirectory, bool isAssemblyInitialize)
         {
             _testContext = testContext;
             _useDedicatedTestResultsDirectory = useDedicatedTestResultsDirectory;
+            _isAssemblyInitialize = isAssemblyInitialize;
             _defaultRunDirectory = testContext.TestRunResultsDirectory;
             RunDirectory = _useDedicatedTestResultsDirectory ? TestContextUtility.GetTestRunDirectory(testContext) : _defaultRunDirectory;
             TestRootDirectory = Path.Combine(RunDirectory, "Tests");
@@ -44,12 +46,14 @@ namespace Dibix.Testing
             _actualDirectory = Path.Combine(RunDirectory, ActualDirectoryName);
             _testRunFiles = new HashSet<string>();
             _testFiles = new HashSet<string>();
-            EnsureTestContextDump();
-            EnsureEnvironmentDump();
+            Initialize();
         }
 
         public string AddTestFile(string fileName)
         {
+            if (_isAssemblyInitialize)
+                throw new InvalidOperationException("Test files cannot be added during AssemblyInitialize");
+
             string path = Path.Combine(TestDirectory, fileName);
             EnsureDirectory(path);
             RegisterFile(path, scopeIsTestRun: false);
@@ -109,7 +113,15 @@ namespace Dibix.Testing
 
         public void Complete()
         {
-            ZipTestOutput();
+            foreach (string resultFile in _testFiles.OrderBy(Path.GetFileName)) 
+                _testContext.AddResultFile(resultFile);
+
+            foreach (string resultFile in _testRunFiles.OrderBy(Path.GetFileName)) 
+                _testContext.AddResultFile(resultFile);
+
+            if (!_isAssemblyInitialize)
+                ZipTestOutput();
+
             CopyTestOutput();
         }
 
@@ -162,6 +174,23 @@ namespace Dibix.Testing
             return true;
         }
 
+        private void Initialize()
+        {
+            DirectoryInfo runDirectory = new DirectoryInfo(RunDirectory);
+            if (runDirectory.Exists)
+            {
+                // Import previous run attachments possibly from AssemblyInitialize
+                foreach (FileInfo existingRunFile in runDirectory.EnumerateFiles())
+                {
+                    string filePath = existingRunFile.FullName;
+                    _testRunFiles.Add(filePath);
+                }
+            }
+
+            EnsureTestContextDump();
+            EnsureEnvironmentDump();
+        }
+
         private void EnsureFileComparisonContent(string path, string outputName, string extension, string content)
         {
             DirectoryInfo directory = new DirectoryInfo(path);
@@ -192,7 +221,6 @@ namespace Dibix.Testing
                 // However the AssemblyCleanup method doesn't accept a TestContext and is also not inheritable.
                 // Therefore this step is executed after each test and involves to skip these files in subsequent tests of the current run.
                 _testRunFiles.Add(path);
-                _testContext.AddResultFile(path);
                 return false;
             }
 
@@ -211,7 +239,6 @@ Allowed path length 255: {path.Substring(0, 255)}", nameof(path));
             if (files.Contains(path))
                 throw new InvalidOperationException($"Test result file already registered: {path}");
 
-            _testContext.AddResultFile(path);
             files.Add(path);
         }
 

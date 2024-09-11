@@ -25,31 +25,32 @@ namespace Dibix.Testing
         #region Properties
         public TestContext TestContext
         {
-            get => SafeGetProperty(ref this._testContext);
-            set => this._testContext = value;
+            get => SafeGetProperty(ref _testContext);
+            set => _testContext = value;
         }
         internal TestOutputWriter TestOutputHelper
         {
-            get => SafeGetProperty(ref this._testOutputHelper);
-            private set => this._testOutputHelper = value;
+            get => SafeGetProperty(ref _testOutputHelper);
+            private set => _testOutputHelper = value;
         }
         protected virtual bool AttachOutputObserver => false;
         protected virtual TestConfigurationValidationBehavior ConfigurationValidationBehavior => TestDefaults.ValidationBehavior;
-        protected virtual TextWriter Out => this.TestOutputHelper;
-        protected string RunDirectory => this.TestResultComposer.RunDirectory;
-        protected string TestDirectory => this.TestResultComposer.TestDirectory;
+        protected virtual TextWriter Out => TestOutputHelper;
+        protected string RunDirectory => TestResultComposer.RunDirectory;
+        protected string TestDirectory => TestResultComposer.TestDirectory;
         protected virtual bool UseDedicatedTestResultsDirectory => true;
+        protected bool IsAssemblyInitialize { get; private set; }
         private TestResultComposer TestResultComposer
         {
-            get => SafeGetProperty(ref this._testResultComposer);
-            set => this._testResultComposer = value;
+            get => SafeGetProperty(ref _testResultComposer);
+            set => _testResultComposer = value;
         }
         #endregion
 
         #region Constructor
         protected TestBase()
         {
-            this._assembly = this.GetType().Assembly;
+            _assembly = GetType().Assembly;
         }
         #endregion
 
@@ -57,8 +58,9 @@ namespace Dibix.Testing
         [TestInitialize]
         public async Task OnTestInitialize()
         {
-            this.TestResultComposer = new TestResultComposer(this.TestContext, this.UseDedicatedTestResultsDirectory);
-            this.TestOutputHelper = new TestOutputWriter(this.TestContext, this.TestResultComposer, outputToFile: true, tailOutput: this.AttachOutputObserver);
+            TestResultComposer = new TestResultComposer(TestContext, UseDedicatedTestResultsDirectory, IsAssemblyInitialize);
+            string outputFileName = IsAssemblyInitialize ? "AssemblyInitialize.log" : "Output.log";
+            TestOutputHelper = new TestOutputWriter(TestContext, TestResultComposer, outputToFile: true, fileName: outputFileName, IsAssemblyInitialize, tailOutput: AttachOutputObserver);
 
 #if NETCOREAPP
             if (OperatingSystem.IsWindows())
@@ -67,16 +69,25 @@ namespace Dibix.Testing
                 _unhandledExceptionDiagnostics = new UnhandledExceptionDiagnostics(TestResultComposer, Out, LogException, ConfigureEventLogDiagnostics);
             }
 
-            await this.OnTestInitialized().ConfigureAwait(false);
+            await OnTestInitialized().ConfigureAwait(false);
         }
         #endregion
 
         #region Protected Methods
+        protected static async Task<T> CreateFromAssemblyInitialize<T>(TestContext testContext) where T : TestBase, new()
+        {
+            T instance = new T();
+            instance.TestContext = testContext;
+            instance.IsAssemblyInitialize = true;
+            await instance.OnTestInitialize().ConfigureAwait(false);
+            return instance;
+        }
+
         protected virtual Task OnTestInitialized() => Task.CompletedTask;
 
-        protected void WriteLine(string message) => this.TestOutputHelper.WriteLine(message);
+        protected void WriteLine(string message) => TestOutputHelper.WriteLine(message);
 
-        protected string GetEmbeddedResourceContent(string key) => ResourceUtility.GetEmbeddedResourceContent(this._assembly, key);
+        protected string GetEmbeddedResourceContent(string key) => ResourceUtility.GetEmbeddedResourceContent(_assembly, key);
 
         protected void AssertEqual(string actual, string extension, string message = null, bool normalizeEndings = false)
         {
@@ -85,7 +96,7 @@ namespace Dibix.Testing
             string expected = GetEmbeddedResourceContent(expectedKey);
             AssertEqual(expected, actual, outputName, extension, message, normalizeEndings);
         }
-        protected void AssertEqual(string expected, string actual, string extension, string message = null, bool normalizeLineEndings = false) => this.AssertEqual(expected, actual, this.TestContext.TestName, extension, message, normalizeLineEndings);
+        protected void AssertEqual(string expected, string actual, string extension, string message = null, bool normalizeLineEndings = false) => AssertEqual(expected, actual, TestContext.TestName, extension, message, normalizeLineEndings);
         protected void AssertEqual(string expected, string actual, string outputName, string extension, string message = null, bool normalizeLineEndings = false)
         {
             string expectedNormalized = expected;
@@ -104,7 +115,7 @@ namespace Dibix.Testing
             throw new AssertTextFailedException(expectedNormalized, actualNormalized, message);
         }
 
-        protected void LogException(Exception exception) => this.TestResultComposer.AddTestFile("AdditionalErrors.txt", $@"An error occured while collecting the last event log errors
+        protected void LogException(Exception exception) => TestResultComposer.AddTestFile("AdditionalErrors.txt", $@"An error occured while collecting the last event log errors
 {exception}");
 
         protected virtual void ConfigureEventLogDiagnostics(EventLogDiagnosticsOptions options) { }
@@ -175,7 +186,7 @@ Value: {instance}");
         #region IDisposable Members
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 
@@ -183,9 +194,9 @@ Value: {instance}");
         {
             if (disposing)
             {
-                this._unhandledExceptionDiagnostics?.Dispose();
-                this._testOutputHelper?.Dispose();
-                this._testResultComposer?.Complete();
+                _unhandledExceptionDiagnostics?.Dispose();
+                _testOutputHelper?.Dispose();
+                _testResultComposer?.Complete();
             }
         }
         #endregion
@@ -217,7 +228,9 @@ Value: {instance}");
         private void AddConfigurationToOutput(TConfiguration configuration)
         {
             OnConfigurationLoaded(configuration);
-            _ = AddTestFile("appsettings.json", JsonConvert.SerializeObject(configuration, Formatting.Indented));
+
+            if (!IsAssemblyInitialize)
+                _ = AddTestFile("appsettings.json", JsonConvert.SerializeObject(configuration, Formatting.Indented));
         }
     }
 }
