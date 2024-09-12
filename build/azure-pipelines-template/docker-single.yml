@@ -1,0 +1,29 @@
+﻿parameters:
+- name: project
+  type: string
+  values:
+  - Dibix.Http.Host
+  - Dibix.Worker.Host
+
+steps:
+- task: ExtractFiles@1
+  displayName: 📂 Extracing build output for docker image (${{ parameters.project }})
+  inputs:
+    archiveFilePatterns: $(Pipeline.Workspace)/CI/Publish output (Linux)/${{ parameters.project }}.linux-x64.zip
+    destinationFolder: $(Agent.TempDirectory)/Docker/${{ parameters.project }}
+    cleanDestinationFolder: false
+
+- task: Docker@2
+  displayName: 🐋 Build and push docker image (${{ parameters.project }})
+  inputs:
+    containerRegistry: hub.docker.com/tommylohsesw
+    ${{ if eq(parameters.project, 'Dibix.Http.Host') }}:
+      repository: tommylohsesw/dibix-http-host
+    ${{ if eq(parameters.project, 'Dibix.Worker.Host') }}:
+      repository: tommylohsesw/dibix-worker-host
+    command: buildAndPush
+    Dockerfile: src/${{ parameters.project }}/Dockerfile
+    buildContext: $(Agent.TempDirectory)/Docker/${{ parameters.project }}
+    tags: |
+      latest
+      $(Build.BuildNumber)

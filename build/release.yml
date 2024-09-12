@@ -10,6 +10,10 @@ parameters:
   displayName: Create GitHub release
   type: boolean
   default: true
+- name: pushDockerImage
+  displayName: Push docker image
+  type: boolean
+  default: true
 
 resources:
   pipelines:
@@ -24,9 +28,6 @@ jobs:
   pool:
     vmImage: ubuntu-latest
   steps:
-  # The default behavior is as if checkout: self were the first step, and the current repository is checked out.
-  # We don't need sources, therefore, disable it
-  - checkout: none
   - powershell: |
       Write-Host "##vso[build.updatebuildnumber]$(resources.pipeline.CI.runName)"
       Write-Host "##vso[task.setvariable variable=IsPreRelease]$('$(resources.pipeline.CI.runName)'.Contains('-'))"
@@ -61,6 +62,13 @@ jobs:
   - download: CI
     artifact: Publish output (macOS)
     displayName: 📬 Download 'Publish output (macOS)' artifact
+
+  - ${{ if eq(parameters.pushDockerImage, true) }}:
+    - template: azure-pipelines-template/docker-multiple.yml
+      parameters:
+        projects:
+          - Dibix.Http.Host
+          - Dibix.Worker.Host
 
   - task: GitHubRelease@1
     displayName: 📝 Create GitHub release

@@ -1,0 +1,10 @@
+﻿parameters:
+- name: projects
+  type: object
+  default: { }
+
+steps:
+- ${{ each project in parameters.projects }}:
+  - template: docker-single.yml
+    parameters:
+      project: ${{ project }}
