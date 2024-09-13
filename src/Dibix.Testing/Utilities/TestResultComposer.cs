@@ -145,7 +145,9 @@ namespace Dibix.Testing
 
             _eventLogCollected = true;
 
-            AddTestFile("EventLogOptions.json", JsonConvert.SerializeObject(options, Formatting.Indented));
+            Func<string, string, string> addTestFileHandler = _isAssemblyInitialize ? AddTestRunFile : AddTestFile;
+
+            addTestFileHandler("EventLogOptions.json", JsonConvert.SerializeObject(options, Formatting.Indented));
 
             EventLog eventLog = new EventLog(options.LogName, options.MachineName, options.Source);
 
@@ -154,7 +156,7 @@ namespace Dibix.Testing
                       .Select(x => eventLog.Entries[x])
                       .Where(x => MatchEventLogEntry(x, options.Type, options.Since))
                       .Take(options.Count)
-                      .Each((x, i) => AddTestFile($"EventLogEntry_{i + 1}_{x.EntryType}.txt", FormatContent(x)));
+                      .Each((x, i) => addTestFileHandler($"EventLogEntry_{i + 1}_{x.EntryType}.txt", FormatContent(x)));
         }
 
 #if NETCOREAPP
