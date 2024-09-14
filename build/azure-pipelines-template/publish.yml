@@ -3,6 +3,7 @@
   type: string
   values:
   - linux-x64
+  - linux-musl-x64
   - osx-x64
   - win-x64
 - name: configuration
@@ -10,8 +11,6 @@
   values:
   - Debug
   - Release
-- name: publishSingleFile
-  type: boolean
 - name: publishReadyToRun
   type: boolean
 
@@ -23,10 +22,5 @@ steps:
     - Dibix.Worker.Host
     configuration: ${{ parameters.configuration }}
     runtimeIdentifier: ${{ parameters.runtimeIdentifier }}
-    publishSingleFile: ${{ parameters.publishSingleFile }}
+    publishSingleFile: True
     publishReadyToRun: ${{ parameters.publishReadyToRun }}
-
-- template: publish-artifact.yml
-  parameters:
-    artifact: Publish output ($(operatingSystem))
-    folder: publish

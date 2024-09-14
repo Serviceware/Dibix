@@ -21,9 +21,6 @@
   values:
   - Native
   - Cobertura
-- name: publishSingleFile
-  type: boolean
-  default: true
 - name: publishReadyToRun
   type: boolean
   default: true
@@ -39,7 +36,12 @@ steps:
 - template: build.yml
   parameters:
     configuration: ${{ parameters.configuration }}
-    publishSingleFile: ${{ parameters.publishSingleFile }}
+    runtimeIdentifier: ${{ parameters.runtimeIdentifier }}
+
+- template: publish-artifact.yml
+  parameters:
+    artifact: Build output ($(operatingSystem))
+    folder: build
 
 - template: test.yml
   parameters:
@@ -56,10 +58,21 @@ steps:
   parameters:
     configuration: ${{ parameters.configuration }}
     runtimeIdentifier: ${{ parameters.runtimeIdentifier }}
-    publishSingleFile: ${{ parameters.publishSingleFile }}
     publishReadyToRun: ${{ parameters.publishReadyToRun }}
+
+- ${{ if eq(parameters.operatingSystem, 'Linux') }}:
+  - template: restore.yml
+    parameters:
+      publishReadyToRun: ${{ parameters.publishReadyToRun }}
+      runtimeIdentifier: linux-musl-x64
+
+  - template: publish.yml
+    parameters:
+      configuration: ${{ parameters.configuration }}
+      runtimeIdentifier: linux-musl-x64
+      publishReadyToRun: ${{ parameters.publishReadyToRun }}
 
 - template: publish-artifact.yml
   parameters:
-    artifact: Build output ($(operatingSystem))
-    folder: build
+    artifact: Publish output ($(operatingSystem))
+    folder: publish

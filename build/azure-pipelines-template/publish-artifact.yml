@@ -3,7 +3,7 @@
   type: string
 - name: folder
   type: string
- 
+
 steps:
 - pwsh: New-Item -ItemType Directory -Force -Path $(Build.ArtifactStagingDirectory)/${{ parameters.folder }}
   displayName: 👮 Ensure artifact folder '${{ parameters.folder }}' exists

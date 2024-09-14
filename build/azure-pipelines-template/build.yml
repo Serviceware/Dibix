@@ -4,8 +4,12 @@
   values:
   - Debug
   - Release
-- name: publishSingleFile
-  type: boolean
+- name: runtimeIdentifier
+  type: string
+  values:
+  - linux-x64
+  - osx-x64
+  - win-x64
 
 steps:
 - template: build-multiple.yml
@@ -43,3 +47,13 @@ steps:
     configuration: ${{ parameters.configuration }}
     runtimeIdentifier: none
     publishSingleFile: False
+
+- template: build-multiple.yml
+  parameters:
+    folder: src
+    projects:
+    - Dibix.Http.Host
+    - Dibix.Worker.Host
+    configuration: ${{ parameters.configuration }}
+    runtimeIdentifier: ${{ parameters.runtimeIdentifier }}
+    publishSingleFile: True

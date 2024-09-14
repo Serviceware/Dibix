@@ -10,7 +10,7 @@
 - name: arguments
   type: string
   default:
- 
+
 steps:
 - ${{ each project in parameters.projects }}:
   - task: DotNetCoreCLI@2
@@ -28,7 +28,7 @@ steps:
         --collect:"XPlat Code Coverage"
         ${{ parameters.arguments }}
         -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.DeterministicReport=True
-  
+
   - pwsh: Get-ChildItem $(Agent.TempDirectory)/*/coverage.cobertura.xml | %{ Rename-Item -Path $_.FullName -NewName ${{ project }}.xml }
     displayName: 🎨 Rename coverage.cobertura.xml -> ${{ project }}.xml
 

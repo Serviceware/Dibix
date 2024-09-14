@@ -60,6 +60,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "azure-pipeline-templates", 
 		build\azure-pipelines-template\docker-single.yml = build\azure-pipelines-template\docker-single.yml
 		build\azure-pipelines-template\initialize.yml = build\azure-pipelines-template\initialize.yml
 		build\azure-pipelines-template\install-dotnet-sdk.yml = build\azure-pipelines-template\install-dotnet-sdk.yml
+		build\azure-pipelines-template\nbgv.yml = build\azure-pipelines-template\nbgv.yml
 		build\azure-pipelines-template\pack-dotnet.yml = build\azure-pipelines-template\pack-dotnet.yml
 		build\azure-pipelines-template\pack.yml = build\azure-pipelines-template\pack.yml
 		build\azure-pipelines-template\publish-artifact.yml = build\azure-pipelines-template\publish-artifact.yml

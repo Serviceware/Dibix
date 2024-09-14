@@ -10,13 +10,14 @@
   type: string
   values:
   - linux-x64
+  - linux-musl-x64
   - osx-x64
   - win-x64
 - name: publishSingleFile
   type: boolean
 - name: publishReadyToRun
   type: boolean
- 
+
 steps:
 - template: build-dotnet-self-contained.yml
   parameters:
@@ -27,7 +28,7 @@ steps:
     publishSingleFile: ${{ parameters.publishSingleFile }}
 
 - task: DotNetCoreCLI@2
-  displayName: 🌐 Publish ${{ parameters.project }} (${{ parameters.configuration }}) [self-contained]
+  displayName: 🌐 Publish ${{ parameters.project }} (${{ parameters.configuration }}) (${{ parameters.runtimeIdentifier }}) [self-contained]
   inputs:
     command: publish
     projects: src/${{ parameters.project }}

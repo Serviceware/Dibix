@@ -28,15 +28,27 @@ jobs:
   pool:
     vmImage: ubuntu-latest
   steps:
-  - powershell: |
-      Write-Host "##vso[build.updatebuildnumber]$(resources.pipeline.CI.runName)"
-      Write-Host "##vso[task.setvariable variable=IsPreRelease]$('$(resources.pipeline.CI.runName)'.Contains('-'))"
-      Write-Host "##vso[task.setvariable variable=IsPreview]$('$(resources.pipeline.CI.runName)'.Contains('+'))"
-    displayName: 🖌️ Update pipeline instance name
-  - powershell: |
-      Write-Host "IsPreRelease = $(IsPreRelease)"
-      Write-Host "IsPreview = $(IsPreview)"
-    displayName: 📖 Print configuration
+  - template: azure-pipelines-template/nbgv.yml
+  - script: |
+      dockerImageTags=$(NBGV_SEMVER2)
+      if [ "$(NBGV_PUBLICRELEASE)" == "True" ]; then
+        isPreview="False"
+        dockerImageTags+=",latest"
+      else
+        isPreview="True"
+      fi
+      if [ -n "$(NBGV_PRERELEASEVERSION)" ]; then
+        isPreRelease="True"
+      else
+        isPreRelease="False"
+      fi
+
+      echo "##vso[task.setvariable variable=IsPreview]$isPreview"
+      echo "##vso[task.setvariable variable=IsPreRelease]$isPreRelease"
+      echo "##vso[task.setvariable variable=DockerImageTags]$dockerImageTags"
+    displayName: ✍️ Initialize variables
+  - script: env | sort -f
+    displayName: 📖 Print environment variables
 
   - download: CI
     artifact: NuGet packages
@@ -69,6 +81,7 @@ jobs:
         projects:
           - Dibix.Http.Host
           - Dibix.Worker.Host
+        tags: $(DockerImageTags)
 
   - task: GitHubRelease@1
     displayName: 📝 Create GitHub release

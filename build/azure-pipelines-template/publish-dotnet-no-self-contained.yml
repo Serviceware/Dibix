@@ -10,24 +10,27 @@
   type: string
   values:
   - linux-x64
+  - linux-musl-x64
   - osx-x64
   - win-x64
 - name: publishSingleFile
   type: boolean
 - name: publishReadyToRun
   type: boolean
- 
+
 steps:
-- template: build-dotnet-no-self-contained.yml
-  parameters:
-    folder: src
-    project: ${{ parameters.project }}
-    configuration: ${{ parameters.configuration }}
-    runtimeIdentifier: ${{ parameters.runtimeIdentifier }}
-    publishSingleFile: ${{ parameters.publishSingleFile }}
+# Other runtimes are already built initially with all the other projects in build.yml to collect binary logs
+- ${{ if eq(parameters.runtimeIdentifier, 'linux-musl-x64') }}:
+  - template: build-dotnet-no-self-contained.yml
+    parameters:
+      folder: src
+      project: ${{ parameters.project }}
+      configuration: ${{ parameters.configuration }}
+      runtimeIdentifier: ${{ parameters.runtimeIdentifier }}
+      publishSingleFile: ${{ parameters.publishSingleFile }}
 
 - task: DotNetCoreCLI@2
-  displayName: 🌐 Publish ${{ parameters.project }} (${{ parameters.configuration }})
+  displayName: 🌐 Publish ${{ parameters.project }} (${{ parameters.configuration }}) (${{ parameters.runtimeIdentifier }})
   inputs:
     command: publish
     projects: src/${{ parameters.project }}

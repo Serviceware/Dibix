@@ -7,7 +7,7 @@
   values:
   - Debug
   - Release
- 
+
 steps:
 - ${{ each project in parameters.projects }}:
   - task: DotNetCoreCLI@2

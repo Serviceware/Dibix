@@ -2,9 +2,12 @@
 - name: projects
   type: object
   default: { }
+- name: tags
+  type: string
 
 steps:
 - ${{ each project in parameters.projects }}:
   - template: docker-single.yml
     parameters:
       project: ${{ project }}
+      tags: ${{ parameters.tags }}

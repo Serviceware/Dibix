@@ -3,14 +3,15 @@
   type: string
   values:
   - linux-x64
+  - linux-musl-x64
   - osx-x64
   - win-x64
 - name: publishReadyToRun
   type: boolean
- 
+
 steps:
 - task: DotNetCoreCLI@2
-  displayName: 📦 Restore NuGet packages
+  displayName: 📦 Restore NuGet packages (${{ parameters.runtimeIdentifier }})
   inputs:
     command: restore
     verbosityRestore: minimal

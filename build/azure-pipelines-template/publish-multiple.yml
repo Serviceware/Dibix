@@ -11,13 +11,14 @@
   type: string
   values:
   - linux-x64
+  - linux-musl-x64
   - osx-x64
   - win-x64
 - name: publishSingleFile
   type: boolean
 - name: publishReadyToRun
   type: boolean
- 
+
 steps:
 - ${{ each project in parameters.projects }}:
   - template: publish-dotnet.yml

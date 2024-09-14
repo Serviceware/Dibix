@@ -6,7 +6,7 @@ parameters:
   values:
   - Debug
   - Release
-  
+
 variables:
 - template: azure-pipelines-template/variables.yml
 
@@ -31,7 +31,7 @@ stages:
         runtimeIdentifier: linux-x64
         configuration: ${{ parameters.buildConfiguration }}
         codeCoverageEngine: ${{ variables.codeCoverageEngine }}
-  
+
   - job: macOS
     pool:
       vmImage: macOS-latest
@@ -54,7 +54,7 @@ stages:
         runtimeIdentifier: osx-x64
         configuration: ${{ parameters.buildConfiguration }}
         codeCoverageEngine: ${{ variables.codeCoverageEngine }}
-  
+
   - job: Windows
     pool:
       vmImage: windows-latest

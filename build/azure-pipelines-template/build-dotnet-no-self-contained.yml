@@ -16,14 +16,18 @@
   values:
   - none
   - linux-x64
+  - linux-musl-x64
   - osx-x64
   - win-x64
 - name: publishSingleFile
   type: boolean
- 
+
 steps:
 - task: DotNetCoreCLI@2
-  displayName: 🏭 Build ${{ parameters.project }} (${{ parameters.configuration }})
+  ${{ if eq(parameters.runtimeIdentifier, 'none') }}:
+    displayName: 🏭 Build ${{ parameters.project }} (${{ parameters.configuration }})
+  ${{ else }}:
+    displayName: 🏭 Build ${{ parameters.project }} (${{ parameters.configuration }}) (${{ parameters.runtimeIdentifier }})
   inputs:
     command: build
     projects: ${{ parameters.folder }}/${{ parameters.project }}
@@ -35,7 +39,7 @@ steps:
         --bl:$(Build.ArtifactStagingDirectory)/build/logs/${{ parameters.configuration }}/${{ parameters.project }}.binlog
         --p:PublishSingleFile=${{ parameters.publishSingleFile }}
         --no-self-contained
-    ${{ if not(eq(parameters.runtimeIdentifier, 'none')) }}:
+    ${{ else }}:
       arguments: >
         --configuration ${{ parameters.configuration }}
         --no-restore
@@ -44,6 +48,6 @@ steps:
         --p:PublishSingleFile=${{ parameters.publishSingleFile }}
         --no-self-contained
         --runtime ${{ parameters.runtimeIdentifier }}
-    
+
     # Workarounds
     # --p:PublishSingleFile => https://github.com/dotnet/sdk/issues/17526

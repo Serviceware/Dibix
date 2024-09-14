@@ -15,7 +15,7 @@
   values:
   - Native
   - Cobertura
- 
+
 steps:
 - task: DotNetCoreCLI@2
   displayName: 📈 Install ReportGenerator

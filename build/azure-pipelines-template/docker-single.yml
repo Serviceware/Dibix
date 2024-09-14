@@ -4,12 +4,14 @@
   values:
   - Dibix.Http.Host
   - Dibix.Worker.Host
+- name: tags
+  type: string
 
 steps:
 - task: ExtractFiles@1
   displayName: 📂 Extracing build output for docker image (${{ parameters.project }})
   inputs:
-    archiveFilePatterns: $(Pipeline.Workspace)/CI/Publish output (Linux)/${{ parameters.project }}.linux-x64.zip
+    archiveFilePatterns: $(Pipeline.Workspace)/CI/Publish output (Linux)/${{ parameters.project }}.linux-musl-x64.self-contained.zip
     destinationFolder: $(Agent.TempDirectory)/Docker/${{ parameters.project }}
     cleanDestinationFolder: false
 
@@ -24,6 +26,4 @@ steps:
     command: buildAndPush
     Dockerfile: src/${{ parameters.project }}/Dockerfile
     buildContext: $(Agent.TempDirectory)/Docker/${{ parameters.project }}
-    tags: |
-      latest
-      $(Build.BuildNumber)
+    tags: ${{ parameters.tags }}

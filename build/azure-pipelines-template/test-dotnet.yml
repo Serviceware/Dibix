@@ -15,7 +15,7 @@
 - name: arguments
   type: string
   default:
- 
+
 steps:
 - ${{ if eq(parameters.codeCoverageEngine, 'Native') }}:
   - template: test-dotnet-native.yml
@@ -30,4 +30,3 @@ steps:
       projects: ${{ parameters.projects }}
       configuration: ${{ parameters.configuration }}
       arguments: ${{ parameters.arguments }}
-  
