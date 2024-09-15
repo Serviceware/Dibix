@@ -3,8 +3,8 @@ Seamlessly create use case oriented REST APIs based on T-SQL stored procedures.
 
 [![Build Status](https://img.shields.io/azure-devops/build/serviceware/dibix/2/main)](https://dev.azure.com/serviceware/Dibix/_build/latest?definitionId=2&branchName=main) [![Test Status](https://img.shields.io/azure-devops/tests/serviceware/dibix/2/main)](https://dev.azure.com/serviceware/Dibix/_build/latest?definitionId=2&branchName=main) [![Code coverage](https://img.shields.io/azure-devops/coverage/serviceware/dibix/2/main)](https://dev.azure.com/serviceware/Dibix/_build/latest?definitionId=2&branchName=main)
 
-## Packages
-| Package | NuGet |
+## Artifacts
+| Name | Version |
 | - | - |
 | [Dibix](https://www.nuget.org/packages/Dibix) | [![Dibix](https://img.shields.io/nuget/v/Dibix.svg)](https://www.nuget.org/packages/Dibix) |
 | [Dibix.Dapper](https://www.nuget.org/packages/Dibix.Dapper) | [![Dibix.Dapper](https://img.shields.io/nuget/v/Dibix.Dapper.svg)](https://www.nuget.org/packages/Dibix.Dapper) |
@@ -13,6 +13,8 @@ Seamlessly create use case oriented REST APIs based on T-SQL stored procedures.
 | [Dibix.Sdk](https://www.nuget.org/packages/Dibix.Sdk) | [![Dibix.Sdk](https://img.shields.io/nuget/v/Dibix.Sdk.svg)](https://www.nuget.org/packages/Dibix.Sdk) |
 | [Dibix.Testing](https://www.nuget.org/packages/Dibix.Testing) | [![Dibix.Testing](https://img.shields.io/nuget/v/Dibix.Testing.svg)](https://www.nuget.org/packages/Dibix.Testing) |
 | [Dibix.Worker.Abstractions](https://www.nuget.org/packages/Dibix.Worker.Abstractions) | [![Dibix.Worker.Abstractions](https://img.shields.io/nuget/v/Dibix.Worker.Abstractions.svg)](https://www.nuget.org/packages/Dibix.Worker.Abstractions) |
+| [Dibix.Http.Host](https://hub.docker.com/r/tommylohsesw/dibix-http-host) | [![Dibix.Http.Host](https://img.shields.io/docker/v/tommylohsesw/dibix-http-host?label=docker&sort=semver)](https://hub.docker.com/r/tommylohsesw/dibix-http-host/tags) |
+| [Dibix.Worker.Host](https://hub.docker.com/r/tommylohsesw/dibix-worker-host) | [![Dibix.Worker.Host](https://img.shields.io/docker/v/tommylohsesw/dibix-worker-host?label=docker&sort=semver)](https://hub.docker.com/r/tommylohsesw/dibix-worker-host/tags) |
 
 ## Background
 The aim of Dibix is to rapidly create use case oriented REST APIs without writing any boilerplate code, unlike the general approach of designing ASP<span>.</span>NET APIs by writing controllers and actions. It strictly focuses on a hand-written T-SQL stored procedure, which is described with a bit of metadata markup. The APIs and contracts involved are specified in a declarative JSON format. Basically, each URL defined in an API endpoint results in invoking the SQL stored procedure, materializing the relational result into a hierarchical result and then return that to the client.
