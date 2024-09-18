@@ -462,6 +462,58 @@ paths:
           description: NoContent
       security:
         - DibixBearer: [ ]
+  /Tests/GenericEndpoint/MultipleAuthorizationBehaviors:
+    delete:
+      tags:
+        - GenericEndpoint
+      summary: EmptyWithParams6
+      operationId: EmptyWithParams6
+      parameters:
+        - name: a
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: b
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int32
+        - name: d
+          in: query
+          schema:
+            type: string
+            default: null
+            nullable: true
+        - name: e
+          in: query
+          schema:
+            type: boolean
+            default: true
+        - name: f
+          in: query
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Direction'
+            nullable: true
+        - name: g
+          in: query
+          schema:
+            type: string
+            default: Cake
+            nullable: true
+      responses:
+        '204':
+          description: NoContent
+      security:
+        - DibixBearer: [ ]
 components:
   schemas:
     GenericContract:

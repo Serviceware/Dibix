@@ -469,7 +469,7 @@ namespace Dibix.Sdk.Tests.Business
                     action.ActionName = "EmptyWithParams";
                     action.Method = HttpApiMethod.Delete;
                     action.SecuritySchemes.Add("DibixBearer");
-                    action.WithAuthorization(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.AssertAuthorized)), authorization =>
+                    action.AddAuthorizationBehavior(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.AssertAuthorized)), authorization =>
                     {
                         authorization.ResolveParameterFromConstant("right", (byte)1);
                     });
@@ -492,7 +492,7 @@ namespace Dibix.Sdk.Tests.Business
                     action.Method = HttpApiMethod.Delete;
                     action.ChildRoute = "Alternative";
                     action.SecuritySchemes.Add("DibixBearer");
-                    action.WithAuthorization(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.AssertAuthorized)), authorization =>
+                    action.AddAuthorizationBehavior(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.AssertAuthorized)), authorization =>
                     {
                         authorization.ResolveParameterFromConstant("right", (byte)1);
                     });
@@ -515,7 +515,34 @@ namespace Dibix.Sdk.Tests.Business
                     action.Method = HttpApiMethod.Delete;
                     action.ChildRoute = "AnotherAlternative";
                     action.SecuritySchemes.Add("DibixBearer");
-                    action.WithAuthorization(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.AssertAuthorized)), authorization =>
+                    action.AddAuthorizationBehavior(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.AssertAuthorized)), authorization =>
+                    {
+                        authorization.ResolveParameterFromConstant("right", (byte)1);
+                    });
+                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string a, string b, int[] ids, CancellationToken cancellationToken, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake") => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
+                    {
+                        { "a", a },
+                        { "b", b },
+                        { "ids", Dibix.Sdk.Tests.Data.IntParameterSet.From(ids, (set, item) => set.Add(item)) },
+                        { "d", d },
+                        { "e", e },
+                        { "f", f },
+                        { "g", g }
+                    }, cancellationToken));
+                    action.ResolveParameterFromNull<System.Guid?>("c");
+                    action.ResolveParameterFromNull<string?>("password");
+                });
+                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
+                {
+                    action.ActionName = "EmptyWithParams";
+                    action.Method = HttpApiMethod.Delete;
+                    action.ChildRoute = "MultipleAuthorizationBehaviors";
+                    action.SecuritySchemes.Add("DibixBearer");
+                    action.AddAuthorizationBehavior(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.AssertAuthorized)), authorization =>
+                    {
+                        authorization.ResolveParameterFromConstant("right", (byte)1);
+                    });
+                    action.AddAuthorizationBehavior(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.AssertAuthorized)), authorization =>
                     {
                         authorization.ResolveParameterFromConstant("right", (byte)1);
                     });

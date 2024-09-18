@@ -108,7 +108,7 @@ namespace Dibix.Testing
                 actualNormalized = actual.NormalizeLineEndings();
             }
 
-            if (Equals(expectedNormalized, actualNormalized)) 
+            if (Equals(expectedNormalized, actualNormalized))
                 return;
 
             TestResultComposer.AddFileComparison(expectedNormalized, actualNormalized, outputName, extension);

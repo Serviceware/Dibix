@@ -27,7 +27,7 @@ namespace Dibix.Http.Server
         public HttpRequestBody Body { get; set; }
         public HttpFileResponseDefinition FileResponse { get; set; }
         public string Description { get; set; }
-        public HttpAuthorizationDefinition Authorization { get; set; }
+        public ICollection<HttpAuthorizationDefinition> Authorization { get; } = new List<HttpAuthorizationDefinition>();
         public ICollection<string> SecuritySchemes { get; } = new Collection<string>();
         public IList<string> RequiredClaims { get; } = new Collection<string>();
         public IDictionary<int, HttpErrorResponse> StatusCodeDetectionResponses { get; }

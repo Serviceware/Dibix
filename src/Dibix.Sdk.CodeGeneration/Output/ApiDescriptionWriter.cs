@@ -199,10 +199,10 @@ namespace Dibix.Sdk.CodeGeneration
                 writer.WriteLine($"{variableName}.SetStatusCodeDetectionResponse({httpStatusCode}, {errorCode}, {(errorMessage != null ? $"\"{errorMessage}\"" : "errorMessage: null")});");
             }
 
-            if (action.Authorization != null)
+            foreach (AuthorizationBehavior authorizationBehavior in action.Authorization)
             {
-                writer.Write($"{variableName}.WithAuthorization(");
-                WriteActionTarget(context, writer, action.Authorization, "authorization", WriteAuthorizationBehavior);
+                writer.Write($"{variableName}.AddAuthorizationBehavior(");
+                WriteActionTarget(context, writer, authorizationBehavior, "authorization", WriteAuthorizationBehavior);
             }
 
             if (_compatibilityLevel == ActionCompatibilityLevel.Native)

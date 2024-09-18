@@ -109,13 +109,15 @@ CommandText: <Inline>", requestException.Message);
             Assert.AreEqual(1, action.RequiredClaims.Count, "action.RequiredClaims.Count");
             Assert.AreEqual(ClaimTypes.NameIdentifier, action.RequiredClaims[0], "action.RequiredClaims[0]");
 
+            HttpAuthorizationBehaviorContext httpAuthorizationBehaviorContext = new HttpAuthorizationBehaviorContext();
             try
             {
-                await Execute(action, request.Object, responseFormatter.Object).ConfigureAwait(false);
+                await Execute(action, request.Object, responseFormatter.Object, [new KeyValuePair<string, object>("context", httpAuthorizationBehaviorContext)]).ConfigureAwait(false);
                 Assert.Fail($"{nameof(HttpRequestExecutionException)} was expected but not thrown");
             }
             catch (HttpRequestExecutionException requestException)
             {
+                Assert.AreEqual("FirstAuthorizationTargetCalled", httpAuthorizationBehaviorContext.Result);
                 requestException.AppendToResponse(response.Object);
                 Assert.AreEqual(@"403 Forbidden: Sorry
 CommandType: 0
@@ -128,7 +130,8 @@ CommandText: <Inline>", requestException.Message);
             }
         }
         private static void Invoke_DDL_WithHttpClientError_ProducedByAuthorizationBehavior_IsMappedToHttpStatusCode_Target(IDatabaseAccessorFactory databaseAccessorFactory) { }
-        private static void Invoke_DDL_WithHttpClientError_ProducedByAuthorizationBehavior_IsMappedToHttpStatusCode_Authorization_Target(IDatabaseAccessorFactory databaseAccessorFactory, string userid) => throw CreateException(errorInfoNumber: 403001, errorMessage: "Sorry");
+        private static void Invoke_DDL_WithHttpClientError_ProducedByAuthorizationBehavior_IsMappedToHttpStatusCode_Authorization_Target1(IDatabaseAccessorFactory databaseAccessorFactory, HttpAuthorizationBehaviorContext context) => context.Result = "FirstAuthorizationTargetCalled";
+        private static void Invoke_DDL_WithHttpClientError_ProducedByAuthorizationBehavior_IsMappedToHttpStatusCode_Authorization_Target2(IDatabaseAccessorFactory databaseAccessorFactory, string userid) => throw CreateException(errorInfoNumber: 403001, errorMessage: "Sorry");
 
         [TestMethod]
         public async Task Invoke_DDL_WithHttpClientError_AutoDetectedByDatabaseErrorCode_IsMappedToHttpStatusCode()

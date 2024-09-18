@@ -523,53 +523,63 @@ namespace Dibix.Sdk.CodeGeneration
                 return;
             }
 
-            CollectAuthorization(property, property.Value.Type, actionDefinition, pathParameters);
+            CollectAuthorization(property.Value.Type, property.Value, actionDefinition, pathParameters);
         }
-        private void CollectAuthorization(JProperty property, JTokenType type, ActionDefinition actionDefinition, IReadOnlyDictionary<string, PathParameter> pathParameters)
+        private void CollectAuthorization(JTokenType type, JToken value, ActionDefinition actionDefinition, IReadOnlyDictionary<string, PathParameter> pathParameters)
         {
             switch (type)
             {
                 case JTokenType.Object:
-                    JObject authorizationValue = (JObject)property.Value;
-                    JProperty templateProperty = authorizationValue.Property("name");
-                    CollectAuthorization(templateProperty, authorizationValue, actionDefinition, pathParameters);
+                    JObject authorizationValue = (JObject)value;
+                    JToken templateNameValue = authorizationValue.Property("name")?.Value;
+                    CollectAuthorization(templateNameValue, authorizationValue, actionDefinition, pathParameters);
                     break;
 
-                case JTokenType.String when (string)property.Value == "none":
+                case JTokenType.String when (string)value == "none":
                     break;
 
                 case JTokenType.String:
-                    CollectAuthorization(templateProperty: property, authorizationValue: new JObject(), actionDefinition, pathParameters);
+                    CollectAuthorization(templateNameValue: value, authorizationValue: new JObject(), actionDefinition, pathParameters);
+                    break;
+
+                case JTokenType.Array:
+                    JArray array = (JArray)value;
+                    foreach (JToken item in array)
+                        CollectAuthorization(item.Type, item, actionDefinition, pathParameters);
+
                     break;
 
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(type), type, property.Value.Path);
+                    throw new ArgumentOutOfRangeException(nameof(type), type, value.Path);
             }
         }
-        private void CollectAuthorization(JProperty templateProperty, JObject authorizationValue, ActionDefinition actionDefinition, IReadOnlyDictionary<string, PathParameter> pathParameters)
+        private void CollectAuthorization(JToken templateNameValue, JObject authorizationValue, ActionDefinition actionDefinition, IReadOnlyDictionary<string, PathParameter> pathParameters)
         {
             JObject authorization = authorizationValue;
 
-            if (templateProperty != null
-             && (authorization = ApplyAuthorizationTemplate(templateProperty, authorizationValue)) == null) // In case of error that has been previously logged
-                return;
+            // "name" property is optional, when the endpoint defines an authorization behavior manually
+            if (templateNameValue != null)
+            {
+                authorization = ApplyAuthorizationTemplate(templateNameValue, authorizationValue);
+                if (authorization == null) // If the template is not found, it will have been logged already at this point
+                    return;
+            }
 
             IReadOnlyDictionary<string, ExplicitParameter> explicitParameters = CollectExplicitParameters(authorization, requestBody: null, pathParameters);
             ICollection<string> bodyParameters = new Collection<string>();
-            actionDefinition.Authorization = CreateActionDefinition<AuthorizationBehavior>(authorization, explicitParameters, pathParameters, bodyParameters, requestBody: null);
+            AuthorizationBehavior authorizationBehavior = CreateActionDefinition<AuthorizationBehavior>(authorization, explicitParameters, pathParameters, bodyParameters, requestBody: null);
+            actionDefinition.Authorization.Add(authorizationBehavior);
         }
 
-        private JObject ApplyAuthorizationTemplate(JProperty templateNameProperty, JObject authorizationTemplateReference)
+        private JObject ApplyAuthorizationTemplate(JToken templateNameValue, JObject authorizationTemplateReference)
         {
-            string templateName = (string)templateNameProperty.Value;
+            string templateName = (string)templateNameValue;
             if (!_templates.Authorization.TryGetTemplate(templateName, out ConfigurationAuthorizationTemplate template))
             {
-                SourceLocation templateNameLineInfo = templateNameProperty.Value.GetSourceInfo();
+                SourceLocation templateNameLineInfo = templateNameValue.GetSourceInfo();
                 Logger.LogError($"Unknown authorization template '{templateName}'", templateNameLineInfo.Source, templateNameLineInfo.Line, templateNameLineInfo.Column);
                 return null;
             }
-
-            templateNameProperty.Remove();
 
             JObject resolvedAuthorization = new JObject();
 

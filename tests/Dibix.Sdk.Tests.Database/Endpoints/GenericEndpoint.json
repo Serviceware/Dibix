@@ -187,6 +187,22 @@
         "password": null
       },
       "authorization": "AssertAuthorizedOne"
+    },
+    {
+      "method": "DELETE",
+      "childRoute": "MultipleAuthorizationBehaviors",
+      "target": "EmptyWithParams",
+      "params": {
+        "c": null,
+        "password": null
+      },
+      "authorization": [
+        "AssertAuthorizedOne",
+        {
+          "name": "AssertAuthorized",
+          "right": 1
+        }
+      ]
     }
   ]
 }

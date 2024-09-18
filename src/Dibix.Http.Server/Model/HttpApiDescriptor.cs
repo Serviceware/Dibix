@@ -72,7 +72,7 @@ namespace Dibix.Http.Server
         private sealed class HttpActionDefinitionBuilder : HttpActionBuilderBase, IHttpActionDefinitionBuilder, IHttpActionBuilderBase, IHttpParameterSourceSelector, IHttpActionDescriptor, IHttpActionMetadata
         {
             private readonly string _controllerName;
-            private HttpAuthorizationBuilder _authorization;
+            private readonly ICollection<HttpAuthorizationBuilder> _authorization;
             private Uri _uri;
 
             public EndpointMetadata Metadata { get; }
@@ -92,8 +92,9 @@ namespace Dibix.Http.Server
 
             public HttpActionDefinitionBuilder(EndpointMetadata endpointMetadata, string controllerName, IHttpActionTarget target)
             {
-                Metadata = endpointMetadata;
                 _controllerName = controllerName;
+                _authorization = new List<HttpAuthorizationBuilder>();
+                Metadata = endpointMetadata;
                 Target = target.Build();
                 StatusCodeDetectionResponses = new Dictionary<int, HttpErrorResponse>(HttpStatusCodeDetectionMap.Defaults);
             }
@@ -102,12 +103,12 @@ namespace Dibix.Http.Server
             
             public void SetStatusCodeDetectionResponse(int statusCode, int errorCode, string errorMessage) => StatusCodeDetectionResponses[statusCode] = new HttpErrorResponse(statusCode, errorCode, errorMessage);
 
-            public void WithAuthorization(IHttpActionTarget target, Action<IHttpAuthorizationBuilder> setupAction)
+            public void AddAuthorizationBehavior(IHttpActionTarget target, Action<IHttpAuthorizationBuilder> setupAction)
             {
                 HttpAuthorizationBuilder builder = new HttpAuthorizationBuilder(this, target);
                 Guard.IsNotNull(setupAction, nameof(setupAction));
                 setupAction(builder);
-                _authorization = builder;
+                _authorization.Add(builder);
             }
 
             public void RegisterDelegate(Delegate @delegate) => Delegate = @delegate;
@@ -130,9 +131,9 @@ namespace Dibix.Http.Server
                     Body = BodyContract != null ? new HttpRequestBody(BodyContract, BodyBinder) : null,
                     FileResponse = FileResponse,
                     Description = Description,
-                    Authorization = _authorization?.Build(),
                     Delegate = Delegate
                 };
+                action.Authorization.AddRange(_authorization.Select(x => x.Build()));
                 action.SecuritySchemes.AddRange(SecuritySchemes);
                 action.RequiredClaims.AddRange(RequiredClaims);
                 action.StatusCodeDetectionResponses.AddRange(StatusCodeDetectionResponses);

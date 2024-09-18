@@ -51,7 +51,7 @@ namespace Dibix.Http.Server.Tests
             IDictionary<string, object> arguments = new Dictionary<string, object> { ["databaseAccessorFactory"] = null };
             foreach (KeyValuePair<string, object> parameter in parameters)
                 arguments.Add(parameter);
-            
+
             object result = await HttpActionInvoker.Invoke(action, request, responseFormatter, arguments, ControllerActivator.NotImplemented, parameterDependencyResolver.Object, default).ConfigureAwait(false);
             return result;
         }
@@ -99,8 +99,11 @@ namespace Dibix.Http.Server.Tests
                     configureActions?.Invoke(builder);
 
                     string authorizationMethodName = $"{testName}_Authorization_Target";
-                    if (typeof(HttpActionInvokerTest).GetMethod(authorizationMethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static) != null)
-                        builder.WithAuthorization(ReflectionHttpActionTarget.Create(typeof(HttpActionInvokerTest), authorizationMethodName), configureAuthorization ?? (_ => { }));
+                    foreach (MethodInfo method in typeof(HttpActionInvokerTest).GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static).OrderBy(x => x.Name))
+                    {
+                        if (method.Name.StartsWith(authorizationMethodName, StringComparison.Ordinal))
+                            builder.AddAuthorizationBehavior(ReflectionHttpActionTarget.Create(typeof(HttpActionInvokerTest), method.Name), configureAuthorization ?? (_ => { }));
+                    }
                 };
             }
 
@@ -112,6 +115,11 @@ namespace Dibix.Http.Server.Tests
             public X() : base("x") => base.ImportSqlMetadata(() => Add(default, default));
 
             public void Add(int intValue, string stringValue) => base.AddValues(intValue, stringValue);
+        }
+
+        private sealed class HttpAuthorizationBehaviorContext
+        {
+            public string Result { get; set; }
         }
     }
 }
