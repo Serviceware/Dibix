@@ -22,19 +22,27 @@ namespace Dibix.Http.Client
             FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(path);
             string productName = fileVersionInfo.ProductName;
             string assemblyName = Path.GetFileNameWithoutExtension(path);
-            string normalizedAssemblyName = assemblyName.Replace(".", null);
             string productVersion = fileVersionInfo.ProductVersion;
+            return ResolveUserAgent(productName, assemblyName, productVersion, productNameFormatter);
+        }
 
+        private static ProductInfoHeaderValue ResolveUserAgentFromAssembly(Assembly assembly, Func<string, string> productNameFormatter)
+        {
+            string productName = assembly.GetCustomAttribute<AssemblyProductAttribute>()?.Product;
+            string assemblyName = assembly.GetName().Name;
+            string productVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+            return ResolveUserAgent(productName, assemblyName, productVersion, productNameFormatter);
+        }
+
+        private static ProductInfoHeaderValue ResolveUserAgent(string productName, string assemblyName, string productVersion, Func<string, string> productNameFormatter)
+        {
+            string normalizedAssemblyName = assemblyName.Replace(".", null);
             string userAgentProductName = $"{productName}{normalizedAssemblyName}";
             if (productNameFormatter != null)
                 userAgentProductName = productNameFormatter(userAgentProductName);
 
             return new ProductInfoHeaderValue(userAgentProductName, productVersion);
         }
-
-#pragma warning disable IL3000 // Avoid accessing Assembly file path when publishing as a single file
-        private static ProductInfoHeaderValue ResolveUserAgentFromAssembly(Assembly assembly, Func<string, string> productNameFormatter) => FromFile(assembly.Location, productNameFormatter);
-#pragma warning restore IL3000 // Avoid accessing Assembly file path when publishing as a single file
 
         private static Assembly ResolveEntryAssembly()
         {
