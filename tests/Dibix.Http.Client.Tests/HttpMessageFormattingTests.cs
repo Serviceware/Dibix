@@ -15,7 +15,7 @@ namespace Dibix.Http.Client.Tests
         [TestMethod]
         public async Task HttpException_GetFormattedText_WithMaskedSecret()
         {
-            MethodInfo createMethod = typeof(HttpException).SafeGetMethod("Create", BindingFlags.NonPublic | BindingFlags.Static, new[] { typeof(HttpRequestMessage), typeof(HttpResponseMessage) });
+            MethodInfo createMethod = typeof(HttpException).SafeGetMethod("Create", BindingFlags.Public | BindingFlags.Static, new[] { typeof(HttpRequestMessage), typeof(HttpResponseMessage) });
             HttpRequestMessage request = new HttpRequestMessage();
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/json"));
@@ -60,7 +60,7 @@ Content-Type: application/json; charset=utf-8
         [TestMethod]
         public async Task HttpException_GetFormattedText_WithNoMaskedSecret()
         {
-            MethodInfo createMethod = typeof(HttpException).SafeGetMethod("Create", BindingFlags.NonPublic | BindingFlags.Static, new[] { typeof(HttpRequestMessage), typeof(HttpResponseMessage) });
+            MethodInfo createMethod = typeof(HttpException).SafeGetMethod("Create", BindingFlags.Public | BindingFlags.Static, new[] { typeof(HttpRequestMessage), typeof(HttpResponseMessage) });
             HttpRequestMessage request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "Secret!");
             request.Content = new FormUrlEncodedContent(new[]
@@ -96,7 +96,7 @@ Content-Length: 0";
         [TestMethod]
         public async Task HttpException_GetFormattedText_WithUnmaskedSecret()
         {
-            MethodInfo createMethod = typeof(HttpException).SafeGetMethod("Create", BindingFlags.NonPublic | BindingFlags.Static, new[] { typeof(HttpRequestMessage), typeof(HttpResponseMessage) });
+            MethodInfo createMethod = typeof(HttpException).SafeGetMethod("Create", BindingFlags.Public | BindingFlags.Static, new[] { typeof(HttpRequestMessage), typeof(HttpResponseMessage) });
             HttpRequestMessage request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "Okay");
 

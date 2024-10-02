@@ -22,7 +22,7 @@ namespace Dibix.Http.Client
             this.ResponseContentText = responseContentText;
         }
 
-        internal static async Task<HttpException> Create(HttpRequestMessage request, HttpResponseMessage response)
+        public static async Task<HttpException> Create(HttpRequestMessage request, HttpResponseMessage response)
         {
             string requestContentText = null;
             if (request.Content != null)
