@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
@@ -13,79 +14,91 @@ namespace Dibix.Dapper.Tests
     public sealed class DapperDatabaseAccessorTest : DapperTestBase
     {
         [TestMethod]
-        public Task QuerySingleAsync_WithMultipleRows_ThrowsException() => base.ExecuteTest(async accessor =>
+        public Task QuerySingleAsync_WithMultipleRows_ThrowsException() => ExecuteTest(async accessor =>
         {
             const string commandText = "SELECT 1 UNION ALL SELECT 2";
             DatabaseAccessException exception = await AssertThrows<DatabaseAccessException>(() => accessor.QuerySingleAsync<int>(commandText, CommandType.Text, ParametersVisitor.Empty, default)).ConfigureAwait(false);
+            Assert.AreEqual("""
+                            Sequence contains more than one element
+                            CommandType: Text
+                            CommandText: <Inline>
+                            """, exception.Message);
             Assert.AreEqual(DatabaseAccessErrorCode.SequenceContainsMoreThanOneElement, exception.AdditionalErrorCode);
-            Assert.AreEqual(@"Sequence contains more than one element
-CommandType: Text
-CommandText: <Inline>", exception.Message);
         });
 
         [TestMethod]
-        public Task QuerySingle_WithNoRows_ThrowsException() => base.ExecuteTest(accessor =>
+        public Task QuerySingle_WithNoRows_ThrowsException() => ExecuteTest(accessor =>
         {
             const string commandText = "SELECT 1 WHERE 1 = 2";
             DatabaseAccessException exception = AssertThrows<DatabaseAccessException>(() => accessor.QuerySingle<int>(commandText, CommandType.Text, ParametersVisitor.Empty));
+            Assert.AreEqual("""
+                            Sequence contains no elements
+                            CommandType: Text
+                            CommandText: <Inline>
+                            """, exception.Message);
             Assert.AreEqual(DatabaseAccessErrorCode.SequenceContainsNoElements, exception.AdditionalErrorCode);
-            Assert.AreEqual(@"Sequence contains no elements
-CommandType: Text
-CommandText: <Inline>", exception.Message);
         });
 
         [TestMethod]
-        public Task QuerySingleOrDefaultAsync_WithMultipleRows_ThrowsException() => base.ExecuteTest(async accessor =>
+        public Task QuerySingleOrDefaultAsync_WithMultipleRows_ThrowsException() => ExecuteTest(async accessor =>
         {
             const string commandText = "SELECT 1 UNION ALL SELECT 2";
             DatabaseAccessException exception = await AssertThrows<DatabaseAccessException>(() => accessor.QuerySingleOrDefaultAsync<int>(commandText, CommandType.Text, ParametersVisitor.Empty, default)).ConfigureAwait(false);
+            Assert.AreEqual("""
+                            Sequence contains more than one element
+                            CommandType: Text
+                            CommandText: <Inline>
+                            """, exception.Message);
             Assert.AreEqual(DatabaseAccessErrorCode.SequenceContainsMoreThanOneElement, exception.AdditionalErrorCode);
-            Assert.AreEqual(@"Sequence contains more than one element
-CommandType: Text
-CommandText: <Inline>", exception.Message);
         });
 
         [TestMethod]
-        public Task ReadSingleAsync_WithMultipleRows_ThrowsException() => base.ExecuteTest(async accessor =>
+        public Task ReadSingleAsync_WithMultipleRows_ThrowsException() => ExecuteTest(async accessor =>
         {
             const string commandText = "SELECT 1 SELECT 1 UNION ALL SELECT 2";
             using IMultipleResultReader reader = await accessor.QueryMultipleAsync(commandText, CommandType.Text, ParametersVisitor.Empty, default).ConfigureAwait(false);
             _ = await reader.ReadSingleAsync<int>().ConfigureAwait(false);
             DatabaseAccessException exception = await AssertThrows<DatabaseAccessException>(async () => await reader.ReadSingleAsync<int>().ConfigureAwait(false)).ConfigureAwait(false);
+            Assert.AreEqual("""
+                            Sequence contains more than one element
+                            CommandType: Text
+                            CommandText: <Inline>
+                            """, exception.Message);
             Assert.AreEqual(DatabaseAccessErrorCode.SequenceContainsMoreThanOneElement, exception.AdditionalErrorCode);
-            Assert.AreEqual(@"Sequence contains more than one element
-CommandType: Text
-CommandText: <Inline>", exception.Message);
         });
 
         [TestMethod]
-        public Task ReadSingle_WithNoRows_ThrowsException() => base.ExecuteTest(accessor =>
+        public Task ReadSingle_WithNoRows_ThrowsException() => ExecuteTest(accessor =>
         {
             const string commandText = "SELECT 1 SELECT 1 WHERE 1 = 2";
             using IMultipleResultReader reader = accessor.QueryMultiple(commandText, CommandType.Text, ParametersVisitor.Empty);
             _ = reader.ReadSingle<int>();
             DatabaseAccessException exception = AssertThrows<DatabaseAccessException>(() => reader.ReadSingle<int>());
+            Assert.AreEqual("""
+                            Sequence contains no elements
+                            CommandType: Text
+                            CommandText: <Inline>
+                            """, exception.Message);
             Assert.AreEqual(DatabaseAccessErrorCode.SequenceContainsNoElements, exception.AdditionalErrorCode);
-            Assert.AreEqual(@"Sequence contains no elements
-CommandType: Text
-CommandText: <Inline>", exception.Message);
         });
 
         [TestMethod]
-        public Task ReadSingleOrDefaultAsync_WithMultipleRows_ThrowsException() => base.ExecuteTest(async accessor =>
+        public Task ReadSingleOrDefaultAsync_WithMultipleRows_ThrowsException() => ExecuteTest(async accessor =>
         {
             const string commandText = "SELECT 1 SELECT 1 UNION ALL SELECT 2";
             using IMultipleResultReader reader = accessor.QueryMultiple(commandText, CommandType.Text, ParametersVisitor.Empty);
             _ = reader.ReadSingle<int>();
             DatabaseAccessException exception = await AssertThrows<DatabaseAccessException>(() => reader.ReadSingleOrDefaultAsync<int>()).ConfigureAwait(false);
+            Assert.AreEqual("""
+                            Sequence contains more than one element
+                            CommandType: Text
+                            CommandText: <Inline>
+                            """, exception.Message);
             Assert.AreEqual(DatabaseAccessErrorCode.SequenceContainsMoreThanOneElement, exception.AdditionalErrorCode);
-            Assert.AreEqual(@"Sequence contains more than one element
-CommandType: Text
-CommandText: <Inline>", exception.Message);
         });
 
         [TestMethod]
-        public Task QuerySingleOrDefault_WithNoRows_ReturnsDefault() => base.ExecuteTest(accessor =>
+        public Task QuerySingleOrDefault_WithNoRows_ReturnsDefault() => ExecuteTest(accessor =>
         {
             const string commandText = "SELECT 1 WHERE 1 = 2";
             int result = accessor.QuerySingleOrDefault<int>(commandText, CommandType.Text, ParametersVisitor.Empty);
@@ -93,7 +106,7 @@ CommandText: <Inline>", exception.Message);
         });
 
         [TestMethod]
-        public Task QueryFile_WithStreamParameter_IsAcceptedAsBinary() => base.ExecuteTest(accessor =>
+        public Task QueryFile_WithStreamParameter_IsAcceptedAsBinary() => ExecuteTest(accessor =>
         {
                 byte[] data = { 1, 2 };
                 const string commandText = "SELECT @data";
@@ -105,7 +118,7 @@ CommandText: <Inline>", exception.Message);
             });
 
         [TestMethod]
-        public Task Execute_WithOutputParameter_OutputParameterValueIsReturned() => base.ExecuteTest(accessor =>
+        public Task Execute_WithOutputParameter_OutputParameterValueIsReturned() => ExecuteTest(accessor =>
         {
             const string commandText = "[dbo].[_dibix_tests_sp1]";
             InputClass input = new InputClass();
@@ -126,7 +139,7 @@ CommandText: <Inline>", exception.Message);
         }
 
         [TestMethod]
-        public Task QueryMany_WithBinaryParameter_UsingTemplate_Success() => base.ExecuteTest(accessor =>
+        public Task QueryMany_WithBinaryParameter_UsingTemplate_Success() => ExecuteTest(accessor =>
         {
             const string commandText = "SELECT CAST(@binary AS NVARCHAR(MAX))";
             byte[] binary = Encoding.Unicode.GetBytes("Test");
@@ -136,7 +149,7 @@ CommandText: <Inline>", exception.Message);
         });
 
         [TestMethod]
-        public Task QueryMany_WithXElementParameter_UsingTemplate_Success() => base.ExecuteTest(accessor =>
+        public Task QueryMany_WithXElementParameter_UsingTemplate_Success() => ExecuteTest(accessor =>
         {
             const string commandText = "SELECT [x].[v].value('@value', 'INT') FROM @xml.nodes(N'root/item') AS [x]([v])";
             XElement xml = XElement.Parse("<root><item value=\"1\" /><item value=\"2\" /></root>");
@@ -148,7 +161,7 @@ CommandText: <Inline>", exception.Message);
         });
 
         [TestMethod]
-        public Task QueryMany_WithXElementParameter_UsingTypedMethod_Success() => base.ExecuteTest(accessor =>
+        public Task QueryMany_WithXElementParameter_UsingTypedMethod_Success() => ExecuteTest(accessor =>
         {
             const string commandText = "SELECT [x].[v].value('@value', 'INT') FROM @xml.nodes(N'root/item') AS [x]([v])";
             XElement xml = XElement.Parse("<root><item value=\"1\" /><item value=\"2\" /></root>");
@@ -160,7 +173,7 @@ CommandText: <Inline>", exception.Message);
         });
 
         [TestMethod]
-        public Task QueryMany_WithXElementResult_Success() => base.ExecuteTest(accessor =>
+        public Task QueryMany_WithXElementResult_Success() => ExecuteTest(accessor =>
         {
             const string commandText = "SELECT N'<xml/>'";
             XElement element = accessor.QuerySingle<XElement>(commandText, CommandType.Text, ParametersVisitor.Empty);
@@ -168,27 +181,31 @@ CommandText: <Inline>", exception.Message);
         });
 
         [TestMethod]
-        public Task QuerySingle_MissingColumnName_ThrowsException() => base.ExecuteTest(accessor =>
+        public Task QuerySingle_MissingColumnName_ThrowsException() => ExecuteTest(accessor =>
         {
             const string commandText = "SELECT 1";
             DatabaseAccessException exception = AssertThrows<DatabaseAccessException>(() => accessor.QuerySingle<Entity>(commandText, CommandType.Text, ParametersVisitor.Empty));
-            Assert.AreEqual(@"Column name was not specified, therefore it cannot be mapped to type 'Dibix.Dapper.Tests.Entity'
-CommandType: Text
-CommandText: <Inline>", exception.Message);
+            Assert.AreEqual("""
+                            Column name was not specified, therefore it cannot be mapped to type 'Dibix.Dapper.Tests.Entity'
+                            CommandType: Text
+                            CommandText: <Inline>
+                            """, exception.Message);
         });
 
         [TestMethod]
-        public Task QuerySingle_InvalidColumnName_ThrowsException() => base.ExecuteTest(accessor =>
+        public Task QuerySingle_InvalidColumnName_ThrowsException() => ExecuteTest(accessor =>
         {
             const string commandText = "SELECT 1 AS [idx]";
             DatabaseAccessException exception = AssertThrows<DatabaseAccessException>(() => accessor.QuerySingle<Entity>(commandText, CommandType.Text, ParametersVisitor.Empty));
-            Assert.AreEqual(@"Column 'idx' does not match a property on type 'Dibix.Dapper.Tests.Entity'
-CommandType: Text
-CommandText: <Inline>", exception.Message);
+            Assert.AreEqual("""
+                            Column 'idx' does not match a property on type 'Dibix.Dapper.Tests.Entity'
+                            CommandType: Text
+                            CommandText: <Inline>
+                            """, exception.Message);
         });
 
         [TestMethod]
-        public Task QuerySingle_Success() => base.ExecuteTest(accessor =>
+        public Task QuerySingle_Success() => ExecuteTest(accessor =>
         {
             const string commandText = "SELECT 1 AS [id]";
             Entity result = accessor.QuerySingle<Entity>(commandText, CommandType.Text, ParametersVisitor.Empty);
@@ -197,7 +214,7 @@ CommandText: <Inline>", exception.Message);
         });
         
         [TestMethod]
-        public Task QuerySingle_PrimitiveResult_Success() => base.ExecuteTest(accessor =>
+        public Task QuerySingle_PrimitiveResult_Success() => ExecuteTest(accessor =>
         {
             const string commandText = "SELECT 1";
             bool result = accessor.QuerySingle<bool>(commandText, CommandType.Text, ParametersVisitor.Empty);
@@ -206,7 +223,7 @@ CommandText: <Inline>", exception.Message);
 
         [TestMethod]
         [Ignore("https://github.com/DapperLib/Dapper/issues/1901")]
-        public Task QuerySingle_PrimitiveResult_Async_Success() => base.ExecuteTest(async accessor =>
+        public Task QuerySingle_PrimitiveResult_Async_Success() => ExecuteTest(async accessor =>
         {
             const string commandText = "SELECT 1";
             bool result = await accessor.QuerySingleAsync<bool>(commandText, CommandType.Text, ParametersVisitor.Empty, default).ConfigureAwait(false);
@@ -214,7 +231,7 @@ CommandText: <Inline>", exception.Message);
         });
 
         [TestMethod]
-        public Task QuerySingle_WithPrimitiveParameter_UsingLambdaSyntax_Success() => base.ExecuteTest(accessor =>
+        public Task QuerySingle_WithPrimitiveParameter_UsingLambdaSyntax_Success() => ExecuteTest(accessor =>
         {
             const string commandText = "SELECT @agentid AS [id], N'beef' AS [name]";
             ParametersVisitor parameters = accessor.Parameters().SetInt32("agentid", 6).Build();
@@ -225,7 +242,7 @@ CommandText: <Inline>", exception.Message);
         });
 
         [TestMethod]
-        public Task QuerySingle_WithPrimitiveParameter_UsingLambdaAndTemplateSyntax_Success() => base.ExecuteTest(accessor =>
+        public Task QuerySingle_WithPrimitiveParameter_UsingLambdaAndTemplateSyntax_Success() => ExecuteTest(accessor =>
         {
             const string commandText = "SELECT @agentid AS [id], N'beef' AS [name]";
             ParametersVisitor parameters = accessor.Parameters().SetFromTemplate(new { agentid = 6 }).Build();
@@ -236,7 +253,7 @@ CommandText: <Inline>", exception.Message);
         });
 
         [TestMethod]
-        public Task QuerySingle_WithPrimitiveParameter_UsingVariableSyntax_Success() => base.ExecuteTest(accessor =>
+        public Task QuerySingle_WithPrimitiveParameter_UsingVariableSyntax_Success() => ExecuteTest(accessor =>
         {
             const string commandText = "SELECT @agentid AS [id], N'beef' AS [name]";
             ParametersVisitor @params = accessor.Parameters()
@@ -249,7 +266,7 @@ CommandText: <Inline>", exception.Message);
         });
 
         [TestMethod]
-        public Task QuerySingle_WithPrimitiveParameter_UsingVariableAndTemplateSyntax_Success() => base.ExecuteTest(accessor =>
+        public Task QuerySingle_WithPrimitiveParameter_UsingVariableAndTemplateSyntax_Success() => ExecuteTest(accessor =>
         {
             const string commandText = "SELECT @agentid AS [id], N'beef' AS [name], @direction AS [direction]";
             ParametersVisitor @params = accessor.Parameters()
@@ -266,10 +283,12 @@ CommandText: <Inline>", exception.Message);
         });
 
         [TestMethod]
-        public Task QueryMany_WithTableValueParameter_Success() => base.ExecuteTest(accessor =>
+        public Task QueryMany_WithTableValueParameter_Success() => ExecuteTest(accessor =>
         {
-            const string commandText = @"SELECT [intvalue] AS [id], [stringvalue] AS [name]
-FROM @translations";
+            const string commandText = """
+                                       SELECT [intvalue] AS [id], [stringvalue] AS [name]
+                                       FROM @translations
+                                       """;
             StructuredType_IntString translationsParam = new StructuredType_IntString
             {
                 { 7, "de" },
@@ -288,12 +307,14 @@ FROM @translations";
         });
 
         [TestMethod]
-        public Task QueryMultiple_UsingTemplate_Success() => base.ExecuteTest(accessor =>
+        public Task QueryMultiple_UsingTemplate_Success() => ExecuteTest(accessor =>
         {
-            const string commandText = @"SELECT @agentid AS [id], N'beef' AS [name], [decimalvalue] AS [price]
-FROM @values
-SELECT [intvalue]
-FROM @ids";
+            const string commandText = """
+                                       SELECT @agentid AS [id], N'beef' AS [name], [decimalvalue] AS [price]
+                                       FROM @values
+                                       SELECT [intvalue]
+                                       FROM @ids
+                                       """;
 
             StructuredType_IntStringDecimal valuesParam = new StructuredType_IntStringDecimal { { 5, "cake", 3.975M } };
             StructuredType_Int idsParam = StructuredType_Int.From(new[] { 1, 2 }, (x, y) => x.Add(y));
@@ -319,12 +340,14 @@ FROM @ids";
         });
 
         [TestMethod]
-        public Task QueryMultiple_UsingTypedMethod_Success() => base.ExecuteTest(accessor =>
+        public Task QueryMultiple_UsingTypedMethod_Success() => ExecuteTest(accessor =>
         {
-            const string commandText = @"SELECT @agentid AS [id], N'beef' AS [name], [decimalvalue] AS [price]
-FROM @values
-SELECT [intvalue]
-FROM @ids";
+            const string commandText = """
+                                       SELECT @agentid AS [id], N'beef' AS [name], [decimalvalue] AS [price]
+                                       FROM @values
+                                       SELECT [intvalue]
+                                       FROM @ids
+                                       """;
 
             StructuredType_IntStringDecimal valuesParam = new StructuredType_IntStringDecimal { { 5, "cake", 3.975M } };
             StructuredType_Int idsParam = StructuredType_Int.From(new[] { 1, 2 }, (x, y) => x.Add(y));
@@ -347,10 +370,12 @@ FROM @ids";
         });
 
         [TestMethod]
-        public Task CustomSqlMetadata_MaxLength_TextIsTrimmed() => base.ExecuteTest(accessor =>
+        public Task CustomSqlMetadata_MaxLength_TextIsTrimmed() => ExecuteTest(accessor =>
         {
-            const string commandText = @"SELECT [stringvalue]
-FROM @values";
+            const string commandText = """
+                                       SELECT [stringvalue]
+                                       FROM @values
+                                       """;
 
             ParametersVisitor parameters = accessor.Parameters().SetStructured("values", new StructuredType_String_Custom { "abc" }).Build();
             string result = accessor.QuerySingle<string>(commandText, CommandType.Text, parameters);
@@ -358,10 +383,12 @@ FROM @values";
         });
 
         [TestMethod]
-        public Task CustomSqlMetadata_Scale_DecimalValueIsRounded() => base.ExecuteTest(accessor =>
+        public Task CustomSqlMetadata_Scale_DecimalValueIsRounded() => ExecuteTest(accessor =>
         {
-            const string commandText = @"SELECT [decimalvalue]
-FROM @values";
+            const string commandText = """
+                                       SELECT [decimalvalue]
+                                       FROM @values
+                                       """;
 
             ParametersVisitor parameters = accessor.Parameters().SetStructured("values", new StructuredType_Decimal_Custom { 3.975M }).Build();
             decimal result = accessor.QuerySingle<decimal>(commandText, CommandType.Text, parameters);

@@ -1,16 +1,16 @@
 <Project>
   <ItemGroup>
     <GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
-    <GlobalPackageReference Include="Nerdbank.GitVersioning"      Version="3.6.141" />
+    <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="3.6.141" />
 
-    <PackageVersion Include="coverlet.collector"                                      Version="6.0.2" />
-    <PackageVersion Include="Dapper.StrongName"                                       Version="2.1.35" />
-    <PackageVersion Include="IdentityModel"                                           Version="7.0.0" />
-    <PackageVersion Include="ILRepack"                                                Version="2.0.34" />
-    <PackageVersion Include="Microsoft.AspNet.WebApi.Client"                          Version="6.0.0" />
-    <PackageVersion Include="Microsoft.AspNet.WebApi.Core"                            Version="5.3.0" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer"           Version="8.0.8" />
-    <PackageVersion Include="Microsoft.Build.Utilities.Core"                          Version="17.11.4" />
+    <PackageVersion Include="coverlet.collector" Version="6.0.2" />
+    <PackageVersion Include="Dapper.StrongName" Version="2.1.35" />
+    <PackageVersion Include="IdentityModel" Version="7.0.0" />
+    <PackageVersion Include="ILRepack" Version="2.0.34" />
+    <PackageVersion Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" />
+    <PackageVersion Include="Microsoft.AspNet.WebApi.Core" Version="5.3.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
+    <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.11.4" />
 
     <!--
       Be careful to update this package, because it might require a newer version of the compiler:
@@ -19,32 +19,33 @@
       The UseDotNet@2 task can help here, but it might also require a newer version of MSBuild, therefore requiring a VS update:
       Version 8.0.400 of the .NET SDK requires at least version 17.9.5 of MSBuild. The current available version of MSBuild is 17.8.3.51904. Change the .NET SDK specified in global.json to an older version that requires the MSBuild version currently available.
     -->
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp"                           Version="4.11.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.11.0" />
 
-    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers"                        Version="3.3.4" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions"         Version="8.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder"               Version="8.0.2" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.2" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Json"                 Version="8.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.UserSecrets"          Version="8.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions"   Version="8.0.1" />
-    <PackageVersion Include="Microsoft.Extensions.Http"                               Version="8.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting"                            Version="8.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices"            Version="8.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions"    Version="8.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations"            Version="8.0.0" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk"                                  Version="17.11.0" />
-    <PackageVersion Include="Microsoft.OpenApi"                                       Version="1.6.17" />
-    <PackageVersion Include="Microsoft.SqlServer.DacFx"                               Version="162.3.566" />
-    <PackageVersion Include="Moq"                                                     Version="4.20.70" />
-    <PackageVersion Include="MSTest.TestAdapter"                                      Version="3.5.2" />
-    <PackageVersion Include="MSTest.TestFramework"                                    Version="3.5.2" />
-    <PackageVersion Include="Newtonsoft.Json"                                         Version="13.0.3" />
-    <PackageVersion Include="Newtonsoft.Json.Schema"                                  Version="4.0.1" />
-    <PackageVersion Include="System.ComponentModel.Annotations"                       Version="5.0.0" />
-    <PackageVersion Include="System.Data.SqlClient"                                   Version="4.8.6" />
-    <PackageVersion Include="System.Diagnostics.EventLog"                             Version="8.0.0" />
-    <PackageVersion Include="System.IO.Packaging"                                     Version="8.0.0" />
-    <PackageVersion Include="System.Reflection.Emit"                                  Version="4.7.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.UserSecrets" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.11.0" />
+    <PackageVersion Include="Microsoft.OpenApi" Version="1.6.17" />
+    <PackageVersion Include="Microsoft.SqlServer.DacFx" Version="162.3.566" />
+    <PackageVersion Include="Moq" Version="4.20.70" />
+    <PackageVersion Include="MSTest.TestAdapter" Version="3.5.2" />
+    <PackageVersion Include="MSTest.TestFramework" Version="3.5.2" />
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageVersion Include="Newtonsoft.Json.Schema" Version="4.0.1" />
+    <PackageVersion Include="System.ComponentModel.Annotations" Version="5.0.0" />
+    <PackageVersion Include="System.Data.SqlClient" Version="4.8.6" />
+    <PackageVersion Include="System.Diagnostics.EventLog" Version="8.0.0" />
+    <PackageVersion Include="System.IO.Packaging" Version="8.0.0" />
+    <PackageVersion Include="System.Reflection.Emit" Version="4.7.0" />
+    <PackageVersion Include="Testcontainers.MsSql" Version="3.10.0" />
   </ItemGroup>
 </Project>

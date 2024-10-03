@@ -301,6 +301,7 @@ start winmergeU ""{ExpectedDirectoryName}"" ""{ActualDirectoryName}""");
                 return;
 
             string path = Path.Combine(TestRootDirectory, $"{_normalizedTestName}.zip");
+            EnsureDirectory(path);
             using (ZipArchive archive = ZipFile.Open(path, ZipArchiveMode.Create))
             {
                 foreach (string file in files)

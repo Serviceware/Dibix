@@ -38,6 +38,7 @@
     <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" />
     <PackageReference Include="MSTest.TestFramework" />
     <PackageReference Include="System.Diagnostics.EventLog" />
+    <PackageReference Include="Testcontainers.MsSql" />
   </ItemGroup>
 
   <ItemGroup>

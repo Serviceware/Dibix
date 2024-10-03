@@ -2,13 +2,12 @@
   
   <PropertyGroup>    
     <TargetFramework>net8.0</TargetFramework>
-    <UserSecretsId>dibix-dapper-tests</UserSecretsId>
     <EnableUnsafeBinaryFormatterSerialization>True</EnableUnsafeBinaryFormatterSerialization>
   </PropertyGroup>
-
+  
   <ItemGroup>
-    <None Remove="*.vspscc" />
     <Compile Include="..\..\shared\Diagnostics\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Resource\InitializeDatabase.sql" LogicalName="%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,6 +18,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="MSTest.TestAdapter" />
     <PackageReference Include="MSTest.TestFramework" />
+    <PackageReference Include="Testcontainers.MsSql" />
   </ItemGroup>
 
   <ItemGroup>

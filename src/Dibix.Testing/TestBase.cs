@@ -45,6 +45,7 @@ namespace Dibix.Testing
             get => SafeGetProperty(ref _testResultComposer);
             set => _testResultComposer = value;
         }
+        private static Exception AssemblyInitializeException { get; set; }
         #endregion
 
         #region Constructor
@@ -59,6 +60,13 @@ namespace Dibix.Testing
         public async Task OnTestInitialize()
         {
             TestResultComposer = new TestResultComposer(TestContext, UseDedicatedTestResultsDirectory, IsAssemblyInitialize);
+
+            // Unfortunately, when an exception occurs during AssemblyInitialize, the result attachments are no longer collected.
+            // Therefore, we delay throwing the exception until the first test is running.
+            // We place it just after the TestResultComposer is initialized and prepared the existing run attachments
+            if (AssemblyInitializeException != null)
+                throw AssemblyInitializeException;
+
             string outputFileName = IsAssemblyInitialize ? "AssemblyInitialize.log" : "Output.log";
             TestOutputHelper = new TestOutputWriter(TestContext, TestResultComposer, outputToFile: true, fileName: outputFileName, IsAssemblyInitialize, tailOutput: AttachOutputObserver);
 
@@ -74,14 +82,27 @@ namespace Dibix.Testing
         #endregion
 
         #region Protected Methods
-        protected static async Task<T> CreateFromAssemblyInitialize<T>(TestContext testContext) where T : TestBase, new()
+        // AssemblyInitialize attribute cannot be placed in base class
+        // See: https://github.com/microsoft/testfx/issues/757
+        // Therefore we provide an entry method for consumers to call
+        // We will then call an instance method for the consumer to implement
+        protected static async Task AssemblyInitialize<T>(TestContext testContext) where T : TestBase, new()
         {
-            T instance = new T();
-            instance.TestContext = testContext;
-            instance.IsAssemblyInitialize = true;
-            await instance.OnTestInitialize().ConfigureAwait(false);
-            return instance;
+            try
+            {
+                using T instance = new T();
+                instance.TestContext = testContext;
+                instance.IsAssemblyInitialize = true;
+                await instance.OnTestInitialize().ConfigureAwait(false);
+                await instance.OnAssemblyInitialize().ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                AssemblyInitializeException = exception;
+            }
         }
+
+        protected virtual Task OnAssemblyInitialize() => Task.CompletedTask;
 
         protected virtual Task OnTestInitialized() => Task.CompletedTask;
 
