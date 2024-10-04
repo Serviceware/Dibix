@@ -28,8 +28,15 @@ if ($Configuration -eq 'Debug')
 }
 else
 {
+    # Ensure that the project is restored from scratch, as previous VS restores may have been done with different settings, i.E. PublishReadyToRun
+    # This causes issues in the single file compilation, and causes a crash of the application during start
+    Exec "dotnet restore --force $sourcePath
+                         --runtime $runtimeIdentifier
+                         --p:PublishReadyToRun=$publishReadyToRun"
+
     Exec "dotnet publish --configuration $Configuration
                          --runtime $runtimeIdentifier
+                         --no-restore
                          $(if ($SelfContained) { "--self-contained" } else { "--no-self-contained" })
                          --p:IgnoreProjectGuid=True
                          --p:PublishReadyToRun=$publishReadyToRun
