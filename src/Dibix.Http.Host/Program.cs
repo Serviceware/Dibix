@@ -123,6 +123,13 @@ namespace Dibix.Http.Host
 
             WebApplication app = builder.Build();
 
+            ILogger logger = loggerFactory.CreateLogger($"Dibix.Http.Host.{nameof(Program)}");
+            logger.LogInformation("Using path base: {pathBase}", !String.IsNullOrEmpty(hostingOptions.BaseAddress) ? hostingOptions.BaseAddress : "/");
+
+            if (!String.IsNullOrWhiteSpace(hostingOptions.BaseAddress))
+            {
+                app.UsePathBase(hostingOptions.BaseAddress);
+            }
             app.UseMiddleware<DiagnosticsMiddleware>();
             app.UseExceptionHandler();
             app.UseRouting();

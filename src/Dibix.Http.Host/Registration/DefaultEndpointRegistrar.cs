@@ -26,11 +26,7 @@ namespace Dibix.Http.Host
         {
             foreach (EndpointDefinition endpoint in _endpointMetadataProvider.GetEndpoints())
             {
-                string baseAddress = "";
-                if (!String.IsNullOrEmpty(_hostingOptions.Value.BaseAddress))
-                    baseAddress = $"/{_hostingOptions.Value.BaseAddress.Trim('/')}";
-
-                string route = $"{baseAddress}{endpoint.Url}";
+                string route = $"{endpoint.Url}";
                 _logger.LogDebug("Registering route: {method} {route}", endpoint.Method, route);
 
                 IEndpointConventionBuilder endpointBuilder = builder.MapMethods(route, EnumerableExtensions.Create(endpoint.Method), _endpointImplementationProvider.GetImplementation(endpoint));
