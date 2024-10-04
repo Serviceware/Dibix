@@ -94,8 +94,17 @@ namespace Dibix.Sdk.CodeGeneration
 
         private void ReadControllerAction(ControllerDefinition controller, JObject action)
         {
-            JObject actionMerged = (JObject)_templates.Default.Action.DeepClone();
-            actionMerged.Merge(action, new JsonMergeSettings { MergeArrayHandling = MergeArrayHandling.Replace });
+            JObject actionMerged;
+            if (_templates.Default.Action != null)
+            {
+                JObject actionTemplate = (JObject)_templates.Default.Action.DeepClone();
+                actionTemplate.Merge(action, new JsonMergeSettings { MergeArrayHandling = MergeArrayHandling.Replace });
+                actionMerged = actionTemplate;
+            }
+            else
+            {
+                actionMerged = action;
+            }
 
             // Collect body parameters
             ActionRequestBody requestBody = ReadBody(action);
