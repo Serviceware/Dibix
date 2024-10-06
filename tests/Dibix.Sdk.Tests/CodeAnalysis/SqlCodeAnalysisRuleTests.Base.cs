@@ -10,7 +10,6 @@ using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.CodeAnalysis;
 using Dibix.Sdk.Sql;
 using Dibix.Testing;
-using Microsoft.SqlServer.Dac.Model;
 
 namespace Dibix.Sdk.Tests.CodeAnalysis
 {
@@ -63,9 +62,9 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
             };
             configuration.Source.AddRange(source);
             configuration.ScriptSource.AddRange(scriptSource);
-            TSqlModel model = PublicSqlDataSchemaModelLoader.Load(preventDmlReferences: true, DatabaseTestUtility.DatabaseSchemaProviderName, DatabaseTestUtility.ModelCollation, source, references, logger);
-            LockEntryManager lockEntryManager = LockEntryManager.Create(reset: false, filePath: null);
-            ISqlCodeAnalysisRuleEngine engine = SqlCodeAnalysisRuleEngine.Create(model, configuration, lockEntryManager, logger);
+            using PublicSqlDataSchemaModel publicSqlDataSchemaModel = PublicSqlDataSchemaModelLoader.Load(preventDmlReferences: true, DatabaseTestUtility.DatabaseSchemaProviderName, DatabaseTestUtility.ModelCollation, source, references, logger);
+            using LockEntryManager lockEntryManager = LockEntryManager.Create(reset: false, filePath: null);
+            ISqlCodeAnalysisRuleEngine engine = SqlCodeAnalysisRuleEngine.Create(publicSqlDataSchemaModel.Model, configuration, lockEntryManager, logger);
             IEnumerable<SqlCodeAnalysisError> errors = handler(engine);
 
             string actual = GenerateXmlFromResults(errors);
@@ -76,7 +75,7 @@ namespace Dibix.Sdk.Tests.CodeAnalysis
         {
             return DatabaseTestUtility.QueryProject($"x:Project/x:ItemGroup/x:{elementName}")
                                       .Select(x => x.Attribute("Include")!.Value)
-                                      .Select(x => new TaskItem(x) { ["FullPath"] = Path.Combine(DatabaseTestUtility.DatabaseProjectDirectory, x) })
+                                      .Select(x => new TaskItem(x) { ["FullPath"] = Path.Combine(DatabaseTestUtility.DatabaseProjectDirectory, x.Replace('\\', Path.DirectorySeparatorChar)) })
                                       .ToArray();
         }
 

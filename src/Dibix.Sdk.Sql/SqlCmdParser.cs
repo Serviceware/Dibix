@@ -9,9 +9,9 @@ namespace Dibix.Sdk.Sql
         {
             string script = File.ReadAllText(scriptFilePath);
             string directory = Path.GetDirectoryName(scriptFilePath);
-            string normalizedScript = Regex.Replace(script, @"^:r (?<include>[^\r\n]+)", x =>
+            string normalizedScript = Regex.Replace(script, "^:r (?<include>[^\r\n]+)", x =>
             {
-                string include = Path.Combine(directory, x.Groups["include"].Value);
+                string include = Path.Combine(directory, x.Groups["include"].Value.Replace('\\', Path.DirectorySeparatorChar));
                 string content = ProcessSqlCmdScript(include);
                 return content;
             }, RegexOptions.Multiline);

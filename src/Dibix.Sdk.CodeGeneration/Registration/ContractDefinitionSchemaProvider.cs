@@ -15,6 +15,7 @@ namespace Dibix.Sdk.CodeGeneration
         private const string RootFolderName = "Contracts";
         private readonly string _productName;
         private readonly string _areaName;
+        private readonly string _projectDirectory;
         private readonly ITypeResolverFacade _typeResolver;
         private readonly ISchemaRegistry _schemaRegistry;
         private readonly IDictionary<string, SchemaDefinition> _schemas;
@@ -25,14 +26,15 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Constructor
-        public ContractDefinitionSchemaProvider(string productName, string areaName, IEnumerable<TaskItem> contracts, IFileSystemProvider fileSystemProvider, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger) : base(fileSystemProvider, logger)
+        public ContractDefinitionSchemaProvider(string productName, string areaName, string projectDirectory, IEnumerable<TaskItem> contracts, ITypeResolverFacade typeResolver, ISchemaRegistry schemaRegistry, ILogger logger) : base(logger)
         {
             _productName = productName;
             _areaName = areaName;
+            _projectDirectory = projectDirectory;
             _typeResolver = typeResolver;
             _schemaRegistry = schemaRegistry;
             _schemas = new Dictionary<string, SchemaDefinition>();
-            base.Collect(contracts.Select(x => x.GetFullPath()));
+            Collect(contracts.Select(x => x.GetFullPath()));
         }
         #endregion
 
@@ -44,7 +46,7 @@ namespace Dibix.Sdk.CodeGeneration
         protected override void Read(JObject json)
         {
             SourceLocation sourceInfo = json.GetSourceInfo();
-            string relativePath = Path.GetDirectoryName(sourceInfo.Source).Substring(base.FileSystemProvider.CurrentDirectory.Length + 1);
+            string relativePath = Path.GetDirectoryName(sourceInfo.Source).Substring(_projectDirectory.Length + 1);
             string[] parts = relativePath.Split(Path.DirectorySeparatorChar);
             if (parts[0] != RootFolderName)
                 throw new InvalidOperationException($"Expected contract root folder to be '{RootFolderName}' but got: {parts[0]}");

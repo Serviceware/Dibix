@@ -277,7 +277,7 @@ namespace Dibix.Sdk.Tests.Client
                 else if (_httpAuthorizationProvider.GetValue("DibixBearer") != null)
                     requestMessage.Headers.Add("Authorization", $"Bearer {_httpAuthorizationProvider.GetValue("DibixBearer")}");
                 else
-                    throw new InvalidOperationException("None of the security scheme requirements were met:\r\n- DibixClientId\r\n- DibixBearer");
+                    throw new InvalidOperationException("None of the security scheme requirements were met:\n- DibixClientId\n- DibixBearer");
                 requestMessage.Content = new ObjectContent<Dibix.Sdk.Tests.DomainModel.AnotherInputContract>(body, Formatter);
                 HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
                 return responseMessage;

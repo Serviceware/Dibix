@@ -30,8 +30,9 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                                                                             .Where(x => x.Count() > 1);
             foreach (IGrouping<IndexHit, IndexHit> match in matches)
             {
-                bool differentIncludeColumns = match.Select(x => x.IncludeColumns).Distinct().Count() > 1;
-                base.Fail(match.First().Source, $"Found duplicate indexes{(differentIncludeColumns ? " with different includes" : null)}: {String.Join(", ", match.Select(x => x.Name))}");
+                ICollection<IndexHit> orderedMatches = match.OrderBy(x => x.Source.StartLine).ThenBy(x => x.Source.StartColumn).ToArray();
+                bool differentIncludeColumns = orderedMatches.Select(x => x.IncludeColumns).Distinct().Count() > 1;
+                base.Fail(orderedMatches.First().Source, $"Found duplicate indexes{(differentIncludeColumns ? " with different includes" : null)}: {String.Join(", ", orderedMatches.Select(x => x.Name))}");
             }
         }
 
@@ -49,7 +50,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                 this.Name = constraint.Name;
                 this.Columns = String.Join(",", constraint.Columns.Select(x => x.Name));
             }
-            public IndexHit(Index index)
+            public IndexHit(Sql.Index index)
             {
                 this.Source = index.Source;
                 this.Name = index.Name;

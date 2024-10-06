@@ -12,13 +12,13 @@ namespace Dibix.Sdk
 
         protected override string SchemaName => "dibix.configuration.schema";
 
-        public UserConfigurationLoader(string filePath, IFileSystemProvider fileSystemProvider, ILogger logger, params IUserConfigurationReader[] readers) : base(fileSystemProvider, logger)
+        public UserConfigurationLoader(string filePath, ILogger logger, params IUserConfigurationReader[] readers) : base(logger)
         {
             _filePath = filePath;
             _readers = readers;
         }
 
-        public void Load() => base.Collect(Enumerable.Repeat(this._filePath, 1));
+        public void Load() => Collect(Enumerable.Repeat(_filePath, 1));
 
         protected override void Read(JObject json)
         {

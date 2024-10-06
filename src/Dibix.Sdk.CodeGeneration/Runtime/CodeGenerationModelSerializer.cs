@@ -4,6 +4,8 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Metadata;
+using System.Reflection.PortableExecutable;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
@@ -12,14 +14,14 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal static class CodeGenerationModelSerializer
     {
-        private static readonly IDictionary<Assembly, IPersistedCodeGenerationModel> Map = new Dictionary<Assembly, IPersistedCodeGenerationModel>();
+        private static readonly IDictionary<string, IPersistedCodeGenerationModel> Map = new Dictionary<string, IPersistedCodeGenerationModel>();
 
-        public static IPersistedCodeGenerationModel Read(Assembly assembly)
+        public static IPersistedCodeGenerationModel Read(string assemblyPath)
         {
-            if (!Map.TryGetValue(assembly, out IPersistedCodeGenerationModel model))
+            if (!Map.TryGetValue(assemblyPath, out IPersistedCodeGenerationModel model))
             {
-                model = LoadModelFromResource(assembly);
-                Map.Add(assembly, model);
+                model = LoadModelFromResource(assemblyPath);
+                Map.Add(assemblyPath, model);
             }
 
             return model;
@@ -41,9 +43,9 @@ namespace Dibix.Sdk.CodeGeneration
             File.WriteAllText(path, serializedModelJson);
         }
 
-        private static IPersistedCodeGenerationModel LoadModelFromResource(Assembly assembly)
+        private static IPersistedCodeGenerationModel LoadModelFromResource(string assemblyPath)
         {
-            using (Stream stream = assembly.GetManifestResourceStream("Model"))
+            using (Stream stream = GetManifestResourceStream(assemblyPath, "Model"))
             {
                 if (stream == null)
                 {
@@ -66,12 +68,31 @@ namespace Dibix.Sdk.CodeGeneration
                         };
                         IPersistedCodeGenerationModel model = serializer.Deserialize<CodeGenerationModel>(jsonReader);
                         if (model == null)
-                            throw new InvalidOperationException($"Model is empty: {assembly}");
+                            throw new InvalidOperationException($"Model is empty: {assemblyPath}");
 
                         return model;
                     }
                 }
             }
+        }
+
+        private static Stream GetManifestResourceStream(string assemblyPath, string resourceName)
+        {
+            using Stream fs = File.OpenRead(assemblyPath);
+            PEReader per = new PEReader(fs);
+            MetadataReader mr = per.GetMetadataReader();
+            foreach (ManifestResourceHandle resHandle in mr.ManifestResources)
+            {
+                ManifestResource res = mr.GetManifestResource(resHandle);
+                if (!mr.StringComparer.Equals(res.Name, resourceName))
+                    continue;
+
+                PEMemoryBlock resourceDirectory = per.GetSectionData(per.PEHeaders.CorHeader.ResourcesDirectory.RelativeVirtualAddress);
+                BlobReader reader = resourceDirectory.GetReader((int)res.Offset, resourceDirectory.Length - (int)res.Offset);
+                uint size = reader.ReadUInt32();
+                return new MemoryStream(reader.ReadBytes((int)size));
+            }
+            return null;
         }
 
         private sealed class SchemaDefinitionSourceConverter : JsonConverter

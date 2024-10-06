@@ -12,7 +12,6 @@ namespace Dibix.Sdk.CodeGeneration
           , IActionParameterSourceRegistry actionParameterSourceRegistry
           , IActionParameterConverterRegistry actionParameterConverterRegistry
           , ILockEntryManager lockEntryManager
-          , IFileSystemProvider fileSystemProvider
           , ILogger logger
           , TSqlModel sqlModel
         )
@@ -20,17 +19,14 @@ namespace Dibix.Sdk.CodeGeneration
             logger.LogMessage("Generating code artifacts...");
 
             ISchemaRegistry schemaRegistry = new SchemaRegistry(logger);
-            DefaultAssemblyResolver assemblyResolver = new DefaultAssemblyResolver(configuration.ProjectDirectory, configuration.ExternalAssemblyReferenceDirectory, configuration.References);
             CodeGenerationModel model = CodeGenerationModelLoader.Load
             (
                 configuration
               , securitySchemes
               , schemaRegistry
-              , assemblyResolver
               , actionParameterSourceRegistry
               , actionParameterConverterRegistry
               , lockEntryManager
-              , fileSystemProvider
               , logger
               , sqlModel
             );

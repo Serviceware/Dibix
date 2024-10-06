@@ -18,7 +18,7 @@ namespace Dibix.Sdk.Tests.Data
     public static class TestAccessor
     {
         // FileResult
-        private const string FileResultCommandText = "DECLARE @table TABLE([id] INT NOT NULL, [thumbnail] VARBINARY(MAX) NOT NULL, PRIMARY KEY ([id]))\r\n\r\nDECLARE @extension NCHAR(3) = N'png'\r\n\r\nDECLARE @fallbackimageid INT = 666\r\n\r\nDECLARE @fallbackimagedata VARBINARY(MAX) = 0x1\r\n\r\nIF @id = @fallbackimageid\r\nBEGIN\r\n    SELECT [type] = CAST(@extension AS NVARCHAR(3))\r\n         , [data] = CAST(@fallbackimagedata AS VARBINARY(MAX))\r\nEND\r\nELSE\r\nBEGIN\r\n    SELECT [type] = @extension\r\n         , [data] = [thumbnail]\r\n    FROM @table\r\n    WHERE [id] = @id\r\nEND";
+        private const string FileResultCommandText = "DECLARE @table TABLE([id] INT NOT NULL, [thumbnail] VARBINARY(MAX) NOT NULL, PRIMARY KEY ([id]))\n\nDECLARE @extension NCHAR(3) = N'png'\n\nDECLARE @fallbackimageid INT = 666\n\nDECLARE @fallbackimagedata VARBINARY(MAX) = 0x1\n\nIF @id = @fallbackimageid\nBEGIN\n    SELECT [type] = CAST(@extension AS NVARCHAR(3))\n         , [data] = CAST(@fallbackimagedata AS VARBINARY(MAX))\nEND\nELSE\nBEGIN\n    SELECT [type] = @extension\n         , [data] = [thumbnail]\n    FROM @table\n    WHERE [id] = @id\nEND";
 
         public static Dibix.FileEntity FileResult(this IDatabaseAccessorFactory databaseAccessorFactory, int id)
         {

@@ -1,35 +1,29 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
-using System.Reflection;
+using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class ExternalSchemaProvider : ISchemaProvider
     {
-        private readonly ReferencedAssemblyInspector _referencedAssemblyInspector;
         private readonly ICollection<SchemaDefinition> _schemas;
 
-        public ExternalSchemaProvider(ReferencedAssemblyInspector referencedAssemblyInspector)
+        public ExternalSchemaProvider(string projectDirectory, IEnumerable<TaskItem> references)
         {
-            this._referencedAssemblyInspector = referencedAssemblyInspector;
-            this._schemas = new Collection<SchemaDefinition>();
-            this.Collect();
+            _schemas = Collect(projectDirectory, references).ToArray();
         }
 
         IEnumerable<SchemaDefinition> ISchemaProvider.Collect() => _schemas;
 
-        private void Collect()
+        private static IEnumerable<SchemaDefinition> Collect(string projectDirectory, IEnumerable<TaskItem> references)
         {
-            IEnumerable<SchemaDefinition> schemas = this._referencedAssemblyInspector.Inspect(VisitReferencedAssemblies);
-            this._schemas.AddRange(schemas);
+            return references.SelectMany(x => CollectSchemas(Path.GetFullPath(Path.Combine(projectDirectory, x.GetFullPath()))));
         }
 
-        private static ICollection<SchemaDefinition> VisitReferencedAssemblies(IEnumerable<Assembly> assemblies) => assemblies.SelectMany(VisitReferencedAssembly).ToArray();
-
-        private static IEnumerable<SchemaDefinition> VisitReferencedAssembly(Assembly assembly)
+        private static IEnumerable<SchemaDefinition> CollectSchemas(string assemblyPath)
         {
-            IPersistedCodeGenerationModel model = CodeGenerationModelSerializer.Read(assembly);
+            IPersistedCodeGenerationModel model = CodeGenerationModelSerializer.Read(assemblyPath);
             ExternalSchemaOwner owner = new ExternalSchemaOwner(model.DefaultClassName);
             foreach (SchemaDefinition schemaDefinition in model.Schemas)
             {

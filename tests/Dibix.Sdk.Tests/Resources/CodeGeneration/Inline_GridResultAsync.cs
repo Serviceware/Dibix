@@ -27,7 +27,7 @@ namespace Dibix.Sdk.Tests.Data.Grid
     public static class TestAccessor
     {
         // GetGrid
-        private const string GetGridCommandText = "SELECT [id]           = 1\r\n     , [name]         = NULL\r\n     , [parentid]     = NULL\r\n     , [role]         = NULL\r\n     , [creationtime] = NULL\r\n     , [imageurl]     = NULL\r\nUNION ALL\r\nSELECT [id]           = 2\r\n     , [name]         = NULL\r\n     , [parentid]     = NULL\r\n     , [role]         = NULL\r\n     , [creationtime] = NULL\r\n     , [imageurl]     = NULL\r\n\r\nSELECT 1";
+        private const string GetGridCommandText = "SELECT [id]           = 1\n     , [name]         = NULL\n     , [parentid]     = NULL\n     , [role]         = NULL\n     , [creationtime] = NULL\n     , [imageurl]     = NULL\nUNION ALL\nSELECT [id]           = 2\n     , [name]         = NULL\n     , [parentid]     = NULL\n     , [role]         = NULL\n     , [creationtime] = NULL\n     , [imageurl]     = NULL\n\nSELECT 1";
 
         public static async Task<Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult> GetGridAsync(this IDatabaseAccessorFactory databaseAccessorFactory, CancellationToken cancellationToken = default)
         {

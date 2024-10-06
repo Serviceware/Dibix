@@ -11,6 +11,18 @@ namespace Dibix
 {
     internal static class ExpressionUtility
     {
+        public static Expression CallBaseMethod(Expression instance, Type type, string methodName, params Expression[] parameters)
+        {
+            MethodInfo method = type.SafeGetMethod(methodName);
+            Type[] delegateParameters = method.GetParameters().Select(x => x.ParameterType).ToArray();
+            Type delegateType = method.ReturnType == typeof(void) ? Expression.GetActionType(delegateParameters) : Expression.GetDelegateType(delegateParameters);
+            Expression functionPointer = Expression.Constant(method.MethodHandle.GetFunctionPointer(), typeof(object));
+            Expression createInstanceParameters = Expression.NewArrayInit(typeof(object), Expression.Convert(instance, typeof(object)), functionPointer);
+            Expression @delegate = Expression.Call(typeof(Activator), nameof(Activator.CreateInstance), [], Expression.Constant(delegateType, typeof(Type)), createInstanceParameters);
+            Expression invocation = Expression.Invoke(Expression.Convert(@delegate, delegateType), parameters);
+            return invocation;
+        }
+
         public static void Foreach
         (
             string name

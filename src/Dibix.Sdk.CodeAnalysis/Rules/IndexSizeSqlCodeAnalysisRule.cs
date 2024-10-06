@@ -57,7 +57,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                 this.Check(constraint.Source, constraint.IsClustered.Value, indexName, constraint.Columns);
             }
 
-            foreach (Index index in base.Model.GetIndexes(tableModel, tableName))
+            foreach (Sql.Index index in base.Model.GetIndexes(tableModel, tableName))
             {
                 this.Check(index.Source, index.IsClustered, index.Name, index.Columns);
             }
