@@ -17,7 +17,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             if (node.IsTemporaryTable())
                 return;
 
-            var query = base.Model
+            var query = Model
                             .GetTableConstraints(node.SchemaObjectName)
                             .Where(x => x.Kind == ConstraintKind.Check)
                             .Select(x => new
@@ -31,7 +31,10 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
             foreach (var constraintGroup in query)
             {
-                base.Fail(constraintGroup.First().Source, String.Join(", ", constraintGroup.Select(x => x.Name)));
+                var orderedConstraints = constraintGroup.OrderBy(x => x.Source.StartLine)
+                                                        .ThenBy(x => x.Source.StartColumn)
+                                                        .ToArray();
+                Fail(orderedConstraints.First().Source, String.Join(", ", orderedConstraints.Select(x => x.Name)));
             }
         }
     }

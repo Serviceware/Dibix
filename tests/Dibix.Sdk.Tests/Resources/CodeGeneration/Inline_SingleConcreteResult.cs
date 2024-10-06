@@ -23,7 +23,7 @@ namespace Dibix.Sdk.Tests.Data
     public static class TestAccessor
     {
         // dbx_tests_syntax_singleconcreteresult
-        private const string dbx_tests_syntax_singleconcreteresultCommandText = "SELECT [id]           = 1\r\n     , [name]         = NULL\r\n     , [parentid]     = NULL\r\n     , [role]         = NULL\r\n     , [creationtime] = NULL\r\n     , [imageurl]     = NULL";
+        private const string dbx_tests_syntax_singleconcreteresultCommandText = "SELECT [id]           = 1\n     , [name]         = NULL\n     , [parentid]     = NULL\n     , [role]         = NULL\n     , [creationtime] = NULL\n     , [imageurl]     = NULL";
 
         public static Dibix.Sdk.Tests.DomainModel.GenericContract dbx_tests_syntax_singleconcreteresult(this IDatabaseAccessorFactory databaseAccessorFactory)
         {

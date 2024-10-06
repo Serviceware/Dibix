@@ -31,7 +31,24 @@ namespace Dibix.Sdk.CodeAnalysis
             {
                 CodeAnalysisSucceededFile = configuration.StaticCodeAnalysisSucceededFile,
                 ResultsFile = configuration.ResultsFile,
-                RuleSettings = new CodeAnalysisRuleSettings()
+                RuleSettings = new CodeAnalysisRuleSettings
+                {
+                  //  new RuleConfiguration("Microsoft.Rules.Data.SR0001", enabled: false, SqlRuleProblemSeverity.Unknown)
+                  //, new RuleConfiguration("Microsoft.Rules.Data.SR0004", enabled: false, SqlRuleProblemSeverity.Unknown)
+                  //, new RuleConfiguration("Microsoft.Rules.Data.SR0005", enabled: false, SqlRuleProblemSeverity.Unknown)
+                  //, new RuleConfiguration("Microsoft.Rules.Data.SR0006", enabled: false, SqlRuleProblemSeverity.Unknown)
+                  //, new RuleConfiguration("Microsoft.Rules.Data.SR0007", enabled: true, SqlRuleProblemSeverity.Unknown)
+                  //, new RuleConfiguration("Microsoft.Rules.Data.SR0008", enabled: false, SqlRuleProblemSeverity.Unknown)
+                  //, new RuleConfiguration("Microsoft.Rules.Data.SR0009", enabled: false, SqlRuleProblemSeverity.Unknown)
+                  //, new RuleConfiguration("Microsoft.Rules.Data.SR0010", enabled: false, SqlRuleProblemSeverity.Unknown)
+                  //, new RuleConfiguration("Microsoft.Rules.Data.SR0011", enabled: false, SqlRuleProblemSeverity.Unknown)
+                  //, new RuleConfiguration("Microsoft.Rules.Data.SR0012", enabled: false, SqlRuleProblemSeverity.Unknown)
+                  //, new RuleConfiguration("Microsoft.Rules.Data.SR0013", enabled: false, SqlRuleProblemSeverity.Unknown)
+                  //, new RuleConfiguration("Microsoft.Rules.Data.SR0014", enabled: false, SqlRuleProblemSeverity.Unknown)
+                  //, new RuleConfiguration("Microsoft.Rules.Data.SR0015", enabled: false, SqlRuleProblemSeverity.Unknown)
+                  //, new RuleConfiguration("Microsoft.Rules.Data.SR0016", enabled: false, SqlRuleProblemSeverity.Unknown)
+
+                }
             };
             CodeAnalysisService service = new CodeAnalysisServiceFactory().CreateAnalysisService(model, settings);
             CodeAnalysisResult analysisResult = service.Analyze(model);

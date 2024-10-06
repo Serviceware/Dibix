@@ -122,7 +122,7 @@ namespace Dibix.Sdk.Abstractions
                 currentIndentation++;
             }
 
-            string value = input.Substring(currentIndentation * IndentationSize).Replace("\\r\\n", "\r\n");
+            string value = input.Substring(currentIndentation * IndentationSize);
             IndentationLevel indentation = (IndentationLevel)currentIndentation;
             return (value, indentation);
         }

@@ -24,7 +24,7 @@ namespace Dibix.Sdk.Tests.Data
     public static class TestAccessor
     {
         // MultiConcreteResult
-        private const string MultiConcreteResultCommandText = "SELECT [id]           = 1\r\n     , [name]         = NULL\r\n     , [parentid]     = NULL\r\n     , [role]         = NULL\r\n     , [creationtime] = NULL\r\n     , [imageurl]     = NULL";
+        private const string MultiConcreteResultCommandText = "SELECT [id]           = 1\n     , [name]         = NULL\n     , [parentid]     = NULL\n     , [role]         = NULL\n     , [creationtime] = NULL\n     , [imageurl]     = NULL";
 
         public static IEnumerable<Dibix.Sdk.Tests.DomainModel.GenericContract> MultiConcreteResult(this IDatabaseAccessorFactory databaseAccessorFactory)
         {

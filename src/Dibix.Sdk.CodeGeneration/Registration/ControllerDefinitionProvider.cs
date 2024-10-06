@@ -38,9 +38,9 @@ namespace Dibix.Sdk.CodeGeneration
           , ITypeResolverFacade typeResolver
           , ISchemaRegistry schemaRegistry
           , IActionParameterSourceRegistry actionParameterSourceRegistry
-          , IActionParameterConverterRegistry actionParameterConverterRegistry, IFileSystemProvider fileSystemProvider
+          , IActionParameterConverterRegistry actionParameterConverterRegistry
           , ILogger logger
-        ) : base(fileSystemProvider, logger)
+        ) : base(logger)
         {
             _usedSecuritySchemes = new Dictionary<string, SecurityScheme>();
             _securitySchemes = securitySchemes;
@@ -141,13 +141,13 @@ namespace Dibix.Sdk.CodeGeneration
                 // Validate explicit parameters
                 foreach (ExplicitParameter explicitParameter in explicitParameters.Values.Where(x => !x.Visited))
                 {
-                    base.Logger.LogError($"Parameter '{explicitParameter.Name}' not found on action: {actionTarget.OperationName}", explicitParameter.SourceLocation.Source, explicitParameter.SourceLocation.Line, explicitParameter.SourceLocation.Column);
+                    Logger.LogError($"Parameter '{explicitParameter.Name}' not found on action: {actionTarget.OperationName}", explicitParameter.SourceLocation.Source, explicitParameter.SourceLocation.Line, explicitParameter.SourceLocation.Column);
                 }
 
                 // Validate path parameters
                 foreach (PathParameter pathSegment in pathParameters.Values.Where(x => !x.Visited))
                 {
-                    base.Logger.LogError($"Undefined path parameter: {pathSegment.Name}", pathSegment.Location.Source, pathSegment.Location.Line, pathSegment.Location.Column);
+                    Logger.LogError($"Undefined path parameter: {pathSegment.Name}", pathSegment.Location.Source, pathSegment.Location.Line, pathSegment.Location.Column);
                 }
             }
 
@@ -236,7 +236,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (contractName == null)
             {
                 SourceLocation valueLocation = value.GetSourceInfo();
-                base.Logger.LogError("Body is missing 'contract' property", valueLocation.Source, valueLocation.Line, valueLocation.Column);
+                Logger.LogError("Body is missing 'contract' property", valueLocation.Source, valueLocation.Line, valueLocation.Column);
                 return null;
             }
 
@@ -473,7 +473,7 @@ namespace Dibix.Sdk.CodeGeneration
             JProperty property = actionJson.Property(propertyName);
             if (property == null)
             {
-                base.Logger.LogError($"Missing required property '{propertyName}'", actionLineInfo.Source, actionLineInfo.Line, actionLineInfo.Column);
+                Logger.LogError($"Missing required property '{propertyName}'", actionLineInfo.Source, actionLineInfo.Line, actionLineInfo.Column);
                 return;
             }
 
@@ -514,7 +514,7 @@ namespace Dibix.Sdk.CodeGeneration
                 {
                     SourceLocation sourceInfo = value.GetSourceInfo();
                     string possibleValues = String.Join(", ", _securitySchemes.Schemes.Select(x => x.SchemeName));
-                    base.Logger.LogError($"Unknown authorization scheme '{name}'. Possible values are: {possibleValues}", sourceInfo.Source, sourceInfo.Line, sourceInfo.Column);
+                    Logger.LogError($"Unknown authorization scheme '{name}'. Possible values are: {possibleValues}", sourceInfo.Source, sourceInfo.Line, sourceInfo.Column);
                     yield break;
                 }
                 _usedSecuritySchemes.Add(name, scheme);
@@ -528,7 +528,7 @@ namespace Dibix.Sdk.CodeGeneration
             JProperty property = actionJson.Property(propertyName);
             if (property == null)
             {
-                base.Logger.LogError($"Missing required property '{propertyName}'", actionLineInfo.Source, actionLineInfo.Line, actionLineInfo.Column);
+                Logger.LogError($"Missing required property '{propertyName}'", actionLineInfo.Source, actionLineInfo.Line, actionLineInfo.Column);
                 return;
             }
 

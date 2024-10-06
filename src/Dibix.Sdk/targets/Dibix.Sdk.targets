@@ -106,7 +106,7 @@
   </PropertyGroup>
 
   <!-- Utility to dump item including metadata -->
-  <UsingTask TaskName="DumpItem" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+  <UsingTask TaskName="DumpItem" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
     <ParameterGroup>
       <Source ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
       <Result Output="true" />
@@ -248,7 +248,13 @@
     <PropertyGroup>
       <ProductName Condition="'$(ProductName)' == ''">$(RootNamespace.Split('.')[0])</ProductName>
       <Title Condition="$(Title) == ''">$(AreaName)</Title>
-      <Description Condition="$(Description) == '' and $(Build_Repository_Uri) != '' and $(Build_SourceVersion) != '' and $(Build_SourceBranch) != ''">__Build version:__ $([System.DateTime]::Now.ToString(G))\r\n\r\n__Source version:__ [$(Build_SourceVersion)]($(Build_Repository_Uri)/commit/$(Build_SourceVersion)?refName=$(Build_SourceBranch))</Description>
+      <Description Condition="$(Description) == '' and $(Build_Repository_Uri) != '' and $(Build_SourceVersion) != '' and $(Build_SourceBranch) != ''">
+        <![CDATA[
+          __Build version:__ $([System.DateTime]::Now.ToString(G))
+          
+          __Source version:__ [$(Build_SourceVersion)]($(Build_Repository_Uri)/commit/$(Build_SourceVersion)?refName=$(Build_SourceBranch))  
+        ]]>
+      </Description>
       <LangVersion>latest</LangVersion>
       <!--<ExternalAssemblyReferenceDirectory Condition="'$(ExternalAssemblyReferenceDirectory)' == ''">$(TargetDir)</ExternalAssemblyReferenceDirectory>-->
 

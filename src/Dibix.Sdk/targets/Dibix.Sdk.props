@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-    <DibixToolsDirectory>$(MSBuildThisFileDirectory)..\tools\net48\</DibixToolsDirectory>
+    <DibixToolsDirectory>$(MSBuildThisFileDirectory)..\tools\net8.0\</DibixToolsDirectory>
     <DibixCliPath>$(DibixToolsDirectory)Dibix.exe</DibixCliPath>
     <DibixSdkPath>$(DibixToolsDirectory)Dibix.Sdk.dll</DibixSdkPath>
     <DibixRuntimeDirectory>$(DibixToolsDirectory)</DibixRuntimeDirectory>
@@ -14,7 +14,7 @@
   -->
   <PropertyGroup>
     <DibixConfigurationDirectory Condition="'$(DibixConfigurationDirectory)' == ''">$(MSBuildProjectDirectory)</DibixConfigurationDirectory>
-    <DibixTargetFramework Condition="'$(DibixTargetFramework)' == ''">net48</DibixTargetFramework>
+    <DibixTargetFramework Condition="'$(DibixTargetFramework)' == ''">net8.0</DibixTargetFramework>
     <IsEmbedded Condition="'$(IsEmbedded)' == ''">$(MSBuildProjectName.EndsWith('.DML'))</IsEmbedded>
     <LimitDdlStatements Condition="'$(LimitDdlStatements)' == ''">True</LimitDdlStatements>
     <PreventDmlReferences Condition="'$(PreventDmlReferences)' == ''">True</PreventDmlReferences>

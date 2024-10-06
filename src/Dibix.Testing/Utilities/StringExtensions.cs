@@ -8,7 +8,11 @@ namespace Dibix.Testing
         {
             return str.Replace("\r\n", "\n")
                       .Replace("\r", "\n")
-                      .Replace("\n", Environment.NewLine);
+                      .Replace("\n", Environment.NewLine)
+                      .Replace("\\r\\n", "\\n")
+                      .Replace("\\r", "\\n")
+                      .Replace("\\n", Environment.NewLine.Replace("\r", "\\r")
+                                                         .Replace("\n", "\\n"));
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <OutputType>Exe</OutputType>
 
     <!-- Since this is a tool package, disable some package generation defaults -->
@@ -57,25 +57,17 @@
       <_ToolDependency Include="Microsoft.Build.Framework.dll" />
       <_ToolDependency Include="Microsoft.Build.Utilities.Core.dll" />
       <_ToolDependency Include="Microsoft.Data.SqlClient.dll" />
-      <_ToolDependency Include="Microsoft.Data.Tools.Components.dll" />
-      <_ToolDependency Include="Microsoft.Data.Tools.Contracts.dll" />
       <_ToolDependency Include="Microsoft.Data.Tools.Schema.Sql.dll" />
       <_ToolDependency Include="Microsoft.Data.Tools.Schema.Tasks.Sql.dll" />
-      <_ToolDependency Include="Microsoft.Data.Tools.Schema.Utilities.Sql.dll" />
       <_ToolDependency Include="Microsoft.Data.Tools.Utilities.dll" />
       <_ToolDependency Include="Microsoft.OpenApi.dll" />
-      <_ToolDependency Include="Microsoft.SqlServer.ConnectionInfo.dll" />
       <_ToolDependency Include="Microsoft.SqlServer.Dac.dll" />
       <_ToolDependency Include="Microsoft.SqlServer.Dac.Extensions.dll" />
       <_ToolDependency Include="Microsoft.SqlServer.TransactSql.ScriptDom.dll" />
       <_ToolDependency Include="Newtonsoft.Json.dll" />
       <_ToolDependency Include="Newtonsoft.Json.Schema.dll" />
       <_ToolDependency Include="System.IO.Packaging.dll" />
-      <_ToolDependency Include="System.Memory.dll" />
-      <_ToolDependency Include="System.Numerics.Vectors.dll" />
       <_ToolDependency Include="System.Resources.Extensions.dll" />
-      <_ToolDependency Include="System.Runtime.CompilerServices.Unsafe.dll" />
-      <_ToolDependency Include="System.ValueTuple.dll" />
     </ItemGroup>
 
     <!-- Merge Dibix SDK + CLI into a single EXE -->
@@ -97,13 +89,11 @@
     -->
     <!--<Exec Command="$(ILRepack) /out:$(_DibixExePath) /target:winexe $(_DibixExeMergeInputFlat)" />-->
     <Copy SourceFiles="$(TargetPath)" DestinationFiles="$(_DibixExePath)" />
-    <Copy SourceFiles="$(TargetPath).config" DestinationFiles="$(_DibixExePath).config" />
 
     
     <!-- Collect package files -->
     <ItemGroup>
       <_ToolItem Include="$(_DibixExeFileName)" />
-      <_ToolItem Include="$(_DibixExeFileName).config" />
       <_ToolItem Include="@(_ToolDependency)" />
     </ItemGroup>
 

@@ -12,7 +12,6 @@ namespace Dibix.Sdk.CodeGeneration
           , IActionParameterSourceRegistry actionParameterSourceRegistry
           , IActionParameterConverterRegistry actionParameterConverterRegistry
           , ILockEntryManager lockEntryManager
-          , IFileSystemProvider fileSystemProvider
           , ILogger logger
           , TSqlModel sqlModel
         )
@@ -30,7 +29,6 @@ namespace Dibix.Sdk.CodeGeneration
               , actionParameterSourceRegistry
               , actionParameterConverterRegistry
               , lockEntryManager
-              , fileSystemProvider
               , logger
               , sqlModel
             );

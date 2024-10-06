@@ -7,6 +7,11 @@
     column="5" />
   <error
     ruleid="17"
+    message="Default constraint 'DF_dbx_codeanalysis_error_017_fail_idx' does not match naming convention 'DF_&lt;table&gt;_&lt;column&gt;'. Also make sure the name is all lowercase."
+    line="22"
+    column="33" />
+  <error
+    ruleid="17"
     message="Primary key constraint 'PK_dbx_codeanalysis_error_017_failx' does not match naming convention 'PK_&lt;table&gt;'. Also make sure the name is all lowercase."
     line="27"
     column="16" />
@@ -14,6 +19,11 @@
     ruleid="17"
     message="Foreign key constraint 'FK_dbx_codeanalysis_error_017_failx_a' does not match naming convention 'FK_&lt;table&gt;_*'. Also make sure the name is all lowercase."
     line="28"
+    column="16" />
+  <error
+    ruleid="17"
+    message="Check constraint 'CK_dbx_codeanalysis_error_017_failx_a' does not match naming convention 'CK_&lt;table&gt;_*'. Also make sure the name is all lowercase."
+    line="29"
     column="16" />
   <error
     ruleid="17"
@@ -25,16 +35,6 @@
     message="Unique constraint 'UQ_dbx_codeanalysis_error_017_failx_d' does not match naming convention 'UQ_&lt;table&gt;_*'. Also make sure the name is all lowercase."
     line="34"
     column="68" />
-  <error
-    ruleid="17"
-    message="Check constraint 'CK_dbx_codeanalysis_error_017_failx_a' does not match naming convention 'CK_&lt;table&gt;_*'. Also make sure the name is all lowercase."
-    line="29"
-    column="16" />
-  <error
-    ruleid="17"
-    message="Default constraint 'DF_dbx_codeanalysis_error_017_fail_idx' does not match naming convention 'DF_&lt;table&gt;_&lt;column&gt;'. Also make sure the name is all lowercase."
-    line="22"
-    column="33" />
   <error
     ruleid="17"
     message="Index 'IX_dbx_codeanalysis_error_017_failx_c' does not match naming convention 'IX_&lt;table&gt;_*'. Also make sure the name is all lowercase."

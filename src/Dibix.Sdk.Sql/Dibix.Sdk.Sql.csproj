@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   
   <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
@@ -15,15 +15,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Utilities.Core" />
     <PackageReference Include="Microsoft.SqlServer.DacFx" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Microsoft.Data.Tools.Schema.Tasks.Sql" HintPath="$(RootDirectory)lib\Microsoft.Data.Tools.Schema.Tasks.Sql.dll" />
-    <Reference Include="Microsoft.Data.Tools.Schema.Utilities.Sql" HintPath="$(RootDirectory)lib\Microsoft.Data.Tools.Schema.Utilities.Sql.dll" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="System.ComponentModel.Composition" />
   </ItemGroup>
 
   <ItemGroup>

@@ -9,7 +9,7 @@
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "A",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
@@ -44,7 +44,7 @@
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "B",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
@@ -79,7 +79,7 @@
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "C",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
@@ -114,7 +114,7 @@
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "SomeIds",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
@@ -148,7 +148,7 @@
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "D",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
@@ -183,7 +183,7 @@
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "Password",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
@@ -218,7 +218,7 @@
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "E",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
@@ -253,7 +253,7 @@
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "F",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
@@ -288,7 +288,7 @@
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "Data",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
@@ -338,7 +338,7 @@
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "Name",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
@@ -389,7 +389,7 @@
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "Id",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
@@ -424,7 +424,7 @@
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "Title",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
@@ -517,7 +517,7 @@
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "Id",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
@@ -552,7 +552,7 @@
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "Name",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
@@ -603,7 +603,7 @@
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "Id",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
@@ -638,7 +638,7 @@
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "Name",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
@@ -699,7 +699,7 @@
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "ParentId",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
@@ -734,7 +734,7 @@
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "Role",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
@@ -790,7 +790,7 @@
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "CreationTime",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
@@ -825,7 +825,7 @@
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "ImageUrl",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
@@ -924,7 +924,7 @@
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "A",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
@@ -959,7 +959,7 @@
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "B",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
@@ -994,7 +994,7 @@
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "C",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
@@ -1029,7 +1029,7 @@
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "Ids",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
@@ -1063,7 +1063,7 @@
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "D",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
@@ -1098,7 +1098,7 @@
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "Password",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
@@ -1133,7 +1133,7 @@
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "E",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
@@ -1168,7 +1168,7 @@
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "F",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
@@ -1203,7 +1203,7 @@
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "G",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
@@ -1255,7 +1255,7 @@
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "id",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
@@ -1290,7 +1290,7 @@
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "name",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
@@ -1342,7 +1342,7 @@
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, mscorlib]], Dibix.Sdk.CodeGeneration",
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "id",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
