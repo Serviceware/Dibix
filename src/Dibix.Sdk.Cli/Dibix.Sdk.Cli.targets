@@ -1,0 +1,109 @@
+﻿<Project>
+
+  <PropertyGroup>
+    <_DibixSdkName>Dibix.Sdk</_DibixSdkName>
+  </PropertyGroup>
+
+  <Target Name="PreparePackage" BeforeTargets="GenerateNuspec">
+    <PropertyGroup>
+      <!-- Publish Dibix.Sdk.Cli as Dibix.Sdk -->
+      <PackageId>$(_DibixSdkName)</PackageId>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="CollectPackageOutputs">
+    <!--
+      Obviously, the preferred solution would be to simply set 'AssemblyName' on the project but it collides with existing project 'Dibix.csproj':
+      C:\Program Files\dotnet\sdk\8.0.400\NuGet.targets(174,5): error : Ambiguous project name 'Dibix'.
+    -->
+    <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+      <!--<_FilesToRename Include="$(OutputPath)Dibix.Sdk.Cli.*" />-->
+      <_FilesToRename Include="$(OutDir)$(TargetName).exe" />
+      <_FilesToRename Include="$(OutDir)$(TargetName).exe.config" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(_FilesToRename)" DestinationFiles="@(_FilesToRename->'$(OutDir)%(Filename)%(Extension)'->Replace('Dibix.Sdk.Cli', 'Dibix'))" />
+
+    <!-- 
+      All tool dependencies must be embedded within the package
+      https://github.com/dotnet/msbuild/issues/1755
+    -->
+    <ItemGroup>
+      <_ToolItem Include="Dibix.dll" />
+      <_ToolItem Include="Dibix.Http.Server.dll" />
+      <_ToolItem Include="Dibix.Sdk.dll" />
+      <_ToolItem Include="Dibix.Sdk.Abstractions.dll" />
+      <_ToolItem Include="Dibix.Sdk.CodeAnalysis.dll" />
+      <_ToolItem Include="Dibix.Sdk.CodeGeneration.dll" />
+      <_ToolItem Include="Dibix.Sdk.Sql.dll" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+      <_ToolItem Include="Dibix.exe" />
+      <_ToolItem Include="Dibix.exe.config" />
+      <_ToolItem Include="Microsoft.Build.Framework.dll" />
+      <_ToolItem Include="Microsoft.Build.Utilities.Core.dll" />
+      <_ToolItem Include="Microsoft.Data.SqlClient.dll" />
+      <_ToolItem Include="Microsoft.Data.Tools.Schema.Sql.dll" />
+      <_ToolItem Include="Microsoft.Data.Tools.Schema.Tasks.Sql.dll" />
+      <_ToolItem Include="Microsoft.Data.Tools.Utilities.dll" />
+      <_ToolItem Include="Microsoft.OpenApi.dll" />
+      <_ToolItem Include="Microsoft.SqlServer.Dac.dll" />
+      <_ToolItem Include="Microsoft.SqlServer.Dac.Extensions.dll" />
+      <_ToolItem Include="Microsoft.SqlServer.TransactSql.ScriptDom.dll" />
+      <_ToolItem Include="Newtonsoft.Json.dll" />
+      <_ToolItem Include="Newtonsoft.Json.Schema.dll" />
+      <_ToolItem Include="System.Collections.Immutable.dll" />
+      <_ToolItem Include="System.IO.Packaging.dll" />
+      <_ToolItem Include="System.Memory.dll" />
+      <_ToolItem Include="System.Numerics.Vectors.dll" />
+      <_ToolItem Include="System.Reflection.Metadata.dll" />
+      <_ToolItem Include="System.Resources.Extensions.dll" />
+      <_ToolItem Include="System.Runtime.CompilerServices.Unsafe.dll" />
+      <_ToolItem Include="System.ValueTuple.dll" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+      <_ToolItem Include="Dibix.Sdk.Cli.deps.json" />
+      <_ToolItem Include="Dibix.Sdk.Cli.runtimeconfig.json" />
+      <_ToolItem Include="Dibix.Sdk.Cli.dll" />
+      <_ToolItem Include="Microsoft.Build.Framework.dll" />
+      <_ToolItem Include="Microsoft.Build.Utilities.Core.dll" />
+      <_ToolItem Include="Microsoft.Data.SqlClient.dll" />
+      <_ToolItem Include="Microsoft.Data.Tools.Schema.Sql.dll" />
+      <_ToolItem Include="Microsoft.Data.Tools.Schema.Tasks.Sql.dll" />
+      <_ToolItem Include="Microsoft.Data.Tools.Utilities.dll" />
+      <_ToolItem Include="Microsoft.OpenApi.dll" />
+      <_ToolItem Include="Microsoft.SqlServer.Dac.dll" />
+      <_ToolItem Include="Microsoft.SqlServer.Dac.Extensions.dll" />
+      <_ToolItem Include="Microsoft.SqlServer.Server.dll" />
+      <_ToolItem Include="Microsoft.SqlServer.TransactSql.ScriptDom.dll" />
+      <_ToolItem Include="Newtonsoft.Json.dll" />
+      <_ToolItem Include="Newtonsoft.Json.Schema.dll" />
+      <_ToolItem Include="System.ComponentModel.Composition.dll" />
+      <_ToolItem Include="System.IO.Packaging.dll" />
+      <_ToolRuntimeItem Include="$(OutDir)runtimes/**/Microsoft.Data.SqlClient.dll" />
+    </ItemGroup>
+
+
+    <!-- Merge Dibix SDK + CLI into a single EXE -->
+    <!-- 
+      ILMerge/ILRepack introduces various issues including problems with dynamically loaded assemblies.
+      Should revisit this at some point.
+    -->
+    <!--
+    <PropertyGroup>
+      <_DibixExeMergeInputFlat>@(_ToolItem->'$(OutDir)%(Identity)', ' ')</_DibixExeMergeInputFlat>
+    </PropertyGroup>
+
+    <Exec Command="$(ILRepack) /out:$(TargetPath) /target:winexe $(_DibixExeMergeInputFlat)" />
+    -->
+
+    <!-- Collect package files -->
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="@(_ToolItem->'$(OutDir)%(Identity)')" PackagePath="tools\$(TargetFramework)" />
+      <TfmSpecificPackageFile Include="@(_ToolRuntimeItem->'%(Identity)')" PackagePath="tools\$(TargetFramework)\runtimes" />
+    </ItemGroup>
+  </Target>
+
+</Project>

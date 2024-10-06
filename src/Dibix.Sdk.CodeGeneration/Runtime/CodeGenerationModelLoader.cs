@@ -11,11 +11,9 @@ namespace Dibix.Sdk.CodeGeneration
             CodeGenerationConfiguration configuration
           , SecuritySchemes securitySchemes
           , ISchemaRegistry schemaRegistry
-          , DefaultAssemblyResolver assemblyResolver
           , IActionParameterSourceRegistry actionParameterSourceRegistry
           , IActionParameterConverterRegistry actionParameterConverterRegistry
           , ILockEntryManager lockEntryManager
-          , IFileSystemProvider fileSystemProvider
           , ILogger logger
           , TSqlModel sqlModel
         )
@@ -54,15 +52,15 @@ namespace Dibix.Sdk.CodeGeneration
             schemaRegistry.ImportSchemas
             (
                 new BuiltInSchemaProvider()
-              , new ExternalSchemaProvider(assemblyResolver)
-              , new ContractDefinitionSchemaProvider(configuration.ProductName, configuration.AreaName, configuration.Contracts, fileSystemProvider, typeResolver, schemaRegistry, logger)
+              , new ExternalSchemaProvider(configuration.ProjectDirectory, configuration.References)
+              , new ContractDefinitionSchemaProvider(configuration.ProductName, configuration.AreaName, configuration.ProjectDirectory, configuration.Contracts, typeResolver, schemaRegistry, logger)
               , new UserDefinedTypeSchemaProvider(configuration.ProductName, configuration.AreaName, configuration.Source, typeResolver, logger)
               , new SqlStatementEnumSchemaProvider(configuration.ProductName, configuration.AreaName, configuration.Source, logger)
               , new SqlStatementDefinitionProvider(configuration.IsEmbedded, configuration.LimitDdlStatements, analyzeAlways: true, configuration.ProductName, configuration.AreaName, configuration.Source, parser, formatter, typeResolver, schemaRegistry, logger, sqlModel)
             );
 
             IActionTargetDefinitionResolverFacade actionTargetResolver = new ActionTargetDefinitionResolverFacade(configuration.ProductName, configuration.AreaName, defaultClassName, lockEntryManager, schemaRegistry, logger);
-            IControllerDefinitionProvider controllerDefinitionProvider = new ControllerDefinitionProvider(configuration.Endpoints, securitySchemes, configuration.ConfigurationTemplates, actionTargetResolver, typeResolver, schemaRegistry, actionParameterSourceRegistry, actionParameterConverterRegistry, fileSystemProvider, logger);
+            IControllerDefinitionProvider controllerDefinitionProvider = new ControllerDefinitionProvider(configuration.Endpoints, securitySchemes, configuration.ConfigurationTemplates, actionTargetResolver, typeResolver, schemaRegistry, actionParameterSourceRegistry, actionParameterConverterRegistry, logger);
 
             model.Controllers.AddRange(controllerDefinitionProvider.Controllers);
             model.SecuritySchemes.AddRange(controllerDefinitionProvider.SecuritySchemes);

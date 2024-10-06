@@ -17,14 +17,14 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         public NamingConventionSqlCodeAnalysisRule(SqlCodeAnalysisContext context) : base(context)
         {
-            this._looseConstraintDeclarations = new Dictionary<string, TSqlFragment>();
+            _looseConstraintDeclarations = new Dictionary<string, TSqlFragment>();
         }
 
         protected override void BeginStatement(TSqlScript node)
         {
             LooseConstraintDeclarationVisitor visitor = new LooseConstraintDeclarationVisitor();
             node.Accept(visitor);
-            this._looseConstraintDeclarations.ReplaceWith(visitor.LooseConstraintDeclarations);
+            _looseConstraintDeclarations.ReplaceWith(visitor.LooseConstraintDeclarations);
         }
 
         public override void Visit(BeginTransactionStatement node)
@@ -45,27 +45,27 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             if (node.IsTemporaryTable())
                 return;
 
-            this.Check(node.SchemaObjectName, NamingConventions.Table);
+            Check(node.SchemaObjectName, NamingConventions.Table);
             base.Visit(node);
         }
 
         // Views
-        public override void Visit(CreateViewStatement node) => this.Check(node.SchemaObjectName, NamingConventions.View);
+        public override void Visit(CreateViewStatement node) => Check(node.SchemaObjectName, NamingConventions.View);
 
         // UDTs
-        public override void Visit(CreateTypeStatement node) => this.Check(node.Name, NamingConventions.Type);
+        public override void Visit(CreateTypeStatement node) => Check(node.Name, NamingConventions.Type);
 
         // Sequences
-        public override void Visit(CreateSequenceStatement node) => this.Check(node.Name, NamingConventions.Sequence);
+        public override void Visit(CreateSequenceStatement node) => Check(node.Name, NamingConventions.Sequence);
 
         // Stored procedures
-        public override void Visit(CreateProcedureStatement node) => this.Check(node.ProcedureReference.Name, NamingConventions.Procedure);
+        public override void Visit(CreateProcedureStatement node) => Check(node.ProcedureReference.Name, NamingConventions.Procedure);
 
         // Functions
-        public override void Visit(CreateFunctionStatement node) => this.Check(node.Name, NamingConventions.Function);
+        public override void Visit(CreateFunctionStatement node) => Check(node.Name, NamingConventions.Function);
 
         // Function parameters
-        public override void Visit(ProcedureParameter node) => this.Check(node.VariableName, NamingConventions.FunctionParameter);
+        public override void Visit(ProcedureParameter node) => Check(node.VariableName, NamingConventions.FunctionParameter);
 
         // Table columns
         protected override void Visit(TableModel tableModel, SchemaObjectName tableName, TableDefinition tableDefinition)
@@ -77,17 +77,17 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                     continue;
 
                 string suppressionKey = $"{tableName.BaseIdentifier.Value}#{column.ColumnIdentifier.Value}";
-                base.FailIfUnsuppressed(column, suppressionKey, $"Column names should only contain the characters 'a-z_' and have no trailing underscores: {tableName.BaseIdentifier.Value}.{column.ColumnIdentifier.Value}");
+                FailIfUnsuppressed(column, suppressionKey, $"Column names should only contain the characters 'a-z_' and have no trailing underscores: {tableName.BaseIdentifier.Value}.{column.ColumnIdentifier.Value}");
             }
 
-            this.VisitConstraints(tableModel, tableName, tableDefinition);
-            this.VisitIndexes(tableModel, tableName, tableDefinition);
+            VisitConstraints(tableModel, tableName, tableDefinition);
+            VisitIndexes(tableModel, tableName, tableDefinition);
         }
 
         // Constraints
         private void VisitConstraints(TableModel tableModel, SchemaObjectName tableName, TableDefinition tableDefinition)
         {
-            foreach (Constraint constraint in base.Model.GetConstraints(tableModel, tableName))
+            foreach (Constraint constraint in Model.GetConstraints(tableModel, tableName).OrderBy(x => x.Source.StartLine))
             {
                 if (constraint.Kind == ConstraintKind.Nullable)
                     return;
@@ -96,13 +96,13 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                     return;
 
                 NamingConvention namingConvention = GetNamingConvention(constraint.Kind);
-                if (!this._looseConstraintDeclarations.TryGetValue(constraint.Name, out TSqlFragment target))
+                if (!_looseConstraintDeclarations.TryGetValue(constraint.Name, out TSqlFragment target))
                 {
                     TSqlFragment sqlFragment = tableDefinition.FindChild(constraint.Source);
                     target = ExtractConstraintIdentifier(sqlFragment, constraint.Name);
                 }
 
-                this.Check(constraint.Name, namingConvention, x => ResolveConstraintPlaceholders(x, tableName.BaseIdentifier.Value, constraint.Columns), target);
+                Check(constraint.Name, namingConvention, x => ResolveConstraintPlaceholders(x, tableName.BaseIdentifier.Value, constraint.Columns), target);
             }
         }
 
@@ -128,16 +128,16 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         // Indexes
         private void VisitIndexes(TableModel tableModel, SchemaObjectName tableName, TableDefinition tableDefinition)
         {
-            foreach (Index index in base.Model.GetIndexes(tableModel, tableName))
+            foreach (Sql.Index index in Model.GetIndexes(tableModel, tableName).OrderBy(x => x.Source.StartLine))
             {
                 NamingConvention namingConvention = index.IsUnique ? NamingConventions.UniqueIndex : NamingConventions.Index;
-                if (!this._looseConstraintDeclarations.TryGetValue(index.Name, out TSqlFragment target))
+                if (!_looseConstraintDeclarations.TryGetValue(index.Name, out TSqlFragment target))
                 {
                     TSqlFragment sqlFragment = tableDefinition.FindChild(index.Source);
                     target = ExtractIndexIdentifier(sqlFragment);
                 }
 
-                this.Check(index.Name, namingConvention, x => ResolveConstraintPlaceholders(x, tableName.BaseIdentifier.Value, index.Columns), target);
+                Check(index.Name, namingConvention, x => ResolveConstraintPlaceholders(x, tableName.BaseIdentifier.Value, index.Columns), target);
             }
         }
 
@@ -152,12 +152,12 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             }
         }
 
-        private void Check(SchemaObjectName schemaObjectName, NamingConvention namingConvention) => this.Check(schemaObjectName.BaseIdentifier, namingConvention);
-        private void Check(Identifier identifier, NamingConvention namingConvention) => this.Check(identifier.Value, namingConvention, null, base.FailIfUnsuppressed, identifier);
-        private void Check(string name, NamingConvention namingConvention, Action<PatternNormalizer> replacements, TSqlFragment target) => this.Check(name, namingConvention, replacements, base.FailIfUnsuppressed, target);
+        private void Check(SchemaObjectName schemaObjectName, NamingConvention namingConvention) => Check(schemaObjectName.BaseIdentifier, namingConvention);
+        private void Check(Identifier identifier, NamingConvention namingConvention) => Check(identifier.Value, namingConvention, null, FailIfUnsuppressed, identifier);
+        private void Check(string name, NamingConvention namingConvention, Action<PatternNormalizer> replacements, TSqlFragment target) => Check(name, namingConvention, replacements, FailIfUnsuppressed, target);
         private void Check<T>(string name, NamingConvention namingConvention, Action<PatternNormalizer> replacements, Action<T, string, object[]> failAction, T target)
         {
-            string namingConventionPrefix = this.Configuration.NamingConventionPrefix;
+            string namingConventionPrefix = Configuration.NamingConventionPrefix;
             string mask = namingConvention.NormalizePattern(namingConventionPrefix, replacements);
             string description = namingConvention.NormalizeDescription(namingConventionPrefix);
             if (Regex.IsMatch(name, mask))
@@ -191,15 +191,15 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         {
             public IDictionary<string, TSqlFragment> LooseConstraintDeclarations { get; }
 
-            public LooseConstraintDeclarationVisitor() => this.LooseConstraintDeclarations = new Dictionary<string, TSqlFragment>();
+            public LooseConstraintDeclarationVisitor() => LooseConstraintDeclarations = new Dictionary<string, TSqlFragment>();
 
-            public override void Visit(CreateIndexStatement node) => this.LooseConstraintDeclarations.Add(node.Name.Value, node.Name);
+            public override void Visit(CreateIndexStatement node) => LooseConstraintDeclarations.Add(node.Name.Value, node.Name);
             
             public override void Visit(AlterTableAddTableElementStatement node)
             {
                 node.Definition
                     .TableConstraints
-                    .Each(x => this.LooseConstraintDeclarations.Add(x.ConstraintIdentifier.Value, x.ConstraintIdentifier));
+                    .Each(x => LooseConstraintDeclarations.Add(x.ConstraintIdentifier.Value, x.ConstraintIdentifier));
             }
         }
     }
@@ -233,21 +233,21 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         public NamingConvention(string pattern, string documentation = null, [CallerMemberName] string name = null)
         {
-            this.Pattern = pattern;
-            this.Documentation = documentation ?? pattern;
-            this.DisplayName = ComputeDisplayName(name);
+            Pattern = pattern;
+            Documentation = documentation ?? pattern;
+            DisplayName = ComputeDisplayName(name);
         }
 
         public string NormalizePattern(string namingConventionPrefix, Action<PatternNormalizer> replacements)
         {
-            PatternNormalizer normalizer = new PatternNormalizer(this.Pattern, namingConventionPrefix);
+            PatternNormalizer normalizer = new PatternNormalizer(Pattern, namingConventionPrefix);
             replacements?.Invoke(normalizer);
             return normalizer.Normalize();
         }
 
         public string NormalizeDescription(string namingConventionPrefix)
         {
-            PatternNormalizer normalizer = new PatternNormalizer(this.Documentation, namingConventionPrefix);
+            PatternNormalizer normalizer = new PatternNormalizer(Documentation, namingConventionPrefix);
             return normalizer.Normalize();
         }
 
@@ -269,11 +269,11 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         private Placeholder(string name, bool normalizeDescription = false)
         {
-            this.Name = name;
-            this.NormalizeDescription = normalizeDescription;
+            Name = name;
+            NormalizeDescription = normalizeDescription;
         }
 
-        public override string ToString() => $"<{this.Name}>";
+        public override string ToString() => $"<{Name}>";
     }
 
     internal sealed class PatternNormalizer
@@ -283,19 +283,19 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         public PatternNormalizer(string pattern, string namingConventionPrefix)
         {
-            this._pattern = pattern;
-            this._map = new Dictionary<string, string> { { Placeholder.Prefix.Name, namingConventionPrefix } };
+            _pattern = pattern;
+            _map = new Dictionary<string, string> { { Placeholder.Prefix.Name, namingConventionPrefix } };
         }
 
-        public void ResolvePlaceholder(string name, string value) => this._map.Add(name, value);
+        public void ResolvePlaceholder(string name, string value) => _map.Add(name, value);
 
         public string Normalize()
         {
-            string replacementPattern = String.Join("|", EnumerableExtensions.Create(@"\*").Concat(this._map.Keys.Select(x => $@"\<{x}\>")));
-            string mask = Regex.Replace(this._pattern, replacementPattern, this.OnMatch);
+            string replacementPattern = String.Join("|", EnumerableExtensions.Create(@"\*").Concat(_map.Keys.Select(x => $@"\<{x}\>")));
+            string mask = Regex.Replace(_pattern, replacementPattern, OnMatch);
             return mask;
         }
 
-        private string OnMatch(Match match) => this._map.TryGetValue(match.Value.TrimStart('<').TrimEnd('>'), out string replacement) ? replacement : match.Value;
+        private string OnMatch(Match match) => _map.TryGetValue(match.Value.TrimStart('<').TrimEnd('>'), out string replacement) ? replacement : match.Value;
     }
 }

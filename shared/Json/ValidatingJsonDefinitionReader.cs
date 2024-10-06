@@ -12,54 +12,46 @@ namespace Dibix.Sdk
     internal abstract class ValidatingJsonDefinitionReader
     {
         public bool HasSchemaErrors { get; private set; }
-        protected IFileSystemProvider FileSystemProvider { get; }
         protected ILogger Logger { get; }
         protected abstract string SchemaName { get; }
 
-        protected ValidatingJsonDefinitionReader(IFileSystemProvider fileSystemProvider, ILogger logger)
+        protected ValidatingJsonDefinitionReader(ILogger logger)
         {
-            FileSystemProvider = fileSystemProvider;
             Logger = logger;
         }
 
-        protected void Collect(IEnumerable<string> inputs)
+        protected void Collect(IEnumerable<string> files)
         {
-            foreach (string filePath in FileSystemProvider.GetFiles(null, inputs.Select(x => (VirtualPath)x), Array.Empty<VirtualPath>()))
+            foreach (string file in files)
             {
-                using (Stream stream = File.OpenRead(filePath))
+                using Stream stream = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                using TextReader textReader = new StreamReader(stream);
+                using JsonReader jsonReader = new JsonTextReader(textReader);
+                JObject json;
+                try
                 {
-                    using (TextReader textReader = new StreamReader(stream))
-                    {
-                        using (JsonReader jsonReader = new JsonTextReader(textReader))
-                        {
-                            JObject json;
-                            try
-                            {
-                                json = JObject.Load(jsonReader, new JsonLoadSettings { DuplicatePropertyNameHandling = DuplicatePropertyNameHandling.Error });
-                                json.SetFileSource(filePath);
-                                if (!VerifyDuplicatePropertiesCaseInsensitive(json))
-                                    continue;
-                            }
-                            catch (JsonReaderException jsonReaderException)
-                            {
-                                Logger.LogError(jsonReaderException.Message, filePath, jsonReaderException.LineNumber, jsonReaderException.LinePosition);
-                                continue;
-                            }
-
-                            if (!json.IsValid(JsonSchemaDefinition.GetSchema(GetType().Assembly, SchemaName), out IList<ValidationError> errors))
-                            {
-                                foreach (ValidationError error in errors.Flatten())
-                                {
-                                    LogError(error.Message, error.Path, error.LineNumber, error.LinePosition, filePath);
-                                }
-                                HasSchemaErrors = true;
-                                continue;
-                            }
-
-                            Read(json);
-                        }
-                    }
+                    json = JObject.Load(jsonReader, new JsonLoadSettings { DuplicatePropertyNameHandling = DuplicatePropertyNameHandling.Error });
+                    json.SetFileSource(file);
+                    if (!VerifyDuplicatePropertiesCaseInsensitive(json))
+                        continue;
                 }
+                catch (JsonReaderException jsonReaderException)
+                {
+                    Logger.LogError(jsonReaderException.Message, file, jsonReaderException.LineNumber, jsonReaderException.LinePosition);
+                    continue;
+                }
+
+                if (!json.IsValid(JsonSchemaDefinition.GetSchema(GetType().Assembly, SchemaName), out IList<ValidationError> errors))
+                {
+                    foreach (ValidationError error in errors.Flatten())
+                    {
+                        LogError(error.Message, error.Path, error.LineNumber, error.LinePosition, file);
+                    }
+                    HasSchemaErrors = true;
+                    continue;
+                }
+
+                Read(json);
             }
         }
 

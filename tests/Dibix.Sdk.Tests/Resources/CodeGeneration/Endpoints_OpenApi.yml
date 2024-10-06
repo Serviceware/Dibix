@@ -258,7 +258,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericContract'
         '404':
-          description: "X-Error-Code|X-Error-Description\r\n-|-\r\n1|The user '{name}' with the id '{id}' could not be found"
+          description: "X-Error-Code|X-Error-Description\n-|-\n1|The user '{name}' with the id '{id}' could not be found"
           headers:
             X-Error-Code:
               description: Additional error code to handle the error on the client

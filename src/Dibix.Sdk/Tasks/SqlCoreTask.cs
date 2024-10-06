@@ -3,7 +3,6 @@ using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.CodeAnalysis;
 using Dibix.Sdk.CodeGeneration;
 using Dibix.Sdk.Sql;
-using Microsoft.SqlServer.Dac.Model;
 
 namespace Dibix.Sdk
 {
@@ -89,7 +88,6 @@ namespace Dibix.Sdk
             codeGenerationConfiguration.Endpoints.AddRange(_configuration.ArtifactGeneration.Endpoints);
             codeGenerationConfiguration.References.AddRange(_configuration.ArtifactGeneration.References);
 
-            IFileSystemProvider fileSystemProvider = new PhysicalFileSystemProvider(_configuration.SqlCore.ProjectDirectory);
             SecuritySchemes securitySchemes = new SecuritySchemes();
             IActionParameterConverterRegistry actionParameterConverterRegistry = new ActionParameterConverterRegistry();
             IActionParameterSourceRegistry actionParameterSourceRegistry = new ActionParameterSourceRegistry();
@@ -99,7 +97,6 @@ namespace Dibix.Sdk
                 UserConfigurationLoader userConfigurationLoader = new UserConfigurationLoader
                 (
                     _configuration.SqlCore.ConfigurationFilePath
-                  , fileSystemProvider
                   , _logger
                   , new SqlCodeAnalysisUserConfigurationReader(sqlCodeAnalysisConfiguration)
                   , new CodeGenerationUserConfigurationReader(codeGenerationConfiguration, securitySchemes, actionParameterSourceRegistry, actionParameterConverterRegistry, _logger)
@@ -110,7 +107,7 @@ namespace Dibix.Sdk
             if (_logger.HasLoggedErrors)
                 return false;
 
-            TSqlModel sqlModel = PublicSqlDataSchemaModelLoader.Load
+            using PublicSqlDataSchemaModel publicSqlDataSchemaModel = PublicSqlDataSchemaModelLoader.Load
             (
                 preventDmlReferences: _configuration.SqlCore.PreventDmlReferences
               , databaseSchemaProviderName: _configuration.SqlCore.DatabaseSchemaProviderName
@@ -120,27 +117,24 @@ namespace Dibix.Sdk
               , logger: _logger
             );
 
-            using (LockEntryManager lockEntryManager = LockEntryManager.Create(_configuration.SqlCore.ResetLockFile, _configuration.SqlCore.LockFile))
-            {
-                bool analysisResult = SqlCodeAnalysisTask.Execute(sqlCodeAnalysisConfiguration, lockEntryManager, _logger, sqlModel);
+            using LockEntryManager lockEntryManager = LockEntryManager.Create(_configuration.SqlCore.ResetLockFile, _configuration.SqlCore.LockFile);
+            bool analysisResult = SqlCodeAnalysisTask.Execute(sqlCodeAnalysisConfiguration, lockEntryManager, _logger, publicSqlDataSchemaModel.Model);
 
-                if (!analysisResult)
-                    return false;
+            if (!analysisResult)
+                return false;
 
-                bool codeGenerationResult = CodeGenerationTask.Execute
-                (
-                    codeGenerationConfiguration
-                  , securitySchemes
-                  , actionParameterSourceRegistry
-                  , actionParameterConverterRegistry
-                  , lockEntryManager
-                  , fileSystemProvider
-                  , _logger
-                  , sqlModel
-                );
+            bool codeGenerationResult = CodeGenerationTask.Execute
+            (
+                codeGenerationConfiguration
+              , securitySchemes
+              , actionParameterSourceRegistry
+              , actionParameterConverterRegistry
+              , lockEntryManager
+              , _logger
+              , publicSqlDataSchemaModel.Model
+            );
 
-                return codeGenerationResult;
-            }
+            return codeGenerationResult;
         }
     }
 }

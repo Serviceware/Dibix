@@ -1,11 +1,16 @@
 <Project>
 
   <PropertyGroup>
-    <DibixToolsDirectory>$(MSBuildThisFileDirectory)..\tools\net48\</DibixToolsDirectory>
-    <DibixCliPath>$(DibixToolsDirectory)Dibix.exe</DibixCliPath>
+    <_DibixToolsFrameworkFolder Condition="'$(MSBuildRuntimeType)' == 'Core'">net8.0</_DibixToolsFrameworkFolder>
+    <_DibixToolsFrameworkFolder Condition="'$(MSBuildRuntimeType)' != 'Core'">net48</_DibixToolsFrameworkFolder>
+    <_DibixPackageFolder>$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..))/</_DibixPackageFolder>
+    
+    <DibixToolsDirectory>$(_DibixPackageFolder)tools/$(_DibixToolsFrameworkFolder)/</DibixToolsDirectory>
+    <DibixCliPath Condition="'$(MSBuildRuntimeType)' == 'Core'">dotnet $(DibixToolsDirectory)Dibix.Sdk.Cli.dll</DibixCliPath>
+    <DibixCliPath Condition="'$(MSBuildRuntimeType)' != 'Core'">$(DibixToolsDirectory)Dibix.exe</DibixCliPath>
     <DibixSdkPath>$(DibixToolsDirectory)Dibix.Sdk.dll</DibixSdkPath>
     <DibixRuntimeDirectory>$(DibixToolsDirectory)</DibixRuntimeDirectory>
-    <DibixSdkVersion>$([System.IO.Path]::GetFileName($([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..))))</DibixSdkVersion>
+    <DibixSdkVersion>$([System.IO.Path]::GetFileName($(_DibixPackageFolder.TrimEnd('/'))))</DibixSdkVersion>
   </PropertyGroup>
 
   <!--
@@ -14,7 +19,8 @@
   -->
   <PropertyGroup>
     <DibixConfigurationDirectory Condition="'$(DibixConfigurationDirectory)' == ''">$(MSBuildProjectDirectory)</DibixConfigurationDirectory>
-    <DibixTargetFramework Condition="'$(DibixTargetFramework)' == ''">net48</DibixTargetFramework>
+    <DibixTargetFramework Condition="'$(DibixTargetFramework)' == ''">netstandard2.0</DibixTargetFramework>
+    <DibixTargetFrameworkRuntime Condition="'$(DibixTargetFrameworkRuntime)' == ''">Core</DibixTargetFrameworkRuntime>
     <IsEmbedded Condition="'$(IsEmbedded)' == ''">$(MSBuildProjectName.EndsWith('.DML'))</IsEmbedded>
     <LimitDdlStatements Condition="'$(LimitDdlStatements)' == ''">True</LimitDdlStatements>
     <PreventDmlReferences Condition="'$(PreventDmlReferences)' == ''">True</PreventDmlReferences>

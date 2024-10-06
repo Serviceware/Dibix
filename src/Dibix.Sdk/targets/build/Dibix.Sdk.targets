@@ -106,7 +106,7 @@
   </PropertyGroup>
 
   <!-- Utility to dump item including metadata -->
-  <UsingTask TaskName="DumpItem" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+  <UsingTask TaskName="DumpItem" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)/Microsoft.Build.Tasks.Core.dll">
     <ParameterGroup>
       <Source ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
       <Result Output="true" />
@@ -234,8 +234,8 @@
 
   <Target Name="SetupCompilationArtifacts" BeforeTargets="SetupSqlCoreInputs">
     <ItemGroup>
-      <Contract Include="@(None)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(RelativeDir)', '^Contracts\\')) and %(Extension) == '.json'" />
-      <Endpoint Include="@(None)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(RelativeDir)', '^Endpoints\\')) and %(Extension) == '.json'" />
+      <Contract Include="@(None)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(RelativeDir)', '^Contracts[/\\]+')) and %(Extension) == '.json'" />
+      <Endpoint Include="@(None)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(RelativeDir)', '^Endpoints[/\\]+')) and %(Extension) == '.json'" />
     </ItemGroup>
   </Target>
 
@@ -248,11 +248,12 @@
     <PropertyGroup>
       <ProductName Condition="'$(ProductName)' == ''">$(RootNamespace.Split('.')[0])</ProductName>
       <Title Condition="$(Title) == ''">$(AreaName)</Title>
-      <Description Condition="$(Description) == '' and $(Build_Repository_Uri) != '' and $(Build_SourceVersion) != '' and $(Build_SourceBranch) != ''">__Build version:__ $([System.DateTime]::Now.ToString(G))\r\n\r\n__Source version:__ [$(Build_SourceVersion)]($(Build_Repository_Uri)/commit/$(Build_SourceVersion)?refName=$(Build_SourceBranch))</Description>
+      <Description Condition="$(Description) == '' and $(Build_Repository_Uri) != '' and $(Build_SourceVersion) != '' and $(Build_SourceBranch) != ''">__Build version:__ $([System.DateTime]::Now.ToString(G))\n\n__Source version:__ [$(Build_SourceVersion)]($(Build_Repository_Uri)/commit/$(Build_SourceVersion)?refName=$(Build_SourceBranch))</Description>
       <LangVersion>latest</LangVersion>
       <!--<ExternalAssemblyReferenceDirectory Condition="'$(ExternalAssemblyReferenceDirectory)' == ''">$(TargetDir)</ExternalAssemblyReferenceDirectory>-->
 
-      <_MSBuildBinPath>$(MSBuildToolsPath)\msbuild.exe</_MSBuildBinPath>
+      <_BuildCommand Condition="'$(MSBuildRuntimeType)' == 'Core'">dotnet build --configuration $(Configuration)</_BuildCommand>
+      <_BuildCommand Condition="'$(MSBuildRuntimeType)' != 'Core'">&quot;$(MSBuildToolsPath)/msbuild.exe&quot; -restore -p:Configuration=$(Configuration) -verbosity:minimal</_BuildCommand>
       <_LockFile>$(DibixConfigurationDirectory)dibix.lock</_LockFile>
       <_SignAssembly>$(SignAssembly)</_SignAssembly>
       <_SignAssembly Condition="'$(_SignAssembly)' == '' and '$(AssemblyOriginatorKeyFile)' != ''">true</_SignAssembly>
@@ -394,10 +395,7 @@ $(_SqlReferencePath)" />
     <!-- Accessor assembly info & DLL generation -->
     <PropertyGroup Condition="'$(ProduceAccessor)' == 'true'">
       <_AccessorIntermediatePathNoExt>$(IntermediateOutputPath)$(AccessorOutputName)</_AccessorIntermediatePathNoExt>
-      <_AccessorTargetFrameworkNetFx>$(DibixTargetFramework)</_AccessorTargetFrameworkNetFx>
-      <_AccessorTargetFrameworkNetStandard>netstandard2.0</_AccessorTargetFrameworkNetStandard>
-      <_AccessorTargetFramework>$(_AccessorTargetFrameworkNetFx)</_AccessorTargetFramework>
-      <_AccessorTargetFramework Condition="'$(CompileArtifactsNetStandard)' == 'true'">$(_AccessorTargetFrameworkNetStandard)</_AccessorTargetFramework>
+      <_AccessorTargetFramework>$(DibixTargetFramework)</_AccessorTargetFramework>
     </PropertyGroup>
 
     <ItemGroup Condition="'$(ProduceAccessor)' == 'true'">
@@ -455,11 +453,11 @@ $(_SqlReferencePath)" />
     -->
   </ItemGroup>
 
-  <ItemGroup Condition="'%24(TargetFramework)' == '$(_AccessorTargetFrameworkNetStandard)'">
+  <ItemGroup Condition="'$(DibixTargetFrameworkRuntime)' == 'Core'">
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" ExcludeAssets="runtime" />
   </ItemGroup>
 
-  <ItemGroup Condition="'%24(TargetFramework)' == '$(_AccessorTargetFrameworkNetFx)'">
+  <ItemGroup Condition="'$(DibixTargetFrameworkRuntime)' != 'Core'">
     <Reference Include="System.ComponentModel.DataAnnotations" />
   </ItemGroup>
 
@@ -497,12 +495,12 @@ $(_SqlReferencePath)" />
       <FileWrites Include="$(IntermediateOutputPath)Directory.Build.targets" />
     </ItemGroup>
 
-    <Exec Command="&quot;$(_MSBuildBinPath)&quot; &quot;$(_AccessorIntermediateProjectFilePath)&quot; -restore -p:Configuration=$(Configuration) -verbosity:minimal"
+    <Exec Command="$(_BuildCommand) &quot;$(_AccessorIntermediateProjectFilePath)&quot;"
           Condition="'$(ProduceAccessor)' == 'true'"/>
 
     <ItemGroup>
       <FileWrites Include="$(IntermediateOutputPath)nuget.output" />
-      <FileWrites Include="$(IntermediateOutputPath)obj\**" />
+      <FileWrites Include="$(IntermediateOutputPath)obj/**" />
     </ItemGroup>
 
 
@@ -511,14 +509,14 @@ $(_SqlReferencePath)" />
       <_EndpointBinaryExt>.dbxc</_EndpointBinaryExt>
       <_EndpointBinaryFileName>$(_EndpointSourceName)$(_EndpointBinaryExt)</_EndpointBinaryFileName>
       <_EndpointIntermediateBinaryPath>$(IntermediateOutputPath)$(_EndpointBinaryFileName)</_EndpointIntermediateBinaryPath>
-      <_EndpointTargetFrameworkNetFx>net8.0</_EndpointTargetFrameworkNetFx>
+      <_EndpointTargetFramework>net8.0</_EndpointTargetFramework>
       <_EndpointIntermediateProjectFilePath>$(IntermediateOutputPath)$(_EndpointSourceName).csproj</_EndpointIntermediateProjectFilePath>
       <_EndpointIntermediateProjectFileContent>
         <![CDATA[
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>$(_EndpointTargetFrameworkNetFx)</TargetFramework>
+    <TargetFramework>$(_EndpointTargetFramework)</TargetFramework>
 
     <OutDir>.</OutDir>
     <TargetExt>$(_EndpointBinaryExt)</TargetExt>
@@ -576,12 +574,12 @@ $(_SqlReferencePath)" />
       <FileWrites Include="$(IntermediateOutputPath)Directory.Build.targets" />
     </ItemGroup>
 
-    <Exec Command="&quot;$(_MSBuildBinPath)&quot; &quot;$(_EndpointIntermediateProjectFilePath)&quot; -restore -p:Configuration=$(Configuration) -verbosity:minimal"
+    <Exec Command="$(_BuildCommand) &quot;$(_EndpointIntermediateProjectFilePath)&quot;"
           Condition="'$(_ProduceEndpoints)' == 'true'" />
 
     <ItemGroup>
       <FileWrites Include="$(_EndpointIntermediateBinaryPath)" />
-      <FileWrites Include="$(IntermediateOutputPath)obj\**" />
+      <FileWrites Include="$(IntermediateOutputPath)obj/**" />
     </ItemGroup>
 
     <!-- Create artifact package (.dbx) -->
@@ -625,10 +623,7 @@ $(_SqlReferencePath)" />
     <!-- Client assembly info & DLL generation -->
     <PropertyGroup Condition="'$(_ProduceClient)' == 'true'">
       <_ClientIntermediateSymbolsPath>$(IntermediateOutputPath)$(ClientOutputName).pdb</_ClientIntermediateSymbolsPath>
-      <_ClientTargetFrameworkNetFx>$(DibixTargetFramework)</_ClientTargetFrameworkNetFx>
-      <_ClientTargetFrameworkNetStandard>netstandard2.0</_ClientTargetFrameworkNetStandard>
-      <_ClientTargetFramework>$(_ClientTargetFrameworkNetFx)</_ClientTargetFramework>
-      <_ClientTargetFramework Condition="'$(CompileArtifactsNetStandard)' == 'true'">$(_ClientTargetFrameworkNetStandard)</_ClientTargetFramework>
+      <_ClientTargetFramework>$(DibixTargetFramework)</_ClientTargetFramework>
     </PropertyGroup>
 
     <ItemGroup Condition="'$(_ProduceClient)' == 'true'">
@@ -678,7 +673,7 @@ $(_SqlReferencePath)" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" ExcludeAssets="runtime" />
   </ItemGroup>
 
-  <ItemGroup Condition="'%24(TargetFramework)' == '$(_ClientTargetFrameworkNetFx)'">
+  <ItemGroup Condition="'$(DibixTargetFrameworkRuntime)' != 'Core'">
     <Reference Include="System.Net.Http" />
   </ItemGroup>
 
@@ -707,12 +702,12 @@ $(_SqlReferencePath)" />
     </ItemGroup>
 
     <Exec Condition="'$(_ProduceClient)' == 'true'"
-          Command="&quot;$(_MSBuildBinPath)&quot; &quot;$(_ClientIntermediateProjectFilePath)&quot; -restore -p:Configuration=$(Configuration) -verbosity:minimal" />
+          Command="$(_BuildCommand) &quot;$(_ClientIntermediateProjectFilePath)&quot;" />
 
     <ItemGroup>
       <FileWrites Include="$(_ClientIntermediateAssemblyPath)" />
       <FileWrites Include="$(_ClientIntermediateSymbolsPath)" />
-      <FileWrites Include="$(IntermediateOutputPath)obj\**" />
+      <FileWrites Include="$(IntermediateOutputPath)obj/**" />
     </ItemGroup>
   </Target>
 
@@ -738,7 +733,7 @@ $(_SqlReferencePath)" />
     </PropertyGroup>
 
     <ItemGroup>
-      <Docs Include="@(_DocsFiles->'$(OutDir)\%(Identity)')" />
+      <Docs Include="@(_DocsFiles->'$(OutDir)/%(Identity)')" />
     </ItemGroup>
 
     <!-- Copy generated client assembly (.dll) -->
@@ -780,7 +775,7 @@ $(_SqlReferencePath)" />
     </Copy>
 
     <!-- Publish docs -->
-    <Copy SourceFiles="@(_DocsFiles->'$(IntermediateOutputPath)\%(Identity)')"
+    <Copy SourceFiles="@(_DocsFiles->'$(IntermediateOutputPath)/%(Identity)')"
           DestinationFolder="$(OutDir)"
           SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
           OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
@@ -790,6 +785,21 @@ $(_SqlReferencePath)" />
           UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)">
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites" />
     </Copy>
+  </Target>
+
+
+  <!--
+    TODO: Investigate if there is a more elegant solution
+    The following build error occured since migrating the SDK to .NET 8.
+    It occurs only when using dotnet build instead of msbuild.
+    It doesn't matter if the assembly is compiled with .NET Framework or .NET Core as target framework.
+    -
+    Build error SQL72025: The referenced assembly <Assembly-Name-Of-The-Current-Project.dll> is corrupt or not valid.
+  -->
+  <Target Name="PrepareSqlBuild" BeforeTargets="SqlBuild" Condition="'$(MSBuildRuntimeType)' == 'Core'">
+    <PropertyGroup>
+      <IntermediateTargetFullFileName />
+    </PropertyGroup>
   </Target>
 
 

@@ -1,115 +1,47 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFrameworks>net8.0;net48</TargetFrameworks>
     <OutputType>Exe</OutputType>
+    <EnableUnsafeBinaryFormatterSerialization>True</EnableUnsafeBinaryFormatterSerialization>
 
-    <!-- Since this is a tool package, disable some package generation defaults -->
-    <!-- Don't create a lib folder -->
+    <!--
+      We could set IsTool to make the application end up in the tools folder.
+      However, we want to rename the tool from Dibix.Sdk.Cli to Dibix.
+    -->
+    <!--<IsTool>true</IsTool>-->
     <IncludeBuildOutput>false</IncludeBuildOutput>
-    <!-- There aren't any dependencies for the consumer -->
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);CollectPackageOutputs</TargetsForTfmSpecificContentInPackage>
+
+    <!-- Do not collect framework dependencies in nuspec file -->
     <SuppressDependenciesWhenPacking>True</SuppressDependenciesWhenPacking>
-    <!-- This project has a target framework, however the NuGet package doesn't include this as a dependency. -->
-    <NoWarn>$(NoWarn);NU5128</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\Dibix.Sdk\targets\Dibix.*" Pack="true" PackagePath="build" />
-    <None Include="..\Dibix.Sdk\targets\Sdk.*" Pack="true" PackagePath="Sdk" />
-    <None Include="..\Dibix.Sdk\Schema\*.json" Pack="true" PackagePath="content" />
-    <None Include="..\Dibix.Sdk.CodeGeneration\Schema\*.json" Pack="true" PackagePath="content" />
+    <None Include="..\Dibix.Sdk\targets\build\*" Link="build\%(Filename)%(Extension)" Pack="true" PackagePath="build" />
+    <None Include="..\Dibix.Sdk\targets\Sdk\*" Link="Sdk\%(Filename)%(Extension)" Pack="true" PackagePath="Sdk" />
+    <None Include="..\Dibix.Sdk\Schema\*.json" Link="content\%(Filename)%(Extension)" Pack="true" PackagePath="content" />
+    <None Include="..\Dibix.Sdk.CodeGeneration\Schema\*.json" Link="content\%(Filename)%(Extension)" Pack="true" PackagePath="content" />
     <Compile Include="..\..\shared\Diagnostics\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Extensions\ReflectionExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
   </ItemGroup>
 
+  <ItemDefinitionGroup>
+    <PackageReference PrivateAssets="All" />
+    <ProjectReference PrivateAssets="All" />
+    <Reference PrivateAssets="All" />
+  </ItemDefinitionGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\Dibix\Dibix.csproj" PrivateAssets="All" />
-    <ProjectReference Include="..\Dibix.Http.Server\Dibix.Http.Server.csproj" PrivateAssets="All" />
-    <ProjectReference Include="..\Dibix.Sdk\Dibix.Sdk.csproj" PrivateAssets="All" />
+    <ProjectReference Include="..\Dibix\Dibix.csproj" />
+    <ProjectReference Include="..\Dibix.Http.Server\Dibix.Http.Server.csproj" />
+    <ProjectReference Include="..\Dibix.Sdk\Dibix.Sdk.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ILRepack" PrivateAssets="All" />
+    <PackageReference Include="ILRepack" />
   </ItemGroup>
 
-  <Target Name="PreparePackage" BeforeTargets="GenerateNuspec">
-
-    <PropertyGroup>
-      <_DibixSdkName>Dibix.Sdk</_DibixSdkName>
-      <_DibixSdkFileName>$(_DibixSdkName).dll</_DibixSdkFileName>
-
-      <!-- Publish Dibix.Sdk.Cli as Dibix.Sdk -->
-      <PackageId>$(_DibixSdkName)</PackageId>
-    </PropertyGroup>
-
-    <!-- 
-      All tool dependencies must be embedded within the package
-      https://github.com/dotnet/msbuild/issues/1755
-    -->
-    <ItemGroup>
-      <_ToolDependency Include="Dibix.dll" />
-      <_ToolDependency Include="Dibix.Http.Server.dll" />
-      <_ToolDependency Include="$(_DibixSdkFileName)" />
-      <_ToolDependency Include="Dibix.Sdk.Abstractions.dll" />
-      <_ToolDependency Include="Dibix.Sdk.CodeAnalysis.dll" />
-      <_ToolDependency Include="Dibix.Sdk.CodeGeneration.dll" />
-      <_ToolDependency Include="Dibix.Sdk.Sql.dll" />
-      <_ToolDependency Include="Microsoft.Build.Framework.dll" />
-      <_ToolDependency Include="Microsoft.Build.Utilities.Core.dll" />
-      <_ToolDependency Include="Microsoft.Data.SqlClient.dll" />
-      <_ToolDependency Include="Microsoft.Data.Tools.Components.dll" />
-      <_ToolDependency Include="Microsoft.Data.Tools.Contracts.dll" />
-      <_ToolDependency Include="Microsoft.Data.Tools.Schema.Sql.dll" />
-      <_ToolDependency Include="Microsoft.Data.Tools.Schema.Tasks.Sql.dll" />
-      <_ToolDependency Include="Microsoft.Data.Tools.Schema.Utilities.Sql.dll" />
-      <_ToolDependency Include="Microsoft.Data.Tools.Utilities.dll" />
-      <_ToolDependency Include="Microsoft.OpenApi.dll" />
-      <_ToolDependency Include="Microsoft.SqlServer.ConnectionInfo.dll" />
-      <_ToolDependency Include="Microsoft.SqlServer.Dac.dll" />
-      <_ToolDependency Include="Microsoft.SqlServer.Dac.Extensions.dll" />
-      <_ToolDependency Include="Microsoft.SqlServer.TransactSql.ScriptDom.dll" />
-      <_ToolDependency Include="Newtonsoft.Json.dll" />
-      <_ToolDependency Include="Newtonsoft.Json.Schema.dll" />
-      <_ToolDependency Include="System.IO.Packaging.dll" />
-      <_ToolDependency Include="System.Memory.dll" />
-      <_ToolDependency Include="System.Numerics.Vectors.dll" />
-      <_ToolDependency Include="System.Resources.Extensions.dll" />
-      <_ToolDependency Include="System.Runtime.CompilerServices.Unsafe.dll" />
-      <_ToolDependency Include="System.ValueTuple.dll" />
-    </ItemGroup>
-
-    <!-- Merge Dibix SDK + CLI into a single EXE -->
-    <ItemGroup>
-      <_DibixExeMergeInput Include="$(TargetName)" />
-      <_DibixExeMergeInput Include="@(_ToolDependency)" />
-    </ItemGroup>
-
-    <PropertyGroup>
-      <_DibixExeFileName>Dibix.exe</_DibixExeFileName>
-      <_DibixExePath>$(OutDir)$(_DibixExeFileName)</_DibixExePath>
-
-      <_DibixExeMergeInputFlat>@(_DibixExeMergeInput->'$(OutDir)%(Identity)', ' ')</_DibixExeMergeInputFlat>
-    </PropertyGroup>
-
-    <!-- 
-      ILMerge/ILRepack introduces various issues including problems with dynamically loaded assemblies.
-      Should revisit this at some point.
-    -->
-    <!--<Exec Command="$(ILRepack) /out:$(_DibixExePath) /target:winexe $(_DibixExeMergeInputFlat)" />-->
-    <Copy SourceFiles="$(TargetPath)" DestinationFiles="$(_DibixExePath)" />
-    <Copy SourceFiles="$(TargetPath).config" DestinationFiles="$(_DibixExePath).config" />
-
-    
-    <!-- Collect package files -->
-    <ItemGroup>
-      <_ToolItem Include="$(_DibixExeFileName)" />
-      <_ToolItem Include="$(_DibixExeFileName).config" />
-      <_ToolItem Include="@(_ToolDependency)" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <_PackageFiles Include="@(_ToolItem->'$(OutDir)%(Identity)')" PackagePath="tools\$(TargetFramework)" />
-    </ItemGroup>
-  </Target>
+  <Import Project="$(MSBuildProjectName).targets" />
 
 </Project>

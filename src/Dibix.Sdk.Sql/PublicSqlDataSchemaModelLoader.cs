@@ -9,7 +9,6 @@ using System.Reflection;
 using Dibix.Sdk.Abstractions;
 using Microsoft.Build.Framework;
 using Microsoft.Data.Tools.Schema.Tasks.Sql;
-using Microsoft.Data.Tools.Schema.Utilities.Sql.Common;
 using Microsoft.SqlServer.Dac.Model;
 using Assembly = System.Reflection.Assembly;
 using ILogger = Dibix.Sdk.Abstractions.ILogger;
@@ -22,14 +21,14 @@ namespace Dibix.Sdk.Sql
     {
         #region Fields
         private static readonly Assembly TasksAssembly = typeof(SqlBuildTask).Assembly;
-        private static readonly Assembly UtilitiesAssembly = typeof(SqlConnectionInfoUtils).Assembly;
         private static readonly LoadPublicDataSchemaModel ModelFactory = CompileModelFactory();
         private static readonly ConcurrentDictionary<ILogger, ITask> TaskCache = new ConcurrentDictionary<ILogger, ITask>();
         #endregion
 
         #region Public Methods
-        public static TSqlModel Load(bool preventDmlReferences, string databaseSchemaProviderName, string modelCollation, IEnumerable<TaskItem> source, ICollection<TaskItem> sqlReferencePath, ILogger logger)
+        public static PublicSqlDataSchemaModel Load(bool preventDmlReferences, string databaseSchemaProviderName, string modelCollation, IEnumerable<TaskItem> source, ICollection<TaskItem> sqlReferencePath, ILogger logger)
         {
+            NullableColumnSchemaAnalyzerProxy.Setup();
             ValidateReferences(preventDmlReferences, sqlReferencePath, logger);
             ITask task = TaskCache.GetOrAdd(logger, CreateTask);
             return ModelFactory(databaseSchemaProviderName, modelCollation, source.ToMSBuildTaskItems(), sqlReferencePath.ToMSBuildTaskItems(), task, logger);
@@ -44,7 +43,7 @@ namespace Dibix.Sdk.Sql
                 string path = reference.GetFullPath();
                 string fileName = Path.GetFileNameWithoutExtension(path);
 
-                if (reference.TryGetValue("SuppressMissingDependenciesErrors", out string suppressionValue) && Boolean.Parse(suppressionValue))
+                if (reference.TryGetValue("SuppressMissingDependenciesErrors", out string suppressionValue) && suppressionValue.Length > 0 && Boolean.Parse(suppressionValue))
                 {
                     logger.LogError($"SuppressMissingDependenciesErrors is not supported: {path}", null, default, default);
                     continue;
@@ -78,8 +77,6 @@ namespace Dibix.Sdk.Sql
         private static LoadPublicDataSchemaModel CompileModelFactory()
         {
             // IEnumerator<DataSchemaError> errorEnumerator;
-            // SqlExceptionUtils._disableFiltering = true;
-            // SqlExceptionUtils._initialized = true;
             // TaskLoggingHelper loggingHelper = new TaskLoggingHelper(task);
             // TaskHostLoader hostLoader = new TaskHostLoader();
             // hostLoader.DatabaseSchemaProviderName = databaseSchemaProviderName;
@@ -101,7 +98,8 @@ namespace Dibix.Sdk.Sql
             //     if (errorEnumerator != null)
             //         errorEnumerator.Dispose();
             // }
-            // return new TSqlModel(hostLoader.LoadedTaskHost.Model);
+            // TSqlModel model = TSqlModel(hostLoader.LoadedTaskHost.Model);
+            // return new PublicSqlDataSchemaModel(model, new [] { hostLoader, hostLoader.LoadedTaskHost, hostLoader.LoadedErrorManager });
 
             // (string databaseSchemaProviderName, string modelCollation, ITaskItem[] source, ITaskItem[] sqlReferencePath, ITask task, ILogger logger) =>
             ParameterExpression databaseSchemaProviderNameParameter = Expression.Parameter(typeof(string), "databaseSchemaProviderName");
@@ -111,17 +109,12 @@ namespace Dibix.Sdk.Sql
             ParameterExpression taskParameter = Expression.Parameter(typeof(ITask), "task");
             ParameterExpression loggerParameter = Expression.Parameter(typeof(ILogger), "logger");
 
-            // Improve logging
-            // SqlExceptionUtils._disableFiltering = true;
-            // SqlExceptionUtils._initialized = true;
-            Type sqlExceptionUtilsType = UtilitiesAssembly.GetType("Microsoft.Data.Tools.Schema.Utilities.Sql.Common.Exceptions.SqlExceptionUtils", throwOnError: true);
-            FieldInfo disableFilteringField = TryGetStaticField(sqlExceptionUtilsType, "_disableFiltering");
-            FieldInfo initializedField = TryGetStaticField(sqlExceptionUtilsType, "_initialized");
-            Expression disableFilteringAssign = Expression.Assign(Expression.Field(null, disableFilteringField), Expression.Constant(true));
-            Expression initializedAssign = Expression.Assign(Expression.Field(null, initializedField), Expression.Constant(true));
-
             // TaskLoggingHelper loggingHelper = new TaskLoggingHelper(task);
+#if NETFRAMEWORK
             Assembly buildUtilitiesAssembly = Assembly.Load("Microsoft.Build.Utilities.v4.0, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
+#else
+            Assembly buildUtilitiesAssembly = typeof(Microsoft.Build.Utilities.TaskLoggingHelper).Assembly;
+#endif
             Type loggingHelperType = buildUtilitiesAssembly.GetType("Microsoft.Build.Utilities.TaskLoggingHelper", throwOnError: true);
             ParameterExpression loggingHelperVariable = Expression.Variable(loggingHelperType, "loggingHelper");
             ConstructorInfo loggingHelperCtor = loggingHelperType.GetConstructorSafe(typeof(ITask));
@@ -171,24 +164,30 @@ namespace Dibix.Sdk.Sql
               , enumeratorStatement: out Expression enumeratorStatement
             );
 
-            // new TSqlModel(hostLoader.LoadedTaskHost.Model);
+            // TSqlModel model = new TSqlModel(hostLoader.LoadedTaskHost.Model);
             Expression loadedTaskHostProperty = Expression.Property(hostLoaderVariable, "LoadedTaskHost");
             MemberExpression modelProperty = Expression.Property(loadedTaskHostProperty, "Model");
             Type dataSchemaModelType = DacReflectionUtility.SchemaSqlAssembly.GetType("Microsoft.Data.Tools.Schema.SchemaModel.DataSchemaModel", throwOnError: true);
             ConstructorInfo modelCtor = typeof(TSqlModel).GetConstructorSafe(BindingFlags.NonPublic | BindingFlags.Instance, dataSchemaModelType);
+            ParameterExpression modelVariable = Expression.Variable(typeof(TSqlModel), "model");
             Expression modelValue = Expression.New(modelCtor, modelProperty);
+            Expression modelAssign = Expression.Assign(modelVariable, modelValue);
+
+            // return new PublicSqlDataSchemaModel(model, disposeHostLoader);
+            ConstructorInfo publicSqlDataSchemaModelCtor = typeof(PublicSqlDataSchemaModel).GetConstructorSafe(typeof(TSqlModel), typeof(object), typeof(Action<object>));
+            Action<object> disposeHostLoaderCall = CompileDisposeHostLoader(hostLoaderType);
+            Expression disposeHostLoaderValue = Expression.Constant(disposeHostLoaderCall, typeof(Action<object>));
+            Expression publicSqlDataSchemaModel = Expression.New(publicSqlDataSchemaModelCtor, modelVariable, hostLoaderVariable, disposeHostLoaderValue);
 
 
             Expression block = Expression.Block
             (
-                new[]
-                {
+                [
                     loggingHelperVariable
                   , hostLoaderVariable
                   , enumeratorVariable
-                }
-              , disableFilteringAssign
-              , initializedAssign
+                  , modelVariable
+                ]
               , loggingHelperAssign
               , hostLoaderAssign
               , databaseSchemaProviderNameAssign
@@ -197,7 +196,8 @@ namespace Dibix.Sdk.Sql
               , sqlReferencePathAssign
               , loadCall
               , enumeratorStatement
-              , modelValue
+              , modelAssign
+              , publicSqlDataSchemaModel
             );
             Expression<LoadPublicDataSchemaModel> lambda = Expression.Lambda<LoadPublicDataSchemaModel>
             (
@@ -231,7 +231,39 @@ namespace Dibix.Sdk.Sql
             builder.AddStatement(logErrorCall);
         }
 
-        private static FieldInfo TryGetStaticField(Type type, string fieldName)
+        private static Action<object> CompileDisposeHostLoader(Type hostLoaderType)
+        {
+            // Action<object> disposeHostLoader = hostLoader => 
+            // {
+            //     ((TaskHostLoader)hostLoader).Dispose();
+            //     ((TaskHostLoader)hostLoader)._loadedTaskHost.Dispose();
+            //     ((TaskHostLoader)hostLoader)._loadedErrorManager.Dispose();
+            //     ((TaskHostLoader)hostLoader)._loadedTaskHost = null;
+            //     ((TaskHostLoader)hostLoader)._loadedErrorManager = null;
+            // };
+            ParameterExpression hostLoaderParameter = Expression.Parameter(typeof(object), "hostLoader");
+            Expression hostLoaderVariable = Expression.Convert(hostLoaderParameter, hostLoaderType);
+            Expression disposeHostLoader = Expression.Call(hostLoaderVariable, nameof(IDisposable.Dispose), []);
+            Expression loadedTaskHostField = Expression.Field(hostLoaderVariable, "_loadedTaskHost");
+            Expression loadedErrorManagerField = Expression.Field(hostLoaderVariable, "_loadedErrorManager");
+            Expression loadedTaskHostDispose = Expression.Call(loadedTaskHostField, nameof(IDisposable.Dispose), []);
+            Expression loadedErrorManagerDispose = Expression.Call(loadedErrorManagerField, nameof(IDisposable.Dispose), []);
+            Expression loadedTaskHostAssign = Expression.Assign(loadedTaskHostField, Expression.Constant(null, loadedTaskHostField.Type));
+            Expression loadedErrorManagerAssign = Expression.Assign(loadedErrorManagerField, Expression.Constant(null, loadedErrorManagerField.Type));
+            Expression disposeHostLoaderBlock = Expression.Block
+            (
+                disposeHostLoader
+              , loadedTaskHostDispose
+              , loadedErrorManagerDispose
+              , loadedTaskHostAssign
+              , loadedErrorManagerAssign
+            );
+            Expression<Action<object>> lambda = Expression.Lambda<Action<object>>(disposeHostLoaderBlock, hostLoaderParameter);
+            Action<object> compiled = lambda.Compile();
+            return compiled;
+        }
+
+        private static FieldInfo TryGetStaticField(IReflect type, string fieldName)
         {
             FieldInfo fieldInfo = type.GetField(fieldName, BindingFlags.Static | BindingFlags.NonPublic);
             if (fieldInfo == null)
@@ -247,10 +279,10 @@ namespace Dibix.Sdk.Sql
         private static ITaskItem ToMSBuildTaskItem(TaskItem source) => new TaskItemWrapper(source);
 
         private static void LogError(ILogger logger, string errorCode, string message, string document, int? line, int? column) => logger.LogError(errorCode, message, document, line ?? default, column ?? default); 
-        #endregion
+#endregion
 
         #region Delegates
-        private delegate TSqlModel LoadPublicDataSchemaModel(string databaseSchemaProviderName, string modelCollation, ITaskItem[] source, ITaskItem[] sqlReferencePath, ITask task, ILogger logger);
+        private delegate PublicSqlDataSchemaModel LoadPublicDataSchemaModel(string databaseSchemaProviderName, string modelCollation, ITaskItem[] source, ITaskItem[] sqlReferencePath, ITask task, ILogger logger);
         #endregion
 
         #region Nested types

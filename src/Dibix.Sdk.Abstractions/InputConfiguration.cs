@@ -114,15 +114,15 @@ namespace Dibix.Sdk.Abstractions
         private static (string value, IndentationLevel indentation) ParseValue(string input)
         {
             int currentIndentation = 0;
-            for (int i = 0; i < input.Length; i+=IndentationSize)
+            for (int i = 0; i < input.Length; i += IndentationSize)
             {
                 if (input[i] != ' ')
                     break;
-                
+
                 currentIndentation++;
             }
 
-            string value = input.Substring(currentIndentation * IndentationSize).Replace("\\r\\n", "\r\n");
+            string value = input.Substring(currentIndentation * IndentationSize);
             IndentationLevel indentation = (IndentationLevel)currentIndentation;
             return (value, indentation);
         }
