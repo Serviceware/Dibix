@@ -44,8 +44,10 @@
     <PackageVersion Include="System.ComponentModel.Annotations" Version="5.0.0" />
     <PackageVersion Include="System.Data.SqlClient" Version="4.8.6" />
     <PackageVersion Include="System.Diagnostics.EventLog" Version="8.0.0" />
-    <PackageVersion Include="System.IO.Packaging" Version="8.0.0" />
+    <PackageVersion Include="System.IO.Packaging" Version="8.0.1" />
     <PackageVersion Include="System.Reflection.Emit" Version="4.7.0" />
+    <!-- Add package "System.Text.Json" because “IdentityModel” refers to the package in an older version where CVE-2024-43485 & CVE-2024-30105 is not fixed -->
+    <PackageVersion Include="System.Text.Json" Version="8.0.5" />
     <PackageVersion Include="Testcontainers.MsSql" Version="3.10.0" />
   </ItemGroup>
 </Project>
