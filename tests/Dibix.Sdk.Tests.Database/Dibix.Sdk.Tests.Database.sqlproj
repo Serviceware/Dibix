@@ -64,8 +64,8 @@
   <PropertyGroup>
     <DibixCliPath>..\..\src\Dibix.Sdk.Cli\bin\$(Configuration)\net472\Dibix.Sdk.Cli.exe</DibixCliPath>
   </PropertyGroup>
-  <Import Project="..\..\src\Dibix.Sdk\targets\Dibix.Sdk.props" />
-  <Import Project="..\..\src\Dibix.Sdk\targets\Dibix.Sdk.targets" />
+  <Import Project="..\..\src\Dibix.Sdk\targets\build\Dibix.Sdk.props" />
+  <Import Project="..\..\src\Dibix.Sdk\targets\build\Dibix.Sdk.targets" />
   <ItemGroup>
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_001.sql" />
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_002.sql" />
