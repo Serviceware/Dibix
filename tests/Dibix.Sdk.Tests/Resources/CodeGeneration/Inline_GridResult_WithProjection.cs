@@ -8,9 +8,7 @@
 //----------------------------------------------------------------------------*/
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Runtime.Serialization;
 using Dibix;
@@ -25,7 +23,7 @@ namespace Dibix.Sdk.Tests.Data.Grid
     public static class TestAccessor
     {
         // GetGrid
-        private const string GetGridCommandText = "SELECT [id] = 1, [name] = NULL, [parentid] = NULL, [role] = NULL, [creationtime] = NULL, [imageurl]= NULL, [direction] = 0, [accessrights] = 1\nUNION ALL\nSELECT [id] = 2, [name] = NULL, [parentid] = NULL, [role] = NULL, [creationtime] = NULL, [imageurl]= NULL, [direction] = 1, [accessrights] = 1\n\nSELECT [accessrights] = 1";
+        private const string GetGridCommandText = "SELECT [id] = 1, [name] = NULL, [parentid] = NULL, [role] = NULL, [creationtime] = NULL, [imageurl]= NULL, [direction] = 0, [accessrights] = 1\r\nUNION ALL\r\nSELECT [id] = 2, [name] = NULL, [parentid] = NULL, [role] = NULL, [creationtime] = NULL, [imageurl]= NULL, [direction] = 1, [accessrights] = 1\r\n\r\nSELECT [accessrights] = 1";
 
         public static Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult GetGrid(this IDatabaseAccessorFactory databaseAccessorFactory)
         {
@@ -113,7 +111,7 @@ namespace Dibix.Sdk.Tests.DomainModel.Grid
 
         public GetGridResult()
         {
-            Items = new Collection<Dibix.Sdk.Tests.DomainModel.JointContract>();
+            Items = new List<Dibix.Sdk.Tests.DomainModel.JointContract>();
         }
     }
 }

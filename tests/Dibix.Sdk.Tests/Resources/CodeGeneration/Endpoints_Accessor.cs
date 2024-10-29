@@ -8,9 +8,7 @@
 //----------------------------------------------------------------------------*/
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Runtime.Serialization;
 using System.Threading;
@@ -256,7 +254,7 @@ namespace Dibix.Sdk.Tests.DomainModel
 
         public AnotherInputContract()
         {
-            SomeIds = new Collection<Dibix.Sdk.Tests.DomainModel.AnotherEntry>();
+            SomeIds = new List<Dibix.Sdk.Tests.DomainModel.AnotherEntry>();
         }
     }
 
@@ -318,7 +316,7 @@ namespace Dibix.Sdk.Tests.DomainModel
 
         public InputContract()
         {
-            Ids = new Collection<Dibix.Sdk.Tests.DomainModel.Entry>();
+            Ids = new List<Dibix.Sdk.Tests.DomainModel.Entry>();
         }
     }
 

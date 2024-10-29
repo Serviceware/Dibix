@@ -102,13 +102,13 @@ namespace Dibix.Sdk.CodeGeneration
                       .Initializer(defaultValue);
 
                 if (propertyType.IsEnumerable)
-                    ctorAssignments.Add($"{property.Name.Value} = new {nameof(Collection<object>)}<{clrTypeName}>();");
+                    ctorAssignments.Add($"{property.Name.Value} = new {nameof(List<object>)}<{clrTypeName}>();");
             }
 
             if (ctorAssignments.Any())
             {
                 context.AddUsing<ICollection<object>>()
-                       .AddUsing<Collection<object>>();
+                       .AddUsing<List<object>>();
 
                 @class.AddSeparator()
                       .AddConstructor(String.Join(Environment.NewLine, ctorAssignments));

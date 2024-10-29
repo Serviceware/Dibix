@@ -8,7 +8,6 @@
 //----------------------------------------------------------------------------*/
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Net.Http;
 using System.Net.Http.Formatting;
@@ -42,7 +41,7 @@ namespace Dibix.Sdk.Tests.DomainModel
 
         public AnotherInputContract()
         {
-            SomeIds = new Collection<Dibix.Sdk.Tests.DomainModel.AnotherEntry>();
+            SomeIds = new List<Dibix.Sdk.Tests.DomainModel.AnotherEntry>();
         }
     }
 
@@ -88,7 +87,7 @@ namespace Dibix.Sdk.Tests.DomainModel
 
         public InputContract()
         {
-            Ids = new Collection<Dibix.Sdk.Tests.DomainModel.Entry>();
+            Ids = new List<Dibix.Sdk.Tests.DomainModel.Entry>();
         }
     }
 
@@ -277,7 +276,7 @@ namespace Dibix.Sdk.Tests.Client
                 else if (_httpAuthorizationProvider.GetValue("DibixBearer") != null)
                     requestMessage.Headers.Add("Authorization", $"Bearer {_httpAuthorizationProvider.GetValue("DibixBearer")}");
                 else
-                    throw new InvalidOperationException("None of the security scheme requirements were met:\n- DibixClientId\n- DibixBearer");
+                    throw new InvalidOperationException("None of the security scheme requirements were met:\r\n- DibixClientId\r\n- DibixBearer");
                 requestMessage.Content = new ObjectContent<Dibix.Sdk.Tests.DomainModel.AnotherInputContract>(body, Formatter);
                 HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
                 return responseMessage;

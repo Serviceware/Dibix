@@ -41,7 +41,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (property.IsPartOfKey)
             {
-                context.AddUsing("System.ComponentModel.DataAnnotations");
+                context.AddUsing("Dibix");
                 propertyAnnotations.Add(new CSharpAnnotation("Key")); // Dibix runtime
             }
 

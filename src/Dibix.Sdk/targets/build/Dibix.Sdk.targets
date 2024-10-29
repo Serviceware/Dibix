@@ -453,14 +453,6 @@ $(_SqlReferencePath)" />
     -->
   </ItemGroup>
 
-  <ItemGroup Condition="'$(DibixTargetFrameworkRuntime)' == 'Core'">
-    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" ExcludeAssets="runtime" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(DibixTargetFrameworkRuntime)' != 'Core'">
-    <Reference Include="System.ComponentModel.DataAnnotations" />
-  </ItemGroup>
-
   <Target Name="DumpResolvedDibixReferencePaths" AfterTargets="ResolvePackageAssets">
     <ItemGroup>
       <_DibixReferencePath Include="%40(ResolvedCompileFileDefinitions)" Condition="'%25(NuGetPackageId)' == '$(_DibixName)'" />

@@ -8,9 +8,7 @@
 //----------------------------------------------------------------------------*/
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Runtime.Serialization;
 using System.Threading;
@@ -27,7 +25,7 @@ namespace Dibix.Sdk.Tests.Data.Grid
     public static class TestAccessor
     {
         // GetGrid
-        private const string GetGridCommandText = "SELECT [id]           = 1\n     , [name]         = NULL\n     , [parentid]     = NULL\n     , [role]         = NULL\n     , [creationtime] = NULL\n     , [imageurl]     = NULL\nUNION ALL\nSELECT [id]           = 2\n     , [name]         = NULL\n     , [parentid]     = NULL\n     , [role]         = NULL\n     , [creationtime] = NULL\n     , [imageurl]     = NULL\n\nSELECT 1";
+        private const string GetGridCommandText = "SELECT [id]           = 1\r\n     , [name]         = NULL\r\n     , [parentid]     = NULL\r\n     , [role]         = NULL\r\n     , [creationtime] = NULL\r\n     , [imageurl]     = NULL\r\nUNION ALL\r\nSELECT [id]           = 2\r\n     , [name]         = NULL\r\n     , [parentid]     = NULL\r\n     , [role]         = NULL\r\n     , [creationtime] = NULL\r\n     , [imageurl]     = NULL\r\n\r\nSELECT 1";
 
         public static async Task<Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult> GetGridAsync(this IDatabaseAccessorFactory databaseAccessorFactory, CancellationToken cancellationToken = default)
         {
@@ -98,8 +96,8 @@ namespace Dibix.Sdk.Tests.DomainModel.Grid
 
         public GetGridResult()
         {
-            Items = new Collection<Dibix.Sdk.Tests.DomainModel.GenericContract>();
-            Directions = new Collection<Dibix.Sdk.Tests.DomainModel.Direction>();
+            Items = new List<Dibix.Sdk.Tests.DomainModel.GenericContract>();
+            Directions = new List<Dibix.Sdk.Tests.DomainModel.Direction>();
         }
     }
 }
