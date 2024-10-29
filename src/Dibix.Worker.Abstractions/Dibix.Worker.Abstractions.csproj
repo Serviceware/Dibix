@@ -13,7 +13,6 @@
     <PackageReference Include="Dapper.StrongName" />
     <PackageReference Include="IdentityModel" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
-    <PackageReference Include="System.Text.Json" />
   </ItemGroup>
 
   <ItemGroup>
