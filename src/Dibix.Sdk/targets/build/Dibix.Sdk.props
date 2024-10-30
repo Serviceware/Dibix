@@ -32,4 +32,6 @@
     <Clean Include="$(ClientSymbolsTargetPath)" />
   </ItemGroup>
 
+  <Import Project="$(MSBuildThisFileDirectory)Packages.props" />
+
 </Project>

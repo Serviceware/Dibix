@@ -106,4 +106,35 @@
     </ItemGroup>
   </Target>
 
+  <Target Name="DumpPackageVersions" BeforeTargets="PreparePackage">
+    <ItemGroup>
+      <_PackageVersionRequirement Include="@(PackageVersion)" Condition="'%(Identity)' == 'Microsoft.Extensions.Http'" />
+      <_PackageVersionRequirement Include="@(PackageVersion)" Condition="'%(Identity)' == 'Newtonsoft.Json'" />
+      <_PackageVersionRequirement>
+        <PropertyName>$([System.String]::Copy('%(Identity)').Replace('.', '_'))</PropertyName>
+      </_PackageVersionRequirement>
+    </ItemGroup>
+
+    <PropertyGroup>
+      <_PackagePropsFile>$(IntermediateOutputPath)Packages.props</_PackagePropsFile>
+      <_PackagePropsIntermediateProjectFileContent>
+        <![CDATA[
+<Project>
+
+  <PropertyGroup>
+    @(_PackageVersionRequirement->'<PackageVersion_%(PropertyName)>%(Version)</PackageVersion_%(PropertyName)>', '%0a    ')
+  </PropertyGroup>
+
+</Project>
+]]>
+      </_PackagePropsIntermediateProjectFileContent>
+    </PropertyGroup>
+
+    <WriteLinesToFile File="$(_PackagePropsFile)" Lines="$(_PackagePropsIntermediateProjectFileContent)" Overwrite="True" />
+
+    <ItemGroup>
+      <_PackageFiles Include="$(_PackagePropsFile)" PackagePath="build" />
+    </ItemGroup>
+  </Target>
+
 </Project>

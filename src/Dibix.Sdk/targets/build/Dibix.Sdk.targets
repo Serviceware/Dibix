@@ -70,21 +70,6 @@
       PostBuildEvent;
       AfterBuild;
     </BuildDependsOn>
-
-    <!-- 
-      CPM is now enabled by the presence of Directory.Packages.props.
-      So the workaround to override the inheritance by placing an empty file no longer works.
-      See: https://github.com/dotnet/sdk/issues/40445#issuecomment-2085774502
-    -->
-    <_DirectoryBuildPropsContent>
-      <![CDATA[
-<Project>
-  <PropertyGroup>
-    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
-  </PropertyGroup>
-</Project>
-]]>
-    </_DirectoryBuildPropsContent>
   </PropertyGroup>
 
   <!-- 
@@ -401,10 +386,17 @@ $(_SqlReferencePath)" />
     <ItemGroup Condition="'$(ProduceAccessor)' == 'true'">
       <AccessorCompilationReference Include="@(AccessorCompilationArtifactReference)" />
 
-      <_AccessorCompilationEmbeddedResource Include="&lt;EmbeddedResource Include=&quot;$(_ModelFileName)&quot; LogicalName=&quot;Model&quot; /&gt;"
-                                            Condition="'$(_HasEndpoints)' != 'true'" />
+      <_AccessorCompilationSourceItem Include="&lt;Compile Include=&quot;$(_AccessorSourceFileName)&quot; /&gt;" />
+      <_AccessorCompilationSourceItem Include="&lt;EmbeddedResource Include=&quot;$(_ModelFileName)&quot; LogicalName=&quot;Model&quot; /&gt;"
+                                      Condition="'$(_HasEndpoints)' != 'true'" />
       <_AccessorCompilationReferenceItem Include="@(AccessorCompilationReference->'&lt;Reference Include=&quot;%(Filename)&quot; HintPath=&quot;%(FullPath)&quot; Private=&quot;False&quot; /&gt;')" />
-      <_AccessorCompilationReferenceItem Include="&lt;PackageReference Include=&quot;$(_DibixHttpServerName)&quot; Version=&quot;$(DibixSdkVersion)&quot; ExcludeAssets=&quot;runtime&quot; /&gt;" />
+      <_AccessorCompilationPackageReferenceItemSource Include="$(_DibixName)" Version="$(DibixSdkVersion)" />
+      <_AccessorCompilationPackageReferenceItemSource Include="$(_DibixHttpServerName)" Version="$(DibixSdkVersion)" />
+      <_AccessorCompilationPackageReferenceItemSource Include="Newtonsoft.Json" Version="$(PackageVersion_Newtonsoft_Json)" />
+      <_AccessorCompilationPackageReferenceItem Include="@(_AccessorCompilationPackageReferenceItemSource->'&lt;PackageReference Include=&quot;%(Identity)&quot; Version=&quot;%(Version)&quot; /&gt;')"
+                                                Condition="'$(ManagePackageVersionsCentrally)' != 'true'" />
+      <_AccessorCompilationPackageReferenceItem Include="@(_AccessorCompilationPackageReferenceItemSource->'&lt;PackageReference Include=&quot;%(Identity)&quot; /&gt;')"
+                                                Condition="'$(ManagePackageVersionsCentrally)' == 'true'" />
     </ItemGroup>
 
     <PropertyGroup Condition="'$(ProduceAccessor)' == 'true'">
@@ -437,20 +429,15 @@ $(_SqlReferencePath)" />
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="$(_AccessorSourceFileName)" />
-    @(_AccessorCompilationEmbeddedResource)
+    @(_AccessorCompilationSourceItem->'%(Identity)', '%0a    ')
   </ItemGroup>
 
   <ItemGroup>
-@(_AccessorCompilationReferenceItem)
+    @(_AccessorCompilationPackageReferenceItem->'%(Identity)', '%0a    ')
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="$(_DibixName)" Version="$(DibixSdkVersion)" ExcludeAssets="runtime" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" ExcludeAssets="runtime" />
-    <!--
-    <PackageReference Include="System.Reflection" Version="4.3.0" ExcludeAssets="runtime" />
-    -->
+    @(_AccessorCompilationReferenceItem->'%(Identity)', '%0a    ')
   </ItemGroup>
 
   <Target Name="DumpResolvedDibixReferencePaths" AfterTargets="ResolvePackageAssets">
@@ -477,16 +464,6 @@ $(_SqlReferencePath)" />
       <FileWrites Include="$(_AccessorIntermediateProjectFilePath)" />
     </ItemGroup>
 
-    <!-- Override Directory.Build props/targets to ensure the project configuration is isolated -->
-    <!-- For example, a central package reference of Dibix runtime might interfere here -->
-    <WriteLinesToFile File="$(IntermediateOutputPath)Directory.Build.props" Lines="$(_DirectoryBuildPropsContent)" Overwrite="True" Condition="'$(ProduceAccessor)' == 'true'" />
-    <WriteLinesToFile File="$(IntermediateOutputPath)Directory.Build.targets" Lines="&lt;Project /&gt;" Overwrite="True" Condition="'$(ProduceAccessor)' == 'true'" />
-
-    <ItemGroup>
-      <FileWrites Include="$(IntermediateOutputPath)Directory.Build.props" />
-      <FileWrites Include="$(IntermediateOutputPath)Directory.Build.targets" />
-    </ItemGroup>
-
     <Exec Command="$(_BuildCommand) &quot;$(_AccessorIntermediateProjectFilePath)&quot;"
           Condition="'$(ProduceAccessor)' == 'true'"/>
 
@@ -497,6 +474,15 @@ $(_SqlReferencePath)" />
 
 
     <!-- Endpoint assembly & package generation -->
+    <ItemGroup Condition="'$(_ProduceEndpoints)' == 'true'">
+      <_EndpointCompilationPackageReferenceItemSource Include="$(_DibixName)" Version="$(DibixSdkVersion)" />
+      <_EndpointCompilationPackageReferenceItemSource Include="$(_DibixHttpServerName)" Version="$(DibixSdkVersion)" />
+      <_EndpointCompilationPackageReferenceItem Include="@(_EndpointCompilationPackageReferenceItemSource->'&lt;PackageReference Include=&quot;%(Identity)&quot; Version=&quot;%(Version)&quot; /&gt;')"
+                                                Condition="'$(ManagePackageVersionsCentrally)' != 'true'" />
+      <_EndpointCompilationPackageReferenceItem Include="@(_EndpointCompilationPackageReferenceItemSource->'&lt;PackageReference Include=&quot;%(Identity)&quot; /&gt;')"
+                                                Condition="'$(ManagePackageVersionsCentrally)' == 'true'" />
+    </ItemGroup>
+
     <PropertyGroup Condition="'$(_ProduceEndpoints)' == 'true'">
       <_EndpointBinaryExt>.dbxc</_EndpointBinaryExt>
       <_EndpointBinaryFileName>$(_EndpointSourceName)$(_EndpointBinaryExt)</_EndpointBinaryFileName>
@@ -538,8 +524,7 @@ $(_SqlReferencePath)" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="$(_DibixName)" Version="$(DibixSdkVersion)" ExcludeAssets="runtime" />
-    <PackageReference Include="$(_DibixHttpServerName)" Version="$(DibixSdkVersion)" ExcludeAssets="runtime" />
+    @(_EndpointCompilationPackageReferenceItem->'%(Identity)', '%0a    ')
   </ItemGroup>
 
 </Project>
@@ -554,16 +539,6 @@ $(_SqlReferencePath)" />
 
     <ItemGroup>
       <FileWrites Include="$(_EndpointIntermediateProjectFilePath)" />
-    </ItemGroup>
-
-    <!-- Override Directory.Build props/targets to ensure the project configuration is isolated -->
-    <!-- For example, a central package reference of Dibix runtime might interfere here -->
-    <WriteLinesToFile File="$(IntermediateOutputPath)Directory.Build.props" Lines="$(_DirectoryBuildPropsContent)" Overwrite="True" Condition="'$(_ProduceEndpoints)' == 'true'" />
-    <WriteLinesToFile File="$(IntermediateOutputPath)Directory.Build.targets" Lines="&lt;Project /&gt;" Overwrite="True" Condition="'$(_ProduceEndpoints)' == 'true'" />
-
-    <ItemGroup>
-      <FileWrites Include="$(IntermediateOutputPath)Directory.Build.props" />
-      <FileWrites Include="$(IntermediateOutputPath)Directory.Build.targets" />
     </ItemGroup>
 
     <Exec Command="$(_BuildCommand) &quot;$(_EndpointIntermediateProjectFilePath)&quot;"
@@ -619,7 +594,13 @@ $(_SqlReferencePath)" />
     </PropertyGroup>
 
     <ItemGroup Condition="'$(_ProduceClient)' == 'true'">
-      <_ClientCompilationReferenceItem Include="@(ClientCompilationReference->'&lt;Reference Include=&quot;%(Filename)&quot; HintPath=&quot;%(FullPath)&quot; Private=&quot;False&quot; /&gt;')" />
+      <_ClientCompilationPackageReferenceItemSource Include="$(_DibixHttpClientName)" Version="$(DibixSdkVersion)" />
+      <_ClientCompilationPackageReferenceItemSource Include="Microsoft.AspNet.WebApi.Client" Version="$(PackageVersion_Microsoft_AspNet_WebApi_Client)" />
+      <_ClientCompilationPackageReferenceItemSource Include="Microsoft.Extensions.Http" Version="$(PackageVersion_Microsoft_Extensions_Http)" />
+      <_ClientCompilationPackageReferenceItem Include="@(_ClientCompilationPackageReferenceItemSource->'&lt;PackageReference Include=&quot;%(Identity)&quot; Version=&quot;%(Version)&quot; /&gt;')"
+                                              Condition="'$(ManagePackageVersionsCentrally)' != 'true'"/>
+      <_ClientCompilationPackageReferenceItem Include="@(_ClientCompilationPackageReferenceItemSource->'&lt;PackageReference Include=&quot;%(Identity)&quot; /&gt;')"
+                                              Condition="'$(ManagePackageVersionsCentrally)' == 'true'"/>
     </ItemGroup>
 
     <PropertyGroup Condition="'$(_ProduceClient)' == 'true'">
@@ -656,13 +637,7 @@ $(_SqlReferencePath)" />
   </ItemGroup>
 
   <ItemGroup>
-@(_ClientCompilationReferenceItem)
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="$(_DibixHttpClientName)" Version="$(DibixSdkVersion)" ExcludeAssets="runtime" />
-    <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" ExcludeAssets="runtime" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" ExcludeAssets="runtime" />
+    @(_ClientCompilationPackageReferenceItem->'%(Identity)', '%0a    ')
   </ItemGroup>
 
   <ItemGroup Condition="'$(DibixTargetFrameworkRuntime)' != 'Core'">
@@ -681,16 +656,6 @@ $(_SqlReferencePath)" />
 
     <ItemGroup>
       <FileWrites Include="$(_ClientIntermediateProjectFilePath)" />
-    </ItemGroup>
-
-    <!-- Override Directory.Build props/targets to ensure the project configuration is isolated -->
-    <!-- For example, a central package reference of Dibix runtime might interfere here -->
-    <WriteLinesToFile File="$(IntermediateOutputPath)Directory.Build.props" Lines="$(_DirectoryBuildPropsContent)" Overwrite="True" Condition="'$(_ProduceClient)' == 'true'" />
-    <WriteLinesToFile File="$(IntermediateOutputPath)Directory.Build.targets" Lines="&lt;Project /&gt;" Overwrite="True" Condition="'$(_ProduceClient)' == 'true'" />
-
-    <ItemGroup>
-      <FileWrites Include="$(IntermediateOutputPath)Directory.Build.props" />
-      <FileWrites Include="$(IntermediateOutputPath)Directory.Build.targets" />
     </ItemGroup>
 
     <Exec Condition="'$(_ProduceClient)' == 'true'"
