@@ -113,14 +113,14 @@ namespace Dibix.Testing
 
         public void Complete()
         {
+            if (!_isAssemblyInitialize)
+                ZipTestOutput();
+
             foreach (string resultFile in _testFiles.OrderBy(Path.GetFileName)) 
                 _testContext.AddResultFile(resultFile);
 
             foreach (string resultFile in _testRunFiles.OrderBy(Path.GetFileName)) 
                 _testContext.AddResultFile(resultFile);
-
-            if (!_isAssemblyInitialize)
-                ZipTestOutput();
 
             CopyTestOutput();
         }
