@@ -220,7 +220,7 @@ SqlReferencePath");
 
             string extension = Path.GetExtension(generatedFilePath).TrimStart('.');
             string expectedText = GetExpectedText(expectedTextKey, extension);
-            base.AssertEqual(expectedText, actualText, extension, normalizeLineEndings: true);
+            base.AssertEqual(expectedText, actualText, extension: extension);
         }
 
         private string GetExpectedText(string extension) => GetExpectedText(TestContext.TestName, extension);

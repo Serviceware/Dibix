@@ -110,15 +110,15 @@ namespace Dibix.Testing
 
         protected string GetEmbeddedResourceContent(string key) => ResourceUtility.GetEmbeddedResourceContent(_assembly, key);
 
-        protected void AssertEqual(string actual, string extension, string message = null, bool normalizeEndings = false)
+        protected void AssertEqual(string actual, string extension, string message = null, bool normalizeEndings = true)
         {
             string outputName = TestContext.TestName;
             string expectedKey = $"{outputName}.{extension}";
             string expected = GetEmbeddedResourceContent(expectedKey);
             AssertEqual(expected, actual, outputName, extension, message, normalizeEndings);
         }
-        protected void AssertEqual(string expected, string actual, string extension, string message = null, bool normalizeLineEndings = false) => AssertEqual(expected, actual, TestContext.TestName, extension, message, normalizeLineEndings);
-        protected void AssertEqual(string expected, string actual, string outputName, string extension, string message = null, bool normalizeLineEndings = false)
+        protected void AssertEqual(string expected, string actual, string extension, string message = null, bool normalizeLineEndings = true) => AssertEqual(expected, actual, TestContext.TestName, extension, message, normalizeLineEndings);
+        protected void AssertEqual(string expected, string actual, string outputName, string extension, string message = null, bool normalizeLineEndings = true)
         {
             string expectedNormalized = expected;
             string actualNormalized = actual;
