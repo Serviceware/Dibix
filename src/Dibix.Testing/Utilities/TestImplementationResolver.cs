@@ -7,7 +7,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dibix.Testing
 {
-    internal static class TestImplementationResolver
+    public static class TestImplementationResolver
     {
         private static readonly ConcurrentDictionary<TestContext, Assembly> TestAssemblyCache = new ConcurrentDictionary<TestContext, Assembly>();
 
