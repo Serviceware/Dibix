@@ -75,7 +75,12 @@ namespace Dibix.Testing.TestContainers
             throw await WrapException($"Container exited with exit code {exitCode}", container).ConfigureAwait(false);
         }
 
-        public static async Task<InvalidOperationException> WrapException(string message, IContainer container, Exception innerException = null)
+        public static async Task<Exception> WrapException(TimeoutException exception, IContainer container, string serviceName, int port, TimeSpan timeout)
+        {
+            string message = $"{serviceName} did not respond on port {port} within the given timeout: {timeout}";
+            return await WrapException(message, container, exception).ConfigureAwait(false);
+        }
+        public static async Task<Exception> WrapException(string message, IContainer container, Exception innerException = null)
         {
             return new InvalidOperationException($"""
                                                   {message}
@@ -98,6 +103,23 @@ namespace Dibix.Testing.TestContainers
 
             string containerName = String.Join("-", tokens);
             return containerName;
+        }
+
+        public static string GenerateImageDisplayName(this IImage image)
+        {
+            string imageName = image.Name.Replace("-", " ");
+            string serviceName = $"{Char.ToUpperInvariant(imageName[0])}{imageName.Substring(1)}";
+            return serviceName;
+        }
+
+        public static async Task WriteHeader(TextWriter logger, string message)
+        {
+            string border = new string('-', message.Length);
+            await logger.WriteLineAsync($"""
+                                         {border}
+                                         {message}
+                                         {border}
+                                         """).ConfigureAwait(false);
         }
 
         private static async Task<string> GetErrors(IContainer container)

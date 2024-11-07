@@ -47,7 +47,7 @@ namespace Dibix.Dapper.Tests
             IImage image = new DockerImage("mcr.microsoft.com/mssql/server");
             string serviceName = image.GenerateContainerName();
 
-            await WriteHeader(logger, serviceName).ConfigureAwait(false);
+            await TestContainerExtensions.WriteHeader(logger, serviceName).ConfigureAwait(false);
 
             string initializeDatabaseScript = await GetInitializeDatabaseScript().ConfigureAwait(false);
             string logFilePath = addTestRunFile($"{serviceName}.log");
@@ -67,7 +67,7 @@ namespace Dibix.Dapper.Tests
             }
             catch (TimeoutException exception)
             {
-                throw await TestContainerExtensions.WrapException("Container did not start in time", container, exception);
+                throw await TestContainerExtensions.WrapException("Container did not start in time", container, exception).ConfigureAwait(false);
             }
             await container.ExecScriptAsync(initializeDatabaseScript).ConfigureAwait(false);
             await logger.WriteLineAsync("Container is ready").ConfigureAwait(false);
@@ -86,16 +86,6 @@ namespace Dibix.Dapper.Tests
             using StreamReader reader = new StreamReader(stream);
             string script = await reader.ReadToEndAsync().ConfigureAwait(false);
             return script;
-        }
-
-        private static async Task WriteHeader(TextWriter logger, string message)
-        {
-            string border = new string('-', message.Length);
-            await logger.WriteLineAsync($"""
-                                         {border}
-                                         {message}
-                                         {border}
-                                         """).ConfigureAwait(false);
         }
     }
 }
