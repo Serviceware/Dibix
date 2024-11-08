@@ -207,6 +207,10 @@ Value: {instance}");
         #region IDisposable Members
         public void Dispose()
         {
+            // Not a big fan of this, but subsequent Dispose calls might cause exceptions because the TestBase is an uninitialized state
+            if (AssemblyInitializeException != null)
+                return;
+
             Dispose(true);
             GC.SuppressFinalize(this);
         }
