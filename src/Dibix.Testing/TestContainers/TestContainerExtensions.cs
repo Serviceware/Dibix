@@ -50,7 +50,7 @@ namespace Dibix.Testing.TestContainers
                 sb.Append($" {string.Join(" ", mounts.Select(x => $"--volume \"{x.Source}\":\"{x.Target}\"{(x.BindOptions?.Propagation != null ? $":{x.BindOptions.Propagation}" : null)}"))}");
 
             if (configuration.Environments.Any())
-                sb.Append($" {string.Join(" ", configuration.Environments.Select(x => $"--env {x.Key}={MaskSecrets(x.Value)}"))}");
+                sb.Append($" {string.Join(" ", configuration.Environments.Select(x => $"--env {x.Key}=\"{MaskSecrets(x.Value)}\""))}");
 
             if (configuration.PortBindings.Any())
                 sb.Append($" {string.Join(" ", configuration.PortBindings.Select(x => $"--publish {x.Key}:{(!String.IsNullOrEmpty(x.Value) ? x.Value : x.Key)}"))}");
