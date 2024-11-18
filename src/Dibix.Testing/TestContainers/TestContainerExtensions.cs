@@ -55,6 +55,10 @@ namespace Dibix.Testing.TestContainers
             if (configuration.PortBindings.Any())
                 sb.Append($" {string.Join(" ", configuration.PortBindings.Select(x => $"--publish {x.Key}:{(!String.IsNullOrEmpty(x.Value) ? x.Value : x.Key)}"))}");
 
+            string[] extraHosts = configuration.ExtraHosts.ToArray();
+            if (extraHosts.Any())
+                sb.Append($" {string.Join(" ", extraHosts.Select(x => $"--add-host {x}"))}");
+
             sb.Append($" {configuration.Image.FullName}");
 
             if (configuration.Command.Any())
