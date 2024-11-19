@@ -38,11 +38,11 @@
     <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" />
     <PackageReference Include="MSTest.TestFramework" />
     <PackageReference Include="System.Diagnostics.EventLog" />
-    <PackageReference Include="Testcontainers.MsSql" />
+    <PackageReference Include="Testcontainers" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Dibix.Testing.Generators\Dibix.Testing.Generators.csproj" ReferenceOutputAssembly="False" PackAsAnalyzer="True" />
   </ItemGroup>
-  
+
 </Project>

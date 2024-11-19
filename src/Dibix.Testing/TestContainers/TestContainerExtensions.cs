@@ -100,18 +100,14 @@ namespace Dibix.Testing.TestContainers
 
         public static string GenerateContainerName(this IImage image)
         {
-            IList<string> tokens = new Collection<string> { image.Name };
-            string[] parts = image.Repository.Split(['/'], 2);
-            if (parts.Length > 1)
-                tokens.Insert(0, parts[1]);
-
-            string containerName = String.Join("-", tokens);
+            string[] parts = image.Repository.Split(['/']);
+            string containerName = String.Join("-", parts);
             return containerName;
         }
 
         public static string GenerateImageDisplayName(this IImage image)
         {
-            string imageName = image.Name.Replace("-", " ");
+            string imageName = image.Repository.Split('/').Last().Replace("-", " ");
             string serviceName = $"{Char.ToUpperInvariant(imageName[0])}{imageName.Substring(1)}";
             return serviceName;
         }

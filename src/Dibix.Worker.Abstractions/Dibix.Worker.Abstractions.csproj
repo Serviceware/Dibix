@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="Dapper.StrongName" />
-    <PackageReference Include="IdentityModel" />
+    <PackageReference Include="Duende.IdentityModel" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
   </ItemGroup>
 
