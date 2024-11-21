@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Http.Json;
+using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -24,6 +25,7 @@ namespace Dibix.Http.Host
         {
             WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
             bool isDevelopment = builder.Environment.IsDevelopment();
+            IConfigurationRoot configuration = builder.Configuration;
             IServiceCollection services = builder.Services;
 
             void ConfigureLogging(ILoggingBuilder logging)
@@ -36,11 +38,12 @@ namespace Dibix.Http.Host
             // Prepare logging, that can be used to log during bootstrapping before the host is built
             using ILoggerFactory loggerFactory = LoggerFactory.Create(logging =>
             {
-                logging.AddDefaults(builder.Configuration);
+                logging.AddDefaults(configuration);
                 ConfigureLogging(logging);
             });
 
             services.AddLogging(ConfigureLogging);
+            services.AddHttpLoggingWithSensitiveRequestHeaders(configuration);
 
             services.AddSingleton<IDatabaseConnectionFactory, DefaultDatabaseConnectionFactory>()
                     .AddScoped<DbConnection>(x => x.GetRequiredService<IDatabaseConnectionFactory>().Create())
@@ -67,13 +70,14 @@ namespace Dibix.Http.Host
             services.AddExceptionHandler<DatabaseAccessExceptionHandler>();
             services.AddProblemDetails();
 
-            IConfigurationSection hostingConfigurationSection = builder.Configuration.GetSection(HostingOptions.ConfigurationSectionName);
+            IConfigurationSection hostingConfigurationSection = configuration.GetSection(HostingOptions.ConfigurationSectionName);
             HostingOptions hostingOptions = hostingConfigurationSection.Bind<HostingOptions>();
 
-            services.Configure<DatabaseOptions>(builder.Configuration.GetSection(DatabaseOptions.ConfigurationSectionName))
+            services.Configure<DatabaseOptions>(configuration.GetSection(DatabaseOptions.ConfigurationSectionName))
                     .Configure<HostingOptions>(hostingConfigurationSection)
-                    .Configure<AuthenticationOptions>(builder.Configuration.GetSection(AuthenticationOptions.ConfigurationSectionName))
-                    .Configure<CorsOptions>(builder.Configuration.GetSection(CorsOptions.ConfigurationSectionName));
+                    .Configure<AuthenticationOptions>(configuration.GetSection(AuthenticationOptions.ConfigurationSectionName))
+                    .Configure<CorsOptions>(configuration.GetSection(CorsOptions.ConfigurationSectionName))
+                    .Configure<HttpLoggingOptions>(configuration.GetSection("HttpLogging"));
 
             // PoC: Set audience based on request
             /*
@@ -86,9 +90,8 @@ namespace Dibix.Http.Host
             services.AddAuthentication()
                     .AddJwtBearer(x =>
                     {
-                        AuthenticationOptions authenticationOptions = builder.Configuration
-                                                                             .GetSection(AuthenticationOptions.ConfigurationSectionName)
-                                                                             .Bind<AuthenticationOptions>();
+                        AuthenticationOptions authenticationOptions = configuration.GetSection(AuthenticationOptions.ConfigurationSectionName)
+                                                                                   .Bind<AuthenticationOptions>();
 
                         x.Authority = authenticationOptions.Authority;
                         x.Audience = authenticationOptions.Audience;
@@ -119,7 +122,7 @@ namespace Dibix.Http.Host
                 x.MaxAge = TimeSpan.FromDays(730); // 2 years => https://hstspreload.org/
             });
 
-            var hostExtensionRegistrar = HttpHostExtensionRegistrar.Register(hostingOptions, services, loggerFactory, builder.Configuration);
+            IHttpHostExtensionRegistrar? hostExtensionRegistrar = HttpHostExtensionRegistrar.Register(hostingOptions, services, loggerFactory, configuration);
 
             WebApplication app = builder.Build();
 
@@ -131,6 +134,7 @@ namespace Dibix.Http.Host
                 app.UsePathBase(hostingOptions.BaseAddress);
             }
             app.UseMiddleware<DiagnosticsMiddleware>();
+            app.UseHttpLogging();
             app.UseExceptionHandler();
             app.UseRouting();
             app.UseMiddleware<DatabaseScopeMiddleware>();
@@ -142,7 +146,7 @@ namespace Dibix.Http.Host
 
             if (isDevelopment)
             {
-                app.MapGet("/configuration", () => ConfigurationSerializer.DumpConfiguration(builder.Configuration));
+                app.MapGet("/configuration", () => ConfigurationSerializer.DumpConfiguration(configuration));
             }
 
             app.Services.GetRequiredService<IEndpointRegistrar>().Register(app);
