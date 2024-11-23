@@ -4,10 +4,13 @@
     <_DibixToolsFrameworkFolder Condition="'$(MSBuildRuntimeType)' == 'Core'">net8.0</_DibixToolsFrameworkFolder>
     <_DibixToolsFrameworkFolder Condition="'$(MSBuildRuntimeType)' != 'Core'">net48</_DibixToolsFrameworkFolder>
     <_DibixPackageFolder>$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..))/</_DibixPackageFolder>
-    
-    <DibixToolsDirectory>$(_DibixPackageFolder)tools/$(_DibixToolsFrameworkFolder)/</DibixToolsDirectory>
+
+    <!-- Note: Do not remove condition. Will be overriden by Dibix.Sdk.Tests.Database -->
+    <DibixToolsDirectory Condition="'$(DibixToolsDirectory)' == ''">$(_DibixPackageFolder)tools/$(_DibixToolsFrameworkFolder)/</DibixToolsDirectory>
+    <DibixExeName Condition="'$(DibixExeName)' == ''">Dibix</DibixExeName>
+
     <DibixCliPath Condition="'$(MSBuildRuntimeType)' == 'Core'">dotnet $(DibixToolsDirectory)Dibix.Sdk.Cli.dll</DibixCliPath>
-    <DibixCliPath Condition="'$(MSBuildRuntimeType)' != 'Core'">$(DibixToolsDirectory)Dibix.exe</DibixCliPath>
+    <DibixCliPath Condition="'$(MSBuildRuntimeType)' != 'Core'">$(DibixToolsDirectory)$(DibixExeName).exe</DibixCliPath>
     <DibixSdkPath>$(DibixToolsDirectory)Dibix.Sdk.dll</DibixSdkPath>
     <DibixRuntimeDirectory>$(DibixToolsDirectory)</DibixRuntimeDirectory>
     <DibixSdkVersion>$([System.IO.Path]::GetFileName($(_DibixPackageFolder.TrimEnd('/'))))</DibixSdkVersion>

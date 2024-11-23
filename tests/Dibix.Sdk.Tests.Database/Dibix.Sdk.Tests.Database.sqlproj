@@ -62,7 +62,8 @@
   <Import Condition="'$(NetCoreBuild)' != 'true' AND '$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
   <Import Condition="'$(NetCoreBuild)' != 'true' AND '$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
   <PropertyGroup>
-    <DibixCliPath>..\..\src\Dibix.Sdk.Cli\bin\$(Configuration)\net472\Dibix.Sdk.Cli.exe</DibixCliPath>
+    <DibixToolsDirectory>..\..\src\Dibix.Sdk.Cli\bin\$(Configuration)\net8.0\</DibixToolsDirectory>
+    <DibixExeName>Dibix.Sdk.Cli</DibixExeName>
   </PropertyGroup>
   <Import Project="..\..\src\Dibix.Sdk\targets\build\Dibix.Sdk.props" />
   <Import Project="..\..\src\Dibix.Sdk\targets\build\Dibix.Sdk.targets" />
