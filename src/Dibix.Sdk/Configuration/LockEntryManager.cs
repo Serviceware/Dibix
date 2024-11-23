@@ -112,20 +112,23 @@ namespace Dibix.Sdk
         {
             using (stream)
             {
-                BinaryFormatter binaryFormatter = new BinaryFormatter();
-                byte[] bytes = (byte[])binaryFormatter.Deserialize(stream);
-
-                using (MemoryStream memoryStream = new MemoryStream(bytes))
+                using (BinaryReader binaryReader = new BinaryReader(stream))
                 {
-                    using (Stream zipStream = new GZipStream(memoryStream, CompressionMode.Decompress))
+                    int length = binaryReader.ReadInt32();
+                    byte[] bytes = binaryReader.ReadBytes(length);
+
+                    using (MemoryStream memoryStream = new MemoryStream(bytes))
                     {
-                        using (TextReader textReader = new StreamReader(zipStream))
+                        using (Stream zipStream = new GZipStream(memoryStream, CompressionMode.Decompress))
                         {
-                            using (JsonReader jsonReader = new JsonTextReader(textReader))
+                            using (TextReader textReader = new StreamReader(zipStream))
                             {
-                                JsonSerializer serializer = new JsonSerializer();
-                                LockStore store = serializer.Deserialize<LockStore>(jsonReader);
-                                return store;
+                                using (JsonReader jsonReader = new JsonTextReader(textReader))
+                                {
+                                    JsonSerializer serializer = new JsonSerializer();
+                                    LockStore store = serializer.Deserialize<LockStore>(jsonReader);
+                                    return store;
+                                }
                             }
                         }
                     }
@@ -218,10 +221,14 @@ namespace Dibix.Sdk
                     }
                 }
 
+                byte[] bytes = memoryStream.ToArray();
                 using (Stream stream = File.Open(path, FileMode.Create))
                 {
-                    BinaryFormatter binaryFormatter = new BinaryFormatter();
-                    binaryFormatter.Serialize(stream, memoryStream.ToArray());
+                    using (BinaryWriter binaryWriter = new BinaryWriter(stream))
+                    {
+                        binaryWriter.Write(bytes.Length);
+                        binaryWriter.Write(bytes);
+                    }
                 }
             }
         }
