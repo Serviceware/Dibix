@@ -3,7 +3,8 @@ CREATE TABLE [dbo].[dbx_codeanalysis_error_025_table_success1]
 (
     [a] INT NOT NULL 
   , [b] INT NULL 
-  , [c] AS 1 PERSISTED -- NOT NULL can be explictly specified, however NULL cannot be specified and will be determined by SQL server based on the expression
+  , [c] AS 1 PERSISTED -- For computed persisted columns, NOT NULL can be explictly specified, however NULL cannot be specified and will be determined by SQL server based on the expression.
+  , [d] AS 1           -- Neither NOT NULL nor NULL can be explicitly specified for non persisted computed columns.
   , CONSTRAINT [PK_dbx_codeanalysis_error_025_table_success1] PRIMARY KEY ([a], [c])
 )
 GO

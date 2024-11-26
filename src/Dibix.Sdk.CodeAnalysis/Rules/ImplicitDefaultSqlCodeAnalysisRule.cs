@@ -58,7 +58,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         {
             foreach (ColumnDefinition column in tableDefinition.ColumnDefinitions)
             {
-                if (column.IsPersisted || column.Constraints.OfType<NullableConstraintDefinition>().Any())
+                if (column.ComputedColumnExpression != null || column.Constraints.OfType<NullableConstraintDefinition>().Any())
                     continue;
 
                 string columnName = column.ColumnIdentifier.Value;

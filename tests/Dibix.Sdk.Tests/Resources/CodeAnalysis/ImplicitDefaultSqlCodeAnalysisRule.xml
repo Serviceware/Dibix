@@ -3,21 +3,21 @@
   <error
     ruleid="25"
     message="Please specify a nullable constraint for the column 'dbx_codeanalysis_error_025_table_fail.a' and don't rely on the default"
-    line="12"
-    column="5" />
-  <error
-    ruleid="25"
-    message="Please specify a nullable constraint for the column 'dbx_codeanalysis_error_025_table_fail.b' and don't rely on the default"
     line="13"
     column="5" />
   <error
     ruleid="25"
+    message="Please specify a nullable constraint for the column 'dbx_codeanalysis_error_025_table_fail.b' and don't rely on the default"
+    line="14"
+    column="5" />
+  <error
+    ruleid="25"
     message="Please specify the clustering (CLUSTERED/NONCLUSTERED) for the index 'IX_dbx_codeanalysis_error_025_table_fail_b' and don't rely on the default"
-    line="24"
+    line="25"
     column="1" />
   <error
     ruleid="25"
     message="Please specify the join type explicitly and don't rely on the default"
-    line="36"
+    line="37"
     column="5" />
 </errors>
