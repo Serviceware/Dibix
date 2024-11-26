@@ -68,7 +68,13 @@ namespace Dibix.Http.Host
                     .AddSingleton<IControllerActivator, NotSupportedControllerActivator>();
 
             services.AddExceptionHandler<DatabaseAccessExceptionHandler>();
-            services.AddProblemDetails();
+            services.AddProblemDetailsWithMapping()
+                    .Map<HttpRequestExecutionException>(x => x.IsClientError, (x, y) =>
+                    {
+                        x.Status = (int)y.StatusCode;
+                        x.Detail = y.ErrorMessage;
+                        x.Extensions["code"] = y.ErrorCode;
+                    });
 
             IConfigurationSection hostingConfigurationSection = configuration.GetSection(HostingOptions.ConfigurationSectionName);
             HostingOptions hostingOptions = hostingConfigurationSection.Bind<HostingOptions>();

@@ -8,29 +8,14 @@ namespace Dibix.Http.Server
 {
     public static class HttpActionInvoker
     {
-        public static Task<object> Invoke(HttpActionDefinition action, HttpRequestMessage request, IDictionary<string, object> arguments, IControllerActivator controllerActivator, IParameterDependencyResolver parameterDependencyResolver, CancellationToken cancellationToken)
+        // ASP.NET implementation
+        // Uses custom exception handling
+        public static async Task<object> Invoke(HttpActionDefinition action, HttpRequestMessage request, IDictionary<string, object> arguments, IControllerActivator controllerActivator, IParameterDependencyResolver parameterDependencyResolver, CancellationToken cancellationToken)
         {
             IHttpResponseFormatter<HttpRequestMessageDescriptor> responseFormatter = new HttpResponseMessageFormatter();
-            return Invoke(action, new HttpRequestMessageDescriptor(request), responseFormatter, arguments, controllerActivator, parameterDependencyResolver, cancellationToken);
-        }
-        public static async Task<object> Invoke<TRequest>(HttpActionDefinition action, TRequest request, IHttpResponseFormatter<TRequest> responseFormatter, IDictionary<string, object> arguments, IControllerActivator controllerActivator, IParameterDependencyResolver parameterDependencyResolver, CancellationToken cancellationToken) where TRequest : IHttpRequestDescriptor
-        {
             try
             {
-                if (action.Authorization.Any())
-                {
-                    // Clone the arguments, so they don't overwrite the endpoint arguments.
-                    // For example having a 'productid' parameter in both authorization behavior and endpoint with different meanings and different types can cause collisions.
-                    IDictionary<string, object> authorizationArguments = arguments.ToDictionary(x => x.Key, x => x.Value);
-                    foreach (HttpAuthorizationDefinition authorizationDefinition in action.Authorization)
-                    {
-                        _ = await Execute(authorizationDefinition, request, authorizationArguments, controllerActivator, parameterDependencyResolver, cancellationToken).ConfigureAwait(false);
-                    }
-                }
-
-                object result = await Execute(action, request, arguments, controllerActivator, parameterDependencyResolver, cancellationToken).ConfigureAwait(false);
-                object formattedResult = await responseFormatter.Format(result, request, action, cancellationToken).ConfigureAwait(false);
-                return formattedResult;
+                return await Invoke(action, new HttpRequestMessageDescriptor(request), responseFormatter, arguments, controllerActivator, parameterDependencyResolver, cancellationToken).ConfigureAwait(false);
             }
             catch (DatabaseAccessException exception)
             {
@@ -45,6 +30,26 @@ namespace Dibix.Http.Server
 
                 throw;
             }
+        }
+
+        // ASP.NET Core implementation => Dibix.Http.Host
+        // No custom exception handling needed, will be done by ProblemDetails/IExceptionHandler
+        public static async Task<object> Invoke<TRequest>(HttpActionDefinition action, TRequest request, IHttpResponseFormatter<TRequest> responseFormatter, IDictionary<string, object> arguments, IControllerActivator controllerActivator, IParameterDependencyResolver parameterDependencyResolver, CancellationToken cancellationToken) where TRequest : IHttpRequestDescriptor
+        {
+            if (action.Authorization.Any())
+            {
+                // Clone the arguments, so they don't overwrite the endpoint arguments.
+                // For example having a 'productid' parameter in both authorization behavior and endpoint with different meanings and different types can cause collisions.
+                IDictionary<string, object> authorizationArguments = arguments.ToDictionary(x => x.Key, x => x.Value);
+                foreach (HttpAuthorizationDefinition authorizationDefinition in action.Authorization)
+                {
+                    _ = await Execute(authorizationDefinition, request, authorizationArguments, controllerActivator, parameterDependencyResolver, cancellationToken).ConfigureAwait(false);
+                }
+            }
+
+            object result = await Execute(action, request, arguments, controllerActivator, parameterDependencyResolver, cancellationToken).ConfigureAwait(false);
+            object formattedResult = await responseFormatter.Format(result, request, action, cancellationToken).ConfigureAwait(false);
+            return formattedResult;
         }
 
         private static async Task<object> Execute(IHttpActionExecutionDefinition definition, IHttpRequestDescriptor request, IDictionary<string, object> arguments, IControllerActivator controllerActivator, IParameterDependencyResolver parameterDependencyResolver, CancellationToken cancellationToken)

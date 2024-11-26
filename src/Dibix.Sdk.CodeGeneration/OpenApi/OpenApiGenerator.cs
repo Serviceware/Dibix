@@ -31,6 +31,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             };
 
             AppendSecuritySchemes(document, model.SecuritySchemes);
+            AppendBuiltinSchemas(document);
             AppendPaths(document, model.AreaName, model.Controllers, model.RootNamespace, model.SupportOpenApiNullableReferenceTypes, schemaRegistry, logger);
             return document;
         }
@@ -220,29 +221,56 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                         sb.AppendLine();
 
                     ICollection<ErrorDescription> errorDescriptions = actionResponse.Errors.Values;
-                    sb.Append($@"{KnownHeaders.ClientErrorCodeHeaderName}|{KnownHeaders.ClientErrorDescriptionHeaderName}
--|-
-{String.Join(Environment.NewLine, errorDescriptions.Select(x => $"{(x.ErrorCode != 0 ? x.ErrorCode.ToString() : "n/a")}|{x.Description}"))}");
+                    sb.Append($"""
+                               Code|Description
+                               -|-
+                               {String.Join(Environment.NewLine, errorDescriptions.Select(x => $"{x.ErrorCode}|{x.Description}"))}
+                               """);
 
-                    if (errorDescriptions.Any(x => x.ErrorCode != 0))
+                    const string mimeType = "application/json";
+                    OpenApiMediaType errorResponseContent = new OpenApiMediaType
                     {
-                        apiResponse.Headers.Add(KnownHeaders.ClientErrorCodeHeaderName, new OpenApiHeader
+                        Schema = new OpenApiSchema
                         {
-                            Description = "Additional error code to handle the error on the client",
-                            Schema = PrimitiveTypeMap.GetOpenApiFactory(PrimitiveType.Int16).Invoke()
-                        });
-                    }
+                            AllOf = new List<OpenApiSchema>
+                            {
+                                new OpenApiSchema
+                                {
+                                    Reference = new OpenApiReference
+                                    {
+                                        Id = "ProblemDetails",
+                                        Type = ReferenceType.Schema
+                                    }
+                                },
+                                new OpenApiSchema
+                                {
+                                    Type = "object",
+                                    Properties =
+                                    {
+                                        ["code"] = new OpenApiSchema
+                                        {
+                                            Type = "integer",
+                                            Enum = errorDescriptions.Select(x => new OpenApiInteger(x.ErrorCode)).Cast<IOpenApiAny>().ToArray(),
+                                            Description = String.Join(Environment.NewLine, errorDescriptions.Select(x => $"{x.ErrorCode}: {x.Description}"))
+                                        }
+                                    },
+                                    Required = { "code" }
+                                }
+                            }
+                        }
+                    };
+                    apiResponse.Content.Add(mimeType, errorResponseContent);
 
-                    if (errorDescriptions.Any(x => !String.IsNullOrEmpty(x.Description)))
+                    apiResponse.Headers.Add(KnownHeaders.ClientErrorCodeHeaderName, new OpenApiHeader
                     {
-                        apiResponse.Headers.Add(KnownHeaders.ClientErrorDescriptionHeaderName, new OpenApiHeader
-                        {
-                            Description = "A mesage describing the cause of the error",
-                            Schema = PrimitiveTypeMap.GetOpenApiFactory(PrimitiveType.String).Invoke()
-                        });
-                        const string mimeType = "text/plain";
-                        apiResponse.Content.Add(mimeType, new OpenApiMediaType { Schema = PrimitiveTypeMap.GetOpenApiFactory(PrimitiveType.String).Invoke() });
-                    }
+                        Description = "Additional error code to handle the error on the client",
+                        Schema = PrimitiveTypeMap.GetOpenApiFactory(PrimitiveType.Int16).Invoke()
+                    });
+                    apiResponse.Headers.Add(KnownHeaders.ClientErrorDescriptionHeaderName, new OpenApiHeader
+                    {
+                        Description = "A mesage describing the cause of the error",
+                        Schema = PrimitiveTypeMap.GetOpenApiFactory(PrimitiveType.String).Invoke()
+                    });
                 }
 
                 apiResponse.Description = sb.Length > 0 ? sb.ToString() : actionResponse.StatusCode.ToString();
@@ -494,6 +522,64 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
         }
 
         private static OpenApiComponents EnsureComponents(OpenApiDocument document) => document.Components ?? (document.Components = new OpenApiComponents());
+
+        private static void AppendBuiltinSchemas(OpenApiDocument document)
+        {
+            AppendProblemDetails(document);
+        }
+
+        private static void AppendProblemDetails(OpenApiDocument document)
+        {
+            // See
+            // https://api.swaggerhub.com/domains/smartbear-public/ProblemDetails/1.0.0#/components/responses/BadRequest
+            // https://swagger.io/blog/problem-details-rfc9457-api-error-handling/
+            OpenApiSchema schema = new OpenApiSchema
+            {
+                Type = "object",
+                Properties =
+                {
+                    ["type"] = new OpenApiSchema
+                    {
+                        Type = "string",
+                        Format = "uri",
+                        MaxLength = 1024,
+                        Description = "A URI reference that identifies the problem type."
+                    },
+                    ["status"] = new OpenApiSchema
+                    {
+                        Type = "integer",
+                        Format = "int32",
+                        Minimum = 100,
+                        Maximum = 599,
+                        Description = "The HTTP status code generated by the origin server for this occurrence of the problem."
+                    },
+                    ["title"] = new OpenApiSchema
+                    {
+                        Type = "string",
+                        MaxLength = 1024,
+                        Description = "A short, human-readable summary of the problem type. It should not change from occurrence to occurrence of the problem, except for purposes of localization."
+                    },
+                    ["detail"] = new OpenApiSchema
+                    {
+                        Type = "string",
+                        MaxLength = 4096,
+                        Description = "A human-readable explanation specific to this occurrence of the problem."
+                    },
+                    ["instance"] = new OpenApiSchema
+                    {
+                        Type = "string",
+                        MaxLength = 1024,
+                        Description = "A URI reference that identifies the specific occurrence of the problem. It may or may not yield further information if dereferenced."
+                    }
+                },
+                Required =
+                {
+                    "type",
+                    "title"
+                }
+            };
+            document.Components.Schemas.Add("ProblemDetails", schema);
+        }
 
         private static IOpenApiAny ParseDefaultValue(ValueReference defaultValue, ISchemaRegistry schemaRegistry, ILogger logger)
         {

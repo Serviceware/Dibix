@@ -96,12 +96,10 @@ CommandText: <Inline>", requestException.Message);
             Mock<IHttpRequestDescriptor> request = new Mock<IHttpRequestDescriptor>(MockBehavior.Strict);
             Mock<IHttpResponseFormatter<IHttpRequestDescriptor>> responseFormatter = new Mock<IHttpResponseFormatter<IHttpRequestDescriptor>>(MockBehavior.Strict);
             Mock<Microsoft.AspNetCore.Http.HttpResponse> response = new Mock<Microsoft.AspNetCore.Http.HttpResponse>(MockBehavior.Strict);
-            int statusCode = 0;
-
+            
             request.Setup(x => x.GetUser()).Returns(new ClaimsPrincipal(new ClaimsIdentity(EnumerableExtensions.Create(new Claim(ClaimTypes.NameIdentifier, "user")))));
             response.SetupGet(x => x.BodyWriter).Returns(PipeWriter.Create(Stream.Null));
             response.SetupGet(x => x.HasStarted).Returns(false);
-            response.SetupSet(x => x.StatusCode = 403).Callback((int x) => statusCode = x);
             response.Setup(x => x.Headers).Returns(new HeaderDictionary());
             response.Setup(x => x.StartAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
@@ -112,10 +110,10 @@ CommandText: <Inline>", requestException.Message);
             HttpAuthorizationBehaviorContext httpAuthorizationBehaviorContext = new HttpAuthorizationBehaviorContext();
             try
             {
-                await Execute(action, request.Object, responseFormatter.Object, [new KeyValuePair<string, object>("context", httpAuthorizationBehaviorContext)]).ConfigureAwait(false);
+                await Execute(action, request.Object, responseFormatter.Object, new KeyValuePair<string, object>("context", httpAuthorizationBehaviorContext)).ConfigureAwait(false);
                 Assert.Fail($"{nameof(HttpRequestExecutionException)} was expected but not thrown");
             }
-            catch (HttpRequestExecutionException requestException)
+            catch (DatabaseAccessException databaseAccessException) when (SqlHttpStatusCodeParser.TryParse(databaseAccessException, action, new Dictionary<string, object>(), out HttpRequestExecutionException requestException))
             {
                 Assert.AreEqual("FirstAuthorizationTargetCalled", httpAuthorizationBehaviorContext.Result);
                 requestException.AppendToResponse(response.Object);
@@ -124,7 +122,7 @@ CommandType: 0
 CommandText: <Inline>", requestException.Message);
                 AssertIsType<DatabaseAccessException>(requestException.InnerException);
                 Assert.IsTrue(requestException.IsClientError);
-                Assert.AreEqual((int)HttpStatusCode.Forbidden, statusCode);
+                Assert.AreEqual(HttpStatusCode.Forbidden, requestException.StatusCode);
                 Assert.AreEqual("1", (string)response.Object.Headers["X-Error-Code"]);
                 Assert.AreEqual("Sorry", (string)response.Object.Headers["X-Error-Description"].Single());
             }

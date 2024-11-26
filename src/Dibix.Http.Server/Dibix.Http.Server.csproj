@@ -32,6 +32,7 @@
     <Compile Remove="Diagnostics\DefaultDiagnosticScope.cs" />
     <Compile Remove="Diagnostics\IDiagnosticScopeProvider.cs" />
     <Compile Remove="Extensions\HttpLoggingExtensions.cs" />
+    <Compile Remove="Extensions\ProblemDetailsExtensions.cs" />
     <Compile Remove="Registration\HttpContextExtensions.cs" />
     <Compile Remove="Runtime\IHttpActionDelegator.cs" />
   </ItemGroup>
