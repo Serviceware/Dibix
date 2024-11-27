@@ -68,7 +68,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                         AppendParameters(document, operation, action, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
                         AppendBody(document, operation, action, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
                         AppendResponses(document, operation, action, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
-                        AppendSecuritySchemes(document, action, operation);
+                        AppendSecuritySchemes(action, operation);
 
                         value.AddOperation(operationType, operation);
                     }
@@ -284,7 +284,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             target.Add(mediaType, content);
         }
 
-        private static void AppendSecuritySchemes(OpenApiDocument document, ActionDefinition action, OpenApiOperation operation)
+        private static void AppendSecuritySchemes(ActionDefinition action, OpenApiOperation operation)
         {
             if (!action.SecuritySchemes.HasEffectiveRequirements)
                 return;
@@ -480,7 +480,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                 AdditionalPropertiesAllowed = false
             };
 
-            document.Components.Schemas.Add(schemaName, schema); // Register schema before traversing properties to avoid endless recursions for self referencing properties
+            EnsureComponents(document).Schemas.Add(schemaName, schema); // Register schema before traversing properties to avoid endless recursions for self referencing properties
 
             foreach (ObjectSchemaProperty property in objectContract.Properties)
             {
@@ -519,7 +519,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                 enumNames.Add(new OpenApiString(member.Name));
             }
 
-            document.Components.Schemas.Add(schemaName, schema);
+            EnsureComponents(document).Schemas.Add(schemaName, schema);
         }
 
         private static OpenApiComponents EnsureComponents(OpenApiDocument document) => document.Components ?? (document.Components = new OpenApiComponents());
@@ -579,7 +579,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                     "title"
                 }
             };
-            document.Components.Schemas.Add("ProblemDetails", schema);
+            EnsureComponents(document).Schemas.Add("ProblemDetails", schema);
         }
 
         private static IOpenApiAny ParseDefaultValue(ValueReference defaultValue, ISchemaRegistry schemaRegistry, ILogger logger)
