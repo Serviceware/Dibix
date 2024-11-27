@@ -33,7 +33,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public override void Write(CodeGenerationContext context)
         {
-            var namespaceGroups = _schemas.GroupBy(x => x.Namespace).OrderBy(x => x.Key).ToArray();
+            var namespaceGroups = _schemas.GroupBy(x => x.AbsoluteNamespace).OrderBy(x => x.Key).ToArray();
 
             for (int i = 0; i < namespaceGroups.Length; i++)
             {

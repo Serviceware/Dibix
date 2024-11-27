@@ -163,13 +163,13 @@ If this is not a project that has multiple areas, please make sure to define the
                     properties.Add(objectSchemaProperty);
                 }
             }
-            ObjectSchema contract = new ObjectSchema(currentNamespace.Path, definitionName, SchemaDefinitionSource.Defined, sourceInfo, properties, wcfNamespace);
+            ObjectSchema contract = new ObjectSchema(currentNamespace.Path, currentNamespace.RelativeNamespace, definitionName, SchemaDefinitionSource.Defined, sourceInfo, properties, wcfNamespace);
             CollectContract(contract, sourceInfo);
         }
 
         private void ReadEnumContract(NamespacePath currentNamespace, string definitionName, JToken definitionValue, SourceLocation sourceInfo)
         {
-            EnumSchema contract = new EnumSchema(currentNamespace.Path, definitionName, SchemaDefinitionSource.Defined, sourceInfo);
+            EnumSchema contract = new EnumSchema(currentNamespace.Path, currentNamespace.RelativeNamespace, definitionName, SchemaDefinitionSource.Defined, sourceInfo);
 
             ICollection<EnumValue> values = ReadEnumValues(definitionValue).ToArray();
             IDictionary<string, int> actualValues = values.Where(x => x.ActualValue.HasValue).ToDictionary(x => x.Name, x => x.ActualValue.Value);

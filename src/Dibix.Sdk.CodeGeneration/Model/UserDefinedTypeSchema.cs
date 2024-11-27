@@ -6,7 +6,7 @@ namespace Dibix.Sdk.CodeGeneration
     {
         public string UdtName { get; }
 
-        public UserDefinedTypeSchema(string @namespace, string definitionName, SchemaDefinitionSource source, SourceLocation location, string udtName, IList<ObjectSchemaProperty> properties) : base(@namespace, definitionName, source, location, properties)
+        public UserDefinedTypeSchema(string absoluteNamespace, string relativeNamespace, string definitionName, SchemaDefinitionSource source, SourceLocation location, string udtName, IList<ObjectSchemaProperty> properties) : base(absoluteNamespace, relativeNamespace, definitionName, source, location, properties)
         {
             this.UdtName = udtName;
         }

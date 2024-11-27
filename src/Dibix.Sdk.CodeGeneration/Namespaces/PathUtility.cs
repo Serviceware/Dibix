@@ -37,16 +37,6 @@ namespace Dibix.Sdk.CodeGeneration
             return new TargetPath(productName, areaName, layerName, relativeNamespace, @namespace, typeName, path);
         }
 
-        public static string BuildRelativeNamespace(string rootNamespace, string layerName, string absoluteNamespace)
-        {
-            bool multipleAreas = rootNamespace.IndexOf('.') < 0;
-            int startIndex = rootNamespace.Length + 1;
-            if (!multipleAreas)
-                startIndex += +layerName.Length + 1;
-
-            return startIndex < absoluteNamespace.Length ? absoluteNamespace.Substring(startIndex) : null;
-        }
-
         private static (string @namespace, string typeName, string path) BuildPath(string productName, ref string areaName, string layerName, ref string relativeNamespace, string targetNamePath)
         {
             IList<string> relativeNamespaceParts = (relativeNamespace ?? String.Empty).Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries).ToList();

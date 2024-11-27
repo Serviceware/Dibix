@@ -41,8 +41,8 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             string accessorClassName = statementDefinition.ExternalSchemaInfo?.Owner.DefaultClassName ?? _className;
-            string localAccessorFullName = $"{statementDefinition.Namespace}.{_className}";
-            string externalAccessorFullName = $"{statementDefinition.Namespace}.{accessorClassName}";
+            string localAccessorFullName = $"{statementDefinition.AbsoluteNamespace}.{_className}";
+            string externalAccessorFullName = $"{statementDefinition.AbsoluteNamespace}.{accessorClassName}";
             string definitionName = statementDefinition.DefinitionName;
             bool isAsync = statementDefinition.Async;
             bool hasRefParameters = statementDefinition.Parameters.Any(x => x.IsOutput);

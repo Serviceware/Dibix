@@ -39,7 +39,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             context.AddUsing("Dibix");
 
-            var namespaceGroups = _schemas.GroupBy(x => x.Namespace).OrderBy(x => x.Key).ToArray();
+            var namespaceGroups = _schemas.GroupBy(x => x.AbsoluteNamespace).OrderBy(x => x.Key).ToArray();
 
             for (int i = 0; i < namespaceGroups.Length; i++)
             {
@@ -612,7 +612,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (definition.GenerateResultClass)
             {
                 ObjectSchema schema = (ObjectSchema)context.GetSchema(schemaTypeReference);
-                return schema != null ? $"{schema.Namespace}.{schema.DefinitionName}" : null;
+                return schema != null ? $"{schema.AbsoluteNamespace}.{schema.DefinitionName}" : null;
             }
 
             return schemaTypeReference.Key;

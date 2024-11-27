@@ -8,7 +8,7 @@ namespace Dibix.Sdk.CodeGeneration
         public string WcfNamespace { get; }
         public IReadOnlyList<ObjectSchemaProperty> Properties { get; }
 
-        public ObjectSchema(string @namespace, string definitionName, SchemaDefinitionSource source, SourceLocation location, IList<ObjectSchemaProperty> properties, string wcfNamespace = null) : base(@namespace, definitionName, source, location)
+        public ObjectSchema(string absoluteNamespace, string relativeNamespace, string definitionName, SchemaDefinitionSource source, SourceLocation location, IList<ObjectSchemaProperty> properties, string wcfNamespace = null) : base(absoluteNamespace, relativeNamespace, definitionName, source, location)
         {
             WcfNamespace = wcfNamespace;
             Properties = new ReadOnlyCollection<ObjectSchemaProperty>(properties);

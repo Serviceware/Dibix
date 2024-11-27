@@ -397,12 +397,13 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             if (UseRelativeNamespaces)
             {
                 typeName = schemaDefinition.DefinitionName;
-                string relativeNamespace = PathUtility.BuildRelativeNamespace(rootNamespace, LayerName.DomainModel, schemaDefinition.Namespace);
-                if (!String.IsNullOrEmpty(relativeNamespace))
-                    typeName = $"{relativeNamespace}.{typeName}";
+                if (!String.IsNullOrEmpty(schemaDefinition.RelativeNamespace))
+                    typeName = $"{schemaDefinition.RelativeNamespace}.{typeName}";
             }
             else
+            {
                 typeName = schemaDefinition.FullName;
+            }
 
             EnsureSchema(document, typeName, schemaDefinition, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
 
