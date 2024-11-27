@@ -168,7 +168,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static void CollectErrorResponses(TSqlFragment body, SqlStatementDefinition definition)
         {
-            ThrowVisitor visitor = new ThrowVisitor();
+            ThrowVisitor visitor = new ThrowVisitor(definition.Location.Source);
             body.Accept(visitor);
 
             definition.ErrorResponses.AddRange(visitor.ErrorResponses);
@@ -187,9 +187,15 @@ namespace Dibix.Sdk.CodeGeneration
         #region Nested Types
         private sealed class ThrowVisitor : TSqlFragmentVisitor
         {
+            private readonly string _source;
             private readonly IDictionary<ErrorResponseKey, ErrorResponse> _errorResponses = new Dictionary<ErrorResponseKey, ErrorResponse>();
 
             public ICollection<ErrorResponse> ErrorResponses => _errorResponses.Values;
+
+            public ThrowVisitor(string source)
+            {
+                _source = source;
+            }
 
             public override void Visit(ThrowStatement node)
             {
@@ -206,7 +212,7 @@ namespace Dibix.Sdk.CodeGeneration
                     if (_errorResponses.ContainsKey(errorResponseKey))
                         return;
 
-                    _errorResponses.Add(errorResponseKey, new ErrorResponse(statusCode, errorCode, errorMessage));
+                    _errorResponses.Add(errorResponseKey, new ErrorResponse(statusCode, errorCode, errorMessage, new SourceLocation(_source, errorNumberLiteral.StartLine, errorNumberLiteral.StartColumn)));
                 }
             }
         }

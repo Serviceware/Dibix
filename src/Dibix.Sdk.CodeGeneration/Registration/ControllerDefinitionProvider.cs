@@ -129,7 +129,8 @@ namespace Dibix.Sdk.CodeGeneration
             IReadOnlyDictionary<string, ExplicitParameter> explicitParameters = CollectExplicitParameters(action, requestBody, pathParameters);
 
             // Resolve action target, parameters and create action definition
-            ActionDefinition actionDefinition = CreateActionDefinition<ActionDefinition>(action, explicitParameters, pathParameters, bodyParameters, requestBody);
+            Dictionary<HttpStatusCode, ActionResponse> responses = new Dictionary<HttpStatusCode, ActionResponse>();
+            ActionDefinition actionDefinition = CreateActionDefinition<ActionDefinition>(action, explicitParameters, pathParameters, bodyParameters, requestBody, responses);
             if (actionDefinition == null)
                 return;
             
@@ -159,6 +160,7 @@ namespace Dibix.Sdk.CodeGeneration
             actionDefinition.Description = (string)action.Property("description")?.Value;
             actionDefinition.RequestBody = requestBody;
             actionDefinition.ChildRoute = childRoute;
+            actionDefinition.Responses.AddRange(responses);
 
             if (TryReadFileResponse(action, out ActionFileResponse fileResponse, out SourceLocation fileResponseLocation))
                 actionDefinition.SetFileResponse(fileResponse, fileResponseLocation);
@@ -365,7 +367,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             CollectActionResponses(responseProperty, responseProperty.Value.Type, actionDefinition);
         }
-        private void CollectActionResponses(JProperty responseProperty, JTokenType type, ActionTargetDefinition actionDefinition)
+        private void CollectActionResponses(JProperty responseProperty, JTokenType type, ActionDefinition actionDefinition)
         {
             switch (type)
             {
@@ -392,17 +394,17 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private void CollectActionResponseFromStatusCode(JProperty statusCodeProperty, JTokenType type, ActionTargetDefinition actionTargetDefinition)
+        private void CollectActionResponseFromStatusCode(JProperty statusCodeProperty, JTokenType type, ActionDefinition actionDefinition)
         {
             HttpStatusCode statusCode = (HttpStatusCode)Int32.Parse(statusCodeProperty.Name);
-            CollectActionResponseFromStatusCode(statusCode, statusCodeProperty.Value, type, actionTargetDefinition);
+            CollectActionResponseFromStatusCode(statusCode, statusCodeProperty.Value, type, actionDefinition);
         }
-        private void CollectActionResponseFromStatusCode(HttpStatusCode statusCode, JToken value, JTokenType type, ActionTargetDefinition actionTargetDefinition)
+        private void CollectActionResponseFromStatusCode(HttpStatusCode statusCode, JToken value, JTokenType type, ActionDefinition actionDefinition)
         {
-            if (!actionTargetDefinition.Responses.TryGetValue(statusCode, out ActionResponse response))
+            if (!actionDefinition.Responses.TryGetValue(statusCode, out ActionResponse response))
             {
                 response = new ActionResponse(statusCode);
-                actionTargetDefinition.Responses.Add(statusCode, response);
+                actionDefinition.Responses.Add(statusCode, response);
             }
 
             switch (type)
@@ -414,7 +416,7 @@ namespace Dibix.Sdk.CodeGeneration
                     break;
 
                 case JTokenType.Object:
-                    CollectActionResponseDetail((JObject)value, actionTargetDefinition, response);
+                    CollectActionResponseDetail((JObject)value, actionDefinition, response);
                     break;
 
                 default:
@@ -422,7 +424,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private void CollectActionResponseDetail(JObject responseObject, ActionTargetDefinition actionTargetDefinition, ActionResponse response)
+        private void CollectActionResponseDetail(JObject responseObject, ActionDefinition actionDefinition, ActionResponse response)
         {
             string description = (string)responseObject.Property("description")?.Value;
             JProperty autoDetectProperty = responseObject.Property("autoDetect");
@@ -438,18 +440,18 @@ namespace Dibix.Sdk.CodeGeneration
                 response.Description = description;
                     
             if (autoDetectProperty != null)
-                CollectStatusCodeDetection(autoDetectProperty, autoDetectProperty.Value.Type, actionTargetDefinition, response);
+                CollectStatusCodeDetection(autoDetectProperty, autoDetectProperty.Value.Type, actionDefinition, response);
         }
 
-        private static void CollectStatusCodeDetection(JProperty property, JTokenType type, ActionTargetDefinition actionTargetDefinition, ActionResponse response)
+        private static void CollectStatusCodeDetection(JProperty property, JTokenType type, ActionDefinition actionDefinition, ActionResponse response)
         {
             switch (type)
             {
                 case JTokenType.Boolean:
-                    actionTargetDefinition.DisabledAutoDetectionStatusCodes.Add((int)response.StatusCode);
+                    actionDefinition.DisabledAutoDetectionStatusCodes.Add((int)response.StatusCode);
 
                     if (property.Parent!.Count == 1)
-                        actionTargetDefinition.Responses.Remove(response.StatusCode);
+                        actionDefinition.Responses.Remove(response.StatusCode);
 
                     break;
 
@@ -457,8 +459,10 @@ namespace Dibix.Sdk.CodeGeneration
                     JObject autoDetectObject = (JObject)property.Value;
                     int errorCode = (int?)autoDetectObject.Property("errorCode")?.Value ?? default;
                     string errorMessage = (string)autoDetectObject.Property("errorMessage")?.Value;
-                    ErrorDescription error = new ErrorDescription(errorCode, errorMessage);
-                    response.Errors[errorCode] = error;
+                    SourceLocation sourceLocation = autoDetectObject.GetSourceInfo();
+                    ErrorDescription error = new ErrorDescription(errorCode, errorMessage, sourceLocation);
+                    response.ResultType = new SchemaTypeReference(BuiltInSchemaProvider.ProblemDetailsSchema.FullName, isNullable: false, isEnumerable: false, sourceLocation);
+                    response.Errors.Add(errorCode, error);
                     response.StatusCodeDetectionDetail = error;
                     break;
 
@@ -576,7 +580,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             IReadOnlyDictionary<string, ExplicitParameter> explicitParameters = CollectExplicitParameters(authorization, requestBody: null, pathParameters);
             ICollection<string> bodyParameters = new Collection<string>();
-            AuthorizationBehavior authorizationBehavior = CreateActionDefinition<AuthorizationBehavior>(authorization, explicitParameters, pathParameters, bodyParameters, requestBody: null);
+            AuthorizationBehavior authorizationBehavior = CreateActionDefinition<AuthorizationBehavior>(authorization, explicitParameters, pathParameters, bodyParameters, requestBody: null, responses: actionDefinition.Responses);
             actionDefinition.Authorization.Add(authorizationBehavior);
         }
 
@@ -608,11 +612,11 @@ namespace Dibix.Sdk.CodeGeneration
             return mergedAuthorization;
         }
 
-        private T CreateActionDefinition<T>(JObject action, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, ActionRequestBody requestBody) where T : ActionTargetDefinition, new()
+        private T CreateActionDefinition<T>(JObject action, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, ActionRequestBody requestBody, IDictionary<HttpStatusCode, ActionResponse> responses) where T : ActionTargetDefinition, new()
         {
             JValue targetValue = (JValue)action.Property("target").Value;
-            SourceLocation sourceInfo = targetValue.GetSourceInfo();
-            T actionDefinition = _actionTargetResolver.Resolve<T>(targetName: (string)targetValue, sourceInfo, explicitParameters, pathParameters, bodyParameters, requestBody);
+            SourceLocation sourceLocation = targetValue.GetSourceInfo();
+            T actionDefinition = _actionTargetResolver.Resolve<T>(targetName: (string)targetValue, sourceLocation, explicitParameters, pathParameters, bodyParameters, requestBody, responses);
             return actionDefinition;
         }
         #endregion

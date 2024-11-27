@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using Dibix.Sdk.Abstractions;
 
@@ -20,7 +21,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Abstract Methods
-        public abstract bool TryResolve<T>(string targetName, SourceLocation sourceLocation, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> readOnlyDictionary, ICollection<string> bodyParameters, ActionRequestBody requestBody, out T actionTargetDefinition) where T : ActionTargetDefinition, new();
+        public abstract bool TryResolve<T>(string targetName, SourceLocation sourceLocation, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> readOnlyDictionary, ICollection<string> bodyParameters, ActionRequestBody requestBody, IDictionary<HttpStatusCode, ActionResponse> responses, out T actionTargetDefinition) where T : ActionTargetDefinition, new();
         #endregion
 
         #region Protected Methods
@@ -108,15 +109,27 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        protected static void RegisterErrorResponse(ActionTargetDefinition actionTargetDefinition, int statusCode, int errorCode, string errorDescription)
+        protected void RegisterErrorResponse(IDictionary<HttpStatusCode, ActionResponse> responses, ErrorResponse errorResponse)
         {
-            HttpStatusCode httpStatusCode = (HttpStatusCode)statusCode;
-            if (!actionTargetDefinition.Responses.TryGetValue(httpStatusCode, out ActionResponse response))
+            HttpStatusCode httpStatusCode = (HttpStatusCode)errorResponse.StatusCode;
+            if (!responses.TryGetValue(httpStatusCode, out ActionResponse response))
             {
-                response = new ActionResponse(httpStatusCode);
-                actionTargetDefinition.Responses.Add(httpStatusCode, response);
+                SchemaDefinition problemDetailsSchema = BuiltInSchemaProvider.ProblemDetailsSchema;
+                response = new ActionResponse(httpStatusCode, new SchemaTypeReference(key: problemDetailsSchema.FullName, isNullable: false, isEnumerable: false, problemDetailsSchema.Location));
+                responses.Add(httpStatusCode, response);
             }
-            response.Errors.Add(errorCode, new ErrorDescription(errorCode, errorDescription));
+
+            if (response.Errors.TryGetValue(errorResponse.ErrorCode, out ErrorDescription existingErrorDescription))
+            {
+                if (existingErrorDescription.Description != errorResponse.ErrorDescription)
+                {
+                    Logger.LogError($"Ambiguous validation error code: {existingErrorDescription.ErrorCode}{(!String.IsNullOrEmpty(existingErrorDescription.Description) ? $" ({existingErrorDescription.Description})" : null)}", existingErrorDescription.Location);
+                    Logger.LogError($"Ambiguous validation error code: {errorResponse.ErrorCode}{(!String.IsNullOrEmpty(errorResponse.ErrorDescription) ? $" ({errorResponse.ErrorDescription})" : null)}", errorResponse.SourceLocation);
+                }
+                return;
+            }
+
+            response.Errors.Add(errorResponse.ErrorCode, new ErrorDescription(errorResponse.ErrorCode, errorResponse.ErrorDescription, errorResponse.SourceLocation));
         }
         #endregion
 

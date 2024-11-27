@@ -88,7 +88,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static string DetermineReturnTypeName(ActionTargetDefinition definition, CodeGenerationContext context)
+        private static string DetermineReturnTypeName(ActionDefinition definition, CodeGenerationContext context)
         {
             context.AddUsing<Task<object>>();
 

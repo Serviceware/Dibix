@@ -165,9 +165,9 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private void ValidateResponseContracts(ActionTargetDefinition actionTargetDefinition, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
+        private void ValidateResponseContracts(ActionDefinition actionDefinition, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
         {
-            foreach (ActionResponse response in actionTargetDefinition.Responses.Values)
+            foreach (ActionResponse response in actionDefinition.Responses.Values)
             {
                 if (response.ResultType == null)
                     continue;

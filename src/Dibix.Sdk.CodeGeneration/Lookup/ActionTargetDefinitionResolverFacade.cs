@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Net;
 using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -34,11 +35,11 @@ namespace Dibix.Sdk.CodeGeneration
             };
         }
 
-        public T Resolve<T>(string targetName, SourceLocation sourceLocation, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, ActionRequestBody requestBody) where T : ActionTargetDefinition, new()
+        public T Resolve<T>(string targetName, SourceLocation sourceLocation, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, ActionRequestBody requestBody, IDictionary<HttpStatusCode, ActionResponse> responses) where T : ActionTargetDefinition, new()
         {
             foreach (ActionTargetDefinitionResolver resolver in this._resolvers)
             {
-                if (resolver.TryResolve(targetName, sourceLocation, explicitParameters, pathParameters, bodyParameters, requestBody, out T definition))
+                if (resolver.TryResolve(targetName, sourceLocation, explicitParameters, pathParameters, bodyParameters, requestBody, responses, out T definition))
                     return definition;
             }
 

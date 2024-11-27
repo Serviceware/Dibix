@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -32,7 +33,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Overrides
-        public override bool TryResolve<T>(string targetName, SourceLocation sourceLocation, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, ActionRequestBody requestBody, out T actionTargetDefinition)
+        public override bool TryResolve<T>(string targetName, SourceLocation sourceLocation, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, ActionRequestBody requestBody, IDictionary<HttpStatusCode, ActionResponse> responses, out T actionTargetDefinition)
         {
             if (!TryGetStatementDefinitionByProbing(targetName, out SqlStatementDefinition statementDefinition))
             {
@@ -75,9 +76,11 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             foreach (ErrorResponse errorResponse in statementDefinition.ErrorResponses)
-                RegisterErrorResponse(actionTargetDefinition, errorResponse.StatusCode, errorResponse.ErrorCode, errorResponse.ErrorDescription);
+                RegisterErrorResponse(responses, errorResponse);
 
-            CollectResponse(actionTargetDefinition, statementDefinition);
+            if (actionTargetDefinition is ActionDefinition actionDefinition)
+                CollectResponse(actionDefinition, statementDefinition);
+
             return true;
         }
         #endregion
@@ -94,12 +97,12 @@ namespace Dibix.Sdk.CodeGeneration
             return false;
         }
 
-        private static void CollectResponse(ActionTargetDefinition actionTargetDefinition, SqlStatementDefinition definition)
+        private static void CollectResponse(ActionDefinition actionDefinition, SqlStatementDefinition definition)
         {
             if (definition.FileResult != null)
-                actionTargetDefinition.SetFileResponse(new ActionFileResponse(HttpMediaType.Binary), definition.FileResult.Location);
+                actionDefinition.SetFileResponse(new ActionFileResponse(HttpMediaType.Binary), definition.FileResult.Location);
             else
-                actionTargetDefinition.DefaultResponseType = definition.ResultType;
+                actionDefinition.DefaultResponseType = definition.ResultType;
         }
         #endregion
     }

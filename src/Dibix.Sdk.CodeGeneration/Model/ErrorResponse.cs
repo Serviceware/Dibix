@@ -5,12 +5,14 @@
         public int StatusCode { get; }
         public int ErrorCode { get; }
         public string ErrorDescription { get; }
+        public SourceLocation SourceLocation { get; }
 
-        public ErrorResponse(int statusCode, int errorCode, string errorDescription)
+        public ErrorResponse(int statusCode, int errorCode, string errorDescription, SourceLocation sourceLocation)
         {
-            this.StatusCode = statusCode;
-            this.ErrorCode = errorCode;
-            this.ErrorDescription = errorDescription;
+            StatusCode = statusCode;
+            ErrorCode = errorCode;
+            ErrorDescription = errorDescription;
+            SourceLocation = sourceLocation;
         }
     }
 }
