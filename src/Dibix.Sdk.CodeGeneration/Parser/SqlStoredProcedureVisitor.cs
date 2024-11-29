@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Dibix.Http;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
@@ -168,7 +169,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static void CollectErrorResponses(TSqlFragment body, SqlStatementDefinition definition)
         {
-            ThrowVisitor visitor = new ThrowVisitor(definition.Location.Source);
+            ThrowVisitor visitor = new ThrowVisitor(definition.Location.Source, definition.Parameters);
             body.Accept(visitor);
 
             definition.ErrorResponses.AddRange(visitor.ErrorResponses);
@@ -189,35 +190,112 @@ namespace Dibix.Sdk.CodeGeneration
         {
             private readonly string _source;
             private readonly IDictionary<ErrorResponseKey, ErrorResponse> _errorResponses = new Dictionary<ErrorResponseKey, ErrorResponse>();
+            private readonly IDictionary<string, string> _variableValues = new Dictionary<string, string>();
+            private readonly HashSet<string> _parameters;
 
             public ICollection<ErrorResponse> ErrorResponses => _errorResponses.Values;
 
-            public ThrowVisitor(string source)
+            public ThrowVisitor(string source, IEnumerable<SqlQueryParameter> parameters)
             {
                 _source = source;
+                _parameters = [..parameters.Select(x => $"@{x.Name}")];
+            }
+
+            public override void Visit(DeclareVariableElement node)
+            {
+                string variableName = node.VariableName.Value;
+                CollectVariableAssignment(variableName, node.Value);
+            }
+
+            public override void Visit(SetVariableStatement node)
+            {
+                string variableName = node.Variable.Name;
+                CollectVariableAssignment(variableName, node.Expression);
             }
 
             public override void Visit(ThrowStatement node)
             {
-                string errorMessage = String.Empty;
-                if (node.Message is StringLiteral literal)
-                    errorMessage = literal.Value;
-
-                if (node.ErrorNumber is Literal errorNumberLiteral
-                 && Int32.TryParse(errorNumberLiteral.Value, out int errorNumber)
-                 && HttpErrorResponseUtility.TryParseErrorResponse(errorNumber, out int statusCode, out int errorCode, out bool isClientError)
-                 && isClientError)
+                string errorMessage = node.Message switch
                 {
-                    ErrorResponseKey errorResponseKey = new ErrorResponseKey(statusCode, errorCode);
-                    if (_errorResponses.ContainsKey(errorResponseKey))
-                        return;
+                    StringLiteral literal => literal.Value,
+                    VariableReference variableReference when _variableValues.TryGetValue(variableReference.Name, out string variableValue) => variableValue,
+                    _ => String.Empty
+                };
 
-                    _errorResponses.Add(errorResponseKey, new ErrorResponse(statusCode, errorCode, errorMessage, new SourceLocation(_source, errorNumberLiteral.StartLine, errorNumberLiteral.StartColumn)));
+                if (node.ErrorNumber is not Literal errorNumberLiteral)
+                    return;
+
+                if (!Int32.TryParse(errorNumberLiteral.Value, out int errorNumber))
+                    return;
+
+                if (!HttpErrorResponseUtility.TryParseErrorResponse(errorNumber, out int statusCode, out int errorCode, out bool isClientError))
+                    return;
+
+                if (!isClientError)
+                    return;
+
+                ErrorResponseKey errorResponseKey = new ErrorResponseKey(statusCode, errorCode);
+                if (_errorResponses.ContainsKey(errorResponseKey))
+                    return;
+
+                _errorResponses.Add(errorResponseKey, new ErrorResponse(statusCode, errorCode, errorMessage, new SourceLocation(_source, errorNumberLiteral.StartLine, errorNumberLiteral.StartColumn)));
+            }
+
+            private void CollectVariableAssignment(string variableName, ScalarExpression value)
+            {
+                string variableValue = null;
+
+                switch (value)
+                {
+                    case null:
+                        variableValue = "";
+                        break;
+
+                    case StringLiteral literal:
+                        variableValue = literal.Value;
+                        break;
+
+                    case FunctionCall functionCall when functionCall.FunctionName.Value == "CONCAT":
+                        StringBuilder sb = new StringBuilder();
+
+                        foreach (ScalarExpression parameter in functionCall.Parameters)
+                        {
+                            switch (parameter)
+                            {
+                                case StringLiteral stringLiteral:
+                                    sb.Append(stringLiteral.Value);
+                                    break;
+
+                                case VariableReference variableReference when _variableValues.TryGetValue(variableReference.Name, out string variableReferenceValue):
+                                    sb.Append(variableReferenceValue);
+                                    break;
+
+                                case VariableReference variableReference when _parameters.Contains(variableReference.Name):
+                                    sb.Append($"{{{variableReference.Name.TrimStart('@')}}}");
+                                    break;
+
+                                default:
+                                    continue;
+                            }
+                        }
+
+                        if (sb.Length > 0)
+                            variableValue = sb.ToString();
+
+                        break;
+
+                    default:
+                        return;
                 }
+
+                if (variableValue == null)
+                    return;
+
+                _variableValues[variableName] = variableValue;
             }
         }
 
-        private readonly struct ErrorResponseKey
+        private readonly record struct ErrorResponseKey
         {
             public int StatusCode { get; }
             public int ErrorCode { get; }

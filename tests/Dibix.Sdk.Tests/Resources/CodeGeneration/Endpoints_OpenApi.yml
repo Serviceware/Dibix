@@ -123,7 +123,7 @@ paths:
         '204':
           description: NoContent
         '403':
-          description: "Code|Description\r\n-|-\r\n1|Forbidden"
+          description: "Code|Description\r\n-|-\r\n1|Forbidden. Expected the right: {right}!"
           headers:
             X-Error-Code:
               description: Additional error code to handle the error on the client
@@ -425,7 +425,7 @@ paths:
         '204':
           description: NoContent
         '403':
-          description: "Code|Description\r\n-|-\r\n1|Forbidden"
+          description: "Code|Description\r\n-|-\r\n1|Forbidden. Expected the right: {right}!"
           headers:
             X-Error-Code:
               description: Additional error code to handle the error on the client
@@ -493,7 +493,7 @@ paths:
         '204':
           description: NoContent
         '403':
-          description: "Code|Description\r\n-|-\r\n1|Forbidden"
+          description: "Code|Description\r\n-|-\r\n1|Forbidden. Expected the right: {right}!"
           headers:
             X-Error-Code:
               description: Additional error code to handle the error on the client
@@ -561,7 +561,7 @@ paths:
         '204':
           description: NoContent
         '403':
-          description: "Code|Description\r\n-|-\r\n1|Forbidden"
+          description: "Code|Description\r\n-|-\r\n1|Forbidden. Expected the right: {right}!"
           headers:
             X-Error-Code:
               description: Additional error code to handle the error on the client

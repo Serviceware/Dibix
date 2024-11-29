@@ -1440,11 +1440,11 @@
           "$type": "Dibix.Sdk.CodeGeneration.ErrorResponse, Dibix.Sdk.CodeGeneration",
           "StatusCode": 403,
           "ErrorCode": 1,
-          "ErrorDescription": "Forbidden",
+          "ErrorDescription": "Forbidden. Expected the right: {right}!",
           "SourceLocation": {
             "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
             "Source": "Tests/dbx_tests_authorization.sql",
-            "Line": 6,
+            "Line": 9,
             "Column": 10
           }
         }
