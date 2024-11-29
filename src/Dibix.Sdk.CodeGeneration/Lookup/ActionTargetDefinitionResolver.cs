@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
 using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -21,14 +20,13 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Abstract Methods
-        public abstract bool TryResolve<T>(string targetName, SourceLocation sourceLocation, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> readOnlyDictionary, ICollection<string> bodyParameters, ActionRequestBody requestBody, IDictionary<HttpStatusCode, ActionResponse> responses, out T actionTargetDefinition) where T : ActionTargetDefinition, new();
+        public abstract bool TryResolve<T>(string targetName, SourceLocation sourceLocation, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> readOnlyDictionary, ICollection<string> bodyParameters, ActionRequestBody requestBody, Func<ActionTarget, T> actionTargetDefinitionFactory, out T actionTargetDefinition) where T : ActionTargetDefinition;
         #endregion
 
         #region Protected Methods
-        protected T CreateActionTargetDefinition<T>(ActionTarget actionTarget, IReadOnlyDictionary<string, PathParameter> pathParameters, ActionRequestBody requestBody) where T : ActionTargetDefinition, new()
+        protected T CreateActionTargetDefinition<T>(ActionTarget actionTarget, IReadOnlyDictionary<string, PathParameter> pathParameters, ActionRequestBody requestBody, Func<ActionTarget, T> actionTargetDefinitionFactory) where T : ActionTargetDefinition
         {
-            T actionTargetDefinition = new T();
-            actionTargetDefinition.Target = actionTarget;
+            T actionTargetDefinition = actionTargetDefinitionFactory(actionTarget);
             actionTargetDefinition.PathParameters.AddRange(pathParameters);
             if (requestBody?.Contract != null)
                 actionTargetDefinition.Parameters.Add(new ActionParameter("body", "body", requestBody.Contract, ActionParameterLocation.Body, isRequired: true, isOutput: false, defaultValue: null, sourceLocation: requestBody.Contract.Location, source: null));
@@ -107,29 +105,6 @@ namespace Dibix.Sdk.CodeGeneration
                 default:
                     return false;
             }
-        }
-
-        protected void RegisterErrorResponse(IDictionary<HttpStatusCode, ActionResponse> responses, ErrorResponse errorResponse)
-        {
-            HttpStatusCode httpStatusCode = (HttpStatusCode)errorResponse.StatusCode;
-            if (!responses.TryGetValue(httpStatusCode, out ActionResponse response))
-            {
-                SchemaDefinition problemDetailsSchema = BuiltInSchemaProvider.ProblemDetailsSchema;
-                response = new ActionResponse(httpStatusCode, new SchemaTypeReference(key: problemDetailsSchema.FullName, isNullable: false, isEnumerable: false, problemDetailsSchema.Location));
-                responses.Add(httpStatusCode, response);
-            }
-
-            if (response.Errors.TryGetValue(errorResponse.ErrorCode, out ErrorDescription existingErrorDescription))
-            {
-                if (existingErrorDescription.Description != errorResponse.ErrorDescription)
-                {
-                    Logger.LogError($"Ambiguous validation error code: {existingErrorDescription.ErrorCode}{(!String.IsNullOrEmpty(existingErrorDescription.Description) ? $" ({existingErrorDescription.Description})" : null)}", existingErrorDescription.Location);
-                    Logger.LogError($"Ambiguous validation error code: {errorResponse.ErrorCode}{(!String.IsNullOrEmpty(errorResponse.ErrorDescription) ? $" ({errorResponse.ErrorDescription})" : null)}", errorResponse.SourceLocation);
-                }
-                return;
-            }
-
-            response.Errors.Add(errorResponse.ErrorCode, new ErrorDescription(errorResponse.ErrorCode, errorResponse.ErrorDescription, errorResponse.SourceLocation));
         }
         #endregion
 

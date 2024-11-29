@@ -22,13 +22,17 @@ namespace Dibix.Sdk.CodeGeneration
             get => GetDefaultResponseType();
             set => SetDefaultResponseType(value);
         }
-        public IDictionary<HttpStatusCode, ActionResponse> Responses { get; } = new Dictionary<HttpStatusCode, ActionResponse>();
+
+        public ActionDefinition(ActionTarget actionTarget) : base(actionTarget) { }
 
         public void SetFileResponse(ActionFileResponse actionFileResponse, SourceLocation location)
         {
             FileResponse = actionFileResponse;
             Responses[HttpStatusCode.OK] = new ActionResponse(HttpStatusCode.OK, actionFileResponse.MediaType, resultType: ActionDefinitionUtility.CreateStreamTypeReference(location));
-            Responses[HttpStatusCode.NotFound] = new ActionResponse(HttpStatusCode.NotFound);
+            
+            // A custom error response might have already been registered
+            if (!Responses.ContainsKey(HttpStatusCode.NotFound))
+                Responses[HttpStatusCode.NotFound] = new ActionResponse(HttpStatusCode.NotFound);
         }
 
         private TypeReference GetDefaultResponseType() => Responses.TryGetValue(HttpStatusCode.OK, out ActionResponse response) ? response.ResultType : null;

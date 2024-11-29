@@ -219,11 +219,10 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                     if (sb.Length > 0)
                         sb.AppendLine();
 
-                    ICollection<ErrorDescription> errorDescriptions = actionResponse.Errors.Values;
                     sb.Append($"""
                                Code|Description
                                -|-
-                               {String.Join(Environment.NewLine, errorDescriptions.Select(x => $"{x.ErrorCode}|{x.Description}"))}
+                               {String.Join(Environment.NewLine, actionResponse.Errors.Select(x => $"{x.ErrorCode}|{x.Description}"))}
                                """);
 
                     apiResponse.Headers.Add(KnownHeaders.ClientErrorCodeHeaderName, new OpenApiHeader

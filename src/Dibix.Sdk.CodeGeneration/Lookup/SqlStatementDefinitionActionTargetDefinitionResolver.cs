@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using Dibix.Sdk.Abstractions;
@@ -33,7 +34,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Overrides
-        public override bool TryResolve<T>(string targetName, SourceLocation sourceLocation, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, ActionRequestBody requestBody, IDictionary<HttpStatusCode, ActionResponse> responses, out T actionTargetDefinition)
+        public override bool TryResolve<T>(string targetName, SourceLocation sourceLocation, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, ActionRequestBody requestBody, Func<ActionTarget, T> actionTargetDefinitionFactory, out T actionTargetDefinition)
         {
             if (!TryGetStatementDefinitionByProbing(targetName, out SqlStatementDefinition statementDefinition))
             {
@@ -48,7 +49,7 @@ namespace Dibix.Sdk.CodeGeneration
             bool isAsync = statementDefinition.Async;
             bool hasRefParameters = statementDefinition.Parameters.Any(x => x.IsOutput);
             ActionTarget actionTarget = new LocalActionTarget(statementDefinition, localAccessorFullName, externalAccessorFullName, definitionName, isAsync, hasRefParameters, sourceLocation);
-            actionTargetDefinition = CreateActionTargetDefinition<T>(actionTarget, pathParameters, requestBody);
+            actionTargetDefinition = CreateActionTargetDefinition(actionTarget, pathParameters, requestBody, actionTargetDefinitionFactory);
             ActionParameterRegistry parameterRegistry = new ActionParameterRegistry(actionTargetDefinition, pathParameters);
             foreach (SqlQueryParameter parameter in statementDefinition.Parameters)
             {
@@ -75,11 +76,19 @@ namespace Dibix.Sdk.CodeGeneration
                 explicitParameter.Visited = true;
             }
 
-            foreach (ErrorResponse errorResponse in statementDefinition.ErrorResponses)
-                RegisterErrorResponse(responses, errorResponse);
+            if (statementDefinition.Results.Any(x => x.ResultMode == SqlQueryResultMode.Single) && actionTargetDefinition.Responses.ContainsKey(HttpStatusCode.NotFound))
+            {
+                // Automatic status code detection
+                actionTargetDefinition.Responses.Add(HttpStatusCode.NotFound, new ActionResponse(HttpStatusCode.NotFound));
+            }
 
             if (actionTargetDefinition is ActionDefinition actionDefinition)
                 CollectResponse(actionDefinition, statementDefinition);
+
+            foreach (ErrorResponse errorResponse in statementDefinition.ErrorResponses)
+            {
+                actionTargetDefinition.RegisterErrorResponse(errorResponse.StatusCode, errorResponse.ErrorCode, errorResponse.ErrorDescription, errorResponse.SourceLocation, Logger);
+            }
 
             return true;
         }

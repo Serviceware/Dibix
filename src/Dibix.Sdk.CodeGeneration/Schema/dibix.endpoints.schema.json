@@ -475,6 +475,9 @@
             },
             {
               "$ref": "#/definitions/TypeReference"
+            },
+            {
+              "type": "null"
             }
           ]
         }
