@@ -13,12 +13,12 @@ namespace Dibix.Testing.Http
         #region Protected Methods
         protected virtual Task ExecuteTest(Func<HttpTestContext<TService>, Task> testFlow) => base.ExecuteTest(testFlow, CreateTestContext);
 
-        protected Task ExecuteTest<TContent>(Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector, Action<JsonSerializerSettings> configureSerializer = null) => ExecuteTest(x => InvokeApiAndAssertResponse(x.Service, methodSelector, configureSerializer));
+        protected Task ExecuteTest<TContent>(Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector, string expectedText = null, string outputName = null, Action<JsonSerializerSettings> configureSerializer = null) => ExecuteTest(x => InvokeApiAndAssertResponse(x.Service, methodSelector, expectedText, outputName, configureSerializer));
 
-        protected Task InvokeApiAndAssertResponse<TContent>(TService service, Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector, Action<JsonSerializerSettings> configureSerializer = null)
+        protected Task InvokeApiAndAssertResponse<TContent>(TService service, Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector, string expectedText = null, string outputName = null, Action<JsonSerializerSettings> configureSerializer = null)
         {
-            string expectedText = ResolveExpectedTextFromEmbeddedResource();
-            return InvokeApi(service, methodSelector, expectedText, configureSerializer: configureSerializer);
+            string expectedTextNormalized = expectedText ?? ResolveExpectedTextFromEmbeddedResource();
+            return InvokeApi(service, methodSelector, expectedTextNormalized, outputName, configureSerializer);
         }
         #endregion
 

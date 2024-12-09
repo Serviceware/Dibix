@@ -19,7 +19,7 @@ namespace Dibix.Worker.Host
 
             void ConfigureLogging(ILoggingBuilder logging)
             {
-                logging.AddSimpleConsole(y => y.TimestampFormat = "\x1B[1'm'\x1B[37'm'[yyyy-MM-dd HH:mm:ss.fff\x1B[39'm'\x1B[22'm'] ");
+                logging.AddSimpleConsole(y => y.TimestampFormat = "\x1B[1'm'\x1B[37'm'[yyyy-MM-dd HH:mm:ss.fff]\x1B[39'm'\x1B[22'm' ");
                 logging.Configure(y => y.ActivityTrackingOptions = ActivityTrackingOptions.None);
                 logging.AddEventLogOptions();
             }
