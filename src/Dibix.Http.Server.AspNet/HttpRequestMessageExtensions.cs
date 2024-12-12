@@ -1,7 +1,7 @@
 ﻿using System.Net.Http;
 using System.Security.Claims;
 
-namespace Dibix.Http.Server
+namespace Dibix.Http.Server.AspNet
 {
     public static class HttpRequestMessageExtensions
     {

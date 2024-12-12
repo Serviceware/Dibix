@@ -104,6 +104,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "msbuild-targets", "msbuild-
 		build\msbuild-targets\Generator.targets = build\msbuild-targets\Generator.targets
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dibix.Http.Server.AspNetCore", "src\Dibix.Http.Server.AspNetCore\Dibix.Http.Server.AspNetCore.csproj", "{E1988D12-7E51-415E-A621-BB8D36666E9C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dibix.Http.Server.AspNet", "src\Dibix.Http.Server.AspNet\Dibix.Http.Server.AspNet.csproj", "{7D55F9E2-8CB0-4B5C-800D-12F21D38B9C7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -201,6 +205,14 @@ Global
 		{C573AC5D-0380-4752-B6EE-2E2F3806B111}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C573AC5D-0380-4752-B6EE-2E2F3806B111}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C573AC5D-0380-4752-B6EE-2E2F3806B111}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1988D12-7E51-415E-A621-BB8D36666E9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1988D12-7E51-415E-A621-BB8D36666E9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1988D12-7E51-415E-A621-BB8D36666E9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1988D12-7E51-415E-A621-BB8D36666E9C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D55F9E2-8CB0-4B5C-800D-12F21D38B9C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D55F9E2-8CB0-4B5C-800D-12F21D38B9C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D55F9E2-8CB0-4B5C-800D-12F21D38B9C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D55F9E2-8CB0-4B5C-800D-12F21D38B9C7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -231,6 +243,8 @@ Global
 		{E2042ADB-46CB-4CA6-A807-39E9A43F1CC1} = {118B0BCE-C81F-4DA0-814C-2F8AC4867710}
 		{C573AC5D-0380-4752-B6EE-2E2F3806B111} = {118B0BCE-C81F-4DA0-814C-2F8AC4867710}
 		{65F20838-0EDA-4D61-BB19-15818EB8E447} = {62C58971-8516-42E1-8D2A-70A0CE779FFE}
+		{E1988D12-7E51-415E-A621-BB8D36666E9C} = {118B0BCE-C81F-4DA0-814C-2F8AC4867710}
+		{7D55F9E2-8CB0-4B5C-800D-12F21D38B9C7} = {118B0BCE-C81F-4DA0-814C-2F8AC4867710}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F25BA702-70BE-4E04-8583-C71369C6D3D0}

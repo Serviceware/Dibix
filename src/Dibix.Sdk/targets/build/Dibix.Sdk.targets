@@ -392,6 +392,7 @@ $(_SqlReferencePath)" />
       <_AccessorCompilationReferenceItem Include="@(AccessorCompilationReference->'&lt;Reference Include=&quot;%(Filename)&quot; HintPath=&quot;%(FullPath)&quot; Private=&quot;False&quot; /&gt;')" />
       <_AccessorCompilationPackageReferenceItemSource Include="$(_DibixName)" Version="$(DibixSdkVersion)" />
       <_AccessorCompilationPackageReferenceItemSource Include="$(_DibixHttpServerName)" Version="$(DibixSdkVersion)" />
+      <_AccessorCompilationPackageReferenceItemSource Include="$(_DibixHttpServerName).AspNet" Version="$(DibixSdkVersion)" />
       <_AccessorCompilationPackageReferenceItemSource Include="Newtonsoft.Json" Version="$(PackageVersion_Newtonsoft_Json)" />
       <_AccessorCompilationPackageReferenceItem Include="@(_AccessorCompilationPackageReferenceItemSource->'&lt;PackageReference Include=&quot;%(Identity)&quot; Version=&quot;%(Version)&quot; /&gt;')"
                                                 Condition="'$(ManagePackageVersionsCentrally)' != 'true'" />
@@ -442,8 +443,7 @@ $(_SqlReferencePath)" />
 
   <Target Name="DumpResolvedDibixReferencePaths" AfterTargets="ResolvePackageAssets">
     <ItemGroup>
-      <_DibixReferencePath Include="%40(ResolvedCompileFileDefinitions)" Condition="'%25(NuGetPackageId)' == '$(_DibixName)'" />
-      <_DibixReferencePath Include="%40(ResolvedCompileFileDefinitions)" Condition="'%25(NuGetPackageId)' == '$(_DibixHttpServerName)'" />
+      <_DibixReferencePath Include="%40(ResolvedCompileFileDefinitions)" Condition="%24([System.String]::Copy('%25(NuGetPackageId)').StartsWith('Dibix'))" />
     </ItemGroup>
 
     <WriteLinesToFile File="%24(MSBuildThisFileDirectory)nuget.output" Lines="%40(_DibixReferencePath)" Overwrite="True" />
@@ -477,6 +477,7 @@ $(_SqlReferencePath)" />
     <ItemGroup Condition="'$(_ProduceEndpoints)' == 'true'">
       <_EndpointCompilationPackageReferenceItemSource Include="$(_DibixName)" Version="$(DibixSdkVersion)" />
       <_EndpointCompilationPackageReferenceItemSource Include="$(_DibixHttpServerName)" Version="$(DibixSdkVersion)" />
+      <_EndpointCompilationPackageReferenceItemSource Include="$(_DibixHttpServerName).AspNetCore" Version="$(DibixSdkVersion)" />
       <_EndpointCompilationPackageReferenceItem Include="@(_EndpointCompilationPackageReferenceItemSource->'&lt;PackageReference Include=&quot;%(Identity)&quot; Version=&quot;%(Version)&quot; /&gt;')"
                                                 Condition="'$(ManagePackageVersionsCentrally)' != 'true'" />
       <_EndpointCompilationPackageReferenceItem Include="@(_EndpointCompilationPackageReferenceItemSource->'&lt;PackageReference Include=&quot;%(Identity)&quot; /&gt;')"

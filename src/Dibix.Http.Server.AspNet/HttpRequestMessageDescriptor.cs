@@ -8,7 +8,7 @@ using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace Dibix.Http.Server
+namespace Dibix.Http.Server.AspNet
 {
     public sealed class HttpRequestMessageDescriptor : IHttpRequestDescriptor
     {
@@ -29,11 +29,7 @@ namespace Dibix.Http.Server
 
         public ClaimsPrincipal GetUser()
         {
-#if NETFRAMEWORK
             return RequestMessage.GetUser();
-#else
-            throw new NotSupportedException();
-#endif
         }
 
         public HttpActionDefinition GetActionDefinition() => throw new NotSupportedException();

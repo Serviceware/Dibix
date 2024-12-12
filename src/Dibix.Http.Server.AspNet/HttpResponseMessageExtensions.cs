@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http;
 
-namespace Dibix.Http.Server
+namespace Dibix.Http.Server.AspNet
 {
     internal static class HttpResponseMessageExtensions
     {

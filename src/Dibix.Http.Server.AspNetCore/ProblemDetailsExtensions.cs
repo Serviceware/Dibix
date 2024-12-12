@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Dibix.Http.Server
+namespace Dibix.Http.Server.AspNetCore
 {
     public static class ProblemDetailsExtensions
     {

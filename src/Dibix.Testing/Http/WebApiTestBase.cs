@@ -39,22 +39,28 @@ namespace Dibix.Testing.Http
             options.ResponseContent.MakeRelativeUrisAbsolute = false;
         }
 
-        protected Task InvokeApi<TService>(TService service, Expression<Func<TService, Task<HttpResponseMessage>>> methodSelector) => InvokeApi<TService, HttpResponseMessage>(service, methodSelector);
-        protected async Task<TContent> InvokeApi<TService, TContent>(TService service, Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector, string expectedText, string outputName = null, Action<JsonSerializerSettings> configureSerializer = null)
+        protected Task InvokeApi<TService>(HttpTestContext context, Expression<Func<TService, Task<HttpResponseMessage>>> methodSelector) => CreateServiceAndInvokeApi(context, methodSelector);
+        protected Task InvokeApi<TService>(TService service, Expression<Func<TService, Task<HttpResponseMessage>>> methodSelector) => InvokeApiCore(service, methodSelector);
+        protected async Task<TResponseContent> InvokeApi<TService, TResponseContent>(HttpTestContext context, Expression<Func<TService, Task<HttpResponse<TResponseContent>>>> methodSelector)
         {
-            HttpResponse<TContent> response = await InvokeApi(service, methodSelector).ConfigureAwait(false);
+            HttpResponse<TResponseContent> response = await CreateServiceAndInvokeApi(context, methodSelector).ConfigureAwait(false);
+            return response.ResponseContent;
+        }
+        protected async Task<TResponseContent> InvokeApi<TService, TResponseContent>(TService service, Expression<Func<TService, Task<HttpResponse<TResponseContent>>>> methodSelector)
+        {
+            HttpResponse<TResponseContent> response = await InvokeApiCore(service, methodSelector).ConfigureAwait(false);
+            return response.ResponseContent;
+        }
+
+        protected async Task<TResponseContent> InvokeApiAndAssertResponse<TService, TResponseContent>(TService service, Expression<Func<TService, Task<HttpResponse<TResponseContent>>>> methodSelector, string expectedText = null, string outputName = null, Action<JsonSerializerSettings> configureSerializer = null)
+        {
+            HttpResponse<TResponseContent> response = await InvokeApiCore(service, methodSelector).ConfigureAwait(false);
             Assert(response, expectedText, outputName, configureSerializer);
             return response.ResponseContent;
         }
-        protected Task InvokeApi<TService>(HttpTestContext context, Expression<Func<TService, Task<HttpResponseMessage>>> methodSelector) => InvokeApiCore<TService, HttpResponseMessage>(context, methodSelector);
-        protected async Task<TContent> InvokeApi<TService, TContent>(HttpTestContext context, Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector)
+        protected async Task<TResponseContent> InvokeApiAndAssertResponse<TService, TResponseContent>(HttpTestContext context, Expression<Func<TService, Task<HttpResponse<TResponseContent>>>> methodSelector, string expectedText = null, string outputName = null, Action<JsonSerializerSettings> configureSerializer = null)
         {
-            HttpResponse<TContent> response = await InvokeApiCore(context, methodSelector).ConfigureAwait(false);
-            return response.ResponseContent;
-        }
-        protected async Task<TContent> InvokeApi<TService, TContent>(HttpTestContext context, Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector, string expectedText, string outputName = null, Action<JsonSerializerSettings> configureSerializer = null)
-        {
-            HttpResponse<TContent> response = await InvokeApiCore(context, methodSelector).ConfigureAwait(false);
+            HttpResponse<TResponseContent> response = await CreateServiceAndInvokeApi(context, methodSelector).ConfigureAwait(false);
             Assert(response, expectedText, outputName, configureSerializer);
             return response.ResponseContent;
         }
@@ -65,12 +71,7 @@ namespace Dibix.Testing.Http
         #endregion
 
         #region Private Methods
-        private static Task<TResponse> InvokeApiCore<TService, TResponse>(HttpTestContext context, Expression<Func<TService, Task<TResponse>>> methodSelector)
-        {
-            TService service = HttpServiceFactory.CreateServiceInstance<TService>(context.HttpClientFactory, context.HttpClientOptions, context.HttpAuthorizationProvider);
-            return InvokeApi(service, methodSelector);
-        }
-        private static async Task<TResponse> InvokeApi<TService, TResponse>(TService service, Expression<Func<TService, Task<TResponse>>> methodSelector)
+        private static async Task<TResponse> InvokeApiCore<TService, TResponse>(TService service, Expression<Func<TService, Task<TResponse>>> methodSelector)
         {
             Func<TService, Task<TResponse>> compiled = methodSelector.Compile();
             Task<TResponse> task = compiled(service);
@@ -78,7 +79,13 @@ namespace Dibix.Testing.Http
             return response;
         }
 
-        private void Assert<TContent>(HttpResponse<TContent> response, string expectedText, string outputName, Action<JsonSerializerSettings> configureSerializer)
+        private static Task<TResponse> CreateServiceAndInvokeApi<TService, TResponse>(HttpTestContext context, Expression<Func<TService, Task<TResponse>>> methodSelector)
+        {
+            TService service = HttpServiceFactory.CreateServiceInstance<TService>(context.HttpClientFactory, context.HttpClientOptions, context.HttpAuthorizationProvider);
+            return InvokeApiCore(service, methodSelector);
+        }
+
+        private void Assert<TResponseContent>(HttpResponse<TResponseContent> response, string expectedText, string outputName, Action<JsonSerializerSettings> configureSerializer)
         {
             JsonSerializerSettings settings = new JsonSerializerSettings
             {
@@ -88,9 +95,12 @@ namespace Dibix.Testing.Http
             };
             configureSerializer?.Invoke(settings);
 
+            const string extension = "json";
+            string outputNameResolved = outputName ?? TestContext.TestName;
+            string expectedTextResolved = expectedText ?? GetEmbeddedResourceContent($"{outputNameResolved}.{extension}");
             string actualText = JsonConvert.SerializeObject(response.ResponseContent, settings);
             JToken actualTextDom = JToken.Parse(actualText);
-            string expectedTextReplaced = Regex.Replace(expectedText, @"\{(?<path>[A-Za-z.]+)\}", x =>
+            string expectedTextReplaced = Regex.Replace(expectedTextResolved, @"\{(?<path>[A-Za-z.]+)\}", x =>
             {
                 string path = x.Groups["path"].Value;
                 if (!(actualTextDom.SelectToken(path) is JValue value) || value.Value == null)
@@ -98,7 +108,7 @@ namespace Dibix.Testing.Http
 
                 return value.Value.ToString();
             });
-            AssertEqual(expectedTextReplaced, actualText, outputName ?? TestContext.TestName, extension: "json");
+            AssertEqual(expectedTextReplaced, actualText, outputNameResolved, extension: extension);
         }
 
         private static HttpTestContext CreateTestContext(IHttpClientFactory httpClientFactory, HttpClientOptions httpClientOptions, IHttpAuthorizationProvider authorizationProvider)

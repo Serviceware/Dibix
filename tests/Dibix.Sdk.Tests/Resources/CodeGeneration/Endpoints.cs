@@ -16,6 +16,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dibix;
 using Dibix.Http.Server;
+using Dibix.Http.Server.AspNetCore;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -342,14 +343,14 @@ namespace Dibix.Sdk.Tests.Business
         {
             base.RegisterController("GenericEndpoint", controller =>
             {
-                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.MultiConcreteResult)), action =>
+                controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.MultiConcreteResult)), action =>
                 {
                     action.ActionName = "MultiConcreteResult";
                     action.Method = HttpApiMethod.Get;
                     action.SecuritySchemes.Add("DibixBearer");
                     action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>(), cancellationToken));
                 });
-                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
+                controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
                     action.ActionName = "EmptyWithParams";
                     action.Method = HttpApiMethod.Get;
@@ -372,7 +373,7 @@ namespace Dibix.Sdk.Tests.Business
                     action.ResolveParameterFromConstant("f", Dibix.Sdk.Tests.DomainModel.Direction.Descending);
                     action.ResolveParameterFromConstant("g", "cake");
                 });
-                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
+                controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
                     action.ActionName = "EmptyWithParamsAnonymous";
                     action.Method = HttpApiMethod.Get;
@@ -391,7 +392,7 @@ namespace Dibix.Sdk.Tests.Business
                     }, cancellationToken));
                     action.ResolveParameterFromNull<System.Guid?>("c");
                 });
-                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.SingleConrecteResultWithParamsAsync)), action =>
+                controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.SingleConrecteResultWithParamsAsync)), action =>
                 {
                     action.ActionName = "SingleConrecteResultWithParams";
                     action.Method = HttpApiMethod.Get;
@@ -405,7 +406,7 @@ namespace Dibix.Sdk.Tests.Business
                         { "cancellationToken", cancellationToken }
                     }, cancellationToken));
                 });
-                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.SingleConrecteResultWithArrayParam)), action =>
+                controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.SingleConrecteResultWithArrayParam)), action =>
                 {
                     action.ActionName = "SingleConrecteResultWithArrayParam";
                     action.Method = HttpApiMethod.Get;
@@ -417,7 +418,7 @@ namespace Dibix.Sdk.Tests.Business
                         { "ids", Dibix.Sdk.Tests.Data.IntParameterSet.From(ids, (set, item) => set.Add(item)) }
                     }, cancellationToken));
                 });
-                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.FileResult)), action =>
+                controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.FileResult)), action =>
                 {
                     action.ActionName = "FileResult";
                     action.Method = HttpApiMethod.Get;
@@ -430,7 +431,7 @@ namespace Dibix.Sdk.Tests.Business
                         { "id", id }
                     }, cancellationToken));
                 });
-                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.File.TestAccessor), nameof(Dibix.Sdk.Tests.Data.File.TestAccessor.FileUploadAsync)), action =>
+                controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.File.TestAccessor), nameof(Dibix.Sdk.Tests.Data.File.TestAccessor.FileUploadAsync)), action =>
                 {
                     action.ActionName = "FileUpload";
                     action.RelativeNamespace = "File";
@@ -444,7 +445,7 @@ namespace Dibix.Sdk.Tests.Business
                     }, cancellationToken));
                     action.ResolveParameterFromSource("data", "BODY", "$RAW");
                 });
-                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParamsAndComplexUdt)), action =>
+                controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParamsAndComplexUdt)), action =>
                 {
                     action.ActionName = "EmptyWithParamsAndComplexUdt";
                     action.Method = HttpApiMethod.Patch;
@@ -462,12 +463,12 @@ namespace Dibix.Sdk.Tests.Business
                     });
                     action.ResolveParameterFromSource("g", "BODY", "Data.Name");
                 });
-                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
+                controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
                     action.ActionName = "EmptyWithParams";
                     action.Method = HttpApiMethod.Delete;
                     action.SecuritySchemes.Add("DibixBearer");
-                    action.AddAuthorizationBehavior(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.AssertAuthorized)), authorization =>
+                    action.AddAuthorizationBehavior(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.AssertAuthorized)), authorization =>
                     {
                         authorization.ResolveParameterFromConstant("right", (byte)1);
                     });
@@ -484,13 +485,13 @@ namespace Dibix.Sdk.Tests.Business
                     action.ResolveParameterFromNull<System.Guid?>("c");
                     action.ResolveParameterFromNull<string?>("password");
                 });
-                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
+                controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
                     action.ActionName = "EmptyWithParams";
                     action.Method = HttpApiMethod.Delete;
                     action.ChildRoute = "Alternative";
                     action.SecuritySchemes.Add("DibixBearer");
-                    action.AddAuthorizationBehavior(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.AssertAuthorized)), authorization =>
+                    action.AddAuthorizationBehavior(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.AssertAuthorized)), authorization =>
                     {
                         authorization.ResolveParameterFromConstant("right", (byte)1);
                     });
@@ -507,13 +508,13 @@ namespace Dibix.Sdk.Tests.Business
                     action.ResolveParameterFromNull<System.Guid?>("c");
                     action.ResolveParameterFromNull<string?>("password");
                 });
-                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
+                controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
                     action.ActionName = "EmptyWithParams";
                     action.Method = HttpApiMethod.Delete;
                     action.ChildRoute = "AnotherAlternative";
                     action.SecuritySchemes.Add("DibixBearer");
-                    action.AddAuthorizationBehavior(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.AssertAuthorized)), authorization =>
+                    action.AddAuthorizationBehavior(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.AssertAuthorized)), authorization =>
                     {
                         authorization.ResolveParameterFromConstant("right", (byte)1);
                     });
@@ -530,17 +531,17 @@ namespace Dibix.Sdk.Tests.Business
                     action.ResolveParameterFromNull<System.Guid?>("c");
                     action.ResolveParameterFromNull<string?>("password");
                 });
-                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
+                controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
                     action.ActionName = "EmptyWithParams";
                     action.Method = HttpApiMethod.Delete;
                     action.ChildRoute = "MultipleAuthorizationBehaviors";
                     action.SecuritySchemes.Add("DibixBearer");
-                    action.AddAuthorizationBehavior(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.AssertAuthorized)), authorization =>
+                    action.AddAuthorizationBehavior(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.AssertAuthorized)), authorization =>
                     {
                         authorization.ResolveParameterFromConstant("right", (byte)1);
                     });
-                    action.AddAuthorizationBehavior(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.AssertAuthorized)), authorization =>
+                    action.AddAuthorizationBehavior(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.AssertAuthorized)), authorization =>
                     {
                         authorization.ResolveParameterFromConstant("right", (byte)1);
                     });

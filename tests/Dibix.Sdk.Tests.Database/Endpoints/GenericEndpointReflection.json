@@ -1,0 +1,33 @@
+﻿{
+  "$schema": "../../../src/Dibix.Sdk/CodeGeneration/Schema/dibix.endpoints.schema.json",
+  "GenericEndpoint": [
+    //"Dibix.GenericEndpoint",
+    {
+      "method": "GET",
+      "target": "Dibix.Sdk.Tests.CodeGeneration.CodeGenerationTaskTests.ReflectionTarget,Dibix.Sdk.Tests",
+      "childRoute": "Reflection/{id}",
+      "params": {
+        "id": {
+          "type": "int32"
+        },
+        "name": {
+          "type": "string?",
+          "location": "Header",
+          "default": null
+        },
+        "age": {
+          "type": "int32",
+          "default": 18
+        },
+        "identifier": {
+          "source": "DBX.X",
+          "converter": "DBX"
+        }
+      },
+      "authorization": "none",
+      "response": {
+        "type": "string"
+      }
+    }
+  ]
+}

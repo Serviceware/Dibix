@@ -15,6 +15,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dibix;
 using Dibix.Http.Server;
+using Dibix.Http.Server.AspNet;
 using Newtonsoft.Json;
 
 [assembly: ArtifactAssembly]
@@ -233,46 +234,10 @@ namespace Dibix.Sdk.Tests.Data
 #region Contracts
 namespace Dibix.Sdk.Tests.DomainModel
 {
-    public sealed class AnotherEntry
-    {
-        public int Id { get; set; }
-        public string Title { get; set; }
-    }
-
-    public sealed class AnotherInputContract
-    {
-        public string A { get; set; }
-        public string B { get; set; }
-        [Optional]
-        public string C { get; set; }
-        public IList<Dibix.Sdk.Tests.DomainModel.AnotherEntry> SomeIds { get; private set; }
-        public System.Guid D { get; set; }
-        public string Password { get; set; }
-        public bool E { get; set; }
-        public int F { get; set; }
-        public Dibix.Sdk.Tests.DomainModel.AnotherInputContractData Data { get; set; }
-
-        public AnotherInputContract()
-        {
-            SomeIds = new List<Dibix.Sdk.Tests.DomainModel.AnotherEntry>();
-        }
-    }
-
-    public sealed class AnotherInputContractData
-    {
-        public string Name { get; set; }
-    }
-
     public enum Direction : int
     {
         Ascending,
         Descending
-    }
-
-    public sealed class Entry
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
     }
 
     [DataContract(Namespace = "https://schemas.dibix.com/GenericContract")]
@@ -301,25 +266,6 @@ namespace Dibix.Sdk.Tests.DomainModel
         public System.Uri ImageUrl { get; set; }
     }
 
-    public sealed class InputContract
-    {
-        public string A { get; set; }
-        public string B { get; set; }
-        [Optional]
-        public string C { get; set; }
-        public IList<Dibix.Sdk.Tests.DomainModel.Entry> Ids { get; private set; }
-        public System.Guid D { get; set; }
-        public string Password { get; set; }
-        public bool E { get; set; }
-        public int F { get; set; }
-        public string G { get; set; }
-
-        public InputContract()
-        {
-            Ids = new List<Dibix.Sdk.Tests.DomainModel.Entry>();
-        }
-    }
-
     public enum Role : int
     {
         None,
@@ -338,28 +284,13 @@ namespace Dibix.Sdk.Tests.Business
         {
             base.RegisterController("GenericEndpoint", controller =>
             {
-                controller.AddAction(ReflectionHttpActionTarget.Create(context, typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithOutputParam)), action =>
-                {
-                    action.ActionName = "EmptyWithOutputParam";
-                    action.Method = HttpApiMethod.Get;
-                    action.ChildRoute = "Out";
-                    action.SecuritySchemes.Add("DibixBearer");
-                });
-                controller.AddAction(ReflectionHttpActionTarget.Create("Dibix.Sdk.Tests.CodeGeneration.CodeGenerationTaskTests.ReflectionTarget,Dibix.Sdk.Tests"), action =>
+                controller.AddAction(ExternalReflectionHttpActionTarget.Create("Dibix.Sdk.Tests.CodeGeneration.CodeGenerationTaskTests.ReflectionTarget,Dibix.Sdk.Tests"), action =>
                 {
                     action.ActionName = "ReflectionTarget";
                     action.Method = HttpApiMethod.Get;
                     action.ChildRoute = "Reflection/{id}";
                     action.SecuritySchemes.Add("DibixBearer");
                     action.ResolveParameterFromSource("identifier", "DBX", "X", "DBX");
-                });
-                controller.AddAction(ReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
-                {
-                    action.ActionName = "EmptyWithParams";
-                    action.Method = HttpApiMethod.Post;
-                    action.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.InputContract);
-                    action.SecuritySchemes.Add("DibixBearer");
-                    action.ResolveParameterFromBody("ids", "Dibix.GenericContractIdsInputConverter");
                 });
             });
         }

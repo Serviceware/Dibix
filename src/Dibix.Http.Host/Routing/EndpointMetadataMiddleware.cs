@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Dibix.Http.Server;
+using Dibix.Http.Server.AspNetCore;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 

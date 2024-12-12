@@ -27,7 +27,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Dibix.Dapper\Dibix.Dapper.csproj" />
-    <ProjectReference Include="..\Dibix.Http.Server\Dibix.Http.Server.csproj" />
+    <ProjectReference Include="..\Dibix.Http.Server.AspNetCore\Dibix.Http.Server.AspNetCore.csproj" />
   </ItemGroup>
   
 </Project>

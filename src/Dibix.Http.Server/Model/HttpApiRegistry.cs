@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
 namespace Dibix.Http.Server
 {
@@ -18,22 +17,17 @@ namespace Dibix.Http.Server
         #endregion
 
         #region Factory Methods
-        public static IHttpApiRegistry Discover(IEnumerable<Assembly> additionalAssemblies) => DiscoverCore(new StaticAssemblyHttpApiDiscoveryStrategy(additionalAssemblies));
-        public static IHttpApiRegistry Discover(IHttpApiDiscoveryStrategy strategy) => DiscoverCore(strategy);
-        #endregion
-
-        #region IHttpApiRegistry Members
-        public IEnumerable<HttpApiDescriptor> GetApis() => _apis;
-        #endregion
-
-        #region Private Methods
-        private static IHttpApiRegistry DiscoverCore(IHttpApiDiscoveryStrategy strategy)
+        public static IHttpApiRegistry Discover(IHttpApiDiscoveryStrategy strategy)
         {
             HttpApiDiscoveryContext context = new HttpApiDiscoveryContext();
             ICollection<HttpApiDescriptor> apis = strategy.Collect(context).ToArray();
             context.FinishProxyAssembly();
             return new HttpApiRegistry(apis);
         }
+        #endregion
+
+        #region IHttpApiRegistry Members
+        public IEnumerable<HttpApiDescriptor> GetApis() => _apis;
         #endregion
     }
 }

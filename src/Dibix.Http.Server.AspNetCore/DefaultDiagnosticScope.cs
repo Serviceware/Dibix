@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
 
-namespace Dibix.Http.Server
+namespace Dibix.Http.Server.AspNetCore
 {
     public class DefaultDiagnosticScope : IDiagnosticScopeProvider
     {
@@ -26,10 +26,10 @@ namespace Dibix.Http.Server
 
         private static (string Key, string Value)? ThreadId() => ("ThreadId", Environment.CurrentManagedThreadId.ToString());
 
-        protected virtual (string Key, string Value) RequestMethod(HttpContext context) => ("RequestMethod", context.Request.Method);
+        protected virtual (string Key, string Value)? RequestMethod(HttpContext context) => ("RequestMethod", context.Request.Method);
 
-        protected virtual (string Key, string Value) User(HttpContext context) => ("User", context.User?.Identity?.Name ?? UnavailableValue);
+        protected virtual (string Key, string Value)? User(HttpContext context) => ("User", context.User?.Identity?.Name ?? UnavailableValue);
 
-        protected virtual (string Key, string Value) Action(HttpContext context) => ("Action", context.TryGetEndpointDefinition()?.ActionDefinition.ActionName ?? UnavailableValue);
+        protected virtual (string Key, string Value)? Action(HttpContext context) => ("Action", context.TryGetEndpointDefinition()?.ActionDefinition.ActionName ?? UnavailableValue);
     }
 }

@@ -13,6 +13,8 @@ steps:
     - Dibix.Dapper
     - Dibix.Http.Client
     - Dibix.Http.Server
+    - Dibix.Http.Server.AspNet
+    - Dibix.Http.Server.AspNetCore
     - Dibix.Sdk.Cli
     - Dibix.Testing
     - Dibix.Worker.Abstractions

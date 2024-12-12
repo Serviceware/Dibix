@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Dibix.Http.Server.AspNetCore;
 
 namespace Dibix.Http.Server.Tests
 {
@@ -26,7 +27,7 @@ namespace Dibix.Http.Server.Tests
                 _methodName = $"{testName}_Target";
             }
 
-            public override void Configure(IHttpApiDiscoveryContext context) => base.RegisterController("Test", x => x.AddAction(ReflectionHttpActionTarget.Create(typeof(HttpActionExecutorTest), _methodName), _actionConfiguration));
+            public override void Configure(IHttpApiDiscoveryContext context) => base.RegisterController("Test", x => x.AddAction(LocalReflectionHttpActionTarget.Create(typeof(HttpActionExecutorTest), _methodName), _actionConfiguration));
         }
     }
 

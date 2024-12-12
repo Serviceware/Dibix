@@ -21,7 +21,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Dibix.Http.Server\Dibix.Http.Server.csproj" />
+    <ProjectReference Include="..\..\src\Dibix.Http.Server.AspNet\Dibix.Http.Server.AspNet.csproj" />
+    <ProjectReference Include="..\..\src\Dibix.Http.Server.AspNetCore\Dibix.Http.Server.AspNetCore.csproj" />
     <ProjectReference Include="..\..\src\Dibix.Testing\Dibix.Testing.csproj" />
   </ItemGroup>
 

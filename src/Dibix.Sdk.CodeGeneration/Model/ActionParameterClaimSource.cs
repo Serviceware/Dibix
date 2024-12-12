@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-
-namespace Dibix.Sdk.CodeGeneration
+﻿namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class ActionParameterClaimSource : ActionParameterSource, IActionParameterPropertySource
     {

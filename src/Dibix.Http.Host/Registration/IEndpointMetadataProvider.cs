@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Dibix.Http.Server;
+using Dibix.Http.Server.AspNetCore;
 
 namespace Dibix.Http.Host
 {

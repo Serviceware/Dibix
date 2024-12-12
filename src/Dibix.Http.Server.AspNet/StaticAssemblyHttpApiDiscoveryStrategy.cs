@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace Dibix.Http.Server
+namespace Dibix.Http.Server.AspNet
 {
-    internal sealed class StaticAssemblyHttpApiDiscoveryStrategy : AssemblyHttpApiDiscoveryStrategy, IHttpApiDiscoveryStrategy
+    public sealed class StaticAssemblyHttpApiDiscoveryStrategy : AssemblyHttpApiDiscoveryStrategy, IHttpApiDiscoveryStrategy
     {
         private readonly IEnumerable<Assembly> _assemblies;
 

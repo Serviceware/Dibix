@@ -1,4 +1,4 @@
-﻿namespace Dibix.Http.Server
+﻿namespace Dibix.Http.Server.AspNetCore
 {
     public interface IHttpHostExtension
     {

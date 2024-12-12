@@ -259,6 +259,7 @@ SqlReferencePath");
             yield return MetadataReferenceFactory.FromType<System.Runtime.Serialization.DataContractAttribute>();
             yield return MetadataReferenceFactory.FromType<Dibix.IDatabaseAccessor>();
             yield return MetadataReferenceFactory.FromType<Dibix.Http.Server.HttpActionDefinition>();
+            yield return MetadataReferenceFactory.FromType<Dibix.Http.Server.AspNet.ExternalReflectionHttpActionTarget>();
         }
 
         private static IEnumerable<MetadataReference> CollectEndpointReferences()
@@ -276,6 +277,7 @@ SqlReferencePath");
             yield return MetadataReferenceFactory.FromType<System.Text.Json.Serialization.JsonIncludeAttribute>();
             yield return MetadataReferenceFactory.FromType<Dibix.IDatabaseAccessor>();
             yield return MetadataReferenceFactory.FromType<Dibix.Http.Server.HttpActionDefinition>();
+            yield return MetadataReferenceFactory.FromType<Dibix.Http.Server.AspNetCore.IHttpActionDelegator>();
         }
 
         private static IEnumerable<MetadataReference> CollectClientReferences()

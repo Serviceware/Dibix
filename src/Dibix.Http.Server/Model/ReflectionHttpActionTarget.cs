@@ -3,51 +3,20 @@ using System.Reflection;
 
 namespace Dibix.Http.Server
 {
-    public sealed class ReflectionHttpActionTarget : IHttpActionTarget
+    public abstract class ReflectionHttpActionTarget : IHttpActionTarget
     {
         private MethodInfo _methodInfo;
         
-        internal bool IsExternal { get; }
-
-        private ReflectionHttpActionTarget(MethodInfo methodInfo, bool isExternal)
+        protected ReflectionHttpActionTarget(IHttpApiDiscoveryContext context, Type type, string methodName)
         {
-            this.IsExternal = isExternal;
-            this._methodInfo = methodInfo;
+            _methodInfo = GetMethod(type, methodName);
+            context?.RegisterProxyHandler(_methodInfo, this.UpdateMethod);
         }
 
-        MethodInfo IHttpActionTarget.Build() => this._methodInfo;
+        MethodInfo IHttpActionTarget.Build() => _methodInfo;
 
-        private void UpdateMethod(MethodInfo method) => this._methodInfo = method;
+        private void UpdateMethod(MethodInfo method) => _methodInfo = method;
 
-        public static IHttpActionTarget Create(Type type, string methodName) => Create(null, type, methodName);
-        public static IHttpActionTarget Create(IHttpApiDiscoveryContext context, Type type, string methodName) => Create(context, type, methodName, isExternal: false);
-        public static IHttpActionTarget Create(string assemblyAndTypeQualifiedMethodName) => Create((IHttpApiDiscoveryContext)null, assemblyAndTypeQualifiedMethodName);
-        public static IHttpActionTarget Create(IHttpApiDiscoveryContext context, string assemblyAndTypeQualifiedMethodName)
-        {
-            // DataImport.Business.ExternalController#ExternalAction,DataImport.Business.Implementation
-            string[] targetParts = assemblyAndTypeQualifiedMethodName.Split(',');
-            if (targetParts.Length != 2)
-                throw new InvalidOperationException($"Invalid action target format: {assemblyAndTypeQualifiedMethodName}");
-
-            int typeNameIndex = targetParts[0].LastIndexOf('.');
-            if (typeNameIndex < 0)
-                throw new InvalidOperationException($"Invalid action target format: {assemblyAndTypeQualifiedMethodName}");
-
-            string assemblyName = targetParts[1];
-            string typeName = targetParts[0].Substring(0, typeNameIndex);
-            string methodName = targetParts[0].Substring(typeNameIndex + 1);
-
-            string assemblyQualifiedTypeName = $"{typeName},{assemblyName}";
-            Type type = Type.GetType(assemblyQualifiedTypeName, true);
-            return Create(context, type, methodName, isExternal: true);
-        }
-
-        private static IHttpActionTarget Create(IHttpApiDiscoveryContext context, Type type, string methodName, bool isExternal)
-        {
-            MethodInfo method = type.SafeGetMethod(methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
-            ReflectionHttpActionTarget target = new ReflectionHttpActionTarget(method, isExternal);
-            context?.RegisterProxyHandler(method, target.UpdateMethod);
-            return target;
-        }
+        private static MethodInfo GetMethod(Type type, string methodName) => type.SafeGetMethod(methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
     }
 }

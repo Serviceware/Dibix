@@ -22,7 +22,7 @@ $rootPath = Resolve-Path (Join-Path $PSScriptRoot '..')
 $sourcePath = Join-Path $rootPath 'src'
 $cleanPath = Join-Path $PSScriptRoot 'clean.bat'
 
-Write-Warning -WarningAction Inquire "Please ensure, that none of the projects are currently opened in Visual Studio, before running this script. Otherwise it will automatically restore these projects after clean using the wrong runtimes."
+Write-Warning -WarningAction Inquire "Please ensure, that none of the projects are currently open in Visual Studio, before running this script. Otherwise it will automatically restore these projects after clean using the wrong runtimes."
 
 # The dotnet CLI picks up the global.json, which selects the SDK, only from the current working directory
 # See: https://github.com/dotnet/sdk/issues/7465
@@ -42,6 +42,8 @@ try
         'Dibix.Sdk.Abstractions'
         'Dibix.Http.Client'
         'Dibix.Http.Server'
+        'Dibix.Http.Server.AspNet'
+        'Dibix.Http.Server.AspNetCore'
         'Dibix.Sdk.Sql'
         'Dibix.Sdk.CodeAnalysis'
         'Dibix.Sdk.Generators'

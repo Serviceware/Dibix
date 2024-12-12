@@ -10,6 +10,8 @@ Seamlessly create use case oriented REST APIs based on T-SQL stored procedures.
 | [Dibix.Dapper](https://www.nuget.org/packages/Dibix.Dapper) | [![Dibix.Dapper](https://img.shields.io/nuget/v/Dibix.Dapper.svg)](https://www.nuget.org/packages/Dibix.Dapper) |
 | [Dibix.Http.Client](https://www.nuget.org/packages/Dibix.Http.Client) | [![Dibix.Http.Client](https://img.shields.io/nuget/v/Dibix.Http.Client.svg)](https://www.nuget.org/packages/Dibix.Http.Client) |
 | [Dibix.Http.Server](https://www.nuget.org/packages/Dibix.Http.Server) | [![Dibix.Http.Server](https://img.shields.io/nuget/v/Dibix.Http.Server.svg)](https://www.nuget.org/packages/Dibix.Http.Server) |
+| [Dibix.Http.Server.AspNet](https://www.nuget.org/packages/Dibix.Http.Server.AspNet) | [![Dibix.Http.Server.AspNet](https://img.shields.io/nuget/v/Dibix.Http.Server.AspNet.svg)](https://www.nuget.org/packages/Dibix.Http.Server.AspNet) |
+| [Dibix.Http.Server.AspNetCore](https://www.nuget.org/packages/Dibix.Http.Server.AspNetCore) | [![Dibix.Http.Server.AspNetCore](https://img.shields.io/nuget/v/Dibix.Http.Server.AspNetCore.svg)](https://www.nuget.org/packages/Dibix.Http.Server.AspNetCore) |
 | [Dibix.Sdk](https://www.nuget.org/packages/Dibix.Sdk) | [![Dibix.Sdk](https://img.shields.io/nuget/v/Dibix.Sdk.svg)](https://www.nuget.org/packages/Dibix.Sdk) |
 | [Dibix.Testing](https://www.nuget.org/packages/Dibix.Testing) | [![Dibix.Testing](https://img.shields.io/nuget/v/Dibix.Testing.svg)](https://www.nuget.org/packages/Dibix.Testing) |
 | [Dibix.Worker.Abstractions](https://www.nuget.org/packages/Dibix.Worker.Abstractions) | [![Dibix.Worker.Abstractions](https://img.shields.io/nuget/v/Dibix.Worker.Abstractions.svg)](https://www.nuget.org/packages/Dibix.Worker.Abstractions) |

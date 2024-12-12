@@ -93,12 +93,18 @@ namespace Dibix.Sdk.CodeGeneration
 
         private void WriteAddAction(CodeGenerationContext context, StringWriter writer, ActionDefinition action)
         {
+            if (_compatibilityLevel == ActionCompatibilityLevel.Native)
+                context.AddUsing("Dibix.Http.Server.AspNetCore");
+            else if (_compatibilityLevel == ActionCompatibilityLevel.Reflection)
+                context.AddUsing("Dibix.Http.Server.AspNet");
+
             writer.Write("controller.AddAction(");
             WriteActionTarget(context, writer, action, "action", WriteActionConfiguration);
         }
 
         private void WriteActionTarget<T>(CodeGenerationContext context, StringWriter writer, T actionTargetDefinition, string variableName, Action<CodeGenerationContext, StringWriter, T, string> body) where T : ActionTargetDefinition
         {
+            writer.WriteRaw(actionTargetDefinition.Target is ReflectionActionTarget ? "External" : "Local");
             writer.WriteRaw("ReflectionHttpActionTarget.Create(");
 
             if (actionTargetDefinition.Parameters.Any(x => x.IsOutput))

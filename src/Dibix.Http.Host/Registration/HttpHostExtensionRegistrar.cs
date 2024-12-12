@@ -1,13 +1,16 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.Loader;
 using System.Threading.Tasks;
 using Dibix.Hosting.Abstractions;
 using Dibix.Hosting.Abstractions.Data;
-using Dibix.Http.Host.Runtime;
 using Dibix.Http.Server;
+using Dibix.Http.Server.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -54,14 +57,6 @@ namespace Dibix.Http.Host
                 Configuration = configuration;
             }
 
-            IHttpHostExtensionConfigurationBuilder IHttpHostExtensionConfigurationBuilder.EnableRequestIdentityProvider()
-            {
-                _services.AddHttpContextAccessor()
-                         .AddScoped<IRequestIdentityProvider, RequestIdentityProvider>();
-                
-                return this;
-            }
-
             IHttpHostExtensionConfigurationBuilder IHttpHostExtensionConfigurationBuilder.ConfigureOptions<TOptions>(string sectionName, Action<TOptions, string?>? optionsMonitorSubscriber) where TOptions : class => Configure(Configuration.GetSection(sectionName), optionsMonitorSubscriber);
             IHttpHostExtensionConfigurationBuilder IHttpHostExtensionConfigurationBuilder.ConfigureOptions<TOptions>(IConfiguration configuration, Action<TOptions, string?>? optionsMonitorSubscriber) where TOptions : class => Configure(configuration, optionsMonitorSubscriber);
 
@@ -76,6 +71,11 @@ namespace Dibix.Http.Host
 
             IHttpHostExtensionConfigurationBuilder IHttpHostExtensionConfigurationBuilder.RegisterClaimsTransformer<T>()
             {
+                // Unfortunately Microsoft.AspNetCore.Authentication.IClaimsTransformation.TransformAsync doesn't receive HttpContext.
+                // Therefore, we have to register the async local, if needed.
+                if (typeof(T).GetConstructors(BindingFlags.Public | BindingFlags.Instance).SelectMany(x => x.GetParameters()).Any(x => x.ParameterType == typeof(IHttpContextAccessor)))
+                    _services.AddHttpContextAccessor();
+
                 _services.AddScoped<IClaimsTransformer, T>();
                 return this;
             }

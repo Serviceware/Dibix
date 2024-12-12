@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   
   <PropertyGroup>
-    <TargetFrameworks>net8.0;netstandard2.0;net48</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,7 +12,6 @@
     <Compile Include="..\..\shared\Http\HttpErrorResponseUtility.cs" Link="Runtime\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\HttpParameterUtility.cs" Link="Runtime\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\HttpParameterName.cs" Link="Runtime\%(Filename)%(Extension)" />
-    <Compile Include="..\..\shared\Http\KnownHeaders.cs" Link="Runtime\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\RouteBuilder.cs" Link="Utilities\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Metadata\IPropertyDescriptor.cs" Link="Model\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Metadata\PrimitiveType.cs" Link="Model\%(Filename)%(Extension)" />
@@ -24,41 +23,12 @@
     <Compile Include="..\..\shared\Utilities\MimeTypes.cs" Link="Utilities\%(Filename)%(Extension)" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' != 'net48'">
-    <Compile Remove="Runtime\HttpRequestMessageExtensions.cs" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' != 'net8.0'">
-    <Compile Remove="Diagnostics\DefaultDiagnosticScope.cs" />
-    <Compile Remove="Diagnostics\IDiagnosticScopeProvider.cs" />
-    <Compile Remove="Extensions\HttpLoggingExtensions.cs" />
-    <Compile Remove="Extensions\ProblemDetailsExtensions.cs" />
-    <Compile Remove="Registration\HttpContextExtensions.cs" />
-    <Compile Remove="Runtime\IHttpActionDelegator.cs" />
+  <ItemGroup>
+    <PackageReference Include="System.Reflection.Emit" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Dibix\Dibix.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="System.Reflection.Emit" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
-    <PackageReference Include="Microsoft.AspNet.WebApi.Core" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
-    <Reference Include="System.Web" />
-    <Reference Include="WindowsBase" /> <!-- System.IO.Packaging -->
   </ItemGroup>
 
 </Project>

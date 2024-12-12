@@ -421,15 +421,10 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                 }
               , contracts: new[]
                 {
-                    @"Contracts\AnotherInputContract.json"
-                  , @"Contracts\AnotherInputContractData.json"
-                  , @"Contracts\AnotherEntry.json"
-                  , @"Contracts\Direction.json"
-                  , @"Contracts\Entry.json"
+                    @"Contracts\Direction.json"
                   , @"Contracts\GenericContract.json"
-                  , @"Contracts\InputContract.json"
                 }
-              , endpoints: new[] { @"Endpoints\GenericEndpoint.json" }
+              , endpoints: new[] { @"Endpoints\GenericEndpointReflection.json" }
               , isEmbedded: false
               , outputKind: AssertOutputKind.Accessor
             );

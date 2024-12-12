@@ -194,6 +194,7 @@
     <None Include="dibix.json" />
     <None Include="Contracts\AnotherInputContractData.json" />
     <None Include="Scripts\PostDeployA.sql" />
+    <None Include="Endpoints\GenericEndpointReflection.json" />
   </ItemGroup>
   <Import Condition="'$(NetCoreBuild)' == 'true'" Project="$(NETCoreTargetsPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
   <ItemGroup>

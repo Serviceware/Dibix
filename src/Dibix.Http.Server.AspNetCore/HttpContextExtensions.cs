@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.AspNetCore.Http;
 
-namespace Dibix.Http.Server
+namespace Dibix.Http.Server.AspNetCore
 {
     public static class HttpContextExtensions
     {

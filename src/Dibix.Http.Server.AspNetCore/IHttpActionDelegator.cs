@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
-namespace Dibix.Http.Server
+namespace Dibix.Http.Server.AspNetCore
 {
     public interface IHttpActionDelegator
     {

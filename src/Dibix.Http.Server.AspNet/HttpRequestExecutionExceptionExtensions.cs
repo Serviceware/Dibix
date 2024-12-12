@@ -1,6 +1,6 @@
 ﻿using System.Net.Http;
 
-namespace Dibix.Http.Server
+namespace Dibix.Http.Server.AspNet
 {
     public static class HttpRequestExecutionExceptionExtensions
     {
@@ -17,18 +17,5 @@ namespace Dibix.Http.Server
 
             return response;
         }
-
-#if NET
-        public static void AppendToResponse(this HttpRequestExecutionException exception, Microsoft.AspNetCore.Http.HttpResponse response)
-        {
-            if (!exception.IsClientError) 
-                return;
-
-            // Dibix.Http.Host uses ProblemDetails and IExceptionHandler
-            // This remains just for compatibility
-            Microsoft.AspNetCore.Http.HeaderDictionaryExtensions.Append(response.Headers, KnownHeaders.ClientErrorCodeHeaderName, exception.ErrorCode.ToString());
-            Microsoft.AspNetCore.Http.HeaderDictionaryExtensions.Append(response.Headers, KnownHeaders.ClientErrorDescriptionHeaderName, exception.ErrorMessage);
-        }
-#endif
     }
 }

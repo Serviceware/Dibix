@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Dibix.Http.Server
+namespace Dibix.Http.Server.AspNetCore
 {
     public sealed class EndpointDefinition
     {

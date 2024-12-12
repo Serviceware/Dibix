@@ -8,6 +8,8 @@ using System.Net.Http;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
+using Dibix.Http.Server.AspNet;
+using Dibix.Http.Server.AspNetCore;
 using Microsoft.AspNetCore.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -24,19 +26,6 @@ namespace Dibix.Http.Server.Tests
             Assert.AreEqual(1, result);
         }
         private static int Invoke_WithResult_Target(IDatabaseAccessorFactory databaseAccessorFactory) => 1;
-
-        [TestMethod]
-        public async Task Invoke_WithResponse()
-        {
-            HttpRequestMessage request = new HttpRequestMessage();
-
-            object result = await CompileAndExecute(request).ConfigureAwait(false);
-            
-            HttpResponseMessage response = AssertIsType<HttpResponseMessage>(result);
-            Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
-            Assert.AreEqual(request, response.RequestMessage);
-        }
-        private static HttpResponse Invoke_WithResponse_Target(IDatabaseAccessorFactory databaseAccessorFactory) => new HttpResponse(HttpStatusCode.Forbidden);
 
         [TestMethod]
         public async Task Invoke_DDL_WithHttpServerError_IsMappedToHttpStatusCode()
@@ -95,7 +84,7 @@ CommandText: <Inline>", requestException.Message);
         {
             Mock<IHttpRequestDescriptor> request = new Mock<IHttpRequestDescriptor>(MockBehavior.Strict);
             Mock<IHttpResponseFormatter<IHttpRequestDescriptor>> responseFormatter = new Mock<IHttpResponseFormatter<IHttpRequestDescriptor>>(MockBehavior.Strict);
-            Mock<Microsoft.AspNetCore.Http.HttpResponse> response = new Mock<Microsoft.AspNetCore.Http.HttpResponse>(MockBehavior.Strict);
+            Mock<HttpResponse> response = new Mock<HttpResponse>(MockBehavior.Strict);
             
             request.Setup(x => x.GetUser()).Returns(new ClaimsPrincipal(new ClaimsIdentity(EnumerableExtensions.Create(new Claim(ClaimTypes.NameIdentifier, "user")))));
             response.SetupGet(x => x.BodyWriter).Returns(PipeWriter.Create(Stream.Null));
@@ -124,7 +113,7 @@ CommandText: <Inline>", requestException.Message);
                 Assert.IsTrue(requestException.IsClientError);
                 Assert.AreEqual(HttpStatusCode.Forbidden, requestException.StatusCode);
                 Assert.AreEqual("1", (string)response.Object.Headers["X-Error-Code"]);
-                Assert.AreEqual("Sorry", (string)response.Object.Headers["X-Error-Description"].Single());
+                Assert.AreEqual("Sorry", response.Object.Headers["X-Error-Description"].Single());
             }
         }
         private static void Invoke_DDL_WithHttpClientError_ProducedByAuthorizationBehavior_IsMappedToHttpStatusCode_Target(IDatabaseAccessorFactory databaseAccessorFactory) { }

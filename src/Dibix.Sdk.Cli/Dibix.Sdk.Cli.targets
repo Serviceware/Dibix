@@ -29,8 +29,6 @@
       https://github.com/dotnet/msbuild/issues/1755
     -->
     <ItemGroup>
-      <_ToolItem Include="Dibix.dll" />
-      <_ToolItem Include="Dibix.Http.Server.dll" />
       <_ToolItem Include="Dibix.Sdk.dll" />
       <_ToolItem Include="Dibix.Sdk.Abstractions.dll" />
       <_ToolItem Include="Dibix.Sdk.CodeAnalysis.dll" />
