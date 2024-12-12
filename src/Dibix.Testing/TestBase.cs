@@ -69,6 +69,7 @@ namespace Dibix.Testing
 
             string outputFileName = IsAssemblyInitialize ? "AssemblyInitialize.log" : "Output.log";
             TestOutputHelper = new TestOutputWriter(TestContext, TestResultComposer, outputToFile: true, fileName: outputFileName, IsAssemblyInitialize, tailOutput: AttachOutputObserver);
+            WriteLine($"Starting execution of test: {TestContextUtility.GetTestName(TestContext)}");
 
 #if NETCOREAPP
             if (OperatingSystem.IsWindows())
