@@ -7,8 +7,10 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using System.Web;
+using Dibix.Http.Server;
 
-namespace Dibix.Http.Server
+namespace Dibix.Http.Extensions.AspNet
 {
     public sealed class HttpRequestMessageDescriptor : IHttpRequestDescriptor
     {
@@ -29,33 +31,21 @@ namespace Dibix.Http.Server
 
         public ClaimsPrincipal GetUser()
         {
-#if NETFRAMEWORK
             return RequestMessage.GetUser();
-#else
-            throw new NotSupportedException();
-#endif
         }
 
         public HttpActionDefinition GetActionDefinition() => throw new NotSupportedException();
 
         public string GetRemoteAddress()
         {
-#if NETFRAMEWORK
-            System.Web.HttpContextBase context = RequestMessage.Properties["MS_HttpContext"] as System.Web.HttpContextBase;
+            HttpContextBase context = RequestMessage.Properties["MS_HttpContext"] as HttpContextBase;
             return context?.Request.UserHostAddress;
-#else
-            throw new NotSupportedException();
-#endif
         }
 
         public string GetRemoteName()
         {
-#if NETFRAMEWORK
-            System.Web.HttpContextBase context = RequestMessage.Properties["MS_HttpContext"] as System.Web.HttpContextBase;
+            HttpContextBase context = RequestMessage.Properties["MS_HttpContext"] as HttpContextBase;
             return context?.Request.UserHostName;
-#else
-            throw new NotSupportedException();
-#endif
         }
 
         public string GetBearerToken() => throw new NotSupportedException();

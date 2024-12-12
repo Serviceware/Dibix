@@ -4,8 +4,9 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
+using Dibix.Http.Server;
 
-namespace Dibix.Http.Server
+namespace Dibix.Http.Extensions.AspNet
 {
     internal sealed class HttpResponseMessageFormatter : IHttpResponseFormatter<HttpRequestMessageDescriptor>
     {
@@ -16,11 +17,6 @@ namespace Dibix.Http.Server
             if (action.FileResponse != null)
             {
                 return CreateFileResponse(result, request, action);
-            }
-
-            if (result is HttpResponse response)
-            {
-                return response.CreateResponse(request.RequestMessage);
             }
 
             return result;

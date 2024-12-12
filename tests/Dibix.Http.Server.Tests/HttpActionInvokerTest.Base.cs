@@ -38,7 +38,7 @@ namespace Dibix.Http.Server.Tests
             foreach (KeyValuePair<string, object> parameter in parameters)
                 arguments.Add(parameter);
 
-            object result = await HttpActionInvoker.Invoke(action, request, arguments, ControllerActivator.NotImplemented, parameterDependencyResolver.Object, default).ConfigureAwait(false);
+            object result = await Extensions.AspNet.HttpActionInvoker.Invoke(action, request, arguments, ControllerActivator.NotImplemented, parameterDependencyResolver.Object, default).ConfigureAwait(false);
             return result;
         }
 
@@ -52,7 +52,7 @@ namespace Dibix.Http.Server.Tests
             foreach (KeyValuePair<string, object> parameter in parameters)
                 arguments.Add(parameter);
 
-            object result = await HttpActionInvoker.Invoke(action, request, responseFormatter, arguments, ControllerActivator.NotImplemented, parameterDependencyResolver.Object, default).ConfigureAwait(false);
+            object result = await HttpActionInvoker.Invoke(action, request, responseFormatter, arguments, parameterDependencyResolver.Object).ConfigureAwait(false);
             return result;
         }
 
@@ -86,6 +86,14 @@ namespace Dibix.Http.Server.Tests
             return normalizedExceptionText;
         }
 
+        private sealed class HttpActionInvoker : HttpActionInvokerBase
+        {
+            public static Task<object> Invoke<TRequest>(HttpActionDefinition action, TRequest request, IHttpResponseFormatter<TRequest> responseFormatter, IDictionary<string, object> arguments, IParameterDependencyResolver parameterDependencyResolver) where TRequest : IHttpRequestDescriptor
+            {
+                return Invoke(action, request, responseFormatter, arguments, ControllerActivator.NotImplemented, parameterDependencyResolver, cancellationToken: default);
+            }
+        }
+
         private sealed class HttpApiRegistration : HttpApiDescriptor
         {
             private readonly string _methodName;
@@ -102,12 +110,12 @@ namespace Dibix.Http.Server.Tests
                     foreach (MethodInfo method in typeof(HttpActionInvokerTest).GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static).OrderBy(x => x.Name))
                     {
                         if (method.Name.StartsWith(authorizationMethodName, StringComparison.Ordinal))
-                            builder.AddAuthorizationBehavior(ReflectionHttpActionTarget.Create(typeof(HttpActionInvokerTest), method.Name), configureAuthorization ?? (_ => { }));
+                            builder.AddAuthorizationBehavior(LocalReflectionHttpActionTarget.Create(typeof(HttpActionInvokerTest), method.Name), configureAuthorization ?? (_ => { }));
                     }
                 };
             }
 
-            public override void Configure(IHttpApiDiscoveryContext context) => base.RegisterController("Test", x => x.AddAction(ReflectionHttpActionTarget.Create(typeof(HttpActionInvokerTest), _methodName), _actionConfiguration));
+            public override void Configure(IHttpApiDiscoveryContext context) => base.RegisterController("Test", x => x.AddAction(LocalReflectionHttpActionTarget.Create(typeof(HttpActionInvokerTest), _methodName), _actionConfiguration));
         }
 
         private sealed class X : StructuredType<X, int, string>

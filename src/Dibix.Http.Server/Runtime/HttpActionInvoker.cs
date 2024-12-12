@@ -1,40 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Dibix.Http.Server
 {
-    public static class HttpActionInvoker
+    public abstract class HttpActionInvokerBase
     {
-        // ASP.NET implementation
-        // Uses custom exception handling
-        public static async Task<object> Invoke(HttpActionDefinition action, HttpRequestMessage request, IDictionary<string, object> arguments, IControllerActivator controllerActivator, IParameterDependencyResolver parameterDependencyResolver, CancellationToken cancellationToken)
-        {
-            IHttpResponseFormatter<HttpRequestMessageDescriptor> responseFormatter = new HttpResponseMessageFormatter();
-            try
-            {
-                return await Invoke(action, new HttpRequestMessageDescriptor(request), responseFormatter, arguments, controllerActivator, parameterDependencyResolver, cancellationToken).ConfigureAwait(false);
-            }
-            catch (DatabaseAccessException exception)
-            {
-                // Sample:
-                // THROW 404017, N'Feature not configured', 1
-                // 404017 => 404 17 => HttpStatusCode.NotFound (ResultCode: 17) - ResultCode can be a more specific application/feature error code
-                // 
-                // HTTP/1.1 404 NotFound
-                // X-Result-Code: 17
-                if (SqlHttpStatusCodeParser.TryParse(exception, action, arguments, out HttpRequestExecutionException httpException))
-                    throw httpException;
-
-                throw;
-            }
-        }
-
-        // ASP.NET Core implementation => Dibix.Http.Host
-        // No custom exception handling needed, will be done by ProblemDetails/IExceptionHandler
-        public static async Task<object> Invoke<TRequest>(HttpActionDefinition action, TRequest request, IHttpResponseFormatter<TRequest> responseFormatter, IDictionary<string, object> arguments, IControllerActivator controllerActivator, IParameterDependencyResolver parameterDependencyResolver, CancellationToken cancellationToken) where TRequest : IHttpRequestDescriptor
+        protected static async Task<object> Invoke<TRequest>(HttpActionDefinition action, TRequest request, IHttpResponseFormatter<TRequest> responseFormatter, IDictionary<string, object> arguments, IControllerActivator controllerActivator, IParameterDependencyResolver parameterDependencyResolver, CancellationToken cancellationToken) where TRequest : IHttpRequestDescriptor
         {
             if (action.Authorization.Any())
             {

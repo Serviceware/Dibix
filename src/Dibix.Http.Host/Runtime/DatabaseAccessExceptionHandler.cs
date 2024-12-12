@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Dibix.Http.Extensions.AspNet;
 using Dibix.Http.Server;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;

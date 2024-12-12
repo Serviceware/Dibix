@@ -31,7 +31,7 @@ namespace Dibix.Http.Server.Tests
                 _actionConfiguration = actionConfiguration;
             }
 
-            public override void Configure(IHttpApiDiscoveryContext context) => base.RegisterController("Test", x => x.AddAction(ReflectionHttpActionTarget.Create(typeof(HttpParameterResolverTest), _methodName), _actionConfiguration));
+            public override void Configure(IHttpApiDiscoveryContext context) => base.RegisterController("Test", x => x.AddAction(LocalReflectionHttpActionTarget.Create(typeof(HttpParameterResolverTest), _methodName), _actionConfiguration));
         }
 
         private sealed class LocaleParameterHttpSourceProvider : HttpParameterPropertySourceProvider, IHttpParameterSourceProvider

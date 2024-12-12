@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Dibix.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Moq.Protected;
@@ -10,7 +11,33 @@ using Moq.Protected;
 namespace Dibix.Http.Client.Tests
 {
     [TestClass]
-    public partial class HttpMessageHandlerTests
+    public class X : TestBase
+    {
+        [TestMethod]
+        [DataRow("A")]
+        [DataRow("B")]
+        public void A(string cake)
+        {
+            Console.WriteLine(cake);
+        }
+
+        [TestMethod]
+        public void B()
+        {
+            Console.WriteLine("B");
+        }
+        [TestMethod]
+        [DataRow("A", "X")]
+        [DataRow("B", "Y")]
+        public void A(string cake, string cookie)
+        {
+            Console.WriteLine($"{cake} - {cookie}");
+        }
+    }
+
+
+    [TestClass]
+    public partial class HttpMessageHandlerTests : TestBase
     {
         [TestMethod]
         [DataRow(true, false, DisplayName = "IWebProxy.IsBypassed = False")]

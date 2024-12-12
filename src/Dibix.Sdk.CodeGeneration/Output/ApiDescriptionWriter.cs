@@ -99,6 +99,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private void WriteActionTarget<T>(CodeGenerationContext context, StringWriter writer, T actionTargetDefinition, string variableName, Action<CodeGenerationContext, StringWriter, T, string> body) where T : ActionTargetDefinition
         {
+            writer.WriteRaw(actionTargetDefinition.Target is ReflectionActionTarget ? "External" : "Local");
             writer.WriteRaw("ReflectionHttpActionTarget.Create(");
 
             if (actionTargetDefinition.Parameters.Any(x => x.IsOutput))
