@@ -23,7 +23,7 @@ namespace Dibix.Testing
             if (!DataDrivenTestUtility.IsDataDrivenTest(testContext))
                 return testContext.TestName;
 
-            string dataDrivenTestName = TestNameMap.GetOrAdd(testContext, static context => DataDrivenTestUtility.TryGetDataDrivenTestName(context));
+            string dataDrivenTestName = TestNameMap.GetOrAdd(testContext, static context => DataDrivenTestUtility.GetDataDrivenTestName(context));
             return dataDrivenTestName ?? testContext.TestName;
         }
 

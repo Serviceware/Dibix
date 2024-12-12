@@ -87,8 +87,22 @@ namespace Dibix.Testing
             if (testClass == null)
                 throw new InvalidOperationException($"Could not resolve test class: {testClassName}");
 
+            Type[] types = null;
+            if (testContext.ManagedMethod != null)
+            {
+                int startIndex = testContext.ManagedMethod.IndexOf('(');
+                if (startIndex > 0)
+                {
+                    // Data driven test
+                    int endIndex = testContext.ManagedMethod.IndexOf(')', startIndex);
+                    string parameters = testContext.ManagedMethod.Substring(startIndex + 1, endIndex - startIndex - 1);
+                    string[] parameterTypeNames = parameters.Split(',');
+                    types = parameterTypeNames.Select(x => Type.GetType(x, throwOnError: true)).ToArray();
+                }
+            }
+
             string testMethodName = testContext.TestName;
-            MethodInfo testMethod = testClass.SafeGetMethod(testMethodName);
+            MethodInfo testMethod = testClass.SafeGetMethod(testMethodName, types);
             return testMethod;
         }
     }
