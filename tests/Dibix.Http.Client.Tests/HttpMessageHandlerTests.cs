@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Dibix.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Moq.Protected;
@@ -10,12 +11,12 @@ using Moq.Protected;
 namespace Dibix.Http.Client.Tests
 {
     [TestClass]
-    public partial class HttpMessageHandlerTests
+    public partial class HttpMessageHandlerTests : TestBase
     {
         [TestMethod]
-        [DataRow(true, false, DisplayName = "IWebProxy.IsBypassed = False")]
-        [DataRow(true, true, DisplayName = "IWebProxy.IsBypassed = True")]
-        [DataRow(false, false, DisplayName = "UseHandler = False")]
+        [DataRow(true,  false, DisplayName = $"{nameof(TraceProxyHandler)}(IWebProxy.IsBypassed = False)")]
+        [DataRow(true,  true,  DisplayName = $"{nameof(TraceProxyHandler)}(IWebProxy.IsBypassed = True)")]
+        [DataRow(false, false, DisplayName = $"{nameof(TraceProxyHandler)}(UseHandler = False)")]
         public async Task TraceProxyHandler(bool useHandler, bool isByPassed)
         {
             (HttpClientHandler _, Func<Task> sendInvoker) = SetupFixture<TraceProxyHttpMessageHandler>(useHandler);
@@ -46,11 +47,11 @@ namespace Dibix.Http.Client.Tests
         }
 
         [TestMethod]
-        [DataRow(false, false, HttpStatusCode.NotFound, false, DisplayName = "UseHandler = False")]
-        [DataRow(true,  false, HttpStatusCode.NotFound, true,  DisplayName = "HttpStatusCode.NotFound")]
-        [DataRow(true,  false, HttpStatusCode.Created,  false, DisplayName = "HttpStatusCode.Created")]
-        [DataRow(true,  false, HttpStatusCode.Found,    true,  DisplayName = "HttpStatusCode.Found with AllowAutoRedirect = True")]
-        [DataRow(true,  true,  HttpStatusCode.Found,    false, DisplayName = "HttpStatusCode.Found with AllowAutoRedirect = False")]
+        [DataRow(false, false, HttpStatusCode.NotFound, false, DisplayName = $"{nameof(EnsureSuccessStatusCodeHandler)}(UseHandler = False)")]
+        [DataRow(true,  false, HttpStatusCode.NotFound, true,  DisplayName = $"{nameof(EnsureSuccessStatusCodeHandler)}(HttpStatusCode.NotFound)")]
+        [DataRow(true,  false, HttpStatusCode.Created,  false, DisplayName = $"{nameof(EnsureSuccessStatusCodeHandler)}(HttpStatusCode.Created)")]
+        [DataRow(true,  false, HttpStatusCode.Found,    true,  DisplayName = $"{nameof(EnsureSuccessStatusCodeHandler)}(HttpStatusCode.Found with AllowAutoRedirect = True)")]
+        [DataRow(true,  true,  HttpStatusCode.Found,    false, DisplayName = $"{nameof(EnsureSuccessStatusCodeHandler)}(HttpStatusCode.Found with AllowAutoRedirect = False)")]
         public async Task EnsureSuccessStatusCodeHandler(bool useHandler, bool disableAutoRedirect, HttpStatusCode statusCode, bool expectException)
         {
             (HttpClientHandler _, Func<Task> sendInvoker) = SetupFixture<EnsureSuccessStatusCodeHttpMessageHandler>(useHandler, statusCode: statusCode, disableAutoRedirect: disableAutoRedirect);
@@ -122,8 +123,8 @@ namespace Dibix.Http.Client.Tests
       //}
 
         [TestMethod]
-        [DataRow(false, DisplayName = "UseHandler = False")]
-        [DataRow(true, DisplayName = "UseHandler = True")]
+        [DataRow(false, DisplayName = $"{nameof(TracingHandler)}(UseHandler = False)")]
+        [DataRow(true, DisplayName = $"{nameof(TracingHandler)}(UseHandler = True)")]
         public async Task TracingHandler(bool useHandler)
         {
             Mock<HttpRequestTracer> tracer = new Mock<HttpRequestTracer>(MockBehavior.Strict);

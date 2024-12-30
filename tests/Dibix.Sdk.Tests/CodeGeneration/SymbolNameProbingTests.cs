@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
 using Dibix.Sdk.CodeGeneration;
+using Dibix.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dibix.Sdk.Tests.CodeGeneration
 {
     [TestClass]
-    public sealed class SymbolNameProbingTests
+    public sealed class SymbolNameProbingTests : TestBase
     {
         private readonly ICollection<string> _schemaStore = new HashSet<string>
         {
@@ -15,35 +16,33 @@ namespace Dibix.Sdk.Tests.CodeGeneration
           , "Dibix.CodeGeneration.DomainModel.Contract"
         };
 
-        public TestContext TestContext { get; set; }
-
         [TestMethod]
-        [DataRow(null,      "Contract",                                          "Dibix.CodeGeneration.DomainModel.Contract",         1, DisplayName = "Scenario A")]
-        [DataRow(null,      "CodeAnalysis.DomainModel.Contract",                 "Dibix.CodeAnalysis.DomainModel.Contract",           2, DisplayName = "Scenario B")]
-        [DataRow(null,      "DomainModel.Contract",                              "Dibix.CodeGeneration.DomainModel.Contract",         3, DisplayName = "Scenario C")]
-        [DataRow(null,      "Runtime.Contract",                                  "Dibix.CodeGeneration.DomainModel.Runtime.Contract", 1, DisplayName = "Scenario D")]
-        [DataRow(null,      "Dibix.CodeGeneration.DomainModel.Runtime.Contract", "Dibix.CodeGeneration.DomainModel.Runtime.Contract", 5, DisplayName = "Scenario E")]
-        [DataRow("Runtime", "Contract",                                          "Dibix.CodeGeneration.DomainModel.Runtime.Contract", 1, DisplayName = "Scenario F")]
-        [DataRow("Runtime", "CodeAnalysis.DomainModel.Contract",                 "Dibix.CodeAnalysis.DomainModel.Contract",           2, DisplayName = "Scenario G")]
-        [DataRow("Runtime", "DomainModel.Contract",                              "Dibix.CodeGeneration.DomainModel.Contract",         3, DisplayName = "Scenario H")]
-        [DataRow("Runtime", "Runtime.Contract",                                  "Dibix.CodeGeneration.DomainModel.Runtime.Contract", 4, DisplayName = "Scenario I")]
-        [DataRow("Runtime", "Dibix.CodeGeneration.DomainModel.Runtime.Contract", "Dibix.CodeGeneration.DomainModel.Runtime.Contract", 5, DisplayName = "Scenario J")]
+        [DataRow(null,      "Contract",                                          "Dibix.CodeGeneration.DomainModel.Contract",         1, DisplayName = $"{nameof(EvaluateProbingCandidates_WithSingleArea_AllScenarios)}(Scenario A)")]
+        [DataRow(null,      "CodeAnalysis.DomainModel.Contract",                 "Dibix.CodeAnalysis.DomainModel.Contract",           2, DisplayName = $"{nameof(EvaluateProbingCandidates_WithSingleArea_AllScenarios)}(Scenario B)")]
+        [DataRow(null,      "DomainModel.Contract",                              "Dibix.CodeGeneration.DomainModel.Contract",         3, DisplayName = $"{nameof(EvaluateProbingCandidates_WithSingleArea_AllScenarios)}(Scenario C)")]
+        [DataRow(null,      "Runtime.Contract",                                  "Dibix.CodeGeneration.DomainModel.Runtime.Contract", 1, DisplayName = $"{nameof(EvaluateProbingCandidates_WithSingleArea_AllScenarios)}(Scenario D)")]
+        [DataRow(null,      "Dibix.CodeGeneration.DomainModel.Runtime.Contract", "Dibix.CodeGeneration.DomainModel.Runtime.Contract", 5, DisplayName = $"{nameof(EvaluateProbingCandidates_WithSingleArea_AllScenarios)}(Scenario E)")]
+        [DataRow("Runtime", "Contract",                                          "Dibix.CodeGeneration.DomainModel.Runtime.Contract", 1, DisplayName = $"{nameof(EvaluateProbingCandidates_WithSingleArea_AllScenarios)}(Scenario F)")]
+        [DataRow("Runtime", "CodeAnalysis.DomainModel.Contract",                 "Dibix.CodeAnalysis.DomainModel.Contract",           2, DisplayName = $"{nameof(EvaluateProbingCandidates_WithSingleArea_AllScenarios)}(Scenario G)")]
+        [DataRow("Runtime", "DomainModel.Contract",                              "Dibix.CodeGeneration.DomainModel.Contract",         3, DisplayName = $"{nameof(EvaluateProbingCandidates_WithSingleArea_AllScenarios)}(Scenario H)")]
+        [DataRow("Runtime", "Runtime.Contract",                                  "Dibix.CodeGeneration.DomainModel.Runtime.Contract", 4, DisplayName = $"{nameof(EvaluateProbingCandidates_WithSingleArea_AllScenarios)}(Scenario I)")]
+        [DataRow("Runtime", "Dibix.CodeGeneration.DomainModel.Runtime.Contract", "Dibix.CodeGeneration.DomainModel.Runtime.Contract", 5, DisplayName = $"{nameof(EvaluateProbingCandidates_WithSingleArea_AllScenarios)}(Scenario J)")]
         public void EvaluateProbingCandidates_WithSingleArea_AllScenarios(string relativeNamespace, string typeName, string expectedPath, int expectedAttempts)
         {
             EvaluateProbingCandidates_AllScenarios(areaName: "CodeGeneration", relativeNamespace, typeName, expectedPath, expectedAttempts);
         }
 
         [TestMethod]
-        [DataRow(null,                     "CodeGeneration.Contract",                           "Dibix.CodeGeneration.DomainModel.Contract",         1, DisplayName = "Scenario A")]
-        [DataRow(null,                     "CodeAnalysis.DomainModel.Contract",                 "Dibix.CodeAnalysis.DomainModel.Contract",           3, DisplayName = "Scenario B")]
-        [DataRow(null,                     "CodeGeneration.DomainModel.Contract",               "Dibix.CodeGeneration.DomainModel.Contract",         3, DisplayName = "Scenario C")]
-        [DataRow(null,                     "CodeGeneration.Runtime.Contract",                   "Dibix.CodeGeneration.DomainModel.Runtime.Contract", 1, DisplayName = "Scenario D")]
-        [DataRow(null,                     "Dibix.CodeGeneration.DomainModel.Runtime.Contract", "Dibix.CodeGeneration.DomainModel.Runtime.Contract", 2, DisplayName = "Scenario E")]
-        [DataRow("CodeGeneration.Runtime", "Contract",                                          "Dibix.CodeGeneration.DomainModel.Runtime.Contract", 1, DisplayName = "Scenario F")]
-        [DataRow("CodeGeneration.Runtime", "CodeAnalysis.DomainModel.Contract",                 "Dibix.CodeAnalysis.DomainModel.Contract",           3, DisplayName = "Scenario G")]
-        [DataRow("CodeGeneration.Runtime", "CodeGeneration.DomainModel.Contract",               "Dibix.CodeGeneration.DomainModel.Contract",         3, DisplayName = "Scenario H")]
-        [DataRow("CodeGeneration.Runtime", "CodeGeneration.Runtime.Contract",                   "Dibix.CodeGeneration.DomainModel.Runtime.Contract", 4, DisplayName = "Scenario I")]
-        [DataRow("CodeGeneration.Runtime", "Dibix.CodeGeneration.DomainModel.Runtime.Contract", "Dibix.CodeGeneration.DomainModel.Runtime.Contract", 2, DisplayName = "Scenario J")]
+        [DataRow(null,                     "CodeGeneration.Contract",                           "Dibix.CodeGeneration.DomainModel.Contract",         1, DisplayName = $"{nameof(EvaluateProbingCandidates_WithMultipleAreas_AllScenarios)}(Scenario A)")]
+        [DataRow(null,                     "CodeAnalysis.DomainModel.Contract",                 "Dibix.CodeAnalysis.DomainModel.Contract",           3, DisplayName = $"{nameof(EvaluateProbingCandidates_WithMultipleAreas_AllScenarios)}(Scenario B)")]
+        [DataRow(null,                     "CodeGeneration.DomainModel.Contract",               "Dibix.CodeGeneration.DomainModel.Contract",         3, DisplayName = $"{nameof(EvaluateProbingCandidates_WithMultipleAreas_AllScenarios)}(Scenario C)")]
+        [DataRow(null,                     "CodeGeneration.Runtime.Contract",                   "Dibix.CodeGeneration.DomainModel.Runtime.Contract", 1, DisplayName = $"{nameof(EvaluateProbingCandidates_WithMultipleAreas_AllScenarios)}(Scenario D)")]
+        [DataRow(null,                     "Dibix.CodeGeneration.DomainModel.Runtime.Contract", "Dibix.CodeGeneration.DomainModel.Runtime.Contract", 2, DisplayName = $"{nameof(EvaluateProbingCandidates_WithMultipleAreas_AllScenarios)}(Scenario E)")]
+        [DataRow("CodeGeneration.Runtime", "Contract",                                          "Dibix.CodeGeneration.DomainModel.Runtime.Contract", 1, DisplayName = $"{nameof(EvaluateProbingCandidates_WithMultipleAreas_AllScenarios)}(Scenario F)")]
+        [DataRow("CodeGeneration.Runtime", "CodeAnalysis.DomainModel.Contract",                 "Dibix.CodeAnalysis.DomainModel.Contract",           3, DisplayName = $"{nameof(EvaluateProbingCandidates_WithMultipleAreas_AllScenarios)}(Scenario G)")]
+        [DataRow("CodeGeneration.Runtime", "CodeGeneration.DomainModel.Contract",               "Dibix.CodeGeneration.DomainModel.Contract",         3, DisplayName = $"{nameof(EvaluateProbingCandidates_WithMultipleAreas_AllScenarios)}(Scenario H)")]
+        [DataRow("CodeGeneration.Runtime", "CodeGeneration.Runtime.Contract",                   "Dibix.CodeGeneration.DomainModel.Runtime.Contract", 4, DisplayName = $"{nameof(EvaluateProbingCandidates_WithMultipleAreas_AllScenarios)}(Scenario I)")]
+        [DataRow("CodeGeneration.Runtime", "Dibix.CodeGeneration.DomainModel.Runtime.Contract", "Dibix.CodeGeneration.DomainModel.Runtime.Contract", 2, DisplayName = $"{nameof(EvaluateProbingCandidates_WithMultipleAreas_AllScenarios)}(Scenario J)")]
         public void EvaluateProbingCandidates_WithMultipleAreas_AllScenarios(string relativeNamespace, string typeName, string expectedPath, int expectedAttempts)
         {
             EvaluateProbingCandidates_AllScenarios(areaName: null, relativeNamespace, typeName, expectedPath, expectedAttempts);

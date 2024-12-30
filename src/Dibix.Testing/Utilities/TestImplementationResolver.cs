@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -87,7 +88,8 @@ namespace Dibix.Testing
             if (testClass == null)
                 throw new InvalidOperationException($"Could not resolve test class: {testClassName}");
 
-            Type[] types = null;
+            string testMethodName = testContext.TestName;
+            
             if (testContext.ManagedMethod != null)
             {
                 int startIndex = testContext.ManagedMethod.IndexOf('(');
@@ -97,13 +99,58 @@ namespace Dibix.Testing
                     int endIndex = testContext.ManagedMethod.IndexOf(')', startIndex);
                     string parameters = testContext.ManagedMethod.Substring(startIndex + 1, endIndex - startIndex - 1);
                     string[] parameterTypeNames = parameters.Split(',');
-                    types = parameterTypeNames.Select(x => Type.GetType(x, throwOnError: true)).ToArray();
+
+                    // We can't use Type.GetType here because the parameter type names are not assembly qualified
+                    //types = parameterTypeNames.Select(x => Type.GetType(x, throwOnError: true)).ToArray();
+                    MethodInfo dataDrivenTestMethod = ResolveDataDrivenTestMethod(testClass, testMethodName, parameterTypeNames);
+                    return dataDrivenTestMethod;
                 }
             }
 
-            string testMethodName = testContext.TestName;
-            MethodInfo testMethod = testClass.SafeGetMethod(testMethodName, types);
+            MethodInfo testMethod = testClass.SafeGetMethod(testMethodName);
             return testMethod;
+        }
+
+        private static MethodInfo ResolveDataDrivenTestMethod(Type type, string methodName, string[] parameterTypeNames)
+        {
+            const BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public;
+
+            MethodInfo method = ResolveDataDrivenTestMethod(type, methodName, parameterTypeNames, bindingFlags);
+            if (method == null)
+                throw new InvalidOperationException($"Could not find method {type}.{methodName}({String.Join(", ", parameterTypeNames)}) [{bindingFlags}]");
+
+            return method;
+        }
+        private static MethodInfo ResolveDataDrivenTestMethod(IReflect type, string methodName, IReadOnlyList<string> parameterTypeNames, BindingFlags bindingFlags)
+        {
+            foreach (MethodInfo methodInfo in type.GetMethods(bindingFlags))
+            {
+                if (methodInfo.Name != methodName)
+                    continue;
+
+                ParameterInfo[] parameters = methodInfo.GetParameters();
+                if (parameters.Length != parameterTypeNames.Count)
+                    continue;
+
+                bool parametersMatch = true;
+                for (int i = 0; i < parameters.Length; i++)
+                {
+                    string expectedParameterTypeName = parameterTypeNames[i];
+                    string actualParameterTypeName = parameters[i].ParameterType.FullName;
+                    if (expectedParameterTypeName == actualParameterTypeName)
+                        continue;
+
+                    parametersMatch = false;
+                    break;
+                }
+
+                if (!parametersMatch)
+                    continue;
+
+                return methodInfo;
+            }
+
+            return null;
         }
     }
 }
