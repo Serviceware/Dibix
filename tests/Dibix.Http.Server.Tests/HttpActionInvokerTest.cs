@@ -102,7 +102,7 @@ CommandText: <Inline>", requestException.Message);
                 await Execute(action, request.Object, responseFormatter.Object, new KeyValuePair<string, object>("context", httpAuthorizationBehaviorContext)).ConfigureAwait(false);
                 Assert.Fail($"{nameof(HttpRequestExecutionException)} was expected but not thrown");
             }
-            catch (DatabaseAccessException databaseAccessException) when (SqlHttpStatusCodeParser.TryParse(databaseAccessException, action, new Dictionary<string, object>(), out HttpRequestExecutionException requestException))
+            catch (HttpRequestExecutionException requestException)
             {
                 Assert.AreEqual("FirstAuthorizationTargetCalled", httpAuthorizationBehaviorContext.Result);
                 requestException.AppendToResponse(response.Object);

@@ -9,6 +9,27 @@ namespace Dibix.Http.Server
     {
         protected static async Task<object> Invoke<TRequest>(HttpActionDefinition action, TRequest request, IHttpResponseFormatter<TRequest> responseFormatter, IDictionary<string, object> arguments, IControllerActivator controllerActivator, IParameterDependencyResolver parameterDependencyResolver, CancellationToken cancellationToken) where TRequest : IHttpRequestDescriptor
         {
+            try
+            {
+                return await InvokeCore(action, request, responseFormatter, arguments, controllerActivator, parameterDependencyResolver, cancellationToken).ConfigureAwait(false);
+            }
+            catch (DatabaseAccessException exception)
+            {
+                // Sample:
+                // THROW 404017, N'Feature not configured', 1
+                // 404017 => 404 17 => HttpStatusCode.NotFound (ResultCode: 17) - ResultCode can be a more specific application/feature error code
+                // 
+                // HTTP/1.1 404 NotFound
+                // X-Result-Code: 17
+                if (SqlHttpStatusCodeParser.TryParse(exception, action, arguments, out HttpRequestExecutionException httpException))
+                    throw httpException;
+
+                throw;
+            }
+        }
+        
+        private static async Task<object> InvokeCore<TRequest>(HttpActionDefinition action, TRequest request, IHttpResponseFormatter<TRequest> responseFormatter, IDictionary<string, object> arguments, IControllerActivator controllerActivator, IParameterDependencyResolver parameterDependencyResolver, CancellationToken cancellationToken) where TRequest : IHttpRequestDescriptor
+        {
             if (action.Authorization.Any())
             {
                 // Clone the arguments, so they don't overwrite the endpoint arguments.

@@ -8,13 +8,12 @@ using Microsoft.AspNetCore.Http;
 
 namespace Dibix.Http.Host
 {
-    // Map sql error codes to http status codes globally
-    // This is needed if a DatabaseAccessException is thrown outside HttpActionInvoker. For example, within the http host extension.
-    internal sealed class DatabaseAccessExceptionHandler : IExceptionHandler
+    // Map custom HTTP status codes to response
+    internal sealed class HttpRequestExecutionExceptionHandler : IExceptionHandler
     {
         private readonly IProblemDetailsService _problemDetailsService;
 
-        public DatabaseAccessExceptionHandler(IProblemDetailsService problemDetailsService)
+        public HttpRequestExecutionExceptionHandler(IProblemDetailsService problemDetailsService)
         {
             _problemDetailsService = problemDetailsService;
         }
@@ -25,27 +24,21 @@ namespace Dibix.Http.Host
         // See: https://www.milanjovanovic.tech/blog/problem-details-for-aspnetcore-apis#handling-specific-exceptions-status-codes
         private async ValueTask<bool> TryHandleWithProblemDetails(HttpContext httpContext, Exception exception)
         {
-            bool result = TryHandle(httpContext, exception, out HttpRequestExecutionException? httpRequestExecutionException);
+            bool result = TryHandle(httpContext, exception);
             if (!result)
                 return false;
 
             ProblemDetailsContext problemDetailsContext = new ProblemDetailsContext
             {
                 HttpContext = httpContext,
-                Exception = httpRequestExecutionException
+                Exception = exception
             };
             return await _problemDetailsService.TryWriteAsync(problemDetailsContext).ConfigureAwait(false);
         }
 
-        private static bool TryHandle(HttpContext httpContext, Exception exception, out HttpRequestExecutionException? httpRequestExecutionException)
+        private static bool TryHandle(HttpContext httpContext, Exception exception)
         {
-            if (exception is not DatabaseAccessException databaseAccessException)
-            {
-                httpRequestExecutionException = null;
-                return false;
-            }
-
-            if (!SqlHttpStatusCodeParser.TryParse(databaseAccessException, out httpRequestExecutionException))
+            if (exception is not HttpRequestExecutionException httpRequestExecutionException)
                 return false;
 
             httpContext.Response.StatusCode = (int)httpRequestExecutionException.StatusCode;

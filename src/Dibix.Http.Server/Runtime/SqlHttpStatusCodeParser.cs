@@ -12,11 +12,11 @@ namespace Dibix.Http.Server
         {
             return TryParse(databaseAccessException, action: null, arguments: new Dictionary<string, object>(), out httpException);
         }
-        public static bool TryParse(DatabaseAccessException databaseAccessException, HttpActionDefinition action, IDictionary<string, object> arguments, out HttpRequestExecutionException httpException)
+        internal static bool TryParse(DatabaseAccessException databaseAccessException, HttpActionDefinition action, IDictionary<string, object> arguments, out HttpRequestExecutionException httpException)
         {
             return TryParse(databaseAccessException, databaseAccessException.InnerException as SqlException, action, arguments, out httpException);
         }
-        private  static bool TryParse(DatabaseAccessException originalException, SqlException rootException, HttpActionDefinition action, IDictionary<string, object> arguments, out HttpRequestExecutionException httpException)
+        private static bool TryParse(DatabaseAccessException originalException, SqlException rootException, HttpActionDefinition action, IDictionary<string, object> arguments, out HttpRequestExecutionException httpException)
         {
             if (rootException != null && HttpErrorResponseUtility.TryParseErrorResponse(rootException.Number, out int statusCode, out int errorCode, out bool isClientError))
             {
