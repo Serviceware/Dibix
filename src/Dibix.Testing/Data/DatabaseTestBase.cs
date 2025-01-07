@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,7 +10,7 @@ namespace Dibix.Testing.Data
     public abstract class DatabaseTestBase<TConfiguration> : TestBase<TConfiguration>, IDisposable where TConfiguration : DatabaseConfigurationBase, new()
     {
         #region Fields
-        private readonly Lazy<IDatabaseAccessorFactory> _databaseAccessorFactoryAccessor;
+        private readonly Lazy<IDisposableDatabaseAccessorFactory> _databaseAccessorFactoryAccessor;
         private Action _removeTraceListener;
         #endregion
 
@@ -23,7 +21,7 @@ namespace Dibix.Testing.Data
         #region Constructor
         protected DatabaseTestBase()
         {
-            this._databaseAccessorFactoryAccessor = new Lazy<IDatabaseAccessorFactory>(() => CreateDatabaseAccessorFactory());
+            this._databaseAccessorFactoryAccessor = new Lazy<IDisposableDatabaseAccessorFactory>(() => CreateDatabaseAccessorFactoryCore());
         }
         #endregion
 
@@ -56,10 +54,12 @@ namespace Dibix.Testing.Data
             }
         }
 
-        protected IDatabaseAccessorFactory CreateDatabaseAccessorFactory(int? commandTimeout = 30) => DatabaseTestUtility.CreateDatabaseAccessorFactory(base.Configuration, commandTimeout);
+        protected IDatabaseAccessorFactory CreateDatabaseAccessorFactory(int? commandTimeout = 30) => CreateDatabaseAccessorFactoryCore(commandTimeout);
         #endregion
 
         #region Private Methods
+        private IDisposableDatabaseAccessorFactory CreateDatabaseAccessorFactoryCore(int? commandTimeout = 30) => DatabaseTestUtility.CreateDatabaseAccessorFactory(base.Configuration, commandTimeout);
+
         private static TraceSource GetDibixTraceSource()
         {
             const string fieldName = "TraceSource";
@@ -76,16 +76,6 @@ namespace Dibix.Testing.Data
             traceSource.Switch.Level = SourceLevels.Information;
             return traceSource;
         }
-
-        private static TraceSource GetDibixTraceSource_()
-        {
-            FieldInfo traceSourcesField = typeof(TraceSource).GetField("s_tracesources", BindingFlags.NonPublic | BindingFlags.Static);
-            ICollection<WeakReference> traceSources = (ICollection<WeakReference>)traceSourcesField.GetValue(null);
-            TraceSource traceSource = traceSources.Select(x => x.Target)
-                                                  .Cast<TraceSource>()
-                                                  .Single(x => x.Name == "Dibix.Sql");
-            return traceSource;
-        }
         #endregion
 
         #region IDisposable Members
@@ -95,6 +85,8 @@ namespace Dibix.Testing.Data
             if (disposing)
             {
                 this._removeTraceListener?.Invoke();
+                if (_databaseAccessorFactoryAccessor.IsValueCreated)
+                    _databaseAccessorFactoryAccessor.Value.Dispose();
             }
         }
         #endregion

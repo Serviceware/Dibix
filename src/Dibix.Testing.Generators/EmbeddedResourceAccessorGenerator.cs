@@ -24,9 +24,11 @@ namespace Dibix.Testing.Generators
             AnalyzerConfigOptions options = analyzerConfigOptionsProvider.GlobalOptions;
             string rootNamespace = GetRequiredMetadataProperty<string>(options, "build_property.rootnamespace");
 
-            ImmutableArray<EmbeddedResourceItem> items = files.Where(x => ShouldGenerateAccessor(analyzerConfigOptionsProvider, x))
-                                                              .Select(x => CreateItem(x, analyzerConfigOptionsProvider))
-                                                              .ToImmutableArray();
+            ImmutableArray<EmbeddedResourceItem> items =
+            [
+                ..files.Where(x => ShouldGenerateAccessor(analyzerConfigOptionsProvider, x))
+                       .Select(x => CreateItem(x, analyzerConfigOptionsProvider))
+            ];
             if (!items.Any())
                 return;
 

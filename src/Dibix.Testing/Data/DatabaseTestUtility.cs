@@ -7,19 +7,12 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
-using Dibix.Testing.Configuration;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dibix.Testing.Data
 {
-    public static class DatabaseTestUtility
+    internal static class DatabaseTestUtility
     {
-        public static IDatabaseAccessorFactory CreateDatabaseAccessorFactory<TConfiguration>(TestContext testContext, TestConfigurationValidationBehavior configurationValidationBehavior = TestDefaults.ValidationBehavior) where TConfiguration : DatabaseConfigurationBase, new()
-        {
-            TConfiguration configuration = TestConfigurationLoader.Load<TConfiguration>(testContext, configurationValidationBehavior);
-            return CreateDatabaseAccessorFactory(configuration);
-        }
-        public static IDatabaseAccessorFactory CreateDatabaseAccessorFactory<TConfiguration>(TConfiguration configuration, int? defaultCommandTimeout = null) where TConfiguration : DatabaseConfigurationBase, new()
+        public static IDisposableDatabaseAccessorFactory CreateDatabaseAccessorFactory<TConfiguration>(TConfiguration configuration, int? defaultCommandTimeout = null) where TConfiguration : DatabaseConfigurationBase, new()
         {
             return new DapperDatabaseAccessorFactory(configuration.Database.ConnectionString, RaiseErrorWithNoWaitBehavior.ExecuteScalar, defaultCommandTimeout);
         }
@@ -40,22 +33,27 @@ namespace Dibix.Testing.Data
             ExecuteScalar
         }
 
-        private sealed class DapperDatabaseAccessorFactory : IDatabaseAccessorFactory
+        private sealed class DapperDatabaseAccessorFactory : IDisposableDatabaseAccessorFactory, IDatabaseAccessorFactory, IDisposable
         {
-            private readonly string _connectionString;
             private readonly RaiseErrorWithNoWaitBehavior _raiseErrorWithNoWaitBehavior;
             private readonly int? _defaultCommandTimeout;
+            private readonly Lazy<SqlConnection> _connectionAccessor;
 
             public DapperDatabaseAccessorFactory(string connectionString, RaiseErrorWithNoWaitBehavior raiseErrorWithNoWaitBehavior, int? defaultCommandTimeout)
             {
-                _connectionString = connectionString;
                 _raiseErrorWithNoWaitBehavior = raiseErrorWithNoWaitBehavior;
                 _defaultCommandTimeout = defaultCommandTimeout;
+                _connectionAccessor = new Lazy<SqlConnection>(() =>
+                {
+                    SqlConnection connection = new SqlConnection(connectionString);
+                    connection.Open();
+                    return connection;
+                });
             }
 
             public IDatabaseAccessor Create()
             {
-                SqlConnection connection = new SqlConnection(_connectionString);
+                SqlConnection connection = _connectionAccessor.Value;
 
                 if (_raiseErrorWithNoWaitBehavior == RaiseErrorWithNoWaitBehavior.FireInfoMessageEventOnUserErrors)
                 {
@@ -82,6 +80,12 @@ namespace Dibix.Testing.Data
                 // Exceptions within the InfoMessage handler will generally be caught and traced.
                 // Unless they are of a severe exception type.
                 throw new AccessViolationException(exception.Message, exception);
+            }
+
+            void IDisposable.Dispose()
+            {
+                if (_connectionAccessor.IsValueCreated)
+                    _connectionAccessor.Value.Dispose();
             }
         }
 
@@ -115,6 +119,15 @@ namespace Dibix.Testing.Data
                 _ = await base.Connection.ExecuteScalarAsync(command).ConfigureAwait(false);
                 return default;
             }
+
+            protected override void DisposeConnection()
+            {
+                // Will be disposed at the end of the test
+            }
         }
+    }
+
+    internal interface IDisposableDatabaseAccessorFactory : IDatabaseAccessorFactory, IDisposable
+    {
     }
 }
