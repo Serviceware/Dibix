@@ -5,6 +5,6 @@ namespace Dibix.Http.Server.AspNetCore
 {
     public interface IDiagnosticScopeProvider
     {
-        IEnumerable<KeyValuePair<string, object>> CollectScopeProperties(HttpContext context);
+        IReadOnlyCollection<KeyValuePair<string, object>> CollectScopeProperties(HttpContext context);
     }
 }

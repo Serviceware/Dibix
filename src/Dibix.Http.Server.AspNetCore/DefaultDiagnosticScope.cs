@@ -9,11 +9,12 @@ namespace Dibix.Http.Server.AspNetCore
     {
         protected const string UnavailableValue = "<Unavailable>";
 
-        IEnumerable<KeyValuePair<string, object>> IDiagnosticScopeProvider.CollectScopeProperties(HttpContext context)
+        IReadOnlyCollection<KeyValuePair<string, object>> IDiagnosticScopeProvider.CollectScopeProperties(HttpContext context)
         {
             return CollectScopeProperties(context).Where(x => x != null)
                                                   .Select(x => x.Value)
-                                                  .Select(x => new KeyValuePair<string, object>(x.Key, x.Value));
+                                                  .Select(x => new KeyValuePair<string, object>(x.Key, x.Value))
+                                                  .ToArray();
         }
 
         protected virtual IEnumerable<(string Key, object Value)?> CollectScopeProperties(HttpContext context)

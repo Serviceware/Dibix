@@ -23,7 +23,7 @@ namespace Dibix.Http.Host
         public async Task InvokeAsync(HttpContext context)
         {
             IDiagnosticScopeProvider scopeProvider = _diagnosticsOptions.Value.Provider;
-            IEnumerable<KeyValuePair<string, object>> scopeProperties = scopeProvider.CollectScopeProperties(context);
+            IReadOnlyCollection<KeyValuePair<string, object>> scopeProperties = scopeProvider.CollectScopeProperties(context);
             using (_logger.BeginScope(scopeProperties))
             {
                 await _next(context).ConfigureAwait(false);
