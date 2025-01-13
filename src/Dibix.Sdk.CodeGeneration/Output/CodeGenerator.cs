@@ -54,8 +54,7 @@ namespace Dibix.Sdk.CodeGeneration
             //    return;
 
             // Prepare writer
-            IEnumerable<CSharpAnnotation> globalAnnotations = CollectGlobalAnnotations(model)
-                                                                  .Concat(writers.SelectMany(x => x.GetGlobalAnnotations(model)));
+            IEnumerable<CSharpAnnotation> globalAnnotations = CollectGlobalAnnotations(model).Concat(writers.SelectMany(x => x.GetGlobalAnnotations(model)));
             CSharpWriter csWriter = new CSharpWriter(writer, globalAnnotations);
             CSharpStatementScope output = csWriter.Root.Output;
 

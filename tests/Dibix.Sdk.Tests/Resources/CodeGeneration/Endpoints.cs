@@ -21,7 +21,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 [assembly: ArtifactAssembly]
-[assembly: AreaRegistration("Tests")]
 
 #region Accessor
 namespace Dibix.Sdk.Tests.Data

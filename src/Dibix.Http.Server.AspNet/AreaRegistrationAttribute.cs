@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Dibix
+namespace Dibix.Http.Server.AspNet
 {
     [AttributeUsage(AttributeTargets.Assembly)]
     public sealed class AreaRegistrationAttribute : Attribute
