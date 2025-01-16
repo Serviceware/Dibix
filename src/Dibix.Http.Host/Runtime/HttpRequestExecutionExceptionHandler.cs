@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Http;
 namespace Dibix.Http.Host
 {
     // Map custom HTTP status codes to response
-    internal sealed class HttpRequestExecutionExceptionHandler : IExceptionHandler
+    internal class HttpRequestExecutionExceptionHandler : IExceptionHandler
     {
         private readonly IProblemDetailsService _problemDetailsService;
 
@@ -18,8 +18,25 @@ namespace Dibix.Http.Host
             _problemDetailsService = problemDetailsService;
         }
 
-        public ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken) => TryHandleWithProblemDetails(httpContext, exception);
-        
+        public virtual ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken) => TryHandleWithProblemDetails(httpContext, exception);
+
+        protected static bool HandleHttpRequestExecutionException(HttpContext httpContext, HttpRequestExecutionException httpRequestExecutionException)
+        {
+            httpContext.Response.StatusCode = (int)httpRequestExecutionException.StatusCode;
+
+            // For compatibility reasons
+            // TODO: Remove, once problem details are stabilized
+            httpRequestExecutionException.AppendToResponse(httpContext.Response);
+
+            // Note: The ExceptionHandlerMiddleware will log the exception even if the handler returns true
+            // See: https://github.com/dotnet/aspnetcore/issues/54554
+            // If client exceptions should not be logged, we can do the following:
+            // - Implement a custom IExceptionHandler
+            // - Use LogError with a custom log category (i.E. the name of the handler, something like 'HttpStatusCodeClientExceptionHandler')
+            // - Set this category's log level to 'Critical' by default, to avoid logging client exceptions
+            return true;
+        }
+
         // TODO: Instead of writing problem details manually, use the StatusCodeSelector introduced in .NET 9
         // See: https://www.milanjovanovic.tech/blog/problem-details-for-aspnetcore-apis#handling-specific-exceptions-status-codes
         private async ValueTask<bool> TryHandleWithProblemDetails(HttpContext httpContext, Exception exception)
@@ -41,19 +58,7 @@ namespace Dibix.Http.Host
             if (exception is not HttpRequestExecutionException httpRequestExecutionException)
                 return false;
 
-            httpContext.Response.StatusCode = (int)httpRequestExecutionException.StatusCode;
-
-            // For compatibility reasons
-            // TODO: Remove, once problem details are stabilized
-            httpRequestExecutionException.AppendToResponse(httpContext.Response);
-
-            // Note: The ExceptionHandlerMiddleware will log the exception even if the handler returns true
-            // See: https://github.com/dotnet/aspnetcore/issues/54554
-            // If client exceptions should not be logged, we can do the following:
-            // - Implement a custom IExceptionHandler
-            // - Use LogError with a custom log category (i.E. the name of the handler, something like 'HttpStatusCodeClientExceptionHandler')
-            // - Set this category's log level to 'Critical' by default, to avoid logging client exceptions
-            return true;
+            return HandleHttpRequestExecutionException(httpContext, httpRequestExecutionException);
         }
     }
 }

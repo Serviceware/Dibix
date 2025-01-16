@@ -68,6 +68,7 @@ namespace Dibix.Http.Host
                     .AddTransient<IPostConfigureOptions<JsonOptions>, JsonPostConfigureOptions>()
                     .AddSingleton<IControllerActivator, NotSupportedControllerActivator>();
 
+            services.AddExceptionHandler<DatabaseAccessExceptionHandler>();
             services.AddExceptionHandler<HttpRequestExecutionExceptionHandler>();
             services.AddProblemDetailsWithMapping()
                     .Map<HttpRequestExecutionException>(x => x.IsClientError, (x, y) =>
