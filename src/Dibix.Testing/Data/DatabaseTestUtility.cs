@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Data;
 using System.Data.Common;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
+using Microsoft.Data.SqlClient;
 
 namespace Dibix.Testing.Data
 {
@@ -74,6 +74,10 @@ namespace Dibix.Testing.Data
 
                 SqlErrorCollection errorCollection = e.Errors;
                 string serverVersion = null;
+
+                // TODO
+                // RaiseErrorWithNoWaitBehavior.FireInfoMessageEventOnUserErrors is currently not used and solely here for documentation purposes.
+                // Since we switched from System.Data.SqlClient to Microsoft.Data.SqlClient, it hasn't been tested again, and might not work anymore.
                 MethodInfo createExceptionMethod = typeof(SqlException).SafeGetMethod("CreateException", BindingFlags.NonPublic | BindingFlags.Static, new[] { typeof(SqlErrorCollection), typeof(string) });
                 SqlException exception = (SqlException)createExceptionMethod.Invoke(null, new object[] { errorCollection, serverVersion });
 
@@ -94,7 +98,7 @@ namespace Dibix.Testing.Data
             private readonly RaiseErrorWithNoWaitBehavior _raiseErrorWithNoWaitBehavior;
             private readonly int? _defaultCommandTimeout;
 
-            public DapperDatabaseAccessor(DbConnection connection, RaiseErrorWithNoWaitBehavior raiseErrorWithNoWaitBehavior, int? defaultCommandTimeout) : base(connection, defaultCommandTimeout: defaultCommandTimeout)
+            public DapperDatabaseAccessor(DbConnection connection, RaiseErrorWithNoWaitBehavior raiseErrorWithNoWaitBehavior, int? defaultCommandTimeout) : base(connection, defaultCommandTimeout: defaultCommandTimeout, sqlDataRecordAdapter: new MicrosoftSqlDataRecordAdapter())
             {
                 _raiseErrorWithNoWaitBehavior = raiseErrorWithNoWaitBehavior;
                 _defaultCommandTimeout = defaultCommandTimeout;

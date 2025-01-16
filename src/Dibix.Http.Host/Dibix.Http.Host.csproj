@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\..\shared\Data\MicrosoftSqlDataRecordAdapter.cs" Link="Data\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Diagnostics\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Extensions\BindConfigurationExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Extensions\EnumerableExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
@@ -21,6 +22,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <PackageReference Include="Microsoft.Data.SqlClient" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
     <PackageReference Include="System.IO.Packaging" />
   </ItemGroup>

@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq.Expressions;
 using Microsoft.SqlServer.Server;
 
@@ -10,7 +9,7 @@ namespace Dibix
     public abstract class StructuredType : IEnumerable<SqlDataRecord>
     {
         #region Fields
-        private readonly ICollection<SqlDataRecord> _records;
+        private readonly List<SqlDataRecord> _records;
         private SqlMetaData[] _metadata;
         #endregion
 
@@ -21,68 +20,56 @@ namespace Dibix
         #region Constructor
         protected StructuredType(string typeName)
         {
-            this._records = new Collection<SqlDataRecord>();
-            this.TypeName = typeName;
+            _records = new List<SqlDataRecord>();
+            TypeName = typeName;
         }
         #endregion
 
         #region Public Methods
+        public IReadOnlyCollection<SqlDataRecord> GetRecords() => _records;
+
+        public SqlMetaData[] GetMetadata() => _metadata;
+
         public string Dump(bool truncate = false)
         {
-            return SqlDataRecordDiagnostics.Dump(this._metadata, this._records, truncate);
-        }
-        
-        public IEnumerable<SqlDataRecord> GetRecords()
-        {
-            return this._records;
+            return SqlDataRecordDiagnostics.Dump(_metadata, _records, truncate);
         }
         #endregion
 
         #region Protected Methods
         protected void ImportSqlMetadata(Expression<Action> addMethodExpression)
         {
-            this._metadata = SqlMetaDataAccessor.GetMetadata(this.GetType(), addMethodExpression);
+            _metadata = SqlMetaDataAccessor.GetMetadata(GetType(), addMethodExpression);
         }
 
         protected internal void AddItem(params object[] values)
         {
-            if (this._metadata == null)
+            if (_metadata == null)
                 throw new InvalidOperationException("Please define metadata by calling ImportSqlMetadata() in your constructor");
 
-            SqlDataRecord record = new SqlDataRecord(this._metadata);
+            SqlDataRecord record = new SqlDataRecord(_metadata);
             record.SetValues(values);
-            this._records.Add(record);
+            _records.Add(record);
         }
-        #endregion
-
-        #region Internal Methods
-        public IEnumerable<SqlMetaData> GetMetadata() => _metadata;
         #endregion
 
         #region IEnumerable Members
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return this._records.GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => _records.GetEnumerator();
         #endregion
 
         #region IEnumerable<SqlDataRecord> Members
-        IEnumerator<SqlDataRecord> IEnumerable<SqlDataRecord>.GetEnumerator()
-        {
-            return this._records.GetEnumerator();
-        }
+        IEnumerator<SqlDataRecord> IEnumerable<SqlDataRecord>.GetEnumerator() => _records.GetEnumerator();
         #endregion
     }
-    
+
     public abstract class StructuredType<TDefinition> : StructuredType where TDefinition : StructuredType, new()
     {
         protected StructuredType(string typeName) : base(typeName) { }
 
         public static TDefinition From<TSource>(IEnumerable<TSource> source, Action<TDefinition, TSource> addItemFunc)
         {
-            return From(source, (x, y, z) => addItemFunc(x, y));
+            return From(source, (x, y, _) => addItemFunc(x, y));
         }
-
         public static TDefinition From<TSource>(IEnumerable<TSource> source, Action<TDefinition, TSource, int> addItemFunc)
         {
             Guard.IsNotNull(source, nameof(source));

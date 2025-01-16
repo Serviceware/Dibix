@@ -159,27 +159,6 @@ namespace Dibix.Http.Host
 
             app.Services.GetRequiredService<IEndpointRegistrar>().Register(app);
 
-            // DbConnection is registered as a scoped service, because it should stay open for the entire HTTP request and then be disposed.
-            // To use a scoped service outside the request, a scope must be created manually.
-            // This is a sample for future use.
-            /*
-            using (IServiceScope serviceScope = app.Services.CreateScope())
-            {
-                // Connection is created here
-                IDatabaseAccessorFactory databaseAccessorFactory = serviceScope.ServiceProvider.GetRequiredService<IDatabaseAccessorFactory>();
-                using (IDatabaseAccessor databaseAccessor = databaseAccessorFactory.Create())
-                {
-                    // Connection will not be disposed
-                }
-                using (IDatabaseAccessor databaseAccessor = databaseAccessorFactory.Create())
-                {
-                    // Connection will not be disposed
-                }
-                
-                // Connection will now be disposed
-            }
-            */
-
             if (hostExtensionRegistrar != null)
                 await hostExtensionRegistrar.Configure(app).ConfigureAwait(false);
 

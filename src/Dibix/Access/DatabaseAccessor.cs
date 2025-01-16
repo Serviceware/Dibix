@@ -23,6 +23,8 @@ namespace Dibix
         #region Constructor
         protected DatabaseAccessor(DbConnection connection)
         {
+            Guard.IsNotNull(connection, nameof(connection));
+
             _isSqlClient = false;
             Connection = connection;
 

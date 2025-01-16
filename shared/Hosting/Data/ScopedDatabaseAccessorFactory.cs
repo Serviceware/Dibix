@@ -25,7 +25,7 @@ namespace Dibix.Hosting.Abstractions.Data
         {
             private readonly ILogger _logger;
 
-            public LoggingDapperDatabaseAccessor(DbConnection connection, ILogger logger) : base(connection)
+            public LoggingDapperDatabaseAccessor(DbConnection connection, ILogger logger) : base(connection, sqlDataRecordAdapter: new MicrosoftSqlDataRecordAdapter())
             {
                 _logger = logger;
             }

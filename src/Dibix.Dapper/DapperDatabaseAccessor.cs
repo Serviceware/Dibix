@@ -14,14 +14,16 @@ namespace Dibix.Dapper
         private readonly IDbTransaction _defaultTransaction;
         private readonly int? _defaultCommandTimeout;
         private readonly Action _onDispose;
+        private readonly SqlDataRecordAdapter _sqlDataRecordAdapter;
         #endregion
 
         #region Constructor
-        public DapperDatabaseAccessor(DbConnection connection = null, IDbTransaction defaultTransaction = null, int? defaultCommandTimeout = null, Action onDispose = null) : base(connection)
+        public DapperDatabaseAccessor(DbConnection connection, IDbTransaction defaultTransaction = null, int? defaultCommandTimeout = null, Action onDispose = null, SqlDataRecordAdapter sqlDataRecordAdapter = null) : base(connection)
         {
             _defaultTransaction = defaultTransaction;
             _defaultCommandTimeout = defaultCommandTimeout;
             _onDispose = onDispose;
+            _sqlDataRecordAdapter = sqlDataRecordAdapter ?? new SystemSqlClientDataRecordAdapter();
             ConfigureDapper();
         }
         #endregion
@@ -93,7 +95,7 @@ namespace Dibix.Dapper
         #endregion
 
         #region Protected Methods
-        protected static object CollectParameters(ParametersVisitor parametersVisitor)
+        protected object CollectParameters(ParametersVisitor parametersVisitor)
         {
             Guard.IsNotNull(parametersVisitor, nameof(parametersVisitor));
             DynamicParameters @params = new DynamicParameters();
@@ -110,10 +112,10 @@ namespace Dibix.Dapper
         #endregion
 
         #region Private Methods
-        private static object NormalizeParameterValue(object value)
+        private object NormalizeParameterValue(object value)
         {
-            if (value is StructuredType tvp)
-                return new DapperStructuredTypeParameter(tvp.TypeName, tvp.GetRecords);
+            if (value is StructuredType udt)
+                return new DapperStructuredTypeParameter(udt, _sqlDataRecordAdapter);
 
             return value;
         }

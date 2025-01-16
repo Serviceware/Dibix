@@ -152,7 +152,7 @@ namespace Dibix
                 if (parameter.Value is not StructuredType structuredType)
                     throw new InvalidOperationException($"Unexpected db parameter value for type 'Object': {parameter.Value} ({parameter.Value?.GetType()})");
 
-                ICollection<SqlMetaData> metadata = structuredType.GetMetadata().ToArray();
+                IReadOnlyCollection<SqlMetaData> metadata = structuredType.GetMetadata();
                 string[][] rows = structuredType.GetRecords().Select(CollectValues).ToArray();
                 if (!rows.Any())
                     return "";
