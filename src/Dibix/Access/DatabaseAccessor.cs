@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,26 +12,21 @@ namespace Dibix
     {
         #region Fields
         private static readonly TraceSource TraceSource = new TraceSource("Dibix.Sql");
-        private readonly bool _isSqlClient;
         #endregion
 
         #region Properties
         protected DbConnection Connection { get; }
+        protected SqlClientAdapter SqlClientAdapter { get; }
         #endregion
 
         #region Constructor
-        protected DatabaseAccessor(DbConnection connection)
+        protected DatabaseAccessor(DbConnection connection, SqlClientAdapter sqlClientAdapter = null)
         {
             Guard.IsNotNull(connection, nameof(connection));
 
-            _isSqlClient = false;
             Connection = connection;
-
-            if (Connection is SqlConnection sqlConnection)
-            {
-                sqlConnection.InfoMessage += OnInfoMessage;
-                _isSqlClient = true;
-            }
+            SqlClientAdapter = sqlClientAdapter ?? new SystemSqlClientAdapter(connection);
+            SqlClientAdapter.AttachInfoMessageHandler(OnInfoMessageEvent);
         }
         #endregion
 
@@ -123,22 +117,22 @@ namespace Dibix
         private T QuerySingle<T>(string commandText, CommandType commandType, ParametersVisitor parameters, bool defaultIfEmpty)
         {
             IEnumerable<T> result = QueryMany<T>(commandText, commandType, parameters, buffered: false).PostProcess();
-            return result.Single(commandText, commandType, parameters, defaultIfEmpty, _isSqlClient);
+            return result.Single(commandText, commandType, parameters, defaultIfEmpty, SqlClientAdapter.IsSqlClient);
         }
         private T QuerySingle<T>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, string splitOn, bool defaultIfEmpty) where T : new()
         {
             IEnumerable<T> result = QueryManyAutoMultiMap<T>(commandText, commandType, parameters, types, splitOn, buffered: false);
-            return result.Single(commandText, commandType, parameters, defaultIfEmpty, _isSqlClient);
+            return result.Single(commandText, commandType, parameters, defaultIfEmpty, SqlClientAdapter.IsSqlClient);
         }
         private async Task<T> QuerySingleAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, string splitOn, bool defaultIfEmpty, CancellationToken cancellationToken) where T : new()
         {
             IEnumerable<T> result = await QueryManyAutoMultiMapAsync<T>(commandText, commandType, parameters, types, splitOn, cancellationToken, buffered: false).ConfigureAwait(false);
-            return result.Single(commandText, commandType, parameters, defaultIfEmpty, _isSqlClient);
+            return result.Single(commandText, commandType, parameters, defaultIfEmpty, SqlClientAdapter.IsSqlClient);
         }
         private async Task<T> QuerySingleAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, bool defaultIfEmpty, CancellationToken cancellationToken)
         {
             IEnumerable<T> result = await QueryManyAsync<T>(commandText, commandType, parameters, buffered: false, cancellationToken).PostProcess().ConfigureAwait(false);
-            return result.Single(commandText, commandType, parameters, defaultIfEmpty, _isSqlClient);
+            return result.Single(commandText, commandType, parameters, defaultIfEmpty, SqlClientAdapter.IsSqlClient);
         }
 
         private T Execute<T>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<T> action)
@@ -149,7 +143,7 @@ namespace Dibix
                 return action();
             }
             catch (DatabaseAccessException exception) when (exception.AdditionalErrorCode != DatabaseAccessErrorCode.None) { throw; }
-            catch (Exception exception) { throw DatabaseAccessException.Create(commandType, commandText, parameters, exception, _isSqlClient); }
+            catch (Exception exception) { throw DatabaseAccessException.Create(commandType, commandText, parameters, exception, SqlClientAdapter.TryGetSqlExceptionNumber(exception), SqlClientAdapter.IsSqlClient); }
         }
         private async Task<T> Execute<T>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<Task<T>> action)
         {
@@ -160,8 +154,8 @@ namespace Dibix
             }
             catch (DatabaseAccessException exception) when (exception.AdditionalErrorCode != DatabaseAccessErrorCode.None) { throw; }
             catch (AggregateException exception) when (exception.InnerException is DatabaseAccessException databaseAccessException && databaseAccessException.AdditionalErrorCode != DatabaseAccessErrorCode.None) { throw databaseAccessException; }
-            catch (AggregateException exception) { throw DatabaseAccessException.Create(commandType, commandText, parameters, exception.InnerException ?? exception, _isSqlClient); }
-            catch (Exception exception) { throw DatabaseAccessException.Create(commandType, commandText, parameters, exception, _isSqlClient); }
+            catch (AggregateException exception) { throw DatabaseAccessException.Create(commandType, commandText, parameters, exception.InnerException ?? exception, SqlClientAdapter.TryGetSqlExceptionNumber(exception.InnerException), SqlClientAdapter.IsSqlClient); }
+            catch (Exception exception) { throw DatabaseAccessException.Create(commandType, commandText, parameters, exception, SqlClientAdapter.TryGetSqlExceptionNumber(exception), SqlClientAdapter.IsSqlClient); }
         }
 
         private void ValidateParameters(string commandText, CommandType commandType, ParametersVisitor parameters)
@@ -184,7 +178,7 @@ namespace Dibix
                 case DbType.StringFixedLength:
                 case DbType.AnsiStringFixedLength:
                     if (value is string str && str.Length > size)
-                        throw DatabaseAccessException.Create(DatabaseAccessErrorCode.ParameterSizeExceeded, commandText, commandType, parameters, _isSqlClient, name, str.Length, size);
+                        throw DatabaseAccessException.Create(DatabaseAccessErrorCode.ParameterSizeExceeded, commandText, commandType, parameters, SqlClientAdapter.IsSqlClient, name, str.Length, size);
 
                     return;
 
@@ -193,10 +187,10 @@ namespace Dibix
             }
         }
 
-        private void OnInfoMessage(object sender, SqlInfoMessageEventArgs e)
+        private void OnInfoMessageEvent(string message)
         {
-            TraceSource.TraceInformation(e.Message);
-            OnInfoMessage(e.Message);
+            TraceSource.TraceInformation(message);
+            OnInfoMessage(message);
         }
 
         private static void ValidateParameters(IReadOnlyCollection<Type> types, string splitOn)
@@ -216,9 +210,7 @@ namespace Dibix
         {
             if (disposing)
             {
-                if (Connection is SqlConnection sqlConnection) 
-                    sqlConnection.InfoMessage -= OnInfoMessage;
-
+                SqlClientAdapter.DetachInfoMessageHandler();
                 DisposeConnection();
             }
         }

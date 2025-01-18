@@ -7,14 +7,14 @@ namespace Dibix.Dapper
     {
         #region Fields
         private readonly StructuredType _udt;
-        private readonly SqlDataRecordAdapter _sqlDataRecordAdapter;
+        private readonly SqlClientAdapter _sqlClientAdapter;
         #endregion
 
         #region Constructor
-        public DapperStructuredTypeParameter(StructuredType udt, SqlDataRecordAdapter sqlDataRecordAdapter)
+        public DapperStructuredTypeParameter(StructuredType udt, SqlClientAdapter sqlClientAdapter)
         {
             _udt = udt;
-            _sqlDataRecordAdapter = sqlDataRecordAdapter;
+            _sqlClientAdapter = sqlClientAdapter;
         }
         #endregion
 
@@ -31,7 +31,7 @@ namespace Dibix.Dapper
         {
             IDbDataParameter param = command.CreateParameter();
             param.ParameterName = parameterName;
-            _sqlDataRecordAdapter.MapStructuredTypeToParameter(param, _udt);
+            _sqlClientAdapter.MapStructuredTypeToParameter(param, _udt);
 
             return param;
         }

@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Data;
 using System.Data.Common;
-using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
-using Microsoft.Data.SqlClient;
 
 namespace Dibix.Testing.Data
 {
@@ -37,15 +34,15 @@ namespace Dibix.Testing.Data
         {
             private readonly RaiseErrorWithNoWaitBehavior _raiseErrorWithNoWaitBehavior;
             private readonly int? _defaultCommandTimeout;
-            private readonly Lazy<SqlConnection> _connectionAccessor;
+            private readonly Lazy<DbConnection> _connectionAccessor;
 
             public DapperDatabaseAccessorFactory(string connectionString, RaiseErrorWithNoWaitBehavior raiseErrorWithNoWaitBehavior, int? defaultCommandTimeout)
             {
                 _raiseErrorWithNoWaitBehavior = raiseErrorWithNoWaitBehavior;
                 _defaultCommandTimeout = defaultCommandTimeout;
-                _connectionAccessor = new Lazy<SqlConnection>(() =>
+                _connectionAccessor = new Lazy<DbConnection>(() =>
                 {
-                    SqlConnection connection = new SqlConnection(connectionString);
+                    DbConnection connection = CreateConnection(connectionString);
                     connection.Open();
                     return connection;
                 });
@@ -53,19 +50,22 @@ namespace Dibix.Testing.Data
 
             public IDatabaseAccessor Create()
             {
-                SqlConnection connection = _connectionAccessor.Value;
+                DbConnection connection = _connectionAccessor.Value;
 
+                /*
                 if (_raiseErrorWithNoWaitBehavior == RaiseErrorWithNoWaitBehavior.FireInfoMessageEventOnUserErrors)
                 {
                     connection.FireInfoMessageEventOnUserErrors = true;
                     connection.InfoMessage += OnInfoMessage;
                 }
+                */
 
                 return new DapperDatabaseAccessor(connection, _raiseErrorWithNoWaitBehavior, _defaultCommandTimeout);
             }
 
             // When FireInfoMessageEventOnUserErrors is true, errors will trigger an info message event aswell, without throwing an exception.
             // To restore the original behavior for errors, we have to throw ourselves.
+            /*
             private static void OnInfoMessage(object sender, SqlInfoMessageEventArgs e)
             {
                 bool isError = e.Errors.Cast<SqlError>().Aggregate(false, (current, sqlError) => current || sqlError.Class > 10);
@@ -85,6 +85,16 @@ namespace Dibix.Testing.Data
                 // Unless they are of a severe exception type.
                 throw new AccessViolationException(exception.Message, exception);
             }
+            */
+
+            private static DbConnection CreateConnection(string connectionString)
+            {
+#if NETFRAMEWORK
+                return new System.Data.SqlClient.SqlConnection(connectionString);
+#else
+                return new Microsoft.Data.SqlClient.SqlConnection(connectionString);
+#endif
+            }
 
             void IDisposable.Dispose()
             {
@@ -98,7 +108,7 @@ namespace Dibix.Testing.Data
             private readonly RaiseErrorWithNoWaitBehavior _raiseErrorWithNoWaitBehavior;
             private readonly int? _defaultCommandTimeout;
 
-            public DapperDatabaseAccessor(DbConnection connection, RaiseErrorWithNoWaitBehavior raiseErrorWithNoWaitBehavior, int? defaultCommandTimeout) : base(connection, defaultCommandTimeout: defaultCommandTimeout, sqlDataRecordAdapter: new MicrosoftSqlDataRecordAdapter())
+            public DapperDatabaseAccessor(DbConnection connection, RaiseErrorWithNoWaitBehavior raiseErrorWithNoWaitBehavior, int? defaultCommandTimeout) : base(connection, defaultCommandTimeout: defaultCommandTimeout, sqlClientAdapter: CreateSqlClientAdapter(connection))
             {
                 _raiseErrorWithNoWaitBehavior = raiseErrorWithNoWaitBehavior;
                 _defaultCommandTimeout = defaultCommandTimeout;
@@ -127,6 +137,15 @@ namespace Dibix.Testing.Data
             protected override void DisposeConnection()
             {
                 // Will be disposed at the end of the test
+            }
+
+            private static SqlClientAdapter CreateSqlClientAdapter(DbConnection connection)
+            {
+#if NETFRAMEWORK
+                return new SystemSqlClientAdapter(connection);
+#else
+                return new MicrosoftSqlClientAdapter(connection);
+#endif
             }
         }
     }

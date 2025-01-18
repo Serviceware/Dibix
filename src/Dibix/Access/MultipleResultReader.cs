@@ -10,17 +10,17 @@ namespace Dibix
         #region Fields
         private readonly string _commandText;
         private readonly CommandType _commandType;
-        private readonly bool _isSqlClient;
         private readonly ParametersVisitor _parameters;
+        private readonly SqlClientAdapter _sqlClientAdapter;
         #endregion
 
         #region Constructor
-        protected MultipleResultReader(string commandText, CommandType commandType, ParametersVisitor parameters, bool isSqlClient)
+        protected MultipleResultReader(string commandText, CommandType commandType, ParametersVisitor parameters, SqlClientAdapter sqlClientAdapter)
         {
             _commandText = commandText;
             _commandType = commandType;
             _parameters = parameters;
-            _isSqlClient = isSqlClient;
+            _sqlClientAdapter = sqlClientAdapter;
         }
         #endregion
 
@@ -82,17 +82,17 @@ namespace Dibix
         private T ReadSingle<T>(bool defaultIfEmpty)
         {
             IEnumerable<T> result = ReadMany<T>(buffered: false).PostProcess();
-            return result.Single(_commandText, _commandType, _parameters, defaultIfEmpty, _isSqlClient);
+            return result.Single(_commandText, _commandType, _parameters, defaultIfEmpty, _sqlClientAdapter.IsSqlClient);
         }
         private T ReadSingle<T>(Type[] types, string splitOn, bool defaultIfEmpty) where T : new()
         {
             IEnumerable<T> result = ReadManyAutoMultiMap<T>(types, splitOn, buffered: false).PostProcess();
-            return result.Single(_commandText, _commandType, _parameters, defaultIfEmpty, _isSqlClient);
+            return result.Single(_commandText, _commandType, _parameters, defaultIfEmpty, _sqlClientAdapter.IsSqlClient);
         }
         private async Task<T> ReadSingleAsync<T>(bool defaultIfEmpty)
         {
             IEnumerable<T> result = await ReadManyAsync<T>(buffered: false).PostProcess().ConfigureAwait(false);
-            return result.Single(_commandText, _commandType, _parameters, defaultIfEmpty, _isSqlClient);
+            return result.Single(_commandText, _commandType, _parameters, defaultIfEmpty, _sqlClientAdapter.IsSqlClient);
         }
 
         private T Execute<T>(Func<T> action)
@@ -100,16 +100,16 @@ namespace Dibix
             try { return action(); }
             catch (DatabaseAccessException exception) when (exception.AdditionalErrorCode != DatabaseAccessErrorCode.None) { throw; }
             catch (AggregateException exception) when (exception.InnerException is DatabaseAccessException databaseAccessException && databaseAccessException.AdditionalErrorCode != DatabaseAccessErrorCode.None) { throw databaseAccessException; }
-            catch (AggregateException exception) { throw DatabaseAccessException.Create(_commandType, _commandText, _parameters, exception.InnerException ?? exception, _isSqlClient); }
-            catch (Exception exception) { throw DatabaseAccessException.Create(_commandType, _commandText, _parameters, exception, _isSqlClient); }
+            catch (AggregateException exception) { throw DatabaseAccessException.Create(_commandType, _commandText, _parameters, exception.InnerException ?? exception, _sqlClientAdapter.TryGetSqlExceptionNumber(exception), _sqlClientAdapter.IsSqlClient); }
+            catch (Exception exception) { throw DatabaseAccessException.Create(_commandType, _commandText, _parameters, exception, _sqlClientAdapter.TryGetSqlExceptionNumber(exception), _sqlClientAdapter.IsSqlClient); }
         }
         private async Task<T> Execute<T>(Func<Task<T>> action)
         {
             try { return await action().ConfigureAwait(false); }
             catch (DatabaseAccessException exception) when (exception.AdditionalErrorCode != DatabaseAccessErrorCode.None) { throw; }
             catch (AggregateException exception) when (exception.InnerException is DatabaseAccessException databaseAccessException && databaseAccessException.AdditionalErrorCode != DatabaseAccessErrorCode.None) { throw databaseAccessException; }
-            catch (AggregateException exception) { throw DatabaseAccessException.Create(_commandType, _commandText, _parameters, exception.InnerException ?? exception, _isSqlClient); }
-            catch (Exception exception) { throw DatabaseAccessException.Create(_commandType, _commandText, _parameters, exception, _isSqlClient); }
+            catch (AggregateException exception) { throw DatabaseAccessException.Create(_commandType, _commandText, _parameters, exception.InnerException ?? exception, _sqlClientAdapter.TryGetSqlExceptionNumber(exception), _sqlClientAdapter.IsSqlClient); }
+            catch (Exception exception) { throw DatabaseAccessException.Create(_commandType, _commandText, _parameters, exception, _sqlClientAdapter.TryGetSqlExceptionNumber(exception), _sqlClientAdapter.IsSqlClient); }
         }
 
         private static void ValidateParameters(IReadOnlyCollection<Type> types, string splitOn)

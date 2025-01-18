@@ -14,16 +14,14 @@ namespace Dibix.Dapper
         private readonly IDbTransaction _defaultTransaction;
         private readonly int? _defaultCommandTimeout;
         private readonly Action _onDispose;
-        private readonly SqlDataRecordAdapter _sqlDataRecordAdapter;
         #endregion
 
         #region Constructor
-        public DapperDatabaseAccessor(DbConnection connection, IDbTransaction defaultTransaction = null, int? defaultCommandTimeout = null, Action onDispose = null, SqlDataRecordAdapter sqlDataRecordAdapter = null) : base(connection)
+        public DapperDatabaseAccessor(DbConnection connection, IDbTransaction defaultTransaction = null, int? defaultCommandTimeout = null, Action onDispose = null, SqlClientAdapter sqlClientAdapter = null) : base(connection, sqlClientAdapter)
         {
             _defaultTransaction = defaultTransaction;
             _defaultCommandTimeout = defaultCommandTimeout;
             _onDispose = onDispose;
-            _sqlDataRecordAdapter = sqlDataRecordAdapter ?? new SystemSqlClientDataRecordAdapter();
             ConfigureDapper();
         }
         #endregion
@@ -76,13 +74,13 @@ namespace Dibix.Dapper
         protected override IMultipleResultReader QueryMultiple(string commandText, CommandType commandType, ParametersVisitor parameters)
         {
             SqlMapper.GridReader reader = base.Connection.QueryMultiple(commandText, CollectParameters(parameters), _defaultTransaction, commandTimeout: _defaultCommandTimeout, commandType: commandType);
-            return new DapperGridResultReader(reader, commandText, commandType, parameters);
+            return new DapperGridResultReader(reader, commandText, commandType, parameters, SqlClientAdapter);
         }
 
         protected override async Task<IMultipleResultReader> QueryMultipleAsync(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken)
         {
             SqlMapper.GridReader reader = await base.Connection.QueryMultipleAsync(new CommandDefinition(commandText, CollectParameters(parameters), _defaultTransaction, _defaultCommandTimeout, commandType, cancellationToken: cancellationToken)).ConfigureAwait(false);
-            return new DapperGridResultReader(reader, commandText, commandType, parameters);
+            return new DapperGridResultReader(reader, commandText, commandType, parameters, SqlClientAdapter);
         }
 
         protected override void DisposeConnection()
@@ -115,7 +113,7 @@ namespace Dibix.Dapper
         private object NormalizeParameterValue(object value)
         {
             if (value is StructuredType udt)
-                return new DapperStructuredTypeParameter(udt, _sqlDataRecordAdapter);
+                return new DapperStructuredTypeParameter(udt, SqlClientAdapter);
 
             return value;
         }

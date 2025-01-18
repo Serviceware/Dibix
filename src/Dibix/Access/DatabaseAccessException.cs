@@ -16,8 +16,9 @@ namespace Dibix
         public string ParameterDump { get; }
         public string SqlDebugStatement { get; }
         public DatabaseAccessErrorCode AdditionalErrorCode { get; }
+        public int? SqlErrorNumber { get; }
 
-        private DatabaseAccessException(string message, CommandType commandType, string commandText, ParametersVisitor parameters, string parameterDump, string parameterDumpTruncated, string sqlDebugStatement, string sqlDebugStatementTruncated, DatabaseAccessErrorCode additionalErrorCode, Exception innerException) : base(message, innerException)
+        private DatabaseAccessException(string message, CommandType commandType, string commandText, ParametersVisitor parameters, string parameterDump, string parameterDumpTruncated, string sqlDebugStatement, string sqlDebugStatementTruncated, DatabaseAccessErrorCode additionalErrorCode, int? sqlErrorNumber, Exception innerException) : base(message, innerException)
         {
             _parameterDumpTruncated = parameterDumpTruncated;
             _sqlDebugStatementTruncated = sqlDebugStatementTruncated;
@@ -27,6 +28,7 @@ namespace Dibix
             ParameterDump = parameterDump;
             SqlDebugStatement = sqlDebugStatement;
             AdditionalErrorCode = additionalErrorCode;
+            SqlErrorNumber = sqlErrorNumber;
         }
 
         public override string ToString()
@@ -45,20 +47,20 @@ Debug statement:
             return text;
         }
 
-        internal static DatabaseAccessException Create(CommandType commandType, string commandText, ParametersVisitor parameters, Exception innerException, bool isSqlClient)
+        internal static DatabaseAccessException Create(CommandType commandType, string commandText, ParametersVisitor parameters, Exception innerException, int? sqlErrorNumber, bool isSqlClient)
         {
-            return Create(innerException.Message, commandType, commandText, parameters, innerException, additionalErrorCode: DatabaseAccessErrorCode.None, isSqlClient);
+            return Create(innerException.Message, commandType, commandText, parameters, innerException, additionalErrorCode: DatabaseAccessErrorCode.None, sqlErrorNumber, isSqlClient);
         }
         internal static DatabaseAccessException Create(string message, CommandType commandType, string commandText, ParametersVisitor parameters, DatabaseAccessErrorCode additionalErrorCode, bool isSqlClient)
         {
-            return Create(message, commandType, commandText, parameters, innerException: null, additionalErrorCode, isSqlClient);
+            return Create(message, commandType, commandText, parameters, innerException: null, additionalErrorCode, sqlErrorNumber: null, isSqlClient);
         }
         internal static DatabaseAccessException Create(DatabaseAccessErrorCode errorCode, string commandText, CommandType commandType, ParametersVisitor parameters, bool isSqlClient, params object[] args)
         {
             string message = String.Format(CultureInfo.InvariantCulture, GetExceptionMessageTemplate(errorCode), args);
             return Create(message, commandType, commandText, parameters, errorCode, isSqlClient);
         }
-        private static DatabaseAccessException Create(string message, CommandType commandType, string commandText, ParametersVisitor parameters, Exception innerException, DatabaseAccessErrorCode additionalErrorCode, bool isSqlClient)
+        private static DatabaseAccessException Create(string message, CommandType commandType, string commandText, ParametersVisitor parameters, Exception innerException, DatabaseAccessErrorCode additionalErrorCode, int? sqlErrorNumber, bool isSqlClient)
         {
             string newMessage = @$"{message}
 CommandType: {commandType}
@@ -73,7 +75,7 @@ CommandText: {(commandType == CommandType.StoredProcedure ? commandText : "<Inli
                 sqlDebugStatement = DbParameterFormatter.CollectSqlDebugStatement(commandType, commandText, parameters, truncate: false);
                 sqlDebugStatementTruncated = DbParameterFormatter.CollectSqlDebugStatement(commandType, commandText, parameters, truncate: true);
             }
-            return new DatabaseAccessException(newMessage, commandType, commandText, parameters, parameterDump, parameterDumpTruncated, sqlDebugStatement, sqlDebugStatementTruncated, additionalErrorCode, innerException);
+            return new DatabaseAccessException(newMessage, commandType, commandText, parameters, parameterDump, parameterDumpTruncated, sqlDebugStatement, sqlDebugStatementTruncated, additionalErrorCode, sqlErrorNumber, innerException);
         }
 
         private static string GetExceptionMessageTemplate(DatabaseAccessErrorCode errorCode) => errorCode switch

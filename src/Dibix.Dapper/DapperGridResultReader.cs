@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 using System.Threading.Tasks;
 using Dapper;
 
@@ -18,7 +17,7 @@ namespace Dibix.Dapper
         #endregion
 
         #region Constructor
-        public DapperGridResultReader(SqlMapper.GridReader reader, string commandText, CommandType commandType, ParametersVisitor parameters) : base(commandText, commandType, parameters, isSqlClient: reader.Command is SqlCommand)
+        public DapperGridResultReader(SqlMapper.GridReader reader, string commandText, CommandType commandType, ParametersVisitor parameters, SqlClientAdapter sqlClientAdapter) : base(commandText, commandType, parameters, sqlClientAdapter)
         {
             _reader = reader;
         }

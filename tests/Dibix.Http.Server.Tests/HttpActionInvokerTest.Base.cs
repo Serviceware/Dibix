@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Dibix.Http.Server.AspNetCore;
+using Microsoft.Data.SqlClient;
 using Moq;
 using Moq.Language.Flow;
 
@@ -67,8 +67,8 @@ namespace Dibix.Http.Server.Tests
             SqlException sqlException = SqlExceptionFactory.Create(serverVersion: default, infoNumber: errorInfoNumber, errorState: default, errorClass: default, server: default, errorMessage, procedure: default, lineNumber: default);
             const bool isSqlClient = true;
 
-            MethodInfo createMethod = typeof(DatabaseAccessException).SafeGetMethod("Create", BindingFlags.NonPublic | BindingFlags.Static, new[] { typeof(CommandType), typeof(string), typeof(ParametersVisitor), typeof(Exception), typeof(bool) });
-            Exception exception = (Exception)createMethod.Invoke(null, new object[] { commandType, commandText, parametersVisitor.Object, sqlException, isSqlClient });
+            MethodInfo createMethod = typeof(DatabaseAccessException).SafeGetMethod("Create", BindingFlags.NonPublic | BindingFlags.Static, new[] { typeof(CommandType), typeof(string), typeof(ParametersVisitor), typeof(Exception), typeof(int?), typeof(bool) });
+            Exception exception = (Exception)createMethod.Invoke(null, new object[] { commandType, commandText, parametersVisitor.Object, sqlException, sqlException.Number, isSqlClient });
             return exception;
         }
         private static Exception CreateException(DatabaseAccessErrorCode errorCode, string errorMessage, CommandType? commandType = null, string commandText = null)

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Net;
 using System.Text.RegularExpressions;
 
@@ -12,19 +11,15 @@ namespace Dibix.Http.Server
         {
             return TryParse(databaseAccessException, action: null, arguments: new Dictionary<string, object>(), out httpException);
         }
-        internal static bool TryParse(DatabaseAccessException databaseAccessException, HttpActionDefinition action, IDictionary<string, object> arguments, out HttpRequestExecutionException httpException)
+        internal static bool TryParse(DatabaseAccessException exception, HttpActionDefinition action, IDictionary<string, object> arguments, out HttpRequestExecutionException httpException)
         {
-            return TryParse(databaseAccessException, databaseAccessException.InnerException as SqlException, action, arguments, out httpException);
-        }
-        private static bool TryParse(DatabaseAccessException originalException, SqlException rootException, HttpActionDefinition action, IDictionary<string, object> arguments, out HttpRequestExecutionException httpException)
-        {
-            if (rootException != null && HttpErrorResponseUtility.TryParseErrorResponse(rootException.Number, out int statusCode, out int errorCode, out bool isClientError))
+            if (exception.SqlErrorNumber != null && exception.InnerException != null && HttpErrorResponseUtility.TryParseErrorResponse(exception.SqlErrorNumber.Value, out int statusCode, out int errorCode, out bool isClientError))
             {
-                httpException = new HttpRequestExecutionException((HttpStatusCode)statusCode, errorCode, rootException.Message, isClientError, originalException);
+                httpException = new HttpRequestExecutionException((HttpStatusCode)statusCode, errorCode, exception.InnerException.Message, isClientError, exception);
                 return true;
             }
 
-            if (HttpStatusCodeDetectionMap.TryGetStatusCode(originalException.AdditionalErrorCode, out HttpErrorResponse defaultResponse))
+            if (HttpStatusCodeDetectionMap.TryGetStatusCode(exception.AdditionalErrorCode, out HttpErrorResponse defaultResponse))
             {
                 HttpErrorResponse error = defaultResponse;
                 if (action != null && action.StatusCodeDetectionResponses.TryGetValue(error.StatusCode, out HttpErrorResponse userResponse)) 
@@ -37,7 +32,7 @@ namespace Dibix.Http.Server
                     string parameterName = x.Groups["ParameterName"].Value;
                     return caseInsensitiveArguments.TryGetValue(parameterName, out object value) ? value?.ToString() : x.Value;
                 });
-                httpException = new HttpRequestExecutionException((HttpStatusCode)error.StatusCode, error.ErrorCode, formattedErrorMessage, isClientError, originalException);
+                httpException = new HttpRequestExecutionException((HttpStatusCode)error.StatusCode, error.ErrorCode, formattedErrorMessage, isClientError, exception);
                 return true;
             }
 
