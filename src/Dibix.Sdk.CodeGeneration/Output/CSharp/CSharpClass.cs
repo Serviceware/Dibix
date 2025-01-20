@@ -28,7 +28,7 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             return this;
         }
 
-        public CSharpProperty AddProperty(string name, string returnType, CSharpModifiers modifiers = CSharpModifiers.Public) => this.AddProperty(name, returnType, Enumerable.Empty<CSharpAnnotation>(), modifiers);
+        public CSharpProperty AddProperty(string name, string returnType, CSharpModifiers modifiers = CSharpModifiers.Public) => this.AddProperty(name, returnType, [], modifiers);
         public CSharpProperty AddProperty(string name, string returnType, IEnumerable<CSharpAnnotation> annotations, CSharpModifiers modifiers = CSharpModifiers.Public)
         {
             CSharpProperty property = new CSharpProperty(name, returnType, modifiers, annotations);
@@ -43,8 +43,9 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             return ctor;
         }
 
-        public CSharpMethod AddMethod(string name, string returnType, CSharpModifiers modifiers = CSharpModifiers.Public | CSharpModifiers.Abstract) => this.AddMethod(name, returnType, body: null, Enumerable.Empty<CSharpAnnotation>(), isExtension: false, modifiers);
-        public CSharpMethod AddMethod(string name, string returnType, string body, bool isExtension = false, CSharpModifiers modifiers = CSharpModifiers.Public) => this.AddMethod(name, returnType, body, Enumerable.Empty<CSharpAnnotation>(), isExtension, modifiers);
+        public CSharpMethod AddMethod(string name, string returnType, CSharpModifiers modifiers = CSharpModifiers.Public | CSharpModifiers.Abstract) => this.AddMethod(name, returnType, body: null, [], isExtension: false, modifiers);
+        public CSharpMethod AddMethod(string name, string returnType, string body, CSharpModifiers modifiers = CSharpModifiers.Public) => AddMethod(name, returnType, body, [], isExtension: false, modifiers);
+        public CSharpMethod AddMethod(string name, string returnType, string body, bool isExtension, CSharpModifiers modifiers = CSharpModifiers.Public) => this.AddMethod(name, returnType, body, [], isExtension, modifiers);
         public CSharpMethod AddMethod(string name, string returnType, string body, IEnumerable<CSharpAnnotation> annotations, bool isExtension = false, CSharpModifiers modifiers = CSharpModifiers.Public)
         {
             CSharpMethod method = new CSharpMethod(name, returnType, body, isExtension, modifiers, annotations);
@@ -54,7 +55,7 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
 
         public CSharpClass AddClass(string name, CSharpModifiers modifiers = CSharpModifiers.Public)
         {
-            CSharpClass @class = new CSharpClass(name, modifiers, Enumerable.Empty<CSharpAnnotation>());
+            CSharpClass @class = new CSharpClass(name, modifiers, []);
             this._members.Add(@class);
             return @class;
         }

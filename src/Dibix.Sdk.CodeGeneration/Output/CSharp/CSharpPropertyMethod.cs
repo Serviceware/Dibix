@@ -45,7 +45,7 @@
                           .Write("}");
                 }
                 else
-                    writer.WriteRaw(" } ");
+                    writer.WriteRaw(" }");
             }
             else
             {

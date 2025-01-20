@@ -6,7 +6,6 @@ using System.Net.Http;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Dibix.Http.Server.AspNetCore;
 using Microsoft.Data.SqlClient;
 using Moq;
 using Moq.Language.Flow;
@@ -119,11 +118,17 @@ namespace Dibix.Http.Server.Tests
             public override void Configure(IHttpApiDiscoveryContext context) => base.RegisterController("Test", x => x.AddAction(LocalReflectionHttpActionTarget.Create(typeof(HttpActionInvokerTest), _methodName), _actionConfiguration));
         }
 
-        private sealed class X : StructuredType<X, int, string>
+        private sealed class X : StructuredType<X>
         {
-            public X() : base("x") => base.ImportSqlMetadata(() => Add(default, default));
+            public override string TypeName => "x";
 
-            public void Add(int intValue, string stringValue) => base.AddValues(intValue, stringValue);
+            public void Add(int intValue, string stringValue) => AddRecord(intValue, stringValue);
+
+            protected override void CollectMetadata(ISqlMetadataCollector collector)
+            {
+                collector.RegisterMetadata("intValue", SqlDbType.Int);
+                collector.RegisterMetadata("stringValue", SqlDbType.NVarChar, maxLength: -1);
+            }
         }
 
         private sealed class HttpAuthorizationBehaviorContext

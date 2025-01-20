@@ -49,15 +49,16 @@ namespace Dibix.Sdk.Tests.Data
 namespace Dibix.Sdk.Tests.Data
 {
     [StructuredType("[dbo].[dbx_codeanalysis_udt_int]")]
-    public sealed class IntParameterSet : StructuredType<IntParameterSet, int>
+    public sealed class IntParameterSet : StructuredType<IntParameterSet>
     {
-        public IntParameterSet() : base("[dbo].[dbx_codeanalysis_udt_int]")
-        {
-            base.ImportSqlMetadata(() => Add(default));
-        }
+        public override string TypeName { get { return "[dbo].[dbx_codeanalysis_udt_int]"; } }
         public void Add(int id)
         {
-            base.AddValues(id);
+            AddRecord(id);
+        }
+        protected override void CollectMetadata(ISqlMetadataCollector collector)
+        {
+            collector.RegisterMetadata("id", SqlDbType.Int);
         }
     }
 }

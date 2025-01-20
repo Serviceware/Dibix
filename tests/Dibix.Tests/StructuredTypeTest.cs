@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Data;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dibix.Tests
 {
@@ -21,11 +22,17 @@ namespace Dibix.Tests
 7                y                        ", dump);
         }
 
-        private class X : StructuredType<X, int, string>
+        private class X : StructuredType<X>
         {
-            public X() : base("x") => base.ImportSqlMetadata(() => this.Add(default, default));
+            public override string TypeName => "x";
 
-            public void Add(int intValue, string stringValue) => base.AddValues(intValue, stringValue);
+            public void Add(int intValue, string stringValue) => AddRecord(intValue, stringValue);
+
+            protected override void CollectMetadata(ISqlMetadataCollector collector)
+            {
+                collector.RegisterMetadata("intValue", SqlDbType.Int);
+                collector.RegisterMetadata("stringValue", SqlDbType.NVarChar, maxLength: -1);
+            }
         }
     }
 }

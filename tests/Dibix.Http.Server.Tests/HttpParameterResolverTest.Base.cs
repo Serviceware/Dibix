@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Xml.Linq;
-using Dibix.Http.Server.AspNetCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -139,11 +139,16 @@ namespace Dibix.Http.Server.Tests
             }
         }
 
-        private sealed class HttpBodyItemSet : StructuredType<HttpBodyItemSet, string>
+        private sealed class HttpBodyItemSet : StructuredType<HttpBodyItemSet>
         {
-            public HttpBodyItemSet() : base("x") => base.ImportSqlMetadata(() => Add(default));
+            public override string TypeName => "x";
 
-            public void Add(string encryptedpassword) => base.AddValues(encryptedpassword);
+            public void Add(string encryptedpassword) => AddRecord(encryptedpassword);
+
+            protected override void CollectMetadata(ISqlMetadataCollector collector)
+            {
+                collector.RegisterMetadata("encryptedpassword", SqlDbType.NVarChar, maxLength: -1);
+            }
         }
 
         private sealed class EncryptionHttpParameterConverter : IHttpParameterConverter
@@ -201,25 +206,44 @@ namespace Dibix.Http.Server.Tests
             public XElement data { get; set; }
         }
         
-        private sealed class ExplicitHttpBodyItemSet : StructuredType<ExplicitHttpBodyItemSet, int, int, int, string>
+        private sealed class ExplicitHttpBodyItemSet : StructuredType<ExplicitHttpBodyItemSet>
         {
-            public ExplicitHttpBodyItemSet() : base("x") => base.ImportSqlMetadata(() => Add(default, default, default, default));
+            public override string TypeName => "x";
 
-            public void Add(int id_, int idx, int age_, string name_) => base.AddValues(id_, idx, age_, name_);
+            public void Add(int id_, int idx, int age_, string name_) => AddRecord(id_, idx, age_, name_);
+
+            protected override void CollectMetadata(ISqlMetadataCollector collector)
+            {
+                collector.RegisterMetadata("id_", SqlDbType.Int);
+                collector.RegisterMetadata("idx", SqlDbType.Int);
+                collector.RegisterMetadata("age_", SqlDbType.Int);
+                collector.RegisterMetadata("name_", SqlDbType.NVarChar, maxLength: -1);
+            }
         }
         
-        private sealed class ImplicitHttpBodyItemSet : StructuredType<ImplicitHttpBodyItemSet, short, string>
+        private sealed class ImplicitHttpBodyItemSet : StructuredType<ImplicitHttpBodyItemSet>
         {
-            public ImplicitHttpBodyItemSet() : base("x") => base.ImportSqlMetadata(() => Add(default, default));
+            public override string TypeName => "x";
 
-            public void Add(short type, string name) => base.AddValues(type, name);
+            public void Add(short type, string name) => AddRecord(type, name);
+
+            protected override void CollectMetadata(ISqlMetadataCollector collector)
+            {
+                collector.RegisterMetadata("type", SqlDbType.SmallInt);
+                collector.RegisterMetadata("name", SqlDbType.NVarChar, maxLength: -1);
+            }
         }
         
-        private sealed class StringSet : StructuredType<StringSet, string>
+        private sealed class StringSet : StructuredType<StringSet>
         {
-            public StringSet() : base("x") => base.ImportSqlMetadata(() => Add(default));
+            public override string TypeName => "x";
 
-            public void Add(string name) => base.AddValues(name);
+            public void Add(string name) => AddRecord(name);
+
+            protected override void CollectMetadata(ISqlMetadataCollector collector)
+            {
+                collector.RegisterMetadata("name", SqlDbType.NVarChar, maxLength: -1);
+            }
         }
 
         private sealed class JsonToXmlConverter : IFormattedInputConverter<JObject, XElement>

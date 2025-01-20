@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using Dibix.Http.Server.AspNetCore;
 
 namespace Dibix.Http.Server.Tests
 {

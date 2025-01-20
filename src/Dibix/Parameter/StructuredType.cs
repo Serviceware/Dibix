@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq.Expressions;
+using System.Data;
+using System.Linq;
 #if NET
 using Microsoft.Data.SqlClient.Server;
 #else
@@ -13,19 +15,20 @@ namespace Dibix
     public abstract class StructuredType : IEnumerable<SqlDataRecord>
     {
         #region Fields
+        private static readonly ConcurrentDictionary<Type, SqlMetaData[]> MetadataCache = new ConcurrentDictionary<Type, SqlMetaData[]>();
+        private readonly SqlMetaData[] _metadata;
         private readonly List<SqlDataRecord> _records;
-        private SqlMetaData[] _metadata;
         #endregion
 
         #region Properties
-        public string TypeName { get; }
+        public abstract string TypeName { get; }
         #endregion
 
         #region Constructor
-        protected StructuredType(string typeName)
+        protected StructuredType()
         {
             _records = new List<SqlDataRecord>();
-            TypeName = typeName;
+            _metadata = MetadataCache.GetOrAdd(GetType(), CollectMetadata);
         }
         #endregion
 
@@ -34,27 +37,18 @@ namespace Dibix
 
         public SqlMetaData[] GetMetadata() => _metadata;
 
-        public string Dump(bool truncate = false)
-        {
-            return SqlDataRecordDiagnostics.Dump(_metadata, _records, truncate);
-        }
+        public string Dump(bool truncate = false) => SqlDataRecordDiagnostics.Dump(_metadata, _records, truncate);
         #endregion
 
         #region Protected Methods
-        protected void ImportSqlMetadata(Expression<Action> addMethodExpression)
+        protected internal void AddRecord(params object[] values)
         {
-            _metadata = SqlMetaDataAccessor.GetMetadata(GetType(), addMethodExpression);
-        }
-
-        protected internal void AddItem(params object[] values)
-        {
-            if (_metadata == null)
-                throw new InvalidOperationException("Please define metadata by calling ImportSqlMetadata() in your constructor");
-
             SqlDataRecord record = new SqlDataRecord(_metadata);
             record.SetValues(values);
             _records.Add(record);
         }
+
+        protected abstract void CollectMetadata(ISqlMetadataCollector collector);
         #endregion
 
         #region IEnumerable Members
@@ -64,12 +58,35 @@ namespace Dibix
         #region IEnumerable<SqlDataRecord> Members
         IEnumerator<SqlDataRecord> IEnumerable<SqlDataRecord>.GetEnumerator() => _records.GetEnumerator();
         #endregion
+
+        #region Private Methods
+        private SqlMetaData[] CollectMetadata(Type type)
+        {
+            SqlMetadataCollector collector = new SqlMetadataCollector();
+            CollectMetadata(collector);
+
+            if (collector.Metadata.Count == 0)
+                throw new InvalidOperationException("Metadata must not be empty");
+
+            SqlMetaData[] metadata = collector.Metadata.ToArray();
+            return metadata;
+        }
+        #endregion
+
+        #region Nested Types
+        private sealed class SqlMetadataCollector : ISqlMetadataCollector
+        {
+            public ICollection<SqlMetaData> Metadata { get; } = new List<SqlMetaData>();
+
+            public void RegisterMetadata(string name, SqlDbType type) => Metadata.Add(new SqlMetaData(name, type));
+            public void RegisterMetadata(string name, SqlDbType type, long maxLength) => Metadata.Add(new SqlMetaData(name, type, maxLength));
+            public void RegisterMetadata(string name, SqlDbType type, byte precision, byte scale) => Metadata.Add(new SqlMetaData(name, type, precision, scale));
+        }
+        #endregion
     }
 
     public abstract class StructuredType<TDefinition> : StructuredType where TDefinition : StructuredType, new()
     {
-        protected StructuredType(string typeName) : base(typeName) { }
-
         public static TDefinition From<TSource>(IEnumerable<TSource> source, Action<TDefinition, TSource> addItemFunc)
         {
             return From(source, (x, y, _) => addItemFunc(x, y));
@@ -86,156 +103,6 @@ namespace Dibix
                 addItemFunc(type, item, index++);
             }
             return type;
-        }
-    }
-
-    public abstract class StructuredType<TDefinition, TItem> : StructuredType<TDefinition> where TDefinition : StructuredType, new()
-    {
-        protected StructuredType(string typeName) : base(typeName) { }
-
-        protected void AddValues(TItem item)
-        {
-            base.AddItem(item);
-        }
-    }
-
-    public abstract class StructuredType<TDefinition, TItem1, TItem2> : StructuredType<TDefinition> where TDefinition : StructuredType, new()
-    {
-        protected StructuredType(string typeName) : base(typeName) { }
-
-        protected void AddValues(TItem1 item1, TItem2 item2)
-        {
-            base.AddItem(item1, item2);
-        }
-    }
-
-    public abstract class StructuredType<TDefinition, TItem1, TItem2, TItem3> : StructuredType<TDefinition> where TDefinition : StructuredType, new()
-    {
-        protected StructuredType(string typeName) : base(typeName) { }
-
-        protected void AddValues(TItem1 item1, TItem2 item2, TItem3 item3)
-        {
-            base.AddItem(item1, item2, item3);
-        }
-    }
-
-    public abstract class StructuredType<TDefinition, TItem1, TItem2, TItem3, TItem4> : StructuredType<TDefinition> where TDefinition : StructuredType, new()
-    {
-        protected StructuredType(string typeName) : base(typeName) { }
-
-        protected void AddValues(TItem1 item1, TItem2 item2, TItem3 item3, TItem4 item4)
-        {
-            base.AddItem(item1, item2, item3, item4);
-        }
-    }
-
-    public abstract class StructuredType<TDefinition, TItem1, TItem2, TItem3, TItem4, TItem5> : StructuredType<TDefinition> where TDefinition : StructuredType, new()
-    {
-        protected StructuredType(string typeName) : base(typeName) { }
-
-        protected void AddValues(TItem1 item1, TItem2 item2, TItem3 item3, TItem4 item4, TItem5 item5)
-        {
-            base.AddItem(item1, item2, item3, item4, item5);
-        }
-    }
-
-    public abstract class StructuredType<TDefinition, TItem1, TItem2, TItem3, TItem4, TItem5, TItem6> : StructuredType<TDefinition> where TDefinition : StructuredType, new()
-    {
-        protected StructuredType(string typeName) : base(typeName) { }
-
-        protected void AddValues(TItem1 item1, TItem2 item2, TItem3 item3, TItem4 item4, TItem5 item5, TItem6 item6)
-        {
-            base.AddItem(item1, item2, item3, item4, item5, item6);
-        }
-    }
-
-    public abstract class StructuredType<TDefinition, TItem1, TItem2, TItem3, TItem4, TItem5, TItem6, TItem7> : StructuredType<TDefinition> where TDefinition : StructuredType, new()
-    {
-        protected StructuredType(string typeName) : base(typeName) { }
-
-        protected void AddValues(TItem1 item1, TItem2 item2, TItem3 item3, TItem4 item4, TItem5 item5, TItem6 item6, TItem7 item7)
-        {
-            base.AddItem(item1, item2, item3, item4, item5, item6, item7);
-        }
-    }
-
-    public abstract class StructuredType<TDefinition, TItem1, TItem2, TItem3, TItem4, TItem5, TItem6, TItem7, TItem8> : StructuredType<TDefinition> where TDefinition : StructuredType, new()
-    {
-        protected StructuredType(string typeName) : base(typeName) { }
-
-        protected void AddValues(TItem1 item1, TItem2 item2, TItem3 item3, TItem4 item4, TItem5 item5, TItem6 item6, TItem7 item7, TItem8 item8)
-        {
-            base.AddItem(item1, item2, item3, item4, item5, item6, item7, item8);
-        }
-    }
-
-    public abstract class StructuredType<TDefinition, TItem1, TItem2, TItem3, TItem4, TItem5, TItem6, TItem7, TItem8, TItem9> : StructuredType<TDefinition> where TDefinition : StructuredType, new()
-    {
-        protected StructuredType(string typeName) : base(typeName) { }
-
-        protected void AddValues(TItem1 item1, TItem2 item2, TItem3 item3, TItem4 item4, TItem5 item5, TItem6 item6, TItem7 item7, TItem8 item8, TItem9 item9)
-        {
-            base.AddItem(item1, item2, item3, item4, item5, item6, item7, item8, item9);
-        }
-    }
-
-    public abstract class StructuredType<TDefinition, TItem1, TItem2, TItem3, TItem4, TItem5, TItem6, TItem7, TItem8, TItem9, TItem10> : StructuredType<TDefinition> where TDefinition : StructuredType, new()
-    {
-        protected StructuredType(string typeName) : base(typeName) { }
-
-        protected void AddValues(TItem1 item1, TItem2 item2, TItem3 item3, TItem4 item4, TItem5 item5, TItem6 item6, TItem7 item7, TItem8 item8, TItem9 item9, TItem10 item10)
-        {
-            base.AddItem(item1, item2, item3, item4, item5, item6, item7, item8, item9, item10);
-        }
-    }
-
-    public abstract class StructuredType<TDefinition, TItem1, TItem2, TItem3, TItem4, TItem5, TItem6, TItem7, TItem8, TItem9, TItem10, TItem11> : StructuredType<TDefinition> where TDefinition : StructuredType, new()
-    {
-        protected StructuredType(string typeName) : base(typeName) { }
-
-        protected void AddValues(TItem1 item1, TItem2 item2, TItem3 item3, TItem4 item4, TItem5 item5, TItem6 item6, TItem7 item7, TItem8 item8, TItem9 item9, TItem10 item10, TItem11 item11)
-        {
-            base.AddItem(item1, item2, item3, item4, item5, item6, item7, item8, item9, item10, item11);
-        }
-    }
-
-    public abstract class StructuredType<TDefinition, TItem1, TItem2, TItem3, TItem4, TItem5, TItem6, TItem7, TItem8, TItem9, TItem10, TItem11, TItem12> : StructuredType<TDefinition> where TDefinition : StructuredType, new()
-    {
-        protected StructuredType(string typeName) : base(typeName) { }
-
-        protected void AddValues(TItem1 item1, TItem2 item2, TItem3 item3, TItem4 item4, TItem5 item5, TItem6 item6, TItem7 item7, TItem8 item8, TItem9 item9, TItem10 item10, TItem11 item11, TItem12 item12)
-        {
-            base.AddItem(item1, item2, item3, item4, item5, item6, item7, item8, item9, item10, item11, item12);
-        }
-    }
-
-    public abstract class StructuredType<TDefinition, TItem1, TItem2, TItem3, TItem4, TItem5, TItem6, TItem7, TItem8, TItem9, TItem10, TItem11, TItem12, TItem13> : StructuredType<TDefinition> where TDefinition : StructuredType, new()
-    {
-        protected StructuredType(string typeName) : base(typeName) { }
-
-        protected void AddValues(TItem1 item1, TItem2 item2, TItem3 item3, TItem4 item4, TItem5 item5, TItem6 item6, TItem7 item7, TItem8 item8, TItem9 item9, TItem10 item10, TItem11 item11, TItem12 item12, TItem13 item13)
-        {
-            base.AddItem(item1, item2, item3, item4, item5, item6, item7, item8, item9, item10, item11, item12, item13);
-        }
-    }
-
-    public abstract class StructuredType<TDefinition, TItem1, TItem2, TItem3, TItem4, TItem5, TItem6, TItem7, TItem8, TItem9, TItem10, TItem11, TItem12, TItem13, TItem14> : StructuredType<TDefinition> where TDefinition : StructuredType, new()
-    {
-        protected StructuredType(string typeName) : base(typeName) { }
-
-        protected void AddValues(TItem1 item1, TItem2 item2, TItem3 item3, TItem4 item4, TItem5 item5, TItem6 item6, TItem7 item7, TItem8 item8, TItem9 item9, TItem10 item10, TItem11 item11, TItem12 item12, TItem13 item13, TItem14 item14)
-        {
-            base.AddItem(item1, item2, item3, item4, item5, item6, item7, item8, item9, item10, item11, item12, item13, item14);
-        }
-    }
-
-    public abstract class StructuredType<TDefinition, TItem1, TItem2, TItem3, TItem4, TItem5, TItem6, TItem7, TItem8, TItem9, TItem10, TItem11, TItem12, TItem13, TItem14, TItem15, TItem16, TItem17> : StructuredType<TDefinition> where TDefinition : StructuredType, new()
-    {
-        protected StructuredType(string typeName) : base(typeName) { }
-
-        protected void AddValues(TItem1 item1, TItem2 item2, TItem3 item3, TItem4 item4, TItem5 item5, TItem6 item6, TItem7 item7, TItem8 item8, TItem9 item9, TItem10 item10, TItem11 item11, TItem12 item12, TItem13 item13, TItem14 item14, TItem15 item15, TItem16 item16, TItem17 item17)
-        {
-            base.AddItem(item1, item2, item3, item4, item5, item6, item7, item8, item9, item10, item11, item12, item13, item14, item15, item16, item17);
         }
     }
 }

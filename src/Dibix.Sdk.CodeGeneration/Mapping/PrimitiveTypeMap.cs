@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using Microsoft.OpenApi.Models;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
@@ -27,7 +28,7 @@ namespace Dibix.Sdk.CodeGeneration
         };
         // System.ReflectionOnlyType <> System.RuntimeType
         private static readonly IDictionary<Guid, PrimitiveType> GuidMap = ClrTypeMap.ToDictionary(x => x.Key.GUID, x => x.Value);
-        private static readonly IDictionary<SqlDataTypeOption, PrimitiveType> SqlTypeMap = new Dictionary<SqlDataTypeOption, PrimitiveType>
+        private static readonly IDictionary<SqlDataTypeOption, PrimitiveType> ScriptDomTypeMap = new Dictionary<SqlDataTypeOption, PrimitiveType>
         {
             [SqlDataTypeOption.Bit]              = PrimitiveType.Boolean
           , [SqlDataTypeOption.TinyInt]          = PrimitiveType.Byte
@@ -55,6 +56,25 @@ namespace Dibix.Sdk.CodeGeneration
           , [SqlDataTypeOption.NText]            = PrimitiveType.String
           , [SqlDataTypeOption.UniqueIdentifier] = PrimitiveType.UUID
         };
+        private static readonly IDictionary<PrimitiveType, SqlDbType> SqlClientTypeMap = new Dictionary<PrimitiveType, SqlDbType>
+        {
+            [PrimitiveType.Boolean]        = SqlDbType.Bit
+          , [PrimitiveType.Byte]           = SqlDbType.TinyInt
+          , [PrimitiveType.Int16]          = SqlDbType.SmallInt
+          , [PrimitiveType.Int32]          = SqlDbType.Int
+          , [PrimitiveType.Int64]          = SqlDbType.BigInt
+          , [PrimitiveType.Float]          = SqlDbType.Real
+          , [PrimitiveType.Double]         = SqlDbType.Float
+          , [PrimitiveType.Decimal]        = SqlDbType.Decimal
+          , [PrimitiveType.Binary]         = SqlDbType.Binary
+          , [PrimitiveType.Stream]         = SqlDbType.Binary
+          , [PrimitiveType.DateTime]       = SqlDbType.DateTime
+          , [PrimitiveType.DateTimeOffset] = SqlDbType.DateTimeOffset
+          , [PrimitiveType.String]         = SqlDbType.NVarChar
+          , [PrimitiveType.Uri]            = SqlDbType.NVarChar
+          , [PrimitiveType.UUID]           = SqlDbType.UniqueIdentifier
+          , [PrimitiveType.Xml]            = SqlDbType.Xml
+        };
         private static readonly IDictionary<PrimitiveType, Func<OpenApiSchema>> OpenApiTypeMap = new Dictionary<PrimitiveType, Func<OpenApiSchema>>
         {
             [PrimitiveType.Boolean]        = () => new OpenApiSchema { Type = "boolean"                       }
@@ -76,8 +96,9 @@ namespace Dibix.Sdk.CodeGeneration
         };
 
         public static bool TryGetPrimitiveType(Type clrType, out PrimitiveType primitiveType) => GuidMap.TryGetValue(clrType.GUID, out primitiveType);
-
-        public static bool TryGetPrimitiveType(SqlDataTypeOption sqlDataType, out PrimitiveType primitiveType) => SqlTypeMap.TryGetValue(sqlDataType, out primitiveType);
+        public static bool TryGetPrimitiveType(SqlDataTypeOption sqlDataType, out PrimitiveType primitiveType) => ScriptDomTypeMap.TryGetValue(sqlDataType, out primitiveType);
+        
+        public static SqlDbType GetSqlDbType(PrimitiveType primitiveType) => SqlClientTypeMap[primitiveType];
 
         public static Func<OpenApiSchema> GetOpenApiFactory(PrimitiveType primitiveType) => OpenApiTypeMap[primitiveType];
         public static bool TryGetOpenApiFactory(PrimitiveType primitiveType, out Func<OpenApiSchema> factory) => OpenApiTypeMap.TryGetValue(primitiveType, out factory);
