@@ -1,99 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Xml.Linq;
+#if NET
+using Microsoft.Data.SqlClient.Server;
+#else
 using Microsoft.SqlServer.Server;
+#endif
 
 namespace Dibix
 {
-    public static class DbParameterFormatter
+    internal static class TSqlDebugStatementFormatter
     {
-        internal const string TrimSuffix = "<TRUNCATED>";
-        public static int MaxValueLength = 1000;
-
-        public static string CollectParameterDump(ParametersVisitor parameters, bool truncate)
+        public static string CollectTSqlDebugStatement(CommandType commandType, string commandText, ParametersVisitor parameters, bool truncate)
         {
-            string FormatParameter(ParameterDescriptor parameter)
-            {
-                StringBuilder sb = new StringBuilder();
-
-                sb.Append("Parameter ").Append(parameter.Name);
-
-                string parameterType;
-                string parameterDescription = null;
-
-                if (parameter.Value is StructuredType structuredType)
-                {
-                    parameterType = structuredType.TypeName;
-                    parameterDescription = structuredType.Dump(truncate);
-                }
-                else
-                    parameterType = parameter.Type.ToString();
-
-                if (parameterType != null)
-                {
-                    sb.Append(' ')
-                      .Append(parameterType);
-
-                    if (parameter.Size != null)
-                        sb.AppendFormat($"({parameter.Size})");
-                }
-
-                sb.Append(":");
-
-                if (parameter.Value is not StructuredType)
-                {
-                    sb.Append(' ')
-                      .Append(TrimIfNecessary(parameter.Value, truncate) ?? "NULL");
-                }
-
-                if (parameterDescription != null)
-                {
-                    sb.AppendLine()
-                      .Append(parameterDescription);
-                }
-
-                string parameterInfo = sb.ToString();
-                return parameterInfo;
-            }
-
-            ICollection<ParameterDescriptor> parameterDescriptors = CollectParameters(parameters);
-            string parameterInfo = String.Join(Environment.NewLine, parameterDescriptors.Select(FormatParameter));
-            return parameterInfo;
-        }
-
-        public static string CollectSqlDebugStatement(CommandType commandType, string commandText, ParametersVisitor parameters, bool truncate)
-        {
-            ICollection<ParameterDescriptor> parameterDescriptors = CollectParameters(parameters);
-            string debugStatement = CollectParameterDeclarations(parameterDescriptors, initialize: true, truncate: truncate);
+            ICollection<ParameterDescriptor> parameterDescriptors = SqlDiagnosticsUtility.CollectParameters(parameters);
+            string debugStatement = CollectTSqlParameterDeclarations(parameterDescriptors, initialize: true, truncate: truncate);
 
             if (commandType == CommandType.StoredProcedure)
             {
                 string separator = debugStatement.Length > 0 ? $"{Environment.NewLine}{Environment.NewLine}" : null;
-                debugStatement = $"{debugStatement}{separator}{CollectStoredProcedureDebugStatement(commandText, parameterDescriptors)}";
+                debugStatement = $"{debugStatement}{separator}{CollectTSqlStoredProcedureDebugStatement(commandText, parameterDescriptors)}";
             }
 
             return debugStatement;
         }
 
-        public static string TrimIfNecessary(object value, bool trim)
-        {
-            if (value == null)
-                return null;
-
-            string stringValue = value.ToString();
-            if (trim && stringValue.Length > MaxValueLength)
-                stringValue = $"{stringValue.Substring(0, MaxValueLength)}{TrimSuffix}";
-
-            return stringValue;
-        }
-
-        private static string CollectStoredProcedureDebugStatement(string procedureName, ICollection<ParameterDescriptor> parameters)
+        private static string CollectTSqlStoredProcedureDebugStatement(string procedureName, ICollection<ParameterDescriptor> parameters)
         {
             string debugStatement = $"EXEC {procedureName}";
 
@@ -108,7 +44,7 @@ namespace Dibix
             return debugStatement;
         }
 
-        private static string CollectParameterDeclarations(IEnumerable<ParameterDescriptor> parameters, bool initialize, bool truncate, params DbType[] dbTypeFilter)
+        private static string CollectTSqlParameterDeclarations(IEnumerable<ParameterDescriptor> parameters, bool initialize, bool truncate, params DbType[] dbTypeFilter)
         {
             ICollection<ParameterDescriptor> filteredParameters = parameters.Where(x => !dbTypeFilter.Any() || dbTypeFilter.Contains(x.Type)).ToArray();
             if (!filteredParameters.Any())
@@ -168,20 +104,13 @@ namespace Dibix
             return debugStatement;
         }
 
-        private static string NormalizeIdentifier(string identifier)
-        {
-            Guard.IsNotNullOrEmpty(identifier, nameof(identifier));
-            IList<string> parts = identifier.Split('.').Select(x => x.TrimStart('[').TrimEnd(']')).ToList();
-            return String.Join(".", parts.Select(x => $"[{x}]"));
-        }
-
         private static string GetConstantLiteral(object value, bool truncate) => value switch
         {
             null or DBNull => "NULL",
             StructuredType => throw new ArgumentOutOfRangeException(nameof(value), value, null),
             byte[] binary => GetConstantLiteral(binary),
             Stream stream => GetConstantLiteral(stream),
-            string or char or Guid or Uri or XElement => $"N'{TrimIfNecessary(value, truncate)}'",
+            string or char or Guid or Uri or XElement => $"N'{SqlDiagnosticsUtility.TrimParameterValueIfNecessary(value, truncate)}'",
             DateTime dateTime => $"CAST(N'{dateTime:s}.{dateTime:fff}' AS DATETIME)",
             DateTimeOffset dateTimeOffset => $"CAST(N'{dateTimeOffset:O}' AS DATETIMEOFFSET)",
             bool boolValue => boolValue ? "1" : "0",
@@ -206,6 +135,13 @@ namespace Dibix
         {
             string value = binary.Count <= 100 ? $"0x{String.Join(null, binary.Select(x => $"{x:x2}"))}" : $"<TRUNCATED> /* {binary.Count} bytes */";
             return value;
+        }
+
+        private static string NormalizeIdentifier(string identifier)
+        {
+            Guard.IsNotNullOrEmpty(identifier, nameof(identifier));
+            IList<string> parts = identifier.Split('.').Select(x => x.TrimStart('[').TrimEnd(']')).ToList();
+            return String.Join(".", parts.Select(x => $"[{x}]"));
         }
 
         private static string ToDataTypeString(DbType dbType, object value, int? size)
@@ -241,29 +177,6 @@ namespace Dibix
                 case DbType.DateTime2: return "DATETIME2";
                 case DbType.DateTimeOffset: return "DATETIMEOFFSET";
                 default: return $"<unknown({nameof(DbType)}.{dbType})>"; // throw new ArgumentOutOfRangeException(nameof(dbType), dbType, null);
-            }
-        }
-
-        private static ICollection<ParameterDescriptor> CollectParameters(ParametersVisitor parameters)
-        {
-            ICollection<ParameterDescriptor> statements = new Collection<ParameterDescriptor>();
-            parameters.VisitInputParameters((name, type, value, size, _, _) => statements.Add(new ParameterDescriptor(name, type, value, size)));
-            return statements;
-        }
-
-        private readonly struct ParameterDescriptor
-        {
-            public string Name { get; }
-            public DbType Type { get; }
-            public object Value { get; }
-            public int? Size { get; }
-
-            public ParameterDescriptor(string name, DbType type, object value, int? size)
-            {
-                Name = name;
-                Type = type;
-                Value = value;
-                Size = size;
             }
         }
     }

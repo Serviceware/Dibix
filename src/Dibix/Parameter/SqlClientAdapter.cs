@@ -1,37 +1,43 @@
 using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using Microsoft.SqlServer.Server;
+#if NET
+using Microsoft.Data.SqlClient;
+#else
+using System.Data.SqlClient;
+#endif
 
 namespace Dibix
 {
-    public abstract class SqlClientAdapter
+    public sealed class SqlClientAdapter : DbProviderAdapter<SqlConnection>
     {
-        private Action<string> _onInfoMessage;
+        public override bool UsesTSql => true;
 
-        public abstract bool IsSqlClient { get; }
-
-        public void AttachInfoMessageHandler(Action<string> handler)
+        public SqlClientAdapter(SqlConnection connection) : base(connection)
         {
-            _onInfoMessage = handler;
+            connection.InfoMessage += OnInfoMessage;
         }
 
-        public abstract void DetachInfoMessageHandler();
-
-        public abstract int? TryGetSqlExceptionNumber(Exception exception);
-
-        public void MapStructuredTypeToParameter(IDbDataParameter parameter, StructuredType type)
+        protected override void AttachInfoMessageHandler()
         {
-            IReadOnlyCollection<SqlDataRecord> records = type.GetRecords();
-            parameter.Value = records.Any() ? GetStructuredTypeParameterValue(type) : null;
-            SetProviderSpecificParameterProperties(parameter, SqlDbType.Structured, type.TypeName);
+            Connection.InfoMessage += OnInfoMessage;
         }
 
-        protected abstract object GetStructuredTypeParameterValue(StructuredType type);
+        public override void DetachInfoMessageHandler()
+        {
+            Connection.InfoMessage -= OnInfoMessage;
+        }
 
-        protected abstract void SetProviderSpecificParameterProperties(IDbDataParameter parameter, SqlDbType sqlDbType, string typeName);
+        public override int? TryGetSqlErrorNumber(Exception exception) => exception is SqlException sqlException ? sqlException.Number : null;
 
-        protected void OnInfoMessage(string message) => _onInfoMessage?.Invoke(message);
+        protected override object GetStructuredTypeParameterValue(StructuredType type) => type.GetRecords();
+
+        protected override void SetProviderSpecificParameterProperties(IDbDataParameter parameter, SqlDbType sqlDbType, string typeName)
+        {
+            SqlParameter sqlParameter = (SqlParameter)parameter;
+            sqlParameter.SqlDbType = sqlDbType;
+            sqlParameter.TypeName = typeName;
+        }
+
+        private void OnInfoMessage(object sender, SqlInfoMessageEventArgs e) => OnInfoMessage(e.Message);
     }
 }

@@ -5,7 +5,7 @@ namespace Dibix
 {
     internal static class SingleExtensions
     {
-        internal static T Single<T>(this IEnumerable<T> result, string commandText, CommandType commandType, ParametersVisitor parameters, bool defaultIfEmpty, bool isSqlClient)
+        internal static T Single<T>(this IEnumerable<T> result, string commandText, CommandType commandType, ParametersVisitor parameters, bool defaultIfEmpty, bool collectTSqlDebugStatement)
         {
             using IEnumerator<T> enumerator = result.GetEnumerator();
 
@@ -15,7 +15,7 @@ namespace Dibix
             {
                 current = enumerator.Current;
                 if (enumerator.MoveNext())
-                    throw DatabaseAccessException.Create(DatabaseAccessErrorCode.SequenceContainsMoreThanOneElement, commandText, commandType, parameters, isSqlClient);
+                    throw DatabaseAccessException.Create(DatabaseAccessErrorCode.SequenceContainsMoreThanOneElement, commandText, commandType, parameters, collectTSqlDebugStatement);
             }
             else if (defaultIfEmpty)
             {
@@ -23,7 +23,7 @@ namespace Dibix
             }
             else
             {
-                throw DatabaseAccessException.Create(DatabaseAccessErrorCode.SequenceContainsNoElements, commandText, commandType, parameters, isSqlClient);
+                throw DatabaseAccessException.Create(DatabaseAccessErrorCode.SequenceContainsNoElements, commandText, commandType, parameters, collectTSqlDebugStatement);
             }
 
             return current;

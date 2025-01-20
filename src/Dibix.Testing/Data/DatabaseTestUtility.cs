@@ -4,6 +4,11 @@ using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
+#if NET
+using Microsoft.Data.SqlClient;
+#else
+using System.Data.SqlClient;
+#endif
 
 namespace Dibix.Testing.Data
 {
@@ -42,7 +47,7 @@ namespace Dibix.Testing.Data
                 _defaultCommandTimeout = defaultCommandTimeout;
                 _connectionAccessor = new Lazy<DbConnection>(() =>
                 {
-                    DbConnection connection = CreateConnection(connectionString);
+                    DbConnection connection = new SqlConnection(connectionString);
                     connection.Open();
                     return connection;
                 });
@@ -87,15 +92,6 @@ namespace Dibix.Testing.Data
             }
             */
 
-            private static DbConnection CreateConnection(string connectionString)
-            {
-#if NETFRAMEWORK
-                return new System.Data.SqlClient.SqlConnection(connectionString);
-#else
-                return new Microsoft.Data.SqlClient.SqlConnection(connectionString);
-#endif
-            }
-
             void IDisposable.Dispose()
             {
                 if (_connectionAccessor.IsValueCreated)
@@ -108,7 +104,7 @@ namespace Dibix.Testing.Data
             private readonly RaiseErrorWithNoWaitBehavior _raiseErrorWithNoWaitBehavior;
             private readonly int? _defaultCommandTimeout;
 
-            public DapperDatabaseAccessor(DbConnection connection, RaiseErrorWithNoWaitBehavior raiseErrorWithNoWaitBehavior, int? defaultCommandTimeout) : base(connection, defaultCommandTimeout: defaultCommandTimeout, sqlClientAdapter: CreateSqlClientAdapter(connection))
+            public DapperDatabaseAccessor(DbConnection connection, RaiseErrorWithNoWaitBehavior raiseErrorWithNoWaitBehavior, int? defaultCommandTimeout) : base(connection, defaultCommandTimeout: defaultCommandTimeout)
             {
                 _raiseErrorWithNoWaitBehavior = raiseErrorWithNoWaitBehavior;
                 _defaultCommandTimeout = defaultCommandTimeout;
@@ -137,15 +133,6 @@ namespace Dibix.Testing.Data
             protected override void DisposeConnection()
             {
                 // Will be disposed at the end of the test
-            }
-
-            private static SqlClientAdapter CreateSqlClientAdapter(DbConnection connection)
-            {
-#if NETFRAMEWORK
-                return new SystemSqlClientAdapter(connection);
-#else
-                return new MicrosoftSqlClientAdapter(connection);
-#endif
             }
         }
     }

@@ -17,7 +17,7 @@ namespace Dibix.Dapper
         #endregion
 
         #region Constructor
-        public DapperGridResultReader(SqlMapper.GridReader reader, string commandText, CommandType commandType, ParametersVisitor parameters, SqlClientAdapter sqlClientAdapter) : base(commandText, commandType, parameters, sqlClientAdapter)
+        public DapperGridResultReader(SqlMapper.GridReader reader, string commandText, CommandType commandType, ParametersVisitor parameters, DbProviderAdapter dbProviderAdapter) : base(commandText, commandType, parameters, dbProviderAdapter)
         {
             _reader = reader;
         }

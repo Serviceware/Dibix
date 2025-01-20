@@ -25,12 +25,10 @@ namespace Dibix.Tests
             };
 
             Mock<DbConnection> connection = new Mock<DbConnection>(MockBehavior.Strict);
-            Mock<SqlClientAdapter> sqlClientAdapter = new Mock<SqlClientAdapter>(MockBehavior.Strict);
-            Mock<DatabaseAccessor> accessor = new Mock<DatabaseAccessor>(connection.Object, sqlClientAdapter.Object);
+            Mock<DatabaseAccessor> accessor = new Mock<DatabaseAccessor>(connection.Object);
             Mock<ParametersVisitor> parametersVisitor = new Mock<ParametersVisitor>(MockBehavior.Strict);
 
             connection.Protected().Setup(nameof(IDisposable.Dispose), exactParameterMatch: true, false);
-            sqlClientAdapter.SetupGet(x => x.IsSqlClient).Returns(true);
             accessor.Protected()
                     .Setup<IEnumerable<Character>>("QueryMany", new[] { typeof(Character) }, exactParameterMatch: true, "commandText", CommandType.Text, ItExpr.Is<ParametersVisitor>(x => x == parametersVisitor.Object), new[] { typeof(Character), typeof(Name), typeof(string), typeof(Name) }, ItExpr.IsAny<Func<object[], Character>>(), "x,x,x", false)
                     .Returns<string, CommandType, ParametersVisitor, Type[], Func<object[], Character>, string, bool>((_, _, _, _, map, _, _) => rows.Select(map));
@@ -68,8 +66,7 @@ namespace Dibix.Tests
             };
 
             Mock<DbConnection> connection = new Mock<DbConnection>(MockBehavior.Strict);
-            Mock<SqlClientAdapter> sqlClientAdapter = new Mock<SqlClientAdapter>(MockBehavior.Strict);
-            Mock<DatabaseAccessor> accessor = new Mock<DatabaseAccessor>(connection.Object, sqlClientAdapter.Object);
+            Mock<DatabaseAccessor> accessor = new Mock<DatabaseAccessor>(connection.Object);
             Mock<ParametersVisitor> parametersVisitor = new Mock<ParametersVisitor>(MockBehavior.Strict);
 
             connection.Protected().Setup(nameof(IDisposable.Dispose), exactParameterMatch: true, false);
@@ -140,12 +137,10 @@ namespace Dibix.Tests
             };
 
             Mock<DbConnection> connection = new Mock<DbConnection>(MockBehavior.Strict);
-            Mock<SqlClientAdapter> sqlClientAdapter = new Mock<SqlClientAdapter>(MockBehavior.Strict);
-            Mock<DatabaseAccessor> accessor = new Mock<DatabaseAccessor>(connection.Object, sqlClientAdapter.Object);
-            Mock<MultipleResultReader> multipleResultReader = new Mock<MultipleResultReader>(MockBehavior.Strict, null, null, null, sqlClientAdapter.Object);
+            Mock<DatabaseAccessor> accessor = new Mock<DatabaseAccessor>(connection.Object);
+            Mock<MultipleResultReader> multipleResultReader = new Mock<MultipleResultReader>(MockBehavior.Strict, null, null, null, null);
 
             connection.Protected().Setup(nameof(IDisposable.Dispose), exactParameterMatch: true, false);
-            sqlClientAdapter.SetupGet(x => x.IsSqlClient).Returns(true);
             accessor.Protected()
                     .Setup<IMultipleResultReader>("QueryMultiple", exactParameterMatch: true, "commandText", CommandType.Text, ItExpr.Is<ParametersVisitor>(x => x == ParametersVisitor.Empty))
                     .Returns(multipleResultReader.Object);

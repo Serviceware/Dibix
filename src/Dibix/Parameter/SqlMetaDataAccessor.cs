@@ -4,7 +4,11 @@ using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+#if NET
+using Microsoft.Data.SqlClient.Server;
+#else
 using Microsoft.SqlServer.Server;
+#endif
 
 namespace Dibix
 {

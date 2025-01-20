@@ -2,7 +2,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+#if NET
+using Microsoft.Data.SqlClient.Server;
+#else
 using Microsoft.SqlServer.Server;
+#endif
 
 namespace Dibix
 {

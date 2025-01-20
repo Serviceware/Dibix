@@ -185,7 +185,7 @@ INSERT INTO @b ([intValue], [stringValue])
 
 EXEC x @a = @a
      , @b = @b
-     , @c = @c", ex.SqlDebugStatement);
+     , @c = @c", ex.TSqlDebugStatement);
                 Assert.AreEqual(@"Dibix.DatabaseAccessException: Oops
 CommandType: StoredProcedure
 CommandText: x
@@ -241,7 +241,7 @@ DECLARE @b [x]
 DECLARE @c NVARCHAR(5)    = N'value'
 INSERT INTO @b ([intValue], [stringValue])
         VALUES (1         , N'I'         )
-             , (2         , N'II'        )", ex.SqlDebugStatement);
+             , (2         , N'II'        )", ex.TSqlDebugStatement);
                 Assert.AreEqual(@"Dibix.DatabaseAccessException: Oops
 CommandType: Text
 CommandText: <Inline>

@@ -2,7 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+#if NET
+using Microsoft.Data.SqlClient.Server;
+#else
 using Microsoft.SqlServer.Server;
+#endif
 
 namespace Dibix
 {
@@ -15,7 +19,7 @@ namespace Dibix
             {
                 object[] values = new object[x.FieldCount];
                 x.GetValues(values);
-                return values.Select(y => y != DBNull.Value ? DbParameterFormatter.TrimIfNecessary(y, truncate) : "NULL").ToArray();
+                return values.Select(y => y != DBNull.Value ? SqlDiagnosticsUtility.TrimParameterValueIfNecessary(y, truncate) : "NULL").ToArray();
             }).ToArray();
             string dump = ToTable(columns, rows);
             return dump;
