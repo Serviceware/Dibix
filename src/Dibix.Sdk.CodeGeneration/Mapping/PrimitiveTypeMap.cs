@@ -66,8 +66,8 @@ namespace Dibix.Sdk.CodeGeneration
           , [PrimitiveType.Float]          = SqlDbType.Real
           , [PrimitiveType.Double]         = SqlDbType.Float
           , [PrimitiveType.Decimal]        = SqlDbType.Decimal
-          , [PrimitiveType.Binary]         = SqlDbType.Binary
-          , [PrimitiveType.Stream]         = SqlDbType.Binary
+          , [PrimitiveType.Binary]         = SqlDbType.VarBinary
+          , [PrimitiveType.Stream]         = SqlDbType.VarBinary
           , [PrimitiveType.DateTime]       = SqlDbType.DateTime
           , [PrimitiveType.DateTimeOffset] = SqlDbType.DateTimeOffset
           , [PrimitiveType.String]         = SqlDbType.NVarChar
