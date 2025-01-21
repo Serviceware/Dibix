@@ -32,11 +32,11 @@ namespace Dibix.Http.Server
         {
             if (action.Authorization.Any())
             {
-                // Clone the arguments, so they don't overwrite the endpoint arguments.
-                // For example having a 'productid' parameter in both authorization behavior and endpoint with different meanings and different types can cause collisions.
-                IDictionary<string, object> authorizationArguments = arguments.ToDictionary(x => x.Key, x => x.Value);
                 foreach (HttpAuthorizationDefinition authorizationDefinition in action.Authorization)
                 {
+                    // Clone the arguments, so they don't overwrite the endpoint arguments.
+                    // For example having a 'productid' parameter in both authorization behavior and endpoint with different meanings and different types can cause collisions.
+                    IDictionary<string, object> authorizationArguments = arguments.ToDictionary(x => x.Key, x => x.Value);
                     _ = await Execute(authorizationDefinition, request, authorizationArguments, controllerActivator, parameterDependencyResolver, cancellationToken).ConfigureAwait(false);
                 }
             }
