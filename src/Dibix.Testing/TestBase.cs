@@ -18,7 +18,7 @@ namespace Dibix.Testing
         private readonly Assembly _assembly;
         private TestContext _testContext;
         private TestOutputWriter _testOutputHelper;
-        private TestResultComposer _testResultComposer;
+        private TestResultFileManager _testResultFileManager;
         private IDisposable _unhandledExceptionDiagnostics;
         #endregion
 
@@ -36,14 +36,14 @@ namespace Dibix.Testing
         protected virtual bool AttachOutputObserver => false;
         protected virtual TestConfigurationValidationBehavior ConfigurationValidationBehavior => TestDefaults.ValidationBehavior;
         protected virtual TextWriter Out => TestOutputHelper;
-        protected string RunDirectory => TestResultComposer.RunDirectory;
-        protected string TestDirectory => TestResultComposer.TestDirectory;
+        protected string RunDirectory => TestResultFileManager.RunDirectory;
+        protected string TestDirectory => TestResultFileManager.TestDirectory;
         protected virtual bool UseDedicatedTestResultsDirectory => true;
-        protected bool IsAssemblyInitialize { get; private set; }
-        private TestResultComposer TestResultComposer
+        protected TestClassInstanceScope Scope { get; private set; }
+        private TestResultFileManager TestResultFileManager
         {
-            get => SafeGetProperty(ref _testResultComposer);
-            set => _testResultComposer = value;
+            get => SafeGetProperty(ref _testResultFileManager);
+            set => _testResultFileManager = value;
         }
         private static Exception AssemblyInitializeException { get; set; }
         #endregion
@@ -57,28 +57,10 @@ namespace Dibix.Testing
 
         #region Public Methods
         [TestInitialize]
-        public async Task OnTestInitialize()
+        public async Task TestInitialize()
         {
-            TestResultComposer = new TestResultComposer(TestContext, UseDedicatedTestResultsDirectory, IsAssemblyInitialize);
-
-            // Unfortunately, when an exception occurs during AssemblyInitialize, the result attachments are no longer collected.
-            // Therefore, we delay throwing the exception until the first test is running.
-            // We place it just after the TestResultComposer is initialized and prepared the existing run attachments
-            if (AssemblyInitializeException != null)
-                throw AssemblyInitializeException;
-
-            string outputFileName = IsAssemblyInitialize ? "AssemblyInitialize.log" : "Output.log";
-            TestOutputHelper = new TestOutputWriter(TestContext, TestResultComposer, outputToFile: true, fileName: outputFileName, IsAssemblyInitialize, tailOutput: AttachOutputObserver);
-            WriteLine($"Starting execution of test: {TestContextUtility.GetTestName(TestContext)}");
-
-#if NETCOREAPP
-            if (OperatingSystem.IsWindows())
-#endif
-            {
-                _unhandledExceptionDiagnostics = new UnhandledExceptionDiagnostics(TestResultComposer, Out, LogException, ConfigureEventLogDiagnostics);
-            }
-
-            await OnTestInitialized().ConfigureAwait(false);
+            Scope = TestClassInstanceScope.TestInitialize;
+            await OnTestInitialize().ConfigureAwait(false);
         }
         #endregion
 
@@ -93,7 +75,7 @@ namespace Dibix.Testing
             {
                 using T instance = new T();
                 instance.TestContext = testContext;
-                instance.IsAssemblyInitialize = true;
+                instance.Scope = TestClassInstanceScope.AssemblyInitialize;
                 await instance.OnTestInitialize().ConfigureAwait(false);
                 await instance.OnAssemblyInitialize().ConfigureAwait(false);
             }
@@ -133,24 +115,24 @@ namespace Dibix.Testing
             if (Equals(expectedNormalized, actualNormalized))
                 return;
 
-            TestResultComposer.AddFileComparison(expectedNormalized, actualNormalized, outputName, extension);
+            TestResultFileManager.AddFileComparison(expectedNormalized, actualNormalized, outputName, extension);
             throw new AssertTextFailedException(expectedNormalized, actualNormalized, message);
         }
 
-        protected void LogException(Exception exception) => TestResultComposer.AddTestFile("AdditionalErrors.txt", $@"An error occured while collecting the last event log errors
+        protected void LogException(Exception exception) => TestResultFileManager.AddTestFile("AdditionalErrors.txt", $@"An error occured while collecting the last event log errors
 {exception}");
 
         protected virtual void ConfigureEventLogDiagnostics(EventLogDiagnosticsOptions options) { }
 
-        protected string AddTestFile(string fileName) => TestResultComposer.AddTestFile(fileName);
-        protected string AddTestFile(string fileName, string content) => TestResultComposer.AddTestFile(fileName, content);
+        protected string AddTestFile(string fileName) => TestResultFileManager.AddTestFile(fileName);
+        protected string AddTestFile(string fileName, string content) => TestResultFileManager.AddTestFile(fileName, content);
 
-        protected string ImportTestFile(string filePath) => TestResultComposer.ImportTestFile(filePath);
+        protected string ImportTestFile(string filePath) => TestResultFileManager.ImportTestFile(filePath);
 
-        protected string AddTestRunFile(string fileName) => TestResultComposer.AddTestRunFile(fileName);
-        protected string AddTestRunFile(string fileName, string content) => TestResultComposer.AddTestRunFile(fileName, content);
+        protected string AddTestRunFile(string fileName) => TestResultFileManager.AddTestRunFile(fileName);
+        protected string AddTestRunFile(string fileName, string content) => TestResultFileManager.AddTestRunFile(fileName, content);
         
-        protected string ImportTestRunFile(string filePath) => TestResultComposer.ImportTestRunFile(filePath);
+        protected string ImportTestRunFile(string filePath) => TestResultFileManager.ImportTestRunFile(filePath);
 
         protected static void AssertAreEqual<T>(IEnumerable<T> expected, IEnumerable<T> actual) => Assert.IsTrue(expected.SequenceEqual(actual), "expected.SequenceEqual(actual)");
 
@@ -196,6 +178,29 @@ Value: {instance}");
         #endregion
 
         #region Private
+        private async Task OnTestInitialize()
+        {
+            TestResultFileManager = TestResultFileManager.FromTestContext(TestContext, UseDedicatedTestResultsDirectory, Scope);
+
+            // Unfortunately, when an exception occurs during AssemblyInitialize, the result attachments are no longer collected.
+            // Therefore, we delay throwing the exception until the first test is running.
+            // We place it just after the TestResultFileManager is initialized and prepared the existing run attachments
+            if (AssemblyInitializeException != null)
+                throw AssemblyInitializeException;
+
+            TestOutputHelper = new TestOutputWriter(TestContext, TestResultFileManager, outputToFile: true, Scope, tailOutput: AttachOutputObserver);
+            WriteLine($"Starting execution of test: {TestContextUtility.GetTestName(TestContext)}");
+
+#if NETCOREAPP
+            if (OperatingSystem.IsWindows())
+#endif
+            {
+                _unhandledExceptionDiagnostics = new UnhandledExceptionDiagnostics(TestResultFileManager, Out, LogException, ConfigureEventLogDiagnostics);
+            }
+
+            await OnTestInitialized().ConfigureAwait(false);
+        }
+
         private static T SafeGetProperty<T>(ref T field, [CallerMemberName] string propertyName = null) where T : class
         {
             if (field == null)
@@ -222,7 +227,7 @@ Value: {instance}");
             {
                 _unhandledExceptionDiagnostics?.Dispose();
                 _testOutputHelper?.Dispose();
-                _testResultComposer?.Complete();
+                _testResultFileManager?.Complete();
             }
         }
         #endregion
@@ -255,7 +260,7 @@ Value: {instance}");
         {
             OnConfigurationLoaded(configuration);
 
-            if (!IsAssemblyInitialize)
+            if (Scope == TestClassInstanceScope.TestInitialize)
                 _ = AddTestFile("appsettings.json", JsonConvert.SerializeObject(configuration, Formatting.Indented));
         }
     }

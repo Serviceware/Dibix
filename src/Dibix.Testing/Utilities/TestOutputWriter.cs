@@ -17,14 +17,14 @@ namespace Dibix.Testing
 
         public override Encoding Encoding => Encoding.UTF8;
 
-        public TestOutputWriter(TestContext testContext, TestResultComposer testResultComposer, bool outputToFile, string fileName, bool isAssemblyInitialize, bool tailOutput)
+        public TestOutputWriter(TestContext testContext, TestResultFileManager testResultFileManager, bool outputToFile, TestClassInstanceScope scope, bool tailOutput)
         {
             _outputToFile = outputToFile;
 
             if (!_outputToFile) 
                 return;
 
-            string outputPath = isAssemblyInitialize ? testResultComposer.AddTestRunFile(fileName) : testResultComposer.AddTestFile(fileName);
+            string outputPath = AddResultFile(testResultFileManager, scope);
             _output = new StreamWriter(outputPath);
 
             if (!tailOutput) 
@@ -104,6 +104,13 @@ namespace Dibix.Testing
             if (_outputToFile)
                 _output.WriteLine();
         }
+
+        private static string AddResultFile(TestResultFileManager testResultFileManager, TestClassInstanceScope scope) => scope switch
+        {
+            TestClassInstanceScope.AssemblyInitialize => testResultFileManager.AddTestRunFile("AssemblyInitialize.log"),
+            TestClassInstanceScope.TestInitialize => testResultFileManager.AddTestFile("Output.log"),
+            _ => throw new ArgumentOutOfRangeException(nameof(scope), scope, null)
+        };
 
         private sealed class TestOutputHelperTraceListener : TraceListener
         {
