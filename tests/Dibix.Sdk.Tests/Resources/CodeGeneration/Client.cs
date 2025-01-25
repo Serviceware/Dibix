@@ -25,6 +25,8 @@ namespace Dibix.Sdk.Tests.DomainModel
     {
         public int Id { get; set; }
         public string Title { get; set; }
+        public byte[] Data { get; set; }
+        public decimal Value { get; set; }
     }
 
     public sealed class AnotherInputContract
@@ -60,6 +62,8 @@ namespace Dibix.Sdk.Tests.DomainModel
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public byte[] Data { get; set; }
+        public decimal Value { get; set; }
     }
 
     public sealed class GenericContract

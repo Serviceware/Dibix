@@ -1,6 +1,8 @@
 ﻿{
   "Entry": {
     "Id": "int32",
-    "Name": "string"
+    "Name": "string",
+    "Data": "binary",
+    "Value": "decimal"
   }
 }

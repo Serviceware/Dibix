@@ -39,7 +39,10 @@
           "IsOptional": false,
           "IsDiscriminator": false,
           "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         },
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -74,7 +77,10 @@
           "IsOptional": false,
           "IsDiscriminator": false,
           "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         },
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -109,7 +115,10 @@
           "IsOptional": true,
           "IsDiscriminator": false,
           "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         },
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -143,7 +152,10 @@
           "IsOptional": false,
           "IsDiscriminator": false,
           "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         },
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -178,7 +190,10 @@
           "IsOptional": false,
           "IsDiscriminator": false,
           "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         },
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -213,7 +228,10 @@
           "IsOptional": false,
           "IsDiscriminator": false,
           "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         },
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -248,7 +266,10 @@
           "IsOptional": false,
           "IsDiscriminator": false,
           "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         },
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -283,7 +304,10 @@
           "IsOptional": false,
           "IsDiscriminator": false,
           "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         },
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -317,7 +341,10 @@
           "IsOptional": false,
           "IsDiscriminator": false,
           "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         }
       ],
       "AbsoluteNamespace": "Dibix.Sdk.Tests.DomainModel",
@@ -369,7 +396,10 @@
           "IsOptional": false,
           "IsDiscriminator": false,
           "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         }
       ],
       "AbsoluteNamespace": "Dibix.Sdk.Tests.DomainModel",
@@ -421,7 +451,10 @@
           "IsOptional": false,
           "IsDiscriminator": false,
           "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         },
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -456,7 +489,86 @@
           "IsOptional": false,
           "IsDiscriminator": false,
           "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
+        },
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
+          "Name": {
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
+            "Value": "Data",
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Contracts/AnotherEntry.json",
+              "Line": 5,
+              "Column": 6
+            }
+          },
+          "Type": {
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "Type": "Binary",
+            "Size": null,
+            "DisplayName": "Binary",
+            "IsNullable": false,
+            "IsEnumerable": false,
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Contracts/AnotherEntry.json",
+              "Line": 2,
+              "Column": 19
+            }
+          },
+          "DefaultValue": null,
+          "DateTimeKind": "Unspecified",
+          "SerializationBehavior": "Always",
+          "IsPartOfKey": false,
+          "IsOptional": false,
+          "IsDiscriminator": false,
+          "IsObfuscated": false,
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
+        },
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
+          "Name": {
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
+            "Value": "Value",
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Contracts/AnotherEntry.json",
+              "Line": 6,
+              "Column": 6
+            }
+          },
+          "Type": {
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "Type": "Decimal",
+            "Size": null,
+            "DisplayName": "Decimal",
+            "IsNullable": false,
+            "IsEnumerable": false,
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Contracts/AnotherEntry.json",
+              "Line": 2,
+              "Column": 19
+            }
+          },
+          "DefaultValue": null,
+          "DateTimeKind": "Unspecified",
+          "SerializationBehavior": "Always",
+          "IsPartOfKey": false,
+          "IsOptional": false,
+          "IsDiscriminator": false,
+          "IsObfuscated": false,
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         }
       ],
       "AbsoluteNamespace": "Dibix.Sdk.Tests.DomainModel",
@@ -551,7 +663,10 @@
           "IsOptional": false,
           "IsDiscriminator": false,
           "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         },
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -586,7 +701,86 @@
           "IsOptional": false,
           "IsDiscriminator": false,
           "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
+        },
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
+          "Name": {
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
+            "Value": "Data",
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Contracts/Entry.json",
+              "Line": 5,
+              "Column": 6
+            }
+          },
+          "Type": {
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "Type": "Binary",
+            "Size": null,
+            "DisplayName": "Binary",
+            "IsNullable": false,
+            "IsEnumerable": false,
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Contracts/Entry.json",
+              "Line": 2,
+              "Column": 12
+            }
+          },
+          "DefaultValue": null,
+          "DateTimeKind": "Unspecified",
+          "SerializationBehavior": "Always",
+          "IsPartOfKey": false,
+          "IsOptional": false,
+          "IsDiscriminator": false,
+          "IsObfuscated": false,
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
+        },
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
+          "Name": {
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
+            "Value": "Value",
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Contracts/Entry.json",
+              "Line": 6,
+              "Column": 6
+            }
+          },
+          "Type": {
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "Type": "Decimal",
+            "Size": null,
+            "DisplayName": "Decimal",
+            "IsNullable": false,
+            "IsEnumerable": false,
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Contracts/Entry.json",
+              "Line": 2,
+              "Column": 12
+            }
+          },
+          "DefaultValue": null,
+          "DateTimeKind": "Unspecified",
+          "SerializationBehavior": "Always",
+          "IsPartOfKey": false,
+          "IsOptional": false,
+          "IsDiscriminator": false,
+          "IsObfuscated": false,
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         }
       ],
       "AbsoluteNamespace": "Dibix.Sdk.Tests.DomainModel",
@@ -638,7 +832,10 @@
           "IsOptional": false,
           "IsDiscriminator": false,
           "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         },
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -699,7 +896,10 @@
           "IsOptional": false,
           "IsDiscriminator": false,
           "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         },
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -734,7 +934,10 @@
           "IsOptional": false,
           "IsDiscriminator": true,
           "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         },
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -790,7 +993,10 @@
           "IsOptional": false,
           "IsDiscriminator": false,
           "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         },
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -825,7 +1031,10 @@
           "IsOptional": false,
           "IsDiscriminator": false,
           "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         },
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -860,7 +1069,10 @@
           "IsOptional": false,
           "IsDiscriminator": false,
           "IsObfuscated": false,
-          "IsRelativeHttpsUrl": true
+          "IsRelativeHttpsUrl": true,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         }
       ],
       "AbsoluteNamespace": "Dibix.Sdk.Tests.DomainModel",
@@ -961,7 +1173,10 @@
           "IsOptional": false,
           "IsDiscriminator": false,
           "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         },
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -996,7 +1211,10 @@
           "IsOptional": false,
           "IsDiscriminator": false,
           "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         },
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -1031,7 +1249,10 @@
           "IsOptional": true,
           "IsDiscriminator": false,
           "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         },
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -1065,7 +1286,10 @@
           "IsOptional": false,
           "IsDiscriminator": false,
           "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         },
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -1100,7 +1324,10 @@
           "IsOptional": false,
           "IsDiscriminator": false,
           "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         },
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -1135,7 +1362,10 @@
           "IsOptional": false,
           "IsDiscriminator": false,
           "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         },
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -1170,7 +1400,10 @@
           "IsOptional": false,
           "IsDiscriminator": false,
           "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         },
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -1205,7 +1438,10 @@
           "IsOptional": false,
           "IsDiscriminator": false,
           "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         },
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -1240,7 +1476,10 @@
           "IsOptional": false,
           "IsDiscriminator": false,
           "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         }
       ],
       "AbsoluteNamespace": "Dibix.Sdk.Tests.DomainModel",
@@ -1283,7 +1522,7 @@
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Types/dbx_codeanalysis_udt_generic.sql",
               "Line": 4,
-              "Column": 9
+              "Column": 10
             }
           },
           "DefaultValue": null,
@@ -1293,7 +1532,10 @@
           "IsOptional": false,
           "IsDiscriminator": false,
           "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         },
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -1318,7 +1560,7 @@
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Types/dbx_codeanalysis_udt_generic.sql",
               "Line": 5,
-              "Column": 12
+              "Column": 13
             }
           },
           "DefaultValue": null,
@@ -1328,7 +1570,86 @@
           "IsOptional": false,
           "IsDiscriminator": false,
           "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": 50,
+          "Precision": null,
+          "Scale": null
+        },
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
+          "Name": {
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
+            "Value": "data",
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Types/dbx_codeanalysis_udt_generic.sql",
+              "Line": 6,
+              "Column": 5
+            }
+          },
+          "Type": {
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "Type": "Binary",
+            "Size": null,
+            "DisplayName": "Binary",
+            "IsNullable": true,
+            "IsEnumerable": false,
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Types/dbx_codeanalysis_udt_generic.sql",
+              "Line": 6,
+              "Column": 13
+            }
+          },
+          "DefaultValue": null,
+          "DateTimeKind": "Unspecified",
+          "SerializationBehavior": "Always",
+          "IsPartOfKey": false,
+          "IsOptional": false,
+          "IsDiscriminator": false,
+          "IsObfuscated": false,
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": 500,
+          "Precision": null,
+          "Scale": null
+        },
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
+          "Name": {
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
+            "Value": "value",
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Types/dbx_codeanalysis_udt_generic.sql",
+              "Line": 7,
+              "Column": 5
+            }
+          },
+          "Type": {
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "Type": "Decimal",
+            "Size": null,
+            "DisplayName": "Decimal",
+            "IsNullable": true,
+            "IsEnumerable": false,
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Types/dbx_codeanalysis_udt_generic.sql",
+              "Line": 7,
+              "Column": 13
+            }
+          },
+          "DefaultValue": null,
+          "DateTimeKind": "Unspecified",
+          "SerializationBehavior": "Always",
+          "IsPartOfKey": false,
+          "IsOptional": false,
+          "IsDiscriminator": false,
+          "IsObfuscated": false,
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": 15,
+          "Scale": 3
         }
       ],
       "AbsoluteNamespace": "Dibix.Sdk.Tests.Data",
@@ -1381,7 +1702,10 @@
           "IsOptional": false,
           "IsDiscriminator": false,
           "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         }
       ],
       "AbsoluteNamespace": "Dibix.Sdk.Tests.Data",

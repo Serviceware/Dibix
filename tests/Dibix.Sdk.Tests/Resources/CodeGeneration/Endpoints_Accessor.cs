@@ -207,14 +207,16 @@ namespace Dibix.Sdk.Tests.Data
     public sealed class GenericParameterSet : StructuredType<GenericParameterSet>
     {
         public override string TypeName { get { return "[dbo].[dbx_codeanalysis_udt_generic]"; } }
-        public void Add(int id, string? name)
+        public void Add(int id, string? name, byte[]? data, decimal? value)
         {
-            AddRecord(id, name);
+            AddRecord(id, name, data, value);
         }
         protected override void CollectMetadata(ISqlMetadataCollector collector)
         {
             collector.RegisterMetadata("id", SqlDbType.Int);
-            collector.RegisterMetadata("name", SqlDbType.NVarChar, -1);
+            collector.RegisterMetadata("name", SqlDbType.NVarChar, 50);
+            collector.RegisterMetadata("data", SqlDbType.VarBinary, 500);
+            collector.RegisterMetadata("value", SqlDbType.Decimal, 15, 3);
         }
     }
 

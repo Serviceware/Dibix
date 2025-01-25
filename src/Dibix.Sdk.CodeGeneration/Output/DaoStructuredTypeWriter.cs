@@ -81,15 +81,12 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 const byte defaultPrecision = 19;
                 const byte defaultScale = 2;
-                byte? precision = null; // TODO: Collect from UDT
-                byte? scale = null; // TODO: Collect from UDT
-                sb.Append($", {precision ?? defaultPrecision}, {scale ?? defaultScale}");
+                sb.Append($", {property.Precision ?? defaultPrecision}, {property.Scale ?? defaultScale}");
             }
             else if (sqlDbType is SqlDbType.NVarChar or SqlDbType.VarBinary)
             {
                 const int defaultMaxLength = -1;
-                int? maxLength = null; // TODO: Collect from UDT
-                sb.Append($", {maxLength ?? defaultMaxLength}");
+                sb.Append($", {property.MaxLength ?? defaultMaxLength}");
             }
 
             sb.Append(");");

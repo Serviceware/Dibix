@@ -654,6 +654,8 @@ components:
       required:
         - id
         - name
+        - data
+        - value
       type: object
       properties:
         id:
@@ -661,6 +663,12 @@ components:
           format: int32
         name:
           type: string
+        data:
+          type: string
+          format: byte
+        value:
+          type: number
+          format: double
       additionalProperties: false
     AnotherInputContract:
       required:
@@ -701,6 +709,8 @@ components:
       required:
         - id
         - title
+        - data
+        - value
       type: object
       properties:
         id:
@@ -708,6 +718,12 @@ components:
           format: int32
         title:
           type: string
+        data:
+          type: string
+          format: byte
+        value:
+          type: number
+          format: double
       additionalProperties: false
     AnotherInputContractData:
       required:

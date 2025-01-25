@@ -83,7 +83,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 foreach (ConstraintDefinition constraint in table.TableConstraints)
                 {
-                    if (!(constraint is UniqueConstraintDefinition unique) || !unique.IsPrimaryKey)
+                    if (constraint is not UniqueConstraintDefinition { IsPrimaryKey: true } unique)
                         continue;
 
                     foreach (ColumnWithSortOrder column in unique.Columns)
@@ -92,18 +92,68 @@ namespace Dibix.Sdk.CodeGeneration
 
                 foreach (ColumnDefinition column in table.ColumnDefinitions)
                 {
-                    if (column.Constraints.Any(x => x is NullableConstraintDefinition nullable && !nullable.Nullable))
+                    if (column.Constraints.Any(x => x is NullableConstraintDefinition { Nullable: false }))
                         yield return column.ColumnIdentifier.Value;
                 }
             }
 
-            private ObjectSchemaProperty MapColumn(ColumnDefinition column, string relativeNamespace, ICollection<string> notNullableColumns, ISqlMarkupDeclaration markup)
+            private ObjectSchemaProperty MapColumn(ColumnDefinitionBase column, string relativeNamespace, ICollection<string> notNullableColumns, ISqlMarkupDeclaration markup)
             {
                 Identifier columnIdentifier = column.ColumnIdentifier;
                 string columnName = columnIdentifier.Value;
                 bool isNullable = !notNullableColumns.Contains(columnName);
                 TypeReference typeReference = column.DataType.ToTypeReference(isNullable, columnName, relativeNamespace, _source, markup, _typeResolver, _logger, out string udtName);
-                return new ObjectSchemaProperty(name: new Token<string>(columnName, new SourceLocation(_source, columnIdentifier.StartLine, columnIdentifier.StartColumn)), typeReference);
+                long? maxLength = null;
+                byte? precision = null;
+                byte? scale = null;
+                CollectDataTypeParameters(column, ref maxLength, ref precision, ref scale);
+                return new ObjectSchemaProperty(name: new Token<string>(columnName, new SourceLocation(_source, columnIdentifier.StartLine, columnIdentifier.StartColumn)), typeReference, maxLength: maxLength, precision: precision, scale: scale);
+            }
+
+            private static void CollectDataTypeParameters(ColumnDefinitionBase column, ref long? maxLength, ref byte? precision, ref byte? scale)
+            {
+                if (column.DataType is not ParameterizedDataTypeReference dataType)
+                    return;
+
+                switch (dataType.Parameters.Count)
+                {
+                    case 1:
+                        maxLength = CollectMaxLength(dataType.Parameters[0]);
+                        break;
+
+                    case 2:
+                        CollectPrecisionAndScale(dataType.Parameters[0], dataType.Parameters[1], ref precision, ref scale);
+                        break;
+                }
+            }
+
+            private static long? CollectMaxLength(Literal parameter)
+            {
+                if (parameter is not IntegerLiteral integerLiteral)
+                    return null;
+
+                if (!Int64.TryParse(integerLiteral.Value, out long maxLength))
+                    return null;
+
+                return maxLength;
+            }
+
+            private static void CollectPrecisionAndScale(Literal parameter1, Literal parameter2, ref byte? precision, ref byte? scale)
+            {
+                if (parameter1 is not IntegerLiteral literal1)
+                    return;
+
+                if (parameter2 is not IntegerLiteral literal2)
+                    return;
+
+                if (!Byte.TryParse(literal1.Value, out byte precisionValue))
+                    return;
+
+                if (!Byte.TryParse(literal2.Value, out byte scaleValue))
+                    return;
+
+                precision = precisionValue;
+                scale = scaleValue;
             }
         }
     }
