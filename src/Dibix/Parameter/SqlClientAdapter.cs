@@ -12,10 +12,7 @@ namespace Dibix
     {
         public override bool UsesTSql => true;
 
-        public SqlClientAdapter(SqlConnection connection) : base(connection)
-        {
-            connection.InfoMessage += OnInfoMessage;
-        }
+        public SqlClientAdapter(SqlConnection connection) : base(connection) { }
 
         protected override void AttachInfoMessageHandler()
         {
