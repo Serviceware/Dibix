@@ -102,14 +102,14 @@ namespace Dibix
         #region Private Methods
         private IEnumerable<TReturn> QueryManyAutoMultiMap<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, string splitOn, bool buffered = true) where TReturn : new()
         {
-            ValidateParameters(types, splitOn);
+            ValidateMultiMapSegments(types, splitOn);
             MultiMapper multiMapper = new MultiMapper();
             bool useProjection = types[0] != typeof(TReturn);
             return QueryMany(commandText, commandType, parameters, types, x => multiMapper.MapRow<TReturn>(useProjection, x), splitOn, buffered).PostProcess(multiMapper);
         }
         private Task<IEnumerable<TReturn>> QueryManyAutoMultiMapAsync<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, string splitOn, CancellationToken cancellationToken, bool buffered = true) where TReturn : new()
         {
-            ValidateParameters(types, splitOn);
+            ValidateMultiMapSegments(types, splitOn);
             MultiMapper multiMapper = new MultiMapper();
             bool useProjection = types[0] != typeof(TReturn);
             return QueryManyAsync(commandText, commandType, parameters, types, x => multiMapper.MapRow<TReturn>(useProjection, x), splitOn, buffered, cancellationToken).PostProcess(multiMapper);
@@ -140,7 +140,6 @@ namespace Dibix
         {
             try 
             {
-                ValidateParameters(commandText, commandType, parameters);
                 return action();
             }
             catch (DatabaseAccessException exception) when (exception.AdditionalErrorCode != DatabaseAccessErrorCode.None) { throw; }
@@ -150,7 +149,6 @@ namespace Dibix
         {
             try
             {
-                ValidateParameters(commandText, commandType, parameters);
                 return await action().ConfigureAwait(false);
             }
             catch (DatabaseAccessException exception) when (exception.AdditionalErrorCode != DatabaseAccessErrorCode.None) { throw; }
@@ -159,42 +157,13 @@ namespace Dibix
             catch (Exception exception) { throw DatabaseAccessException.Create(commandType, commandText, parameters, exception, DbProviderAdapter.TryGetSqlErrorNumber(exception), collectTSqlDebugStatement: DbProviderAdapter.UsesTSql); }
         }
 
-        private void ValidateParameters(string commandText, CommandType commandType, ParametersVisitor parameters)
-        {
-            parameters.VisitInputParameters((name, type, value, size, _, _) =>
-            {
-                ValidateSize(name, type, value, size, commandText, commandType, parameters);
-            });
-        }
-
-        private void ValidateSize(string name, DbType type, object value, int? size, string commandText, CommandType commandType, ParametersVisitor parameters)
-        {
-            if (size == null)
-                return;
-
-            switch (type)
-            {
-                case DbType.String:
-                case DbType.AnsiString:
-                case DbType.StringFixedLength:
-                case DbType.AnsiStringFixedLength:
-                    if (value is string str && str.Length > size)
-                        throw DatabaseAccessException.Create(DatabaseAccessErrorCode.ParameterSizeExceeded, commandText, commandType, parameters, collectTSqlDebugStatement: DbProviderAdapter.UsesTSql, name, str.Length, size);
-
-                    return;
-
-                default:
-                    return;
-            }
-        }
-
         private void OnInfoMessageEvent(string message)
         {
             TraceSource.TraceInformation(message);
             OnInfoMessage(message);
         }
 
-        private static void ValidateParameters(IReadOnlyCollection<Type> types, string splitOn)
+        private static void ValidateMultiMapSegments(IReadOnlyCollection<Type> types, string splitOn)
         {
             MultiMapUtility.ValidateParameters(types, splitOn);
         }

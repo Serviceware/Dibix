@@ -44,6 +44,7 @@ namespace Dibix
         protected internal void AddRecord(params object[] values)
         {
             SqlDataRecord record = new SqlDataRecord(_metadata);
+            ValidateParameterLengths(values);
             record.SetValues(values);
             _records.Add(record);
         }
@@ -70,6 +71,44 @@ namespace Dibix
 
             SqlMetaData[] metadata = collector.Metadata.ToArray();
             return metadata;
+        }
+
+        private void ValidateParameterLengths(object[] row)
+        {
+            int rowIndex = _records.Count;
+            for (int i = 0; i < row.Length; i++)
+            {
+                object value = row[i];
+                SqlMetaData metadata = _metadata[i];
+                ValidateParameterLength(value, metadata, rowIndex);
+            }
+        }
+        private static void ValidateParameterLength(object value, SqlMetaData metadata, int rowIndex)
+        {
+            switch (value)
+            {
+                case string stringValue:
+                    ValidateParameterLength(value, metadata, rowIndex, stringValue.Length);
+                    break;
+
+                case byte[] binaryValue:
+                    ValidateParameterLength(value, metadata, rowIndex, binaryValue.Length);
+                    break;
+            }
+        }
+        private static void ValidateParameterLength(object value, SqlMetaData metadata, int rowIndex, int length)
+        {
+            if (metadata.MaxLength < 0)
+                return;
+
+            if (length > metadata.MaxLength)
+            {
+                throw new InvalidOperationException($"""
+                                                  The value at row {rowIndex} for column '{metadata.Name}' has a length of {length} which exceeds the maximum length of the data type ({metadata.MaxLength})
+                                                  -
+                                                  Value: {value}
+                                                  """);
+            }
         }
         #endregion
 

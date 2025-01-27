@@ -4,7 +4,6 @@ namespace Dibix
     {
         None,
         SequenceContainsNoElements,
-        SequenceContainsMoreThanOneElement,
-        ParameterSizeExceeded
+        SequenceContainsMoreThanOneElement
     }
 }

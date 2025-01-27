@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -10,15 +11,13 @@ namespace Dibix.Dapper.Tests
         [TestMethod]
         public Task ParameterLengthSpecified_ValueTooLarge_ThrowsException() => ExecuteTest(accessor =>
         {
-            const string commandText = "SELECT @param";
-            ParametersVisitor parameters = accessor.Parameters()
-                                                   .SetString("param", "value", size: 4)
-                                                   .Build();
-            DatabaseAccessException exception = AssertThrows<DatabaseAccessException>(() => accessor.QuerySingle<string>(commandText, CommandType.Text, parameters));
-            Assert.AreEqual(DatabaseAccessErrorCode.ParameterSizeExceeded, exception.AdditionalErrorCode);
-            Assert.AreEqual(@"Length of parameter 'param' is '5', which exceeds the supported size '4'
-CommandType: Text
-CommandText: <Inline>", exception.Message);
+            IParameterBuilder parameterBuilder = accessor.Parameters();
+            InvalidOperationException exception = AssertThrows<InvalidOperationException>(() => parameterBuilder.SetString("param", "value", size: 4));
+            Assert.AreEqual("""
+                            The value for parameter 'param' has a length of 5 which exceeds the maximum length of the data type (4)
+                            -
+                            Value: value
+                            """, exception.Message);
         });
 
         [TestMethod]

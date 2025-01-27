@@ -82,7 +82,6 @@ CommandText: {(commandType == CommandType.StoredProcedure ? commandText : "<Inli
         {
             DatabaseAccessErrorCode.SequenceContainsNoElements => "Sequence contains no elements",
             DatabaseAccessErrorCode.SequenceContainsMoreThanOneElement => "Sequence contains more than one element",
-            DatabaseAccessErrorCode.ParameterSizeExceeded => "Length of parameter '{0}' is '{1}', which exceeds the supported size '{2}'",
             _ => throw new ArgumentOutOfRangeException(nameof(errorCode), errorCode, null)
         };
     }

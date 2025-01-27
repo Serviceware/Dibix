@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
@@ -369,16 +370,15 @@ namespace Dibix.Dapper.Tests
         });
 
         [TestMethod]
-        public Task CustomSqlMetadata_MaxLength_TextIsTrimmed() => ExecuteTest(accessor =>
+        public Task CustomSqlMetadata_MaxLength_ValueTooLarge_ThrowsException() => ExecuteTest(accessor =>
         {
-            const string commandText = """
-                                       SELECT [stringvalue]
-                                       FROM @values
-                                       """;
-
-            ParametersVisitor parameters = accessor.Parameters().SetStructured("values", new StructuredType_String_Custom { "abc" }).Build();
-            string result = accessor.QuerySingle<string>(commandText, CommandType.Text, parameters);
-            Assert.AreEqual("a", result);
+            IParameterBuilder parameterBuilder = accessor.Parameters();
+            InvalidOperationException exception = AssertThrows<InvalidOperationException>(() => parameterBuilder.SetStructured("values", new StructuredType_String_Custom { "abc" }));
+            Assert.AreEqual("""
+                            The value at row 0 for column 'stringValue' has a length of 3 which exceeds the maximum length of the data type (1)
+                            -
+                            Value: abc
+                            """, exception.Message);
         });
 
         [TestMethod]

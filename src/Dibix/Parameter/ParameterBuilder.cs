@@ -154,8 +154,37 @@ namespace Dibix
         }
         private IParameterBuilder Set(string name, DbType type, object value, int? size = null, OutParameter outParameter = null, CustomInputType customInputType = default)
         {
+            ValidateParameterLength(name, value, size);
             _parameters[name] = new Parameter(name, type, value, size, outParameter, customInputType);
             return this;
+        }
+
+        private static void ValidateParameterLength(string name, object value, int? maxLength)
+        {
+            if (maxLength == null)
+                return;
+
+            switch (value)
+            {
+                case string stringValue:
+                    ValidateParameterLength(name, value, stringValue.Length, maxLength.Value);
+                    break;
+
+                case byte[] binaryValue:
+                    ValidateParameterLength(name, value, binaryValue.Length, maxLength.Value);
+                    break;
+            }
+        }
+        private static void ValidateParameterLength(string name, object value, int valueLength, int maxLength)
+        {
+            if (valueLength > maxLength)
+            {
+                throw new InvalidOperationException($"""
+                                                     The value for parameter '{name}' has a length of {valueLength} which exceeds the maximum length of the data type ({maxLength})
+                                                     -
+                                                     Value: {value}
+                                                     """);
+            }
         }
 
         private static DbType ResolveDbType(Type clrType, ref Type outParameterType, ref CustomInputType customInputType)
