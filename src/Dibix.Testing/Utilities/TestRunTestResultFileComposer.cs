@@ -37,6 +37,10 @@ namespace Dibix.Testing
 
             // Use Lazy<T> to ensure the test run attachments are only written to disk once when running tests in parallel
             TestRunTestResultFileComposer instance = Cache.GetOrAdd(testRunIdentifier, _ => new Lazy<TestRunTestResultFileComposer>(() => Create(testContext, useDedicatedTestResultsDirectory))).Value;
+
+            // Make test run attachments available for each test method
+            instance.ImportResultFilesIfNecessary(testContext);
+
             return instance;
         }
 
@@ -56,6 +60,15 @@ namespace Dibix.Testing
         {
             EnsureTestContextDump();
             EnsureEnvironmentDump();
+        }
+
+        private void ImportResultFilesIfNecessary(TestContext currentTestContext)
+        {
+            if (currentTestContext == _testContext)
+                return;
+
+            foreach (string resultFile in ResultFiles)
+                currentTestContext.AddResultFile(resultFile);
         }
 
         private void EnsureTestContextDump() => AddResultFile("TestContext.json", JsonConvert.SerializeObject(_testContext, new JsonSerializerSettings
