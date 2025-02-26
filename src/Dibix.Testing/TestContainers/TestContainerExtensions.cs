@@ -23,6 +23,8 @@ namespace Dibix.Testing.TestContainers
         {
             string MaskSecrets(string text) => secrets.Where(x => x != null).Aggregate(text, (current, secret) => current.Replace(secret!, "*****"));
 
+            string FormatCommand(string command) => MaskSecrets(command.Contains(' ') ? $"\"{command}\"" : command);
+
             string containerName = configuration.Name ?? GenerateContainerName(configuration.Image);
             StringBuilder sb = new StringBuilder($"docker run --rm --tty --interactive --name {containerName}");
 
@@ -61,7 +63,7 @@ namespace Dibix.Testing.TestContainers
             sb.Append($" {configuration.Image.FullName}");
 
             if (configuration.Command.Any())
-                sb.Append($" {string.Join(" ", configuration.Command.Select(MaskSecrets))}");
+                sb.Append($" {string.Join(" ", configuration.Command.Select(FormatCommand))}");
 
             string command = sb.ToString();
             await logger.WriteLineAsync($"> {command}").ConfigureAwait(false);
