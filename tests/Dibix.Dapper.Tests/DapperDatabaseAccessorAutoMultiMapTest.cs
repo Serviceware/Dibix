@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -163,6 +164,22 @@ INNER JOIN (VALUES (N'feature1', N'product1')
             ProductEntity result = accessor.QuerySingle<ProductEntity>(commandText, CommandType.Text, accessor.Parameters().Build(), new[] { typeof(ProductEntity), typeof(int), typeof(FeatureEntity) }, "feature_id,name");
             Assert.AreEqual("product1", result.Name);
             Assert.AreEqual(0, result.FirstFeatureId); // Setting a primitive property using multi map doesn't make sense and is therefore not supported
+            Assert.AreEqual(2, result.Features.Count);
+            Assert.AreEqual("feature1", result.Features[0].Name);
+            Assert.AreEqual("feature2", result.Features[1].Name);
+        });
+
+        // See: https://github.com/DapperLib/Dapper/issues/596
+        [TestMethod]
+        public Task QuerySingleAsync_WithAutoMultiMap_DataIsReadBeforeReaderIsDisposed() => ExecuteTest(async accessor =>
+        {
+            const string commandText = """
+                                       SELECT [name] = N'product1', [name] = N'feature1'
+                                       UNION ALL
+                                       SELECT [name] = N'product1', [name] = N'feature2'
+                                       """;
+            ProductEntity result = await accessor.QuerySingleAsync<ProductEntity>(commandText, CommandType.Text, accessor.Parameters().Build(), [typeof(ProductEntity), typeof(FeatureEntity)], splitOn: "name", CancellationToken.None).ConfigureAwait(false);
+            Assert.AreEqual("product1", result.Name);
             Assert.AreEqual(2, result.Features.Count);
             Assert.AreEqual("feature1", result.Features[0].Name);
             Assert.AreEqual("feature2", result.Features[1].Name);
