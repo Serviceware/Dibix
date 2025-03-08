@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Linq.Expressions;
 using System.Net.Http;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Dibix.Http.Client;
 using Dibix.Testing.Data;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
 
 namespace Dibix.Testing.Http
 {
@@ -55,13 +52,13 @@ namespace Dibix.Testing.Http
         protected async Task<TResponseContent> InvokeApiAndAssertResponse<TService, TResponseContent>(TService service, Expression<Func<TService, Task<HttpResponse<TResponseContent>>>> methodSelector, string expectedText = null, string outputName = null, Action<JsonSerializerSettings> configureSerializer = null)
         {
             HttpResponse<TResponseContent> response = await InvokeApiCore(service, methodSelector).ConfigureAwait(false);
-            Assert(response, expectedText, outputName, configureSerializer);
+            AssertJsonResponse(response.ResponseContent, configureSerializer, outputName, expectedText);
             return response.ResponseContent;
         }
         protected async Task<TResponseContent> InvokeApiAndAssertResponse<TService, TResponseContent>(HttpTestContext context, Expression<Func<TService, Task<HttpResponse<TResponseContent>>>> methodSelector, string expectedText = null, string outputName = null, Action<JsonSerializerSettings> configureSerializer = null)
         {
             HttpResponse<TResponseContent> response = await CreateServiceAndInvokeApi(context, methodSelector).ConfigureAwait(false);
-            Assert(response, expectedText, outputName, configureSerializer);
+            AssertJsonResponse(response.ResponseContent, configureSerializer, outputName, expectedText);
             return response.ResponseContent;
         }
 
@@ -83,32 +80,6 @@ namespace Dibix.Testing.Http
         {
             TService service = HttpServiceFactory.CreateServiceInstance<TService>(context.HttpClientFactory, context.HttpClientOptions, context.HttpAuthorizationProvider);
             return InvokeApiCore(service, methodSelector);
-        }
-
-        private void Assert<TResponseContent>(HttpResponse<TResponseContent> response, string expectedText, string outputName, Action<JsonSerializerSettings> configureSerializer)
-        {
-            JsonSerializerSettings settings = new JsonSerializerSettings
-            {
-                ContractResolver = new DefaultContractResolver { NamingStrategy = new CamelCaseNamingStrategy() },
-                Formatting = Formatting.Indented,
-                DateTimeZoneHandling = DateTimeZoneHandling.Unspecified
-            };
-            configureSerializer?.Invoke(settings);
-
-            const string extension = "json";
-            string outputNameResolved = outputName ?? TestContext.TestName;
-            string expectedTextResolved = expectedText ?? GetEmbeddedResourceContent($"{outputNameResolved}.{extension}");
-            string actualText = JsonConvert.SerializeObject(response.ResponseContent, settings);
-            JToken actualTextDom = JToken.Parse(actualText);
-            string expectedTextReplaced = Regex.Replace(expectedTextResolved, @"\{(?<path>[A-Za-z.]+)\}", x =>
-            {
-                string path = x.Groups["path"].Value;
-                if (!(actualTextDom.SelectToken(path) is JValue value) || value.Value == null)
-                    throw new InvalidOperationException($"Replace pattern did not match a JSON path in the actual document: {path} ({x.Index})");
-
-                return value.Value.ToString();
-            });
-            AssertEqual(expectedTextReplaced, actualText, outputNameResolved, extension: extension);
         }
 
         private static HttpTestContext CreateTestContext(IHttpClientFactory httpClientFactory, HttpClientOptions httpClientOptions, IHttpAuthorizationProvider authorizationProvider)

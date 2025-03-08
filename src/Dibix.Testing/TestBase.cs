@@ -4,11 +4,15 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Dibix.Testing.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 
 namespace Dibix.Testing
 {
@@ -117,6 +121,51 @@ namespace Dibix.Testing
 
             TestResultFileManager.AddFileComparison(expectedNormalized, actualNormalized, outputName, extension);
             throw new AssertTextFailedException(expectedNormalized, actualNormalized, message);
+        }
+
+        protected void AssertJsonResponse<T>(T response, Action<JsonSerializerSettings> configureSerializer = null, string outputName = null, string expectedText = null)
+        {
+            JsonSerializerSettings settings = new JsonSerializerSettings
+            {
+                ContractResolver = new DefaultContractResolver { NamingStrategy = new CamelCaseNamingStrategy() },
+                Formatting = Formatting.Indented,
+                DateTimeZoneHandling = DateTimeZoneHandling.Unspecified
+            };
+            configureSerializer?.Invoke(settings);
+
+            const string extension = "json";
+            string outputNameResolved = outputName ?? TestContext.TestName;
+            string expectedTextResolved = expectedText ?? GetEmbeddedResourceContent($"{outputNameResolved}.{extension}");
+            string actualText = JsonConvert.SerializeObject(response, settings);
+            JToken actualTextDom = JToken.Parse(actualText);
+
+            // Replace JSON path placeholders in the expected text with values from the actual text
+            // This is useful for undeterministic values like IDs
+            // Example:
+            // {
+            //   "values": [
+            //     {
+            //       "id": "{values[0].id}"
+            //     }
+            //   ]
+            // }
+            string expectedTextReplaced = Regex.Replace(expectedTextResolved, """
+                                                                              "{(?<path>([A-Za-z]+(\[[\d]+\])?)(\.([A-Za-z]+(\[[\d]+\])?)){0,})\}"
+                                                                              """, x =>
+            {
+                string path = x.Groups["path"].Value;
+                if (actualTextDom.SelectToken(path) is not JValue jsonValue || jsonValue.Value == null)
+                    throw new InvalidOperationException($"Replace pattern did not match a JSON path in the actual document: {path} ({x.Index})");
+
+                StringBuilder sb = new StringBuilder();
+                using TextWriter textWriter = new StringWriter(sb);
+                using JsonWriter writer = new JsonTextWriter(textWriter);
+                jsonValue.WriteTo(writer);
+                string replacement = sb.ToString();
+                return replacement;
+            });
+
+            AssertEqual(expectedTextReplaced, actualText, outputNameResolved, extension: extension);
         }
 
         protected void LogException(Exception exception) => TestResultFileManager.AddTestFile("AdditionalErrors.txt", $@"An error occured while collecting the last event log errors
