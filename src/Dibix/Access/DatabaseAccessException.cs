@@ -4,7 +4,6 @@ using System.Globalization;
 
 namespace Dibix
 {
-    [Serializable]
     public sealed class DatabaseAccessException : Exception
     {
         private readonly string _parameterDumpTruncated;
