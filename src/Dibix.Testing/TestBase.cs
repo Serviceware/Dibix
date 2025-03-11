@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Dibix.Testing.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 
@@ -129,7 +130,8 @@ namespace Dibix.Testing
             {
                 ContractResolver = new DefaultContractResolver { NamingStrategy = new CamelCaseNamingStrategy() },
                 Formatting = Formatting.Indented,
-                DateTimeZoneHandling = DateTimeZoneHandling.Unspecified
+                DateTimeZoneHandling = DateTimeZoneHandling.Unspecified,
+                Converters = { new StringEnumConverter() }
             };
             configureSerializer?.Invoke(settings);
 
