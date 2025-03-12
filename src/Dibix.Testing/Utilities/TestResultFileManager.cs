@@ -13,17 +13,19 @@ namespace Dibix.Testing
         private readonly TestRunTestResultFileComposer _testRunFileComposer;
         private readonly TestMethodTestResultFileComposer _testMethodFileComposer;
         private readonly WinMergeComparisonComposer _winMergeComparisonComposer;
+        private readonly TestContext _testContext;
         private readonly TestClassInstanceScope _scope;
         private bool _eventLogCollected;
 
         public string RunDirectory => _testRunFileComposer.ResultDirectory;
         public string TestDirectory => _testMethodFileComposer.ResultDirectory;
 
-        private TestResultFileManager(TestRunTestResultFileComposer testRunFileComposer, TestMethodTestResultFileComposer testMethodFileComposer, WinMergeComparisonComposer winMergeComparisonComposer, TestClassInstanceScope scope)
+        private TestResultFileManager(TestRunTestResultFileComposer testRunFileComposer, TestMethodTestResultFileComposer testMethodFileComposer, WinMergeComparisonComposer winMergeComparisonComposer, TestContext testContext, TestClassInstanceScope scope)
         {
             _testRunFileComposer = testRunFileComposer;
             _testMethodFileComposer = testMethodFileComposer;
             _winMergeComparisonComposer = winMergeComparisonComposer;
+            _testContext = testContext;
             _scope = scope;
         }
 
@@ -32,8 +34,8 @@ namespace Dibix.Testing
             TestRunTestResultFileComposer testRunFileComposer = TestRunTestResultFileComposer.Resolve(testContext, useDedicatedTestResultsDirectory);
             string resultTestsDirectory = Path.Combine(testRunFileComposer.ResultDirectory, "Tests");
             TestMethodTestResultFileComposer testMethodFileComposer = TestMethodTestResultFileComposer.Create(testContext, resultTestsDirectory);
-            WinMergeComparisonComposer winMergeComparisonComposer = new WinMergeComparisonComposer(testMethodFileComposer, testRunFileComposer);
-            TestResultFileManager resultFileComposer = new TestResultFileManager(testRunFileComposer, testMethodFileComposer, winMergeComparisonComposer, scope);
+            WinMergeComparisonComposer winMergeComparisonComposer = new WinMergeComparisonComposer(testMethodFileComposer, testRunFileComposer, testContext);
+            TestResultFileManager resultFileComposer = new TestResultFileManager(testRunFileComposer, testMethodFileComposer, winMergeComparisonComposer, testContext, scope);
             return resultFileComposer;
         }
 
@@ -49,10 +51,10 @@ namespace Dibix.Testing
 
         public string ImportTestFile(string filePath) => _testMethodFileComposer.ImportResultFile(filePath);
 
-        public string AddTestRunFile(string fileName) => _testRunFileComposer.AddResultFile(fileName);
-        public string AddTestRunFile(string fileName, string content) => _testRunFileComposer.AddResultFile(fileName, content);
+        public string AddTestRunFile(string fileName) => _testRunFileComposer.AddResultFile(fileName, _testContext);
+        public string AddTestRunFile(string fileName, string content) => _testRunFileComposer.AddResultFile(fileName, content, _testContext);
 
-        public string ImportTestRunFile(string filePath) => _testRunFileComposer.ImportResultFile(filePath);
+        public string ImportTestRunFile(string filePath) => _testRunFileComposer.ImportResultFile(filePath, _testContext);
 
         public void AddFileComparison(string expectedContent, string actualContent, string outputName, string extension) => _winMergeComparisonComposer.AddFileComparison(expectedContent, actualContent, outputName, extension);
 
@@ -91,7 +93,7 @@ namespace Dibix.Testing
 
             TestResultFileComposer composer = GetTargetTestResultFileComposer(_scope);
 
-            composer.AddResultFile("EventLogOptions.json", JsonConvert.SerializeObject(options, Formatting.Indented));
+            composer.AddResultFile("EventLogOptions.json", JsonConvert.SerializeObject(options, Formatting.Indented), _testContext);
 
             EventLog eventLog = new EventLog(options.LogName, options.MachineName, options.Source);
 
@@ -100,7 +102,7 @@ namespace Dibix.Testing
                       .Select(x => eventLog.Entries[x])
                       .Where(x => MatchEventLogEntry(x, options.Type, options.Since))
                       .Take(options.Count)
-                      .Each((x, i) => composer.AddResultFile($"EventLogEntry_{i + 1}_{x.EntryType}.txt", FormatContent(x)));
+                      .Each((x, i) => composer.AddResultFile($"EventLogEntry_{i + 1}_{x.EntryType}.txt", FormatContent(x), _testContext));
         }
 
         private TestResultFileComposer GetTargetTestResultFileComposer(TestClassInstanceScope scope) => scope switch

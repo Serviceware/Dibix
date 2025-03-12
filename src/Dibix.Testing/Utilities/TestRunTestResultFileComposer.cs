@@ -15,15 +15,13 @@ namespace Dibix.Testing
     internal sealed class TestRunTestResultFileComposer : TestResultFileComposer
     {
         private static readonly ConcurrentDictionary<string, Lazy<TestRunTestResultFileComposer>> Cache = new ConcurrentDictionary<string, Lazy<TestRunTestResultFileComposer>>();
-        private readonly TestContext _testContext;
         private readonly string _defaultRunDirectory;
         private readonly bool _useDedicatedTestResultsDirectory;
         private readonly ICollection<string> _deployedFiles;
         private readonly ICollection<string> _registeredFileNames;
 
-        private TestRunTestResultFileComposer(string directory, TestContext testContext, string defaultRunDirectory, bool useDedicatedTestResultsDirectory) : base(directory, testContext)
+        private TestRunTestResultFileComposer(string directory, string defaultRunDirectory, bool useDedicatedTestResultsDirectory) : base(directory)
         {
-            _testContext = testContext;
             _defaultRunDirectory = defaultRunDirectory;
             _deployedFiles = new HashSet<string>();
             _useDedicatedTestResultsDirectory = useDedicatedTestResultsDirectory;
@@ -36,10 +34,13 @@ namespace Dibix.Testing
             string testRunIdentifier = testContext.TestRunDirectory;
 
             // Use Lazy<T> to ensure the test run attachments are only written to disk once when running tests in parallel
-            TestRunTestResultFileComposer instance = Cache.GetOrAdd(testRunIdentifier, _ => new Lazy<TestRunTestResultFileComposer>(() => Create(testContext, useDedicatedTestResultsDirectory))).Value;
+            Lazy<TestRunTestResultFileComposer> value = Cache.GetOrAdd(testRunIdentifier, _ => new Lazy<TestRunTestResultFileComposer>(() => Create(testContext, useDedicatedTestResultsDirectory)));
+            bool isFirstTest = !value.IsValueCreated;
+            TestRunTestResultFileComposer instance = value.Value;
 
             // Make test run attachments available for each test method
-            instance.ImportResultFilesIfNecessary(testContext);
+            if (!isFirstTest)
+                instance.ImportResultFiles(testContext);
 
             return instance;
         }
@@ -56,28 +57,25 @@ namespace Dibix.Testing
 
         protected override void OnFileNameRegistered(string fileName) => _registeredFileNames.Add(fileName);
 
-        private void Initialize()
+        private void Initialize(TestContext testContext)
         {
-            EnsureTestContextDump();
-            EnsureEnvironmentDump();
+            EnsureTestContextDump(testContext);
+            EnsureEnvironmentDump(testContext);
         }
 
-        private void ImportResultFilesIfNecessary(TestContext currentTestContext)
+        private void ImportResultFiles(TestContext testContext)
         {
-            if (currentTestContext == _testContext)
-                return;
-
             foreach (string resultFile in ResultFiles)
-                currentTestContext.AddResultFile(resultFile);
+                testContext.AddResultFile(resultFile);
         }
 
-        private void EnsureTestContextDump() => AddResultFile("TestContext.json", JsonConvert.SerializeObject(_testContext, new JsonSerializerSettings
+        private void EnsureTestContextDump(TestContext testContext) => AddResultFile("TestContext.json", JsonConvert.SerializeObject(testContext, new JsonSerializerSettings
         {
             Formatting = Formatting.Indented,
             ContractResolver = new TestContextContractResolver()
-        }));
+        }), testContext);
 
-        private void EnsureEnvironmentDump()
+        private void EnsureEnvironmentDump(TestContext testContext)
         {
             IDictionary<string, object> environmentVariables = Environment.GetEnvironmentVariables()
                                                                           .Cast<DictionaryEntry>()
@@ -94,7 +92,7 @@ namespace Dibix.Testing
             }
 
             string environment = sb.ToString();
-            AddResultFile("Environment.txt", environment);
+            AddResultFile("Environment.txt", environment, testContext);
         }
 
         private void CopyFiles(IEnumerable<string> files, string targetDirectory)
@@ -120,8 +118,8 @@ namespace Dibix.Testing
         {
             string defaultRunDirectory = testContext.TestRunResultsDirectory;
             string runDirectory = useDedicatedTestResultsDirectory ? CreateTestRunDirectory(testContext) : defaultRunDirectory;
-            TestRunTestResultFileComposer instance = new TestRunTestResultFileComposer(runDirectory, testContext, defaultRunDirectory, useDedicatedTestResultsDirectory);
-            instance.Initialize();
+            TestRunTestResultFileComposer instance = new TestRunTestResultFileComposer(runDirectory, defaultRunDirectory, useDedicatedTestResultsDirectory);
+            instance.Initialize(testContext);
             return instance;
         }
 

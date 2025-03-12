@@ -7,43 +7,40 @@ namespace Dibix.Testing
 {
     public abstract class TestResultFileComposer
     {
-        private readonly TestContext _testContext;
-        
         public ICollection<string> ResultFiles { get; }
         public string ResultDirectory { get; }
 
-        protected TestResultFileComposer(string directory, TestContext testContext)
+        protected TestResultFileComposer(string directory)
         {
             ResultDirectory = directory;
             ResultFiles = new List<string>();
-            _testContext = testContext;
         }
 
-        public string AddResultFile(string fileName)
+        public string AddResultFile(string fileName, TestContext testContext)
         {
             string path = Path.Combine(ResultDirectory, fileName);
             EnsureDirectory(path);
-            RegisterResultFile(path);
+            RegisterResultFile(path, testContext);
             OnFileNameRegistered(fileName);
             return path;
         }
 
-        public string AddResultFile(string fileName, string content)
+        public string AddResultFile(string fileName, string content, TestContext testContext)
         {
-            string path = AddResultFile(fileName);
+            string path = AddResultFile(fileName, testContext);
             WriteContentToFile(path, content);
             return path;
         }
 
-        public string ImportResultFile(string filePath)
+        public string ImportResultFile(string filePath, TestContext testContext)
         {
             string fileName = Path.GetFileName(filePath);
-            string targetPath = AddResultFile(fileName);
+            string targetPath = AddResultFile(fileName, testContext);
             File.Copy(filePath, targetPath);
             return targetPath;
         }
 
-        public void RegisterResultFile(string path)
+        public void RegisterResultFile(string path, TestContext testContext)
         {
             if (path.Length > 255)
             {
@@ -57,7 +54,7 @@ namespace Dibix.Testing
                 throw new InvalidOperationException($"Test result file already registered: {path}");
 
             ResultFiles.Add(path);
-            _testContext.AddResultFile(path);
+            testContext.AddResultFile(path);
         }
 
         public static void WriteContentToFile(string path, string content)

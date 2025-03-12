@@ -10,11 +10,13 @@ namespace Dibix.Testing
     {
         private readonly string _resultTestsDirectory;
         private readonly string _normalizedTestName;
+        private readonly TestContext _testContext;
 
-        private TestMethodTestResultFileComposer(string directory, string resultTestsDirectory, string normalizedTestName, TestContext testContext) : base(directory, testContext)
+        private TestMethodTestResultFileComposer(string directory, string resultTestsDirectory, string normalizedTestName, TestContext testContext) : base(directory)
         {
             _resultTestsDirectory = resultTestsDirectory;
             _normalizedTestName = normalizedTestName;
+            _testContext = testContext;
         }
 
         public static TestMethodTestResultFileComposer Create(TestContext testContext, string resultTestsDirectory)
@@ -40,5 +42,13 @@ namespace Dibix.Testing
             }
             RegisterResultFile(path);
         }
+
+        public string AddResultFile(string fileName) => AddResultFile(fileName, _testContext);
+
+        public string AddResultFile(string fileName, string content) => AddResultFile(fileName, content, _testContext);
+
+        public string ImportResultFile(string filePath) => ImportResultFile(filePath, _testContext);
+
+        public void RegisterResultFile(string path) => RegisterResultFile(path, _testContext);
     }
 }

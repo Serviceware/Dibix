@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dibix.Testing
 {
@@ -10,13 +11,15 @@ namespace Dibix.Testing
         private const string ActualDirectoryName = "actual";
         private readonly TestMethodTestResultFileComposer _testMethodFileComposer;
         private readonly TestRunTestResultFileComposer _testRunFileComposer;
+        private readonly TestContext _testContext;
         private readonly string _expectedDirectory;
         private readonly string _actualDirectory;
 
-        public WinMergeComparisonComposer(TestMethodTestResultFileComposer testMethodFileComposer, TestRunTestResultFileComposer testRunFileComposer)
+        public WinMergeComparisonComposer(TestMethodTestResultFileComposer testMethodFileComposer, TestRunTestResultFileComposer testRunFileComposer, TestContext testContext)
         {
             _testMethodFileComposer = testMethodFileComposer;
             _testRunFileComposer = testRunFileComposer;
+            _testContext = testContext;
             _expectedDirectory = Path.Combine(testRunFileComposer.ResultDirectory, ExpectedDirectoryName);
             _actualDirectory = Path.Combine(testRunFileComposer.ResultDirectory, ActualDirectoryName);
         }
@@ -37,9 +40,9 @@ namespace Dibix.Testing
                     return;
 
                 _testRunFileComposer.AddResultFile(fileName, $"""
-                                                                 @echo off
-                                                                 start winmergeU "{ExpectedDirectoryName}" "{ActualDirectoryName}"
-                                                                 """);
+                                                              @echo off
+                                                              start winmergeU "{ExpectedDirectoryName}" "{ActualDirectoryName}"
+                                                              """, _testContext);
             }
         }
 
@@ -61,7 +64,7 @@ namespace Dibix.Testing
         private void EnsureFileComparisonContent(string path, string content)
         {
             TestResultFileComposer.WriteContentToFile(path, content);
-            _testMethodFileComposer.RegisterResultFile(path);
+            _testMethodFileComposer.RegisterResultFile(path, _testContext);
         }
     }
 }
