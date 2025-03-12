@@ -130,7 +130,6 @@ namespace Dibix.Testing
             {
                 ContractResolver = new DefaultContractResolver { NamingStrategy = new CamelCaseNamingStrategy() },
                 Formatting = Formatting.Indented,
-                DateTimeZoneHandling = DateTimeZoneHandling.Unspecified,
                 Converters = { new StringEnumConverter() }
             };
             configureSerializer?.Invoke(settings);
