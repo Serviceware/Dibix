@@ -110,7 +110,7 @@ namespace Dibix
             StructuredType => throw new ArgumentOutOfRangeException(nameof(value), value, null),
             byte[] binary => GetConstantLiteral(binary),
             Stream stream => GetConstantLiteral(stream),
-            string or char or Guid or Uri or XElement => $"N'{SqlDiagnosticsUtility.TrimParameterValueIfNecessary(value, truncate)}'",
+            string or char or Guid or Uri or XElement => $"N'{SqlDiagnosticsUtility.TrimParameterValueIfNecessary(value, truncate).Replace("'", "''")}'",
             DateTime dateTime => $"CAST(N'{dateTime:s}.{dateTime:fff}' AS DATETIME)",
             DateTimeOffset dateTimeOffset => $"CAST(N'{dateTimeOffset:O}' AS DATETIMEOFFSET)",
             bool boolValue => boolValue ? "1" : "0",
