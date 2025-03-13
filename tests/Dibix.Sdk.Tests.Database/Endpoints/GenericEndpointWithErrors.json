@@ -9,6 +9,7 @@
         "a": "WTF.Is.This",
         "b": "ENV.MachinePassword",
         "c": "CLAIM.None",
+        "ids": "QUERY.ids",
         "d": {
           "type": "string"
         },
@@ -50,18 +51,30 @@
       "method": "GET",
       "target": "EmptyWithParams",
       "childRoute": "ambiguous/route/{a}/{c}/{password}",
+      "params": {
+        "b": "QUERY.b",
+        "ids": "QUERY.ids",
+      },
       "authorization": "none"
     },
     {
       "method": "POST",
       "target": "EmptyWithParams",
       "childRoute": "ambiguous/route/{b}/{c}/{password}",
+      "params": {
+        "a": "QUERY.a",
+        "ids": "QUERY.ids",
+      },
       "authorization": "none"
     },
     {
       "method": "GET",
       "target": "EmptyWithParamsAndComplexUdt",
       "childRoute": "ambiguous/route/{a}/{c}/{password}",
+      "params": {
+        "b": "QUERY.b",
+        "ids": "QUERY.ids",
+      },
       "authorization": "none"
     },
     {
@@ -69,7 +82,11 @@
       "target": "EmptyWithParams",
       "childRoute": "this/first/route/is/ok",
       "params": {
-        "password": null
+        "a": "QUERY.a",
+        "b": "QUERY.b",
+        "c": "QUERY.c",
+        "password": null,
+        "ids": "QUERY.ids",
       },
       "authorization": "none"
     },
@@ -78,8 +95,11 @@
       "target": "EmptyWithParams",
       "childRoute": "this/second/route/is/ok",
       "params": {
+        "a": "QUERY.a",
+        "b": "QUERY.b",
         "c": null,
-        "password": null
+        "password": null,
+        "ids": "QUERY.ids",
       },
       "authorization": "none"
     }

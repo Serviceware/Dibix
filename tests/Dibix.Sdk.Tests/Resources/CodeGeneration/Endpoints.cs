@@ -376,6 +376,7 @@ namespace Dibix.Sdk.Tests.Business
                     action.ResolveParameterFromSource("a", "HEADER", "User-Agent");
                     action.ResolveParameterFromSource("b", "HEADER", "Authorization.Parameter");
                     action.ResolveParameterFromSource("c", "DBX", "X", "DBX");
+                    action.ResolveParameterFromSource("ids", "QUERY", "ids");
                     action.ResolveParameterFromSource("d", "REQUEST", "Language");
                     action.ResolveParameterFromConstant("e", true);
                     action.ResolveParameterFromConstant("f", Dibix.Sdk.Tests.DomainModel.Direction.Descending);
@@ -398,7 +399,10 @@ namespace Dibix.Sdk.Tests.Business
                         { "f", f },
                         { "g", g }
                     }, cancellationToken));
+                    action.ResolveParameterFromSource("a", "QUERY", "a");
+                    action.ResolveParameterFromSource("b", "QUERY", "b");
                     action.ResolveParameterFromNull<System.Guid?>("c");
+                    action.ResolveParameterFromSource("ids", "QUERY", "ids");
                 });
                 controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.SingleConrecteResultWithParamsAsync)), action =>
                 {
@@ -425,6 +429,7 @@ namespace Dibix.Sdk.Tests.Business
                     {
                         { "ids", Dibix.Sdk.Tests.Data.IntParameterSet.From(ids, (set, item) => set.Add(item)) }
                     }, cancellationToken));
+                    action.ResolveParameterFromSource("ids", "QUERY", "ids");
                 });
                 controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.FileResult)), action =>
                 {
@@ -490,8 +495,11 @@ namespace Dibix.Sdk.Tests.Business
                         { "f", f },
                         { "g", g }
                     }, cancellationToken));
+                    action.ResolveParameterFromSource("a", "QUERY", "a");
+                    action.ResolveParameterFromSource("b", "QUERY", "b");
                     action.ResolveParameterFromNull<System.Guid?>("c");
                     action.ResolveParameterFromNull<string?>("password");
+                    action.ResolveParameterFromSource("ids", "QUERY", "ids");
                 });
                 controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
@@ -513,8 +521,11 @@ namespace Dibix.Sdk.Tests.Business
                         { "f", f },
                         { "g", g }
                     }, cancellationToken));
+                    action.ResolveParameterFromSource("a", "QUERY", "a");
+                    action.ResolveParameterFromSource("b", "QUERY", "b");
                     action.ResolveParameterFromNull<System.Guid?>("c");
                     action.ResolveParameterFromNull<string?>("password");
+                    action.ResolveParameterFromSource("ids", "QUERY", "ids");
                 });
                 controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
@@ -536,8 +547,11 @@ namespace Dibix.Sdk.Tests.Business
                         { "f", f },
                         { "g", g }
                     }, cancellationToken));
+                    action.ResolveParameterFromSource("a", "QUERY", "a");
+                    action.ResolveParameterFromSource("b", "QUERY", "b");
                     action.ResolveParameterFromNull<System.Guid?>("c");
                     action.ResolveParameterFromNull<string?>("password");
+                    action.ResolveParameterFromSource("ids", "QUERY", "ids");
                 });
                 controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
@@ -563,8 +577,11 @@ namespace Dibix.Sdk.Tests.Business
                         { "f", f },
                         { "g", g }
                     }, cancellationToken));
+                    action.ResolveParameterFromSource("a", "QUERY", "a");
+                    action.ResolveParameterFromSource("b", "QUERY", "b");
                     action.ResolveParameterFromNull<System.Guid?>("c");
                     action.ResolveParameterFromNull<string?>("password");
+                    action.ResolveParameterFromSource("ids", "QUERY", "ids");
                 });
             });
         }

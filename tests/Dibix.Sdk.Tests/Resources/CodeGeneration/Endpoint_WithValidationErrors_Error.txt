@@ -1,24 +1,25 @@
 One or more errors occured during code generation:
 Tests\Syntax\dbx_tests_syntax_singleconcreteresult_missingcolumn.sql(4,12,4,12):error:Property 'ImageUrl' on type 'Dibix.Sdk.Tests.DomainModel.GenericContract' not mapped
 Endpoints\GenericEndpointWithErrors.json(9,15,9,15):error:Unknown property source 'WTF'
-Endpoints\GenericEndpointWithErrors.json(12,10,12,10):error:Metadata of parameter 'd' is automatically detected for this action target and therefore should not be specified explicitly
-Endpoints\GenericEndpointWithErrors.json(16,10,16,10):error:Parameter 'unknown' not found on action: EmptyWithParamsAndComplexUdt
+Endpoints\GenericEndpointWithErrors.json(6,18,6,18):error:Location of parameter 'password' cannot be inferred. Please declare the source of the parameter.
+Endpoints\GenericEndpointWithErrors.json(13,10,13,10):error:Metadata of parameter 'd' is automatically detected for this action target and therefore should not be specified explicitly
+Endpoints\GenericEndpointWithErrors.json(17,10,17,10):error:Parameter 'unknown' not found on action: EmptyWithParamsAndComplexUdt
 Endpoints\GenericEndpointWithErrors.json(7,22,7,22):error:Undefined path parameter: wtf
-Endpoints\GenericEndpointWithErrors.json(18,27,18,27):error:Unknown authorization scheme 'FreeToUse'. Possible values are: Anonymous, Bearer, DibixClientId, DibixBearer
-Endpoints\GenericEndpointWithErrors.json(26,10,26,10):error:Unknown type for parameter 'source'. Either specify a 'source' or 'type' property.
-Endpoints\GenericEndpointWithErrors.json(24,33,24,33):error:Metadata of parameter 'id' cannot be automatically detected for this action target and therefore must be specified explicitly
-Endpoints\GenericEndpointWithErrors.json(21,5,21,5):error:Missing required property 'authorization'
-Endpoints\GenericEndpointWithErrors.json(37,20,37,20):error:Property 'X' not found on contract 'Dibix.Sdk.Tests.DomainModel.Request'
-Endpoints\GenericEndpointWithErrors.json(38,23,38,23):error:Property 'Nm' not found on contract 'Dibix.Sdk.Tests.DomainModel.Entry'
-Endpoints\GenericEndpointWithErrors.json(43,27,43,27):error:Property 'Nm' not found on contract 'Dibix.Sdk.Tests.DomainModel.Entry'
+Endpoints\GenericEndpointWithErrors.json(19,27,19,27):error:Unknown authorization scheme 'FreeToUse'. Possible values are: Anonymous, Bearer, DibixClientId, DibixBearer
+Endpoints\GenericEndpointWithErrors.json(27,10,27,10):error:Unknown type for parameter 'source'. Either specify a 'source' or 'type' property.
+Endpoints\GenericEndpointWithErrors.json(25,33,25,33):error:Metadata of parameter 'id' cannot be automatically detected for this action target and therefore must be specified explicitly
+Endpoints\GenericEndpointWithErrors.json(22,5,22,5):error:Missing required property 'authorization'
+Endpoints\GenericEndpointWithErrors.json(38,20,38,20):error:Property 'X' not found on contract 'Dibix.Sdk.Tests.DomainModel.Request'
+Endpoints\GenericEndpointWithErrors.json(39,23,39,23):error:Property 'Nm' not found on contract 'Dibix.Sdk.Tests.DomainModel.Entry'
+Endpoints\GenericEndpointWithErrors.json(44,27,44,27):error:Property 'Nm' not found on contract 'Dibix.Sdk.Tests.DomainModel.Entry'
 Endpoints\GenericEndpointWithErrors.json(10,19,10,19):error:Source 'ENV' does not support property 'MachinePassword'
 Endpoints\GenericEndpointWithErrors.json(11,21,11,21):error:Source 'CLAIM' does not support property 'None'
-Endpoints\GenericEndpointWithErrors.json(15,21,15,21):error:The parameter 'wtf' is a path parameter, therefore cannot be read using the 'QUERY' source
+Endpoints\GenericEndpointWithErrors.json(16,21,16,21):error:The parameter 'wtf' is a path parameter, therefore cannot be read using the 'QUERY' source
 Endpoints\GenericEndpointWithErrors.json(6,18,6,18):error:Deep object query parameters are not supported: ids
-Endpoints\GenericEndpointWithErrors.json(35,27,35,27):error:The path segment 'get' is a known HTTP verb, which should be indicated by the action method and is therefore redundant: this/get/is/wrong
-Endpoints\GenericEndpointWithErrors.json(63,18,63,18):error:Deep object query parameters are not supported: ids
-Endpoints\GenericEndpointWithErrors.json(69,18,69,18):error:Required nullable query parameters are not supported: 'c'. Either make the parameter optional by providing a default value, add it to the path/body or make it non-nullable.
-Endpoints\GenericEndpointWithErrors.json(49,5,49,5):error:Equivalent path defined: GET Tests/GenericEndpoint/ambiguous/route/{a}/{c}/{password}
-Endpoints\GenericEndpointWithErrors.json(55,5,55,5):error:Equivalent path defined: POST Tests/GenericEndpoint/ambiguous/route/{b}/{c}/{password}
-Endpoints\GenericEndpointWithErrors.json(49,5,49,5):error:Duplicate method defined within path: GET Tests/GenericEndpoint/ambiguous/route/{a}/{c}/{password}
-Endpoints\GenericEndpointWithErrors.json(61,5,61,5):error:Duplicate method defined within path: GET Tests/GenericEndpoint/ambiguous/route/{a}/{c}/{password}
+Endpoints\GenericEndpointWithErrors.json(36,27,36,27):error:The path segment 'get' is a known HTTP verb, which should be indicated by the action method and is therefore redundant: this/get/is/wrong
+Endpoints\GenericEndpointWithErrors.json(72,18,72,18):error:Deep object query parameters are not supported: ids
+Endpoints\GenericEndpointWithErrors.json(82,18,82,18):error:Required nullable query parameters are not supported: 'c'. Either make the parameter optional by providing a default value, add it to the path/body or make it non-nullable.
+Endpoints\GenericEndpointWithErrors.json(50,5,50,5):error:Equivalent path defined: GET Tests/GenericEndpoint/ambiguous/route/{a}/{c}/{password}
+Endpoints\GenericEndpointWithErrors.json(60,5,60,5):error:Equivalent path defined: POST Tests/GenericEndpoint/ambiguous/route/{b}/{c}/{password}
+Endpoints\GenericEndpointWithErrors.json(50,5,50,5):error:Duplicate method defined within path: GET Tests/GenericEndpoint/ambiguous/route/{a}/{c}/{password}
+Endpoints\GenericEndpointWithErrors.json(70,5,70,5):error:Duplicate method defined within path: GET Tests/GenericEndpoint/ambiguous/route/{a}/{c}/{password}

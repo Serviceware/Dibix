@@ -19,6 +19,7 @@
           "converter": "DBX"
         },
         "password": null,
+        "ids": "QUERY.ids",
         "d": "REQUEST.Language",
         "e": true,
         "f": "Descending",
@@ -33,7 +34,10 @@
       "securitySchemes": "Anonymous",
       "operationId": "EmptyWithParamsAnonymous",
       "params": {
-        "c": null
+        "a": "QUERY.a",
+        "b": "QUERY.b",
+        "c": null,
+        "ids": "QUERY.ids",
       },
       "authorization": "none"
     },
@@ -41,6 +45,9 @@
       "method": "GET",
       "target": "EmptyWithOutputParam",
       "childRoute": "Out",
+      "params": {
+        "a": "QUERY.a"
+      },
       "authorization": "none"
     },
     {
@@ -61,6 +68,9 @@
       "method": "GET",
       "target": "SingleConrecteResultWithArrayParam",
       "childRoute": "Array",
+      "params": {
+        "ids": "QUERY.ids"
+      },
       "authorization": "none",
       "response": {
         "404": {
@@ -155,8 +165,11 @@
       "method": "DELETE",
       "target": "EmptyWithParams",
       "params": {
+        "a": "QUERY.a",
+        "b": "QUERY.b",
         "c": null,
-        "password": null
+        "password": null,
+        "ids": "QUERY.ids",
       },
       "authorization": {
         "target": "AssertAuthorized",
@@ -170,8 +183,11 @@
       "childRoute": "Alternative",
       "target": "EmptyWithParams",
       "params": {
+        "a": "QUERY.a",
+        "b": "QUERY.b",
         "c": null,
-        "password": null
+        "password": null,
+        "ids": "QUERY.ids",
       },
       "authorization": {
         "name": "AssertAuthorized",
@@ -183,8 +199,11 @@
       "childRoute": "AnotherAlternative",
       "target": "EmptyWithParams",
       "params": {
+        "a": "QUERY.a",
+        "b": "QUERY.b",
         "c": null,
-        "password": null
+        "password": null,
+        "ids": "QUERY.ids",
       },
       "authorization": "AssertAuthorizedOne"
     },
@@ -193,8 +212,11 @@
       "childRoute": "MultipleAuthorizationBehaviors",
       "target": "EmptyWithParams",
       "params": {
+        "a": "QUERY.a",
+        "b": "QUERY.b",
         "c": null,
-        "password": null
+        "password": null,
+        "ids": "QUERY.ids",
       },
       "authorization": [
         "AssertAuthorizedOne",

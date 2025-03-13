@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -166,12 +167,26 @@ namespace Dibix.Sdk.CodeGeneration
                 location = ActionParameterLocation.Path;
                 pathParameter.Visited = true;
             }
-            else if (bodyParameters.Contains(name))
+            else if (bodyParameters.Any())
             {
                 location = ActionParameterLocation.Body;
+
+                if (bodyParameters.Contains(name))
+                    return null;
             }
             else
             {
+                if (defaultValue == null)
+                {
+                    // Inferring the parameter from query as a fallback was initially adapted from ASP.NET.
+                    // However, it is very error-prone, because sometimes parameters are added to the SP,
+                    // that are intended to be resolved from a parameter source, but are forgotten to be explicitly mapped.
+                    // Then they end up on the client, which they shouldn't be.
+                    // From now on they have to be explicitly mapped using the 'QUERY' parameter source.
+                    //location = ActionParameterLocation.Query;
+                    Logger.LogError($"Location of parameter '{name}' cannot be inferred. Please declare the source of the parameter.", sourceLocation);
+                    return null;
+                }
                 location = ActionParameterLocation.Query;
             }
 
