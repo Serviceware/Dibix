@@ -239,7 +239,7 @@ Value: {instance}");
                 throw AssemblyInitializeException;
 
             TestOutputHelper = new TestOutputWriter(TestContext, TestResultFileManager, outputToFile: true, Scope, tailOutput: AttachOutputObserver);
-            WriteLine($"Starting execution of test: {TestContextUtility.GetTestName(TestContext)}");
+            WriteLine($"Starting execution of test: {TestContext.TestDisplayName}");
 
 #if NETCOREAPP
             if (OperatingSystem.IsWindows())

@@ -21,7 +21,8 @@ namespace Dibix.Testing
 
         public static TestMethodTestResultFileComposer Create(TestContext testContext, string resultTestsDirectory)
         {
-            string normalizedTestName = String.Join("_", TestContextUtility.GetTestName(testContext).Split(Path.GetInvalidFileNameChars()));
+            string testName = testContext.TestDisplayName ?? testContext.TestName ?? throw new InvalidOperationException("TestDisplayName and TestName are null");
+            string normalizedTestName = String.Join("_", testName.Split(Path.GetInvalidFileNameChars()));
             string testDirectory = Path.Combine(resultTestsDirectory, normalizedTestName);
             TestMethodTestResultFileComposer instance = new TestMethodTestResultFileComposer(testDirectory, resultTestsDirectory, normalizedTestName, testContext);
             return instance;
