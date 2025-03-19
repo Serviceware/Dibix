@@ -23,6 +23,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
     <PackageReference Include="Microsoft.Data.SqlClient" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="Microsoft.IdentityModel.LoggingExtensions" />
     <PackageReference Include="System.IO.Packaging" />
   </ItemGroup>
 

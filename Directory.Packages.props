@@ -32,6 +32,7 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.3" />
     <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="9.0.3" />
+    <PackageVersion Include="Microsoft.IdentityModel.LoggingExtensions" Version="8.6.1" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
     <PackageVersion Include="Microsoft.OpenApi" Version="1.6.23" />
     <PackageVersion Include="Microsoft.SqlServer.DacFx" Version="162.5.57" />

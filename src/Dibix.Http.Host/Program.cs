@@ -17,6 +17,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.LoggingExtensions;
 
 namespace Dibix.Http.Host
 {
@@ -143,6 +144,7 @@ namespace Dibix.Http.Host
             }
             app.UseMiddleware<DiagnosticsMiddleware>();
             app.UseHttpLogging();
+            app.UseIdentityLogging(configuration);
             app.UseExceptionHandler();
             app.UseRouting();
             app.UseMiddleware<DatabaseScopeMiddleware>();
