@@ -16,7 +16,7 @@ namespace Dibix.Worker.Abstractions
 
         protected sealed override async Task StartServiceAsync(CancellationToken cancellationToken)
         {
-            await _hostedServiceEvents.OnWorkerStarted(GetType().FullName, cancellationToken).ConfigureAwait(false);
+            await _hostedServiceEvents.OnWorkerStarted(GetType().FullName!, cancellationToken).ConfigureAwait(false);
             await StartListenerAsync(cancellationToken).ConfigureAwait(false);
         }
 

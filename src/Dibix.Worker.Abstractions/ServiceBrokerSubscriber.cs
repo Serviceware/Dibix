@@ -20,7 +20,7 @@ namespace Dibix.Worker.Abstractions
         protected ServiceBrokerSubscriber(IServiceBrokerMessageReader serviceBrokerMessageReader, IHostedServiceEvents hostedServiceEvents, ILogger logger) : base(hostedServiceEvents, logger)
         {
             _serviceBrokerMessageReader = serviceBrokerMessageReader;
-            _fullSubscriberName = GetType().FullName;
+            _fullSubscriberName = GetType().FullName!;
         }
         #endregion
 

@@ -7,6 +7,6 @@ namespace Dibix.Worker.Abstractions
     {
         private static readonly ConcurrentDictionary<string, OpenIdConnectDiscoveryCache> WorkerInstanceCache = new ConcurrentDictionary<string, OpenIdConnectDiscoveryCache>();
 
-        public static OpenIdConnectDiscoveryCache Create<T>() where T : IWorkerExtension => WorkerInstanceCache.GetOrAdd(typeof(T).FullName, _ => new OpenIdConnectDiscoveryCache());
+        public static OpenIdConnectDiscoveryCache Create<T>() where T : IWorkerExtension => WorkerInstanceCache.GetOrAdd(typeof(T).FullName!, _ => new OpenIdConnectDiscoveryCache());
     }
 }
