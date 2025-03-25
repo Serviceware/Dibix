@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Data.SqlClient;
 
 namespace Dibix.Testing
 {
@@ -43,19 +42,22 @@ namespace Dibix.Testing
             switch (exception)
             {
                 case DatabaseAccessException databaseAccessException: return IsCancellationException(databaseAccessException.InnerException, cancellationToken);
-                case SqlException sqlException: return IsPossiblySqlCommandCancellation(sqlException);
+#if NET
+                case Microsoft.Data.SqlClient.SqlException sqlException: return IsPossiblySqlCommandCancellation(sqlException);
+#endif
                 case TaskCanceledException _: return true;
                 case OperationCanceledException _: return true;
                 default: return false;
             }
 
         }
-
-        private static bool IsPossiblySqlCommandCancellation(SqlException sqlException)
+#if NET
+        private static bool IsPossiblySqlCommandCancellation(Microsoft.Data.SqlClient.SqlException sqlException)
         {
             // A severe error occurred on the current command.  The results, if any, should be discarded.
             // Operation cancelled by user.
             return sqlException.Class == 11 && sqlException.Number == 0;
         }
+#endif
     }
 }
