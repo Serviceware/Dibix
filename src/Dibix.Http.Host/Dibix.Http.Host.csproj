@@ -24,6 +24,13 @@
     <PackageReference Include="Microsoft.Data.SqlClient" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
     <PackageReference Include="System.IO.Packaging" />
+
+    <!--
+      CVE-2024-43483
+      Explicitily reference this implicit dependency of Microsoft.Data.SqlClient to force the correct version to be deployed.
+      Enabling CentralPackageTransitivePinningEnabled would introduce breaking changes for other packages and is avoided during a patch.
+    -->
+    <PackageReference Include="System.Runtime.Caching" />
   </ItemGroup>
 
   <ItemGroup>

@@ -46,6 +46,7 @@
     <PackageVersion Include="System.IO.Packaging" Version="9.0.0" />
     <PackageVersion Include="System.Reflection.Emit" Version="4.7.0" />
     <PackageVersion Include="System.Reflection.Metadata" Version="9.0.0" />
+    <PackageVersion Include="System.Runtime.Caching" Version="8.0.1" />
     <PackageVersion Include="Testcontainers" Version="4.0.0" />
     <PackageVersion Include="Testcontainers.MsSql" Version="4.0.0" />
   </ItemGroup>
