@@ -97,11 +97,7 @@ jobs:
       assets: |
         $(Pipeline.Workspace)/CI/NuGet packages/*.nupkg
         $(Pipeline.Workspace)/CI/Publish output*/*.zip
-      changeLogCompareToRelease: lastNonDraftRelease
+      changeLogCompareToRelease: lastFullRelease
+      changeLogCompareToReleaseTag: v$(NBGV_MAJORMINORVERSION)\.\d+$
       changeLogType: commitBased
-      changeLogLabels: |
-        [
-          { "label" : "bug", "displayName" : "Fixes", "state" : "closed" },
-          { "label" : "enhancement", "displayName": "Enhancements", "state" : "closed" }
-        ]
     condition: and(succeeded(), eq(${{ parameters.createGitHubRelease }}, true))
