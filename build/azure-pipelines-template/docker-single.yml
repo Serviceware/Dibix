@@ -18,11 +18,11 @@ steps:
 - task: Docker@2
   displayName: 🐋 Build and push docker image (${{ parameters.project }})
   inputs:
-    containerRegistry: hub.docker.com/tommylohsesw
+    containerRegistry: hub.docker.com/servicewareit
     ${{ if eq(parameters.project, 'Dibix.Http.Host') }}:
-      repository: tommylohsesw/dibix-http-host
+      repository: servicewareit/dibix-http-host
     ${{ if eq(parameters.project, 'Dibix.Worker.Host') }}:
-      repository: tommylohsesw/dibix-worker-host
+      repository: servicewareit/dibix-worker-host
     command: buildAndPush
     Dockerfile: src/${{ parameters.project }}/Dockerfile
     buildContext: $(Agent.TempDirectory)/Docker/${{ parameters.project }}
