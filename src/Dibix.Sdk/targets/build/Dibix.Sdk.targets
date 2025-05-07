@@ -233,7 +233,7 @@
     <PropertyGroup>
       <ProductName Condition="'$(ProductName)' == ''">$(RootNamespace.Split('.')[0])</ProductName>
       <Title Condition="$(Title) == ''">$(AreaName)</Title>
-      <Description Condition="$(Description) == '' and $(Build_Repository_Uri) != '' and $(Build_SourceVersion) != '' and $(Build_SourceBranch) != ''">__Build version:__ $([System.DateTime]::Now.ToString(G))\n\n__Source version:__ [$(Build_SourceVersion)]($(Build_Repository_Uri)/commit/$(Build_SourceVersion)?refName=$(Build_SourceBranch))</Description>
+      <Description Condition="$(Description) == '' and $(Build_Repository_Uri) != '' and $(Build_SourceVersion) != '' and $(Build_SourceBranch) != ''">__Build version:__ $([System.DateTime]::Now.ToString(G))&lt;br/&gt;__Source version:__ [$(Build_SourceVersion)]($(Build_Repository_Uri)/commit/$(Build_SourceVersion)?refName=$(Build_SourceBranch))</Description>
       <LangVersion>latest</LangVersion>
       <!--<ExternalAssemblyReferenceDirectory Condition="'$(ExternalAssemblyReferenceDirectory)' == ''">$(TargetDir)</ExternalAssemblyReferenceDirectory>-->
 
