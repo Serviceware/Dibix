@@ -335,7 +335,7 @@ namespace Dibix.Sdk.CodeGeneration
                 if (!(schema is ObjectSchema objectSchema))
                     throw new NotSupportedException($"Unsupported return type for result validation: {returnType.GetType()}");
 
-                foreach (IGrouping<string, OutputColumnResult> duplicateGroups in columnGroup.GroupBy(x => x.ColumnName).Where(x => x.Count() > 1))
+                foreach (IGrouping<string, OutputColumnResult> duplicateGroups in columnGroup.GroupBy(x => x.ColumnName).Where(x => x.Key != null && x.Count() > 1))
                 {
                     foreach (OutputColumnResult duplicateColumn in duplicateGroups.Skip(1))
                     {
