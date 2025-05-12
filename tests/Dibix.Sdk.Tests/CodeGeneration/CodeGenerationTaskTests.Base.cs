@@ -54,9 +54,9 @@ AreaName
   {areaName}
 Title
   Dibix.Sdk.Tests API title
-Version
+OpenApiVersion
   1.0.1
-Description
+OpenApiDescription
   Dibix.Sdk.Tests API description
 OutputDirectory
   {outputDirectory}

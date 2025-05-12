@@ -18,8 +18,8 @@ namespace Dibix.Sdk
     [TaskProperty("ProductName", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
     [TaskProperty("AreaName", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
     [TaskProperty("Title", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
-    [TaskProperty("Version", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
-    [TaskProperty("Description", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
+    [TaskProperty("OpenApiVersion", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
+    [TaskProperty("OpenApiDescription", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
     [TaskProperty("OutputDirectory", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
     [TaskProperty("AccessorTargetName", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
     [TaskProperty("AccessorTargetFileName", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
@@ -79,8 +79,8 @@ namespace Dibix.Sdk
                 ModelTargetFileName = _configuration.ArtifactGeneration.ModelTargetFileName,
                 DocumentationTargetName = _configuration.ArtifactGeneration.DocumentationTargetName,
                 Title = _configuration.ArtifactGeneration.Title,
-                Version = _configuration.ArtifactGeneration.Version,
-                Description = _configuration.ArtifactGeneration.Description,
+                OpenApiVersion = _configuration.ArtifactGeneration.OpenApiVersion,
+                OpenApiDescription = _configuration.ArtifactGeneration.OpenApiDescription,
                 SupportOpenApiNullableReferenceTypes = _configuration.ArtifactGeneration.SupportOpenApiNullableReferenceTypes
             };
             codeGenerationConfiguration.Source.AddRange(_configuration.SqlCore.Source);

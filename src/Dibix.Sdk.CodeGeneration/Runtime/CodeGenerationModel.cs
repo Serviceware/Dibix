@@ -10,8 +10,8 @@ namespace Dibix.Sdk.CodeGeneration
         public string RootNamespace { get; set; }
         public string DefaultClassName { get; set; }
         public string Title { get; set; }
-        public string Version { get; set; }
-        public string Description { get; set; }
+        public string OpenApiVersion { get; set; }
+        public string OpenApiDescription { get; set; }
         public string OutputDirectory { get; set; }
         public string AccessorTargetFileName { get; set; }
         public string EndpointTargetFileName { get; set; }

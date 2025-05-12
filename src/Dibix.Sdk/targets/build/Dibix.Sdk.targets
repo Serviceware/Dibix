@@ -233,7 +233,8 @@
     <PropertyGroup>
       <ProductName Condition="'$(ProductName)' == ''">$(RootNamespace.Split('.')[0])</ProductName>
       <Title Condition="$(Title) == ''">$(AreaName)</Title>
-      <Description Condition="$(Description) == '' and $(Build_Repository_Uri) != '' and $(Build_SourceVersion) != '' and $(Build_SourceBranch) != ''">__Build version:__ $([System.DateTime]::Now.ToString(G))&lt;br/&gt;__Source version:__ [$(Build_SourceVersion)]($(Build_Repository_Uri)/commit/$(Build_SourceVersion)?refName=$(Build_SourceBranch))</Description>
+      <OpenApiDescription Condition="$(OpenApiDescription) == '' and $(Build_Repository_Uri) != '' and $(Build_SourceVersion) != '' and $(Build_SourceBranch) != ''">__Build version:__ $([System.DateTime]::Now.ToString(G))&lt;br/&gt;__Source version:__ [$(Build_SourceVersion)]($(Build_Repository_Uri)/commit/$(Build_SourceVersion)?refName=$(Build_SourceBranch))</OpenApiDescription>
+      <OpenApiVersion Condition="'$(OpenApiVersion)' == ''">$(InformationalVersion)</OpenApiVersion>
       <LangVersion>latest</LangVersion>
       <!--<ExternalAssemblyReferenceDirectory Condition="'$(ExternalAssemblyReferenceDirectory)' == ''">$(TargetDir)</ExternalAssemblyReferenceDirectory>-->
 
@@ -297,10 +298,10 @@
   $(AreaName)" />
       <_SqlCoreInputItem Include="Title
   $(Title)" />
-      <_SqlCoreInputItem Include="Version
-  $(FileVersion)" />
-      <_SqlCoreInputItem Include="Description
-  $(Description)" />
+      <_SqlCoreInputItem Include="OpenApiVersion
+  $(OpenApiVersion)" />
+      <_SqlCoreInputItem Include="OpenApiDescription
+  $(OpenApiDescription)" />
       <_SqlCoreInputItem Include="OutputDirectory
   $(IntermediateOutputPath)" />
       <_SqlCoreInputItem Include="AccessorTargetName

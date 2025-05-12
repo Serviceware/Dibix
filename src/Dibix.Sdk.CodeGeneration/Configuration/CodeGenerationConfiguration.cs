@@ -21,9 +21,9 @@ namespace Dibix.Sdk.CodeGeneration
         public string ModelTargetFileName { get; set; }
         public string DocumentationTargetName { get; set; }
         public string Title { get; set; }
-        public string Version { get; set; }
+        public string OpenApiVersion { get; set; }
         public string BaseUrl { get; set; }
-        public string Description { get; set; }
+        public string OpenApiDescription { get; set; }
         public bool SupportOpenApiNullableReferenceTypes { get; set; }
         public ConfigurationTemplates ConfigurationTemplates { get; } = new ConfigurationTemplates();
         public ICollection<TaskItem> Source { get; } = new Collection<TaskItem>();

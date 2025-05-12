@@ -24,8 +24,8 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                 Info = new OpenApiInfo
                 {
                     Title = model.Title,
-                    Version = !String.IsNullOrEmpty(model.Version) ? model.Version : "1.0.0",
-                    Description = model.Description
+                    Version = !String.IsNullOrEmpty(model.OpenApiVersion) ? model.OpenApiVersion : "1.0.0",
+                    Description = model.OpenApiDescription
                 },
                 Servers = { new OpenApiServer { Url = model.BaseUrl } }
             };
