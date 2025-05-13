@@ -1,0 +1,10 @@
+﻿[*.cs]
+
+# SA1500: Braces for multi-line statements should not share line
+dotnet_diagnostic.SA1500.severity = none # Analyzer crashes
+
+# SA1502: Element should not be on a single line
+dotnet_diagnostic.SA1502.severity = none # Analyzer crashes
+
+# SA1508: Closing braces should not be preceded by blank line
+dotnet_diagnostic.SA1508.severity = none # Analyzer crashes
