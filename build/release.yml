@@ -55,14 +55,37 @@ jobs:
     artifact: NuGet packages
     displayName: 📬 Download 'NuGet packages' artifact
 
-  - task: NuGetCommand@2
+ # NuGetCommand@2 supports pushing using service connection but requires mono which is no longer installed on newer build agents (Ubuntu 24.04).
+ # Error: The task has failed because you are using Ubuntu 24.04 or later without mono installed. See https://aka.ms/nuget-task-mono for more information.
+ #- task: NuGetCommand@2
+ #  displayName: 🚀 Publish packages
+ #  inputs:
+ #    command: push
+ #    packagesToPush: "$(Pipeline.Workspace)/CI/NuGet packages/*.nupkg"
+ #    nuGetFeedType: external
+ #    publishFeedCredentials: NuGet.org
+ #  condition: and(succeeded(), eq(${{ parameters.publishNuGetPackages }}, true))
+
+ # The proposed solution to the issue above doesn't work either, because DoNetCoreCLI@2 does not support service connections.
+ # Error: DotNetCore currently does not support using an encrypted Api Key.
+ # https://github.com/microsoft/azure-pipelines-tasks/issues/7160#issuecomment-2786529769
+ #- task: DotNetCoreCLI@2
+ #  displayName: 🚀 Publish packages
+ #  inputs:
+ #    command: push
+ #    packagesToPush: "$(Pipeline.Workspace)/CI/NuGet packages/*.nupkg"
+ #    nuGetFeedType: external
+ #    publishFeedCredentials: NuGet.org
+ #  condition: and(succeeded(), eq(${{ parameters.publishNuGetPackages }}, true))
+
+  # Workaround to the issues above.
+  # https://github.com/microsoft/azure-pipelines-tasks/issues/7160#issuecomment-509044113
+  - task: DotNetCoreCLI@2
     displayName: 🚀 Publish packages
     inputs:
-      command: push
-      packagesToPush: "$(Pipeline.Workspace)/CI/NuGet packages/*.nupkg"
-      nuGetFeedType: external
-      publishFeedCredentials: NuGet.org
-    condition: and(succeeded(), eq(${{ parameters.publishNuGetPackages }}, true))
+      command: custom
+      custom: nuget
+      arguments: push "$(Pipeline.Workspace)/CI/NuGet packages/*.nupkg" --source https://nuget.org --api-key $(NuGetApiKey)
 
   - download: CI
     artifact: Publish output (Linux)
